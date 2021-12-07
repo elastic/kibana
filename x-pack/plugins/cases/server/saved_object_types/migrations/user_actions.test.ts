@@ -9,7 +9,6 @@
 
 import { SavedObjectMigrationContext, SavedObjectSanitizedDoc } from 'kibana/server';
 import { migrationMocks } from 'src/core/server/mocks';
-import { CaseUserActionAttributes } from '../../../common/api';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 import {
   createConnectorObject,
@@ -17,6 +16,11 @@ import {
   createJiraConnector,
 } from '../../services/test_utils';
 import { userActionsConnectorIdMigration } from './user_actions';
+
+interface OldCaseUserActionAttributes {
+  new_value?: string;
+  old_value?: string;
+}
 
 const create_7_14_0_userAction = (
   params: {
@@ -60,7 +64,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
 
           const parsedExternalService = JSON.parse(migratedUserAction.attributes.new_value!);
           expect(parsedExternalService).not.toHaveProperty('connector_id');
@@ -103,7 +107,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
 
           const parsedNewExternalService = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldExternalService = JSON.parse(migratedUserAction.attributes.old_value!);
@@ -130,7 +134,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
 
           const parsedNewExternalService = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldExternalService = JSON.parse(migratedUserAction.attributes.old_value!);
@@ -155,7 +159,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
 
           expect(migratedUserAction.attributes.old_value).toBeNull();
           expect(migratedUserAction).toMatchInlineSnapshot(`
@@ -186,7 +190,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
 
           expect(migratedUserAction.attributes.old_value).toBeNull();
           expect(migratedUserAction.attributes.new_value).toEqual('{a');
@@ -233,7 +237,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
 
           const parsedConnector = JSON.parse(migratedUserAction.attributes.new_value!);
           expect(parsedConnector).not.toHaveProperty('id');
@@ -273,7 +277,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
 
           const parsedNewConnector = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldConnector = JSON.parse(migratedUserAction.attributes.new_value!);
@@ -301,7 +305,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
 
           const parsedNewConnectorId = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldConnectorId = JSON.parse(migratedUserAction.attributes.old_value!);
@@ -326,7 +330,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
 
           expect(migratedUserAction).toMatchInlineSnapshot(`
             Object {
@@ -356,7 +360,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
 
           expect(migratedUserAction).toMatchInlineSnapshot(`
             Object {
@@ -401,7 +405,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
 
           const parsedConnector = JSON.parse(migratedUserAction.attributes.new_value!);
           expect(parsedConnector.connector).not.toHaveProperty('id');
@@ -443,7 +447,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
 
           const parsedNewConnector = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldConnector = JSON.parse(migratedUserAction.attributes.new_value!);
@@ -471,7 +475,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
 
           const parsedNewConnectorId = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldConnectorId = JSON.parse(migratedUserAction.attributes.old_value!);
@@ -496,7 +500,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
 
           expect(migratedUserAction).toMatchInlineSnapshot(`
             Object {
@@ -526,7 +530,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
 
           expect(migratedUserAction).toMatchInlineSnapshot(`
             Object {

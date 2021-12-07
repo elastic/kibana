@@ -6,11 +6,21 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseUserActionExternalServiceRt } from '../case';
+import { CaseUserActionExternalServiceRt, CaseExternalServiceBasicRt } from '../case';
 import { Fields, Actions } from './common';
 
-export const PushedUserActionPayloadRt = rt.type({
+export const PushedUserActionPayloadWithoutConnectorIdRt = rt.type({
   externalService: CaseUserActionExternalServiceRt,
+});
+
+export const PushedUserActionPayloadRt = rt.type({
+  externalService: CaseExternalServiceBasicRt,
+});
+
+export const PushedUserActionWithoutConnectorIdRt = rt.type({
+  fields: rt.array(rt.literal(Fields.pushed)),
+  action: rt.literal(Actions.push_to_service),
+  payload: PushedUserActionPayloadWithoutConnectorIdRt,
 });
 
 export const PushedUserActionRt = rt.type({
@@ -20,3 +30,6 @@ export const PushedUserActionRt = rt.type({
 });
 
 export type PushedUserAction = rt.TypeOf<typeof PushedUserActionRt>;
+export type PushedUserActionWithoutConnectorId = rt.TypeOf<
+  typeof PushedUserActionWithoutConnectorIdRt
+>;

@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { Actions, FieldsRt } from './common';
+import { Actions, Fields } from './common';
 import { ConnectorUserActionPayloadRt } from './connector';
 import { DescriptionUserActionPayloadRt } from './description';
 import { SettingsUserActionPayloadRt } from './settings';
@@ -14,7 +14,17 @@ import { TagsUserActionPayloadRt } from './tags';
 import { TitleUserActionPayloadRt } from './title';
 
 export const CreateCaseUserActionRt = rt.type({
-  fields: FieldsRt,
+  fields: rt.array(
+    rt.union([
+      rt.literal(Fields.description),
+      rt.literal(Fields.status),
+      rt.literal(Fields.tags),
+      rt.literal(Fields.title),
+      rt.literal(Fields.connector),
+      rt.literal(Fields.settings),
+      rt.literal(Fields.owner),
+    ])
+  ),
   action: rt.literal(Actions.create),
   payload: rt.type({
     description: DescriptionUserActionPayloadRt.props.description,

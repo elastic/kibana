@@ -6,12 +6,21 @@
  */
 
 import * as rt from 'io-ts';
-import { ConnectorTypeFieldsRt } from '../../connectors';
+import { CaseUserActionConnectorRt, CaseConnectorRt } from '../../connectors';
 import { Fields, Actions } from './common';
 
+export const ConnectorUserActionPayloadWithoutConnectorIdRt = rt.type({
+  connector: CaseUserActionConnectorRt,
+});
+
 export const ConnectorUserActionPayloadRt = rt.type({
-  // TODO: Make it work with name, id
-  connector: ConnectorTypeFieldsRt,
+  connector: CaseConnectorRt,
+});
+
+export const ConnectorUserActionWithoutConnectorIdRt = rt.type({
+  fields: rt.array(rt.literal(Fields.connector)),
+  action: rt.literal(Actions.update),
+  payload: ConnectorUserActionPayloadWithoutConnectorIdRt,
 });
 
 export const ConnectorUserActionRt = rt.type({

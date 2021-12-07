@@ -16,7 +16,7 @@ import {
 import React, { useContext } from 'react';
 import classNames from 'classnames';
 import { ThemeContext } from 'styled-components';
-import { Comment } from '../../../common/ui/types';
+import { CaseExternalService, Comment } from '../../../common/ui/types';
 import {
   ActionConnector,
   CaseStatuses,
@@ -39,6 +39,14 @@ import { AlertCommentEvent } from './user_action_alert_comment_event';
 import { CasesNavigation } from '../links';
 import { HostIsolationCommentEvent } from './user_action_host_isolation_comment_event';
 import { MarkdownRenderer } from '../markdown_editor';
+import {
+  isStatusUserAction,
+  isTagsUserAction,
+  isTitleUserAction,
+} from '../../../common/utils/user_actions';
+import { ConnectorUserAction } from '../../../common/api/cases/user_actions/connector';
+import { TagsUserAction } from '../../../common/api/cases/user_actions/tags';
+import { PushedUserAction } from '../../../common/api/cases/user_actions/pushed';
 
 interface LabelTitle {
   action: CaseUserActions;
@@ -67,15 +75,15 @@ const isStatusValid = (status: string): status is CaseStatuses =>
   Object.prototype.hasOwnProperty.call(statuses, status);
 
 export const getLabelTitle = ({ action, field }: LabelTitle) => {
-  if (field === 'tags') {
+  if (isTagsUserAction(action)) {
     return getTagsLabelTitle(action);
-  } else if (field === 'title' && action.action === 'update') {
+  } else if (field === 'title' && isTitleUserAction(action)) {
     return `${i18n.CHANGED_FIELD.toLowerCase()} ${i18n.CASE_NAME.toLowerCase()}  ${i18n.TO} "${
       action.payload.title
     }"`;
   } else if (field === 'description' && action.action === 'update') {
     return `${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`;
-  } else if (field === 'status' && action.action === 'update') {
+  } else if (field === 'status' && isStatusUserAction(action)) {
     const status = action.payload.status ?? '';
     if (isStatusValid(status)) {
       return getStatusTitle(action.actionId, status);
@@ -93,7 +101,7 @@ export const getConnectorLabelTitle = ({
   action,
   connectors,
 }: {
-  action: CaseUserActions;
+  action: ConnectorUserAction;
   connectors: ActionConnector[];
 }) => {
   const connector = action.payload.connector;
@@ -118,7 +126,7 @@ export const getConnectorLabelTitle = ({
   return i18n.REMOVED_THIRD_PARTY;
 };
 
-const getTagsLabelTitle = (action: CaseUserActions) => {
+const getTagsLabelTitle = (action: TagsUserAction) => {
   const tags = action.payload.tags ?? [];
 
   return (
@@ -134,7 +142,7 @@ const getTagsLabelTitle = (action: CaseUserActions) => {
   );
 };
 
-export const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: boolean) => {
+export const getPushedServiceLabelTitle = (action: PushedUserAction, firstPush: boolean) => {
   const externalService = action.payload.externalService;
 
   return (

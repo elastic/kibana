@@ -16,7 +16,6 @@ import {
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
 import { CasesClientArgs } from '../types';
-import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 import { createCaseError } from '../../common/error';
 import { checkEnabledCaseConnectorOrThrow } from '../../common/utils';
 import { Operations } from '../../authorization';
@@ -144,8 +143,6 @@ export async function deleteComment(
 
   try {
     checkEnabledCaseConnectorOrThrow(subCaseID);
-
-    const deleteDate = new Date().toISOString();
 
     const myComment = await attachmentService.get({
       unsecuredSavedObjectsClient,

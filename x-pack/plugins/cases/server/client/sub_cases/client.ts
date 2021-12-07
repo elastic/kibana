@@ -23,7 +23,6 @@ import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/cons
 import { CasesClientArgs } from '..';
 import { createCaseError } from '../../common/error';
 import { countAlertsForID, flattenSubCaseSavedObject, transformSubCases } from '../../common/utils';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { constructQueryOptions } from '../utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { update } from './update';
@@ -138,6 +137,7 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
         id: subCaseIDToParentID.get(subCase.id) ?? '',
         subCaseId: subCase.id,
         owner: subCase.attributes.owner,
+        connectorId: '',
       })),
       user,
     });

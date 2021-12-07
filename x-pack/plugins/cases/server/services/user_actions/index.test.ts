@@ -5,10 +5,21 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResult } from 'kibana/server';
-import { transformFindResponseToExternalModel, UserActionItem } from '.';
-import { CaseUserActionAttributes, UserAction, UserActionField } from '../../../common/api';
-import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
+import { SavedObject, SavedObjectsFindResponse, SavedObjectsFindResult } from 'kibana/server';
+import { ConnectorUserAction } from '../../../common/api/cases/user_actions/connector';
+import { transformFindResponseToExternalModel } from '.';
+import {
+  Actions,
+  CaseUserActionAttributes,
+  UserAction,
+  UserActionField,
+} from '../../../common/api';
+import {
+  CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../../common/constants';
+import { CASE_REF_NAME, SUB_CASE_REF_NAME } from '../../common/constants';
 
 import {
   createConnectorObject,
@@ -16,7 +27,6 @@ import {
   createJiraConnector,
   createSOFindResponse,
 } from '../test_utils';
-import { buildCaseUserActionItem, buildCommentUserActionItem } from './helpers';
 
 const createConnectorUserAction = (
   subCaseId?: string,
@@ -65,7 +75,7 @@ const pushConnectorUserAction = ({
 } = {}): SavedObject<CaseUserActionAttributes> => {
   return {
     ...createUserActionSO({
-      action: 'push-to-service',
+      action: Actions.push_to_service,
       fields: ['pushed'],
       newValue: createExternalService(),
       oldValue,
@@ -101,8 +111,8 @@ const createUserActionSO = ({
 }): SavedObject<CaseUserActionAttributes> => {
   const defaultParams = {
     action,
-    actionAt: 'abc',
-    actionBy: {
+    created_at: 'abc',
+    created_by: {
       email: 'a',
       username: 'b',
       full_name: 'abc',
@@ -110,31 +120,35 @@ const createUserActionSO = ({
     caseId: '1',
     subCaseId,
     fields,
-    newValue,
-    oldValue,
+    payload: { title: 'a new title' },
     owner: 'securitySolution',
+    ...(commentId ? { comment_id: commentId } : {}),
   };
-
-  let userAction: UserActionItem;
-
-  if (commentId) {
-    userAction = buildCommentUserActionItem({
-      commentId,
-      ...defaultParams,
-    });
-  } else {
-    userAction = buildCaseUserActionItem(defaultParams);
-  }
 
   return {
     type: CASE_USER_ACTION_SAVED_OBJECT,
     id: '100',
     attributes: {
-      ...userAction.attributes,
+      ...defaultParams,
       ...(attributesOverrides && { ...attributesOverrides }),
     },
-    references: userAction.references,
-  };
+    references: [
+      {
+        type: CASE_SAVED_OBJECT,
+        name: CASE_REF_NAME,
+        id: '1',
+      },
+      ...(subCaseId
+        ? [
+            {
+              type: SUB_CASE_SAVED_OBJECT,
+              name: SUB_CASE_REF_NAME,
+              id: subCaseId,
+            },
+          ]
+        : []),
+    ],
+  } as SavedObject<CaseUserActionAttributes>;
 };
 
 describe('CaseUserActionService', () => {
@@ -175,7 +189,7 @@ describe('CaseUserActionService', () => {
                 "action_id": "100",
                 "case_id": "1",
                 "comment_id": null,
-                "new_val_connector_id": "1",
+                "payload.connector.id": "1",
                 "new_value": "{\\"connector\\":{\\"name\\":\\".jira\\",\\"type\\":\\".jira\\",\\"fields\\":{\\"issueType\\":\\"bug\\",\\"priority\\":\\"high\\",\\"parent\\":\\"2\\"}}}",
                 "old_val_connector_id": null,
                 "old_value": null,
@@ -204,40 +218,16 @@ describe('CaseUserActionService', () => {
       `);
     });
 
-    it('populates the new_val_connector_id for multiple user actions', () => {
+    it('populates the payload.connector.id for multiple user actions', () => {
       const transformed = transformFindResponseToExternalModel(
         createSOFindResponse([
           createUserActionFindSO(createConnectorUserAction()),
           createUserActionFindSO(createConnectorUserAction()),
         ])
-      );
+      ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-      expect(transformed.saved_objects[0].attributes.new_val_connector_id).toEqual('1');
-      expect(transformed.saved_objects[1].attributes.new_val_connector_id).toEqual('1');
-    });
-
-    it('populates the old_val_connector_id for multiple user actions', () => {
-      const transformed = transformFindResponseToExternalModel(
-        createSOFindResponse([
-          createUserActionFindSO(
-            createUserActionSO({
-              action: 'create',
-              fields: ['connector'],
-              oldValue: createConnectorObject(),
-            })
-          ),
-          createUserActionFindSO(
-            createUserActionSO({
-              action: 'create',
-              fields: ['connector'],
-              oldValue: createConnectorObject({ id: '10' }),
-            })
-          ),
-        ])
-      );
-
-      expect(transformed.saved_objects[0].attributes.old_val_connector_id).toEqual('1');
-      expect(transformed.saved_objects[1].attributes.old_val_connector_id).toEqual('10');
+      expect(transformed.saved_objects[0].attributes.payload.connector.id).toEqual('1');
+      expect(transformed.saved_objects[1].attributes.payload.connector.id).toEqual('1');
     });
 
     describe('reference ids', () => {
@@ -327,25 +317,16 @@ describe('CaseUserActionService', () => {
     });
 
     describe('create connector', () => {
-      it('does not populate the new_val_connector_id when it cannot find the reference', () => {
+      it('does not populate the payload.connector.id when it cannot find the reference', () => {
         const userAction = { ...createConnectorUserAction(), references: [] };
         const transformed = transformFindResponseToExternalModel(
           createSOFindResponse([createUserActionFindSO(userAction)])
-        );
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.new_val_connector_id).toBeNull();
+        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeNull();
       });
 
-      it('does not populate the old_val_connector_id when it cannot find the reference', () => {
-        const userAction = { ...createConnectorUserAction(), references: [] };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        );
-
-        expect(transformed.saved_objects[0].attributes.old_val_connector_id).toBeNull();
-      });
-
-      it('does not populate the new_val_connector_id when the reference exists but the action and fields are invalid', () => {
+      it('does not populate the payload.connector.id when the reference exists but the action and fields are invalid', () => {
         const validUserAction = createConnectorUserAction();
         const invalidUserAction = {
           ...validUserAction,
@@ -355,78 +336,32 @@ describe('CaseUserActionService', () => {
           createSOFindResponse([
             createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
           ])
-        );
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.new_val_connector_id).toBeNull();
+        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeNull();
       });
 
-      it('does not populate the old_val_connector_id when the reference exists but the action and fields are invalid', () => {
-        const validUserAction = createUserActionSO({
-          action: 'create',
-          fields: ['connector'],
-          oldValue: createConnectorObject(),
-        });
-
-        const invalidUserAction = {
-          ...validUserAction,
-          attributes: { ...validUserAction.attributes, action: 'invalid' },
-        };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([
-            createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
-          ])
-        );
-
-        expect(transformed.saved_objects[0].attributes.old_val_connector_id).toBeNull();
-      });
-
-      it('populates the new_val_connector_id', () => {
+      it('populates the payload.connector.id', () => {
         const userAction = createConnectorUserAction();
         const transformed = transformFindResponseToExternalModel(
           createSOFindResponse([createUserActionFindSO(userAction)])
-        );
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.new_val_connector_id).toEqual('1');
-      });
-
-      it('populates the old_val_connector_id', () => {
-        const userAction = createUserActionSO({
-          action: 'create',
-          fields: ['connector'],
-          oldValue: createConnectorObject(),
-        });
-
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        );
-
-        expect(transformed.saved_objects[0].attributes.old_val_connector_id).toEqual('1');
+        expect(transformed.saved_objects[0].attributes.payload.connector.id).toEqual('1');
       });
     });
 
     describe('update connector', () => {
-      it('does not populate the new_val_connector_id when it cannot find the reference', () => {
+      it('does not populate the payload.connector.id when it cannot find the reference', () => {
         const userAction = { ...updateConnectorUserAction(), references: [] };
         const transformed = transformFindResponseToExternalModel(
           createSOFindResponse([createUserActionFindSO(userAction)])
-        );
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.new_val_connector_id).toBeNull();
+        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeNull();
       });
 
-      it('does not populate the old_val_connector_id when it cannot find the reference', () => {
-        const userAction = {
-          ...updateConnectorUserAction({ oldValue: createJiraConnector() }),
-          references: [],
-        };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        );
-
-        expect(transformed.saved_objects[0].attributes.old_val_connector_id).toBeNull();
-      });
-
-      it('does not populate the new_val_connector_id when the reference exists but the action and fields are invalid', () => {
+      it('does not populate the payload.connector.id when the reference exists but the action and fields are invalid', () => {
         const validUserAction = updateConnectorUserAction();
         const invalidUserAction = {
           ...validUserAction,
@@ -436,70 +371,32 @@ describe('CaseUserActionService', () => {
           createSOFindResponse([
             createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
           ])
-        );
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.new_val_connector_id).toBeNull();
+        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeNull();
       });
 
-      it('does not populate the old_val_connector_id when the reference exists but the action and fields are invalid', () => {
-        const validUserAction = updateConnectorUserAction({ oldValue: createJiraConnector() });
-
-        const invalidUserAction = {
-          ...validUserAction,
-          attributes: { ...validUserAction.attributes, action: 'invalid' },
-        };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([
-            createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
-          ])
-        );
-
-        expect(transformed.saved_objects[0].attributes.old_val_connector_id).toBeNull();
-      });
-
-      it('populates the new_val_connector_id', () => {
+      it('populates the payload.connector.id', () => {
         const userAction = updateConnectorUserAction();
         const transformed = transformFindResponseToExternalModel(
           createSOFindResponse([createUserActionFindSO(userAction)])
-        );
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.new_val_connector_id).toEqual('1');
-      });
-
-      it('populates the old_val_connector_id', () => {
-        const userAction = updateConnectorUserAction({ oldValue: createJiraConnector() });
-
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        );
-
-        expect(transformed.saved_objects[0].attributes.old_val_connector_id).toEqual('1');
+        expect(transformed.saved_objects[0].attributes.payload.connector.id).toEqual('1');
       });
     });
 
     describe('push connector', () => {
-      it('does not populate the new_val_connector_id when it cannot find the reference', () => {
+      it('does not populate the payload.connector.id when it cannot find the reference', () => {
         const userAction = { ...pushConnectorUserAction(), references: [] };
         const transformed = transformFindResponseToExternalModel(
           createSOFindResponse([createUserActionFindSO(userAction)])
-        );
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.new_val_connector_id).toBeNull();
+        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeNull();
       });
 
-      it('does not populate the old_val_connector_id when it cannot find the reference', () => {
-        const userAction = {
-          ...pushConnectorUserAction({ oldValue: createExternalService() }),
-          references: [],
-        };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        );
-
-        expect(transformed.saved_objects[0].attributes.old_val_connector_id).toBeNull();
-      });
-
-      it('does not populate the new_val_connector_id when the reference exists but the action and fields are invalid', () => {
+      it('does not populate the payload.connector.id when the reference exists but the action and fields are invalid', () => {
         const validUserAction = pushConnectorUserAction();
         const invalidUserAction = {
           ...validUserAction,
@@ -509,44 +406,18 @@ describe('CaseUserActionService', () => {
           createSOFindResponse([
             createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
           ])
-        );
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.new_val_connector_id).toBeNull();
+        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeNull();
       });
 
-      it('does not populate the old_val_connector_id when the reference exists but the action and fields are invalid', () => {
-        const validUserAction = pushConnectorUserAction({ oldValue: createExternalService() });
-
-        const invalidUserAction = {
-          ...validUserAction,
-          attributes: { ...validUserAction.attributes, action: 'invalid' },
-        };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([
-            createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
-          ])
-        );
-
-        expect(transformed.saved_objects[0].attributes.old_val_connector_id).toBeNull();
-      });
-
-      it('populates the new_val_connector_id', () => {
+      it('populates the payload.connector.id', () => {
         const userAction = pushConnectorUserAction();
         const transformed = transformFindResponseToExternalModel(
           createSOFindResponse([createUserActionFindSO(userAction)])
-        );
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.new_val_connector_id).toEqual('100');
-      });
-
-      it('populates the old_val_connector_id', () => {
-        const userAction = pushConnectorUserAction({ oldValue: createExternalService() });
-
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        );
-
-        expect(transformed.saved_objects[0].attributes.old_val_connector_id).toEqual('100');
+        expect(transformed.saved_objects[0].attributes.payload.connector.id).toEqual('100');
       });
     });
   });

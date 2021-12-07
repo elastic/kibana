@@ -55,6 +55,7 @@ import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { useCaseViewParams } from '../../common/navigation';
+import { isConnectorUserAction, isPushedUserAction } from '../../../common/utils/user_actions';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -500,7 +501,7 @@ export const UserActionTree = React.memo(
             }
 
             // Connectors
-            if (action.fields.length === 1 && action.fields[0] === 'connector') {
+            if (action.fields.length === 1 && isConnectorUserAction(action)) {
               const label = getConnectorLabelTitle({ action, connectors });
               return [
                 ...comments,
@@ -513,7 +514,8 @@ export const UserActionTree = React.memo(
             }
 
             // Pushed information
-            if (action.fields.length === 1 && action.fields[0] === 'pushed') {
+            // TODO: Use types guards
+            if (action.fields.length === 1 && isPushedUserAction(action)) {
               const parsedExternalService = action.payload.externalService;
 
               const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(

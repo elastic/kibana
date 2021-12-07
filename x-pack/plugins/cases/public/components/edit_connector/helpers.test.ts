@@ -36,7 +36,7 @@ describe('helpers', () => {
       expect(
         getConnectorFieldsFromUserActions('a', [
           createUserAction({
-            newValue: createEncodedJiraConnector(),
+            newValue: createJiraConnector(),
             oldValue: JSON.stringify({ a: '1' }),
             newValConnectorId: 'a',
           }),
@@ -48,7 +48,7 @@ describe('helpers', () => {
       expect(
         getConnectorFieldsFromUserActions('a', [
           createUserAction({
-            newValue: createEncodedJiraConnector(),
+            newValue: createJiraConnector(),
             newValConnectorId: 'a',
           }),
         ])
@@ -61,8 +61,8 @@ describe('helpers', () => {
       expect(
         getConnectorFieldsFromUserActions('id-to-find', [
           createUserAction({
-            newValue: createEncodedJiraConnector(),
-            oldValue: createEncodedJiraConnector({
+            newValue: createJiraConnector(),
+            oldValue: createJiraConnector({
               fields: expectedFields,
             }),
             newValConnectorId: 'b',
@@ -78,14 +78,14 @@ describe('helpers', () => {
       expect(
         getConnectorFieldsFromUserActions('id-to-find', [
           createUserAction({
-            newValue: createEncodedJiraConnector(),
-            oldValue: createEncodedJiraConnector(),
+            newValue: createJiraConnector(),
+            oldValue: createJiraConnector(),
             newValConnectorId: 'b',
             oldValConnectorId: 'a',
           }),
           createUserAction({
-            newValue: createEncodedJiraConnector(),
-            oldValue: createEncodedJiraConnector({ fields: expectedFields }),
+            newValue: createJiraConnector(),
+            oldValue: createJiraConnector({ fields: expectedFields }),
             newValConnectorId: 'b',
             oldValConnectorId: 'id-to-find',
           }),
@@ -101,7 +101,7 @@ describe('helpers', () => {
             newValConnectorId: null,
           }),
           createUserAction({
-            newValue: createEncodedJiraConnector({
+            newValue: createJiraConnector({
               type: ConnectorTypes.none,
               name: '',
               fields: null,
@@ -141,12 +141,11 @@ describe('helpers', () => {
       expect(
         getConnectorFieldsFromUserActions('none', [
           createUserAction({
-            newValue: createEncodedJiraConnector({
+            payload: createJiraConnector({
               type: ConnectorTypes.none,
               name: '',
               fields: null,
             }),
-            newValConnectorId: null,
           }),
         ])
       ).toBeNull();
@@ -154,30 +153,31 @@ describe('helpers', () => {
   });
 });
 
-function createUserAction(fields: Partial<CaseUserActions>): CaseUserActions {
+function createUserAction(attributes: Partial<CaseUserActions>): CaseUserActions {
   return {
     action: 'update',
-    actionAt: '',
-    actionBy: {},
-    actionField: ['connector'],
+    createdAt: '',
+    createdBy: {},
+    fields: ['connector'],
     actionId: '',
     caseId: '',
     commentId: '',
-    newValConnectorId: null,
-    oldValConnectorId: null,
-    newValue: null,
-    oldValue: null,
-    ...fields,
+    payload: {},
+    ...attributes,
   };
 }
 
-function createEncodedJiraConnector(fields?: Partial<CaseUserActionConnector>): string {
-  return JSON.stringify({
-    type: ConnectorTypes.jira,
-    name: 'name',
-    fields: defaultJiraFields,
-    ...fields,
-  });
+function createJiraConnector(
+  fields?: Partial<CaseUserActionConnector>
+): ConnectorUserAction['payload'] {
+  return {
+    connector: {
+      type: ConnectorTypes.jira,
+      name: 'name',
+      fields: defaultJiraFields,
+      ...fields,
+    },
+  };
 }
 
 const defaultJiraFields = {

@@ -10,10 +10,11 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { ElasticUser, CaseUserActions, CaseExternalService } from '../../common/ui/types';
-import { CaseFullExternalService, CaseConnector } from '../../common/api';
+import { Actions, CaseConnector } from '../../common/api';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
+import { isPushedUserAction, isConnectorUserAction } from '../../common/utils/user_actions';
 
 export interface CaseService extends CaseExternalService {
   firstPushIndex: number;
@@ -56,20 +57,16 @@ const groupConnectorFields = (
   userActions: CaseUserActions[]
 ): Record<string, Array<CaseConnector['fields']>> =>
   userActions.reduce((acc, mua) => {
-    if (mua.fields[0] !== 'connector') {
-      return acc;
+    if (isConnectorUserAction(mua)) {
+      const connector = mua.payload.connector;
+
+      return {
+        ...acc,
+        [connector.id]: [...(acc[connector.id] || []), connector.fields],
+      };
     }
 
-    const connector = mua.payload;
-
-    if (connector) {
-      return acc;
-    }
-
-    return {
-      ...acc,
-      [connector.id]: [...(acc[connector.id] || []), connector.fields],
-    };
+    return acc;
   }, {} as Record<string, Array<CaseConnector['fields']>>);
 
 const connectorHasChangedFields = ({
@@ -120,7 +117,9 @@ export const getPushedInfo = (
   const hasDataToPushForConnector = (connectorId: string): boolean => {
     const caseUserActionsReversed = [...caseUserActions].reverse();
     const lastPushOfConnectorReversedIndex = caseUserActionsReversed.findIndex(
-      (mua) => isPushedUserAction(mua) && mua.payload.externalService.connectorId === connectorId
+      (mua) =>
+        isPushedUserAction<'cameCase'>(mua) &&
+        mua.payload.externalService.connectorId === connectorId
     );
 
     if (lastPushOfConnectorReversedIndex === -1) {
@@ -167,7 +166,7 @@ export const getPushedInfo = (
   );
 
   let caseServices = caseUserActions.reduce<CaseServices>((acc, cua, i) => {
-    if (cua.action !== Actions.push_to_service) {
+    if (!isPushedUserAction<'cameCase'>(cua)) {
       return acc;
     }
 

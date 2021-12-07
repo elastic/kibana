@@ -18,7 +18,7 @@ import {
   basicPushSnake,
   caseUserActions,
   elasticUser,
-  getJiraConnectorWithoutId,
+  getJiraConnector,
   getUserAction,
   jiraFields,
 } from './mock';
@@ -118,7 +118,7 @@ describe('useGetCaseUserActions', () => {
 
   describe('getPushedInfo', () => {
     it('Correctly marks first/last index - hasDataToPush: false', () => {
-      const userActions = [...caseUserActions, getUserAction(['pushed'], 'push-to-service')];
+      const userActions = [...caseUserActions, getUserAction(['pushed'], 'push_to_service')];
       const result = getPushedInfo(userActions, '123');
       expect(result).toEqual({
         hasDataToPush: false,
@@ -137,7 +137,7 @@ describe('useGetCaseUserActions', () => {
     it('Correctly marks first/last index and comment id - hasDataToPush: true', () => {
       const userActions = [
         ...caseUserActions,
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         getUserAction(['comment'], 'create'),
       ];
       const result = getPushedInfo(userActions, '123');
@@ -158,7 +158,7 @@ describe('useGetCaseUserActions', () => {
     it('Correctly marks first/last index and multiple comment ids, both needs push', () => {
       const userActions = [
         ...caseUserActions,
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         getUserAction(['comment'], 'create'),
         { ...getUserAction(['comment'], 'create'), commentId: 'muahaha' },
       ];
@@ -183,9 +183,9 @@ describe('useGetCaseUserActions', () => {
     it('Correctly marks first/last index and multiple comment ids, one needs push', () => {
       const userActions = [
         ...caseUserActions,
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         getUserAction(['comment'], 'create'),
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         { ...getUserAction(['comment'], 'create'), commentId: 'muahaha' },
       ];
       const result = getPushedInfo(userActions, '123');
@@ -206,9 +206,9 @@ describe('useGetCaseUserActions', () => {
     it('Correctly marks first/last index and multiple comment ids, one needs push and one needs update', () => {
       const userActions = [
         ...caseUserActions,
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         getUserAction(['comment'], 'create'),
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         { ...getUserAction(['comment'], 'create'), commentId: 'muahaha' },
         getUserAction(['comment'], 'update'),
         getUserAction(['comment'], 'update'),
@@ -234,7 +234,7 @@ describe('useGetCaseUserActions', () => {
     it('Does not count connector update as a reason to push', () => {
       const userActions = [
         ...caseUserActions,
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         getUserAction(['connector'], 'update'),
       ];
       const result = getPushedInfo(userActions, '123');
@@ -255,9 +255,9 @@ describe('useGetCaseUserActions', () => {
     it('Correctly handles multiple push actions', () => {
       const userActions = [
         ...caseUserActions,
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         getUserAction(['comment'], 'create'),
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
       ];
       const result = getPushedInfo(userActions, '123');
       expect(result).toEqual({
@@ -277,9 +277,9 @@ describe('useGetCaseUserActions', () => {
     it('Correctly handles comment update with multiple push actions', () => {
       const userActions = [
         ...caseUserActions,
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         getUserAction(['comment'], 'create'),
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         getUserAction(['comment'], 'update'),
       ];
       const result = getPushedInfo(userActions, '123');
@@ -298,16 +298,15 @@ describe('useGetCaseUserActions', () => {
     });
 
     it('Multiple connector tracking - hasDataToPush: true', () => {
-      const pushAction123 = getUserAction(['pushed'], 'push-to-service');
+      const pushAction123 = getUserAction(['pushed'], 'push_to_service');
       const push456 = {
         ...basicPushSnake,
         connector_name: 'other connector name',
         external_id: 'other_external_id',
       };
 
-      const pushAction456 = getUserAction(['pushed'], 'push-to-service', {
-        newValue: JSON.stringify(push456),
-        newValConnectorId: '456',
+      const pushAction456 = getUserAction(['pushed'], 'push_to_service', {
+        payload: { externalService: push456 },
       });
 
       const userActions = [
@@ -344,16 +343,15 @@ describe('useGetCaseUserActions', () => {
     });
 
     it('Multiple connector tracking - hasDataToPush: false', () => {
-      const pushAction123 = getUserAction(['pushed'], 'push-to-service');
+      const pushAction123 = getUserAction(['pushed'], 'push_to_service');
       const push456 = {
         ...basicPushSnake,
         connector_name: 'other connector name',
         external_id: 'other_external_id',
       };
 
-      const pushAction456 = getUserAction(['pushed'], 'push-to-service', {
-        newValue: JSON.stringify(push456),
-        newValConnectorId: '456',
+      const pushAction456 = getUserAction(['pushed'], 'push_to_service', {
+        payload: { externalService: push456 },
       });
 
       const userActions = [
@@ -391,7 +389,7 @@ describe('useGetCaseUserActions', () => {
     it('Change fields of current connector - hasDataToPush: true', () => {
       const userActions = [
         ...caseUserActions,
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         createUpdateConnectorFields123HighPriorityUserAction(),
       ];
 
@@ -413,7 +411,7 @@ describe('useGetCaseUserActions', () => {
     it('Change current connector - hasDataToPush: true', () => {
       const userActions = [
         ...caseUserActions,
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         createChangeConnector123To456UserAction(),
       ];
 
@@ -435,7 +433,7 @@ describe('useGetCaseUserActions', () => {
     it('Change connector and back - hasDataToPush: true', () => {
       const userActions = [
         ...caseUserActions,
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         createChangeConnector123To456UserAction(),
         createChangeConnector456To123UserAction(),
       ];
@@ -459,7 +457,7 @@ describe('useGetCaseUserActions', () => {
       const userActions = [
         ...caseUserActions,
         createUpdateConnectorFields123HighPriorityUserAction(),
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         createChangeConnector123HighPriorityTo456UserAction(),
         createChangeConnector456To123PriorityLowUserAction(),
       ];
@@ -483,7 +481,7 @@ describe('useGetCaseUserActions', () => {
       const userActions = [
         ...caseUserActions,
         createUpdateConnectorFields123HighPriorityUserAction(),
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         createChangeConnector123HighPriorityTo456UserAction(),
         createChangeConnector456To123HighPriorityUserAction(),
       ];
@@ -504,16 +502,15 @@ describe('useGetCaseUserActions', () => {
     });
 
     it('Change connectors and fields - multiple pushes', () => {
-      const pushAction123 = getUserAction(['pushed'], 'push-to-service');
+      const pushAction123 = getUserAction(['pushed'], 'push_to_service');
       const push456 = {
         ...basicPushSnake,
         connector_name: 'other connector name',
         external_id: 'other_external_id',
       };
 
-      const pushAction456 = getUserAction(['pushed'], 'push-to-service', {
-        newValue: JSON.stringify(push456),
-        newValConnectorId: '456',
+      const pushAction456 = getUserAction(['pushed'], 'push_to_service', {
+        payload: { externalService: push456 },
       });
 
       const userActions = [
@@ -553,16 +550,15 @@ describe('useGetCaseUserActions', () => {
     });
 
     it('pushing other connectors does not count as an update', () => {
-      const pushAction123 = getUserAction(['pushed'], 'push-to-service');
+      const pushAction123 = getUserAction(['pushed'], 'push_to_service');
       const push456 = {
         ...basicPushSnake,
         connector_name: 'other connector name',
         external_id: 'other_external_id',
       };
 
-      const pushAction456 = getUserAction(['pushed'], 'push-to-service', {
-        newValConnectorId: '456',
-        newValue: JSON.stringify(push456),
+      const pushAction456 = getUserAction(['pushed'], 'push_to_service', {
+        payload: { externalService: push456 },
       });
 
       const userActions = [
@@ -603,7 +599,7 @@ describe('useGetCaseUserActions', () => {
       const userActions = [
         ...caseUserActions,
         createUpdateConnectorFields123HighPriorityUserAction(),
-        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['pushed'], 'push_to_service'),
         createChangeConnector123HighPriorityTo456UserAction(),
         createUpdateConnectorFields456HighPriorityUserAction(),
       ];
@@ -643,64 +639,40 @@ const jira456HighPriorityFields = {
 
 const createUpdateConnectorFields123HighPriorityUserAction = () =>
   getUserAction(['connector'], 'update', {
-    oldValue: getJiraConnectorWithoutId(),
-    newValue: getJiraConnectorWithoutId(jira123HighPriorityFields),
-    oldValConnectorId: '123',
-    newValConnectorId: '123',
+    payload: { connector: getJiraConnector(jira123HighPriorityFields) },
   });
 
 const createUpdateConnectorFields456HighPriorityUserAction = () =>
   getUserAction(['connector'], 'update', {
-    oldValue: getJiraConnectorWithoutId(jira456Fields),
-    newValue: getJiraConnectorWithoutId(jira456HighPriorityFields),
-    oldValConnectorId: '456',
-    newValConnectorId: '456',
+    payload: { connector: getJiraConnector(jira456HighPriorityFields) },
   });
 
 const createChangeConnector123HighPriorityTo456UserAction = () =>
   getUserAction(['connector'], 'update', {
-    oldValue: getJiraConnectorWithoutId(jira123HighPriorityFields),
-    oldValConnectorId: '123',
-    newValue: getJiraConnectorWithoutId(jira456Fields),
-    newValConnectorId: '456',
+    payload: { connector: getJiraConnector(jira456Fields) },
   });
 
 const createChangeConnector123To456UserAction = () =>
   getUserAction(['connector'], 'update', {
-    oldValue: getJiraConnectorWithoutId(),
-    oldValConnectorId: '123',
-    newValue: getJiraConnectorWithoutId(jira456Fields),
-    newValConnectorId: '456',
+    payload: { connector: getJiraConnector(jira456Fields) },
   });
 
 const createChangeConnector123LowPriorityTo456UserAction = () =>
   getUserAction(['connector'], 'update', {
-    oldValue: getJiraConnectorWithoutId(jira123LowPriorityFields),
-    oldValConnectorId: '123',
-    newValue: getJiraConnectorWithoutId(jira456Fields),
-    newValConnectorId: '456',
+    payload: { connector: getJiraConnector(jira456Fields) },
   });
 
 const createChangeConnector456To123UserAction = () =>
   getUserAction(['connector'], 'update', {
-    oldValue: getJiraConnectorWithoutId(jira456Fields),
-    oldValConnectorId: '456',
-    newValue: getJiraConnectorWithoutId(),
-    newValConnectorId: '123',
+    payload: { connector: getJiraConnector() },
   });
 
 const createChangeConnector456To123HighPriorityUserAction = () =>
   getUserAction(['connector'], 'update', {
-    oldValue: getJiraConnectorWithoutId(jira456Fields),
-    oldValConnectorId: '456',
-    newValue: getJiraConnectorWithoutId(jira123HighPriorityFields),
-    newValConnectorId: '123',
+    payload: { connector: getJiraConnector(jira123HighPriorityFields) },
   });
 
 const createChangeConnector456To123PriorityLowUserAction = () =>
   getUserAction(['connector'], 'update', {
-    oldValue: getJiraConnectorWithoutId(jira456Fields),
-    oldValConnectorId: '456',
-    newValue: getJiraConnectorWithoutId(jira123LowPriorityFields),
-    newValConnectorId: '123',
+    payload: { connector: getJiraConnector(jira123LowPriorityFields) },
   });

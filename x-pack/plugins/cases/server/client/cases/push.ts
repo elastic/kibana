@@ -19,7 +19,6 @@ import {
   CaseAttributes,
 } from '../../../common/api';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
 import { createCaseError } from '../../common/error';

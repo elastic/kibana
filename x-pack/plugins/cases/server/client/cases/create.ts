@@ -20,10 +20,8 @@ import {
   CasesClientPostRequestRt,
   CasePostRequest,
   CaseType,
-  OWNER_FIELD,
 } from '../../../common/api';
 import { ENABLE_CASE_CONNECTOR, MAX_TITLE_LENGTH } from '../../../common/constants';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';

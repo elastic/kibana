@@ -7,11 +7,10 @@
 
 import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
-import { isCreateConnector, isPush, isUpdateConnector } from '../../common/utils/user_actions';
 import { ResolvedCase } from '../../common/ui/types';
 import {
   AssociationType,
-  CaseUserActionConnector,
+  CaseConnector,
   CaseResponse,
   CasesFindResponse,
   CasesResponse,
@@ -247,15 +246,12 @@ export const pushedCase: Case = {
 };
 
 const basicAction = {
-  actionAt: basicCreatedAt,
-  actionBy: elasticUser,
-  oldValConnectorId: null,
-  oldValue: null,
-  newValConnectorId: null,
-  newValue: 'what a cool value',
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
   caseId: basicCaseId,
   commentId: null,
   owner: SECURITY_SOLUTION_OWNER,
+  payload: { title: 'a title' },
 };
 
 export const cases: Case[] = [
@@ -336,6 +332,7 @@ export const casesStatusSnake: CasesStatusResponse = {
 
 export const pushConnectorId = '123';
 export const pushSnake = {
+  connector_id: pushConnectorId,
   connector_name: 'connector name',
   external_id: 'external_id',
   external_title: 'external title',
@@ -391,18 +388,17 @@ const basicActionSnake = {
   comment_id: null,
   owner: SECURITY_SOLUTION_OWNER,
 };
-export const getUserActionSnake = (af: UserActionField, a: UserAction) => {
-  const isPushToService = a === 'push-to-service' && af[0] === 'pushed';
+
+export const getUserActionSnake = (fields: UserActionField, action: UserAction) => {
+  const isPushToService = action === 'push_to_service' && fields[0] === 'pushed';
 
   return {
     ...basicActionSnake,
-    action_id: `${af[0]}-${a}`,
-    action_field: af,
-    action: a,
-    comment_id: af[0] === 'comment' ? basicCommentId : null,
-    new_value: isPushToService ? JSON.stringify(basicPushSnake) : basicAction.newValue,
-    new_val_connector_id: isPushToService ? pushConnectorId : null,
-    old_val_connector_id: null,
+    action_id: `${fields[0]}-${action}`,
+    fields,
+    action,
+    comment_id: fields[0] === 'comment' ? basicCommentId : null,
+    payload: isPushToService ? { externalService: basicPushSnake } : basicAction.payload,
   };
 };
 
@@ -415,72 +411,28 @@ export const caseUserActionsSnake: CaseUserActionsResponse = [
 // user actions
 
 export const getUserAction = (
-  af: UserActionField,
-  a: UserAction,
+  fields: UserActionField,
+  action: UserAction,
   overrides?: Partial<CaseUserActions>
 ): CaseUserActions => {
   return {
     ...basicAction,
-    actionId: `${af[0]}-${a}`,
-    actionField: af,
-    action: a,
-    commentId: af[0] === 'comment' ? basicCommentId : null,
-    ...getValues(a, af, overrides),
+    actionId: `${fields[0]}-${action}`,
+    fields,
+    action,
+    commentId: fields[0] === 'comment' ? basicCommentId : null,
+    ...overrides,
   };
 };
 
-const getValues = (
-  userAction: UserAction,
-  actionFields: UserActionField,
-  overrides?: Partial<CaseUserActions>
-): Partial<CaseUserActions> => {
-  if (isCreateConnector(userAction, actionFields)) {
-    return {
-      newValue:
-        overrides?.newValue === undefined ? JSON.stringify(basicCaseSnake) : overrides.newValue,
-      newValConnectorId: overrides?.newValConnectorId ?? null,
-      oldValue: null,
-      oldValConnectorId: null,
-    };
-  } else if (isUpdateConnector(userAction, actionFields)) {
-    return {
-      newValue:
-        overrides?.newValue === undefined
-          ? JSON.stringify({ name: 'My Connector', type: ConnectorTypes.none, fields: null })
-          : overrides.newValue,
-      newValConnectorId: overrides?.newValConnectorId ?? null,
-      oldValue:
-        overrides?.oldValue === undefined
-          ? JSON.stringify({ name: 'My Connector2', type: ConnectorTypes.none, fields: null })
-          : overrides.oldValue,
-      oldValConnectorId: overrides?.oldValConnectorId ?? null,
-    };
-  } else if (isPush(userAction, actionFields)) {
-    return {
-      newValue:
-        overrides?.newValue === undefined ? JSON.stringify(basicPushSnake) : overrides?.newValue,
-      newValConnectorId:
-        overrides?.newValConnectorId === undefined ? pushConnectorId : overrides.newValConnectorId,
-      oldValue: overrides?.oldValue ?? null,
-      oldValConnectorId: overrides?.oldValConnectorId ?? null,
-    };
-  } else {
-    return {
-      newValue: overrides?.newValue === undefined ? basicAction.newValue : overrides.newValue,
-      newValConnectorId: overrides?.newValConnectorId ?? null,
-      oldValue: overrides?.oldValue ?? null,
-      oldValConnectorId: overrides?.oldValConnectorId ?? null,
-    };
-  }
-};
-
-export const getJiraConnectorWithoutId = (overrides?: Partial<CaseUserActionConnector>) => {
-  return JSON.stringify({
+export const getJiraConnector = (overrides?: Partial<CaseConnector>): CaseConnector => {
+  return {
+    id: '123',
     name: 'jira1',
     type: ConnectorTypes.jira,
     ...jiraFields,
     ...overrides,
-  });
+  };
 };
 
 export const jiraFields = { fields: { issueType: '10006', priority: null, parent: null } };

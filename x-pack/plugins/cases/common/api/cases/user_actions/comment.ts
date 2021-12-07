@@ -13,7 +13,11 @@ export const CommentUserActionPayloadRt = rt.type({ comment: CommentRequestRt })
 
 export const CommentUserActionRt = rt.type({
   fields: rt.array(rt.literal(Fields.comment)),
-  action: rt.union([rt.literal(Actions.update), rt.literal(Actions.create)]),
+  action: rt.union([
+    rt.literal(Actions.update),
+    rt.literal(Actions.create),
+    rt.literal(Actions.delete),
+  ]),
   payload: CommentUserActionPayloadRt,
 });
 

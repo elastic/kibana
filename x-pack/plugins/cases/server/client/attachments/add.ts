@@ -36,10 +36,6 @@ import {
   ENABLE_CASE_CONNECTOR,
   MAX_GENERATED_ALERTS_PER_SUB_CASE,
 } from '../../../common/constants';
-import {
-  buildCaseUserActionItem,
-  buildCommentUserActionItem,
-} from '../../services/user_actions/helpers';
 
 import { AttachmentService, CasesService, CaseUserActionService } from '../../services';
 import { CommentableCase } from '../../common/models';

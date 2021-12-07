@@ -14,10 +14,7 @@ import {
 } from '../../../../../../src/core/server';
 import { ESConnectorFields } from '../../services';
 import { ConnectorTypes, CaseType } from '../../../common/api';
-import {
-  transformConnectorIdToReference,
-  transformPushConnectorIdToReference,
-} from '../../services/user_actions/transform';
+import { transformConnectorIdToReference, transformPushConnectorIdToReference } from './utils';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,

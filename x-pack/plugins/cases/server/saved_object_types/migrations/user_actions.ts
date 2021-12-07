@@ -20,6 +20,10 @@ import { isPush, isUpdateConnector, isCreateConnector } from '../../../common/ut
 import { ConnectorTypes } from '../../../common/api';
 
 import { extractConnectorIdFromJson, UserActionFieldType } from './utils';
+import {
+  USER_ACTION_OLD_ID_REF_NAME,
+  USER_ACTION_OLD_PUSH_ID_REF_NAME,
+} from '../../common/constants';
 
 interface UserActions {
   action: string;
