@@ -252,7 +252,7 @@ function useDimensions(
       updateContainerRect();
     };
 
-    window.addEventListener('scroll', handler, { passive: true });
+    window.addEventListener('scroll', handler, { passive: true, capture: true });
 
     const resizeObserver =
       typeof window.ResizeObserver !== 'undefined' &&
@@ -264,7 +264,7 @@ function useDimensions(
     }
 
     return () => {
-      window.removeEventListener('scroll', handler);
+      window.removeEventListener('scroll', handler, { capture: true });
       if (resizeObserver) resizeObserver.disconnect();
     };
   }, [setPageOffset, container, updateContainerRect]);
