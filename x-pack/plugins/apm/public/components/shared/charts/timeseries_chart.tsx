@@ -180,13 +180,11 @@ export function TimeseriesChart({
   };
 
   const changePoint: ProjectionClickListener = ({ x }) => {
-    console.log('x', x);
     if (typeof x === 'number') {
       const wp = getWindowParameters(x, min, max);
       setWindowParameters(wp);
     }
   };
-  console.log('windowXXX', windowParameters);
 
   const { progress, response, startFetch } = useChangePointDetection(
     windowParameters ?? {}
@@ -366,7 +364,9 @@ export function TimeseriesChart({
 
   const chart = (
     <>
-      {windowParameters && <MlBrush data={[1, 2, 3]} />}
+      {windowParameters && (
+        <MlBrush windowParameters={windowParameters} min={min} max={max} />
+      )}
       <ChartContainer
         hasData={!isEmpty}
         height={height}
@@ -375,6 +375,7 @@ export function TimeseriesChart({
       >
         <Chart ref={chartRef} id={id}>
           <Settings
+            debugState={true}
             tooltip={{ stickTo: 'top', showNullValues: true }}
             onBrushEnd={(event) =>
               onBrushEnd({ x: (event as XYBrushEvent).x, history })

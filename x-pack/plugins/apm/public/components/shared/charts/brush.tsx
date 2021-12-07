@@ -6,17 +6,34 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-
 import { brush, brushSelection, brushX } from 'd3-brush';
+import { scaleLinear } from 'd3-scale';
 import { select } from 'd3-selection';
 
-const d3 = { brush, brushSelection, brushX, select };
+import { WindowParameters } from '../../../../common/correlations/change_point/types';
 
 import './brush.scss';
 
+const d3 = { brush, brushSelection, brushX, scaleLinear, select };
+
 interface MlBrush {
-  id: number;
+  id: string;
   brush: unknown;
+  start: number;
+  end: number;
+}
+
+interface Dimensions {
+  width: number;
+  height: number;
+  margin: {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+  };
+  boundedWidth: number;
+  boundedHeight: number;
 }
 
 const margin = {
@@ -26,14 +43,35 @@ const margin = {
   left: 10,
 };
 
-const width = 400 - margin.left - margin.right;
+// const width = 400 - margin.left - margin.right;
 const height = 200 - margin.top - margin.bottom;
 
-export function MlBrush({ data }: { data: any[] }) {
+export function MlBrush({
+  windowParameters,
+  min,
+  max,
+}: {
+  windowParameters: WindowParameters;
+  min: number;
+  max: number;
+}) {
+  const stageSvgRef = useRef(null);
   const d3Container = useRef(null);
 
+  const width =
+    stageSvgRef.current !== null
+      ? stageSvgRef.current.offsetWidth - margin.left - margin.right
+      : null;
+
+  const { baselineMin, baselineMax, deviationMin, deviationMax } =
+    windowParameters;
+
   useEffect(() => {
-    if (d3Container.current) {
+    if (d3Container.current && stageSvgRef.current && width) {
+      const x = d3.scaleLinear().domain([min, max]).rangeRound([0, width]);
+      const minExtentPx = Math.round((x(max) - x(min)) / 100);
+      const brushes: MlBrush[] = [];
+
       const svg = d3.select(d3Container.current);
 
       const gElement = svg
@@ -46,20 +84,18 @@ export function MlBrush({ data }: { data: any[] }) {
         .attr('width', width)
         .attr('height', height);
 
-      // We initially generate a SVG group to keep our brushes' DOM elements in:
       const gBrushes = gElement.append('g').attr('class', 'brushes');
 
-      // We also keep the actual d3-brush functions and their IDs in a list:
-      const brushes: MlBrush[] = [];
-
-      function newBrush() {
+      function newBrush(id: string, start: number, end: number) {
         brushes.push({
-          id: brushes.length,
+          id,
           brush: d3
             .brushX()
             .on('start', brushstart)
             .on('brush', brushed)
             .on('end', brushend),
+          start,
+          end,
         });
 
         function brushstart() {
@@ -71,17 +107,44 @@ export function MlBrush({ data }: { data: any[] }) {
         }
 
         function brushend() {
-          // Figure out if our latest brush has a selection
-          const lastBrushID = brushes[brushes.length - 1].id;
-          const lastBrush = document.getElementById('brush-' + lastBrushID);
-          const selection = d3.brushSelection(lastBrush);
+          const baselineBrush = document.getElementById('brush-baseline');
+          const baselineSelection = d3.brushSelection(baselineBrush);
 
-          // If it does, that means we need another one
-          if (selection && selection[0] !== selection[1]) {
-            newBrush();
+          const deviationBrush = document.getElementById('brush-deviation');
+          const deviationSelection = d3.brushSelection(deviationBrush);
+
+          if (
+            id === 'deviation' &&
+            deviationSelection &&
+            baselineSelection &&
+            deviationSelection[0] - minExtentPx < baselineSelection[1]
+          ) {
+            const newDeviationMin = baselineSelection[1] + minExtentPx;
+            const newDeviationMax = Math.max(
+              deviationSelection[1],
+              newDeviationMin + minExtentPx
+            );
+            d3.select(this)
+              .transition()
+              .duration(200)
+              .call(brushes[1].brush.move, [newDeviationMin, newDeviationMax]);
+          } else if (
+            id === 'baseline' &&
+            deviationSelection &&
+            baselineSelection &&
+            deviationSelection[0] < baselineSelection[1] + minExtentPx
+          ) {
+            const newBaselineMax = deviationSelection[0] - minExtentPx;
+            const newBaselineMin = Math.min(
+              baselineSelection[0],
+              newBaselineMax - minExtentPx
+            );
+            d3.select(this)
+              .transition()
+              .duration(200)
+              .call(brushes[0].brush.move, [newBaselineMin, newBaselineMax]);
           }
 
-          // Always draw brushes
           drawBrushes();
         }
       }
@@ -102,38 +165,38 @@ export function MlBrush({ data }: { data: any[] }) {
             return 'brush-' + b.id;
           })
           .each(function (brushObject: MlBrush) {
-            // call the brush
             brushObject.brush(d3.select(this));
+            brushObject.brush.move(d3.select(this), [
+              x(brushObject.start),
+              x(brushObject.end),
+            ]);
           });
 
-        mlBrushSelection.each(function (brushObject: MlBrush) {
-          d3.select(this)
-            .attr('class', 'brush')
-            .selectAll('.overlay')
-            .style('pointer-events', function () {
-              const b = brushObject.brush;
-              if (brushObject.id === brushes.length - 1 && b !== undefined) {
-                return 'all';
-              } else {
-                return 'none';
-              }
-            });
-        });
+        // disable drag-select to reset a brush's selection
+        mlBrushSelection
+          .attr('class', 'brush')
+          .selectAll('.overlay')
+          .style('pointer-events', 'none');
 
-        brushSelection.exit().remove();
+        mlBrushSelection.exit().remove();
       }
 
-      newBrush();
+      newBrush('baseline', baselineMin, baselineMax);
+      newBrush('deviation', deviationMin, deviationMax);
       drawBrushes();
     }
-  }, []);
+  }, [min, max, width, baselineMin, baselineMax, deviationMin, deviationMax]);
 
   return (
-    <svg
-      className="ml-d3-component"
-      width={width}
-      height={height}
-      ref={d3Container}
-    />
+    <div className="ml-state-svg" ref={stageSvgRef}>
+      {width && (
+        <svg
+          className="ml-d3-component"
+          width={width}
+          height={height}
+          ref={d3Container}
+        />
+      )}
+    </div>
   );
 }
