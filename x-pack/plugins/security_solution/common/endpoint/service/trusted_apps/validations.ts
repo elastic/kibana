@@ -34,6 +34,23 @@ export const getDuplicateFields = (entries: ConditionEntry[]) => {
     .map((entry) => entry[0]);
 };
 
+export const hasSimpleExecutableName = ({
+  os,
+  type,
+  value,
+}: {
+  os: OperatingSystem;
+  type: TrustedAppEntryTypes;
+  value: string;
+}): boolean => {
+  if (type === 'wildcard') {
+    return os === OperatingSystem.WINDOWS
+      ? /\\(\w+\.\w+)$/i.test(value)
+      : /\/\w+\.*\w*$/i.test(value);
+  }
+  return true;
+};
+
 export const isPathValid = ({
   os,
   field,
