@@ -48,6 +48,7 @@ export type ZipUrlTLSFields = t.TypeOf<typeof ZipUrlTLSFieldsCodec>;
 // CommonFields
 export const CommonFieldsCodec = t.interface({
   [ConfigKey.NAME]: t.string,
+  [ConfigKey.ID]: t.string,
   [ConfigKey.MONITOR_TYPE]: DataStreamCodec,
   [ConfigKey.ENABLED]: t.boolean,
   [ConfigKey.SCHEDULE]: Schedule,
