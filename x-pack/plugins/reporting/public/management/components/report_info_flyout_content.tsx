@@ -141,12 +141,6 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       }),
       description: info.layout?.id || UNKNOWN,
     },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.browserTypeInfo', {
-        defaultMessage: 'Browser type',
-      }),
-      description: info.browser_type || NA,
-    },
   ];
 
   const warnings = info.getWarnings();

@@ -47,13 +47,13 @@ import {
   User,
   CaseAttributes,
 } from '../../../common/api';
+import { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import {
   defaultSortField,
   flattenCaseSavedObject,
   flattenSubCaseSavedObject,
   groupTotalAlertsByID,
-  SavedObjectFindOptionsKueryNode,
-} from '../../common';
+} from '../../common/utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { ClientArgs } from '..';
 import { combineFilters } from '../../client/utils';

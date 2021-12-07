@@ -36,6 +36,7 @@ import {
   KibanaContextProvider,
   KibanaReactContext,
   KibanaReactContextValue,
+  KibanaThemeProvider,
 } from '../../services/kibana_react';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
@@ -60,6 +61,7 @@ export interface DashboardContainerServices {
   uiSettings: IUiSettingsClient;
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
+  theme: CoreStart['theme'];
   http: CoreStart['http'];
 }
 
@@ -259,9 +261,11 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
-          <this.services.presentationUtil.ContextProvider>
-            <DashboardViewport container={this} controlGroup={this.controlGroup} />
-          </this.services.presentationUtil.ContextProvider>
+          <KibanaThemeProvider theme$={this.services.theme.theme$}>
+            <this.services.presentationUtil.ContextProvider>
+              <DashboardViewport container={this} controlGroup={this.controlGroup} />
+            </this.services.presentationUtil.ContextProvider>
+          </KibanaThemeProvider>
         </KibanaContextProvider>
       </I18nProvider>,
       dom
