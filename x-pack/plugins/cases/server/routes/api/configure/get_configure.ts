@@ -7,7 +7,8 @@
 
 import { RouteDeps } from '../types';
 import { escapeHatch, wrapError } from '../utils';
-import { CASE_CONFIGURE_URL, GetConfigureFindRequest } from '../../../../common';
+import { CASE_CONFIGURE_URL } from '../../../../common/constants';
+import { GetConfigureFindRequest } from '../../../../common/api';
 
 export function initGetCaseConfigure({ router, logger }: RouteDeps) {
   router.get(
