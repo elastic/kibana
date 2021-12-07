@@ -438,7 +438,7 @@ describe('Task Runner', () => {
         expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
         expect(logger.debug).nthCalledWith(
           2,
-          `rule test:1: 'rule-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+          `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
         );
         expect(logger.debug).nthCalledWith(
           3,
@@ -599,7 +599,7 @@ describe('Task Runner', () => {
               },
             ],
           },
-          message: "alert executed: test:1: 'rule-name'",
+          message: "rule executed: test:1: 'rule-name'",
           rule: {
             category: 'test',
             id: '1',
@@ -653,11 +653,11 @@ describe('Task Runner', () => {
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
-      `rule test:1: 'rule-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+      `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
     );
     expect(logger.debug).nthCalledWith(
       3,
-      `no scheduling of actions for rule test:1: 'rule-name': alert is muted.`
+      `no scheduling of actions for rule test:1: 'rule-name': rule is muted.`
     );
     expect(logger.debug).nthCalledWith(
       4,
@@ -787,7 +787,7 @@ describe('Task Runner', () => {
           },
         ],
       },
-      message: "alert executed: test:1: 'rule-name'",
+      message: "rule executed: test:1: 'rule-name'",
       rule: {
         category: 'test',
         id: '1',
@@ -852,11 +852,11 @@ describe('Task Runner', () => {
         expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
         expect(logger.debug).nthCalledWith(
           2,
-          `rule test:1: 'rule-name' has 2 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"},{\"instanceId\":\"2\",\"actionGroup\":\"default\"}]`
+          `rule test:1: 'rule-name' has 2 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"},{\"instanceId\":\"2\",\"actionGroup\":\"default\"}]`
         );
         expect(logger.debug).nthCalledWith(
           3,
-          `skipping scheduling of actions for '2' in rule test:1: 'rule-name': alert is muted`
+          `skipping scheduling of actions for '2' in rule test:1: 'rule-name': rule is muted`
         );
         expect(logger.debug).nthCalledWith(
           4,
@@ -1542,11 +1542,11 @@ describe('Task Runner', () => {
         expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
         expect(logger.debug).nthCalledWith(
           2,
-          `rule test:1: 'rule-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+          `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
         );
         expect(logger.debug).nthCalledWith(
           3,
-          `rule test:1: 'rule-name' has 1 recovered alert instances: [\"2\"]`
+          `rule test:1: 'rule-name' has 1 recovered alerts: [\"2\"]`
         );
         expect(logger.debug).nthCalledWith(
           4,
@@ -1894,12 +1894,12 @@ describe('Task Runner', () => {
 
         const logger = customTaskRunnerFactoryInitializerParams.logger;
         expect(logger.debug).toHaveBeenCalledWith(
-          `rule test:${alertId}: 'rule-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+          `rule test:${alertId}: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
         );
 
         expect(logger.debug).nthCalledWith(
           3,
-          `rule test:${alertId}: 'rule-name' has 1 recovered alert instances: [\"2\"]`
+          `rule test:${alertId}: 'rule-name' has 1 recovered alerts: [\"2\"]`
         );
         expect(logger.debug).nthCalledWith(
           4,
@@ -2312,7 +2312,7 @@ describe('Task Runner', () => {
       }
     `);
     expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
-      `Executing Alert foo:test:1 has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]`
+      `Executing Rule foo:test:1 has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]`
     );
   });
 
@@ -3112,7 +3112,7 @@ describe('Task Runner', () => {
     return taskRunner.run().catch((ex) => {
       expect(ex).toMatchInlineSnapshot(`[Error: Saved object [alert/1] not found]`);
       expect(logger.debug).toHaveBeenCalledWith(
-        `Executing Alert foo:test:1 has resulted in Error: Saved object [alert/1] not found`
+        `Executing Rule foo:test:1 has resulted in Error: Saved object [alert/1] not found`
       );
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
@@ -3154,7 +3154,7 @@ describe('Task Runner', () => {
     return taskRunner.run().catch((ex) => {
       expect(ex).toMatchInlineSnapshot(`[Error: Saved object [alert/1] not found]`);
       expect(logger.debug).toHaveBeenCalledWith(
-        `Executing Alert test space:test:1 has resulted in Error: Saved object [alert/1] not found`
+        `Executing Rule test space:test:1 has resulted in Error: Saved object [alert/1] not found`
       );
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(

@@ -438,7 +438,7 @@ export class TaskRunner<
                 const shouldExecuteAction = !throttled && !muted;
                 if (!shouldExecuteAction) {
                   this.logger.debug(
-                    `skipping scheduling of actions for '${alertName}' in rule ${ruleLabel}: alert is ${
+                    `skipping scheduling of actions for '${alertName}' in rule ${ruleLabel}: rule is ${
                       muted ? 'muted' : 'throttled'
                     }`
                   );
