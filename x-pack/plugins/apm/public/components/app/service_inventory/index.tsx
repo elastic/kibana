@@ -26,7 +26,7 @@ import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
 import { SearchBar } from '../../shared/search_bar';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import { ServiceList } from './service_list';
-import { MLCallout } from './service_list/MLCallout';
+import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 
 const initialData = {
   requestId: '',
@@ -157,26 +157,19 @@ function useServicesFetcher() {
 }
 
 export function ServiceInventory() {
-  const { core } = useApmPluginContext();
-
   const { mainStatisticsData, mainStatisticsStatus, comparisonData } =
     useServicesFetcher();
 
-  const { anomalyDetectionJobsData, anomalyDetectionJobsStatus } =
-    useAnomalyDetectionJobsContext();
+  const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
 
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
-    'apm.userHasDismissedServiceInventoryMlCallout',
+    `apm.userHasDismissedServiceInventoryMlCallout.${anomalyDetectionSetupState}`,
     false
   );
 
-  const canCreateJob = !!core.application.capabilities.ml?.canCreateJob;
-
   const displayMlCallout =
-    anomalyDetectionJobsStatus === FETCH_STATUS.SUCCESS &&
-    !anomalyDetectionJobsData?.jobs.length &&
-    canCreateJob &&
-    !userHasDismissedCallout;
+    !userHasDismissedCallout &&
+    shouldDisplayMlCallout(anomalyDetectionSetupState);
 
   const isLoading = mainStatisticsStatus === FETCH_STATUS.LOADING;
   const isFailure = mainStatisticsStatus === FETCH_STATUS.FAILURE;
@@ -196,10 +189,14 @@ export function ServiceInventory() {
   return (
     <>
       <SearchBar showTimeComparison />
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="m">
         {displayMlCallout && (
           <EuiFlexItem>
-            <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
+            <MLCallout
+              isOnSettingsPage={false}
+              anomalyDetectionSetupState={anomalyDetectionSetupState}
+              onDismiss={() => setUserHasDismissedCallout(true)}
+            />
           </EuiFlexItem>
         )}
         <EuiFlexItem>
