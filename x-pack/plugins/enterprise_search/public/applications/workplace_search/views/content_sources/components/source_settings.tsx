@@ -17,6 +17,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiForm,
+  EuiSpacer,
+  EuiFilePicker,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -26,7 +29,11 @@ import { AppLogic } from '../../../app_logic';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourceConfigFields } from '../../../components/shared/source_config_fields';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { NAV } from '../../../constants';
+import {
+  NAV,
+  GITHUB_VIA_APP_SERVICE_TYPE,
+  GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE,
+} from '../../../constants';
 
 import {
   CANCEL_BUTTON,
@@ -36,6 +43,7 @@ import {
   REMOVE_BUTTON,
 } from '../../../constants';
 import { SourceDataItem } from '../../../types';
+import { handlePrivateKeyUpload } from '../../../utils';
 import { AddSourceLogic } from '../components/add_source/add_source_logic';
 import {
   SOURCE_SETTINGS_HEADING,
@@ -58,12 +66,19 @@ import { SourceLayout } from './source_layout';
 export const SourceSettings: React.FC = () => {
   const { http } = useValues(HttpLogic);
 
-  const { updateContentSource, removeContentSource } = useActions(SourceLogic);
+  const {
+    updateContentSource,
+    removeContentSource,
+    setStagedPrivateKey,
+    updateContentSourceConfiguration,
+  } = useActions(SourceLogic);
   const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
-    contentSource: { name, id, serviceType, isOauth1 },
+    contentSource: { name, id, serviceType, isOauth1, secret },
     buttonLoading,
+    stagedPrivateKey,
+    isConfigurationUpdateButtonLoading,
   } = useValues(SourceLogic);
 
   const {
@@ -76,16 +91,22 @@ export const SourceSettings: React.FC = () => {
     getSourceConfigData(serviceType);
   }, []);
 
-  const { editPath } = staticSourceData.find(
-    (source) => source.serviceType === serviceType
-  ) as SourceDataItem;
+  const isGithubApp =
+    serviceType === GITHUB_VIA_APP_SERVICE_TYPE ||
+    serviceType === GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE;
+
+  const editPath = isGithubApp
+    ? undefined // undefined for GitHub apps, as they are configured source-wide, and don't use a connector where you can edit the configuration
+    : (staticSourceData.find((source) => source.serviceType === serviceType) as SourceDataItem)
+        .editPath;
 
   const [inputValue, setValue] = useState(name);
   const [confirmModalVisible, setModalVisibility] = useState(false);
   const showConfirm = () => setModalVisibility(true);
   const hideConfirm = () => setModalVisibility(false);
 
-  const showConfig = isOrganization && !isEmpty(configuredFields);
+  const showOauthConfig = !isGithubApp && isOrganization && !isEmpty(configuredFields);
+  const showGithubAppConfig = isGithubApp;
 
   const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
 
@@ -100,6 +121,11 @@ export const SourceSettings: React.FC = () => {
   const submitNameChange = (e: FormEvent) => {
     e.preventDefault();
     updateContentSource(id, { name: inputValue });
+  };
+
+  const submitConfigurationChange = (e: FormEvent) => {
+    e.preventDefault();
+    updateContentSourceConfiguration(id, { private_key: stagedPrivateKey });
   };
 
   const handleSourceRemoval = () => {
@@ -164,7 +190,7 @@ export const SourceSettings: React.FC = () => {
           </EuiFlexGroup>
         </form>
       </ContentSection>
-      {showConfig && (
+      {showOauthConfig && (
         <ContentSection title={SOURCE_CONFIG_TITLE}>
           <SourceConfigFields
             isOauth1={isOauth1}
@@ -175,10 +201,43 @@ export const SourceSettings: React.FC = () => {
             baseUrl={baseUrl}
           />
           <EuiFormRow>
-            <EuiButtonEmptyTo to={editPath} flush="left">
+            <EuiButtonEmptyTo to={editPath as string} flush="left">
               {SOURCE_CONFIG_LINK}
             </EuiButtonEmptyTo>
           </EuiFormRow>
+        </ContentSection>
+      )}
+      {showGithubAppConfig && (
+        <ContentSection title={SOURCE_CONFIG_TITLE}>
+          <EuiForm component="form" onSubmit={submitConfigurationChange}>
+            <EuiFormRow label="GitHub App ID">
+              <div>{secret!.app_id}</div>
+            </EuiFormRow>
+            {secret!.base_url && (
+              <EuiFormRow label="Base URL">
+                <div>{secret!.base_url}</div>
+              </EuiFormRow>
+            )}
+            <EuiFormRow label="Private key">
+              <>
+                <div>SHA256:{secret!.fingerprint}</div>
+                <EuiSpacer size="s" />
+                <EuiFilePicker
+                  key={secret!.fingerprint} // clear staged file by rerendering the file picker each time the fingerprint changes
+                  onChange={(files) => handlePrivateKeyUpload(files, setStagedPrivateKey)}
+                  initialPromptText="Upload a new .pem file to rotate the private key"
+                  accept=".pem"
+                />
+              </>
+            </EuiFormRow>
+            <EuiButton
+              type="submit"
+              isLoading={isConfigurationUpdateButtonLoading}
+              disabled={!stagedPrivateKey}
+            >
+              {isConfigurationUpdateButtonLoading ? 'Loading…' : 'Save'}
+            </EuiButton>
+          </EuiForm>
         </ContentSection>
       )}
       <ContentSection title={SYNC_DIAGNOSTICS_TITLE} description={SYNC_DIAGNOSTICS_DESCRIPTION}>
