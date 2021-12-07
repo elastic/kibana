@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Storage } from './storage';
+import { Storage, StorageKeys } from './storage';
 
 export class StorageMock extends Storage {
   delete = jest.fn();
@@ -15,7 +15,13 @@ export class StorageMock extends Storage {
   encodeKey = jest.fn();
   encode = jest.fn();
   has = jest.fn();
-  keys = jest.fn();
-  get = jest.fn();
+  keys = jest.fn(() => []);
   set = jest.fn();
+  get = jest.fn((key: string) => {
+    if (key === StorageKeys.WIDTH) {
+      return [100, 100];
+    }
+
+    return '';
+  });
 }
