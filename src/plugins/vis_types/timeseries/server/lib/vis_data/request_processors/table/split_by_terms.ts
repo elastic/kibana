@@ -6,38 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { buildEsQuery } from '@kbn/es-query';
 import { overwrite } from '../../helpers';
-import { isUIControlEnabled } from '../../../../../common/check_ui_restrictions';
+
 import type { TableRequestProcessorsFunction } from './types';
 
-export const splitByTerms: TableRequestProcessorsFunction = ({
-  panel,
-  esQueryConfig,
-  seriesIndex,
-  capabilities,
-}) => {
-  const indexPattern = seriesIndex.indexPattern || undefined;
-
+export const splitByTerms: TableRequestProcessorsFunction = ({ panel }) => {
   return (next) => (doc) => {
     panel.series
-      .filter(
-        (c) =>
-          c.aggregate_by &&
-          c.aggregate_function &&
-          isUIControlEnabled('aggregate_function', capabilities.uiRestrictions)
-      )
+      .filter((c) => c.aggregate_by && c.aggregate_function)
       .forEach((column) => {
         overwrite(doc, `aggs.pivot.aggs.${column.id}.terms.field`, column.aggregate_by);
         overwrite(doc, `aggs.pivot.aggs.${column.id}.terms.size`, 100);
-
-        if (column.filter) {
-          overwrite(
-            doc,
-            `aggs.pivot.aggs.${column.id}.column_filter.filter`,
-            buildEsQuery(indexPattern, [column.filter], [], esQueryConfig)
-          );
-        }
       });
 
     return next(doc);

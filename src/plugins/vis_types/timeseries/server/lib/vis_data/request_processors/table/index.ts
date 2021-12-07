@@ -8,7 +8,7 @@
 
 export { pivot } from './pivot';
 export { query } from './query';
-export { splitByEverything } from './split_by_everything';
+export { applyFilters } from './apply_filters';
 export { splitByTerms } from './split_by_terms';
 export { dateHistogram } from './date_histogram';
 export { metricBuckets } from './metric_buckets';
