@@ -95,7 +95,13 @@ export function getEcsOpsMetricsLog(metrics: OpsMetrics) {
   };
 
   return {
-    message: `${processMemoryUsedInBytesMsg}${uptimeValMsg}${loadValsMsg}${eventLoopDelayValMsg}${eventLoopDelayHistMsg}`,
+    message: [
+      processMemoryUsedInBytesMsg,
+      uptimeValMsg,
+      loadValsMsg,
+      eventLoopDelayValMsg,
+      eventLoopDelayHistMsg,
+    ].join(''),
     meta,
   };
 }
