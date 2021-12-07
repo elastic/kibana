@@ -36,7 +36,7 @@ import {
   byDataColorPaletteMap,
   extractUniqTermsMap,
 } from './render_helpers';
-import { EmptyPlaceholder } from '../shared_components';
+import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import './visualization.scss';
 import {
   ChartsPluginSetup,
