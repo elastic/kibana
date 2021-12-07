@@ -153,7 +153,7 @@ describe('sort_exception_lists_to_create_update', () => {
                 type: 'detection',
                 updated_by: 'elastic',
               },
-              id: undefined,
+              id: '1',
               type: 'exception-list',
             },
           ],

@@ -27,66 +27,6 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllExceptions(supertest, log);
     });
 
-    it('should reject with an error if the file type is not that of a ndjson', async () => {
-      const { body } = await supertest
-        .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
-        .set('kbn-xsrf', 'true')
-        .attach(
-          'file',
-          Buffer.from(toNdJsonString([getImportExceptionsListSchemaMock('some-list-id')])),
-          'exceptions.txt'
-        )
-        .expect(400);
-
-      expect(body).to.eql({
-        status_code: 400,
-        message: 'Invalid file extension .txt',
-      });
-    });
-
-    it('should NOT be able to import more than 10,000 exceptions', async () => {
-      const listIds = new Array(10001).fill(undefined).map((_, index) => `list-${index}`);
-      const { body } = await supertest
-        .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
-        .set('kbn-xsrf', 'true')
-        .attach(
-          'file',
-          Buffer.from(toNdJsonString(listIds.map((id) => getImportExceptionsListSchemaMock(id)))),
-          'exceptions.ndjson'
-        )
-        .expect(500);
-
-      expect(body).to.eql({
-        status_code: 500,
-        message: "Can't import more than 10000 exceptions",
-      });
-    });
-
-    it('should be able to import 1000 exceptions', async () => {
-      const listIds = new Array(1000).fill(undefined).map((_, index) => `list-${index}`);
-      const { body } = await supertest
-        .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
-        .set('kbn-xsrf', 'true')
-        .attach(
-          'file',
-          Buffer.from(
-            toNdJsonString(listIds.flatMap((id) => [getImportExceptionsListSchemaMock(id)]))
-          ),
-          'exceptions.ndjson'
-        )
-        .expect(200);
-
-      expect(body).to.eql({
-        errors: [],
-        success_count_exception_list_items: 0,
-        success_count_exception_lists: 1000,
-        success_exception_list_items: true,
-        success_exception_lists: true,
-        success: true,
-        success_count: 1000,
-      });
-    });
-
     describe('"overwrite" is false', () => {
       it('should report duplicate error when importing exception list matches an existing list with same "list_id"', async () => {
         await supertest
@@ -370,24 +310,38 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should report error when importing exception list item matches an existing list item with same "item_id" but differing "list_id"s', async () => {
+      // TO DO - work in progress on this one
+      it.skip('should report error when importing exception list item matches an existing list item with same "item_id" but differing "list_id"s', async () => {
         // create an exception list
         await supertest
           .post(EXCEPTION_LIST_URL)
           .set('kbn-xsrf', 'true')
-          .send({ ...getCreateExceptionListMinimalSchemaMock(), list_id: 'a_list_id' })
+          .send({
+            ...getCreateExceptionListMinimalSchemaMock(),
+            namespace_type: 'single',
+            list_id: 'list-id-1',
+          })
           .expect(200);
         await supertest
           .post(EXCEPTION_LIST_URL)
           .set('kbn-xsrf', 'true')
-          .send(getCreateExceptionListMinimalSchemaMock())
+          .send({
+            ...getCreateExceptionListMinimalSchemaMock(),
+            namespace_type: 'single',
+            list_id: 'list-id-2',
+          })
           .expect(200);
 
         // create an exception list item
         await supertest
           .post(EXCEPTION_LIST_ITEM_URL)
           .set('kbn-xsrf', 'true')
-          .send({ ...getCreateExceptionListItemMinimalSchemaMock(), list_id: 'a_list_id' })
+          .send({
+            ...getCreateExceptionListItemMinimalSchemaMock(),
+            item_id: 'item-id-1',
+            list_id: 'list-id-2',
+            namespace_type: 'single',
+          })
           .expect(200);
 
         const { body } = await supertest
@@ -397,7 +351,10 @@ export default ({ getService }: FtrProviderContext): void => {
             'file',
             Buffer.from(
               toNdJsonString([
-                getImportExceptionsListItemSchemaMock('some-list-item-id', 'some-list-id'),
+                {
+                  ...getImportExceptionsListItemSchemaMock('item-id-1', 'list-id-1'),
+                  namespace_type: 'single',
+                },
               ])
             ),
             'exceptions.ndjson'
@@ -685,6 +642,71 @@ export default ({ getService }: FtrProviderContext): void => {
           success: false,
           success_count: 0,
         });
+      });
+    });
+
+    it('should reject with an error if the file type is not that of a ndjson', async () => {
+      const { body } = await supertest
+        .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
+        .set('kbn-xsrf', 'true')
+        .attach(
+          'file',
+          Buffer.from(toNdJsonString([getImportExceptionsListSchemaMock('some-list-id')])),
+          'exceptions.txt'
+        )
+        .expect(400);
+
+      expect(body).to.eql({
+        status_code: 400,
+        message: 'Invalid file extension .txt',
+      });
+    });
+
+    it('should NOT be able to import more than 10,000 exceptions', async () => {
+      const listIds = new Array(10001).fill(undefined).map((_, index) => `list-${index}`);
+      const { body } = await supertest
+        .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
+        .set('kbn-xsrf', 'true')
+        .attach(
+          'file',
+          Buffer.from(toNdJsonString(listIds.map((id) => getImportExceptionsListSchemaMock(id)))),
+          'exceptions.ndjson'
+        )
+        .expect(500);
+
+      expect(body).to.eql({
+        status_code: 500,
+        message: "Can't import more than 10000 exceptions",
+      });
+    });
+
+    it('should be able to import 500 exceptions lists and items', async () => {
+      const listIds = new Array(500).fill(undefined).map((_, index) => `list-${index}`);
+      const { body } = await supertest
+        .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
+        .set('kbn-xsrf', 'true')
+        .attach(
+          'file',
+          Buffer.from(
+            toNdJsonString(
+              listIds.flatMap((id, count) => [
+                getImportExceptionsListSchemaMock(id),
+                getImportExceptionsListItemSchemaMock(`item-id${count}`, id),
+              ])
+            )
+          ),
+          'exceptions.ndjson'
+        )
+        .expect(200);
+
+      expect(body).to.eql({
+        errors: [],
+        success_count_exception_list_items: 500,
+        success_count_exception_lists: 500,
+        success_exception_list_items: true,
+        success_exception_lists: true,
+        success: true,
+        success_count: 1000,
       });
     });
   });
