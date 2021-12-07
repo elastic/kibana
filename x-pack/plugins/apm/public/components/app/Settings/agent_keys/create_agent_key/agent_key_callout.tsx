@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiSpacer,
@@ -22,7 +22,7 @@ interface Props {
 
 export function AgentKeyCallOut({ name, token }: Props) {
   return (
-    <Fragment>
+    <>
       <EuiCallOut
         title={i18n.translate(
           'xpack.apm.settings.agentKeys.copyAgentKeyField.title',
@@ -81,6 +81,6 @@ export function AgentKeyCallOut({ name, token }: Props) {
         </EuiFormControlLayout>
       </EuiCallOut>
       <EuiSpacer size="m" />
-    </Fragment>
+    </>
   );
 }

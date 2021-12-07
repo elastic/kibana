@@ -89,7 +89,7 @@ export async function createAgentKey({
     privileges.push(
       PrivilegeType.SOURCEMAP,
       PrivilegeType.EVENT,
-      PrivilegeType.AGENT_CONFIG,
+      PrivilegeType.AGENT_CONFIG
     );
   }
 

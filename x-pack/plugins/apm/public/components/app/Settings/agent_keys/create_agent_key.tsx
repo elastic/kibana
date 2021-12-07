@@ -51,10 +51,12 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
   const [eventWriteChecked, setEventWriteChecked] = useState(true);
   const [sourcemapChecked, setSourcemapChecked] = useState(true);
 
-  const isFormInvalid = isEmpty(keyName);
+  const isInputInvalid = isEmpty(keyName);
+  const isFormInvalid = formTouched && isInputInvalid;
+
   const formError = i18n.translate(
     'xpack.apm.settings.agentKeys.createKeyFlyout.name.placeholder',
-    { defaultMessage: 'Enter a name', }
+    { defaultMessage: 'Enter a name' }
   );
 
   useEffect(() => {
@@ -71,12 +73,12 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
 
   const createAgentKeyTitle = i18n.translate(
     'xpack.apm.settings.agentKeys.createKeyFlyout.createAgentKey',
-    { defaultMessage: 'Create agent key', }
+    { defaultMessage: 'Create agent key' }
   );
 
   const createAgentKey = async () => {
     setFormTouched(true);
-    if (isFormInvalid) {
+    if (isInputInvalid) {
       return;
     }
 
@@ -109,12 +111,12 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiForm isInvalid={formTouched && isFormInvalid} error={formError}>
+        <EuiForm isInvalid={isFormInvalid} error={formError}>
           {username && (
             <EuiFormRow
               label={i18n.translate(
                 'xpack.apm.settings.agentKeys.createKeyFlyout.userTitle',
-                { defaultMessage: 'User', }
+                { defaultMessage: 'User' }
               )}
             >
               <EuiText>{username}</EuiText>
@@ -133,7 +135,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                 defaultMessage: 'What is this key used for?',
               }
             )}
-            isInvalid={formTouched && isFormInvalid}
+            isInvalid={isFormInvalid}
             error={formError}
           >
             <EuiFieldText
@@ -145,7 +147,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                 }
               )}
               onChange={(e) => setKeyName(e.target.value)}
-              isInvalid={formTouched && isFormInvalid}
+              isInvalid={isFormInvalid}
               onBlur={() => setFormTouched(true)}
             />
           </EuiFormRow>
@@ -173,7 +175,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                 id={htmlIdGenerator()()}
                 label="config_agent:read"
                 checked={agentConfigChecked}
-                onChange={() => setAgentConfigChecked(state => !state)
+                onChange={() => setAgentConfigChecked((state) => !state)}
               />
             </EuiFormRow>
             <EuiSpacer size="s" />
@@ -189,7 +191,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                 id={htmlIdGenerator()()}
                 label="event:write"
                 checked={eventWriteChecked}
-                onChange={() => setEventWriteChecked(state => !state)}
+                onChange={() => setEventWriteChecked((state) => !state)}
               />
             </EuiFormRow>
             <EuiSpacer size="s" />
@@ -205,7 +207,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                 id={htmlIdGenerator()()}
                 label="sourcemap:write"
                 checked={sourcemapChecked}
-                onChange={() => setSourcemapChecked(state => !state)}
+                onChange={() => setSourcemapChecked((state) => !state)}
               />
             </EuiFormRow>
             <EuiSpacer size="s" />
@@ -230,7 +232,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
               fill={true}
               onClick={createAgentKey}
               type="submit"
-              disabled={formTouched && isFormInvalid}
+              disabled={isFormInvalid}
             >
               {createAgentKeyTitle}
             </EuiButton>
