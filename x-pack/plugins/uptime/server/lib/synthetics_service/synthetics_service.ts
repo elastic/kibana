@@ -201,7 +201,7 @@ export class SyntheticsService {
       type: syntheticsMonitorType,
     });
 
-    const savedObjectsList = monitorsSavedObjects.saved_objects;
+    const savedObjectsList = monitorsSavedObjects?.saved_objects ?? [];
     return savedObjectsList.map<ValuesType<MonitorFields[]>>(({ attributes, id }) => ({
       ...attributes,
       id,

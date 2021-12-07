@@ -16,6 +16,7 @@ const UI_KEYS = [
   ConfigKey.LATENCY,
   ConfigKey.THROTTLING_CONFIG,
   ConfigKey.IS_THROTTLING_ENABLED,
+  ConfigKey.PASSWORD,
 ];
 
 interface HeartbeatConfig {

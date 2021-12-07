@@ -76,7 +76,7 @@ export class ServiceAPIClient {
 
     this.locations.forEach(({ id, url }) => {
       const locMonitors = allMonitors.filter(
-        ({ locations }) => !locations || locations?.includes(id)
+        ({ locations }) => !locations || locations.length === 0 || locations?.includes(id)
       );
       if (locMonitors.length > 0) {
         promises.push(
