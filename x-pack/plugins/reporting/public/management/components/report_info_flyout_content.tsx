@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDescriptionList, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiDescriptionList, EuiSpacer, EuiText, EuiDescriptionListProps } from '@elastic/eui';
 
 import type { Job } from '../../lib/job';
 import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
@@ -83,6 +83,10 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       description:
         info.kibana_name && info.kibana_id ? `${info.kibana_name} (${info.kibana_id})` : NA,
     },
+    Boolean(info.spaceId) && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.space', { defaultMessage: 'Space' }),
+      description: info.spaceId,
+    },
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.contentTypeInfo', {
         defaultMessage: 'Content type',
@@ -128,7 +132,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
     },
 
     // TODO: when https://github.com/elastic/kibana/pull/106137 is merged, add kibana version field
-  ];
+  ].filter(Boolean) as EuiDescriptionListProps['listItems'];
 
   const jobScreenshot = [
     {
