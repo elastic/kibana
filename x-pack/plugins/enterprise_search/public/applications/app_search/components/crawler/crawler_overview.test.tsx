@@ -80,6 +80,7 @@ const events: CrawlEventFromServer[] = [
       domain_allowlist: ['moviedatabase.com', 'swiftype.com'],
       seed_urls: [],
       sitemap_urls: [],
+      max_crawl_depth: 10,
     },
   },
   {
@@ -94,6 +95,7 @@ const events: CrawlEventFromServer[] = [
       domain_allowlist: ['swiftype.com'],
       seed_urls: [],
       sitemap_urls: [],
+      max_crawl_depth: 10,
     },
   },
 ];
