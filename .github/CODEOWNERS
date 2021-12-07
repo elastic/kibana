@@ -177,6 +177,8 @@
 /x-pack/test/functional/services/ml/  @elastic/ml-ui
 /x-pack/test/functional_basic/apps/ml/ @elastic/ml-ui
 /x-pack/test/functional_with_es_ssl/apps/ml/ @elastic/ml-ui
+/x-pack/test/alerting_api_integration/spaces_only/tests/alerting/ml_rule_types/ @elastic/ml-ui
+/x-pack/test/alerting_api_integration/spaces_only/tests/alerting/transform_rule_types/ @elastic/ml-ui
 
 # ML team owns and maintains the transform plugin despite it living in the Data management section.
 /x-pack/plugins/transform/  @elastic/ml-ui
