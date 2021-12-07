@@ -64,11 +64,11 @@ export const useStackByFields = () => {
   const allFields = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
   useEffect(() => {
     const options = Object.entries(allFields).reduce<EuiComboBoxOptionOption[]>(
-      (prev: EuiComboBoxOptionOption[], [key, field]) => {
+      (filteredOptions: EuiComboBoxOptionOption[], [key, field]) => {
         if (field.aggregatable === true) {
-          return [...prev, { label: key, value: key }];
+          return [...filteredOptions, { label: key, value: key }];
         } else {
-          return prev;
+          return filteredOptions;
         }
       },
       []
