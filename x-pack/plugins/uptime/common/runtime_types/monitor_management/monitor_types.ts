@@ -50,6 +50,7 @@ export type ZipUrlTLSFields = t.TypeOf<typeof ZipUrlTLSFieldsCodec>;
 export const CommonFieldsCodec = t.interface({
   [ConfigKey.NAME]: t.string,
   [ConfigKey.MONITOR_TYPE]: DataStreamCodec,
+  [ConfigKey.ENABLED]: t.boolean,
   [ConfigKey.SCHEDULE]: Schedule,
   [ConfigKey.LOCATIONS]: t.array(t.string),
   [ConfigKey.APM_SERVICE_NAME]: t.string,

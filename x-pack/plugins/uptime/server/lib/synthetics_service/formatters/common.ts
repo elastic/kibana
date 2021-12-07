@@ -19,8 +19,8 @@ export type CommonFormatMap = Record<keyof CommonFields, Formatter>;
 
 export const commonFormatters: CommonFormatMap = {
   [ConfigKey.NAME]: null,
-  [ConfigKey.LOCATIONS]: null,
   [ConfigKey.MONITOR_TYPE]: null,
+  [ConfigKey.ENABLED]: null,
   [ConfigKey.LOCATIONS]: null,
   [ConfigKey.SCHEDULE]: (fields) =>
     `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorServiceNowITSMTypeFields } from '../../../common';
+import { ConnectorServiceNowITSMTypeFields } from '../../../common/api';
 import { ServiceNowITSMFormat } from './types';
 
 export const format: ServiceNowITSMFormat = (theCase, alerts) => {

@@ -195,7 +195,7 @@ export class SyntheticsService {
 
   async getMonitorConfigs() {
     const savedObjectsClient = this.server.savedObjectsClient;
-    const monitorsSavedObjects = await savedObjectsClient.find<
+    const monitorsSavedObjects = await savedObjectsClient?.find<
       SyntheticsMonitorSavedObject['attributes']
     >({
       type: syntheticsMonitorType,
