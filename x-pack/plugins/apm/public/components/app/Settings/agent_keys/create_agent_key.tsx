@@ -211,7 +211,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                 id={htmlIdGenerator()()}
                 label="sourcemap:write"
                 checked={sourcemapChecked}
-                onChange={() => setSourcemapChecked(!sourcemapChecked)}
+                onChange={() => setSourcemapChecked(state => !state)}
               />
             </EuiFormRow>
             <EuiSpacer size="s" />
