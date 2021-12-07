@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { find } from 'lodash/fp';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { BrowserFields } from '../../../containers/source';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
@@ -130,7 +131,7 @@ export const Overview = React.memo<Props>(
           enrichedFieldInfo={severityData}
           contextId={contextId}
         >
-          <SeverityBadge value={severityData.values[0]} />
+          <SeverityBadge value={severityData.values[0] as Severity} />
         </OverviewCardWithActions>
       </EuiFlexItem>
     );
