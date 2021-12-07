@@ -39,7 +39,7 @@ export function createAbortableEsClientFactory(opts: CreateAbortableEsClientFact
           });
         } catch (e) {
           if (isAbortError(e)) {
-            throw new Error('');
+            throw new Error('Search has been aborted due to cancelled execution');
           }
           throw e;
         }
@@ -55,7 +55,7 @@ export function createAbortableEsClientFactory(opts: CreateAbortableEsClientFact
           });
         } catch (e) {
           if (isAbortError(e)) {
-            throw new Error('');
+            throw new Error('Search has been aborted due to cancelled execution');
           }
           throw e;
         }

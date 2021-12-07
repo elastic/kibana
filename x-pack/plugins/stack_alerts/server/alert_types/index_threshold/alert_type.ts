@@ -173,6 +173,13 @@ export function getAlertType(
     });
     logger.debug(`alert ${ID}:${alertId} "${name}" query result: ${JSON.stringify(result)}`);
 
+    if (options.services.shouldStopExecution()) {
+      logger.warn(
+        `short circuiting execution for rule ${ID}:${alertId} "${name}" due to cancelled execution`
+      );
+      return;
+    }
+
     const groupResults = result.results || [];
     // console.log(`index_threshold: response: ${JSON.stringify(groupResults, null, 4)}`);
     for (const groupResult of groupResults) {

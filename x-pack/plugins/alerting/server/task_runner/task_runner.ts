@@ -86,6 +86,7 @@ export class TaskRunner<
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
   private ruleName: string | null;
+  private ruleId: string | null;
   private alertType: NormalizedAlertType<
     Params,
     ExtractedParams,
@@ -116,13 +117,16 @@ export class TaskRunner<
     this.logger = context.logger;
     this.alertType = alertType;
     this.ruleName = null;
+    this.ruleId = null;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled$ = new BehaviorSubject<boolean>(false);
 
     this.cancelled$.pipe(filter((cancelled: boolean) => cancelled)).subscribe(() => {
-      this.logger.info(`Cancelling es search!!!!!`);
+      this.logger.debug(
+        `Aborting any in-progress ES searches for rule type ${this.alertType.id} with id ${this.ruleId}`
+      );
       this.searchAbortController.abort();
     });
   }
@@ -583,6 +587,7 @@ export class TaskRunner<
     }
 
     this.ruleName = alert.name;
+    this.ruleId = alert.id;
 
     try {
       this.ruleTypeRegistry.ensureRuleTypeEnabled(alert.alertTypeId);

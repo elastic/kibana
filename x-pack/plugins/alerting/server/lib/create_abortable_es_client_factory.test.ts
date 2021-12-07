@@ -67,19 +67,37 @@ describe('createAbortableEsClientFactory', () => {
     expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
   });
 
-  test('throws error when abort signal received', async () => {
+  test('re-throws error when search throws error', async () => {
     const abortController = new AbortController();
-    abortController.abort();
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    scopedClusterClient.asInternalUser.search.mockRejectedValueOnce(
+      new Error('something went wrong!')
+    );
     const abortableSearchClient = createAbortableEsClientFactory({
       scopedClusterClient,
       abortController,
     });
 
-    await abortableSearchClient.asInternalUser.search(esQuery);
-    expect(scopedClusterClient.asInternalUser.search).toHaveBeenCalledWith(esQuery, {
-      signal: abortController.signal,
+    await expect(
+      abortableSearchClient.asInternalUser.search
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
+  });
+
+  test('throws error when search throws abort error', async () => {
+    const abortController = new AbortController();
+    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    scopedClusterClient.asInternalUser.search.mockRejectedValueOnce(
+      new Error('Request has been aborted by the user')
+    );
+    const abortableSearchClient = createAbortableEsClientFactory({
+      scopedClusterClient,
+      abortController,
     });
-    await expect(abortableSearchClient.asInternalUser.search).rejects.toThrow();
+
+    await expect(
+      abortableSearchClient.asInternalUser.search
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Search has been aborted due to cancelled execution"`
+    );
   });
 });
