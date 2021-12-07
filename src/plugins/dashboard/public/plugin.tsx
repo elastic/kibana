@@ -193,6 +193,11 @@ export class DashboardPlugin
       );
     }
 
+    const getPlaceholderEmbeddableStartServices = async () => {
+      const [coreStart] = await core.getStartServices();
+      return { theme: coreStart.theme };
+    };
+
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
 
@@ -203,13 +208,14 @@ export class DashboardPlugin
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
         showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
         notifications: coreStart.notifications,
+        screenshotMode: deps.screenshotMode,
         application: coreStart.application,
         uiSettings: coreStart.uiSettings,
         overlays: coreStart.overlays,
         embeddable: deps.embeddable,
         uiActions: deps.uiActions,
         inspector: deps.inspector,
-        screenshotMode: deps.screenshotMode,
+        theme: coreStart.theme,
         http: coreStart.http,
         ExitFullScreenButton,
         presentationUtil: deps.presentationUtil,
@@ -279,10 +285,12 @@ export class DashboardPlugin
         dashboardContainerFactory.type,
         dashboardContainerFactory
       );
-    });
 
-    const placeholderFactory = new PlaceholderEmbeddableFactory();
-    embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
+      const placeholderFactory = new PlaceholderEmbeddableFactory(
+        getPlaceholderEmbeddableStartServices
+      );
+      embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
+    });
 
     this.stopUrlTracking = () => {
       stopUrlTracker();
@@ -364,7 +372,7 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    const { notifications, overlays, application } = core;
+    const { notifications, overlays, application, theme } = core;
     const { uiActions, data, share, presentationUtil, embeddable } = plugins;
 
     const dashboardCapabilities: Readonly<DashboardCapabilities> = application.capabilities
@@ -406,11 +414,15 @@ export class DashboardPlugin
       uiActions.registerAction(unlinkFromLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
 
-      const libraryNotificationAction = new LibraryNotificationAction(unlinkFromLibraryAction);
+      const libraryNotificationAction = new LibraryNotificationAction(
+        theme,
+        unlinkFromLibraryAction
+      );
       uiActions.registerAction(libraryNotificationAction);
       uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
 
       const copyToDashboardAction = new CopyToDashboardAction(
+        theme,
         overlays,
         embeddable.getStateTransfer(),
         {
