@@ -8,11 +8,13 @@
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
+import { toBooleanRt } from '@kbn/io-ts-utils/to_boolean_rt';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import { getAgentKeys } from './get_agent_keys';
 import { getAgentKeysPrivileges } from './get_agent_keys_privileges';
 import { invalidateAgentKey } from './invalidate_agent_key';
+import { createAgentKey } from './create_agent_key';
 
 const agentKeysRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/agent_keys',
@@ -74,10 +76,40 @@ const invalidateAgentKeyRoute = createApmServerRoute({
   },
 });
 
+const createAgentKeyRoute = createApmServerRoute({
+  endpoint: 'POST /apm/agent_keys',
+  options: { tags: ['access:apm', 'access:apm_write'] },
+  params: t.type({
+    body: t.intersection([
+      t.partial({
+        sourcemap: toBooleanRt,
+        event: toBooleanRt,
+        agentConfig: toBooleanRt,
+      }),
+      t.type({
+        name: t.string,
+      }),
+    ]),
+  }),
+  handler: async (resources) => {
+    const { context, params } = resources;
+
+    const { body: requestBody } = params;
+
+    const agentKey = await createAgentKey({
+      context,
+      requestBody,
+    });
+
+    return agentKey;
+  },
+});
+
 export const agentKeysRouteRepository = createApmServerRouteRepository()
   .add(agentKeysRoute)
   .add(agentKeysPrivilegesRoute)
-  .add(invalidateAgentKeyRoute);
+  .add(invalidateAgentKeyRoute)
+  .add(createAgentKeyRoute);
 
 const SECURITY_REQUIRED_MESSAGE = i18n.translate(
   'xpack.apm.api.apiKeys.securityRequired',

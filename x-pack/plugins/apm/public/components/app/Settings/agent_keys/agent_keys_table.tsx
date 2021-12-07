@@ -18,10 +18,10 @@ import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 interface Props {
   agentKeys: ApiKey[];
-  refetchAgentKeys: () => void;
+  onKeyDelete: () => void;
 }
 
-export function AgentKeysTable({ agentKeys, refetchAgentKeys }: Props) {
+export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
   const [agentKeyToBeDeleted, setAgentKeyToBeDeleted] = useState<ApiKey>();
 
   const columns: Array<EuiBasicTableColumn<ApiKey>> = [
@@ -159,7 +159,7 @@ export function AgentKeysTable({ agentKeys, refetchAgentKeys }: Props) {
           agentKey={agentKeyToBeDeleted}
           onConfirm={() => {
             setAgentKeyToBeDeleted(undefined);
-            refetchAgentKeys();
+            onKeyDelete();
           }}
         />
       )}
