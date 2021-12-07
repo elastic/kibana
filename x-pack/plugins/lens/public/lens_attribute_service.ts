@@ -15,8 +15,7 @@ import type {
   LensUnwrapResult,
   LensByReferenceInput,
 } from './embeddable/embeddable';
-import { SavedObjectIndexStore } from './persistence';
-import { checkForDuplicateTitle } from './saved_objects_utils';
+import { SavedObjectIndexStore, checkForDuplicateTitle } from './persistence';
 import { OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 import { DOC_TYPE } from '../common/constants';
 

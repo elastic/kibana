@@ -9,7 +9,7 @@ import React from 'react';
 import type { OverlayStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal } from '@elastic/eui';
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
 export function confirmModalPromise(
   message = '',

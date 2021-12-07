@@ -22,7 +22,7 @@ import {
 } from '../mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
-import { checkForDuplicateTitle } from '../saved_objects_utils';
+import { checkForDuplicateTitle } from '../persistence';
 import { createMemoryHistory } from 'history';
 import {
   esFilters,
@@ -40,7 +40,7 @@ import moment from 'moment';
 import { setState, LensAppState } from '../state_management/index';
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
-jest.mock('../saved_visualize_helpers/check_for_duplicate_title', () => ({
+jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
   checkForDuplicateTitle: jest.fn(),
 }));
 
