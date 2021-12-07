@@ -27,7 +27,6 @@ export const DOCUMENT_PERMISSIONS_DOCS_URL = docLinks.workplaceSearchDocumentPer
 export const ENT_SEARCH_LICENSE_MANAGEMENT = docLinks.licenseManagement;
 export const EXTERNAL_IDENTITIES_DOCS_URL = docLinks.workplaceSearchExternalIdentities;
 export const OBJECTS_AND_ASSETS_DOCS_URL = docLinks.workplaceSearchSynch;
-export const PRIVATE_SOURCES_DOCS_URL = docLinks.workplaceSearchPermissions;
 export const SECURITY_DOCS_URL = docLinks.workplaceSearchSecurity;
 
 export const PERSONAL_PATH = '/p';
