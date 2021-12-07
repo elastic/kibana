@@ -8,7 +8,11 @@
 
 import React from 'react';
 import { merge } from 'lodash';
+import axios from 'axios';
+// @ts-ignore
+import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
+import { HttpSetup } from 'src/core/public';
 import {
   ServicesContextProvider,
   EditorContextProvider,
@@ -18,14 +22,19 @@ import { getAppContextMock } from './app_context.mock';
 import { ContextValue } from '../../../public/application/contexts/services_context';
 import { init as initHttpRequests } from './http_requests';
 
+// EditorExample gets mounted on an external div, mocking the component prevents
+// it from getting mounted.
 jest.mock('../../../public/application/components/editor_example.tsx', () => ({
   EditorExample: () => '',
 }));
 
+const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
+
 export const WithAppDependencies =
   (Comp: any, { settings, ...overrides }: Record<string, unknown> = {}) =>
   (props: Record<string, unknown>) => {
-    const appContextMock = getAppContextMock() as unknown as ContextValue;
+    const http = mockHttpClient as unknown as HttpSetup;
+    const appContextMock = getAppContextMock(http) as unknown as ContextValue;
 
     return (
       <ServicesContextProvider value={merge(appContextMock, overrides)}>

@@ -6,36 +6,41 @@
  * Side Public License, v 1.
  */
 
-import { notificationServiceMock, httpServiceMock } from 'src/core/public/mocks';
-import { StorageMock } from '../../../public/services/storage.mock';
-import { SettingsMock } from '../../../public/services/settings.mock';
+import { notificationServiceMock, coreMock } from 'src/core/public/mocks';
+import { createStorage } from '../../../public/services/storage';
+import { createSettings } from '../../../public/services/settings';
 import { createHistory } from '../../../public/services/history';
 import { createApi, createEsHostService } from '../../../public/application/lib';
 
-export const getAppContextMock = () => {
-  const http = httpServiceMock.createSetupContract();
-  const storage = new StorageMock(null, null);
-  const settings = new SettingsMock(null);
+import { HttpSetup } from 'src/core/public';
+
+const objectStorageClient = {
+  text: {
+    findAll: jest.fn(() => []),
+    create: jest.fn(),
+    update: jest.fn(),
+  },
+};
+
+export const getAppContextMock = (http: HttpSetup) => {
+  const storageMock = coreMock.createStorage();
+
+  const storage = createStorage({ engine: storageMock, prefix: '' });
   const history = createHistory({ storage });
+  const settings = createSettings({ storage });
   const api = createApi({ http });
   const esHostService = createEsHostService({ api });
-  const objectStorageClient = {
-    text: {
-      findAll: jest.fn(() => []),
-      create: jest.fn(),
-    },
-  };
 
   return {
     docLinksVersion: '8.0',
     services: {
-      esHostService,
       storage,
       history,
       settings,
-      notifications: notificationServiceMock.createStartContract(),
-      trackUiMetric: jest.fn(),
+      esHostService,
       objectStorageClient,
+      trackUiMetric: jest.fn(),
+      notifications: notificationServiceMock.createStartContract(),
     },
   };
 };

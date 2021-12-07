@@ -6,7 +6,13 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "__jest__/**/*"],
+  "include": [
+    "../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "__jest__/**/*"
+  ],
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../dev_tools/tsconfig.json" },
