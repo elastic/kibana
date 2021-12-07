@@ -13,7 +13,33 @@ import { Breakpoints } from '../../../../hooks/use_breakpoints';
 import { getServiceColumns } from './';
 import * as stories from './service_list.stories';
 
-const { Example, EmptyState, WithHealthWarnings } = composeStories(stories);
+const { Example, EmptyState } = composeStories(stories);
+
+const query = {
+  rangeFrom: 'now-15m',
+  rangeTo: 'now',
+  environment: ENVIRONMENT_ALL.value,
+  kuery: '',
+};
+
+const service: any = {
+  serviceName: 'opbeans-python',
+  agentName: 'python',
+  transactionsPerMinute: {
+    value: 86.93333333333334,
+    timeseries: [],
+  },
+  errorsPerMinute: {
+    value: 12.6,
+    timeseries: [],
+  },
+  avgResponseTime: {
+    value: 91535.42944785276,
+    timeseries: [],
+  },
+  environments: ['test'],
+  transactionType: 'request',
+};
 
 describe('ServiceList', () => {
   it('renders empty state', async () => {
@@ -29,34 +55,10 @@ describe('ServiceList', () => {
   });
 
   describe('responsive columns', () => {
-    const query = {
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-      environment: ENVIRONMENT_ALL.value,
-      kuery: '',
-    };
-
-    const service: any = {
-      serviceName: 'opbeans-python',
-      agentName: 'python',
-      transactionsPerMinute: {
-        value: 86.93333333333334,
-        timeseries: [],
-      },
-      errorsPerMinute: {
-        value: 12.6,
-        timeseries: [],
-      },
-      avgResponseTime: {
-        value: 91535.42944785276,
-        timeseries: [],
-      },
-      environments: ['test'],
-      transactionType: 'request',
-    };
     describe('when small', () => {
       it('shows environment, transaction type and sparklines', () => {
         const renderedColumns = getServiceColumns({
+          showHealthStatusColumn: true,
           query,
           showTransactionTypeColumn: true,
           breakpoints: {
@@ -91,6 +93,7 @@ describe('ServiceList', () => {
     describe('when Large', () => {
       it('hides environment, transaction type and sparklines', () => {
         const renderedColumns = getServiceColumns({
+          showHealthStatusColumn: true,
           query,
           showTransactionTypeColumn: true,
           breakpoints: {
@@ -114,6 +117,7 @@ describe('ServiceList', () => {
       describe('when XL', () => {
         it('hides transaction type', () => {
           const renderedColumns = getServiceColumns({
+            showHealthStatusColumn: true,
             query,
             showTransactionTypeColumn: true,
             breakpoints: {
@@ -147,6 +151,7 @@ describe('ServiceList', () => {
       describe('when XXL', () => {
         it('hides transaction type', () => {
           const renderedColumns = getServiceColumns({
+            showHealthStatusColumn: true,
             query,
             showTransactionTypeColumn: true,
             breakpoints: {
@@ -181,20 +186,34 @@ describe('ServiceList', () => {
   });
 
   describe('without ML data', () => {
-    it('sorts by throughput', async () => {
-      render(<Example />);
-
-      expect(await screen.findByTitle('Throughput')).toBeInTheDocument();
+    it('hides healthStatus column', () => {
+      const renderedColumns = getServiceColumns({
+        showHealthStatusColumn: false,
+        query,
+        showTransactionTypeColumn: true,
+        breakpoints: {
+          isSmall: false,
+          isLarge: false,
+          isXl: false,
+        } as Breakpoints,
+      }).map((c) => c.field);
+      expect(renderedColumns.includes('healthStatus')).toBeFalsy();
     });
   });
 
   describe('with ML data', () => {
-    it('renders the health column', async () => {
-      render(<WithHealthWarnings />);
-
-      expect(
-        await screen.findByRole('button', { name: /Health/ })
-      ).toBeInTheDocument();
+    it('shows healthStatus column', () => {
+      const renderedColumns = getServiceColumns({
+        showHealthStatusColumn: true,
+        query,
+        showTransactionTypeColumn: true,
+        breakpoints: {
+          isSmall: false,
+          isLarge: false,
+          isXl: false,
+        } as Breakpoints,
+      }).map((c) => c.field);
+      expect(renderedColumns.includes('healthStatus')).toBeTruthy();
     });
   });
 });
