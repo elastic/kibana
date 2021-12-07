@@ -188,7 +188,7 @@ export function runFailedTestsReporterCli() {
             value: githubApi.getRequestCount(),
             meta: Object.fromEntries(
               Object.entries(bkMeta).map(
-                ([k, v]) => [`buildkite${k[0].toUpperCase()}${k[0].slice(1)}`, v] as const
+                ([k, v]) => [`buildkite${k[0].toUpperCase()}${k.slice(1)}`, v] as const
               )
             ),
           },
