@@ -6,7 +6,7 @@
  */
 
 import './toolbar.scss';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -60,15 +60,35 @@ const emptySizeRatioLabel = i18n.translate('xpack.lens.pieChart.emptySizeRatioLa
 export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
   const { state, setState } = props;
   const layer = state.layers[0];
-  if (!layer) {
-    return null;
-  }
+
+  const onStateChange = useCallback(
+    (part: Record<string, unknown>) => {
+      setState({
+        ...state,
+        layers: [{ ...layer, ...part }],
+      });
+    },
+    [layer, state, setState]
+  );
+
   const {
     categoryOptions,
     numberOptions,
     emptySizeRatioOptions,
     isDisabled: isToolbarPopoverDisabled,
   } = PartitionChartsMeta[state.shape].toolbarPopover;
+
+  const onEmptySizeRatioChange = useCallback(
+    (sizeId) => {
+      const emptySizeRatio = emptySizeRatioOptions?.find(({ id }) => id === sizeId)?.value;
+      onStateChange({ emptySizeRatio });
+    },
+    [emptySizeRatioOptions, onStateChange]
+  );
+
+  if (!layer) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
@@ -166,10 +186,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
                 emptySizeRatioOptions.find(({ value }) => value === layer.emptySizeRatio)?.id ??
                 'emptySizeRatioOption-medium'
               }
-              onChange={(sizeId) => {
-                const emptySizeRatio = emptySizeRatioOptions.find(({ id }) => id === sizeId)?.value;
-                setState({ ...state, layers: [{ ...layer, emptySizeRatio }] });
-              }}
+              onChange={onEmptySizeRatioChange}
             />
           </EuiFormRow>
         </ToolbarPopover>
