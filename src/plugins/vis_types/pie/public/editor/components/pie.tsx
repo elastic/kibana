@@ -129,7 +129,7 @@ const PieOptions = (props: PieOptionsProps) => {
           value={stateParams.isDonut}
           setValue={setValue}
         />
-        {stateParams.isDonut && (
+        {props.showElasticChartsOptions && stateParams.isDonut && (
           <EuiFormRow label={emptySizeRatioLabel} fullWidth>
             <EuiButtonGroup
               isFullWidth

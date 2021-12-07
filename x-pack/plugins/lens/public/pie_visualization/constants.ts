@@ -10,5 +10,5 @@ export const DEFAULT_PERCENT_DECIMALS = 2;
 export enum EMPTY_SIZE_RATIOS {
   SMALL = 0.2,
   MEDIUM = 0.3,
-  LARGE = 0.5,
+  LARGE = 0.7,
 }
