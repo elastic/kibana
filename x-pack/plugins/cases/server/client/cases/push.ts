@@ -15,17 +15,19 @@ import {
   CaseStatuses,
   ExternalServiceResponse,
   CaseType,
-  ENABLE_CASE_CONNECTOR,
   CasesConfigureAttributes,
   CaseAttributes,
-} from '../../../common';
+} from '../../../common/api';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
-import { createCaseError, flattenCaseSavedObject, getAlertInfoFromComments } from '../../common';
+import { createCaseError } from '../../common/error';
+import { flattenCaseSavedObject, getAlertInfoFromComments } from '../../common/utils';
 import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
+import { getAlerts } from '../alerts/get';
 
 /**
  * Returns true if the case should be closed based on the configuration settings and whether the case
@@ -106,9 +108,7 @@ export const push = async (
 
     const alertsInfo = getAlertInfoFromComments(theCase?.comments);
 
-    const alerts = await casesClientInternal.alerts.get({
-      alertsInfo,
-    });
+    const alerts = await getAlerts(alertsInfo, clientArgs);
 
     const getMappingsResponse = await casesClientInternal.configuration.getMappings({
       connector: theCase.connector,

@@ -7,18 +7,23 @@
 
 import { merge } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
+import {
+  AGENT_NAME,
+  TRANSACTION_TYPE,
+  TRANSACTION_NAME,
+  SERVICE_NAME,
+} from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
-import { getTransactionDurationFieldForTransactions } from '../helpers/transactions';
-
+import { getDurationFieldForTransactions } from '../helpers/transactions';
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 interface MetricParams {
   request: TransactionGroupRequestBase;
   setup: TransactionGroupSetup;
   searchAggregatedTransactions: boolean;
 }
 
-type BucketKey = Record<string, string>;
+type BucketKey = Record<typeof TRANSACTION_NAME | typeof SERVICE_NAME, string>;
 
 function mergeRequestWithAggs<
   TRequestBase extends TransactionGroupRequestBase,
@@ -46,9 +51,7 @@ export async function getAverages({
   const params = mergeRequestWithAggs(request, {
     avg: {
       avg: {
-        field: getTransactionDurationFieldForTransactions(
-          searchAggregatedTransactions
-        ),
+        field: getDurationFieldForTransactions(searchAggregatedTransactions),
       },
     },
   });
@@ -79,6 +82,9 @@ export async function getCounts({ request, setup }: MetricParams) {
           {
             field: TRANSACTION_TYPE,
           } as const,
+          {
+            field: AGENT_NAME,
+          } as const,
         ],
       },
     },
@@ -98,6 +104,9 @@ export async function getCounts({ request, setup }: MetricParams) {
       transactionType: bucket.transaction_type.top[0].metrics[
         TRANSACTION_TYPE
       ] as string,
+      agentName: bucket.transaction_type.top[0].metrics[
+        AGENT_NAME
+      ] as AgentName,
     };
   });
 }
@@ -110,9 +119,7 @@ export async function getSums({
   const params = mergeRequestWithAggs(request, {
     sum: {
       sum: {
-        field: getTransactionDurationFieldForTransactions(
-          searchAggregatedTransactions
-        ),
+        field: getDurationFieldForTransactions(searchAggregatedTransactions),
       },
     },
   });

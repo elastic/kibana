@@ -24,12 +24,13 @@ import {
   ENDPOINT_ACTION_LOG_ROUTE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../common/endpoint/constants';
 import {
   pendingActionsHttpMock,
   PendingActionsHttpMockInterface,
 } from '../../../common/lib/endpoint_pending_actions/mocks';
-import { METADATA_TRANSFORM_STATS_URL, TRANSFORM_STATES } from '../../../../common/constants';
+import { TRANSFORM_STATES } from '../../../../common/constants';
 import { TransformStatsResponse } from './types';
 import {
   fleetGetAgentPolicyListHttpMock,
@@ -48,30 +49,6 @@ type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
 }>;
 export const endpointMetadataHttpMocks = httpHandlerMockFactory<EndpointMetadataHttpMocksInterface>(
   [
-    {
-      id: 'metadataList',
-      path: HOST_METADATA_LIST_ROUTE,
-      method: 'post',
-      handler: () => {
-        const generator = new EndpointDocGenerator('seed');
-
-        return {
-          hosts: Array.from({ length: 10 }, () => {
-            const endpoint = {
-              metadata: generator.generateHostMetadata(),
-              host_status: HostStatus.UNHEALTHY,
-            };
-
-            generator.updateCommonInfo();
-
-            return endpoint;
-          }),
-          total: 10,
-          request_page_size: 10,
-          request_page_index: 0,
-        };
-      },
-    },
     {
       id: 'metadataList',
       path: HOST_METADATA_LIST_ROUTE,
@@ -186,7 +163,7 @@ export const failedTransformStateMock = {
 export const transformsHttpMocks = httpHandlerMockFactory<TransformHttpMocksInterface>([
   {
     id: 'metadataTransformStats',
-    path: METADATA_TRANSFORM_STATS_URL,
+    path: METADATA_TRANSFORMS_STATUS_ROUTE,
     method: 'get',
     handler: () => failedTransformStateMock,
   },

@@ -34,7 +34,7 @@ import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
-import { overridePackageInputs, packagePolicyService } from './package_policy';
+import { preconfigurePackageInputs, packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
@@ -404,6 +404,7 @@ async function addPreconfiguredPolicyPackages(
   agentPolicy: AgentPolicy,
   installedPackagePolicies: Array<
     Partial<Omit<NewPackagePolicy, 'inputs'>> & {
+      id?: string | number;
       name: string;
       installedPackage: Installation;
       inputs?: InputsOverride[];
@@ -413,7 +414,7 @@ async function addPreconfiguredPolicyPackages(
   bumpAgentPolicyRevison = false
 ) {
   // Add packages synchronously to avoid overwriting
-  for (const { installedPackage, name, description, inputs } of installedPackagePolicies) {
+  for (const { installedPackage, id, name, description, inputs } of installedPackagePolicies) {
     const packageInfo = await getPackageInfo({
       savedObjectsClient: soClient,
       pkgName: installedPackage.name,
@@ -427,8 +428,9 @@ async function addPreconfiguredPolicyPackages(
       agentPolicy,
       defaultOutput,
       name,
+      id,
       description,
-      (policy) => overridePackageInputs(policy, packageInfo, inputs),
+      (policy) => preconfigurePackageInputs(policy, packageInfo, inputs),
       bumpAgentPolicyRevison
     );
   }

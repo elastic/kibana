@@ -117,19 +117,22 @@ export class TaskRunner<
     this.cancelled = false;
   }
 
-  async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
+  async getDecryptedAttributes(
+    ruleId: string,
+    spaceId: string
+  ): Promise<{ apiKey: string | null; enabled: boolean }> {
     const namespace = this.context.spaceIdToNamespace(spaceId);
     // Only fetch encrypted attributes here, we'll create a saved objects client
     // scoped with the API key to fetch the remaining data.
     const {
-      attributes: { apiKey },
+      attributes: { apiKey, enabled },
     } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
       'alert',
-      alertId,
+      ruleId,
       { namespace }
     );
 
-    return apiKey;
+    return { apiKey, enabled };
   }
 
   private getFakeKibanaRequest(spaceId: string, apiKey: RawAlert['apiKey']) {
@@ -320,6 +323,7 @@ export class TaskRunner<
               InstanceContext,
               WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
             >(alertInstances),
+            shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
           },
           params,
           state: alertTypeState as State,
@@ -516,12 +520,23 @@ export class TaskRunner<
     const {
       params: { alertId, spaceId },
     } = this.taskInstance;
+    let enabled: boolean;
     let apiKey: string | null;
     try {
-      apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
+      const decryptedAttributes = await this.getDecryptedAttributes(alertId, spaceId);
+      apiKey = decryptedAttributes.apiKey;
+      enabled = decryptedAttributes.enabled;
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
+
+    if (!enabled) {
+      throw new ErrorWithReason(
+        AlertExecutionStatusErrorReasons.Disabled,
+        new Error(`Rule failed to execute because rule ran after it was disabled.`)
+      );
+    }
+
     const [services, rulesClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
 
     let alert: SanitizedAlert<Params>;
@@ -587,7 +602,6 @@ export class TaskRunner<
     const scheduleDelay = runDate.getTime() - this.taskInstance.runAt.getTime();
 
     const event = createAlertEventLogRecordObject({
-      timestamp: runDateString,
       ruleId: alertId,
       ruleType: this.alertType as UntypedNormalizedAlertType,
       action: EVENT_LOG_ACTIONS.execute,
@@ -732,7 +746,6 @@ export class TaskRunner<
 
     const eventLogger = this.context.eventLogger;
     const event: IEvent = {
-      '@timestamp': new Date().toISOString(),
       event: {
         action: EVENT_LOG_ACTIONS.executeTimeout,
         kind: 'alert',
