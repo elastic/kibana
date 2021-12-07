@@ -16,9 +16,7 @@ import { install } from './browsers/install';
 let initContext: PluginInitializerContext;
 let coreSetup: CoreSetup;
 let coreStart: CoreStart;
-let setupDeps: {
-  screenshotMode: ScreenshotModePluginSetup;
-};
+let setupDeps: Parameters<ScreenshottingPlugin['setup']>[1];
 
 beforeEach(() => {
   const configSchema = {
@@ -35,17 +33,15 @@ beforeEach(() => {
 test('sets up and starts properly', async () => {
   const plugin = new ScreenshottingPlugin(initContext);
   const setupContract = plugin.setup(coreSetup, setupDeps);
-  expect(setupContract).toMatchInlineSnapshot(`Object {}`);
+  expect(setupContract).toEqual({});
 
   await coreSetup.getStartServices();
 
   const startContract = plugin.start(coreStart);
-  expect(startContract).toMatchInlineSnapshot(`
-    Object {
-      "diagnose": [Function],
-      "getScreenshots": [Function],
-    }
-  `);
+  expect(startContract).toEqual(expect.objectContaining({
+    diagnose: expect.any(Function),
+    getScreenshots: expect.any(Function),
+  }));
 });
 
 test('handles setup issues', async () => {
@@ -58,10 +54,8 @@ test('handles setup issues', async () => {
   await coreSetup.getStartServices();
 
   const startContract = plugin.start(coreStart);
-  expect(startContract).toMatchInlineSnapshot(`
-    Object {
-      "diagnose": [Function],
-      "getScreenshots": [Function],
-    }
-  `);
+  expect(startContract).toEqual(expect.objectContaining({
+    diagnose: expect.any(Function),
+    getScreenshots: expect.any(Function),
+  }));
 });
