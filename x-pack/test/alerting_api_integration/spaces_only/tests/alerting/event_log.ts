@@ -575,7 +575,7 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   }
 
   const duration = event?.event?.duration;
-  const timestamp = Date.parse(event?.['@timestamp'] || 'udnefined');
+  const timestamp = Date.parse(event?.['@timestamp'] || 'undefined');
   const eventStart = Date.parse(event?.event?.start || 'undefined');
   const eventEnd = Date.parse(event?.event?.end || 'undefined');
   const dateNow = Date.now();
