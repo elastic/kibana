@@ -20,6 +20,8 @@ type OpenJsonModalFunc = () => void;
 
 interface Props {
   onJson(json: { [key: string]: any }): void;
+  /** List of plugins installed in the cluster nodes */
+  esNodesPlugins: string[];
   children: (openModal: OpenJsonModalFunc) => React.ReactNode;
 }
 
@@ -124,7 +126,7 @@ const getErrorMessage = (error: MappingsValidationError) => {
 const areAllObjectKeysValidParameters = (obj: { [key: string]: any }) =>
   Object.keys(obj).every((key) => VALID_MAPPINGS_PARAMETERS.includes(key));
 
-export const LoadMappingsProvider = ({ onJson, children }: Props) => {
+export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props) => {
   const [state, setState] = useState<State>({ isModalOpen: false });
   const [totalErrorsToDisplay, setTotalErrorsToDisplay] = useState<number>(MAX_ERRORS_TO_DISPLAY);
   const jsonContent = useRef<Parameters<OnJsonEditorUpdateHandler>['0'] | undefined>(undefined);
@@ -219,7 +221,7 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
         mappingsToValidate = unparsed[customType];
       }
 
-      const { value: parsed, errors } = validateMappings(mappingsToValidate);
+      const { value: parsed, errors } = validateMappings(mappingsToValidate, esNodesPlugins);
 
       // Wrap the mappings definition with custom type if one was provided.
       const parsedWithType = customType !== undefined ? { [customType]: parsed } : parsed;
