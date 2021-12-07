@@ -1683,7 +1683,6 @@ components:
           required:
             - name
             - version
-            - title
         namespace:
           type: string
         output_id:
@@ -1711,7 +1710,6 @@ components:
             required:
               - type
               - enabled
-              - streams
         policy_id:
           type: string
         name:
@@ -1719,9 +1717,7 @@ components:
         description:
           type: string
       required:
-        - output_id
         - inputs
-        - policy_id
         - name
     package_policy:
       title: Package policy
@@ -1801,12 +1797,61 @@ components:
       items: {}
     update_package_policy:
       title: Update package policy
-      allOf:
-        - type: object
+      type: object
+      description: ''
+      properties:
+        version:
+          type: string
+        enabled:
+          type: boolean
+        package:
+          type: object
           properties:
+            name:
+              type: string
             version:
               type: string
-        - $ref: '#/components/schemas/new_package_policy'
+            title:
+              type: string
+          required:
+            - name
+            - title
+            - version
+        namespace:
+          type: string
+        output_id:
+          type: string
+        inputs:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              enabled:
+                type: boolean
+              processors:
+                type: array
+                items:
+                  type: string
+              streams:
+                type: array
+                items: {}
+              config:
+                type: object
+              vars:
+                type: object
+            required:
+              - type
+              - enabled
+              - streams
+        policy_id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+      required: null
     output:
       title: Output
       type: object
