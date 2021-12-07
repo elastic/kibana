@@ -19,7 +19,7 @@ import {
   SavedObjectMigrationContext,
 } from '../../../../../../src/core/server';
 import { LensServerPluginSetup } from '../../../../lens/server';
-import { CommentType, AssociationType } from '../../../common';
+import { CommentType, AssociationType } from '../../../common/api';
 import {
   isLensMarkdownNode,
   LensMarkdownNode,

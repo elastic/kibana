@@ -13,7 +13,8 @@ import {
   SavedObjectsMigrationLogger,
 } from 'kibana/server';
 import { migrationMocks } from 'src/core/server/mocks';
-import { CaseUserActionAttributes, CASE_USER_ACTION_SAVED_OBJECT } from '../../../common';
+import { CaseUserActionAttributes } from '../../../common/api';
+import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 import {
   createConnectorObject,
   createExternalService,

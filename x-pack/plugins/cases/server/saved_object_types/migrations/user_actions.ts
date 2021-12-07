@@ -13,7 +13,8 @@ import {
   SavedObjectSanitizedDoc,
   SavedObjectMigrationContext,
 } from '../../../../../../src/core/server';
-import { ConnectorTypes, isCreateConnector, isPush, isUpdateConnector } from '../../../common';
+import { isPush, isUpdateConnector, isCreateConnector } from '../../../common/utils/user_actions';
+import { ConnectorTypes } from '../../../common/api';
 
 import { extractConnectorIdFromJson } from '../../services/user_actions/transform';
 import { UserActionFieldType } from '../../services/user_actions/types';

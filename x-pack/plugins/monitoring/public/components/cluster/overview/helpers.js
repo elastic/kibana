@@ -94,6 +94,7 @@ export function ClusterItemContainer(props) {
     logstash: 'logoLogstash',
     beats: 'logoBeats',
     apm: 'apmApp',
+    enterprise_search: 'logoEnterpriseSearch',
   };
   const icon = iconMap[props.url];
 
