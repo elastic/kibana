@@ -66,7 +66,7 @@ const getResourcesEvaluationEsQuery = (
   size: number,
   resources?: string[]
 ): SearchRequest => {
-  const query: QueryDslQueryContainer = {
+  const query: Required<Pick<QueryDslQueryContainer, 'bool'>> = {
     bool: {
       filter: [
         { term: { 'run_id.keyword': cycleId } },
@@ -75,7 +75,7 @@ const getResourcesEvaluationEsQuery = (
     },
   };
   if (resources) {
-    query.bool!.must = { terms: { 'resource.filename.keyword': resources } };
+    query.bool.must = { terms: { 'resource.filename.keyword': resources } };
   }
   return {
     index: FINDINGS_INDEX,
