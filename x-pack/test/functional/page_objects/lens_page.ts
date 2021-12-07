@@ -807,6 +807,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }, {});
     },
 
+    async getCountOfDatatableColumns() {
+      const table = await find.byCssSelector('.euiDataGrid');
+      const $ = await table.parseDomContent();
+      return (await $('.euiDataGridHeaderCell__content')).length;
+    },
+
     async getDatatableHeader(index = 0) {
       log.debug(`All headers ${await testSubjects.getVisibleText('dataGridHeader')}`);
       return find.byCssSelector(
@@ -817,9 +823,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDatatableCell(rowIndex = 0, colIndex = 0) {
-      const table = await find.byCssSelector('.euiDataGrid');
-      const $ = await table.parseDomContent();
-      const columnNumber = $('.euiDataGridHeaderCell__content').length;
+      const columnNumber = await this.getCountOfDatatableColumns();
       return await find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"]:nth-child(${
           rowIndex * columnNumber + colIndex + 2

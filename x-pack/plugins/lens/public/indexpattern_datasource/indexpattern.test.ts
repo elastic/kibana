@@ -1250,6 +1250,7 @@ describe('IndexPattern Data Source', () => {
           label: 'My Op',
           dataType: 'string',
           isBucketed: true,
+          isStaticValue: false,
         } as Operation);
       });
 
@@ -1723,6 +1724,7 @@ describe('IndexPattern Data Source', () => {
               ...state.layers.first.columns,
               newStatic: {
                 dataType: 'number',
+                isStaticValue: true,
                 isBucketed: false,
                 label: 'Static value: 0',
                 operationType: 'static_value',

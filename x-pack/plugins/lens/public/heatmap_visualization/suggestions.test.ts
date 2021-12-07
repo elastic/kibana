@@ -32,6 +32,53 @@ describe('heatmap suggestions', () => {
       ).toHaveLength(0);
     });
 
+    test('when metric value isStaticValue', () => {
+      expect(
+        getSuggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'date-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'date',
+                  scale: 'interval',
+                  label: 'Date',
+                },
+              },
+              {
+                columnId: 'metric-column',
+                operation: {
+                  isBucketed: false,
+                  dataType: 'number',
+                  scale: 'ratio',
+                  label: 'Metric',
+                  isStaticValue: true,
+                },
+              },
+              {
+                columnId: 'group-column',
+                operation: {
+                  isBucketed: true,
+                  dataType: 'string',
+                  scale: 'ratio',
+                  label: 'Group',
+                },
+              },
+            ],
+            changeType: 'initial',
+          },
+          state: {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+          } as HeatmapVisualizationState,
+          keptLayerIds: ['first'],
+        })
+      ).toEqual([]);
+    });
+
     test('when there are 3 or more buckets', () => {
       expect(
         getSuggestions({

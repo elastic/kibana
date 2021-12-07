@@ -14720,7 +14720,6 @@
     "xpack.lens.xyVisualization.lineLabel": "折れ線",
     "xpack.lens.xyVisualization.mixedBarHorizontalLabel": "混在した横棒",
     "xpack.lens.xyVisualization.mixedLabel": "ミックスされた XY",
-    "xpack.lens.xyVisualization.noDataLabel": "結果が見つかりませんでした",
     "xpack.lens.xyVisualization.stackedAreaLabel": "面積み上げ",
     "xpack.lens.xyVisualization.stackedBarHorizontalFullLabel": "積み上げ横棒",
     "xpack.lens.xyVisualization.stackedBarHorizontalLabel": "H.積み上げ棒",

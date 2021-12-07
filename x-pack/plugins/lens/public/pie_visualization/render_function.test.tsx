@@ -20,7 +20,7 @@ import type { LensMultiTable } from '../../common';
 import type { PieExpressionArgs } from '../../common/expressions';
 import { PieComponent } from './render_function';
 import { VisualizationContainer } from '../visualization_container';
-import { EmptyPlaceholder } from '../shared_components';
+import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { LensIconChartDonut } from '../assets/chart_donut';
 

@@ -14914,7 +14914,6 @@
     "xpack.lens.xyVisualization.lineLabel": "折线图",
     "xpack.lens.xyVisualization.mixedBarHorizontalLabel": "水平混合条形图",
     "xpack.lens.xyVisualization.mixedLabel": "混合 XY",
-    "xpack.lens.xyVisualization.noDataLabel": "找不到结果",
     "xpack.lens.xyVisualization.stackedAreaLabel": "堆积面积图",
     "xpack.lens.xyVisualization.stackedBarHorizontalFullLabel": "水平堆叠条形图",
     "xpack.lens.xyVisualization.stackedBarHorizontalLabel": "水平堆叠条形图",

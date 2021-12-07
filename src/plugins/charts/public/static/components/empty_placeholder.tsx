@@ -9,15 +9,20 @@
 import React from 'react';
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import './empty_placeholder.scss';
 
-export const EmptyPlaceholder = (props: { icon: IconType }) => (
+export const EmptyPlaceholder = ({
+  icon,
+  message = <FormattedMessage id="charts.noDataLabel" defaultMessage="No results found" />,
+}: {
+  icon: IconType;
+  message?: JSX.Element;
+}) => (
   <>
-    <EuiText className="heatmap-chart__empty" textAlign="center" color="subdued" size="xs">
-      <EuiIcon type={props.icon} color="subdued" size="l" />
+    <EuiText className="chart__empty-placeholder" textAlign="center" color="subdued" size="xs">
+      <EuiIcon type={icon} color="subdued" size="l" />
       <EuiSpacer size="s" />
-      <p>
-        <FormattedMessage id="charts.noDataLabel" defaultMessage="No results found" />
-      </p>
+      <p>{message}</p>
     </EuiText>
   </>
 );
