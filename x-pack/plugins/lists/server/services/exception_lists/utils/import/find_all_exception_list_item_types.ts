@@ -17,6 +17,12 @@ import { getExceptionListsItemFilter } from '../../find_exception_list_items';
 import { CHUNK_PARSED_OBJECT_SIZE } from '../../import_exception_list_and_items';
 import { transformSavedObjectsToFoundExceptionListItem } from '..';
 
+/**
+ * Helper to build out a filter using item_ids
+ * @param objects {array} - exception list items to add to filter
+ * @param savedObjectsClient {object}
+ * @returns {string} filter
+ */
 export const getItemsFilter = ({
   objects,
   namespaceType,
@@ -31,6 +37,13 @@ export const getItemsFilter = ({
   }.attributes.item_id:(${objects.map((item) => item.item_id).join(' OR ')})`;
 };
 
+/**
+ * Find exception items that may or may not match an existing item_id
+ * @param agnosticListItems {array} - items with a namespace of agnostic
+ * @param nonAgnosticListItems {array} - items with a namespace of single
+ * @param savedObjectsClient {object}
+ * @returns {object} results of any found items
+ */
 export const findAllListItemTypes = async (
   agnosticListItems: ImportExceptionListItemSchemaDecoded[],
   nonAgnosticListItems: ImportExceptionListItemSchemaDecoded[],
@@ -48,10 +61,13 @@ export const findAllListItemTypes = async (
     objects: nonAgnosticListItems,
   });
 
-  if (agnosticListItems.length && !nonAgnosticListItems.length) {
+  // savedObjectTypes
+  const savedObjectType = getSavedObjectTypes({ namespaceType: ['single'] });
+  const savedObjectTypeAgnostic = getSavedObjectTypes({ namespaceType: ['agnostic'] });
+
+  if (!agnosticListItems.length && !nonAgnosticListItems.length) {
     return null;
   } else if (agnosticListItems.length && !nonAgnosticListItems.length) {
-    const savedObjectType = getSavedObjectTypes({ namespaceType: ['agnostic'] });
     return savedObjectsClient.find<ExceptionListSoSchema>({
       filter: getExceptionListsItemFilter({
         filter: [agnosticFilter],
@@ -65,10 +81,9 @@ export const findAllListItemTypes = async (
       perPage: CHUNK_PARSED_OBJECT_SIZE,
       sortField: undefined,
       sortOrder: undefined,
-      type: savedObjectType,
+      type: savedObjectTypeAgnostic,
     });
   } else if (!agnosticListItems.length && nonAgnosticListItems.length) {
-    const savedObjectType = getSavedObjectTypes({ namespaceType: ['single'] });
     return savedObjectsClient.find<ExceptionListSoSchema>({
       filter: getExceptionListsItemFilter({
         filter: [nonAgnosticFilter],
@@ -88,7 +103,7 @@ export const findAllListItemTypes = async (
     const items = [...nonAgnosticListItems, ...agnosticListItems];
     return savedObjectsClient.find<ExceptionListSoSchema>({
       filter: getExceptionListsItemFilter({
-        filter: [nonAgnosticFilter],
+        filter: [nonAgnosticFilter, agnosticFilter],
         listId: items.map(({ list_id: listId }) => listId),
         savedObjectType: items.map(
           ({ namespace_type: namespaceType }) =>
@@ -99,11 +114,18 @@ export const findAllListItemTypes = async (
       perPage: CHUNK_PARSED_OBJECT_SIZE,
       sortField: undefined,
       sortOrder: undefined,
-      type: ['single', 'agnostic'],
+      type: [...savedObjectType, ...savedObjectTypeAgnostic],
     });
   }
 };
 
+/**
+ * Helper to find if any imported items match existing items based on item_id
+ * @param agnosticListItems {array} - items with a namespace of agnostic
+ * @param nonAgnosticListItems {array} - items with a namespace of single
+ * @param savedObjectsClient {object}
+ * @returns {object} results of any found items
+ */
 export const getAllListItemTypes = async (
   agnosticListItems: ImportExceptionListItemSchemaDecoded[],
   nonAgnosticListItems: ImportExceptionListItemSchemaDecoded[],

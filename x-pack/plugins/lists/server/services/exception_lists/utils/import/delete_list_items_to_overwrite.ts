@@ -10,7 +10,14 @@ import { SavedObjectsClientContract } from 'kibana/server';
 
 import { deleteExceptionListItemByList } from '../../delete_exception_list_items_by_list';
 
-export const bulkDeleteListItems = async ({
+/**
+ * Helper to bulk create exception list parent
+ * containers
+ * @param listsToCreate {array} - exception lists to be bulk created
+ * @param savedObjectsClient {object}
+ * @returns {array} returns array of success and error formatted responses
+ */
+export const deleteListItemsToBeOverwritten = async ({
   listsOfItemsToDelete,
   savedObjectsClient,
 }: {

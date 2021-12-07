@@ -10,6 +10,11 @@ import {
   ImportExceptionListSchemaDecoded,
 } from '@kbn/securitysolution-io-ts-list-types';
 
+/**
+ * Helper to sort exception lists by namespace type
+ * @param exceptions {array} exception lists to sort
+ * @returns {array} tuple of agnostic and non agnostic lists
+ */
 export const sortListsImportsByNamespace = (
   exceptions: ImportExceptionListSchemaDecoded[]
 ): [ImportExceptionListSchemaDecoded[], ImportExceptionListSchemaDecoded[]] => {
@@ -27,6 +32,11 @@ export const sortListsImportsByNamespace = (
   );
 };
 
+/**
+ * Helper to sort exception list items by namespace type
+ * @param exceptions {array} exception list items to sort
+ * @returns {array} tuple of agnostic and non agnostic items
+ */
 export const sortItemsImportsByNamespace = (
   exceptions: ImportExceptionListItemSchemaDecoded[]
 ): [ImportExceptionListItemSchemaDecoded[], ImportExceptionListItemSchemaDecoded[]] => {

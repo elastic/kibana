@@ -25,8 +25,8 @@ describe('importExceptionsResponseSchema', () => {
   });
 
   test('it should NOT accept an undefined for "errors"', () => {
-    const payload = getImportExceptionsResponseSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsResponseSchemaMock>> =
+      getImportExceptionsResponseSchemaMock();
     delete payload.errors;
     const decoded = importExceptionsResponseSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -38,8 +38,8 @@ describe('importExceptionsResponseSchema', () => {
   });
 
   test('it should NOT accept an undefined for "success"', () => {
-    const payload = getImportExceptionsResponseSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsResponseSchemaMock>> =
+      getImportExceptionsResponseSchemaMock();
     delete payload.success;
     const decoded = importExceptionsResponseSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -51,8 +51,8 @@ describe('importExceptionsResponseSchema', () => {
   });
 
   test('it should NOT accept an undefined for "success_count"', () => {
-    const payload = getImportExceptionsResponseSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsResponseSchemaMock>> =
+      getImportExceptionsResponseSchemaMock();
     delete payload.success_count;
     const decoded = importExceptionsResponseSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -64,8 +64,8 @@ describe('importExceptionsResponseSchema', () => {
   });
 
   test('it should NOT accept an undefined for "success_exception_lists"', () => {
-    const payload = getImportExceptionsResponseSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsResponseSchemaMock>> =
+      getImportExceptionsResponseSchemaMock();
     delete payload.success_exception_lists;
     const decoded = importExceptionsResponseSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -77,8 +77,8 @@ describe('importExceptionsResponseSchema', () => {
   });
 
   test('it should NOT accept an undefined for "success_count_exception_lists"', () => {
-    const payload = getImportExceptionsResponseSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsResponseSchemaMock>> =
+      getImportExceptionsResponseSchemaMock();
     delete payload.success_count_exception_lists;
     const decoded = importExceptionsResponseSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -90,8 +90,8 @@ describe('importExceptionsResponseSchema', () => {
   });
 
   test('it should NOT accept an undefined for "success_exception_list_items"', () => {
-    const payload = getImportExceptionsResponseSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsResponseSchemaMock>> =
+      getImportExceptionsResponseSchemaMock();
     delete payload.success_exception_list_items;
     const decoded = importExceptionsResponseSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -103,8 +103,8 @@ describe('importExceptionsResponseSchema', () => {
   });
 
   test('it should NOT accept an undefined for "success_count_exception_list_items"', () => {
-    const payload = getImportExceptionsResponseSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsResponseSchemaMock>> =
+      getImportExceptionsResponseSchemaMock();
     delete payload.success_count_exception_list_items;
     const decoded = importExceptionsResponseSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

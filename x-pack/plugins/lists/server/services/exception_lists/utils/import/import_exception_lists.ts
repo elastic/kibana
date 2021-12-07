@@ -14,7 +14,7 @@ import { getAllListTypes } from './find_all_exception_list_types';
 import { sortExceptionListsToUpdateOrCreate } from './sort_exception_lists_to_create_update';
 import { bulkCreateImportedLists } from './bulk_create_imported_lists';
 import { bulkUpdateImportedLists } from './bulk_update_imported_lists';
-import { bulkDeleteListItems } from './bulk_delete_items';
+import { deleteListItemsToBeOverwritten } from './delete_list_items_to_overwrite';
 import { sortListsImportsByNamespace } from './sort_import_by_namespace';
 import { sortImportResponses } from './sort_import_responses';
 /**
@@ -62,7 +62,7 @@ export const importExceptionLists = async ({
     // lists that are to be updated where overwrite is true, need to have
     // existing items removed. By selecting to overwrite, user selects to
     // overwrite entire list + items
-    await bulkDeleteListItems({
+    await deleteListItemsToBeOverwritten({
       listsOfItemsToDelete: listItemsToDelete,
       savedObjectsClient,
     });

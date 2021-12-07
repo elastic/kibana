@@ -11,6 +11,13 @@ import { SavedObjectsBulkCreateObject, SavedObjectsClientContract } from 'kibana
 import { ExceptionListSoSchema } from '../../../../schemas/saved_objects/exceptions_list_so_schema';
 import { ImportResponse } from '../../import_exception_list_and_items';
 
+/**
+ * Helper to bulk create exception list parent
+ * containers
+ * @param listsToCreate {array} - exception lists to be bulk created
+ * @param savedObjectsClient {object}
+ * @returns {array} returns array of success and error formatted responses
+ */
 export const bulkCreateImportedLists = async ({
   listsToCreate,
   savedObjectsClient,
@@ -36,7 +43,7 @@ export const bulkCreateImportedLists = async ({
       };
     } else {
       return {
-        list_id: so.attributes.list_id,
+        id: so.id,
         status_code: 200,
       };
     }

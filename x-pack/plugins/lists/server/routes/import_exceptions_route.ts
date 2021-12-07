@@ -29,7 +29,7 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
     {
       options: {
         body: {
-          maxBytes: config.maxImportPayloadBytes,
+          maxBytes: config.maxExceptionsImportSize,
           output: 'stream',
         },
         tags: ['access:lists-all'],
@@ -55,14 +55,13 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
             statusCode: 400,
           });
         }
-        // console.time('importException');
 
         const importsSummary = await exceptionListsClient.importExceptionListAndItems({
           exceptionsToImport: request.body.file,
           maxExceptionsImportSize: config.maxExceptionsImportSize,
           overwrite: request.query.overwrite,
         });
-        // console.timeEnd('importException');
+
         const [validated, errors] = validate(importsSummary, importExceptionsResponseSchema);
 
         if (errors != null) {

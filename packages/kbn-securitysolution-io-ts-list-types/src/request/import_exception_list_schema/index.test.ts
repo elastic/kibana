@@ -28,8 +28,8 @@ describe('import_list_item_schema', () => {
   });
 
   test('it should NOT accept an undefined for "list_id"', () => {
-    const payload = getImportExceptionsListSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsListSchemaMock>> =
+      getImportExceptionsListSchemaMock();
     delete payload.list_id;
     const decoded = importExceptionsListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -41,8 +41,8 @@ describe('import_list_item_schema', () => {
   });
 
   test('it should NOT accept an undefined for "description"', () => {
-    const payload = getImportExceptionsListSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsListSchemaMock>> =
+      getImportExceptionsListSchemaMock();
     delete payload.description;
     const decoded = importExceptionsListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -54,8 +54,8 @@ describe('import_list_item_schema', () => {
   });
 
   test('it should NOT accept an undefined for "name"', () => {
-    const payload = getImportExceptionsListSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsListSchemaMock>> =
+      getImportExceptionsListSchemaMock();
     delete payload.name;
     const decoded = importExceptionsListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -67,8 +67,8 @@ describe('import_list_item_schema', () => {
   });
 
   test('it should NOT accept an undefined for "type"', () => {
-    const payload = getImportExceptionsListSchemaMock();
-    // @ts-expect-error
+    const payload: Partial<ReturnType<typeof getImportExceptionsListSchemaMock>> =
+      getImportExceptionsListSchemaMock();
     delete payload.type;
     const decoded = importExceptionsListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -80,7 +80,10 @@ describe('import_list_item_schema', () => {
   });
 
   test('it should NOT accept value of "true" for "immutable"', () => {
-    const payload = { ...getImportExceptionsListSchemaMock(), immutable: true };
+    const payload: ImportExceptionsListSchema = {
+      ...getImportExceptionsListSchemaMock(),
+      immutable: true,
+    };
 
     const decoded = importExceptionsListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -92,7 +95,7 @@ describe('import_list_item_schema', () => {
   });
 
   test('it should accept any partial fields', () => {
-    const payload = {
+    const payload: ImportExceptionsListSchema = {
       ...getImportExceptionsListSchemaMock(),
       namespace_type: 'single',
       immutable: false,

@@ -12,6 +12,12 @@ import { ImportResponse } from '../../import_exception_list_and_items';
 
 import { isImportRegular } from './is_import_regular';
 
+/**
+ * Helper to sort responses into success and error and report on
+ * final results
+ * @param responses {array}
+ * @returns {object} totals of successes and errors
+ */
 export const sortImportResponses = (
   responses: ImportResponse[]
 ): {

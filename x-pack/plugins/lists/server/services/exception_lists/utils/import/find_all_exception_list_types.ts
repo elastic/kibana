@@ -17,6 +17,12 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { findExceptionList } from '../../find_exception_list';
 import { CHUNK_PARSED_OBJECT_SIZE } from '../../import_exception_list_and_items';
 
+/**
+ * Helper to build out a filter using list_id
+ * @param objects {array} - exception lists to add to filter
+ * @param savedObjectsClient {object}
+ * @returns {string} filter
+ */
 export const getListFilter = ({
   objects,
   namespaceType,
@@ -31,6 +37,13 @@ export const getListFilter = ({
   }.attributes.list_id:(${objects.map((list) => list.list_id).join(' OR ')})`;
 };
 
+/**
+ * Find exception lists that may or may not match an existing list_id
+ * @param agnosticListItems {array} - lists with a namespace of agnostic
+ * @param nonAgnosticListItems {array} - lists with a namespace of single
+ * @param savedObjectsClient {object}
+ * @returns {object} results of any found lists
+ */
 export const findAllListTypes = async (
   agnosticListItems: ImportExceptionListSchemaDecoded[] | ImportExceptionListItemSchemaDecoded[],
   nonAgnosticListItems: ImportExceptionListSchemaDecoded[] | ImportExceptionListItemSchemaDecoded[],
@@ -83,12 +96,19 @@ export const findAllListTypes = async (
   }
 };
 
+/**
+ * Helper to find if any imported lists match existing lists based on list_id
+ * @param agnosticListItems {array} - lists with a namespace of agnostic
+ * @param nonAgnosticListItems {array} - lists with a namespace of single
+ * @param savedObjectsClient {object}
+ * @returns {object} results of any found lists
+ */
 export const getAllListTypes = async (
   agnosticListItems: ImportExceptionListSchemaDecoded[] | ImportExceptionListItemSchemaDecoded[],
   nonAgnosticListItems: ImportExceptionListSchemaDecoded[] | ImportExceptionListItemSchemaDecoded[],
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<Record<string, ImportExceptionListSchemaDecoded>> => {
-  // Gather lists referenced by items
+  // Gather lists referenced
   const foundListsResponse = await findAllListTypes(
     agnosticListItems,
     nonAgnosticListItems,

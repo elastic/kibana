@@ -19,12 +19,14 @@ import { createPromiseFromStreams } from '@kbn/utils';
 import { SavedObjectsClientContract } from 'kibana/server';
 import { chunk } from 'lodash/fp';
 
-import { importExceptionLists } from './utils/import/import_exception_list';
+import { importExceptionLists } from './utils/import/import_exception_lists';
 import { importExceptionListItems } from './utils/import/import_exception_list_items';
 import { getTupleErrorsAndUniqueExceptionLists } from './utils/import/dedupe_incoming_lists';
 import { getTupleErrorsAndUniqueExceptionListItems } from './utils/import/dedupe_incoming_items';
-import { createExceptionsStreamFromNdjson } from './utils/import/create_exceptions_stream_from_ndjson';
-import { exceptionsChecksFromArray } from './utils/import/create_exceptions_stream_from_array';
+import {
+  createExceptionsStreamFromNdjson,
+  exceptionsChecksFromArray,
+} from './utils/import/create_exceptions_stream_logic';
 
 export interface PromiseFromStreams {
   lists: Array<ImportExceptionListSchemaDecoded | Error>;

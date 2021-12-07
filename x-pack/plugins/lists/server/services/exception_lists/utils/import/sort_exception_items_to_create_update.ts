@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import { SavedObjectsBulkCreateObject, SavedObjectsBulkUpdateObject } from 'kibana/server';
-import { SavedObjectType, getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
   BulkErrorSchema,
   ImportExceptionListItemSchemaDecoded,
@@ -34,7 +34,11 @@ export const sortExceptionItemsToUpdateOrCreate = ({
   itemsToCreate: Array<SavedObjectsBulkCreateObject<ExceptionListSoSchema>>;
   itemsToUpdate: Array<SavedObjectsBulkUpdateObject<ExceptionListSoSchema>>;
 } => {
-  return items.reduce(
+  return items.reduce<{
+    errors: BulkErrorSchema[];
+    itemsToCreate: Array<SavedObjectsBulkCreateObject<ExceptionListSoSchema>>;
+    itemsToUpdate: Array<SavedObjectsBulkUpdateObject<ExceptionListSoSchema>>;
+  }>(
     (acc, chunk) => {
       const {
         comments,
@@ -166,7 +170,7 @@ export const sortExceptionItemsToUpdateOrCreate = ({
             ...acc.errors,
             {
               error: {
-                message: `Found that item_id: "${listId}" already exists. Import of item_id: "${listId}" skipped.`,
+                message: `Found that item_id: "${itemId}" already exists. Import of item_id: "${itemId}" skipped.`,
                 status_code: 409,
               },
               item_id: itemId,
@@ -178,13 +182,9 @@ export const sortExceptionItemsToUpdateOrCreate = ({
       return acc;
     },
     {
-      errors: [] as BulkErrorSchema[],
-      itemsToCreate: [] as Array<{ attributes: ExceptionListSoSchema; type: SavedObjectType }>,
-      itemsToUpdate: [] as Array<{
-        attributes: ExceptionListSoSchema;
-        id: string;
-        type: SavedObjectType;
-      }>,
+      errors: [],
+      itemsToCreate: [],
+      itemsToUpdate: [],
     }
   );
 };

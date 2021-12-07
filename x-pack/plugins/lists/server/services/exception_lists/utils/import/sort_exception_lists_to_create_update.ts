@@ -32,7 +32,12 @@ export const sortExceptionListsToUpdateOrCreate = ({
   listsToCreate: Array<SavedObjectsBulkCreateObject<ExceptionListSoSchema>>;
   listsToUpdate: Array<SavedObjectsBulkUpdateObject<ExceptionListSoSchema>>;
 } => {
-  return lists.reduce(
+  return lists.reduce<{
+    errors: BulkErrorSchema[];
+    listItemsToDelete: Array<[string, NamespaceType]>;
+    listsToCreate: Array<SavedObjectsBulkCreateObject<ExceptionListSoSchema>>;
+    listsToUpdate: Array<SavedObjectsBulkUpdateObject<ExceptionListSoSchema>>;
+  }>(
     (acc, chunk) => {
       const {
         description,
