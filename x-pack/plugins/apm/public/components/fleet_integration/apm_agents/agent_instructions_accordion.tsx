@@ -16,7 +16,7 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactElement } from 'react';
+import React, { ComponentType } from 'react';
 import styled from 'styled-components';
 import {
   AgentRuntimeAttachmentProps,
@@ -28,7 +28,7 @@ import {
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { AgentIcon } from '../../shared/agent_icon';
-import {
+import type {
   NewPackagePolicy,
   PackagePolicy,
   PackagePolicyEditExtensionComponentProps,
@@ -114,12 +114,12 @@ interface Props {
   title: string;
   variantId: string;
   createAgentInstructions: CreateAgentInstructions;
-  AgentRuntimeAttachment?: (props: AgentRuntimeAttachmentProps) => ReactElement;
+  AgentRuntimeAttachment?: ComponentType<AgentRuntimeAttachmentProps>;
 }
 
 const StyledEuiAccordion = styled(EuiAccordion)`
-  //This is an alternative fix suggested by the EUI team to fix drag elements inside EuiAccordion
-  //This Issue tracks the fix on the Eui side https://github.com/elastic/eui/issues/3548#issuecomment-639041283
+  // This is an alternative fix suggested by the EUI team to fix drag elements inside EuiAccordion
+  // This Issue tracks the fix on the Eui side https://github.com/elastic/eui/issues/3548#issuecomment-639041283
   .euiAccordion__childWrapper {
     transform: none;
   }
@@ -222,7 +222,10 @@ export function AgentInstructionsAccordion({
             tabs={[
               {
                 id: 'manual-instrumentation',
-                name: 'Manual instrumentation',
+                name: i18n.translate(
+                  'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.manualInstrumentation',
+                  { defaultMessage: 'Manual instrumentation' }
+                ),
                 content: manualInstrumentationContent,
               },
               {
@@ -233,7 +236,12 @@ export function AgentInstructionsAccordion({
                     alignItems="baseline"
                     gutterSize="s"
                   >
-                    <EuiFlexItem grow={false}>Auto-Attachment</EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {i18n.translate(
+                        'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.autoAttachment',
+                        { defaultMessage: 'Auto-Attachment' }
+                      )}
+                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiBetaBadge
                         label={i18n.translate(

@@ -14,7 +14,7 @@ import {
   RuntimeAttachmentSettings,
   IDiscoveryRule,
 } from '..';
-import {
+import type {
   NewPackagePolicy,
   PackagePolicy,
   PackagePolicyEditExtensionComponentProps,

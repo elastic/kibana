@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReactElement } from 'react';
+import { ComponentType } from 'react';
 import {
   createDotNetAgentInstructions,
   createDjangoAgentInstructions,
@@ -48,7 +48,7 @@ export const ApmAgentInstructionsMappings: Array<{
   title: string;
   variantId: string;
   createAgentInstructions: CreateAgentInstructions;
-  AgentRuntimeAttachment?: (props: AgentRuntimeAttachmentProps) => ReactElement;
+  AgentRuntimeAttachment?: ComponentType<AgentRuntimeAttachmentProps>;
 }> = [
   {
     agentName: 'java',

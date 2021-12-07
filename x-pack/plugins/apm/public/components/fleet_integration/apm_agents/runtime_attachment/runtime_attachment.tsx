@@ -123,7 +123,10 @@ export function RuntimeAttachment({
         {isEnabled && versions && (
           <EuiFlexItem>
             <EuiFormRow
-              label="Version"
+              label={i18n.translate(
+                'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version',
+                { defaultMessage: 'Version' }
+              )}
               isInvalid={!isValidVersion}
               error={i18n.translate(
                 'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.invalid',
@@ -173,7 +176,10 @@ export function RuntimeAttachment({
                 disabled={editDiscoveryRuleId !== null}
                 onClick={onAddRule}
               >
-                Add rule
+                {i18n.translate(
+                  'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.addRule',
+                  { defaultMessage: 'Add rule' }
+                )}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

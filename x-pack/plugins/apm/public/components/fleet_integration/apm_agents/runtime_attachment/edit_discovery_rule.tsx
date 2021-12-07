@@ -55,7 +55,14 @@ export function EditDiscoveryRule({
     <EuiPanel paddingSize="m" hasBorder={true}>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiFormFieldset legend={{ children: 'Operation' }}>
+          <EuiFormFieldset
+            legend={{
+              children: i18n.translate(
+                'xpack.apm.fleetIntegration.apmAgent.editDisacoveryRule.operation',
+                { defaultMessage: 'Operation' }
+              ),
+            }}
+          >
             <EuiSelect
               options={operationTypes.map((item) => ({
                 text: item.operation.label,
@@ -71,13 +78,20 @@ export function EditDiscoveryRule({
       </EuiFlexGroup>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormFieldset legend={{ children: 'Type' }}>
+          <EuiFormFieldset
+            legend={{
+              children: i18n.translate(
+                'xpack.apm.fleetIntegration.apmAgent.editDisacoveryRule.type',
+                { defaultMessage: 'Type' }
+              ),
+            }}
+          >
             <EuiFormRow
               fullWidth
               helpText={i18n.translate(
                 'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.helpText',
                 {
-                  defaultMessage: 'Choose from allowed params',
+                  defaultMessage: 'Choose from allowed parameters',
                 }
               )}
             >
@@ -104,9 +118,7 @@ export function EditDiscoveryRule({
                     })) ?? []
                 }
                 valueOfSelected={type}
-                onChange={(value) => {
-                  onChangeType(value);
-                }}
+                onChange={onChangeType}
               />
             </EuiFormRow>
           </EuiFormFieldset>
@@ -115,7 +127,14 @@ export function EditDiscoveryRule({
       {type !== DISCOVERY_RULE_TYPE_ALL && (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormFieldset legend={{ children: 'Probe' }}>
+            <EuiFormFieldset
+              legend={{
+                children: i18n.translate(
+                  'xpack.apm.fleetIntegration.apmAgent.editDisacoveryRule.probe',
+                  { defaultMessage: 'Probe' }
+                ),
+              }}
+            >
               <EuiFormRow
                 fullWidth
                 helpText={i18n.translate(

@@ -78,7 +78,6 @@ export const RuntimeAttachmentExample: Story = () => {
     </>
   );
 };
-RuntimeAttachmentExample.storyName = 'RuntimeAttachment';
 
 export const JavaRuntimeAttachmentExample: Story = () => {
   return (
@@ -89,7 +88,6 @@ export const JavaRuntimeAttachmentExample: Story = () => {
     />
   );
 };
-JavaRuntimeAttachmentExample.storyName = 'JavaRuntimeAttachment';
 
 const policy = {
   id: 'cc380ec5-d84e-40e1-885a-d706edbdc968',

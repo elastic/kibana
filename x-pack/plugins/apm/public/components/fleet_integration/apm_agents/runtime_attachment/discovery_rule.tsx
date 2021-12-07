@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
 import {
   EuiText,
   EuiFlexGroup,
@@ -13,6 +13,7 @@ import {
   EuiBadge,
   EuiPanel,
   DraggableProvidedDragHandleProps,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { Operation } from '.';
@@ -41,7 +42,12 @@ export function DiscoveryRule({
   operationTypes,
 }: Props) {
   const operationTypesLabels = useMemo(() => {
-    return operationTypes.reduce((acc, current) => {
+    return operationTypes.reduce<{
+      [operationValue: string]: {
+        label: string;
+        types: { [typeValue: string]: string };
+      };
+    }>((acc, current) => {
       return {
         ...acc,
         [current.operation.value]: {
@@ -51,14 +57,19 @@ export function DiscoveryRule({
           }, {}),
         },
       };
-    }, {} as { [operationValue: string]: { label: string; types: { [typeValue: string]: string } } });
+    }, {});
   }, [operationTypes]);
-
   return (
     <EuiPanel paddingSize="m" hasBorder={true}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <div {...providedDragHandleProps} aria-label="Drag Handle">
+          <div
+            {...providedDragHandleProps}
+            aria-label={i18n.translate(
+              'xpack.apm.fleetIntegration.apmAgent.discoveryRule.DragHandle',
+              { defaultMessage: 'Drag Handle' }
+            )}
+          >
             <EuiIcon type="grab" />
           </div>
         </EuiFlexItem>
@@ -87,23 +98,21 @@ export function DiscoveryRule({
             <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    type="pencil"
+                  <EuiButtonIcon
+                    iconType="pencil"
                     color="primary"
                     onClick={() => {
                       onEdit(id);
                     }}
-                    style={{ cursor: 'pointer' }}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    type="trash"
+                  <EuiButtonIcon
+                    iconType="trash"
                     color="danger"
                     onClick={() => {
                       onDelete(id);
                     }}
-                    style={{ cursor: 'pointer' }}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
