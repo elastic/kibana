@@ -30,22 +30,40 @@ export function createAbortableEsClientFactory(opts: CreateAbortableEsClientFact
   const { scopedClusterClient, abortController } = opts;
   return {
     asInternalUser: {
-      search: (query: ESSearchRequest, options?: TransportRequestOptions) => {
-        const searchOptions = options ?? {};
-        return scopedClusterClient.asInternalUser.search(query, {
-          ...searchOptions,
-          signal: abortController.signal,
-        });
+      search: async (query: ESSearchRequest, options?: TransportRequestOptions) => {
+        try {
+          const searchOptions = options ?? {};
+          return await scopedClusterClient.asInternalUser.search(query, {
+            ...searchOptions,
+            signal: abortController.signal,
+          });
+        } catch (e) {
+          if (isAbortError(e)) {
+            throw new Error('');
+          }
+          throw e;
+        }
       },
     },
     asCurrentUser: {
-      search: (query: ESSearchRequest, options?: TransportRequestOptions) => {
-        const searchOptions = options ?? {};
-        return scopedClusterClient.asCurrentUser.search(query, {
-          ...searchOptions,
-          signal: abortController.signal,
-        });
+      search: async (query: ESSearchRequest, options?: TransportRequestOptions) => {
+        try {
+          const searchOptions = options ?? {};
+          return await scopedClusterClient.asCurrentUser.search(query, {
+            ...searchOptions,
+            signal: abortController.signal,
+          });
+        } catch (e) {
+          if (isAbortError(e)) {
+            throw new Error('');
+          }
+          throw e;
+        }
       },
     },
   };
+}
+
+function isAbortError(error: Error) {
+  return error.message === 'Request has been aborted by the user';
 }
