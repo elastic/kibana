@@ -195,7 +195,7 @@ export const configurationFormSchema: FormSchema = {
   _size: {
     enabled: {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.sizeLabel', {
-        defaultMessage: 'Index the size in bytes of the _source field',
+        defaultMessage: 'Index the _source field size in bytes',
       }),
       defaultValue: false,
     },
