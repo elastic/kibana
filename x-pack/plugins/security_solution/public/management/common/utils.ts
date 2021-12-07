@@ -53,7 +53,8 @@ export const parsePoliciesToKQL = (includedPolicies: string, excludedPolicies: s
 /**
  * Takes a list of policies (string[]) and an existing kuery
  * (string) and returns an unified KQL with and AND
- * @param policies string[] a list of policies ids
+ * The policy list can also contain "unassigned" and "global".
+ * @param policies string[] a list of policies ids.
  * @param kuery string an existing KQL.
  */
 export const parsePoliciesAndFilterToKql = ({
@@ -65,7 +66,7 @@ export const parsePoliciesAndFilterToKql = ({
 }): string | undefined => {
   let kql: string | undefined;
 
-  if (policies && policies.length && policies[0] !== '') {
+  if (policies && policies.length) {
     const policiesKQL = parsePoliciesToKQL(policies.join(','), '');
     kql = `(${policiesKQL})`;
   }
