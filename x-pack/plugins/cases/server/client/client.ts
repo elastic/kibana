@@ -11,7 +11,7 @@ import { AttachmentsSubClient, createAttachmentsSubClient } from './attachments/
 import { UserActionsSubClient, createUserActionsSubClient } from './user_actions/client';
 import { CasesClientInternal, createCasesClientInternal } from './client_internal';
 import { createSubCasesClient, SubCasesClient } from './sub_cases/client';
-import { ENABLE_CASE_CONNECTOR } from '../../common';
+import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
 import { ConfigureSubClient, createConfigurationSubClient } from './configure/client';
 import { createStatsSubClient, StatsSubClient } from './stats/client';
 import { createMetricsSubClient, MetricsSubClient } from './metrics/client';
