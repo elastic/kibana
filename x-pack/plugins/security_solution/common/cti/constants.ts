@@ -23,6 +23,9 @@ export const FIRST_SEEN = 'indicator.first_seen';
 export const LAST_SEEN = 'indicator.last_seen';
 export const PROVIDER = 'indicator.provider';
 export const REFERENCE = 'indicator.reference';
+export const FEED_NAME = 'feed.name';
+
+export const FEED_NAME_PATH = `threat.${FEED_NAME}`;
 
 export const INDICATOR_FIRSTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${FIRST_SEEN}`;
 export const INDICATOR_LASTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${LAST_SEEN}`;

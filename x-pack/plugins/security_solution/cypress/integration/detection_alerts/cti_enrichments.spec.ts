@@ -75,6 +75,7 @@ describe('CTI Enrichment', () => {
   it('Displays persisted enrichments on the JSON view', () => {
     const expectedEnrichment = [
       {
+        feed: {},
         indicator: {
           first_seen: '2021-03-10T08:02:14.000Z',
           file: {
@@ -176,7 +177,7 @@ describe('CTI Enrichment', () => {
       const investigationTimeEnrichment = {
         field: 'source.ip',
         value: '192.168.1.1',
-        provider: 'another_provider',
+        feedName: 'feed_name',
       };
 
       expandFirstAlert();
@@ -194,7 +195,7 @@ describe('CTI Enrichment', () => {
         .should('exist')
         .should(
           'have.text',
-          `${investigationTimeEnrichment.field} ${investigationTimeEnrichment.value} from ${investigationTimeEnrichment.provider}`
+          `${investigationTimeEnrichment.field} ${investigationTimeEnrichment.value} from ${investigationTimeEnrichment.feedName}`
         );
     });
   });

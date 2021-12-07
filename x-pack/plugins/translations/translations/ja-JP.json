@@ -22819,7 +22819,6 @@
     "xpack.securitySolution.eventDetails.ctiSummary.informationAriaLabel": "情報",
     "xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentTitle": "Threat Intelligenceで拡張",
     "xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentTooltipContent": "このフィールド値には脅威インテリジェンスソースの別の情報があります。",
-    "xpack.securitySolution.eventDetails.ctiSummary.providerPreposition": "開始",
     "xpack.securitySolution.eventDetails.description": "説明",
     "xpack.securitySolution.eventDetails.field": "フィールド",
     "xpack.securitySolution.eventDetails.filter.placeholder": "フィールド、値、または説明でフィルター...",

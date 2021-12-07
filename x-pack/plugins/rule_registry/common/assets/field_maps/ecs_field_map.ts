@@ -2925,6 +2925,16 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.enrichments.feed': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.feed.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.enrichments.matched.atomic': {
     type: 'keyword',
     array: false,

@@ -23182,7 +23182,6 @@
     "xpack.securitySolution.eventDetails.ctiSummary.informationAriaLabel": "信息",
     "xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentTitle": "已使用威胁情报扩充",
     "xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentTooltipContent": "此字段值具有威胁情报源提供的其他信息。",
-    "xpack.securitySolution.eventDetails.ctiSummary.providerPreposition": "来自",
     "xpack.securitySolution.eventDetails.description": "描述",
     "xpack.securitySolution.eventDetails.field": "字段",
     "xpack.securitySolution.eventDetails.filter.placeholder": "按字段、值或描述筛选......",

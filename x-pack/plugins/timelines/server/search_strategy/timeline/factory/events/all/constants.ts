@@ -26,11 +26,13 @@ export const FIRST_SEEN = 'indicator.first_seen';
 export const LAST_SEEN = 'indicator.last_seen';
 export const PROVIDER = 'indicator.provider';
 export const REFERENCE = 'indicator.reference';
+export const FEED_NAME = 'feed.name';
 
 export const INDICATOR_FIRSTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${FIRST_SEEN}`;
 export const INDICATOR_LASTSEEN = `${ENRICHMENT_DESTINATION_PATH}.${LAST_SEEN}`;
 export const INDICATOR_PROVIDER = `${ENRICHMENT_DESTINATION_PATH}.${PROVIDER}`;
 export const INDICATOR_REFERENCE = `${ENRICHMENT_DESTINATION_PATH}.${REFERENCE}`;
+export const FEED_NAME_REFERENCE = `${ENRICHMENT_DESTINATION_PATH}.${FEED_NAME}`;
 
 export const CTI_ROW_RENDERER_FIELDS = [
   INDICATOR_MATCHED_ATOMIC,
@@ -38,6 +40,7 @@ export const CTI_ROW_RENDERER_FIELDS = [
   INDICATOR_MATCHED_TYPE,
   INDICATOR_REFERENCE,
   INDICATOR_PROVIDER,
+  FEED_NAME_REFERENCE,
 ];
 
 export const TIMELINE_EVENTS_FIELDS = [

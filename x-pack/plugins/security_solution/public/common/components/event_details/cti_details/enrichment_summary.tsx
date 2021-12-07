@@ -29,13 +29,13 @@ export interface ThreatSummaryDescription {
   data: FieldsData | undefined;
   eventId: string;
   index: number;
-  provider: string | undefined;
+  feedName: string | undefined;
   timelineId: string;
   value: string | undefined;
   isDraggable?: boolean;
 }
 
-const EnrichmentFieldProvider = styled.span`
+const EnrichmentFieldFeedName = styled.span`
   margin-left: ${({ theme }) => theme.eui.paddingSizes.xs};
   white-space: nowrap;
   font-style: italic;
@@ -46,13 +46,13 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
   data,
   eventId,
   index,
-  provider,
+  feedName,
   timelineId,
   value,
   isDraggable,
 }) => {
   if (!data || !value) return null;
-  const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${data.field}-${value}-${index}-${provider}`;
+  const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${data.field}-${value}-${index}-${feedName}`;
   return (
     <EuiFlexGroup key={key} direction="row" gutterSize="none" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -67,10 +67,10 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
             isObjectArray={data.isObjectArray}
             value={value}
           />
-          {provider && (
-            <EnrichmentFieldProvider>
-              {i18n.PROVIDER_PREPOSITION} {provider}
-            </EnrichmentFieldProvider>
+          {feedName && (
+            <EnrichmentFieldFeedName>
+              {i18n.FEED_NAME_PREPOSITION} {feedName}
+            </EnrichmentFieldFeedName>
           )}
         </div>
       </EuiFlexItem>
@@ -99,7 +99,7 @@ const EnrichmentSummaryComponent: React.FC<{
   isDraggable?: boolean;
 }> = ({ browserFields, data, enrichments, timelineId, eventId, isDraggable }) => {
   const parsedEnrichments = enrichments.map((enrichment, index) => {
-    const { field, type, provider, value } = getEnrichmentIdentifiers(enrichment);
+    const { field, type, feedName, value } = getEnrichmentIdentifiers(enrichment);
     const eventData = data.find((item) => item.field === field);
     const category = eventData?.category ?? '';
     const browserField = get([category, 'fields', field ?? ''], browserFields);
@@ -114,7 +114,7 @@ const EnrichmentSummaryComponent: React.FC<{
     return {
       fieldsData,
       type,
-      provider,
+      feedName,
       index,
       field,
       browserField,
@@ -136,7 +136,7 @@ const EnrichmentSummaryComponent: React.FC<{
               toolTipContent={i18n.INDICATOR_TOOLTIP_CONTENT}
             />
 
-            {indicator.map(({ fieldsData, index, field, provider, browserField, value }) => (
+            {indicator.map(({ fieldsData, index, field, feedName, browserField, value }) => (
               <EnrichedDataRow
                 key={field}
                 field={field}
@@ -144,7 +144,7 @@ const EnrichmentSummaryComponent: React.FC<{
                   <EnrichmentDescription
                     eventId={eventId}
                     index={index}
-                    provider={provider}
+                    feedName={feedName}
                     timelineId={timelineId}
                     value={value}
                     data={fieldsData}
@@ -166,7 +166,7 @@ const EnrichmentSummaryComponent: React.FC<{
               toolTipContent={i18n.INVESTIGATION_TOOLTIP_CONTENT}
             />
 
-            {investigation.map(({ fieldsData, index, field, provider, browserField, value }) => (
+            {investigation.map(({ fieldsData, index, field, feedName, browserField, value }) => (
               <EnrichedDataRow
                 key={field}
                 field={field}
@@ -174,7 +174,7 @@ const EnrichmentSummaryComponent: React.FC<{
                   <EnrichmentDescription
                     eventId={eventId}
                     index={index}
-                    provider={provider}
+                    feedName={feedName}
                     timelineId={timelineId}
                     value={value}
                     data={fieldsData}
