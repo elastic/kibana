@@ -44,7 +44,7 @@ export const ErrorStatePrompt: React.FC<{ errorConnectingMessage?: string }> = (
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.errorConnectingState.description1"
-              defaultMessage="We can’t establish a connection to Enterprise Search at the host URL {enterpriseSearchUrl} due to the following error."
+              defaultMessage="We can’t establish a connection to Enterprise Search at the host URL {enterpriseSearchUrl} due to the following error:"
               values={{
                 enterpriseSearchUrl: (
                   <EuiLink
