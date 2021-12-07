@@ -17,7 +17,7 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
 import {
   CONTAINER_ID,
-  HOSTNAME,
+  HOST_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -99,7 +99,7 @@ export const getInfrastructureKQLFilter = (
 
   const kqlFilter = containerIds.length
     ? containerIds.map((id) => `${CONTAINER_ID}: "${id}"`)
-    : hostNames.map((id) => `${HOSTNAME}: "${id}"`);
+    : hostNames.map((id) => `${HOST_NAME}: "${id}"`);
 
   return kqlFilter.join(' or ');
 };
