@@ -30,12 +30,15 @@ type PreconfiguredAgentPolicyWithDefaultInputs = Omit<
   package_policies: Array<Omit<PreconfiguredAgentPolicy['package_policies'][0], 'inputs'>>;
 };
 
+export const DEFAULT_SYSTEM_PACKAGE_POLICY_ID = 'default-system-policy';
+
 export const DEFAULT_AGENT_POLICY: PreconfiguredAgentPolicyWithDefaultInputs = {
   name: 'Default policy',
   namespace: 'default',
   description: 'Default agent policy created by Kibana',
   package_policies: [
     {
+      id: DEFAULT_SYSTEM_PACKAGE_POLICY_ID,
       name: `${FLEET_SYSTEM_PACKAGE}-1`,
       package: {
         name: FLEET_SYSTEM_PACKAGE,
@@ -47,12 +50,15 @@ export const DEFAULT_AGENT_POLICY: PreconfiguredAgentPolicyWithDefaultInputs = {
   monitoring_enabled: monitoringTypes,
 };
 
+export const DEFAULT_FLEET_SERVER_POLICY_ID = 'default-fleet-server-policy';
+
 export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicyWithDefaultInputs = {
   name: 'Default Fleet Server policy',
   namespace: 'default',
   description: 'Default Fleet Server agent policy created by Kibana',
   package_policies: [
     {
+      id: DEFAULT_FLEET_SERVER_POLICY_ID,
       name: `${FLEET_SERVER_PACKAGE}-1`,
       package: {
         name: FLEET_SERVER_PACKAGE,
