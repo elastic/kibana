@@ -7,73 +7,101 @@
 
 import React from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
+  EuiBadge,
   EuiBasicTable,
-  EuiEmptyPrompt,
-  EuiIconTip,
   EuiTableFieldDataColumnType,
+  EuiTableComputedColumnType,
+  EuiEmptyPrompt,
+  EuiLink,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { CrawlDetailLogic } from '../crawl_detail_logic';
 import { CrawlerLogic } from '../crawler_logic';
 import { CrawlEvent, readableCrawlerStatuses } from '../types';
 
+import { CrawlEventTypeBadge } from './crawl_event_type_badge';
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
-
-const columns: Array<EuiTableFieldDataColumnType<CrawlEvent>> = [
-  {
-    field: 'id',
-    name: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.domainURL',
-      {
-        defaultMessage: 'Request ID',
-      }
-    ),
-  },
-  {
-    field: 'createdAt',
-    name: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.created',
-      {
-        defaultMessage: 'Created',
-      }
-    ),
-    render: (createdAt: CrawlEvent['createdAt']) => (
-      <CustomFormattedTimestamp timestamp={createdAt} />
-    ),
-  },
-  {
-    field: 'status',
-    name: i18n.translate(
-      'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.status',
-      {
-        defaultMessage: 'Status',
-      }
-    ),
-    align: 'right',
-    render: (status: CrawlEvent['status'], event: CrawlEvent) => (
-      <>
-        {event.stage === 'process' && (
-          <EuiIconTip
-            aria-label="Process crawl"
-            size="m"
-            type="iInCircle"
-            color="primary"
-            position="top"
-            content="Re-applied crawl rules"
-          />
-        )}
-        {readableCrawlerStatuses[status]}
-      </>
-    ),
-  },
-];
 
 export const CrawlRequestsTable: React.FC = () => {
   const { events } = useValues(CrawlerLogic);
+  const { fetchCrawlRequest, openFlyout } = useActions(CrawlDetailLogic);
+
+  const columns: Array<
+    EuiTableFieldDataColumnType<CrawlEvent> | EuiTableComputedColumnType<CrawlEvent>
+  > = [
+    {
+      field: 'id',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.domainURL',
+        {
+          defaultMessage: 'Request ID',
+        }
+      ),
+      render: (id: string, event: CrawlEvent) => {
+        if (event.stage === 'crawl') {
+          return (
+            <EuiLink
+              onClick={() => {
+                fetchCrawlRequest(id);
+                openFlyout();
+              }}
+            >
+              {id}
+            </EuiLink>
+          );
+        }
+        return <span>{id}</span>;
+      },
+    },
+    {
+      field: 'createdAt',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.created',
+        {
+          defaultMessage: 'Created',
+        }
+      ),
+      render: (createdAt: CrawlEvent['createdAt']) => (
+        <CustomFormattedTimestamp timestamp={createdAt} />
+      ),
+    },
+    {
+      field: 'type',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.crawlType',
+        {
+          defaultMessage: 'Crawl type',
+        }
+      ),
+      render: (_, event: CrawlEvent) => <CrawlEventTypeBadge event={event} />,
+    },
+    {
+      name: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.domains',
+        {
+          defaultMessage: 'Domains',
+        }
+      ),
+      render: (event: CrawlEvent) => (
+        <EuiBadge>{event.crawlConfig.domainAllowlist.length}</EuiBadge>
+      ),
+    },
+    {
+      field: 'status',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.column.status',
+        {
+          defaultMessage: 'Status',
+        }
+      ),
+      render: (status: CrawlEvent['status']) => readableCrawlerStatuses[status],
+    },
+  ];
 
   return (
     <EuiBasicTable

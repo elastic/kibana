@@ -10,7 +10,7 @@ import React from 'react';
 import { History, Location } from 'history';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { mountReactNode } from '../../utils';
 import { IToasts } from '../../notifications';

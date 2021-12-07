@@ -13,7 +13,6 @@ import { APP_NAME, APP_UI_ID } from '../../../../../common/constants';
 import { StartServices } from '../../../../types';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/details';
-import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../../cases/pages/utils';
 import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getBreadcrumbs as getTimelinesBreadcrumbs } from '../../../../timelines/pages';
 import { getBreadcrumbs as getUebaBreadcrumbs } from '../../../../ueba/pages/details/utils';
@@ -174,24 +173,9 @@ export const getBreadcrumbsForRoute = (
   }
 
   if (isCaseRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'case', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
-    if (spyState.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
-    }
-
-    return [
-      siemRootBreadcrumb,
-      ...getCaseDetailsBreadcrumbs(
-        spyState,
-        urlStateKeys.reduce(
-          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
-          []
-        ),
-        getUrlForApp
-      ),
-    ];
+    return null; // controlled by Cases routes
   }
+
   if (isTimelinesRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'timeline', isDetailPage: false };
     const urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];

@@ -6,7 +6,6 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { omit } from 'lodash';
 import {
   EuiBadge,
   EuiButton,
@@ -21,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
@@ -54,6 +53,7 @@ import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 import { useRefresh } from '../../routing/use_refresh';
 import { DEPLOYMENT_STATE } from '../../../../common/constants/trained_models';
+import { getUserConfirmationProvider } from './force_stop_dialog';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -81,6 +81,7 @@ export const ModelsList: FC = () => {
   const {
     services: {
       application: { navigateToUrl, capabilities },
+      overlays,
     },
   } = useMlKibana();
   const urlLocator = useMlLocator()!;
@@ -110,6 +111,8 @@ export const ModelsList: FC = () => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
+
+  const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays), []);
 
   const navigateToPath = useNavigateToPath();
 
@@ -153,9 +156,7 @@ export const ModelsList: FC = () => {
       }
 
       // Need to fetch state for 3rd party models to enable/disable actions
-      await fetchAndPopulateDeploymentStats(
-        newItems.filter((v) => v.model_type.includes('pytorch'))
-      );
+      await fetchModelsStats(newItems.filter((v) => v.model_type.includes('pytorch')));
 
       setItems(newItems);
 
@@ -232,39 +233,6 @@ export const ModelsList: FC = () => {
         error,
         i18n.translate('xpack.ml.trainedModels.modelsList.fetchModelStatsErrorMessage', {
           defaultMessage: 'Fetch model stats failed',
-        })
-      );
-    }
-  }, []);
-
-  /**
-   * Updates model items with deployment stats;
-   *
-   * We have to fetch all deployment stats on each update,
-   * because for stopped models the API returns 404 response.
-   */
-  const fetchAndPopulateDeploymentStats = useCallback(async (modelItems: ModelItem[]) => {
-    try {
-      const { deployment_stats: deploymentStats } =
-        await trainedModelsApiService.getTrainedModelDeploymentStats('*');
-
-      for (const deploymentStat of deploymentStats) {
-        const deployedModel = modelItems.find(
-          (model) => model.model_id === deploymentStat.model_id
-        );
-
-        if (deployedModel) {
-          deployedModel.stats = {
-            ...(deployedModel.stats ?? {}),
-            deployment_stats: omit(deploymentStat, 'model_id'),
-          };
-        }
-      }
-    } catch (error) {
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeploymentStatsErrorMessage', {
-          defaultMessage: 'Fetch deployment stats failed',
         })
       );
     }
@@ -398,11 +366,11 @@ export const ModelsList: FC = () => {
       },
     },
     {
-      name: i18n.translate('xpack.ml.inference.modelsList.startModelAllocationActionLabel', {
-        defaultMessage: 'Start allocation',
+      name: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
+        defaultMessage: 'Start deployment',
       }),
-      description: i18n.translate('xpack.ml.inference.modelsList.startModelAllocationActionLabel', {
-        defaultMessage: 'Start allocation',
+      description: i18n.translate('xpack.ml.inference.modelsList.startModelDeploymentActionLabel', {
+        defaultMessage: 'Start deployment',
       }),
       icon: 'play',
       type: 'icon',
@@ -442,11 +410,11 @@ export const ModelsList: FC = () => {
       },
     },
     {
-      name: i18n.translate('xpack.ml.inference.modelsList.stopModelAllocationActionLabel', {
-        defaultMessage: 'Stop allocation',
+      name: i18n.translate('xpack.ml.inference.modelsList.stopModelDeploymentActionLabel', {
+        defaultMessage: 'Stop deployment',
       }),
-      description: i18n.translate('xpack.ml.inference.modelsList.stopModelAllocationActionLabel', {
-        defaultMessage: 'Stop allocation',
+      description: i18n.translate('xpack.ml.inference.modelsList.stopModelDeploymentActionLabel', {
+        defaultMessage: 'Stop deployment',
       }),
       icon: 'stop',
       type: 'icon',
@@ -454,13 +422,21 @@ export const ModelsList: FC = () => {
       available: (item) => item.model_type === 'pytorch',
       enabled: (item) =>
         !isLoading &&
-        !isPopulatedObject(item.pipelines) &&
         isPopulatedObject(item.stats?.deployment_stats) &&
         item.stats?.deployment_stats?.state !== DEPLOYMENT_STATE.STOPPING,
       onClick: async (item) => {
+        const requireForceStop = isPopulatedObject(item.pipelines);
+
+        if (requireForceStop) {
+          const hasUserApproved = await getUserConfirmation(item);
+          if (!hasUserApproved) return;
+        }
+
         try {
           setIsLoading(true);
-          await trainedModelsApiService.stopModelAllocation(item.model_id);
+          await trainedModelsApiService.stopModelAllocation(item.model_id, {
+            force: requireForceStop,
+          });
           displaySuccessToast(
             i18n.translate('xpack.ml.trainedModels.modelsList.stopSuccess', {
               defaultMessage: 'Deployment for "{modelId}" has been stopped successfully.',
@@ -567,6 +543,7 @@ export const ModelsList: FC = () => {
         defaultMessage: 'Type',
       }),
       sortable: true,
+      truncateText: true,
       align: 'left',
       render: (types: string[]) => (
         <EuiFlexGroup gutterSize={'xs'} wrap>
@@ -587,6 +564,7 @@ export const ModelsList: FC = () => {
       }),
       sortable: (item) => item.stats?.deployment_stats?.state,
       align: 'left',
+      truncateText: true,
       render: (model: ModelItem) => {
         const state = model.stats?.deployment_stats?.state;
         return state ? <EuiBadge color="hollow">{state}</EuiBadge> : null;

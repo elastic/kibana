@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
+import type { Observable } from 'rxjs';
+import type { CoreStart, CoreTheme } from 'kibana/public';
 import { apiService } from './api/utils';
 
 class KibanaService {
   private static instance: KibanaService;
   private _core!: CoreStart;
+  private _theme!: Observable<CoreTheme>;
 
   public get core() {
     return this._core;
@@ -19,6 +21,14 @@ class KibanaService {
   public set core(coreStart: CoreStart) {
     this._core = coreStart;
     apiService.http = this._core.http;
+  }
+
+  public get theme() {
+    return this._theme;
+  }
+
+  public set theme(coreTheme: Observable<CoreTheme>) {
+    this._theme = coreTheme;
   }
 
   public get toasts() {

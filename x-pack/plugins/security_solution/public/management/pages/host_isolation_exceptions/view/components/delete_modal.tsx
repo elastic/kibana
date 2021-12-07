@@ -16,7 +16,7 @@ import {
   EuiModalHeaderTitle,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useMutation } from 'react-query';

@@ -46,6 +46,7 @@ export const PACKAGE_POLICY_API_ROUTES = {
   UPDATE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/{packagePolicyId}`,
   DELETE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/delete`,
   UPGRADE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/upgrade`,
+  DRYRUN_PATTERN: `${PACKAGE_POLICY_API_ROOT}/upgrade/dryrun`,
 };
 
 // Agent policy API routes
@@ -65,6 +66,8 @@ export const OUTPUT_API_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/outputs`,
   INFO_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   UPDATE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
+  DELETE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
+  CREATE_PATTERN: `${API_ROOT}/outputs`,
 };
 
 // Settings API routes

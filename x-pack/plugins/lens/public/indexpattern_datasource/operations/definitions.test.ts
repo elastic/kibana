@@ -19,7 +19,8 @@ import {
 import { getFieldByNameFactory } from '../pure_helpers';
 import { documentField } from '../document_field';
 import { IndexPattern, IndexPatternLayer, IndexPatternField } from '../types';
-import { IndexPatternColumn } from '.';
+import { GenericIndexPatternColumn } from '.';
+import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 
 const indexPatternFields = [
   {
@@ -77,7 +78,7 @@ const indexPattern = {
 };
 
 const baseColumnArgs: {
-  previousColumn: IndexPatternColumn;
+  previousColumn: GenericIndexPatternColumn;
   indexPattern: IndexPattern;
   layer: IndexPatternLayer;
   field: IndexPatternField;
@@ -113,7 +114,7 @@ const layer: IndexPatternLayer = {
       operationType: 'date_histogram',
       sourceField: 'timestamp',
       params: { interval: 'auto' },
-    },
+    } as DateHistogramIndexPatternColumn,
     metric: {
       label: 'metricLabel',
       customLabel: true,

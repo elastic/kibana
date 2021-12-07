@@ -10,6 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
+import { nodeBuilder } from '@kbn/es-query';
 import {
   SavedObject,
   SavedObjectsClientContract,
@@ -17,35 +18,33 @@ import {
   SavedObjectsUtils,
 } from '../../../../../../src/core/server';
 import { LensServerPluginSetup } from '../../../../lens/server';
-import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 
 import {
   AlertCommentRequestRt,
-  CASE_COMMENT_SAVED_OBJECT,
   CaseResponse,
   CaseStatuses,
   CaseType,
   CommentRequest,
   CommentRequestRt,
   CommentType,
-  ENABLE_CASE_CONNECTOR,
-  MAX_GENERATED_ALERTS_PER_SUB_CASE,
   SubCaseAttributes,
   throwErrors,
   User,
-} from '../../../common';
+} from '../../../common/api';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  ENABLE_CASE_CONNECTOR,
+  MAX_GENERATED_ALERTS_PER_SUB_CASE,
+} from '../../../common/constants';
 import {
   buildCaseUserActionItem,
   buildCommentUserActionItem,
 } from '../../services/user_actions/helpers';
 
 import { AttachmentService, CasesService, CaseUserActionService } from '../../services';
-import {
-  createCaseError,
-  CommentableCase,
-  createAlertUpdateRequest,
-  isCommentRequestTypeGenAlert,
-} from '../../common';
+import { CommentableCase } from '../../common/models';
+import { createCaseError } from '../../common/error';
+import { createAlertUpdateRequest, isCommentRequestTypeGenAlert } from '../../common/utils';
 import { CasesClientArgs, CasesClientInternal } from '..';
 
 import { decodeCommentRequest } from '../utils';
@@ -127,6 +126,7 @@ const addGeneratedAlerts = async (
     logger,
     lensEmbeddableFactory,
     authorization,
+    alertsService,
   } = clientArgs;
 
   const query = pipe(
@@ -204,9 +204,7 @@ const addGeneratedAlerts = async (
         comment: query,
         status: subCase.attributes.status,
       });
-      await casesClientInternal.alerts.updateStatus({
-        alerts: alertsToUpdate,
-      });
+      await alertsService.updateAlertsStatus(alertsToUpdate);
     }
 
     await userActionService.bulkCreate({
@@ -339,6 +337,7 @@ export const addComment = async (
     logger,
     lensEmbeddableFactory,
     authorization,
+    alertsService,
   } = clientArgs;
 
   if (isCommentRequestTypeGenAlert(comment)) {
@@ -392,9 +391,7 @@ export const addComment = async (
         status: updatedCase.status,
       });
 
-      await casesClientInternal.alerts.updateStatus({
-        alerts: alertsToUpdate,
-      });
+      await alertsService.updateAlertsStatus(alertsToUpdate);
     }
 
     await userActionService.bulkCreate({
