@@ -9,6 +9,7 @@ import path from 'path';
 
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
+import semverValid from 'semver/functions/valid';
 import type { ResponseHeaders, KnownHeaders } from 'src/core/server';
 
 import type {
@@ -50,7 +51,11 @@ import {
   getInstallation,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
-import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
+import {
+  defaultIngestErrorHandler,
+  ingestErrorToResponseOptions,
+  IngestManagerError,
+} from '../../errors';
 import { licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
@@ -190,6 +195,9 @@ export const getInfoHandler: FleetRequestHandler<TypeOf<typeof GetInfoRequestSch
     try {
       const savedObjectsClient = context.fleet.epm.internalSoClient;
       const { pkgName, pkgVersion } = request.params;
+      if (!semverValid(pkgVersion)) {
+        throw new IngestManagerError('Package version is not a valid semver');
+      }
       const res = await getPackageInfo({ savedObjectsClient, pkgName, pkgVersion });
       const body: GetInfoResponse = {
         item: res,
