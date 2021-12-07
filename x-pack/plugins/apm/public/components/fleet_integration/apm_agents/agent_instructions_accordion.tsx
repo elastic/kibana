@@ -235,7 +235,12 @@ export function AgentInstructionsAccordion({
                   >
                     <EuiFlexItem grow={false}>Auto-Attachment</EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiBetaBadge label="BETA" />
+                      <EuiBetaBadge
+                        label={i18n.translate(
+                          'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.betaBadge.label',
+                          { defaultMessage: 'BETA' }
+                        )}
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 ),
