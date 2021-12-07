@@ -295,6 +295,9 @@ describe('getFiltersByFilterExpressions', () => {
     `exactly value="machine-learning" column="project1"`,
     `exactly value="kibana" column="project2" filterGroup="${group2}"`,
   ];
+
+  const filtersExprWithGroup = `filters group="${group2}"`;
+
   const kibanaExpr = 'kibana';
   const selectFilterExprEmpty = 'selectFilter';
   const selectFilterExprWithGroup = `${selectFilterExprEmpty} group="${group2}"`;
@@ -360,7 +363,7 @@ describe('getFiltersByFilterExpressions', () => {
     expect(matchedFilters).toEqual([filters[0]]);
   });
 
-  it('should include/exlude filters iteratively', () => {
+  it('should include/exclude filters iteratively', () => {
     const filtersExprs = getFiltersAsts([
       kibanaExpr,
       selectFilterExprWithGroup,
@@ -369,6 +372,18 @@ describe('getFiltersByFilterExpressions', () => {
     ]);
     const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
     expect(matchedFilters).toEqual([]);
+  });
+
+  it('should include/exclude filters from global filters if `filters` expression is specified', () => {
+    const filtersExprs = getFiltersAsts([
+      kibanaExpr,
+      selectFilterExprWithGroup,
+      removeFilterExprWithGroup,
+      selectFilterExprEmpty,
+      filtersExprWithGroup,
+    ]);
+    const matchedFilters = getFiltersByFilterExpressions(filters, filtersExprs);
+    expect(matchedFilters).toEqual([filters[1], filters[3]]);
   });
 });
 
