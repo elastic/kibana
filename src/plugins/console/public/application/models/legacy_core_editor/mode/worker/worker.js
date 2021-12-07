@@ -1884,6 +1884,7 @@ ace.define(
         at = newAt + 1;
       },
       next = function (c) {
+        console.log('CH--NEXT', ch);
         if (c && c !== ch) {
           error('Expected \'' + c + '\' instead of \'' + ch + '\'');
         }
@@ -2022,9 +2023,8 @@ ace.define(
       },
       // parses and returns the method
       method = function () {
-        const [first, ...rest] = text.split(' ');
-        text = first.toUpperCase() + rest.join(' ');
-        ch = ch.toUpperCase();
+        const re = /get|post|put|head|delete/gi
+        text = text.replace(re, (match) => match.toUpperCase())
 
         switch (ch) {
           case 'G':
