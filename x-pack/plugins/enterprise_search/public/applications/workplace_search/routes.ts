@@ -7,8 +7,6 @@
 
 import { generatePath } from 'react-router-dom';
 
-import { docLinks } from '../shared/doc_links';
-
 import {
   GITHUB_VIA_APP_SERVICE_TYPE,
   GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE,
@@ -21,8 +19,6 @@ export const LOGOUT_ROUTE = '/logout';
 
 export const LEAVE_FEEDBACK_EMAIL = 'support@elastic.co';
 export const LEAVE_FEEDBACK_URL = `mailto:${LEAVE_FEEDBACK_EMAIL}?Subject=Elastic%20Workplace%20Search%20Feedback`;
-
-export const SECURITY_DOCS_URL = docLinks.workplaceSearchSecurity;
 
 export const PERSONAL_PATH = '/p';
 
