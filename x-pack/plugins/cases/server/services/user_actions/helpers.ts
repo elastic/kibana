@@ -27,7 +27,7 @@ import { isTwoArraysDifference } from '../../client/utils';
 import { UserActionItem } from '.';
 import { extractConnectorId } from './transform';
 import { UserActionFieldType } from './types';
-import { CASE_REF_NAME, COMMENT_REF_NAME, SUB_CASE_REF_NAME } from '../../common';
+import { CASE_REF_NAME, COMMENT_REF_NAME, SUB_CASE_REF_NAME } from '../../common/constants';
 
 interface BuildCaseUserActionParams {
   action: UserAction;
