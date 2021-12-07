@@ -71,6 +71,9 @@ import {
   last_failure_at,
   last_failure_message,
   namespace,
+  last_gap,
+  bulk_create_time_durations,
+  search_after_time_durations,
 } from '../common/schemas';
 
 export const createSchema = <
@@ -422,6 +425,9 @@ const responseOptionalFields = {
   last_success_message,
   last_failure_at,
   last_failure_message,
+  last_gap,
+  bulk_create_time_durations,
+  search_after_time_durations,
 };
 
 export const fullResponseSchema = t.intersection([

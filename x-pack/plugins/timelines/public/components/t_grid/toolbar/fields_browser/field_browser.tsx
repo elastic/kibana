@@ -21,12 +21,13 @@ import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import type {
-  BrowserFields,
-  ColumnHeaderOptions,
-  CreateFieldComponentType,
-} from '../../../../../common';
-import { isEscape, isTab, stopPropagationAndPreventDefault } from '../../../../../common';
+import type { BrowserFields } from '../../../../../common/search_strategy';
+import type { ColumnHeaderOptions, CreateFieldComponentType } from '../../../../../common/types';
+import {
+  isEscape,
+  isTab,
+  stopPropagationAndPreventDefault,
+} from '../../../../../common/utils/accessibility';
 import { CategoriesPane } from './categories_pane';
 import { FieldsPane } from './fields_pane';
 import { Search } from './search';

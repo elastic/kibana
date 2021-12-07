@@ -17,12 +17,12 @@ import {
   transformUpdateResponseToExternalModel,
 } from './transform';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
 import {
-  getNoneCaseConnector,
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
-} from '../../common';
+} from '../../common/constants';
+import { getNoneCaseConnector } from '../../common/utils';
 
 describe('case transforms', () => {
   describe('transformUpdateResponseToExternalModel', () => {

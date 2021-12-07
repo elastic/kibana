@@ -9,7 +9,8 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { CaseStatuses, StatusAll } from '../../../common';
+import { StatusAll } from '../../../common/ui/types';
+import { CaseStatuses } from '../../../common/api';
 import { StatusFilter } from './status_filter';
 
 const stats = {

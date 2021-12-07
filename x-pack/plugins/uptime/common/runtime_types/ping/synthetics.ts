@@ -44,8 +44,12 @@ export const JourneyStepType = t.intersection([
         text: t.string,
       }),
       step: t.type({
+        status: t.string,
         index: t.number,
         name: t.string,
+        duration: t.type({
+          us: t.number,
+        }),
       }),
       isFullScreenshot: t.boolean,
       isScreenshotRef: t.boolean,
