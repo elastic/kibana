@@ -99,13 +99,15 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       title: i18n.translate('xpack.reporting.listing.infoPanel.attemptsInfo', {
         defaultMessage: 'Attempts',
       }),
-      description: info.attempts.toString(),
-    },
-    {
-      title: i18n.translate('xpack.reporting.listing.infoPanel.maxAttemptsInfo', {
-        defaultMessage: 'Max attempts',
-      }),
-      description: info.max_attempts?.toString() || NA,
+      description:
+        info.attempts.toString() +
+        (info.max_attempts
+          ? ' ' +
+            i18n.translate('xpack.reporting.listing.infoPanel.ofMaximumAttempts', {
+              defaultMessage: 'of {maxAttempts}',
+              values: { maxAttempts: info.max_attempts.toString() },
+            })
+          : ''),
     },
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.timeoutInfo', {
