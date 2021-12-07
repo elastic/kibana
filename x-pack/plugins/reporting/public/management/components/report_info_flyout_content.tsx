@@ -172,7 +172,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
   ];
 
   return (
-    <div>
+    <>
       <EuiTitle size="xs">
         <h3>Output</h3>
       </EuiTitle>
@@ -197,6 +197,6 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
           <EuiDescriptionList listItems={errorInfo} type="column" align="center" compressed />
         </>
       )}
-    </div>
+    </>
   );
 };
