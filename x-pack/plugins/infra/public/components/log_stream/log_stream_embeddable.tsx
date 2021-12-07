@@ -77,7 +77,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
     }
 
     ReactDOM.render(
-      <CoreProviders core={this.core} plugins={this.pluginDeps}>
+      <CoreProviders core={this.core} plugins={this.pluginDeps} theme$={this.core.theme.theme$}>
         <EuiThemeProvider>
           <div style={{ width: '100%' }}>
             <LazyLogStreamWrapper

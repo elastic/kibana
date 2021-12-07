@@ -255,48 +255,6 @@ export default function (providerContext: FtrProviderContext) {
         }
         expect(resIndexPattern.response.data.statusCode).equal(404);
       });
-      it('should have removed the fields from the index patterns', async () => {
-        // The reason there is an expect inside the try and inside the catch in this test case is to guard against two
-        // different scenarios.
-        //
-        // If a test case in another file calls /setup then the system and endpoint packages will be installed and
-        // will be present for the remainder of the tests (because they cannot be removed). If that is the case the
-        // expect in the try will work because the logs-* and metrics-* index patterns will still be present even
-        // after this test uninstalls its package.
-        //
-        // If /setup was never called prior to this test, when the test package is uninstalled the index pattern code
-        // checks to see if there are no packages installed and completely removes the logs-* and metrics-* index
-        // patterns. If that happens this code will throw an error and indicate that the index pattern being searched
-        // for was completely removed. In this case the catch's expect will test to make sure the error thrown was
-        // a 404 because all of the packages have been removed.
-        try {
-          const resIndexPatternLogs = await kibanaServer.savedObjects.get({
-            type: 'index-pattern',
-            id: 'logs-*',
-          });
-          const fields = JSON.parse(resIndexPatternLogs.attributes.fields);
-          const exists = fields.find((field: { name: string }) => field.name === 'logs_test_name');
-          expect(exists).to.be(undefined);
-        } catch (err) {
-          // if all packages are uninstalled there won't be a logs-* index pattern
-          expect(err.response.data.statusCode).equal(404);
-        }
-
-        try {
-          const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
-            type: 'index-pattern',
-            id: 'metrics-*',
-          });
-          const fieldsMetrics = JSON.parse(resIndexPatternMetrics.attributes.fields);
-          const existsMetrics = fieldsMetrics.find(
-            (field: { name: string }) => field.name === 'metrics_test_name'
-          );
-          expect(existsMetrics).to.be(undefined);
-        } catch (err) {
-          // if all packages are uninstalled there won't be a metrics-* index pattern
-          expect(err.response.data.statusCode).equal(404);
-        }
-      });
       it('should have removed the saved object', async function () {
         let res;
         try {
@@ -512,23 +470,19 @@ const expectAssetsInstalled = ({
     }
     expect(resInvalidTypeIndexPattern.response.data.statusCode).equal(404);
   });
-  it('should create an index pattern with the package fields', async () => {
+  it('should not add fields to the index patterns', async () => {
     const resIndexPatternLogs = await kibanaServer.savedObjects.get({
       type: 'index-pattern',
       id: 'logs-*',
     });
-    const fields = JSON.parse(resIndexPatternLogs.attributes.fields);
-    const exists = fields.find((field: { name: string }) => field.name === 'logs_test_name');
-    expect(exists).not.to.be(undefined);
+    const logsAttributes = resIndexPatternLogs.attributes;
+    expect(logsAttributes.fields).to.be(undefined);
     const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
       type: 'index-pattern',
       id: 'metrics-*',
     });
-    const fieldsMetrics = JSON.parse(resIndexPatternMetrics.attributes.fields);
-    const metricsExists = fieldsMetrics.find(
-      (field: { name: string }) => field.name === 'metrics_test_name'
-    );
-    expect(metricsExists).not.to.be(undefined);
+    const metricsAttributes = resIndexPatternMetrics.attributes;
+    expect(metricsAttributes.fields).to.be(undefined);
   });
   it('should have created the correct saved object', async function () {
     const res = await kibanaServer.savedObjects.get({
