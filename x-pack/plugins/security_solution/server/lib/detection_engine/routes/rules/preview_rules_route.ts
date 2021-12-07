@@ -262,9 +262,12 @@ export const previewRulesRoute = async (
           .map((item) => item.message);
 
         // Refreshes alias to ensure index is able to be read before returning
-        await context.core.elasticsearch.client.asInternalUser.indices.refresh({
-          index: previewRuleDataClient.indexNameWithNamespace(spaceId),
-        });
+        await context.core.elasticsearch.client.asInternalUser.indices.refresh(
+          {
+            index: previewRuleDataClient.indexNameWithNamespace(spaceId),
+          },
+          { ignore: [404] }
+        );
 
         return response.ok({
           body: {
