@@ -6,3 +6,4 @@
  */
 
 export * from './vector_source';
+export { IMvtVectorSource } from './mvt_vector_source';
