@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('anomaly detection', function () {
     loadTestFile(require.resolve('./geographic_data'));
+    loadTestFile(require.resolve('./population_analysis'));
   });
 }

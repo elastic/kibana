@@ -24,7 +24,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     job_id: `ecommerce-geo`,
     analysis_config: {
       bucket_span: '15m',
-      influencers: ['geoip.country_iso_code', 'day_of_week', 'category.keyword'],
+      influencers: ['geoip.country_iso_code', 'day_of_week', 'category.keyword', 'user'],
       detectors: [
         {
           detector_description: 'Unusual coordinates by user',
@@ -224,6 +224,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('navigate to job list');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
+      await elasticChart.setNewChartUiDebugFlag(true);
 
       await ml.testExecution.logTestStep('open job in anomaly explorer');
       await ml.jobTable.waitForJobsToLoad();
@@ -231,9 +232,19 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.jobTable.clickOpenJobInAnomalyExplorerButton(ecommerceGeoJobConfig.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
 
-      // TODO: fix AD job so it produces anomalies
+      await ml.testExecution.logTestStep('select swim lane tile');
+      const cells = await ml.swimLane.getCells(overallSwimLaneTestSubj);
+      const sampleCell = cells[0];
+      await ml.swimLane.selectSingleCell(overallSwimLaneTestSubj, {
+        x: sampleCell.x + cellSize,
+        y: sampleCell.y + cellSize,
+      });
+      await ml.swimLane.waitForSwimLanesToLoad();
 
       await ml.testExecution.logTestStep('take screenshot');
+      await ml.anomaliesTable.ensureDetailsOpen(0);
+      await ml.anomalyExplorer.scrollChartsContainerIntoView();
+
       await mlScreenshots.takeScreenshot(
         'ecommerce-anomaly-explorer-geopoint',
         screenshotDirectories
@@ -270,8 +281,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await maps.openLegend();
       await maps.clickFitToData();
       await maps.closeLegend();
-
-      // TODO: open map tooltip(s)
 
       await mlScreenshots.takeScreenshot(
         'weblogs-anomaly-explorer-geopoint',

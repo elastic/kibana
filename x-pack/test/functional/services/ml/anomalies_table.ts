@@ -149,5 +149,25 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
       await testSubjects.click(`tablePagination-${rowsNumber}-rows`);
       await this.assertRowsNumberPerPage(rowsNumber);
     },
+
+    async ensureDetailsOpen(rowIndex: number) {
+      await retry.tryForTime(10 * 1000, async () => {
+        const rowSubj = await this.getRowSubjByRowIndex(rowIndex);
+        if (!(await testSubjects.exists('mlAnomaliesListRowDetails'))) {
+          await testSubjects.click(`${rowSubj} > mlAnomaliesListRowDetailsToggle`);
+          await testSubjects.existOrFail('mlAnomaliesListRowDetails', { timeout: 1000 });
+        }
+      });
+    },
+
+    async ensureDetailsClosed(rowIndex: number) {
+      await retry.tryForTime(10 * 1000, async () => {
+        const rowSubj = await this.getRowSubjByRowIndex(rowIndex);
+        if (await testSubjects.exists('mlAnomaliesListRowDetails')) {
+          await testSubjects.click(`${rowSubj} > mlAnomaliesListRowDetailsToggle`);
+          await testSubjects.missingOrFail('mlAnomaliesListRowDetails', { timeout: 1000 });
+        }
+      });
+    },
   };
 }
