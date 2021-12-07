@@ -27,7 +27,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../shared/doc_links';
 import { Loading } from '../../../shared/loading';
 import { SourceIcon } from '../../components/shared/source_icon';
-import { DOCUMENT_PERMISSIONS_DOCS_URL } from '../../routes';
 
 import {
   EXTERNAL_IDENTITIES_LINK,
@@ -97,7 +96,7 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ children }) => {
               defaultMessage="Documents will not be searchable from Workplace Search until user and group mappings have been configured. {documentPermissionsLink}."
               values={{
                 documentPermissionsLink: (
-                  <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
+                  <EuiLink target="_blank" href={docLinks.workplaceSearchDocumentPermissions}>
                     {DOCUMENT_PERMISSIONS_LINK}
                   </EuiLink>
                 ),

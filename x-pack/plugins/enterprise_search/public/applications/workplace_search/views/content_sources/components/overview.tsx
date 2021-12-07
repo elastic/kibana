@@ -47,7 +47,6 @@ import {
   DOCUMENTATION_LINK_TITLE,
 } from '../../../constants';
 import {
-  DOCUMENT_PERMISSIONS_DOCS_URL,
   ENT_SEARCH_LICENSE_MANAGEMENT,
   SYNC_FREQUENCY_PATH,
   BLOCKED_TIME_WINDOWS_PATH,
@@ -346,7 +345,7 @@ export const Overview: React.FC = () => {
                   defaultMessage="{learnMoreLink} about permissions"
                   values={{
                     learnMoreLink: (
-                      <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
+                      <EuiLink target="_blank" href={docLinks.workplaceSearchDocumentPermissions}>
                         {LEARN_MORE_LINK}
                       </EuiLink>
                     ),

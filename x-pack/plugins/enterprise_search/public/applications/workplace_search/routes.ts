@@ -22,7 +22,6 @@ export const LOGOUT_ROUTE = '/logout';
 export const LEAVE_FEEDBACK_EMAIL = 'support@elastic.co';
 export const LEAVE_FEEDBACK_URL = `mailto:${LEAVE_FEEDBACK_EMAIL}?Subject=Elastic%20Workplace%20Search%20Feedback`;
 
-export const DOCUMENT_PERMISSIONS_DOCS_URL = docLinks.workplaceSearchDocumentPermissions;
 export const ENT_SEARCH_LICENSE_MANAGEMENT = docLinks.licenseManagement;
 export const SECURITY_DOCS_URL = docLinks.workplaceSearchSecurity;
 
