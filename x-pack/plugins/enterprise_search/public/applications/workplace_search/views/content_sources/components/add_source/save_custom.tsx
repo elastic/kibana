@@ -31,7 +31,6 @@ import { LicenseBadge } from '../../../../components/shared/license_badge';
 import {
   SOURCES_PATH,
   SOURCE_DISPLAY_SETTINGS_PATH,
-  ENT_SEARCH_LICENSE_MANAGEMENT,
   getContentSourcePath,
   getSourcesPath,
 } from '../../../../routes';
@@ -192,7 +191,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                 <EuiSpacer size="xs" />
                 {!hasPlatinumLicense && (
                   <EuiText size="s">
-                    <EuiLink target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+                    <EuiLink target="_blank" href={docLinks.licenseManagement}>
                       {LEARN_CUSTOM_FEATURES_BUTTON}
                     </EuiLink>
                   </EuiText>

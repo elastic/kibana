@@ -47,7 +47,6 @@ import {
   DOCUMENTATION_LINK_TITLE,
 } from '../../../constants';
 import {
-  ENT_SEARCH_LICENSE_MANAGEMENT,
   SYNC_FREQUENCY_PATH,
   BLOCKED_TIME_WINDOWS_PATH,
   getGroupPath,
@@ -464,7 +463,7 @@ export const Overview: React.FC = () => {
       </EuiText>
       <EuiSpacer size="s" />
       <EuiText size="s">
-        <EuiLink target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+        <EuiLink target="_blank" href={docLinks.licenseManagement}>
           {LEARN_CUSTOM_FEATURES_BUTTON}
         </EuiLink>
       </EuiText>
