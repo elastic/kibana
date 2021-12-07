@@ -6,6 +6,7 @@
  */
 
 import { getImportExceptionsListSchemaDecodedMock } from '../../../../../common/schemas/request/import_exceptions_schema.mock';
+import { getExceptionListSchemaMock } from '../../../../../common/schemas/response/exception_list_schema.mock';
 
 import { sortExceptionListsToUpdateOrCreate } from './sort_exception_lists_to_create_update';
 
@@ -63,7 +64,7 @@ describe('sort_exception_lists_to_create_update', () => {
       it('assigns error if matching list_id is found', () => {
         const result = sortExceptionListsToUpdateOrCreate({
           existingLists: {
-            'list-id-1': { ...getImportExceptionsListSchemaDecodedMock('list-id-1') },
+            'list-id-1': { ...getExceptionListSchemaMock(), list_id: 'list-id-1' },
           },
           isOverwrite: false,
           lists: [getImportExceptionsListSchemaDecodedMock('list-id-1')],
@@ -131,7 +132,7 @@ describe('sort_exception_lists_to_create_update', () => {
       it('assigns list to be updated if its list_id matches an existing one', () => {
         const result = sortExceptionListsToUpdateOrCreate({
           existingLists: {
-            'list-id-1': { ...getImportExceptionsListSchemaDecodedMock('list-id-1') },
+            'list-id-1': { ...getExceptionListSchemaMock(), list_id: 'list-id-1' },
           },
           isOverwrite: true,
           lists: [getImportExceptionsListSchemaDecodedMock('list-id-1')],
