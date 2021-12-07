@@ -26,7 +26,7 @@ import { RelatedIcon } from '../../assets/related';
 import { DistributeEquallyIcon } from '../../assets/distribute_equally';
 import { getDataMinMax, getStepValue, isValidColor, roundValue } from './utils';
 import type { CustomPaletteParamsConfig, ColorStop } from '../../../common';
-import { useDebouncedValue } from '../index';
+import { useDebouncedValue, TooltipWrapper } from '../index';
 import { DEFAULT_COLOR } from './constants';
 export interface ColorRanges {
   color: string;
@@ -164,7 +164,7 @@ export function ColorRanges(props: ColorRangesProps) {
             data-test-subj={`${dataTestPrefix}_dynamicColoring_range_color_${indexPostfix}`}
           >
             {isLast ? (
-              <EuiIcon type={RelatedIcon} />
+              <EuiIcon type={RelatedIcon} size="l" />
             ) : (
               <EuiColorPicker
                 key={value}
@@ -218,9 +218,9 @@ export function ColorRanges(props: ColorRangesProps) {
               append={rangeType === 'percent' ? '%' : undefined}
               prepend={
                 isLast ? (
-                  <label className="euiFormLabel">&#8804;</label>
+                  <span className="euiFormLabel">&#8804;</span>
                 ) : (
-                  <label className="euiFormLabel">&#8805;</label>
+                  <span className="euiFormLabel">&#8805;</span>
                 )
               }
               aria-label={i18n.translate(
@@ -305,22 +305,36 @@ export function ColorRanges(props: ColorRangesProps) {
               ) : (
                 <EuiButtonIcon
                   iconType={isLast ? ValueMaxIcon : ValueMinIcon}
-                  aria-label={i18n.translate(
-                    `xpack.lens.dynamicColoring.customPalette.autoDetect${
-                      isLast ? 'Maximum' : 'Minimum'
-                    }AriaLabel`,
-                    {
-                      defaultMessage: `Auto detect ${isLast ? 'maximum' : 'minimum'} value`,
-                    }
-                  )}
-                  title={i18n.translate(
-                    `xpack.lens.dynamicColoring.customPalette.autoDetect${
-                      isLast ? 'Maximum' : 'Minimum'
-                    }Label`,
-                    {
-                      defaultMessage: `Auto detect ${isLast ? 'maximum' : 'minimum'} value`,
-                    }
-                  )}
+                  aria-label={
+                    isLast
+                      ? i18n.translate(
+                          `xpack.lens.dynamicColoring.customPalette.autoDetectMaximumAriaLabel`,
+                          {
+                            defaultMessage: `Auto detect maximum value`,
+                          }
+                        )
+                      : i18n.translate(
+                          `xpack.lens.dynamicColoring.customPalette.autoDetectMinimumAriaLabel`,
+                          {
+                            defaultMessage: `Auto detect minimum value`,
+                          }
+                        )
+                  }
+                  title={
+                    isLast
+                      ? i18n.translate(
+                          `xpack.lens.dynamicColoring.customPalette.autoDetectMaximumLabel`,
+                          {
+                            defaultMessage: `Auto detect maximum value`,
+                          }
+                        )
+                      : i18n.translate(
+                          `xpack.lens.dynamicColoring.customPalette.autoDetectMinimumLabel`,
+                          {
+                            defaultMessage: `Auto detect minimum value`,
+                          }
+                        )
+                  }
                   onClick={() => {
                     let newValue;
                     if (rangeType !== 'percent') {
@@ -375,95 +389,109 @@ export function ColorRanges(props: ColorRangesProps) {
           true
         )}
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiButtonEmpty
-        data-test-subj={`${dataTestPrefix}_dynamicColoring_addColorRange`}
-        iconType="plusInCircle"
-        color="primary"
-        aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorRange', {
-          defaultMessage: 'Add color range',
-        })}
-        size="xs"
-        flush="left"
-        disabled={shouldDisableAdd}
-        onClick={() => {
-          const newColorRanges = [...localColorRanges];
-          const length = newColorRanges.length;
-          const { max } = getDataMinMax(rangeType, dataBounds);
-          const step = getStepValue(
-            colorRanges.map(({ color, start }) => ({ color, stop: Number(start) })),
-            newColorRanges.map(({ color, start }) => ({ color, stop: Number(start) })),
-            max
-          );
-          const prevColor = localColorRanges[length - 1].color || DEFAULT_COLOR;
-          const newStart = step + Number(localColorRanges[length - 1].start);
-          const prevEndValue = newColorRanges[length - 1].end;
-          newColorRanges[length - 1].end = newStart;
-          newColorRanges.push({
-            color: prevColor,
-            start: newStart,
-            end:
-              newStart < prevEndValue
-                ? prevEndValue
-                : dataBounds.max > newStart
-                ? dataBounds.max
-                : newStart + step,
-          });
-          setColorRanges(newColorRanges);
-        }}
-      >
-        {i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorRange', {
-          defaultMessage: 'Add color range',
-        })}
-      </EuiButtonEmpty>
-      <EuiButtonEmpty
-        data-test-subj={`${dataTestPrefix}_dynamicColoring_reverseColors`}
-        iconType="sortable"
-        color="primary"
-        aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.reverseColors', {
-          defaultMessage: 'Reverse colors',
-        })}
-        size="xs"
-        flush="left"
-        onClick={() => {
-          setColorRanges(reversePalette(localColorRanges));
-        }}
-      >
-        {i18n.translate('xpack.lens.dynamicColoring.customPalette.reverseColors', {
-          defaultMessage: 'Reverse colors',
-        })}
-      </EuiButtonEmpty>
-      <EuiButtonEmpty
-        data-test-subj={`${dataTestPrefix}_dynamicColoring_distributeEqually`}
-        iconType={DistributeEquallyIcon}
-        color="primary"
-        aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.distributeEqually', {
-          defaultMessage: 'Distribute equally',
-        })}
-        size="xs"
-        flush="left"
-        onClick={() => {
-          const colorsCount = localColorRanges.length;
-          const start = localColorRanges[0].start;
-          const end = localColorRanges[colorsCount - 1].end;
-          const step = roundValue((end - start) / colorsCount);
-          const newRanges = localColorRanges.map((colorRange, index) => {
-            return {
-              color: colorRange.color,
-              start: roundValue(start + (step * 100 * index) / 100),
-              end:
-                index === localColorRanges.length - 1
-                  ? end
-                  : roundValue(start + (step * 100 * (index + 1)) / 100),
-            };
-          });
-          setColorRanges(newRanges);
-        }}
-      >
-        {i18n.translate('xpack.lens.dynamicColoring.customPalette.distributeEqually', {
-          defaultMessage: 'Distribute equally',
-        })}
-      </EuiButtonEmpty>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup justifyContent="spaceAround" gutterSize="s">
+        <TooltipWrapper
+          tooltipContent={i18n.translate(
+            'xpack.lens.dynamicColoring.customPalette.maximumStepsApplied',
+            {
+              defaultMessage: `You've applied the maximum number of steps`,
+            }
+          )}
+          condition={shouldDisableAdd}
+          position="top"
+          delay="regular"
+        >
+          <EuiButtonEmpty
+            data-test-subj={`${dataTestPrefix}_dynamicColoring_addColorRange`}
+            iconType="plusInCircle"
+            color="primary"
+            aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorRange', {
+              defaultMessage: 'Add color range',
+            })}
+            size="xs"
+            flush="left"
+            disabled={shouldDisableAdd}
+            onClick={() => {
+              const newColorRanges = [...localColorRanges];
+              const length = newColorRanges.length;
+              const { max } = getDataMinMax(rangeType, dataBounds);
+              const step = getStepValue(
+                colorRanges.map(({ color, start }) => ({ color, stop: Number(start) })),
+                newColorRanges.map(({ color, start }) => ({ color, stop: Number(start) })),
+                max
+              );
+              const prevColor = localColorRanges[length - 1].color || DEFAULT_COLOR;
+              const newStart = step + Number(localColorRanges[length - 1].start);
+              const prevEndValue = newColorRanges[length - 1].end;
+              newColorRanges[length - 1].end = newStart;
+              newColorRanges.push({
+                color: prevColor,
+                start: newStart,
+                end:
+                  newStart < prevEndValue
+                    ? prevEndValue
+                    : dataBounds.max > newStart
+                    ? dataBounds.max
+                    : newStart + step,
+              });
+              setColorRanges(newColorRanges);
+            }}
+          >
+            {i18n.translate('xpack.lens.dynamicColoring.customPalette.addColorRange', {
+              defaultMessage: 'Add color range',
+            })}
+          </EuiButtonEmpty>
+        </TooltipWrapper>
+        <EuiButtonEmpty
+          data-test-subj={`${dataTestPrefix}_dynamicColoring_reverseColors`}
+          iconType="sortable"
+          color="primary"
+          aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.reverseColors', {
+            defaultMessage: 'Reverse colors',
+          })}
+          size="xs"
+          flush="left"
+          onClick={() => {
+            setColorRanges(reversePalette(localColorRanges));
+          }}
+        >
+          {i18n.translate('xpack.lens.dynamicColoring.customPalette.reverseColors', {
+            defaultMessage: 'Reverse colors',
+          })}
+        </EuiButtonEmpty>
+        <EuiButtonEmpty
+          data-test-subj={`${dataTestPrefix}_dynamicColoring_distributeEqually`}
+          iconType={DistributeEquallyIcon}
+          color="primary"
+          aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.distributeEqually', {
+            defaultMessage: 'Distribute equally',
+          })}
+          size="xs"
+          flush="left"
+          onClick={() => {
+            const colorsCount = localColorRanges.length;
+            const start = localColorRanges[0].start;
+            const end = localColorRanges[colorsCount - 1].end;
+            const step = roundValue((end - start) / colorsCount);
+            const newRanges = localColorRanges.map((colorRange, index) => {
+              return {
+                color: colorRange.color,
+                start: roundValue(start + (step * 100 * index) / 100),
+                end:
+                  index === localColorRanges.length - 1
+                    ? end
+                    : roundValue(start + (step * 100 * (index + 1)) / 100),
+              };
+            });
+            setColorRanges(newRanges);
+          }}
+        >
+          {i18n.translate('xpack.lens.dynamicColoring.customPalette.distributeEqually', {
+            defaultMessage: 'Distribute equally',
+          })}
+        </EuiButtonEmpty>
+      </EuiFlexGroup>
     </>
   );
 }

@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reflect stop changes when in number to the chart', async () => {
-      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '0', {
+      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '0', {
         clearWithKeyboard: true,
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
