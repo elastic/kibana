@@ -7,13 +7,15 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+import { EMSClient } from '@elastic/ems-client';
+import { i18n } from '@kbn/i18n';
 import {
   setKibanaVersion,
   setLicensingPluginStart,
   setMapConfig,
   getIsEnterprisePlus,
 } from './kibana_services';
-import { MapsEmsPluginSetup, MapsEmsPluginStart } from './index';
+import { MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart } from './index';
 import type { MapConfig } from '../config';
 import { getServiceSettings } from './lazy_load_bundle/get_service_settings';
 import { createEMSSettings } from '../common/ems_settings';
@@ -21,6 +23,7 @@ import {
   LicensingPluginSetup,
   LicensingPluginStart,
 } from '../../../../x-pack/plugins/licensing/public';
+import { EMS_APP_NAME } from '../common';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -35,7 +38,7 @@ export interface MapsEmsSetupDependencies {
   licensing: LicensingPluginSetup;
 }
 
-export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup, MapsEmsPluginStart> {
+export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart> {
   readonly _initializerContext: PluginInitializerContext<MapConfig>;
 
   constructor(initializerContext: PluginInitializerContext<MapConfig>) {
@@ -54,6 +57,21 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup, MapsEmsPluginSt
       getServiceSettings,
       createEMSSettings: () => {
         return createEMSSettings(mapConfig, getIsEnterprisePlus);
+      },
+      createEMSClient: () => {
+        const emsSettings = createEMSSettings(mapConfig, getIsEnterprisePlus);
+        return new EMSClient({
+          language: i18n.getLocale(),
+          appVersion: this._initializerContext.env.packageInfo.version,
+          appName: EMS_APP_NAME,
+          tileApiUrl: emsSettings!.getEMSTileApiUrl(),
+          fileApiUrl: emsSettings!.getEMSFileApiUrl(),
+          landingPageUrl: emsSettings!.getEMSLandingPageUrl(),
+          fetchFunction(url: string) {
+            return fetch(url);
+          },
+          proxyPath: '',
+        });
       },
     };
   }

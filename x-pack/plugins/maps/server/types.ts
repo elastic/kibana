@@ -9,7 +9,7 @@ import { PluginSetupContract as FeaturesPluginSetupContract } from '../../featur
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/server';
+import { MapsEmsPluginServerSetup } from '../../../../src/plugins/maps_ems/server';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
@@ -19,7 +19,7 @@ export interface SetupDeps {
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
-  mapsEms: MapsEmsPluginSetup;
+  mapsEms: MapsEmsPluginServerSetup;
   embeddable: EmbeddableSetup;
   customIntegrations: CustomIntegrationsPluginSetup;
 }

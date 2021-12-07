@@ -15,6 +15,7 @@ export {
   DEFAULT_EMS_ROADMAP_ID,
   DEFAULT_EMS_ROADMAP_DESATURATED_ID,
   DEFAULT_EMS_DARKMAP_ID,
+  EMS_APP_NAME,
 } from './ems_defaults';
 
 export { ORIGIN } from './origin';

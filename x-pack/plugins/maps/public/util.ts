@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
-import { EMS_APP_NAME, FONTS_API_PATH } from '../common/constants';
-import { getHttp, getTilemap, getKibanaVersion, getEMSSettings } from './kibana_services';
+import { FONTS_API_PATH } from '../common/constants';
+import { getHttp, getTilemap, getEMSSettings, getMapsEmsSetup } from './kibana_services';
 import { getLicenseId } from './licensed_features';
 
 export function getKibanaTileMap(): unknown {
@@ -35,23 +34,7 @@ let emsClient: EMSClient | null = null;
 let latestLicenseId: string | undefined;
 export function getEMSClient(): EMSClient {
   if (!emsClient) {
-    const emsSettings = getEMSSettings();
-    const proxyPath = '';
-    const tileApiUrl = emsSettings!.getEMSTileApiUrl();
-    const fileApiUrl = emsSettings!.getEMSFileApiUrl();
-
-    emsClient = new EMSClient({
-      language: i18n.getLocale(),
-      appVersion: getKibanaVersion(),
-      appName: EMS_APP_NAME,
-      tileApiUrl,
-      fileApiUrl,
-      landingPageUrl: emsSettings!.getEMSLandingPageUrl(),
-      fetchFunction(url: string) {
-        return fetch(url);
-      },
-      proxyPath,
-    });
+    emsClient = getMapsEmsSetup().createEMSClient();
   }
   const licenseId = getLicenseId();
   if (latestLicenseId !== licenseId) {

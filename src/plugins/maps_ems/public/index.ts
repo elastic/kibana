@@ -7,11 +7,11 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
+import type { EMSClient } from '@elastic/ems-client';
 import { MapsEmsPlugin } from './plugin';
 import { IEMSKbnMapsSettings } from './service_settings';
 import type { MapConfig } from '../config';
 import { EMSSettings } from '../common';
-import { IEMSConfig } from '../common/ems_settings';
 
 /** @public */
 export type {
@@ -30,9 +30,10 @@ export { TMS_IN_YML_ID } from '../common';
 
 export type { MapConfig } from '../config';
 
-export interface MapsEmsPluginSetup {
+export interface MapsEmsPluginPublicSetup {
   config: MapConfig;
   getServiceSettings(): Promise<IEMSKbnMapsSettings>;
   createEMSSettings(): EMSSettings;
+  createEMSClient(): EMSClient;
 }
-export type MapsEmsPluginStart = ReturnType<MapsEmsPlugin['start']>;
+export type MapsEmsPluginPublicStart = ReturnType<MapsEmsPlugin['start']>;

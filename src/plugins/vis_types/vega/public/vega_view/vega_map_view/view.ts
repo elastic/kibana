@@ -100,8 +100,8 @@ export class VegaMapView extends VegaBaseView {
         );
         return;
       }
-      zoomSettings.maxZoom = (await tmsService.getMaxZoom()) ?? defaultMapConfig.maxZoom;
-      zoomSettings.minZoom = (await tmsService.getMinZoom()) ?? defaultMapConfig.minZoom;
+      zoomSettings.maxZoom = defaultMapConfig.maxZoom;
+      zoomSettings.minZoom = defaultMapConfig.minZoom;
       customAttribution = this._serviceSettings.getAttributionsFromTMSServce(tmsService);
       style = (await tmsService.getVectorStyleSheet()) as Style;
     } else {

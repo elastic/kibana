@@ -30,12 +30,12 @@ export const config: PluginConfigDescriptor<MapConfig> = {
   schema: mapConfigSchema,
 };
 
-export interface MapsEmsPluginSetup {
+export interface MapsEmsPluginServerSetup {
   config: MapConfig;
   createEMSSettings: () => EMSSettings;
 }
 
-export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup> {
+export class MapsEmsPlugin implements Plugin<MapsEmsPluginServerSetup> {
   readonly _initializerContext: PluginInitializerContext<MapConfig>;
 
   constructor(initializerContext: PluginInitializerContext<MapConfig>) {

@@ -6,15 +6,11 @@
  */
 
 import type { CoreStart } from 'kibana/public';
-import type { MapConfig } from '../../../../src/plugins/maps_ems/public';
 import type { MapsConfigType } from '../config';
 import type { MapsPluginStartDependencies } from './plugin';
 import type { EMSSettings } from '../../../../src/plugins/maps_ems/common/ems_settings';
 import type { PaletteRegistry } from '../../../../src/plugins/charts/public';
-
-let kibanaVersion: string;
-export const setKibanaVersion = (version: string) => (kibanaVersion = version);
-export const getKibanaVersion = () => kibanaVersion;
+import { MapsEmsPluginPublicSetup } from '../../../../src/plugins/maps_ems/public';
 
 let coreStart: CoreStart;
 let pluginsStart: MapsPluginStartDependencies;
@@ -63,23 +59,27 @@ export const getMapAppConfig = () => mapAppConfig;
 export const getShowMapsInspectorAdapter = () => getMapAppConfig().showMapsInspectorAdapter;
 export const getPreserveDrawingBuffer = () => getMapAppConfig().preserveDrawingBuffer;
 
-// map.* kibana.yml settings from maps_ems plugin that are shared between OSS map visualizations and maps app
-let kibanaCommonConfig: MapsEmsConfig;
-export const setKibanaCommonConfig = (config: MapsEmsConfig) => (kibanaCommonConfig = config);
-export const getKibanaCommonConfig = () => kibanaCommonConfig;
-
+let mapsEms: MapsEmsPluginPublicSetup;
 let emsSettings: EMSSettings;
-export const setEMSSettings = (value: EMSSettings) => {
-  emsSettings = value;
+export const setMapsEmsSetup = (value: MapsEmsPluginPublicSetup) => {
+  mapsEms = value;
+  emsSettings = mapsEms.createEMSSettings();
 };
+// map.* kibana.yml settings from maps_ems plugin that are shared between OSS map visualizations and maps app
+export const getMapsEmsSetup: () => MapsEmsPluginPublicSetup = () => {
+  return mapsEms;
+};
+
 export const getEMSSettings: () => EMSSettings = () => {
   return emsSettings;
 };
 
-export const getEmsTileLayerId = () => getKibanaCommonConfig().emsTileLayerId;
+export const getMapConfig = () => mapsEms.config;
+
+export const getEmsTileLayerId = () => getMapConfig().emsTileLayerId;
 
 export const getTilemap = () => {
-  const config = getKibanaCommonConfig();
+  const config = getMapConfig();
   if (config.tilemap) {
     return config.tilemap;
   } else {
