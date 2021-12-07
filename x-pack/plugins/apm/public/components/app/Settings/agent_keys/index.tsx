@@ -25,6 +25,7 @@ import { CreateAgentKeyFlyout } from './create_agent_key';
 import { AgentKeyCallOut } from './create_agent_key/agent_key_callout';
 import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { ApiKey } from '../../../../../../security/common/model';
 
 const INITIAL_DATA = {
   areApiKeysEnabled: false,
@@ -68,103 +69,6 @@ export function AgentKeys() {
   );
 
   const agentKeys = data?.agentKeys;
-  const isLoading =
-    privilegesStatus === FETCH_STATUS.LOADING ||
-    status === FETCH_STATUS.LOADING;
-
-  const requestFailed =
-    privilegesStatus === FETCH_STATUS.FAILURE ||
-    status === FETCH_STATUS.FAILURE;
-
-  let content = null;
-
-  if (!agentKeys) {
-    if (isLoading) {
-      content = (
-        <EuiEmptyPrompt
-          icon={<EuiLoadingSpinner size="xl" />}
-          titleSize="xs"
-          title={
-            <h2>
-              {i18n.translate(
-                'xpack.apm.settings.agentKeys.agentKeysLoadingPromptTitle',
-                {
-                  defaultMessage: 'Loading Agent keys...',
-                }
-              )}
-            </h2>
-          }
-        />
-      );
-    } else if (requestFailed) {
-      content = (
-        <EuiEmptyPrompt
-          iconType="alert"
-          title={
-            <h2>
-              {i18n.translate(
-                'xpack.apm.settings.agentKeys.agentKeysErrorPromptTitle',
-                {
-                  defaultMessage: 'Could not load agent keys.',
-                }
-              )}
-            </h2>
-          }
-        />
-      );
-    } else if (!canManage) {
-      content = <PermissionDenied />;
-    } else if (!areApiKeysEnabled) {
-      content = <ApiKeysNotEnabled />;
-    }
-  } else {
-    if (isEmpty(agentKeys)) {
-      content = (
-        <EuiEmptyPrompt
-          iconType="gear"
-          title={
-            <h2>
-              {i18n.translate('xpack.apm.settings.agentKeys.emptyPromptTitle', {
-                defaultMessage: 'Create your first key',
-              })}
-            </h2>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.apm.settings.agentKeys.emptyPromptBody', {
-                defaultMessage:
-                  'Create keys to authorize agent requests to the APM Server.',
-              })}
-            </p>
-          }
-          actions={
-            <EuiButton
-              onClick={() => setIsFlyoutVisible(true)}
-              fill={true}
-              iconType="plusInCircle"
-            >
-              {i18n.translate(
-                'xpack.apm.settings.agentKeys.createAgentKeyButton',
-                {
-                  defaultMessage: 'Create agent key',
-                }
-              )}
-            </EuiButton>
-          }
-        />
-      );
-    } else {
-      content = (
-        <AgentKeysTable
-          agentKeys={agentKeys ?? []}
-          onKeyDelete={() => {
-            setCreatedAgentKey(undefined);
-            refetchAgentKeys();
-          }}
-        />
-      );
-    }
-  }
 
   return (
     <Fragment>
@@ -230,7 +134,134 @@ export function AgentKeys() {
           }}
         />
       )}
-      {content}
+      <AgentKeysContent
+        loading={
+          privilegesStatus === FETCH_STATUS.LOADING ||
+          status === FETCH_STATUS.LOADING
+        }
+        requestFailed={
+          privilegesStatus === FETCH_STATUS.FAILURE ||
+          status === FETCH_STATUS.FAILURE
+        }
+        canManage={canManage}
+        areApiKeysEnabled={areApiKeysEnabled}
+        agentKeys={agentKeys}
+        onKeyDelete={() => {
+          setCreatedAgentKey(undefined);
+          refetchAgentKeys();
+        }}
+        onCreateAgentClick={() => setIsFlyoutVisible(true)}
+      />
     </Fragment>
   );
+}
+
+function AgentKeysContent({
+  loading,
+  requestFailed,
+  canManage,
+  areApiKeysEnabled,
+  agentKeys,
+  onKeyDelete,
+  onCreateAgentClick,
+}: {
+  loading: boolean;
+  requestFailed: boolean;
+  canManage: boolean;
+  areApiKeysEnabled: boolean;
+  agentKeys?: ApiKey[];
+  onKeyDelete: () => void;
+  onCreateAgentClick: () => void;
+}) {
+  if (!agentKeys) {
+    if (loading) {
+      return (
+        <EuiEmptyPrompt
+          icon={<EuiLoadingSpinner size="xl" />}
+          titleSize="xs"
+          title={
+            <h2>
+              {i18n.translate(
+                'xpack.apm.settings.agentKeys.agentKeysLoadingPromptTitle',
+                {
+                  defaultMessage: 'Loading Agent keys...',
+                }
+              )}
+            </h2>
+          }
+        />
+      );
+    }
+
+    if (requestFailed) {
+      return (
+        <EuiEmptyPrompt
+          iconType="alert"
+          title={
+            <h2>
+              {i18n.translate(
+                'xpack.apm.settings.agentKeys.agentKeysErrorPromptTitle',
+                {
+                  defaultMessage: 'Could not load agent keys.',
+                }
+              )}
+            </h2>
+          }
+        />
+      );
+    }
+
+    if (!canManage) {
+      return <PermissionDenied />;
+    }
+
+    if (!areApiKeysEnabled) {
+      return <ApiKeysNotEnabled />;
+    }
+  }
+
+  if (agentKeys && isEmpty(agentKeys)) {
+    return (
+      <EuiEmptyPrompt
+        iconType="gear"
+        title={
+          <h2>
+            {i18n.translate('xpack.apm.settings.agentKeys.emptyPromptTitle', {
+              defaultMessage: 'Create your first key',
+            })}
+          </h2>
+        }
+        body={
+          <p>
+            {i18n.translate('xpack.apm.settings.agentKeys.emptyPromptBody', {
+              defaultMessage:
+                'Create keys to authorize agent requests to the APM Server.',
+            })}
+          </p>
+        }
+        actions={
+          <EuiButton
+            onClick={onCreateAgentClick}
+            fill={true}
+            iconType="plusInCircle"
+          >
+            {i18n.translate(
+              'xpack.apm.settings.agentKeys.createAgentKeyButton',
+              {
+                defaultMessage: 'Create agent key',
+              }
+            )}
+          </EuiButton>
+        }
+      />
+    );
+  }
+
+  if (agentKeys && !isEmpty(agentKeys)) {
+    return (
+      <AgentKeysTable agentKeys={agentKeys ?? []} onKeyDelete={onKeyDelete} />
+    );
+  }
+
+  return null;
 }
