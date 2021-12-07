@@ -10,11 +10,7 @@ import {
   deleteItemsFromArray,
   appplyBulkActionUpdateToRule,
 } from './bulk_action_update';
-import {
-  BulkActionUpdate,
-  BulkActionUpdateType,
-} from '../../../../common/detection_engine/schemas/common/schemas';
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
+import { BulkActionUpdateType } from '../../../../common/detection_engine/schemas/common/schemas';
 
 describe('bulk_action_update', () => {
   describe('addItemsToArray', () => {

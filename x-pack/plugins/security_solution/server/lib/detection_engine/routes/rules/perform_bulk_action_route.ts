@@ -9,10 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { Logger } from 'src/core/server';
 
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
-import {
-  BulkAction,
-  BulkActionUpdateType,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { performBulkActionSchema } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -156,7 +153,7 @@ export const performBulkActionRoute = (
               rules.data.map(async (rule) => {
                 throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
-                const updatedRule = body?.updates?.reduce?.(
+                const updatedRule = body.updates.reduce(
                   (acc, action) => appplyBulkActionUpdateToRule(acc, action),
                   transformAlertToRule(rule)
                 );

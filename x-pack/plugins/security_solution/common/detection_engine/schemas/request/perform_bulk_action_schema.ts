@@ -6,16 +6,27 @@
  */
 
 import * as t from 'io-ts';
-import { bulkAction, queryOrUndefined, bulkActionUpdate } from '../common/schemas';
+import {
+  bulkActionEnhanced,
+  bulkActionSimple,
+  queryOrUndefined,
+  bulkActionUpdate,
+} from '../common/schemas';
 
-export const performBulkActionSchema = t.exact(
-  t.intersection([
+export const performBulkActionSchema = t.union([
+  t.exact(
     t.type({
       query: queryOrUndefined,
-      action: bulkAction,
-    }),
-    t.partial({ updates: t.array(bulkActionUpdate) }),
-  ])
-);
+      action: bulkActionSimple,
+    })
+  ),
+  t.exact(
+    t.type({
+      query: queryOrUndefined,
+      action: bulkActionEnhanced,
+      updates: t.array(bulkActionUpdate),
+    })
+  ),
+]);
 
 export type PerformBulkActionSchema = t.TypeOf<typeof performBulkActionSchema>;

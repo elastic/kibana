@@ -438,14 +438,27 @@ export const privilege = t.type({
 
 export type Privilege = t.TypeOf<typeof privilege>;
 
-export enum BulkAction {
+export enum BulkActionSimple {
   'enable' = 'enable',
   'disable' = 'disable',
   'export' = 'export',
   'delete' = 'delete',
   'duplicate' = 'duplicate',
+}
+
+export const bulkActionSimple = enumeration('BulkActionSimple', BulkActionSimple);
+
+export enum BulkActionEnhanced {
   'update' = 'update',
 }
+export const bulkActionEnhanced = enumeration('BulkActionEnhanced', BulkActionEnhanced);
+
+export const BulkAction = {
+  ...BulkActionSimple,
+  ...BulkActionEnhanced,
+};
+
+export type BulkAction = BulkActionSimple | BulkActionEnhanced;
 
 export const bulkAction = enumeration('BulkAction', BulkAction);
 
