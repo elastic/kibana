@@ -250,8 +250,10 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
 
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
   if (settingsToRetrieve[settingsKey] === true) {
-    const WITH_PRODUCT_ORIGIN = true;
-    return es.send('GET', settingKeyToPathMap[settingsKey], null, true, WITH_PRODUCT_ORIGIN);
+    // Use pretty=false in these request in order to compress the response by removing whitespace
+    const path = `${settingKeyToPathMap[settingsKey]}?pretty=false`;
+
+    return es.send('GET', path, null, true);
   } else {
     const settingsPromise = new $.Deferred();
     if (settingsToRetrieve[settingsKey] === false) {
