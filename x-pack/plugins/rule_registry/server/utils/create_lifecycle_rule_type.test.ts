@@ -18,6 +18,7 @@ import { castArray, omit, mapValues } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
+import { alertsMock } from '../../../alerting/server/mocks';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -111,6 +112,8 @@ function createRule(shouldWriteAlerts: boolean = true) {
           savedObjectsClient: {} as any,
           scopedClusterClient: {} as any,
           shouldWriteAlerts: () => shouldWriteAlerts,
+          shouldStopExecution: () => false,
+          search: alertsMock.createAlertServices<InstanceState, InstanceContext>().search,
         },
         spaceId: 'spaceId',
         state,
