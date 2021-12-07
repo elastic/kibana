@@ -26,7 +26,9 @@ export const deprecations = ({
     deprecate('cluster_alerts.allowedSpaces', '8.0.0', {
       level: 'warning',
       message: i18n.translate('xpack.monitoring.deprecations.allowedSpaces', {
-        defaultMessage: 'Cluster alerts are now created after opt-in.',
+        defaultMessage:
+          'Starting in 7.15, the Stack Monitoring application will prompt you to create cluster alerts rather than creating them automatically in allowed spaces.' +
+          ' This configuration is no longer used and will be removed in a future version. ',
       }),
     }),
     // This order matters. The "blanket rename" needs to happen at the end
