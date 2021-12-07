@@ -25,7 +25,7 @@ export async function install(
   platform: string = process.platform,
   architecture: string = os.arch()
 ): Promise<string> {
-  const pkg = paths.find(platform, architecture);
+  const pkg = paths.find(platform, architecture + '-foo');
 
   if (!pkg) {
     throw new Error(`Unsupported platform: ${platform}-${architecture}`);

@@ -66,23 +66,24 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
         return new HeadlessChromiumDriverFactory(this.screenshotMode, config, logger, binaryPath);
       } catch (error) {
         this.logger.error('Error in screenshotting setup, it may not function properly.');
-
-        throw error;
+        this.logger.error(error);
       }
-    })();
+    })() as Promise<HeadlessChromiumDriverFactory>;
 
     return {};
   }
 
   start({}: CoreStart): ScreenshottingStart {
-    return {
-      diagnose: () =>
-        from(this.browserDriverFactory).pipe(switchMap((factory) => factory.diagnose())),
-      getScreenshots: (options) =>
-        from(this.browserDriverFactory).pipe(
-          switchMap((factory) => getScreenshots(factory, this.logger.get('screenshot'), options))
-        ),
-    };
+    return (
+      this.browserDriverFactory && {
+        diagnose: () =>
+          from(this.browserDriverFactory).pipe(switchMap((factory) => factory.diagnose())),
+        getScreenshots: (options) =>
+          from(this.browserDriverFactory).pipe(
+            switchMap((factory) => getScreenshots(factory, this.logger.get('screenshot'), options))
+          ),
+      }
+    );
   }
 
   stop() {}
