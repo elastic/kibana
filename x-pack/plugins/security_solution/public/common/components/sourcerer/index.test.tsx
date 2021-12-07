@@ -20,57 +20,21 @@ import {
 import { createStore } from '../../store';
 import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
 import { waitFor } from '@testing-library/dom';
-import { useAppToasts } from '../../hooks/use_app_toasts';
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
-import { RefreshButton } from './refresh_button';
 import { useSourcererDataView } from '../../containers/sourcerer';
 
 const mockDispatch = jest.fn();
 
 jest.mock('../../containers/sourcerer');
-jest.mock('../../lib/kibana', () => {
-  const original = jest.requireActual('../../lib/kibana');
-  return {
-    ...original,
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        uiSettings: {
-          get: jest
-            .fn()
-            .mockResolvedValue([
-              'apm-*-transaction*',
-              'traces-apm*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ]),
-          set: jest.fn().mockResolvedValue(true),
-        },
-      },
-    }),
-  };
-});
+const mockUseUpdateDataView = jest.fn().mockReturnValue(() => true);
+jest.mock('./use_update_data_view', () => ({
+  useUpdateDataView: () => mockUseUpdateDataView,
+}));
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 
   return {
     ...original,
     useDispatch: () => mockDispatch,
-  };
-});
-
-jest.mock('../../hooks/use_app_toasts', () => {
-  const original = jest.requireActual('../../hooks/use_app_toasts');
-
-  return {
-    ...original,
-    useAppToasts: jest.fn().mockReturnValue({
-      addSuccess: jest.fn(),
-      addError: jest.fn(),
-    }),
   };
 });
 
@@ -926,8 +890,6 @@ describe('Update available', () => {
       },
     },
   };
-  const mockAddError = jest.fn();
-  const mockAddSuccess = jest.fn();
 
   let wrapper: ReactWrapper;
 
@@ -935,10 +897,6 @@ describe('Update available', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
-    });
-    (useAppToasts as jest.Mock).mockReturnValue({
-      addSuccess: mockAddSuccess,
-      addError: mockAddError,
     });
     store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
@@ -980,7 +938,7 @@ describe('Update available', () => {
     );
   });
 
-  test('Set all the index patterns from legacy timeline to sorcerer, after clicking on "Add index pattern"', async () => {
+  test('Set all the index patterns from legacy timeline to sourcerer, after clicking on "Add index pattern"', async () => {
     wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
 
     wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
@@ -996,30 +954,5 @@ describe('Update available', () => {
         shouldValidateSelectedPatterns: false,
       })
     );
-  });
-
-  test('Show success toast after Adding index pattern successfully', async () => {
-    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
-
-    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
-
-    wrapper.find(`button[data-test-subj="sourcerer-update-data-view"]`).simulate('click');
-
-    await waitFor(() => wrapper.update());
-    expect(mockAddSuccess).toHaveBeenCalled();
-  });
-
-  test('Show page refresh button in success toast after Adding index pattern successfully', async () => {
-    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
-
-    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
-
-    wrapper.find(`button[data-test-subj="sourcerer-update-data-view"]`).simulate('click');
-
-    await waitFor(() => wrapper.update());
-    expect((toMountPoint as jest.Mock).mock.calls[0][0]).toEqual(
-      'One or more settings require you to reload the page to take effect'
-    );
-    expect((toMountPoint as jest.Mock).mock.calls[1][0]).toEqual(<RefreshButton />);
   });
 });

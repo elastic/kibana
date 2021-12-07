@@ -68,7 +68,7 @@ export const Blockquote = styled.span`
 
 interface GetDataViewSelectOptionsProps {
   dataViewId: string;
-  defaultDataView: sourcererModel.KibanaDataView;
+  defaultDataViewId: sourcererModel.KibanaDataView['id'];
   isModified: boolean;
   isOnlyDetectionAlerts: boolean;
   kibanaDataViews: sourcererModel.KibanaDataView[];
@@ -76,7 +76,7 @@ interface GetDataViewSelectOptionsProps {
 
 export const getDataViewSelectOptions = ({
   dataViewId,
-  defaultDataView,
+  defaultDataViewId,
   isModified,
   isOnlyDetectionAlerts,
   kibanaDataViews,
@@ -92,12 +92,12 @@ export const getDataViewSelectOptions = ({
               </StyledBadge>
             </span>
           ),
-          value: defaultDataView.id,
+          value: defaultDataViewId,
         },
       ]
     : kibanaDataViews.map(({ title, id }) => ({
         inputDisplay:
-          id === defaultDataView.id ? (
+          id === defaultDataViewId ? (
             <span data-test-subj="security-option-super">
               <EuiIcon type="logoSecurity" size="s" /> {i18n.SECURITY_DEFAULT_DATA_VIEW_LABEL}
               {isModified && id === dataViewId && (

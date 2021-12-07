@@ -6,10 +6,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { sourcererModel } from '../../store/sourcerer';
-import { getPatternListWithoutSignals } from './helpers';
+import { getDataViewSelectOptions, getPatternListWithoutSignals } from './helpers';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
 interface UsePickIndexPatternsProps {
@@ -27,6 +27,7 @@ export type ModifiedTypes = 'modified' | 'alerts' | 'deprecated' | 'missingPatte
 
 interface UsePickIndexPatterns {
   allOptions: Array<EuiComboBoxOptionOption<string>>;
+  dataViewSelectOptions: Array<EuiSuperSelectOption<string>>;
   isModified: ModifiedTypes;
   onChangeCombo: (newSelectedDataViewId: Array<EuiComboBoxOptionOption<string>>) => void;
   renderOption: ({ value }: EuiComboBoxOptionOption<string>) => React.ReactElement;
@@ -55,6 +56,7 @@ export const usePickIndexPatterns = ({
     () => (signalIndexName ? patternListToOptions([signalIndexName]) : []),
     [signalIndexName]
   );
+
   const { allPatterns, selectablePatterns } = useMemo<{
     allPatterns: string[];
     selectablePatterns: string[];
@@ -172,8 +174,23 @@ export const usePickIndexPatterns = ({
     setSelectedOptions(getDefaultSelectedOptionsByDataView(newSelectedDataViewId, isAlerts));
   };
 
+  const dataViewSelectOptions = useMemo(
+    () =>
+      dataViewId != null
+        ? getDataViewSelectOptions({
+            dataViewId,
+            defaultDataViewId,
+            isModified: isModified === 'modified',
+            isOnlyDetectionAlerts,
+            kibanaDataViews,
+          })
+        : [],
+    [dataViewId, defaultDataViewId, isModified, isOnlyDetectionAlerts, kibanaDataViews]
+  );
+
   return {
     allOptions,
+    dataViewSelectOptions,
     isModified,
     onChangeCombo,
     renderOption,
