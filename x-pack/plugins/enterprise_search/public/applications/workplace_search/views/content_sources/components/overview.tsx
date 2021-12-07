@@ -33,6 +33,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CANCEL_BUTTON_LABEL, START_BUTTON_LABEL } from '../../../../shared/constants';
+import { docLinks } from '../../../../shared/doc_links';
 import { EuiListGroupItemTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import aclImage from '../../../assets/supports_acl.svg';
@@ -46,7 +47,6 @@ import {
   DOCUMENTATION_LINK_TITLE,
 } from '../../../constants';
 import {
-  CUSTOM_SOURCE_DOCS_URL,
   DOCUMENT_PERMISSIONS_DOCS_URL,
   ENT_SEARCH_LICENSE_MANAGEMENT,
   EXTERNAL_IDENTITIES_DOCS_URL,
@@ -569,7 +569,7 @@ export const Overview: React.FC = () => {
                         defaultMessage="{learnMoreLink} about custom sources."
                         values={{
                           learnMoreLink: (
-                            <EuiLink target="_blank" href={CUSTOM_SOURCE_DOCS_URL}>
+                            <EuiLink target="_blank" href={docLinks.workplaceSearchCustomSources}>
                               {LEARN_MORE_LINK}
                             </EuiLink>
                           ),

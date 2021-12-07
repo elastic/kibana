@@ -47,7 +47,6 @@ import {
   EDIT_SLACK_PATH,
   EDIT_ZENDESK_PATH,
   EDIT_CUSTOM_PATH,
-  CUSTOM_SOURCE_DOCS_URL,
 } from '../../routes';
 import { FeatureIds, SourceDataItem } from '../../types';
 
@@ -603,7 +602,7 @@ export const staticSourceData = [
         defaultMessage:
           'To create a Custom API Source, provide a human-readable and descriptive name. The name will appear as-is in the various search experiences and management interfaces.',
       }),
-      documentationUrl: CUSTOM_SOURCE_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchCustomSources,
       applicationPortalUrl: '',
     },
     accountContextOnly: false,
