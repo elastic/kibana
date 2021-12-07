@@ -19,6 +19,7 @@ configure this setting lower than the `index.max_result_window` in {es}.
 The default is `1000`.
 
 `monitoring.cluster_alerts.allowedSpaces` {ess-icon}:: 
+deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
 Specifies the spaces where cluster alerts are automatically generated. 
 You must specify all spaces where you want to generate alerts, including the default space. 
 When the default space is unspecified, {kib} is unable to generate an alert for the default space.
