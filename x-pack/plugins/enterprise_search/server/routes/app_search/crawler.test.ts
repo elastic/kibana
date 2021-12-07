@@ -28,7 +28,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler',
+        path: '/api/as/v1/engines/:name/crawler',
       });
     });
 
@@ -61,7 +61,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests',
       });
     });
 
@@ -94,7 +94,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_requests/:id',
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests/:id',
       });
     });
 
@@ -132,7 +132,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests',
       });
     });
 
@@ -165,7 +165,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains',
+        path: '/api/as/v1/engines/:name/crawler/domains',
       });
     });
 
@@ -204,7 +204,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_requests/active/cancel',
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests/active/cancel',
       });
     });
 
@@ -237,7 +237,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains',
+        path: '/api/as/v1/engines/:name/crawler/domains',
       });
     });
 
@@ -293,7 +293,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains/:id',
+        path: '/api/as/v1/engines/:name/crawler/domains/:id',
       });
     });
 
@@ -339,7 +339,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains/:id',
+        path: '/api/as/v1/engines/:name/crawler/domains/:id',
       });
     });
 
@@ -397,7 +397,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains/:id',
+        path: '/api/as/v1/engines/:name/crawler/domains/:id',
       });
     });
 
@@ -435,7 +435,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/crawler/validate_url',
+        path: '/api/as/v1/crawler/validate_url',
       });
     });
 
@@ -472,7 +472,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/process_crawls',
+        path: '/api/as/v1/engines/:name/crawler/process_crawls',
       });
     });
 
@@ -519,7 +519,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+        path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
       });
     });
 
@@ -556,7 +556,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+        path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
       });
     });
 
@@ -611,7 +611,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+        path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
       });
     });
 
