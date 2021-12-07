@@ -9,6 +9,7 @@ import {
   ALERT_REASON,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAMESPACE,
+  ALERT_RULE_PARAMETERS,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -20,7 +21,6 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { createHash } from 'crypto';
 
-import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
 import { Ancestor, BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
 import {
   getField,
@@ -37,7 +37,15 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_THRESHOLD_RESULT,
   ALERT_ORIGINAL_EVENT,
+  ALERT_BUILDING_BLOCK_TYPE,
 } from '../../../../../../common/field_maps/field_names';
+import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import {
+  commonParamsCamelToSnake,
+  typeSpecificCamelToSnake,
+} from '../../../schemas/rule_converters';
+import { transformTags } from '../../../routes/rules/utils';
+import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 
 export const generateAlertId = (alert: RACAlert) => {
   return createHash('sha256')
@@ -86,7 +94,7 @@ export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
  */
 export const buildAlert = (
   docs: SimpleHit[],
-  rule: RulesSchema,
+  completeRule: CompleteRule<RuleParams>,
   spaceId: string | null | undefined,
   reason: string
 ): RACAlert => {
@@ -94,8 +102,23 @@ export const buildAlert = (
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
   const ancestors = docs.reduce((acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)), []);
 
-  const { id, output_index: outputIndex, ...mappedRule } = rule;
-  mappedRule.uuid = id;
+  const ruleParamsSnakeCase = {
+    ...commonParamsCamelToSnake(completeRule.ruleParams),
+    ...typeSpecificCamelToSnake(completeRule.ruleParams),
+  };
+
+  const {
+    actions,
+    schedule,
+    name,
+    tags,
+    enabled,
+    createdBy,
+    updatedBy,
+    throttle,
+    createdAt,
+    updatedAt,
+  } = completeRule.ruleConfig;
 
   return {
     [TIMESTAMP]: new Date().toISOString(),
@@ -106,7 +129,23 @@ export const buildAlert = (
     [ALERT_WORKFLOW_STATUS]: 'open',
     [ALERT_DEPTH]: depth,
     [ALERT_REASON]: reason,
-    ...flattenWithPrefix(ALERT_RULE_NAMESPACE, mappedRule as RulesSchema),
+    [ALERT_BUILDING_BLOCK_TYPE]: completeRule.ruleParams.buildingBlockType,
+    [ALERT_RULE_PARAMETERS]: ruleParamsSnakeCase,
+    ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
+      uuid: completeRule.alertId,
+      actions: actions.map(transformAlertToRuleAction),
+      created_at: createdAt.toISOString(),
+      created_by: createdBy ?? '',
+      enabled,
+      interval: schedule.interval,
+      name,
+      tags: transformTags(tags),
+      throttle: throttle ?? undefined,
+      updated_at: updatedAt.toISOString(),
+      updated_by: updatedBy ?? '',
+      type: completeRule.ruleParams.type,
+      ...commonParamsCamelToSnake(completeRule.ruleParams),
+    }),
   } as unknown as RACAlert;
 };
 

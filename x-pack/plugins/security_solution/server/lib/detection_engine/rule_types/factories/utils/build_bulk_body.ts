@@ -62,7 +62,7 @@ export const buildBulkBody = (
     return {
       ...filteredSource,
       ...eventFields,
-      ...buildAlert([mergedDoc], rule, spaceId, reason),
+      ...buildAlert([mergedDoc], completeRule, spaceId, reason),
       ...additionalAlertFields({ ...mergedDoc, _source: { ...mergedDoc._source, ...eventFields } }),
       [EVENT_KIND]: 'signal',
       [TIMESTAMP]: new Date().toISOString(),
