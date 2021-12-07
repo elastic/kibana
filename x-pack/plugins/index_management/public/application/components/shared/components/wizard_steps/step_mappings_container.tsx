@@ -21,14 +21,7 @@ export const StepMappingsContainer: React.FunctionComponent<Props> = ({ esDocsBa
     CommonWizardSteps,
     'mappings'
   >('mappings');
-  const { data: plugins } = useLoadNodesPlugins();
-  const [esNodesPlugins, setEsNodesPlugins] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (plugins) {
-      setEsNodesPlugins(plugins);
-    }
-  }, [plugins]);
+  const { data: esNodesPlugins } = useLoadNodesPlugins();
 
   return (
     <StepMappings
@@ -36,7 +29,7 @@ export const StepMappingsContainer: React.FunctionComponent<Props> = ({ esDocsBa
       onChange={updateContent}
       indexSettings={getSingleContentData('settings')}
       esDocsBase={esDocsBase}
-      esNodesPlugins={esNodesPlugins}
+      esNodesPlugins={esNodesPlugins ?? []}
     />
   );
 };
