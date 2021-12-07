@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ApplicationStart } from 'kibana/public';
 import { useKibana } from '../../common/lib/kibana';
 
 /**
@@ -18,7 +17,7 @@ import { useKibana } from '../../common/lib/kibana';
  **/
 
 export const useAvailableCasesOwners = (level: 'crud' | 'read' = 'crud'): string[] => {
-  const { capabilities } = useKibana().services.application as ApplicationStart;
+  const { capabilities } = useKibana().services.application;
   const capabilityName = `${level}_cases`;
   return Object.entries(capabilities).reduce(
     (availableOwners: string[], [featureId, capability]) => {

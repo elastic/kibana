@@ -36,7 +36,7 @@ export type FormProps = Omit<CasePostRequest, 'connector' | 'settings' | 'owner'
   connectorId: string;
   fields: ConnectorTypeFields['fields'];
   syncAlerts: boolean;
-  selectedOwner?: string;
+  selectedOwner?: string | null;
 };
 
 export const schema: FormSchema<FormProps> = {

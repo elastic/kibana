@@ -27,7 +27,7 @@ const initialCaseValue: FormProps = {
   connectorId: 'none',
   fields: null,
   syncAlerts: true,
-  selectedOwner: '',
+  selectedOwner: null,
 };
 
 interface Props {

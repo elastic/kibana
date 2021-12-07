@@ -40,7 +40,8 @@ const FullWidthKeyPadMenu = euiStyled(EuiKeyPadMenu)`
 `;
 
 const FullWidthKeyPadItem = euiStyled(EuiKeyPadMenuItem)`
-  width: 100%
+
+  width: 100%;
 `;
 
 const CaseOwnerSelectionComponent: React.FC<Props> = ({ availableOwners, isLoading }) => {
@@ -58,10 +59,16 @@ function MenuSelection({
   field,
   isLoading = false,
 }: MenuSelectionProps): JSX.Element {
-  const radioGroupName = useGeneratedHtmlId({ prefix: 'caseOwnerRadioGroup' });
   const { errorMessage, isInvalid } = getFieldValidityAndErrorMessage(field);
+  const radioGroupName = useGeneratedHtmlId({ prefix: 'caseOwnerRadioGroup' });
 
   const onChange = useCallback((val: string) => field.setValue(val), [field]);
+
+  React.useEffect(() => {
+    if (availableOwners.length === 1) {
+      onChange(availableOwners[0]);
+    }
+  }, [availableOwners, onChange]);
 
   return (
     <EuiFormRow

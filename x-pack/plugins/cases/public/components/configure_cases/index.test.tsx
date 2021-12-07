@@ -191,7 +191,7 @@ describe('ConfigureCases', () => {
     test('it disables correctly when the user cannot crud', () => {
       const newWrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
-        wrappingComponentProps: { caseConfig: { userCanCrud: false } },
+        wrappingComponentProps: { userCanCrud: false },
       });
 
       expect(newWrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')).toBe(

@@ -61,7 +61,7 @@ describe('CreateCaseForm', () => {
     globalForm = form;
 
     return (
-      <TestProviders caseConfig={{ ...props }}>
+      <TestProviders {...props}>
         <Form form={form}>{children}</Form>
       </TestProviders>
     );

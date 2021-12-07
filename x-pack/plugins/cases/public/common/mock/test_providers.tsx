@@ -15,38 +15,36 @@ import { CasesFeatures } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
 import { createKibanaContextProviderMock } from '../lib/kibana/kibana_react.mock';
 import { FieldHook } from '../shared_imports';
-interface Props {
-  children: React.ReactNode;
-  caseConfig?: Partial<CasesContextValue>;
-}
+
+type Props = { children: React.ReactNode } & Partial<CasesContextValue>;
 
 window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 
-const defaultCaseConfig = {
-  userCanCrud: true,
-  owner: [SECURITY_SOLUTION_OWNER],
-  features: DEFAULT_FEATURES,
-};
-
 /** A utility for wrapping children in the providers required to run most tests */
-const TestProvidersComponent: React.FC<Props> = ({ children, caseConfig = {} }) => (
-  <I18nProvider>
-    <MockKibanaContextProvider>
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <CasesProvider
-          value={{
-            ...defaultCaseConfig,
-            ...caseConfig,
-            features: merge({}, DEFAULT_FEATURES, caseConfig.features),
-          }}
-        >
-          {children}
-        </CasesProvider>
-      </ThemeProvider>
-    </MockKibanaContextProvider>
-  </I18nProvider>
-);
+const TestProvidersComponent: React.FC<Props> = ({
+  children,
+  features,
+  owner = [SECURITY_SOLUTION_OWNER],
+  userCanCrud = true,
+}) => {
+  /**
+   * The empty object at the beginning avoids the mutation
+   * of the DEFAULT_FEATURES object
+   */
+  const featuresOptions = merge({}, DEFAULT_FEATURES, features);
+  return (
+    <I18nProvider>
+      <MockKibanaContextProvider>
+        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <CasesProvider value={{ features: featuresOptions, owner, userCanCrud }}>
+            {children}
+          </CasesProvider>
+        </ThemeProvider>
+      </MockKibanaContextProvider>
+    </I18nProvider>
+  );
+};
 
 export const TestProviders = React.memo(TestProvidersComponent);
 

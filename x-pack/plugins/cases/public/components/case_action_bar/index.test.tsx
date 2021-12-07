@@ -118,7 +118,7 @@ describe('CaseActionBar', () => {
 
   it('should not show the sync alerts toggle when alerting is disabled', () => {
     const { queryByText } = render(
-      <TestProviders caseConfig={{ features: { alerts: { sync: false } } }}>
+      <TestProviders features={{ alerts: { sync: false } }}>
         <CaseActionBar {...defaultProps} />
       </TestProviders>
     );

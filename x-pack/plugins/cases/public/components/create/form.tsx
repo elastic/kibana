@@ -75,7 +75,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
 
     const { owner } = useCasesContext();
     const availableOwners = useAvailableCasesOwners();
-    const canShowCaseTypeSelection = !owner.length && availableOwners.length;
+    const canShowCaseSolutionSelection = !owner.length && availableOwners.length;
 
     const firstStep = useMemo(
       () => ({
@@ -86,7 +86,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             <Container>
               <Tags isLoading={isSubmitting} />
             </Container>
-            {canShowCaseTypeSelection && (
+            {canShowCaseSolutionSelection && (
               <Container big>
                 <CaseOwnerSelection availableOwners={availableOwners} isLoading={isSubmitting} />
               </Container>
@@ -97,7 +97,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
           </>
         ),
       }),
-      [isSubmitting, canShowCaseTypeSelection, availableOwners]
+      [isSubmitting, canShowCaseSolutionSelection, availableOwners]
     );
 
     const secondStep = useMemo(

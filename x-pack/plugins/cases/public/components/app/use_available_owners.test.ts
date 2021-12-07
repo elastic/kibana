@@ -60,18 +60,21 @@ describe('useKibanaMock', () => {
 
     expect(result.current).toEqual(['securitySolution', 'observability']);
   });
+
   it('returns no owner types if user has access to none', () => {
     mockKibana({});
     const { result } = renderHook(useAvailableCasesOwners);
 
     expect(result.current).toEqual([]);
   });
+
   it('returns only the permission it should have with CRUD as default', () => {
     mockKibana(hasSecurityAsCrud);
     const { result } = renderHook(useAvailableCasesOwners);
 
     expect(result.current).toEqual(['securitySolution']);
   });
+
   it('returns only the permission it should have with READ as default', () => {
     mockKibana(hasObservabilityAsRead);
     const { result } = renderHook(() => useAvailableCasesOwners('read'));
