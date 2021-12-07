@@ -28,6 +28,14 @@ interface InstallArchiveOptions {
   esArgs?: string[];
 }
 
+const isHttpUrl = (str: string) => {
+  try {
+    return ['http:', 'https:'].includes(new URL(str).protocol);
+  } catch {
+    return false;
+  }
+};
+
 /**
  * Extracts an ES archive and optionally installs plugins
  */
@@ -42,7 +50,7 @@ export async function installArchive(archive: string, options: InstallArchiveOpt
   } = options;
 
   let dest = archive;
-  if (['http:', 'https:'].includes(new URL(archive).protocol)) {
+  if (isHttpUrl(archive)) {
     const artifact = await Artifact.getArchive(archive, log);
     dest = path.resolve(basePath, 'cache', artifact.spec.filename);
     await artifact.download(dest);
