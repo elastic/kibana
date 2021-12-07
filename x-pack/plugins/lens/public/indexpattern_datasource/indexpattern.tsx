@@ -68,12 +68,13 @@ export function columnToOperation(
   column: GenericIndexPatternColumn,
   uniqueLabel?: string
 ): Operation {
-  const { dataType, label, isBucketed, scale } = column;
+  const { dataType, label, isBucketed, scale, operationType } = column;
   return {
     dataType: normalizeOperationDataType(dataType),
     isBucketed,
     scale,
     label: uniqueLabel || label,
+    isStaticValue: operationType === 'static_value',
   };
 }
 
