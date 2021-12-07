@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION } from 'constants';
 import {
   mockEvents,
   mockProcessMap,
-  sessionViewBasicProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
-import { Process, ProcessEvent, ProcessMap } from '../../../common/types/process_tree';
+import { Process, ProcessMap } from '../../../common/types/process_tree';
 import {
   updateProcessMap,
   buildProcessTree,
@@ -30,7 +28,7 @@ describe('process tree hook helpers tests', () => {
   });
 
   it('updateProcessMap works', () => {
-    updateProcessMap(processMap, mockEvents);
+    processMap = updateProcessMap(processMap, mockEvents);
 
     // processes are added to processMap
     mockEvents.forEach((event) => {
@@ -41,7 +39,7 @@ describe('process tree hook helpers tests', () => {
   it('buildProcessTree works', () => {
     processMap = mockProcessMap;
     const orphans: Process[] = [];
-    buildProcessTree(processMap, mockEvents, orphans, SESSION_ENTITY_ID);
+    processMap = buildProcessTree(processMap, mockEvents, orphans, SESSION_ENTITY_ID);
 
     const sessionLeaderChildrenIds = new Set(
       processMap[SESSION_ENTITY_ID].children.map((child) => child.id)
@@ -69,7 +67,7 @@ describe('process tree hook helpers tests', () => {
     processMap[SESSION_ENTITY_ID].children = childProcesses;
 
     expect(processMap[SESSION_ENTITY_ID].autoExpand).toBeFalsy();
-    autoExpandProcessTree(processMap);
+    processMap = autoExpandProcessTree(processMap);
     // session leader should have autoExpand to be true
     expect(processMap[SESSION_ENTITY_ID].autoExpand).toBeTruthy();
   });

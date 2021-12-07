@@ -14,12 +14,7 @@ import {
   ProcessEvent,
   ProcessMap,
 } from '../../../common/types/process_tree';
-import {
-  updateProcessMap,
-  buildProcessTree,
-  searchProcessTree,
-  autoExpandProcessTree,
-} from './helpers';
+import { processNewEvents, searchProcessTree, autoExpandProcessTree } from './helpers';
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;
@@ -139,29 +134,28 @@ export const useProcessTree = ({
   const [searchResults, setSearchResults] = useState<Process[]>([]);
   const [orphans, setOrphans] = useState<Process[]>([]);
 
-  const processNewEvents = (
-    events: ProcessEvent[] | undefined,
-    backwardDirection: boolean = false
-  ) => {
-    if (!events || events.length === 0) {
-      return;
-    }
-
-    updateProcessMap(processMap, events);
-    buildProcessTree(processMap, events, orphans, sessionEntityId, backwardDirection);
-    autoExpandProcessTree(processMap);
-  };
-
   useEffect(() => {
+    let eventsProcessMap: ProcessMap = processMap;
     if (backward) {
-      processNewEvents(backward.slice(0, backward.length - backwardIndex), true);
+      eventsProcessMap = processNewEvents(
+        eventsProcessMap,
+        backward.slice(0, backward.length - backwardIndex),
+        orphans,
+        sessionEntityId,
+        true
+      );
       setBackwardIndex(backward.length);
     }
 
-    processNewEvents(forward.slice(forwardIndex));
+    eventsProcessMap = processNewEvents(
+      eventsProcessMap,
+      forward.slice(forwardIndex),
+      orphans,
+      sessionEntityId
+    );
     setForwardIndex(forward.length);
 
-    setProcessMap({ ...processMap });
+    setProcessMap({ ...eventsProcessMap });
     setOrphans([...orphans]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forward, backward]);

@@ -19,6 +19,8 @@ export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[])
 
     process.events.push(event);
   });
+
+  return processMap;
 };
 
 export const buildProcessTree = (
@@ -47,6 +49,8 @@ export const buildProcessTree = (
       orphans.push(process);
     }
   });
+
+  return processMap;
 };
 
 export const searchProcessTree = (processMap: ProcessMap, searchQuery: string | undefined) => {
@@ -91,4 +95,28 @@ export const autoExpandProcessTree = (processMap: ProcessMap) => {
       }
     }
   }
+
+  return processMap;
+};
+
+export const processNewEvents = (
+  eventsProcessMap: ProcessMap,
+  events: ProcessEvent[] | undefined,
+  orphans: Process[],
+  sessionEntityId: string,
+  backwardDirection: boolean = false
+) => {
+  if (!events || events.length === 0) {
+    return eventsProcessMap;
+  }
+
+  const updatedProcessMap = updateProcessMap(eventsProcessMap, events);
+  const builtProcessMap = buildProcessTree(
+    updatedProcessMap,
+    events,
+    orphans,
+    sessionEntityId,
+    backwardDirection
+  );
+  return autoExpandProcessTree(builtProcessMap);
 };
