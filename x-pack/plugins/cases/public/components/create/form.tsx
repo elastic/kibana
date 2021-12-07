@@ -23,7 +23,7 @@ import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import { ActionConnector, CaseType } from '../../../common';
+import { ActionConnector, CaseType } from '../../../common/api';
 import { Case } from '../../containers/types';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
