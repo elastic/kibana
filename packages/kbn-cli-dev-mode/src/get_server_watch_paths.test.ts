@@ -8,7 +8,8 @@
 
 import Path from 'path';
 
-import { REPO_ROOT, createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { getServerWatchPaths } from './get_server_watch_paths';
 
