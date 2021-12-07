@@ -190,6 +190,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     loading: loadingSourcerer,
     indexPattern,
     runtimeMappings,
+    // important to get selectedPatterns from useSourcererDataView
+    // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { uiSettings } = useKibana().services;
