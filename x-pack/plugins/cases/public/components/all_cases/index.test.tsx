@@ -9,14 +9,14 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { AllCases, AllCasesProps } from '.';
+import { AllCases } from '.';
 import { TestProviders } from '../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useKibana } from '../../common/lib/kibana';
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses } from '../../../common/api';
 import { casesStatus, connectorsMock, useGetCasesMockState } from '../../containers/mock';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { useGetCases } from '../../containers/use_get_cases';
@@ -30,10 +30,6 @@ jest.mock('../../containers/api');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
-
-const defaultAllCasesProps: AllCasesProps = {
-  disableAlerts: false,
-};
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useConnectorsMock = useConnectors as jest.Mock;
@@ -105,7 +101,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} />
+        <AllCases />
       </TestProviders>
     );
 
@@ -141,7 +137,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} />
+        <AllCases />
       </TestProviders>
     );
 
@@ -173,7 +169,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} />
+        <AllCases />
       </TestProviders>
     );
 
@@ -199,7 +195,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases {...defaultAllCasesProps} />
+        <AllCases />
       </TestProviders>
     );
 
