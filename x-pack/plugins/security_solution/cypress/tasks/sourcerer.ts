@@ -119,6 +119,8 @@ export const unsetSourcererOption = (patternName: string, sourcererScope?: strin
 
 export const clickOutOfSourcererTimeline = () => cy.get(TIMELINE_TITLE).first().click();
 
+export const clickAlertCheckbox = () => cy.get(SOURCERER.alertCheckbox).check({ force: true });
+
 export const addIndexToDefault = (index: string) => {
   cy.visit(`/app/management/kibana/settings?query=category:(securitySolution)`);
   cy.get(SOURCERER.siemDefaultIndexInput)

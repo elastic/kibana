@@ -13,6 +13,7 @@ import {
 import { HOSTS_URL, TIMELINES_URL } from '../../urls/navigation';
 import {
   addIndexToDefault,
+  clickAlertCheckbox,
   deleteAlertsIndex,
   deselectSourcererOptions,
   isDataViewSelection,
@@ -42,7 +43,7 @@ const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,beats*,siem-read*,.kibana*,fakebeat-*'];
 
 describe('Sourcerer', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
     deleteAlertsIndex();
     dataViews.forEach((dataView: string) => postDataView(dataView));
@@ -206,7 +207,7 @@ describe('Sourcerer', () => {
           .filter((pattern) => pattern !== 'fakebeat-*')
           .forEach((pattern) => isSourcererSelection(pattern));
 
-        cy.get(SOURCERER.alertCheckbox).check({ force: true });
+        clickAlertCheckbox();
         isNotSourcererSelection(`auditbeat-*`);
         isSourcererSelection(`${DEFAULT_ALERTS_INDEX}-default`);
         cy.get(SOURCERER.alertCheckbox).uncheck({ force: true });
@@ -214,7 +215,7 @@ describe('Sourcerer', () => {
       });
 
       it('shows alerts badge when index patterns change and removes when reset', () => {
-        cy.get(SOURCERER.alertCheckbox).check({ force: true });
+        clickAlertCheckbox();
         saveSourcerer();
         cy.get(SOURCERER.badgeAlerts).should(`exist`);
         openSourcerer('timeline');
