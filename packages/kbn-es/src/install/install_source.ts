@@ -6,28 +6,35 @@
  * Side Public License, v 1.
  */
 
-const path = require('path');
-const fs = require('fs');
-const os = require('os');
-const chalk = require('chalk');
-const crypto = require('crypto');
-const simpleGit = require('simple-git/promise');
-const { installArchive } = require('./archive');
-const { log: defaultLog, cache, buildSnapshot, archiveForPlatform } = require('../utils');
-const { BASE_PATH } = require('../paths');
+import path from 'path';
+import fs from 'fs';
+import os from 'os';
+import crypto from 'crypto';
+
+import chalk from 'chalk';
+import simpleGit from 'simple-git/promise';
+import { ToolingLog } from '@kbn/dev-utils';
+
+import { installArchive } from './install_archive';
+import { log as defaultLog } from '../utils/log';
+import { cache } from '../utils/cache';
+import { buildSnapshot, archiveForPlatform } from '../utils/build_snapshot';
+import { BASE_PATH } from '../paths';
+
+interface InstallSourceOptions {
+  sourcePath: string;
+  license?: string;
+  password?: string;
+  basePath?: string;
+  installPath?: string;
+  log?: ToolingLog;
+  esArgs?: string[];
+}
 
 /**
  * Installs ES from source
- *
- * @param {Object} options
- * @property {('oss'|'basic'|'trial')} options.license
- * @property {String} options.password
- * @property {String} options.sourcePath
- * @property {String} options.basePath
- * @property {String} options.installPath
- * @property {ToolingLog} options.log
  */
-exports.installSource = async function installSource({
+export async function installSource({
   license = 'basic',
   password = 'changeme',
   sourcePath,
@@ -35,7 +42,7 @@ exports.installSource = async function installSource({
   installPath = path.resolve(basePath, 'source'),
   log = defaultLog,
   esArgs,
-}) {
+}: InstallSourceOptions) {
   log.info('source path: %s', chalk.bold(sourcePath));
   log.info('install path: %s', chalk.bold(installPath));
   log.info('license: %s', chalk.bold(license));
@@ -62,14 +69,9 @@ exports.installSource = async function installSource({
     log,
     esArgs,
   });
-};
+}
 
-/**
- *
- * @param {String} cwd
- * @param {ToolingLog} log
- */
-async function sourceInfo(cwd, license, log = defaultLog) {
+async function sourceInfo(cwd: string, license: string, log: ToolingLog = defaultLog) {
   if (!fs.existsSync(cwd)) {
     throw new Error(`${cwd} does not exist`);
   }
