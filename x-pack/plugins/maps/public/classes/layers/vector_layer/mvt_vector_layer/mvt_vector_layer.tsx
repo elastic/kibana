@@ -20,7 +20,7 @@ import {
   AbstractVectorLayer,
   VectorLayerArguments,
 } from '../vector_layer';
-import { ITiledSingleLayerVectorSource } from '../../../sources/tiled_single_layer_vector_source';
+import { IMvtVectorSource } from '../../../sources/vector_source';
 import { DataRequestContext } from '../../../../actions';
 import {
   StyleMetaDescriptor,
@@ -52,11 +52,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     return layerDescriptor;
   }
 
-  readonly _source: ITiledSingleLayerVectorSource; // downcast to the more specific type
+  readonly _source: IMvtVectorSource;
 
   constructor({ layerDescriptor, source }: VectorLayerArguments) {
     super({ layerDescriptor, source });
-    this._source = source as ITiledSingleLayerVectorSource;
+    this._source = source as IMvtVectorSource;
   }
 
   getFeatureId(feature: Feature): string | number | undefined {
@@ -180,7 +180,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
         this.getSource(),
         this.getCurrentStyle()
       ),
-      source: this.getSource() as ITiledSingleLayerVectorSource,
+      source: this.getSource() as IMvtVectorSource,
       syncContext,
     });
   }
@@ -206,9 +206,9 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     const mbSourceId = this.getMbSourceId();
     mbMap.addSource(mbSourceId, {
       type: 'vector',
-      tiles: [sourceData.urlTemplate],
-      minzoom: sourceData.minSourceZoom,
-      maxzoom: sourceData.maxSourceZoom,
+      tiles: [sourceData.tileUrl],
+      minzoom: sourceData.tileMinZoom,
+      maxzoom: sourceData.tileMaxZoom,
     });
   }
 
@@ -236,13 +236,13 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       return;
     }
     const sourceData = sourceDataRequest.getData() as MvtSourceData | undefined;
-    if (!sourceData || sourceData.layerName === '') {
+    if (!sourceData || sourceData.tileSourceLayer === '') {
       return;
     }
 
-    this._setMbLabelProperties(mbMap, sourceData.layerName);
-    this._setMbPointsProperties(mbMap, sourceData.layerName);
-    this._setMbLinePolygonProperties(mbMap, sourceData.layerName);
+    this._setMbLabelProperties(mbMap, sourceData.tileSourceLayer);
+    this._setMbPointsProperties(mbMap, sourceData.tileSourceLayer);
+    this._setMbLinePolygonProperties(mbMap, sourceData.tileSourceLayer);
     this._syncTooManyFeaturesProperties(mbMap);
   }
 
@@ -308,9 +308,9 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     }
 
     const isSourceDifferent =
-      mbTileSource.tiles?.[0] !== sourceData.urlTemplate ||
-      mbTileSource.minzoom !== sourceData.minSourceZoom ||
-      mbTileSource.maxzoom !== sourceData.maxSourceZoom;
+      mbTileSource.tiles?.[0] !== sourceData.tileUrl ||
+      mbTileSource.minzoom !== sourceData.tileMinZoom ||
+      mbTileSource.maxzoom !== sourceData.tileMaxZoom;
 
     if (isSourceDifferent) {
       return true;
@@ -324,7 +324,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       if (
         mbLayer &&
         // @ts-expect-error
-        mbLayer.sourceLayer !== sourceData.layerName &&
+        mbLayer.sourceLayer !== sourceData.tileSourceLayer &&
         // @ts-expect-error
         mbLayer.sourceLayer !== ES_MVT_META_LAYER_NAME
       ) {

@@ -8,11 +8,11 @@
 import { AbstractField, IField } from './field';
 import { FIELD_ORIGIN, MVT_FIELD_TYPE } from '../../../common/constants';
 import { IVectorSource } from '../sources/vector_source';
-import { ITiledSingleLayerVectorSource } from '../sources/tiled_single_layer_vector_source';
+import { IMvtVectorSource } from '../sources/vector_source';
 import { MVTFieldDescriptor } from '../../../common/descriptor_types';
 
 export class MVTField extends AbstractField implements IField {
-  private readonly _source: ITiledSingleLayerVectorSource;
+  private readonly _source: IMvtVectorSource;
   private readonly _type: MVT_FIELD_TYPE;
   constructor({
     fieldName,
@@ -21,7 +21,7 @@ export class MVTField extends AbstractField implements IField {
     origin,
   }: {
     fieldName: string;
-    source: ITiledSingleLayerVectorSource;
+    source: IMvtVectorSource;
     origin: FIELD_ORIGIN;
     type: MVT_FIELD_TYPE;
   }) {

@@ -36,8 +36,6 @@ export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
 export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
 
-export const MVT_TOKEN_PARAM_NAME = 'token';
-
 export function getNewMapPath() {
   return `/${MAPS_APP_PATH}/${MAP_PATH}`;
 }
