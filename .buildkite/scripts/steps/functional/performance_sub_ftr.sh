@@ -10,16 +10,16 @@ source .buildkite/scripts/common/util.sh
 echo --- Run Performance Tests with FTR config
 
 node scripts/es snapshot \
-  -E network.bind_host=127.0.0.1,192.168.50.1 \
-  -E discovery.type=single-node \
   --license=trial &
+  # -E network.bind_host=127.0.0.1,192.168.50.1 \
+  # -E discovery.type=single-node \
 
 esPid=$!
 
-while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 30; done
+# while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 30; done
 
-export TEST_KIBANA_URL=http://elastic:changeme@192.168.50.5:5601
-export TEST_ES_URL=http://elastic:changeme@192.168.50.1:9200
+# export TEST_KIBANA_URL=http://elastic:changeme@192.168.50.5:5601
+# export TEST_ES_URL=http://elastic:changeme@192.168.50.1:9200
 
 cd "$XPACK_DIR"
 
