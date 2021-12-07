@@ -54,9 +54,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
   const isFormInvalid = isEmpty(keyName);
   const formError = i18n.translate(
     'xpack.apm.settings.agentKeys.createKeyFlyout.name.placeholder',
-    {
-      defaultMessage: 'Enter a name',
-    }
+    { defaultMessage: 'Enter a name', }
   );
 
   useEffect(() => {
