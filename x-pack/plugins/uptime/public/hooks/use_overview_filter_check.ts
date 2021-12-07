@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { getParsedParams } from '../lib/helper/parse_search';
-import { esKueryInitialStatusSelector } from '../state/selectors';
+import { esKuerySelector } from '../state/selectors';
 
 function hasFilters(search: string) {
   const parsed = getParsedParams(search);
@@ -23,10 +23,10 @@ function hasFilters(search: string) {
  * defined in the URL path, the check will pass and call the function.
  */
 export function useOverviewFilterCheck() {
-  const esKueryHasLoaded = useSelector(esKueryInitialStatusSelector);
+  const filters = useSelector(esKuerySelector);
   const { search } = useLocation();
 
-  const shouldRun = esKueryHasLoaded || !hasFilters(search);
+  const shouldRun = !!filters || !hasFilters(search);
 
   return useCallback(
     (fn: () => void) => {

@@ -26,7 +26,6 @@ describe('ui reducer', () => {
           integrationsPopoverOpen: null,
           searchText: '',
           monitorId: 'test',
-          initialEsKuerySet: true,
         },
         action
       )
@@ -35,7 +34,6 @@ describe('ui reducer', () => {
         "alertFlyoutVisible": false,
         "basePath": "yyz",
         "esKuery": "",
-        "initialEsKuerySet": true,
         "integrationsPopoverOpen": null,
         "monitorId": "test",
         "searchText": "",
@@ -57,7 +55,6 @@ describe('ui reducer', () => {
           integrationsPopoverOpen: null,
           searchText: '',
           monitorId: 'test',
-          initialEsKuerySet: true,
         },
         action
       )
@@ -66,7 +63,6 @@ describe('ui reducer', () => {
         "alertFlyoutVisible": false,
         "basePath": "",
         "esKuery": "",
-        "initialEsKuerySet": true,
         "integrationsPopoverOpen": Object {
           "id": "popover-2",
           "open": true,
@@ -88,7 +84,6 @@ describe('ui reducer', () => {
           integrationsPopoverOpen: null,
           searchText: '',
           monitorId: 'test',
-          initialEsKuerySet: true,
         },
         action
       )
@@ -97,7 +92,6 @@ describe('ui reducer', () => {
         "alertFlyoutVisible": true,
         "basePath": "",
         "esKuery": "",
-        "initialEsKuerySet": true,
         "integrationsPopoverOpen": null,
         "monitorId": "test",
         "searchText": "",
@@ -116,7 +110,6 @@ describe('ui reducer', () => {
           integrationsPopoverOpen: null,
           searchText: '',
           monitorId: 'test',
-          initialEsKuerySet: true,
         },
         action
       )
@@ -125,7 +118,6 @@ describe('ui reducer', () => {
         "alertFlyoutVisible": false,
         "basePath": "",
         "esKuery": "",
-        "initialEsKuerySet": true,
         "integrationsPopoverOpen": null,
         "monitorId": "test",
         "searchText": "lorem ipsum",

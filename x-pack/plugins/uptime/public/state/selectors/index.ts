@@ -78,9 +78,6 @@ export const monitorListSelector = ({ monitorList }: AppState) => monitorList;
 
 export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
 
-export const esKueryInitialStatusSelector = ({ ui: { initialEsKuerySet } }: AppState) =>
-  initialEsKuerySet;
-
 export const searchTextSelector = ({ ui: { searchText } }: AppState) => searchText;
 
 export const selectedFiltersSelector = ({ selectedFilters }: AppState) => selectedFilters;

@@ -28,7 +28,6 @@ describe('state selectors', () => {
       integrationsPopoverOpen: null,
       searchText: '',
       monitorId: '',
-      initialEsKuerySet: false,
     },
     monitorStatus: {
       status: null,
