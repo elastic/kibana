@@ -20,7 +20,7 @@ import {
  * that no documents have been found, allowing Discover to show a no
  * results message.
  */
-export function sendNoResultsFound(main$: DataMain$) {
+export function sendNoResultsFoundMsg(main$: DataMain$) {
   sendCompleteMsg(main$, false);
 }
 

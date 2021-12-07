@@ -9,7 +9,7 @@ import {
   sendCompleteMsg,
   sendErrorMsg,
   sendLoadingMsg,
-  sendNoResultsFound,
+  sendNoResultsFoundMsg,
   sendPartialMsg,
   sendResetMsg,
 } from './use_saved_search_messages';
@@ -121,7 +121,7 @@ export function fetchAll(
       if (hitsCount > 0) {
         sendPartialMsg(dataSubjects.main$);
       } else {
-        sendNoResultsFound(dataSubjects.main$);
+        sendNoResultsFoundMsg(dataSubjects.main$);
       }
     };
 
