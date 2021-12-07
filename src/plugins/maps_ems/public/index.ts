@@ -9,18 +9,8 @@
 import { PluginInitializerContext } from 'kibana/public';
 import type { EMSClient } from '@elastic/ems-client';
 import { MapsEmsPlugin } from './plugin';
-import { IEMSKbnMapsSettings } from './service_settings';
 import type { MapConfig } from '../config';
 import { EMSSettings } from '../common';
-
-/** @public */
-export type {
-  VectorLayer,
-  FileLayerField,
-  FileLayer,
-  TmsLayer,
-  IEMSKbnMapsSettings,
-} from './service_settings';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsEmsPlugin(initializerContext);
