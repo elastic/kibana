@@ -87,9 +87,6 @@ export default function (providerContext: FtrProviderContext) {
       expect(packageInfo.download).to.not.equal(undefined);
       await uninstallPackage(testPkgName, testPkgVersion);
     });
-    it('returns a 400 for a package key without a proper name', async function () {
-      await supertest.get('/api/fleet/epm/packages/-0.1.0').expect(400);
-    });
 
     it('returns a 404 for a package that do not exists', async function () {
       await supertest.get('/api/fleet/epm/packages/notexists/99.99.99').expect(404);
