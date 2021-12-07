@@ -65,9 +65,6 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       }),
       description: info.browserTimezone || NA,
     },
-  ].filter(Boolean) as EuiDescriptionListProps['listItems'];
-
-  const processingInfo = [
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.startedAtInfo', {
         defaultMessage: 'Started at',
@@ -132,7 +129,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
     },
 
     // TODO: when https://github.com/elastic/kibana/pull/106137 is merged, add kibana version field
-  ];
+  ].filter(Boolean) as EuiDescriptionListProps['listItems'];
 
   const jobScreenshot = [
     {
@@ -168,8 +165,6 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
   return (
     <>
       <EuiDescriptionList listItems={jobInfo} type="column" align="center" compressed />
-      <EuiSpacer size="s" />
-      <EuiDescriptionList listItems={processingInfo} type="column" align="center" compressed />
       {USES_HEADLESS_JOB_TYPES.includes(info.jobtype) ? (
         <>
           <EuiSpacer size="s" />
