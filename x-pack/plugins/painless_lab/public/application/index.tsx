@@ -10,10 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
 import { CoreSetup, CoreStart, HttpSetup, ChromeStart, CoreTheme } from 'src/core/public';
 
-import {
-  createKibanaReactContext,
-  KibanaThemeProvider,
-} from '../../../../../src/plugins/kibana_react/public';
+import { createKibanaReactContext, KibanaThemeProvider } from '../shared_imports';
 
 import { Links } from '../links';
 import { AppContextProvider } from './context';
