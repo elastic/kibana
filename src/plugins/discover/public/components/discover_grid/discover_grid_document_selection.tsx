@@ -16,7 +16,7 @@ import {
   EuiCheckbox,
   EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   euiLightVars as themeLight,
   euiDarkVars as themeDark,

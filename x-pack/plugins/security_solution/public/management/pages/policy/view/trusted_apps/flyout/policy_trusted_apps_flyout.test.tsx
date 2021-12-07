@@ -14,39 +14,26 @@ import {
 } from '../../../../../../common/mock/endpoint';
 import { MiddlewareActionSpyHelper } from '../../../../../../common/store/test_utils';
 
-import { TrustedAppsHttpService } from '../../../../trusted_apps/service';
 import { PolicyDetailsState } from '../../../types';
-import { getMockCreateResponse, getMockListResponse } from '../../../test_utils';
 import { createLoadedResourceState, isLoadedResourceState } from '../../../../../state';
 import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
+import { trustedAppsAllHttpMocks } from '../../../../mocks';
+import { HttpFetchOptionsWithPath } from 'kibana/public';
 
-jest.mock('../../../../trusted_apps/service');
 jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 let mockedContext: AppContextTestRender;
 let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
 let render: () => ReturnType<AppContextTestRender['render']>;
+let mockedApis: ReturnType<typeof trustedAppsAllHttpMocks>;
 const act = reactTestingLibrary.act;
-const TrustedAppsHttpServiceMock = TrustedAppsHttpService as jest.Mock;
 let getState: () => PolicyDetailsState;
 
 describe('Policy trusted apps flyout', () => {
   beforeEach(() => {
-    TrustedAppsHttpServiceMock.mockImplementation(() => {
-      return {
-        getTrustedAppsList: () => getMockListResponse(),
-        updateTrustedApp: () => ({
-          data: getMockCreateResponse(),
-        }),
-        assignPolicyToTrustedApps: () => [
-          {
-            data: getMockCreateResponse(),
-          },
-        ],
-      };
-    });
     mockedContext = createAppRootMockRenderer();
     waitForAction = mockedContext.middlewareSpy.waitForAction;
+    mockedApis = trustedAppsAllHttpMocks(mockedContext.coreStart.http);
     getState = () => mockedContext.store.getState().management.policyDetails;
     render = () => mockedContext.render(<PolicyTrustedAppsFlyout />);
   });
@@ -58,11 +45,13 @@ describe('Policy trusted apps flyout', () => {
       validate: (action) => isLoadedResourceState(action.payload),
     });
 
-    TrustedAppsHttpServiceMock.mockImplementation(() => {
-      return {
-        getTrustedAppsList: () => ({ data: [] }),
-      };
+    mockedApis.responseProvider.trustedAppsList.mockReturnValue({
+      data: [],
+      total: 0,
+      per_page: 10,
+      page: 1,
     });
+
     const component = render();
 
     mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234', { show: 'list' }));
@@ -77,10 +66,11 @@ describe('Policy trusted apps flyout', () => {
   });
 
   it('should renders flyout open correctly without data', async () => {
-    TrustedAppsHttpServiceMock.mockImplementation(() => {
-      return {
-        getTrustedAppsList: () => ({ data: [] }),
-      };
+    mockedApis.responseProvider.trustedAppsList.mockReturnValue({
+      data: [],
+      total: 0,
+      per_page: 10,
+      page: 1,
     });
     const component = render();
 
@@ -107,36 +97,37 @@ describe('Policy trusted apps flyout', () => {
     });
 
     expect(component.getByTestId('confirmPolicyTrustedAppsFlyout')).not.toBeNull();
-    expect(component.getByTestId(`${getMockListResponse().data[0].name}_checkbox`)).not.toBeNull();
+    expect(component.getByTestId('Generated Exception (u6kh2)_checkbox')).not.toBeNull();
   });
 
   it('should confirm flyout action', async () => {
-    const waitForUpdate = waitForAction('policyArtifactsUpdateTrustedAppsChanged', {
-      validate: (action) => isLoadedResourceState(action.payload),
-    });
-    const waitChangeUrl = waitForAction('userChangedUrl');
     const component = render();
 
-    mockedContext.history.push(getPolicyDetailsArtifactsListPath('1234', { show: 'list' }));
+    mockedContext.history.push(
+      getPolicyDetailsArtifactsListPath('2d95bec3-b48f-4db7-9622-a2b061cc031d', { show: 'list' })
+    );
     await waitForAction('policyArtifactsAssignableListPageDataChanged', {
       validate: (action) => isLoadedResourceState(action.payload),
     });
 
-    const tACardCheckbox = component.getByTestId(`${getMockListResponse().data[0].name}_checkbox`);
+    // TA name below in the selector matches the 3rd generated trusted app which is policy specific
+    const tACardCheckbox = component.getByTestId('Generated Exception (3xnng)_checkbox');
 
-    await act(async () => {
+    act(() => {
       fireEvent.click(tACardCheckbox);
     });
 
+    const waitChangeUrl = waitForAction('userChangedUrl');
     const confirmButton = component.getByTestId('confirmPolicyTrustedAppsFlyout');
 
-    await act(async () => {
+    act(() => {
       fireEvent.click(confirmButton);
     });
 
-    await waitForUpdate;
     await waitChangeUrl;
+
     const currentLocation = getState().artifacts.location;
+
     expect(currentLocation.show).toBeUndefined();
   });
 
@@ -161,11 +152,13 @@ describe('Policy trusted apps flyout', () => {
   });
 
   it('should display warning message when too much results', async () => {
-    TrustedAppsHttpServiceMock.mockImplementation(() => {
-      return {
-        getTrustedAppsList: () => ({ ...getMockListResponse(), total: 101 }),
-      };
-    });
+    const listResponse = {
+      ...mockedApis.responseProvider.trustedAppsList.getMockImplementation()!({
+        query: {},
+      } as HttpFetchOptionsWithPath),
+      total: 101,
+    };
+    mockedApis.responseProvider.trustedAppsList.mockReturnValue(listResponse);
 
     const component = render();
 

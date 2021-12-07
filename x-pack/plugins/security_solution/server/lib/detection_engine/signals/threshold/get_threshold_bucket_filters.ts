@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from 'src/plugins/data/common';
+import type { Filter } from '@kbn/es-query';
 import { ESFilter } from '../../../../../../../../src/core/types/elasticsearch';
 import { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from '../types';
 

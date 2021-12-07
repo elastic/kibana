@@ -141,7 +141,12 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
               </UtilityBarAction>
             </>
           )}
-          <UtilityBarAction iconSide="left" iconType="refresh" onClick={refreshCases}>
+          <UtilityBarAction
+            iconSide="left"
+            iconType="refresh"
+            onClick={refreshCases}
+            dataTestSubj="all-cases-refresh"
+          >
             {i18n.REFRESH}
           </UtilityBarAction>
         </UtilityBarGroup>

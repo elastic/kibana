@@ -15,6 +15,8 @@ import type {
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
+  KibanaRequest,
+  ElasticsearchClient,
 } from 'kibana/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
@@ -29,7 +31,7 @@ import type {
 } from '../../encrypted_saved_objects/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import type { FleetConfigType } from '../common';
+import type { FleetConfigType, FleetAuthz } from '../common';
 import { INTEGRATIONS_PLUGIN_ID } from '../common';
 import type { CloudSetup } from '../../cloud/server';
 
@@ -70,20 +72,16 @@ import {
   ESIndexPatternSavedObjectService,
   agentPolicyService,
   packagePolicyService,
+  AgentServiceImpl,
 } from './services';
-import {
-  getAgentStatusById,
-  getAgentStatusForAgentPolicy,
-  getAgentsByKuery,
-  getAgentById,
-} from './services/agents';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation, ensureInstalledPackage } from './services/epm/packages';
-import { RouterWrappers } from './routes/security';
+import { getAuthzFromRequest, RouterWrappers } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
 import { setupFleet } from './services/setup';
+import { fetchFindLatestPackage } from './services/epm/registry';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -142,6 +140,9 @@ export interface FleetStartContract {
    * services
    */
   fleetSetupCompleted: () => Promise<void>;
+  authz: {
+    fromRequest(request: KibanaRequest): Promise<FleetAuthz>;
+  };
   esIndexPatternService: ESIndexPatternService;
   packageService: PackageService;
   agentService: AgentService;
@@ -161,6 +162,8 @@ export interface FleetStartContract {
    * @param packageName
    */
   createArtifactsClient: (packageName: string) => FleetArtifactsClient;
+
+  fetchFindLatestPackage: typeof fetchFindLatestPackage;
 }
 
 export class FleetPlugin
@@ -179,6 +182,8 @@ export class FleetPlugin
   private securitySetup?: SecurityPluginSetup;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
+
+  private agentService?: AgentService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -230,7 +235,7 @@ export class FleetPlugin
         },
         privileges: {
           all: {
-            api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
+            api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`, `integrations-all`, `integrations-read`],
             app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
             catalogue: ['fleet'],
             savedObject: {
@@ -240,7 +245,7 @@ export class FleetPlugin
             ui: ['show', 'read', 'write'],
           },
           read: {
-            api: [`${PLUGIN_ID}-read`],
+            api: [`${PLUGIN_ID}-read`, `integrations-read`],
             app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
             catalogue: ['fleet'], // TODO: check if this is actually available to read user
             savedObject: {
@@ -253,18 +258,33 @@ export class FleetPlugin
       });
     }
 
-    core.http.registerRouteHandlerContext<FleetRequestHandlerContext, 'fleet'>(
-      'fleet',
-      (coreContext, request) => ({
-        epm: {
-          // Use a lazy getter to avoid constructing this client when not used by a request handler
-          get internalSoClient() {
-            return appContextService
-              .getSavedObjects()
-              .getScopedClient(request, { excludedWrappers: ['security'] });
+    core.http.registerRouteHandlerContext<FleetRequestHandlerContext, typeof PLUGIN_ID>(
+      PLUGIN_ID,
+      async (context, request) => {
+        const plugin = this;
+
+        return {
+          get agentClient() {
+            const agentService = plugin.setupAgentService(
+              context.core.elasticsearch.client.asInternalUser
+            );
+
+            return {
+              asCurrentUser: agentService.asScoped(request),
+              asInternalUser: agentService.asInternalUser,
+            };
           },
-        },
-      })
+          authz: await getAuthzFromRequest(request),
+          epm: {
+            // Use a lazy getter to avoid constructing this client when not used by a request handler
+            get internalSoClient() {
+              return appContextService
+                .getSavedObjects()
+                .getScopedClient(request, { excludedWrappers: ['security'] });
+            },
+          },
+        };
+      }
     );
 
     const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
@@ -348,18 +368,16 @@ export class FleetPlugin
     })();
 
     return {
+      authz: {
+        fromRequest: getAuthzFromRequest,
+      },
       fleetSetupCompleted: () => fleetSetupPromise,
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
         getInstallation,
         ensureInstalledPackage,
       },
-      agentService: {
-        getAgent: getAgentById,
-        listAgents: getAgentsByKuery,
-        getAgentStatusById,
-        getAgentStatusForAgentPolicy,
-      },
+      agentService: this.setupAgentService(core.elasticsearch.client.asInternalUser),
       agentPolicyService: {
         get: agentPolicyService.get,
         list: agentPolicyService.list,
@@ -374,6 +392,7 @@ export class FleetPlugin
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
+      fetchFindLatestPackage,
     };
   }
 
@@ -381,5 +400,14 @@ export class FleetPlugin
     appContextService.stop();
     licenseService.stop();
     this.telemetryEventsSender.stop();
+  }
+
+  private setupAgentService(internalEsClient: ElasticsearchClient): AgentService {
+    if (this.agentService) {
+      return this.agentService;
+    }
+
+    this.agentService = new AgentServiceImpl(internalEsClient);
+    return this.agentService;
   }
 }

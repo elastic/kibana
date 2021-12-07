@@ -7,7 +7,7 @@
 
 import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 export const AggDescription: FC = memo(({ children }) => {

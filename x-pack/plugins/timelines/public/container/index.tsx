@@ -14,11 +14,8 @@ import { Subscription } from 'rxjs';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { tGridActions } from '..';
 
-import {
-  DataPublicPluginStart,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../src/plugins/data/public';
+import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { isCompleteResponse, isErrorResponse } from '../../../../../src/plugins/data/common';
 import {
   Direction,
   TimelineFactoryQueryTypes,
@@ -278,6 +275,7 @@ export const useTimelineEvents = ({
         filterQuery: createFilter(filterQuery),
         querySize: limit,
         sort,
+        runtimeMappings,
         timerange: {
           interval: '12h',
           from: startDate,

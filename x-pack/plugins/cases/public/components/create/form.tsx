@@ -6,18 +6,30 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiLoadingSpinner, EuiSteps } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSteps,
+} from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
 import { useFormContext } from '../../common/shared_imports';
 
 import { Title } from './title';
-import { Description } from './description';
+import { Description, fieldName as descriptionFieldName } from './description';
 import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import { ActionConnector } from '../../../common';
+import { ActionConnector, CaseType } from '../../../common';
+import { Case } from '../../containers/types';
+import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
+import { InsertTimeline } from '../insert_timeline';
+import { UsePostComment } from '../../containers/use_post_comment';
+import { SubmitCaseButton } from './submit_button';
+import { FormContext } from './form_context';
 
 interface ContainerProps {
   big?: boolean;
@@ -36,22 +48,28 @@ const MySpinner = styled(EuiLoadingSpinner)`
   z-index: 99;
 `;
 
-interface Props {
-  connectors?: ActionConnector[];
-  disableAlerts?: boolean;
-  hideConnectorServiceNowSir?: boolean;
-  isLoadingConnectors?: boolean;
-  withSteps?: boolean;
+export interface CreateCaseFormFieldsProps {
+  connectors: ActionConnector[];
+  isLoadingConnectors: boolean;
+  disableAlerts: boolean;
+  hideConnectorServiceNowSir: boolean;
+  withSteps: boolean;
 }
+export interface CreateCaseFormProps
+  extends Pick<
+    Partial<CreateCaseFormFieldsProps>,
+    'disableAlerts' | 'hideConnectorServiceNowSir' | 'withSteps'
+  > {
+  onCancel: () => void;
+  onSuccess: (theCase: Case) => Promise<void>;
+  afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
+  caseType?: CaseType;
+  timelineIntegration?: CasesTimelineIntegration;
+}
+
 const empty: ActionConnector[] = [];
-export const CreateCaseForm: React.FC<Props> = React.memo(
-  ({
-    connectors = empty,
-    disableAlerts = false,
-    isLoadingConnectors = false,
-    hideConnectorServiceNowSir = false,
-    withSteps = true,
-  }) => {
+export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
+  ({ connectors, disableAlerts, isLoadingConnectors, hideConnectorServiceNowSir, withSteps }) => {
     const { isSubmitting } = useFormContext();
     const firstStep = useMemo(
       () => ({
@@ -124,6 +142,63 @@ export const CreateCaseForm: React.FC<Props> = React.memo(
       </>
     );
   }
+);
+
+CreateCaseFormFields.displayName = 'CreateCaseFormFields';
+
+export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
+  ({
+    disableAlerts = false,
+    hideConnectorServiceNowSir = false,
+    withSteps = true,
+    afterCaseCreated,
+    caseType,
+    onCancel,
+    onSuccess,
+    timelineIntegration,
+  }) => (
+    <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
+      <FormContext
+        afterCaseCreated={afterCaseCreated}
+        caseType={caseType}
+        hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+        onSuccess={onSuccess}
+        // if we are disabling alerts, then we should not sync alerts
+        syncAlertsDefaultValue={!disableAlerts}
+      >
+        <CreateCaseFormFields
+          connectors={empty}
+          disableAlerts={disableAlerts}
+          isLoadingConnectors={false}
+          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+          withSteps={withSteps}
+        />
+        <Container>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="xs"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="create-case-cancel"
+                iconType="cross"
+                onClick={onCancel}
+                size="s"
+              >
+                {i18n.CANCEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SubmitCaseButton />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Container>
+        <InsertTimeline fieldName={descriptionFieldName} />
+      </FormContext>
+    </CasesTimelineIntegrationProvider>
+  )
 );
 
 CreateCaseForm.displayName = 'CreateCaseForm';

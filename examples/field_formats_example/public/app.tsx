@@ -29,7 +29,11 @@ import * as example2 from './examples/2_creating_custom_formatter';
 // @ts-ignore
 import example1SampleCode from '!!raw-loader!./examples/1_using_existing_format';
 // @ts-ignore
-import example2SampleCode from '!!raw-loader!./examples/2_creating_custom_formatter';
+import example2SampleCodePart1 from '!!raw-loader!../common/example_currency_format';
+// @ts-ignore
+import example2SampleCodePart2 from '!!raw-loader!./examples/2_creating_custom_formatter';
+// @ts-ignore
+import example2SampleCodePart3 from '!!raw-loader!../server/examples/2_creating_custom_formatter';
 // @ts-ignore
 import example3SampleCode from '!!raw-loader!./examples/3_creating_custom_format_editor';
 
@@ -88,11 +92,16 @@ const CreatingCustomFieldFormat: React.FC<{ deps: Deps }> = (props) => {
       <EuiText>
         <p>
           This example shows how to create a custom field formatter. As an example, we create a
-          currency formatter and then display some values as <EuiCode>USD</EuiCode>.
+          currency formatter and then display some values as <EuiCode>USD</EuiCode>. Custom field
+          formatter has to be registered both client and server side.
         </p>
       </EuiText>
       <EuiSpacer size={'s'} />
-      <EuiCodeBlock>{example2SampleCode}</EuiCodeBlock>
+      <EuiCodeBlock>{example2SampleCodePart1}</EuiCodeBlock>
+      <EuiSpacer size={'xs'} />
+      <EuiCodeBlock>{example2SampleCodePart2}</EuiCodeBlock>
+      <EuiSpacer size={'xs'} />
+      <EuiCodeBlock>{example2SampleCodePart3}</EuiCodeBlock>
       <EuiSpacer size={'s'} />
       <EuiBasicTable
         items={sample}

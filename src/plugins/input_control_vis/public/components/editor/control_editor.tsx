@@ -7,7 +7,7 @@
  */
 
 import React, { PureComponent, ChangeEvent } from 'react';
-import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n-react';
 
 import {
   EuiAccordion,

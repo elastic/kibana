@@ -137,7 +137,7 @@ describe('getAlertSummary()', () => {
 
     const dateStart = new Date(Date.now() - 60 * 1000).toISOString();
 
-    const durations: number[] = eventsFactory.getExecutionDurations();
+    const durations: Record<string, number> = eventsFactory.getExecutionDurations();
 
     const result = await rulesClient.getAlertSummary({ id: '1', dateStart });
     const resultWithoutExecutionDuration = omit(result, 'executionDuration');
@@ -186,8 +186,8 @@ describe('getAlertSummary()', () => {
     `);
 
     expect(result.executionDuration).toEqual({
-      average: Math.round(mean(durations)),
-      values: durations,
+      average: Math.round(mean(Object.values(durations))),
+      valuesWithTimestamp: durations,
     });
   });
 

@@ -129,7 +129,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     if (fallbackSymbolId) {
       breaks.push({
         color: 'grey',
-        label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
+        label: <EuiTextColor color="success">{getOtherCategoryLabel()}</EuiTextColor>,
         symbolId: fallbackSymbolId,
       });
     }

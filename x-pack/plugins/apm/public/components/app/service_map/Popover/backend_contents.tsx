@@ -57,12 +57,14 @@ export function BackendContents({
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
-  const detailsUrl = apmRouter.link('/backends/overview', {
-    query: {
-      ...query,
-      backendName,
-    } as TypeOf<ApmRoutes, '/backends/overview'>['query'],
-  });
+  const detailsUrl = backendName
+    ? apmRouter.link('/backends/overview', {
+        query: {
+          ...query,
+          backendName,
+        } as TypeOf<ApmRoutes, '/backends/overview'>['query'],
+      })
+    : undefined;
 
   const trackEvent = useUiTracker();
 

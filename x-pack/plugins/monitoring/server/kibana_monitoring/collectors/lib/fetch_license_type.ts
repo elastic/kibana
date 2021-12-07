@@ -13,7 +13,7 @@ import { getCcsIndexPattern } from '../../../lib/alerts/get_ccs_index_pattern';
 
 export async function fetchLicenseType(
   client: ElasticsearchClient,
-  availableCcs: string[],
+  availableCcs: boolean,
   clusterUuid: string
 ) {
   let index = INDEX_PATTERN_ELASTICSEARCH;
