@@ -30,17 +30,25 @@ describe('useExpViewTimeRange', function () {
     const loading = true;
     const state = {
       monitorManagementList: {
+        list: {
+          perPage: 10,
+          page: 1,
+          total: 0,
+          monitors: [],
+        },
         locations: [],
         error: {
           serviceLocations: error,
+          monitorList: null,
         },
         loading: {
+          monitorList: false,
           serviceLocations: loading,
         },
       },
     };
 
-    const Wrapper = ({ children }) => {
+    const Wrapper = ({ children }: { children: React.ReactNode }) => {
       return <MockRedux state={state}>{children}</MockRedux>;
     };
     const { result } = renderHook(() => useLocations(), {

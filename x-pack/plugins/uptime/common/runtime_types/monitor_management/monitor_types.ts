@@ -210,6 +210,6 @@ export type MonitorManagementListResult = Omit<
 > & {
   monitors: Array<{
     id: string;
-    attributes: MonitorFields;
+    attributes: Partial<MonitorFields>;
   }>;
 };

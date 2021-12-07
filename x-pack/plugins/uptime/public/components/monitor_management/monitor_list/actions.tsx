@@ -65,7 +65,7 @@ export const Actions = ({ id, setRefresh }: Props) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {status === FETCH_STATUS.LOADING ? (
-          <EuiLoadingSpinner size="m" />
+          <EuiLoadingSpinner size="m" aria-label={MONITOR_DELETE_LOADING_LABEL} />
         ) : (
           <EuiButtonIcon
             iconType="trash"
@@ -87,7 +87,7 @@ const DELETE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.dele
 });
 
 const MONITOR_DELETE_SUCCESS_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.monitorSuccessMessage',
+  'xpack.uptime.monitorManagement.monitorDeleteSuccessMessage',
   {
     defaultMessage: 'Monitor deleted successfully.',
   }
@@ -95,8 +95,15 @@ const MONITOR_DELETE_SUCCESS_LABEL = i18n.translate(
 
 // TODO: Discuss error states with product
 const MONITOR_DELETE_FAILURE_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.monitorFailureMessage',
+  'xpack.uptime.monitorManagement.monitorDeleteFailureMessage',
   {
     defaultMessage: 'Monitor was unable to be deleted. Please try again later.',
+  }
+);
+
+const MONITOR_DELETE_LOADING_LABEL = i18n.translate(
+  'xpack.uptime.monitorManagement.monitorDeleteLoadingMessage',
+  {
+    defaultMessage: 'Deleting monitor...',
   }
 );

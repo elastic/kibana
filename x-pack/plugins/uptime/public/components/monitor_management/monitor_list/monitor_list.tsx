@@ -38,7 +38,7 @@ export const MonitorManagementList = ({
       pageIndex: pageIndex - 1, // page index for EuiBasicTable is base 0
       pageSize: perPage,
       totalItemCount: total || 0,
-      pageSizeOptions: [3, 5, 8],
+      pageSizeOptions: [10, 25, 50, 100],
     }),
     [pageIndex, perPage, total]
   );
@@ -58,7 +58,13 @@ export const MonitorManagementList = ({
     {
       align: 'left' as const,
       name: 'Monitor name',
-      render: ({ attributes: { name }, id }: { attributes: MonitorFields; id: string }) => (
+      render: ({
+        attributes: { name },
+        id,
+      }: {
+        attributes: Partial<MonitorFields>;
+        id: string;
+      }) => (
         <EuiLink
           href={`${basePath}/app/uptime/monitor/${Buffer.from(id, 'utf8').toString('base64')}`}
         >
@@ -72,25 +78,26 @@ export const MonitorManagementList = ({
       align: 'left' as const,
       field: 'attributes',
       name: 'Monitor type',
-      render: ({ type }: MonitorFields) => type,
+      render: ({ type }: Partial<MonitorFields>) => type,
     },
     {
       align: 'left' as const,
       field: 'attributes',
       name: 'Tags',
-      render: ({ tags }: MonitorFields) => <MonitorTags tags={tags} />,
+      render: ({ tags }: Partial<MonitorFields>) => (tags ? <MonitorTags tags={tags} /> : null),
     },
     {
       align: 'left' as const,
       field: 'attributes',
       name: 'Schedule',
-      render: ({ schedule: { number, unit } }: MonitorFields) => `@every ${number}${unit}`,
+      render: ({ schedule }: Partial<MonitorFields>) =>
+        `@every ${schedule?.number}${schedule?.unit}`,
     },
     {
       align: 'left' as const,
       field: 'attributes',
       name: 'URL',
-      render: (attributes: MonitorFields) => attributes.urls || attributes.hosts,
+      render: (attributes: Partial<MonitorFields>) => attributes.urls || attributes.hosts,
       truncateText: true,
     },
     {

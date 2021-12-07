@@ -47,7 +47,7 @@ export interface KibanaProviderOptions<ExtraCore> {
 }
 
 interface MockKibanaProviderProps<ExtraCore> extends KibanaProviderOptions<ExtraCore> {
-  children: ReactElement;
+  children: React.ReactNode;
 }
 
 interface MockRouterProps<ExtraCore> extends MockKibanaProviderProps<ExtraCore> {
@@ -179,7 +179,7 @@ export const MockRedux = ({
   children,
 }: {
   state: Partial<AppState>;
-  histroy: History;
+  history: History;
   children: React.ReactNode;
 }) => {
   const testState: AppState = {
