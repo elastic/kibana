@@ -82,6 +82,10 @@ describe('configureClient', () => {
     const client = configureClient(config, { logger, type: 'test', scoped: false });
 
     expect(instrumentEsQueryAndDeprecationLogger).toHaveBeenCalledTimes(1);
-    expect(instrumentEsQueryAndDeprecationLogger).toHaveBeenCalledWith(logger, client, 'test');
+    expect(instrumentEsQueryAndDeprecationLogger).toHaveBeenCalledWith({
+      logger,
+      client,
+      type: 'test',
+    });
   });
 });
