@@ -145,7 +145,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
                             ),
                           ]
                         : []),
-                      ...(!createIndexPattern
+                      ...(!createIndexPattern && !destinationIndexPatternTitleExists
                         ? [
                             <EuiText size="xs" color="warning">
                               {i18n.translate(

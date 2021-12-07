@@ -397,13 +397,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    checkIndexExists(indexName: string) {
-      return httpService.http<{ exists: boolean }>({
-        path: `${basePath()}/index_exists/${indexName}`,
-        method: 'GET',
-      });
-    },
-
     getFieldCaps({ index, fields }: { index: string; fields: string[] }) {
       const body = JSON.stringify({
         ...(index !== undefined ? { index } : {}),

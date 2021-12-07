@@ -225,59 +225,21 @@ export function systemRoutes(
       try {
         const { indices } = request.body;
 
-        const options = {
-          index: indices,
-          fields: ['*'],
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        };
+        const results = await Promise.all(
+          indices.map(async (index) =>
+            client.asCurrentUser.indices.exists({
+              index,
+            })
+          )
+        );
 
-        const { body } = await client.asCurrentUser.fieldCaps(options);
-
-        const result = indices.reduce((acc, cur) => {
-          acc[cur] = { exists: body.indices.includes(cur) };
+        const result = indices.reduce((acc, cur, i) => {
+          acc[cur] = { exists: results[i].body };
           return acc;
         }, {} as Record<string, { exists: boolean }>);
 
         return response.ok({
           body: result,
-        });
-      } catch (error) {
-        return response.customError(wrapError(error));
-      }
-    })
-  );
-
-  /**
-   * @apiGroup SystemRoutes
-   *
-   * @api {get} /api/ml/index_exists/<indexName> check if index exists
-   * @apiName MlSpecificIndexExists
-   * @apiDescription Returns boolean for if index exists
-   */
-  router.get(
-    {
-      path: '/api/ml/index_exists/{indexName}',
-      validate: {
-        params: schema.object({
-          /**
-           * index name
-           */
-          indexName: schema.string(),
-        }),
-      },
-      options: {
-        tags: ['access:ml:canAccessML'],
-      },
-    },
-    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
-      try {
-        const { indexName } = request.params;
-        const { body } = await client.asCurrentUser.indices.exists({
-          index: indexName,
-        });
-        return response.ok({
-          body: { exists: body },
         });
       } catch (error) {
         return response.customError(wrapError(error));

@@ -149,9 +149,9 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         }
 
         try {
-          const resp = await ml.checkIndexExists(destinationIndex);
+          const resp = await ml.checkIndicesExists({ indices: [destinationIndex] });
           // Index exists - clear interval and create index pattern
-          if (resp && resp.exists) {
+          if (resp && resp[destinationIndex] && resp[destinationIndex].exists) {
             clearInterval(interval);
             await mlContext.dataViewsContract.createAndSave(
               {
