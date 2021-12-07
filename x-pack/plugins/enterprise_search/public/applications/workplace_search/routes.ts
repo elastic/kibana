@@ -7,8 +7,6 @@
 
 import { generatePath } from 'react-router-dom';
 
-import { docLinks } from '../shared/doc_links';
-
 import {
   GITHUB_VIA_APP_SERVICE_TYPE,
   GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE,
@@ -21,35 +19,6 @@ export const LOGOUT_ROUTE = '/logout';
 
 export const LEAVE_FEEDBACK_EMAIL = 'support@elastic.co';
 export const LEAVE_FEEDBACK_URL = `mailto:${LEAVE_FEEDBACK_EMAIL}?Subject=Elastic%20Workplace%20Search%20Feedback`;
-
-export const BOX_DOCS_URL = docLinks.workplaceSearchBox;
-export const CONFLUENCE_DOCS_URL = docLinks.workplaceSearchConfluenceCloud;
-export const CONFLUENCE_SERVER_DOCS_URL = docLinks.workplaceSearchConfluenceServer;
-export const CUSTOM_SOURCE_DOCS_URL = docLinks.workplaceSearchCustomSources;
-export const CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL =
-  docLinks.workplaceSearchCustomSourcePermissions;
-export const DIFFERENT_SYNC_TYPES_DOCS_URL = docLinks.workplaceSearchIndexingSchedule;
-export const DOCUMENT_PERMISSIONS_DOCS_URL = docLinks.workplaceSearchDocumentPermissions;
-export const DROPBOX_DOCS_URL = docLinks.workplaceSearchDropbox;
-export const ENT_SEARCH_LICENSE_MANAGEMENT = docLinks.licenseManagement;
-export const EXTERNAL_IDENTITIES_DOCS_URL = docLinks.workplaceSearchExternalIdentities;
-export const GETTING_STARTED_DOCS_URL = docLinks.workplaceSearchGettingStarted;
-export const GITHUB_DOCS_URL = docLinks.workplaceSearchGitHub;
-export const GITHUB_ENTERPRISE_DOCS_URL = docLinks.workplaceSearchGitHub;
-export const GMAIL_DOCS_URL = docLinks.workplaceSearchGmail;
-export const GOOGLE_DRIVE_DOCS_URL = docLinks.workplaceSearchGoogleDrive;
-export const JIRA_DOCS_URL = docLinks.workplaceSearchJiraCloud;
-export const JIRA_SERVER_DOCS_URL = docLinks.workplaceSearchJiraServer;
-export const OBJECTS_AND_ASSETS_DOCS_URL = docLinks.workplaceSearchSynch;
-export const ONEDRIVE_DOCS_URL = docLinks.workplaceSearchOneDrive;
-export const PRIVATE_SOURCES_DOCS_URL = docLinks.workplaceSearchPermissions;
-export const SALESFORCE_DOCS_URL = docLinks.workplaceSearchSalesforce;
-export const SECURITY_DOCS_URL = docLinks.workplaceSearchSecurity;
-export const SERVICENOW_DOCS_URL = docLinks.workplaceSearchServiceNow;
-export const SHAREPOINT_DOCS_URL = docLinks.workplaceSearchSharePoint;
-export const SLACK_DOCS_URL = docLinks.workplaceSearchSlack;
-export const SYNCHRONIZATION_DOCS_URL = docLinks.workplaceSearchSynch;
-export const ZENDESK_DOCS_URL = docLinks.workplaceSearchZendesk;
 
 export const PERSONAL_PATH = '/p';
 
