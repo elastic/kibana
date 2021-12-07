@@ -74,6 +74,12 @@ export function getRequestDebugMeta(event: DiagnosticResult): {
   };
 }
 
+/** HTTP Warning headers have the following syntax:
+ * <warn-code> <warn-agent> <warn-text> (where warn-code is a three digit number)
+ * This function tests if a warning comes from an Elasticsearch warn-agent
+ * */
+const isEsWarning = (warning: string) => /\d\d\d Elasticsearch-/.test(warning);
+
 export const instrumentEsQueryAndDeprecationLogger = ({
   logger,
   client,
@@ -106,7 +112,7 @@ export const instrumentEsQueryAndDeprecationLogger = ({
 
       queryLogger.debug(queryMsg, meta);
 
-      if (event.warnings && event.warnings.length > 0) {
+      if (event.warnings && event.warnings.filter(isEsWarning).length > 0) {
         // Plugins can explicitly mark requests as originating from a user by
         // removing the `'x-elastic-product-origin': 'kibana'` header that's
         // added by default. User requests will be shown to users in the

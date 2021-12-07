@@ -21,20 +21,19 @@ import type { DiagnosticResult, RequestBody } from '@elastic/elasticsearch';
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
-import { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 
 const createApiResponse = <T>({
   body,
   statusCode = 200,
   headers = {},
-  warnings = [],
+  warnings = null,
   params,
   requestOptions = {},
 }: {
   body: T;
   statusCode?: number;
   headers?: Record<string, string>;
-  warnings?: string[];
+  warnings?: string[] | null;
   params?: TransportRequestParams | ConnectionRequestParams;
   requestOptions?: TransportRequestOptions;
 }): DiagnosticResult<T> => {
@@ -436,10 +435,49 @@ describe('instrumentQueryAndDeprecationLogger', () => {
     it('does not log when no deprecation warning header is returned', () => {
       instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
 
-      const response = createResponseWithBody({
-        seq_no_primary_term: true,
-        query: {
-          term: { user: 'kimchy' },
+      const response = createApiResponse({
+        statusCode: 200,
+        warnings: null,
+        params: {
+          method: 'GET',
+          path: '/_path',
+          querystring: { hello: 'dolly' },
+        },
+        body: {
+          hits: [
+            {
+              _source: 'may the source be with you',
+            },
+          ],
+        },
+      });
+      client.diagnostic.emit('response', new errors.ResponseError(response), response);
+
+      // One debug log entry from 'elasticsearch.query' context
+      expect(loggingSystemMock.collect(logger).debug.length).toEqual(1);
+      expect(loggingSystemMock.collect(logger).warn).toEqual([]);
+    });
+
+    it('does not log when warning header comes from a warn-agent that is not elasticsearch', () => {
+      instrumentEsQueryAndDeprecationLogger({ logger, client, type: 'test type' });
+
+      const response = createApiResponse({
+        statusCode: 200,
+        warnings: [
+          '299 nginx/2.3.1 "GET /_path is deprecated"',
+          '299 nginx/2.3.1 "GET hello query param is deprecated"',
+        ],
+        params: {
+          method: 'GET',
+          path: '/_path',
+          querystring: { hello: 'dolly' },
+        },
+        body: {
+          hits: [
+            {
+              _source: 'may the source be with you',
+            },
+          ],
         },
       });
       client.diagnostic.emit('response', new errors.ResponseError(response), response);
@@ -454,7 +492,7 @@ describe('instrumentQueryAndDeprecationLogger', () => {
 
       const response = createApiResponse({
         statusCode: 400,
-        warnings: ['GET /_path is deprecated'],
+        warnings: ['299 Elasticsearch-8.1.0 "GET /_path is deprecated"'],
         params: {
           method: 'GET',
           path: '/_path',
@@ -472,7 +510,7 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       expect(loggingSystemMock.collect(logger).warn).toEqual([]);
       // Test debug[1] since theree is one log entry from 'elasticsearch.query' context
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
-        'Elasticsearch deprecation: GET /_path is deprecated'
+        'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
       );
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch('Origin:user');
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(/Stack trace:\n.*at/);
@@ -486,7 +524,7 @@ describe('instrumentQueryAndDeprecationLogger', () => {
 
       const response = createApiResponse({
         statusCode: 400,
-        warnings: ['GET /_path is deprecated'],
+        warnings: ['299 Elasticsearch-8.1.0 "GET /_path is deprecated"'],
         params: {
           method: 'GET',
           path: '/_path',
@@ -506,7 +544,7 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       // One debug log entry from 'elasticsearch.query' context
       expect(loggingSystemMock.collect(logger).debug.length).toEqual(1);
       expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
-        'Elasticsearch deprecation: GET /_path is deprecated'
+        'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
       );
       expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch('Origin:kibana');
       expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(/Stack trace:\n.*at/);
@@ -520,7 +558,7 @@ describe('instrumentQueryAndDeprecationLogger', () => {
 
       const response = createApiResponse({
         statusCode: 200,
-        warnings: ['GET /_path is deprecated'],
+        warnings: ['299 Elasticsearch-8.1.0 "GET /_path is deprecated"'],
         params: {
           method: 'GET',
           path: '/_path',
@@ -539,7 +577,7 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       expect(loggingSystemMock.collect(logger).warn).toEqual([]);
       // Test debug[1] since theree is one log entry from 'elasticsearch.query' context
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
-        'Elasticsearch deprecation: GET /_path is deprecated'
+        'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
       );
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch('Origin:user');
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(/Stack trace:\n.*at/);
@@ -553,7 +591,7 @@ describe('instrumentQueryAndDeprecationLogger', () => {
 
       const response = createApiResponse({
         statusCode: 200,
-        warnings: ['GET /_path is deprecated'],
+        warnings: ['299 Elasticsearch-8.1.0 "GET /_path is deprecated"'],
         params: {
           method: 'GET',
           path: '/_path',
@@ -574,7 +612,7 @@ describe('instrumentQueryAndDeprecationLogger', () => {
       // One debug log entry from 'elasticsearch.query' context
       expect(loggingSystemMock.collect(logger).debug.length).toEqual(1);
       expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
-        'Elasticsearch deprecation: GET /_path is deprecated'
+        'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
       );
       expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch('Origin:kibana');
       expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(/Stack trace:\n.*at/);
