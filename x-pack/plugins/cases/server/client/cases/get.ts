@@ -25,11 +25,11 @@ import {
   AllReportersFindRequest,
   CasesByAlertIDRequest,
   CasesByAlertIDRequestRt,
-  ENABLE_CASE_CONNECTOR,
   CasesByAlertId,
   CasesByAlertIdRt,
   CaseAttributes,
-} from '../../../common';
+} from '../../../common/api';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
 import { CasesClientArgs } from '..';

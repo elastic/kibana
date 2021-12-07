@@ -21,7 +21,7 @@ import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
-import { CaseAttributes, CaseFullExternalService } from '../../../common';
+import { CaseAttributes, CaseFullExternalService } from '../../../common/api';
 import {
   findConnectorIdReference,
   transformFieldsToESModel,

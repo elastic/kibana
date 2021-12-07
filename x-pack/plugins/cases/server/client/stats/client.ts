@@ -19,7 +19,7 @@ import {
   throwErrors,
   excess,
   CasesStatusRequestRt,
-} from '../../../common';
+} from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { constructQueryOptions } from '../utils';

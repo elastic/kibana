@@ -21,19 +21,21 @@ import { LensServerPluginSetup } from '../../../../lens/server';
 
 import {
   AlertCommentRequestRt,
-  CASE_COMMENT_SAVED_OBJECT,
   CaseResponse,
   CaseStatuses,
   CaseType,
   CommentRequest,
   CommentRequestRt,
   CommentType,
-  ENABLE_CASE_CONNECTOR,
-  MAX_GENERATED_ALERTS_PER_SUB_CASE,
   SubCaseAttributes,
   throwErrors,
   User,
-} from '../../../common';
+} from '../../../common/api';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  ENABLE_CASE_CONNECTOR,
+  MAX_GENERATED_ALERTS_PER_SUB_CASE,
+} from '../../../common/constants';
 import {
   buildCaseUserActionItem,
   buildCommentUserActionItem,

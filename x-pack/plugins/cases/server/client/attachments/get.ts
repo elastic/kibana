@@ -18,10 +18,9 @@ import {
   CommentResponseRt,
   CommentsResponse,
   CommentsResponseRt,
-  ENABLE_CASE_CONNECTOR,
   FindQueryParams,
-} from '../../../common';
-import { createCaseError } from '../../common/error';
+} from '../../../common/api';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import {
   checkEnabledCaseConnectorOrThrow,
   defaultSortField,
@@ -30,6 +29,7 @@ import {
   flattenCommentSavedObjects,
   getIDsAndIndicesAsArrays,
 } from '../../common/utils';
+import { createCaseError } from '../../common/error';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { CasesClientArgs } from '../types';
 import { combineFilters, stringToKueryNode } from '../utils';

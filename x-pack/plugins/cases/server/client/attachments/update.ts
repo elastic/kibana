@@ -14,13 +14,8 @@ import { CommentableCase } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import { checkEnabledCaseConnectorOrThrow } from '../../common/utils';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
-import {
-  CASE_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
-  CaseResponse,
-  CommentPatchRequest,
-  CommentRequest,
-} from '../../../common';
+import { CaseResponse, CommentPatchRequest, CommentRequest } from '../../../common/api';
+import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 import { AttachmentService, CasesService } from '../../services';
 import { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
