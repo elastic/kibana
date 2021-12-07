@@ -8,7 +8,7 @@
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { SecuritySubPlugins } from '../../app/types';
 import { createInitialState } from './reducer';
-import { mockSourcererState } from '../mock';
+import { mockIndexPattern, mockSourcererState } from '../mock';
 import { useSourcererDataView } from '../containers/sourcerer';
 import { useDeepEqualSelector } from '../hooks/use_selector';
 import { renderHook } from '@testing-library/react-hooks';
@@ -18,6 +18,12 @@ jest.mock('../lib/kibana', () => ({
   KibanaServices: {
     get: jest.fn(() => ({ uiSettings: { get: () => ({ from: 'now-24h', to: 'now' }) } })),
   },
+}));
+jest.mock('../containers/source', () => ({
+  useFetchIndex: () => [
+    false,
+    { indexes: [], indicesExist: true, indexPatterns: mockIndexPattern },
+  ],
 }));
 
 describe('createInitialState', () => {
@@ -40,20 +46,24 @@ describe('createInitialState', () => {
       (useDeepEqualSelector as jest.Mock).mockClear();
     });
 
-    test('indicesExist should be TRUE if configIndexPatterns is NOT empty', async () => {
+    test('indicesExist should be TRUE if patternList is NOT empty', async () => {
       const { result } = renderHook(() => useSourcererDataView());
       expect(result.current.indicesExist).toEqual(true);
     });
 
-    test('indicesExist should be FALSE if configIndexPatterns is empty', () => {
+    test('indicesExist should be FALSE if patternList is empty', () => {
       const state = createInitialState(mockPluginState, {
         ...defaultState,
         defaultDataView: {
           ...defaultState.defaultDataView,
-          id: '',
-          title: '',
           patternList: [],
         },
+        kibanaDataViews: [
+          {
+            ...defaultState.defaultDataView,
+            patternList: [],
+          },
+        ],
       });
       (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => cb(state));
       const { result } = renderHook(() => useSourcererDataView());

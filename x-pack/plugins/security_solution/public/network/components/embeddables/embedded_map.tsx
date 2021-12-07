@@ -32,6 +32,7 @@ import { getLayerList } from './map_config';
 import { sourcererSelectors } from '../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -97,12 +98,15 @@ export const EmbeddedMapComponent = ({
 
   const [, dispatchToaster] = useStateToaster();
 
-  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
-  const { kibanaDataViews, sourcererScope }: sourcererSelectors.SourcererScopeSelector =
-    useDeepEqualSelector((state) => sourcererScopeSelector(state, SourcererScopeName.default));
+  const getDataViewsSelector = useMemo(
+    () => sourcererSelectors.getSourcererDataViewsSelector(),
+    []
+  );
+  const { kibanaDataViews } = useDeepEqualSelector((state) => getDataViewsSelector(state));
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.default);
 
   const [mapIndexPatterns, setMapIndexPatterns] = useState(
-    kibanaDataViews.filter((dataView) => sourcererScope.selectedPatterns.includes(dataView.title))
+    kibanaDataViews.filter((dataView) => selectedPatterns.includes(dataView.title))
   );
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
@@ -116,7 +120,7 @@ export const EmbeddedMapComponent = ({
   useEffect(() => {
     setMapIndexPatterns((prevMapIndexPatterns) => {
       const newIndexPatterns = kibanaDataViews.filter((dataView) =>
-        sourcererScope.selectedPatterns.includes(dataView.title)
+        selectedPatterns.includes(dataView.title)
       );
       if (!deepEqual(newIndexPatterns, prevMapIndexPatterns)) {
         if (newIndexPatterns.length === 0) {
@@ -126,7 +130,7 @@ export const EmbeddedMapComponent = ({
       }
       return prevMapIndexPatterns;
     });
-  }, [kibanaDataViews, sourcererScope.selectedPatterns]);
+  }, [kibanaDataViews, selectedPatterns]);
 
   // Initial Load useEffect
   useEffect(() => {
@@ -159,7 +163,7 @@ export const EmbeddedMapComponent = ({
         }
       }
     }
-    if (embeddable == null && sourcererScope.selectedPatterns.length > 0) {
+    if (embeddable == null && selectedPatterns.length > 0) {
       setupEmbeddable();
     }
 
@@ -175,7 +179,7 @@ export const EmbeddedMapComponent = ({
     query,
     portalNode,
     services.embeddable,
-    sourcererScope.selectedPatterns,
+    selectedPatterns,
     setQuery,
     startDate,
   ]);

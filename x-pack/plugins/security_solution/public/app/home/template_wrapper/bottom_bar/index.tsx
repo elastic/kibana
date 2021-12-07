@@ -24,10 +24,10 @@ export const SecuritySolutionBottomBar = React.memo(
   ({ onAppLeave }: { onAppLeave: (handler: AppLeaveHandler) => void }) => {
     const [showTimeline] = useShowTimeline();
 
-    const { indicesExist } = useSourcererDataView(SourcererScopeName.timeline);
-    useResolveRedirect();
+    const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
 
-    return indicesExist && showTimeline ? (
+    useResolveRedirect();
+    return (indicesExist || dataViewId === null) && showTimeline ? (
       <>
         <AutoSaveWarningMsg />
         <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />

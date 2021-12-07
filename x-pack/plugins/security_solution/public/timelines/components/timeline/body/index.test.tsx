@@ -112,6 +112,10 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
   maxDelay: () => 3000,
 }));
 
+jest.mock('../../create_field_button', () => ({
+  useCreateFieldButton: () => <></>,
+}));
+
 describe('Body', () => {
   const mount = useMountAppended();
   const mockRefetch = jest.fn();
