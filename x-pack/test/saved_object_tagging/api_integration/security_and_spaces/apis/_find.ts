@@ -45,6 +45,15 @@ export default function ({ getService }: FtrProviderContext) {
           });
         },
       },
+      noResults: {
+        httpCode: 200,
+        expectResponse: ({ body }) => {
+          expect(body).to.eql({
+            tags: [],
+            total: 0,
+          });
+        },
+      },
       unauthorized: {
         httpCode: 403,
         expectResponse: ({ body }) => {
@@ -56,7 +65,6 @@ export default function ({ getService }: FtrProviderContext) {
         },
       },
     };
-
     const expectedResults: Record<string, User[]> = {
       authorized: [
         USERS.SUPERUSER,
@@ -68,7 +76,8 @@ export default function ({ getService }: FtrProviderContext) {
         USERS.DEFAULT_SPACE_VISUALIZE_READ_USER,
         USERS.DEFAULT_SPACE_MAPS_READ_USER,
       ],
-      unauthorized: [USERS.NOT_A_KIBANA_USER, USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER],
+      noResults: [USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER],
+      unauthorized: [USERS.NOT_A_KIBANA_USER],
     };
 
     const createUserTest = (
