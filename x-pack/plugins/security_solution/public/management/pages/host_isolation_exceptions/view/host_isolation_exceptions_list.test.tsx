@@ -11,6 +11,8 @@ import React from 'react';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utilts';
 import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -19,8 +21,12 @@ import { EndpointPrivileges } from '../../../../../common/endpoint/types';
 jest.mock('../service');
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../services/policies/policies');
 
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
+(sendGetEndpointSpecificPackagePolicies as jest.Mock).mockImplementation(
+  sendGetEndpointSpecificPackagePoliciesMock
+);
 
 describe('When on the host isolation exceptions page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -43,7 +49,9 @@ describe('When on the host isolation exceptions page', () => {
   };
 
   const waitForApiCall = () => {
-    return waitFor(() => expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled());
+    return waitFor(() => {
+      expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled();
+    });
   };
 
   beforeEach(() => {
@@ -185,6 +193,9 @@ describe('When on the host isolation exceptions page', () => {
         await waitForApiCall();
         userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
         await waitForApiCall();
+        await waitFor(() => {
+          expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
+        });
         expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });
 
@@ -192,6 +203,9 @@ describe('When on the host isolation exceptions page', () => {
         history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
         render();
         await waitForApiCall();
+        await waitFor(() => {
+          expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
+        });
         expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
         expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
       });
