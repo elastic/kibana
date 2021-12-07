@@ -103,7 +103,6 @@ describe('syncMvtSourceData', () => {
             tileMinZoom: 4,
             tileMaxZoom: 14,
             tileSourceLayer: 'aggs',
-            refreshTokenParamName: 'token',
             tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
             refreshToken: '12345',
           };
@@ -142,7 +141,6 @@ describe('syncMvtSourceData', () => {
             tileMinZoom: 4,
             tileMaxZoom: 14,
             tileSourceLayer: 'aggs',
-            refreshTokenParamName: 'token',
             tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
             refreshToken: '12345',
           };
@@ -189,7 +187,6 @@ describe('syncMvtSourceData', () => {
             tileMinZoom: 4,
             tileMaxZoom: 14,
             tileSourceLayer: 'barfoo', // tileSourceLayer is different then mockSource
-            refreshTokenParamName: 'token',
             tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
             refreshToken: '12345',
           };
@@ -228,7 +225,6 @@ describe('syncMvtSourceData', () => {
             tileMinZoom: 2, // tileMinZoom is different then mockSource
             tileMaxZoom: 14,
             tileSourceLayer: 'aggs',
-            refreshTokenParamName: 'token',
             tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
             refreshToken: '12345',
           };
@@ -267,7 +263,6 @@ describe('syncMvtSourceData', () => {
             tileMinZoom: 4,
             tileMaxZoom: 9, // tileMinZoom is different then mockSource
             tileSourceLayer: 'aggs',
-            refreshTokenParamName: 'token',
             tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
             refreshToken: '12345',
           };
