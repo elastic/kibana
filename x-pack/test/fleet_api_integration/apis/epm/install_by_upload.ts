@@ -75,7 +75,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/gzip')
         .send(buf)
         .expect(200);
-      expect(res.body.response.length).to.be(27);
+      expect(res.body.items.length).to.be(27);
     });
 
     it('should install a zip archive correctly and package info should return correctly after validation', async function () {
@@ -86,21 +86,21 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
-      expect(res.body.response.length).to.be(27);
+      expect(res.body.items.length).to.be(27);
 
       const packageInfoRes = await supertest
         .get(`/api/fleet/epm/packages/${testPkgName}/${testPkgVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      delete packageInfoRes.body.response.latestVersion;
-      delete packageInfoRes.body.response.savedObject.attributes.install_started_at;
-      delete packageInfoRes.body.response.savedObject.version;
-      delete packageInfoRes.body.response.savedObject.updated_at;
-      delete packageInfoRes.body.response.savedObject.coreMigrationVersion;
-      delete packageInfoRes.body.response.savedObject.migrationVersion;
+      delete packageInfoRes.body.item.latestVersion;
+      delete packageInfoRes.body.item.savedObject.attributes.install_started_at;
+      delete packageInfoRes.body.item.savedObject.version;
+      delete packageInfoRes.body.item.savedObject.updated_at;
+      delete packageInfoRes.body.item.savedObject.coreMigrationVersion;
+      delete packageInfoRes.body.item.savedObject.migrationVersion;
 
-      expectSnapshot(packageInfoRes.body.response).toMatch();
+      expectSnapshot(packageInfoRes.body.item).toMatch();
     });
 
     it('should throw an error if the archive is zip but content type is gzip', async function () {
