@@ -174,7 +174,7 @@ const getDocToSave = (
   references: SavedObjectReference[]
 ) => {
   const docToSave = {
-    ...getLastKnownDocWithoutPinnedFilters(lastKnownDoc)!,
+    ...injectDocFilterReferences(removePinnedFilters(lastKnownDoc))!,
     references,
   };
 
@@ -353,21 +353,26 @@ export const runSaveLensVisualization = async (
   }
 };
 
-export function getLastKnownDocWithoutPinnedFilters(doc?: Document) {
+export function injectDocFilterReferences(doc?: Document) {
   if (!doc) return undefined;
-  const [pinnedFilters, appFilters] = partition(
-    injectFilterReferences(doc.state?.filters || [], doc.references),
-    esFilters.isFilterPinned
-  );
-  return pinnedFilters?.length
-    ? {
-        ...doc,
-        state: {
-          ...doc.state,
-          filters: appFilters,
-        },
-      }
-    : doc;
+  return {
+    ...doc,
+    state: {
+      ...doc.state,
+      filters: injectFilterReferences(doc.state?.filters || [], doc.references),
+    },
+  };
+}
+
+export function removePinnedFilters(doc?: Document) {
+  if (!doc) return undefined;
+  return {
+    ...doc,
+    state: {
+      ...doc.state,
+      filters: (doc.state?.filters || []).filter((filter) => !esFilters.isFilterPinned(filter)),
+    },
+  };
 }
 
 // eslint-disable-next-line import/no-default-export

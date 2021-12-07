@@ -34,8 +34,9 @@ import {
 } from '../state_management';
 import {
   SaveModalContainer,
-  getLastKnownDocWithoutPinnedFilters,
   runSaveLensVisualization,
+  injectDocFilterReferences,
+  removePinnedFilters,
 } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
@@ -148,10 +149,11 @@ export function App({
     onAppLeave((actions) => {
       // Confirm when the user has made any changes to an existing doc
       // or when the user has configured something without saving
-
+      const persistedState = injectDocFilterReferences(persistedDoc)?.state;
+      const lastKnownDocState = removePinnedFilters(injectDocFilterReferences(lastKnownDoc))?.state;
       if (
         application.capabilities.visualize.save &&
-        !isEqual(persistedDoc?.state, getLastKnownDocWithoutPinnedFilters(lastKnownDoc)?.state) &&
+        !isEqual(persistedState, lastKnownDocState) &&
         (isSaveable || persistedDoc)
       ) {
         return actions.confirm(

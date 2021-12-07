@@ -85,7 +85,7 @@
           "meta": {
             "alias": null,
             "disabled": false,
-            "indexRefName": "filter-index-pattern-0",
+            "index": "filter-index-pattern-0",
             "key": "response",
             "negate": true,
             "params": {
