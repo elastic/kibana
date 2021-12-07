@@ -134,7 +134,9 @@ export const VisualizeEditorCommon = ({
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' && <ExperimentalVisInfo />}
-      {!hasHeatmapLegacyhartsEnabled && isSplitChart && <SplitChartWarning />}
+      {!hasHeatmapLegacyhartsEnabled &&
+        isSplitChart &&
+        visInstance?.vis.type.name === 'heatmap' && <SplitChartWarning />}
       {visInstance?.vis?.type?.getInfoMessage?.(visInstance.vis)}
       {getLegacyUrlConflictCallout()}
       {visInstance && (
