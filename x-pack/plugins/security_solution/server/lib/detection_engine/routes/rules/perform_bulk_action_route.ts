@@ -24,6 +24,7 @@ import { duplicateRule } from '../../rules/duplicate_rule';
 import { enableRule } from '../../rules/enable_rule';
 import { findRules } from '../../rules/find_rules';
 import { patchRules } from '../../rules/patch_rules';
+import { appplyBulkActionUpdateToRule } from '../../rules/bulk_action_update';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 import { transformAlertToRule } from './utils';
@@ -151,77 +152,25 @@ export const performBulkActionRoute = (
               body: responseBody,
             });
           case BulkAction.update:
-            const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
-              Array.from(new Set([...arr, ...items]));
-
-            const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
-              const itemsSet = new Set(items);
-              return arr.filter((item) => !itemsSet.has(item));
-            };
-
             await Promise.all(
-              rules.data.map(async (existingRule) => {
-                const transformedRule = transformAlertToRule(existingRule);
+              rules.data.map(async (rule) => {
+                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
-                body?.updates?.map?.((action) => {
-                  switch (action.type) {
-                    // tags actions
-                    case BulkActionUpdateType.add_tags:
-                      transformedRule.tags = addItemsToArray(
-                        transformedRule.tags ?? [],
-                        action.value
-                      );
-                      break;
-
-                    case BulkActionUpdateType.delete_tags:
-                      transformedRule.tags = deleteItemsFromArray(
-                        transformedRule.tags ?? [],
-                        action.value
-                      );
-                      break;
-
-                    case BulkActionUpdateType.set_tags:
-                      transformedRule.tags = action.value;
-                      break;
-
-                    // index actions
-                    case BulkActionUpdateType.add_index:
-                      transformedRule.index = addItemsToArray(
-                        transformedRule.index ?? [],
-                        action.value
-                      );
-                      break;
-
-                    case BulkActionUpdateType.delete_index:
-                      transformedRule.index = deleteItemsFromArray(
-                        transformedRule.index ?? [],
-                        action.value
-                      );
-                      break;
-
-                    case BulkActionUpdateType.set_index:
-                      transformedRule.index = action.value;
-                      break;
-
-                    // timeline actions
-                    case BulkActionUpdateType.set_timeline:
-                      transformedRule.timeline_id = action.value.timelineId;
-                      transformedRule.timeline_title = action.value.timelineTitle;
-                  }
-
-                  return transformedRule;
-                });
+                const updatedRule = body?.updates?.reduce?.(
+                  (acc, action) => appplyBulkActionUpdateToRule(acc, action),
+                  transformAlertToRule(rule)
+                );
 
                 const {
                   tags,
                   index,
                   timeline_title: timelineTitle,
                   timeline_id: timelineId,
-                } = transformedRule;
+                } = updatedRule;
 
                 await patchRules({
                   rulesClient,
-                  rule: existingRule,
+                  rule,
                   tags,
                   index,
                   timelineTitle,

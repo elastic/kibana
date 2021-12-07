@@ -514,3 +514,5 @@ export const bulkActionUpdate = t.union([
   actionUpdateIndex,
   actionUpdateTimeline,
 ]);
+
+export type BulkActionUpdate = t.TypeOf<typeof bulkActionUpdate>;
