@@ -50,7 +50,7 @@ export const DEFAULT_AGENT_POLICY: PreconfiguredAgentPolicyWithDefaultInputs = {
   monitoring_enabled: monitoringTypes,
 };
 
-export const DEFAULT_FLEET_SERVER_POLICY_ID = 'default-system-policy';
+export const DEFAULT_FLEET_SERVER_POLICY_ID = 'default-fleet-server-policy';
 
 export const DEFAULT_FLEET_SERVER_AGENT_POLICY: PreconfiguredAgentPolicyWithDefaultInputs = {
   name: 'Default Fleet Server policy',
