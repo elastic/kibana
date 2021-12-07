@@ -58,7 +58,7 @@ const condition = schema.object({
   ),
 });
 
-export async function registerMetricInventoryThresholdAlertType(
+export async function registerMetricInventoryThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
 ) {

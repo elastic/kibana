@@ -8,16 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { METRIC_ANOMALY_ALERT_TYPE_ID } from '../../../common/alerting/metrics';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { AlertTypeParams } from '../../../../alerting/common';
+import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import { AlertTypeParams as RuleTypeParams } from '../../../../alerting/common';
 import { validateMetricAnomaly } from './components/validation';
 
-interface MetricAnomalyAlertTypeParams extends AlertTypeParams {
+interface MetricAnomalyRuleTypeParams extends RuleTypeParams {
   hasInfraMLCapabilities: boolean;
 }
 
-export function createMetricAnomalyAlertType(): AlertTypeModel<MetricAnomalyAlertTypeParams> {
+export function createMetricAnomalyRuleType(): AlertTypeModel<MetricAnomalyRuleTypeParams> {
   return {
     id: METRIC_ANOMALY_ALERT_TYPE_ID,
     description: i18n.translate('xpack.infra.metrics.anomaly.alertFlyout.alertDescription', {

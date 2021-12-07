@@ -53,7 +53,7 @@ interface CompositeAggregationsResponse {
   };
 }
 
-export interface EvaluatedAlertParams {
+export interface EvaluatedRuleParams {
   criteria: MetricExpressionParams[];
   groupBy: string | undefined | string[];
   filterQuery?: string;
@@ -61,7 +61,7 @@ export interface EvaluatedAlertParams {
   shouldDropPartialBuckets?: boolean;
 }
 
-export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAlertParams>(
+export const evaluateRule = <Params extends EvaluatedRuleParams = EvaluatedRuleParams>(
   esClient: ElasticsearchClient,
   params: Params,
   config: InfraSource['configuration'],

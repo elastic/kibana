@@ -9,9 +9,9 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { MlPluginSetup } from '../../../../../ml/server';
 import {
-  AlertType,
-  AlertInstanceState,
-  AlertInstanceContext,
+  AlertType as RuleType,
+  AlertInstanceState as AlertState,
+  AlertInstanceContext as AlertContext,
 } from '../../../../../alerting/server';
 import {
   createMetricAnomalyExecutor,
@@ -26,18 +26,18 @@ import { RecoveredActionGroupId } from '../../../../../alerting/common';
 
 export type MetricAnomalyAllowedActionGroups = typeof FIRED_ACTIONS_ID;
 
-export const registerMetricAnomalyAlertType = (
+export const registerMetricAnomalyRuleType = (
   libs: InfraBackendLibs,
   ml?: MlPluginSetup
-): AlertType<
+): RuleType<
   /**
    * TODO: Remove this use of `any` by utilizing a proper type
    */
   Record<string, any>,
   never, // Only use if defining useSavedObjectReferences hook
   Record<string, any>,
-  AlertInstanceState,
-  AlertInstanceContext,
+  AlertState,
+  AlertContext,
   MetricAnomalyAllowedActionGroups,
   RecoveredActionGroupId
 > => ({
