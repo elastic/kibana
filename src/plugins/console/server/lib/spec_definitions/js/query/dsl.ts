@@ -697,25 +697,12 @@ export const query = (specService: SpecDefinitionsService) => {
     },
     script_score: {
       __template: {
-        query: '',
         script: {},
       },
-      script: {
-        source: '',
-        params: {
-          origin: '',
-          scale: '',
-          offset: '',
-          decay: 0,
-          weight: 0,
-          factor: 0,
-          query_vector: '',
-          queryVector: '',
-          queryVectorMag: 0,
-        },
-      },
-      min_score: 0,
-      boost: 0,
+      script: {},
+      query: {},
+      min_score: '',
+      boost: 1.0,
     },
     wrapper: {
       __template: {
