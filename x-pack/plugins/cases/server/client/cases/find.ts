@@ -20,7 +20,8 @@ import {
   excess,
 } from '../../../common/api';
 
-import { createCaseError, transformCases } from '../../common';
+import { createCaseError } from '../../common/error';
+import { transformCases } from '../../common/utils';
 import { constructQueryOptions } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';

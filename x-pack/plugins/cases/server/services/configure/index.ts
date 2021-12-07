@@ -13,7 +13,8 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 
-import { SavedObjectFindOptionsKueryNode, CONNECTOR_ID_REFERENCE_NAME } from '../../common';
+import { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { CasesConfigureAttributes, CasesConfigurePatch } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';

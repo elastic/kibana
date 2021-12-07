@@ -6,7 +6,7 @@
  */
 
 import { isBoom, boomify } from '@hapi/boom';
-import { HTTPError } from '../../common';
+import { HTTPError } from '../../common/error';
 import { wrapError } from './utils';
 
 describe('Utils', () => {

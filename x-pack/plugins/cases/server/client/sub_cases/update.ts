@@ -37,12 +37,12 @@ import {
 import { CASE_COMMENT_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getCaseToUpdate } from '../utils';
 import { buildSubCaseUserActions } from '../../services/user_actions/helpers';
+import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateRequest,
-  createCaseError,
   isCommentRequestTypeAlertOrGenAlert,
   flattenSubCaseSavedObject,
-} from '../../common';
+} from '../../common/utils';
 import { UpdateAlertRequest } from '../../client/alerts/types';
 import { CasesClientArgs } from '../types';
 

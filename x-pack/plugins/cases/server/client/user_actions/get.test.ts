@@ -7,7 +7,7 @@
 
 import { CaseUserActionResponse } from '../../../common/api';
 import { SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
-import { SUB_CASE_REF_NAME } from '../../common';
+import { SUB_CASE_REF_NAME } from '../../common/constants';
 import { extractAttributesWithoutSubCases } from './get';
 
 describe('get', () => {

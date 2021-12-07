@@ -11,7 +11,7 @@ import { SavedObject, SavedObjectsClientContract, SavedObjectsFindResponse } fro
 import { CommentAttributes, SubCaseAttributes, OWNER_FIELD } from '../../../common/api';
 import { ENABLE_CASE_CONNECTOR, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { CasesClientArgs } from '..';
-import { createCaseError } from '../../common';
+import { createCaseError } from '../../common/error';
 import { AttachmentService, CasesService } from '../../services';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { Operations, OwnerEntity } from '../../authorization';

@@ -12,7 +12,9 @@ import {
   CaseUserActionResponse,
 } from '../../../common/api';
 import { SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
-import { createCaseError, checkEnabledCaseConnectorOrThrow, SUB_CASE_REF_NAME } from '../../common';
+import { createCaseError } from '../../common/error';
+import { checkEnabledCaseConnectorOrThrow } from '../../common/utils';
+import { SUB_CASE_REF_NAME } from '../../common/constants';
 import { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { UserActionGet } from './client';

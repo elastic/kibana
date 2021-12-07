@@ -30,7 +30,8 @@ import {
   CaseAttributes,
 } from '../../../common/api';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
-import { countAlertsForID, createCaseError, flattenCaseSavedObject } from '../../common';
+import { createCaseError } from '../../common/error';
+import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
 import { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';

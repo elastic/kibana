@@ -36,11 +36,15 @@ import {
   MAX_DOCS_PER_PAGE,
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
-import { flattenCommentSavedObjects, flattenSubCaseSavedObject, transformNewComment } from '..';
 import { AttachmentService, CasesService } from '../../services';
 import { createCaseError } from '../error';
-import { countAlertsForID } from '../index';
-import { getOrUpdateLensReferences } from '../utils';
+import {
+  countAlertsForID,
+  flattenCommentSavedObjects,
+  flattenSubCaseSavedObject,
+  transformNewComment,
+  getOrUpdateLensReferences,
+} from '../utils';
 
 interface UpdateCommentResp {
   comment: SavedObjectsUpdateResponse<CommentAttributes>;

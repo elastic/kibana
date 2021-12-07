@@ -31,7 +31,7 @@ import {
   transformers,
   transformFields,
 } from './utils';
-import { flattenCaseSavedObject } from '../../common';
+import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 

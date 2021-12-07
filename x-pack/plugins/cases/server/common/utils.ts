@@ -13,7 +13,7 @@ import {
   SavedObjectReference,
 } from 'kibana/server';
 import { flatMap, uniqWith, isEmpty, xorWith } from 'lodash';
-import { AlertInfo } from '.';
+import { AlertInfo } from './types';
 import { LensServerPluginSetup } from '../../../lens/server';
 
 import {
