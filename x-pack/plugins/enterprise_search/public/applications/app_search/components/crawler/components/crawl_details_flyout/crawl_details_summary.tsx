@@ -220,12 +220,12 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
               data-test-subj="clientErrors"
               titleSize="s"
               title={statusCounts.clientErrorCount}
-              description={`4xx ${i18n.translate(
+              description={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.clientErrorsLabel',
                 {
-                  defaultMessage: 'Errors',
+                  defaultMessage: '4xx Errors',
                 }
-              )}`}
+              )}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -233,12 +233,12 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
               data-test-subj="serverErrors"
               titleSize="s"
               title={statusCounts.serverErrorCount}
-              description={`5xx ${i18n.translate(
+              description={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.crawler.crawlDetailsSummary.serverErrorsLabel',
                 {
-                  defaultMessage: 'Errors',
+                  defaultMessage: '5xx Errors',
                 }
-              )}`}
+              )}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
