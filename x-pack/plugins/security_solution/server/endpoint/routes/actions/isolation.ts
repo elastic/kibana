@@ -18,6 +18,7 @@ import {
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   failedFleetActionErrorCode,
+  FORBIDDEN_MESSAGE,
 } from '../../../../common/endpoint/constants';
 import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
 import {
@@ -105,8 +106,7 @@ export const isolationRequestHandler = function (
     if ((!canIsolateHost && isolate) || (!canUnIsolateHost && !isolate)) {
       return res.forbidden({
         body: {
-          message:
-            'You do not have permission to perform this action or license level does not allow for this action',
+          message: FORBIDDEN_MESSAGE,
         },
       });
     }

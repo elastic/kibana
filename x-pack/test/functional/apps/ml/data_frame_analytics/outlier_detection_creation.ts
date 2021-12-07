@@ -63,13 +63,13 @@ export default function ({ getService }: FtrProviderContext) {
             // markers
             { color: '#52B398', percentage: 15 },
             // grey boilerplate
-            { color: '#6A717D', percentage: 33 },
+            { color: '#6A717D', percentage: 13 },
           ],
           scatterplotMatrixColorStatsResults: [
             // red markers
             { color: '#D98071', percentage: 1 },
             // tick/grid/axis, grey markers
-            { color: '#6A717D', percentage: 33 },
+            { color: '#6A717D', percentage: 12 },
             { color: '#D3DAE6', percentage: 8 },
             { color: '#98A1B3', percentage: 12 },
             // anti-aliasing
