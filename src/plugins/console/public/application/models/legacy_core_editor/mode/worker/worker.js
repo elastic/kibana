@@ -1884,7 +1884,6 @@ ace.define(
         at = newAt + 1;
       },
       next = function (c) {
-        console.log('CH--NEXT', ch);
         if (c && c !== ch) {
           error('Expected \'' + c + '\' instead of \'' + ch + '\'');
         }
