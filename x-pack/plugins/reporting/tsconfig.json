@@ -26,6 +26,7 @@
     { "path": "../../../src/plugins/field_formats/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
+    { "path": "../screenshotting/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
   ]

@@ -1189,12 +1189,10 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signals.hits.hits.length).to.eql(1);
 
         const statusResponse = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+          .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send({ ids: [ruleResponse.id] });
-        const initialStatusDate = new Date(
-          statusResponse.body[ruleResponse.id].current_status.status_date
-        );
+          .query({ id: ruleResponse.id });
+        const initialStatusDate = new Date(statusResponse.body.status_date);
 
         const initialSignal = signals.hits.hits[0];
 
