@@ -41,6 +41,7 @@ import {
   TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER,
 } from './util';
 import { SavedObjectsClient } from '../../../../../src/core/server';
+import { DataViewField } from '../../../../../src/plugins/data_views/common/fields';
 
 async function getIndexPatternsService() {
   const factory = getIndexPatternsServiceFactory();
@@ -217,7 +218,8 @@ async function filterIndexPatternsByField(fields: string[]) {
       const indexPattern = await indexPatternsService.get(indexPatternId);
       const containsField = fields.some((field: string) =>
         indexPattern.fields.some(
-          (fieldDescriptor) => fieldDescriptor.esTypes && fieldDescriptor.esTypes.includes(field)
+          (fieldDescriptor: DataViewField) =>
+            fieldDescriptor.esTypes && fieldDescriptor.esTypes.includes(field)
         )
       );
       if (containsField) {
