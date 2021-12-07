@@ -312,6 +312,7 @@ export class SecurityPlugin
     return Object.freeze<SecurityPluginSetup>({
       audit: {
         asScoped: this.auditSetup.asScoped,
+        asSystem: this.auditSetup.asSystem,
       },
       authc: { getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request) },
       authz: {

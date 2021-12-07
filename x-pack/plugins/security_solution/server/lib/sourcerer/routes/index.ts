@@ -7,17 +7,21 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { StartServicesAccessor } from 'kibana/server';
-import type { SecuritySolutionPluginRouter } from '../../../types';
+
+import { DataViewListItem } from '../../../../../../../src/plugins/data_views/common';
 import { DEFAULT_TIME_FIELD, SOURCERER_API_URL } from '../../../../common/constants';
-import { buildSiemResponse } from '../../detection_engine/routes/utils';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { sourcererSchema } from './schema';
-import { StartPlugins } from '../../../plugin';
+import { SetupPlugins, StartPlugins } from '../../../plugin';
+import { buildSiemResponse } from '../../detection_engine/routes/utils';
+import { sourcererSavedObjectEvent, SourcererSavedObjectAction } from './audit_log';
 import { findExistingIndices } from './helpers';
+import { sourcererSchema } from './schema';
 
 export const createSourcererDataViewRoute = (
   router: SecuritySolutionPluginRouter,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  security: SetupPlugins['security']
 ) => {
   router.post(
     {
@@ -33,6 +37,9 @@ export const createSourcererDataViewRoute = (
       const siemResponse = buildSiemResponse(response);
       const siemClient = context.securitySolution?.getAppClient();
       const dataViewId = siemClient.getSourcererDataViewId();
+      const unsecuredSavedObjectClient = context.core.savedObjects.getClient({
+        excludedWrappers: ['security'],
+      });
       try {
         const [
           ,
@@ -40,69 +47,121 @@ export const createSourcererDataViewRoute = (
             data: { indexPatterns },
           },
         ] = await getStartServices();
-        const dataViewService = await indexPatterns.indexPatternsServiceFactory(
+        const auditLogger = security?.audit.asScoped(request);
+        /*
+         * Note for future engineer
+         * We need to have two different DataViewService because one will be to access all
+         * the data views that the user can access and the UnsecuredDataViewService will be
+         * to create the security solution data view
+         */
+        const unsecuredDataViewService = await indexPatterns.dataViewsServiceFactory(
+          unsecuredSavedObjectClient,
+          context.core.elasticsearch.client.asInternalUser
+        );
+        const dataViewService = await indexPatterns.dataViewsServiceFactory(
           context.core.savedObjects.client,
           context.core.elasticsearch.client.asInternalUser
         );
 
-        let allDataViews = await dataViewService.getIdsWithTitle();
+        let allDataViews: DataViewListItem[] = [];
+        try {
+          allDataViews = await dataViewService.getIdsWithTitle();
+        } catch (error) {
+          // DO nothing because we will return at least one data view.
+          // let's not block the security solution users
+        }
+        let siemDataView;
+        try {
+          siemDataView = await unsecuredDataViewService.get(dataViewId);
+        } catch (error) {
+          // if does not exist, it is all good
+        }
         const { patternList } = request.body;
-        const siemDataView = allDataViews.find((v) => v.id === dataViewId);
-        const patternListAsTitle = patternList.join();
-
+        const patternListAsTitle = patternList.sort().join();
+        const siemDataViewTitle = siemDataView ? siemDataView.title.split(',').sort().join() : '';
         if (siemDataView == null) {
-          const defaultDataView = await dataViewService.createAndSave({
-            allowNoIndex: true,
-            id: dataViewId,
-            title: patternListAsTitle,
-            timeFieldName: DEFAULT_TIME_FIELD,
-          });
-          // ?? dataViewId -> type thing here, should never happen
-          allDataViews.push({ ...defaultDataView, id: defaultDataView.id ?? dataViewId });
-        } else if (patternListAsTitle !== siemDataView.title) {
-          const defaultDataView = { ...siemDataView, id: siemDataView.id ?? '' };
-          const wholeDataView = await dataViewService.get(defaultDataView.id);
-          wholeDataView.title = patternListAsTitle;
+          auditLogger?.log(
+            sourcererSavedObjectEvent({
+              action: SourcererSavedObjectAction.CREATE,
+              outcome: 'unknown',
+              id: dataViewId,
+            })
+          );
+          try {
+            siemDataView = await unsecuredDataViewService.createAndSave({
+              allowNoIndex: true,
+              id: dataViewId,
+              title: patternListAsTitle,
+              timeFieldName: DEFAULT_TIME_FIELD,
+            });
+            // ?? dataViewId -> type thing here, should never happen
+            allDataViews.push({ ...siemDataView, id: siemDataView.id ?? dataViewId });
+          } catch (error) {
+            auditLogger?.log(
+              sourcererSavedObjectEvent({
+                action: SourcererSavedObjectAction.CREATE,
+                id: dataViewId,
+                error,
+              })
+            );
+            throw error;
+          }
+        } else if (patternListAsTitle !== siemDataViewTitle) {
+          siemDataView.title = patternListAsTitle;
           let didUpdate = true;
-          await dataViewService.updateSavedObject(wholeDataView).catch((err) => {
-            const error = transformError(err);
-            if (error.statusCode === 403) {
-              didUpdate = false;
-              // user doesnt have permissions to update, use existing pattern
-              wholeDataView.title = defaultDataView.title;
-              return;
-            }
-            throw err;
-          });
+          auditLogger?.log(
+            sourcererSavedObjectEvent({
+              action: SourcererSavedObjectAction.UPDATE,
+              outcome: 'unknown',
+              id: dataViewId,
+            })
+          );
+          try {
+            await unsecuredDataViewService.updateSavedObject(siemDataView).catch((err) => {
+              const error = transformError(err);
+              if (error.statusCode === 403) {
+                didUpdate = false;
+                return;
+              }
+              throw err;
+            });
+          } catch (error) {
+            auditLogger?.log(
+              sourcererSavedObjectEvent({
+                action: SourcererSavedObjectAction.UPDATE,
+                id: dataViewId,
+                error,
+              })
+            );
+            throw error;
+          }
 
           // update the data view in allDataViews
           if (didUpdate) {
-            allDataViews = allDataViews.map((v) =>
-              v.id === dataViewId ? { ...v, title: patternListAsTitle } : v
-            );
+            if (allDataViews.some((dv) => dv.id === dataViewId)) {
+              allDataViews = allDataViews.map((v) =>
+                v.id === dataViewId ? { ...v, title: patternListAsTitle } : v
+              );
+            } else {
+              allDataViews.push({ ...siemDataView, id: siemDataView.id ?? dataViewId });
+            }
           }
         }
-
-        const patternLists: string[][] = allDataViews.map(({ title }) => title.split(','));
-        const activePatternBools: boolean[][] = await Promise.all(
-          patternLists.map((pl) =>
-            findExistingIndices(pl, context.core.elasticsearch.client.asCurrentUser)
-          )
+        const siemPatternList = siemDataView.title.split(',');
+        const siemActivePatternBools: boolean[] = await findExistingIndices(
+          siemPatternList,
+          context.core.elasticsearch.client.asCurrentUser
+        );
+        const siemActivePatternLists: string[] = siemPatternList.filter(
+          (pattern, j, self) => self.indexOf(pattern) === j && siemActivePatternBools[j]
         );
 
-        const activePatternLists = patternLists.map((pl, i) =>
-          // also remove duplicates from active
-          pl.filter((pattern, j, self) => self.indexOf(pattern) === j && activePatternBools[i][j])
-        );
-
-        const kibanaDataViews = allDataViews.map((kip, i) => ({
-          ...kip,
-          patternList: activePatternLists[i],
-        }));
+        const defaultDataView = { ...siemDataView, patternList: siemActivePatternLists };
         const body = {
-          defaultDataView: kibanaDataViews.find((p) => p.id === dataViewId) ?? {},
-          kibanaDataViews,
+          defaultDataView,
+          kibanaDataViews: allDataViews.map((dv) => (dv.id === dataViewId ? defaultDataView : dv)),
         };
+
         return response.ok({ body });
       } catch (err) {
         const error = transformError(err);

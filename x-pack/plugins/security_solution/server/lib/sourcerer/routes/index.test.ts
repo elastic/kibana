@@ -15,6 +15,7 @@ import {
 import { SOURCERER_API_URL } from '../../../../common/constants';
 import { StartServicesAccessor } from 'kibana/server';
 import { StartPlugins } from '../../../plugin';
+import { securityMock } from '../../../../../security/server/mocks';
 
 jest.mock('./helpers', () => {
   const original = jest.requireActual('./helpers');
@@ -120,6 +121,7 @@ export const getSourcererRequest = (patternList: string[]) =>
   });
 
 describe('sourcerer route', () => {
+  const security = securityMock.createSetup();
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
 
@@ -129,21 +131,21 @@ describe('sourcerer route', () => {
   });
 
   test('returns sourcerer formatted Data Views when SIEM Data View does NOT exist', async () => {
-    createSourcererDataViewRoute(server.router, getStartServicesNotSiem);
+    createSourcererDataViewRoute(server.router, getStartServicesNotSiem, security);
     const response = await server.inject(getSourcererRequest(mockPatternList), context);
     expect(response.status).toEqual(200);
     expect(response.body).toEqual(mockDataViewsTransformed);
   });
 
   test('returns sourcerer formatted Data Views when SIEM Data View exists', async () => {
-    createSourcererDataViewRoute(server.router, getStartServices);
+    createSourcererDataViewRoute(server.router, getStartServices, security);
     const response = await server.inject(getSourcererRequest(mockPatternList), context);
     expect(response.status).toEqual(200);
     expect(response.body).toEqual(mockDataViewsTransformed);
   });
 
   test('returns sourcerer formatted Data Views when SIEM Data View exists and patternList input is changed', async () => {
-    createSourcererDataViewRoute(server.router, getStartServices);
+    createSourcererDataViewRoute(server.router, getStartServices, security);
     mockPatternList.shift();
     const response = await server.inject(getSourcererRequest(mockPatternList), context);
     expect(response.status).toEqual(200);

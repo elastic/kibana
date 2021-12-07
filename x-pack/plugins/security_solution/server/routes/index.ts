@@ -154,5 +154,5 @@ export const initRoutes = (
   readPrivilegesRoute(router, hasEncryptionKey);
 
   // Sourcerer API to generate default pattern
-  createSourcererDataViewRoute(router, getStartServices);
+  createSourcererDataViewRoute(router, getStartServices, security);
 };
