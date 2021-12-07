@@ -24,12 +24,13 @@ import {
   ENDPOINT_ACTION_LOG_ROUTE,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../common/endpoint/constants';
 import {
   pendingActionsHttpMock,
   PendingActionsHttpMockInterface,
 } from '../../../common/lib/endpoint_pending_actions/mocks';
-import { METADATA_TRANSFORM_STATS_URL, TRANSFORM_STATES } from '../../../../common/constants';
+import { TRANSFORM_STATES } from '../../../../common/constants';
 import { TransformStatsResponse } from './types';
 import {
   fleetGetAgentPolicyListHttpMock,
@@ -162,7 +163,7 @@ export const failedTransformStateMock = {
 export const transformsHttpMocks = httpHandlerMockFactory<TransformHttpMocksInterface>([
   {
     id: 'metadataTransformStats',
-    path: METADATA_TRANSFORM_STATS_URL,
+    path: METADATA_TRANSFORMS_STATUS_ROUTE,
     method: 'get',
     handler: () => failedTransformStateMock,
   },

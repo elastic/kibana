@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { noneConnectorId } from '../../../common';
+import { noneConnectorId } from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
-  getNoneCaseConnector,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
   USER_ACTION_OLD_ID_REF_NAME,
   USER_ACTION_OLD_PUSH_ID_REF_NAME,
-} from '../../common';
+} from '../../common/constants';
+import { getNoneCaseConnector } from '../../common/utils';
 import { createConnectorObject, createExternalService, createJiraConnector } from '../test_utils';
 import {
   extractConnectorIdHelper,

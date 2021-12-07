@@ -86,6 +86,7 @@ export function PieComponent(
     truncateLegend,
     hideLabels,
     palette,
+    showValuesInLegend,
   } = props.args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
@@ -315,7 +316,7 @@ export function PieComponent(
                 (legend.getShowLegendDefault?.(bucketColumns) ?? false)))
           }
           flatLegend={legend.flat}
-          showLegendExtra={legend.showValues}
+          showLegendExtra={showValuesInLegend}
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={props.interactive ?? true ? onElementClickHandler : undefined}

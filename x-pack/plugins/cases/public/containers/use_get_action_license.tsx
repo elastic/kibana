@@ -11,7 +11,7 @@ import { useToasts } from '../common/lib/kibana';
 import { getActionLicense } from './api';
 import * as i18n from './translations';
 import { ActionLicense } from './types';
-import { ConnectorTypes } from '../../common';
+import { ConnectorTypes } from '../../common/api';
 
 export interface ActionLicenseState {
   actionLicense: ActionLicense | null;
