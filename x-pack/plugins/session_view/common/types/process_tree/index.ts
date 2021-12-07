@@ -29,6 +29,16 @@ export interface User {
   name: string;
 }
 
+export interface EventResultBody {
+  hits: any[];
+  total: number;
+}
+
+export interface ProcessEventResults {
+  events: EventResultBody;
+  alerts: EventResultBody;
+}
+
 export interface ProcessFields {
   args: string[];
   args_count: number;
@@ -125,3 +135,7 @@ export interface Process {
   isUserEntered(): boolean;
   getMaxAlertLevel(): number | null;
 }
+
+export type ProcessMap = {
+  [key: string]: Process;
+};

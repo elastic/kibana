@@ -9,19 +9,8 @@ import { useQuery } from 'react-query';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { ProcessEvent } from '../../../common/types/process_tree';
+import { ProcessEvent, ProcessEventResults } from '../../../common/types/process_tree';
 import { PROCESS_EVENTS_ROUTE } from '../../../common/constants';
-
-interface ProcessEventResults {
-  events: {
-    hits: any[];
-    total: number;
-  };
-  alerts: {
-    hits: any[];
-    total: number;
-  };
-}
 
 export const useFetchSessionViewProcessEvents = (sessionEntityId: string) => {
   const { http } = useKibana<CoreStart>().services;
@@ -37,6 +26,7 @@ export const useFetchSessionViewProcessEvents = (sessionEntityId: string) => {
 
 export const useParseSessionViewProcessEvents = (getData: ProcessEventResults | undefined) => {
   const [data, setData] = useState<ProcessEvent[]>([]);
+  const { events, alerts } = getData || {};
 
   const sortEvents = (a: ProcessEvent, b: ProcessEvent) => {
     if (a['@timestamp'].valueOf() < b['@timestamp'].valueOf()) {
@@ -49,19 +39,15 @@ export const useParseSessionViewProcessEvents = (getData: ProcessEventResults | 
   };
 
   useEffect(() => {
-    if (!getData) {
-      return;
-    }
-
-    const events: ProcessEvent[] = (getData.events?.hits || []).map(
+    const eventsSource: ProcessEvent[] = (events?.hits || []).map(
       (event: any) => event._source as ProcessEvent
     );
-    const alerts: ProcessEvent[] = (getData.alerts?.hits || []).map((event: any) => {
+    const alertsSource: ProcessEvent[] = (alerts?.hits || []).map((event: any) => {
       return event._source as ProcessEvent;
     });
-    const all: ProcessEvent[] = events.concat(alerts).sort(sortEvents);
+    const all: ProcessEvent[] = eventsSource.concat(alertsSource).sort(sortEvents);
     setData(all);
-  }, [getData]);
+  }, [events, alerts]);
 
   return {
     data,

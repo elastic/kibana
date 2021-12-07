@@ -45,7 +45,7 @@ export function ProcessTreeAlerts({ alerts }: ProcessTreeAlertsDeps) {
     const { name, query, severity } = rule;
 
     return (
-      <EuiText key={uuid} size="s">
+      <EuiText key={uuid} size="s" data-test-subj={`sessionViewAlertDetail-${uuid}`}>
         <EuiFlexGroup>
           <EuiFlexItem>
             <h6>
@@ -77,7 +77,11 @@ export function ProcessTreeAlerts({ alerts }: ProcessTreeAlertsDeps) {
             {event.action}
             <EuiSpacer />
             <div>
-              <EuiButton size="s" href={getRuleUrl(alert)}>
+              <EuiButton
+                size="s"
+                href={getRuleUrl(alert)}
+                data-test-subj={`sessionViewAlertDetailViewRule-${uuid}`}
+              >
                 <FormattedMessage id="xpack.sessionView.viewRule" defaultMessage="View rule" />
               </EuiButton>
             </div>
@@ -92,5 +96,9 @@ export function ProcessTreeAlerts({ alerts }: ProcessTreeAlertsDeps) {
     );
   };
 
-  return <div css={styles.container}>{alerts.map(renderAlertDetails)}</div>;
+  return (
+    <div css={styles.container} data-test-subj="sessionViewAlertDetails">
+      {alerts.map(renderAlertDetails)}
+    </div>
+  );
 }

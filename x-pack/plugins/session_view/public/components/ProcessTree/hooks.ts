@@ -12,7 +12,9 @@ import {
   EventActionPartition,
   Process,
   ProcessEvent,
-} from '../../common/types/process_tree';
+  ProcessMap,
+} from '../../../common/types/process_tree';
+import { processNewEvents, searchProcessTree, autoExpandProcessTree } from './helpers';
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;
@@ -21,11 +23,7 @@ interface UseProcessTreeDeps {
   searchQuery?: string;
 }
 
-type ProcessMap = {
-  [key: string]: Process;
-};
-
-class ProcessImpl implements Process {
+export class ProcessImpl implements Process {
   id: string;
   events: ProcessEvent[];
   children: Process[];
@@ -82,7 +80,7 @@ class ProcessImpl implements Process {
       return eventsPartition.fork[eventsPartition.fork.length - 1];
     }
 
-    return {} as ProcessEvent;
+    return this.events[this.events.length - 1] || ({} as ProcessEvent);
   }
 
   getOutput() {
@@ -136,116 +134,35 @@ export const useProcessTree = ({
   const [searchResults, setSearchResults] = useState<Process[]>([]);
   const [orphans, setOrphans] = useState<Process[]>([]);
 
-  const updateProcessMap = (events: ProcessEvent[]) => {
-    events.forEach((event) => {
-      const { entity_id: id } = event.process;
-      let process = processMap[id];
-
-      if (!process) {
-        process = new ProcessImpl(id);
-        processMap[id] = process;
-      }
-
-      process.events.push(event);
-    });
-  };
-
-  const buildProcessTree = (events: ProcessEvent[], backwardDirection: boolean = false) => {
-    events.forEach((event) => {
-      const process = processMap[event.process.entity_id];
-      const parentProcess = processMap[event.process.parent?.entity_id];
-
-      if (parentProcess) {
-        process.parent = parentProcess; // handy for recursive operations (like auto expand)
-
-        if (!parentProcess.children.includes(process) && parentProcess.id !== process.id) {
-          if (backwardDirection) {
-            parentProcess.children.unshift(process);
-          } else {
-            parentProcess.children.push(process);
-          }
-        }
-      } else if (process.id !== sessionEntityId && !orphans.includes(process)) {
-        // if no parent process, process is probably orphaned
-        orphans.push(process);
-      }
-    });
-  };
-
-  const searchProcessTree = () => {
-    const results = [];
-
-    if (searchQuery) {
-      for (const processId of Object.keys(processMap)) {
-        const process = processMap[processId];
-        const event = process.getDetails();
-        const { working_directory: workingDirectory, args } = event.process;
-
-        // TODO: the text we search is the same as what we render.
-        // should this be customizable??
-        const text = `${workingDirectory} ${args.join(' ')}`;
-
-        process.searchMatched = text.includes(searchQuery) ? searchQuery : null;
-
-        if (process.searchMatched) {
-          results.push(process);
-        }
-      }
-    } else {
-      for (const processId of Object.keys(processMap)) {
-        processMap[processId].searchMatched = null;
-        processMap[processId].autoExpand = false;
-      }
-    }
-
-    setSearchResults(results);
-  };
-
-  const autoExpandProcessTree = () => {
-    for (const processId of Object.keys(processMap)) {
-      const process = processMap[processId];
-
-      if (process.searchMatched || process.isUserEntered()) {
-        let { parent } = process;
-
-        while (parent && parent.id !== parent.parent?.id) {
-          parent.autoExpand = true;
-          parent = parent.parent;
-        }
-      }
-    }
-  };
-
-  const processNewEvents = (
-    events: ProcessEvent[] | undefined,
-    backwardDirection: boolean = false
-  ) => {
-    if (!events || events.length === 0) {
-      return;
-    }
-
-    updateProcessMap(events);
-    buildProcessTree(events, backwardDirection);
-    autoExpandProcessTree();
-  };
-
   useEffect(() => {
+    let eventsProcessMap: ProcessMap = processMap;
     if (backward) {
-      processNewEvents(backward.slice(0, backward.length - backwardIndex), true);
+      eventsProcessMap = processNewEvents(
+        eventsProcessMap,
+        backward.slice(0, backward.length - backwardIndex),
+        orphans,
+        sessionEntityId,
+        true
+      );
       setBackwardIndex(backward.length);
     }
 
-    processNewEvents(forward.slice(forwardIndex));
+    eventsProcessMap = processNewEvents(
+      eventsProcessMap,
+      forward.slice(forwardIndex),
+      orphans,
+      sessionEntityId
+    );
     setForwardIndex(forward.length);
 
-    setProcessMap({ ...processMap });
+    setProcessMap({ ...eventsProcessMap });
     setOrphans([...orphans]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forward, backward]);
 
   useEffect(() => {
-    searchProcessTree();
-    autoExpandProcessTree();
+    setSearchResults(searchProcessTree(processMap, searchQuery));
+    autoExpandProcessTree(processMap);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 

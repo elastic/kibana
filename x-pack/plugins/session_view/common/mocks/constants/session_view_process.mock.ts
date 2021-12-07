@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import { Process, ProcessEvent, EventAction, EventKind } from '../../types/process_tree';
+import {
+  Process,
+  ProcessEvent,
+  ProcessFields,
+  EventAction,
+  EventKind,
+  ProcessMap,
+  User,
+} from '../../types/process_tree';
 
-const mockEvents = [
+export const mockEvents = [
   {
     '@timestamp': new Date('2021-11-23T15:25:04.210Z'),
     process: {
@@ -91,7 +99,7 @@ const mockEvents = [
       },
       executable: '/usr/bin/vi',
       interactive: true,
-      entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726',
+      entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3727',
       parent: {
         pid: 2442,
         pgid: 2442,
@@ -163,7 +171,7 @@ const mockEvents = [
       },
       executable: '/usr/bin/vi',
       interactive: true,
-      entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726',
+      entity_id: '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3728',
       parent: {
         pid: 2442,
         pgid: 2442,
@@ -226,7 +234,7 @@ const mockEvents = [
   },
 ];
 
-const mockAlerts = [
+export const mockAlerts = [
   {
     kibana: {
       alert: {
@@ -419,8 +427,8 @@ const mockAlerts = [
   },
 ];
 
-const processMock: Process = {
-  id: '3f44d854-fe8d-5666-abc9-9efe7f970b4b',
+export const processMock: Process = {
+  id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
   events: [],
   children: [],
   autoExpand: false,
@@ -431,7 +439,31 @@ const processMock: Process = {
   getAlerts: () => [],
   hasExec: () => false,
   getOutput: () => '',
-  getDetails: () => ({} as ProcessEvent),
+  getDetails: () =>
+    ({
+      '@timestamp': new Date('2021-11-23T15:25:04.210Z'),
+      event: {
+        kind: EventKind.event,
+        category: 'process',
+        action: EventAction.exec,
+      },
+      process: {
+        args: [],
+        args_count: 0,
+        command_line: '',
+        entity_id: '3d0192c6-7c54-5ee6-a110-3539a7cf42bc',
+        executable: '',
+        interactive: false,
+        name: '',
+        working_directory: '/home/vagrant',
+        pid: 1,
+        pgid: 1,
+        user: {} as User,
+        parent: {} as ProcessFields,
+        session: {} as ProcessFields,
+        entry: {} as ProcessFields,
+      },
+    } as ProcessEvent),
   isUserEntered: () => false,
   getMaxAlertLevel: () => null,
 };
@@ -451,3 +483,28 @@ export const sessionViewAlertProcessMock: Process = {
   hasExec: () => true,
   isUserEntered: () => true,
 };
+
+export const mockProcessMap = mockEvents.reduce(
+  (processMap, event) => {
+    processMap[event.process.entity_id] = {
+      id: event.process.entity_id,
+      events: [event],
+      children: [],
+      parent: undefined,
+      autoExpand: false,
+      searchMatched: null,
+      hasOutput: () => false,
+      hasAlerts: () => false,
+      getAlerts: () => [],
+      hasExec: () => false,
+      getOutput: () => '',
+      getDetails: () => event,
+      isUserEntered: () => false,
+      getMaxAlertLevel: () => null,
+    };
+    return processMap;
+  },
+  {
+    [sessionViewBasicProcessMock.id]: sessionViewBasicProcessMock,
+  } as ProcessMap
+);
