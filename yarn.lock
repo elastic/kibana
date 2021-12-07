@@ -5502,11 +5502,6 @@
   resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.7.tgz#c8fa532b60a0042219cdf173ca21a975ef0666ad"
   integrity sha512-wE2v81i4C4Ol09RtsWFAqg3BUitWbHSpSlIo+bNdsCJijO9sjme+zm+73ZMCa/qMC8UEERxzGbvmr1cffo2SiQ==
 
-"@types/getopts@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@types/getopts/-/getopts-2.0.1.tgz#b7e5478fe7571838b45aff736a59ab69b8bcda18"
-  integrity sha512-JsQJHtzLYKunMz7acYOX6x5IJ/42CsjjHFfLCmis1Hn/qFoD/y0kJFUIAg8HoDigQpKUcWj55d8rxZQBnvz1Pw==
-
 "@types/getos@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/getos/-/getos-3.0.0.tgz#582c758e99e9d634f31f471faf7ce59cf1c39a71"
@@ -5848,6 +5843,10 @@
   uid ""
 
 "@types/kbn__crypto@link:bazel-bin/packages/kbn-crypto/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__docs-utils@link:bazel-bin/packages/kbn-docs-utils/npm_module_types":
   version "0.0.0"
   uid ""
 
