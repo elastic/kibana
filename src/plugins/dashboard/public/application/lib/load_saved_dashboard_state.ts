@@ -8,10 +8,10 @@
 
 import _ from 'lodash';
 
+import { getDashboard60Warning, dashboardLoadingErrorStrings } from '../../dashboard_strings';
 import { savedObjectToDashboardState } from './convert_dashboard_state';
 import { DashboardState, DashboardBuildContext } from '../../types';
 import { DashboardConstants, DashboardSavedObject } from '../..';
-import { getDashboard60Warning } from '../../dashboard_strings';
 import { migrateLegacyQuery } from './migrate_legacy_query';
 import { cleanFiltersForSerialize } from './filter_utils';
 import { ViewMode } from '../../services/embeddable';
@@ -51,16 +51,44 @@ export const loadSavedDashboardState = async ({
     notifications.toasts.addWarning(getDashboard60Warning());
     return;
   }
+<<<<<<< HEAD
   await indexPatterns.ensureDefaultIndexPattern();
   let savedDashboard: DashboardSavedObject | undefined;
   try {
     savedDashboard = (await savedDashboards.get(savedDashboardId)) as DashboardSavedObject;
+=======
+  await indexPatterns.ensureDefaultDataView();
+  try {
+    const savedDashboard = (await savedDashboards.get({
+      id: savedDashboardId,
+      useResolve: true,
+    })) as DashboardSavedObject;
+    const savedDashboardState = savedObjectToDashboardState({
+      savedDashboard,
+      usageCollection,
+      showWriteControls,
+      savedObjectsTagging,
+      version: initializerContext.env.packageInfo.version,
+    });
+
+    const isViewMode = !showWriteControls || Boolean(savedDashboard.id);
+    savedDashboardState.viewMode = isViewMode ? ViewMode.VIEW : ViewMode.EDIT;
+    savedDashboardState.filters = cleanFiltersForSerialize(savedDashboardState.filters);
+    savedDashboardState.query = migrateLegacyQuery(
+      savedDashboardState.query || queryString.getDefaultQuery()
+    );
+
+    return { savedDashboardState, savedDashboard };
+>>>>>>> 44c19bd2ca9... [Dashboard] Fix Invalid Filter Blank Screen (#120530)
   } catch (error) {
     // E.g. a corrupt or deleted dashboard
-    notifications.toasts.addDanger(error.message);
+    notifications.toasts.addDanger(
+      dashboardLoadingErrorStrings.getDashboardLoadError(error.message)
+    );
     history.push(DashboardConstants.LANDING_PAGE_PATH);
     return;
   }
+<<<<<<< HEAD
   if (!savedDashboard) return;
 
   const savedDashboardState = savedObjectToDashboardState({
@@ -79,4 +107,6 @@ export const loadSavedDashboardState = async ({
   );
 
   return { savedDashboardState, savedDashboard };
+=======
+>>>>>>> 44c19bd2ca9... [Dashboard] Fix Invalid Filter Blank Screen (#120530)
 };
