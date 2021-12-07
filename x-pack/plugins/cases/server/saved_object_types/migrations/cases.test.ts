@@ -13,7 +13,7 @@ import {
   noneConnectorId,
 } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { getNoneCaseConnector } from '../../common';
+import { getNoneCaseConnector } from '../../common/utils';
 import { createExternalService, ESCaseConnectorWithId } from '../../services/test_utils';
 import { caseConnectorIdMigration } from './cases';
 
