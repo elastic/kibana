@@ -94,7 +94,7 @@ export function getServiceColumns({
                 />
               );
             },
-          },
+          } as ITableColumn<ServiceListItem>,
         ]
       : []),
     {
