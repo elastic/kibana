@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 import { Forms } from '../../../../../shared_imports';
 import { useLoadNodesPlugins } from '../../../../services';
