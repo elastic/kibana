@@ -404,7 +404,7 @@ async function addPreconfiguredPolicyPackages(
   agentPolicy: AgentPolicy,
   installedPackagePolicies: Array<
     Partial<Omit<NewPackagePolicy, 'inputs'>> & {
-      id: string | number;
+      id?: string | number;
       name: string;
       installedPackage: Installation;
       inputs?: InputsOverride[];

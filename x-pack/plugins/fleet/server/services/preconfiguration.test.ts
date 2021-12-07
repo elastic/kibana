@@ -415,7 +415,6 @@ describe('policy preconfiguration', () => {
         id: 'test-id',
         package_policies: [
           {
-            id: 'test-package',
             package: { name: 'test_package' },
             name: 'Test package',
           },
@@ -603,7 +602,6 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
     unenroll_timeout: 60,
     package_policies: [
       {
-        id: 'test_package_policy',
         package: { name: 'test_package' },
         name: 'Test package',
       },
@@ -656,7 +654,6 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
         ...baseConfig,
         package_policies: [
           {
-            id: 'different_package_policy',
             package: { name: 'different_package' },
             name: 'Different package',
           },
