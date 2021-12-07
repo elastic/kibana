@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { InnerLinkPanel } from './inner_link_panel';
-export { LinkPanel } from './link_panel';
-export type { LinkPanelListItem } from './types';
+import { useBasePath } from '../../../common/lib/kibana';
+
+export const useIntegrationsPageLink = () =>
+  `${useBasePath()}/app/integrations/browse?q=threat%20intelligence`;
