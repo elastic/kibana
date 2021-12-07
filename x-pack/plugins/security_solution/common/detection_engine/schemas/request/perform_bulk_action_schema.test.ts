@@ -43,7 +43,7 @@ describe('perform_bulk_action_schema', () => {
     const payload: Omit<PerformBulkActionSchema, 'action'> = {
       query: 'name: test',
     };
-    const message = retrieveValidationMessage(payload);
+    const message = retrieveValidationMessage(payload as PerformBulkActionSchema);
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "action"',
@@ -57,7 +57,7 @@ describe('perform_bulk_action_schema', () => {
       query: 'name: test',
       action: 'unknown',
     };
-    const message = retrieveValidationMessage(payload);
+    const message = retrieveValidationMessage(payload as unknown as PerformBulkActionSchema);
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "unknown" supplied to "action"',
@@ -67,12 +67,12 @@ describe('perform_bulk_action_schema', () => {
   });
 
   test('missing updates array is invalid when action type is update', () => {
-    const payload: PerformBulkActionSchema = {
+    const payload = {
       query: 'name: test',
       action: BulkAction.update,
     };
 
-    const message = retrieveValidationMessage(payload);
+    const message = retrieveValidationMessage(payload as PerformBulkActionSchema);
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "update" supplied to "action"',
@@ -82,7 +82,7 @@ describe('perform_bulk_action_schema', () => {
   });
 
   test('updates property is invalid when action is not update', () => {
-    const payload: PerformBulkActionSchema = {
+    const payload = {
       query: 'name: test',
       action: BulkAction.enable,
       updates: [{ type: BulkActionUpdateType.set_tags, value: ['test-tag'] }],
