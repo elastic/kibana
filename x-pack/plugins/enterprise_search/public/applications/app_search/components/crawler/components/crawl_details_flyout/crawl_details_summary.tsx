@@ -26,7 +26,7 @@ import { CrawlRequestStats } from '../../types';
 interface ICrawlerSummaryProps {
   crawlDepth: number;
   crawlType: string;
-  crawlerLogsEnabled: boolean | undefined;
+  crawlerLogsEnabled: boolean;
   domainCount: number;
   stats: CrawlRequestStats | null;
 }
@@ -50,15 +50,12 @@ export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
     }
   };
 
-  const getStatusCount = (code: string, codes: { [code: string]: number }) => {
-    let count = 0;
-    Object.keys(codes).forEach((key) => {
-      if (key[0] === code) {
-        count += codes[key];
-      }
-    });
-    return count;
-  };
+const getStatusCount = (code: string, codes: { [code: string]: number }) => {
+  return Object.entries(codes).reduce((count, [k, v]) => {
+    if (k[0] !== code) return count;
+    return v + count;
+  }, 0)
+};
 
   const statusCounts = {
     clientErrorCount:
