@@ -19,6 +19,7 @@ export enum ConfigKey {
   MAX_REDIRECTS = 'max_redirects',
   METADATA = '__ui',
   MONITOR_TYPE = 'type',
+  ID = 'id',
   NAME = 'name',
   LOCATIONS = 'locations',
   PARAMS = 'params',
