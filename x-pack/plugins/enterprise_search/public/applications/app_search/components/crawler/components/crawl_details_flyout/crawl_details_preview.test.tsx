@@ -9,12 +9,14 @@ import { setMockValues } from '../../../../../__mocks__/kea_logic';
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
+import { set } from 'lodash/fp';
 
 import { CrawlDetailValues } from '../../crawl_detail_logic';
 import { CrawlerStatus, CrawlType } from '../../types';
 
 import { AccordionList } from './accordion_list';
 import { CrawlDetailsPreview } from './crawl_details_preview';
+import { CrawlDetailsSummary } from './crawl_details_summary';
 
 const MOCK_VALUES: Partial<CrawlDetailValues> = {
   crawlRequest: {
@@ -54,9 +56,37 @@ describe('CrawlDetailsPreview', () => {
   describe('when a crawl request has been loaded', () => {
     let wrapper: ShallowWrapper;
 
-    beforeAll(() => {
+    beforeEach(() => {
       setMockValues(MOCK_VALUES);
       wrapper = shallow(<CrawlDetailsPreview crawlerLogsEnabled />);
+    });
+
+    it('contains a summary', () => {
+      const summary = wrapper.find(CrawlDetailsSummary);
+      expect(summary.props()).toEqual({
+        crawlDepth: 10,
+        crawlType: 'full',
+        crawlerLogsEnabled: true,
+        domainCount: 2,
+        stats: {
+          status: {
+            avgResponseTimeMSec: 100,
+            crawlDurationMSec: 36000,
+            pagesVisited: 10,
+            urlsAllowed: 10,
+          },
+        },
+      });
+    });
+
+    it('will default values on summary if missing', () => {
+      const values = set('crawlRequest.stats', undefined, MOCK_VALUES);
+      setMockValues(values);
+      wrapper = shallow(<CrawlDetailsPreview crawlerLogsEnabled={undefined} />);
+
+      const summary = wrapper.find(CrawlDetailsSummary);
+      expect(summary.prop('crawlerLogsEnabled')).toEqual(false);
+      expect(summary.prop('stats')).toEqual(null);
     });
 
     it('contains a list of domains', () => {
