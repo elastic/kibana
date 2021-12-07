@@ -8,8 +8,11 @@
 
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
+import useObservable from 'react-use/lib/useObservable';
+import { EMPTY } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import {
   EuiFlexGroup,
@@ -139,18 +142,60 @@ export const QueryBarTopRow = React.memo(
 
     const propsOnSubmit = props.onSubmit;
 
+    const toRecentlyUsedRanges = (ranges: TimeRange[]) =>
+      ranges.map(({ from, to }: { from: string; to: string }) => {
+        return {
+          start: from,
+          end: to,
+        };
+      });
+    const timeHistory = props.timeHistory;
+    const timeHistory$ = useMemo(
+      () => timeHistory?.get$().pipe(map(toRecentlyUsedRanges)) ?? EMPTY,
+      [timeHistory]
+    );
+
+    const recentlyUsedRanges = useObservable(
+      timeHistory$,
+      toRecentlyUsedRanges(timeHistory?.get() ?? [])
+    );
+    const [commonlyUsedRanges] = useState(() => {
+      return (
+        uiSettings
+          ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
+          ?.map(({ from, to, display }: { from: string; to: string; display: string }) => {
+            return {
+              start: from,
+              end: to,
+              label: display,
+            };
+          }) ?? []
+      );
+    });
+
+    const onSubmit = useCallback(
+      ({ query, dateRange }: { query?: Query; dateRange: TimeRange }) => {
+        if (timeHistory) {
+          timeHistory.add(dateRange);
+        }
+
+        propsOnSubmit({ query, dateRange });
+      },
+      [timeHistory, propsOnSubmit]
+    );
+
     const onClickSubmitButton = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         if (persistedLog && queryRef.current) {
           persistedLog.add(queryRef.current.query);
         }
         event.preventDefault();
-        propsOnSubmit({
+        onSubmit({
           query: queryRef.current,
           dateRange: dateRangeRef.current,
         });
       },
-      [propsOnSubmit, persistedLog]
+      [persistedLog, onSubmit]
     );
 
     const propsOnChange = props.onChange;
@@ -190,12 +235,12 @@ export const QueryBarTopRow = React.memo(
         };
 
         if (isQuickSelection) {
-          propsOnSubmit(retVal);
+          onSubmit(retVal);
         } else {
           propsOnChange(retVal);
         }
       },
-      [propsOnChange, propsOnSubmit]
+      [propsOnChange, onSubmit]
     );
 
     const propsOnRefresh = props.onRefresh;
@@ -212,50 +257,6 @@ export const QueryBarTopRow = React.memo(
         }
       },
       [propsOnRefresh]
-    );
-
-    const timeHistory = props.timeHistory;
-
-    const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(() =>
-      timeHistory?.get().map(({ from, to }: { from: string; to: string }) => {
-        return {
-          start: from,
-          end: to,
-        };
-      })
-    );
-
-    const [commonlyUsedRanges] = useState(() => {
-      return (
-        uiSettings
-          ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
-          ?.map(({ from, to, display }: { from: string; to: string; display: string }) => {
-            return {
-              start: from,
-              end: to,
-              label: display,
-            };
-          }) ?? []
-      );
-    });
-
-    const onSubmit = useCallback(
-      ({ query, dateRange }: { query?: Query; dateRange: TimeRange }) => {
-        if (timeHistory) {
-          timeHistory.add(dateRange);
-          setRecentlyUsedRanges(
-            timeHistory?.get().map(({ from, to }: { from: string; to: string }) => {
-              return {
-                start: from,
-                end: to,
-              };
-            })
-          );
-        }
-
-        propsOnSubmit({ query, dateRange });
-      },
-      [timeHistory, propsOnSubmit]
     );
 
     const onInputSubmit = useCallback(
