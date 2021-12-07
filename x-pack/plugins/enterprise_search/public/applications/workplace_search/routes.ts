@@ -29,7 +29,6 @@ export const DIFFERENT_SYNC_TYPES_DOCS_URL = docLinks.workplaceSearchIndexingSch
 export const DOCUMENT_PERMISSIONS_DOCS_URL = docLinks.workplaceSearchDocumentPermissions;
 export const ENT_SEARCH_LICENSE_MANAGEMENT = docLinks.licenseManagement;
 export const EXTERNAL_IDENTITIES_DOCS_URL = docLinks.workplaceSearchExternalIdentities;
-export const GETTING_STARTED_DOCS_URL = docLinks.workplaceSearchGettingStarted;
 export const OBJECTS_AND_ASSETS_DOCS_URL = docLinks.workplaceSearchSynch;
 export const PRIVATE_SOURCES_DOCS_URL = docLinks.workplaceSearchPermissions;
 export const SECURITY_DOCS_URL = docLinks.workplaceSearchSecurity;
