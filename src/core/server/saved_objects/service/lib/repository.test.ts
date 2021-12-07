@@ -3558,6 +3558,20 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
+      it('search for the right fields when typeToNamespacesMap is set', async () => {
+        const relevantOpts = {
+          ...commonOptions,
+          fields: ['title'],
+          type: '',
+          namespaces: [],
+          typeToNamespacesMap: new Map([[type, [namespace]]]),
+        };
+
+        await findSuccess(relevantOpts, namespace);
+        const esOptions = client.search.mock.calls[0][0];
+        expect(esOptions?._source ?? []).toContain('index-pattern.title');
+      });
+
       it(`accepts hasReferenceOperator`, async () => {
         const relevantOpts: SavedObjectsFindOptions = {
           ...commonOptions,
