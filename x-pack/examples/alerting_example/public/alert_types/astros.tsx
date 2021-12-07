@@ -28,7 +28,7 @@ export function registerNavigation(alerting: AlertingSetup) {
   alerting.registerNavigation(
     ALERTING_EXAMPLE_APP_ID,
     'example.people-in-space',
-    (rule: SanitizedAlert) => `/astros/${rule.id}`
+    (alert: SanitizedAlert) => `/astros/${alert.id}`
   );
 }
 

@@ -390,7 +390,7 @@ export class AlertingPlugin {
         ruleTypeRegistry: this.ruleTypeRegistry!,
         kibanaBaseUrl: this.kibanaBaseUrl,
         supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
-        maxEphemeralActionsPerAlert: config.maxEphemeralActionsPerAlert,
+        maxEphemeralActionsPerRule: config.maxEphemeralActionsPerAlert,
         cancelAlertsOnRuleTimeout: config.cancelAlertsOnRuleTimeout,
       });
     });

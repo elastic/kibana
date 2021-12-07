@@ -29,10 +29,10 @@ import { alertsMock, rulesClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { IEventLogger } from '../../../event_log/server';
 import { Alert, RecoveredActionGroup } from '../../common';
-import { UntypedNormalizedAlertType } from '../rule_type_registry';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 
-const ruleType: jest.Mocked<UntypedNormalizedAlertType> = {
+const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test',
   name: 'My test rule',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -100,7 +100,7 @@ describe('Task Runner Cancel', () => {
     ruleTypeRegistry,
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: false,
-    maxEphemeralActionsPerAlert: 10,
+    maxEphemeralActionsPerRule: 10,
     cancelAlertsOnRuleTimeout: true,
   };
 
