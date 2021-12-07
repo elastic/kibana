@@ -81,6 +81,7 @@ TYPES_DEPS = [
   "//packages/kbn-utils",
   "@npm//@elastic/elasticsearch",
   "@npm//axios",
+  "@npm//elastic-apm-node",
   "@npm//del",
   "@npm//exit-hook",
   "@npm//form-data",
