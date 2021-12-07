@@ -34,12 +34,12 @@ import { TruncateLabelsOption } from './truncate_labels';
 import { PaletteRegistry } from '../../../../../charts/public';
 import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
 import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../../types';
-import { donutInnerAreaSizeOptions, getLabelPositions, getValuesFormats } from '../collections';
+import { emptySizeRatioOptions, getLabelPositions, getValuesFormats } from '../collections';
 import { getLegendPositions } from '../positions';
 
 export interface PieOptionsProps extends VisEditorOptionsProps<PieVisParams>, PieTypeProps {}
 
-const donutInnerAreaSizeLabel = i18n.translate('visTypePie.editors.pie.donutInnerAreaSizeLabel', {
+const emptySizeRatioLabel = i18n.translate('visTypePie.editors.pie.emptySizeRatioLabel', {
   defaultMessage: 'Inner area size',
 });
 
@@ -101,10 +101,10 @@ const PieOptions = (props: PieOptionsProps) => {
     fetchPalettes();
   }, [props.palettes]);
 
-  const handleDonutInnerAreaSizeChange = useCallback(
+  const handleEmptySizeRatioChange = useCallback(
     (sizeId) => {
-      const donutInnerAreaSize = donutInnerAreaSizeOptions.find(({ id }) => id === sizeId)?.value;
-      setValue('donutInnerAreaSize', donutInnerAreaSize);
+      const emptySizeRatio = emptySizeRatioOptions.find(({ id }) => id === sizeId)?.value;
+      setValue('emptySizeRatio', emptySizeRatio);
     },
     [setValue]
   );
@@ -130,19 +130,18 @@ const PieOptions = (props: PieOptionsProps) => {
           setValue={setValue}
         />
         {stateParams.isDonut && (
-          <EuiFormRow label={donutInnerAreaSizeLabel} fullWidth>
+          <EuiFormRow label={emptySizeRatioLabel} fullWidth>
             <EuiButtonGroup
               isFullWidth
-              name="donutInnerAreaSize"
+              name="emptySizeRatio"
               buttonSize="compressed"
-              legend={donutInnerAreaSizeLabel}
-              options={donutInnerAreaSizeOptions}
+              legend={emptySizeRatioLabel}
+              options={emptySizeRatioOptions}
               idSelected={
-                donutInnerAreaSizeOptions.find(
-                  ({ value }) => value === stateParams.donutInnerAreaSize
-                )?.id ?? 'donutInnerAreaSizeOption-medium'
+                emptySizeRatioOptions.find(({ value }) => value === stateParams.emptySizeRatio)
+                  ?.id ?? 'emptySizeRatioOption-medium'
               }
-              onChange={handleDonutInnerAreaSizeChange}
+              onChange={handleEmptySizeRatioChange}
             />
           </EuiFormRow>
         )}

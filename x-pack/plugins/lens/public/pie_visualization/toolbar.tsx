@@ -53,7 +53,7 @@ const legendOptions: Array<{
   },
 ];
 
-const innerAreaSizeLabel = i18n.translate('xpack.lens.pieChart.innerAreaSizeLabel', {
+const emptySizeRatioLabel = i18n.translate('xpack.lens.pieChart.emptySizeRatioLabel', {
   defaultMessage: 'Inner area size',
 });
 
@@ -66,7 +66,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   const {
     categoryOptions,
     numberOptions,
-    innerAreaSizeOptions,
+    emptySizeRatioOptions,
     isDisabled: isToolbarPopoverDisabled,
   } = PartitionChartsMeta[state.shape].toolbarPopover;
 
@@ -146,7 +146,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           />
         </EuiFormRow>
       </ToolbarPopover>
-      {innerAreaSizeOptions.length ? (
+      {emptySizeRatioOptions?.length ? (
         <ToolbarPopover
           title={i18n.translate('xpack.lens.pieChart.visualOptionsLabel', {
             defaultMessage: 'Visual options',
@@ -155,22 +155,20 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           groupPosition="center"
           buttonDataTestSubj="lnsVisualOptionsButton"
         >
-          <EuiFormRow label={innerAreaSizeLabel} display="columnCompressed" fullWidth>
+          <EuiFormRow label={emptySizeRatioLabel} display="columnCompressed" fullWidth>
             <EuiButtonGroup
               isFullWidth
-              name="donutInnerAreaSize"
+              name="emptySizeRatio"
               buttonSize="compressed"
-              legend={innerAreaSizeLabel}
-              options={innerAreaSizeOptions}
+              legend={emptySizeRatioLabel}
+              options={emptySizeRatioOptions}
               idSelected={
-                innerAreaSizeOptions.find(({ value }) => value === layer.donutInnerAreaSize)?.id ??
-                'innerAreaSizeOption-medium'
+                emptySizeRatioOptions.find(({ value }) => value === layer.emptySizeRatio)?.id ??
+                'emptySizeRatioOption-medium'
               }
               onChange={(sizeId) => {
-                const donutInnerAreaSize = innerAreaSizeOptions.find(
-                  ({ id }) => id === sizeId
-                )?.value;
-                setState({ ...state, layers: [{ ...layer, donutInnerAreaSize }] });
+                const emptySizeRatio = emptySizeRatioOptions.find(({ id }) => id === sizeId)?.value;
+                setState({ ...state, layers: [{ ...layer, emptySizeRatio }] });
               }}
             />
           </EuiFormRow>

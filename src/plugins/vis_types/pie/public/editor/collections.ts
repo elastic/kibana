@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DONUT_INNER_AREA_SIZE } from './constants';
+import { EMPTY_SIZE_RATIOS } from './constants';
 import { LabelPositions, ValueFormats } from '../types';
 
 export const getLabelPositions = [
@@ -40,25 +40,25 @@ export const getValuesFormats = [
   },
 ];
 
-export const donutInnerAreaSizeOptions = [
+export const emptySizeRatioOptions = [
   {
-    id: 'donutInnerAreaSizeOption-small',
-    value: DONUT_INNER_AREA_SIZE.SMALL,
-    label: i18n.translate('visTypePie.donutInnerAreaSizeOptions.small', {
+    id: 'emptySizeRatioOption-small',
+    value: EMPTY_SIZE_RATIOS.SMALL,
+    label: i18n.translate('visTypePie.emptySizeRatioOptions.small', {
       defaultMessage: 'Small',
     }),
   },
   {
-    id: 'donutInnerAreaSizeOption-medium',
-    value: DONUT_INNER_AREA_SIZE.MEDIUM,
-    label: i18n.translate('visTypePie.donutInnerAreaSizeOptions.medium', {
+    id: 'emptySizeRatioOption-medium',
+    value: EMPTY_SIZE_RATIOS.MEDIUM,
+    label: i18n.translate('visTypePie.emptySizeRatioOptions.medium', {
       defaultMessage: 'Medium',
     }),
   },
   {
-    id: 'donutInnerAreaSizeOption-large',
-    value: DONUT_INNER_AREA_SIZE.LARGE,
-    label: i18n.translate('visTypePie.donutInnerAreaSizeOptions.large', {
+    id: 'emptySizeRatioOption-large',
+    value: EMPTY_SIZE_RATIOS.LARGE,
+    label: i18n.translate('visTypePie.emptySizeRatioOptions.large', {
       defaultMessage: 'Large',
     }),
   },

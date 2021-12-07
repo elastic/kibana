@@ -117,9 +117,9 @@ export const createPieVisFn = (): VisTypePieExpressionFunctionDefinition => ({
       }),
       default: false,
     },
-    donutInnerAreaSize: {
+    emptySizeRatio: {
       types: ['number'],
-      help: i18n.translate('visTypePie.function.args.donutInnerAreaSizeHelpText', {
+      help: i18n.translate('visTypePie.function.args.emptySizeRatioHelpText', {
         defaultMessage: 'Defines donut inner empty area size',
       }),
     },

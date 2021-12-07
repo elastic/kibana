@@ -19,7 +19,7 @@ export interface SharedPieLayerState {
   legendPosition?: 'left' | 'right' | 'top' | 'bottom';
   nestedLegend?: boolean;
   percentDecimals?: number;
-  donutInnerAreaSize?: number;
+  emptySizeRatio?: number;
   legendMaxLines?: number;
   truncateLegend?: boolean;
 }

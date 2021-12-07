@@ -8,7 +8,7 @@
 import { Ast } from '@kbn/interpreter/common';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { Operation, DatasourcePublicAPI } from '../types';
-import { DEFAULT_PERCENT_DECIMALS, DONUT_INNER_AREA_SIZE } from './constants';
+import { DEFAULT_PERCENT_DECIMALS, EMPTY_SIZE_RATIOS } from './constants';
 import type { PieVisualizationState } from '../../common/expressions';
 
 export function toExpression(
@@ -55,7 +55,7 @@ function expressionHelper(
           categoryDisplay: [layer.categoryDisplay],
           legendDisplay: [layer.legendDisplay],
           legendPosition: [layer.legendPosition || 'right'],
-          donutInnerAreaSize: [layer.donutInnerAreaSize ?? DONUT_INNER_AREA_SIZE.MEDIUM],
+          emptySizeRatio: [layer.emptySizeRatio ?? EMPTY_SIZE_RATIOS.MEDIUM],
           percentDecimals: [
             state.shape === 'waffle'
               ? DEFAULT_PERCENT_DECIMALS

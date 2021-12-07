@@ -47,7 +47,7 @@ Object {
         "splitRow": undefined,
       },
       "distinctColors": false,
-      "donutInnerAreaSize": 0.3,
+      "emptySizeRatio": 0.3,
       "isDonut": true,
       "labels": Object {
         "percentDecimals": 2,
