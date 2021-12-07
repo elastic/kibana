@@ -66,7 +66,9 @@ describe('create_exceptions_stream_logic', () => {
           getImportExceptionsListItemSchemaMock();
         delete item.item_id;
 
-        const result = exceptionsChecksFromArray([item], 100);
+        // Typescript won, and couldn't get it to accept
+        // a new value (undefined) for item_id
+        const result = exceptionsChecksFromArray([item as ImportExceptionListItemSchema], 100);
 
         expect(result).toEqual({
           items: [new Error('Invalid value "undefined" supplied to "item_id"')],
@@ -79,7 +81,9 @@ describe('create_exceptions_stream_logic', () => {
           getImportExceptionsListItemSchemaMock();
         delete item.entries;
 
-        const result = exceptionsChecksFromArray([item], 100);
+        // Typescript won, and couldn't get it to accept
+        // a new value (undefined) for entries
+        const result = exceptionsChecksFromArray([item as ImportExceptionListItemSchema], 100);
 
         expect(result).toEqual({
           items: [new Error('Invalid value "undefined" supplied to "entries"')],
@@ -108,7 +112,9 @@ describe('create_exceptions_stream_logic', () => {
           getImportExceptionsListSchemaMock();
         delete list.list_id;
 
-        const result = exceptionsChecksFromArray([list], 100);
+        // Typescript won, and couldn't get it to accept
+        // a new value (undefined) for list_id
+        const result = exceptionsChecksFromArray([list as ImportExceptionsListSchema], 100);
 
         expect(result).toEqual({
           items: [],

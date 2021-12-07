@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import {
-  getImportExceptionsListItemSchemaDecodedMock,
-  getImportExceptionsListSchemaDecodedMock,
-} from '../../../../../common/schemas/request/import_exceptions_schema.mock';
+import { getImportExceptionsListItemSchemaDecodedMock } from '../../../../../common/schemas/request/import_exceptions_schema.mock';
+import { getExceptionListSchemaMock } from '../../../../../common/schemas/response/exception_list_schema.mock';
+import { getExceptionListItemSchemaMock } from '../../../../../common/schemas/response/exception_list_item_schema.mock';
 
 import { sortExceptionItemsToUpdateOrCreate } from './sort_exception_items_to_create_update';
 
@@ -54,7 +53,7 @@ describe('sort_exception_lists_items_to_create_update', () => {
         const result = sortExceptionItemsToUpdateOrCreate({
           existingItems: {},
           existingLists: {
-            'list-id-1': { ...getImportExceptionsListSchemaDecodedMock('list-id-1') },
+            'list-id-1': { ...getExceptionListSchemaMock(), list_id: 'list-id-1' },
           },
           isOverwrite: false,
           items: [getImportExceptionsListItemSchemaDecodedMock('item-id-1', 'list-id-1')],
@@ -114,11 +113,11 @@ describe('sort_exception_lists_items_to_create_update', () => {
         const result = sortExceptionItemsToUpdateOrCreate({
           existingItems: {
             'item-id-1': {
-              ...getImportExceptionsListItemSchemaDecodedMock('item-id-1', 'list-id-1'),
+              ...getExceptionListItemSchemaMock({ item_id: 'item-id-1', list_id: 'list-id-1' }),
             },
           },
           existingLists: {
-            'list-id-1': { ...getImportExceptionsListSchemaDecodedMock('list-id-1') },
+            'list-id-1': { ...getExceptionListSchemaMock(), list_id: 'list-id-1' },
           },
           isOverwrite: false,
           items: [getImportExceptionsListItemSchemaDecodedMock('item-id-1', 'list-id-1')],
@@ -174,11 +173,11 @@ describe('sort_exception_lists_items_to_create_update', () => {
         const result = sortExceptionItemsToUpdateOrCreate({
           existingItems: {
             'item-id-1': {
-              ...getImportExceptionsListItemSchemaDecodedMock('item-id-1', 'list-id-2'),
+              ...getExceptionListItemSchemaMock({ item_id: 'item-id-1', list_id: 'list-id-2' }),
             },
           },
           existingLists: {
-            'list-id-1': { ...getImportExceptionsListSchemaDecodedMock('list-id-1') },
+            'list-id-1': { ...getExceptionListSchemaMock(), list_id: 'list-id-1' },
           },
           isOverwrite: true,
           items: [getImportExceptionsListItemSchemaDecodedMock('item-id-1', 'list-id-1')],
@@ -206,7 +205,7 @@ describe('sort_exception_lists_items_to_create_update', () => {
         const result = sortExceptionItemsToUpdateOrCreate({
           existingItems: {},
           existingLists: {
-            'list-id-1': { ...getImportExceptionsListSchemaDecodedMock('list-id-1') },
+            'list-id-1': { ...getExceptionListSchemaMock(), list_id: 'list-id-1' },
           },
           isOverwrite: true,
           items: [getImportExceptionsListItemSchemaDecodedMock('item-id-1', 'list-id-1')],
@@ -266,11 +265,11 @@ describe('sort_exception_lists_items_to_create_update', () => {
         const result = sortExceptionItemsToUpdateOrCreate({
           existingItems: {
             'item-id-1': {
-              ...getImportExceptionsListItemSchemaDecodedMock('item-id-1', 'list-id-1'),
+              ...getExceptionListItemSchemaMock({ item_id: 'item-id-1', list_id: 'list-id-1' }),
             },
           },
           existingLists: {
-            'list-id-1': { ...getImportExceptionsListSchemaDecodedMock('list-id-1') },
+            'list-id-1': { ...getExceptionListSchemaMock(), list_id: 'list-id-1' },
           },
           isOverwrite: true,
           items: [getImportExceptionsListItemSchemaDecodedMock('item-id-1', 'list-id-1')],
@@ -312,7 +311,7 @@ describe('sort_exception_lists_items_to_create_update', () => {
                 type: 'simple',
                 updated_by: 'elastic',
               },
-              id: undefined,
+              id: '1',
               type: 'exception-list',
             },
           ],

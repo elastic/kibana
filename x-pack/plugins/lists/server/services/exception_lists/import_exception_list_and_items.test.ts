@@ -15,10 +15,10 @@ import {
 } from '../../../../lists/common/schemas/request/import_exceptions_schema.mock';
 
 import { importExceptionsAsStream } from './import_exception_list_and_items';
-import { importExceptionLists } from './utils/import/import_exception_list';
+import { importExceptionLists } from './utils/import/import_exception_lists';
 import { importExceptionListItems } from './utils/import/import_exception_list_items';
 
-jest.mock('./utils/import/import_exception_list');
+jest.mock('./utils/import/import_exception_lists');
 jest.mock('./utils/import/import_exception_list_items');
 
 const toReadable = (items: unknown[]): Readable => {

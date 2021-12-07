@@ -149,8 +149,8 @@ export const validateExceptions = (exceptions: {
   items: Array<ImportExceptionListItemSchema | Error>;
   lists: Array<ImportExceptionsListSchema | Error>;
 }): {
-  items: Array<ImportExceptionListItemSchema | Error>;
-  lists: Array<ImportExceptionsListSchema | Error>;
+  items: Array<ImportExceptionListItemSchemaDecoded | Error>;
+  lists: Array<ImportExceptionListSchemaDecoded | Error>;
 } => {
   return {
     items: validateExceptionsItems(exceptions.items),
@@ -296,8 +296,8 @@ export const exceptionsChecksFromArray = (
   exceptionsToImport: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>,
   exceptionsLimit: number
 ): {
-  items: Array<ImportExceptionListItemSchema | Error>;
-  lists: Array<ImportExceptionsListSchema | Error>;
+  items: Array<ImportExceptionListItemSchemaDecoded | Error>;
+  lists: Array<ImportExceptionListSchemaDecoded | Error>;
 } => {
   return pipe(exceptionsToImport, checkLimits(exceptionsLimit), sortExceptions, validateExceptions);
 };
