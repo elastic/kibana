@@ -191,7 +191,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                 id={htmlIdGenerator()()}
                 label="event:write"
                 checked={eventWriteChecked}
-                onChange={() => setEventWriteChecked(!eventWriteChecked)}
+                onChange={() => setEventWriteChecked(state => !state)}
               />
             </EuiFormRow>
             <EuiSpacer size="s" />
