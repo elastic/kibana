@@ -6,7 +6,8 @@
  */
 
 import { getOr, isEmpty, uniqBy } from 'lodash/fp';
-import { BrowserField, BrowserFields, ColumnHeaderOptions } from '../../../common';
+import type { BrowserField, BrowserFields } from '../../../common/search_strategy';
+import { ColumnHeaderOptions } from '../../../common/types';
 import { defaultHeaders } from '../t_grid/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../t_grid/body/constants';
 

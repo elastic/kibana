@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Direction } from '../../common';
+import { Direction } from '../../common/search_strategy';
 import { TimelineState } from '../types';
 import { defaultHeaders } from './header';
 
