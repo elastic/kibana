@@ -18,7 +18,10 @@ import {
   transformConnectorIdToReference,
   transformPushConnectorIdToReference,
 } from '../../services/user_actions/transform';
-import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../../common';
+import {
+  CONNECTOR_ID_REFERENCE_NAME,
+  PUSH_CONNECTOR_ID_REFERENCE_NAME,
+} from '../../common/constants';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
