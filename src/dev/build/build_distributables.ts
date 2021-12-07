@@ -45,14 +45,14 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   /**
    * verify, reset, and initialize the build environment
    */
-  if (options.initialize) {
-    await run(Tasks.VerifyEnv);
-    await run(Tasks.Clean);
-    await run(
-      options.downloadFreshNode ? Tasks.DownloadNodeBuilds : Tasks.VerifyExistingNodeBuilds
-    );
-    await run(Tasks.ExtractNodeBuilds);
-  }
+  // if (options.initialize) {
+  //   await run(Tasks.VerifyEnv);
+  //   await run(Tasks.Clean);
+  //   await run(
+  //     options.downloadFreshNode ? Tasks.DownloadNodeBuilds : Tasks.VerifyExistingNodeBuilds
+  //   );
+  //   await run(Tasks.ExtractNodeBuilds);
+  // }
 
   /**
    * build example plugins
@@ -60,6 +60,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   if (options.createExamplePlugins) {
     await run(Tasks.BuildKibanaExamplePlugins);
   }
+  return;
 
   /**
    * run platform-generic build tasks
