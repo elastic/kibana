@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { findMostRecentlyChanged } from './find_most_recently_changed';
+
 jest.mock('fs', () => ({
   statSync: jest.fn().mockImplementation((path) => {
     if (path.includes('oldest')) {
@@ -30,8 +32,6 @@ jest.mock('fs', () => ({
     return ['oldest.yml', 'newest.yml', 'middle.yml'];
   }),
 }));
-
-const { findMostRecentlyChanged } = require('./find_most_recently_changed');
 
 test('returns newest file', () => {
   const file = findMostRecentlyChanged('/data/*.yml');
