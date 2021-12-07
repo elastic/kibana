@@ -192,7 +192,7 @@ export class RuleDataClient implements IRuleDataClient {
             return clusterClient.bulk(requestWithDefaultParameters).then((response) => {
               if (response.body.errors) {
                 const error = new errors.ResponseError(response);
-                throw error;
+                this.options.logger.error(error);
               }
               return response;
             });
