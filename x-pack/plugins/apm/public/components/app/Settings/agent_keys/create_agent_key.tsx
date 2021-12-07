@@ -73,9 +73,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
 
   const createAgentKeyTitle = i18n.translate(
     'xpack.apm.settings.agentKeys.createKeyFlyout.createAgentKey',
-    {
-      defaultMessage: 'Create agent key',
-    }
+    { defaultMessage: 'Create agent key', }
   );
 
   const createAgentKey = async () => {
