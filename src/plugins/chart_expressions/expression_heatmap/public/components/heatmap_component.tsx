@@ -272,14 +272,6 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const overwriteColors = uiState?.get('vis.colors') ?? null;
 
   const bands = ranges.map((start, index, array) => {
-    const { min, max } = minMaxByColumnId[args.valueAccessor!];
-    let rangeMax = Infinity;
-    if (paletteParams?.rangeMax) {
-      rangeMax =
-        paletteParams?.range === 'percent'
-          ? min + ((max - min) * paletteParams?.rangeMax) / 100
-          : paletteParams?.rangeMax;
-    }
     // by default the last range is right-open
     let end = index === array.length - 1 ? Infinity : array[index + 1];
     // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value

@@ -65,11 +65,11 @@ export function ColorRanges(props: ColorRangesProps) {
   const dataTestPrefix = props['data-test-prefix'];
   const [isValid, setValid] = useState(true);
   const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
-  const [autoValue, setAutoValue] = useState<CustomPaletteParamsConfig['autoValue']>(
-    paletteConfiguration?.autoValue ?? 'none'
-  );
+
+  let autoValue = paletteConfiguration?.autoValue ?? 'none';
   const isDisabledStart = ['min', 'all'].includes(autoValue!);
   const isDisabledEnd = ['max', 'all'].includes(autoValue!);
+
   const onChangeWithValidation = (newColorRanges: ColorRanges[]) => {
     const upperMin = ['min', 'all'].includes(autoValue!)
       ? -Infinity
@@ -293,9 +293,9 @@ export function ColorRanges(props: ColorRangesProps) {
                       newValue = localColorRanges[index].end - step;
                     }
                     if (isLast) {
-                      setAutoValue(autoValue === 'all' ? 'min' : 'none');
+                      autoValue = autoValue === 'all' ? 'min' : 'none';
                     } else {
-                      setAutoValue(autoValue === 'all' ? 'max' : 'none');
+                      autoValue = autoValue === 'all' ? 'max' : 'none';
                     }
                     localColorRanges[index][isLast ? 'end' : 'start'] = roundValue(newValue);
                     setColorRanges([...localColorRanges]);
@@ -308,30 +308,30 @@ export function ColorRanges(props: ColorRangesProps) {
                   aria-label={
                     isLast
                       ? i18n.translate(
-                          `xpack.lens.dynamicColoring.customPalette.autoDetectMaximumAriaLabel`,
+                          'xpack.lens.dynamicColoring.customPalette.autoDetectMaximumAriaLabel',
                           {
-                            defaultMessage: `Auto detect maximum value`,
+                            defaultMessage: 'Auto detect maximum value',
                           }
                         )
                       : i18n.translate(
-                          `xpack.lens.dynamicColoring.customPalette.autoDetectMinimumAriaLabel`,
+                          'xpack.lens.dynamicColoring.customPalette.autoDetectMinimumAriaLabel',
                           {
-                            defaultMessage: `Auto detect minimum value`,
+                            defaultMessage: 'Auto detect minimum value',
                           }
                         )
                   }
                   title={
                     isLast
                       ? i18n.translate(
-                          `xpack.lens.dynamicColoring.customPalette.autoDetectMaximumLabel`,
+                          'xpack.lens.dynamicColoring.customPalette.autoDetectMaximumLabel',
                           {
-                            defaultMessage: `Auto detect maximum value`,
+                            defaultMessage: 'Auto detect maximum value',
                           }
                         )
                       : i18n.translate(
-                          `xpack.lens.dynamicColoring.customPalette.autoDetectMinimumLabel`,
+                          'xpack.lens.dynamicColoring.customPalette.autoDetectMinimumLabel',
                           {
-                            defaultMessage: `Auto detect minimum value`,
+                            defaultMessage: 'Auto detect minimum value',
                           }
                         )
                   }
@@ -343,9 +343,9 @@ export function ColorRanges(props: ColorRangesProps) {
                       newValue = isLast ? 100 : 0;
                     }
                     if (isLast) {
-                      setAutoValue(autoValue === 'none' ? 'max' : 'all');
+                      autoValue = autoValue === 'none' ? 'max' : 'all';
                     } else {
-                      setAutoValue(autoValue === 'none' ? 'min' : 'all');
+                      autoValue = autoValue === 'none' ? 'min' : 'all';
                     }
 
                     localColorRanges[index][isLast ? 'end' : 'start'] = newValue;

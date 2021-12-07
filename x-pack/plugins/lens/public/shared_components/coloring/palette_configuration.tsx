@@ -24,6 +24,7 @@ import {
   getSwitchToCustomParams,
   roundStopValues,
   roundValue,
+  getStepValue,
 } from './utils';
 
 import { ColorRanges } from './color_ranges';
@@ -54,22 +55,35 @@ function getColorRanges(
   const colorStopsToShow = roundStopValues(
     getColorStops(palettes, colorStops || [], activePalette, dataBounds)
   );
+  const rangeType = activePalette.params?.rangeType ?? 'percent';
+
   const autoValue = activePalette.params?.autoValue;
   let max = activePalette.params?.rangeMax || dataBounds.max;
   let min = activePalette.params?.rangeMin || dataBounds.min;
+  const step = getStepValue(
+    colorStopsToShow,
+    colorStopsToShow,
+    rangeType === 'percent' ? 100 : dataBounds.max
+  );
 
   if (autoValue) {
     if (['max', 'all'].includes(autoValue)) {
-      max = dataBounds.max;
+      max =
+        dataBounds.max > colorStopsToShow[colorStopsToShow.length - 1].stop
+          ? dataBounds.max
+          : colorStopsToShow[colorStopsToShow.length - 1].stop + step;
     }
 
+    // as 0-stop is -infinity when auto detected min value
     if (['min', 'all'].includes(autoValue)) {
-      min = dataBounds.min;
+      min =
+        dataBounds.min < colorStopsToShow[1].stop
+          ? dataBounds.min
+          : colorStopsToShow[1].stop - step;
     }
   }
 
-  // as default range type is percent
-  if (!activePalette.params?.rangeType || activePalette.params?.rangeType === 'percent') {
+  if (rangeType === 'percent') {
     const oldMin = min;
     const interval = max - min;
     min = ((min - oldMin) * 100) / interval;
