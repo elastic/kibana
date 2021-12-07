@@ -10,6 +10,7 @@ import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
 import { AppMountParameters, OverlayRef } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '../../../../kibana_react/public';
 import {
   VisualizeServices,
@@ -21,6 +22,8 @@ import { APP_NAME } from '../visualize_constants';
 import { getTopNavConfig } from '../utils';
 import type { IndexPattern } from '../../../../data/public';
 import type { NavigateToLensOptions } from '../../../../visualizations/public';
+
+const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 
 interface VisualizeTopNavProps {
   currentAppState: VisualizeAppState;
@@ -61,6 +64,15 @@ const TopNav = ({
   const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const [editInLensOptions, setEditInLensOptions] = useState<NavigateToLensOptions | null>();
+  // if the user has clicked the edit in lens button, we want to hide the badge
+  const [hideTryInLensBadge, setHideTryInLensBadge] = useLocalStorage(
+    LOCAL_STORAGE_EDIT_IN_LENS_BADGE,
+    false
+  );
+  const hideLensBadge = useCallback(() => {
+    setHideTryInLensBadge(true);
+  }, [setHideTryInLensBadge]);
+
   const openInspector = useCallback(() => {
     const session = embeddableHandler.openInspector();
     setInspectorSession(session);
@@ -110,6 +122,7 @@ const TopNav = ({
           embeddableId,
           editInLensOptions,
           displayEditInLensItem: Boolean(vis.type.navigateToLens),
+          hideLensBadge,
         },
         services
       );
@@ -130,6 +143,7 @@ const TopNav = ({
     embeddableId,
     editInLensOptions,
     vis.type.navigateToLens,
+    hideLensBadge,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>(
     vis.data.indexPattern ? [vis.data.indexPattern] : []
@@ -247,6 +261,8 @@ const TopNav = ({
       showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
       showSearchBar
       useDefaultBehaviors
+      badges={!hideTryInLensBadge ? [{ badgeText: 'Try it', color: 'accent' }] : []}
+      isBetaBadge={true}
     />
   ) : showFilterBar ? (
     /**

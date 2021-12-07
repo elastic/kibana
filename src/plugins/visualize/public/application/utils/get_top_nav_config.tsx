@@ -67,6 +67,7 @@ export interface TopNavConfigParams {
   embeddableId?: string;
   editInLensOptions?: NavigateToLensOptions | null;
   displayEditInLensItem: boolean;
+  hideLensBadge: () => void;
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -95,6 +96,7 @@ export const getTopNavConfig = (
     embeddableId,
     editInLensOptions,
     displayEditInLensItem,
+    hideLensBadge,
   }: TopNavConfigParams,
   {
     data,
@@ -288,6 +290,7 @@ export const getTopNavConfig = (
             testId: 'visualizeEditInLensButton',
             run: async () => {
               if (editInLensOptions) {
+                hideLensBadge();
                 getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(editInLensOptions);
               }
             },

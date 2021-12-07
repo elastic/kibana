@@ -7,7 +7,14 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiBadge, EuiBadgeGroup, EuiBadgeProps, EuiHeaderLinks } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiBadgeProps,
+  EuiHeaderLinks,
+  EuiBetaBadge,
+  EuiBetaBadgeProps,
+} from '@elastic/eui';
 import classNames from 'classnames';
 
 import { MountPoint } from '../../../../core/public';
@@ -24,6 +31,7 @@ export type TopNavMenuProps = StatefulSearchBarProps &
   Omit<SearchBarProps, 'kibana' | 'intl' | 'timeHistory'> & {
     config?: TopNavMenuData[];
     badges?: Array<EuiBadgeProps & { badgeText: string }>;
+    isBetaBadge?: boolean;
     showSearchBar?: boolean;
     showQueryBar?: boolean;
     showQueryInput?: boolean;
@@ -62,7 +70,7 @@ export type TopNavMenuProps = StatefulSearchBarProps &
  **/
 
 export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
-  const { config, badges, showSearchBar, ...searchBarProps } = props;
+  const { config, badges, isBetaBadge, showSearchBar, ...searchBarProps } = props;
 
   if ((!config || config.length === 0) && (!showSearchBar || !props.data)) {
     return null;
@@ -71,10 +79,17 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   function renderBadges(): ReactElement | null {
     if (!badges || badges.length === 0) return null;
     return (
-      <EuiBadgeGroup className={'kbnTopNavMenu__badgeGroup'}>
+      <EuiBadgeGroup
+        className={
+          Boolean(isBetaBadge) ? 'kbnTopNavMenu__betaBadgeGroup' : 'kbnTopNavMenu__badgeGroup'
+        }
+      >
         {badges.map((badge: EuiBadgeProps & { badgeText: string }, i: number) => {
-          const { badgeText, ...badgeProps } = badge;
-          return (
+          const { badgeText, color, ...badgeProps } = badge;
+          const badgeColor = color as EuiBetaBadgeProps['color'];
+          return Boolean(isBetaBadge) ? (
+            <EuiBetaBadge label={badgeText} color={badgeColor ?? 'subdued'} size="s" />
+          ) : (
             <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
               {badgeText}
             </EuiBadge>
