@@ -47,11 +47,7 @@ export const ErrorStatePrompt: React.FC<{ errorConnectingMessage?: string }> = (
               defaultMessage="We can’t establish a connection to Enterprise Search at the host URL {enterpriseSearchUrl} due to the following error:"
               values={{
                 enterpriseSearchUrl: (
-                  <EuiLink
-                    target="_blank"
-                    href={config.host || ''}
-                    css={{ overflowWrap: 'break-word' }}
-                  >
+                  <EuiLink target="_blank" href={config.host} css={{ overflowWrap: 'break-word' }}>
                     {config.host}
                   </EuiLink>
                 ),
