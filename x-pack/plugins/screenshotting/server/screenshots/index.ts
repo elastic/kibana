@@ -11,7 +11,6 @@ import {
   catchError,
   concatMap,
   first,
-  map,
   mapTo,
   mergeMap,
   take,
