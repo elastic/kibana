@@ -15,7 +15,7 @@ import { useKibana } from '../../../common/lib/kibana';
 
 import * as i18n from './translations';
 import { CreateFieldComponentType, TimelineId } from '../../../../../timelines/common';
-import { tGridActions } from '../../../../../timelines/public';
+import { upsertColumn } from '../../../../../timelines/public';
 import { useDataView } from '../../../common/containers/source/use_data_view';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { sourcererSelectors } from '../../../common/store';
@@ -59,7 +59,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
 
             // Add the new field to the event table
             dispatch(
-              tGridActions.upsertColumn({
+              upsertColumn({
                 column: {
                   columnHeaderType: defaultColumnHeaderType,
                   id: field.name,

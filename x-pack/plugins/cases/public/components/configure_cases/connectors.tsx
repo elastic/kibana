@@ -21,7 +21,7 @@ import * as i18n from './translations';
 
 import { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
-import { ActionTypeConnector, ConnectorTypes } from '../../../common';
+import { ActionTypeConnector, ConnectorTypes } from '../../../common/api';
 import { DeprecatedCallout } from '../connectors/deprecated_callout';
 import { isDeprecatedConnector } from '../utils';
 

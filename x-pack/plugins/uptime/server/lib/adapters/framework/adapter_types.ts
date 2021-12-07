@@ -26,6 +26,7 @@ import { SecurityPluginStart } from '../../../../../security/server';
 import { CloudSetup } from '../../../../../cloud/server';
 import { FleetStartContract } from '../../../../../fleet/server';
 import { UptimeConfig } from '../../../../common/config';
+import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 
 export type UMElasticsearchQueryFn<P, R = any> = (
   params: {
@@ -45,8 +46,9 @@ export interface UptimeServerSetup {
   cloud?: CloudSetup;
   fleet: FleetStartContract;
   security: SecurityPluginStart;
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient?: SavedObjectsClientContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  syntheticsService: SyntheticsService;
 }
 
 export interface UptimeCorePluginsSetup {
