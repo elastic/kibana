@@ -10,7 +10,6 @@ import { CoreStart, HttpStart } from 'kibana/public';
 import { Dispatch } from 'redux';
 import semverGte from 'semver/functions/gte';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
-import { METADATA_TRANSFORM_STATS_URL } from '../../../../../common/constants';
 import {
   BASE_POLICY_RESPONSE_ROUTE,
   ENDPOINT_ACTION_LOG_ROUTE,
@@ -18,6 +17,7 @@ import {
   HOST_METADATA_LIST_ROUTE,
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../../common/endpoint/constants';
 import {
   ActivityLog,
@@ -783,7 +783,7 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
 
   try {
     const transformStatsResponse: TransformStatsResponse = await http.get(
-      METADATA_TRANSFORM_STATS_URL
+      METADATA_TRANSFORMS_STATUS_ROUTE
     );
 
     dispatch({
