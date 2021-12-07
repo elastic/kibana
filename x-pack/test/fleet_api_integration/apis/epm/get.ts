@@ -81,7 +81,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(200);
 
-      const res = await supertest.get(`/api/fleet/epm/packages/apach/0.1.3`).expect(200);
+      const res = await supertest.get(`/api/fleet/epm/packages/apache/0.1.3`).expect(200);
       const packageInfo = res.body.item;
       expect(packageInfo.description).to.equal('Apache Integration');
       expect(packageInfo.download).to.not.equal(undefined);
