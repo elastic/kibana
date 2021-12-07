@@ -12,7 +12,7 @@ import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { Adapters } from 'src/plugins/inspector/public';
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
 
 import { mapboxgl } from '@kbn/mapbox-gl';

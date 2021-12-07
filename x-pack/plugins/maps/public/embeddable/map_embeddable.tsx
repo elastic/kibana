@@ -20,12 +20,12 @@ import {
   VALUE_CLICK_TRIGGER,
 } from '../../../../../src/plugins/embeddable/public';
 import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
+import { Filter } from '@kbn/es-query';
 import {
   ACTION_GLOBAL_APPLY_FILTER,
   APPLY_FILTER_TRIGGER,
   esFilters,
   TimeRange,
-  Filter,
   Query,
 } from '../../../../../src/plugins/data/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';

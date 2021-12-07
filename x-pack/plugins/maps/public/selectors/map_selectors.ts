@@ -53,7 +53,8 @@ import {
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 import { MapSettings } from '../reducers/map';
-import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { TimeRange } from '../../../../../src/plugins/data/public';
 import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
