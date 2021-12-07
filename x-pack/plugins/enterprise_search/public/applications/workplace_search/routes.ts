@@ -9,6 +9,11 @@ import { generatePath } from 'react-router-dom';
 
 import { docLinks } from '../shared/doc_links';
 
+import {
+  GITHUB_VIA_APP_SERVICE_TYPE,
+  GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE,
+} from './constants';
+
 export const SETUP_GUIDE_PATH = '/setup_guide';
 
 export const NOT_FOUND_PATH = '/404';
@@ -70,7 +75,8 @@ export const ADD_CONFLUENCE_SERVER_PATH = `${SOURCES_PATH}/add/confluence_server
 export const ADD_DROPBOX_PATH = `${SOURCES_PATH}/add/dropbox`;
 export const ADD_GITHUB_ENTERPRISE_PATH = `${SOURCES_PATH}/add/github_enterprise_server`;
 export const ADD_GITHUB_PATH = `${SOURCES_PATH}/add/github`;
-export const ADD_GITHUB_APP_PATH = `${SOURCES_PATH}/add/github_app`;
+export const ADD_GITHUB_VIA_APP_PATH = `${SOURCES_PATH}/add/${GITHUB_VIA_APP_SERVICE_TYPE}`;
+export const ADD_GITHUB_ENTERPRISE_SERVER_VIA_APP_PATH = `${SOURCES_PATH}/add/${GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE}`;
 export const ADD_GMAIL_PATH = `${SOURCES_PATH}/add/gmail`;
 export const ADD_GOOGLE_DRIVE_PATH = `${SOURCES_PATH}/add/google_drive`;
 export const ADD_JIRA_PATH = `${SOURCES_PATH}/add/jira_cloud`;
