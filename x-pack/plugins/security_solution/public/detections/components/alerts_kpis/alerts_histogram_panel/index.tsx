@@ -261,7 +261,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       () => (onlyField == null ? title : i18n.TOP(onlyField)),
       [onlyField, title]
     );
-    // TODO: histogram here
+
     return (
       <InspectButtonContainer data-test-subj="alerts-histogram-panel" show={!isInitialLoading}>
         <KpiPanel height={PANEL_HEIGHT} hasBorder paddingSize={paddingSize}>
