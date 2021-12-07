@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../shared/doc_links';
+
 import { SOURCE_NAMES, SOURCE_OBJ_TYPES, GITHUB_LINK_TITLE } from '../../constants';
 import {
   ADD_BOX_PATH,
@@ -45,22 +47,6 @@ import {
   EDIT_SLACK_PATH,
   EDIT_ZENDESK_PATH,
   EDIT_CUSTOM_PATH,
-  BOX_DOCS_URL,
-  CONFLUENCE_DOCS_URL,
-  CONFLUENCE_SERVER_DOCS_URL,
-  GITHUB_ENTERPRISE_DOCS_URL,
-  DROPBOX_DOCS_URL,
-  GITHUB_DOCS_URL,
-  GMAIL_DOCS_URL,
-  GOOGLE_DRIVE_DOCS_URL,
-  JIRA_DOCS_URL,
-  JIRA_SERVER_DOCS_URL,
-  ONEDRIVE_DOCS_URL,
-  SALESFORCE_DOCS_URL,
-  SERVICENOW_DOCS_URL,
-  SHAREPOINT_DOCS_URL,
-  SLACK_DOCS_URL,
-  ZENDESK_DOCS_URL,
   CUSTOM_SOURCE_DOCS_URL,
 } from '../../routes';
 import { FeatureIds, SourceDataItem } from '../../types';
@@ -75,7 +61,7 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: BOX_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchBox,
       applicationPortalUrl: 'https://app.box.com/developers/console',
     },
     objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.ALL_FILES],
@@ -104,7 +90,7 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: true,
-      documentationUrl: CONFLUENCE_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchConfluenceCloud,
       applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
     },
     objTypes: [
@@ -138,7 +124,7 @@ export const staticSourceData = [
       isPublicKey: true,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: CONFLUENCE_SERVER_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchConfluenceServer,
     },
     objTypes: [
       SOURCE_OBJ_TYPES.PAGES,
@@ -170,7 +156,7 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: DROPBOX_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchDropbox,
       applicationPortalUrl: 'https://www.dropbox.com/developers/apps',
     },
     objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.ALL_FILES],
@@ -200,7 +186,7 @@ export const staticSourceData = [
       hasOauthRedirect: true,
       needsBaseUrl: false,
       needsConfiguration: true,
-      documentationUrl: GITHUB_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchGitHub,
       applicationPortalUrl: 'https://github.com/settings/developers',
       applicationLinkTitle: GITHUB_LINK_TITLE,
     },
@@ -242,7 +228,7 @@ export const staticSourceData = [
           defaultMessage: 'GitHub Enterprise URL',
         }
       ),
-      documentationUrl: GITHUB_ENTERPRISE_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchGitHub,
       applicationPortalUrl: 'https://github.com/settings/developers',
       applicationLinkTitle: GITHUB_LINK_TITLE,
     },
@@ -277,7 +263,7 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: GMAIL_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchGmail,
       applicationPortalUrl: 'https://console.developers.google.com/',
     },
     objTypes: [SOURCE_OBJ_TYPES.EMAILS],
@@ -295,7 +281,7 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: GOOGLE_DRIVE_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchGoogleDrive,
       applicationPortalUrl: 'https://console.developers.google.com/',
     },
     objTypes: [
@@ -328,7 +314,7 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: true,
-      documentationUrl: JIRA_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchJiraCloud,
       applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
     },
     objTypes: [
@@ -364,7 +350,7 @@ export const staticSourceData = [
       isPublicKey: true,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: JIRA_SERVER_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchJiraServer,
       applicationPortalUrl: '',
     },
     objTypes: [
@@ -399,7 +385,7 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: ONEDRIVE_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchOneDrive,
       applicationPortalUrl: 'https://portal.azure.com/',
     },
     objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.ALL_FILES],
@@ -428,7 +414,7 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: SALESFORCE_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchSalesforce,
       applicationPortalUrl: 'https://salesforce.com/',
     },
     objTypes: [
@@ -464,7 +450,7 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: SALESFORCE_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchSalesforce,
       applicationPortalUrl: 'https://test.salesforce.com/',
     },
     objTypes: [
@@ -500,7 +486,7 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: true,
-      documentationUrl: SERVICENOW_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchServiceNow,
       applicationPortalUrl: 'https://www.servicenow.com/my-account/sign-in.html',
     },
     objTypes: [
@@ -533,7 +519,7 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: SHAREPOINT_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchSharePoint,
       applicationPortalUrl: 'https://portal.azure.com/',
     },
     objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.SITES, SOURCE_OBJ_TYPES.ALL_FILES],
@@ -562,7 +548,7 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: SLACK_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchSlack,
       applicationPortalUrl: 'https://api.slack.com/apps/',
     },
     objTypes: [
@@ -585,7 +571,7 @@ export const staticSourceData = [
       hasOauthRedirect: true,
       needsBaseUrl: false,
       needsSubdomain: true,
-      documentationUrl: ZENDESK_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchZendesk,
       applicationPortalUrl: 'https://www.zendesk.com/login/',
     },
     objTypes: [SOURCE_OBJ_TYPES.TICKETS],
