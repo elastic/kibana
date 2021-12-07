@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
+import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { getAllFieldsByName } from '../../../../common/containers/source';
 
 export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   response: string;
@@ -15,6 +19,7 @@ export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' 
   uniqueQueryId: string;
   loading: boolean;
 }
+
 /**
  * * Add query to inspect button utility.
  * * Delete query from inspect button utility when component unmounts
@@ -47,4 +52,28 @@ export const useInspectButton = ({
       }
     };
   }, [setQuery, loading, response, request, refetch, uniqueQueryId, deleteQuery]);
+};
+
+export const useStackByFields = () => {
+  const [stackByFieldOptions, setStackByFieldOptions] = useState<
+    undefined | EuiComboBoxOptionOption[]
+  >(undefined);
+  const { pathname } = useLocation();
+
+  const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
+  const allFields = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
+  useEffect(() => {
+    const options = Object.entries(allFields).reduce<EuiComboBoxOptionOption[]>(
+      (prev: EuiComboBoxOptionOption[], [key, field]) => {
+        if (field.aggregatable === true) {
+          return [...prev, { label: key, value: key }];
+        } else {
+          return prev;
+        }
+      },
+      []
+    );
+    setStackByFieldOptions(options);
+  }, [allFields]);
+  return useMemo(() => stackByFieldOptions, [stackByFieldOptions]);
 };
