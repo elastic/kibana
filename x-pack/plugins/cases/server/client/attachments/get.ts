@@ -22,14 +22,14 @@ import {
 } from '../../../common/api';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import {
-  createCaseError,
   checkEnabledCaseConnectorOrThrow,
   defaultSortField,
   transformComments,
   flattenCommentSavedObject,
   flattenCommentSavedObjects,
   getIDsAndIndicesAsArrays,
-} from '../../common';
+} from '../../common/utils';
+import { createCaseError } from '../../common/error';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { CasesClientArgs } from '../types';
 import { combineFilters, stringToKueryNode } from '../utils';
