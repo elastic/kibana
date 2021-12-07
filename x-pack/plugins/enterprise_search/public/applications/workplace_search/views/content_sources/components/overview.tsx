@@ -37,7 +37,6 @@ import { EuiListGroupItemTo, EuiLinkTo } from '../../../../shared/react_router_h
 import { AppLogic } from '../../../app_logic';
 import aclImage from '../../../assets/supports_acl.svg';
 import { ComponentLoader } from '../../../components/shared/component_loader';
-import { CredentialItem } from '../../../components/shared/credential_item';
 import { LicenseBadge } from '../../../components/shared/license_badge';
 import { StatusItem } from '../../../components/shared/status_item';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
@@ -78,8 +77,6 @@ import {
   STATUS_TEXT,
   ADDITIONAL_CONFIG_HEADING,
   EXTERNAL_IDENTITIES_LINK,
-  ACCESS_TOKEN_LABEL,
-  ID_LABEL,
   LEARN_CUSTOM_FEATURES_BUTTON,
   DOC_PERMISSIONS_DESCRIPTION,
   CUSTOM_CALLOUT_TITLE,
@@ -92,6 +89,7 @@ import {
 } from '../constants';
 import { SourceLogic } from '../source_logic';
 
+import { SourceIdentifier } from './source_identifier';
 import { SourceLayout } from './source_layout';
 
 export const Overview: React.FC = () => {
@@ -106,7 +104,6 @@ export const Overview: React.FC = () => {
     groups,
     details,
     custom,
-    accessToken,
     licenseSupportsPermissions,
     serviceTypeSupportsPermissions,
     indexPermissions,
@@ -432,9 +429,7 @@ export const Overview: React.FC = () => {
         </h6>
       </EuiText>
       <EuiSpacer size="s" />
-      <CredentialItem label={ID_LABEL} value={id} testSubj="ContentSourceId" />
-      <EuiSpacer size="s" />
-      <CredentialItem label={ACCESS_TOKEN_LABEL} value={accessToken} testSubj="AccessToken" />
+      <SourceIdentifier id={id} />
     </EuiPanel>
   );
 

@@ -113,6 +113,7 @@ export class DocLinksService {
           usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
         },
         workplaceSearch: {
+          apiKeys: `${WORKPLACE_SEARCH_DOCS}workplace-search-api-authentication.html`,
           box: `${WORKPLACE_SEARCH_DOCS}workplace-search-box-connector.html`,
           confluenceCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-cloud-connector.html`,
           confluenceServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-server-connector.html`,
@@ -671,6 +672,7 @@ export interface DocLinksStart {
       readonly usersAccess: string;
     };
     readonly workplaceSearch: {
+      readonly apiKeys: string;
       readonly box: string;
       readonly confluenceCloud: string;
       readonly confluenceServer: string;
