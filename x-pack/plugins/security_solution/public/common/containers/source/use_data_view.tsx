@@ -51,10 +51,12 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
     [dispatch]
   );
 
+  const dataViewId = useRef('');
   const indexFieldsSearch = useCallback(
     (selectedDataViewId: string) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
+        dataViewId.current = selectedDataViewId;
         setLoading({ id: selectedDataViewId, loading: true });
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest<'dataView'>, IndexFieldsStrategyResponse>(
@@ -71,7 +73,6 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
             next: (response) => {
               if (isCompleteResponse(response)) {
                 const patternString = response.indicesExist.sort().join();
-
                 dispatch(
                   sourcererActions.setDataView({
                     browserFields: getBrowserFields(patternString, response.indexFields),
@@ -102,8 +103,10 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
             },
           });
       };
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
+      if (dataViewId.current === selectedDataViewId) {
+        searchSubscription$.current.unsubscribe();
+        abortCtrl.current.abort();
+      }
       asyncSearch();
     },
     [addError, addWarning, data.search, dispatch, setLoading]
