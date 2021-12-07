@@ -91,7 +91,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
 
     return (
       <InspectButtonContainer>
-        <KpiPanel hasBorder data-test-subj="alertsCou1ntPanel">
+        <KpiPanel hasBorder data-test-subj="alertsCountPanel">
           <HeaderSection
             id={uniqueQueryId}
             title={i18n.COUNT_TABLE_TITLE}
