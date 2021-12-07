@@ -1,0 +1,14 @@
+{
+  "id": "profiling",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "profiling",
+    "githubTeam": "profiling"
+  },
+  "description": "",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation", "data", "kibanaUtils", "share"],
+  "optionalPlugins": []
+}
