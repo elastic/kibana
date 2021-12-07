@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { find } from 'lodash/fp';
 
@@ -28,6 +28,7 @@ import { FormattedFieldValue } from '../../../../timelines/components/timeline/b
 import { OverviewCardWithActions } from '../overview/overview_card';
 import { StatusPopoverButton } from '../overview/status_popover_button';
 import { SeverityBadge } from '../../../../../public/detections/components/rules/severity_badge';
+import { useThrottledResizeObserver } from '../../utils';
 
 export const NotGrowingFlexGroup = euiStyled(EuiFlexGroup)`
   flex-grow: 0;
@@ -103,75 +104,102 @@ export const Overview = React.memo<Props>(
       );
     }, [browserFields, contextId, data, eventId, timelineId]);
 
-    return (
-      <NotGrowingFlexGroup gutterSize="s">
-        {hasData(statusData) && (
-          <EuiFlexItem>
-            <OverviewCardWithActions
-              title={SIGNAL_STATUS}
-              enrichedFieldInfo={statusData}
-              contextId={contextId}
-            >
-              <StatusPopoverButton
-                eventId={eventId}
-                contextId={contextId}
-                enrichedFieldInfo={statusData}
-                indexName={indexName}
-                timelineId={timelineId}
-                handleOnEventClosed={handleOnEventClosed}
-              />
-            </OverviewCardWithActions>
-          </EuiFlexItem>
-        )}
-
-        {hasData(severityData) && (
-          <EuiFlexItem>
-            <OverviewCardWithActions
-              title={ALERTS_HEADERS_SEVERITY}
-              enrichedFieldInfo={severityData}
-              contextId={contextId}
-            >
-              <SeverityBadge value={severityData.values[0]} />
-            </OverviewCardWithActions>
-          </EuiFlexItem>
-        )}
-
-        {hasData(riskScoreData) && (
-          <EuiFlexItem>
-            <OverviewCardWithActions
-              title={ALERTS_HEADERS_RISK_SCORE}
-              enrichedFieldInfo={riskScoreData}
-              contextId={contextId}
-            >
-              {riskScoreData.values[0]}
-            </OverviewCardWithActions>
-          </EuiFlexItem>
-        )}
-
-        {hasData(ruleNameData) && (
-          <EuiFlexItem>
-            <OverviewCardWithActions
-              title={ALERTS_HEADERS_RULE}
-              enrichedFieldInfo={ruleNameData}
-              contextId={contextId}
-              alignItems="flexEnd"
-            >
-              <FormattedFieldValue
-                contextId={contextId}
-                eventId={eventId}
-                value={ruleNameData.values[0]}
-                fieldName={ruleNameData.data.field}
-                linkValue={ruleNameData.linkValue}
-                fieldType={ruleNameData.data.type}
-                fieldFormat={ruleNameData.data.format}
-                isDraggable={false}
-                truncate={false}
-              />
-            </OverviewCardWithActions>
-          </EuiFlexItem>
-        )}
-      </NotGrowingFlexGroup>
+    const signalCard = hasData(statusData) && (
+      <EuiFlexItem>
+        <OverviewCardWithActions
+          title={SIGNAL_STATUS}
+          enrichedFieldInfo={statusData}
+          contextId={contextId}
+        >
+          <StatusPopoverButton
+            eventId={eventId}
+            contextId={contextId}
+            enrichedFieldInfo={statusData}
+            indexName={indexName}
+            timelineId={timelineId}
+            handleOnEventClosed={handleOnEventClosed}
+          />
+        </OverviewCardWithActions>
+      </EuiFlexItem>
     );
+
+    const severityCard = hasData(severityData) && (
+      <EuiFlexItem>
+        <OverviewCardWithActions
+          title={ALERTS_HEADERS_SEVERITY}
+          enrichedFieldInfo={severityData}
+          contextId={contextId}
+        >
+          <SeverityBadge value={severityData.values[0]} />
+        </OverviewCardWithActions>
+      </EuiFlexItem>
+    );
+
+    const riskScoreCard = hasData(riskScoreData) && (
+      <EuiFlexItem>
+        <OverviewCardWithActions
+          title={ALERTS_HEADERS_RISK_SCORE}
+          enrichedFieldInfo={riskScoreData}
+          contextId={contextId}
+        >
+          {riskScoreData.values[0]}
+        </OverviewCardWithActions>
+      </EuiFlexItem>
+    );
+
+    const ruleNameCard = hasData(ruleNameData) && (
+      <EuiFlexItem>
+        <OverviewCardWithActions
+          title={ALERTS_HEADERS_RULE}
+          enrichedFieldInfo={ruleNameData}
+          contextId={contextId}
+          alignItems="flexEnd"
+        >
+          <FormattedFieldValue
+            contextId={contextId}
+            eventId={eventId}
+            value={ruleNameData.values[0]}
+            fieldName={ruleNameData.data.field}
+            linkValue={ruleNameData.linkValue}
+            fieldType={ruleNameData.data.type}
+            fieldFormat={ruleNameData.data.format}
+            isDraggable={false}
+            truncate={false}
+          />
+        </OverviewCardWithActions>
+      </EuiFlexItem>
+    );
+
+    const { width, ref } = useThrottledResizeObserver();
+
+    // 675px is the container width at which none of the cards, when hovered,
+    // creates a visual overflow in a single row setup
+    const showAsSingleRow = width === 0 || width >= 675;
+
+    // If there is enough space, render a single row.
+    // Otherwise, render two rows with each two cards.
+    const content = showAsSingleRow ? (
+      <NotGrowingFlexGroup gutterSize="s">
+        {signalCard}
+        {severityCard}
+        {riskScoreCard}
+        {ruleNameCard}
+      </NotGrowingFlexGroup>
+    ) : (
+      <>
+        <NotGrowingFlexGroup gutterSize="s">
+          {signalCard}
+          {severityCard}
+        </NotGrowingFlexGroup>
+        <EuiSpacer size="s" />
+        <NotGrowingFlexGroup gutterSize="s">
+          {riskScoreCard}
+          {ruleNameCard}
+        </NotGrowingFlexGroup>
+      </>
+    );
+
+    return <div ref={ref}>{content}</div>;
   }
 );
 
