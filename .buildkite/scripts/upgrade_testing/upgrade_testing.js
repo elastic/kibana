@@ -101,6 +101,19 @@ const upgradeInstance = async ({ deploymentId }) => {
   return response;
 };
 
+const deleteInstance = async (deploymentId) => {
+  let response;
+  try {
+    response = await request.post(`deployments/${deploymentId}/_shutdown`);
+  } catch (error) {
+    console.log('error', error);
+    throw error;
+    // throw new pRetry.AbortError(error);
+  }
+
+  return response;
+};
+
 (async () => {
   const instance = await createInstance();
   console.log('instance', instance.data);
@@ -157,4 +170,6 @@ const upgradeInstance = async ({ deploymentId }) => {
       `buildkite-agent artifact upload target/kibana-osquery/**/*`
     );
   }
+
+  await deleteInstance(deploymentId);
 })();

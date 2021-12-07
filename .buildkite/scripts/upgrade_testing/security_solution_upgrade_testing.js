@@ -21,12 +21,12 @@ const request = axios.create({
   headers: { Authorization: `ApiKey ${CLOUD_API_KEY}` },
 });
 
-const createInstance = async () => {
+const createInstance = async (version = '7.15.0') => {
   console.log('CLOUD_API_KEY', CLOUD_API_KEY);
 
   let response;
   try {
-    response = await request.post('deployments?validate_only=false', {...getConfig('7.15.0'), name: "Security Solution Cases"});
+    response = await request.post('deployments?validate_only=false', {...getConfig(version), name: "Security Solution Cases"});
   } catch (error) {
     console.log('error', error);
     throw error;
@@ -36,6 +36,19 @@ const createInstance = async () => {
 
   if (response.status === 404) {
     throw new pRetry.AbortError(response.statusText);
+  }
+
+  return response;
+};
+
+const deleteInstance = async (deploymentId) => {
+  let response;
+  try {
+    response = await request.post(`deployments/${deploymentId}/_shutdown`);
+  } catch (error) {
+    console.log('error', error);
+    throw error;
+    // throw new pRetry.AbortError(error);
   }
 
   return response;
@@ -102,7 +115,7 @@ const upgradeInstance = async ({ deploymentId }) => {
 };
 
 (async () => {
-  const instance = await createInstance();
+  const instance = await createInstance('7.15.0');
   console.log('instance', instance.data);
   const deploymentId = instance.data.id;
   const credentials = find(instance.data.resources, { kind: 'elasticsearch' }).credentials;
@@ -119,16 +132,12 @@ const upgradeInstance = async ({ deploymentId }) => {
     kibana: clusterInfo.resources.kibana[0].info.metadata.endpoint,
   };
 
-  const baseCommand = `CYPRESS_BASE_URL=https://${credentials.username}:${credentials.password}@${resources.kibana}:9243 CYPRESS_ELASTICSEARCH_URL=https://${credentials.username}:${credentials.password}@${resources.elasticsearch}:9243 CYPRESS_ELASTICSEARCH_USERNAME=${credentials.username} CYPRESS_ELASTICSEARCH_PASSWORD=${credentials.password} yarn --cwd x-pack/plugins/security_solution cypress:run`;
+  const KIBANA_URL = `https://${credentials.username}:${credentials.password}@${resources.kibana}:9243`;
+  const ES_URL = `https://${credentials.username}:${credentials.password}@${resources.elasticsearch}:9243`
+
+  const baseCommand = `CYPRESS_BASE_URL=${KIBANA_URL} CYPRESS_ELASTICSEARCH_URL=${ES_URL} CYPRESS_ELASTICSEARCH_USERNAME=${credentials.username} CYPRESS_ELASTICSEARCH_PASSWORD=${credentials.password} yarn --cwd x-pack/plugins/security_solution`;
 
   console.log('command', baseCommand);
-
-  // await execa.command(
-  //   `${baseCommand} --spec cypress/integration/trusted_apps_pre.spec.ts`,
-  //   {
-  //     shell: true,
-  //   }
-  // );
 
   await upgradeInstance({ deploymentId });
 
@@ -138,9 +147,21 @@ const upgradeInstance = async ({ deploymentId }) => {
   });
 
   await execa.command(
-    `${baseCommand} --spec cypress/upgrade_integration/import_case.spec.ts`,
+    `node scripts/es_archiver.js load x-pack/test/security_solution_cypress/es_archives/auditbeat --es-url ${ES_URL} --kibana-url ${KIBANA_URL}`,
     {
       shell: true,
     }
   );
+
+  // ADD AUDITBEAT DOCUMENT
+
+  await execa.command(
+    `${baseCommand} cypress:run:upgrade`
+    ,
+    {
+      shell: true,
+    }
+  );
+
+  await deleteInstance(deploymentId);
 })();
