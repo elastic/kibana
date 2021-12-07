@@ -7,8 +7,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
-import { EMSClient } from '@elastic/ems-client';
-import { i18n } from '@kbn/i18n';
 import {
   setKibanaVersion,
   setLicensingPluginStart,
@@ -23,7 +21,7 @@ import {
   LicensingPluginSetup,
   LicensingPluginStart,
 } from '../../../../x-pack/plugins/licensing/public';
-import { EMS_APP_NAME } from '../common';
+import { createEMSClient } from './create_ems_client';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -60,18 +58,7 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
       },
       createEMSClient: () => {
         const emsSettings = createEMSSettings(mapConfig, getIsEnterprisePlus);
-        return new EMSClient({
-          language: i18n.getLocale(),
-          appVersion: this._initializerContext.env.packageInfo.version,
-          appName: EMS_APP_NAME,
-          tileApiUrl: emsSettings!.getEMSTileApiUrl(),
-          fileApiUrl: emsSettings!.getEMSFileApiUrl(),
-          landingPageUrl: emsSettings!.getEMSLandingPageUrl(),
-          fetchFunction(url: string) {
-            return fetch(url);
-          },
-          proxyPath: '',
-        });
+        return createEMSClient(emsSettings, kibanaVersion);
       },
     };
   }

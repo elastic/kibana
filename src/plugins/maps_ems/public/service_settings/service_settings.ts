@@ -9,12 +9,12 @@
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-client';
-import { i18n } from '@kbn/i18n';
 import { getIsEnterprisePlus, getKibanaVersion } from '../kibana_services';
 import { FileLayer, IEMSKbnMapsSettings, TmsLayer } from './service_settings_types';
 import { ORIGIN, TMS_IN_YML_ID } from '../../common';
 import type { MapConfig, TileMapConfig } from '../../config';
 import { createEMSSettings } from '../../common/ems_settings';
+import { createEMSClient } from '../create_ems_client';
 
 /**
  * This class provides access to the EMS-layers and the kibana.yml configured layers through a single interface.
@@ -32,20 +32,7 @@ export class KbnMapsSettings implements IEMSKbnMapsSettings {
     this._hasTmsConfigured = typeof tilemapsConfig.url === 'string' && tilemapsConfig.url !== '';
 
     const emsSettings = createEMSSettings(mapConfig, getIsEnterprisePlus);
-
-    this._emsClient = new EMSClient({
-      language: i18n.getLocale(),
-      appVersion: getKibanaVersion(),
-      appName: 'kibana',
-      fileApiUrl: emsSettings.getEMSFileApiUrl(),
-      tileApiUrl: emsSettings.getEMSTileApiUrl(),
-      landingPageUrl: emsSettings.getEMSLandingPageUrl(),
-      // Wrap to avoid errors passing window fetch
-      fetchFunction(...args: any[]) {
-        // @ts-expect-error
-        return fetch(...args);
-      },
-    });
+    this._emsClient = createEMSClient(emsSettings, getKibanaVersion());
     // any kibana user, regardless of distribution, should get all zoom levels
     // use `sspl` license to indicate this
     this._emsClient.addQueryParams({ license: 'sspl' });
