@@ -33,7 +33,7 @@ import { ApmPluginStartDeps } from '../../../../plugin';
 import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
 
 interface Props {
-  onCancel(): void;
+  onCancel: () => void;
   onSuccess: (agentKey: CreateApiKeyResponse) => void;
   onError: (keyName: string) => void;
 }
