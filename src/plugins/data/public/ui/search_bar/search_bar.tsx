@@ -439,7 +439,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onRemoveAll={this.onRemoveAll}
         onSaveQuery={this.onInitiateSaveNew}
         services={this.services}
-        onLanguageChange={this.onQueryBarChange}
+        onQueryChange={this.onQueryBarChange}
         dateRangeFrom={this.state.dateRangeFrom}
         dateRangeTo={this.state.dateRangeTo}
       />
