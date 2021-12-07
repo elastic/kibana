@@ -95,6 +95,17 @@ export interface IndexOptions {
    * @example '.siem-signals', undefined
    */
   secondaryAlias?: string;
+
+  /**
+   * Optional prefix name that will be prepended to indices in addition to
+   * primary dataset and context naming convention.
+   *
+   * Currently used only for creating a preview index for the purpose of
+   * previewing alerts from a rule. The documents are identical to alerts, but
+   * shouldn't exist on an alert index and shouldn't be queried together with
+   * real alerts in any way, because the rule that created them doesn't exist
+   */
+  additionalPrefix?: string;
 }
 
 /**

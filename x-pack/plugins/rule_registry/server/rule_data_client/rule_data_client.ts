@@ -54,6 +54,10 @@ export class RuleDataClient implements IRuleDataClient {
     return this.options.indexInfo.kibanaVersion;
   }
 
+  public indexNameWithNamespace(namespace: string): string {
+    return this.options.indexInfo.getPrimaryAlias(namespace);
+  }
+
   private get writeEnabled(): boolean {
     return this._isWriteEnabled;
   }

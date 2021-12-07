@@ -25,6 +25,7 @@ import { getTimeframeOptions } from './helpers';
 import { CalloutGroup } from './callout_group';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LoadingHistogram } from './loading_histogram';
+import { FieldValueThreshold } from '../threshold_input';
 
 export interface RulePreviewProps {
   index: string[];
@@ -34,6 +35,9 @@ export interface RulePreviewProps {
   threatIndex: string[];
   threatMapping: ThreatMapping;
   threatQuery: FieldValueQueryBar;
+  threshold: FieldValueThreshold;
+  machineLearningJobId: string[];
+  anomalyThreshold: number;
 }
 
 const Select = styled(EuiSelect)`
@@ -44,6 +48,8 @@ const PreviewButton = styled(EuiButton)`
   margin-left: 0;
 `;
 
+const defaultTimeRange: Unit = 'h';
+
 const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   index,
   isDisabled,
@@ -52,6 +58,9 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   threatIndex,
   threatQuery,
   threatMapping,
+  threshold,
+  machineLearningJobId,
+  anomalyThreshold,
 }) => {
   const { spaces } = useKibana().services;
   const [spaceId, setSpaceId] = useState('');
@@ -61,7 +70,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     }
   }, [spaces]);
 
-  const [timeFrame, setTimeFrame] = useState<Unit>('h');
+  const [timeFrame, setTimeFrame] = useState<Unit>(defaultTimeRange);
   const {
     addNoiseWarning,
     createPreview,
@@ -78,7 +87,15 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     timeFrame,
     ruleType,
     threatMapping,
+    threshold,
+    machineLearningJobId,
+    anomalyThreshold,
   });
+
+  // Resets the timeFrame to default when rule type is changed because not all time frames are supported by all rule types
+  useEffect(() => {
+    setTimeFrame(defaultTimeRange);
+  }, [ruleType]);
 
   return (
     <>
@@ -108,7 +125,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
               isLoading={isPreviewRequestInProgress}
               isDisabled={isDisabled}
               onClick={createPreview}
-              data-test-subj="preview-button"
+              data-test-subj="queryPreviewButton"
             >
               {i18n.QUERY_PREVIEW_BUTTON}
             </PreviewButton>
@@ -117,12 +134,16 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       </EuiFormRow>
       <EuiSpacer size="s" />
       {isPreviewRequestInProgress && <LoadingHistogram />}
-      {!isPreviewRequestInProgress && previewId && spaceId && (
+      {!isPreviewRequestInProgress && previewId && spaceId && query && (
         <PreviewHistogram
+          ruleType={ruleType}
           timeFrame={timeFrame}
           previewId={previewId}
           addNoiseWarning={addNoiseWarning}
           spaceId={spaceId}
+          threshold={threshold}
+          query={query}
+          index={index}
         />
       )}
       <CalloutGroup items={errors} isError />
