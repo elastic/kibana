@@ -230,6 +230,8 @@ export async function mountApp(
             history={props.history}
             datasourceMap={datasourceMap}
             visualizationMap={visualizationMap}
+            initialContext={initialContext}
+            contextOriginatingApp={historyLocationState?.originatingApp}
           />
         </Provider>
       );

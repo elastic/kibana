@@ -39,6 +39,7 @@ function getLensTopNavConfig(options: {
   tooltips: LensTopNavTooltips;
   savingToLibraryPermitted: boolean;
   savingToDashboardPermitted: boolean;
+  goBackNavMenuItem?: LensTopNavMenuProps['goBackNavMenuItem'];
 }): TopNavMenuData[] {
   const {
     actions,
@@ -49,6 +50,7 @@ function getLensTopNavConfig(options: {
     savingToLibraryPermitted,
     savingToDashboardPermitted,
     tooltips,
+    goBackNavMenuItem,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -70,6 +72,16 @@ function getLensTopNavConfig(options: {
     : i18n.translate('xpack.lens.app.save', {
         defaultMessage: 'Save',
       });
+
+  if (goBackNavMenuItem) {
+    topNavMenu.push({
+      label: goBackNavMenuItem.label,
+      run: goBackNavMenuItem.onClick,
+      testId: 'lnsApp_goBackToAppButton',
+      description: goBackNavMenuItem.label,
+      disableButton: false,
+    });
+  }
 
   topNavMenu.push({
     label: i18n.translate('xpack.lens.app.inspect', {
@@ -151,6 +163,7 @@ export const LensTopNavMenu = ({
   redirectToOrigin,
   datasourceMap,
   title,
+  goBackNavMenuItem,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -252,6 +265,7 @@ export const LensTopNavMenu = ({
         showCancel: Boolean(isLinkedToOriginatingApp),
         savingToLibraryPermitted,
         savingToDashboardPermitted,
+        goBackNavMenuItem,
         tooltips: {
           showExportWarning: () => {
             if (activeData) {
@@ -333,24 +347,25 @@ export const LensTopNavMenu = ({
         },
       }),
     [
-      activeData,
-      attributeService,
-      dashboardFeatureFlag.allowByValueEmbeddables,
-      fieldFormats.deserialize,
-      getIsByValueMode,
-      initialInput,
       isLinkedToOriginatingApp,
+      dashboardFeatureFlag.allowByValueEmbeddables,
+      initialInput,
       isSaveable,
-      title,
-      onAppLeave,
-      redirectToOrigin,
-      runSave,
-      savingToDashboardPermitted,
+      activeData,
+      getIsByValueMode,
       savingToLibraryPermitted,
-      setIsSaveModalVisible,
-      uiSettings,
-      unsavedTitle,
+      savingToDashboardPermitted,
+      goBackNavMenuItem,
       lensInspector,
+      title,
+      unsavedTitle,
+      uiSettings,
+      fieldFormats.deserialize,
+      onAppLeave,
+      runSave,
+      attributeService,
+      setIsSaveModalVisible,
+      redirectToOrigin,
     ]
   );
 

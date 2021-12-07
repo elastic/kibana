@@ -59,6 +59,8 @@ export function App({
   setHeaderActionMenu,
   datasourceMap,
   visualizationMap,
+  initialContext,
+  contextOriginatingApp,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
@@ -280,6 +282,16 @@ export function App({
       setIsSaveModalVisible,
     ]
   );
+  let goBackNavMenuItem;
+  if (initialContext) {
+    goBackNavMenuItem = {
+      label: i18n.translate('xpack.lens.app.goBackLabel', {
+        defaultMessage: `Go back to ${contextOriginatingApp}`,
+        values: { contextOriginatingApp },
+      }),
+      onClick: history.goBack,
+    };
+  }
 
   return (
     <>
@@ -296,6 +308,7 @@ export function App({
           datasourceMap={datasourceMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
+          goBackNavMenuItem={goBackNavMenuItem}
         />
 
         {getLegacyUrlConflictCallout()}

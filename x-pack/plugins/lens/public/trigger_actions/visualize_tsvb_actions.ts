@@ -27,7 +27,7 @@ export const visualizeTSVBAction = (application: ApplicationStart) =>
         layers: table,
       };
       application.navigateToApp('lens', {
-        state: { type: ACTION_CONVERT_TO_LENS, payload },
+        state: { type: ACTION_CONVERT_TO_LENS, payload, originatingApp: 'TSVB' },
       });
     },
   });

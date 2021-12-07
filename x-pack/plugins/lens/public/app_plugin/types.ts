@@ -66,6 +66,8 @@ export interface LensAppProps {
   incomingState?: EmbeddableEditorState;
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
+  initialContext?: VisualizeEditorContext | VisualizeFieldContext;
+  contextOriginatingApp?: string;
 }
 
 export type RunSave = (
@@ -81,6 +83,11 @@ export type RunSave = (
   }
 ) => Promise<void>;
 
+interface BackNavMenuProps {
+  onClick: () => void;
+  label: string;
+}
+
 export interface LensTopNavMenuProps {
   onAppLeave: AppMountParameters['onAppLeave'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
@@ -95,11 +102,13 @@ export interface LensTopNavMenuProps {
   datasourceMap: DatasourceMap;
   title?: string;
   lensInspector: LensInspector;
+  goBackNavMenuItem?: BackNavMenuProps;
 }
 
 export interface HistoryLocationState {
   type: typeof ACTION_VISUALIZE_LENS_FIELD | typeof ACTION_CONVERT_TO_LENS;
   payload: VisualizeFieldContext | VisualizeEditorContext;
+  originatingApp?: string;
 }
 
 export interface LensAppServices {
