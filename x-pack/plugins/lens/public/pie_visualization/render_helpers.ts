@@ -45,10 +45,13 @@ export const isPartitionShape = (shape: PieChartTypes | string) =>
 export const isTreemapOrMosaicShape = (shape: PieChartTypes | string) =>
   ['treemap', 'mosaic'].includes(shape);
 
-export const shouldShowValuesInLegend = (layer: PieLayerState, shape: PieChartTypes) =>
-  layer.showValuesInLegend !== undefined
-    ? layer.showValuesInLegend
-    : Boolean(PartitionChartsMeta[shape]?.legend?.showValues);
+export const shouldShowValuesInLegend = (layer: PieLayerState, shape: PieChartTypes) => {
+  if ('showValues' in PartitionChartsMeta[shape]?.legend) {
+    return layer.showValuesInLegend ?? PartitionChartsMeta[shape]?.legend?.showValues ?? true;
+  }
+
+  return false;
+};
 
 export const extractUniqTermsMap = (dataTable: Datatable, columnId: string) =>
   [...new Set(dataTable.rows.map((item) => item[columnId]))].reduce(

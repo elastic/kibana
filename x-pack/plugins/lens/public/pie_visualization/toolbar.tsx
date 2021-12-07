@@ -192,7 +192,9 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         mode={layer.legendDisplay}
         onDisplayChange={onLegendDisplayChange}
         valueInLegend={shouldShowValuesInLegend(layer, state.shape)}
-        renderValueInLegendSwitch={Boolean(PartitionChartsMeta[state.shape]?.legend?.showValues)}
+        renderValueInLegendSwitch={
+          'showValues' in PartitionChartsMeta[state.shape]?.legend ?? false
+        }
         onValueInLegendChange={onValueInLegendChange}
         position={layer.legendPosition}
         onPositionChange={onLegendPositionChange}
