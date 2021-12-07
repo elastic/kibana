@@ -15,7 +15,7 @@ import { QueryStringInput, QueryStringInputProps } from '../../../../../../plugi
 import { getDataStart } from '../../services';
 import { fetchIndexPattern, isStringTypeIndexPattern } from '../../../common/index_patterns_utils';
 
-type QueryBarWrapperProps = Pick<QueryStringInputProps, 'query' | 'onChange'> & {
+type QueryBarWrapperProps = Pick<QueryStringInputProps, 'query' | 'onChange' | 'isInvalid'> & {
   indexPatterns: IndexPatternValue[];
   'data-test-subj'?: string;
 };
@@ -24,6 +24,7 @@ export function QueryBarWrapper({
   query,
   onChange,
   indexPatterns,
+  isInvalid,
   'data-test-subj': dataTestSubj,
 }: QueryBarWrapperProps) {
   const { indexPatterns: indexPatternsService } = getDataStart();
@@ -63,6 +64,7 @@ export function QueryBarWrapper({
   return (
     <QueryStringInput
       query={query}
+      isInvalid={isInvalid}
       onChange={onChange}
       indexPatterns={indexes}
       {...coreStartContext}

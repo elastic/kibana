@@ -36,6 +36,8 @@ import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { QueryBarWrapper } from '../../query_bar_wrapper';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 
+import { combinationOfFiltersErrorMessage } from '../../../../../common/errors';
+
 export class TableSeriesConfig extends Component {
   UNSAFE_componentWillMount() {
     const { model } = this.props;
@@ -123,6 +125,9 @@ export class TableSeriesConfig extends Component {
     const isKibanaIndexPattern =
       this.props.panel.use_kibana_indexes || this.props.indexPatternForQuery === '';
 
+    const isFilterInvalid =
+      model?.filter?.query && model?.aggregate_by && model?.aggregate_function;
+
     return (
       <div className="tvbAggRow">
         <EuiFlexGroup gutterSize="s">
@@ -174,6 +179,8 @@ export class TableSeriesConfig extends Component {
                   defaultMessage="Filter"
                 />
               }
+              isInvalid={isFilterInvalid}
+              error={combinationOfFiltersErrorMessage}
               fullWidth
             >
               <QueryBarWrapper
@@ -183,6 +190,7 @@ export class TableSeriesConfig extends Component {
                 }}
                 onChange={(filter) => this.props.onChange({ filter })}
                 indexPatterns={[this.props.indexPatternForQuery]}
+                isInvalid={isFilterInvalid}
               />
             </EuiFormRow>
           </EuiFlexItem>

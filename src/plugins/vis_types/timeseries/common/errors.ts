@@ -56,3 +56,16 @@ export class AggNotSupportedInMode extends UIError {
     );
   }
 }
+
+export const combinationOfFiltersErrorMessage = i18n.translate(
+  'visTypeTimeseries.filterWithAggFunctionErrorMessage',
+  {
+    defaultMessage: 'Filter cannot be used in combination with the aggregation function.',
+  }
+);
+
+export class CombinationOfFiltersError extends UIError {
+  constructor() {
+    super(combinationOfFiltersErrorMessage);
+  }
+}
