@@ -11,7 +11,10 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
 } from '../../../../plugins/security_solution/common/constants';
-import { BulkAction } from '../../../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
+import {
+  BulkAction,
+  BulkActionUpdateType,
+} from '../../../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
@@ -29,6 +32,11 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
+  const postBulkAction = () =>
+    supertest.post(DETECTION_ENGINE_RULES_BULK_ACTION).set('kbn-xsrf', 'true');
+  const fetchRule = (ruleId: string) =>
+    supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`).set('kbn-xsrf', 'true');
+
   describe('perform_bulk_action', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest, log);
@@ -42,9 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should export rules', async () => {
       await createRule(supertest, log, getSimpleRule());
 
-      const { body } = await supertest
-        .post(DETECTION_ENGINE_RULES_BULK_ACTION)
-        .set('kbn-xsrf', 'true')
+      const { body } = await postBulkAction()
         .send({ query: '', action: BulkAction.export })
         .expect(200)
         .expect('Content-Type', 'application/ndjson')
@@ -75,36 +81,26 @@ export default ({ getService }: FtrProviderContext): void => {
       const ruleId = 'ruleId';
       await createRule(supertest, log, getSimpleRule(ruleId));
 
-      const { body } = await supertest
-        .post(DETECTION_ENGINE_RULES_BULK_ACTION)
-        .set('kbn-xsrf', 'true')
+      const { body } = await postBulkAction()
         .send({ query: '', action: BulkAction.delete })
         .expect(200);
 
       expect(body).to.eql({ success: true, rules_count: 1 });
 
-      await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
-        .set('kbn-xsrf', 'true')
-        .expect(404);
+      await await fetchRule(ruleId).expect(404);
     });
 
     it('should enable rules', async () => {
       const ruleId = 'ruleId';
       await createRule(supertest, log, getSimpleRule(ruleId));
 
-      const { body } = await supertest
-        .post(DETECTION_ENGINE_RULES_BULK_ACTION)
-        .set('kbn-xsrf', 'true')
+      const { body } = await postBulkAction()
         .send({ query: '', action: BulkAction.enable })
         .expect(200);
 
       expect(body).to.eql({ success: true, rules_count: 1 });
 
-      const { body: ruleBody } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
-        .set('kbn-xsrf', 'true')
-        .expect(200);
+      const { body: ruleBody } = await fetchRule(ruleId).expect(200);
 
       const referenceRule = getSimpleRuleOutput(ruleId);
       referenceRule.enabled = true;
@@ -118,18 +114,13 @@ export default ({ getService }: FtrProviderContext): void => {
       const ruleId = 'ruleId';
       await createRule(supertest, log, getSimpleRule(ruleId, true));
 
-      const { body } = await supertest
-        .post(DETECTION_ENGINE_RULES_BULK_ACTION)
-        .set('kbn-xsrf', 'true')
+      const { body } = await postBulkAction()
         .send({ query: '', action: BulkAction.disable })
         .expect(200);
 
       expect(body).to.eql({ success: true, rules_count: 1 });
 
-      const { body: ruleBody } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
-        .set('kbn-xsrf', 'true')
-        .expect(200);
+      const { body: ruleBody } = await fetchRule(ruleId).expect(200);
 
       const referenceRule = getSimpleRuleOutput(ruleId);
       const storedRule = removeServerGeneratedProperties(ruleBody);
@@ -141,9 +132,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const ruleId = 'ruleId';
       await createRule(supertest, log, getSimpleRule(ruleId));
 
-      const { body } = await supertest
-        .post(DETECTION_ENGINE_RULES_BULK_ACTION)
-        .set('kbn-xsrf', 'true')
+      const { body } = await postBulkAction()
         .send({ query: '', action: BulkAction.duplicate })
         .expect(200);
 
@@ -155,6 +144,52 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       expect(rulesResponse.total).to.eql(2);
+    });
+
+    it('should set, add and delete tags in rules', async () => {
+      const ruleId = 'ruleId';
+      const tags = ['tag1', 'tag2'];
+      await createRule(supertest, log, getSimpleRule(ruleId));
+
+      const { body } = await postBulkAction()
+        .send({
+          query: '',
+          action: BulkAction.update,
+          updates: [
+            {
+              type: BulkActionUpdateType.set_tags,
+              value: [],
+            },
+            {
+              type: BulkActionUpdateType.add_tags,
+              value: tags,
+            },
+          ],
+        })
+        .expect(200);
+
+      expect(body).to.eql({ success: true, rules_count: 1 });
+
+      const { body: addedTagsRule } = await fetchRule(ruleId).expect(200);
+
+      expect(addedTagsRule.tags).to.eql(tags);
+
+      await postBulkAction()
+        .send({
+          query: '',
+          action: BulkAction.update,
+          updates: [
+            {
+              type: BulkActionUpdateType.delete_tags,
+              value: ['tag1'],
+            },
+          ],
+        })
+        .expect(200);
+
+      const { body: deletedTagsRule } = await fetchRule(ruleId).expect(200);
+
+      expect(deletedTagsRule.tags).to.eql(['tag2']);
     });
   });
 };
