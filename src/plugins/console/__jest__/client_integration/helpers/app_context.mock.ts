@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { notificationServiceMock, coreMock, httpServiceMock, themeServiceMock } from 'src/core/public/mocks';
+import {
+  notificationServiceMock,
+  coreMock,
+  httpServiceMock,
+  themeServiceMock,
+} from 'src/core/public/mocks';
 import { createStorage } from '../../../public/services/storage';
 import { createSettings } from '../../../public/services/settings';
 import { createHistory } from '../../../public/services/history';
