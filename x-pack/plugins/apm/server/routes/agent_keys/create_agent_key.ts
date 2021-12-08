@@ -82,7 +82,7 @@ export async function createAgentKey({
     throw Boom.internal(error);
   }
 
-  const { name = 'apm-key', sourcemap, event, agentConfig } = requestBody;
+  const { name, sourcemap, event, agentConfig } = requestBody;
 
   const privileges: PrivilegeType[] = [];
   if (!sourcemap && !event && !agentConfig) {
