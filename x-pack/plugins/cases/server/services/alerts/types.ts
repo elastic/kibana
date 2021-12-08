@@ -20,3 +20,13 @@ export interface UserAggregate {
   name: string;
   count: number;
 }
+
+export interface FrequencyResult {
+  hosts?: HostAggregate[];
+  users?: UserAggregate[];
+}
+
+export interface UniqueCountResult {
+  totalHosts?: number;
+  totalUsers?: number;
+}

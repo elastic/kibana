@@ -19,7 +19,13 @@ import {
   ALERT_WORKFLOW_STATUS,
   STATUS_VALUES,
 } from '../../../../rule_registry/common/technical_rule_data_field_names';
-import { AggregationFields, HostAggregate, UserAggregate } from './types';
+import {
+  AggregationFields,
+  FrequencyResult,
+  HostAggregate,
+  UniqueCountResult,
+  UserAggregate,
+} from './types';
 
 export class AlertService {
   constructor(
@@ -33,7 +39,7 @@ export class AlertService {
   }: {
     fields: AggregationFields[];
     alerts: AlertIdIndex[];
-  }): Promise<{ totalHosts?: number; totalUsers?: number }> {
+  }): Promise<UniqueCountResult> {
     try {
       const { ids, indices } = AlertService.getUniqueIdsIndices(alerts);
 
@@ -94,7 +100,7 @@ export class AlertService {
     fields: AggregationFields[];
     alerts: Array<{ id: string; index: string }>;
     size?: number;
-  }): Promise<{ hosts?: HostAggregate[]; users?: UserAggregate[] }> {
+  }): Promise<FrequencyResult> {
     try {
       const { ids, indices } = AlertService.getUniqueIdsIndices(alerts);
 

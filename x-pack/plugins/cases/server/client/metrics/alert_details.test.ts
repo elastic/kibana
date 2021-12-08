@@ -38,6 +38,17 @@ describe('AlertDetails', () => {
     expect(await handler.compute()).toEqual({});
   });
 
+  it('returns empty alert details metrics when no features were setup when called twice', async () => {
+    const client = createCasesClientMock();
+    client.attachments.getAllAlertsAttachToCase.mockImplementation(async () => {
+      return [{ id: '1', index: '2', attached_at: '3' }];
+    });
+
+    const handler = new AlertDetails('', client, {} as CasesClientArgs);
+    expect(await handler.compute()).toEqual({});
+    expect(await handler.compute()).toEqual({});
+  });
+
   it('returns host details when the host feature is setup', async () => {
     const client = createMockClient();
     const clientArgs = createMockClientArgs();
@@ -53,6 +64,26 @@ describe('AlertDetails', () => {
         },
       },
     });
+  });
+
+  it('only performs a single query to retrieve the details when compute is called twice', async () => {
+    expect.assertions(2);
+
+    const client = createMockClient();
+    const alertsService = mockAlertsService();
+
+    const clientArgs = {
+      alertsService,
+    } as unknown as CasesClientArgs;
+
+    const handler = new AlertDetails('', client, clientArgs);
+
+    handler.setupFeature('alertHosts');
+
+    await handler.compute();
+    await handler.compute();
+    expect(alertsService.getMostFrequentValuesForFields).toHaveBeenCalledTimes(1);
+    expect(alertsService.countUniqueValuesForFields).toHaveBeenCalledTimes(1);
   });
 
   it('returns user details when the user feature is setup', async () => {

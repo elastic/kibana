@@ -9,7 +9,7 @@ import { merge } from 'lodash';
 
 import { AlertHostsMetrics, AlertUsersMetrics, CaseMetricsResponse } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import { AggregationFields, HostAggregate, UserAggregate } from '../../services/alerts/types';
+import { AggregationFields, FrequencyResult, UniqueCountResult } from '../../services/alerts/types';
 import { CasesClient } from '../client';
 import { CasesClientArgs } from '../types';
 import { MetricsHandler } from './types';
@@ -52,7 +52,7 @@ export class AlertDetails implements MetricsHandler {
       });
 
       if (alerts.length > 0 && this.requestedFeatures.length > 0) {
-        const [frequentValues, countsOfValues] = await Promise.all([
+        const [frequentValues, counts] = await Promise.all([
           alertsService.getMostFrequentValuesForFields({
             fields: this.requestedFeatures,
             alerts,
@@ -64,10 +64,8 @@ export class AlertDetails implements MetricsHandler {
         ]);
 
         this.setRetrievedMetrics({
-          uniqueHosts: frequentValues.hosts,
-          uniqueUsers: frequentValues.users,
-          totalHosts: countsOfValues.totalHosts,
-          totalUsers: countsOfValues.totalUsers,
+          frequentValues,
+          counts,
         });
       } else {
         this.setRetrievedMetrics();
@@ -86,16 +84,15 @@ export class AlertDetails implements MetricsHandler {
   }
 
   private setRetrievedMetrics({
-    uniqueHosts,
-    uniqueUsers,
-    totalHosts,
-    totalUsers,
+    frequentValues,
+    counts,
   }: {
-    uniqueHosts?: HostAggregate[];
-    uniqueUsers?: UserAggregate[];
-    totalHosts?: number;
-    totalUsers?: number;
+    frequentValues?: FrequencyResult;
+    counts?: UniqueCountResult;
   } = {}) {
+    const { hosts: uniqueHosts, users: uniqueUsers } = frequentValues ?? {};
+    const { totalHosts, totalUsers } = counts ?? {};
+
     let mergedMetrics: AlertMetrics = {};
     if (uniqueHosts && totalHosts) {
       mergedMetrics = merge(mergedMetrics, {
