@@ -6,18 +6,29 @@
  */
 
 import React from 'react';
-import { fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { BrowserAdvancedFields } from './advanced_fields';
-import { ConfigKeys, IBrowserAdvancedFields, IBrowserSimpleFields } from '../types';
+import {
+  ConfigKey,
+  BrowserAdvancedFields as BrowserAdvancedFieldsType,
+  BrowserSimpleFields,
+  Validation,
+  DataStream,
+} from '../types';
 import {
   BrowserAdvancedFieldsContextProvider,
   BrowserSimpleFieldsContextProvider,
   defaultBrowserAdvancedFields as defaultConfig,
   defaultBrowserSimpleFields,
 } from '../contexts';
+import { validate as centralValidation } from '../validation';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+const defaultValidation = centralValidation[DataStream.BROWSER];
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
@@ -25,16 +36,20 @@ describe('<BrowserAdvancedFields />', () => {
   const WrappedComponent = ({
     defaultValues = defaultConfig,
     defaultSimpleFields = defaultBrowserSimpleFields,
+    validate = defaultValidation,
   }: {
-    defaultValues?: IBrowserAdvancedFields;
-    defaultSimpleFields?: IBrowserSimpleFields;
+    defaultValues?: BrowserAdvancedFieldsType;
+    defaultSimpleFields?: BrowserSimpleFields;
+    validate?: Validation;
   }) => {
     return (
-      <BrowserSimpleFieldsContextProvider defaultValues={defaultSimpleFields}>
-        <BrowserAdvancedFieldsContextProvider defaultValues={defaultValues}>
-          <BrowserAdvancedFields />
-        </BrowserAdvancedFieldsContextProvider>
-      </BrowserSimpleFieldsContextProvider>
+      <IntlProvider locale="en">
+        <BrowserSimpleFieldsContextProvider defaultValues={defaultSimpleFields}>
+          <BrowserAdvancedFieldsContextProvider defaultValues={defaultValues}>
+            <BrowserAdvancedFields validate={validate} />
+          </BrowserAdvancedFieldsContextProvider>
+        </BrowserSimpleFieldsContextProvider>
+      </IntlProvider>
     );
   };
 
@@ -43,18 +58,19 @@ describe('<BrowserAdvancedFields />', () => {
 
     const syntheticsArgs = getByLabelText('Synthetics args');
     const screenshots = getByLabelText('Screenshot options') as HTMLInputElement;
-    expect(screenshots.value).toEqual(defaultConfig[ConfigKeys.SCREENSHOTS]);
+
+    expect(screenshots.value).toEqual(defaultConfig[ConfigKey.SCREENSHOTS]);
     expect(syntheticsArgs).toBeInTheDocument();
   });
 
-  it('handles changing fields', () => {
-    const { getByLabelText } = render(<WrappedComponent />);
+  describe('handles changing fields', () => {
+    it('for screenshot options', () => {
+      const { getByLabelText } = render(<WrappedComponent />);
 
-    const screenshots = getByLabelText('Screenshot options') as HTMLInputElement;
-
-    fireEvent.change(screenshots, { target: { value: 'off' } });
-
-    expect(screenshots.value).toEqual('off');
+      const screenshots = getByLabelText('Screenshot options') as HTMLInputElement;
+      userEvent.selectOptions(screenshots, ['off']);
+      expect(screenshots.value).toEqual('off');
+    });
   });
 
   it('only displayed filter options when zip url is truthy', () => {
@@ -70,7 +86,7 @@ describe('<BrowserAdvancedFields />', () => {
       <WrappedComponent
         defaultSimpleFields={{
           ...defaultBrowserSimpleFields,
-          [ConfigKeys.SOURCE_ZIP_URL]: 'https://elastic.zip',
+          [ConfigKey.SOURCE_ZIP_URL]: 'https://elastic.zip',
         }}
       />
     );

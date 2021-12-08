@@ -23,7 +23,7 @@ import {
   EuiIcon,
   EuiHealth,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import {
@@ -70,6 +70,7 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 import { ExpressionChart } from './expression_chart';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
+export const QUERY_INVALID = Symbol('QUERY_INVALID');
 
 export interface AlertContextMeta {
   options?: Partial<InfraWaffleMapOptions>;
@@ -84,7 +85,7 @@ type Props = Omit<
     {
       criteria: Criteria;
       nodeType: InventoryItemType;
-      filterQuery?: string;
+      filterQuery?: string | symbol;
       filterQueryText?: string;
       sourceId: string;
       alertOnNoData?: boolean;
@@ -157,10 +158,14 @@ export const Expressions: React.FC<Props> = (props) => {
   const onFilterChange = useCallback(
     (filter: any) => {
       setAlertParams('filterQueryText', filter || '');
-      setAlertParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-      );
+      try {
+        setAlertParams(
+          'filterQuery',
+          convertKueryToElasticSearchQuery(filter, derivedIndexPattern, false) || ''
+        );
+      } catch (e) {
+        setAlertParams('filterQuery', QUERY_INVALID);
+      }
     },
     [derivedIndexPattern, setAlertParams]
   );

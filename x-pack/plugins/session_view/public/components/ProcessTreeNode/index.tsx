@@ -13,8 +13,8 @@
  */
 import React, { useMemo, useRef, useLayoutEffect, useState, useEffect, MouseEvent } from 'react';
 import { EuiButton, EuiIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { Process } from '../../hooks/use_process_tree';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Process } from '../../../common/types/process_tree';
 import { useStyles, ButtonType } from './styles';
 import { ProcessTreeAlerts } from '../ProcessTreeAlerts';
 

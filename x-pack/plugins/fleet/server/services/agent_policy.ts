@@ -7,6 +7,7 @@
 
 import { uniq, omit } from 'lodash';
 import uuid from 'uuid/v4';
+import uuidv5 from 'uuid/v5';
 import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
@@ -57,7 +58,11 @@ import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
+
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
+
+// UUID v5 values require a namespace
+const UUID_V5_NAMESPACE = 'dde7c2de-1370-4c19-9975-b473d0e03508';
 
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
@@ -780,8 +785,10 @@ export async function addPackageToAgentPolicy(
   agentPolicy: AgentPolicy,
   defaultOutput: Output,
   packagePolicyName?: string,
+  packagePolicyId?: string | number,
   packagePolicyDescription?: string,
-  transformPackagePolicy?: (p: NewPackagePolicy) => NewPackagePolicy
+  transformPackagePolicy?: (p: NewPackagePolicy) => NewPackagePolicy,
+  bumpAgentPolicyRevison = false
 ) {
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
@@ -802,8 +809,18 @@ export async function addPackageToAgentPolicy(
     ? transformPackagePolicy(basePackagePolicy)
     : basePackagePolicy;
 
+  // If an ID is provided via preconfiguration, use that value. Otherwise fall back to
+  // a UUID v5 value seeded from the agent policy's ID and the provided package policy name.
+  const id = packagePolicyId
+    ? String(packagePolicyId)
+    : uuidv5(`${agentPolicy.id}-${packagePolicyName}`, UUID_V5_NAMESPACE);
+
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
-    bumpRevision: false,
+    id,
+    bumpRevision: bumpAgentPolicyRevison,
     skipEnsureInstalled: true,
+    skipUniqueNameVerification: true,
+    overwrite: true,
+    force: true, // To add package to managed policy we need the force flag
   });
 }

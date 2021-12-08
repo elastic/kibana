@@ -12,7 +12,6 @@ import {
   SavedObjectsServiceStart,
 } from 'kibana/server';
 
-import { TypeOf } from '@kbn/config-schema';
 import { TransportResult } from '@elastic/elasticsearch';
 import { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -27,7 +26,6 @@ import { Agent, AgentPolicy, PackagePolicy } from '../../../../../fleet/common';
 import {
   AgentNotFoundError,
   AgentPolicyServiceInterface,
-  AgentService,
   PackagePolicyServiceInterface,
 } from '../../../../../fleet/server';
 import {
@@ -52,12 +50,13 @@ import {
   fleetAgentStatusToEndpointHostStatus,
   wrapErrorIfNeeded,
 } from '../../utils';
-import { EndpointError } from '../../errors';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 import { METADATA_UNITED_INDEX } from '../../../../common/endpoint/constants';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
 import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
-import { GetMetadataListRequestSchemaV2 } from '../../routes/metadata';
+import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
+import { EndpointError } from '../../../../common/endpoint/errors';
+import { EndpointFleetServicesInterface } from '../endpoint_fleet_services';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
@@ -85,7 +84,6 @@ export class EndpointMetadataService {
 
   constructor(
     private savedObjectsStart: SavedObjectsServiceStart,
-    private readonly agentService: AgentService,
     private readonly agentPolicyService: AgentPolicyServiceInterface,
     private readonly packagePolicyService: PackagePolicyServiceInterface,
     private readonly logger?: Logger
@@ -157,12 +155,14 @@ export class EndpointMetadataService {
    * Retrieve a single endpoint host metadata along with fleet information
    *
    * @param esClient Elasticsearch Client (usually scoped to the user's context)
+   * @param fleetServices
    * @param endpointId the endpoint id (from `agent.id`)
    *
    * @throws
    */
   async getEnrichedHostMetadata(
     esClient: ElasticsearchClient,
+    fleetServices: EndpointFleetServicesInterface,
     endpointId: string
   ): Promise<HostInfo> {
     const endpointMetadata = await this.getHostMetadata(esClient, endpointId);
@@ -177,7 +177,7 @@ export class EndpointMetadataService {
         this.logger?.warn(`Missing elastic agent id, using host id instead ${fleetAgentId}`);
       }
 
-      fleetAgent = await this.getFleetAgent(esClient, fleetAgentId);
+      fleetAgent = await this.getFleetAgent(fleetServices.agent, fleetAgentId);
     } catch (error) {
       if (error instanceof FleetAgentNotFoundError) {
         this.logger?.warn(`agent with id ${fleetAgentId} not found`);
@@ -193,12 +193,12 @@ export class EndpointMetadataService {
       );
     }
 
-    return this.enrichHostMetadata(esClient, endpointMetadata, fleetAgent);
+    return this.enrichHostMetadata(fleetServices, endpointMetadata, fleetAgent);
   }
 
   /**
    * Enriches a host metadata document with data from fleet
-   * @param esClient
+   * @param fleetServices
    * @param endpointMetadata
    * @param _fleetAgent
    * @param _fleetAgentPolicy
@@ -207,7 +207,7 @@ export class EndpointMetadataService {
    */
   // eslint-disable-next-line complexity
   private async enrichHostMetadata(
-    esClient: ElasticsearchClient,
+    fleetServices: EndpointFleetServicesInterface,
     endpointMetadata: HostMetadata,
     /**
      * If undefined, it will be retrieved from Fleet using the ID in the endpointMetadata.
@@ -243,7 +243,7 @@ export class EndpointMetadataService {
           );
         }
 
-        fleetAgent = await this.getFleetAgent(esClient, fleetAgentId);
+        fleetAgent = await this.getFleetAgent(fleetServices.agent, fleetAgentId);
       } catch (error) {
         if (error instanceof FleetAgentNotFoundError) {
           this.logger?.warn(`agent with id ${fleetAgentId} not found`);
@@ -311,12 +311,15 @@ export class EndpointMetadataService {
   /**
    * Retrieve a single Fleet Agent data
    *
-   * @param esClient Elasticsearch Client (usually scoped to the user's context)
+   * @param fleetAgentService
    * @param agentId The elastic agent id (`from `elastic.agent.id`)
    */
-  async getFleetAgent(esClient: ElasticsearchClient, agentId: string): Promise<Agent> {
+  async getFleetAgent(
+    fleetAgentService: EndpointFleetServicesInterface['agent'],
+    agentId: string
+  ): Promise<Agent> {
     try {
-      return await this.agentService.getAgent(esClient, agentId);
+      return await fleetAgentService.getAgent(agentId);
     } catch (error) {
       if (error instanceof AgentNotFoundError) {
         throw new FleetAgentNotFoundError(`agent with id ${agentId} not found`, error);
@@ -403,7 +406,8 @@ export class EndpointMetadataService {
    */
   async getHostMetadataList(
     esClient: ElasticsearchClient,
-    queryOptions: TypeOf<typeof GetMetadataListRequestSchemaV2.query>
+    fleetServices: EndpointFleetServicesInterface,
+    queryOptions: GetMetadataListRequestQuery
   ): Promise<Pick<MetadataListResponse, 'data' | 'total'>> {
     const endpointPolicies = await getAllEndpointPackagePolicies(
       this.packagePolicyService,
@@ -469,7 +473,7 @@ export class EndpointMetadataService {
         const endpointPolicy = endpointPoliciesMap[agent.policy_id!];
 
         hosts.push(
-          await this.enrichHostMetadata(esClient, metadata, agent, agentPolicy, endpointPolicy)
+          await this.enrichHostMetadata(fleetServices, metadata, agent, agentPolicy, endpointPolicy)
         );
       }
     }

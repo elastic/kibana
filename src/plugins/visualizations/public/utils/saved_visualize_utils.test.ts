@@ -43,10 +43,10 @@ jest.mock('../../../../plugins/data/public', () => ({
 }));
 
 const mockInjectReferences = jest.fn();
-const mockExtractReferences = jest.fn(() => ({ references: [], attributes: {} }));
+const mockExtractReferences = jest.fn((arg) => arg);
 jest.mock('./saved_visualization_references', () => ({
   injectReferences: jest.fn((...args) => mockInjectReferences(...args)),
-  extractReferences: jest.fn(() => mockExtractReferences()),
+  extractReferences: jest.fn((arg) => mockExtractReferences(arg)),
 }));
 
 let isTitleDuplicateConfirmed = true;
@@ -56,10 +56,11 @@ const mockCheckForDuplicateTitle = jest.fn(() => {
   }
 });
 const mockSaveWithConfirmation = jest.fn(() => ({ id: 'test-after-confirm' }));
-jest.mock('../../../../plugins/saved_objects/public', () => ({
+jest.mock('./saved_objects_utils/check_for_duplicate_title', () => ({
   checkForDuplicateTitle: jest.fn(() => mockCheckForDuplicateTitle()),
+}));
+jest.mock('./saved_objects_utils/save_with_confirmation', () => ({
   saveWithConfirmation: jest.fn(() => mockSaveWithConfirmation()),
-  isErrorNonFatal: jest.fn(() => true),
 }));
 
 describe('saved_visualize_utils', () => {
@@ -184,6 +185,7 @@ describe('saved_visualize_utils', () => {
       vis = {
         visState: {
           type: 'area',
+          params: {},
         },
         title: 'test',
         uiStateJSON: '{}',
@@ -262,15 +264,19 @@ describe('saved_visualize_utils', () => {
     describe('isTitleDuplicateConfirmed', () => {
       it('as false we should not save vis with duplicated title', async () => {
         isTitleDuplicateConfirmed = false;
-        const savedVisId = await saveVisualization(
-          vis,
-          { isTitleDuplicateConfirmed },
-          { savedObjectsClient, overlays }
-        );
+        try {
+          const savedVisId = await saveVisualization(
+            vis,
+            { isTitleDuplicateConfirmed },
+            { savedObjectsClient, overlays }
+          );
+          expect(savedVisId).toBe('');
+        } catch {
+          // ignore
+        }
         expect(savedObjectsClient.create).not.toHaveBeenCalled();
         expect(mockSaveWithConfirmation).not.toHaveBeenCalled();
         expect(mockCheckForDuplicateTitle).toHaveBeenCalled();
-        expect(savedVisId).toBe('');
         expect(vis.id).toBeUndefined();
       });
 

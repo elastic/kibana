@@ -10,7 +10,7 @@ import React, { memo, useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiHorizontalRule,
   EuiFlexItem,
@@ -215,7 +215,7 @@ export const AvailablePackages: React.FC = memo(() => {
     category: '',
   });
   const eprIntegrationList = useMemo(
-    () => packageListToIntegrationsList(eprPackages?.response || []),
+    () => packageListToIntegrationsList(eprPackages?.items || []),
     [eprPackages]
   );
 
@@ -256,7 +256,7 @@ export const AvailablePackages: React.FC = memo(() => {
       ? []
       : mergeCategoriesAndCount(
           eprCategories
-            ? (eprCategories.response as Array<{ id: string; title: string; count: number }>)
+            ? (eprCategories.items as Array<{ id: string; title: string; count: number }>)
             : [],
           cards
         );

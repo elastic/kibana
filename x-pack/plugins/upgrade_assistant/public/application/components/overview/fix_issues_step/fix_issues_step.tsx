@@ -9,7 +9,7 @@ import React, { FunctionComponent, useState, useEffect } from 'react';
 
 import { EuiText, EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { DEPRECATION_LOGS_INDEX } from '../../../../../common/constants';

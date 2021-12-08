@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { MatchedIndicesSet } from '../../../types';
 
 interface StatusMessageProps {

@@ -37,11 +37,12 @@ import React, { useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 
 import type { Certificate } from '../common';
 import { DocLink } from './doc_link';
+import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SubmitErrorCallout } from './submit_error_callout';
 import { TextTruncate } from './text_truncate';
 import type { ValidationErrors } from './use_form';
@@ -511,7 +512,7 @@ export const ForgotPasswordPopover: FunctionComponent<ForgotPasswordPopoverProps
           />
         </p>
         <EuiCodeBlock language="bash" paddingSize="m" isCopyable>
-          bin/elasticsearch-reset-password --username {username}
+          {getCommandLineSnippet('elasticsearch-reset-password', `--username ${username}`)}
         </EuiCodeBlock>
       </EuiText>
     </EuiPopover>

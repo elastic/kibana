@@ -9,7 +9,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { cloneDeep } from 'lodash/fp';
 import { render, screen } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
 import { createStore, State } from '../../../common/store';
 import {
@@ -60,7 +60,10 @@ describe('RiskyHostsEnabledModule', () => {
                     host: {
                       name: 'a',
                     },
-                    risk_score: 1,
+                    risk_stats: {
+                      risk_score: 1,
+                      rule_risks: [],
+                    },
                     risk: '',
                   },
                 ],

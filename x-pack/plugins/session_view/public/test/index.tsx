@@ -12,7 +12,7 @@ import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { Router } from 'react-router-dom';
 import { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { CoreStart } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';

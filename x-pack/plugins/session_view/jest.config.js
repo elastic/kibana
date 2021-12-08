@@ -14,4 +14,5 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/plugins/session_view/{common,public,server}/**/*.{ts,tsx}',
   ],
+  setupFiles: ['jest-canvas-mock'],
 };

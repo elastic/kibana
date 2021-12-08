@@ -6,7 +6,7 @@
  */
 import React, { useMemo, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +19,7 @@ import {
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
-import { ConfigKeys, DataStream, Validation } from './types';
+import { ConfigKey, DataStream, Validation } from './types';
 import { usePolicyConfigContext } from './contexts';
 import { TLSFields } from './tls_fields';
 import { HTTPSimpleFields } from './http/simple_fields';
@@ -33,6 +33,7 @@ import { BrowserAdvancedFields } from './browser/advanced_fields';
 interface Props {
   validate: Validation;
   dataStreams?: DataStream[];
+  children?: React.ReactNode;
 }
 
 const dataStreamToString = [
@@ -50,7 +51,7 @@ const dataStreamToString = [
   },
 ];
 
-export const CustomFields = memo<Props>(({ validate, dataStreams = [] }) => {
+export const CustomFields = memo<Props>(({ validate, dataStreams = [], children }) => {
   const { monitorType, setMonitorType, isTLSEnabled, setIsTLSEnabled, isEditable } =
     usePolicyConfigContext();
 
@@ -98,6 +99,7 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [] }) => {
       >
         <EuiFlexGroup>
           <EuiFlexItem>
+            {children}
             {!isEditable && (
               <EuiFormRow
                 label={
@@ -107,8 +109,8 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [] }) => {
                   />
                 }
                 isInvalid={
-                  !!validate[ConfigKeys.MONITOR_TYPE]?.({
-                    [ConfigKeys.MONITOR_TYPE]: monitorType,
+                  !!validate[ConfigKey.MONITOR_TYPE]?.({
+                    [ConfigKey.MONITOR_TYPE]: monitorType as DataStream,
                   })
                 }
                 error={
@@ -174,9 +176,10 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [] }) => {
               defaultMessage="Configure TLS options, including verification mode, certificate authorities, and client certificates."
             />
           }
+          id="uptimeFleetIsTLSEnabled"
         >
           <EuiSwitch
-            id={'uptimeFleetIsTLSEnabled'}
+            id="uptimeFleetIsTLSEnabled"
             data-test-subj="syntheticsIsTLSEnabled"
             checked={!!isTLSEnabled}
             label={
@@ -193,7 +196,7 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [] }) => {
       <EuiSpacer size="m" />
       {isHTTP && <HTTPAdvancedFields validate={validate} />}
       {isTCP && <TCPAdvancedFields />}
-      {isBrowser && <BrowserAdvancedFields />}
+      {isBrowser && <BrowserAdvancedFields validate={validate} />}
     </EuiForm>
   );
 });

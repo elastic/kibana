@@ -7,7 +7,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiTabbedContent, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 
