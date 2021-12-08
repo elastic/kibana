@@ -29,7 +29,12 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(() => {
-      _monitors = [getFixtureJson('http_monitor'), getFixtureJson('browser_monitor')];
+      _monitors = [
+        getFixtureJson('icmp_monitor'),
+        getFixtureJson('tcp_monitor'),
+        getFixtureJson('http_monitor'),
+        getFixtureJson('browser_monitor'),
+      ];
     });
 
     beforeEach(() => {
@@ -42,7 +47,9 @@ export default function ({ getService }: FtrProviderContext) {
           monitors.map(saveMonitor)
         );
 
-        const apiResponse = await supertest.get(API_URLS.SYNTHETICS_MONITORS).expect(200);
+        const apiResponse = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS + '?perPage=1000') // 1000 to sort of load all saved monitors
+          .expect(200);
 
         let found = apiResponse.body.monitors.filter(({ id }) => [id1, id2].includes(id));
         found.sort(({ id: a }) => (a === id2 ? 1 : a === id1 ? -1 : 0));
@@ -54,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('with page params', async () => {
-        await Promise.all([...monitors, ...monitors, ...monitors].map(saveMonitor));
+        await Promise.all([...monitors, ...monitors].map(saveMonitor));
 
         const firstPageResp = await supertest
           .get(`${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=2`)
@@ -63,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`${API_URLS.SYNTHETICS_MONITORS}?page=2&perPage=3`)
           .expect(200);
 
-        expect(firstPageResp.body.total).greaterThan(4);
+        expect(firstPageResp.body.total).greaterThan(6);
         expect(firstPageResp.body.monitors.length).eql(2);
         expect(secondPageResp.body.monitors.length).eql(3);
 
