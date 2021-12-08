@@ -7,24 +7,11 @@
  */
 
 import type { IServiceSettings } from '../service_settings/service_settings_types';
+import { ServiceSettings } from './service_settings';
 import { getMapsEms } from '../../../services';
 import type { MapConfig } from '../../../../../../maps_ems/config';
 
-let loadPromise: Promise<IServiceSettings>;
-
-export async function getServiceSettings(): Promise<IServiceSettings> {
-  if (typeof loadPromise !== 'undefined') {
-    return loadPromise;
-  }
-
-  loadPromise = new Promise(async (resolve, reject) => {
-    try {
-      const { ServiceSettings } = await import('./service_settings');
-      const mapsEmsConfig: MapConfig = getMapsEms().config;
-      resolve(new ServiceSettings(mapsEmsConfig, mapsEmsConfig.tilemap));
-    } catch (error) {
-      reject(error);
-    }
-  });
-  return loadPromise;
+export function getServiceSettings(): IServiceSettings {
+  const mapsEmsConfig: MapConfig = getMapsEms().config;
+  return new ServiceSettings(mapsEmsConfig, mapsEmsConfig.tilemap);
 }

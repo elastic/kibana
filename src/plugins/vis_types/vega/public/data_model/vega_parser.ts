@@ -69,7 +69,7 @@ export class VegaParser {
   containerDir?: ControlsLocation | ControlsDirection;
   controlsDir?: ControlsLocation;
   searchAPI: SearchAPI;
-  getServiceSettings: () => Promise<IServiceSettings>;
+  getServiceSettings: () => IServiceSettings;
   filters: Bool;
   timeCache: TimeCache;
 
@@ -78,7 +78,7 @@ export class VegaParser {
     searchAPI: SearchAPI,
     timeCache: TimeCache,
     filters: Bool,
-    getServiceSettings: () => Promise<IServiceSettings>
+    getServiceSettings: () => IServiceSettings
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
@@ -593,7 +593,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
    */
   async _resolveDataUrls() {
     if (!this._urlParsers) {
-      const serviceSettings = await this.getServiceSettings();
+      const serviceSettings = this.getServiceSettings();
       const onWarn = this._onWarning.bind(this);
       this._urlParsers = {
         elasticsearch: new EsQueryParser(this.timeCache, this.searchAPI, this.filters, onWarn),

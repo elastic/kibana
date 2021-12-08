@@ -58,7 +58,7 @@ describe('vega_map_view/view', () => {
   describe('VegaMapView', () => {
     const coreStart = coreMock.createStart();
     const dataPluginStart = dataPluginMock.createStartContract();
-    const mockGetServiceSettings = async () => {
+    const mockGetServiceSettings = () => {
       return {} as IServiceSettings;
     };
     let vegaParser: VegaParser;

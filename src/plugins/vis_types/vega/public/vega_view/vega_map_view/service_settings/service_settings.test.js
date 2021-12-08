@@ -6,12 +6,6 @@
  * Side Public License, v 1.
  */
 
-jest.mock('../kibana_services', () => ({
-  getKibanaVersion() {
-    return '1.2.3';
-  },
-}));
-
 import url from 'url';
 
 import EMS_FILES from './__tests__/ems_mocks/sample_files.json';

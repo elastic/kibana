@@ -70,7 +70,7 @@ export const createVegaVisualization = (
           this.vegaView = null;
         }
 
-        const serviceSettings = await getServiceSettings();
+        const serviceSettings = getServiceSettings();
         const { filterManager } = this.dataPlugin.query;
         const { timefilter } = this.dataPlugin.query.timefilter;
         const vegaViewParams = {
