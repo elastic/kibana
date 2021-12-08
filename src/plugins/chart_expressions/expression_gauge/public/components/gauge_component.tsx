@@ -10,14 +10,9 @@ import { Chart, Goal, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CustomPaletteState } from '../../../../charts/public';
 import { EmptyPlaceholder } from '../../../../charts/public';
-import type { GaugeRenderProps } from '../../common';
+import type { GaugeRenderProps, GaugeLabelMajorMode, GaugeTicksPosition } from '../../common';
+import { GaugeShapes, GaugeTicksPositions } from '../../common';
 import { GaugeIconVertical, GaugeIconHorizontal } from './gauge_icon';
-import {
-  GaugeLabelMajorMode,
-  GaugeShapes,
-  GaugeTicksPosition,
-  GaugeTicksPositions,
-} from '../../common/types';
 import { getMaxValue, getMinValue, getValueFromAccessor } from './utils';
 
 declare global {

@@ -19,11 +19,16 @@ export type {
   GaugeArguments,
   GaugeShape,
   GaugeLabelMajorMode,
+  GaugeTicksPosition,
   GaugeState,
 } from './types';
 
-export { GaugeShapes, GaugeColorModes, GaugeTicksPositions, GaugeLabelMajorModes } from './types';
-
 export { gaugeFunction } from './expression_functions';
 
-export { EXPRESSION_GAUGE_NAME } from './constants';
+export {
+  EXPRESSION_GAUGE_NAME,
+  GaugeShapes,
+  GaugeColorModes,
+  GaugeTicksPositions,
+  GaugeLabelMajorModes,
+} from './constants';

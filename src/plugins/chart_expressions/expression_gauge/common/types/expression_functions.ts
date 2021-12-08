@@ -12,29 +12,15 @@ import {
   ExpressionValueRender,
 } from '../../../../expressions';
 import { CustomPaletteState, PaletteOutput } from '../../../../charts/common';
-import { EXPRESSION_GAUGE_NAME, GAUGE_FUNCTION_RENDERER_NAME } from '../constants';
+import {
+  EXPRESSION_GAUGE_NAME,
+  GAUGE_FUNCTION_RENDERER_NAME,
+  GaugeShapes,
+  GaugeTicksPositions,
+  GaugeLabelMajorModes,
+  GaugeColorModes,
+} from '../constants';
 import { CustomPaletteParams } from '.';
-
-export const GaugeShapes = {
-  horizontalBullet: 'horizontalBullet',
-  verticalBullet: 'verticalBullet',
-} as const;
-
-export const GaugeTicksPositions = {
-  auto: 'auto',
-  bands: 'bands',
-} as const;
-
-export const GaugeLabelMajorModes = {
-  auto: 'auto',
-  custom: 'custom',
-  none: 'none',
-} as const;
-
-export const GaugeColorModes = {
-  palette: 'palette',
-  none: 'none',
-} as const;
 
 export type GaugeType = 'gauge';
 export type GaugeColorMode = keyof typeof GaugeColorModes;
