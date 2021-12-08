@@ -16,7 +16,6 @@ import { getInitialDatasourceId } from '../../utils';
 import { initializeDatasources } from '../../editor_frame_service/editor_frame';
 import { LensAppServices } from '../../app_plugin/types';
 import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
-import { inject as injectFilterReferences } from '../../../../../../src/plugins/data/common';
 import { Document } from '../../persistence';
 
 export const getPersisted = async ({
@@ -165,7 +164,7 @@ export function loadInitial(
             {}
           );
 
-          const filters = injectFilterReferences(doc.state.filters, doc.references);
+          const filters = data.query.filterManager.inject(doc.state.filters, doc.references);
           // Don't overwrite any pinned filters
           data.query.filterManager.setAppFilters(filters);
 

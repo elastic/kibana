@@ -7,7 +7,7 @@
 
 import { Observable, Subject } from 'rxjs';
 import moment from 'moment';
-import { DataPublicPluginStart, esFilters } from '../../../../../src/plugins/data/public';
+import { DataPublicPluginStart, esFilters, Filter } from '../../../../../src/plugins/data/public';
 
 function createMockTimefilter() {
   const unsubscribe = jest.fn();
@@ -89,6 +89,12 @@ export function mockDataPlugin(
       removeAll: () => {
         filters = [];
         subscriber();
+      },
+      inject: (filtersIn: Filter[]) => {
+        return filtersIn.map((filter) => ({
+          ...filter,
+          meta: { ...filter.meta, index: 'injected!' },
+        }));
       },
     };
   }

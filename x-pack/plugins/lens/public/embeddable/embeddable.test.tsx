@@ -73,16 +73,13 @@ const options = {
 };
 
 const mockInjectFilterReferences: FilterManager['inject'] = (filters, references) => {
-  return filters.map((filter) => {
-    const reference = references.find((ref) => ref.name === filter.meta.index);
-    return {
-      ...filter,
-      meta: {
-        ...filter.meta,
-        index: reference?.id,
-      },
-    };
-  });
+  return filters.map((filter) => ({
+    ...filter,
+    meta: {
+      ...filter.meta,
+      index: 'injected!',
+    },
+  }));
 };
 
 const attributeServiceMockFromSavedVis = (document: Document): LensAttributeService => {
