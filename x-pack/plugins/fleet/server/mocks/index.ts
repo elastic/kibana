@@ -7,11 +7,11 @@
 import { of } from 'rxjs';
 
 import {
+  coreMock,
   elasticsearchServiceMock,
   loggingSystemMock,
-  savedObjectsServiceMock,
-  coreMock,
   savedObjectsClientMock,
+  savedObjectsServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 import { licensingMock } from '../../../../plugins/licensing/server/mocks';
@@ -21,7 +21,7 @@ import type { PackagePolicyServiceInterface } from '../services/package_policy';
 import type { AgentPolicyServiceInterface, PackageService } from '../services';
 import type { FleetAppContext } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
-import type { FleetAuthz } from '../../common';
+import { createFleetAuthzMock } from '../../common';
 import { agentServiceMock } from '../services/agents/agent_service.mock';
 import type { FleetRequestHandlerContext } from '../types';
 
@@ -99,6 +99,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServi
   return {
     _compilePackagePolicyInputs: jest.fn(),
     buildPackagePolicyFromPackage: jest.fn(),
+    buildPackagePolicyFromPackageWithVersion: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
@@ -112,6 +113,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServi
     upgrade: jest.fn(),
     getUpgradeDryRunDiff: jest.fn(),
     getUpgradePackagePolicyInfo: jest.fn(),
+    enrichPolicyWithDefaultsFromPackage: jest.fn(),
   };
 };
 
@@ -143,29 +145,5 @@ export const createMockPackageService = (): PackageService => {
   return {
     getInstallation: jest.fn(),
     ensureInstalledPackage: jest.fn(),
-  };
-};
-
-/**
- * Creates mock `authz` object
- */
-export const createFleetAuthzMock = (): FleetAuthz => {
-  return {
-    fleet: {
-      all: true,
-      setup: true,
-      readEnrollmentTokens: true,
-    },
-    integrations: {
-      readPackageInfo: true,
-      readInstalledPackages: true,
-      installPackages: true,
-      upgradePackages: true,
-      removePackages: true,
-      readPackageSettings: true,
-      writePackageSettings: true,
-      readIntegrationPolicies: true,
-      writeIntegrationPolicies: true,
-    },
   };
 };

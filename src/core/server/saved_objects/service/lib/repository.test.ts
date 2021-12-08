@@ -976,8 +976,9 @@ describe('SavedObjectsRepository', () => {
     describe('migration', () => {
       it(`migrates the docs and serializes the migrated docs`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocument);
-        await bulkCreateSuccess([obj1, obj2]);
-        const docs = [obj1, obj2].map((x) => ({ ...x, ...mockTimestampFields }));
+        const modifiedObj1 = { ...obj1, coreMigrationVersion: '8.0.0' };
+        await bulkCreateSuccess([modifiedObj1, obj2]);
+        const docs = [modifiedObj1, obj2].map((x) => ({ ...x, ...mockTimestampFields }));
         expectMigrationArgs(docs[0], true, 1);
         expectMigrationArgs(docs[1], true, 2);
 
@@ -2556,8 +2557,22 @@ describe('SavedObjectsRepository', () => {
 
       it(`migrates a document and serializes the migrated doc`, async () => {
         const migrationVersion = mockMigrationVersion;
-        await createSuccess(type, attributes, { id, references, migrationVersion });
-        const doc = { type, id, attributes, references, migrationVersion, ...mockTimestampFields };
+        const coreMigrationVersion = '8.0.0';
+        await createSuccess(type, attributes, {
+          id,
+          references,
+          migrationVersion,
+          coreMigrationVersion,
+        });
+        const doc = {
+          type,
+          id,
+          attributes,
+          references,
+          migrationVersion,
+          coreMigrationVersion,
+          ...mockTimestampFields,
+        };
         expectMigrationArgs(doc);
 
         const migratedDoc = migrator.migrateDocument(doc);
@@ -3541,6 +3556,20 @@ describe('SavedObjectsRepository', () => {
           ...relevantOpts,
           type: [type],
         });
+      });
+
+      it('search for the right fields when typeToNamespacesMap is set', async () => {
+        const relevantOpts = {
+          ...commonOptions,
+          fields: ['title'],
+          type: '',
+          namespaces: [],
+          typeToNamespacesMap: new Map([[type, [namespace]]]),
+        };
+
+        await findSuccess(relevantOpts, namespace);
+        const esOptions = client.search.mock.calls[0][0];
+        expect(esOptions?._source ?? []).toContain('index-pattern.title');
       });
 
       it(`accepts hasReferenceOperator`, async () => {

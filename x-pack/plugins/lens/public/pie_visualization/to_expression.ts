@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter/common';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import { Operation, DatasourcePublicAPI } from '../types';
+import type { Ast } from '@kbn/interpreter/common';
+import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { Operation, DatasourcePublicAPI } from '../types';
 import { DEFAULT_PERCENT_DECIMALS, EMPTY_SIZE_RATIOS } from './constants';
+import { shouldShowValuesInLegend } from './render_helpers';
 import type { PieVisualizationState } from '../../common/expressions';
 
 export function toExpression(
@@ -34,6 +35,7 @@ function expressionHelper(
   const operations = layer.groups
     .map((columnId) => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
     .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
+
   if (!layer.metric || !operations.length) {
     return null;
   }
@@ -56,6 +58,7 @@ function expressionHelper(
           legendDisplay: [layer.legendDisplay],
           legendPosition: [layer.legendPosition || 'right'],
           emptySizeRatio: [layer.emptySizeRatio ?? EMPTY_SIZE_RATIOS.MEDIUM],
+          showValuesInLegend: [shouldShowValuesInLegend(layer, state.shape)],
           percentDecimals: [
             state.shape === 'waffle'
               ? DEFAULT_PERCENT_DECIMALS

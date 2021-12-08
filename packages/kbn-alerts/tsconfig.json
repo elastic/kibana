@@ -8,7 +8,7 @@
     "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../packages/kbn-alerts/src",
-    "types": ["jest", "node", "resize-observer-polyfill"]
+    "types": ["jest", "node"]
   },
   "include": ["src/**/*"],
 }
