@@ -14,6 +14,7 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../../cases/common/constants';
 
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { isElasticRule } from './index';
@@ -249,11 +250,10 @@ export const getDetectionRuleMetrics = async (
     })) as { body: AlertsAggregationResponse };
 
     const cases = await savedObjectClient.find<CasesSavedObject>({
-      type: 'cases-comments',
-      fields: [],
+      type: CASE_COMMENT_SAVED_OBJECT,
       page: 1,
       perPage: MAX_RESULTS_WINDOW,
-      filter: 'cases-comments.attributes.type: alert',
+      filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: alert`,
     });
 
     const casesCache = cases.saved_objects.reduce((cache, { attributes: casesObject }) => {
