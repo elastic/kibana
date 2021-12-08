@@ -355,7 +355,7 @@ export const checkExceptions = async ({
   return [errors, ruleExceptions];
 };
 
-export const importExceptionsHelper = async ({
+export const importRuleExceptions = async ({
   exceptions,
   exceptionsClient,
   overwrite,
@@ -374,23 +374,19 @@ export const importExceptionsHelper = async ({
     };
   }
 
-  try {
-    const {
-      errors,
-      success,
-      success_count: successCount,
-    } = await exceptionsClient.importExceptionListAndItemsAsArray({
-      exceptionsToImport: exceptions,
-      overwrite,
-      maxExceptionsImportSize,
-    });
+  const {
+    errors,
+    success,
+    success_count: successCount,
+  } = await exceptionsClient.importExceptionListAndItemsAsArray({
+    exceptionsToImport: exceptions,
+    overwrite,
+    maxExceptionsImportSize,
+  });
 
-    return {
-      errors,
-      success,
-      successCount,
-    };
-  } catch (err) {
-    throw new Error(err);
-  }
+  return {
+    errors,
+    success,
+    successCount,
+  };
 };

@@ -36,7 +36,7 @@ import { createRulesAndExceptionsStreamFromNdJson } from '../../rules/create_rul
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { HapiReadableStream } from '../../rules/types';
 import {
-  importExceptionsHelper,
+  importRuleExceptions,
   importRules as importRulesHelper,
   RuleExceptionsPromiseFromStreams,
 } from './utils/import_rules_utils';
@@ -115,7 +115,7 @@ export const importRulesRoute = (
           errors: exceptionsErrors,
           successCount: exceptionsSuccessCount,
           success: exceptionsSuccess,
-        } = await importExceptionsHelper({
+        } = await importRuleExceptions({
           exceptions,
           exceptionsClient,
           // TODO: Add option of overwriting exceptions separately

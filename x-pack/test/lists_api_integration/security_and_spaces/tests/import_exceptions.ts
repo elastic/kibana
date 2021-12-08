@@ -680,8 +680,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should be able to import 500 exceptions lists and items', async () => {
-      const listIds = new Array(500).fill(undefined).map((_, index) => `list-${index}`);
+    it('should be able to import 100 exceptions lists and 100 items', async () => {
+      const listIds = new Array(100).fill(undefined).map((_, index) => `list-${index}`);
       const { body } = await supertest
         .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
         .set('kbn-xsrf', 'true')
@@ -701,12 +701,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body).to.eql({
         errors: [],
-        success_count_exception_list_items: 500,
-        success_count_exception_lists: 500,
+        success_count_exception_list_items: 100,
+        success_count_exception_lists: 100,
         success_exception_list_items: true,
         success_exception_lists: true,
         success: true,
-        success_count: 1000,
+        success_count: 200,
       });
     });
   });

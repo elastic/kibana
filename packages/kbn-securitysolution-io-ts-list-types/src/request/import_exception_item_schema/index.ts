@@ -57,10 +57,10 @@ export const importExceptionListItemSchema = t.intersection([
     t.partial({
       id, // defaults to undefined if not set during decode
       comments: DefaultCreateCommentsArray, // defaults to empty array if not set during decode
-      created_at, // defaults "undefined" if not set during decode
-      updated_at, // defaults "undefined" if not set during decode
-      created_by, // defaults "undefined" if not set during decode
-      updated_by, // defaults "undefined" if not set during decode
+      created_at, // defaults undefined if not set during decode
+      updated_at, // defaults undefined if not set during decode
+      created_by, // defaults undefined if not set during decode
+      updated_by, // defaults undefined if not set during decode
       _version, // defaults to undefined if not set during decode
       tie_breaker_id,
       meta, // defaults to undefined if not set during decode
