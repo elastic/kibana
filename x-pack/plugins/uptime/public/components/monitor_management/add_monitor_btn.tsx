@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { MONITOR_ADD_ROUTE } from '../../../common/constants';
