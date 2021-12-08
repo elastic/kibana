@@ -1,4 +1,4 @@
-[[troubleshooting]]
+[[kibana-troubleshooting]]
 == Troubleshooting
 
 === Using {kib} server logs
