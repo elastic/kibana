@@ -18,6 +18,7 @@ import {
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   failedFleetActionErrorCode,
+  FORBIDDEN_MESSAGE,
 } from '../../../../common/endpoint/constants';
 import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
 import {
@@ -105,8 +106,7 @@ export const isolationRequestHandler = function (
     if ((!canIsolateHost && isolate) || (!canUnIsolateHost && !isolate)) {
       return res.forbidden({
         body: {
-          message:
-            'You do not have permission to perform this action or license level does not allow for this action',
+          message: FORBIDDEN_MESSAGE,
         },
       });
     }
@@ -203,13 +203,9 @@ export const isolationRequestHandler = function (
     }
 
     try {
-      let esClient = context.core.elasticsearch.client.asCurrentUser;
-      if (doesLogsEndpointActionsDsExist) {
-        // create action request record as system user with user in .fleet-actions
-        esClient = context.core.elasticsearch.client.asInternalUser;
-      }
-      // write as the current user if the new indices do not exist
-      // <v7.16 requires the current user to be super user
+      const esClient = context.core.elasticsearch.client.asInternalUser;
+      // write as the internal user if the new indices do not exist
+      // 8.0+ requires internal user to write to system indices
       fleetActionIndexResult = await esClient.index<EndpointAction>({
         index: AGENT_ACTIONS_INDEX,
         body: {

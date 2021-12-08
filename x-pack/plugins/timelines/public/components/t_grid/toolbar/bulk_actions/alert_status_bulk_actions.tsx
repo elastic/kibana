@@ -13,7 +13,7 @@ import type {
   SetEventsDeleted,
   OnUpdateAlertStatusSuccess,
   OnUpdateAlertStatusError,
-} from '../../../../../common';
+} from '../../../../../common/types';
 import type { Refetch } from '../../../../store/t_grid/inputs';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../../store/t_grid';
 import { BulkActions } from './';
