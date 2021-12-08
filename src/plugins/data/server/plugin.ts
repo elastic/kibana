@@ -20,6 +20,7 @@ import { UsageCollectionSetup } from '../../usage_collection/server';
 import { AutocompleteService } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server';
 import { getUiSettings } from './ui_settings';
+import { QuerySetup } from './query';
 
 export interface DataEnhancements {
   search: SearchEnhancements;
@@ -27,6 +28,7 @@ export interface DataEnhancements {
 
 export interface DataPluginSetup {
   search: ISearchSetup;
+  query: QuerySetup;
   /**
    * @deprecated - use "fieldFormats" plugin directly instead
    */

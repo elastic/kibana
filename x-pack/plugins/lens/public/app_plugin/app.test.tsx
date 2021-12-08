@@ -695,7 +695,7 @@ describe('Lens App', () => {
             savedObjectId: defaultSavedObjectId,
             title: 'hello there2',
             state: expect.objectContaining({
-              filters: [unpinned],
+              filters: services.data.query.filterManager.inject([unpinned], []),
             }),
           }),
           true,
