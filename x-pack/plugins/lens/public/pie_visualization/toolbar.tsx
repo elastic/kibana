@@ -122,9 +122,6 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     });
   }, [layer, state.shape, onStateChange]);
 
-  if (!layer) {
-    return null;
-  }
   const {
     categoryOptions,
     numberOptions,
