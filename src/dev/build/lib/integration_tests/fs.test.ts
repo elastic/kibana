@@ -48,7 +48,8 @@ afterAll(async () => {
   await del(TMP);
 });
 
-describe('mkdirp()', () => {
+/* eslint-disable-next-line ban/ban, jest/no-focused-tests */
+describe.only('mkdirp()', () => {
   it('rejects if path is not absolute', async () => {
     try {
       await mkdirp('foo/bar');
@@ -56,6 +57,8 @@ describe('mkdirp()', () => {
     } catch (error) {
       assertNonAbsoluteError(error);
     }
+
+    throw new Error('jest integration test failure');
   });
 
   it('makes directory and necessary parent directories', async () => {

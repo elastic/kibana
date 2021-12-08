@@ -61,6 +61,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.security.login('monitoring_user', 'monitoring_user-password', {
           expectForbidden: true,
         });
+
+        throw new Error('ciGroup1 failure');
       });
     });
 

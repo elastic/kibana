@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('dashboard', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await a11y.testAppSnapshot();
+      throw new Error('a11y test failure');
     });
 
     it('create dashboard button', async () => {

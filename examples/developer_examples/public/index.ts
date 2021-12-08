@@ -10,4 +10,5 @@ import { DeveloperExamplesPlugin } from './plugin';
 
 export const plugin = () => new DeveloperExamplesPlugin();
 
-export type { DeveloperExamplesSetup } from './plugin';
+// force eslint_type_type failure
+export { DeveloperExamplesSetup } from './plugin';
