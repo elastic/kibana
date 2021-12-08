@@ -46,7 +46,12 @@ export function esOverviewRoute(server) {
         ccs,
         true
       );
-      const mbIndexPattern = prefixIndexPattern(config, 'metricbeat-*', ccs, true);
+      const mbIndexPattern = prefixIndexPattern(
+        config,
+        config.get('monitoring.ui.metricbeat.index'),
+        ccs,
+        true
+      );
 
       const filebeatIndexPattern = prefixIndexPattern(
         config,
