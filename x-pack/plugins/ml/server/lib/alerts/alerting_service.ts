@@ -108,7 +108,7 @@ export function alertingServiceProvider(
       try {
         const dataViewsService = await getDataViewsService();
 
-        const dataViews = await dataViewsService.find(indexPattern, 1);
+        const dataViews = await dataViewsService.find(indexPattern);
         const dataView = dataViews.find(({ title }) => title === indexPattern);
 
         if (!dataView) return;
