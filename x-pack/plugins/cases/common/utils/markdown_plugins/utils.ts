@@ -38,19 +38,12 @@ export const parseCommentString = (comment: string) => {
 export const stringifyComment = (comment: LensMarkdownParent) =>
   unified()
     .use([
-      [
-        remarkStringify,
-        {
-          allowDangerousHtml: true,
-          handlers: {
-            /*
-              because we're using rison in the timeline url we need
-              to make sure that markdown parser doesn't modify the url
-            */
-            timeline: TimelineSerializer,
-            lens: LensSerializer,
-          },
-        },
-      ],
+      [remarkStringify],
+      /*
+        because we're using rison in the timeline url we need
+        to make sure that markdown parser doesn't modify the url
+      */
+      LensSerializer,
+      TimelineSerializer,
     ])
     .stringify(comment);
