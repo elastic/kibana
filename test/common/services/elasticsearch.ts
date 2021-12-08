@@ -11,7 +11,7 @@ import fs from 'fs';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
-import { systemIndicesUser } from '@kbn/test';
+import { systemIndicesSuperuser } from '@kbn/test';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 /*
@@ -23,7 +23,7 @@ export function ElasticsearchProvider({ getService }: FtrProviderContext): Clien
   const esUrl = formatUrl({
     ...config.get('servers.elasticsearch'),
     // Use system indices user so tests can write to system indices
-    auth: `${systemIndicesUser.username}:${systemIndicesUser.password}`,
+    auth: `${systemIndicesSuperuser.username}:${systemIndicesSuperuser.password}`,
   });
 
   if (process.env.TEST_CLOUD) {
