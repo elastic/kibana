@@ -7,7 +7,7 @@
  */
 
 import './table.scss';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { debounce } from 'lodash';
 import { Storage } from '../../../../../../kibana_utils/public';
 import { usePager } from '../../../../utils/use_pager';
 import { FieldName } from '../../../../components/field_name/field_name';
@@ -38,13 +39,15 @@ import { getIgnoredReason } from '../../../../utils/get_ignored_reason';
 import { formatFieldValue } from '../../../../utils/format_value';
 import { isNestedFieldParent } from '../../../../application/main/utils/nested_fields';
 import { TableFieldValue } from './table_cell_value';
-import { TableActions } from './table_actions';
+import { TableActions } from './table_cell_actions';
 
-export interface FieldRecord extends FieldRecordLegacy {
+export interface FieldRecord {
+  action: Omit<FieldRecordLegacy['action'], 'isActive'>;
   field: {
     pinned: boolean;
     onTogglePinned: (field: string) => void;
   } & FieldRecordLegacy['field'];
+  value: FieldRecordLegacy['value'];
 }
 
 interface ItemsEntry {
@@ -52,17 +55,51 @@ interface ItemsEntry {
   restItems: FieldRecord[];
 }
 
-const MOBILE_OPTIONS = { header: false };
-const PINNED_FIELDS_KEY = 'discover:pinnedFields';
+interface BrowseFieldsState {
+  search?: string;
+  pinnedFields?: string[];
+  pageSize?: number;
+}
 
-const getPinnedFieldsEntry = (storage: Storage): Record<string, string[]> => {
+const MOBILE_OPTIONS = { header: false };
+const PAGE_SIZE_OPTIONS = [25, 50, 100];
+const BROWSE_FIELDS_STATE_KEY = 'discover:browseFieldsState';
+
+const validatePageSize = (pageSize?: number) => {
+  return pageSize && PAGE_SIZE_OPTIONS.includes(pageSize);
+};
+
+const getAllBrowseFieldsStates = (
+  storage: Storage
+): Record<string, BrowseFieldsState | undefined> => {
   try {
-    const storedPinnedFields = storage.get(PINNED_FIELDS_KEY);
-    return (storedPinnedFields && JSON.parse(storedPinnedFields)) || {};
-  } catch (e) {
+    const BrowseFieldsState = storage.get(BROWSE_FIELDS_STATE_KEY);
+    return (BrowseFieldsState && JSON.parse(BrowseFieldsState)) || {};
+  } catch {
     return {};
   }
 };
+
+const setBrowseFieldsState = (
+  newState: BrowseFieldsState,
+  indexPatternId: string,
+  storage: Storage
+) => {
+  const entry = getAllBrowseFieldsStates(storage);
+  const prev = entry[indexPatternId] || {};
+
+  const newBrowseFieldsState = Object.assign(prev, newState);
+  const newBrowseFieldsStateEntry = Object.assign(entry, {
+    [indexPatternId]: newBrowseFieldsState,
+  });
+  storage.set(BROWSE_FIELDS_STATE_KEY, JSON.stringify(newBrowseFieldsStateEntry));
+};
+
+const saveQueryOptimized = debounce(
+  (query: string, indexPattern: string, storage: Storage) =>
+    setBrowseFieldsState({ search: query }, indexPattern, storage),
+  500
+);
 
 export const DocViewerTable = ({
   columns,
@@ -72,12 +109,25 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const [query, setQuery] = useState('');
   const { storage, uiSettings } = getServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
-  const [pinnedFields, setPinnedFields] = useState<string[]>(
-    getPinnedFieldsEntry(storage)[indexPattern.id!] || []
-  );
+  const currentIndexPatternId = indexPattern.id!;
+
+  const {
+    search: initialSearch,
+    pinnedFields: initialPinnedFields,
+    pageSize: initialPageSize,
+  }: Required<BrowseFieldsState> = useMemo(() => {
+    const state = getAllBrowseFieldsStates(storage)[currentIndexPatternId] || {};
+    return {
+      pinnedFields: state.pinnedFields || [],
+      search: state.search || '',
+      pageSize: (validatePageSize(state.pageSize) && state.pageSize) || 25,
+    };
+  }, [storage, currentIndexPatternId]);
+  const [query, setQuery] = useState(initialSearch);
+  const [pinnedFields, setPinnedFields] = useState<string[]>(initialPinnedFields);
+
   const flattened = flattenHit(hit, indexPattern, { source: true, includeIgnoredValues: true });
   const fieldsToShow = getFieldsToShow(Object.keys(flattened), indexPattern, showMultiFields);
   const showActionsColumn = !!filter;
@@ -111,13 +161,10 @@ export const DocViewerTable = ({
         ? pinnedFields.filter((curField) => curField !== field)
         : [...pinnedFields, field];
 
-      const newStoredPinnedFields = Object.assign(getPinnedFieldsEntry(storage), {
-        [indexPattern.id!]: newPinned,
-      });
-      storage.set(PINNED_FIELDS_KEY, JSON.stringify(newStoredPinnedFields));
+      setBrowseFieldsState({ pinnedFields: newPinned }, currentIndexPatternId, storage);
       setPinnedFields(newPinned);
     },
-    [indexPattern.id, pinnedFields, storage]
+    [currentIndexPatternId, pinnedFields, storage]
   );
 
   const fieldToItem = useCallback(
@@ -163,9 +210,14 @@ export const DocViewerTable = ({
     ]
   );
 
-  const handleOnChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(event.currentTarget.value);
-  }, []);
+  const handleOnChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newQuery = event.currentTarget.value;
+      saveQueryOptimized(newQuery, currentIndexPatternId, storage);
+      setQuery(newQuery);
+    },
+    [currentIndexPatternId, storage]
+  );
 
   const { pinnedItems, restItems } = Object.keys(flattened)
     .sort((fieldA, fieldB) => {
@@ -201,10 +253,18 @@ export const DocViewerTable = ({
 
   const { curPageIndex, pageSize, totalPages, startIndex, changePageIndex, changePageSize } =
     usePager({
-      initialPageSize: 25,
+      initialPageSize,
       totalItems: restItems.length,
     });
   const showPagination = totalPages !== 0;
+
+  const onChangePageSize = useCallback(
+    (newPageSize: number) => {
+      setBrowseFieldsState({ pageSize: newPageSize }, currentIndexPatternId, storage);
+      changePageSize(newPageSize);
+    },
+    [changePageSize, currentIndexPatternId, storage]
+  );
 
   const headers = [
     showActionsColumn && (
@@ -239,7 +299,7 @@ export const DocViewerTable = ({
     (items: FieldRecord[]) => {
       return items.map(
         ({
-          action: { flattenedField, isActive, onFilter },
+          action: { flattenedField, onFilter },
           field: { field, fieldMapping, displayName, fieldType, scripted, pinned },
           value: { formattedValue, ignored },
         }: FieldRecord) => {
@@ -255,7 +315,6 @@ export const DocViewerTable = ({
                   mobileOptions={MOBILE_OPTIONS}
                 >
                   <TableActions
-                    isActive={isActive}
                     field={field}
                     pinned={pinned}
                     fieldMapping={fieldMapping}
@@ -349,9 +408,9 @@ export const DocViewerTable = ({
           <EuiTablePagination
             activePage={curPageIndex}
             itemsPerPage={pageSize}
-            itemsPerPageOptions={[25, 50, 100]}
+            itemsPerPageOptions={PAGE_SIZE_OPTIONS}
             pageCount={totalPages}
-            onChangeItemsPerPage={changePageSize}
+            onChangeItemsPerPage={onChangePageSize}
             onChangePage={changePageIndex}
           />
         </EuiFlexItem>
