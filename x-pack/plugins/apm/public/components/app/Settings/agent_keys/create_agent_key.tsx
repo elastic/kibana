@@ -67,7 +67,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
 
     try {
       const { agentKey } = await callApmApi({
-        endpoint: 'POST /apm/agent_keys',
+        endpoint: 'POST /api/apm/agent_keys',
         signal: null,
         params: {
           body: {
