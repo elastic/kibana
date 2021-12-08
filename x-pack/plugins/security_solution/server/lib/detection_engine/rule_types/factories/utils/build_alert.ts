@@ -7,10 +7,12 @@
 
 import {
   ALERT_REASON,
+  ALERT_RISK_SCORE,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAMESPACE,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_WORKFLOW_STATUS,
@@ -96,14 +98,23 @@ export const buildAlert = (
   docs: SimpleHit[],
   completeRule: CompleteRule<RuleParams>,
   spaceId: string | null | undefined,
-  reason: string
+  reason: string,
+  overrides?: {
+    nameOverride: string;
+    severityOverride: string;
+    riskScoreOverride: number;
+  }
 ): RACAlert => {
   const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
   const ancestors = docs.reduce((acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)), []);
 
+  const { output_index: outputIndex, ...commonRuleParams } = commonParamsCamelToSnake(
+    completeRule.ruleParams
+  );
+
   const ruleParamsSnakeCase = {
-    ...commonParamsCamelToSnake(completeRule.ruleParams),
+    ...commonRuleParams,
     ...typeSpecificCamelToSnake(completeRule.ruleParams),
   };
 
@@ -130,6 +141,8 @@ export const buildAlert = (
     [ALERT_DEPTH]: depth,
     [ALERT_REASON]: reason,
     [ALERT_BUILDING_BLOCK_TYPE]: completeRule.ruleParams.buildingBlockType,
+    [ALERT_SEVERITY]: overrides?.severityOverride ?? completeRule.ruleParams.severity,
+    [ALERT_RISK_SCORE]: overrides?.riskScoreOverride ?? completeRule.ruleParams.riskScore,
     [ALERT_RULE_PARAMETERS]: ruleParamsSnakeCase,
     ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
       uuid: completeRule.alertId,
@@ -138,13 +151,13 @@ export const buildAlert = (
       created_by: createdBy ?? '',
       enabled,
       interval: schedule.interval,
-      name,
+      name: overrides?.nameOverride ?? name,
       tags: transformTags(tags),
       throttle: throttle ?? undefined,
       updated_at: updatedAt.toISOString(),
       updated_by: updatedBy ?? '',
       type: completeRule.ruleParams.type,
-      ...commonParamsCamelToSnake(completeRule.ruleParams),
+      ...commonRuleParams,
     }),
   } as unknown as RACAlert;
 };
