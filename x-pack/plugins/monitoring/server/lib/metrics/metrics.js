@@ -10,6 +10,7 @@ import { metrics as kibanaMetrics } from './kibana/metrics';
 import { metrics as logstashMetrics } from './logstash/metrics';
 import { metrics as beatsMetrics } from './beats/metrics';
 import { metrics as apmMetrics } from './apm/metrics';
+import { metrics as entSearchMetrics } from './enterprise_search/metrics';
 
 export const metrics = {
   ...elasticsearchMetrics,
@@ -17,4 +18,5 @@ export const metrics = {
   ...logstashMetrics,
   ...beatsMetrics,
   ...apmMetrics,
+  ...entSearchMetrics,
 };
