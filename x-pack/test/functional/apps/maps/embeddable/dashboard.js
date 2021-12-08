@@ -96,7 +96,7 @@ export default function ({ getPageObjects, getService }) {
       await filterBar.selectIndexPattern('logstash-*');
       await filterBar.addFilter('machine.os', 'is', 'win 8');
       await PageObjects.maps.waitForLayersToLoad();
-      
+
       // retry is fix for flaky test https://github.com/elastic/kibana/issues/113993
       // timing issue where click for addFilter opens filter pill created above instead of clicking addFilter
       await retry.try(async () => {
