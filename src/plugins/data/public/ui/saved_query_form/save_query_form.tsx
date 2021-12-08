@@ -7,20 +7,7 @@
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiModal,
-  EuiButton,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiSwitch,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiForm, EuiFormRow, EuiFieldText, EuiSwitch, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { sortBy, isEqual } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
@@ -212,28 +199,7 @@ export function SaveQueryForm({
           />
         </EuiFormRow>
       )}
-    </EuiForm>
-  );
-
-  return (
-    <EuiModal onClose={onClose} initialFocus="[name=title]">
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          {i18n.translate('data.search.searchBar.savedQueryFormTitle', {
-            defaultMessage: 'Save query',
-          })}
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-
-      <EuiModalBody>{saveQueryForm}</EuiModalBody>
-
-      <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} data-test-subj="savedQueryFormCancelButton">
-          {i18n.translate('data.search.searchBar.savedQueryFormCancelButtonText', {
-            defaultMessage: 'Cancel',
-          })}
-        </EuiButtonEmpty>
-
+      <EuiFormRow>
         <EuiButton
           onClick={onClickSave}
           fill
@@ -244,7 +210,39 @@ export function SaveQueryForm({
             defaultMessage: 'Save',
           })}
         </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+      </EuiFormRow>
+    </EuiForm>
   );
+
+  return <div>{saveQueryForm}</div>;
+  // <EuiModal onClose={onClose} initialFocus="[name=title]">
+  //   <EuiModalHeader>
+  //     <EuiModalHeaderTitle>
+  //       {i18n.translate('data.search.searchBar.savedQueryFormTitle', {
+  //         defaultMessage: 'Save query',
+  //       })}
+  //     </EuiModalHeaderTitle>
+  //   </EuiModalHeader>
+
+  //   <EuiModalBody>{saveQueryForm}</EuiModalBody>
+
+  //   <EuiModalFooter>
+  //     <EuiButtonEmpty onClick={onClose} data-test-subj="savedQueryFormCancelButton">
+  //       {i18n.translate('data.search.searchBar.savedQueryFormCancelButtonText', {
+  //         defaultMessage: 'Cancel',
+  //       })}
+  //     </EuiButtonEmpty>
+
+  //     <EuiButton
+  //       onClick={onClickSave}
+  //       fill
+  //       data-test-subj="savedQueryFormSaveButton"
+  //       disabled={hasErrors || !enabledSaveButton}
+  //     >
+  //       {i18n.translate('data.search.searchBar.savedQueryFormSaveButtonText', {
+  //         defaultMessage: 'Save',
+  //       })}
+  //     </EuiButton>
+  //   </EuiModalFooter>
+  // </EuiModal>
 }

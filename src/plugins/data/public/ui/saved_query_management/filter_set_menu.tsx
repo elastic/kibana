@@ -9,15 +9,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 import {
-  EuiButton,
   EuiButtonIcon,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
-  EuiIcon,
   EuiPopover,
-  EuiSpacer,
-  EuiText,
-  toSentenceCase,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -33,8 +28,9 @@ interface Props {
   onDisableAll: () => void;
   onToggleAllNegated: () => void;
   onRemoveAll: () => void;
-  onSaveQuery: () => void;
   onQueryChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  toggleFilterSetPopover: (value: boolean) => void;
+  openFilterSetPopover: boolean;
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
   services: KibanaReactContextValue<IDataPluginServices>['services'];
@@ -43,6 +39,7 @@ interface Props {
   toggleAddFilterModal?: (value: boolean, addFilterMode?: string) => void;
   savedQueryService: SavedQueryService;
   applySelectedSavedQueries: (selectedSavedQuery?: SavedQuery) => void;
+  saveQueryFormComponent?: JSX.Element;
 }
 
 export function FilterSetMenu({
@@ -56,13 +53,14 @@ export function FilterSetMenu({
   onDisableAll,
   onToggleAllNegated,
   onRemoveAll,
-  onSaveQuery,
   onQueryChange,
   toggleAddFilterModal,
   savedQueryService,
   applySelectedSavedQueries,
+  saveQueryFormComponent,
+  openFilterSetPopover,
+  toggleFilterSetPopover,
 }: Props) {
-  const [isPopoverOpen, setPopover] = useState(false);
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
 
@@ -74,26 +72,26 @@ export function FilterSetMenu({
         requestGotCancelled = true;
       };
 
-      const { queries: savedQueryItems } = await savedQueryService.findSavedQueries('', 5, 1);
+      const { queries: savedQueryItems } = await savedQueryService.findSavedQueries('');
 
       if (requestGotCancelled) return;
 
-      setSavedQueries(savedQueryItems.reverse());
+      setSavedQueries(savedQueryItems.reverse().slice(0, 5));
     };
-    if (isPopoverOpen) {
+    if (openFilterSetPopover) {
       fetchSavedSearched();
     }
-  }, [isPopoverOpen, savedQueryService]);
+  }, [openFilterSetPopover, savedQueryService]);
 
   const normalContextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'normalContextMenuPopover',
   });
   const onButtonClick = () => {
-    setPopover(!isPopoverOpen);
+    toggleFilterSetPopover(!openFilterSetPopover);
   };
 
   const closePopover = () => {
-    setPopover(false);
+    toggleFilterSetPopover(false);
   };
 
   const getDateRange = () => {
@@ -201,13 +199,7 @@ export function FilterSetMenu({
       title: i18n.translate('data.filter.options.saveCurrentFilterSetLabel', {
         defaultMessage: 'Save current filter set',
       }),
-      content: (
-        <div style={{ padding: 16 }}>
-          <EuiButton fill onClick={onSaveQuery}>
-            Save
-          </EuiButton>
-        </div>
-      ),
+      content: <div style={{ padding: 16 }}>{saveQueryFormComponent}</div>,
     },
     {
       id: 2,
@@ -279,7 +271,7 @@ export function FilterSetMenu({
       <EuiPopover
         id={normalContextMenuPopoverId}
         button={button}
-        isOpen={isPopoverOpen}
+        isOpen={openFilterSetPopover}
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="rightUp"
