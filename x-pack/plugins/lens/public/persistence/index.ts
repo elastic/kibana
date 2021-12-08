@@ -6,3 +6,4 @@
  */
 
 export * from './saved_object_store';
+export { checkForDuplicateTitle } from './saved_objects_utils';

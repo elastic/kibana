@@ -90,7 +90,7 @@ export class DataServerPlugin
     { bfetch, expressions, usageCollection, fieldFormats }: DataPluginSetupDependencies
   ) {
     this.scriptsService.setup(core);
-    this.queryService.setup(core);
+    const querySetup = this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
 
@@ -107,6 +107,7 @@ export class DataServerPlugin
         searchSetup.__enhance(enhancements.search);
       },
       search: searchSetup,
+      query: querySetup,
       fieldFormats,
     };
   }
