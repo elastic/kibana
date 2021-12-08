@@ -154,7 +154,6 @@ export const Overview = React.memo<Props>(
           title={ALERTS_HEADERS_RULE}
           enrichedFieldInfo={ruleNameData}
           contextId={contextId}
-          alignItems="flexEnd"
         >
           <FormattedFieldValue
             contextId={contextId}
