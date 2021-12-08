@@ -7,7 +7,7 @@
 
 import type { GetPackagesResponse } from '../../../public/types';
 
-export const response: GetPackagesResponse['response'] = [
+export const items: GetPackagesResponse['items'] = [
   {
     name: 'ga_not_installed',
     title: 'a. GA, Not Installed',
