@@ -18,7 +18,7 @@ import { getDataViewIdFromName } from '../../util/index_utils';
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { ml } from '../../services/ml_api_service';
-import { replaceStringTokens } from '../../util/string_utils';
+import { escapeForElasticsearchQuery, replaceStringTokens } from '../../util/string_utils';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
@@ -81,6 +81,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       const interval = props.interval;
       const dataViewId = (await getDataViewIdFromName(index)) || index;
       const record = props.anomaly.source;
+
       // Add or subtract a day our hour to the original timestamp
       // If interval is Show all then +/- bucket span
       // else add or subtract a day our hour to the original timestamp
@@ -97,7 +98,12 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
       if (record.influencers) {
         kqlQuery = record.influencers
-          .map((i) => `${i.influencer_field_name}:${i.influencer_field_values[0]}`)
+          .map(
+            (i) =>
+              `${escapeForElasticsearchQuery(i.influencer_field_name)}:"${
+                i.influencer_field_values[0] ?? ''
+              }"`
+          )
           .join(' AND ');
       }
 
@@ -126,11 +132,15 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       }
     };
 
-    generateDiscoverUrl();
+    // No need to show if it's a categorization jobs
+    if (props?.anomaly?.entityName !== 'mlcategory') {
+      generateDiscoverUrl();
+    }
     return () => {
       unmounted = true;
     };
-  }, []);
+  }, [JSON.stringify(props.anomaly)]);
+
   const onButtonClick = () => setPopoverOpen(!isPopoverOpen);
 
   const closePopover = () => setPopoverOpen(false);
@@ -501,7 +511,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     });
   }
 
-  if (openInDiscoverUrl) {
+  if (anomaly.entityName !== 'mlcategory' && openInDiscoverUrl) {
     items.push(
       <EuiContextMenuItem
         key={`auto_raw_data_url`}
