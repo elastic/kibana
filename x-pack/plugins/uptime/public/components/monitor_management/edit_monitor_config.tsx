@@ -33,7 +33,6 @@ export const EditMonitorConfig = ({ monitor }: Props) => {
     monitorType,
     tlsConfig: defaultTLSConfig,
   } = useMemo(() => {
-    /* TODO: fetch current monitor to be edited from saved objects based on url param */
     let enableTLS = false;
     let enableZipUrlTLS = false;
     const getDefaultConfig = () => {

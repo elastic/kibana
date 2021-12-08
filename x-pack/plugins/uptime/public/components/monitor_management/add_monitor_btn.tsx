@@ -23,8 +23,12 @@ export const AddMonitorBtn = () => {
           pathname: MONITOR_ADD_ROUTE,
         })}
       >
-        Add monitor
+        {ADD_MONITOR_LABEL}
       </EuiButton>
     </EuiFlexItem>
   );
 };
+
+const ADD_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.addMonitorLabel', {
+  defaultMessage: 'Add monitor',
+});

@@ -26,7 +26,7 @@ describe('useExpViewTimeRange', function () {
   });
 
   it('returns loading and error from redux store', async function () {
-    const error = 'error';
+    const error = new Error('error');
     const loading = true;
     const state = {
       monitorManagementList: {
