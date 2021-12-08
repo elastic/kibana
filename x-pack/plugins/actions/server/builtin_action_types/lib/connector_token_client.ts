@@ -103,12 +103,19 @@ export class ConnectorTokenClient {
         id
       );
     const createTime = Date.now();
-
+    const conflicts = await this.unsecuredSavedObjectsClient.checkConflicts([
+      { id, type: 'connector_token' },
+    ]);
     try {
-      if (
-        (await this.unsecuredSavedObjectsClient.checkConflicts([{ id, type: 'connector_token' }]))
-          .errors.length > 0
-      ) {
+      if (conflicts.errors.length > 0) {
+        this.logger.error(
+          `Failed to update connector_token for id "${id}" and tokenType: "${
+            tokenType ?? 'access_token'
+          }". ${conflicts.errors.reduce(
+            (messages, errorObj) => `Error: ${errorObj.error.message} ${messages}`,
+            ''
+          )}`
+        );
         return null;
       } else {
         const result = await this.unsecuredSavedObjectsClient.create<ConnectorToken>(
@@ -178,7 +185,7 @@ export class ConnectorTokenClient {
           tokenType ?? 'access_token'
         }". Error: ${err.message}`
       );
-      return { hasErrors: false, connectorToken: null };
+      return { hasErrors: true, connectorToken: null };
     }
 
     if (connectorTokensResult.length === 0) {

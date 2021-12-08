@@ -29,6 +29,7 @@ import {
   RawAction,
   PreConfiguredAction,
   ActionTypeExecutorResult,
+  ConnectorTokenClientContract,
 } from './types';
 import { PreconfiguredActionDisabledModificationError } from './lib/errors/preconfigured_action_disabled_modification';
 import { ExecuteOptions } from './lib/action_executor';
@@ -44,7 +45,6 @@ import {
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
 import { RunNowResult } from '../../task_manager/server';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
-import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -78,7 +78,7 @@ interface ConstructorOptions {
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
-  connectorTokenClient: ConnectorTokenClient;
+  connectorTokenClient: ConnectorTokenClientContract;
 }
 
 export interface UpdateOptions {
@@ -99,7 +99,7 @@ export class ActionsClient {
   private readonly ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   private readonly auditLogger?: AuditLogger;
   private readonly usageCounter?: UsageCounter;
-  private readonly connectorTokenClient: ConnectorTokenClient;
+  private readonly connectorTokenClient: ConnectorTokenClientContract;
 
   constructor({
     actionTypeRegistry,

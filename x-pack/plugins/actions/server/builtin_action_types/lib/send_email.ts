@@ -15,9 +15,8 @@ import { CustomHostSettings } from '../../config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
 import { sendEmailGraphApi } from './send_email_graph_api';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
-import { ProxySettings } from '../../types';
+import { ConnectorTokenClientContract, ProxySettings } from '../../types';
 import { AdditionalEmailServices } from '../../../common';
-import { ConnectorTokenClient } from './connector_token_client';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -64,7 +63,7 @@ export interface Content {
 export async function sendEmail(
   logger: Logger,
   options: SendEmailOptions,
-  connectorTokenClient: ConnectorTokenClient
+  connectorTokenClient: ConnectorTokenClientContract
 ): Promise<unknown> {
   const { transport, content } = options;
   const { message } = content;
@@ -82,7 +81,7 @@ async function sendEmailWithExchange(
   logger: Logger,
   options: SendEmailOptions,
   messageHTML: string,
-  connectorTokenClient: ConnectorTokenClient
+  connectorTokenClient: ConnectorTokenClientContract
 ): Promise<unknown> {
   const { transport, configurationUtilities, connectorId } = options;
   const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;

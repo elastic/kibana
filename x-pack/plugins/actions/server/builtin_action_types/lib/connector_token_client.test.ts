@@ -103,12 +103,15 @@ describe('get()', () => {
       tokenType: 'access_token',
     });
     expect(result).toEqual({
-      id: '1',
-      connectorId: '123',
-      tokenType: 'access_token',
-      token: 'testtokenvalue',
-      createdAt,
-      expiresAt,
+      hasErrors: false,
+      connectorToken: {
+        id: '1',
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        createdAt,
+        expiresAt,
+      },
     });
   });
 
@@ -125,7 +128,7 @@ describe('get()', () => {
       connectorId: '123',
       tokenType: 'access_token',
     });
-    expect(result).toEqual(null);
+    expect(result).toEqual({ connectorToken: null, hasErrors: false });
   });
 
   test('return null and log the error if unsecuredSavedObjectsClient thows an error', async () => {
@@ -139,7 +142,7 @@ describe('get()', () => {
     expect(logger.error.mock.calls[0]).toMatchObject([
       `Failed to fetch connector_token for connectorId "123" and tokenType: "access_token". Error: Fail`,
     ]);
-    expect(result).toEqual(null);
+    expect(result).toEqual({ connectorToken: null, hasErrors: true });
   });
 
   test('return null and log the error if encryptedSavedObjectsClient decrypt method thows an error', async () => {
@@ -173,7 +176,7 @@ describe('get()', () => {
     expect(logger.error.mock.calls[0]).toMatchObject([
       `Failed to decrypt connector_token for connectorId "123" and tokenType: "access_token". Error: Fail`,
     ]);
-    expect(result).toEqual(null);
+    expect(result).toEqual({ connectorToken: null, hasErrors: true });
   });
 });
 
@@ -203,6 +206,9 @@ describe('update()', () => {
       },
       references: [],
     });
+    unsecuredSavedObjectsClient.checkConflicts.mockResolvedValueOnce({
+      errors: [],
+    });
     const result = await connectorTokenClient.update({
       id: '1',
       tokenType: 'access_token',
@@ -228,6 +234,46 @@ describe('update()', () => {
     `);
   });
 
+  test('should log error, when failed to update the connector token if there are a conflict errors', async () => {
+    const expiresAt = new Date().toISOString();
+
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'connector_token',
+      attributes: {
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'testtokenvalue',
+        createdAt: new Date().toISOString(),
+      },
+      references: [],
+    });
+    unsecuredSavedObjectsClient.checkConflicts.mockResolvedValueOnce({
+      errors: [{
+        id: '1',
+        error: {
+         error: 'error',
+         statusCode: 503,
+         message: 'There is a conflict.',
+        },
+        type: 'conflict'
+      }],
+    });
+
+    
+    const result = await connectorTokenClient.update({
+      id: '1',
+      tokenType: 'access_token',
+      token: 'testtokenvalue',
+      expiresAtMillis: expiresAt,
+    });
+    expect(result).toEqual(null);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(0);
+    expect(logger.error.mock.calls[0]).toMatchObject([
+      'Failed to update connector_token for id "1" and tokenType: "access_token". Error: There is a conflict. ',
+    ]);
+  });
+
   test('throws an error when unsecuredSavedObjectsClient throws', async () => {
     const expiresAt = new Date().toISOString();
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -240,6 +286,9 @@ describe('update()', () => {
         createdAt: new Date().toISOString(),
       },
       references: [],
+    });
+    unsecuredSavedObjectsClient.checkConflicts.mockResolvedValueOnce({
+      errors: [],
     });
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
     await expect(

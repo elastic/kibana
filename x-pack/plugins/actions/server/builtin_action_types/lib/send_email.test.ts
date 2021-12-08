@@ -27,6 +27,7 @@ import { sendEmailGraphApi } from './send_email_graph_api';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 import { ConnectorTokenClient } from './connector_token_client';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
+import { connectorTokenClientMock } from './connector_token_client.mock';
 
 const createTransportMock = nodemailer.createTransport as jest.Mock;
 const sendMailMockResult = { result: 'does not matter' };
@@ -297,6 +298,9 @@ describe('send_email module', () => {
     const date = new Date();
     date.setDate(date.getDate() + 5);
 
+    unsecuredSavedObjectsClient.checkConflicts.mockResolvedValueOnce({
+      errors: [],
+    });
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 2,
       saved_objects: [
@@ -486,6 +490,9 @@ describe('send_email module', () => {
         tokenType: 'access_token',
         token: '11111111',
       },
+    });
+    unsecuredSavedObjectsClient.checkConflicts.mockResolvedValueOnce({
+      errors: [],
     });
 
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -784,46 +791,15 @@ describe('send_email module', () => {
     const date = new Date();
     date.setDate(date.getDate() + 5);
 
-    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
-      total: 1,
-      saved_objects: [
-        {
-          id: '1',
-          score: 1,
-          type: 'connector_token',
-          references: [],
-          attributes: {
-            connectorId: '123',
-            expiresAt: date.toISOString(),
-            tokenType: 'access_token',
-          },
-        },
-      ],
-      per_page: 500,
-      page: 1,
+    const connectorTokenClientM = connectorTokenClientMock.create();
+    connectorTokenClientM.get.mockResolvedValueOnce({
+      hasErrors: true,
+      connectorToken: null,
     });
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
-
-    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-      id: '1',
-      type: 'connector_token',
-      references: [],
-      attributes: {
-        connectorId: '123',
-        expiresAt: date.toISOString(),
-        tokenType: 'access_token',
-        token: '11111111',
-      },
-    });
-
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClientM);
     expect(requestOAuthClientCredentialsTokenMock.mock.calls.length).toBe(1);
-    expect(unsecuredSavedObjectsClient.create.mock.calls.length).toBe(1);
-    expect(unsecuredSavedObjectsClient.delete.mock.calls.length).toBe(1);
-    expect(mockLogger.warn.mock.calls[0]).toMatchObject([
-      `Not able to decrypt connector token for connectorId: 1 due to error: Fail`,
-    ]);
+    expect(connectorTokenClientM.deleteConnectorTokens.mock.calls.length).toBe(1);
 
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -888,37 +864,13 @@ describe('send_email module', () => {
         Object {
           "context": Array [],
           "debug": [MockFunction],
-          "error": [MockFunction] {
-            "calls": Array [
-              Array [
-                "Failed to create connector_token for connectorId \\"1\\" and tokenType: \\"access_token\\". Error: Fail",
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
+          "error": [MockFunction],
           "fatal": [MockFunction],
           "get": [MockFunction],
           "info": [MockFunction],
           "log": [MockFunction],
           "trace": [MockFunction],
-          "warn": [MockFunction] {
-            "calls": Array [
-              Array [
-                "Not able to update connector token for connectorId: 1 due to error: Fail",
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
+          "warn": [MockFunction],
         },
         Object {
           "ensureActionTypeEnabled": [MockFunction],

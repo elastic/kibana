@@ -40,6 +40,7 @@ import { elasticsearchClientMock } from '../../../../src/core/server/elasticsear
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { Logger } from 'kibana/server';
+import { connectorTokenClientMock } from './builtin_action_types/lib/connector_token_client.mock';
 
 jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -85,11 +86,7 @@ const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
 
-const connectorTokenClient = new ConnectorTokenClient({
-  unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
-  encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
-  logger,
-});
+const connectorTokenClient = connectorTokenClientMock.create();
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -522,11 +519,7 @@ describe('create()', () => {
       ephemeralExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
-      connectorTokenClient: new ConnectorTokenClient({
-        unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
-        encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
-        logger,
-      }),
+      connectorTokenClient: connectorTokenClientMock.create(),
     });
 
     const savedObjectCreateResult = {
@@ -642,11 +635,7 @@ describe('get()', () => {
             },
           },
         ],
-        connectorTokenClient: new ConnectorTokenClient({
-          unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
-          encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
-          logger,
-        }),
+        connectorTokenClient: connectorTokenClientMock.create(),
       });
 
       await actionsClient.get({ id: 'testPreconfigured' });
@@ -703,11 +692,7 @@ describe('get()', () => {
             },
           },
         ],
-        connectorTokenClient: new ConnectorTokenClient({
-          unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
-          encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
-          logger,
-        }),
+        connectorTokenClient: connectorTokenClientMock.create(),
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
@@ -825,11 +810,7 @@ describe('get()', () => {
           },
         },
       ],
-      connectorTokenClient: new ConnectorTokenClient({
-        unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
-        encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
-        logger,
-      }),
+      connectorTokenClient: connectorTokenClientMock.create(),
     });
 
     const result = await actionsClient.get({ id: 'testPreconfigured' });
@@ -898,11 +879,7 @@ describe('getAll()', () => {
             },
           },
         ],
-        connectorTokenClient: new ConnectorTokenClient({
-          unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
-          encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
-          logger,
-        }),
+        connectorTokenClient: connectorTokenClientMock.create(),
       });
       return actionsClient.getAll();
     }
@@ -1041,11 +1018,7 @@ describe('getAll()', () => {
           },
         },
       ],
-      connectorTokenClient: new ConnectorTokenClient({
-        unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
-        encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
-        logger,
-      }),
+      connectorTokenClient: connectorTokenClientMock.create(),
     });
     const result = await actionsClient.getAll();
     expect(result).toEqual([
@@ -1122,11 +1095,7 @@ describe('getBulk()', () => {
             },
           },
         ],
-        connectorTokenClient: new ConnectorTokenClient({
-          unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
-          encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
-          logger,
-        }),
+        connectorTokenClient: connectorTokenClientMock.create(),
       });
       return actionsClient.getBulk(['1', 'testPreconfigured']);
     }
@@ -1259,11 +1228,7 @@ describe('getBulk()', () => {
           },
         },
       ],
-      connectorTokenClient: new ConnectorTokenClient({
-        unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
-        encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
-        logger,
-      }),
+      connectorTokenClient: connectorTokenClientMock.create(),
     });
     const result = await actionsClient.getBulk(['1', 'testPreconfigured']);
     expect(result).toEqual([

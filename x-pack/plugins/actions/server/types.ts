@@ -33,6 +33,7 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
 export type ActionTypeConfig = Record<string, unknown>;
 export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
+export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
 
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
