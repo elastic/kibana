@@ -21,7 +21,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListType } from '@kbn/securitysolution-list-utils';
 
-import { ExceptionListSoSchema } from '../../schemas/saved_objects';
+import { ExceptionListSoSchema } from '../../../schemas/saved_objects';
 
 export const transformSavedObjectToExceptionList = ({
   savedObject,

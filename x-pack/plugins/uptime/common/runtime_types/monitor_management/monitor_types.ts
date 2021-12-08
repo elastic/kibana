@@ -15,6 +15,7 @@ import {
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
 import { TLSVersionCodec, VerificationModeCodec } from './monitor_configs';
+import { ServiceLocationsCodec } from './locations';
 
 const Schedule = t.interface({
   number: t.string,
@@ -53,6 +54,7 @@ export const CommonFieldsCodec = t.interface({
   [ConfigKey.APM_SERVICE_NAME]: t.string,
   [ConfigKey.TIMEOUT]: t.string,
   [ConfigKey.TAGS]: t.array(t.string),
+  [ConfigKey.LOCATIONS]: ServiceLocationsCodec,
 });
 
 export type CommonFields = t.TypeOf<typeof CommonFieldsCodec>;
@@ -194,3 +196,20 @@ export const MonitorFieldsCodec = t.intersection([
 ]);
 
 export type MonitorFields = t.TypeOf<typeof MonitorFieldsCodec>;
+
+export const MonitorManagementListResultCodec = t.type({
+  monitors: t.array(t.interface({ id: t.string, attributes: MonitorFieldsCodec })),
+  page: t.number,
+  perPage: t.number,
+  total: t.union([t.number, t.null]),
+});
+
+export type MonitorManagementListResult = Omit<
+  t.TypeOf<typeof MonitorManagementListResultCodec>,
+  'monitors'
+> & {
+  monitors: Array<{
+    id: string;
+    attributes: Partial<MonitorFields>;
+  }>;
+};

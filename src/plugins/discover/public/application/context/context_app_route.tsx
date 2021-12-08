@@ -15,6 +15,7 @@ import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../utils/use_index_pattern';
+import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
 
 export interface ContextAppProps {
   /**
@@ -33,17 +34,18 @@ export function ContextAppRoute(props: ContextAppProps) {
   const { chrome } = services;
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();
+  const breadcrumb = useMainRouteBreadcrumb();
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(),
+      ...getRootBreadcrumbs(breadcrumb),
       {
         text: i18n.translate('discover.context.breadcrumb', {
           defaultMessage: 'Surrounding documents',
         }),
       },
     ]);
-  }, [chrome]);
+  }, [chrome, breadcrumb]);
 
   const { indexPattern, error } = useIndexPattern(services.indexPatterns, indexPatternId);
 
