@@ -84,7 +84,6 @@ export class TaskRunner<
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
   private ruleName: string | null;
-  private ruleId: string | null;
   private alertType: NormalizedAlertType<
     Params,
     ExtractedParams,
@@ -115,7 +114,6 @@ export class TaskRunner<
     this.logger = context.logger;
     this.alertType = alertType;
     this.ruleName = null;
-    this.ruleId = null;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
@@ -570,7 +568,6 @@ export class TaskRunner<
     }
 
     this.ruleName = alert.name;
-    this.ruleId = alert.id;
 
     try {
       this.ruleTypeRegistry.ensureRuleTypeEnabled(alert.alertTypeId);
@@ -745,11 +742,6 @@ export class TaskRunner<
 
     this.cancelled = true;
 
-    this.logger.debug(
-      `Aborting any in-progress ES searches for rule type ${this.alertType.id} with id ${this.ruleId}`
-    );
-    this.searchAbortController.abort();
-
     // Write event log entry
     const {
       params: { alertId, spaceId },
@@ -759,6 +751,11 @@ export class TaskRunner<
     this.logger.debug(
       `Cancelling rule type ${this.alertType.id} with id ${alertId} - execution exceeded rule type timeout of ${this.alertType.ruleTaskTimeout}`
     );
+
+    this.logger.debug(
+      `Aborting any in-progress ES searches for rule type ${this.alertType.id} with id ${alertId}`
+    );
+    this.searchAbortController.abort();
 
     const eventLogger = this.context.eventLogger;
     const event: IEvent = {

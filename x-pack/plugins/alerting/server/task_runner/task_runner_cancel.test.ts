@@ -193,8 +193,8 @@ describe('Task Runner Cancel', () => {
 
     const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenNthCalledWith(
-      2,
-      `Aborting any in-progress ES searches for rule type test with id null`
+      3,
+      `Aborting any in-progress ES searches for rule type test with id 1`
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -404,11 +404,11 @@ describe('Task Runner Cancel', () => {
     expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
-      'Aborting any in-progress ES searches for rule type test with id null'
+      `Cancelling rule type test with id 1 - execution exceeded rule type timeout of 5m`
     );
     expect(logger.debug).nthCalledWith(
       3,
-      `Cancelling rule type test with id 1 - execution exceeded rule type timeout of 5m`
+      'Aborting any in-progress ES searches for rule type test with id 1'
     );
     expect(logger.debug).nthCalledWith(
       4,
@@ -525,11 +525,11 @@ describe('Task Runner Cancel', () => {
     expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
-      'Aborting any in-progress ES searches for rule type test with id null'
+      `Cancelling rule type test with id 1 - execution exceeded rule type timeout of 5m`
     );
     expect(logger.debug).nthCalledWith(
       3,
-      `Cancelling rule type test with id 1 - execution exceeded rule type timeout of 5m`
+      'Aborting any in-progress ES searches for rule type test with id 1'
     );
     expect(logger.debug).nthCalledWith(
       4,
