@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { MonitorFields } from '../../../../../plugins/uptime/common/runtime_types/monitor_management';
+import { MonitorFields } from '../../../../../plugins/uptime/common/runtime_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('get synthetics monitor', () => {
+  describe('[GET] /internal/uptime/service/monitors', () => {
     const supertest = getService('supertest');
 
     let _monitors: MonitorFields[];
@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
       monitors = _monitors;
     });
 
-    describe('get all monitors', () => {
+    describe('get many monitors', () => {
       it('without params', async () => {
         const [{ id: id1, attributes: mon1 }, { id: id2, attributes: mon2 }] = await Promise.all(
           monitors.map(saveMonitor)
@@ -51,6 +51,23 @@ export default function ({ getService }: FtrProviderContext) {
         const expected = [mon1, mon2];
 
         expect(found).eql(expected);
+      });
+
+      it('with page params', async () => {
+        await Promise.all([...monitors, ...monitors, ...monitors].map(saveMonitor));
+
+        const firstPageResp = await supertest
+          .get(`${API_URLS.SYNTHETICS_MONITORS}?page=1&perPage=2`)
+          .expect(200);
+        const secondPageResp = await supertest
+          .get(`${API_URLS.SYNTHETICS_MONITORS}?page=2&perPage=3`)
+          .expect(200);
+
+        expect(firstPageResp.body.total).greaterThan(4);
+        expect(firstPageResp.body.monitors.length).eql(2);
+        expect(secondPageResp.body.monitors.length).eql(3);
+
+        expect(firstPageResp.body.monitors[0].id).not.eql(secondPageResp.body.monitors[0].id);
       });
     });
 

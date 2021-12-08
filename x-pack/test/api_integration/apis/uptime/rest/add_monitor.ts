@@ -5,13 +5,13 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { HTTPFields } from '../../../../../plugins/uptime/common/runtime_types/monitor_management';
+import { HTTPFields } from '../../../../../plugins/uptime/common/runtime_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('add synthetics monitor', () => {
+  describe('[POST] /internal/uptime/service/monitors', () => {
     const supertest = getService('supertest');
 
     let _httpMonitorJson: HTTPFields;

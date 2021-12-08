@@ -28,7 +28,7 @@ import {
   TLSVersion,
   VerificationMode,
   ZipUrlTLSFields,
-} from '../../../common/runtime_types/monitor_management';
+} from '../../../common/runtime_types';
 import { validateMonitor } from './monitor_validation';
 
 describe('validateMonitor', () => {
@@ -54,6 +54,7 @@ describe('validateMonitor', () => {
     testTags = ['tag1', 'tag2'];
     testCommonFields = {
       [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
+      [ConfigKey.ENABLED]: true,
       [ConfigKey.TAGS]: testTags,
       [ConfigKey.SCHEDULE]: testSchedule,
       [ConfigKey.APM_SERVICE_NAME]: '',
@@ -389,66 +390,67 @@ describe('validateMonitor', () => {
 
 function getJsonPayload() {
   const json =
-    '{\n' +
-    '  "type": "http",\n' +
-    '  "tags": [\n' +
-    '    "tag1",\n' +
-    '    "tag2"\n' +
-    '  ],\n' +
-    '  "schedule": {\n' +
-    '    "number": "5",\n' +
-    '    "unit": "m"\n' +
-    '  },\n' +
-    '  "service.name": "",\n' +
-    '  "timeout": "3m",\n' +
-    '  "__ui": {\n' +
-    '    "is_tls_enabled": false,\n' +
-    '    "is_zip_url_tls_enabled": false,\n' +
-    '    "script_source": {\n' +
-    '      "is_generated_script": false,\n' +
-    '      "file_name": "test-file.name"\n' +
-    '    }\n' +
-    '  },\n' +
-    '  "max_redirects": "3",\n' +
-    '  "password": "test",\n' +
-    '  "urls": "https://nextjs-test-synthetics.vercel.app/api/users",\n' +
-    '  "proxy_url": "http://proxy.com",\n' +
-    '  "check.response.body.negative": [],\n' +
-    '  "check.response.body.positive": [],\n' +
-    '  "response.include_body": "never",\n' +
-    '  "check.response.headers": {},\n' +
-    '  "response.include_headers": true,\n' +
-    '  "check.response.status": [\n' +
-    '    "200",\n' +
-    '    "201"\n' +
-    '  ],\n' +
-    '  "check.request.body": {\n' +
-    '    "value": "testValue",\n' +
-    '    "type": "json"\n' +
-    '  },\n' +
-    '  "check.request.headers": {},\n' +
-    '  "check.request.method": "",\n' +
-    '  "username": "test-username",\n' +
-    '  "ssl.certificate_authorities": "t.string",\n' +
-    '  "ssl.certificate": "t.string",\n' +
-    '  "ssl.key": "t.string",\n' +
-    '  "ssl.key_passphrase": "t.string",\n' +
-    '  "ssl.verification_mode": "certificate",\n' +
-    '  "ssl.supported_protocols": [\n' +
-    '    "TLSv1.1",\n' +
-    '    "TLSv1.2"\n' +
-    '  ],\n' +
-    '  "name": "test-monitor-name",\n' +
-    '  "locations": [{\n' +
-    '    "id": "eu-west-01",\n' +
-    '    "label": "Europe West",\n' +
-    '    "geo": {\n' +
-    '      "lat": 33.2343132435,\n' +
-    '      "lon": 73.2342343434\n' +
-    '    },\n' +
-    '    "url": "https://example-url.com"\n' +
-    '  }]\n' +
-    '}\n';
+    '{' +
+    '  "type": "http",' +
+    '  "enabled": true, ' +
+    '  "tags": [' +
+    '    "tag1",' +
+    '    "tag2"' +
+    '  ],' +
+    '  "schedule": {' +
+    '    "number": "5",' +
+    '    "unit": "m"' +
+    '  },' +
+    '  "service.name": "",' +
+    '  "timeout": "3m",' +
+    '  "__ui": {' +
+    '    "is_tls_enabled": false,' +
+    '    "is_zip_url_tls_enabled": false,' +
+    '    "script_source": {' +
+    '      "is_generated_script": false,' +
+    '      "file_name": "test-file.name"' +
+    '    }' +
+    '  },' +
+    '  "max_redirects": "3",' +
+    '  "password": "test",' +
+    '  "urls": "https://nextjs-test-synthetics.vercel.app/api/users",' +
+    '  "proxy_url": "http://proxy.com",' +
+    '  "check.response.body.negative": [],' +
+    '  "check.response.body.positive": [],' +
+    '  "response.include_body": "never",' +
+    '  "check.response.headers": {},' +
+    '  "response.include_headers": true,' +
+    '  "check.response.status": [' +
+    '    "200",' +
+    '    "201"' +
+    '  ],' +
+    '  "check.request.body": {' +
+    '    "value": "testValue",' +
+    '    "type": "json"' +
+    '  },' +
+    '  "check.request.headers": {},' +
+    '  "check.request.method": "",' +
+    '  "username": "test-username",' +
+    '  "ssl.certificate_authorities": "t.string",' +
+    '  "ssl.certificate": "t.string",' +
+    '  "ssl.key": "t.string",' +
+    '  "ssl.key_passphrase": "t.string",' +
+    '  "ssl.verification_mode": "certificate",' +
+    '  "ssl.supported_protocols": [' +
+    '    "TLSv1.1",' +
+    '    "TLSv1.2"' +
+    '  ],' +
+    '  "name": "test-monitor-name",' +
+    '  "locations": [{' +
+    '    "id": "eu-west-01",' +
+    '    "label": "Europe West",' +
+    '    "geo": {' +
+    '      "lat": 33.2343132435,' +
+    '      "lon": 73.2342343434' +
+    '    },' +
+    '    "url": "https://example-url.com"' +
+    '  }]' +
+    '}';
 
   return JSON.parse(json);
 }

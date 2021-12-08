@@ -6,16 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  HTTPFields,
-  MonitorFields,
-} from '../../../../../plugins/uptime/common/runtime_types/monitor_management';
+import { HTTPFields, MonitorFields } from '../../../../../plugins/uptime/common/runtime_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('delete synthetics monitor', () => {
+  describe('[DELETE] /internal/uptime/service/monitors', () => {
     const supertest = getService('supertest');
 
     let _httpMonitorJson: HTTPFields;

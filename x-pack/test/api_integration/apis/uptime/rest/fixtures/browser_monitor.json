@@ -1,6 +1,6 @@
 {
   "type": "browser",
-  "undefined": true,
+  "enabled": true,
   "schedule": {
     "number": "3",
     "unit": "m"

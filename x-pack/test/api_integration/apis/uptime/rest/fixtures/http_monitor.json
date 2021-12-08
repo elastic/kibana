@@ -1,5 +1,6 @@
 {
   "type": "http",
+  "enabled": true,
   "tags": [
     "tag1",
     "tag2"
