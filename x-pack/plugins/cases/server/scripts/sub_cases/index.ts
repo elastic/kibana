@@ -8,14 +8,8 @@
 import yargs from 'yargs';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
-import {
-  CaseResponse,
-  CaseType,
-  CommentType,
-  ConnectorTypes,
-  CASES_URL,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../common';
+import { CaseResponse, CaseType, CommentType, ConnectorTypes } from '../../../common/api';
+import { CASES_URL, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { ActionResult, ActionTypeExecutorResult } from '../../../../actions/common';
 import { ContextTypeGeneratedAlertType, createAlertsString } from '../../connectors';
 import {

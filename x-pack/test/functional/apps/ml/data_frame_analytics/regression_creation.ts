@@ -53,8 +53,8 @@ export default function ({ getService }: FtrProviderContext) {
             { color: '#61AFA3', percentage: 2 },
             { color: '#D1E5E0', percentage: 2 },
             // tick/grid/axis
-            { color: '#6A717D', percentage: 10 },
-            { color: '#F5F7FA', percentage: 10 },
+            { color: '#6A717D', percentage: 5 },
+            { color: '#F5F7FA', percentage: 5 },
             { color: '#D3DAE6', percentage: 3 },
           ],
           runtimeFieldsEditorContent: ['{', '  "uppercase_stab": {', '    "type": "keyword",'],
@@ -189,12 +189,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
 
-          await ml.testExecution.logTestStep('sets the create data view switch');
-          await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
-            testData.createIndexPattern
-          );
-
           await ml.testExecution.logTestStep('continues to the validation step');
           await ml.dataFrameAnalyticsCreation.continueToValidationStep();
 
@@ -204,6 +198,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
+
+          await ml.testExecution.logTestStep('sets the create data view switch');
+          await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
+          await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
+            testData.createIndexPattern
+          );
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {

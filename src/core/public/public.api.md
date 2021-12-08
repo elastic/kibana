@@ -561,6 +561,7 @@ export interface DocLinksStart {
             readonly usersAccess: string;
         };
         readonly workplaceSearch: {
+            readonly apiKeys: string;
             readonly box: string;
             readonly confluenceCloud: string;
             readonly confluenceServer: string;
@@ -760,7 +761,14 @@ export interface DocLinksStart {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
-        readonly plugins: Record<string, string>;
+        readonly plugins: {
+            azureRepo: string;
+            gcsRepo: string;
+            hdfsRepo: string;
+            s3Repo: string;
+            snapshotRestoreRepos: string;
+            mapperSize: string;
+        };
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{

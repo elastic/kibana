@@ -95,7 +95,7 @@ export const areaVisTypeDefinition = {
           drawLinesBetweenPoints: true,
           lineWidth: 2,
           showCircles: true,
-          circlesRadius: 3,
+          circlesRadius: 1,
           interpolate: InterpolationMode.Linear,
           valueAxis: 'ValueAxis-1',
         },
