@@ -13,13 +13,14 @@ import {
 
 export type Formatter =
   | null
-  | ((fields: Partial<MonitorFields>) => string | string[] | Record<string, string> | null);
+  | ((
+      fields: Partial<MonitorFields>
+    ) => boolean | string | string[] | Record<string, string> | null);
 
 export type CommonFormatMap = Record<keyof CommonFields, Formatter>;
 
 export const commonFormatters: CommonFormatMap = {
   [ConfigKey.NAME]: null,
-  [ConfigKey.ID]: null,
   [ConfigKey.LOCATIONS]: null,
   [ConfigKey.ENABLED]: null,
   [ConfigKey.MONITOR_TYPE]: null,

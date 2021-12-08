@@ -17,7 +17,6 @@ export const defaultValues: CommonFields = {
   [ConfigKey.APM_SERVICE_NAME]: '',
   [ConfigKey.TAGS]: [],
   [ConfigKey.TIMEOUT]: '16',
-  [ConfigKey.ID]: '',
   [ConfigKey.NAME]: '',
   [ConfigKey.LOCATIONS]: [],
 };

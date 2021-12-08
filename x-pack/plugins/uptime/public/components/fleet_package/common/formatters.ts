@@ -13,7 +13,6 @@ export type CommonFormatMap = Record<keyof CommonFields | ConfigKey.NAME, Format
 
 export const commonFormatters: CommonFormatMap = {
   [ConfigKey.NAME]: null,
-  [ConfigKey.ID]: null,
   [ConfigKey.LOCATIONS]: (fields) => arrayToJsonFormatter(fields[ConfigKey.LOCATIONS]),
   [ConfigKey.MONITOR_TYPE]: null,
   [ConfigKey.ENABLED]: null,

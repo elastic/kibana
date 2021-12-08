@@ -9,27 +9,25 @@ import { isNil, omitBy } from 'lodash';
 import { ConfigKey, MonitorFields } from '../../../../common/runtime_types/monitor_management';
 import { formatters } from './index';
 
-const UI_KEYS = [
+const UI_KEYS_TO_SKIP = [
   ConfigKey.METADATA,
   ConfigKey.UPLOAD_SPEED,
   ConfigKey.DOWNLOAD_SPEED,
   ConfigKey.LATENCY,
-  ConfigKey.THROTTLING_CONFIG,
   ConfigKey.IS_THROTTLING_ENABLED,
 ];
 
-interface HeartbeatConfig {
-  throttling: boolean | string;
-}
+const uiToHeartbeatKeyMap = {
+  throttling: ConfigKey.THROTTLING_CONFIG,
+};
 
-export const formatMonitorConfig = (
-  configKeys: ConfigKey[],
-  config: Partial<MonitorFields & HeartbeatConfig>
-) => {
-  const formattedMonitor = {} as Record<ConfigKey, any> & HeartbeatConfig;
+type YamlKeys = keyof typeof uiToHeartbeatKeyMap;
+
+export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<MonitorFields>) => {
+  const formattedMonitor = {} as Record<ConfigKey | YamlKeys, any>;
 
   configKeys.forEach((key) => {
-    if (!UI_KEYS.includes(key)) {
+    if (!UI_KEYS_TO_SKIP.includes(key)) {
       const value = config[key] ?? null;
       if (value && formatters[key]) {
         formattedMonitor[key] = formatters[key]?.(config);
@@ -37,12 +35,13 @@ export const formatMonitorConfig = (
         formattedMonitor[key] = value;
       }
     }
-    if (key === ConfigKey.THROTTLING_CONFIG && config[key]) {
-      formattedMonitor.throttling = config[key] as string;
-    }
-    if (key === ConfigKey.IS_THROTTLING_ENABLED && config[key] === false) {
-      formattedMonitor.throttling = false;
-    }
+  });
+
+  Object.keys(uiToHeartbeatKeyMap).forEach((key) => {
+    const hbKey = key as YamlKeys;
+    const configKey = uiToHeartbeatKeyMap[hbKey];
+    formattedMonitor[hbKey] = formattedMonitor[configKey];
+    delete formattedMonitor[configKey];
   });
 
   return omitBy(formattedMonitor, isNil) as Partial<MonitorFields>;

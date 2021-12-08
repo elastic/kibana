@@ -32,6 +32,8 @@ import { ServiceAPIClient } from './service_api_client';
 import { formatMonitorConfig } from './formatters/format_configs';
 import { ConfigKey, MonitorFields } from '../../../common/runtime_types/monitor_management';
 
+export type MonitorFieldsWithID = MonitorFields & { id: string };
+
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-task';
@@ -167,7 +169,7 @@ export class SyntheticsService {
     };
   }
 
-  async pushConfigs(request?: KibanaRequest, configs?: MonitorFields[]) {
+  async pushConfigs(request?: KibanaRequest, configs?: MonitorFieldsWithID[]) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       return;
@@ -185,7 +187,7 @@ export class SyntheticsService {
     }
   }
 
-  async deleteConfigs(request: KibanaRequest, configs: MonitorFields[]) {
+  async deleteConfigs(request: KibanaRequest, configs: MonitorFieldsWithID[]) {
     const data = {
       monitors: configs,
       output: await this.getOutput(request),
