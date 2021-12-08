@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export const getSingleDocUrl = (indexPatternId: string, rowIndex: string, rowId: string) => {
-  return `/app/discover#/doc/${indexPatternId}/${rowIndex}?id=${encodeURIComponent(rowId)}`;
-};
+export { saveWithConfirmation } from './save_with_confirmation';
+export { checkForDuplicateTitle } from './check_for_duplicate_title';

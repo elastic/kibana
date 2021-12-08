@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
-import { createPreviewIndex } from './api';
-
-export const usePreviewIndex = () => {
-  useEffect(() => {
-    createPreviewIndex();
-  }, []);
-};
+export { checkForDuplicateTitle } from './check_for_duplicate_title';
