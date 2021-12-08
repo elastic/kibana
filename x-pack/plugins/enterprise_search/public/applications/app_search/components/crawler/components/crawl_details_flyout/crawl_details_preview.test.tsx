@@ -4,17 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 import { set } from 'lodash/fp';
 
-import { CrawlDetailValues } from '../../crawl_detail_logic';
-import { CrawlerStatus, CrawlType } from '../../types';
-
-import { AccordionList } from './accordion_list';
 import { CrawlDetailsPreview } from './crawl_details_preview';
 import { CrawlDetailsSummary } from './crawl_details_summary';
 
@@ -89,31 +84,6 @@ describe('CrawlDetailsPreview', () => {
       expect(summary.prop('stats')).toEqual(null);
     });
 
-    it('contains a list of domains', () => {
-      const domainList = wrapper.find(AccordionList).at(0);
-
-      expect(domainList.prop('items')).toEqual([
-        'https://www.elastic.co',
-        'https://www.swiftype.com',
-      ]);
-    });
-
-    it('contains a list of seed urls', () => {
-      const seedUrlList = wrapper.find(AccordionList).at(1);
-
-      expect(seedUrlList.prop('items')).toEqual([
-        'https://www.elastic.co/docs',
-        'https://www.swiftype.com/documentation',
-      ]);
-    });
-
-    it('contains a list of sitemap urls', () => {
-      const sitemapUrlList = wrapper.find(AccordionList).at(2);
-
-      expect(sitemapUrlList.prop('items')).toEqual([
-        'https://www.elastic.co/sitemap.xml',
-        'https://www.swiftype.com/sitemap.xml',
-      ]);
-    });
+    expect(wrapper.isEmptyRender()).toBe(true);
   });
 });

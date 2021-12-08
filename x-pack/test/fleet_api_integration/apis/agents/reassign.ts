@@ -190,7 +190,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
         expect(body.total).to.eql(4);
-        body.list.forEach((agent: any) => {
+        body.items.forEach((agent: any) => {
           expect(agent.policy_id).to.eql('policy2');
         });
       });

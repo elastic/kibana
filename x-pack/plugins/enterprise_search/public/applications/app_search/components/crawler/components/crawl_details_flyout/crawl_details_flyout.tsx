@@ -28,7 +28,7 @@ import { CrawlDetailsPreview } from './crawl_details_preview';
 
 export const CrawlDetailsFlyout: React.FC = () => {
   const { closeFlyout, setSelectedTab } = useActions(CrawlDetailLogic);
-  const { crawlRequestFromServer, dataLoading, flyoutClosed, selectedTab } =
+  const { crawlEventFromServer, dataLoading, flyoutClosed, selectedTab } =
     useValues(CrawlDetailLogic);
   const { fetchLogRetention } = useActions(LogRetentionLogic);
   const { logRetention } = useValues(LogRetentionLogic);
@@ -42,12 +42,7 @@ export const CrawlDetailsFlyout: React.FC = () => {
   }
 
   return (
-    <EuiFlyout
-      maxWidth="45rem"
-      ownFocus
-      onClose={closeFlyout}
-      aria-labelledby="CrawlDetailsFlyoutTitle"
-    >
+    <EuiFlyout ownFocus onClose={closeFlyout} aria-labelledby="CrawlDetailsFlyoutTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="CrawlDetailsFlyoutTitle">
@@ -86,8 +81,8 @@ export const CrawlDetailsFlyout: React.FC = () => {
               />
             )}
             {selectedTab === 'json' && (
-              <EuiCodeBlock language="json" isCopyable>
-                {JSON.stringify(crawlRequestFromServer, null, 2)}
+              <EuiCodeBlock language="json">
+                {JSON.stringify(crawlEventFromServer, null, 2)}
               </EuiCodeBlock>
             )}
           </>
