@@ -35,11 +35,11 @@ export interface DiscoverIndexPatternManagementProps {
 export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManagementProps) {
   const { dataViewFieldEditor, core } = props.services;
   const { useNewFieldsApi, selectedIndexPattern, editField } = props;
-  const indexPatternFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
-  const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
+  const dataViewEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
+  const canEditDataViewField = !!dataViewEditPermission && useNewFieldsApi;
   const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
 
-  if (!useNewFieldsApi || !selectedIndexPattern || !canEditIndexPatternField) {
+  if (!useNewFieldsApi || !selectedIndexPattern || !canEditDataViewField) {
     return null;
   }
 

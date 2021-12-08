@@ -110,8 +110,8 @@ export function DiscoverSidebarComponent({
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
 
   const { dataViewFieldEditor } = services;
-  const indexPatternFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
-  const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
+  const dataViewFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
+  const canEditDataViewField = !!dataViewFieldEditPermission && useNewFieldsApi;
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
@@ -242,7 +242,7 @@ export function DiscoverSidebarComponent({
 
   const deleteField = useMemo(
     () =>
-      canEditIndexPatternField && selectedIndexPattern
+      canEditDataViewField && selectedIndexPattern
         ? async (fieldName: string) => {
             const ref = dataViewFieldEditor.openDeleteModal({
               ctx: {
@@ -263,7 +263,7 @@ export function DiscoverSidebarComponent({
         : undefined,
     [
       selectedIndexPattern,
-      canEditIndexPatternField,
+      canEditDataViewField,
       setFieldEditorRef,
       closeFlyout,
       onEditRuntimeField,
@@ -472,8 +472,8 @@ export function DiscoverSidebarComponent({
                                 getDetails={getDetailsByField}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
-                                onEditField={canEditIndexPatternField ? editField : undefined}
-                                onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                                onEditField={canEditDataViewField ? editField : undefined}
+                                onDeleteField={canEditDataViewField ? deleteField : undefined}
                                 showFieldStats={showFieldStats}
                               />
                             </li>
@@ -501,8 +501,8 @@ export function DiscoverSidebarComponent({
                             getDetails={getDetailsByField}
                             trackUiMetric={trackUiMetric}
                             multiFields={multiFields?.get(field.name)}
-                            onEditField={canEditIndexPatternField ? editField : undefined}
-                            onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                            onEditField={canEditDataViewField ? editField : undefined}
+                            onDeleteField={canEditDataViewField ? deleteField : undefined}
                             showFieldStats={showFieldStats}
                           />
                         </li>
