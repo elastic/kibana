@@ -521,7 +521,6 @@
     "@types/ejs": "^3.0.6",
     "@types/elastic__apm-synthtrace": "link:bazel-bin/packages/elastic-apm-synthtrace/npm_module_types",
     "@types/elastic__datemath": "link:bazel-bin/packages/elastic-datemath/npm_module_types",
-    "@types/elasticsearch": "^5.0.33",
     "@types/enzyme": "^3.10.8",
     "@types/eslint": "^7.28.0",
     "@types/express": "^4.17.13",
