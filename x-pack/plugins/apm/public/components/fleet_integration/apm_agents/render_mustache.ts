@@ -10,12 +10,17 @@ import Mustache from 'mustache';
 
 const TEMPLATE_TAGS = ['{', '}'];
 
-export function replaceTemplateStrings(
-  text: string,
-  docLinks?: CoreStart['docLinks']
-) {
-  Mustache.parse(text, TEMPLATE_TAGS);
-  return Mustache.render(text, {
+export function renderMustache({
+  text,
+  docLinks,
+}: {
+  text: string | string[];
+  docLinks?: CoreStart['docLinks'];
+}) {
+  const template = Array.isArray(text) ? text.join('\n') : text;
+
+  Mustache.parse(template, TEMPLATE_TAGS);
+  return Mustache.render(template, {
     config: {
       docs: {
         base_url: docLinks?.ELASTIC_WEBSITE_URL,

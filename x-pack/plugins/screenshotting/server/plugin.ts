@@ -55,21 +55,20 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
   setup({}: CoreSetup, { screenshotMode }: SetupDeps) {
     this.screenshotMode = screenshotMode;
     this.browserDriverFactory = (async () => {
-      try {
-        const paths = new ChromiumArchivePaths();
-        const logger = this.logger.get('chromium');
-        const [config, binaryPath] = await Promise.all([
-          createConfig(this.logger, this.config),
-          install(paths, logger),
-        ]);
+      const paths = new ChromiumArchivePaths();
+      const logger = this.logger.get('chromium');
+      const [config, binaryPath] = await Promise.all([
+        createConfig(this.logger, this.config),
+        install(paths, logger),
+      ]);
 
-        return new HeadlessChromiumDriverFactory(this.screenshotMode, config, logger, binaryPath);
-      } catch (error) {
-        this.logger.error('Error in screenshotting setup, it may not function properly.');
-
-        throw error;
-      }
+      return new HeadlessChromiumDriverFactory(this.screenshotMode, config, logger, binaryPath);
     })();
+
+    this.browserDriverFactory.catch((error) => {
+      this.logger.error('Error in screenshotting setup, it may not function properly.');
+      this.logger.error(error);
+    });
 
     return {};
   }
