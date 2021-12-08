@@ -30,6 +30,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_RULE_PARAMETERS,
   EVENT_ACTION,
   EVENT_KIND,
   TIMESTAMP,
@@ -226,7 +227,18 @@ export const createLifecycleExecutor =
       });
 
       hits.hits.forEach((hit) => {
-        const fields = parseTechnicalFields(hit.fields);
+        const filteredFields = Object.entries(hit.fields).reduce(
+          (acc, [currFieldKey, currFieldValue]) => {
+            return {
+              ...acc,
+              ...(currFieldKey.startsWith(ALERT_RULE_PARAMETERS)
+                ? {}
+                : { [currFieldKey]: currFieldValue }),
+            };
+          },
+          {}
+        );
+        const fields = parseTechnicalFields(filteredFields);
         const indexName = hit._index;
         const alertId = fields[ALERT_INSTANCE_ID];
         trackedAlertsDataMap[alertId] = {
