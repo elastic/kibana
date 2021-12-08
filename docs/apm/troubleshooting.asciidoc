@@ -1,4 +1,4 @@
-[[apm-troubleshooting]]
+[[troubleshooting]]
 == Troubleshooting
 
 ++++
