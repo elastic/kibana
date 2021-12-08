@@ -22,6 +22,8 @@ import { xyChart } from '../common/expressions/xy_chart/xy_chart';
 import { getDatatable } from '../common/expressions/datatable/datatable';
 import { datatableColumn } from '../common/expressions/datatable/datatable_column';
 
+import { gauge } from '../common/expressions/gauge_chart/gauge_chart';
+
 import { mergeTables } from '../common/expressions/merge_tables';
 import { renameColumns } from '../common/expressions/rename_columns/rename_columns';
 import { pie } from '../common/expressions/pie_chart/pie_chart';
@@ -53,6 +55,7 @@ export const setupExpressions = (
     datatableColumn,
     tickLabelsConfig,
     axisTitlesVisibilityConfig,
+    gauge,
     axisExtentConfig,
     labelsOrientationConfig,
     getDatatable(formatFactory),
