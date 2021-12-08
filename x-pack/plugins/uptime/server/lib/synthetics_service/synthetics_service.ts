@@ -23,11 +23,13 @@ import {
 import { UptimeServerSetup } from '../adapters';
 import { installSyntheticsIndexTemplates } from '../../rest_api/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
+import { ServiceLocations } from '../../../common/runtime_types/monitor_management';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { UptimeConfig } from '../../../common/config';
+import { MonitorConfigs, FormattedMonitorConfigs, ServiceAPIClient } from './service_api_client';
 import { ServiceAPIClient } from './service_api_client';
 import { formatMonitorConfig } from './formatters/format_configs';
 import { ConfigKey, MonitorFields } from '../../../common/runtime_types/monitor_management';
@@ -189,7 +191,7 @@ export class SyntheticsService {
 
   async deleteConfigs(request: KibanaRequest, configs: MonitorFieldsWithID[]) {
     const data = {
-      monitors: configs,
+      monitors: this.formatConfigs(configs),
       output: await this.getOutput(request),
     };
     return await this.apiClient.delete(data);

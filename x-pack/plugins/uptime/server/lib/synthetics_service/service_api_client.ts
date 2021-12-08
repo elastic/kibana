@@ -36,7 +36,7 @@ export class ServiceAPIClient {
     this.locations = [];
 
     getServiceLocations({ manifestUrl }).then((result) => {
-      this.locations = result;
+      this.locations = result.locations;
     });
   }
 
