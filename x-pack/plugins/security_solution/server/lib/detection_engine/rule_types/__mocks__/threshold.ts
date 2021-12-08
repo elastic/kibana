@@ -34,7 +34,6 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_ORIGINAL_EVENT,
 } from '../../../../../common/field_maps/field_names';
-import { WrappedRACAlert } from '../types';
 
 export const mockThresholdResults = {
   rawResponse: {
