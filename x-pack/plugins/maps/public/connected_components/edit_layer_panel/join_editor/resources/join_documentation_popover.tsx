@@ -38,13 +38,31 @@ export class JoinDocumentationPopover extends Component<{}, State> {
           <p>
             <FormattedMessage
               id="xpack.maps.joinDocs.intro"
-              defaultMessage="Use term joins to augment layer with properties for data driven styling. For example, use a term join to add web log traffic count to world country features. Then use data driven styling to shade world countries by web log traffic."
+              defaultMessage="A term join adds properties to vector features for data-driven styling."
             />
           </p>
           <p>
             <FormattedMessage
-              id="xpack.maps.joinDocs.details"
-              defaultMessage="A term join uses a shared key to combine vector features, the left source, with the results of an Elasticsearch terms aggregation, the right source. The terms aggregation creates a bucket for each unique shared key. Metrics are calculated for all documents in a bucket. The join adds metrics for each terms aggregation bucket to the feature with the corresponding shared key. Features that do not have a corresponding terms aggregation bucket are not visible on the map."
+              id="xpack.maps.joinDocs.intro"
+              defaultMessage="A term join uses a shared key to combine vector features with the results of an Elasticsearch terms aggregation."
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.maps.joinDocs.intro"
+              defaultMessage="The terms aggregation creates a bucket for each unique shared key. Metrics are calculated for all documents in a bucket."
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.maps.joinDocs.intro"
+              defaultMessage="The join adds metrics for each terms aggregation bucket to the feature with the corresponding shared key. Features without a corresponding terms aggregation bucket are not visible on the map."
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.maps.joinDocs.exmaple"
+              defaultMessage="For example, you can use a term join to add web log traffic count to world countries, then shade the countries by web log traffic."
             />
           </p>
           <EuiLink href={getDocLinks().links.maps.termJoinsExample} target="_blank" external={true}>

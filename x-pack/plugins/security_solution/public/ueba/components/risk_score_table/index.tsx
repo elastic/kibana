@@ -18,13 +18,12 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { uebaActions, uebaModel, uebaSelectors } from '../../store';
 import { getRiskScoreColumns } from './columns';
 import * as i18n from './translations';
-import {
+import type {
   RiskScoreEdges,
   RiskScoreItem,
   RiskScoreSortField,
-  RiskScoreFields,
-} from '../../../../common';
-import { Direction } from '../../../../common/search_strategy';
+} from '../../../../common/search_strategy';
+import { RiskScoreFields, Direction } from '../../../../common/search_strategy';
 import { rowItems } from '../utils';
 
 const tableType = uebaModel.UebaTableType.riskScore;

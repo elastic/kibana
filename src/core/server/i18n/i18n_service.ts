@@ -16,12 +16,12 @@ import { getKibanaTranslationFiles } from './get_kibana_translation_files';
 import { initTranslations } from './init_translations';
 import { registerRoutes } from './routes';
 
-interface PrebootDeps {
+export interface PrebootDeps {
   http: InternalHttpServicePreboot;
   pluginPaths: string[];
 }
 
-interface SetupDeps {
+export interface SetupDeps {
   http: InternalHttpServiceSetup;
   pluginPaths: string[];
 }
