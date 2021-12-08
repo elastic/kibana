@@ -11,6 +11,7 @@ import type { SavedObjectsClientContract } from 'kibana/server';
 import {
   decodeCloudId,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+  GLOBAL_SETTINGS_ID,
   normalizeHostsForAgents,
 } from '../../common';
 import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common';
@@ -80,10 +81,17 @@ export async function saveSettings(
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
       const defaultSettings = createDefaultSettings();
-      const res = await soClient.create<SettingsSOAttributes>(GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, {
-        ...defaultSettings,
-        ...data,
-      });
+      const res = await soClient.create<SettingsSOAttributes>(
+        GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+        {
+          ...defaultSettings,
+          ...data,
+        },
+        {
+          id: GLOBAL_SETTINGS_ID,
+          overwrite: true,
+        }
+      );
 
       return {
         id: res.id,
