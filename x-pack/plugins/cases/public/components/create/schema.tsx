@@ -64,11 +64,11 @@ export const schema: FormSchema<FormProps> = {
     ],
   },
   selectedOwner: {
-    label: i18n.CASE_TYPE,
+    label: i18n.SOLUTION,
     type: FIELD_TYPES.RADIO_GROUP,
     validations: [
       {
-        validator: emptyField(i18n.SELECTION_REQUIRED),
+        validator: emptyField(i18n.SOLUTION_REQUIRED),
       },
     ],
   },

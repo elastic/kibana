@@ -56,10 +56,10 @@ export const DESCRIPTION_REQUIRED = i18n.translate(
   }
 );
 
-export const SELECTION_REQUIRED = i18n.translate(
-  'xpack.cases.createCase.selectionFieldRequiredError',
+export const SOLUTION_REQUIRED = i18n.translate(
+  'xpack.cases.createCase.solutionFieldRequiredError',
   {
-    defaultMessage: 'A selection is required',
+    defaultMessage: 'A solution is required',
   }
 );
 
@@ -115,8 +115,8 @@ export const TAGS = i18n.translate('xpack.cases.caseView.tags', {
   defaultMessage: 'Tags',
 });
 
-export const CASE_TYPE = i18n.translate('xpack.cases.caseView.caseType', {
-  defaultMessage: 'Case Type',
+export const SOLUTION = i18n.translate('xpack.cases.caseView.solution', {
+  defaultMessage: 'Solution',
 });
 
 export const ACTIONS = i18n.translate('xpack.cases.allCases.actions', {
