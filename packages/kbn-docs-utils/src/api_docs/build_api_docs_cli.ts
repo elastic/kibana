@@ -9,7 +9,8 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import { REPO_ROOT, run, CiStatsReporter, createFlagError } from '@kbn/dev-utils';
+import { run, CiStatsReporter, createFlagError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { Project } from 'ts-morph';
 
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
@@ -248,7 +249,7 @@ export function runBuildApiDocsCli() {
         boolean: ['references'],
         help: `
           --plugin             Optionally, run for only a specific plugin
-          --stats              Optionally print API stats. Must be one or more of: any, comments or exports. 
+          --stats              Optionally print API stats. Must be one or more of: any, comments or exports.
           --references         Collect references for API items
         `,
       },

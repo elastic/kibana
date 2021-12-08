@@ -135,7 +135,7 @@ export const CaseView = React.memo(
         timelineActions.createTimeline({
           id: TimelineId.casePage,
           columns: [],
-          dataViewId: '',
+          dataViewId: null,
           indexNames: [],
           expandedDetail: {},
           show: false,
