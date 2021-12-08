@@ -73,8 +73,8 @@ const getAllBrowseFieldsStates = (
   storage: Storage
 ): Record<string, BrowseFieldsState | undefined> => {
   try {
-    const BrowseFieldsState = storage.get(BROWSE_FIELDS_STATE_KEY);
-    return (BrowseFieldsState && JSON.parse(BrowseFieldsState)) || {};
+    const browseFieldsState = storage.get(BROWSE_FIELDS_STATE_KEY);
+    return (browseFieldsState && JSON.parse(browseFieldsState)) || {};
   } catch {
     return {};
   }
