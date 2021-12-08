@@ -96,6 +96,13 @@ export function mockDataPlugin(
           meta: { ...filter.meta, index: 'injected!' },
         }));
       },
+      extract: (filtersIn: Filter[]) => {
+        const state = filtersIn.map((filter) => ({
+          ...filter,
+          meta: { ...filter.meta, index: 'extracted!' },
+        }));
+        return { state, references: [] };
+      },
     };
   }
   function createMockQueryString() {

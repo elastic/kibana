@@ -612,7 +612,7 @@ describe('embeddable', () => {
       expect.objectContaining({
         timeRange,
         query: [query, savedVis.state.query],
-        filters,
+        filters: mockInjectFilterReferences(filters, []),
       })
     );
 
@@ -728,11 +728,14 @@ describe('embeddable', () => {
     expect(expressionRenderer.mock.calls[0][0].searchContext).toEqual({
       timeRange,
       query: [query, { language: 'kquery', query: 'saved filter' }],
-      filters: [
-        filters[0],
-        // actual index pattern id gets injected
-        { meta: { alias: 'test', negate: false, disabled: false, index: 'my-index-pattern-id' } },
-      ],
+      // actual index pattern id gets injected
+      filters: mockInjectFilterReferences(
+        [
+          filters[0],
+          { meta: { alias: 'test', negate: false, disabled: false, index: 'injected!' } },
+        ],
+        []
+      ),
     });
   });
 
