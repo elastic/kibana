@@ -6,7 +6,6 @@
  */
 
 import {
-  SIGNALS_ID,
   EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
