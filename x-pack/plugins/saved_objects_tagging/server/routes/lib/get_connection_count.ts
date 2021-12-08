@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsFindOptionsReference } from 'src/core/server';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsFindOptionsReference,
+  SavedObject,
+} from 'src/core/server';
 import { tagSavedObjectTypeName } from '../../../common/constants';
-import { Tag, TagWithRelations } from '../../../common/types';
+import { Tag, TagAttributes, TagWithRelations } from '../../../common/types';
 
 export const addConnectionCount = async (
   tags: Tag[],
@@ -22,14 +26,19 @@ export const addConnectionCount = async (
     id,
   }));
 
-  const allResults = await client.find({
+  const pitFinder = client.createPointInTimeFinder<TagAttributes>({
     type: targetTypes,
-    page: 1,
-    perPage: 10000,
+    perPage: 1000,
     hasReference: references,
     hasReferenceOperator: 'OR',
   });
-  allResults.saved_objects.forEach((obj) => {
+
+  const results: SavedObject[] = [];
+  for await (const response of pitFinder.find()) {
+    results.push(...response.saved_objects);
+  }
+
+  results.forEach((obj) => {
     obj.references.forEach((ref) => {
       if (ref.type === tagSavedObjectTypeName && ids.has(ref.id)) {
         counts.set(ref.id, counts.get(ref.id)! + 1);
