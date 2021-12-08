@@ -37,12 +37,15 @@ import {
   isBulkError,
   isImportRegular,
   buildSiemResponse,
-  migrateLegacyActionsIds,
 } from '../utils';
 
 import { patchRules } from '../../rules/patch_rules';
 import { legacyMigrate } from '../../rules/utils';
-import { getTupleDuplicateErrorsAndUniqueRules, getInvalidConnectors } from './utils';
+import {
+  getTupleDuplicateErrorsAndUniqueRules,
+  getInvalidConnectors,
+  migrateLegacyActionsIds,
+} from './utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { HapiReadableStream } from '../../rules/types';
@@ -127,7 +130,7 @@ export const importRulesRoute = (
         );
 
         const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
-          parsedObjectsWithoutDuplicateErrors,
+          migratedParsedObjectsWithoutDuplicateErrors,
           actionsClient
         );
 

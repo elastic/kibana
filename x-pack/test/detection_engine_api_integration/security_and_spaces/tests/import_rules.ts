@@ -553,7 +553,7 @@ export default ({ getService }: FtrProviderContext): void => {
           actions: [
             {
               group: 'default',
-              id: '51b17790-544e-11ec-a349-11361cc441c4', // 'cf92c3c5-203e-54be-bb57-9348afc6651e', // '51b17790-544e-11ec-a349-11361cc441c4'
+              id: 'cf92c3c5-203e-54be-bb57-9348afc6651e', // '51b17790-544e-11ec-a349-11361cc441c4'
               params: {
                 message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },

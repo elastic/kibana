@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { countBy } from 'lodash/fp';
+import { countBy, partition } from 'lodash/fp';
 import uuid from 'uuid';
+import { Action, Actions } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
@@ -193,11 +194,34 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };
 
+const swapActionIds = async (action: Action, actionsClient: ActionsClient): Promise<Action> => {
+  const resolveResponse = await actionsClient.resolve({ id: action.id });
+  console.error('RESOLVE RESPONSE', JSON.stringify(resolveResponse, null, 2));
+  if (resolveResponse.outcome === 'aliasMatch') {
+    const tempAction: Action = { ...action, id: resolveResponse.id };
+    return tempAction;
+  }
+  return action;
+};
+
 export const migrateLegacyActionsIds = async (
   rules: PromiseFromStreams[],
   actionsClient: ActionsClient
-) => {
-  const actionsFind = await actionsClient.getAll();
+): Promise<PromiseFromStreams[]> => {
+  console.error('\n\n\n\n\n********\nDID WE GET IN HERE?\n********\n');
+  const isImportRule = (r: unknown): r is ImportRulesSchemaDecoded => !(r instanceof Error);
+  const rulesToReturn = rules.map(async (rule) => {
+    if (isImportRule(rule)) {
+      const newActions = await Promise.all<Actions>(
+        rule.actions.map<Action>((action) => swapActionIds(action, actionsClient))
+      ).catch((err) => console.error('INTERIOR ERROR', err));
+      return { ...rule, actions: newActions } as ImportRulesSchemaDecoded;
+    }
+    return rule;
+  });
+  await Promise.all(rulesToReturn).catch((err) => console.error('THERE WAS AN ERROR', err));
+  console.error('RULES TO RETURN', JSON.stringify(rulesToReturn, null, 2));
+  return rulesToReturn;
 };
 
 /**
@@ -212,7 +236,7 @@ export const getInvalidConnectors = async (
   actionsClient: ActionsClient
 ): Promise<[BulkError[], PromiseFromStreams[]]> => {
   const actionsFind = await actionsClient.getAll();
-  const actionIds = new Set(actionsFind.flatMap((action) => [action.id, action?.originId]));
+  const actionIds = new Set(actionsFind.flatMap((action) => [action.id]));
   const { errors, rulesAcc } = rules.reduce(
     (acc, parsedRule) => {
       if (parsedRule instanceof Error) {
