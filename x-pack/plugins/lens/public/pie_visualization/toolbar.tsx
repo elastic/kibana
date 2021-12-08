@@ -61,6 +61,12 @@ const emptySizeRatioLabel = i18n.translate('xpack.lens.pieChart.emptySizeRatioLa
 export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
   const { state, setState } = props;
   const layer = state.layers[0];
+  const {
+    categoryOptions,
+    numberOptions,
+    emptySizeRatioOptions,
+    isDisabled: isToolbarPopoverDisabled,
+  } = PartitionChartsMeta[state.shape].toolbarPopover;
 
   const onStateChange = useCallback(
     (part: Record<string, unknown>) => {
@@ -121,13 +127,6 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
       showValuesInLegend: !shouldShowValuesInLegend(layer, state.shape),
     });
   }, [layer, state.shape, onStateChange]);
-
-  const {
-    categoryOptions,
-    numberOptions,
-    emptySizeRatioOptions,
-    isDisabled: isToolbarPopoverDisabled,
-  } = PartitionChartsMeta[state.shape].toolbarPopover;
 
   const onEmptySizeRatioChange = useCallback(
     (sizeId) => {
