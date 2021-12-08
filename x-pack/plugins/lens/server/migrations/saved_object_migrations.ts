@@ -16,7 +16,7 @@ import {
 } from 'src/core/server';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/public';
-import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
+import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
 import { PersistableFilter } from '../../common';
 import {
   LensDocShapePost712,

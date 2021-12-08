@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup } from 'kibana/server';
-import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
+import { MigrateFunctionsObject } from '../../../../src/plugins/kibana_utils/common';
 import { getEditPath } from '../common';
 import { getAllMigrations } from './migrations/saved_object_migrations';
 

@@ -7,8 +7,11 @@
 
 import { cloneDeep } from 'lodash';
 import { PaletteOutput } from 'src/plugins/charts/common';
-import { MigrateFunction, MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
 import { Filter } from '@kbn/es-query';
+import {
+  MigrateFunction,
+  MigrateFunctionsObject,
+} from '../../../../../src/plugins/kibana_utils/common';
 import {
   LensDocShapePre712,
   OperationTypePre712,
