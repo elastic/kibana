@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { EuiForm } from '@elastic/eui';
-import { DataStream } from '../fleet_package/types';
-import { usePolicyConfigContext } from '../fleet_package/contexts';
+import { DataStream } from '../../fleet_package/types';
+import { usePolicyConfigContext } from '../../fleet_package/contexts';
 
-import { CustomFields } from '../fleet_package/custom_fields';
-import { validate } from '../fleet_package/validation';
+import { CustomFields } from '../../fleet_package/custom_fields';
+import { validate } from '../../fleet_package/validation';
 import { MonitorNameAndLocation } from './monitor_name_location';
 
 export const MonitorFields = () => {

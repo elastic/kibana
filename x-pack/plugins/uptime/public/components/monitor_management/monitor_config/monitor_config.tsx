@@ -7,19 +7,15 @@
 
 import React from 'react';
 
-import { defaultConfig, usePolicyConfigContext } from '../fleet_package/contexts';
+import { defaultConfig, usePolicyConfigContext } from '../../fleet_package/contexts';
 
-import { usePolicy } from '../fleet_package/hooks/use_policy';
-import { validate } from '../fleet_package/validation';
+import { usePolicy } from '../../fleet_package/hooks/use_policy';
+import { validate } from '../../fleet_package/validation';
+import { ActionBar } from '../action_bar/action_bar';
+import { useFormatMonitor } from '../hooks/use_format_monitor';
 import { MonitorFields } from './monitor_fields';
-import { ActionBar } from './action_bar/action_bar';
-import { useFormatMonitor } from './hooks/use_format_monitor';
 
-interface Props {
-  id?: string;
-}
-
-export const MonitorConfig = ({ id }: Props) => {
+export const MonitorConfig = () => {
   const { monitorType } = usePolicyConfigContext();
   /* TODO - Use Effect to make sure the package/index templates are loaded. Wait for it to load before showing view
    * then show error message if it fails */
@@ -41,7 +37,7 @@ export const MonitorConfig = ({ id }: Props) => {
   return (
     <>
       <MonitorFields />
-      <ActionBar id={id} monitor={policyConfig[monitorType]} isValid={isValid} />
+      <ActionBar monitor={policyConfig[monitorType]} isValid={isValid} />
     </>
   );
 };
