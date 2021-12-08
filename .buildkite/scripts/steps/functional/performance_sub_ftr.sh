@@ -13,7 +13,7 @@ node scripts/es snapshot&
 
 esPid=$!
 
-export TEST_ES_URL=http://elastic:changeme@192.168.50.1:9200
+export TEST_ES_URL=http://elastic:changeme@localhost:9200
 export DONT_START_ES=true
 export DISABLE_APM=true
 
