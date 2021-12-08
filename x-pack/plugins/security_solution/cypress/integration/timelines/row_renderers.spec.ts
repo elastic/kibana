@@ -98,7 +98,7 @@ describe('Row renderers', () => {
           expect(
             elementsOverlap($googleLinkTooltip, $signatureTooltip),
             'tooltips do not overlap'
-          ).to.equal(true);
+          ).to.equal(false);
         });
       });
     });
