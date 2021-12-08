@@ -249,18 +249,19 @@ describe('update()', () => {
       references: [],
     });
     unsecuredSavedObjectsClient.checkConflicts.mockResolvedValueOnce({
-      errors: [{
-        id: '1',
-        error: {
-         error: 'error',
-         statusCode: 503,
-         message: 'There is a conflict.',
+      errors: [
+        {
+          id: '1',
+          error: {
+            error: 'error',
+            statusCode: 503,
+            message: 'There is a conflict.',
+          },
+          type: 'conflict',
         },
-        type: 'conflict'
-      }],
+      ],
     });
 
-    
     const result = await connectorTokenClient.update({
       id: '1',
       tokenType: 'access_token',
