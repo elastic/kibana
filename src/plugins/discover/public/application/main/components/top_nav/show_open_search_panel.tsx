@@ -8,17 +8,21 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nStart } from 'kibana/public';
+import { CoreTheme, I18nStart } from 'kibana/public';
+import { Observable } from 'rxjs';
 import { OpenSearchPanel } from './open_search_panel';
+import { KibanaThemeProvider } from '../../../../../../kibana_react/public';
 
 let isOpen = false;
 
 export function showOpenSearchPanel({
   I18nContext,
   onOpenSavedSearch,
+  theme$,
 }: {
   I18nContext: I18nStart['Context'];
   onOpenSavedSearch: (id: string) => void;
+  theme$: Observable<CoreTheme>;
 }) {
   if (isOpen) {
     return;
@@ -35,7 +39,9 @@ export function showOpenSearchPanel({
   document.body.appendChild(container);
   const element = (
     <I18nContext>
-      <OpenSearchPanel onClose={onClose} onOpenSavedSearch={onOpenSavedSearch} />
+      <KibanaThemeProvider theme$={theme$}>
+        <OpenSearchPanel onClose={onClose} onOpenSavedSearch={onOpenSavedSearch} />
+      </KibanaThemeProvider>
     </I18nContext>
   );
   ReactDOM.render(element, container);
