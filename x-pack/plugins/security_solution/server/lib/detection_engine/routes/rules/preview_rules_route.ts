@@ -193,7 +193,6 @@ export const previewRulesRoute = async (
               queryAlertType.id,
               queryAlertType.name,
               previewRuleParams,
-              () => true,
               alertInstanceFactoryStub
             );
             break;
@@ -206,7 +205,6 @@ export const previewRulesRoute = async (
               thresholdAlertType.id,
               thresholdAlertType.name,
               previewRuleParams,
-              () => true,
               alertInstanceFactoryStub
             );
             break;
@@ -219,7 +217,6 @@ export const previewRulesRoute = async (
               threatMatchAlertType.id,
               threatMatchAlertType.name,
               previewRuleParams,
-              () => true,
               alertInstanceFactoryStub
             );
             break;
@@ -230,7 +227,6 @@ export const previewRulesRoute = async (
               eqlAlertType.id,
               eqlAlertType.name,
               previewRuleParams,
-              () => true,
               alertInstanceFactoryStub
             );
             break;
@@ -241,7 +237,6 @@ export const previewRulesRoute = async (
               mlAlertType.id,
               mlAlertType.name,
               previewRuleParams,
-              () => true,
               alertInstanceFactoryStub
             );
             break;
