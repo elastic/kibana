@@ -71,8 +71,7 @@ export const getHostsColumns = (showRiskColumn: boolean): HostsTableColumns => {
       name: (
         <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
           <>
-            {i18n.LAST_SEEN}{' '}
-            <EuiIcon size="s" color="subdued" type="iInCircle" className="eui-alignTop" />
+            {i18n.LAST_SEEN} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
@@ -129,7 +128,13 @@ export const getHostsColumns = (showRiskColumn: boolean): HostsTableColumns => {
   if (showRiskColumn) {
     columns.push({
       field: 'node.risk',
-      name: i18n.HOST_RISK,
+      name: (
+        <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
+          <>
+            {i18n.HOST_RISK} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
       truncateText: false,
       mobileOptions: { show: true },
       sortable: false,
