@@ -242,6 +242,12 @@ export function getVisualizeFieldSuggestions({
       visualizationState: {
         ...suggestion.visualizationState,
         fillOpacity,
+        yRightExtent: {
+          mode: 'full',
+        },
+        yLeftExtent: {
+          mode: 'full',
+        },
         legend: configuration.legend,
         gridlinesVisibilitySettings: configuration.gridLinesVisibility,
         layers: visualizationStateLayers,

@@ -10,7 +10,7 @@ import './app.scss';
 import { isEqual } from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumb } from '@elastic/eui';
+import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -102,6 +102,8 @@ export function App({
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(undefined);
+  const [initialDoc, setInitialDoc] = useState<Document | undefined>(undefined);
+  const [isOriginatingAppBackModalOpen, setIsOriginatingAppBackModalOpen] = useState(false);
 
   useEffect(() => {
     if (currentDoc) {
@@ -282,16 +284,29 @@ export function App({
       setIsSaveModalVisible,
     ]
   );
-  let goBackNavMenuItem;
-  if (initialContext) {
-    goBackNavMenuItem = {
-      label: i18n.translate('xpack.lens.app.goBackLabel', {
-        defaultMessage: `Go back to ${contextOriginatingApp}`,
-        values: { contextOriginatingApp },
-      }),
-      onClick: history.goBack,
-    };
-  }
+
+  useEffect(() => {
+    if (lastKnownDoc && !initialDoc) {
+      setInitialDoc(lastKnownDoc);
+    }
+  }, [lastKnownDoc, initialDoc]);
+
+  const goBackToOriginatingApp = useCallback(() => {
+    if (initialContext) {
+      const initialDocHasChanged = !isEqual(
+        initialDoc?.state.visualization,
+        getLastKnownDocWithoutPinnedFilters(lastKnownDoc)?.state.visualization
+      );
+
+      // User hasn't changed the initial doc created by the originating app
+      if (!initialDocHasChanged) {
+        history.goBack();
+      } else {
+        // open dialog to confirm they want to go back
+        setIsOriginatingAppBackModalOpen(true);
+      }
+    }
+  }, [history, initialContext, initialDoc?.state.visualization, lastKnownDoc]);
 
   return (
     <>
@@ -308,8 +323,29 @@ export function App({
           datasourceMap={datasourceMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
-          goBackNavMenuItem={goBackNavMenuItem}
+          goBackToOriginatingApp={goBackToOriginatingApp}
+          contextOriginatingApp={contextOriginatingApp}
         />
+        {isOriginatingAppBackModalOpen && contextOriginatingApp && (
+          <EuiConfirmModal
+            className="lnsApp__originatingAppBackModal"
+            title={i18n.translate('xpack.lens.app.goBackModal.title', {
+              defaultMessage: 'Discard changes?',
+            })}
+            onCancel={() => setIsOriginatingAppBackModalOpen(false)}
+            onConfirm={history.goBack}
+            cancelButtonText="Cancel"
+            confirmButtonText="Discard changes"
+            buttonColor="danger"
+            defaultFocusedButton="confirm"
+          >
+            {i18n.translate('xpack.lens.app.goBackModal.message', {
+              defaultMessage:
+                'The changes you have made here are not backwards compatible with your original {contextOriginatingApp}. Are you sure you want to discard these unsaved changes and return to {contextOriginatingApp}',
+              values: { contextOriginatingApp },
+            })}
+          </EuiConfirmModal>
+        )}
 
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (

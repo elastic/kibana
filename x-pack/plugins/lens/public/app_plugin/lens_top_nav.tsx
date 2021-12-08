@@ -39,7 +39,7 @@ function getLensTopNavConfig(options: {
   tooltips: LensTopNavTooltips;
   savingToLibraryPermitted: boolean;
   savingToDashboardPermitted: boolean;
-  goBackNavMenuItem?: LensTopNavMenuProps['goBackNavMenuItem'];
+  contextOriginatingApp?: string;
 }): TopNavMenuData[] {
   const {
     actions,
@@ -50,7 +50,7 @@ function getLensTopNavConfig(options: {
     savingToLibraryPermitted,
     savingToDashboardPermitted,
     tooltips,
-    goBackNavMenuItem,
+    contextOriginatingApp,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -73,12 +73,18 @@ function getLensTopNavConfig(options: {
         defaultMessage: 'Save',
       });
 
-  if (goBackNavMenuItem) {
+  if (contextOriginatingApp) {
     topNavMenu.push({
-      label: goBackNavMenuItem.label,
-      run: goBackNavMenuItem.onClick,
+      label: i18n.translate('xpack.lens.app.goBackLabel', {
+        defaultMessage: `Go back to {contextOriginatingApp}`,
+        values: { contextOriginatingApp },
+      }),
+      run: actions.goBack,
       testId: 'lnsApp_goBackToAppButton',
-      description: goBackNavMenuItem.label,
+      description: i18n.translate('xpack.lens.app.goBackLabel', {
+        defaultMessage: `Go back to {contextOriginatingApp}`,
+        values: { contextOriginatingApp },
+      }),
       disableButton: false,
     });
   }
@@ -163,7 +169,8 @@ export const LensTopNavMenu = ({
   redirectToOrigin,
   datasourceMap,
   title,
-  goBackNavMenuItem,
+  goBackToOriginatingApp,
+  contextOriginatingApp,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -265,7 +272,7 @@ export const LensTopNavMenu = ({
         showCancel: Boolean(isLinkedToOriginatingApp),
         savingToLibraryPermitted,
         savingToDashboardPermitted,
-        goBackNavMenuItem,
+        contextOriginatingApp,
         tooltips: {
           showExportWarning: () => {
             if (activeData) {
@@ -339,6 +346,11 @@ export const LensTopNavMenu = ({
               setIsSaveModalVisible(true);
             }
           },
+          goBack: () => {
+            if (contextOriginatingApp) {
+              goBackToOriginatingApp?.();
+            }
+          },
           cancel: () => {
             if (redirectToOrigin) {
               redirectToOrigin();
@@ -355,7 +367,6 @@ export const LensTopNavMenu = ({
       getIsByValueMode,
       savingToLibraryPermitted,
       savingToDashboardPermitted,
-      goBackNavMenuItem,
       lensInspector,
       title,
       unsavedTitle,
@@ -365,6 +376,8 @@ export const LensTopNavMenu = ({
       runSave,
       attributeService,
       setIsSaveModalVisible,
+      contextOriginatingApp,
+      goBackToOriginatingApp,
       redirectToOrigin,
     ]
   );

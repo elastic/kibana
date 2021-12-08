@@ -83,11 +83,6 @@ export type RunSave = (
   }
 ) => Promise<void>;
 
-interface BackNavMenuProps {
-  onClick: () => void;
-  label: string;
-}
-
 export interface LensTopNavMenuProps {
   onAppLeave: AppMountParameters['onAppLeave'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
@@ -102,7 +97,8 @@ export interface LensTopNavMenuProps {
   datasourceMap: DatasourceMap;
   title?: string;
   lensInspector: LensInspector;
-  goBackNavMenuItem?: BackNavMenuProps;
+  goBackToOriginatingApp?: () => void;
+  contextOriginatingApp?: string;
 }
 
 export interface HistoryLocationState {
@@ -145,6 +141,7 @@ export interface LensTopNavActions {
   inspect: () => void;
   saveAndReturn: () => void;
   showSaveModal: () => void;
+  goBack: () => void;
   cancel: () => void;
   exportToCSV: () => void;
 }
