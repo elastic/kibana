@@ -14,14 +14,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React, { useMemo } from 'react';
-import { NodeStats } from '../../../../../common/service_map';
 import {
   asDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { Coordinate } from '../../../../../typings/timeseries';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { SparkPlot, Color } from '../../../shared/charts/spark_plot';
+
+type ServiceNodeReturn =
+  APIReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
 
 function LoadingSpinner() {
   return (
@@ -47,19 +50,21 @@ function NoDataMessage() {
 
 interface StatsListProps {
   isLoading: boolean;
-  data: NodeStats;
+  data: ServiceNodeReturn;
 }
 
 interface Item {
   title: string;
   valueLabel: string | null;
   timeseries?: Coordinate[];
+  previousPeriodTimeseries?: Coordinate[];
   color: Color;
 }
 
 export function StatsList({ data, isLoading }: StatsListProps) {
+  const { currentPeriod = {}, previousPeriod } = data;
   const { cpuUsage, failedTransactionsRate, memoryUsage, transactionStats } =
-    data;
+    currentPeriod;
 
   const hasData = [
     cpuUsage?.value,
@@ -82,6 +87,8 @@ export function StatsList({ data, isLoading }: StatsListProps) {
           ? asDuration(transactionStats?.latency?.value)
           : null,
         timeseries: transactionStats?.latency?.timeseries,
+        previousPeriodTimeseries:
+          previousPeriod?.transactionStats?.latency?.timeseries,
         color: 'euiColorVis1',
       },
       {
@@ -93,6 +100,8 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         ),
         valueLabel: asTransactionRate(transactionStats?.throughput?.value),
         timeseries: transactionStats?.throughput?.timeseries,
+        previousPeriodTimeseries:
+          previousPeriod?.transactionStats?.throughput?.timeseries,
         color: 'euiColorVis0',
       },
       {
@@ -101,6 +110,8 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         }),
         valueLabel: asPercent(failedTransactionsRate?.value, 1, ''),
         timeseries: failedTransactionsRate?.timeseries,
+        previousPeriodTimeseries:
+          previousPeriod?.failedTransactionsRate?.timeseries,
         color: 'euiColorVis7',
       },
       {
@@ -109,6 +120,7 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         }),
         valueLabel: asPercent(cpuUsage?.value, 1, ''),
         timeseries: cpuUsage?.timeseries,
+        previousPeriodTimeseries: previousPeriod?.cpuUsage?.timeseries,
         color: 'euiColorVis3',
       },
       {
@@ -120,13 +132,20 @@ export function StatsList({ data, isLoading }: StatsListProps) {
         ),
         valueLabel: asPercent(memoryUsage?.value, 1, ''),
         timeseries: memoryUsage?.timeseries,
+        previousPeriodTimeseries: previousPeriod?.memoryUsage?.timeseries,
         color: 'euiColorVis8',
       },
     ],
-    [cpuUsage, failedTransactionsRate, memoryUsage, transactionStats]
+    [
+      cpuUsage,
+      failedTransactionsRate,
+      memoryUsage,
+      transactionStats,
+      previousPeriod,
+    ]
   );
 
-  if (isLoading) {
+  if (isLoading && !hasData) {
     return <LoadingSpinner />;
   }
 
@@ -136,38 +155,47 @@ export function StatsList({ data, isLoading }: StatsListProps) {
 
   return (
     <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
-      {items.map(({ title, valueLabel, timeseries, color }) => {
-        if (!valueLabel) {
-          return null;
+      {items.map(
+        ({
+          title,
+          valueLabel,
+          timeseries,
+          color,
+          previousPeriodTimeseries,
+        }) => {
+          if (!valueLabel) {
+            return null;
+          }
+          return (
+            <EuiFlexItem key={title}>
+              <EuiFlexGroup gutterSize="none" responsive={false}>
+                <EuiFlexItem
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'end',
+                  }}
+                >
+                  <EuiText color="subdued" size="s">
+                    {title}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {timeseries ? (
+                    <SparkPlot
+                      series={timeseries}
+                      color={color}
+                      valueLabel={valueLabel}
+                      comparisonSeries={previousPeriodTimeseries}
+                    />
+                  ) : (
+                    <div>{valueLabel}</div>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          );
         }
-        return (
-          <EuiFlexItem key={title}>
-            <EuiFlexGroup gutterSize="none" responsive={false}>
-              <EuiFlexItem
-                style={{
-                  display: 'flex',
-                  justifyContent: 'end',
-                }}
-              >
-                <EuiText color="subdued" size="s">
-                  {title}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {timeseries ? (
-                  <SparkPlot
-                    series={timeseries}
-                    color={color}
-                    valueLabel={valueLabel}
-                  />
-                ) : (
-                  <div>{valueLabel}</div>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        );
-      })}
+      )}
     </EuiFlexGroup>
   );
 }
