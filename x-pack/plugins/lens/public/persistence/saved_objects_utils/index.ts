@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './saved_object_store';
-export * from './filter_references';
-export { checkForDuplicateTitle } from './saved_objects_utils';
+export { checkForDuplicateTitle } from './check_for_duplicate_title';
