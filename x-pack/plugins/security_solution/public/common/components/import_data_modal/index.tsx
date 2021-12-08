@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
@@ -15,6 +16,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -36,6 +38,7 @@ interface ImportDataModalProps {
   importComplete: () => void;
   importData: (arg: ImportDataProps) => Promise<ImportDataResponse>;
   showCheckBox: boolean;
+  showExceptionsCheckBox?: boolean;
   showModal: boolean;
   submitBtnText: string;
   subtitle: string;
@@ -55,6 +58,7 @@ export const ImportDataModalComponent = ({
   importComplete,
   importData,
   showCheckBox = true,
+  showExceptionsCheckBox = false,
   showModal,
   submitBtnText,
   subtitle,
@@ -64,6 +68,7 @@ export const ImportDataModalComponent = ({
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [overwrite, setOverwrite] = useState(false);
+  const [overwriteExceptions, setOverwriteExceptions] = useState(false);
   const { addError, addSuccess } = useAppToasts();
 
   const cleanupAndCloseModal = useCallback(() => {
@@ -81,6 +86,7 @@ export const ImportDataModalComponent = ({
         const importResponse = await importData({
           fileToImport: selectedFiles[0],
           overwrite,
+          overwriteExceptions,
           signal: abortCtrl.signal,
         });
 
@@ -108,6 +114,7 @@ export const ImportDataModalComponent = ({
   }, [
     selectedFiles,
     overwrite,
+    overwriteExceptions,
     addError,
     addSuccess,
     cleanupAndCloseModal,
@@ -122,6 +129,14 @@ export const ImportDataModalComponent = ({
     setSelectedFiles(null);
     closeModal();
   }, [closeModal]);
+
+  const handleCheckboxClick = useCallback(() => {
+    setOverwrite((shouldOverwrite) => !shouldOverwrite);
+  }, []);
+
+  const handleExceptionsCheckboxClick = useCallback(() => {
+    setOverwriteExceptions((shouldOverwrite) => !shouldOverwrite);
+  }, []);
 
   return (
     <>
@@ -149,12 +164,22 @@ export const ImportDataModalComponent = ({
             />
             <EuiSpacer size="s" />
             {showCheckBox && (
-              <EuiCheckbox
-                id="import-data-modal-checkbox-label"
-                label={checkBoxLabel}
-                checked={overwrite}
-                onChange={() => setOverwrite(!overwrite)}
-              />
+              <>
+                <EuiCheckbox
+                  id="import-data-modal-checkbox-label"
+                  label={checkBoxLabel}
+                  checked={overwrite}
+                  onChange={handleCheckboxClick}
+                />
+                {showExceptionsCheckBox && (
+                  <EuiCheckbox
+                    id="import-data-modal-exceptions-checkbox-label"
+                    label={i18n.OVERWRITE_EXCEPTIONS_LABEL}
+                    checked={overwriteExceptions}
+                    onChange={handleExceptionsCheckboxClick}
+                  />
+                )}
+              </>
             )}
           </EuiModalBody>
 

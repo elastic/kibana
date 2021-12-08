@@ -181,11 +181,12 @@ const RulesPageComponent: React.FC = () => {
         importComplete={handleRefreshRules}
         importData={importRules}
         successMessage={i18n.SUCCESSFULLY_IMPORTED_RULES}
-        showCheckBox={true}
         showModal={showImportModal}
         submitBtnText={i18n.IMPORT_RULE_BTN_TITLE}
         subtitle={i18n.INITIAL_PROMPT_TEXT}
         title={i18n.IMPORT_RULE}
+        showExceptionsCheckBox
+        showCheckBox
       />
       <SecuritySolutionPageWrapper>
         <DetectionEngineHeaderPage title={i18n.PAGE_TITLE}>

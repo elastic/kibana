@@ -13,3 +13,10 @@ export const CANCEL_BUTTON = i18n.translate(
     defaultMessage: 'Cancel',
   }
 );
+
+export const OVERWRITE_EXCEPTIONS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteExceptionLabel',
+  {
+    defaultMessage: 'Overwrite existing exception lists with conflicting "list_id"',
+  }
+);
