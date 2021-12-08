@@ -21,13 +21,13 @@ import {
   CasePostRequest,
   CaseType,
   OWNER_FIELD,
-  ENABLE_CASE_CONNECTOR,
-  MAX_TITLE_LENGTH,
-} from '../../../common';
+} from '../../../common/api';
+import { ENABLE_CASE_CONNECTOR, MAX_TITLE_LENGTH } from '../../../common/constants';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { Operations } from '../../authorization';
-import { createCaseError, flattenCaseSavedObject, transformNewCase } from '../../common';
+import { createCaseError } from '../../common/error';
+import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import { CasesClientArgs } from '..';
 
 /**
