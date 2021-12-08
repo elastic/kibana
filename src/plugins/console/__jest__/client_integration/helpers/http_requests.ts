@@ -13,9 +13,6 @@ const API_BASE_PATH = 'api/console';
 export interface ResponseError {
   statusCode: number;
   message: string | Error;
-  attributes?: {
-    allNodesUpgraded: boolean;
-  };
 }
 
 // Register helpers to mock HTTP Requests

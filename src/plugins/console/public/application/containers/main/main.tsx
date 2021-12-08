@@ -68,7 +68,6 @@ export function Main() {
         gutterSize="none"
         direction="column"
         responsive={false}
-        data-test-subj="sampleTest"
       >
         <EuiFlexItem grow={false}>
           <EuiTitle className="euiScreenReaderOnly">
