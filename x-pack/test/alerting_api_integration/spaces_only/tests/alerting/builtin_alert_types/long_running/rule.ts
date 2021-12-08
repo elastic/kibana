@@ -31,8 +31,13 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         ruleTypeId: 'test.patternLongRunning.cancelAlertsOnRuleTimeout',
         pattern: [true, true, true, true, true],
       });
+      const statuses = [];
       // get the events we're expecting
       const events = await retry.try(async () => {
+        const { body: rule } = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`
+        );
+        statuses.push(rule.execution_status);
         return await getEventLog({
           getService,
           spaceId: Spaces.space1.id,
@@ -58,15 +63,21 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       ).to.equal(0);
 
       // rule execution status should be in error with reason timeout
-      const { status, body: rule } = await supertest.get(
+      const { status } = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`
       );
       expect(status).to.eql(200);
-      expect(rule.execution_status.status).to.eql('error');
-      expect(rule.execution_status.error.message).to.eql(
+
+      // We can't actually guarantee an execution didn't happen again and not timeout
+      // so we need to be a bit safe in how we detect this situation by looking at the last
+      // two instead of the last one
+      const lastTwo = [statuses.pop(), statuses.pop()];
+      const lastErrorStatus = lastTwo[0].status === 'error' ? lastTwo[0] : lastTwo[1];
+      expect(lastErrorStatus.status).to.eql('error');
+      expect(lastErrorStatus.error.message).to.eql(
         `test.patternLongRunning.cancelAlertsOnRuleTimeout:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of 3s`
       );
-      expect(rule.execution_status.error.reason).to.eql('timeout');
+      expect(lastErrorStatus.error.reason).to.eql('timeout');
     });
 
     it('writes event log document for timeout for each rule execution that ends in timeout - some executions times out', async () => {
