@@ -16,6 +16,7 @@ export enum UptimePage {
   Monitor = 'Monitor',
   MonitorAdd = 'AddMonitor',
   MonitorEdit = 'EditMonitor',
+  MonitorManagement = 'MonitorManagement',
   Settings = 'Settings',
   Certificates = 'Certificates',
   StepDetail = 'StepDetail',

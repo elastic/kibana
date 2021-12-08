@@ -76,6 +76,9 @@ export const indexStatusSelector = ({ indexStatus }: AppState) => indexStatus.in
 
 export const monitorListSelector = ({ monitorList }: AppState) => monitorList;
 
+export const monitorManagementListSelector = ({ monitorManagementList }: AppState) =>
+  monitorManagementList;
+
 export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
 
 export const searchTextSelector = ({ ui: { searchText } }: AppState) => searchText;

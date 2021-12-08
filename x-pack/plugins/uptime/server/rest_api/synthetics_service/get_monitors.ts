@@ -35,6 +35,19 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   handler: async ({ request, savedObjectsClient }): Promise<any> => {
     const { perPage = 50, page } = request.query;
     // TODO: add query/filtering params
-    return await savedObjectsClient.find({ type: syntheticsMonitorType, perPage, page });
+    const {
+      saved_objects: monitors,
+      per_page: perPageT,
+      ...rest
+    } = await savedObjectsClient.find({
+      type: syntheticsMonitorType,
+      perPage,
+      page,
+    });
+    return {
+      ...rest,
+      perPage: perPageT,
+      monitors,
+    };
   },
 });

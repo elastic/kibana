@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-export * from './state';
-export * from './config_key';
-export * from './monitor_configs';
-export * from './monitor_meta_data';
-export * from './monitor_types';
-export * from './locations';
+import * as t from 'io-ts';
+
+export const FetchMonitorManagementListQueryArgsType = t.partial({
+  page: t.number,
+  perPage: t.number,
+});
+
+export type FetchMonitorManagementListQueryArgs = t.TypeOf<
+  typeof FetchMonitorManagementListQueryArgsType
+>;

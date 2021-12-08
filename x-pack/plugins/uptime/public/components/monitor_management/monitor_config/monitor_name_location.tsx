@@ -7,10 +7,11 @@
 
 import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { usePolicyConfigContext } from '../fleet_package/contexts';
+import { usePolicyConfigContext } from '../../fleet_package/contexts';
+import { ServiceLocations } from './locations';
 
 export const MonitorNameAndLocation = () => {
-  const { name, setName } = usePolicyConfigContext();
+  const { name, setName, locations = [], setLocations } = usePolicyConfigContext();
   return (
     <>
       <EuiFormRow label="Monitor name" fullWidth={true}>
@@ -23,15 +24,7 @@ export const MonitorNameAndLocation = () => {
           onChange={(event) => setName(event.target.value)}
         />
       </EuiFormRow>
-      {/* TODO: connect locations */}
-      {/* <EuiFormRow label={'Service locations'} fullWidth={true}>
-        <EuiComboBox
-          selectedOptions={selectedOpts}
-          fullWidth={true}
-          options={locOpts}
-          onChange={(selOptions) => setLocations(selOptions.map(({ value }) => value as string))}
-        />
-      </EuiFormRow> */}
+      <ServiceLocations setLocations={setLocations} selectedLocations={locations} />
     </>
   );
 };

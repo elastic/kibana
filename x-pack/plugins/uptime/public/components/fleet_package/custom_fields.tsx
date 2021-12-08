@@ -78,6 +78,8 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [], children 
     }
   };
 
+  const isWithInUptime = window.location.pathname.includes('/app/uptime');
+
   return (
     <EuiForm component="form">
       <EuiDescribedFormGroup
@@ -129,7 +131,7 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [], children 
               </EuiFormRow>
             )}
             <EuiSpacer size="s" />
-            {isBrowser && (
+            {isBrowser && !isWithInUptime && (
               <EuiCallOut
                 title={
                   <FormattedMessage

@@ -23,12 +23,13 @@ import {
 import { UptimeServerSetup } from '../adapters';
 import { installSyntheticsIndexTemplates } from '../../rest_api/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
+import { ServiceLocations } from '../../../common/runtime_types/monitor_management';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { UptimeConfig } from '../../../common/config';
-import { MonitorConfigs, ServiceAPIClient } from './service_api_client';
+import { MonitorConfigs, FormattedMonitorConfigs, ServiceAPIClient } from './service_api_client';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -182,7 +183,7 @@ export class SyntheticsService {
 
   async deleteConfigs(request: KibanaRequest, configs: MonitorConfigs) {
     const data = {
-      monitors: configs,
+      monitors: this.formatConfigs(configs),
       output: await this.getOutput(request),
     };
     return await this.apiClient.delete(data);
@@ -203,8 +204,9 @@ export class SyntheticsService {
     }));
   }
 
-  formatConfigs(configs: MonitorConfigs) {
+  formatConfigs(configs: MonitorConfigs): FormattedMonitorConfigs {
     // TODO: Move to dedicated formatter class
+
     function parseSchedule(schedule: any) {
       if (schedule?.number) {
         return `@every ${schedule.number}${schedule.unit}`;
@@ -212,14 +214,13 @@ export class SyntheticsService {
       return schedule;
     }
 
-    function parseUrl(urls?: string | string[]) {
+    /* despite urls being plural, it will never be an array
+     * the plural is held over from legacy implementations */
+    function parseUrl(urls?: string) {
       if (!urls) {
         return undefined;
       }
-      if (urls instanceof Array) {
-        return urls;
-      }
-      return [urls];
+      return urls;
     }
 
     function parseInlineSource(monAttrs: any) {
@@ -231,13 +232,18 @@ export class SyntheticsService {
         };
       }
     }
+
+    function parseLocations(locations: ServiceLocations) {
+      return locations.map((location) => location.id);
+    }
+
     return configs.map((monAttrs) => {
       const { id, schedule, type, name, locations, tags, urls } = monAttrs;
       return {
         id,
         type,
         name,
-        locations,
+        locations: parseLocations(locations || []),
         tags,
         source: parseInlineSource(monAttrs),
         urls: parseUrl(urls),
