@@ -171,6 +171,7 @@ export const LensTopNavMenu = ({
   title,
   goBackToOriginatingApp,
   contextOriginatingApp,
+  initialContextIsEmbedded,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -258,14 +259,17 @@ export const LensTopNavMenu = ({
   const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
     defaultMessage: 'unsaved',
   });
+
   const topNavConfig = useMemo(
     () =>
       getLensTopNavConfig({
-        showSaveAndReturn: Boolean(
-          isLinkedToOriginatingApp &&
-            // Temporarily required until the 'by value' paradigm is default.
-            (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
-        ),
+        showSaveAndReturn:
+          Boolean(
+            isLinkedToOriginatingApp &&
+              // Temporarily required until the 'by value' paradigm is default.
+              (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
+          ) || Boolean(initialContextIsEmbedded),
+
         enableExportToCSV: Boolean(isSaveable && activeData && Object.keys(activeData).length),
         isByValueMode: getIsByValueMode(),
         allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
@@ -379,6 +383,7 @@ export const LensTopNavMenu = ({
       contextOriginatingApp,
       goBackToOriginatingApp,
       redirectToOrigin,
+      initialContextIsEmbedded,
     ]
   );
 

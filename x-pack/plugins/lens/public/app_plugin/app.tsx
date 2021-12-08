@@ -8,7 +8,7 @@
 import './app.scss';
 
 import { isEqual } from 'lodash';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
 import {
@@ -310,6 +310,13 @@ export function App({
     }
   }, [history, initialContext, initialDoc?.state.visualization, lastKnownDoc]);
 
+  const initialContextIsEmbedded = useMemo(() => {
+    if (initialContext && 'embeddableId' in initialContext && initialContext.embeddableId) {
+      return true;
+    }
+    return false;
+  }, [initialContext]);
+
   return (
     <>
       <div className="lnsApp" data-test-subj="lnsApp">
@@ -327,6 +334,7 @@ export function App({
           lensInspector={lensInspector}
           goBackToOriginatingApp={goBackToOriginatingApp}
           contextOriginatingApp={contextOriginatingApp}
+          initialContextIsEmbedded={initialContextIsEmbedded}
         />
         {isOriginatingAppBackModalOpen && contextOriginatingApp && (
           <EuiConfirmModal

@@ -99,6 +99,7 @@ export interface LensTopNavMenuProps {
   lensInspector: LensInspector;
   goBackToOriginatingApp?: () => void;
   contextOriginatingApp?: string;
+  initialContextIsEmbedded?: boolean;
 }
 
 export interface HistoryLocationState {
