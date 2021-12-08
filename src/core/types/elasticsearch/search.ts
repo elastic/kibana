@@ -114,7 +114,7 @@ export type AggregateOf<
   TDocument
 > = ValuesType<
   Pick<
-    {
+    Record<string, unknown> & {
       adjacency_matrix: {
         buckets: Array<
           {
@@ -558,8 +558,7 @@ export type AggregateOf<
       };
       // t_test: {} not defined
     },
-    // @ts-expect-error validation is too expensive here
-    Exclude<ValidAggregationKeysOf<TAggregationContainer>, 'aggs' | 'aggregations'>
+    Exclude<ValidAggregationKeysOf<TAggregationContainer>, 'aggs' | 'aggregations'> & string
   >
 >;
 
