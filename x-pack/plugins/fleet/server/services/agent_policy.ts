@@ -138,7 +138,7 @@ class AgentPolicyService {
     const isDefaultPolicy =
       preconfiguredAgentPolicy.is_default || preconfiguredAgentPolicy.is_default_fleet_server;
 
-    if (isDefaultPolicy) {
+    if (isDefaultPolicy && !id) {
       searchParams = {
         searchFields: [
           preconfiguredAgentPolicy.is_default_fleet_server
