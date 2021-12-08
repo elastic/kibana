@@ -19,14 +19,18 @@ import {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
+import { OperatingSystem } from '../../../../common/endpoint/types';
 import { ExceptionListClient } from '../../../../../lists/server';
 import {
   InternalArtifactCompleteSchema,
   TranslatedEntry,
+  TranslatedPerformantEntries,
+  translatedPerformantEntries as translatedPerformantEntriesType,
   translatedEntry as translatedEntryType,
   translatedEntryMatchAnyMatcher,
   TranslatedEntryMatcher,
   translatedEntryMatchMatcher,
+  TranslatedEntryMatchWildcard,
   TranslatedEntryMatchWildcardMatcher,
   translatedEntryMatchWildcardMatcher,
   TranslatedEntryNestedEntry,
@@ -35,6 +39,10 @@ import {
   WrappedTranslatedExceptionList,
   wrappedTranslatedExceptionList,
 } from '../../schemas';
+import {
+  hasSimpleExecutableName,
+  getExecutableName,
+} from '../../../../common/endpoint/service/trusted_apps/validations';
 
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
@@ -217,31 +225,84 @@ function translateItem(
   item: ExceptionListItemSchema
 ): TranslatedExceptionListItem {
   const itemSet = new Set();
-  return {
-    type: item.type,
-    entries: item.entries.reduce<TranslatedEntry[]>((translatedEntries, entry) => {
-      const translatedEntry = translateEntry(schemaVersion, entry);
-      if (translatedEntry !== undefined && translatedEntryType.is(translatedEntry)) {
-        const itemHash = createHash('sha256').update(JSON.stringify(translatedEntry)).digest('hex');
-        if (!itemSet.has(itemHash)) {
-          translatedEntries.push(translatedEntry);
-          itemSet.add(itemHash);
+  const getEntries = (): TranslatedExceptionListItem['entries'] => {
+    return item.entries.reduce<TranslatedEntry[]>((translatedEntries, entry) => {
+      const translatedEntry = translateEntry(schemaVersion, entry, item.os_types[0]);
+
+      if (translatedEntry !== undefined) {
+        if (translatedEntryType.is(translatedEntry)) {
+          const itemHash = createHash('sha256')
+            .update(JSON.stringify(translatedEntry))
+            .digest('hex');
+          if (!itemSet.has(itemHash)) {
+            translatedEntries.push(translatedEntry);
+            itemSet.add(itemHash);
+          }
+        }
+        if (translatedPerformantEntriesType.is(translatedEntry)) {
+          translatedEntry.forEach((tpe) => {
+            const itemHash = createHash('sha256').update(JSON.stringify(tpe)).digest('hex');
+            if (!itemSet.has(itemHash)) {
+              translatedEntries.push(tpe);
+              itemSet.add(itemHash);
+            }
+          });
         }
       }
+
       return translatedEntries;
-    }, []),
+    }, []);
   };
+
+  return {
+    type: item.type,
+    entries: getEntries(),
+  };
+}
+
+function appendProcessNameEntry({
+  wildcardProcessEntry,
+  entry,
+  os,
+}: {
+  wildcardProcessEntry: TranslatedEntryMatchWildcard;
+  entry: {
+    field: string;
+    operator: 'excluded' | 'included';
+    type: 'wildcard';
+    value: string;
+  };
+  os: ExceptionListItemSchema['os_types'][0];
+}): TranslatedPerformantEntries {
+  const entries: TranslatedPerformantEntries = [
+    wildcardProcessEntry,
+    {
+      field: normalizeFieldName('process.name'),
+      operator: entry.operator,
+      type: (os === 'linux' ? 'exact_cased' : 'exact_caseless') as Extract<
+        TranslatedEntryMatcher,
+        'exact_caseless' | 'exact_cased'
+      >,
+      value: getExecutableName({ os: os as OperatingSystem, value: entry.value }),
+    },
+  ].reduce<TranslatedPerformantEntries>((p, c) => {
+    p.push(c);
+    return p;
+  }, []);
+
+  return entries;
 }
 
 function translateEntry(
   schemaVersion: string,
-  entry: Entry | EntryNested
-): TranslatedEntry | undefined {
+  entry: Entry | EntryNested,
+  os: ExceptionListItemSchema['os_types'][0]
+): TranslatedEntry | TranslatedPerformantEntries | undefined {
   switch (entry.type) {
     case 'nested': {
       const nestedEntries = entry.entries.reduce<TranslatedEntryNestedEntry[]>(
         (entries, nestedEntry) => {
-          const translatedEntry = translateEntry(schemaVersion, nestedEntry);
+          const translatedEntry = translateEntry(schemaVersion, nestedEntry, os);
           if (nestedEntry !== undefined && translatedEntryNestedEntry.is(translatedEntry)) {
             entries.push(translatedEntry);
           }
@@ -278,15 +339,37 @@ function translateEntry(
         : undefined;
     }
     case 'wildcard': {
-      const matcher = getMatcherWildcardFunction(entry.field);
-      return translatedEntryMatchWildcardMatcher.is(matcher)
-        ? {
+      const wildcardMatcher = getMatcherWildcardFunction(entry.field);
+      const translatedEntryWildcardMatcher =
+        translatedEntryMatchWildcardMatcher.is(wildcardMatcher);
+
+      const buildEntries = () => {
+        if (translatedEntryWildcardMatcher) {
+          // default process.executable entry
+          const wildcardProcessEntry: TranslatedEntryMatchWildcard = {
             field: normalizeFieldName(entry.field),
             operator: entry.operator,
-            type: matcher,
+            type: wildcardMatcher,
             value: entry.value,
+          };
+
+          const hasExecutableName = hasSimpleExecutableName({
+            os: os as OperatingSystem,
+            type: entry.type,
+            value: entry.value,
+          });
+          if (hasExecutableName) {
+            // when path has a full executable name
+            // append a process.name entry based on os
+            // `exact_cased` for linux and `exact_caseless` for others
+            return appendProcessNameEntry({ entry, os, wildcardProcessEntry });
+          } else {
+            return wildcardProcessEntry;
           }
-        : undefined;
+        }
+      };
+
+      return buildEntries();
     }
   }
 }

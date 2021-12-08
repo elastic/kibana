@@ -34,6 +34,21 @@ export const getDuplicateFields = (entries: ConditionEntry[]) => {
     .map((entry) => entry[0]);
 };
 
+const WIN_EXEC_PATH = /\\(\w+\.\w+)$/i;
+const UNIX_EXEC_PATH = /\/\w+\.*\w*$/i;
+
+export const getExecutableName = ({
+  os,
+  value,
+}: {
+  os: OperatingSystem;
+  value: string;
+}): string => {
+  const execName =
+    os === OperatingSystem.WINDOWS ? value.match(WIN_EXEC_PATH) : value.match(UNIX_EXEC_PATH);
+  return execName ? execName[0].replaceAll(/\/|\\/gi, '') : '';
+};
+
 export const hasSimpleExecutableName = ({
   os,
   type,
@@ -44,9 +59,7 @@ export const hasSimpleExecutableName = ({
   value: string;
 }): boolean => {
   if (type === 'wildcard') {
-    return os === OperatingSystem.WINDOWS
-      ? /\\(\w+\.\w+)$/i.test(value)
-      : /\/\w+\.*\w*$/i.test(value);
+    return os === OperatingSystem.WINDOWS ? WIN_EXEC_PATH.test(value) : UNIX_EXEC_PATH.test(value);
   }
   return true;
 };
