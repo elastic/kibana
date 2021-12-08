@@ -55,6 +55,8 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       loadTestFile(require.resolve('./table'));
       loadTestFile(require.resolve('./runtime_fields'));
       loadTestFile(require.resolve('./dashboard'));
+      loadTestFile(require.resolve('./multi_terms'));
+      loadTestFile(require.resolve('./epoch_millis'));
     });
 
     describe('', function () {
@@ -67,6 +69,7 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       loadTestFile(require.resolve('./geo_field'));
       loadTestFile(require.resolve('./formula'));
       loadTestFile(require.resolve('./heatmap'));
+      loadTestFile(require.resolve('./gauge'));
       loadTestFile(require.resolve('./metrics'));
       loadTestFile(require.resolve('./reference_lines'));
       loadTestFile(require.resolve('./inspector'));

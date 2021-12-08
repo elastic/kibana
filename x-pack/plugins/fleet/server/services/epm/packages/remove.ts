@@ -22,7 +22,6 @@ import { removeUnusedIndexPatterns } from '../kibana/index_pattern/install';
 import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { deleteMlModel } from '../elasticsearch/ml_model';
 import { packagePolicyService, appContextService } from '../..';
-import { splitPkgKey } from '../registry';
 import { deletePackageCache } from '../archive';
 import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
@@ -31,13 +30,12 @@ import { getInstallation, kibanaSavedObjectTypes } from './index';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
+  pkgName: string;
+  pkgVersion: string;
   esClient: ElasticsearchClient;
   force?: boolean;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgkey, esClient, force } = options;
-  // TODO:  the epm api should change to /name/version so we don't need to do this
-  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
+  const { savedObjectsClient, pkgName, pkgVersion, esClient, force } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
   if (installation.removable === false && !force)
