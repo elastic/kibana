@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -28,9 +28,8 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ApmPluginStartDeps } from '../../../../plugin';
 import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
+import { useCurrentUser } from '../../../../hooks/use_current_user';
 
 interface Props {
   onCancel: () => void;
@@ -39,17 +38,13 @@ interface Props {
 }
 
 export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
-  const {
-    services: { security },
-  } = useKibana<ApmPluginStartDeps>();
-
-  const [username, setUsername] = useState('');
-
   const [formTouched, setFormTouched] = useState(false);
   const [keyName, setKeyName] = useState('');
   const [agentConfigChecked, setAgentConfigChecked] = useState(true);
   const [eventWriteChecked, setEventWriteChecked] = useState(true);
   const [sourcemapChecked, setSourcemapChecked] = useState(true);
+
+  const currentUser = useCurrentUser();
 
   const isInputInvalid = isEmpty(keyName);
   const isFormInvalid = formTouched && isInputInvalid;
@@ -58,18 +53,6 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
     'xpack.apm.settings.agentKeys.createKeyFlyout.name.placeholder',
     { defaultMessage: 'Enter a name' }
   );
-
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      try {
-        const authenticatedUser = await security?.authc.getCurrentUser();
-        setUsername(authenticatedUser?.username || '');
-      } catch {
-        setUsername('');
-      }
-    };
-    getCurrentUser();
-  }, [security?.authc]);
 
   const createAgentKeyTitle = i18n.translate(
     'xpack.apm.settings.agentKeys.createKeyFlyout.createAgentKey',
@@ -112,14 +95,14 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
 
       <EuiFlyoutBody>
         <EuiForm isInvalid={isFormInvalid} error={formError}>
-          {username && (
+          {currentUser && (
             <EuiFormRow
               label={i18n.translate(
                 'xpack.apm.settings.agentKeys.createKeyFlyout.userTitle',
                 { defaultMessage: 'User' }
               )}
             >
-              <EuiText>{username}</EuiText>
+              <EuiText>{currentUser?.username}</EuiText>
             </EuiFormRow>
           )}
           <EuiFormRow
