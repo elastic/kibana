@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { Query } from '@kbn/es-query';
+import { Query, Filter } from '@kbn/es-query';
 import { CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
-import { Filter } from '@kbn/es-query';
 import { TimeRange } from '../../../../../../src/plugins/data/public';
 import {
   Embeddable,
