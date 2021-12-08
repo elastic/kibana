@@ -34,7 +34,12 @@ import type {
   ListWithKuery,
   NewPackagePolicy,
 } from '../types';
-import { agentPolicyStatuses, packageToPackagePolicy, AGENT_POLICY_INDEX } from '../../common';
+import {
+  agentPolicyStatuses,
+  packageToPackagePolicy,
+  AGENT_POLICY_INDEX,
+  UUID_V5_NAMESPACE,
+} from '../../common';
 import type {
   DeleteAgentPolicyResponse,
   FleetServerPolicy,
@@ -60,9 +65,6 @@ import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
-
-// UUID v5 values require a namespace
-const UUID_V5_NAMESPACE = 'dde7c2de-1370-4c19-9975-b473d0e03508';
 
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
