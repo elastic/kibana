@@ -15,12 +15,8 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import {
-  Case,
-  CaseStatusWithAllStatus,
-  CommentRequestAlertType,
-  SubCase,
-} from '../../../../common';
+import { Case, SubCase, CaseStatusWithAllStatus } from '../../../../common/ui/types';
+import { CommentRequestAlertType } from '../../../../common/api';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
 export interface AllCasesSelectorModalProps {

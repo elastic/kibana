@@ -11,7 +11,7 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
-} from '../../common';
+} from '../../common/constants';
 import { Verbs, ReadOperations, WriteOperations, OperationDetails } from './types';
 
 export * from './authorization';
@@ -186,10 +186,10 @@ const ConfigurationOperations = {
 };
 
 const AttachmentOperations = {
-  [ReadOperations.CountAlertsAttachedToCase]: {
+  [ReadOperations.GetAttachmentMetrics]: {
     ecsType: EVENT_TYPES.access,
     name: ACCESS_COMMENT_OPERATION,
-    action: 'case_comment_count_alerts_attach_to_case',
+    action: 'case_comment_get_metrics',
     verbs: accessVerbs,
     docType: 'comments',
     savedObjectType: CASE_COMMENT_SAVED_OBJECT,

@@ -7,9 +7,9 @@
 import { merge } from 'lodash';
 import Boom from '@hapi/boom';
 
-import { CaseMetricsResponseRt, CaseMetricsResponse } from '../../../common';
+import { CaseMetricsResponseRt, CaseMetricsResponse } from '../../../common/api';
 import { Operations } from '../../authorization';
-import { createCaseError } from '../../common';
+import { createCaseError } from '../../common/error';
 import { CasesClient } from '../client';
 import { CasesClientArgs } from '../types';
 import { AlertsCount } from './alerts_count';
@@ -70,7 +70,7 @@ const buildHandlers = (
 ): Map<string, MetricsHandler> => {
   const handlers = [
     new Lifespan(params.caseId, casesClient),
-    new AlertsCount(params.caseId, casesClient),
+    new AlertsCount(params.caseId, casesClient, clientArgs),
     new AlertDetails(params.caseId, casesClient, clientArgs),
     new Connectors(),
   ];

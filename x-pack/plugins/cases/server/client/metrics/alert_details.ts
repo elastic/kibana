@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AlertHostsMetrics, AlertUsersMetrics, CaseMetricsResponse } from '../../../common';
-import { createCaseError } from '../../common';
+import { AlertHostsMetrics, AlertUsersMetrics, CaseMetricsResponse } from '../../../common/api';
+import { createCaseError } from '../../common/error';
 import { AggregationFields, HostAggregate, UserAggregate } from '../../services/alerts/types';
 import { CasesClient } from '../client';
 import { CasesClientArgs } from '../types';

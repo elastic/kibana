@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseMetricsResponse } from '../../../common';
+import { CaseMetricsResponse } from '../../../common/api';
 
 export interface MetricsHandler {
   getFeatures(): Set<string>;
