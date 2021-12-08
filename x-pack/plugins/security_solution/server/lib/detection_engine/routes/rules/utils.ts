@@ -196,9 +196,9 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
 
 const swapActionIds = async (action: Action, actionsClient: ActionsClient): Promise<Action> => {
   const resolveResponse = await actionsClient.resolve({ id: action.id });
-  console.error('RESOLVE RESPONSE', JSON.stringify(resolveResponse, null, 2));
+  console.error('RESOLVE RESPONSE', resolveResponse);
   if (resolveResponse.outcome === 'aliasMatch') {
-    const tempAction: Action = { ...action, id: resolveResponse.id };
+    const tempAction: Action = { ...action, id: resolveResponse.alias_target_id };
     return tempAction;
   }
   return action;
@@ -219,9 +219,11 @@ export const migrateLegacyActionsIds = async (
     }
     return rule;
   });
-  await Promise.all(rulesToReturn).catch((err) => console.error('THERE WAS AN ERROR', err));
-  console.error('RULES TO RETURN', JSON.stringify(rulesToReturn, null, 2));
-  return rulesToReturn;
+  const resolvedRulesToReturn = await Promise.all(rulesToReturn).catch((err) =>
+    console.error('THERE WAS AN ERROR', err)
+  );
+  console.error('RULES TO RETURN', JSON.stringify(resolvedRulesToReturn, null, 2));
+  return resolvedRulesToReturn;
 };
 
 /**
