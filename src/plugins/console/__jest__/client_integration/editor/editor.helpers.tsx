@@ -40,8 +40,17 @@ const createActions = (testBed: TestBed) => {
     component.update();
   };
 
+  const openRequestOptionsDropdown = async () => {
+    const { find, component } = testBed;
+    await act(async () => {
+      find('toggleConsoleMenu').simulate('click');
+    });
+    component.update();
+  };
+
   return {
     clickSendRequestButton,
+    openRequestOptionsDropdown,
   };
 };
 

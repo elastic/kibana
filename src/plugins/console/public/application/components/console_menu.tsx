@@ -164,7 +164,7 @@ export class ConsoleMenu extends Component<Props, State> {
           panelPaddingSize="none"
           anchorPosition="downLeft"
         >
-          <EuiContextMenuPanel items={items} />
+          <EuiContextMenuPanel items={items} data-test-subj="contextMenuPanel" />
         </EuiPopover>
       </span>
     );

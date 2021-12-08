@@ -6,16 +6,49 @@
  * Side Public License, v 1.
  */
 
+import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../helpers';
 import { AppTestBed, setupAppPage } from './editor.helpers';
+import {
+  getDocumentation,
+  autoIndent,
+} from '../../../public/application/containers/editor/legacy/console_menu_actions';
+
+jest.mock('../../../public/application/contexts/request_context.tsx', () => ({
+  ...jest.requireActual('../../../public/application/contexts/request_context.tsx'),
+  useRequestReadContext: () => ({
+    requestInFlight: false,
+    lastResult: {
+      data: [
+        {
+          response: {
+            statusCode: 200,
+            statusText: 'OK',
+            value: 'wow',
+          },
+          request: {
+            method: 'GET',
+            path: '/.security',
+          },
+        },
+      ],
+    },
+  }),
+}));
+
+jest.mock('../../../public/application/containers/editor/legacy/console_menu_actions.ts', () => {
+  return {
+    getDocumentation: jest.fn(),
+    autoIndent: jest.fn(),
+  };
+});
 
 describe('Console - Legacy Editor', () => {
   let testBed: AppTestBed;
   let server: ReturnType<typeof setupEnvironment>['server'];
-  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
   beforeEach(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+    ({ server } = setupEnvironment());
   });
 
   afterEach(() => {
@@ -28,16 +61,40 @@ describe('Console - Legacy Editor', () => {
     });
 
     test('sends current request to ES', async () => {
-      const { actions } = testBed;
-
-      httpRequestsMockHelpers.setConsoleRequestResponse({
-        fake_response: true,
-      });
+      const { find, actions } = testBed;
 
       await actions.clickSendRequestButton();
 
-      // const editor = find('response-editor');
-      // console.log(find('statusCode').text());
+      // Using a simple matcher like `200 - OK` wont work since the component
+      // renders the white space as &nbsp;. So we need to use the unix code
+      // equivalent of it `\u00a0` in order to make it work.
+      expect(find('statusCode').text()).toBe('200\u00a0-\u00a0OK');
+    });
+  });
+
+  describe('Request options dropdown', () => {
+    it('opens docs', async () => {
+      const { find, component, actions } = testBed;
+      await actions.openRequestOptionsDropdown();
+
+      await act(async () => {
+        find('contextMenuPanel.consoleMenuOpenDocs').simulate('click');
+      });
+      component.update();
+
+      expect(getDocumentation).toHaveBeenCalledTimes(1);
+    });
+
+    it('prompts auto-indent', async () => {
+      const { find, component, actions } = testBed;
+      await actions.openRequestOptionsDropdown();
+
+      await act(async () => {
+        find('contextMenuPanel.consoleMenuAutoIndent').simulate('click');
+      });
+      component.update();
+
+      expect(autoIndent).toHaveBeenCalledTimes(1);
     });
   });
 });
