@@ -1117,6 +1117,7 @@ Each action type should be defined as an `ActionTypeModel` object with the follo
   validateParams: (actionParams: any) => Promise<ValidationResult>;
   actionConnectorFields: React.FunctionComponent<any> | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
+  customConnectorSelectItem?: CustomConnectorSelectionItem;
 ```
 |Property|Description|
 |---|---|
@@ -1127,6 +1128,20 @@ Each action type should be defined as an `ActionTypeModel` object with the follo
 |validateParams|Validation function for action params.|
 |actionConnectorFields|A lazy loaded React component for building UI of current action type connector.|
 |actionParamsFields|A lazy loaded React component for building UI of current action type params. Displayed as a part of Create Alert flyout.|
+|customConnectorSelectItem|Optional, an object for customizing the selection row of the action connector form.|
+
+### CustomConnectorSelectionItem Properties
+
+```
+  getText: (connector: ActionConnector) => string;
+  getComponent: (connector: ActionConnector) => React.
+    LazyExoticComponent<ComponentType<{ actionConnector: ActionConnector }> | undefined;
+```
+
+|Property|Description|
+|---|---|
+|getText|Function for returning the text to display for the row.|
+|getComponent|Function for returning a lazy loaded React component for customizing the selection row of the action connector form. Or undefined if if no customization is needed.|
 
 ## Register action type model
 
