@@ -12,12 +12,12 @@ import {
 } from '../../../common/utils/markdown_plugins/utils';
 
 import { savedObjectsServiceMock } from '../../../../../../src/core/server/mocks';
-import { lensEmbeddableFactory } from '../../../../lens/server/embeddable/lens_embeddable_factory';
+import { lensEmbeddableFactoryFactory } from '../../../../lens/server/embeddable/lens_embeddable_factory_factory';
 import { LensDocShape715 } from '../../../../lens/server';
 import { SavedObjectReference } from 'kibana/server';
 
 const migrations = createCommentsMigrations({
-  lensEmbeddableFactory,
+  lensEmbeddableFactory: lensEmbeddableFactoryFactory({}),
 });
 
 const contextMock = savedObjectsServiceMock.createMigrationContext();
