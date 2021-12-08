@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
 
-  describe('lens gauge', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/120670
+  describe.skip('lens gauge', () => {
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
