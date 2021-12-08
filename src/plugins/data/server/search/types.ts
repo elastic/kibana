@@ -123,9 +123,6 @@ export interface ISearchStart<
 
 export type SearchRequestHandlerContext = IScopedSearchClient;
 
-/**
- * @internal
- */
 export interface DataRequestHandlerContext extends RequestHandlerContext {
   search: SearchRequestHandlerContext;
 }
