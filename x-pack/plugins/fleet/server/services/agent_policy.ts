@@ -134,14 +134,11 @@ class AgentPolicyService {
     };
 
     let searchParams;
-    if (id) {
-      searchParams = {
-        id: String(id),
-      };
-    } else if (
-      preconfiguredAgentPolicy.is_default ||
-      preconfiguredAgentPolicy.is_default_fleet_server
-    ) {
+
+    const isDefaultPolicy =
+      preconfiguredAgentPolicy.is_default || preconfiguredAgentPolicy.is_default_fleet_server;
+
+    if (isDefaultPolicy) {
       searchParams = {
         searchFields: [
           preconfiguredAgentPolicy.is_default_fleet_server
@@ -150,7 +147,12 @@ class AgentPolicyService {
         ],
         search: 'true',
       };
+    } else if (id) {
+      searchParams = {
+        id: String(id),
+      };
     }
+
     if (!searchParams) throw new Error('Missing ID');
 
     return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams);
