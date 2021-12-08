@@ -9,6 +9,7 @@ import { pick } from 'lodash';
 import type { Request } from '@hapi/hapi';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fromNullable, getOrElse } from 'fp-ts/lib/Option';
+import stringify from 'json-stable-stringify';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import {
   Logger,
@@ -195,9 +196,9 @@ export class TaskRunnerFactory {
       },
       cancel: async () => {
         logger.warn(
-          `Action task with params '${
+          `Action task with params '${stringify(
             taskInstance.params as ActionTaskExecutorParams
-          }' was cancelled due to the timeout.`
+          )}' was cancelled due to the timeout.`
         );
         return { state: {} };
       },
