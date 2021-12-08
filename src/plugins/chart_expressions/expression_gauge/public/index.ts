@@ -13,3 +13,4 @@ export function plugin() {
 }
 
 export { getGoalValue, getMaxValue, getMinValue } from './components/utils';
+export { GaugeIconVertical, GaugeIconHorizontal } from './components/gauge_icon';
