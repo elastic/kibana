@@ -34,6 +34,7 @@ describe('SearchSource service', () => {
         'extract',
         'inject',
         'getAllMigrations',
+        'telemetry',
       ]);
     });
   });

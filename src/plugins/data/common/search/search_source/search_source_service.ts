@@ -34,7 +34,10 @@ export class SearchSourceService {
       createEmpty: () => {
         return new SearchSource({}, dependencies);
       },
-      extract: extractReferences,
+      extract: (state: SerializedSearchSourceFields) => {
+        const [newState, references] = extractReferences(state);
+        return { state: newState, references };
+      },
       inject: injectReferences,
       getAllMigrations: () => {
         const searchSourceMigrations = {};
@@ -49,6 +52,9 @@ export class SearchSourceService {
         });
 
         return mergeMigrationFunctionMaps(searchSourceMigrations, filterMigrations);
+      },
+      telemetry: () => {
+        return {};
       },
     };
   }
