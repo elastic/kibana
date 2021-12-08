@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
 import { ConfigSchema, IEventLogConfig } from './types';
 import { Plugin } from './plugin';
@@ -34,9 +35,19 @@ export const config: PluginConfigDescriptor<IEventLogConfig> = {
       ) {
         addDeprecation({
           configPath: 'xpack.eventLog.enabled',
-          message: `"xpack.eventLog.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
+          title: i18n.translate('xpack.eventLog.deprecations.enabledTitle', {
+            defaultMessage: 'Setting "xpack.eventLog.enabled" is deprecated',
+          }),
+          message: i18n.translate('xpack.eventLog.deprecations.enabledMessage', {
+            defaultMessage:
+              'This setting will be removed in 8.0 and the Event Log plugin will always be enabled.',
+          }),
           correctiveActions: {
-            manualSteps: [`Remove "xpack.eventLog.enabled" from your kibana configs.`],
+            manualSteps: [
+              i18n.translate('xpack.eventLog.deprecations.enabled.manualStepOneMessage', {
+                defaultMessage: 'Remove "xpack.eventLog.enabled" from kibana.yml.',
+              }),
+            ],
           },
         });
       }

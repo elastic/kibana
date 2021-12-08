@@ -102,6 +102,7 @@ export interface TGridIntegratedProps {
   dataProviders: DataProvider[];
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
+  disabledCellActions: string[];
   docValueFields: DocValueFields[];
   end: string;
   entityType: EntityType;
@@ -143,6 +144,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   dataProviders,
   defaultCellActions,
   deletedEventIds,
+  disabledCellActions,
   docValueFields,
   end,
   entityType,
@@ -348,6 +350,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                           bulkActions={bulkActions}
                           data={nonDeletedEvents}
                           defaultCellActions={defaultCellActions}
+                          disabledCellActions={disabledCellActions}
                           filterQuery={filterQuery}
                           filters={filters}
                           filterStatus={filterStatus}

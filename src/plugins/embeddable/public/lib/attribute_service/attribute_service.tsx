@@ -29,13 +29,28 @@ import {
  */
 export const ATTRIBUTE_SERVICE_KEY = 'attributes';
 
-export interface AttributeServiceOptions<A extends { title: string }> {
+export interface GenericAttributes {
+  title: string;
+}
+export interface AttributeServiceUnwrapResult<
+  SavedObjectAttributes extends GenericAttributes,
+  MetaInfo extends unknown = unknown
+> {
+  attributes: SavedObjectAttributes;
+  metaInfo?: MetaInfo;
+}
+export interface AttributeServiceOptions<
+  SavedObjectAttributes extends GenericAttributes,
+  MetaInfo extends unknown = unknown
+> {
   saveMethod: (
-    attributes: A,
+    attributes: SavedObjectAttributes,
     savedObjectId?: string
   ) => Promise<{ id?: string } | { error: Error }>;
   checkForDuplicateTitle: (props: OnSaveProps) => Promise<true>;
-  unwrapMethod?: (savedObjectId: string) => Promise<A>;
+  unwrapMethod?: (
+    savedObjectId: string
+  ) => Promise<AttributeServiceUnwrapResult<SavedObjectAttributes, MetaInfo>>;
 }
 
 export class AttributeService<
@@ -43,7 +58,8 @@ export class AttributeService<
   ValType extends EmbeddableInput & {
     [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes;
   } = EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes },
-  RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+  RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
+  MetaInfo extends unknown = unknown
 > {
   constructor(
     private type: string,
@@ -53,7 +69,7 @@ export class AttributeService<
     ) => void,
     private i18nContext: I18nStart['Context'],
     private toasts: NotificationsStart['toasts'],
-    private options: AttributeServiceOptions<SavedObjectAttributes>,
+    private options: AttributeServiceOptions<SavedObjectAttributes, MetaInfo>,
     getEmbeddableFactory?: (embeddableFactoryId: string) => EmbeddableFactory
   ) {
     if (getEmbeddableFactory) {
@@ -64,20 +80,21 @@ export class AttributeService<
     }
   }
 
-  private async defaultUnwrapMethod(input: RefType): Promise<SavedObjectAttributes> {
-    return new Promise<SavedObjectAttributes>((resolve) => {
-      // @ts-ignore
-      return resolve({ ...input });
-    });
+  private async defaultUnwrapMethod(
+    input: RefType
+  ): Promise<AttributeServiceUnwrapResult<SavedObjectAttributes, MetaInfo>> {
+    return Promise.resolve({ attributes: { ...(input as unknown as SavedObjectAttributes) } });
   }
 
-  public async unwrapAttributes(input: RefType | ValType): Promise<SavedObjectAttributes> {
+  public async unwrapAttributes(
+    input: RefType | ValType
+  ): Promise<AttributeServiceUnwrapResult<SavedObjectAttributes, MetaInfo>> {
     if (this.inputIsRefType(input)) {
       return this.options.unwrapMethod
         ? await this.options.unwrapMethod(input.savedObjectId)
         : await this.defaultUnwrapMethod(input);
     }
-    return input[ATTRIBUTE_SERVICE_KEY];
+    return { attributes: input[ATTRIBUTE_SERVICE_KEY] };
   }
 
   public async wrapAttributes(
@@ -126,12 +143,12 @@ export class AttributeService<
     if (!this.inputIsRefType(input)) {
       return input;
     }
-    const attributes = await this.unwrapAttributes(input);
+    const { attributes } = await this.unwrapAttributes(input);
+    const { savedObjectId, ...originalInputToPropagate } = input;
     return {
-      ...input,
-      savedObjectId: undefined,
+      ...originalInputToPropagate,
       attributes,
-    };
+    } as unknown as ValType;
   };
 
   getInputAsRefType = async (

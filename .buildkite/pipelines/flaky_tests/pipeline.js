@@ -8,7 +8,7 @@ const stepInput = (key, nameOfSuite) => {
 };
 
 const OSS_CI_GROUPS = 12;
-const XPACK_CI_GROUPS = 13;
+const XPACK_CI_GROUPS = 27;
 
 const inputs = [
   {

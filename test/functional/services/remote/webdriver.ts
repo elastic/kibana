@@ -32,6 +32,7 @@ import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
+import { NETWORK_PROFILES } from './network_profiles';
 
 const throttleOption: string = process.env.TEST_THROTTLE_NETWORK as string;
 const headlessBrowser: string = process.env.TEST_BROWSER_HEADLESS as string;
@@ -280,14 +281,30 @@ async function attemptToCreateCommand(
   const { session, consoleLog$ } = await buildDriverInstance();
 
   if (throttleOption === '1' && browserType === 'chrome') {
-    // Only chrome supports this option.
-    log.debug('NETWORK THROTTLED: 768k down, 256k up, 100ms latency.');
+    const { KBN_NETWORK_TEST_PROFILE = 'DEFAULT' } = process.env;
 
-    (session as any).setNetworkConditions({
+    const profile =
+      KBN_NETWORK_TEST_PROFILE in Object.keys(NETWORK_PROFILES)
+        ? KBN_NETWORK_TEST_PROFILE
+        : 'DEFAULT';
+
+    const {
+      DOWNLOAD: downloadThroughput,
+      UPLOAD: uploadThroughput,
+      LATENCY: latency,
+    } = NETWORK_PROFILES[`${profile}`];
+
+    // Only chrome supports this option.
+    log.debug(
+      `NETWORK THROTTLED with profile ${profile}: ${downloadThroughput}kbps down, ${uploadThroughput}kbps up, ${latency} ms latency.`
+    );
+
+    // @ts-expect-error
+    session.setNetworkConditions({
       offline: false,
-      latency: 100, // Additional latency (ms).
-      download_throughput: 768 * 1024, // These speeds are in bites per second, not kilobytes.
-      upload_throughput: 256 * 1024,
+      latency,
+      download_throughput: downloadThroughput,
+      upload_throughput: uploadThroughput,
     });
   }
 

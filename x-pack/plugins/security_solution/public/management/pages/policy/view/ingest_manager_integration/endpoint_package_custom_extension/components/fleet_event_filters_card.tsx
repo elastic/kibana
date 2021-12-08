@@ -95,7 +95,7 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
             <h4>
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersLabel"
-                defaultMessage="Event Filters"
+                defaultMessage="Event filters"
               />
             </h4>
           </EuiText>
@@ -115,7 +115,7 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.fleetCustomExtension.manageEventFiltersLinkLabel"
-                defaultMessage="Manage event filters"
+                defaultMessage="Manage"
               />
             </LinkWithIcon>
           </>

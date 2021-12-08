@@ -20,16 +20,18 @@ export interface Log {
 }
 
 export class CliLog implements Log {
-  public toolingLog = new ToolingLog({
-    level: this.silent ? 'silent' : this.quiet ? 'error' : 'info',
-    writeTo: {
-      write: (msg) => {
-        this.write(msg);
-      },
-    },
-  });
+  public toolingLog: ToolingLog;
 
-  constructor(private readonly quiet: boolean, private readonly silent: boolean) {}
+  constructor(private readonly quiet: boolean, private readonly silent: boolean) {
+    this.toolingLog = new ToolingLog({
+      level: this.silent ? 'silent' : this.quiet ? 'error' : 'info',
+      writeTo: {
+        write: (msg) => {
+          this.write(msg);
+        },
+      },
+    });
+  }
 
   good(label: string, ...args: any[]) {
     if (this.quiet || this.silent) {

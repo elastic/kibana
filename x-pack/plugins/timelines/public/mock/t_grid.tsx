@@ -92,6 +92,7 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   columns: columnHeaders,
   dataProviders: mockDataProviders,
   deletedEventIds: [],
+  disabledCellActions: [],
   docValueFields: mockDocValueFields,
   end: '2021-08-19T00:30:00.000Z',
   entityType: 'alerts',

@@ -50,7 +50,7 @@ export const config: PluginConfigDescriptor<BannersConfigType> = {
           correctiveActions: {
             manualSteps: [
               `Remove "xpack.banners.placement: header" from your kibana configs.`,
-              `Add "xpack.banners.placement: to" to your kibana configs instead.`,
+              `Add "xpack.banners.placement: top" to your kibana configs instead.`,
             ],
           },
         });

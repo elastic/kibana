@@ -26,6 +26,7 @@ import type { EntityType } from '../../../../../timelines/common';
 import { TGridCellAction } from '../../../../../timelines/common/types';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
+import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 
@@ -173,6 +174,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             dataProviders,
             defaultCellActions,
             deletedEventIds,
+            disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
             docValueFields,
             end,
             entityType,
