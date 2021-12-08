@@ -12,7 +12,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiConfirmModal, EuiCallOut, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 
 import { JsonEditor, OnJsonEditorUpdateHandler } from '../../shared_imports';
-import { validateMappings, MappingsValidationError, VALID_MAPPINGS_PARAMETERS } from '../../lib';
+import {
+  validateMappings,
+  MappingsValidationError,
+  mappingsConfigurationSchemaKeys,
+} from '../../lib';
 
 const MAX_ERRORS_TO_DISPLAY = 1;
 
@@ -124,7 +128,7 @@ const getErrorMessage = (error: MappingsValidationError) => {
 };
 
 const areAllObjectKeysValidParameters = (obj: { [key: string]: any }) =>
-  Object.keys(obj).every((key) => VALID_MAPPINGS_PARAMETERS.includes(key));
+  Object.keys(obj).every((key) => mappingsConfigurationSchemaKeys.includes(key));
 
 export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props) => {
   const [state, setState] = useState<State>({ isModalOpen: false });
