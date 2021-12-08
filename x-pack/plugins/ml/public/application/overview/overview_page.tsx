@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useState } from 'react';
-import { EuiFlexGroup, EuiPage, EuiPageBody } from '@elastic/eui';
+import React, { FC, Fragment, useState } from 'react';
+import { EuiFlexGroup, EuiPage, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { checkPermission } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check/check_ml_nodes';
 import { NavigationMenu } from '../components/navigation_menu';
@@ -18,6 +18,7 @@ import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
+import { NodesList } from '../trained_models/nodes_overview';
 
 export const OverviewPage: FC = () => {
   const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
@@ -45,6 +46,12 @@ export const OverviewPage: FC = () => {
           <UpgradeWarning />
 
           <GettingStartedCallout />
+
+          <EuiPanel>
+            <NodesList />
+          </EuiPanel>
+
+          <EuiSpacer size="m" />
 
           <EuiFlexGroup>
             <OverviewContent

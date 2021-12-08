@@ -14,6 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
+  EuiImage,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -24,6 +25,7 @@ import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './util
 import { Dictionary } from '../../../../../common/types/common';
 import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
+import adImage from './blog-machine-learning-720x420.png';
 
 export type GroupsDictionary = Dictionary<Group>;
 
@@ -190,7 +192,9 @@ export const AnomalyDetectionPanel: FC<Props> = ({
       {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}
       {isLoading === false && typeof errorMessage === 'undefined' && groupsCount === 0 && (
         <EuiEmptyPrompt
-          iconType="createSingleMetricJob"
+          layout="horizontal"
+          icon={<EuiImage size="fullWidth" src={adImage} alt="anomaly_detection" />}
+          color="plain"
           title={
             <h2>
               {i18n.translate('xpack.ml.overview.anomalyDetection.createFirstJobMessage', {
@@ -199,20 +203,19 @@ export const AnomalyDetectionPanel: FC<Props> = ({
             </h2>
           }
           body={
-            <Fragment>
+            <>
               <p>
                 {i18n.translate('xpack.ml.overview.anomalyDetection.emptyPromptText', {
                   defaultMessage: `Anomaly detection enables you to find unusual behavior in time series data. Start automatically spotting the anomalies hiding in your data and resolve issues faster.`,
                 })}
               </p>
-            </Fragment>
+            </>
           }
           actions={
             <EuiButton
               color="primary"
               onClick={redirectToCreateJobSelectIndexPage}
               fill
-              iconType="plusInCircle"
               isDisabled={jobCreationDisabled}
               data-test-subj="mlOverviewCreateADJobButton"
             >
