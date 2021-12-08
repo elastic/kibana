@@ -17,7 +17,7 @@ import {
   SerializedFieldFormat,
 } from 'src/plugins/field_formats/common';
 import { VisualizationContainer } from '../../visualization_container';
-import { EmptyPlaceholder } from '../../shared_components';
+import { EmptyPlaceholder } from '../../../../../../src/plugins/charts/public';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { DataContext, DatatableComponent } from './table_basic';
 import { LensMultiTable } from '../../../common';

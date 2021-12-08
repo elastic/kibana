@@ -930,7 +930,7 @@ export class SavedObjectsRepository {
       index: pit ? undefined : this.getIndicesForTypes(allowedTypes),
       // If `searchAfter` is provided, we drop `from` as it will not be used for pagination.
       from: searchAfter ? undefined : perPage * (page - 1),
-      _source: includedFields(type, fields),
+      _source: includedFields(allowedTypes, fields),
       preference,
       rest_total_hits_as_int: true,
       size: perPage,
@@ -938,7 +938,7 @@ export class SavedObjectsRepository {
         size: perPage,
         seq_no_primary_term: true,
         from: perPage * (page - 1),
-        _source: includedFields(type, fields),
+        _source: includedFields(allowedTypes, fields),
         ...(aggsObject ? { aggs: aggsObject } : {}),
         ...getSearchDsl(this._mappings, this._registry, {
           search,

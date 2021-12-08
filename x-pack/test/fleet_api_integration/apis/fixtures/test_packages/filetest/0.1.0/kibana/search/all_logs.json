@@ -1,0 +1,36 @@
+{
+  "attributes": {
+    "columns": [
+      "log.level",
+      "kafka.log.component",
+      "message"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":null,\"disabled\":false,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\",\"key\":\"dataset.name\",\"negate\":false,\"params\":{\"query\":\"kafka.log\",\"type\":\"phrase\"},\"type\":\"phrase\",\"value\":\"log\"},\"query\":{\"match\":{\"dataset.name\":{\"query\":\"kafka.log\",\"type\":\"phrase\"}}}}],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "sort": [
+      [
+        "@timestamp",
+        "desc"
+      ]
+    ],
+    "title": "All logs [Logs Kafka] ECS",
+    "version": 1
+  },
+  "id": "Kafka stacktraces-ecs",
+  "references": [
+    {
+      "id": "logs-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logs-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}
