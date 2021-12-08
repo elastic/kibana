@@ -29,6 +29,9 @@
             "link": "https://www.virustotal.com/gui/file/a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3/detection/f-a04ac6d",
             "percent": "62.30"
           }
+        },
+        "feed": {
+          "name": "feed_name"
         }
       },
       "tags": ["threatintel-abusemalware", "forwarded"],

@@ -199,28 +199,54 @@ export interface CrawlRequest {
   completedAt: string | null;
 }
 
+export interface CrawlRequestStats {
+  status: {
+    avgResponseTimeMSec?: number;
+    crawlDurationMSec?: number;
+    pagesVisited?: number;
+    urlsAllowed?: number;
+    statusCodes?: {
+      [code: string]: number;
+    };
+  };
+}
+
+export interface CrawlRequestStatsFromServer {
+  status: {
+    avg_response_time_msec?: number;
+    crawl_duration_msec?: number;
+    pages_visited?: number;
+    urls_allowed?: number;
+    status_codes?: {
+      [code: string]: number;
+    };
+  };
+}
+
 export interface CrawlConfig {
   domainAllowlist: string[];
   seedUrls: string[];
   sitemapUrls: string[];
+  maxCrawlDepth: number;
 }
 
 export interface CrawlConfigFromServer {
   domain_allowlist: string[];
   seed_urls: string[];
   sitemap_urls: string[];
+  max_crawl_depth: number;
 }
 
 export type CrawlRequestWithDetailsFromServer = CrawlRequestFromServer & {
   type: CrawlType;
   crawl_config: CrawlConfigFromServer;
-  // TODO add other properties like stats
+  stats: CrawlRequestStatsFromServer;
 };
 
 export type CrawlRequestWithDetails = CrawlRequest & {
   type: CrawlType;
   crawlConfig: CrawlConfig;
-  // TODO add other properties like stats
+  stats: CrawlRequestStats | null;
 };
 
 export type CrawlEventStage = 'crawl' | 'process';
