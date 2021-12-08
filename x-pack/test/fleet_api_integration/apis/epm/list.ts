@@ -41,7 +41,7 @@ export default function (providerContext: FtrProviderContext) {
           return response.body;
         };
         const listResponse = await fetchPackageList();
-        expect(listResponse.response.length).not.to.be(0);
+        expect(listResponse.items.length).not.to.be(0);
       });
 
       it('lists all limited packages from the registry', async function () {

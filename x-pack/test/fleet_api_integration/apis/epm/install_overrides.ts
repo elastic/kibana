@@ -39,7 +39,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      const templateName = body.response[0].id;
+      const templateName = body.items[0].id;
 
       const { body: indexTemplateResponse } = await es.transport.request<any>(
         {

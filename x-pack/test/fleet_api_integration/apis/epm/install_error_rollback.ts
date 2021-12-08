@@ -46,7 +46,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(422); // the broken package contains a broken visualization triggering a 422 from Kibana
 
       const pkgInfoResponse = await getPackageInfo(pkgName, badPackageVersion);
-      expect(JSON.parse(pkgInfoResponse.text).response.status).to.be('not_installed');
+      expect(JSON.parse(pkgInfoResponse.text).item.status).to.be('not_installed');
     });
 
     it('on an upgrade, it should fall back to the previous good version during rollback', async function () {
@@ -57,8 +57,8 @@ export default function (providerContext: FtrProviderContext) {
         .expect(422); // the broken package contains a broken visualization triggering a 422 from Kibana
 
       const goodPkgInfoResponse = await getPackageInfo(pkgName, goodPackageVersion);
-      expect(JSON.parse(goodPkgInfoResponse.text).response.status).to.be('installed');
-      expect(JSON.parse(goodPkgInfoResponse.text).response.version).to.be('0.1.0');
+      expect(JSON.parse(goodPkgInfoResponse.text).item.status).to.be('installed');
+      expect(JSON.parse(goodPkgInfoResponse.text).item.version).to.be('0.1.0');
     });
   });
 }

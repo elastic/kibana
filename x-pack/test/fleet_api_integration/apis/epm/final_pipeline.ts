@@ -45,7 +45,7 @@ export default function (providerContext: FtrProviderContext) {
       const { body: getPackagesRes } = await supertest.get(
         `/api/fleet/epm/packages?experimental=true`
       );
-      const logPackage = getPackagesRes.response.find((p: any) => p.name === 'log');
+      const logPackage = getPackagesRes.items.find((p: any) => p.name === 'log');
       if (!logPackage) {
         throw new Error('No log package');
       }
