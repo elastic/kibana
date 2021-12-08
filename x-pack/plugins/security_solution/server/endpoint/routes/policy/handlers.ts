@@ -79,8 +79,8 @@ export const getPolicyListHandler = function (
     const soClient = context.core.savedObjects.client;
     const fleetServices = endpointAppContext.service.getScopedFleetServices(request);
     const endpointFilteredKuery = `${
-      request?.query?.kuery ? `(${request.query.kuery}) AND ` : ''
-    }(${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint)`;
+      request?.query?.kuery ? `${request.query.kuery} and ` : ''
+    }${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`;
     try {
       const listResponse = await fleetServices.packagePolicy.list(soClient, {
         ...request.query,

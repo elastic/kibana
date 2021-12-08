@@ -11,7 +11,11 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import { createMockAgentClient, createMockAgentService } from '../../../../../fleet/server/mocks';
+import {
+  createMockAgentClient,
+  createMockAgentService,
+  createPackagePolicyServiceMock,
+} from '../../../../../fleet/server/mocks';
 import {
   getHostPolicyResponseHandler,
   getAgentPolicySummaryHandler,
@@ -28,11 +32,7 @@ import {
   savedObjectsClientMock,
 } from '../../../../../../../src/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  GetHostPolicyResponse,
-  HostPolicyResponse,
-  PolicyData,
-} from '../../../../common/endpoint/types';
+import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
@@ -41,6 +41,7 @@ import { AgentClient, AgentService } from '../../../../../fleet/server/services'
 import { get } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ScopedClusterClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
+import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
@@ -245,32 +246,38 @@ describe('test policy response handler', () => {
     });
   });
   describe('test GET policy list handler', () => {
+    let mockPackagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
+
     beforeEach(() => {
       mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
       mockSavedObjectClient = savedObjectsClientMock.create();
       mockResponse = httpServerMock.createResponseFactory();
+      mockPackagePolicyService = createPackagePolicyServiceMock();
+      mockPackagePolicyService.list.mockImplementation(() => {
+        return Promise.resolve({
+          items: [],
+          total: 0,
+          page: 1,
+          perPage: 10,
+        });
+      });
       endpointAppContextService = new EndpointAppContextService();
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...createMockEndpointAppContextServiceStartContract(),
+        ...{ packagePolicyService: mockPackagePolicyService },
       });
     });
 
     afterEach(() => endpointAppContextService.stop());
 
     it('should return a list of endpoint package policies', async () => {
-      const response = createPackagePolicySearchResponse(
-        new EndpointDocGenerator().generatePolicyPackagePolicy()
-      );
       const policyHandler = getPolicyListHandler({
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
         experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
-      (mockScopedClient.asCurrentUser.search as jest.Mock).mockImplementationOnce(() =>
-        Promise.resolve({ body: response })
-      );
       const mockRequest = httpServerMock.createKibanaRequest({
         query: {},
       });
@@ -281,6 +288,7 @@ describe('test policy response handler', () => {
         mockResponse
       );
       expect(mockResponse.ok).toBeCalled();
+      expect(mockPackagePolicyService.mock.call).toEqual('hi');
       expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
         items: [],
         total: 0,
@@ -327,42 +335,4 @@ function createSearchResponse(
         : [],
     },
   } as unknown as estypes.SearchResponse<HostPolicyResponse>;
-}
-
-/**
- * Create a SearchResponse with the packagePolicy provided, else return an empty
- * SearchResponse
- * @param packagePolicy
- */
-function createPackagePolicySearchResponse(
-  packagePolicyResponse?: PolicyData
-): estypes.SearchResponse<PolicyData> {
-  return {
-    took: 15,
-    timed_out: false,
-    _shards: {
-      total: 1,
-      successful: 1,
-      skipped: 0,
-      failed: 0,
-    },
-    hits: {
-      total: {
-        value: 5,
-        relation: 'eq',
-      },
-      max_score: null,
-      hits: packagePolicyResponse
-        ? [
-            {
-              _index: 'metrics-endpoint.policy-default-1',
-              _id: '8FhM0HEBYyRTvb6lOQnw',
-              _score: null,
-              _source: packagePolicyResponse,
-              sort: [1588337587997],
-            },
-          ]
-        : [],
-    },
-  } as unknown as estypes.SearchResponse<PolicyData>;
 }
