@@ -40,7 +40,6 @@ import {
   ActionConnectorTableItem,
   ActionTypeIndex,
   EditConectorTabs,
-  UserConfiguredActionConnector,
 } from '../../../../types';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -48,6 +47,11 @@ import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
 import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
+import {
+  connectorDeprecatedMessage,
+  deprecatedMessage,
+  checkConnectorIsDeprecated,
+} from '../../../../common/connectors_selection';
 
 const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
   return (
@@ -65,10 +69,7 @@ const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) =
           size="m"
           type="alert"
           color="warning"
-          content={i18n.translate(
-            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.isDeprecatedDescription',
-            { defaultMessage: 'This connector is deprecated. Update it, or create a new one.' }
-          )}
+          content={connectorDeprecatedMessage}
           position="right"
         />
       )}
@@ -198,18 +199,12 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           actionTypesIndex && actionTypesIndex[item.actionTypeId]
         );
 
-        const itemConfig = (
-          item as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
-        ).config;
-
         /**
          * TODO: Remove when connectors can provide their own UX message.
          * Issue: https://github.com/elastic/kibana/issues/114507
          */
-        const hasSNApplication =
-          item?.actionTypeId === '.servicenow' || item?.actionTypeId === '.servicenow-sir';
-
-        const showDeprecatedTooltip = hasSNApplication && itemConfig?.usesTableApi;
+        const showDeprecatedTooltip = checkConnectorIsDeprecated(item);
+        const name = getConnectorName(value, item);
 
         const link = (
           <>
@@ -219,7 +214,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
               key={item.id}
               disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
             >
-              {value}
+              {name}
             </EuiLink>
             {item.isMissingSecrets ? (
               <EuiIconTip
@@ -492,6 +487,10 @@ export { ActionsConnectorsList as default };
 
 function getActionsCountByActionType(actions: ActionConnector[], actionTypeId: string) {
   return actions.filter((action) => action.actionTypeId === actionTypeId).length;
+}
+
+function getConnectorName(name: string, connector: ActionConnector): string {
+  return checkConnectorIsDeprecated(connector) ? `${name} ${deprecatedMessage}` : name;
 }
 
 const DeleteOperation: React.FunctionComponent<{
