@@ -198,7 +198,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
       it('returns correct statistics', () => {
         const currentPeriodStatistics = servicesDetailedStatistics.currentPeriod[serviceNames[0]];
-        const previousPeriodStatistics = servicesDetailedStatistics.previousPeriod[serviceNames[0]];
+        // TODO fix after fixing previousPeriod type issues
+        const previousPeriodStatistics = (
+          servicesDetailedStatistics.previousPeriod as ServicesDetailedStatisticsReturn['currentPeriod']
+        )[serviceNames[0]];
 
         expect(currentPeriodStatistics.latency.length).to.be.greaterThan(0);
         expect(currentPeriodStatistics.throughput.length).to.be.greaterThan(0);

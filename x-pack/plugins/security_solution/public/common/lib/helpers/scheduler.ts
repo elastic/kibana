@@ -10,7 +10,7 @@ import { scaleLog } from 'd3-scale';
 // Types are from: https://github.com/Microsoft/TypeScript/issues/21309
 // TODO: Once this is no longer an experimental web API, remove these below
 // as they should be Typed by TypeScript
-type RequestIdleCallbackHandle = number;
+// type RequestIdleCallbackHandle = number;
 interface RequestIdleCallbackOptions {
   timeout: number;
 }
@@ -19,15 +19,15 @@ interface RequestIdleCallbackDeadline {
   timeRemaining: () => number;
 }
 
-declare global {
-  interface Window {
-    requestIdleCallback: (
-      callback: (deadline: RequestIdleCallbackDeadline) => void,
-      opts?: RequestIdleCallbackOptions
-    ) => RequestIdleCallbackHandle;
-    cancelIdleCallback: (handle: RequestIdleCallbackHandle) => void;
-  }
-}
+// declare global {
+//   interface Window {
+//     // requestIdleCallback: (
+//     //   callback: (deadline: RequestIdleCallbackDeadline) => void,
+//     //   opts?: RequestIdleCallbackOptions
+//     // ) => RequestIdleCallbackHandle;
+//     // cancelIdleCallback: (handle: RequestIdleCallbackHandle) => void;
+//   }
+// }
 
 /**
  * Polyfill is from: https://developers.google.com/web/updates/2015/08/using-requestidlecallback
