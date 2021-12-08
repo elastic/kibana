@@ -112,10 +112,7 @@ export const createAgentPolicyHandler: RequestHandler<
 
   try {
     // eslint-disable-next-line prefer-const
-    let [agentPolicy, newSysPackagePolicy] = await Promise.all<
-      AgentPolicy,
-      NewPackagePolicy | undefined
-    >([
+    let [agentPolicy, newSysPackagePolicy] = await Promise.all([
       agentPolicyService.create(soClient, esClient, request.body, {
         user,
       }),
