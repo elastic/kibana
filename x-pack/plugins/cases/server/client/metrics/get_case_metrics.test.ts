@@ -11,7 +11,11 @@ import { createCasesClientMock } from '../mocks';
 import { CasesClientArgs } from '../types';
 import { createAuthorizationMock } from '../../authorization/mock';
 import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import { createAttachmentServiceMock, createCaseServiceMock } from '../../services/mocks';
+import {
+  createAlertServiceMock,
+  createAttachmentServiceMock,
+  createCaseServiceMock,
+} from '../../services/mocks';
 import { SavedObject } from 'kibana/server';
 
 describe('getMetrics', () => {
@@ -20,44 +24,8 @@ describe('getMetrics', () => {
     closed_at: '2021-11-23T19:59:44Z',
   };
 
-  const client = createCasesClientMock();
-  client.cases.get.mockImplementation(async () => {
-    return {
-      created_at: '2021-11-23T19:59:43Z',
-      closed_at: '2021-11-23T19:59:44Z',
-    } as unknown as CaseResponse;
-  });
-
-  const attachmentService = createAttachmentServiceMock();
-  attachmentService.countAlertsAttachedToCase.mockImplementation(async () => {
-    return 5;
-  });
-
-  const authorization = createAuthorizationMock();
-  authorization.getAuthorizationFilter.mockImplementation(async () => {
-    return { filter: undefined, ensureSavedObjectsAreAuthorized: () => {} };
-  });
-
-  const soClient = savedObjectsClientMock.create();
-  const caseService = createCaseServiceMock();
-  caseService.getCase.mockImplementation(async () => {
-    return {
-      id: '1',
-      attributes: {
-        owner: 'security',
-      },
-    } as unknown as SavedObject<CaseAttributes>;
-  });
-
-  const logger = loggingSystemMock.createLogger();
-
-  const clientArgs = {
-    authorization,
-    unsecuredSavedObjectsClient: soClient,
-    caseService,
-    logger,
-    attachmentService,
-  } as unknown as CasesClientArgs;
+  const client = createMockClient();
+  const clientArgs = createMockClientArgs();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -85,8 +53,11 @@ describe('getMetrics', () => {
       clientArgs
     );
 
-    expect(metrics.alerts?.hosts).toBeDefined();
-    expect(metrics.alerts?.users).toBeDefined();
+    expect(metrics.alerts?.hosts).toEqual({
+      total: 2,
+      values: [{ name: 'host1', id: '1', count: 1 }],
+    });
+    expect(metrics.alerts?.users).toBeUndefined();
   });
 
   it('populates multiple sections at a time', async () => {
@@ -111,7 +82,10 @@ describe('getMetrics', () => {
     );
 
     expect(metrics.alerts?.count).toEqual(5);
-    expect(metrics.alerts?.hosts).toBeDefined();
+    expect(metrics.alerts?.hosts).toEqual({
+      total: 2,
+      values: [{ name: 'host1', id: '1', count: 1 }],
+    });
   });
 
   it('throws an error for an invalid feature', async () => {
@@ -136,3 +110,66 @@ describe('getMetrics', () => {
     }
   });
 });
+
+function createMockClient() {
+  const client = createCasesClientMock();
+
+  client.cases.get.mockImplementation(async () => {
+    return {
+      created_at: '2021-11-23T19:59:43Z',
+      closed_at: '2021-11-23T19:59:44Z',
+    } as unknown as CaseResponse;
+  });
+
+  client.attachments.getAllAlertsAttachToCase.mockImplementation(async () => {
+    return [{ id: '1', index: '2', attached_at: '3' }];
+  });
+
+  return client;
+}
+
+function createMockClientArgs() {
+  const attachmentService = createAttachmentServiceMock();
+  attachmentService.countAlertsAttachedToCase.mockImplementation(async () => {
+    return 5;
+  });
+
+  const authorization = createAuthorizationMock();
+  authorization.getAuthorizationFilter.mockImplementation(async () => {
+    return { filter: undefined, ensureSavedObjectsAreAuthorized: () => {} };
+  });
+
+  const soClient = savedObjectsClientMock.create();
+
+  const caseService = createCaseServiceMock();
+  caseService.getCase.mockImplementation(async () => {
+    return {
+      id: '1',
+      attributes: {
+        owner: 'security',
+      },
+    } as unknown as SavedObject<CaseAttributes>;
+  });
+
+  const alertsService = createAlertServiceMock();
+  alertsService.getMostFrequentValuesForFields.mockImplementation(async () => {
+    return { hosts: [{ name: 'host1', id: '1', count: 1 }] };
+  });
+
+  alertsService.countUniqueValuesForFields.mockImplementation(async () => {
+    return { totalHosts: 2 };
+  });
+
+  const logger = loggingSystemMock.createLogger();
+
+  const clientArgs = {
+    authorization,
+    unsecuredSavedObjectsClient: soClient,
+    caseService,
+    logger,
+    attachmentService,
+    alertsService,
+  } as unknown as CasesClientArgs;
+
+  return clientArgs;
+}

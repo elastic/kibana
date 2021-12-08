@@ -21,57 +21,13 @@ import {
 } from '../../../../rule_registry/common/technical_rule_data_field_names';
 import { AggregationFields, HostAggregate, UserAggregate } from './types';
 
-interface FieldAggregate {
-  hosts?: {
-    buckets: Array<{
-      key: string;
-      doc_count: number;
-      top_fields: estypes.AggregationsTopHitsAggregate;
-    }>;
-  };
-  users?: {
-    buckets: Array<{
-      key: string;
-      doc_count: number;
-    }>;
-  };
-}
-
-interface UniqueFieldAggregate {
-  hosts?: {
-    value: number;
-  };
-  users?: {
-    value: number;
-  };
-}
-
-interface Alert {
-  _id: string;
-  _index: string;
-  _source: Record<string, unknown>;
-}
-
-interface AlertsResponse {
-  docs: Alert[];
-}
-
-interface AlertIdIndex {
-  id: string;
-  index: string;
-}
-
-function isEmptyAlert(alert: AlertInfo): boolean {
-  return isEmpty(alert.id) || isEmpty(alert.index);
-}
-
 export class AlertService {
   constructor(
     private readonly scopedClusterClient: ElasticsearchClient,
     private readonly logger: Logger
   ) {}
 
-  public async getTotalUniqueFields({
+  public async countUniqueValuesForFields({
     fields,
     alerts,
   }: {
@@ -90,12 +46,9 @@ export class AlertService {
 
       const aggs = res.body.aggregations as UniqueFieldAggregate;
 
-      const totalHosts = aggs.hosts?.value;
-      const totalUsers = aggs.users?.value;
-
       return {
-        totalHosts,
-        totalUsers,
+        totalHosts: aggs.hosts?.value,
+        totalUsers: aggs.users?.value,
       };
     } catch (error) {
       throw createCaseError({
@@ -133,7 +86,7 @@ export class AlertService {
     }, {});
   }
 
-  public async aggregateFields({
+  public async getMostFrequentValuesForFields({
     fields,
     alerts,
     size = 10,
@@ -154,12 +107,9 @@ export class AlertService {
 
       const aggs = res.body.aggregations as FieldAggregate;
 
-      const hosts = AlertService.getMostFrequentHosts(aggs);
-      const users = AlertService.getMostFrequentUsers(aggs);
-
       return {
-        hosts,
-        users,
+        hosts: AlertService.getMostFrequentHosts(aggs),
+        users: AlertService.getMostFrequentUsers(aggs),
       };
     } catch (error) {
       throw createCaseError({
@@ -187,11 +137,11 @@ export class AlertService {
   }
 
   private static buildFieldAggregations(fields: AggregationFields[], size: number) {
-    const topHits = (docValueFields: string[]): estypes.AggregationsAggregationContainer => ({
+    const topHits: estypes.AggregationsAggregationContainer = {
       aggs: {
         top_fields: {
           top_hits: {
-            docvalue_fields: docValueFields,
+            docvalue_fields: ['host.name'],
             sort: [
               {
                 '@timestamp': {
@@ -203,7 +153,7 @@ export class AlertService {
           },
         },
       },
-    });
+    };
 
     return fields.reduce<Record<string, estypes.AggregationsAggregationContainer>>((acc, field) => {
       switch (field) {
@@ -215,7 +165,7 @@ export class AlertService {
                 field: 'host.id',
                 size,
               },
-              ...topHits(['host.*']),
+              ...topHits,
             },
           };
         case AggregationFields.Users:
@@ -235,11 +185,22 @@ export class AlertService {
   }
 
   private static getMostFrequentHosts(aggs: FieldAggregate): HostAggregate[] | undefined {
-    return aggs.hosts?.buckets.map((bucket) => ({
-      name: get(bucket.top_fields.hits.hits[0].fields, 'host.name'),
-      id: bucket.key,
-      count: bucket.doc_count,
-    }));
+    const getName = (bucket: FieldAggregateBucket) => {
+      const unsafeHostName = get(bucket.top_fields.hits.hits[0].fields, 'host.name');
+
+      if (Array.isArray(unsafeHostName) && unsafeHostName.length > 0) {
+        return unsafeHostName[0];
+      }
+      return unsafeHostName;
+    };
+
+    return aggs.hosts?.buckets.map((bucket) => {
+      return {
+        name: getName(bucket),
+        id: bucket.key,
+        count: bucket.doc_count,
+      };
+    });
   }
 
   private static getMostFrequentUsers(aggs: FieldAggregate): UserAggregate[] | undefined {
@@ -272,7 +233,7 @@ export class AlertService {
     return alerts.reduce<Map<string, Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>>>(
       (acc, alert) => {
         // skip any alerts that are empty
-        if (isEmptyAlert(alert)) {
+        if (AlertService.isEmptyAlert(alert)) {
           return acc;
         }
 
@@ -295,6 +256,10 @@ export class AlertService {
       },
       new Map()
     );
+  }
+
+  private static isEmptyAlert(alert: AlertInfo): boolean {
+    return isEmpty(alert.id) || isEmpty(alert.index);
   }
 
   private translateStatus(alert: UpdateAlertRequest): STATUS_VALUES {
@@ -349,7 +314,7 @@ export class AlertService {
   public async getAlerts(alertsInfo: AlertInfo[]): Promise<AlertsResponse | undefined> {
     try {
       const docs = alertsInfo
-        .filter((alert) => !isEmptyAlert(alert))
+        .filter((alert) => !AlertService.isEmptyAlert(alert))
         .slice(0, MAX_ALERTS_PER_SUB_CASE)
         .map((alert) => ({ _id: alert.id, _index: alert.index }));
 
@@ -394,4 +359,46 @@ function updateIndexEntryWithStatus(
   } else {
     statusBucket.push(alert);
   }
+}
+
+interface FieldAggregateBucket {
+  key: string;
+  doc_count: number;
+  top_fields: estypes.AggregationsTopHitsAggregate;
+}
+
+interface FieldAggregate {
+  hosts?: {
+    buckets: FieldAggregateBucket[];
+  };
+  users?: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+}
+
+interface UniqueFieldAggregate {
+  hosts?: {
+    value: number;
+  };
+  users?: {
+    value: number;
+  };
+}
+
+interface Alert {
+  _id: string;
+  _index: string;
+  _source: Record<string, unknown>;
+}
+
+interface AlertsResponse {
+  docs: Alert[];
+}
+
+interface AlertIdIndex {
+  id: string;
+  index: string;
 }

@@ -5,19 +5,14 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
+
 import { AlertHostsMetrics, AlertUsersMetrics, CaseMetricsResponse } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { AggregationFields, HostAggregate, UserAggregate } from '../../services/alerts/types';
 import { CasesClient } from '../client';
 import { CasesClientArgs } from '../types';
 import { MetricsHandler } from './types';
-
-interface AlertMetrics {
-  alerts: {
-    hosts?: AlertHostsMetrics;
-    users?: AlertUsersMetrics;
-  };
-}
 
 export class AlertDetails implements MetricsHandler {
   private retrievedMetrics: AlertMetrics | undefined;
@@ -56,18 +51,27 @@ export class AlertDetails implements MetricsHandler {
         caseId: this.caseId,
       });
 
-      // TODO: do in a promise.all
-      const { hosts: uniqueHosts, users: uniqueUsers } = await alertsService.aggregateFields({
-        fields: this.requestedFeatures,
-        alerts,
-      });
+      if (alerts.length > 0 && this.requestedFeatures.length > 0) {
+        const [frequentValues, countsOfValues] = await Promise.all([
+          alertsService.getMostFrequentValuesForFields({
+            fields: this.requestedFeatures,
+            alerts,
+          }),
+          alertsService.countUniqueValuesForFields({
+            fields: this.requestedFeatures,
+            alerts,
+          }),
+        ]);
 
-      const { totalHosts, totalUsers } = await alertsService.getTotalUniqueFields({
-        fields: this.requestedFeatures,
-        alerts,
-      });
-
-      this.setRetrievedMetrics({ uniqueHosts, uniqueUsers, totalHosts, totalUsers });
+        this.setRetrievedMetrics({
+          uniqueHosts: frequentValues.hosts,
+          uniqueUsers: frequentValues.users,
+          totalHosts: countsOfValues.totalHosts,
+          totalUsers: countsOfValues.totalUsers,
+        });
+      } else {
+        this.setRetrievedMetrics();
+      }
 
       return {
         ...(this.retrievedMetrics ?? {}),
@@ -91,28 +95,33 @@ export class AlertDetails implements MetricsHandler {
     uniqueUsers?: UserAggregate[];
     totalHosts?: number;
     totalUsers?: number;
-  }) {
-    let hosts: AlertHostsMetrics | undefined;
+  } = {}) {
+    let mergedMetrics: AlertMetrics = {};
     if (uniqueHosts && totalHosts) {
-      hosts = {
-        total: totalHosts,
-        values: uniqueHosts,
-      };
+      mergedMetrics = merge(mergedMetrics, {
+        alerts: {
+          hosts: { total: totalHosts, values: uniqueHosts },
+        },
+      });
     }
 
-    let users: AlertUsersMetrics | undefined;
     if (uniqueUsers && totalUsers) {
-      users = {
-        total: totalUsers,
-        values: uniqueUsers,
-      };
+      mergedMetrics = merge(mergedMetrics, {
+        alerts: {
+          users: { total: totalUsers, values: uniqueUsers },
+        },
+      });
     }
 
     this.retrievedMetrics = {
-      alerts: {
-        hosts,
-        users,
-      },
+      ...mergedMetrics,
     };
   }
+}
+
+interface AlertMetrics {
+  alerts?: {
+    hosts?: AlertHostsMetrics;
+    users?: AlertUsersMetrics;
+  };
 }
