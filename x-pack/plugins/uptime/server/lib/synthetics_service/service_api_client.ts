@@ -8,10 +8,9 @@
 import axios from 'axios';
 import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { ServiceLocations } from '../../../common/types';
 import { getServiceLocations } from './get_service_locations';
 import { Logger } from '../../../../../../src/core/server';
-import { MonitorFields } from '../../../common/runtime_types/monitor_management';
+import { MonitorFields, ServiceLocations } from '../../../common/runtime_types/monitor_management';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 
@@ -75,7 +74,7 @@ export class ServiceAPIClient {
 
     this.locations.forEach(({ id, url }) => {
       const locMonitors = allMonitors.filter(
-        ({ locations }) => !locations || locations?.includes(id)
+        ({ locations }) => !locations || locations?.find((loc) => loc.id === id)
       );
       if (locMonitors.length > 0) {
         promises.push(
