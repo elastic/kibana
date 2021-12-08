@@ -11,54 +11,16 @@ import type { DocLinksStart } from 'kibana/public';
 import { EuiLink, EuiTextColor } from '@elastic/eui';
 
 import { DatatableColumn } from 'src/plugins/expressions';
-import type { DataType, FramePublicAPI } from '../types';
-import type {
-  IndexPattern,
-  IndexPatternLayer,
-  DraggedField,
-  IndexPatternPrivateState,
-} from './types';
-import type {
-  BaseIndexPatternColumn,
-  FieldBasedIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-} from './operations/definitions/column_types';
+import type { FramePublicAPI } from '../types';
+import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from './types';
+import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
 import { operationDefinitionMap, GenericIndexPatternColumn } from './operations';
 
 import { getInvalidFieldMessage } from './operations/definitions/helpers';
 import { isQueryValid } from './operations/definitions/filters';
 import { checkColumnForPrecisionError } from '../../../../../src/plugins/data/common';
-
-/**
- * Normalizes the specified operation type. (e.g. document operations
- * produce 'number')
- */
-export function normalizeOperationDataType(type: DataType) {
-  if (type === 'histogram') return 'number';
-  return type === 'document' ? 'number' : type;
-}
-
-export function hasField(column: BaseIndexPatternColumn): column is FieldBasedIndexPatternColumn {
-  return 'sourceField' in column;
-}
-
-export function sortByField<C extends BaseIndexPatternColumn>(columns: C[]) {
-  return [...columns].sort((column1, column2) => {
-    if (hasField(column1) && hasField(column2)) {
-      return column1.sourceField.localeCompare(column2.sourceField);
-    }
-    return column1.operationType.localeCompare(column2.operationType);
-  });
-}
-
-export function isDraggedField(fieldCandidate: unknown): fieldCandidate is DraggedField {
-  return (
-    typeof fieldCandidate === 'object' &&
-    fieldCandidate !== null &&
-    ['id', 'field', 'indexPatternId'].every((prop) => prop in fieldCandidate)
-  );
-}
+import { hasField } from './pure_utils';
 
 export function isColumnInvalid(
   layer: IndexPatternLayer,
@@ -170,4 +132,21 @@ export function getPrecisionErrorWarningMessages(
   }
 
   return warningMessages;
+}
+
+export function getVisualDefaultsForLayer(layer: IndexPatternLayer) {
+  return Object.keys(layer.columns).reduce<Record<string, Record<string, unknown>>>(
+    (memo, columnId) => {
+      const column = layer.columns[columnId];
+      if (column?.operationType) {
+        const opDefinition = operationDefinitionMap[column.operationType];
+        const params = opDefinition.getDefaultVisualSettings?.(column);
+        if (params) {
+          memo[columnId] = params;
+        }
+      }
+      return memo;
+    },
+    {}
+  );
 }

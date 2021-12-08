@@ -8,7 +8,6 @@
 import { DatasourceSuggestion } from '../types';
 import { generateId } from '../id_generator';
 import type { IndexPatternPrivateState } from './types';
-import 'jest-canvas-mock';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,

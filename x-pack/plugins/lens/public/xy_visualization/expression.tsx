@@ -497,10 +497,18 @@ export function XYChart({
     if (xySeries.seriesKeys.length > 1) {
       const pointValue = xySeries.seriesKeys[0];
 
+      const splitColumn = table.columns.find(({ id }) => id === layer.splitAccessor);
+      const splitFormatter = formatFactory(splitColumn && splitColumn.meta?.params);
+
       points.push({
-        row: table.rows.findIndex(
-          (row) => layer.splitAccessor && row[layer.splitAccessor] === pointValue
-        ),
+        row: table.rows.findIndex((row) => {
+          if (layer.splitAccessor) {
+            if (layersAlreadyFormatted[layer.splitAccessor]) {
+              return splitFormatter.convert(row[layer.splitAccessor]) === pointValue;
+            }
+            return row[layer.splitAccessor] === pointValue;
+          }
+        }),
         column: table.columns.findIndex((col) => col.id === layer.splitAccessor),
         value: pointValue,
       });

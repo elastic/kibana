@@ -13,7 +13,7 @@ import {
   VisualizationDimensionGroupConfig,
 } from '../../../types';
 import { getOperationDisplay } from '../../operations';
-import { hasField, isDraggedField } from '../../utils';
+import { hasField, isDraggedField } from '../../pure_utils';
 import { DragContextState } from '../../../drag_drop/providers';
 import { OperationMetadata } from '../../../types';
 import { getOperationTypesForField } from '../../operations';

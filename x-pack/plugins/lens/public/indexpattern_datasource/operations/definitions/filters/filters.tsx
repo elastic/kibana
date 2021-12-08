@@ -101,6 +101,15 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
               language: 'kuery',
             },
           },
+          ...((
+            previousColumn as { params?: { secondaryFields?: string[] } }
+          ).params?.secondaryFields?.map((field) => ({
+            label: '',
+            input: {
+              query: `${field} : *`,
+              language: 'kuery',
+            },
+          })) ?? []),
         ],
       };
     }
