@@ -119,6 +119,7 @@ export class ConsoleMenu extends Component<Props, State> {
       <EuiContextMenuItem
         key="Copy as cURL"
         id="ConCopyAsCurl"
+        data-test-subj="consoleMenuCopyAsCurl"
         disabled={!window.navigator?.clipboard}
         onClick={() => {
           this.closePopover();

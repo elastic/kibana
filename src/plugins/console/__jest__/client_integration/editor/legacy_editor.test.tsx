@@ -13,27 +13,11 @@ import {
   getDocumentation,
   autoIndent,
 } from '../../../public/application/containers/editor/legacy/console_menu_actions';
+import { useRequestReadContext } from '../../../public/application/contexts/request_context';
 
 jest.mock('../../../public/application/contexts/request_context.tsx', () => ({
   ...jest.requireActual('../../../public/application/contexts/request_context.tsx'),
-  useRequestReadContext: () => ({
-    requestInFlight: false,
-    lastResult: {
-      data: [
-        {
-          response: {
-            statusCode: 200,
-            statusText: 'OK',
-            value: 'wow',
-          },
-          request: {
-            method: 'GET',
-            path: '/.security',
-          },
-        },
-      ],
-    },
-  }),
+  useRequestReadContext: jest.fn(),
 }));
 
 jest.mock('../../../public/application/containers/editor/legacy/console_menu_actions.ts', () => {
@@ -47,8 +31,9 @@ describe('Console - Legacy Editor', () => {
   let testBed: AppTestBed;
   let server: ReturnType<typeof setupEnvironment>['server'];
 
-  beforeEach(() => {
+  beforeEach(async () => {
     ({ server } = setupEnvironment());
+    testBed = await setupAppPage();
   });
 
   afterEach(() => {
@@ -56,8 +41,25 @@ describe('Console - Legacy Editor', () => {
   });
 
   describe('send request', () => {
-    beforeEach(async () => {
-      testBed = await setupAppPage();
+    beforeAll(() => {
+      (useRequestReadContext as jest.Mock).mockReturnValue({
+        requestInFlight: false,
+        lastResult: {
+          data: [
+            {
+              response: {
+                statusCode: 200,
+                statusText: 'OK',
+                value: 'wow',
+              },
+              request: {
+                method: 'GET',
+                path: '/.security',
+              },
+            },
+          ],
+        },
+      });
     });
 
     test('sends current request to ES', async () => {
@@ -73,6 +75,20 @@ describe('Console - Legacy Editor', () => {
   });
 
   describe('Request options dropdown', () => {
+    const mockCopyToClipboard = jest.fn();
+
+    beforeAll(() => {
+      // @ts-ignore
+      global.navigator.clipboard = {
+        writeText: mockCopyToClipboard,
+      };
+    });
+
+    afterAll(() => {
+      // @ts-ignore
+      global.navigator = {};
+    });
+
     it('opens docs', async () => {
       const { find, component, actions } = testBed;
       await actions.openRequestOptionsDropdown();
@@ -95,6 +111,18 @@ describe('Console - Legacy Editor', () => {
       component.update();
 
       expect(autoIndent).toHaveBeenCalledTimes(1);
+    });
+
+    it('copy command to clipboard', async () => {
+      const { find, component, actions } = testBed;
+      await actions.openRequestOptionsDropdown();
+
+      await act(async () => {
+        find('contextMenuPanel.consoleMenuCopyAsCurl').simulate('click');
+      });
+      component.update();
+
+      expect(mockCopyToClipboard).toHaveBeenCalledTimes(1);
     });
   });
 });
