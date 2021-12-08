@@ -236,6 +236,41 @@ test('cleans up action_task_params object', async () => {
   expect(services.savedObjectsClient.delete).toHaveBeenCalledWith('action_task_params', '3');
 });
 
+test('cancel the task if its execution runs out of the timeout limits', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockImplementationOnce(async () => {
+    const promise = new Promise((r) => setTimeout(r, 400000));
+    fakeTimer.tick(400000);
+    await promise;
+    return { status: 'ok', actionId: '2' };
+  });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
+  });
+
+  await taskRunner.run();
+  expect(taskRunnerFactoryInitializerParams.logger.warn).toHaveBeenCalledWith(
+    'Action task with params was cancelled due to the timeout'
+  );
+});
+
 test('runs successfully when cleanup fails and logs the error', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,

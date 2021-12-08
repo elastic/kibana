@@ -193,6 +193,14 @@ export class TaskRunnerFactory {
           }
         }
       },
+      cancel: async () => {
+        logger.warn(
+          `Action task with params '${
+            taskInstance.params as ActionTaskExecutorParams
+          }' was cancelled due to the timeout.`
+        );
+        return { state: {} };
+      },
     };
   }
 }
