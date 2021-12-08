@@ -74,43 +74,41 @@ describe('<ComponentTemplateEdit />', () => {
     expect(nameInput.props().disabled).toEqual(true);
   });
 
-  for (let i = 0; i < 100; i++) {
-    describe('form payload', () => {
-      it('should send the correct payload with changed values', async () => {
-        const { actions, component, form } = testBed;
+  describe('form payload', () => {
+    it('should send the correct payload with changed values', async () => {
+      const { actions, component, form } = testBed;
 
-        await act(async () => {
-          form.setInputValue('versionField.input', '1');
-        });
-
-        await act(async () => {
-          actions.clickNextButton();
-        });
-
-        component.update();
-
-        await actions.completeStepSettings();
-        await actions.completeStepMappings();
-        await actions.completeStepAliases();
-
-        await act(async () => {
-          actions.clickNextButton();
-        });
-
-        component.update();
-
-        const latestRequest = server.requests[server.requests.length - 1];
-
-        const expected = {
-          version: 1,
-          ...COMPONENT_TEMPLATE_TO_EDIT,
-          template: {
-            ...COMPONENT_TEMPLATE_TO_EDIT.template,
-          },
-        };
-
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+      await act(async () => {
+        form.setInputValue('versionField.input', '1');
       });
+
+      await act(async () => {
+        actions.clickNextButton();
+      });
+
+      component.update();
+
+      await actions.completeStepSettings();
+      await actions.completeStepMappings();
+      await actions.completeStepAliases();
+
+      await act(async () => {
+        actions.clickNextButton();
+      });
+
+      component.update();
+
+      const latestRequest = server.requests[server.requests.length - 1];
+
+      const expected = {
+        version: 1,
+        ...COMPONENT_TEMPLATE_TO_EDIT,
+        template: {
+          ...COMPONENT_TEMPLATE_TO_EDIT.template,
+        },
+      };
+
+      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
     });
-  }
+  });
 });
