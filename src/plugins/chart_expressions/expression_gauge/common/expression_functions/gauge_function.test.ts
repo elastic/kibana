@@ -33,7 +33,6 @@ describe('interpreter/functions#gauge', () => {
 
   it('returns an object with the correct structure', () => {
     const actual = fn(context, args, undefined);
-
     expect(actual).toMatchSnapshot();
   });
 });

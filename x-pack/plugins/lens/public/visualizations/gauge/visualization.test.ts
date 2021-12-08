@@ -38,7 +38,6 @@ describe('gauge', () => {
       expect(getGaugeVisualization({ paletteService }).initialize(() => 'l1')).toEqual({
         layerId: 'l1',
         layerType: layerTypes.DATA,
-        title: 'Empty Gauge chart',
         shape: 'horizontalBullet',
         labelMajorMode: 'auto',
         ticksPosition: 'auto',
@@ -396,13 +395,10 @@ describe('gauge', () => {
         maxAccessor: 'max-accessor',
         labelMinor: 'Subtitle',
       };
-      const attributes = {
-        title: 'Test',
-      };
       expect(
         getGaugeVisualization({
           paletteService,
-        }).toExpression(state, datasourceLayers, attributes)
+        }).toExpression(state, datasourceLayers)
       ).toEqual({
         type: 'expression',
         chain: [
@@ -410,8 +406,6 @@ describe('gauge', () => {
             type: 'function',
             function: 'gauge',
             arguments: {
-              title: ['Test'],
-              description: [''],
               metricAccessor: ['metric-accessor'],
               minAccessor: ['min-accessor'],
               maxAccessor: ['max-accessor'],
@@ -434,13 +428,10 @@ describe('gauge', () => {
         layerId: 'first',
         minAccessor: 'minAccessor',
       };
-      const attributes = {
-        title: 'Test',
-      };
       expect(
         getGaugeVisualization({
           paletteService,
-        }).toExpression(state, datasourceLayers, attributes)
+        }).toExpression(state, datasourceLayers)
       ).toEqual(null);
     });
   });
