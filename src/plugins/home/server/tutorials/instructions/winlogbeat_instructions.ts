@@ -13,94 +13,106 @@ import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
 import { cloudPasswordAndResetLink } from './cloud_instructions';
 
-export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
-  INSTALL: {
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.winlogbeatInstructions.install.windowsTitle', {
-        defaultMessage: 'Download and install Winlogbeat',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.winlogbeatInstructions.install.windowsTextPre',
-        {
-          defaultMessage:
-            'First time using Winlogbeat? See the [Quick Start]({winlogbeatLink}).\n\
+export const createWinlogbeatInstructions = (context: TutorialContext) => {
+  const SSL_DOC_URL = `https://www.elastic.co/guide/en/beats/winlogbeat/${context.kibanaBranch}/configuration-ssl.html#ca-sha256`;
+
+  return {
+    INSTALL: {
+      WINDOWS: {
+        title: i18n.translate('home.tutorials.common.winlogbeatInstructions.install.windowsTitle', {
+          defaultMessage: 'Download and install Winlogbeat',
+        }),
+        textPre: i18n.translate(
+          'home.tutorials.common.winlogbeatInstructions.install.windowsTextPre',
+          {
+            defaultMessage:
+              'First time using Winlogbeat? See the [Quick Start]({winlogbeatLink}).\n\
  1. Download the Winlogbeat Windows zip file from the [Download]({elasticLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Winlogbeat`.\n\
  4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \
 **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
  5. From the PowerShell prompt, run the following commands to install Winlogbeat as a Windows service.',
-          values: {
-            directoryName: '`winlogbeat-{config.kibana.version}-windows`',
-            folderPath: '`C:\\Program Files`',
-            winlogbeatLink:
-              '{config.docs.beats.winlogbeat}/winlogbeat-installation-configuration.html',
-            elasticLink: 'https://www.elastic.co/downloads/beats/winlogbeat',
-          },
-        }
-      ),
-      commands: ['cd "C:\\Program Files\\Winlogbeat"', '.\\install-service-winlogbeat.ps1'],
-      textPost: i18n.translate(
-        'home.tutorials.common.winlogbeatInstructions.install.windowsTextPost',
-        {
-          defaultMessage:
-            'Modify the settings under `output.elasticsearch` in the {path} file to point to your Elasticsearch installation.',
-          values: { path: '`C:\\Program Files\\Winlogbeat\\winlogbeat.yml`' },
-        }
-      ),
+            values: {
+              directoryName: '`winlogbeat-{config.kibana.version}-windows`',
+              folderPath: '`C:\\Program Files`',
+              winlogbeatLink:
+                '{config.docs.beats.winlogbeat}/winlogbeat-installation-configuration.html',
+              elasticLink: 'https://www.elastic.co/downloads/beats/winlogbeat',
+            },
+          }
+        ),
+        commands: ['cd "C:\\Program Files\\Winlogbeat"', '.\\install-service-winlogbeat.ps1'],
+        textPost: i18n.translate(
+          'home.tutorials.common.winlogbeatInstructions.install.windowsTextPost',
+          {
+            defaultMessage:
+              'Modify the settings under `output.elasticsearch` in the {path} file to point to your Elasticsearch installation.',
+            values: { path: '`C:\\Program Files\\Winlogbeat\\winlogbeat.yml`' },
+          }
+        ),
+      },
     },
-  },
-  START: {
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.winlogbeatInstructions.start.windowsTitle', {
-        defaultMessage: 'Start Winlogbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.winlogbeatInstructions.start.windowsTextPre', {
-        defaultMessage:
-          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
-      }),
-      commands: ['.\\winlogbeat.exe setup', 'Start-Service winlogbeat'],
+    START: {
+      WINDOWS: {
+        title: i18n.translate('home.tutorials.common.winlogbeatInstructions.start.windowsTitle', {
+          defaultMessage: 'Start Winlogbeat',
+        }),
+        textPre: i18n.translate(
+          'home.tutorials.common.winlogbeatInstructions.start.windowsTextPre',
+          {
+            defaultMessage:
+              'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+          }
+        ),
+        commands: ['.\\winlogbeat.exe setup', 'Start-Service winlogbeat'],
+      },
     },
-  },
-  CONFIG: {
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.winlogbeatInstructions.config.windowsTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.winlogbeatInstructions.config.windowsTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information:',
-          values: {
-            path: '`C:\\Program Files\\Winlogbeat\\winlogbeat.yml`',
-          },
-        }
-      ),
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context),
-      ],
-      textPost: i18n.translate(
-        'home.tutorials.common.winlogbeatInstructions.config.windowsTextPost',
-        {
-          defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
-          values: {
-            passwordTemplate: '`<password>`',
-            esUrlTemplate: '`<es_url>`',
-            kibanaUrlTemplate: '`<kibana_url>`',
-          },
-        }
-      ),
+    CONFIG: {
+      WINDOWS: {
+        title: i18n.translate('home.tutorials.common.winlogbeatInstructions.config.windowsTitle', {
+          defaultMessage: 'Edit the configuration',
+        }),
+        textPre: i18n.translate(
+          'home.tutorials.common.winlogbeatInstructions.config.windowsTextPre',
+          {
+            defaultMessage: 'Modify {path} to set the connection information:',
+            values: {
+              path: '`C:\\Program Files\\Winlogbeat\\winlogbeat.yml`',
+            },
+          }
+        ),
+        commands: [
+          'output.elasticsearch:',
+          '  hosts: ["<es_url>"]',
+          '  username: "elastic"',
+          '  password: "<password>"',
+          "  # If using Elasticsearch's default certificate",
+          '  ssl.ca_trusted_fingerprint: "<es cert fingerprint>"',
+          'setup.kibana:',
+          '  host: "<kibana_url>"',
+          getSpaceIdForBeatsTutorial(context),
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.winlogbeatInstructions.config.windowsTextPostMarkdown',
+          {
+            defaultMessage:
+              'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \
+              Elasticsearch, and {kibanaUrlTemplate} is the URL of Kibana. To [configure SSL]({configureSslUrl}) with the \
+              default certificate generated by Elasticsearch, add its fingerprint in {esCertFingerprintTemplate}.',
+            values: {
+              passwordTemplate: '`<password>`',
+              esUrlTemplate: '`<es_url>`',
+              kibanaUrlTemplate: '`<kibana_url>`',
+              configureSslUrl: SSL_DOC_URL,
+              esCertFingerprintTemplate: '`<es cert fingerprint>`',
+            },
+          }
+        ),
+      },
     },
-  },
-});
+  };
+};
 
 export const createWinlogbeatCloudInstructions = () => ({
   CONFIG: {
@@ -158,7 +170,7 @@ export function winlogbeatStatusCheck() {
   };
 }
 
-export function onPremInstructions(context?: TutorialContext) {
+export function onPremInstructions(context: TutorialContext) {
   const WINLOGBEAT_INSTRUCTIONS = createWinlogbeatInstructions(context);
 
   return {
@@ -186,10 +198,10 @@ export function onPremInstructions(context?: TutorialContext) {
   };
 }
 
-export function onPremCloudInstructions() {
+export function onPremCloudInstructions(context: TutorialContext) {
   const TRYCLOUD_OPTION1 = createTrycloudOption1();
   const TRYCLOUD_OPTION2 = createTrycloudOption2();
-  const WINLOGBEAT_INSTRUCTIONS = createWinlogbeatInstructions();
+  const WINLOGBEAT_INSTRUCTIONS = createWinlogbeatInstructions(context);
 
   return {
     instructionSets: [
@@ -218,8 +230,8 @@ export function onPremCloudInstructions() {
   };
 }
 
-export function cloudInstructions() {
-  const WINLOGBEAT_INSTRUCTIONS = createWinlogbeatInstructions();
+export function cloudInstructions(context: TutorialContext) {
+  const WINLOGBEAT_INSTRUCTIONS = createWinlogbeatInstructions(context);
   const WINLOGBEAT_CLOUD_INSTRUCTIONS = createWinlogbeatCloudInstructions();
 
   return {

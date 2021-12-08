@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 
 import { ApplicationStart, ChromeStart, ScopedHistory, CoreTheme } from 'src/core/public';
+import { KibanaThemeProvider } from '../../kibana_react/public';
 import type { DocTitleService, BreadcrumbService } from './services';
 
 import { DevToolApp } from './dev_tool';
@@ -177,32 +178,34 @@ export function renderApp(
 
   ReactDOM.render(
     <I18nProvider>
-      <Router>
-        <Switch>
-          {devTools
-            // Only create routes for devtools that are not disabled
-            .filter((devTool) => !devTool.isDisabled())
-            .map((devTool) => (
-              <Route
-                key={devTool.id}
-                path={`/${devTool.id}`}
-                exact={!devTool.enableRouting}
-                render={(props) => (
-                  <DevToolsWrapper
-                    updateRoute={props.history.push}
-                    activeDevTool={devTool}
-                    devTools={devTools}
-                    theme$={theme$}
-                    appServices={appServices}
-                  />
-                )}
-              />
-            ))}
-          <Route path="/">
-            <Redirect to={`/${devTools[0].id}`} />
-          </Route>
-        </Switch>
-      </Router>
+      <KibanaThemeProvider theme$={theme$}>
+        <Router>
+          <Switch>
+            {devTools
+              // Only create routes for devtools that are not disabled
+              .filter((devTool) => !devTool.isDisabled())
+              .map((devTool) => (
+                <Route
+                  key={devTool.id}
+                  path={`/${devTool.id}`}
+                  exact={!devTool.enableRouting}
+                  render={(props) => (
+                    <DevToolsWrapper
+                      updateRoute={props.history.push}
+                      activeDevTool={devTool}
+                      devTools={devTools}
+                      theme$={theme$}
+                      appServices={appServices}
+                    />
+                  )}
+                />
+              ))}
+            <Route path="/">
+              <Redirect to={`/${devTools[0].id}`} />
+            </Route>
+          </Switch>
+        </Router>
+      </KibanaThemeProvider>
     </I18nProvider>,
     element
   );

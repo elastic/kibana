@@ -129,9 +129,6 @@ Object {
     "available": Object {
       "type": "boolean",
     },
-    "browser_type": Object {
-      "type": "keyword",
-    },
     "csv": Object {
       "app": Object {
         "canvas workpad": Object {
@@ -1973,7 +1970,6 @@ Object {
   },
   "_all": 9,
   "available": true,
-  "browser_type": undefined,
   "csv": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -2243,7 +2239,6 @@ Object {
   },
   "_all": 0,
   "available": true,
-  "browser_type": undefined,
   "csv": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -2492,7 +2487,6 @@ Object {
   },
   "_all": 4,
   "available": true,
-  "browser_type": undefined,
   "csv": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -2768,7 +2762,6 @@ Object {
   },
   "_all": 11,
   "available": true,
-  "browser_type": undefined,
   "csv": Object {
     "app": Object {
       "canvas workpad": 0,
