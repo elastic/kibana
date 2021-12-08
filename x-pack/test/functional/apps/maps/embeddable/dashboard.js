@@ -18,7 +18,8 @@ export default function ({ getPageObjects, getService }) {
   const retry = getService('retry');
   const security = getService('security');
 
-  describe('embed in dashboard', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/113993
+  describe.skip('embed in dashboard', () => {
     before(async () => {
       await security.testUser.setRoles(
         [
