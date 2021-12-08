@@ -12,7 +12,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
 
   const fleetPackages = ['apache', 'nginx'];
-  const installedPackages: string[] = [];
+  const installedPackages: Array<{ pkgName: string; version: string }> = [];
 
   describe('modules', function () {
     before(async () => {
@@ -23,14 +23,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.setupFleet();
 
       for (const fleetPackage of fleetPackages) {
-        const packageWithVersion = await ml.testResources.installFleetPackage(fleetPackage);
-        installedPackages.push(packageWithVersion);
+        const version = await ml.testResources.installFleetPackage(fleetPackage);
+        installedPackages.push({ pkgName: fleetPackage, version });
       }
     });
 
     after(async () => {
       for (const fleetPackage of installedPackages) {
-        await ml.testResources.removeFleetPackage(fleetPackage);
+        await ml.testResources.removeFleetPackage(fleetPackage.pkgName, fleetPackage.version);
       }
       await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });

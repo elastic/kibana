@@ -63,7 +63,7 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
           throw res.error;
         }
 
-        for (const agent of res.data?.list ?? []) {
+        for (const agent of res.data?.items ?? []) {
           if (!agent.policy_id || agentPoliciesAlreadyChecked[agent.policy_id]) {
             continue;
           }

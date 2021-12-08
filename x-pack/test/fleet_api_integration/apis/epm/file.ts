@@ -103,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       after(async () => {
         if (!server.enabled) return;
-        await supertest.delete(`/api/fleet/epm/packages/apache-0.1.4`).set('kbn-xsrf', 'xxxx');
+        await supertest.delete(`/api/fleet/epm/packages/apache/0.1.4`).set('kbn-xsrf', 'xxxx');
       });
       it('fetches a .png screenshot image', async function () {
         if (server.enabled) {

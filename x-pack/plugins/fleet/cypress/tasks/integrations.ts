@@ -50,7 +50,7 @@ export const deleteIntegrations = async (integration: string) => {
 
 export const installPackageWithVersion = (integration: string, version: string) => {
   cy.request({
-    url: `/api/fleet/epm/packages/${integration}-${version}`,
+    url: `/api/fleet/epm/packages/${integration}/${version}`,
     headers: { 'kbn-xsrf': 'cypress' },
     body: '{ "force": true }',
     method: 'POST',

@@ -55,7 +55,7 @@ export const getHttp = (basepath = BASE_PATH) => {
 
       // Ideally, this would be a markdown file instead of a ts file, but we don't have
       // markdown-loader in our package.json, so we'll make do with what we have.
-      if (path.startsWith('/api/fleet/epm/packages/nginx/')) {
+      if (path.match('/api/fleet/epm/packages/nginx/.*/.*/')) {
         const { readme } = await import('./fixtures/readme.nginx');
         return readme;
       }
@@ -66,7 +66,7 @@ export const getHttp = (basepath = BASE_PATH) => {
 
       // Ideally, this would be a markdown file instead of a ts file, but we don't have
       // markdown-loader in our package.json, so we'll make do with what we have.
-      if (path.startsWith('/api/fleet/epm/packages/okta/')) {
+      if (path.match('/api/fleet/epm/packages/okta/.*/.*/')) {
         const { readme } = await import('./fixtures/readme.okta');
         return readme;
       }

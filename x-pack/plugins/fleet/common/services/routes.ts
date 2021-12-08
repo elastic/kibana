@@ -33,8 +33,11 @@ export const epmRouteService = {
     return EPM_API_ROUTES.LIMITED_LIST_PATTERN;
   },
 
-  getInfoPath: (pkgkey: string) => {
-    return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgkey}', pkgkey);
+  getInfoPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
   },
 
   getStatsPath: (pkgName: string) => {
@@ -45,23 +48,27 @@ export const epmRouteService = {
     return `${EPM_API_ROOT}${filePath.replace('/package', '/packages')}`;
   },
 
-  getInstallPath: (pkgkey: string) => {
-    return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN.replace('{pkgkey}', pkgkey).replace(
-      /\/$/,
-      ''
-    ); // trim trailing slash
+  getInstallPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN.replace('{pkgName}', pkgName)
+      .replace('{pkgVersion}', pkgVersion)
+      .replace(/\/$/, ''); // trim trailing slash
   },
 
   getBulkInstallPath: () => {
     return EPM_API_ROUTES.BULK_INSTALL_PATTERN;
   },
 
-  getRemovePath: (pkgkey: string) => {
-    return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgkey}', pkgkey).replace(/\/$/, ''); // trim trailing slash
+  getRemovePath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
+      .replace('{pkgVersion}', pkgVersion)
+      .replace(/\/$/, ''); // trim trailing slash
   },
 
-  getUpdatePath: (pkgkey: string) => {
-    return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgkey}', pkgkey);
+  getUpdatePath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
   },
 };
 

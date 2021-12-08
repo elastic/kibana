@@ -122,7 +122,8 @@ export const getAgentsHandler: RequestHandler<
       : 0;
 
     const body: GetAgentsResponse = {
-      list: agents,
+      list: agents, // deprecated
+      items: agents,
       total,
       totalInactive,
       page,

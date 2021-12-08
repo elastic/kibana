@@ -100,6 +100,7 @@ paths:
       operationId: list-all-packages
     parameters: []
   /epm/packages/{pkgkey}:
+    deprecated: true
     get:
       summary: Packages - Info
       tags: []
@@ -213,6 +214,125 @@ paths:
               properties:
                 force:
                   type: boolean
+  /epm/packages/{pkgName}/{pkgVersion}:
+    get:
+      summary: Packages - Info
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                allOf:
+                  - properties:
+                      item:
+                        $ref: '#/components/schemas/package_info'
+                  - properties:
+                      status:
+                        type: string
+                        enum:
+                          - installed
+                          - installing
+                          - install_failed
+                          - not_installed
+                      savedObject:
+                        type: string
+                    required:
+                      - status
+                      - savedObject
+      operationId: get-package
+      security:
+        - basicAuth: []
+    parameters:
+      - schema:
+          type: string
+        name: pkgName
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: pkgVersion
+        in: path
+        required: true
+    post:
+      summary: Packages - Install
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        type:
+                          oneOf:
+                            - $ref: '#/components/schemas/kibana_saved_object_type'
+                            - $ref: '#/components/schemas/elasticsearch_asset_type'
+                      required:
+                        - id
+                        - type
+                required:
+                  - items
+      operationId: install-package
+      description: ''
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                force:
+                  type: boolean
+    delete:
+      summary: Packages - Delete
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        type:
+                          oneOf:
+                            - $ref: '#/components/schemas/kibana_saved_object_type'
+                            - $ref: '#/components/schemas/elasticsearch_asset_type'
+                      required:
+                        - id
+                        - type
+                required:
+                  - items
+      operationId: delete-package
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                force:
+                  type: boolean
   /agents/setup:
     get:
       summary: Agents setup - Info
@@ -253,6 +373,51 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   /agent-status:
+    deprecated: true
+    get:
+      summary: Agents - Summary stats
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: integer
+                  events:
+                    type: integer
+                  inactive:
+                    type: integer
+                  offline:
+                    type: integer
+                  online:
+                    type: integer
+                  other:
+                    type: integer
+                  total:
+                    type: integer
+                  updating:
+                    type: integer
+                required:
+                  - error
+                  - events
+                  - inactive
+                  - offline
+                  - online
+                  - other
+                  - total
+                  - updating
+      operationId: get-agent-status
+      parameters:
+        - schema:
+            type: string
+          name: policyId
+          in: query
+          required: false
+  /agent_status:
     get:
       summary: Agents - Summary stats
       tags: []
@@ -312,6 +477,11 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/agent'
+                    deprecated: true
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/agent'
                   total:
                     type: number
                   page:
@@ -319,7 +489,7 @@ paths:
                   perPage:
                     type: number
                 required:
-                  - list
+                  - items
                   - total
                   - page
                   - perPage
@@ -784,6 +954,7 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
     parameters: []
   /enrollment-api-keys:
+    deprecated: true
     get:
       summary: Enrollment API Keys - List
       tags: []
@@ -799,6 +970,11 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/enrollment_api_key'
+                    deprecated: true
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/enrollment_api_key'
                   page:
                     type: number
                   perPage:
@@ -806,7 +982,7 @@ paths:
                   total:
                     type: number
                 required:
-                  - list
+                  - items
                   - page
                   - perPage
                   - total
@@ -833,6 +1009,104 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   /enrollment-api-keys/{keyId}:
+    deprecated: true
+    parameters:
+      - schema:
+          type: string
+        name: keyId
+        in: path
+        required: true
+    get:
+      summary: Enrollment API Key - Info
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/enrollment_api_key'
+                required:
+                  - item
+      operationId: get-enrollment-api-key
+    delete:
+      summary: Enrollment API Key - Delete
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  action:
+                    type: string
+                    enum:
+                      - deleted
+                required:
+                  - action
+      operationId: delete-enrollment-api-key
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+  /enrollment_api_keys:
+    get:
+      summary: Enrollment API Keys - List
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  list:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/enrollment_api_key'
+                    deprecated: true
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/enrollment_api_key'
+                  page:
+                    type: number
+                  perPage:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - items
+                  - page
+                  - perPage
+                  - total
+      operationId: get-enrollment-api-keys
+      parameters: []
+    post:
+      summary: Enrollment API Key - Create
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/enrollment_api_key'
+                  action:
+                    type: string
+                    enum:
+                      - created
+      operationId: create-enrollment-api-keys
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+  /enrollment_api_keys/{keyId}:
     parameters:
       - schema:
           type: string
@@ -1582,9 +1856,6 @@ components:
           type: string
         unenrollment_started_at:
           type: string
-        shared_id:
-          type: string
-          deprecated: true
         access_api_key_id:
           type: string
         default_api_key_id:
