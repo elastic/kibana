@@ -149,8 +149,10 @@ export function App({
     onAppLeave((actions) => {
       // Confirm when the user has made any changes to an existing doc
       // or when the user has configured something without saving
-      const persistedState = injectDocFilterReferences(persistedDoc)?.state;
-      const lastKnownDocState = removePinnedFilters(injectDocFilterReferences(lastKnownDoc))?.state;
+      const persistedState = persistedDoc?.state;
+      const lastKnownDocState = removePinnedFilters(
+        injectDocFilterReferences(data.query.filterManager.inject, lastKnownDoc)
+      )?.state;
       if (
         application.capabilities.visualize.save &&
         !isEqual(persistedState, lastKnownDocState) &&
@@ -168,7 +170,14 @@ export function App({
         return actions.default();
       }
     });
-  }, [onAppLeave, lastKnownDoc, isSaveable, persistedDoc, application.capabilities.visualize.save]);
+  }, [
+    onAppLeave,
+    lastKnownDoc,
+    isSaveable,
+    persistedDoc,
+    application.capabilities.visualize.save,
+    data.query.filterManager.inject,
+  ]);
 
   const getLegacyUrlConflictCallout = useCallback(() => {
     // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
