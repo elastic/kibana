@@ -21,6 +21,7 @@ export const toElasticsearchQuery = (...params: Parameters<typeof astToElasticse
 };
 
 export { KQLSyntaxError } from './kuery_syntax_error';
-export { FunctionTypeBuildNode, nodeTypes, nodeBuilder, NodeTypes } from './node_types';
+export { nodeTypes, nodeBuilder } from './node_types';
 export { fromKueryExpression } from './ast';
+export type { FunctionTypeBuildNode, NodeTypes } from './node_types';
 export type { DslQuery, KueryNode, KueryQueryOptions, KueryParseOptions } from './types';
