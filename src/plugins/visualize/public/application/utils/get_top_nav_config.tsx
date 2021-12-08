@@ -43,6 +43,7 @@ import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
 import { VISUALIZE_EDITOR_TRIGGER } from '../../../../ui_actions/public';
+import { getVizEditorOriginatingAppUrl } from './utils';
 
 interface VisualizeCapabilities {
   createShortUrl: boolean;
@@ -289,14 +290,15 @@ export const getTopNavConfig = (
             disableButton: !editInLensOptions,
             testId: 'visualizeEditInLensButton',
             run: async () => {
-              const updatedWithSavedObjectId = {
+              const updatedWithMeta = {
                 ...editInLensOptions,
                 savedObjectId: visInstance.vis.id,
                 embeddableId,
+                originatingAppUrl: getVizEditorOriginatingAppUrl(history),
               };
               if (editInLensOptions) {
                 hideLensBadge();
-                getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(updatedWithSavedObjectId);
+                getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(updatedWithMeta);
               }
             },
           },

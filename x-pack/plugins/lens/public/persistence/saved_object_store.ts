@@ -88,7 +88,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
   loadExistingVisualizationDoc = async (savedObjectId: string) => {
     const resolveResult = await this.client.resolve(VISUALIZE_EDITOR_DOC_TYPE, savedObjectId);
 
-    if (resolveResult.saved_object.error) {
+    if (resolveResult?.saved_object?.error) {
       return;
     }
 
