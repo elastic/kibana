@@ -16,6 +16,7 @@ import type {
   TimefilterContract,
   TimeRange,
   IndexPattern,
+  FilterManager,
 } from 'src/plugins/data/public';
 import type { PaletteOutput } from 'src/plugins/charts/public';
 import type { Start as InspectorStart } from 'src/plugins/inspector/public';
@@ -27,7 +28,6 @@ import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { inject as injectFilterReferences } from '../../../../../src/plugins/data/common';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
   ExpressionRendererEvent,
@@ -108,6 +108,7 @@ export interface LensEmbeddableDeps {
   documentToExpression: (
     doc: Document
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   indexPatternService: IndexPatternsContract;
   expressionRenderer: ReactExpressionRendererType;
@@ -478,7 +479,7 @@ export class Embeddable
       output.filters = [...this.savedVis.state.filters];
     }
 
-    output.filters = injectFilterReferences(output.filters, this.savedVis.references);
+    output.filters = this.deps.injectFilterReferences(output.filters, this.savedVis.references);
     return output;
   }
 
