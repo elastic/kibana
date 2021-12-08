@@ -155,12 +155,16 @@ export async function mountApp(
     if (!embeddableEditorIncomingState?.originatingApp) {
       throw new Error('redirectToOrigin called without an originating app');
     }
+    let embeddableId = embeddableEditorIncomingState.embeddableId;
+    if (initialContext && 'embeddableId' in initialContext) {
+      embeddableId = initialContext.embeddableId;
+    }
     if (stateTransfer && props?.input) {
       const { input, isCopied } = props;
       stateTransfer.navigateToWithEmbeddablePackage(embeddableEditorIncomingState?.originatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
         state: {
-          embeddableId: isCopied ? undefined : embeddableEditorIncomingState.embeddableId,
+          embeddableId: isCopied ? undefined : embeddableId,
           type: LENS_EMBEDDABLE_TYPE,
           input,
           searchSessionId: data.search.session.getSessionId(),

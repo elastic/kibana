@@ -289,9 +289,14 @@ export const getTopNavConfig = (
             disableButton: !editInLensOptions,
             testId: 'visualizeEditInLensButton',
             run: async () => {
+              const updatedWithSavedObjectId = {
+                ...editInLensOptions,
+                savedObjectId: visInstance.vis.id,
+                embeddableId,
+              };
               if (editInLensOptions) {
                 hideLensBadge();
-                getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(editInLensOptions);
+                getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(updatedWithSavedObjectId);
               }
             },
           },

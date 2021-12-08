@@ -11,7 +11,10 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { partition } from 'lodash';
 
 import type { SavedObjectReference } from 'kibana/public';
+import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { SaveModal } from './save_modal';
+import type { VisualizeEditorContext } from '../types';
+
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { Document, injectFilterReferences } from '../persistence';
@@ -197,7 +200,8 @@ export const runSaveLensVisualization = async (
   } & ExtraProps &
     LensAppServices,
   saveProps: SaveProps,
-  options: { saveToLibrary: boolean }
+  options: { saveToLibrary: boolean },
+  initialContext?: VisualizeEditorContext | VisualizeFieldContext
 ): Promise<Partial<LensAppState> | undefined> => {
   const {
     chrome,
@@ -241,7 +245,14 @@ export const runSaveLensVisualization = async (
     );
   }
 
+  let initialContextInput: LensByReferenceInput | undefined;
   const docToSave = getDocToSave(lastKnownDoc, saveProps, references);
+
+  // check that the incoming context is saved to library
+  if (initialContext && 'savedObjectId' in initialContext && initialContext.savedObjectId) {
+    initialContextInput = { savedObjectId: initialContext.savedObjectId } as LensByReferenceInput;
+    docToSave.savedObjectId = initialContext.savedObjectId;
+  }
 
   // Required to serialize filters in by value mode until
   // https://github.com/elastic/kibana/issues/77588 is fixed
@@ -253,7 +264,7 @@ export const runSaveLensVisualization = async (
     });
   }
 
-  const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
+  const originalInput = saveProps.newCopyOnSave ? undefined : initialContextInput ?? initialInput;
   const originalSavedObjectId = (originalInput as LensByReferenceInput)?.savedObjectId;
   if (options.saveToLibrary) {
     try {
@@ -284,7 +295,7 @@ export const runSaveLensVisualization = async (
   try {
     const newInput = (await attributeService.wrapAttributes(
       docToSave,
-      options.saveToLibrary,
+      options.saveToLibrary || Boolean(initialContextInput),
       originalInput
     )) as LensEmbeddableInput;
 

@@ -192,6 +192,8 @@ export interface VisualizeEditorLayersContext {
 export interface VisualizeEditorContext {
   layers: VisualizeEditorLayersContext[];
   configuration: ChartSettings;
+  savedObjectId?: string;
+  embeddableId?: string;
 }
 
 interface ChartSettings {

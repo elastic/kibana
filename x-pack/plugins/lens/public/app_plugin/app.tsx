@@ -255,7 +255,8 @@ export function App({
           ...lensAppServices,
         },
         saveProps,
-        options
+        options,
+        initialContext
       ).then(
         (newState) => {
           if (newState) {
@@ -282,6 +283,7 @@ export function App({
       lensAppServices,
       dispatchSetState,
       setIsSaveModalVisible,
+      initialContext,
     ]
   );
 
