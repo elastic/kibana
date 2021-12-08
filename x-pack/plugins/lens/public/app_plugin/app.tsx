@@ -8,7 +8,7 @@
 import './app.scss';
 
 import { isEqual } from 'lodash';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb } from '@elastic/eui';
 import {
@@ -93,8 +93,17 @@ export function App({
     isSaveable,
   } = useLensSelector((state) => state.lens);
 
+  const selectorDependencies = useMemo(
+    () => ({
+      datasourceMap,
+      visualizationMap,
+      extractFilterReferences: data.query.filterManager.extract,
+    }),
+    [datasourceMap, visualizationMap, data.query.filterManager.extract]
+  );
+
   const currentDoc = useLensSelector((state) =>
-    selectSavedObjectFormat(state, datasourceMap, visualizationMap)
+    selectSavedObjectFormat(state, selectorDependencies)
   );
 
   // Used to show a popover that guides the user towards changing the date range when no data is available.
