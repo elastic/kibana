@@ -412,8 +412,8 @@ export function DiscoverSidebarComponent({
                                 selected={true}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
-                                onEditField={canEditIndexPatternField ? editField : undefined}
-                                onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                                onEditField={canEditDataViewField ? editField : undefined}
+                                onDeleteField={canEditDataViewField ? deleteField : undefined}
                                 showFieldStats={showFieldStats}
                               />
                             </li>
