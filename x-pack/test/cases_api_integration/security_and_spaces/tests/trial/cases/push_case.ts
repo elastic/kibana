@@ -25,8 +25,6 @@ import {
   pushCase,
   createComment,
   updateCase,
-  getCaseUserActions,
-  removeServerGeneratedPropertiesFromUserAction,
   deleteAllCaseItems,
   superUserSpace1Auth,
   createCaseWithConnector,
@@ -36,11 +34,7 @@ import {
   getCase,
   getServiceNowSimulationServer,
 } from '../../../../common/lib/utils';
-import {
-  CaseConnector,
-  CaseStatuses,
-  CaseUserActionResponse,
-} from '../../../../../../plugins/cases/common/api';
+import { CaseConnector, CaseStatuses } from '../../../../../../plugins/cases/common/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -249,46 +243,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       expect(theCase.status).to.eql('closed');
-    });
-
-    it('should create the correct user action', async () => {
-      const { postedCase, connector } = await createCaseWithConnector({
-        supertest,
-        serviceNowSimulatorURL,
-        actionsRemover,
-      });
-      const pushedCase = await pushCase({
-        supertest,
-        caseId: postedCase.id,
-        connectorId: connector.id,
-      });
-      const userActions = await getCaseUserActions({ supertest, caseID: pushedCase.id });
-      const pushUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
-
-      const { new_value, ...rest } = pushUserAction as CaseUserActionResponse;
-      const parsedNewValue = JSON.parse(new_value!);
-
-      expect(rest).to.eql({
-        action_field: ['pushed'],
-        action: 'push-to-service',
-        action_by: defaultUser,
-        old_value: null,
-        old_val_connector_id: null,
-        new_val_connector_id: connector.id,
-        case_id: `${postedCase.id}`,
-        comment_id: null,
-        sub_case_id: '',
-        owner: 'securitySolutionFixture',
-      });
-
-      expect(parsedNewValue).to.eql({
-        pushed_at: pushedCase.external_service!.pushed_at,
-        pushed_by: defaultUser,
-        connector_name: connector.name,
-        external_id: '123',
-        external_title: 'INC01',
-        external_url: `${serviceNowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
-      });
     });
 
     // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests

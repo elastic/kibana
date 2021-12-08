@@ -34,14 +34,15 @@ export const UserActionsRt = rt.union([
 ]);
 
 const CaseUserActionBasicRt = rt.intersection([UserActionsRt, UserActionCommonAttributesRt]);
+const CaseUserActionSavedObjectIdsRt = rt.type({
+  action_id: rt.string,
+  case_id: rt.string,
+  comment_id: rt.union([rt.string, rt.null]),
+});
 
 const CaseUserActionResponseRt = rt.intersection([
   CaseUserActionBasicRt,
-  rt.type({
-    action_id: rt.string,
-    case_id: rt.string,
-    comment_id: rt.union([rt.string, rt.null]),
-  }),
+  CaseUserActionSavedObjectIdsRt,
   rt.partial({ sub_case_id: rt.string }),
 ]);
 
@@ -73,3 +74,6 @@ export type UserActionFieldType = rt.TypeOf<typeof FieldTypeRt>;
 
 export type CaseUserActionResponseES = rt.TypeOf<typeof CaseUserActionESRt>;
 export type CaseUserAction = rt.TypeOf<typeof CaseUserActionBasicRt>;
+export type CaseUserActionWithPayload<T> = rt.TypeOf<typeof UserActionCommonAttributesRt> &
+  rt.TypeOf<typeof CaseUserActionSavedObjectIdsRt> &
+  T;

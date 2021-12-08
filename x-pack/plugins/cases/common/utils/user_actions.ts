@@ -10,6 +10,7 @@ import { PushedUserAction } from '../api/cases/user_actions/pushed';
 import { StatusUserAction } from '../api/cases/user_actions/status';
 import { TagsUserAction } from '../api/cases/user_actions/tags';
 import { TitleUserAction } from '../api/cases/user_actions/title';
+import { SnakeToCamelCase } from '../types';
 
 export function isCreateConnector(action?: string, actionFields?: string[]): boolean {
   return action === 'create' && actionFields != null && actionFields.includes('connector');
@@ -29,16 +30,6 @@ type SnakeCaseOrCamelCaseUserAction<
   C
 > = T extends 'snakeCase' ? S : C;
 
-type SnakeToCamelCase<S extends string> = S extends `${infer T}_${infer U}`
-  ? `${T}${Capitalize<SnakeToCamelCase<U>>}`
-  : S;
-
-type SnakeToCamelCaseNested<T> = T extends object
-  ? {
-      [K in keyof T as SnakeToCamelCase<K & string>]: SnakeToCamelCaseNested<T[K]>;
-    }
-  : T;
-
 /**
  * TODO: Ternary operation for cameCase/snakeCase
  * TODO: Check also the userAction.fields && userAction.action
@@ -51,7 +42,7 @@ export const isPushedUserAction = <T extends 'snakeCase' | 'cameCase'>(
 ): userAction is SnakeCaseOrCamelCaseUserAction<
   T,
   PushedUserAction,
-  SnakeToCamelCaseNested<PushedUserAction>
+  SnakeToCamelCase<PushedUserAction>
 > => (userAction as PushedUserAction)?.payload?.externalService != null;
 
 export const isTitleUserAction = (userAction: unknown): userAction is TitleUserAction =>

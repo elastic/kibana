@@ -17,6 +17,7 @@ import {
   ActionConnector,
   CaseUserActionResponse,
 } from '../api';
+import { SnakeToCamelCase } from '../types';
 
 interface CasesFeatures {
   alerts: { sync: boolean };
@@ -71,16 +72,13 @@ export type Comment = CommentRequest & {
   version: string;
 };
 
-export interface CaseUserActions {
-  actionId: CaseUserActionResponse['action_id'];
+/**
+ * Fields are not interpreted correctly from SnakeToCamelCase
+ * For that reason is being added manually
+ */
+export type CaseUserActions = Omit<SnakeToCamelCase<CaseUserActionResponse>, 'fields'> & {
   fields: CaseUserActionResponse['fields'];
-  action: CaseUserActionResponse['action'];
-  createdAt: CaseUserActionResponse['created_at'];
-  createdBy: ElasticUser;
-  caseId: CaseUserActionResponse['case_id'];
-  commentId: CaseUserActionResponse['comment_id'];
-  payload: CaseUserActionResponse['payload'];
-}
+};
 
 export interface CaseExternalService {
   pushedAt: string;

@@ -47,6 +47,7 @@ import {
 import { ConnectorUserAction } from '../../../common/api/cases/user_actions/connector';
 import { TagsUserAction } from '../../../common/api/cases/user_actions/tags';
 import { PushedUserAction } from '../../../common/api/cases/user_actions/pushed';
+import { SnakeToCamelCase } from '../../../common/types';
 
 interface LabelTitle {
   action: CaseUserActions;
@@ -142,7 +143,10 @@ const getTagsLabelTitle = (action: TagsUserAction) => {
   );
 };
 
-export const getPushedServiceLabelTitle = (action: PushedUserAction, firstPush: boolean) => {
+export const getPushedServiceLabelTitle = (
+  action: SnakeToCamelCase<PushedUserAction>,
+  firstPush: boolean
+) => {
   const externalService = action.payload.externalService;
 
   return (
