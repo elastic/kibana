@@ -111,6 +111,17 @@ export function ColorRanges(props: ColorRangesProps) {
     paletteConfiguration?.maxSteps && localColorRanges.length >= paletteConfiguration?.maxSteps
   );
 
+  const validateLastRange = (isLast: boolean) => {
+    const lastRange = localColorRanges[localColorRanges.length - 1];
+    if (lastRange.start > lastRange.end) {
+      if (isLast && isValid) {
+        setValid(false);
+      }
+    } else if (!isValid) {
+      setValid(true);
+    }
+  };
+
   const getColorRangeElem = (colorRange: ColorRange, index: number, isLast = false) => {
     const value = isLast ? colorRange.end : colorRange.start;
     const showDelete = index !== 0 && !isLast;
@@ -118,15 +129,23 @@ export function ColorRanges(props: ColorRangesProps) {
     const showEdit = !showDelete && isLast ? isDisabledEnd : isDisabledStart;
     const isDisabled = isLast ? isDisabledEnd : index === 0 ? isDisabledStart : false;
     const isInvalid = (!isValid && isLast) || value === undefined || Number.isNaN(value);
+    const prevStartValue = localColorRanges[index - 1]?.start ?? -Infinity;
+    const nextStartValue = localColorRanges[index + 1]?.start ?? Infinity;
 
     return (
       <EuiFlexItem
         key={colorRange.id}
         data-test-subj={`${dataTestPrefix}_dynamicColoring_range_row_${indexPostfix}`}
         onBlur={(e: FocusEvent<HTMLDivElement>) => {
+          const shouldSort = colorRange.start > nextStartValue || prevStartValue > colorRange.start;
           const isFocusStillInContent =
             (e.currentTarget as Node)?.contains(e.relatedTarget as Node) || popoverInFocus;
-          if (!isFocusStillInContent) {
+
+          if (!shouldSort) {
+            validateLastRange(isLast);
+          }
+
+          if (shouldSort && !isFocusStillInContent) {
             const maxValue = localColorRanges[localColorRanges.length - 1].end;
             let newColorRanges = [...localColorRanges].sort(
               ({ start: startA }, { start: startB }) => Number(startA) - Number(startB)
@@ -140,18 +159,13 @@ export function ColorRanges(props: ColorRangesProps) {
               };
             });
             const lastRange = newColorRanges[newColorRanges.length - 1];
-            if (lastRange.start > lastRange.end) {
-              if (isLast) {
-                setValid(false);
-              } else {
-                const oldEnd = lastRange.end;
-                lastRange.end = lastRange.start;
-                lastRange.start = oldEnd;
-                setValid(true);
-              }
-            } else {
-              setValid(true);
+            if (lastRange.start > lastRange.end && !isLast) {
+              const oldEnd = lastRange.end;
+              lastRange.end = lastRange.start;
+              lastRange.start = oldEnd;
             }
+
+            validateLastRange(isLast);
 
             setColorRanges(newColorRanges);
           }
