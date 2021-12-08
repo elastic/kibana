@@ -19,7 +19,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { RawPackageInfo } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
