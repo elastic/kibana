@@ -7,7 +7,9 @@
  */
 
 import React, { createContext, useContext, useEffect } from 'react';
-import { NotificationsSetup } from 'kibana/public';
+import { Observable } from 'rxjs';
+import { NotificationsSetup, CoreTheme } from 'kibana/public';
+
 import { History, Settings, Storage } from '../../services';
 import { ObjectStorageClient } from '../../../common/types';
 import { MetricsTracker } from '../../types';
@@ -26,6 +28,7 @@ interface ContextServices {
 export interface ContextValue {
   services: ContextServices;
   docLinkVersion: string;
+  theme$: Observable<CoreTheme>;
 }
 
 interface ContextProps {
