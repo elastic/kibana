@@ -50,6 +50,25 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1"
       `);
     });
+
+    it('should return the correct command sslCATrustedFingerprint option is passed', () => {
+      const res = getInstallCommandForPlatform(
+        'linux-mac',
+        'http://elasticsearch:9200',
+        'service-token-1',
+        undefined,
+        undefined,
+        false,
+        'fingerprint123456'
+      );
+
+      expect(res).toMatchInlineSnapshot(`
+        "sudo ./elastic-agent install  \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-es-ca-trusted-fingerprint=fingerprint123456"
+      `);
+    });
   });
 
   describe('with policy id', () => {
