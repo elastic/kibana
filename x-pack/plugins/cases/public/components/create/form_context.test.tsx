@@ -10,7 +10,8 @@ import { mount, ReactWrapper } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';

@@ -9,15 +9,8 @@ import React, { useCallback, useEffect, useMemo, useState, useRef, MutableRefObj
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiLoadingSpinner } from '@elastic/eui';
 
-import {
-  CaseStatuses,
-  CaseAttributes,
-  CaseType,
-  Case,
-  CaseConnector,
-  Ecs,
-  CaseViewRefreshPropInterface,
-} from '../../../common';
+import { Case, Ecs, CaseViewRefreshPropInterface } from '../../../common/ui/types';
+import { CaseStatuses, CaseAttributes, CaseType, CaseConnector } from '../../../common/api';
 import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';

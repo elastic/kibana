@@ -10,24 +10,19 @@ import Boom from '@hapi/boom';
 
 import { SavedObject } from 'kibana/server';
 import {
-  CASE_SAVED_OBJECT,
   caseStatuses,
   CommentAttributes,
-  MAX_CONCURRENT_SEARCHES,
   SubCaseResponse,
   SubCaseResponseRt,
   SubCasesFindRequest,
   SubCasesFindResponse,
   SubCasesFindResponseRt,
   SubCasesPatchRequest,
-} from '../../../common';
+} from '../../../common/api';
+import { MAX_CONCURRENT_SEARCHES, CASE_SAVED_OBJECT } from '../../../common/constants';
 import { CasesClientArgs, CasesClientInternal } from '..';
-import {
-  countAlertsForID,
-  createCaseError,
-  flattenSubCaseSavedObject,
-  transformSubCases,
-} from '../../common';
+import { createCaseError } from '../../common/error';
+import { countAlertsForID, flattenSubCaseSavedObject, transformSubCases } from '../../common/utils';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { constructQueryOptions } from '../utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';

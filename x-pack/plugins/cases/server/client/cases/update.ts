@@ -22,8 +22,6 @@ import { nodeBuilder } from '@kbn/es-query';
 
 import {
   AssociationType,
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
   CasePatchRequest,
   CasesPatchRequest,
   CasesPatchRequestRt,
@@ -33,24 +31,27 @@ import {
   CaseType,
   CommentAttributes,
   CommentType,
-  ENABLE_CASE_CONNECTOR,
   excess,
+  throwErrors,
+  CaseAttributes,
+} from '../../../common/api';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  ENABLE_CASE_CONNECTOR,
   MAX_CONCURRENT_SEARCHES,
   SUB_CASE_SAVED_OBJECT,
-  throwErrors,
   MAX_TITLE_LENGTH,
-  CaseAttributes,
-} from '../../../common';
+} from '../../../common/constants';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import { getCaseToUpdate } from '../utils';
-
+import { createCaseError } from '../../common/error';
 import { CasesService } from '../../services';
 import {
   createAlertUpdateRequest,
-  createCaseError,
   flattenCaseSavedObject,
   isCommentRequestTypeAlertOrGenAlert,
-} from '../../common';
+} from '../../common/utils';
 import { UpdateAlertRequest } from '../alerts/types';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '..';
