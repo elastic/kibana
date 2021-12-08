@@ -25,8 +25,34 @@ import { appplyBulkActionUpdateToRule } from '../../rules/bulk_action_update';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 import { transformAlertToRule } from './utils';
+import { RuleParams } from '../../schemas/rule_schemas';
+import { FindResult } from '../../../../../../alerting/server';
 
 const BULK_ACTION_RULES_LIMIT = 10000;
+interface ActionPerformError {
+  error: {
+    message: string;
+    statusCode: number;
+    rule: {
+      id: string;
+      name: string;
+    };
+  };
+}
+
+const actionPerformWrapper = async (
+  func: () => Promise<void>,
+  rule: FindResult<RuleParams>['data'][number]
+): Promise<undefined | ActionPerformError> => {
+  try {
+    await func();
+  } catch (err) {
+    const { message, statusCode } = transformError(err);
+    return {
+      error: { message, statusCode, rule: { id: rule.id, name: rule.name } },
+    };
+  }
+};
 
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
@@ -83,50 +109,59 @@ export const performBulkActionRoute = (
           });
         }
 
+        let processed: Array<undefined | ActionPerformError> = [];
         switch (body.action) {
           case BulkAction.enable:
-            await Promise.all(
-              rules.data.map(async (rule) => {
-                if (!rule.enabled) {
-                  throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-                  await enableRule({
-                    rule,
-                    rulesClient,
-                  });
-                }
-              })
+            processed = await Promise.all(
+              rules.data.map(async (rule) =>
+                actionPerformWrapper(async () => {
+                  if (!rule.enabled) {
+                    throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+                    await enableRule({
+                      rule,
+                      rulesClient,
+                    });
+                  }
+                }, rule)
+              )
             );
             break;
           case BulkAction.disable:
-            await Promise.all(
-              rules.data.map(async (rule) => {
-                if (rule.enabled) {
-                  throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-                  await rulesClient.disable({ id: rule.id });
-                }
-              })
+            processed = await Promise.all(
+              rules.data.map(async (rule) =>
+                actionPerformWrapper(async () => {
+                  if (rule.enabled) {
+                    throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+                    await rulesClient.disable({ id: rule.id });
+                  }
+                }, rule)
+              )
             );
             break;
           case BulkAction.delete:
-            await Promise.all(
-              rules.data.map(async (rule) => {
-                await deleteRules({
-                  ruleId: rule.id,
-                  rulesClient,
-                  ruleStatusClient,
-                });
-              })
+            processed = await Promise.all(
+              rules.data.map(async (rule) =>
+                actionPerformWrapper(async () => {
+                  await deleteRules({
+                    ruleId: rule.id,
+                    rulesClient,
+                    ruleStatusClient,
+                  });
+                }, rule)
+              )
             );
             break;
           case BulkAction.duplicate:
-            await Promise.all(
-              rules.data.map(async (rule) => {
-                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+            processed = await Promise.all(
+              rules.data.map(async (rule) =>
+                actionPerformWrapper(async () => {
+                  throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
-                await rulesClient.create({
-                  data: duplicateRule(rule, isRuleRegistryEnabled),
-                });
-              })
+                  await rulesClient.create({
+                    data: duplicateRule(rule, isRuleRegistryEnabled),
+                  });
+                }, rule)
+              )
             );
             break;
           case BulkAction.export:
@@ -149,35 +184,46 @@ export const performBulkActionRoute = (
               body: responseBody,
             });
           case BulkAction.update:
-            await Promise.all(
-              rules.data.map(async (rule) => {
-                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+            processed = await Promise.all(
+              rules.data.map(async (rule) =>
+                actionPerformWrapper(async () => {
+                  throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
-                const updatedRule = body.updates.reduce(
-                  (acc, action) => appplyBulkActionUpdateToRule(acc, action),
-                  transformAlertToRule(rule)
-                );
+                  const updatedRule = body.updates.reduce(
+                    (acc, action) => appplyBulkActionUpdateToRule(acc, action),
+                    transformAlertToRule(rule)
+                  );
 
-                const {
-                  tags,
-                  index,
-                  timeline_title: timelineTitle,
-                  timeline_id: timelineId,
-                } = updatedRule;
+                  const {
+                    tags,
+                    index,
+                    timeline_title: timelineTitle,
+                    timeline_id: timelineId,
+                  } = updatedRule;
 
-                await patchRules({
-                  rulesClient,
-                  rule,
-                  tags,
-                  index,
-                  timelineTitle,
-                  timelineId,
-                });
-              })
+                  await patchRules({
+                    rulesClient,
+                    rule,
+                    tags,
+                    index,
+                    timelineTitle,
+                    timelineId,
+                  });
+                }, rule)
+              )
             );
         }
 
-        return response.ok({ body: { success: true, rules_count: rules.data.length } });
+        const errors = processed.filter((res) => res?.error);
+        const failedRulesCount = errors.length;
+        return response.ok({
+          body: {
+            success: true,
+            rules_count: rules.data.length,
+            failed_rules_count: failedRulesCount,
+            ...(failedRulesCount > 0 ? { errors } : {}),
+          },
+        });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({
