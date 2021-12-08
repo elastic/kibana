@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    it.skip('should go back after loading', async function () {
+    it('should go back after loading', async function () {
       await retry.waitFor('user navigating to context and returning to discover', async () => {
         // navigate to the context view
         const initialHitCount = await PageObjects.discover.getHitCount();
