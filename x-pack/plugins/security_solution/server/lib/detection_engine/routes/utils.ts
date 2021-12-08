@@ -238,7 +238,7 @@ export const getFailingRules = async (
   try {
     const errorRules = await Promise.all(
       ids.map(async (id) =>
-        rulesClient.get({
+        rulesClient.resolve({
           id,
         })
       )

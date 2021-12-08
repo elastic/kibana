@@ -24,6 +24,7 @@ const VERSION = `${KIBANA_NAMESPACE}.version` as const;
 
 // Fields pertaining to the alert
 const ALERT_ACTION_GROUP = `${ALERT_NAMESPACE}.action_group` as const;
+const ALERT_BUILDING_BLOCK_TYPE = `${ALERT_NAMESPACE}.building_block_type` as const;
 const ALERT_DURATION = `${ALERT_NAMESPACE}.duration.us` as const;
 const ALERT_END = `${ALERT_NAMESPACE}.end` as const;
 const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as const;
@@ -91,6 +92,7 @@ const fields = {
   TAGS,
   TIMESTAMP,
   ALERT_ACTION_GROUP,
+  ALERT_BUILDING_BLOCK_TYPE,
   ALERT_DURATION,
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
@@ -141,6 +143,7 @@ const fields = {
 
 export {
   ALERT_ACTION_GROUP,
+  ALERT_BUILDING_BLOCK_TYPE,
   ALERT_DURATION,
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,

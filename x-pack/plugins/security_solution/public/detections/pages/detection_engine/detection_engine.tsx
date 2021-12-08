@@ -24,7 +24,6 @@ import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { isTab } from '../../../../../timelines/public';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
@@ -61,9 +60,7 @@ import { timelineActions, timelineSelectors } from '../../../timelines/store/tim
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import {
   buildAlertStatusFilter,
-  buildAlertStatusFilterRuleRegistry,
   buildShowBuildingBlockFilter,
-  buildShowBuildingBlockFilterRuleRegistry,
   buildThreatMatchFilter,
 } from '../../components/alerts_table/default_config';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
@@ -115,8 +112,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-  // TODO: Once we are past experimental phase this code should be removed
-  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
   const { to, from } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -187,39 +182,20 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const alertsHistogramDefaultFilters = useMemo(
     () => [
       ...filters,
-      ...(ruleRegistryEnabled
-        ? [
-            // TODO: Once we are past experimental phase this code should be removed
-            ...buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts),
-            ...buildAlertStatusFilterRuleRegistry(filterGroup),
-          ]
-        : [
-            ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-            ...buildAlertStatusFilter(filterGroup),
-          ]),
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...buildAlertStatusFilter(filterGroup),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [
-      filters,
-      ruleRegistryEnabled,
-      showBuildingBlockAlerts,
-      showOnlyThreatIndicatorAlerts,
-      filterGroup,
-    ]
+    [filters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
   );
 
   // AlertsTable manages global filters itself, so not including `filters`
   const alertsTableDefaultFilters = useMemo(
     () => [
-      ...(ruleRegistryEnabled
-        ? [
-            // TODO: Once we are past experimental phase this code should be removed
-            ...buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts),
-          ]
-        : [...buildShowBuildingBlockFilter(showBuildingBlockAlerts)]),
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
+    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
