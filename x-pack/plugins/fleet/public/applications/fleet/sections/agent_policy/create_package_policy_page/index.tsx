@@ -24,6 +24,7 @@ import {
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { safeLoad } from 'js-yaml';
 
+import { splitPkgKey } from '../../../../../../common';
 import type {
   AgentPolicy,
   NewPackagePolicy,
@@ -152,15 +153,16 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   // Form state
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
 
+  const { pkgName, pkgVersion } = splitPkgKey(params.pkgkey);
   // Fetch package info
   const {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(params.pkgkey);
+  } = useGetPackageInfoByKey(pkgName, pkgVersion);
   const packageInfo = useMemo(() => {
-    if (packageInfoData && packageInfoData.response) {
-      return packageInfoData.response;
+    if (packageInfoData && packageInfoData.item) {
+      return packageInfoData.item;
     }
   }, [packageInfoData]);
 

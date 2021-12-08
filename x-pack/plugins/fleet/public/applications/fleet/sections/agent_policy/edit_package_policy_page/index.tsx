@@ -213,15 +213,16 @@ export const EditPackagePolicyForm = memo<{
             }
 
             const { data: packageData } = await sendGetPackageInfoByKey(
-              pkgKeyFromPackageInfo(_packageInfo!)
+              _packageInfo!.name,
+              _packageInfo!.version
             );
 
-            if (packageData?.response) {
-              setPackageInfo(packageData.response);
+            if (packageData?.item) {
+              setPackageInfo(packageData.item);
 
               const newValidationResults = validatePackagePolicy(
                 newPackagePolicy,
-                packageData.response,
+                packageData.item,
                 safeLoad
               );
               setValidationResults(newValidationResults);
