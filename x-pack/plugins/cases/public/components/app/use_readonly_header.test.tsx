@@ -33,7 +33,7 @@ describe('CaseContainerComponent', () => {
 
   it('displays the readonly glasses badge read permissions but not write', () => {
     renderHook(() => useReadonlyHeader(), {
-      wrapper: ({ children }) => <TestProviders userCanCrud>{children}</TestProviders>,
+      wrapper: ({ children }) => <TestProviders userCanCrud={false}>{children}</TestProviders>,
     });
 
     expect(mockedSetBadge).toBeCalledTimes(1);

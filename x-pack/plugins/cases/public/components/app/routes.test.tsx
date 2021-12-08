@@ -41,7 +41,7 @@ const renderWithRouter = (
   userCanCrud = true
 ) => {
   return render(
-    <TestProviders userCanCrud>
+    <TestProviders userCanCrud={userCanCrud}>
       <MemoryRouter initialEntries={initialEntries}>
         <CasesRoutes useFetchAlertData={(alertIds) => [false, {}]} />
       </MemoryRouter>

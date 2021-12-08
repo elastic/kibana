@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 
 import {
   EuiFlexGroup,
@@ -64,7 +64,7 @@ function MenuSelection({
 
   const onChange = useCallback((val: string) => field.setValue(val), [field]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (availableOwners.length === 1) {
       onChange(availableOwners[0]);
     }

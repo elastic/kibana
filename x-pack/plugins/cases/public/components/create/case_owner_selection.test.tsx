@@ -33,7 +33,7 @@ describe('Case Owner Selection', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders', () => {
