@@ -9,7 +9,7 @@ import sinon from 'sinon';
 import moment from 'moment';
 import uuid from 'uuid';
 
-import { transformCreateCommentsToComments, transformUpdateCommentsToComments } from './utils';
+import { transformCreateCommentsToComments, transformUpdateCommentsToComments } from '.';
 
 jest.mock('uuid/v4');
 
