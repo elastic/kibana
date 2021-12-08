@@ -385,7 +385,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
                     { type: 'action', id: createdAction.id, type_id: 'test.noop' },
                   ],
-                  message: `rule: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})' action: test.noop:${createdAction.id}`,
+                  message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})' action: test.noop:${createdAction.id}`,
                   instanceId: 'instance',
                   actionGroupId: 'default',
                   rule: {
