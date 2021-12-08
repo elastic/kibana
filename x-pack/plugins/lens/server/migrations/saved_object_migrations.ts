@@ -16,7 +16,7 @@ import {
 } from 'src/core/server';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/public';
-import { getAllMigrations } from '../../../../../src/plugins/data/common';
+import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
 import { PersistableFilter } from '../../common';
 import {
   LensDocShapePost712,
@@ -481,7 +481,7 @@ export const mergeSavedObjectMigrationMaps = (
   return mergeWith({ ...obj1 }, obj2, customizer);
 };
 
-export const migrations = mergeSavedObjectMigrationMaps(
-  lensMigrations,
-  getLensFilterMigrations(getAllMigrations())
-);
+export const getAllMigrations = (
+  filterMigrations: MigrateFunctionsObject
+): SavedObjectMigrationMap =>
+  mergeSavedObjectMigrationMaps(lensMigrations, getLensFilterMigrations(filterMigrations));

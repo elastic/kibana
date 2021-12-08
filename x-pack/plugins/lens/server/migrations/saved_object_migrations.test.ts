@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { migrations, LensDocShape } from './saved_object_migrations';
+import { getAllMigrations, LensDocShape } from './saved_object_migrations';
 import {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
@@ -17,6 +17,7 @@ import { CustomPaletteParams, layerTypes } from '../../common';
 import { PaletteOutput } from 'src/plugins/charts/common';
 
 describe('Lens migrations', () => {
+  const migrations = getAllMigrations({});
   describe('7.7.0 missing dimensions in XY', () => {
     const context = {} as SavedObjectMigrationContext;
 

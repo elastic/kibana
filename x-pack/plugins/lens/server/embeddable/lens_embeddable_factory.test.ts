@@ -7,11 +7,11 @@
 
 import semverGte from 'semver/functions/gte';
 import { lensEmbeddableFactory } from './lens_embeddable_factory';
-import { migrations } from '../migrations/saved_object_migrations';
+import { getAllMigrations } from '../migrations/saved_object_migrations';
 
 describe('saved object migrations and embeddable migrations', () => {
   test('should have same versions registered (>7.13.0)', () => {
-    const savedObjectMigrationVersions = Object.keys(migrations).filter((version) => {
+    const savedObjectMigrationVersions = Object.keys(getAllMigrations({})).filter((version) => {
       return semverGte(version, '7.13.1');
     });
     const embeddableMigrationVersions = lensEmbeddableFactory()?.migrations;

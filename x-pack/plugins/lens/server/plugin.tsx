@@ -7,7 +7,10 @@
 
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
+import {
+  PluginStart as DataPluginStart,
+  PluginSetup as DataPluginSetup,
+} from 'src/plugins/data/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
@@ -27,6 +30,7 @@ export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
   embeddable: EmbeddableSetup;
   expressions: ExpressionsServerSetup;
+  data: DataPluginSetup;
 }
 
 export interface PluginStartContract {
@@ -47,7 +51,7 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
   }
 
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
-    setupSavedObjects(core);
+    setupSavedObjects(core, plugins.data.query.filterManager.getAllMigrations());
     setupRoutes(core, this.initializerContext.logger.get());
     setupExpressions(core, plugins.expressions);
 
