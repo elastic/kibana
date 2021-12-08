@@ -15,10 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { mlJobService } from '../../services/job_service';
 import { getDataViewIdFromName } from '../../util/index_utils';
-import {
-  formatHumanReadableDateTimeSeconds,
-  timeFormatter,
-} from '../../../../common/util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { ml } from '../../services/ml_api_service';
 import { replaceStringTokens } from '../../util/string_utils';
@@ -36,6 +33,8 @@ import { AnomalyRecordDoc } from '../../../../common/types/anomalies';
 import { MlKibanaReactContextValue } from '../../contexts/kibana';
 // @ts-ignore
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
+import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
+import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 
 interface Anomaly {
   jobId: string;
@@ -59,6 +58,8 @@ interface LinksMenuProps {
 export const LinksMenuUI = (props: LinksMenuProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [openInDiscoverUrl, setOpenInDiscoverUrl] = useState<string | undefined>();
+
+  const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
 
   useEffect(() => {
     let unmounted = false;
@@ -89,8 +90,8 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         second: record.bucket_span * 1000,
       };
 
-      const from = timeFormatter(record.timestamp - timeRangeBound[interval]); // e.g. 2016-02-08T16:00:00.000Z
-      const to = timeFormatter(record.timestamp + timeRangeBound[interval]);
+      const from = dateFormatter(record.timestamp - timeRangeBound[interval]); // e.g. 2016-02-08T16:00:00.000Z
+      const to = dateFormatter(record.timestamp + timeRangeBound[interval]);
 
       let kqlQuery = '';
 
@@ -123,7 +124,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       if (!unmounted) {
         setOpenInDiscoverUrl(url);
       }
-      window.open(url);
     };
 
     generateDiscoverUrl();
