@@ -102,7 +102,7 @@ export const horizontalBarVisTypeDefinition = {
           drawLinesBetweenPoints: true,
           lineWidth: 2,
           showCircles: true,
-          circlesRadius: 3,
+          circlesRadius: 1,
         },
       ],
       addTooltip: true,
