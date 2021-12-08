@@ -21,6 +21,6 @@ export const securitySolutionTags = [
     id: '4453a000-5455-11ec-b0fd-2f7a10a18ba6',
     name: 'Secutiry Solution - Network',
     description: 'This visualisation is consumed by Security Solution - Network',
-    color: '#00BFB3',
+    color: '#FEC514',
   },
 ];

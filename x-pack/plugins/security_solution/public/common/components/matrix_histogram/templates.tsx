@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { SecuritySolutionTemplate } from '../../../../common/types/matrix_histogram_templates';
@@ -62,31 +63,35 @@ export const MatrixHistogramTemplates = ({ plugins }: { plugins: StartPlugins })
   // const onCreateWorkpad = useCreateFromTemplate();
 
   return templates && defaultIndexPattern?.isTimeBased() ? (
-    templates.map((t) => (
-      <LensComponent
-        id={t.id}
-        key={t.id}
-        withActions
-        style={{ height: 280 }}
-        timeRange={time}
-        attributes={t.attributes}
-        // onLoad={(val) => {
-        //   setIsLoading(val);
-        // }}
-        onBrushEnd={({ range }) => {
-          setTime({
-            from: new Date(range[0]).toISOString(),
-            to: new Date(range[1]).toISOString(),
-          });
-        }}
-        onFilter={(_data) => {
-          // call back event for on filter event
-        }}
-        onTableRowClick={(_data) => {
-          // call back event for on table row click event
-        }}
-      />
-    ))
+    <EuiFlexGroup>
+      {templates.map((t) => (
+        <EuiFlexItem style={{ height: 200 }}>
+          <LensComponent
+            id={t.id}
+            key={t.id}
+            withActions
+            style={{ height: 280 }}
+            timeRange={time}
+            attributes={t.attributes}
+            // onLoad={(val) => {
+            //   setIsLoading(val);
+            // }}
+            onBrushEnd={({ range }) => {
+              setTime({
+                from: new Date(range[0]).toISOString(),
+                to: new Date(range[1]).toISOString(),
+              });
+            }}
+            onFilter={(_data) => {
+              // call back event for on filter event
+            }}
+            onTableRowClick={(_data) => {
+              // call back event for on table row click event
+            }}
+          />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
   ) : (
     <>{'Embeddable place holder'}</>
   );

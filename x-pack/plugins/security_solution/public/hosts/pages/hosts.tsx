@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
@@ -194,7 +194,9 @@ const HostsComponent = ({ plugins }) => {
                 narrowDateRange={narrowDateRange}
               />
               <EuiSpacer />
+
               <MatrixHistogramTemplates plugins={plugins} />
+
               {/* <EmbeddablePanelExample
                 embeddableServices={plugins.embeddable}
                 // doesn't look right to use embeddableExamples as dependency, needs an update

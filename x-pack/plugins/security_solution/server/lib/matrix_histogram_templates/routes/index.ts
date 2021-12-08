@@ -33,10 +33,9 @@ export function getMatrixHistogramTemplates(router: SecuritySolutionPluginRouter
         fields: ['*'],
         hasReference: [{ type: 'tag', id: '6853a880-5451-11ec-b0fd-2f7a10a18ba6' }], // id matches anyone in tag.security_solution.ts
       });
-console.log('templates---', templates)
       return response.ok({
         body: {
-          templates: templates.saved_objects
+          templates: templates.saved_objects,
         },
       });
     }
