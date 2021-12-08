@@ -5378,11 +5378,6 @@
   version "0.0.0"
   uid ""
 
-"@types/elasticsearch@^5.0.33":
-  version "5.0.33"
-  resolved "https://registry.yarnpkg.com/@types/elasticsearch/-/elasticsearch-5.0.33.tgz#b0fd37dc674f498223b6d68c313bdfd71f4d812b"
-  integrity sha512-n/g9pqJEpE4fyUE8VvHNGtl7E2Wv8TCroNwfgAeJKRV4ghDENahtrAo1KMsFNIejBD2gDAlEUa4CM4oEEd8p9Q==
-
 "@types/enzyme@^3.10.8":
   version "3.10.8"
   resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.10.8.tgz#ad7ac9d3af3de6fd0673773123fafbc63db50d42"
