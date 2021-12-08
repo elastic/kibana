@@ -42,6 +42,7 @@ export class GithubApi {
   private readonly token: string | undefined;
   private readonly dryRun: boolean;
   private readonly x: AxiosInstance;
+  private requestCount: number = 0;
 
   /**
    * Create a GithubApi helper object, if token is undefined requests won't be
@@ -66,6 +67,10 @@ export class GithubApi {
         'User-Agent': 'elastic/kibana#failed_test_reporter',
       },
     });
+  }
+
+  getRequestCount() {
+    return this.requestCount;
   }
 
   private failedTestIssuesPageCache: {
@@ -191,53 +196,50 @@ export class GithubApi {
   }> {
     const executeRequest = !this.dryRun || options.safeForDryRun;
     const maxAttempts = options.maxAttempts || 5;
-    const attempt = options.attempt || 1;
 
-    this.log.verbose('Github API', executeRequest ? 'Request' : 'Dry Run', options);
+    let attempt = 0;
+    while (true) {
+      attempt += 1;
+      this.log.verbose('Github API', executeRequest ? 'Request' : 'Dry Run', options);
 
-    if (!executeRequest) {
-      return {
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        data: dryRunResponse,
-      };
-    }
+      if (!executeRequest) {
+        return {
+          status: 200,
+          statusText: 'OK',
+          headers: {},
+          data: dryRunResponse,
+        };
+      }
 
-    try {
-      return await this.x.request<T>(options);
-    } catch (error) {
-      const unableToReachGithub = isAxiosRequestError(error);
-      const githubApiFailed = isAxiosResponseError(error) && error.response.status >= 500;
-      const errorResponseLog =
-        isAxiosResponseError(error) &&
-        `[${error.config.method} ${error.config.url}] ${error.response.status} ${error.response.statusText} Error`;
+      try {
+        this.requestCount += 1;
+        return await this.x.request<T>(options);
+      } catch (error) {
+        const unableToReachGithub = isAxiosRequestError(error);
+        const githubApiFailed = isAxiosResponseError(error) && error.response.status >= 500;
+        const errorResponseLog =
+          isAxiosResponseError(error) &&
+          `[${error.config.method} ${error.config.url}] ${error.response.status} ${error.response.statusText} Error`;
 
-      if ((unableToReachGithub || githubApiFailed) && attempt < maxAttempts) {
-        const waitMs = 1000 * attempt;
+        if ((unableToReachGithub || githubApiFailed) && attempt < maxAttempts) {
+          const waitMs = 1000 * attempt;
 
-        if (errorResponseLog) {
-          this.log.error(`${errorResponseLog}: waiting ${waitMs}ms to retry`);
-        } else {
-          this.log.error(`Unable to reach github, waiting ${waitMs}ms to retry`);
+          if (errorResponseLog) {
+            this.log.error(`${errorResponseLog}: waiting ${waitMs}ms to retry`);
+          } else {
+            this.log.error(`Unable to reach github, waiting ${waitMs}ms to retry`);
+          }
+
+          await new Promise((resolve) => setTimeout(resolve, waitMs));
+          continue;
         }
 
-        await new Promise((resolve) => setTimeout(resolve, waitMs));
-        return await this.request<T>(
-          {
-            ...options,
-            maxAttempts,
-            attempt: attempt + 1,
-          },
-          dryRunResponse
-        );
-      }
+        if (errorResponseLog) {
+          throw new Error(`${errorResponseLog}: ${JSON.stringify(error.response.data)}`);
+        }
 
-      if (errorResponseLog) {
-        throw new Error(`${errorResponseLog}: ${JSON.stringify(error.response.data)}`);
+        throw error;
       }
-
-      throw error;
     }
   }
 }
