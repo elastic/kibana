@@ -9198,7 +9198,6 @@
     "xpack.enterpriseSearch.errorConnectingState.description1": "ホストURL {enterpriseSearchUrl}では、エンタープライズ サーチへの接続を確立できません",
     "xpack.enterpriseSearch.errorConnectingState.description2": "ホストURLが{configFile}で正しく構成されていることを確認してください。",
     "xpack.enterpriseSearch.errorConnectingState.description3": "エンタープライズ サーチサーバーが応答していることを確認してください。",
-    "xpack.enterpriseSearch.errorConnectingState.description4": "セットアップガイドを確認するか、サーバーログの{pluginLog}ログメッセージを確認してください。",
     "xpack.enterpriseSearch.errorConnectingState.setupGuideCta": "セットアップガイドを確認",
     "xpack.enterpriseSearch.errorConnectingState.title": "接続できません",
     "xpack.enterpriseSearch.errorConnectingState.troubleshootAuth": "ユーザー認証を確認してください。",
