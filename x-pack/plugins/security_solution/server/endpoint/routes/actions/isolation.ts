@@ -209,13 +209,9 @@ export const isolationRequestHandler = function (
     }
 
     try {
-      let esClient = context.core.elasticsearch.client.asCurrentUser;
-      if (doesLogsEndpointActionsDsExist) {
-        // create action request record as system user with user in .fleet-actions
-        esClient = context.core.elasticsearch.client.asInternalUser;
-      }
-      // write as the current user if the new indices do not exist
-      // <v7.16 requires the current user to be super user
+      const esClient = context.core.elasticsearch.client.asInternalUser;
+      // write as the internal user if the new indices do not exist
+      // 8.0+ requires internal user to write to system indices
       fleetActionIndexResult = await esClient.index<EndpointAction>({
         index: AGENT_ACTIONS_INDEX,
         body: {
