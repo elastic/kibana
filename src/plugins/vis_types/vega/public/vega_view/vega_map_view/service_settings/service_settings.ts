@@ -88,7 +88,7 @@ export class ServiceSettings implements IServiceSettings {
 
     return {
       name: fileLayer.getDisplayName(),
-      origin: fileLayer.getOrigin(),
+      origin: ORIGIN_LEGACY.EMS,
       id: fileLayer.getId(),
       created_at: fileLayer.getCreatedAt(),
       attribution: getAttributionString(fileLayer),
@@ -132,7 +132,7 @@ export class ServiceSettings implements IServiceSettings {
           .map(async (tmsService: TMSService) => {
             // shim for compatibility
             return {
-              origin: tmsService.getOrigin(),
+              origin: ORIGIN_LEGACY.EMS,
               id: tmsService.getId(),
               minZoom: (await tmsService.getMinZoom()) as number,
               maxZoom: (await tmsService.getMaxZoom()) as number,
