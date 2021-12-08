@@ -14,6 +14,7 @@ import { TechnicalRuleDataFieldName } from '../../common/technical_rule_data_fie
 
 export interface IRuleDataClient {
   indexName: string;
+  indexNameWithNamespace(namespace: string): string;
   kibanaVersion: string;
   isWriteEnabled(): boolean;
   getReader(options?: { namespace?: string }): IRuleDataReader;

@@ -33,6 +33,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CANCEL_BUTTON_LABEL, START_BUTTON_LABEL } from '../../../../shared/constants';
+import { docLinks } from '../../../../shared/doc_links';
 import { EuiListGroupItemTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import aclImage from '../../../assets/supports_acl.svg';
@@ -46,10 +47,6 @@ import {
   DOCUMENTATION_LINK_TITLE,
 } from '../../../constants';
 import {
-  CUSTOM_SOURCE_DOCS_URL,
-  DOCUMENT_PERMISSIONS_DOCS_URL,
-  ENT_SEARCH_LICENSE_MANAGEMENT,
-  EXTERNAL_IDENTITIES_DOCS_URL,
   SYNC_FREQUENCY_PATH,
   BLOCKED_TIME_WINDOWS_PATH,
   getGroupPath,
@@ -347,7 +344,7 @@ export const Overview: React.FC = () => {
                   defaultMessage="{learnMoreLink} about permissions"
                   values={{
                     learnMoreLink: (
-                      <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
+                      <EuiLink target="_blank" href={docLinks.workplaceSearchDocumentPermissions}>
                         {LEARN_MORE_LINK}
                       </EuiLink>
                     ),
@@ -408,7 +405,7 @@ export const Overview: React.FC = () => {
                 defaultMessage="The {externalIdentitiesLink} must be used to configure user access mappings. Read the guide to learn more."
                 values={{
                   externalIdentitiesLink: (
-                    <EuiLink target="_blank" href={EXTERNAL_IDENTITIES_DOCS_URL}>
+                    <EuiLink target="_blank" href={docLinks.workplaceSearchExternalIdentities}>
                       {EXTERNAL_IDENTITIES_LINK}
                     </EuiLink>
                   ),
@@ -466,7 +463,7 @@ export const Overview: React.FC = () => {
       </EuiText>
       <EuiSpacer size="s" />
       <EuiText size="s">
-        <EuiLink target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+        <EuiLink target="_blank" href={docLinks.licenseManagement}>
           {LEARN_CUSTOM_FEATURES_BUTTON}
         </EuiLink>
       </EuiText>
@@ -569,7 +566,7 @@ export const Overview: React.FC = () => {
                         defaultMessage="{learnMoreLink} about custom sources."
                         values={{
                           learnMoreLink: (
-                            <EuiLink target="_blank" href={CUSTOM_SOURCE_DOCS_URL}>
+                            <EuiLink target="_blank" href={docLinks.workplaceSearchCustomSources}>
                               {LEARN_MORE_LINK}
                             </EuiLink>
                           ),
