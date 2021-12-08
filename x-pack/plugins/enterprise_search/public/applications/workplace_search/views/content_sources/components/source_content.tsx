@@ -31,12 +31,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../../shared/doc_links';
 import { TruncatedContent } from '../../../../shared/truncate';
 import { ComponentLoader } from '../../../components/shared/component_loader';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { NAV, CUSTOM_SERVICE_TYPE } from '../../../constants';
-import { CUSTOM_SOURCE_DOCS_URL } from '../../../routes';
 import { SourceContentItem } from '../../../types';
 import {
   NO_CONTENT_MESSAGE,
@@ -110,7 +110,7 @@ export const SourceContent: React.FC = () => {
                 defaultMessage="Learn more about adding content in our {documentationLink}"
                 values={{
                   documentationLink: (
-                    <EuiLink target="_blank" href={CUSTOM_SOURCE_DOCS_URL}>
+                    <EuiLink target="_blank" href={docLinks.workplaceSearchCustomSources}>
                       {CUSTOM_DOCUMENTATION_LINK}
                     </EuiLink>
                   ),
