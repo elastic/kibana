@@ -198,7 +198,7 @@ export const MonitorFieldsCodec = t.intersection([
 export type MonitorFields = t.TypeOf<typeof MonitorFieldsCodec>;
 
 export const MonitorManagementListResultCodec = t.type({
-  monitors: t.array(t.interface({ id: t.string, attributes: t.array(MonitorFieldsCodec) })),
+  monitors: t.array(t.interface({ id: t.string, attributes: MonitorFieldsCodec })),
   page: t.number,
   perPage: t.number,
   total: t.union([t.number, t.null]),
