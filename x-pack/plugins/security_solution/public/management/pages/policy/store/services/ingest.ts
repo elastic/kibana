@@ -21,7 +21,7 @@ import { NewPolicyData } from '../../../../../../common/endpoint/types';
 const INGEST_API_ROOT = `/api/fleet`;
 export const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;
 export const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
-const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_ROOT}/agent-status`;
+const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_ROOT}/agent_status`;
 export const INGEST_API_FLEET_AGENTS = `${INGEST_API_ROOT}/agents`;
 export const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
 const INGEST_API_DELETE_PACKAGE_POLICY = `${INGEST_API_PACKAGE_POLICIES}/delete`;
@@ -135,10 +135,10 @@ export const sendGetFleetAgentsWithEndpoint = (
  */
 export const sendGetEndpointSecurityPackage = async (
   http: HttpStart
-): Promise<GetPackagesResponse['response'][0]> => {
+): Promise<GetPackagesResponse['items'][0]> => {
   const options = { query: { category: 'security' } };
   const securityPackages = await http.get<GetPackagesResponse>(INGEST_API_EPM_PACKAGES, options);
-  const endpointPackageInfo = securityPackages.response.find(
+  const endpointPackageInfo = securityPackages.items.find(
     (epmPackage) => epmPackage.name === 'endpoint'
   );
   if (!endpointPackageInfo) {
