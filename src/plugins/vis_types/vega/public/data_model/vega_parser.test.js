@@ -218,7 +218,7 @@ describe('VegaParser._resolveEsQueries', () => {
 
   function check(spec, expected, warnCount) {
     return async () => {
-      const mockGetServiceSettings = async () => {
+      const mockGetServiceSettings = () => {
         return {
           getFileLayers: async () => [{ name: 'file1', url: 'url1' }],
           getUrlForRegionLayer: async (layer) => {
