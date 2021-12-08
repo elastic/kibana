@@ -34,7 +34,7 @@ import { useCurrentUser } from '../../../../hooks/use_current_user';
 interface Props {
   onCancel: () => void;
   onSuccess: (agentKey: CreateApiKeyResponse) => void;
-  onError: (keyName: string) => void;
+  onError: (keyName: string, message: string) => void;
 }
 
 export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
@@ -81,7 +81,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
 
       onSuccess(agentKey);
     } catch (error) {
-      onError(keyName);
+      onError(keyName, error.body?.message || error.message);
     }
   };
 

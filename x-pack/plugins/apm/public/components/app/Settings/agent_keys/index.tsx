@@ -123,11 +123,12 @@ export function AgentKeys() {
             setIsFlyoutVisible(false);
             refetchAgentKeys();
           }}
-          onError={(keyName: string) => {
+          onError={(keyName: string, message: string) => {
             toasts.addDanger(
               i18n.translate('xpack.apm.settings.agentKeys.crate.failed', {
-                defaultMessage: 'Error creating agent key "{keyName}"',
-                values: { keyName },
+                defaultMessage:
+                  'Error creating agent key "{keyName}". Error: "{message}"',
+                values: { keyName, message },
               })
             );
             setIsFlyoutVisible(false);
