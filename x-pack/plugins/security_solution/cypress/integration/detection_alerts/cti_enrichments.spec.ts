@@ -75,7 +75,9 @@ describe('CTI Enrichment', () => {
   it('Displays persisted enrichments on the JSON view', () => {
     const expectedEnrichment = [
       {
-        feed: { name: 'AbuseCH malware' },
+        feed: {
+          name: 'AbuseCH malware',
+        },
         indicator: {
           first_seen: '2021-03-10T08:02:14.000Z',
           file: {
