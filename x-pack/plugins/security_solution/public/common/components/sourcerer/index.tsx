@@ -91,6 +91,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     kibanaDataViews,
     missingPatterns,
     scopeId,
+    selectedDataViewId,
     selectedPatterns,
     signalIndexName,
   });

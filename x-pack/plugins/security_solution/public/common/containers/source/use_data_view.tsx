@@ -50,10 +50,11 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
     },
     [dispatch]
   );
-
+  const requestIds = useRef<string[]>([]);
   const indexFieldsSearch = useCallback(
     (selectedDataViewId: string) => {
       const asyncSearch = async () => {
+        requestIds.current = [...requestIds.current, selectedDataViewId];
         abortCtrl.current = new AbortController();
         setLoading({ id: selectedDataViewId, loading: true });
         searchSubscription$.current = data.search
@@ -69,6 +70,7 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
           )
           .subscribe({
             next: (response) => {
+              requestIds.current = requestIds.current.filter((id) => id !== selectedDataViewId);
               if (isCompleteResponse(response)) {
                 const patternString = response.indicesExist.sort().join();
 
@@ -90,6 +92,7 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
               }
             },
             error: (msg) => {
+              requestIds.current = requestIds.current.filter((id) => id !== selectedDataViewId);
               if (msg.message === DELETED_SECURITY_SOLUTION_DATA_VIEW) {
                 // reload app if security solution data view is deleted
                 return location.reload();
@@ -102,8 +105,11 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
             },
           });
       };
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
+      // only abort requests for ids already in progress
+      if (requestIds.current.includes(selectedDataViewId)) {
+        searchSubscription$.current.unsubscribe();
+        abortCtrl.current.abort();
+      }
       asyncSearch();
     },
     [addError, addWarning, data.search, dispatch, setLoading]
