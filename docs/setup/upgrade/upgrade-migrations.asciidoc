@@ -151,17 +151,18 @@ In order to rollback after a failed upgrade migration, the saved object indices 
 [float]
 ===== Rollback by restoring a backup snapshot:
 
-1. Before proceeding, {ref}/snapshots-take-snapshot.html[take a snapshot] that contains the `kibana` feature state or all `.kibana*` indices.
+1. Before proceeding, {ref}/snapshots-take-snapshot.html[take a snapshot] that contains the `kibana` feature state.
+   Snapshots include this feature state by default.
 2. Shutdown all {kib} instances to be 100% sure that there are no instances currently performing a migration.
 3. Delete all saved object indices with `DELETE /.kibana*`
-4. {ref}/snapshots-restore-snapshot.html[Restore] the `kibana` feature state or all `.kibana* indices and their aliases from the snapshot.
+4. {ref}/snapshots-restore-snapshot.html[Restore] the `kibana` feature state from the snapshot.
 5. Start up all {kib} instances on the older version you wish to rollback to.
 
 [float]
 ===== (Not recommended) Rollback without a backup snapshot:
 
 1. Shutdown all {kib} instances to be 100% sure that there are no {kib} instances currently performing a migration.
-2. {ref}/snapshots-take-snapshot.html[Take a snapshot] that includes the `kibana` feature state or all `.kibana*` indices.
+2. {ref}/snapshots-take-snapshot.html[Take a snapshot] that includes the `kibana` feature state. Snapshots include this feature state by default.
 3. Delete the version specific indices created by the failed upgrade migration. E.g. if you wish to rollback from a failed upgrade to v7.12.0 `DELETE /.kibana_7.12.0_*,.kibana_task_manager_7.12.0_*`
 4. Inspect the output of `GET /_cat/aliases`. If either the `.kibana` and/or `.kibana_task_manager` alias is missing, these will have to be created manually. Find the latest index from the output of `GET /_cat/indices` and create the missing alias to point to the latest index. E.g. if the `.kibana` alias was missing and the latest index is `.kibana_3` create a new alias with `POST /.kibana_3/_aliases/.kibana`.
 5. Remove the write block from the rollback indices. `PUT /.kibana,.kibana_task_manager/_settings {"index.blocks.write": false}`
