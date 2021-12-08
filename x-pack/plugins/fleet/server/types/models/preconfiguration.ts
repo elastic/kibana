@@ -87,6 +87,7 @@ export const PreconfiguredOutputsSchema = schema.arrayOf(
     type: schema.oneOf([schema.literal(outputType.Elasticsearch)]),
     hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
     ca_sha256: schema.maybe(schema.string()),
+    ca_trusted_fingerprint: schema.maybe(schema.string()),
     config: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   }),
   {

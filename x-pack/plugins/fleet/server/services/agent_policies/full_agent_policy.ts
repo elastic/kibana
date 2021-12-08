@@ -168,19 +168,20 @@ export async function getFullAgentPolicy(
   return fullAgentPolicy;
 }
 
-function transformOutputToFullPolicyOutput(
+export function transformOutputToFullPolicyOutput(
   output: Output,
   standalone = false
 ): FullAgentPolicyOutput {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { config_yaml, type, hosts, ca_sha256, api_key } = output;
+  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, api_key } = output;
   const configJs = config_yaml ? safeLoad(config_yaml) : {};
   const newOutput: FullAgentPolicyOutput = {
+    ...configJs,
     type,
     hosts,
     ca_sha256,
     api_key,
-    ...configJs,
+    ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
   };
 
   if (standalone) {

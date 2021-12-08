@@ -61,6 +61,8 @@ put:
                 type: string
             ca_sha256:
               type: string
+            ca_trusted_fingerprint:
+              type: string
             config_yaml:
               type: string
           required:

@@ -32,6 +32,7 @@ export interface PutOutputRequest {
     name?: string;
     hosts?: string[];
     ca_sha256?: string;
+    ca_trusted_fingerprint?: string;
     config_yaml?: string;
     is_default?: boolean;
     is_default_monitoring?: boolean;
@@ -45,6 +46,7 @@ export interface PostOutputRequest {
     name: string;
     hosts?: string[];
     ca_sha256?: string;
+    ca_trusted_fingerprint?: string;
     is_default?: boolean;
     is_default_monitoring?: boolean;
     config_yaml?: string;
