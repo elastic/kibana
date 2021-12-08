@@ -23,7 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     baselineAPdfPrint: path.resolve(__dirname, 'fixtures/baseline/capture_a_print.pdf'),
   };
 
-  describe('Captures', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/116882
+  describe.skip('Captures', () => {
     it('PNG that matches the baseline', async () => {
       await PageObjects.common.navigateToApp(appId);
 
