@@ -138,7 +138,7 @@ class AgentPolicyService {
     const isDefaultPolicy =
       preconfiguredAgentPolicy.is_default || preconfiguredAgentPolicy.is_default_fleet_server;
 
-    if (isDefaultPolicy && !id) {
+    if (isDefaultPolicy) {
       searchParams = {
         searchFields: [
           preconfiguredAgentPolicy.is_default_fleet_server
@@ -155,7 +155,7 @@ class AgentPolicyService {
 
     if (!searchParams) throw new Error('Missing ID');
 
-    return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams);
+    return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams, id);
   }
 
   private async ensureAgentPolicy(
@@ -167,7 +167,8 @@ class AgentPolicyService {
       | {
           searchFields: string[];
           search: string;
-        }
+        },
+    id?: string | number
   ): Promise<{
     created: boolean;
     policy: AgentPolicy;
@@ -205,7 +206,7 @@ class AgentPolicyService {
     if (agentPolicies.total === 0) {
       return {
         created: true,
-        policy: await this.create(soClient, esClient, newAgentPolicy),
+        policy: await this.create(soClient, esClient, newAgentPolicy, { id: String(id) }),
       };
     }
 
