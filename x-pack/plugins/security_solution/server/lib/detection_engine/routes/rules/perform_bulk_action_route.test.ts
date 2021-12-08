@@ -29,6 +29,7 @@ describe.each([
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  const mockRule = getFindResultWithSingleHit(isRuleRegistryEnabled).data[0];
 
   beforeEach(() => {
     server = serverMock.create();
@@ -72,33 +73,6 @@ describe.each([
       const response = await server.inject(getBulkActionRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
-    });
-
-    it('catches error if disable throws error', async () => {
-      clients.rulesClient.disable.mockImplementation(async () => {
-        throw new Error('Test error');
-      });
-      const response = await server.inject(getBulkActionRequest(), context);
-      expect(response.status).toEqual(500);
-      expect(response.body).toEqual({
-        message: 'Test error',
-        status_code: 500,
-      });
-    });
-
-    it('rejects patching a rule if mlAuthz fails', async () => {
-      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
-        validateRuleType: jest
-          .fn()
-          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
-      });
-      const response = await server.inject(getBulkActionRequest(), context);
-
-      expect(response.status).toEqual(403);
-      expect(response.body).toEqual({
-        message: 'mocked validation message',
-        status_code: 403,
-      });
     });
   });
 
@@ -147,6 +121,100 @@ describe.each([
       const result = server.validate(request);
 
       expect(result.ok).toHaveBeenCalled();
+    });
+  });
+
+  describe('failures', () => {
+    it('catches failures if disable throws error', async () => {
+      clients.rulesClient.disable.mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const response = await server.inject(getBulkActionRequest(), context);
+      expect(response.status).toEqual(200);
+
+      expect(response.body).toEqual({
+        errors: [
+          {
+            error: {
+              message: 'Test error',
+              statusCode: 500,
+              rule: {
+                id: mockRule.id,
+                name: mockRule.name,
+              },
+            },
+          },
+        ],
+        failed_rules_count: 1,
+        rules_count: 1,
+        success: false,
+      });
+    });
+
+    it('catches failures when patching rule if mlAuthz fails', async () => {
+      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
+        validateRuleType: jest
+          .fn()
+          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      });
+      const response = await server.inject(getBulkActionRequest(), context);
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        errors: [
+          {
+            error: {
+              message: 'mocked validation message',
+              statusCode: 403,
+              rule: {
+                id: mockRule.id,
+                name: mockRule.name,
+              },
+            },
+          },
+        ],
+        failed_rules_count: 1,
+        rules_count: 1,
+        success: false,
+      });
+    });
+    it('process the rest of rules updates if one of updates fails', async () => {
+      const failedRuleId = 'fail-rule-id';
+      const failedRuleName = 'Rule that fails';
+      clients.rulesClient.find.mockResolvedValue(
+        getFindResultWithMultiHits({
+          data: [{ ...mockRule, id: failedRuleId, name: failedRuleName }, mockRule, mockRule],
+          total: 3,
+        })
+      );
+
+      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
+        validateRuleType: jest
+          .fn()
+          .mockImplementationOnce(() => ({ valid: false, message: 'mocked validation message' }))
+          .mockImplementationOnce(() => ({ valid: true }))
+          .mockImplementationOnce(() => ({ valid: true })),
+      });
+      const response = await server.inject(getBulkActionRequest(), context);
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        errors: [
+          {
+            error: {
+              message: 'mocked validation message',
+              rule: {
+                id: failedRuleId,
+                name: failedRuleName,
+              },
+              statusCode: 403,
+            },
+          },
+        ],
+        failed_rules_count: 1,
+        rules_count: 3,
+        success: false,
+      });
     });
   });
 });

@@ -216,12 +216,12 @@ export const performBulkActionRoute = (
 
         const errors = processed.filter((res) => res?.error);
         const failedRulesCount = errors.length;
+
         return response.ok({
           body: {
-            success: true,
+            success: failedRulesCount === 0,
             rules_count: rules.data.length,
-            failed_rules_count: failedRulesCount,
-            ...(failedRulesCount > 0 ? { errors } : {}),
+            ...(failedRulesCount > 0 ? { errors, failed_rules_count: failedRulesCount } : {}),
           },
         });
       } catch (err) {
