@@ -15,6 +15,7 @@ import {
   CommentRequest,
   User,
   ActionConnector,
+  CaseExternalServiceBasic,
   CaseUserActionResponse,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
@@ -73,22 +74,13 @@ export type Comment = CommentRequest & {
 };
 
 /**
- * Fields are not interpreted correctly from SnakeToCamelCase
- * For that reason is being added manually
+ * TODO: Ensure the type is correct
+ * or find a better way
+ * Payload nested objects are in snakeCase in this type
  */
-export type CaseUserActions = Omit<SnakeToCamelCase<CaseUserActionResponse>, 'fields'> & {
-  fields: CaseUserActionResponse['fields'];
-};
+export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 
-export interface CaseExternalService {
-  pushedAt: string;
-  pushedBy: ElasticUser;
-  connectorId: string;
-  connectorName: string;
-  externalId: string;
-  externalTitle: string;
-  externalUrl: string;
-}
+export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 
 interface BasicCase {
   id: string;

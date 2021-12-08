@@ -62,7 +62,7 @@ import { findConnectorIdReference } from '../transform';
 import { isTwoArraysDifference } from '../../client/utils';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { CommentUserAction } from '../../../common/api/cases/user_actions/comment';
-import { CreateCaseUserAction } from '../../../common/api/cases/user_actions/create_case';
+import { CreateCaseUserActionWithoutConnectorId } from '../../../common/api/cases/user_actions/create_case';
 import { StatusUserAction } from '../../../common/api/cases/user_actions/status';
 import { PushedUserActionWithoutConnectorId } from '../../../common/api/cases/user_actions/pushed';
 
@@ -356,14 +356,14 @@ export class CaseUserActionService {
         action: Actions.create,
         fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', OWNER_FIELD],
         payload: { ...payload, connector: connectorWithoutId, status: CaseStatuses.open },
-      } as CreateCaseUserAction;
+      } as CreateCaseUserActionWithoutConnectorId;
 
       const references = [
         ...this.createCaseReferences(caseId, subCaseId),
         ...this.createConnectorReference(payload.connector.id),
       ];
 
-      await unsecuredSavedObjectsClient.create<CreateCaseUserAction>(
+      await unsecuredSavedObjectsClient.create<CreateCaseUserActionWithoutConnectorId>(
         CASE_USER_ACTION_SAVED_OBJECT,
         userAction,
         {
@@ -732,7 +732,7 @@ const addReferenceIdToPayload = (
       ...userAction.attributes.payload,
       externalService: {
         ...userActionAttributes.payload.externalService,
-        connector_id: connectorId,
+        connector_id: connectorId ?? noneConnectorId,
       },
     };
   }

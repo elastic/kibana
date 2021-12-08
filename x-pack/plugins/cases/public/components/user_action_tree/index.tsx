@@ -515,7 +515,7 @@ export const UserActionTree = React.memo(
 
             // Pushed information
             // TODO: Use types guards
-            if (action.fields.length === 1 && isPushedUserAction(action)) {
+            if (action.fields.length === 1 && isPushedUserAction<'camelCase'>(action)) {
               const parsedExternalService = action.payload.externalService;
 
               const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(

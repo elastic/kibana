@@ -118,7 +118,7 @@ export const getPushedInfo = (
     const caseUserActionsReversed = [...caseUserActions].reverse();
     const lastPushOfConnectorReversedIndex = caseUserActionsReversed.findIndex(
       (mua) =>
-        isPushedUserAction<'cameCase'>(mua) &&
+        isPushedUserAction<'camelCase'>(mua) &&
         mua.payload.externalService.connectorId === connectorId
     );
 
@@ -166,7 +166,7 @@ export const getPushedInfo = (
   );
 
   let caseServices = caseUserActions.reduce<CaseServices>((acc, cua, i) => {
-    if (!isPushedUserAction<'cameCase'>(cua)) {
+    if (!isPushedUserAction<'camelCase'>(cua)) {
       return acc;
     }
 

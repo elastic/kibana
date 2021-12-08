@@ -6,10 +6,10 @@
  */
 
 type SnakeToCamelCaseString<S extends string> = S extends `${infer T}_${infer U}`
-  ? `${T}${Capitalize<SnakeToCamelCase<U>>}`
+  ? `${T}${Capitalize<SnakeToCamelCaseString<U>>}`
   : S;
 
-export type SnakeToCamelCase<T> = T extends object
+export type SnakeToCamelCase<T> = T extends Record<string, unknown>
   ? {
       [K in keyof T as SnakeToCamelCaseString<K & string>]: SnakeToCamelCase<T[K]>;
     }

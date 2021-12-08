@@ -252,6 +252,7 @@ const basicAction = {
   commentId: null,
   owner: SECURITY_SOLUTION_OWNER,
   payload: { title: 'a title' },
+  fields: ['title'],
 };
 
 export const cases: Case[] = [
@@ -420,6 +421,7 @@ export const getUserAction = (
     actionId: `${fields[0]}-${action}`,
     fields,
     action,
+    payload: { title: 'a title' },
     commentId: fields[0] === 'comment' ? basicCommentId : null,
     ...overrides,
   };
@@ -429,10 +431,10 @@ export const getJiraConnector = (overrides?: Partial<CaseConnector>): CaseConnec
   return {
     id: '123',
     name: 'jira1',
-    type: ConnectorTypes.jira,
     ...jiraFields,
     ...overrides,
-  };
+    type: ConnectorTypes.jira as const,
+  } as CaseConnector;
 };
 
 export const jiraFields = { fields: { issueType: '10006', priority: null, parent: null } };
@@ -440,19 +442,19 @@ export const jiraFields = { fields: { issueType: '10006', priority: null, parent
 export const getAlertUserAction = () => ({
   ...basicAction,
   actionId: 'alert-action-id',
-  actionField: ['comment'],
+  fields: ['comment'],
   action: 'create',
   commentId: 'alert-comment-id',
-  newValue: '{"type":"alert","alertId":"alert-id-1","index":"index-id-1"}',
+  payload: { comment: { type: 'alert', alertId: 'alert-id-1', index: 'index-id-1' } },
 });
 
 export const getHostIsolationUserAction = () => ({
   ...basicAction,
   actionId: 'isolate-action-id',
-  actionField: ['comment'] as UserActionField,
+  fields: ['comment'] as UserActionField,
   action: 'create' as UserAction,
   commentId: 'isolate-comment-id',
-  newValue: 'some value',
+  payload: { comment: { type: 'actions', comment: 'a comment', actions: [] } },
 });
 
 export const caseUserActions: CaseUserActions[] = [

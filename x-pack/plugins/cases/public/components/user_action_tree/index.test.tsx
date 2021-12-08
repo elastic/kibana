@@ -94,7 +94,7 @@ describe(`UserActionTree`, () => {
 
   it('Renders service now update line with top and bottom when push is required', async () => {
     const ourActions = [
-      getUserAction(['pushed'], 'push-to-service'),
+      getUserAction(['pushed'], 'push_to_service'),
       getUserAction(['comment'], 'update'),
     ];
 
@@ -123,7 +123,7 @@ describe(`UserActionTree`, () => {
   });
 
   it('Renders service now update line with top only when push is up to date', async () => {
-    const ourActions = [getUserAction(['pushed'], 'push-to-service')];
+    const ourActions = [getUserAction(['pushed'], 'push_to_service')];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
@@ -381,6 +381,7 @@ describe(`UserActionTree`, () => {
       ).toEqual(true);
     });
   });
+
   describe('Host isolation action', () => {
     it('renders in the cases details view', async () => {
       const isolateAction = [getHostIsolationUserAction()];

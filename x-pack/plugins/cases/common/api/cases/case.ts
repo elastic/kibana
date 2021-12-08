@@ -102,7 +102,7 @@ export const CaseUserActionExternalServiceRt = rt.type({
 
 export const CaseExternalServiceBasicRt = rt.intersection([
   rt.type({
-    connector_id: rt.union([rt.string, rt.null]),
+    connector_id: rt.string,
   }),
   CaseUserActionExternalServiceRt,
 ]);

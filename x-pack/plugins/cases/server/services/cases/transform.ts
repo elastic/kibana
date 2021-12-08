@@ -21,7 +21,7 @@ import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
-import { CaseAttributes, CaseFullExternalService } from '../../../common/api';
+import { CaseAttributes, CaseFullExternalService, noneConnectorId } from '../../../common/api';
 import {
   findConnectorIdReference,
   transformFieldsToESModel,
@@ -200,6 +200,6 @@ function transformESExternalService(
 
   return {
     ...externalService,
-    connector_id: connectorIdRef?.id ?? null,
+    connector_id: connectorIdRef?.id ?? noneConnectorId,
   };
 }

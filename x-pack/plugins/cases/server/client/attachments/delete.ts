@@ -176,7 +176,7 @@ export async function deleteComment(
       caseId: id,
       subCaseId: subCaseID,
       attachmentId: attachmentID,
-      attachment: {},
+      attachment: { ...myComment.attributes },
       user,
       owner: myComment.attributes.owner,
     });

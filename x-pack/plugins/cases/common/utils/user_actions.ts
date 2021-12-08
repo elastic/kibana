@@ -25,19 +25,19 @@ export function isPush(action?: string, actionFields?: string[]): boolean {
 }
 
 type SnakeCaseOrCamelCaseUserAction<
-  T extends 'snakeCase' | 'cameCase',
+  T extends 'snakeCase' | 'camelCase',
   S,
   C
 > = T extends 'snakeCase' ? S : C;
 
 /**
- * TODO: Ternary operation for cameCase/snakeCase
+ * TODO: Ternary operation for camelCase/snakeCase
  * TODO: Check also the userAction.fields && userAction.action
  * */
 export const isConnectorUserAction = (userAction: unknown): userAction is ConnectorUserAction =>
   (userAction as ConnectorUserAction)?.payload?.connector != null;
 
-export const isPushedUserAction = <T extends 'snakeCase' | 'cameCase'>(
+export const isPushedUserAction = <T extends 'snakeCase' | 'camelCase'>(
   userAction: unknown
 ): userAction is SnakeCaseOrCamelCaseUserAction<
   T,
