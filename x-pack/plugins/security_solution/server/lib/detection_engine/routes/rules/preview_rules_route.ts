@@ -31,7 +31,7 @@ import {
 } from '../../../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExecutorType } from '../../../../../../alerting/server/types';
-import { AlertInstance, IAbortableClusterClient } from '../../../../../../alerting/server';
+import { AlertInstance } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
 import { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
@@ -135,8 +135,6 @@ export const previewRulesRoute = async (
           ruleTypeName: string,
           params: TParams,
           shouldWriteAlerts: () => boolean,
-          shouldStopExecution: () => boolean,
-          search: IAbortableClusterClient,
           alertInstanceFactory: (
             id: string
           ) => Pick<
@@ -173,9 +171,10 @@ export const previewRulesRoute = async (
               rule,
               services: {
                 shouldWriteAlerts,
-                shouldStopExecution,
+                shouldStopExecution: () => false,
                 alertInstanceFactory,
-                search,
+                // Just use es client always for preview
+                search: context.core.elasticsearch.client,
                 savedObjectsClient: context.core.savedObjects.client,
                 scopedClusterClient: context.core.elasticsearch.client,
               },
@@ -200,9 +199,6 @@ export const previewRulesRoute = async (
               queryAlertType.name,
               previewRuleParams,
               () => true,
-              () => false,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              {} as any,
               alertInstanceFactoryStub
             );
             break;
@@ -216,9 +212,6 @@ export const previewRulesRoute = async (
               thresholdAlertType.name,
               previewRuleParams,
               () => true,
-              () => false,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              {} as any,
               alertInstanceFactoryStub
             );
             break;
@@ -232,9 +225,6 @@ export const previewRulesRoute = async (
               threatMatchAlertType.name,
               previewRuleParams,
               () => true,
-              () => false,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              {} as any,
               alertInstanceFactoryStub
             );
             break;
@@ -246,9 +236,6 @@ export const previewRulesRoute = async (
               eqlAlertType.name,
               previewRuleParams,
               () => true,
-              () => false,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              {} as any,
               alertInstanceFactoryStub
             );
             break;
@@ -260,9 +247,6 @@ export const previewRulesRoute = async (
               mlAlertType.name,
               previewRuleParams,
               () => true,
-              () => false,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              {} as any,
               alertInstanceFactoryStub
             );
             break;
