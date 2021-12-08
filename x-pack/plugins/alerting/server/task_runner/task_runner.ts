@@ -124,7 +124,7 @@ export class TaskRunner<
     this.cancelled$ = new BehaviorSubject<boolean>(false);
 
     this.cancelled$.pipe(filter((cancelled: boolean) => cancelled)).subscribe(() => {
-      this.logger.debug(
+      this.logger.info(
         `Aborting any in-progress ES searches for rule type ${this.alertType.id} with id ${this.ruleId}`
       );
       this.searchAbortController.abort();

@@ -131,7 +131,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       events.filter((event) => event?.event?.action === 'execute');
       expect(events[0]?.event?.outcome).to.eql('failure');
       expect(events[0]?.kibana?.alerting?.status).to.eql('error');
-      expect(events[0]?.error?.message).to.eql('Request aborted');
+      expect(events[0]?.error?.message).to.eql(
+        'Search has been aborted due to cancelled execution'
+      );
 
       // rule execution status should be in error with reason timeout
       const { status, body: rule } = await supertest.get(
