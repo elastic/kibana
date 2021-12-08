@@ -131,6 +131,7 @@ export const NoDataPage = () => {
 
   return (
     <PageTemplate title={title} getPageData={getPageData}>
+      <h1>Hello world</h1>
       {shouldRedirect ? (
         <Redirect to="/home" />
       ) : (
