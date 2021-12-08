@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await rowActions[0].click();
           await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-          await find.clickByCssSelector('[data-test-subj="breadcrumb first"]');
+          await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
           await PageObjects.discover.waitForDocTableLoadingComplete();
 
           for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
