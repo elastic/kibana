@@ -14,7 +14,7 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useStyles } from './styles';
 import { ProcessEvent } from '../../../common/types/process_tree';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';

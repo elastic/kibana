@@ -7,7 +7,7 @@
 import React, { useState, useEffect, ReactNode } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import { partition } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiSplitPanel, EuiTitle, EuiTabs, EuiTab } from '@elastic/eui';
 import { EventKind, Process } from '../../../common/types/process_tree';
 import { useStyles } from './styles';

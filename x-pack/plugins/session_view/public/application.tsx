@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { EuiErrorBoundary } from '@elastic/eui';
 import type { AppMountParameters, CoreStart } from 'kibana/public';
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
