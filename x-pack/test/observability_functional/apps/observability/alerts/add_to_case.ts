@@ -67,5 +67,29 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         });
       });
     });
+
+    describe('When user has read permissions for cases', () => {
+      before(async () => {
+        await observability.users.setTestUserRole(
+          observability.users.defineBasicObservabilityRole({
+            observabilityCases: ['read'],
+            logs: ['all'],
+          })
+        );
+        await observability.alerts.common.navigateToTimeWithData();
+      });
+
+      after(async () => {
+        await observability.users.restoreDefaultTestUserRole();
+      });
+
+      it('does not render case options in the overflow menu', async () => {
+        await observability.alerts.common.openActionsMenuForRow(0);
+        await retry.try(async () => {
+          await observability.alerts.addToCase.missingAddToExistingCaseSelectorOrFail();
+          await observability.alerts.addToCase.missingAddToNewCaseSelectorOrFail();
+        });
+      });
+    });
   });
 };
