@@ -2,9 +2,6 @@
 
 export CI=true
 
-# use the build from another build rather than building our own
-export KIBANA_BUILD_ID="e439c03d-7927-4786-9581-45747d2c9ba2"
-
 KIBANA_DIR=$(pwd)
 export KIBANA_DIR
 export XPACK_DIR="$KIBANA_DIR/x-pack"

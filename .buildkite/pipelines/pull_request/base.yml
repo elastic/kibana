@@ -1,3 +1,7 @@
+# use a build from a previous build
+env:
+  KIBANA_BUILD_ID: e439c03d-7927-4786-9581-45747d2c9ba2
+
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
