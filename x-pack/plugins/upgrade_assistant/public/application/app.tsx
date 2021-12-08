@@ -11,10 +11,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiPageContent, EuiLoadingSpinner } from '@elastic/eui';
 import { ScopedHistory } from 'src/core/public';
 
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 import { API_BASE_PATH } from '../../common/constants';
 import { ClusterUpgradeState } from '../../common/types';
-import { APP_WRAPPER_CLASS, GlobalFlyout, AuthorizationProvider } from '../shared_imports';
+import {
+  APP_WRAPPER_CLASS,
+  GlobalFlyout,
+  AuthorizationProvider,
+  RedirectAppLinks,
+  KibanaThemeProvider,
+} from '../shared_imports';
 import { AppDependencies } from '../types';
 import { AppContextProvider, useAppContext } from './app_context';
 import {
@@ -170,11 +175,13 @@ export const RootComponent = (dependencies: AppDependencies) => {
     <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
       <AuthorizationProvider httpClient={http} privilegesEndpoint={`${API_BASE_PATH}/privileges`}>
         <i18n.Context>
-          <AppContextProvider value={dependencies}>
-            <GlobalFlyoutProvider>
-              <App history={history} />
-            </GlobalFlyoutProvider>
-          </AppContextProvider>
+          <KibanaThemeProvider theme$={dependencies.theme$}>
+            <AppContextProvider value={dependencies}>
+              <GlobalFlyoutProvider>
+                <App history={history} />
+              </GlobalFlyoutProvider>
+            </AppContextProvider>
+          </KibanaThemeProvider>
         </i18n.Context>
       </AuthorizationProvider>
     </RedirectAppLinks>

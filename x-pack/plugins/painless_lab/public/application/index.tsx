@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup, CoreStart } from 'kibana/public';
-import { HttpSetup, ChromeStart } from 'src/core/public';
-import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
+import { Observable } from 'rxjs';
+import { CoreSetup, CoreStart, HttpSetup, ChromeStart, CoreTheme } from 'src/core/public';
+
+import { createKibanaReactContext, KibanaThemeProvider } from '../shared_imports';
 
 import { Links } from '../links';
 import { AppContextProvider } from './context';
@@ -21,11 +22,12 @@ interface AppDependencies {
   uiSettings: CoreSetup['uiSettings'];
   links: Links;
   chrome: ChromeStart;
+  theme$: Observable<CoreTheme>;
 }
 
 export function renderApp(
   element: HTMLElement | null,
-  { http, I18nContext, uiSettings, links, chrome }: AppDependencies
+  { http, I18nContext, uiSettings, links, chrome, theme$ }: AppDependencies
 ) {
   if (!element) {
     return () => undefined;
@@ -35,11 +37,13 @@ export function renderApp(
   });
   render(
     <I18nContext>
-      <KibanaReactContextProvider>
-        <AppContextProvider value={{ http, links, chrome }}>
-          <Main />
-        </AppContextProvider>
-      </KibanaReactContextProvider>
+      <KibanaThemeProvider theme$={theme$}>
+        <KibanaReactContextProvider>
+          <AppContextProvider value={{ http, links, chrome }}>
+            <Main />
+          </AppContextProvider>
+        </KibanaReactContextProvider>
+      </KibanaThemeProvider>
     </I18nContext>,
     element
   );

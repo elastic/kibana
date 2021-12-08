@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-export { EuiCodeEditor } from '../../../../src/plugins/es_ui_shared/public';
-
 export {
-  KibanaContextProvider,
+  createKibanaReactContext,
   KibanaThemeProvider,
 } from '../../../../src/plugins/kibana_react/public';

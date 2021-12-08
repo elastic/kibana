@@ -10,5 +10,5 @@
     "githubTeam": "kibana-stack-management"
   },
   "requiredPlugins": ["devTools", "home", "licensing"],
-  "requiredBundles": ["esUiShared"]
+  "requiredBundles": ["esUiShared", "kibanaReact"]
 }

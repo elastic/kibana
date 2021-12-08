@@ -8,13 +8,16 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HttpSetup, NotificationsSetup, I18nStart } from 'src/core/public';
-import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
-import { Main } from './containers';
-import { createStorage, createHistory, createSettings } from '../services';
-import * as localStorageObjectClient from '../lib/local_storage_object_client';
-import { createUsageTracker } from '../services/tracker';
+import { Observable } from 'rxjs';
+import { HttpSetup, NotificationsSetup, I18nStart, CoreTheme } from 'src/core/public';
+
 import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { KibanaThemeProvider } from '../shared_imports';
+import { createStorage, createHistory, createSettings } from '../services';
+import { createUsageTracker } from '../services/tracker';
+import * as localStorageObjectClient from '../lib/local_storage_object_client';
+import { Main } from './containers';
+import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { createApi, createEsHostService } from './lib';
 
 export interface BootDependencies {
@@ -24,6 +27,7 @@ export interface BootDependencies {
   notifications: NotificationsSetup;
   usageCollection?: UsageCollectionSetup;
   element: HTMLElement;
+  theme$: Observable<CoreTheme>;
 }
 
 export function renderApp({
@@ -33,6 +37,7 @@ export function renderApp({
   usageCollection,
   element,
   http,
+  theme$,
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
@@ -49,26 +54,29 @@ export function renderApp({
 
   render(
     <I18nContext>
-      <ServicesContextProvider
-        value={{
-          docLinkVersion,
-          services: {
-            esHostService,
-            storage,
-            history,
-            settings,
-            notifications,
-            trackUiMetric,
-            objectStorageClient,
-          },
-        }}
-      >
-        <RequestContextProvider>
-          <EditorContextProvider settings={settings.toJSON()}>
-            <Main />
-          </EditorContextProvider>
-        </RequestContextProvider>
-      </ServicesContextProvider>
+      <KibanaThemeProvider theme$={theme$}>
+        <ServicesContextProvider
+          value={{
+            docLinkVersion,
+            services: {
+              esHostService,
+              storage,
+              history,
+              settings,
+              notifications,
+              trackUiMetric,
+              objectStorageClient,
+            },
+            theme$,
+          }}
+        >
+          <RequestContextProvider>
+            <EditorContextProvider settings={settings.toJSON()}>
+              <Main />
+            </EditorContextProvider>
+          </RequestContextProvider>
+        </ServicesContextProvider>
+      </KibanaThemeProvider>
     </I18nContext>,
     element
   );

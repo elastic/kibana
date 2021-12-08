@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { API_BASE_PATH } from '../../common';
-import { AuthorizationProvider } from '../shared_imports';
+import { AuthorizationProvider, KibanaThemeProvider } from '../shared_imports';
 import { AppContextProvider, AppDependencies } from './app_context';
 
 interface Props {
@@ -17,7 +17,7 @@ interface Props {
 }
 
 export const AppProviders = ({ appDependencies, children }: Props) => {
-  const { core } = appDependencies;
+  const { core, theme$ } = appDependencies;
   const {
     i18n: { Context: I18nContext },
     http,
@@ -26,7 +26,9 @@ export const AppProviders = ({ appDependencies, children }: Props) => {
   return (
     <AuthorizationProvider httpClient={http} privilegesEndpoint={`${API_BASE_PATH}privileges`}>
       <I18nContext>
-        <AppContextProvider value={appDependencies}>{children}</AppContextProvider>
+        <KibanaThemeProvider theme$={theme$}>
+          <AppContextProvider value={appDependencies}>{children}</AppContextProvider>
+        </KibanaThemeProvider>
       </I18nContext>
     </AuthorizationProvider>
   );
