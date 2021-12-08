@@ -173,56 +173,74 @@ exports[`Inspector Data View component should render empty state 1`] = `
         </h2>
       }
     >
-      <div
-        className="euiEmptyPrompt"
+      <EuiPanel
+        className="euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
+        color="transparent"
+        paddingSize="none"
       >
-        <EuiTitle
-          size="m"
+        <div
+          className="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
         >
-          <h2
-            className="euiTitle euiTitle--medium"
+          <div
+            className="euiEmptyPrompt__main"
           >
-            <FormattedMessage
-              defaultMessage="No data available"
-              id="data.inspector.table.noDataAvailableTitle"
-              values={Object {}}
-            >
-              No data available
-            </FormattedMessage>
-          </h2>
-        </EuiTitle>
-        <EuiTextColor
-          color="subdued"
-        >
-          <span
-            className="euiTextColor euiTextColor--subdued"
-            style={Object {}}
-          >
-            <EuiSpacer
-              size="m"
+            <div
+              className="euiEmptyPrompt__content"
             >
               <div
-                className="euiSpacer euiSpacer--m"
-              />
-            </EuiSpacer>
-            <EuiText>
-              <div
-                className="euiText euiText--medium"
+                className="euiEmptyPrompt__contentInner"
               >
-                <p>
-                  <FormattedMessage
-                    defaultMessage="The element did not provide any data."
-                    id="data.inspector.table.noDataAvailableDescription"
-                    values={Object {}}
+                <EuiTitle
+                  size="m"
+                >
+                  <h2
+                    className="euiTitle euiTitle--medium"
                   >
-                    The element did not provide any data.
-                  </FormattedMessage>
-                </p>
+                    <FormattedMessage
+                      defaultMessage="No data available"
+                      id="data.inspector.table.noDataAvailableTitle"
+                      values={Object {}}
+                    >
+                      No data available
+                    </FormattedMessage>
+                  </h2>
+                </EuiTitle>
+                <EuiTextColor
+                  color="subdued"
+                >
+                  <span
+                    className="euiTextColor euiTextColor--subdued"
+                    style={Object {}}
+                  >
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                    <EuiText>
+                      <div
+                        className="euiText euiText--medium"
+                      >
+                        <p>
+                          <FormattedMessage
+                            defaultMessage="The element did not provide any data."
+                            id="data.inspector.table.noDataAvailableDescription"
+                            values={Object {}}
+                          >
+                            The element did not provide any data.
+                          </FormattedMessage>
+                        </p>
+                      </div>
+                    </EuiText>
+                  </span>
+                </EuiTextColor>
               </div>
-            </EuiText>
-          </span>
-        </EuiTextColor>
-      </div>
+            </div>
+          </div>
+        </div>
+      </EuiPanel>
     </EuiEmptyPrompt>
   </DataViewComponent>
 </Component>

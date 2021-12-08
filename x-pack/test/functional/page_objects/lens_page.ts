@@ -855,11 +855,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDatatableCell(rowIndex = 0, colIndex = 0) {
-      const columnNumber = await this.getCountOfDatatableColumns();
       return await find.byCssSelector(
-        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"]:nth-child(${
-          rowIndex * columnNumber + colIndex + 2
-        })`
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-id="${rowIndex},${colIndex}"]`
       );
     },
 

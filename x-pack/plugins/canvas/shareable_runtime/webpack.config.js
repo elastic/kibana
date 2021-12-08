@@ -188,7 +188,6 @@ module.exports = {
       {
         test: [
           require.resolve('@elastic/eui/es/components/drag_and_drop'),
-          require.resolve('@elastic/eui/packages/react-datepicker'),
           require.resolve('highlight.js'),
         ],
         use: require.resolve('null-loader'),

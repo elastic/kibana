@@ -491,7 +491,6 @@
     "core.euiStyleSelector.labelExpanded": "拡張密度",
     "core.euiStyleSelector.labelNormal": "標準密度",
     "core.euiSuperDatePicker.showDatesButtonLabel": "日付を表示",
-    "core.euiSuperSelect.screenReaderAnnouncement": "{optionsCount} 件のアイテムのフォームセレクターを使用しています。1 つのオプションを選択する必要があります。上下の矢印キーで移動するか、Escキーで閉じます。",
     "core.euiSuperSelectControl.selectAnOption": "オプションの選択：{selectedValue} を選択済み",
     "core.euiSuperUpdateButton.cannotUpdateTooltip": "アップデートできません",
     "core.euiSuperUpdateButton.clickToApplyTooltip": "クリックして適用",

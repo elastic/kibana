@@ -32,11 +32,23 @@ exports[`TrustedAppsGrid renders correctly initially 1`] = `
           class="body-content undefined"
         >
           <div
-            class="euiEmptyPrompt"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
           >
-            <span>
-              No items found
-            </span>
+            <div
+              class="euiEmptyPrompt__main"
+            >
+              <div
+                class="euiEmptyPrompt__content"
+              >
+                <div
+                  class="euiEmptyPrompt__contentInner"
+                >
+                  <span>
+                    No items found
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
