@@ -18,7 +18,8 @@
     "embeddable",
     "share",
     "presentationUtil",
-    "dataViewFieldEditor"
+    "dataViewFieldEditor",
+    "expressionGauge"
   ],
   "optionalPlugins": [
     "usageCollection",
@@ -39,8 +40,7 @@
     "kibanaUtils",
     "kibanaReact",
     "embeddable",
-    "fieldFormats",
-    "expressionGauge"
+    "fieldFormats"
   ],
   "owner": {
     "name": "Vis Editors",

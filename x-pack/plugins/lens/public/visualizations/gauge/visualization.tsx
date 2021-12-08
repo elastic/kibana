@@ -10,18 +10,18 @@ import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter/common';
-import type { GaugeArguments } from 'src/plugins/chart_expressions/expression_gauge/common';
+import type { GaugeArguments } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
 import {
   GaugeShapes,
   EXPRESSION_GAUGE_NAME,
-} from 'src/plugins/chart_expressions/expression_gauge/common';
+} from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
 import {
   getGoalValue,
   getMaxValue,
   getMinValue,
   GaugeIconVertical,
   GaugeIconHorizontal,
-} from 'src/plugins/chart_expressions/expression_gauge/public';
+} from '../../../../../../src/plugins/chart_expressions/expression_gauge/public';
 import { PaletteRegistry } from '../../../../../../src/plugins/charts/public';
 import type { DatasourcePublicAPI, OperationMetadata, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';

@@ -20,8 +20,11 @@ import type { PaletteRegistry } from 'src/plugins/charts/public';
 import {
   GaugeTicksPositions,
   GaugeColorModes,
-} from 'src/plugins/chart_expressions/expression_gauge/common';
-import { getMaxValue, getMinValue } from 'src/plugins/chart_expressions/expression_gauge/public';
+} from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import {
+  getMaxValue,
+  getMinValue,
+} from '../../../../../../src/plugins/chart_expressions/expression_gauge/public';
 import { isNumericFieldForDatatable } from '../../../common/expressions';
 import {
   applyPaletteParams,

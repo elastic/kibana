@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GaugeState } from 'src/plugins/chart_expressions/expression_gauge/common';
+import { GaugeState } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
 import { LayerType } from '../../../common/';
 
 export const LENS_GAUGE_ID = 'lnsGauge';
