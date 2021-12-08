@@ -547,6 +547,7 @@ function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResul
   return {
     id: savedObject.id,
     ...savedObject.attributes,
+    originId: savedObject.originId,
     isPreconfigured: false,
   };
 }

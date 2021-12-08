@@ -193,6 +193,13 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };
 
+export const migrateLegacyActionsIds = async (
+  rules: PromiseFromStreams[],
+  actionsClient: ActionsClient
+) => {
+  const actionsFind = await actionsClient.getAll();
+};
+
 /**
  * Given a set of rules and an actions client this will return connectors that are invalid
  * such as missing connectors and filter out the rules that have invalid connectors.
@@ -205,7 +212,7 @@ export const getInvalidConnectors = async (
   actionsClient: ActionsClient
 ): Promise<[BulkError[], PromiseFromStreams[]]> => {
   const actionsFind = await actionsClient.getAll();
-  const actionIds = new Set(actionsFind.map((action) => action.id));
+  const actionIds = new Set(actionsFind.flatMap((action) => [action.id, action?.originId]));
   const { errors, rulesAcc } = rules.reduce(
     (acc, parsedRule) => {
       if (parsedRule instanceof Error) {

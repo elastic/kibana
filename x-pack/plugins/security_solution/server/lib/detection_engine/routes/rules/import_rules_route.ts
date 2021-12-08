@@ -37,6 +37,7 @@ import {
   isBulkError,
   isImportRegular,
   buildSiemResponse,
+  migrateLegacyActionsIds,
 } from '../utils';
 
 import { patchRules } from '../../rules/patch_rules';
@@ -119,6 +120,11 @@ export const importRulesRoute = (
 
         const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
           getTupleDuplicateErrorsAndUniqueRules(parsedObjects, request.query.overwrite);
+
+        const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
+          parsedObjectsWithoutDuplicateErrors,
+          actionsClient
+        );
 
         const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
           parsedObjectsWithoutDuplicateErrors,
