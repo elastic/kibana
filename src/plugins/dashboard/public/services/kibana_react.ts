@@ -20,4 +20,5 @@ export {
   reactToUiComponent,
   ExitFullScreenButton,
   KibanaContextProvider,
+  KibanaThemeProvider,
 } from '../../../kibana_react/public';
