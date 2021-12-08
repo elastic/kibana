@@ -22,7 +22,7 @@ import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 import { SearchAPI } from './search_api';
 import { TimeCache } from './time_cache';
-import { IEMSKbnMapsSettings } from '../../../../maps_ems/public';
+import { IServiceSettings } from '../vega_view/vega_map_view/service_settings';
 import {
   Bool,
   Data,
@@ -69,7 +69,7 @@ export class VegaParser {
   containerDir?: ControlsLocation | ControlsDirection;
   controlsDir?: ControlsLocation;
   searchAPI: SearchAPI;
-  getServiceSettings: () => Promise<IEMSKbnMapsSettings>;
+  getServiceSettings: () => Promise<IServiceSettings>;
   filters: Bool;
   timeCache: TimeCache;
 
@@ -78,7 +78,7 @@ export class VegaParser {
     searchAPI: SearchAPI,
     timeCache: TimeCache,
     filters: Bool,
-    getServiceSettings: () => Promise<IEMSKbnMapsSettings>
+    getServiceSettings: () => Promise<IServiceSettings>
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;

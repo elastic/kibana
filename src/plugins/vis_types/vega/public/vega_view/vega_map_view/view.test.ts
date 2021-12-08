@@ -17,7 +17,8 @@ import { SearchAPI } from '../../data_model/search_api';
 import vegaMap from '../../test_utils/vega_map_test.json';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../data/public/mocks';
-import type { IEMSKbnMapsSettings } from '../../../../../maps_ems/public';
+import type { IServiceSettings } from '../vega_map_view/service_settings';
+
 import { setInjectedVars, setData, setNotifications, setUISettings } from '../../services';
 import { initVegaLayer, initTmsRasterLayer } from './layers';
 
@@ -58,7 +59,7 @@ describe('vega_map_view/view', () => {
     const coreStart = coreMock.createStart();
     const dataPluginStart = dataPluginMock.createStartContract();
     const mockGetServiceSettings = async () => {
-      return {} as IEMSKbnMapsSettings;
+      return {} as IServiceSettings;
     };
     let vegaParser: VegaParser;
 

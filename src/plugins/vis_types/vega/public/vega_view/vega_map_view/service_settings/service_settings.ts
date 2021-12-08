@@ -11,7 +11,7 @@ import MarkdownIt from 'markdown-it';
 import { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-client';
 import {
   FileLayer,
-  IEMSKbnMapsSettings,
+  IServiceSettings,
   TmsLayer,
   ORIGIN_LEGACY,
   TMS_IN_YML_ID,
@@ -25,7 +25,7 @@ import {
 /**
  * This class provides access to the EMS-layers and the kibana.yml configured layers through a single interface.
  */
-export class KbnMapsSettings implements IEMSKbnMapsSettings {
+export class ServiceSettings implements IServiceSettings {
   private readonly _mapConfig: MapConfig;
   private readonly _tilemapsConfig: TileMapConfig;
   private readonly _hasTmsConfigured: boolean;

@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import type { IEMSKbnMapsSettings } from '../service_settings/service_settings_types';
+import type { IServiceSettings } from '../service_settings/service_settings_types';
 import { getMapsEms } from '../../../services';
 import type { MapConfig } from '../../../../../../maps_ems/config';
 
-let loadPromise: Promise<IEMSKbnMapsSettings>;
+let loadPromise: Promise<IServiceSettings>;
 
-export async function getServiceSettings(): Promise<IEMSKbnMapsSettings> {
+export async function getServiceSettings(): Promise<IServiceSettings> {
   if (typeof loadPromise !== 'undefined') {
     return loadPromise;
   }
 
   loadPromise = new Promise(async (resolve, reject) => {
     try {
-      const { KbnMapsSettings } = await import('./service_settings');
+      const { ServiceSettings } = await import('./service_settings');
       const mapsEmsConfig: MapConfig = getMapsEms().config;
-      resolve(new KbnMapsSettings(mapsEmsConfig, mapsEmsConfig.tilemap));
+      resolve(new ServiceSettings(mapsEmsConfig, mapsEmsConfig.tilemap));
     } catch (error) {
       reject(error);
     }

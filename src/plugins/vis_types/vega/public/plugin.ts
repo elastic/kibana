@@ -24,7 +24,9 @@ import {
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
-import { IEMSKbnMapsSettings, MapsEmsPluginPublicSetup } from '../../../maps_ems/public';
+import { MapsEmsPluginPublicSetup } from '../../../maps_ems/public';
+import { IServiceSettings } from './vega_view/vega_map_view/service_settings';
+
 import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';
@@ -37,7 +39,7 @@ export interface VegaVisualizationDependencies {
   plugins: {
     data: DataPublicPluginSetup;
   };
-  getServiceSettings: () => Promise<IEMSKbnMapsSettings>;
+  getServiceSettings: () => Promise<IServiceSettings>;
 }
 
 /** @internal */

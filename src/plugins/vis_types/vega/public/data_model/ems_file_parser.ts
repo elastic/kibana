@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
-import { IEMSKbnMapsSettings, FileLayer } from '../../../../maps_ems/public';
+import { IServiceSettings, FileLayer } from '../vega_view/vega_map_view/service_settings';
 import { Data, UrlObject, EmsQueryRequest } from './types';
 
 /**
@@ -17,10 +17,10 @@ import { Data, UrlObject, EmsQueryRequest } from './types';
  * converting url object parameters into query results.
  */
 export class EmsFileParser {
-  _serviceSettings: IEMSKbnMapsSettings;
+  _serviceSettings: IServiceSettings;
   _fileLayersP?: Promise<FileLayer[]>;
 
-  constructor(serviceSettings: IEMSKbnMapsSettings) {
+  constructor(serviceSettings: IServiceSettings) {
     this._serviceSettings = serviceSettings;
   }
 
