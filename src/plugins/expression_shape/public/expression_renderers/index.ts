@@ -6,9 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { shapeRenderer } from './shape_renderer';
-import { progressRenderer } from './progress_renderer';
-
-export const renderers = [shapeRenderer, progressRenderer];
-
-export { shapeRenderer, progressRenderer };
+export { getShapeRenderer, shapeRendererFactory } from './shape_renderer';
+export { getProgressRenderer, progressRendererFactory } from './progress_renderer';

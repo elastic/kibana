@@ -18,7 +18,7 @@ interface LayoutProps {
 export const NoDataLayout: React.FunctionComponent<LayoutProps> = withRouter<
   any,
   React.FunctionComponent<LayoutProps>
->(({ actionSection, title, modalClosePath, children }) => {
+>(({ actionSection, title, modalClosePath, children }: React.PropsWithChildren<LayoutProps>) => {
   return (
     <EuiFlexGroup justifyContent="spaceAround">
       <EuiFlexItem grow={false}>

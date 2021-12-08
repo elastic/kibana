@@ -14,8 +14,8 @@ import {
   CommentAttributes,
   CommentType,
   ConnectorTypes,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../../common';
+} from '../../../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 
 export const mockCases: Array<SavedObject<CaseAttributes>> = [
   {
