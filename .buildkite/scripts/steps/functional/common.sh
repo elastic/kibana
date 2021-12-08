@@ -6,6 +6,8 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+export ES_SNAPSHOT_MANIFEST=https://storage.googleapis.com/smalley/es-pr-81400/manifest.json
+
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/download_build_artifacts.sh
 
