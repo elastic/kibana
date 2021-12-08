@@ -206,7 +206,8 @@ export class TestSubjects extends FtrService {
       // call clearValue() and type() on the element that is focused after
       // clicking on the testSubject
       const input = await this.findService.activeElement();
-      if (clearWithKeyboard === true) {
+      // if `text` is explicitely set to the empty string, then call clearValueWithKeyboard() rather than clearValue()
+      if (clearWithKeyboard === true || text === '') {
         await input.clearValueWithKeyboard();
       } else {
         await input.clearValue();
