@@ -117,7 +117,7 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup,
-      config: { autocreateApmIndexPattern: true } as APMConfig,
+      config: { autoCreateApmDataView: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
