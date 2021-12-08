@@ -9284,7 +9284,6 @@
     "xpack.enterpriseSearch.errorConnectingState.description1": "我们无法与以下主机 URL 的企业搜索建立连接：{enterpriseSearchUrl}",
     "xpack.enterpriseSearch.errorConnectingState.description2": "确保在 {configFile} 中已正确配置主机 URL。",
     "xpack.enterpriseSearch.errorConnectingState.description3": "确认企业搜索服务器响应。",
-    "xpack.enterpriseSearch.errorConnectingState.description4": "阅读设置指南或查看服务器日志中的 {pluginLog} 日志消息。",
     "xpack.enterpriseSearch.errorConnectingState.setupGuideCta": "阅读设置指南",
     "xpack.enterpriseSearch.errorConnectingState.title": "无法连接",
     "xpack.enterpriseSearch.errorConnectingState.troubleshootAuth": "检查您的用户身份验证：",

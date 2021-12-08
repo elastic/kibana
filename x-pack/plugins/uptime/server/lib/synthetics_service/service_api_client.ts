@@ -8,7 +8,8 @@
 import axios from 'axios';
 import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { ServiceLocations, SyntheticsMonitorSavedObject } from '../../../common/types';
+import { ServiceLocations } from '../../../common/runtime_types/monitor_management';
+import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { getServiceLocations } from './get_service_locations';
 import { Logger } from '../../../../../../src/core/server';
 
@@ -25,8 +26,11 @@ export type MonitorConfigs = Array<
   }
 >;
 
+// TODO: Proper type for formatted montior config in heartbeat json format
+export type FormattedMonitorConfigs = Array<Record<string, any> & { locations: string[] }>;
+
 export interface ServiceData {
-  monitors: MonitorConfigs;
+  monitors: FormattedMonitorConfigs;
   output: {
     hosts: string[];
     api_key: string;
@@ -46,7 +50,7 @@ export class ServiceAPIClient {
     this.locations = [];
 
     getServiceLocations({ manifestUrl }).then((result) => {
-      this.locations = result;
+      this.locations = result.locations;
     });
   }
 
