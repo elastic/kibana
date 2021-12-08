@@ -267,7 +267,6 @@ describe('createRouter', () => {
 
       const matches = router.matchRoutes('/', history.location);
 
-      // @ts-expect-error 4.3.5 upgrade - router doesn't seem able to merge properly when two routes match
       expect(matches[1]?.match.params).toEqual({
         query: {
           rangeFrom: 'now-30m',
@@ -286,7 +285,6 @@ describe('createRouter', () => {
 
       expect(matchedRoutes.length).toEqual(4);
 
-      // @ts-expect-error 4.3.5 upgrade - router doesn't seem able to merge properly when two routes match
       expect(matchedRoutes[matchedRoutes.length - 1].match).toEqual({
         isExact: true,
         params: {
