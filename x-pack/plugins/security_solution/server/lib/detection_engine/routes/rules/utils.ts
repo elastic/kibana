@@ -27,6 +27,7 @@ import { RuleParams } from '../../schemas/rule_schemas';
 import { SanitizedAlert } from '../../../../../../alerting/common';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+import { SavedObjectsClientContract } from 'kibana/server';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -194,26 +195,49 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };
 
-const swapActionIds = async (action: Action, actionsClient: ActionsClient): Promise<Action> => {
-  const resolveResponse = await actionsClient.resolve({ id: action.id });
-  console.error('RESOLVE RESPONSE', resolveResponse);
-  if (resolveResponse.outcome === 'aliasMatch') {
-    const tempAction: Action = { ...action, id: resolveResponse.alias_target_id };
-    return tempAction;
+const swapActionIds = async (
+  action: Action,
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<Action> => {
+  try {
+    // const resolveResponse = await savedObjectsClient.find({
+    //   type: 'space',
+    // });
+    const resolveResponse = await savedObjectsClient.search(
+      {
+        index: '.kibana',
+        body: {
+          query: {
+            term: {
+              originId: {
+                value: action.id,
+              },
+            },
+          },
+        },
+      },
+      { meta: true }
+    );
+    console.error('RESOLVE RESPONSE', JSON.stringify(resolveResponse.body, null, 2));
+    if (resolveResponse.body.hits.hits.length === 1) {
+      return { ...action, id: resolveResponse.body.hits.hits[0]._id.split(':')[1] };
+    }
+  } catch (exc) {
+    console.error('SWAP ACTION IDS EXCEPTION', JSON.stringify(exc, null, 2));
   }
   return action;
 };
 
 export const migrateLegacyActionsIds = async (
   rules: PromiseFromStreams[],
-  actionsClient: ActionsClient
+  savedObjectsClient: SavedObjectsClientContract
 ): Promise<PromiseFromStreams[]> => {
   console.error('\n\n\n\n\n********\nDID WE GET IN HERE?\n********\n');
   const isImportRule = (r: unknown): r is ImportRulesSchemaDecoded => !(r instanceof Error);
   const rulesToReturn = rules.map(async (rule) => {
     if (isImportRule(rule)) {
       const newActions = await Promise.all<Actions>(
-        rule.actions.map<Action>((action) => swapActionIds(action, actionsClient))
+        rule.actions.map<Action>((action) => swapActionIds(action, savedObjectsClient))
       ).catch((err) => console.error('INTERIOR ERROR', err));
       return { ...rule, actions: newActions } as ImportRulesSchemaDecoded;
     }

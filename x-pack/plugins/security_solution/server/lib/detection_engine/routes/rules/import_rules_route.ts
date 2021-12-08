@@ -126,7 +126,7 @@ export const importRulesRoute = (
 
         const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
           parsedObjectsWithoutDuplicateErrors,
-          actionsClient
+          esClient.asInternalUser
         );
 
         const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
