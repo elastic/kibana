@@ -11,6 +11,7 @@ import {
   LIST_INDEX,
   LIST_ITEM_INDEX,
   MAX_IMPORT_PAYLOAD_BYTES,
+  MAX_IMPORT_SIZE,
 } from '../common/constants.mock';
 
 import { ConfigType } from './config';
@@ -25,5 +26,6 @@ export const getConfigMockDecoded = (): ConfigType => ({
   importTimeout: IMPORT_TIMEOUT,
   listIndex: LIST_INDEX,
   listItemIndex: LIST_ITEM_INDEX,
+  maxExceptionsImportSize: MAX_IMPORT_SIZE,
   maxImportPayloadBytes: MAX_IMPORT_PAYLOAD_BYTES,
 });
