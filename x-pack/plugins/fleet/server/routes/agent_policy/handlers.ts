@@ -23,7 +23,6 @@ import type {
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
 } from '../../types';
-import type { AgentPolicy, NewPackagePolicy } from '../../types';
 import { FLEET_SYSTEM_PACKAGE } from '../../../common';
 import type {
   GetAgentPoliciesResponse,
