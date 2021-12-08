@@ -11,6 +11,8 @@ import {
   ALERT_RULE_NAMESPACE,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_UPDATED_AT,
+  ALERT_SEVERITY,
+  ALERT_RISK_SCORE,
   ALERT_STATUS,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
@@ -158,6 +160,8 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_STATUS]: 'active',
         [SPACE_IDS]: ['default'],
         [TAGS]: [`__internal_rule_id:${createdRule.rule_id}`, '__internal_immutable:false'],
+        [ALERT_SEVERITY]: 'critical',
+        [ALERT_RISK_SCORE]: 50,
         [ALERT_RULE_PARAMETERS]: {
           anomaly_threshold: 30,
           author: [],
