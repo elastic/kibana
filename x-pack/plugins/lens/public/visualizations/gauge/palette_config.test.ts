@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { transparentizePalettes } from './utils';
+import { transparentizePalettes } from './palette_config';
 import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
 
 const paletteServiceMock = chartPluginMock.createPaletteRegistry();

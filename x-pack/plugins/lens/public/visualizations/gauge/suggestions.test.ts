@@ -7,7 +7,8 @@
 
 import { getSuggestions } from './suggestions';
 import { layerTypes } from '../../../common';
-import { GaugeShapes, GaugeVisualizationState } from './constants';
+import { GaugeShapes } from 'src/plugins/chart_expressions/expression_gauge/common';
+import { GaugeVisualizationState } from './constants';
 
 const metricColumn = {
   columnId: 'metric-column',

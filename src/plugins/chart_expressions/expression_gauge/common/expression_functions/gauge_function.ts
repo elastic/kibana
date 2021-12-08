@@ -14,38 +14,38 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
   name: EXPRESSION_GAUGE_NAME,
   type: 'render',
   inputTypes: ['datatable'],
-  help: i18n.translate('expressionGauge.function.help', {
+  help: i18n.translate('expressionGauge.functions.help', {
     defaultMessage: 'Gauge visualization',
   }),
   args: {
     shape: {
       types: ['string'],
       options: ['horizontalBullet', 'verticalBullet'],
-      help: i18n.translate('xpack.lens.gauge.shape.help', {
+      help: i18n.translate('expressionGauge.functions.shape.help', {
         defaultMessage: 'Type of gauge chart',
       }),
     },
     metricAccessor: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.gauge.metricAccessor.help', {
+      help: i18n.translate('expressionGauge.functions.metricAccessor.help', {
         defaultMessage: 'Current value',
       }),
     },
     minAccessor: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.gauge.minAccessor.help', {
+      help: i18n.translate('expressionGauge.functions.minAccessor.help', {
         defaultMessage: 'Minimum value',
       }),
     },
     maxAccessor: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.gauge.maxAccessor.help', {
+      help: i18n.translate('expressionGauge.functions.maxAccessor.help', {
         defaultMessage: 'Maximum value',
       }),
     },
     goalAccessor: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.gauge.goalAccessor.help', {
+      help: i18n.translate('expressionGauge.functions.goalAccessor.help', {
         defaultMessage: 'Goal Value',
       }),
     },
@@ -53,27 +53,27 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       types: ['string'],
       default: 'none',
       options: ['none', 'palette'],
-      help: i18n.translate('xpack.lens.gauge.colorMode.help', {
+      help: i18n.translate('expressionGauge.functions.colorMode.help', {
         defaultMessage: 'Which part of gauge to color',
       }),
     },
     palette: {
       types: ['palette'],
-      help: i18n.translate('xpack.lens.metric.palette.help', {
+      help: i18n.translate('expressionGauge.functions..metric.palette.help', {
         defaultMessage: 'Provides colors for the values',
       }),
     },
     ticksPosition: {
       types: ['string'],
       options: ['auto', 'bands'],
-      help: i18n.translate('xpack.lens.gaugeChart.config.ticksPosition.help', {
+      help: i18n.translate('expressionGauge.functions..gaugeChart.config.ticksPosition.help', {
         defaultMessage: 'Specifies the placement of ticks',
       }),
       required: true,
     },
     labelMajor: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.gaugeChart.config.labelMajor.help', {
+      help: i18n.translate('expressionGauge.functions..gaugeChart.config.labelMajor.help', {
         defaultMessage: 'Specifies the labelMajor of the gauge chart displayed inside the chart.',
       }),
       required: false,
@@ -81,14 +81,14 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
     labelMajorMode: {
       types: ['string'],
       options: ['none', 'auto', 'custom'],
-      help: i18n.translate('xpack.lens.gaugeChart.config.labelMajorMode.help', {
+      help: i18n.translate('expressionGauge.functions..gaugeChart.config.labelMajorMode.help', {
         defaultMessage: 'Specifies the mode of labelMajor',
       }),
       required: true,
     },
     labelMinor: {
       types: ['string'],
-      help: i18n.translate('xpack.lens.gaugeChart.config.labelMinor.help', {
+      help: i18n.translate('expressionGauge.functions..gaugeChart.config.labelMinor.help', {
         defaultMessage: 'Specifies the labelMinor of the gauge chart',
       }),
       required: false,

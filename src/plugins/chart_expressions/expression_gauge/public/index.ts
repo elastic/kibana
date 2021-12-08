@@ -11,3 +11,5 @@ import { ExpressionGaugePlugin } from './plugin';
 export function plugin() {
   return new ExpressionGaugePlugin();
 }
+
+export { getGoalValue, getMaxValue, getMinValue } from './components/utils';

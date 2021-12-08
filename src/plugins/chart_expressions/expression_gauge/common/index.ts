@@ -22,7 +22,7 @@ export type {
   GaugeState,
 } from './types';
 
-export { GaugeShapes } from './types';
+export { GaugeShapes, GaugeColorModes, GaugeTicksPositions, GaugeLabelMajorModes } from './types';
 
 export { gaugeFunction } from './expression_functions';
 

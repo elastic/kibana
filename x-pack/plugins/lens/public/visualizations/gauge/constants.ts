@@ -17,29 +17,6 @@ export const GROUP_ID = {
   GOAL: 'goal',
 } as const;
 
-export const EXPRESSION_GAUGE_NAME = 'gauge';
-
-export const GaugeShapes = {
-  horizontalBullet: 'horizontalBullet',
-  verticalBullet: 'verticalBullet',
-} as const;
-
-export const GaugeTicksPositions = {
-  auto: 'auto',
-  bands: 'bands',
-} as const;
-
-export const GaugeLabelMajorModes = {
-  auto: 'auto',
-  custom: 'custom',
-  none: 'none',
-} as const;
-
-export const GaugeColorModes = {
-  palette: 'palette',
-  none: 'none',
-} as const;
-
 export type GaugeVisualizationState = GaugeState & {
   layerId: string;
   layerType: LayerType;

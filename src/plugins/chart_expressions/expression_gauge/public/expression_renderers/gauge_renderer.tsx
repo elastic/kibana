@@ -18,15 +18,15 @@ import GaugeComponent from '../components/gauge_component';
 import './index.scss';
 const MemoizedChart = memo(GaugeComponent);
 
-interface ExpressioGaugeRendererDependencies {
+interface ExpressionGaugeRendererDependencies {
   theme: ThemeServiceStart;
 }
 
 export const gaugeRenderer: (
-  deps: ExpressioGaugeRendererDependencies
+  deps: ExpressionGaugeRendererDependencies
 ) => ExpressionRenderDefinition<GaugeExpressionProps> = ({ theme }) => ({
   name: EXPRESSION_GAUGE_NAME,
-  displayName: i18n.translate('expressionGauge.visualizationName', {
+  displayName: i18n.translate('expressionGauge.renderer.visualizationName', {
     defaultMessage: 'Gauge',
   }),
   reuseDomNode: true,

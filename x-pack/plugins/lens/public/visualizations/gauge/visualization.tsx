@@ -11,18 +11,25 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter/common';
 import type { GaugeArguments } from 'src/plugins/chart_expressions/expression_gauge/common';
+import {
+  GaugeShapes,
+  EXPRESSION_GAUGE_NAME,
+} from 'src/plugins/chart_expressions/expression_gauge/common';
+import {
+  getGoalValue,
+  getMaxValue,
+  getMinValue,
+} from 'src/plugins/chart_expressions/expression_gauge/public';
 import { PaletteRegistry } from '../../../../../../src/plugins/charts/public';
 import type { DatasourcePublicAPI, OperationMetadata, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
-import { GROUP_ID, LENS_GAUGE_ID } from './constants';
+import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
 import { GaugeToolbar } from './toolbar_component';
 import { LensIconChartGaugeHorizontal, LensIconChartGaugeVertical } from '../../assets/chart_gauge';
 import { applyPaletteParams, CUSTOM_PALETTE, getStopsForFixedMode } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { CustomPaletteParams, layerTypes } from '../../../common';
 import { generateId } from '../../id_generator';
-import { getGoalValue, getMaxValue, getMinValue } from './utils';
-import { GaugeShapes, EXPRESSION_GAUGE_NAME, GaugeVisualizationState } from './constants';
 
 const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
   defaultMessage: 'Goal and single value',

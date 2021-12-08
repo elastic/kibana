@@ -39,7 +39,8 @@
     "kibanaUtils",
     "kibanaReact",
     "embeddable",
-    "fieldFormats"
+    "fieldFormats",
+    "expressionGauge"
   ],
   "owner": {
     "name": "Vis Editors",

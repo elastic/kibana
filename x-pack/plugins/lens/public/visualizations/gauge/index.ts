@@ -8,7 +8,7 @@
 import type { CoreSetup } from 'kibana/public';
 import type { EditorFrameSetup } from '../../types';
 import type { ChartsPluginSetup } from '../../../../../../src/plugins/charts/public';
-import { transparentizePalettes } from './utils';
+import { transparentizePalettes } from './palette_config';
 
 export interface GaugeVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;

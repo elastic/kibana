@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type { GaugeShape } from 'src/plugins/chart_expressions/expression_gauge/common';
-import type { TableSuggestion, Visualization } from '../../types';
-import { layerTypes } from '../../../common';
 import {
   GaugeShapes,
   GaugeTicksPositions,
   GaugeLabelMajorModes,
-  GaugeVisualizationState,
-} from './constants';
+} from 'src/plugins/chart_expressions/expression_gauge/common';
+import type { TableSuggestion, Visualization } from '../../types';
+import { layerTypes } from '../../../common';
+import { GaugeVisualizationState } from './constants';
 
 const isNotNumericMetric = (table: TableSuggestion) =>
   table.columns?.[0]?.operation.dataType !== 'number' ||
