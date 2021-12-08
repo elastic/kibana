@@ -16,6 +16,7 @@ import {
   createMockAgentService,
   createPackagePolicyServiceMock,
 } from '../../../../../fleet/server/mocks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../fleet/common';
 import {
   getHostPolicyResponseHandler,
   getAgentPolicySummaryHandler,
@@ -247,6 +248,7 @@ describe('test policy response handler', () => {
   });
   describe('test GET policy list handler', () => {
     let mockPackagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
+    let policyHandler: ReturnType<typeof getPolicyListHandler>;
 
     beforeEach(() => {
       mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -267,17 +269,17 @@ describe('test policy response handler', () => {
         ...createMockEndpointAppContextServiceStartContract(),
         ...{ packagePolicyService: mockPackagePolicyService },
       });
-    });
-
-    afterEach(() => endpointAppContextService.stop());
-
-    it('should return a list of endpoint package policies', async () => {
-      const policyHandler = getPolicyListHandler({
+      policyHandler = getPolicyListHandler({
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
         experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
+    });
+
+    afterEach(() => endpointAppContextService.stop());
+
+    it('should return a list of endpoint package policies', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         query: {},
       });
@@ -287,13 +289,34 @@ describe('test policy response handler', () => {
         mockRequest,
         mockResponse
       );
+      expect(mockPackagePolicyService.list.mock.calls[0][1]).toEqual({
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+        perPage: undefined,
+        sortField: undefined,
+      });
       expect(mockResponse.ok).toBeCalled();
-      expect(mockPackagePolicyService.mock.call).toEqual('hi');
       expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
         items: [],
         total: 0,
         page: 1,
         perPage: 10,
+      });
+    });
+
+    it('should add endpoint-specific kuery to the requests kuery', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest({
+        query: { kuery: 'some query' },
+      });
+
+      await policyHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        mockRequest,
+        mockResponse
+      );
+      expect(mockPackagePolicyService.list.mock.calls[0][1]).toEqual({
+        kuery: `some query and ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+        perPage: undefined,
+        sortField: undefined,
       });
     });
   });

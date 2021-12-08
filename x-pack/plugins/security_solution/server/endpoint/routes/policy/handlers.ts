@@ -86,7 +86,7 @@ export const getPolicyListHandler = function (
         ...request.query,
         perPage: request.query.pageSize,
         sortField: request.query.sort,
-        keury: endpointFilteredKuery,
+        kuery: endpointFilteredKuery,
       });
 
       return response.ok({
