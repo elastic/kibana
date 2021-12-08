@@ -1,0 +1,14 @@
+{
+  "id": "csp",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "csp",
+    "githubTeam": "csp"
+  },
+  "description": "",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation"],
+  "optionalPlugins": []
+}
