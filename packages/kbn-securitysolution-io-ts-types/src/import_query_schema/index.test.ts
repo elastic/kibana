@@ -12,8 +12,9 @@ import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts
 
 describe('importQuerySchema', () => {
   test('it should validate proper schema', () => {
-    const payload = {
+    const payload: ImportQuerySchema = {
       overwrite: true,
+      overwrite_exceptions: true,
     };
     const decoded = importQuerySchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -26,6 +27,24 @@ describe('importQuerySchema', () => {
   test('it should NOT validate a non boolean value for "overwrite"', () => {
     const payload: Omit<ImportQuerySchema, 'overwrite'> & { overwrite: string } = {
       overwrite: 'wrong',
+      overwrite_exceptions: true,
+    };
+    const decoded = importQuerySchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = foldLeftRight(checked);
+
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "wrong" supplied to "overwrite"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should NOT validate a non boolean value for "overwrite_exceptions"', () => {
+    const payload: Omit<ImportQuerySchema, 'overwrite_exceptions'> & {
+      overwrite_exceptions: string;
+    } = {
+      overwrite: true,
+      overwrite_exceptions: 'wrong',
     };
     const decoded = importQuerySchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -43,6 +62,7 @@ describe('importQuerySchema', () => {
     } = {
       extraKey: 'extra',
       overwrite: true,
+      overwrite_exceptions: true,
     };
 
     const decoded = importQuerySchema.decode(payload);

@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
@@ -16,7 +15,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';

@@ -118,8 +118,7 @@ export const importRulesRoute = (
         } = await importRuleExceptions({
           exceptions,
           exceptionsClient,
-          // TODO: Add option of overwriting exceptions separately
-          overwrite: request.query.overwrite,
+          overwrite: request.query.overwrite_exceptions,
           maxExceptionsImportSize: objectLimit,
         });
 

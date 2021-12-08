@@ -244,6 +244,7 @@ export interface BasicFetchProps {
 export interface ImportDataProps {
   fileToImport: File;
   overwrite?: boolean;
+  overwriteExceptions?: boolean;
   signal: AbortSignal;
 }
 
