@@ -9,16 +9,15 @@
 import type { IExternalUrl } from 'kibana/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { IEMSKbnMapsSettings } from 'src/plugins/maps_ems/public';
+import { IServiceSettings } from './vega_map_view/service_settings';
 import { VegaParser } from '../data_model/vega_parser';
 import { createVegaStateRestorer } from '../lib/vega_state_restorer';
-import { IEMSKbnMapsSettings } from '../../../../maps_ems/public';
 
 interface VegaViewParams {
   parentEl: HTMLDivElement;
   fireEvent: IInterpreterRenderHandlers['event'];
   vegaParser: VegaParser;
-  serviceSettings: IEMSKbnMapsSettings;
+  serviceSettings: IServiceSettings;
   filterManager: DataPublicPluginStart['query']['filterManager'];
   timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
   vegaStateRestorer: ReturnType<typeof createVegaStateRestorer>;
