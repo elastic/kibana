@@ -26,7 +26,7 @@ import {
 } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
-import { IScopedSearchSessionsClient, ISearchSessionService } from './session';
+import type { IScopedSearchSessionsClient, ISearchSessionService } from './session';
 
 export interface SearchEnhancements {
   sessionService: ISearchSessionService;
