@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
-const { basename } = require('path');
+import Path from 'path';
 
-function isVersionFlag(a) {
+import type { ArtifactSpec } from './artifact';
+
+function isVersionFlag(a: string) {
   return a.startsWith('--version');
 }
 
-function getCustomSnapshotUrl() {
+export function getCustomSnapshotUrl() {
+  // force use of manually created snapshots until ReindexPutMappings fix
   if (
     !process.env.ES_SNAPSHOT_MANIFEST &&
     !process.env.KBN_ES_SNAPSHOT_URL &&
@@ -27,7 +30,10 @@ function getCustomSnapshotUrl() {
   }
 }
 
-function resolveCustomSnapshotUrl(urlVersion, license) {
+export function resolveCustomSnapshotUrl(
+  urlVersion: string,
+  license: string
+): ArtifactSpec | undefined {
   const customSnapshotUrl = getCustomSnapshotUrl();
 
   if (!customSnapshotUrl) {
@@ -47,8 +53,6 @@ function resolveCustomSnapshotUrl(urlVersion, license) {
     url: overrideUrl,
     checksumUrl: overrideUrl + '.sha512',
     checksumType: 'sha512',
-    filename: basename(overrideUrl),
+    filename: Path.basename(overrideUrl),
   };
 }
-
-module.exports = { getCustomSnapshotUrl, resolveCustomSnapshotUrl };
