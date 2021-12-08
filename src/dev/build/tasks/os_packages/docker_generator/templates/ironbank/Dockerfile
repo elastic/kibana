@@ -4,7 +4,7 @@
 ################################################################################
 ARG BASE_REGISTRY=registry1.dsop.io
 ARG BASE_IMAGE=redhat/ubi/ubi8
-ARG BASE_TAG=8.4
+ARG BASE_TAG=8.5
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} as prep_files
 
