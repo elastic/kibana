@@ -98,6 +98,8 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
       if (record.influencers) {
         kqlQuery = record.influencers
+          // No need to add categorization detectors to query
+          .filter((i) => i.influencer_field_name !== 'mlcategory')
           .map(
             (i) =>
               `${escapeForElasticsearchQuery(i.influencer_field_name)}:"${
@@ -132,10 +134,8 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       }
     };
 
-    // No need to show if it's a categorization jobs
-    if (props?.anomaly?.entityName !== 'mlcategory') {
-      generateDiscoverUrl();
-    }
+    generateDiscoverUrl();
+
     return () => {
       unmounted = true;
     };
@@ -511,7 +511,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     });
   }
 
-  if (anomaly.entityName !== 'mlcategory' && openInDiscoverUrl) {
+  if (openInDiscoverUrl) {
     items.push(
       <EuiContextMenuItem
         key={`auto_raw_data_url`}
