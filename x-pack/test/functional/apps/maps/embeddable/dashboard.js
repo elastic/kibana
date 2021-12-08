@@ -18,7 +18,7 @@ export default function ({ getPageObjects, getService }) {
   const retry = getService('retry');
   const security = getService('security');
 
-  describe('embed in dashboard', () => {
+  describe.only('embed in dashboard', () => {
     before(async () => {
       await security.testUser.setRoles(
         [
