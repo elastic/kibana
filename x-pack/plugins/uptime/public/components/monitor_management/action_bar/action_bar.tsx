@@ -128,14 +128,14 @@ const VALIDATION_ERROR_LABEL = i18n.translate('xpack.uptime.monitorManagement.va
 });
 
 const MONITOR_SUCCESS_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.monitorSuccessMessage',
+  'xpack.uptime.monitorManagement.monitorAddedSuccessMessage',
   {
     defaultMessage: 'Monitor added successfully.',
   }
 );
 
 const MONITOR_EDITED_SUCCESS_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.monitorSuccessMessage',
+  'xpack.uptime.monitorManagement.monitorEditedSuccessMessage',
   {
     defaultMessage: 'Monitor edited successfully.',
   }

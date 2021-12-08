@@ -38,10 +38,16 @@ const LOADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.addMonitorL
   defaultMessage: 'Loading Monitor Management',
 });
 
-const ERROR_HEADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.addMonitorError', {
-  defaultMessage: 'Error loading monitor management',
-});
+const ERROR_HEADING_LABEL = i18n.translate(
+  'xpack.uptime.monitorManagement.addMonitorLoadingError',
+  {
+    defaultMessage: 'Error loading monitor management',
+  }
+);
 
-const ERROR_BODY_LABEL = i18n.translate('xpack.uptime.monitorManagement.addMonitorError', {
-  defaultMessage: 'Service locations were not able to be loaded. Please try again later.',
-});
+const ERROR_BODY_LABEL = i18n.translate(
+  'xpack.uptime.monitorManagement.addMonitorServiceLocationsLoadingError',
+  {
+    defaultMessage: 'Service locations were not able to be loaded. Please try again later.',
+  }
+);
