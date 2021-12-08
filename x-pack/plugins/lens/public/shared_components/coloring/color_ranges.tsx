@@ -9,6 +9,7 @@ import React, { useState, useMemo } from 'react';
 import type { FocusEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  htmlIdGenerator,
   EuiFieldNumber,
   EuiColorPicker,
   EuiButtonIcon,
@@ -28,14 +29,17 @@ import { getDataMinMax, getStepValue, isValidColor, roundValue, getAutoValues } 
 import type { CustomPaletteParamsConfig, ColorStop } from '../../../common';
 import { useDebouncedValue, TooltipWrapper } from '../index';
 import { DEFAULT_COLOR } from './constants';
-export interface ColorRanges {
+
+const idGeneratorFn = htmlIdGenerator();
+export interface ColorRange {
   color: string;
   start: number;
   end: number;
+  id?: string;
 }
 
 export interface ColorRangesProps {
-  colorRanges: ColorRanges[];
+  colorRanges: ColorRange[];
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
   onChange: (
     colorStops: ColorStop[],
@@ -50,9 +54,10 @@ function areStopsValid(colorStops: Array<{ color: string; stop: number }>) {
   return colorStops.every(({ color, stop }) => !Number.isNaN(stop) && isValidColor(color));
 }
 
-function reversePalette(colorRanges: ColorRanges[]) {
+function reversePalette(colorRanges: ColorRange[]) {
   return colorRanges
     .map(({ color }, i) => ({
+      id: idGeneratorFn(),
       color,
       start: colorRanges[colorRanges.length - i - 1].start,
       end: colorRanges[colorRanges.length - i - 1].end,
@@ -70,7 +75,7 @@ export function ColorRanges(props: ColorRangesProps) {
   const isDisabledStart = ['min', 'all'].includes(autoValue!);
   const isDisabledEnd = ['max', 'all'].includes(autoValue!);
 
-  const onChangeWithValidation = (newColorRanges: ColorRanges[]) => {
+  const onChangeWithValidation = (newColorRanges: ColorRange[]) => {
     const upperMin = ['min', 'all'].includes(autoValue!)
       ? -Infinity
       : Number(newColorRanges[0].start);
@@ -92,6 +97,7 @@ export function ColorRanges(props: ColorRangesProps) {
       color,
       start,
       end,
+      id: idGeneratorFn(),
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paletteConfiguration?.name, paletteConfiguration?.reverse, paletteConfiguration?.rangeType]);
@@ -105,7 +111,7 @@ export function ColorRanges(props: ColorRangesProps) {
     paletteConfiguration?.maxSteps && localColorRanges.length >= paletteConfiguration?.maxSteps
   );
 
-  const getColorRangeElem = (colorRange: ColorRanges, index: number, isLast = false) => {
+  const getColorRangeElem = (colorRange: ColorRange, index: number, isLast = false) => {
     const value = isLast ? colorRange.end : colorRange.start;
     const showDelete = index !== 0 && !isLast;
     const indexPostfix = isLast ? index + 1 : index;
@@ -115,6 +121,7 @@ export function ColorRanges(props: ColorRangesProps) {
 
     return (
       <EuiFlexItem
+        key={colorRange.id}
         data-test-subj={`${dataTestPrefix}_dynamicColoring_range_row_${indexPostfix}`}
         onBlur={(e: FocusEvent<HTMLDivElement>) => {
           const isFocusStillInContent =
@@ -126,6 +133,7 @@ export function ColorRanges(props: ColorRangesProps) {
             );
             newColorRanges = newColorRanges.map((newColorRange, i) => {
               return {
+                id: idGeneratorFn(),
                 color: newColorRange.color,
                 start: newColorRange.start,
                 end: i !== newColorRanges.length - 1 ? newColorRanges[i + 1].start : maxValue,
@@ -430,6 +438,7 @@ export function ColorRanges(props: ColorRangesProps) {
               const prevEndValue = newColorRanges[length - 1].end;
               newColorRanges[length - 1].end = newStart;
               newColorRanges.push({
+                id: idGeneratorFn(),
                 color: prevColor,
                 start: newStart,
                 end:
@@ -480,6 +489,7 @@ export function ColorRanges(props: ColorRangesProps) {
             const step = roundValue((end - start) / colorsCount);
             const newRanges = localColorRanges.map((colorRange, index) => {
               return {
+                id: idGeneratorFn(),
                 color: colorRange.color,
                 start: roundValue(start + (step * 100 * index) / 100),
                 end:

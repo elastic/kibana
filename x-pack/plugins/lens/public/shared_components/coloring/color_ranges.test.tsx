@@ -185,7 +185,7 @@ describe('Color Ranges component', () => {
     let firstValue = component.find(
       '[data-test-subj="my-test_dynamicColoring_range_value_0"] input[type="number"]'
     );
-    expect(firstValue.prop('disabled')).toBe(false);
+
     expect(firstValue.prop('value')).toBe(20);
 
     const addDetectMinValueButton = component
@@ -200,13 +200,11 @@ describe('Color Ranges component', () => {
     );
 
     expect(firstValue.prop('value')).toBe(0);
-    expect(firstValue.prop('disabled')).toBe(true);
 
     let lastValueInput = component.find(
       '[data-test-subj="my-test_dynamicColoring_range_value_3"] input[type="number"]'
     );
     expect(lastValueInput.prop('value')).toBe(80);
-    expect(lastValueInput.prop('disabled')).toBe(false);
 
     const addDetectMaxValueButton = component
       .find('[data-test-subj="my-test_dynamicColoring_autoDetect_maximum"]')
@@ -220,7 +218,6 @@ describe('Color Ranges component', () => {
     );
 
     expect(lastValueInput.prop('value')).toBe(200);
-    expect(lastValueInput.prop('disabled')).toBe(true);
   });
 
   it('should reverse colors when user click "reverse"', () => {

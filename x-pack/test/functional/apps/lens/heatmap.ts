@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#54b399' },
         { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#d6bf57' },
         { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#e7664c' },
-        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#cc5642' },
+        { key: '16,948.55 - 19,755', name: '16,948.55 - 19,755', color: '#cc5642' },
       ]);
     });
 
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#54b399' },
         { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#d6bf57' },
         { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#e7664c' },
-        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#cc5642' },
+        { key: '16,948.55 - 19,755', name: '16,948.55 - 19,755', color: '#cc5642' },
       ]);
     });
   });

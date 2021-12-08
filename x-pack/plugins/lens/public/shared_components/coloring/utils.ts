@@ -17,7 +17,7 @@ import {
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
 } from './constants';
-import type { ColorRanges } from './color_ranges';
+import type { ColorRange } from './color_ranges';
 import type { CustomPaletteParams, ColorStop } from '../../../common';
 
 /**
@@ -91,7 +91,7 @@ export function remapStopsByNewInterval(
 
 // Utility to remap color stops within new domain
 export function getStopsFromColorRangesByNewInterval(
-  colorRanges: ColorRanges[],
+  colorRanges: ColorRange[],
   {
     newInterval,
     oldInterval,

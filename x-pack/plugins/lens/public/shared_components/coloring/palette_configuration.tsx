@@ -91,7 +91,10 @@ function getColorRanges(
   return colorStopsToShow.map((colorStop, index) => {
     return {
       color: colorStop.color,
-      start: index === 0 ? roundValue(min) : colorStop.stop ?? activePalette.params?.rangeMin,
+      start:
+        index === 0 && autoValue && ['min', 'all'].includes(autoValue)
+          ? roundValue(min)
+          : colorStop.stop ?? activePalette.params?.rangeMin,
       end: index < colorStopsToShow.length - 1 ? colorStopsToShow[index + 1].stop : roundValue(max),
     };
   });
