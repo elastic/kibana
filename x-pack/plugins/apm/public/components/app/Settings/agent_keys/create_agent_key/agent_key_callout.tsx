@@ -13,6 +13,7 @@ import {
   EuiButtonIcon,
   EuiCopy,
   EuiFormControlLayout,
+  EuiFieldText,
 } from '@elastic/eui';
 
 interface Props {
@@ -66,9 +67,8 @@ export function AgentKeyCallOut({ name, token }: Props) {
             </EuiCopy>
           }
         >
-          <input
-            type="text"
-            className="euiFieldText euiFieldText--inGroup"
+          <EuiFieldText
+            className="euiFieldText--inGroup"
             readOnly
             value={token}
             aria-label={i18n.translate(
