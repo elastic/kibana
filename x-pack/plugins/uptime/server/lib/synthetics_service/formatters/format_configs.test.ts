@@ -23,7 +23,6 @@ describe('formatMonitorConfig', () => {
     'service.name': '',
     tags: [],
     timeout: '16',
-    id: '',
     name: 'Test',
     locations: [],
     __ui: { is_tls_enabled: false, is_zip_url_tls_enabled: false },
@@ -72,7 +71,6 @@ describe('formatMonitorConfig', () => {
     'service.name': '',
     tags: [],
     timeout: '16',
-    id: '',
     name: 'Test',
     locations: [],
     __ui: {
