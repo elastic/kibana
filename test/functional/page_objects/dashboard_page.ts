@@ -536,11 +536,11 @@ export class DashboardPageObject extends FtrService {
 
   // returns an array of Boolean values - true if the panel title is visible in view mode, false if it is not
   public async getVisibilityOfPanelTitles() {
+    this.log.debug('in getVisibilityOfPanels');
     // only works if the dashboard is in view mode
     const inViewMode = await this.getIsInViewMode();
     if (!inViewMode) {
       await this.clickCancelOutOfEditMode();
-      // await this.dashboard.switchToEditMode();
     }
     const visibilities: boolean[] = [];
     const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle__wrapper');
@@ -548,8 +548,7 @@ export class DashboardPageObject extends FtrService {
       const exists = !(await titleObject.elementHasClass('embPanel__header--floater'));
       visibilities.push(exists);
     }
-    this.log.debug('Visibilities:', visibilities);
-    // return to previous view mode
+    // return to edit mode if a switch to view mode above was necessary
     if (!inViewMode) {
       await this.switchToEditMode();
     }
