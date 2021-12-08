@@ -258,7 +258,7 @@ describe('service_settings (FKA tile_map test)', function () {
         return layer.id === 'foobar_countries';
       });
       expect(fileLayer.attribution).toEqual(
-        '<a rel=\"noreferrer noopener\" href=\"http://foobar/com\">foobar</a>'
+        `<a rel=\"noreferrer noopener\" href=\"http://foobar/com\">foobar</a>`
       );
     });
   });
