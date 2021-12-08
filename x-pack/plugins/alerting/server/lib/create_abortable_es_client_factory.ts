@@ -65,5 +65,9 @@ export function createAbortableEsClientFactory(opts: CreateAbortableEsClientFact
 }
 
 function isAbortError(error: Error) {
-  return error.message === 'Request aborted' || error.message === 'Aborted';
+  return (
+    error.message === 'Request aborted' ||
+    error.message === 'Aborted' ||
+    error.message === 'Request has been aborted by the user'
+  );
 }

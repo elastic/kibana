@@ -8,8 +8,6 @@ import apm from 'elastic-apm-node';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
-import { BehaviorSubject } from 'rxjs';
-import { filter } from 'rxjs/operators';
 import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -98,7 +96,7 @@ export class TaskRunner<
   >;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private searchAbortController: AbortController;
-  private cancelled$: BehaviorSubject<boolean>;
+  private cancelled: boolean;
 
   constructor(
     alertType: NormalizedAlertType<
@@ -121,14 +119,7 @@ export class TaskRunner<
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
-    this.cancelled$ = new BehaviorSubject<boolean>(false);
-
-    this.cancelled$.pipe(filter((cancelled: boolean) => cancelled)).subscribe(() => {
-      this.logger.debug(
-        `Aborting any in-progress ES searches for rule type ${this.alertType.id} with id ${this.ruleId}`
-      );
-      this.searchAbortController.abort();
-    });
+    this.cancelled = false;
   }
 
   async getDecryptedAttributes(
@@ -243,14 +234,6 @@ export class TaskRunner<
         `error updating rule execution status for ${this.alertType.id}:${alertId} ${err.message}`
       );
     }
-  }
-
-  private get cancelled() {
-    return this.cancelled$.getValue();
-  }
-
-  private set cancelled(isCancelled: boolean) {
-    this.cancelled$.next(isCancelled);
   }
 
   private shouldLogAndScheduleActionsForAlerts() {
@@ -761,6 +744,11 @@ export class TaskRunner<
     }
 
     this.cancelled = true;
+
+    this.logger.debug(
+      `Aborting any in-progress ES searches for rule type ${this.alertType.id} with id ${this.ruleId}`
+    );
+    this.searchAbortController.abort();
 
     // Write event log entry
     const {
