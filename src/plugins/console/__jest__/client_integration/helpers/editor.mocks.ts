@@ -10,6 +10,11 @@ jest.mock('../../../public/application/components/editor_example.tsx', () => ({
   EditorExample: () => '',
 }));
 
+jest.mock('../../../public/application/models/legacy_core_editor/mode/worker/index.js', () => ({
+  id: 'sense_editor/mode/worker',
+  src: {},
+}));
+
 jest.mock('../../../public/application/contexts/editor_context/editor_registry.ts', () => ({
   instance: {
     setInputEditor: () => {},
@@ -19,10 +24,12 @@ jest.mock('../../../public/application/contexts/editor_context/editor_registry.t
     }),
   },
 }));
+
 jest.mock('../../../public/lib/mappings/mappings', () => ({
   retrieveAutoCompleteInfo: () => {},
   clearSubscriptions: () => {},
 }));
+
 jest.mock('../../../public/application/models/sense_editor', () => {
   return {
     create: () => ({
@@ -48,6 +55,7 @@ jest.mock(
     sendRequestToES: jest.fn(),
   })
 );
+
 jest.mock('../../../public/lib/autocomplete/get_endpoint_from_position', () => ({
   getEndpointFromPosition: jest.fn(),
 }));

@@ -12,11 +12,6 @@ import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test/jest';
 import { Main } from '../../../public/application/containers';
 import { WithAppDependencies } from '../helpers';
 
-jest.mock('../../../public/application/models/legacy_core_editor/mode/worker/index.js', () => ({
-  id: 'sense_editor/mode/worker',
-  src: {},
-}));
-
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`/`],

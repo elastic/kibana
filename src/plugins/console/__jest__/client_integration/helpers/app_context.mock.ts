@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { notificationServiceMock, coreMock } from 'src/core/public/mocks';
+import { notificationServiceMock, coreMock, httpServiceMock, themeServiceMock } from 'src/core/public/mocks';
 import { createStorage } from '../../../public/services/storage';
 import { createSettings } from '../../../public/services/settings';
 import { createHistory } from '../../../public/services/history';
 import { createApi, createEsHostService } from '../../../public/application/lib';
-
-import { HttpSetup } from 'src/core/public';
 
 const objectStorageClient = {
   text: {
@@ -22,7 +20,8 @@ const objectStorageClient = {
   },
 };
 
-export const getAppContextMock = (http: HttpSetup) => {
+export const getAppContextMock = () => {
+  const http = httpServiceMock.createSetupContract();
   const storageMock = coreMock.createStorage();
 
   const storage = createStorage({ engine: storageMock, prefix: '' });
@@ -33,13 +32,14 @@ export const getAppContextMock = (http: HttpSetup) => {
 
   return {
     docLinksVersion: '8.0',
+    theme$: themeServiceMock.create().start().theme$,
     services: {
       storage,
       history,
       settings,
       esHostService,
       objectStorageClient,
-      trackUiMetric: jest.fn(),
+      trackUiMetric: { count: jest.fn(), load: jest.fn() },
       notifications: notificationServiceMock.createStartContract(),
     },
   };

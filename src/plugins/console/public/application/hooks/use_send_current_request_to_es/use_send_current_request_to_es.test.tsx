@@ -14,10 +14,11 @@ jest.mock('./track', () => ({ track: jest.fn() }));
 jest.mock('../../contexts/request_context', () => ({ useRequestActionContext: jest.fn() }));
 
 import React from 'react';
+import { merge } from 'lodash';
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { ContextValue, ServicesContextProvider } from '../../contexts';
-import { serviceContextMock } from '../../contexts/services_context.mock';
+import { getAppContextMock } from '../../../../__jest__/client_integration/helpers/app_context.mock';
 import { useRequestActionContext } from '../../contexts/request_context';
 import { instance as editorRegistry } from '../../contexts/editor_context/editor_registry';
 
@@ -32,7 +33,16 @@ describe('useSendCurrentRequestToES', () => {
   );
 
   beforeEach(() => {
-    mockContextValue = serviceContextMock.create();
+    mockContextValue = merge({}, getAppContextMock(), {
+      services: {
+        history: {
+          addToHistory: jest.fn(),
+        },
+        settings: {
+          toJSON: jest.fn(),
+        },
+      },
+    }) as unknown as ContextValue;
     dispatch = jest.fn();
     (useRequestActionContext as jest.Mock).mockReturnValue(dispatch);
   });
