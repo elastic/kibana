@@ -175,11 +175,11 @@ configure({ testIdAttribute: 'data-test-subj' });
 
 export const MockRedux = ({
   state,
-  history,
+  history = createMemoryHistory(),
   children,
 }: {
   state: Partial<AppState>;
-  history: History;
+  history?: History;
   children: React.ReactNode;
 }) => {
   const testState: AppState = {
