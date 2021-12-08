@@ -131,7 +131,7 @@ it('never ignores write messages from the kibana elasticsearch.deprecation logge
     indent: 10,
     args: [
       '%s\n%O\n\n%d',
-      '[deprecation][elasticsearch]',
+      '[elasticsearch.deprecation]',
       { foo: { bar: { 1: [1, 2, 3] } }, bar: { bar: { 1: [1, 2, 3] } } },
       Infinity,
     ],
