@@ -23,10 +23,10 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
-    describe('POST /api/fleet/service-tokens', () => {
+    describe('POST /api/fleet/service_tokens', () => {
       it('should create a valid service account token', async () => {
         const { body: apiResponse } = await supertest
-          .post(`/api/fleet/service-tokens`)
+          .post(`/api/fleet/service_tokens`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
@@ -43,6 +43,10 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(tokensResponse.tokens).have.property(apiResponse.name);
       });
+    });
+
+    it('should work with deprecated api', async () => {
+      await supertest.post(`/api/fleet/service-tokens`).set('kbn-xsrf', 'xxxx').expect(200);
     });
   });
 }
