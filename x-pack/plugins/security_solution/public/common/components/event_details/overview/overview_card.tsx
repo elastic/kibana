@@ -23,7 +23,7 @@ const OverviewPanel = euiStyled(EuiPanel)`
   &&& {
     background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
     padding: ${({ theme }) => theme.eui.paddingSizes.s};
-    height: 87px;
+    height: 78px;
   }
 
   & {
