@@ -75,7 +75,7 @@ it('captures a list of failed test issue, loads the bodies for each issue, and o
     Object {
       "classname": "foo classname",
       "github": Object {
-        "body": "",
+        "body": "FAILURE: foo classname/foo test",
         "htmlUrl": "htmlurl(foo classname/foo test)",
         "nodeId": "nodeid(foo classname/foo test)",
         "number": 21,
@@ -140,6 +140,7 @@ it('captures a list of failed test issue, loads the bodies for each issue, and o
                 Object {
                   "classname": "foo classname",
                   "github": Object {
+                    "body": "FAILURE: foo classname/foo test",
                     "htmlUrl": "htmlurl(foo classname/foo test)",
                     "nodeId": "nodeid(foo classname/foo test)",
                     "number": 21,
