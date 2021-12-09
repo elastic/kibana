@@ -20,7 +20,7 @@ import { DashboardListing } from './listing';
 import { dashboardStateStore } from './state';
 import { DashboardApp } from './dashboard_app';
 import { DashboardNoMatch } from './listing/dashboard_no_match';
-import { KibanaContextProvider } from '../services/kibana_react';
+import { KibanaContextProvider, KibanaThemeProvider } from '../services/kibana_react';
 import { addHelpMenuToAppChrome, DashboardSessionStorage } from './lib';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
@@ -226,26 +226,28 @@ export async function mountApp({
       <Provider store={dashboardStateStore}>
         <KibanaContextProvider services={dashboardServices}>
           <presentationUtil.ContextProvider>
-            <HashRouter>
-              <Switch>
-                <Route
-                  path={[
-                    DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-                    `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
-                  ]}
-                  render={renderDashboard}
-                />
-                <Route
-                  exact
-                  path={DashboardConstants.LANDING_PAGE_PATH}
-                  render={renderListingPage}
-                />
-                <Route exact path="/">
-                  <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
-                </Route>
-                <Route render={renderNoMatch} />
-              </Switch>
-            </HashRouter>
+            <KibanaThemeProvider theme$={core.theme.theme$}>
+              <HashRouter>
+                <Switch>
+                  <Route
+                    path={[
+                      DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+                      `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
+                    ]}
+                    render={renderDashboard}
+                  />
+                  <Route
+                    exact
+                    path={DashboardConstants.LANDING_PAGE_PATH}
+                    render={renderListingPage}
+                  />
+                  <Route exact path="/">
+                    <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
+                  </Route>
+                  <Route render={renderNoMatch} />
+                </Switch>
+              </HashRouter>
+            </KibanaThemeProvider>
           </presentationUtil.ContextProvider>
         </KibanaContextProvider>
       </Provider>
