@@ -103,42 +103,43 @@ export const createCommentsMigrations = (
   return mergeMigrationFunctionMaps(commentsMigrations, embeddableMigrations);
 };
 
-export const migrateByValueLensVisualizations =
-  (
-    migrate: MigrateFunction,
-    version: string
-  ): SavedObjectMigrationFn<{ comment?: string }, { comment?: string }> =>
-  (doc: SavedObjectUnsanitizedDoc<{ comment?: string }>, context: SavedObjectMigrationContext) => {
-    if (doc.attributes.comment == null) {
-      return doc;
-    }
+export const migrateByValueLensVisualizations = (
+  migrate: MigrateFunction,
+  version: string
+): SavedObjectMigrationFn<{ comment?: string }, { comment?: string }> => (
+  doc: SavedObjectUnsanitizedDoc<{ comment?: string }>,
+  context: SavedObjectMigrationContext
+) => {
+  if (doc.attributes.comment == null) {
+    return doc;
+  }
 
-    try {
-      const parsedComment = parseCommentString(doc.attributes.comment);
-      const migratedComment = parsedComment.children.map((comment) => {
-        if (isLensMarkdownNode(comment)) {
-          // casting here because ts complains that comment isn't serializable because LensMarkdownNode
-          // extends Node which has fields that conflict with SerializableRecord even though it is serializable
-          return migrate(comment as SerializableRecord) as LensMarkdownNode;
-        }
+  try {
+    const parsedComment = parseCommentString(doc.attributes.comment);
+    const migratedComment = parsedComment.children.map((comment) => {
+      if (isLensMarkdownNode(comment)) {
+        // casting here because ts complains that comment isn't serializable because LensMarkdownNode
+        // extends Node which has fields that conflict with SerializableRecord even though it is serializable
+        return migrate(comment as SerializableRecord) as LensMarkdownNode;
+      }
 
-        return comment;
-      });
+      return comment;
+    });
 
-      const migratedMarkdown = { ...parsedComment, children: migratedComment };
+    const migratedMarkdown = { ...parsedComment, children: migratedComment };
 
-      return {
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          comment: stringifyCommentWithoutTrailingNewline(doc.attributes.comment, migratedMarkdown),
-        },
-      };
-    } catch (error) {
-      logError({ id: doc.id, context, error, docType: 'comment', docKey: 'comment' });
-      return doc;
-    }
-  };
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        comment: stringifyCommentWithoutTrailingNewline(doc.attributes.comment, migratedMarkdown),
+      },
+    };
+  } catch (error) {
+    logError({ id: doc.id, context, error, docType: 'comment', docKey: 'comment' });
+    return doc;
+  }
+};
 
 export const stringifyCommentWithoutTrailingNewline = (
   originalComment: string,

@@ -8,7 +8,11 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { noneConnectorId } from '../../../common';
-import { SavedObjectReference, SavedObjectMigrationContext, LogMeta } from '../../../../../../src/core/server';
+import {
+  SavedObjectReference,
+  SavedObjectMigrationContext,
+  LogMeta,
+} from '../../../../../../src/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import {
   getNoneCaseConnector,

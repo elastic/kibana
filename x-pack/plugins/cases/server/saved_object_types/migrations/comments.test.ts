@@ -239,9 +239,9 @@ describe('comments migrations', () => {
         const result = migrations['7.14.0'](caseComment, contextMock);
 
         const parsedComment = parseCommentString(result.attributes.comment);
-        const lensVisualizations = getLensVisualizations(
+        const lensVisualizations = (getLensVisualizations(
           parsedComment.children
-        ) as unknown as Array<{
+        ) as unknown) as Array<{
           attributes: LensDocShape715 & { references: SavedObjectReference[] };
         }>;
 
@@ -310,9 +310,9 @@ describe('comments migrations', () => {
 
     describe('mergeMigrationFunctionMaps', () => {
       it('logs an error when the passed migration functions fails', () => {
-        const migrationObj1 = {
+        const migrationObj1 = ({
           '1.0.0': migrateByValueLensVisualizations(migrationFunction, '1.0.0'),
-        } as unknown as MigrateFunctionsObject;
+        } as unknown) as MigrateFunctionsObject;
 
         const migrationObj2 = {
           '2.0.0': (doc: SavedObjectUnsanitizedDoc<{ comment?: string }>) => {
@@ -339,9 +339,9 @@ describe('comments migrations', () => {
       });
 
       it('it does not log an error when the migration function does not use the context', () => {
-        const migrationObj1 = {
+        const migrationObj1 = ({
           '1.0.0': migrateByValueLensVisualizations(migrationFunction, '1.0.0'),
-        } as unknown as MigrateFunctionsObject;
+        } as unknown) as MigrateFunctionsObject;
 
         const migrationObj2 = {
           '2.0.0': (doc: SavedObjectUnsanitizedDoc<{ comment?: string }>) => {
