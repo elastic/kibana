@@ -38,7 +38,7 @@ export function createAbortableEsClientFactory(opts: CreateAbortableEsClientFact
             signal: abortController.signal,
           });
         } catch (e) {
-          if (isAbortError(e)) {
+          if (abortController.signal.aborted) {
             throw new Error('Search has been aborted due to cancelled execution');
           }
           throw e;
@@ -54,7 +54,7 @@ export function createAbortableEsClientFactory(opts: CreateAbortableEsClientFact
             signal: abortController.signal,
           });
         } catch (e) {
-          if (isAbortError(e)) {
+          if (abortController.signal.aborted) {
             throw new Error('Search has been aborted due to cancelled execution');
           }
           throw e;
@@ -62,12 +62,4 @@ export function createAbortableEsClientFactory(opts: CreateAbortableEsClientFact
       },
     },
   };
-}
-
-function isAbortError(error: Error) {
-  return (
-    error.message === 'Request aborted' ||
-    error.message === 'Aborted' ||
-    error.message === 'Request has been aborted by the user'
-  );
 }

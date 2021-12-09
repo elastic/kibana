@@ -85,6 +85,7 @@ describe('createAbortableEsClientFactory', () => {
 
   test('throws error when search throws abort error', async () => {
     const abortController = new AbortController();
+    abortController.abort();
     const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     scopedClusterClient.asInternalUser.search.mockRejectedValueOnce(
       new Error('Request has been aborted by the user')
