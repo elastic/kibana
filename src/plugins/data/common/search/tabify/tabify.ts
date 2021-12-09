@@ -9,7 +9,7 @@
 import { get } from 'lodash';
 import { TabbedAggResponseWriter } from './response_writer';
 import { TabifyBuckets } from './buckets';
-import { TabbedResponseWriterOptions } from './types';
+import type { TabbedResponseWriterOptions } from './types';
 import { AggResponseBucket } from './types';
 import { AggGroupNames, IAggConfigs } from '../aggs';
 

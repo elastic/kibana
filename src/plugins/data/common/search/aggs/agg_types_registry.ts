@@ -16,8 +16,6 @@ export type AggTypesRegistrySetup = ReturnType<AggTypesRegistry['setup']>;
  * real start contract we will need to return the initialized versions.
  * So we need to provide the correct typings so they can be overwritten
  * on client/server.
- *
- * @internal
  */
 export interface AggTypesRegistryStart {
   get: (id: string) => BucketAggType<any> | MetricAggType<any>;

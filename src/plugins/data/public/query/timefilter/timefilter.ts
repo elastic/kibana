@@ -11,7 +11,7 @@ import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
-import { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
+import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
 import { NowProviderInternalContract } from '../../now_provider';
 import {
   calculateBounds,

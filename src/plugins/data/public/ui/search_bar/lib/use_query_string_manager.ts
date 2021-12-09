@@ -9,7 +9,7 @@
 import { useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
 import { Query } from '../../..';
-import { QueryStringContract } from '../../../query/query_string';
+import type { QueryStringContract } from '../../../query/query_string';
 
 interface UseQueryStringProps {
   query?: Query;

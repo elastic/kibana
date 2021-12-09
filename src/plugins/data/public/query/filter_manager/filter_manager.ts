@@ -14,7 +14,6 @@ import { IUiSettingsClient } from 'src/core/public';
 import { isFilterPinned, onlyDisabledFiltersChanged, Filter } from '@kbn/es-query';
 import { sortFilters } from './lib/sort_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
-import { PartitionedFilters } from './types';
 
 import {
   FilterStateStore,
@@ -30,6 +29,11 @@ import {
   extract,
   telemetry,
 } from '../../../common/query/persistable_state';
+
+interface PartitionedFilters {
+  globalFilters: Filter[];
+  appFilters: Filter[];
+}
 
 export class FilterManager implements PersistableStateService<Filter[]> {
   private filters: Filter[] = [];

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type QueryLanguage = 'kuery' | 'lucene';
+type QueryLanguage = 'kuery' | 'lucene';
 
 export function getDefaultQuery(language: QueryLanguage = 'kuery') {
   return {

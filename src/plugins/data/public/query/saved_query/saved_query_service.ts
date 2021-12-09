@@ -8,7 +8,7 @@
 
 import { HttpStart } from 'src/core/public';
 import { SavedQuery } from './types';
-import { SavedQueryAttributes } from '../../../common';
+import type { SavedQueryAttributes } from '../../../common';
 
 export const createSavedQueryService = (http: HttpStart) => {
   const createQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
