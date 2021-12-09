@@ -263,12 +263,14 @@ export class TimePickerPageObject extends FtrService {
 
   public async startAutoRefresh(intervalS = 3) {
     await this.quickSelectTimeMenuToggle.open();
+    const refreshConfig = await this.getRefreshConfig(true);
+
     if (refreshConfig.isPaused) {
       this.log.debug('start auto refresh');
       await this.testSubjects.click('superDatePickerToggleRefreshButton');
     }
+
     await this.inputValue('superDatePickerRefreshIntervalInput', intervalS.toString());
-    const refreshConfig = await this.getRefreshConfig(true);
     await this.quickSelectTimeMenuToggle.close();
   }
 
