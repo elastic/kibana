@@ -121,7 +121,7 @@ export type ExecutorType<
 export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
   validate: (object: unknown) => Params;
 }
-export interface AlertType<
+export interface RuleType<
   Params extends AlertTypeParams = never,
   ExtractedParams extends AlertTypeParams = never,
   State extends AlertTypeState = never,
@@ -166,7 +166,7 @@ export interface AlertType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
 }
-export type UntypedAlertType = AlertType<
+export type UntypedRuleType = RuleType<
   AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
@@ -187,7 +187,7 @@ export interface AlertMeta extends SavedObjectAttributes {
 // note that the `error` property is "null-able", as we're doing a partial
 // update on the alert when we update this data, but need to ensure we
 // delete any previous error if the current status has no error
-export interface RawAlertExecutionStatus extends SavedObjectAttributes {
+export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   status: AlertExecutionStatuses;
   lastExecutionDate: string;
   lastDuration?: number;
@@ -204,7 +204,7 @@ export interface AlertWithLegacyId<Params extends AlertTypeParams = never> exten
   legacyId: string | null;
 }
 
-export type SanitizedAlertWithLegacyId<Params extends AlertTypeParams = never> = Omit<
+export type SanitizedRuleWithLegacyId<Params extends AlertTypeParams = never> = Omit<
   AlertWithLegacyId<Params>,
   'apiKey'
 >;
@@ -215,11 +215,11 @@ export type PartialAlertWithLegacyId<Params extends AlertTypeParams = never> = P
 > &
   Partial<Omit<AlertWithLegacyId<Params>, 'id'>>;
 
-export interface RawAlert extends SavedObjectAttributes {
+export interface RawRule extends SavedObjectAttributes {
   enabled: boolean;
   name: string;
   tags: string[];
-  alertTypeId: string;
+  alertTypeId: string; // this cannot be renamed since it is in the saved object
   consumer: string;
   legacyId: string | null;
   schedule: SavedObjectAttributes;
@@ -237,11 +237,11 @@ export interface RawAlert extends SavedObjectAttributes {
   muteAll: boolean;
   mutedInstanceIds: string[];
   meta?: AlertMeta;
-  executionStatus: RawAlertExecutionStatus;
+  executionStatus: RawRuleExecutionStatus;
 }
 
 export type AlertInfoParams = Pick<
-  RawAlert,
+  RawRule,
   | 'params'
   | 'throttle'
   | 'notifyWhen'

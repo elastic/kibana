@@ -233,7 +233,7 @@ interface MyRuleTypeAlertContext extends AlertInstanceContext {
 
 type MyRuleTypeActionGroups = 'default' | 'warning';
   
-const myRuleType: AlertType<
+const myRuleType: RuleType<
 	MyRuleTypeParams,
 	MyRuleTypeExtractedParams,
 	MyRuleTypeState,
