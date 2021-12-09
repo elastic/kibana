@@ -16,8 +16,8 @@ steps:
     parallelism: "$ITERATION_COUNT"
     concurrency: 1
     concurrency_group: 'performance-test-group'
-    # agents:
-    #   queue: c2-60
+    agents:
+      queue: n2-4
 EOF
 
 
