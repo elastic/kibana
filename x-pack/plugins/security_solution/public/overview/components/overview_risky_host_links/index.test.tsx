@@ -22,11 +22,11 @@ import {
 } from '../../../common/mock';
 import { useRiskyHostsDashboardButtonHref } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
 import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links';
-import { useHostsRiskScore } from '../../containers/overview_risky_host_links/use_hosts_risk_score';
+import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../../containers/overview_risky_host_links/use_hosts_risk_score');
+jest.mock('../../../common/containers/hosts_risk/use_hosts_risk_score');
 const useHostsRiskScoreMock = useHostsRiskScore as jest.Mock;
 
 jest.mock('../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href');

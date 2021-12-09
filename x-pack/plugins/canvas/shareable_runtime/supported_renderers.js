@@ -10,18 +10,18 @@ import { pie } from '../canvas_plugin_src/renderers/pie';
 import { plot } from '../canvas_plugin_src/renderers/plot';
 import { getTableRenderer } from '../canvas_plugin_src/renderers/table';
 import { getTextRenderer } from '../canvas_plugin_src/renderers/text';
-import { imageRenderer as image } from '../../../../src/plugins/expression_image/public';
+import { getImageRenderer } from '../../../../src/plugins/expression_image/public';
 import {
   getErrorRenderer,
   getDebugRenderer,
 } from '../../../../src/plugins/expression_error/public';
-import { repeatImageRenderer as repeatImage } from '../../../../src/plugins/expression_repeat_image/public';
-import { revealImageRenderer as revealImage } from '../../../../src/plugins/expression_reveal_image/public';
+import { getRevealImageRenderer } from '../../../../src/plugins/expression_reveal_image/public';
+import { getRepeatImageRenderer } from '../../../../src/plugins/expression_repeat_image/public';
 import {
-  shapeRenderer as shape,
-  progressRenderer as progress,
+  getShapeRenderer,
+  getProgressRenderer,
 } from '../../../../src/plugins/expression_shape/public';
-import { metricRenderer as metric } from '../../../../src/plugins/expression_metric/public';
+import { getMetricRenderer } from '../../../../src/plugins/expression_metric/public';
 
 const unboxFactory = (factory) => factory();
 
@@ -31,6 +31,12 @@ const renderFunctionsFactories = [
   getTableRenderer,
   getErrorRenderer,
   getDebugRenderer,
+  getImageRenderer,
+  getShapeRenderer,
+  getProgressRenderer,
+  getRevealImageRenderer,
+  getRepeatImageRenderer,
+  getMetricRenderer,
 ];
 
 /**
@@ -38,16 +44,6 @@ const renderFunctionsFactories = [
  * a renderer is not listed here, but is used by the Shared Workpad, it will
  * not render.  This includes any plugins.
  */
-export const renderFunctions = [
-  image,
-  repeatImage,
-  revealImage,
-  metric,
-  pie,
-  plot,
-  progress,
-  shape,
-  ...renderFunctionsFactories.map(unboxFactory),
-];
+export const renderFunctions = [pie, plot, ...renderFunctionsFactories.map(unboxFactory)];
 
 export const renderFunctionNames = [...renderFunctions.map((fn) => fn().name)];
