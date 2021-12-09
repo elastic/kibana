@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export const PROCESS_TREE = '[data-test-subj="sessionViewProcessTree"]';
+export const PROCESS_TREE_NODE = '[data-test-subj="processTreeNode"]';
+export const PROCESS_TREE_NODE_ALERT = '[data-test-subj="processTreeNodeAlertButton"]';
+export const SEARCH_BAR = '[data-test-subj="sessionViewProcessEventsSearch"]';
 
-export const TEST = '[data-test-subj="sessionViewTestPage"]';
+export const DETAILS_PANEL = '[data-test-subj="sessionViewDetailPanel"]';
+export const DETAILS_PANEL_TOGGLE = '[data-test-subj="sessionViewDetailPanelToggle"]';
+export const DETAILS_PANEL_ALERT = '[data-test-subj="sessionViewDetailPanelAlertDetail"]';
+export const DETAILS_PANEL_COMMAND = '[data-test-subj="sessionViewDetailPanelCommandDetail"]';
+export const DETAILS_PANEL_SESSION = '[data-test-subj="sessionViewDetailPanelSessionDetail"]';
+export const DETAILS_PANEL_SERVER = '[data-test-subj="sessionViewDetailPanelServerDetail"]';
 
-export const DETAILS_PANEL = 'span.euiTitle.euiTitle--small';
-
-export const DETAILS_PANEL_TOGGLE = 'span.euiButton__text';
-
-//export const SEARCH_BAR = '[aria-label="This is a search bar. After typing your query, hit enter to filter the results lower in the page."]'
-
-export const SEARCH_BAR = 'input.euiFieldSearch.euiFieldSearch--fullWidth'
+export const getProcessTreeNodeAlertDetailViewRule = (alertUUID: string) =>
+  `[data-test-subj="sessionViewAlertDetailViewRule-${alertUUID}"]`;

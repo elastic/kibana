@@ -9,7 +9,26 @@ import { loginAndWaitForPage } from '../tasks/login';
 import { SESSION_VIEW_URL } from '../urls/navigation';
 import { cleanKibana } from '../tasks/common';
 import { esArchiverLoad } from '../tasks/es_archiver';
-import { DETAILS_PANEL, DETAILS_PANEL_TOGGLE, SEARCH_BAR } from '../screens/common/page';
+import {
+  PROCESS_TREE,
+  PROCESS_TREE_NODE,
+  PROCESS_TREE_NODE_ALERT,
+  DETAILS_PANEL,
+  DETAILS_PANEL_TOGGLE,
+  DETAILS_PANEL_ALERT,
+  DETAILS_PANEL_COMMAND,
+  DETAILS_PANEL_SESSION,
+  DETAILS_PANEL_SERVER,
+  SEARCH_BAR,
+  getProcessTreeNodeAlertDetailViewRule,
+} from '../screens/common/page';
+
+const LS_TEST_COMMAND = 'ls --color=auto';
+const ALERT_TEST_COMMAND = 'vi EventConverter/package.json';
+const ALERT_NODE_TEST_ID = getProcessTreeNodeAlertDetailViewRule(
+  '1900f4bb07c6fcc64eb754ed97a83a952aa7698eaffe14749709e83f7b6bdb0d'
+);
+const ALERT_RULE_ID = '15b43080-5204-11ec-a8f5-f507bc52c10c';
 
 describe('Display session view test page', () => {
   beforeEach(() => {
@@ -20,24 +39,38 @@ describe('Display session view test page', () => {
 
   it('General Layout for Session View', () => {
     loginAndWaitForPage(SESSION_VIEW_URL);
-    cy.contains('Process Tree').click().wait(1000);
     // Checking Search bar exist
     cy.get(SEARCH_BAR).should('be.visible');
-    // Making sure commands from POST curl shows up
-    cy.contains('ls --color=auto').click();
-    // Checking Details panel exist
-    cy.get(DETAILS_PANEL_TOGGLE).contains('Detail panel').click();
-    // Checking Command, Session, Server Detail exist
-    cy.get(DETAILS_PANEL).contains('Command detail');
-    cy.get(DETAILS_PANEL).contains('Session detail');
-    cy.get(DETAILS_PANEL).contains('Server detail');
 
-    cy.contains('vi EventConverter/package.json').click();
+    // Check detail panel and its toggle work correctly
+    cy.get(DETAILS_PANEL).should('not.exist');
+    // Checking Details panel exist
+    cy.get(DETAILS_PANEL_TOGGLE).click();
+    cy.get(DETAILS_PANEL).should('be.visible');
+
+    // Only Session, Server Detail exist when no commands selected when detail panel is open
+    cy.get(DETAILS_PANEL_ALERT).should('not.exist');
+    cy.get(DETAILS_PANEL_COMMAND).should('not.exist');
+    cy.get(DETAILS_PANEL_SESSION).should('be.visible');
+    cy.get(DETAILS_PANEL_SERVER).should('exist');
+
+    const lsCommandNode = cy.get(`${PROCESS_TREE} ${PROCESS_TREE_NODE}`).eq(1);
+    lsCommandNode.contains(LS_TEST_COMMAND).should('be.visible');
+    lsCommandNode.click();
+    // Checking Command, Session, Server Detail exist for a command without alert
+    cy.get(DETAILS_PANEL_ALERT).should('not.exist');
+    cy.get(DETAILS_PANEL_COMMAND).should('be.visible');
+    cy.get(DETAILS_PANEL_SESSION).should('exist');
+    cy.get(DETAILS_PANEL_SERVER).should('exist');
+
+    const viCommand = cy.get(`${PROCESS_TREE} ${PROCESS_TREE_NODE}`).eq(3);
+    viCommand.contains(ALERT_TEST_COMMAND).should('be.visible');
+    viCommand.click();
     // Checking Command, Session, Server, Alert Detail exist
-    cy.get(DETAILS_PANEL).contains('Command detail');
-    cy.get(DETAILS_PANEL).contains('Session detail');
-    cy.get(DETAILS_PANEL).contains('Server detail');
-    cy.get(DETAILS_PANEL).contains('Alert detail');
+    cy.get(DETAILS_PANEL_ALERT).should('exist');
+    cy.get(DETAILS_PANEL_COMMAND).should('be.visible');
+    cy.get(DETAILS_PANEL_SESSION).should('exist');
+    cy.get(DETAILS_PANEL_SERVER).should('exist');
   });
 
   // it('Search Functionality', () => {
@@ -50,12 +83,8 @@ describe('Display session view test page', () => {
 
   it('Alerts Check', () => {
     loginAndWaitForPage(SESSION_VIEW_URL);
-    cy.contains('Process Tree').click().wait(1000);
-    cy.contains('Alerts').first().click();
-    cy.contains('View rule').first().click();
-    cy.location('pathname').should(
-      'contain',
-      'app/security/rules/id/15b43080-5204-11ec-a8f5-f507bc52c10c'
-    );
+    cy.get(PROCESS_TREE_NODE_ALERT).first().click();
+    cy.get(ALERT_NODE_TEST_ID).first().click();
+    cy.location('pathname').should('contain', `app/security/rules/id/${ALERT_RULE_ID}`);
   });
 });

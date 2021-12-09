@@ -224,7 +224,7 @@ node ../../../scripts/es_archiver save ../../test/session_view_cypress/es_archiv
 Example:
 
 ```sh
-node ../../../scripts/es_archiver save ../../test/session_view_cypress/es_archives ".kibana",".siem-signal*","cmd","cmd_entry_leader" --config ../../../test/functional/config.js --es-url http://elastic:changeme@localhost:9200
+node ../../../scripts/es_archiver save ../../test/session_view_cypress/es_archives ".siem-signal*","cmd","cmd_entry_leader" --config ../../../test/functional/config.js --es-url http://elastic:changeme@localhost:9200
 ```
 
 Note that the command will create the folder if it does not exist.

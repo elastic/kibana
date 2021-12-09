@@ -136,6 +136,7 @@ export function ProcessTreeNode({
         <EuiButton
           css={styles.getButtonStyle(ButtonType.alerts)}
           onClick={() => setAlertsExpanded(!alertsExpanded)}
+          data-test-subj="processTreeNodeAlertButton"
         >
           <FormattedMessage id="xpack.sessionView.alerts" defaultMessage="Alerts" />
           <EuiIcon css={styles.buttonArrow} size="s" type={getExpandedIcon(alertsExpanded)} />
