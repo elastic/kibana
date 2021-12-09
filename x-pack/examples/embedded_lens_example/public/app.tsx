@@ -27,6 +27,7 @@ import {
   PersistedIndexPatternLayer,
   XYState,
   LensEmbeddableInput,
+  DateHistogramIndexPatternColumn,
 } from '../../../plugins/lens/public';
 import { StartDependencies } from './plugin';
 
@@ -55,7 +56,7 @@ function getLensAttributes(
         params: { interval: 'auto' },
         scale: 'interval',
         sourceField: defaultIndexPattern.timeFieldName!,
-      },
+      } as DateHistogramIndexPatternColumn,
     },
   };
 

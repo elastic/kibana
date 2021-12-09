@@ -36,17 +36,6 @@ Date.now = jest.fn(() => testTime.getTime());
 // Mock telemetry service
 jest.mock('../public/lib/ui_metric', () => ({ trackCanvasUiMetric: () => {} }));
 
-// Mock EUI generated ids to be consistently predictable for snapshots.
-jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
-
-// Mock react-datepicker dep used by eui to avoid rendering the entire large component
-jest.mock('@elastic/eui/packages/react-datepicker', () => {
-  return {
-    __esModule: true,
-    default: 'ReactDatePicker',
-  };
-});
-
 // Mock React Portal for components that use modals, tooltips, etc
 // @ts-expect-error Portal mocks are notoriously difficult to type
 ReactDOM.createPortal = jest.fn((element) => element);
@@ -71,6 +60,11 @@ jest.mock(
 import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer';
 jest.mock('@elastic/eui/test-env/components/observer/observer');
 EuiObserver.mockImplementation(() => 'EuiObserver');
+
+import { ExpressionInput } from '../../../../src/plugins/presentation_util/public/components/expression_input';
+jest.mock('../../../../src/plugins/presentation_util/public/components/expression_input');
+// @ts-expect-error
+ExpressionInput.mockImplementation(() => 'ExpressionInput');
 
 // @ts-expect-error untyped library
 import Dropzone from 'react-dropzone';

@@ -49,7 +49,7 @@ export const pie: ExpressionFunctionDefinition<
     },
     shape: {
       types: ['string'],
-      options: ['pie', 'donut', 'treemap'],
+      options: ['pie', 'donut', 'treemap', 'mosaic'],
       help: '',
     },
     hideLabels: {
@@ -80,6 +80,10 @@ export const pie: ExpressionFunctionDefinition<
       help: '',
     },
     truncateLegend: {
+      types: ['boolean'],
+      help: '',
+    },
+    showValuesInLegend: {
       types: ['boolean'],
       help: '',
     },

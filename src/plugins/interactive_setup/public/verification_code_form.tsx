@@ -19,10 +19,11 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
 
 import { VERIFICATION_CODE_LENGTH } from '../common';
+import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SingleCharsField } from './single_chars_field';
 import { SubmitErrorCallout } from './submit_error_callout';
 import type { ValidationErrors } from './use_form';
@@ -118,9 +119,7 @@ export const VerificationCodeForm: FunctionComponent<VerificationCodeFormProps> 
                   values={{
                     command: (
                       <EuiCode language="bash">
-                        {window.navigator.userAgent.includes('Win')
-                          ? 'bin\\kibana-verification-code.bat'
-                          : 'bin/kibana-verification-code'}
+                        {getCommandLineSnippet('kibana-verification-code')}
                       </EuiCode>
                     ),
                   }}

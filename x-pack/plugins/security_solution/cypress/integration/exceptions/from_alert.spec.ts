@@ -35,7 +35,7 @@ import {
 import { ALERTS_URL } from '../../urls/navigation';
 import { cleanKibana } from '../../tasks/common';
 
-describe.skip('From alert', () => {
+describe('From alert', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
 
   beforeEach(() => {

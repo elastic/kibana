@@ -10,7 +10,7 @@ import './editor.test.mock';
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
 import * as sinon from 'sinon';
 

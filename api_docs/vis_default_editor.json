@@ -109,7 +109,7 @@
                 "signature": [
                   "Pick<",
                   "VisualizeEmbeddable",
-                  ", \"type\" | \"id\" | \"getDescription\" | \"destroy\" | \"parent\" | \"render\" | \"getInspectorAdapters\" | \"openInspector\" | \"transferCustomizationsToUiState\" | \"hasInspector\" | \"onContainerLoading\" | \"onContainerRender\" | \"onContainerError\" | \"reload\" | \"supportedTriggers\" | \"inputIsRefType\" | \"getInputAsValueType\" | \"getInputAsRefType\" | \"runtimeId\" | \"isContainer\" | \"deferEmbeddableLoad\" | \"fatalError\" | \"getIsContainer\" | \"getUpdated$\" | \"getInput$\" | \"getOutput$\" | \"getOutput\" | \"getInput\" | \"getTitle\" | \"getRoot\" | \"updateInput\">"
+                  ", \"type\" | \"destroy\" | \"parent\" | \"id\" | \"getDescription\" | \"render\" | \"getInspectorAdapters\" | \"openInspector\" | \"transferCustomizationsToUiState\" | \"hasInspector\" | \"onContainerLoading\" | \"onContainerRender\" | \"onContainerError\" | \"reload\" | \"supportedTriggers\" | \"inputIsRefType\" | \"getInputAsValueType\" | \"getInputAsRefType\" | \"runtimeId\" | \"isContainer\" | \"deferEmbeddableLoad\" | \"fatalError\" | \"getIsContainer\" | \"getUpdated$\" | \"getInput$\" | \"getOutput$\" | \"getOutput\" | \"getInput\" | \"getTitle\" | \"getRoot\" | \"updateInput\">"
                 ],
                 "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
                 "deprecated": false,
@@ -306,7 +306,7 @@
             "section": "def-public.DefaultEditorSize",
             "text": "DefaultEditorSize"
           },
-          ") => 50 | 15 | 30"
+          ") => 15 | 30 | 50"
         ],
         "path": "src/plugins/vis_default_editor/public/editor_size.ts",
         "deprecated": false,

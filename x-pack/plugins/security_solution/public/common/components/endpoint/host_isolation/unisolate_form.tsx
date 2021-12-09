@@ -16,7 +16,7 @@ import {
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CANCEL, COMMENT, COMMENT_PLACEHOLDER, CONFIRM, UNISOLATE, ISOLATED } from './translations';
 import { EndpointIsolatedFormProps } from './isolate_form';
 

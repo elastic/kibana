@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { AppDataType, SeriesUrl } from '../../types';
 import { DataTypes, ReportTypes } from '../../configurations/constants';
+import { useExploratoryView } from '../../contexts/exploatory_view_config';
 
 interface Props {
   seriesId: number;
@@ -25,41 +26,6 @@ interface Props {
     dataType?: SeriesUrl['dataType'];
   };
 }
-
-export const DataTypesLabels = {
-  [DataTypes.UX]: i18n.translate('xpack.observability.overview.exploratoryView.uxLabel', {
-    defaultMessage: 'User experience (RUM)',
-  }),
-
-  [DataTypes.SYNTHETICS]: i18n.translate(
-    'xpack.observability.overview.exploratoryView.syntheticsLabel',
-    {
-      defaultMessage: 'Synthetics monitoring',
-    }
-  ),
-
-  [DataTypes.MOBILE]: i18n.translate(
-    'xpack.observability.overview.exploratoryView.mobileExperienceLabel',
-    {
-      defaultMessage: 'Mobile experience',
-    }
-  ),
-};
-
-export const dataTypes: Array<{ id: AppDataType; label: string }> = [
-  {
-    id: DataTypes.SYNTHETICS,
-    label: DataTypesLabels[DataTypes.SYNTHETICS],
-  },
-  {
-    id: DataTypes.UX,
-    label: DataTypesLabels[DataTypes.UX],
-  },
-  {
-    id: DataTypes.MOBILE,
-    label: DataTypesLabels[DataTypes.MOBILE],
-  },
-];
 
 const SELECT_DATA_TYPE = 'SELECT_DATA_TYPE';
 
@@ -77,6 +43,8 @@ export function DataTypesSelect({ seriesId, series }: Props) {
     }
   };
 
+  const { dataTypes } = useExploratoryView();
+
   const options = dataTypes
     .filter(({ id }) => {
       if (reportType === ReportTypes.DEVICE_DISTRIBUTION) {
@@ -91,6 +59,8 @@ export function DataTypesSelect({ seriesId, series }: Props) {
       value: id,
       inputDisplay: label,
     }));
+
+  const currDataType = dataTypes.find((dt) => dt.id === series.dataType);
 
   return (
     <>
@@ -122,7 +92,7 @@ export function DataTypesSelect({ seriesId, series }: Props) {
       )}
       {series.dataType && (
         <EuiToolTip position="top" content={SELECT_DATA_TYPE_TOOLTIP}>
-          <EuiBadge>{DataTypesLabels[series.dataType as DataTypes]}</EuiBadge>
+          <EuiBadge>{currDataType?.label}</EuiBadge>
         </EuiToolTip>
       )}
     </>

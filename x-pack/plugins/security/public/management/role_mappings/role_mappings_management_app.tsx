@@ -13,7 +13,10 @@ import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from 'src/core/public';
 import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../../src/plugins/kibana_react/public';
 import {
   Breadcrumb,
   BreadcrumbsProvider,
@@ -37,7 +40,7 @@ export const roleMappingsManagementApp = Object.freeze({
       id: this.id,
       order: 40,
       title,
-      async mount({ element, setBreadcrumbs, history }) {
+      async mount({ element, theme$, setBreadcrumbs, history }) {
         const [
           [core],
           { RoleMappingsGridPage },
@@ -56,7 +59,7 @@ export const roleMappingsManagementApp = Object.freeze({
 
         const roleMappingsAPIClient = new RoleMappingsAPIClient(core.http);
 
-        const EditRoleMappingsPageWithBreadcrumbs = () => {
+        const EditRoleMappingsPageWithBreadcrumbs = ({ action }: { action: 'edit' | 'clone' }) => {
           const { name } = useParams<{ name?: string }>();
 
           // Additional decoding is a workaround for a bug in react-router's version of the `history` module.
@@ -64,7 +67,7 @@ export const roleMappingsManagementApp = Object.freeze({
           const decodedName = name ? tryDecodeURIComponent(name) : undefined;
 
           const breadcrumbObj =
-            name && decodedName
+            action === 'edit' && name && decodedName
               ? { text: decodedName, href: `/edit/${encodeURIComponent(name)}` }
               : {
                   text: i18n.translate('xpack.security.roleMappings.createBreadcrumb', {
@@ -75,6 +78,7 @@ export const roleMappingsManagementApp = Object.freeze({
           return (
             <Breadcrumb text={breadcrumbObj.text} href={breadcrumbObj.href}>
               <EditRoleMappingPage
+                action={action}
                 name={decodedName}
                 roleMappingsAPI={roleMappingsAPIClient}
                 rolesAPIClient={new RolesAPIClient(core.http)}
@@ -89,27 +93,32 @@ export const roleMappingsManagementApp = Object.freeze({
         render(
           <KibanaContextProvider services={core}>
             <core.i18n.Context>
-              <Router history={history}>
-                <BreadcrumbsProvider
-                  onChange={createBreadcrumbsChangeHandler(core.chrome, setBreadcrumbs)}
-                >
-                  <Breadcrumb text={title} href="/">
-                    <Route path={['/', '']} exact={true}>
-                      <RoleMappingsGridPage
-                        notifications={core.notifications}
-                        rolesAPIClient={new RolesAPIClient(core.http)}
-                        roleMappingsAPI={roleMappingsAPIClient}
-                        docLinks={core.docLinks}
-                        history={history}
-                        navigateToApp={core.application.navigateToApp}
-                      />
-                    </Route>
-                    <Route path="/edit/:name?">
-                      <EditRoleMappingsPageWithBreadcrumbs />
-                    </Route>
-                  </Breadcrumb>
-                </BreadcrumbsProvider>
-              </Router>
+              <KibanaThemeProvider theme$={theme$}>
+                <Router history={history}>
+                  <BreadcrumbsProvider
+                    onChange={createBreadcrumbsChangeHandler(core.chrome, setBreadcrumbs)}
+                  >
+                    <Breadcrumb text={title} href="/">
+                      <Route path={['/', '']} exact={true}>
+                        <RoleMappingsGridPage
+                          notifications={core.notifications}
+                          rolesAPIClient={new RolesAPIClient(core.http)}
+                          roleMappingsAPI={roleMappingsAPIClient}
+                          docLinks={core.docLinks}
+                          history={history}
+                          navigateToApp={core.application.navigateToApp}
+                        />
+                      </Route>
+                      <Route path="/edit/:name?">
+                        <EditRoleMappingsPageWithBreadcrumbs action="edit" />
+                      </Route>
+                      <Route path="/clone/:name">
+                        <EditRoleMappingsPageWithBreadcrumbs action="clone" />
+                      </Route>
+                    </Breadcrumb>
+                  </BreadcrumbsProvider>
+                </Router>
+              </KibanaThemeProvider>
             </core.i18n.Context>
           </KibanaContextProvider>,
           element

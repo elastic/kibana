@@ -8,7 +8,7 @@
 import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { CountryFlagAndName } from '../source_destination/country_flag';
 import {
   FlowTargetSourceDest,

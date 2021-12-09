@@ -11,8 +11,8 @@ import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
 import { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { DataViewBase } from '@kbn/es-query';
-import { Filter, esFilters, FilterManager } from '../../../../../../../../src/plugins/data/public';
+import { DataViewBase, Filter, FilterStateStore } from '@kbn/es-query';
+import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
@@ -144,7 +144,7 @@ export const buildListItems = <T,>(
 export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   return filters.map((filter) => {
     if (filter.$state == null) {
-      return { $state: { store: esFilters.FilterStateStore.APP_STATE }, ...filter };
+      return { $state: { store: FilterStateStore.APP_STATE }, ...filter };
     } else {
       return filter;
     }

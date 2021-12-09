@@ -11,8 +11,8 @@ import markdown from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import unified from 'unified';
 
-import { TimeRange } from 'src/plugins/data/server';
 import { SerializableRecord } from '@kbn/utility-types';
+import type { TimeRange } from 'src/plugins/data/common';
 import { LENS_ID, LensParser, LensSerializer } from './lens';
 import { TimelineSerializer, TimelineParser } from './timeline';
 
@@ -45,20 +45,13 @@ export const parseCommentString = (comment: string) => {
 export const stringifyMarkdownComment = (comment: MarkdownNode) =>
   unified()
     .use([
-      [
-        remarkStringify,
-        {
-          allowDangerousHtml: true,
-          handlers: {
-            /*
-              because we're using rison in the timeline url we need
-              to make sure that markdown parser doesn't modify the url
-            */
-            timeline: TimelineSerializer,
-            lens: LensSerializer,
-          },
-        },
-      ],
+      [remarkStringify],
+      /*
+        because we're using rison in the timeline url we need
+        to make sure that markdown parser doesn't modify the url
+      */
+      LensSerializer,
+      TimelineSerializer,
     ])
     .stringify(comment);
 

@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
 import { EndpointDetailsFlyout } from './details';
@@ -128,14 +128,17 @@ export const EndpointList = () => {
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
   const [showTransformFailedCallout, setShowTransformFailedCallout] = useState(false);
+  const [shouldCheckTransforms, setShouldCheckTransforms] = useState(true);
 
   useEffect(() => {
-    if (!endpointsExist || !listData?.length) {
+    // if no endpoint policy, skip transform check
+    if (!shouldCheckTransforms || !policyItems || !policyItems.length) {
       return;
     }
 
     dispatch({ type: 'loadMetadataTransformStats' });
-  }, [endpointsExist, listData.length, dispatch]);
+    setShouldCheckTransforms(false);
+  }, [policyItems, shouldCheckTransforms, dispatch]);
 
   useEffect(() => {
     const hasFailure = metadataTransformStats.some((transform) =>

@@ -20,6 +20,7 @@ interface Props {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
+  originatingPath?: string;
   history: AppMountParameters['history'];
 }
 
@@ -43,6 +44,7 @@ export class MapPage extends Component<Props, State> {
         mapEmbeddableInput: props.mapEmbeddableInput,
         embeddableId: props.embeddableId,
         originatingApp: props.originatingApp,
+        originatingPath: props.originatingPath,
         stateTransfer: props.stateTransfer,
         onSaveCallback: this.updateSaveCounter,
       }),

@@ -24,7 +24,7 @@
             "section": "def-common.Alert",
             "text": "Alert"
           },
-          "<never>, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">) => string | ",
+          "<never>, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">) => string | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "server",
@@ -47,7 +47,7 @@
             "label": "alert",
             "description": [],
             "signature": [
-              "{ id: string; name: string; tags: string[]; enabled: boolean; params: never; actions: ",
+              "{ name: string; tags: string[]; id: string; enabled: boolean; params: never; actions: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -1038,7 +1038,7 @@
                 "section": "def-common.Alert",
                 "text": "Alert"
               },
-              "<never>, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">, \"name\" | \"tags\" | \"enabled\" | \"actions\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+              "<never>, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">, \"name\" | \"tags\" | \"enabled\" | \"actions\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
@@ -1606,6 +1606,19 @@
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.AlertType.cancelAlertsOnRuleTimeout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cancelAlertsOnRuleTimeout",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1676,7 +1689,7 @@
                 "section": "def-common.Alert",
                 "text": "Alert"
               },
-              "<Params>, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[]"
+              "<Params>, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[]"
             ],
             "path": "x-pack/plugins/alerting/server/rules_client/rules_client.ts",
             "deprecated": false
@@ -1737,6 +1750,23 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.PluginSetupContract.getSecurityHealth",
+            "type": "Function",
+            "tags": [],
+            "label": "getSecurityHealth",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "SecurityHealth",
+              ">"
+            ],
+            "path": "x-pack/plugins/alerting/server/plugin.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -2181,7 +2211,7 @@
             "section": "def-common.Alert",
             "text": "Alert"
           },
-          "<Params>, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">>; delete: ({ id }: { id: string; }) => Promise<{}>; find: <Params extends Record<string, unknown> = never>({ options: { fields, ...options }, }?: { options?: ",
+          "<Params>, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">>; delete: ({ id }: { id: string; }) => Promise<{}>; find: <Params extends Record<string, unknown> = never>({ options: { fields, ...options }, }?: { options?: ",
           "FindOptions",
           " | undefined; }) => Promise<",
           {
@@ -2199,9 +2229,9 @@
             "section": "def-common.Alert",
             "text": "Alert"
           },
-          "<Params>, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\"> | Pick<",
+          "<Params>, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\"> | Pick<",
           "AlertWithLegacyId",
-          "<Params>, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\" | \"legacyId\">>; resolve: <Params extends Record<string, unknown> = never>({ id, }: { id: string; }) => Promise<",
+          "<Params>, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\" | \"legacyId\">>; resolve: <Params extends Record<string, unknown> = never>({ id, includeLegacyId, }: { id: string; includeLegacyId?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -3522,7 +3552,13 @@
             "label": "executionDuration",
             "description": [],
             "signature": [
-              "{ average: number; values: number[]; }"
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.ExecutionDuration",
+                "text": "ExecutionDuration"
+              }
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false
@@ -3729,6 +3765,42 @@
             "label": "path",
             "description": [],
             "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.ExecutionDuration",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExecutionDuration",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.ExecutionDuration.average",
+            "type": "number",
+            "tags": [],
+            "label": "average",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.ExecutionDuration.valuesWithTimestamp",
+            "type": "Object",
+            "tags": [],
+            "label": "valuesWithTimestamp",
+            "description": [],
+            "signature": [
+              "{ [x: string]: number; }"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false
           }
         ],
@@ -4152,7 +4224,7 @@
             "section": "def-common.Alert",
             "text": "Alert"
           },
-          "<Params>, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\"> & Pick<",
+          "<Params>, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\"> & Pick<",
           {
             "pluginId": "core",
             "scope": "server",
@@ -4188,7 +4260,7 @@
         "label": "SanitizedAlert",
         "description": [],
         "signature": [
-          "{ id: string; name: string; tags: string[]; enabled: boolean; params: Params; actions: ",
+          "{ name: string; tags: string[]; id: string; enabled: boolean; params: Params; actions: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -4234,7 +4306,7 @@
             "section": "def-common.Alert",
             "text": "Alert"
           },
-          "<never>, \"id\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">, \"name\" | \"tags\" | \"enabled\" | \"actions\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+          "<never>, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">, \"name\" | \"tags\" | \"enabled\" | \"actions\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
         ],
         "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { X509Certificate } from 'crypto';
 import { constants } from 'fs';
 import fs from 'fs/promises';
 import yaml from 'js-yaml';
@@ -29,6 +30,16 @@ export type WriteConfigParameters = {
     }
   | {}
 );
+
+interface FleetOutputConfig {
+  id: string;
+  name: string;
+  is_default: boolean;
+  is_default_monitoring: boolean;
+  type: 'elasticsearch';
+  hosts: string[];
+  ca_trusted_fingerprint: string;
+}
 
 export class KibanaConfigWriter {
   constructor(
@@ -61,7 +72,9 @@ export class KibanaConfigWriter {
    */
   public async writeConfig(params: WriteConfigParameters) {
     const caPath = path.join(this.dataDirectoryPath, `ca_${Date.now()}.crt`);
-    const config: Record<string, string | string[]> = { 'elasticsearch.hosts': [params.host] };
+    const config: Record<string, string | string[] | FleetOutputConfig[]> = {
+      'elasticsearch.hosts': [params.host],
+    };
     if ('serviceAccountToken' in params && params.serviceAccountToken) {
       config['elasticsearch.serviceAccountToken'] = params.serviceAccountToken.value;
     } else if ('username' in params && params.username) {
@@ -70,6 +83,21 @@ export class KibanaConfigWriter {
     }
     if (params.caCert) {
       config['elasticsearch.ssl.certificateAuthorities'] = [caPath];
+    }
+
+    // If a certificate is passed configure Fleet default output
+    if (params.caCert) {
+      try {
+        config['xpack.fleet.outputs'] = KibanaConfigWriter.getFleetDefaultOutputConfig(
+          params.caCert,
+          params.host
+        );
+      } catch (err) {
+        this.logger.error(
+          `Failed to generate Fleet default output: ${getDetailedErrorMessage(err)}.`
+        );
+        throw err;
+      }
     }
 
     // Load and parse existing configuration file to check if it already has values for the config
@@ -150,6 +178,29 @@ export class KibanaConfigWriter {
     }
 
     return { raw: rawConfig, parsed: parsedConfig };
+  }
+
+  /**
+   * Build config for Fleet outputs
+   * @param caCert
+   * @param host
+   */
+  private static getFleetDefaultOutputConfig(caCert: string, host: string): FleetOutputConfig[] {
+    const cert = new X509Certificate(caCert);
+    // fingerprint256 is a ":" separated uppercase hexadecimal string
+    const certFingerprint = cert.fingerprint256.split(':').join('').toLowerCase();
+
+    return [
+      {
+        id: 'fleet-default-output',
+        name: 'default',
+        is_default: true,
+        is_default_monitoring: true,
+        type: 'elasticsearch',
+        hosts: [host],
+        ca_trusted_fingerprint: certFingerprint,
+      },
+    ];
   }
 
   /**
