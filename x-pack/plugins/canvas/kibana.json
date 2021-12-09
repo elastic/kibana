@@ -33,7 +33,6 @@
   "requiredBundles": [
     "discover",
     "home",
-    "kibanaLegacy",
     "kibanaReact",
     "kibanaUtils",
     "lens",

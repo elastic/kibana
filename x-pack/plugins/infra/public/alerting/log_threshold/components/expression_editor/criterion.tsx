@@ -176,8 +176,8 @@ export const Criterion: React.FC<Props> = ({
                   uppercase={true}
                   value={criterion.field ?? 'a chosen field'}
                   isActive={isFieldPopoverOpen}
-                  color={errors.field.length === 0 ? 'secondary' : 'danger'}
-                  onClick={(e) => {
+                  color={errors.field.length === 0 ? 'success' : 'danger'}
+                  onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     setIsFieldPopoverOpen(!isFieldPopoverOpen);
                   }}
@@ -185,7 +185,7 @@ export const Criterion: React.FC<Props> = ({
               }
               isOpen={isFieldPopoverOpen}
               closePopover={() => setIsFieldPopoverOpen(false)}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
               ownFocus
               panelPaddingSize="s"
               anchorPosition="downLeft"
@@ -227,10 +227,10 @@ export const Criterion: React.FC<Props> = ({
                   isActive={isComparatorPopoverOpen}
                   color={
                     errors.comparator.length === 0 && errors.value.length === 0
-                      ? 'secondary'
+                      ? 'success'
                       : 'danger'
                   }
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
                     setIsComparatorPopoverOpen(!isComparatorPopoverOpen);
                   }}

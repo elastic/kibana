@@ -9,6 +9,7 @@ import type { KibanaLocation } from 'src/plugins/share/public';
 import React from 'react';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DashboardStart } from 'src/plugins/dashboard/public';
+import { DrilldownConfig } from '../../../../common/drilldowns/dashboard_drilldown/types';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
 import { CollectConfigContainer } from './components';
 import {
@@ -20,6 +21,7 @@ import { txtGoToDashboard } from './i18n';
 import {
   CollectConfigProps,
   StartServicesGetter,
+  UiComponent,
 } from '../../../../../../../src/plugins/kibana_utils/public';
 import { Config } from './types';
 
@@ -34,7 +36,10 @@ export interface Params {
 export abstract class AbstractDashboardDrilldown<Context extends object = object>
   implements Drilldown<Config, Context>
 {
-  constructor(protected readonly params: Params) {}
+  constructor(protected readonly params: Params) {
+    this.ReactCollectConfig = (props) => <CollectConfigContainer {...props} params={this.params} />;
+    this.CollectConfig = reactToUiComponent(this.ReactCollectConfig);
+  }
 
   public abstract readonly id: string;
 
@@ -50,9 +55,11 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
 
   private readonly ReactCollectConfig: React.FC<
     CollectConfigProps<Config, BaseActionFactoryContext>
-  > = (props) => <CollectConfigContainer {...props} params={this.params} />;
+  >;
 
-  public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
+  public readonly CollectConfig: UiComponent<
+    CollectConfigProps<DrilldownConfig, BaseActionFactoryContext>
+  >;
 
   public readonly createConfig = () => ({
     dashboardId: '',

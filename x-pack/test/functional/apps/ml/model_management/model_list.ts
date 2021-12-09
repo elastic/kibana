@@ -10,8 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/118251
-  describe.skip('trained models', function () {
+  describe('trained models', function () {
     before(async () => {
       await ml.trainedModels.createTestTrainedModels('classification', 15, true);
       await ml.trainedModels.createTestTrainedModels('regression', 15);

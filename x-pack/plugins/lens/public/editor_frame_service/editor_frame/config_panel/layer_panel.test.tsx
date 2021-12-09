@@ -225,7 +225,39 @@ describe('LayerPanel', () => {
 
       const group = instance
         .find(EuiFormRow)
-        .findWhere((e) => e.prop('error') === 'Required dimension');
+        .findWhere((e) => e.prop('error') === 'Requires field');
+
+      expect(group).toHaveLength(1);
+    });
+
+    it('should render the required warning when only one group is configured (with requiredMinDimensionCount)', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'x' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+          {
+            groupLabel: 'B',
+            groupId: 'b',
+            accessors: [{ columnId: 'y' }],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+            requiredMinDimensionCount: 2,
+          },
+        ],
+      });
+
+      const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+
+      const group = instance
+        .find(EuiFormRow)
+        .findWhere((e) => e.prop('error') === 'Requires 2 fields');
 
       expect(group).toHaveLength(1);
     });

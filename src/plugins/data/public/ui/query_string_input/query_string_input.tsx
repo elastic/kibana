@@ -24,7 +24,7 @@ import {
   EuiIconProps,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -34,8 +34,9 @@ import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 import { KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
-import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
-import { SuggestionsListSize } from '../typeahead/suggestions_component';
+import { getQueryLog, matchPairs, toUser, fromUser } from '../../query';
+import type { PersistedLog } from '../../query';
+import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, getFieldSubtypeNested } from '../../../common';
 

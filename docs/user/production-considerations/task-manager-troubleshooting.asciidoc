@@ -975,7 +975,7 @@ server log [12:41:33.672] [info][plugins][taskManager][taskManager] TaskManager 
 --------------------------------------------------
 
 If you see that message and no other errors that relate to Task Manager, it’s most likely that Task Manager is running fine and has simply not had the chance to pick the task up yet.
-If, on the other hand, the runAt is severely overdue, then it’s worth looking for other Task Manager or Alerting related errors, as something else may have gone wrong.
+If, on the other hand, the runAt is severely overdue, then it’s worth looking for other Task Manager or alerting-related errors, as something else may have gone wrong.
 It’s worth looking at the status field, as it might have failed, which would explain why it hasn’t been picked up or it might be running which means the task might simply be a very long running one.
 
 [float]
@@ -1020,7 +1020,7 @@ This log message tells us that when Task Manager was running one of our rules, i
 
 For example, in this case, we’d expect to see a corresponding log line from the Alerting framework itself, saying that the rule failed. You should look in the Kibana log for a line similar to the log line below (probably shortly before the Task Manager log line):
 
-Executing Alert "27559295-44e4-4983-aa1b-94fe043ab4f9" has resulted in Error: Unable to load resource ‘/api/something’
+Executing Rule "27559295-44e4-4983-aa1b-94fe043ab4f9" has resulted in Error: Unable to load resource ‘/api/something’
 
 This would confirm that the error did in fact happen in the rule itself (rather than the Task Manager) and it would help us pin-point the specific ID of the rule which failed: 27559295-44e4-4983-aa1b-94fe043ab4f9
 

@@ -11,11 +11,10 @@ import { mount } from 'enzyme';
 import { TestProviders } from '../../common/mock';
 import { useKibana } from '../../common/lib/kibana';
 import { AlertCommentEvent } from './user_action_alert_comment_event';
-import { CommentType } from '../../../common';
+import { CommentType } from '../../../common/api';
 
 const props = {
   alertId: 'alert-id-1',
-  getCaseDetailHrefWithCommentId: jest.fn().mockReturnValue('someCaseDetail-withcomment'),
   getRuleDetailsHref: jest.fn().mockReturnValue('some-detection-rule-link'),
   onRuleDetailsClick: jest.fn(),
   ruleId: 'rule-id-1',

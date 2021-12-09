@@ -12,11 +12,11 @@ import moment from 'moment';
 
 import { EuiButton, EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
+import { docLinks } from '../../../../shared/doc_links';
 import { PageTemplateProps } from '../../../../shared/layout';
 import { AppLogic } from '../../../app_logic';
 import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../../components/layout';
 import { NAV } from '../../../constants';
-import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../routes';
 
 import {
   SOURCE_DISABLED_CALLOUT_TITLE,
@@ -53,7 +53,7 @@ export const SourceLayout: React.FC<PageTemplateProps> = ({
     <>
       <EuiCallOut title={SOURCE_DISABLED_CALLOUT_TITLE} color="warning" iconType="alert">
         <p>{SOURCE_DISABLED_CALLOUT_DESCRIPTION}</p>
-        <EuiButton color="warning" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+        <EuiButton color="warning" href={docLinks.licenseManagement}>
           {SOURCE_DISABLED_CALLOUT_BUTTON}
         </EuiButton>
       </EuiCallOut>

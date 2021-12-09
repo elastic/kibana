@@ -1,0 +1,14 @@
+{
+  "id": "dataViewFieldEditor",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["data", "fieldFormats", "dataViews"],
+  "optionalPlugins": ["usageCollection"],
+  "requiredBundles": ["kibanaReact", "esUiShared"],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Reusable data view field editor across Kibana"
+}

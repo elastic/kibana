@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  KibanaRequest,
-  ISavedObjectsRepository,
-} from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
 import chalk from 'chalk';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UMBackendFrameworkAdapter } from './adapters';
 import { UMLicenseCheck } from './domains';
 import { UptimeRequests } from './requests';
-import { savedObjectsAdapter } from './saved_objects';
+import { savedObjectsAdapter } from './saved_objects/saved_objects';
 import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 import { RequestStatus } from '../../../../../src/plugins/inspector';
 import { getInspectResponse } from '../../../observability/server';
@@ -57,7 +52,7 @@ export function createUptimeESClient({
 }: {
   esClient: ElasticsearchClient;
   request?: KibanaRequest;
-  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
+  savedObjectsClient: SavedObjectsClientContract;
 }) {
   return {
     baseESClient: esClient,

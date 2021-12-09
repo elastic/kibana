@@ -18,7 +18,7 @@ import {
   EuiScreenReaderOnly,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 // @ts-ignore could not find declaration file
 import { MonitoringTimeseriesContainer } from '../chart';
@@ -30,8 +30,13 @@ interface TitleType {
   title?: string;
   heading?: unknown;
 }
+
+interface Stats {
+  versions: string[];
+  [key: string]: unknown;
+}
 interface Props {
-  stats: { versions: string[]; [key: string]: unknown };
+  stats: Stats;
   metrics: { [key: string]: unknown };
   seriesToShow: unknown[];
   title: string;
@@ -41,6 +46,7 @@ interface Props {
       container: boolean;
     };
   };
+  StatusComponent: React.FC<{ stats: Stats }>;
 }
 
 const createCharts = (series: unknown[], props: Partial<Props>) => {
@@ -76,7 +82,15 @@ const getHeading = (isFleetTypeMetric: boolean) => {
   return titles;
 };
 
-export const ApmMetrics = ({ stats, metrics, seriesToShow, title, summary, ...props }: Props) => {
+export const ApmMetrics = ({
+  stats,
+  metrics,
+  seriesToShow,
+  title,
+  summary,
+  StatusComponent,
+  ...props
+}: Props) => {
   if (!metrics) {
     return null;
   }
@@ -96,7 +110,7 @@ export const ApmMetrics = ({ stats, metrics, seriesToShow, title, summary, ...pr
           <h1>{titles.heading as FormattedMessage}</h1>
         </EuiScreenReaderOnly>
         <EuiPanel>
-          <Status stats={stats} />
+          <StatusComponent stats={stats} />
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPanel>

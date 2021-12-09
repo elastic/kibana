@@ -234,7 +234,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            className="euiButton euiButton--success euiButton--small euiButton--fill"
             disabled={false}
             onClick={[Function]}
             style={
@@ -462,7 +462,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            className="euiButton euiButton--success euiButton--small euiButton--fill"
             disabled={false}
             onClick={[Function]}
             style={
@@ -690,7 +690,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            className="euiButton euiButton--success euiButton--small euiButton--fill"
             disabled={false}
             onClick={[Function]}
             style={
@@ -893,7 +893,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill euiButton-isDisabled"
+            className="euiButton euiButton--success euiButton--small euiButton--fill euiButton-isDisabled"
             disabled={true}
             onClick={[Function]}
             style={

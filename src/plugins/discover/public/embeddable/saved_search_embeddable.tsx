@@ -26,7 +26,6 @@ import {
   Query,
   TimeRange,
 } from '../../../data/common';
-import { ElasticSearchHit } from '../services/doc_views/doc_views_types';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../ui_actions/public';
 import { getServices } from '../kibana_services';
@@ -47,7 +46,9 @@ import { getDefaultSort } from '../components/doc_table';
 import { SortOrder } from '../components/doc_table/components/table_header/helpers';
 import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
-import { FieldStatsTableSavedSearchEmbeddable } from '../application/components/field_stats_table';
+import { FieldStatsTableSavedSearchEmbeddable } from '../application/main/components/field_stats_table';
+import { ElasticSearchHit } from '../types';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -391,15 +392,17 @@ export class SavedSearchEmbeddable
       Array.isArray(searchProps.columns)
     ) {
       ReactDOM.render(
-        <FieldStatsTableSavedSearchEmbeddable
-          services={searchProps.services}
-          indexPattern={searchProps.indexPattern}
-          columns={searchProps.columns}
-          savedSearch={this.savedSearch}
-          filters={this.input.filters}
-          query={this.input.query}
-          onAddFilter={searchProps.onFilter}
-        />,
+        <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
+          <FieldStatsTableSavedSearchEmbeddable
+            services={searchProps.services}
+            indexPattern={searchProps.indexPattern}
+            columns={searchProps.columns}
+            savedSearch={this.savedSearch}
+            filters={this.input.filters}
+            query={this.input.query}
+            onAddFilter={searchProps.onFilter}
+          />
+        </KibanaThemeProvider>,
         domNode
       );
       return;
@@ -410,7 +413,14 @@ export class SavedSearchEmbeddable
       useLegacyTable,
       refs: domNode,
     };
-    ReactDOM.render(<SavedSearchEmbeddableComponent {...props} />, domNode);
+    if (searchProps.services) {
+      ReactDOM.render(
+        <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
+          <SavedSearchEmbeddableComponent {...props} />
+        </KibanaThemeProvider>,
+        domNode
+      );
+    }
   }
 
   public reload() {

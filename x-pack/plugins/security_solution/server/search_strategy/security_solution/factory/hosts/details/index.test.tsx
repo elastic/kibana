@@ -14,6 +14,7 @@ import {
 } from './__mocks__';
 import {
   IScopedClusterClient,
+  KibanaRequest,
   SavedObjectsClientContract,
 } from '../../../../../../../../../src/core/server';
 import { EndpointAppContext } from '../../../../../endpoint/types';
@@ -35,6 +36,7 @@ const mockDeps = {
     },
     service: {} as EndpointAppContextService,
   } as EndpointAppContext,
+  request: {} as KibanaRequest,
 };
 
 describe('hostDetails search strategy', () => {

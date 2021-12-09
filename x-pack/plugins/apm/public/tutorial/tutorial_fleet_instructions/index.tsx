@@ -19,13 +19,17 @@ import { i18n } from '@kbn/i18n';
 import { HttpStart } from 'kibana/public';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { SUPPORTED_APM_PACKAGE_VERSION } from '../../../common/fleet';
+import {
+  isPrereleaseVersion,
+  SUPPORTED_APM_PACKAGE_VERSION,
+} from '../../../common/fleet';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 
 interface Props {
   http: HttpStart;
   basePath: string;
   isDarkTheme: boolean;
+  kibanaVersion: string;
 }
 
 const CentralizedContainer = styled.div`
@@ -34,9 +38,14 @@ const CentralizedContainer = styled.div`
   align-items: center;
 `;
 
-type APIResponseType = APIReturnType<'GET /internal/apm/fleet/has_data'>;
+type APIResponseType = APIReturnType<'GET /internal/apm/fleet/migration_check'>;
 
-function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
+function TutorialFleetInstructions({
+  http,
+  basePath,
+  isDarkTheme,
+  kibanaVersion,
+}: Props) {
   const [data, setData] = useState<APIResponseType | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,7 +53,7 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
     async function fetchData() {
       setIsLoading(true);
       try {
-        const response = await http.get('/internal/apm/fleet/has_data');
+        const response = await http.get('/internal/apm/fleet/migration_check');
         setData(response as APIResponseType);
       } catch (e) {
         setIsLoading(false);
@@ -55,6 +64,24 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
     fetchData();
   }, [http]);
 
+  const hasApmIntegrations = !!data?.has_apm_integrations;
+  const cloudApmMigrationEnabled = !!data?.cloud_apm_migration_enabled;
+  const hasCloudAgentPolicy = !!data?.has_cloud_agent_policy;
+  const cloudApmPackagePolicy = data?.cloud_apm_package_policy;
+  const hasCloudApmPackagePolicy = !!cloudApmPackagePolicy;
+  const hasRequiredRole = !!data?.has_required_role;
+  const shouldLinkToMigration =
+    cloudApmMigrationEnabled &&
+    hasCloudAgentPolicy &&
+    !hasCloudApmPackagePolicy &&
+    hasRequiredRole;
+
+  const apmIntegrationHref = shouldLinkToMigration
+    ? `${basePath}/app/apm/settings/schema`
+    : isPrereleaseVersion(kibanaVersion)
+    ? `${basePath}/app/integrations#/detail/apm/overview`
+    : `${basePath}/app/integrations/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/overview`;
+
   if (isLoading) {
     return (
       <CentralizedContainer>
@@ -64,9 +91,13 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
   }
 
   // When APM integration is enable in Fleet
-  if (data?.hasData) {
+  if (hasApmIntegrations) {
     return (
-      <EuiButton iconType="gear" fill href={`${basePath}/app/fleet#/policies`}>
+      <EuiButton
+        iconType="gear"
+        fill
+        href={`${basePath}/app/integrations/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/policies`}
+      >
         {i18n.translate(
           'xpack.apm.tutorial.apmServer.fleet.manageApmIntegration.button',
           {
@@ -98,8 +129,8 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
               <>
                 <EuiButton
                   iconType="analyzeEvent"
-                  color="secondary"
-                  href={`${basePath}/app/integrations#/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/overview`}
+                  color="success"
+                  href={apmIntegrationHref}
                 >
                   {i18n.translate(
                     'xpack.apm.tutorial.apmServer.fleet.apmIntegration.button',

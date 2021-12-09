@@ -5,37 +5,41 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { useHistory } from 'react-router-dom';
+import { Immutable } from '../../../../../common/endpoint/types';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useToasts } from '../../../../common/lib/kibana';
+import {
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_PAGE_SIZE_OPTIONS,
+} from '../../../common/constants';
+import { getEndpointListPath } from '../../../common/routing';
+import { AdministrationListPage } from '../../../components/administration_list_page';
+import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
+import { useEndpointPoliciesToArtifactPolicies } from '../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
+import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
+import { SearchExceptions } from '../../../components/search_exceptions';
+import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import { getCurrentLocation } from '../store/selector';
+import { HostIsolationExceptionDeleteModal } from './components/delete_modal';
+import { HostIsolationExceptionsEmptyState } from './components/empty';
+import { HostIsolationExceptionsFormFlyout } from './components/form_flyout';
+import {
+  DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
+  EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
+  getLoadPoliciesError,
+} from './components/translations';
 import {
   useFetchHostIsolationExceptionsList,
   useHostIsolationExceptionsNavigateCallback,
   useHostIsolationExceptionsSelector,
 } from './hooks';
-import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
-import { Immutable } from '../../../../../common/endpoint/types';
-import { AdministrationListPage } from '../../../components/administration_list_page';
-import { SearchExceptions } from '../../../components/search_exceptions';
-import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
-import { HostIsolationExceptionsEmptyState } from './components/empty';
-import { HostIsolationExceptionDeleteModal } from './components/delete_modal';
-import { HostIsolationExceptionsFormFlyout } from './components/form_flyout';
-import {
-  DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
-  EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
-} from './components/translations';
-import { getEndpointListPath } from '../../../common/routing';
-import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
-import {
-  MANAGEMENT_DEFAULT_PAGE_SIZE,
-  MANAGEMENT_PAGE_SIZE_OPTIONS,
-} from '../../../common/constants';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -44,7 +48,7 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
 
 export const HostIsolationExceptionsList = () => {
   const history = useHistory();
-  const privileges = useEndpointPrivileges();
+  const privileges = useUserPrivileges().endpointPrivileges;
 
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
@@ -52,6 +56,14 @@ export const HostIsolationExceptionsList = () => {
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
   const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList();
+  const toasts = useToasts();
+
+  // load the list of policies>
+  const policiesRequest = useGetEndpointSpecificPolicies({
+    onError: (err) => {
+      toasts.addDanger(getLoadPoliciesError(err));
+    },
+  });
 
   const pagination = {
     totalItemCount: data?.total ?? 0,
@@ -79,6 +91,8 @@ export const HostIsolationExceptionsList = () => {
     [navigateCallback]
   );
 
+  const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
+
   function handleItemComponentProps(element: ExceptionListItemSchema): ArtifactEntryCardProps {
     const editAction = {
       icon: 'controlsHorizontal',
@@ -103,6 +117,7 @@ export const HostIsolationExceptionsList = () => {
       item: element,
       'data-test-subj': `hostIsolationExceptionsCard`,
       actions: privileges.canIsolateHost ? [editAction, deleteAction] : [deleteAction],
+      policies: artifactCardPolicies,
     };
   }
 
@@ -132,6 +147,15 @@ export const HostIsolationExceptionsList = () => {
     }
     setItemToDelete(null);
   };
+
+  const handleCloseFlyout = useCallback(
+    () =>
+      navigateCallback({
+        show: undefined,
+        id: undefined,
+      }),
+    [navigateCallback]
+  );
 
   return (
     <AdministrationListPage
@@ -167,7 +191,9 @@ export const HostIsolationExceptionsList = () => {
       }
       hideHeader={!hasDataToShow}
     >
-      {showFlyout && <HostIsolationExceptionsFormFlyout />}
+      {showFlyout && (
+        <HostIsolationExceptionsFormFlyout onCancel={handleCloseFlyout} id={location.id} />
+      )}
 
       {itemToDelete ? (
         <HostIsolationExceptionDeleteModal item={itemToDelete} onCancel={handleCloseDeleteDialog} />

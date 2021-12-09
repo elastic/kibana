@@ -15,7 +15,7 @@ import {
   UtilityBarText,
 } from '../utility_bar';
 import * as i18n from './translations';
-import { AllCases, Case, DeleteCase, FilterOptions } from '../../../common';
+import { AllCases, Case, DeleteCase, FilterOptions } from '../../../common/ui/types';
 import { getBulkItems } from '../bulk_actions';
 import { isSelectedCasesIncludeCollections } from './helpers';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -141,7 +141,12 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = ({
               </UtilityBarAction>
             </>
           )}
-          <UtilityBarAction iconSide="left" iconType="refresh" onClick={refreshCases}>
+          <UtilityBarAction
+            iconSide="left"
+            iconType="refresh"
+            onClick={refreshCases}
+            dataTestSubj="all-cases-refresh"
+          >
             {i18n.REFRESH}
           </UtilityBarAction>
         </UtilityBarGroup>

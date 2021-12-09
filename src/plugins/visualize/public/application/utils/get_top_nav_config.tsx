@@ -54,6 +54,7 @@ export interface TopNavConfigParams {
   setHasUnsavedChanges: (value: boolean) => void;
   openInspector: () => void;
   originatingApp?: string;
+  originatingPath?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   hasUnappliedChanges: boolean;
   visInstance: VisualizeEditorVisInstance;
@@ -79,6 +80,7 @@ export const getTopNavConfig = (
     setHasUnsavedChanges,
     openInspector,
     originatingApp,
+    originatingPath,
     setOriginatingApp,
     hasUnappliedChanges,
     visInstance,
@@ -168,6 +170,8 @@ export const getTopNavConfig = (
           if (saveOptions.dashboardId) {
             path =
               saveOptions.dashboardId === 'new' ? '#/create' : `#/view/${saveOptions.dashboardId}`;
+          } else if (originatingPath) {
+            path = originatingPath;
           }
 
           if (stateTransfer) {
@@ -232,7 +236,8 @@ export const getTopNavConfig = (
       type: VISUALIZE_EMBEDDABLE_TYPE,
       searchSessionId: data.search.session.getSessionId(),
     };
-    stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state });
+
+    stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state, path: originatingPath });
   };
 
   const navigateToOriginatingApp = () => {

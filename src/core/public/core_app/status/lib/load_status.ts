@@ -21,12 +21,15 @@ export interface Metric {
 
 export interface FormattedStatus {
   id: string;
-  state: {
-    id: ServiceStatusLevel;
-    title: string;
-    message: string;
-    uiColor: string;
-  };
+  state: StatusState;
+  original: ServiceStatus;
+}
+
+export interface StatusState {
+  id: ServiceStatusLevel;
+  title: string;
+  message: string;
+  uiColor: string;
 }
 
 interface StatusUIAttributes {
@@ -96,6 +99,7 @@ function formatStatus(id: string, status: ServiceStatus): FormattedStatus {
 
   return {
     id,
+    original: status,
     state: {
       id: status.level,
       message: status.summary,
@@ -105,7 +109,7 @@ function formatStatus(id: string, status: ServiceStatus): FormattedStatus {
   };
 }
 
-const STATUS_LEVEL_UI_ATTRS: Record<ServiceStatusLevel, StatusUIAttributes> = {
+export const STATUS_LEVEL_UI_ATTRS: Record<ServiceStatusLevel, StatusUIAttributes> = {
   critical: {
     title: i18n.translate('core.status.redTitle', {
       defaultMessage: 'Red',
@@ -128,7 +132,7 @@ const STATUS_LEVEL_UI_ATTRS: Record<ServiceStatusLevel, StatusUIAttributes> = {
     title: i18n.translate('core.status.greenTitle', {
       defaultMessage: 'Green',
     }),
-    uiColor: 'secondary',
+    uiColor: 'success',
   },
 };
 
@@ -178,14 +182,13 @@ export async function loadStatus({
   return {
     name: response.name,
     version: response.version,
-    statuses: [
-      ...Object.entries(response.status.core).map(([serviceName, status]) =>
-        formatStatus(`core:${serviceName}`, status)
-      ),
-      ...Object.entries(response.status.plugins).map(([pluginName, status]) =>
-        formatStatus(`plugin:${pluginName}`, status)
-      ),
-    ],
+    coreStatus: Object.entries(response.status.core).map(([serviceName, status]) =>
+      formatStatus(serviceName, status)
+    ),
+    pluginStatus: Object.entries(response.status.plugins).map(([pluginName, status]) =>
+      formatStatus(pluginName, status)
+    ),
+
     serverState: formatStatus('overall', response.status.overall).state,
     metrics: formatMetrics(response),
   };

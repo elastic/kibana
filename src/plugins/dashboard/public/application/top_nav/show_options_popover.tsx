@@ -8,10 +8,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
-
+import { CoreStart } from 'src/core/public';
 import { OptionsMenu } from './options';
+import { KibanaThemeProvider } from '../../services/kibana_react';
 
 let isOpen = false;
 
@@ -22,6 +23,17 @@ const onClose = () => {
   isOpen = false;
 };
 
+export interface ShowOptionsPopoverProps {
+  anchorElement: HTMLElement;
+  useMargins: boolean;
+  onUseMarginsChange: (useMargins: boolean) => void;
+  syncColors: boolean;
+  onSyncColorsChange: (syncColors: boolean) => void;
+  hidePanelTitles: boolean;
+  onHidePanelTitlesChange: (hideTitles: boolean) => void;
+  theme$: CoreStart['theme']['theme$'];
+}
+
 export function showOptionsPopover({
   anchorElement,
   useMargins,
@@ -30,15 +42,8 @@ export function showOptionsPopover({
   onHidePanelTitlesChange,
   syncColors,
   onSyncColorsChange,
-}: {
-  anchorElement: HTMLElement;
-  useMargins: boolean;
-  onUseMarginsChange: (useMargins: boolean) => void;
-  syncColors: boolean;
-  onSyncColorsChange: (syncColors: boolean) => void;
-  hidePanelTitles: boolean;
-  onHidePanelTitlesChange: (hideTitles: boolean) => void;
-}) {
+  theme$,
+}: ShowOptionsPopoverProps) {
   if (isOpen) {
     onClose();
     return;
@@ -49,16 +54,23 @@ export function showOptionsPopover({
   document.body.appendChild(container);
   const element = (
     <I18nProvider>
-      <EuiWrappingPopover id="popover" button={anchorElement} isOpen={true} closePopover={onClose}>
-        <OptionsMenu
-          useMargins={useMargins}
-          onUseMarginsChange={onUseMarginsChange}
-          hidePanelTitles={hidePanelTitles}
-          onHidePanelTitlesChange={onHidePanelTitlesChange}
-          syncColors={syncColors}
-          onSyncColorsChange={onSyncColorsChange}
-        />
-      </EuiWrappingPopover>
+      <KibanaThemeProvider theme$={theme$}>
+        <EuiWrappingPopover
+          id="popover"
+          button={anchorElement}
+          isOpen={true}
+          closePopover={onClose}
+        >
+          <OptionsMenu
+            useMargins={useMargins}
+            onUseMarginsChange={onUseMarginsChange}
+            hidePanelTitles={hidePanelTitles}
+            onHidePanelTitlesChange={onHidePanelTitlesChange}
+            syncColors={syncColors}
+            onSyncColorsChange={onSyncColorsChange}
+          />
+        </EuiWrappingPopover>
+      </KibanaThemeProvider>
     </I18nProvider>
   );
   ReactDOM.render(element, container);

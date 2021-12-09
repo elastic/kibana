@@ -8,7 +8,6 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { IClusterClient } from 'src/core/server';
 import { MonitoringConfig } from '../../config';
-import { fetchAvailableCcs } from '../../lib/alerts/fetch_available_ccs';
 import { getStackProductsUsage } from './lib/get_stack_products_usage';
 import { fetchLicenseType } from './lib/fetch_license_type';
 import { MonitoringUsage, StackProductUsage, MonitoringClusterStackProductUsage } from './types';
@@ -106,7 +105,7 @@ export function getMonitoringUsageCollector(
         ? getClient().asScoped(kibanaRequest).asCurrentUser
         : getClient().asInternalUser;
       const usageClusters: MonitoringClusterStackProductUsage[] = [];
-      const availableCcs = config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : [];
+      const availableCcs = config.ui.ccs.enabled;
       const elasticsearchIndex = getCcsIndexPattern(INDEX_PATTERN_ELASTICSEARCH, availableCcs);
       const clusters = await fetchClusters(callCluster, elasticsearchIndex);
       for (const cluster of clusters) {
@@ -127,12 +126,10 @@ export function getMonitoringUsageCollector(
         });
       }
 
-      const usage = {
+      return {
         hasMonitoringData: usageClusters.length > 0,
         clusters: usageClusters,
       };
-
-      return usage;
     },
   });
 }
