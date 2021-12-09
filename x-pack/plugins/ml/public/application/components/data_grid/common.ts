@@ -64,7 +64,7 @@ export const euiDataGridStyle: EuiDataGridStyle = {
 
 export const euiDataGridToolbarSettings = {
   showColumnSelector: true,
-  showStyleSelector: false,
+  showDisplaySelector: false,
   showSortSelector: true,
   showFullScreenSelector: false,
 };

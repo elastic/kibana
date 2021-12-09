@@ -302,7 +302,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const toolbarVisibility = useMemo(
     () => ({
-      showStyleSelector: false,
+      showDisplaySelector: false,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction
