@@ -6,7 +6,15 @@
  */
 
 import React, { FC, Fragment, useState } from 'react';
-import { EuiFlexGroup, EuiPage, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiPage,
+  EuiPageBody,
+  EuiPanel,
+  EuiSpacer,
+  EuiPageHeader,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { checkPermission } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check/check_ml_nodes';
 import { NavigationMenu } from '../components/navigation_menu';
@@ -17,8 +25,9 @@ import { JobsAwaitingNodeWarning } from '../components/jobs_awaiting_node_warnin
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
-import { useMlKibana } from '../contexts/kibana';
+import { useMlKibana, useTimefilter } from '../contexts/kibana';
 import { NodesList } from '../trained_models/nodes_overview';
+import { DatePickerWrapper } from '../components/navigation_menu/date_picker_wrapper';
 
 export const OverviewPage: FC = () => {
   const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
@@ -31,6 +40,8 @@ export const OverviewPage: FC = () => {
   } = useMlKibana();
   const helpLink = docLinks.links.ml.guide;
 
+  const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
+
   const [adLazyJobCount, setAdLazyJobCount] = useState(0);
   const [dfaLazyJobCount, setDfaLazyJobCount] = useState(0);
   const [refreshCount, setRefreshCount] = useState(0);
@@ -40,6 +51,11 @@ export const OverviewPage: FC = () => {
       <NavigationMenu tabId="overview" />
       <EuiPage data-test-subj="mlPageOverview">
         <EuiPageBody>
+          <EuiPageHeader
+            pageTitle={<FormattedMessage id="xpack.ml.overview.header" defaultMessage="Overview" />}
+            rightSideItems={[<DatePickerWrapper />]}
+          />
+
           <NodeAvailableWarning />
           <JobsAwaitingNodeWarning jobCount={adLazyJobCount + dfaLazyJobCount} />
           <SavedObjectsWarning onCloseFlyout={() => setRefreshCount(refreshCount + 1)} />
@@ -53,15 +69,13 @@ export const OverviewPage: FC = () => {
 
           <EuiSpacer size="m" />
 
-          <EuiFlexGroup>
-            <OverviewContent
-              createAnomalyDetectionJobDisabled={disableCreateAnomalyDetectionJob}
-              createAnalyticsJobDisabled={disableCreateAnalyticsButton}
-              setAdLazyJobCount={setAdLazyJobCount}
-              setDfaLazyJobCount={setDfaLazyJobCount}
-              refreshCount={refreshCount}
-            />
-          </EuiFlexGroup>
+          <OverviewContent
+            createAnomalyDetectionJobDisabled={disableCreateAnomalyDetectionJob}
+            createAnalyticsJobDisabled={disableCreateAnalyticsButton}
+            setAdLazyJobCount={setAdLazyJobCount}
+            setDfaLazyJobCount={setDfaLazyJobCount}
+            refreshCount={refreshCount}
+          />
         </EuiPageBody>
       </EuiPage>
       <HelpMenu docLink={helpLink} />

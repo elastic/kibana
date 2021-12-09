@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useState, useEffect } from 'react';
+import React, { FC, Fragment, useState, useEffect, useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,24 +18,42 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
+import { zipObject } from 'lodash';
+import {
+  useMlKibana,
+  useMlLocator,
+  useNavigateToPath,
+  useTimefilter,
+} from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
-import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
+import {
+  getGroupsFromJobs,
+  getStatsBarData,
+  getJobsWithTimerange,
+} from './utils';
 import { Dictionary } from '../../../../../common/types/common';
 import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import adImage from './blog-machine-learning-720x420.png';
+import { useRefresh } from '../../../routing/use_refresh';
+import { useToastNotificationService } from '../../../services/toast_notification_service';
+import { AnomalyTimelineService } from '../../../services/anomaly_timeline_service';
+import { mlResultsServiceProvider } from '../../../services/results_service';
+import type { OverallSwimlaneData } from '../../../explorer/explorer_utils';
 
 export type GroupsDictionary = Dictionary<Group>;
 
 export interface Group {
   id: string;
+  jobs: MlSummaryJob[];
   jobIds: string[];
   docs_processed: number;
-  earliest_timestamp: number;
-  latest_timestamp: number;
+  earliest_timestamp?: number;
+  latest_timestamp?: number;
   max_anomaly_score: number | undefined | null;
+  jobs_in_group: number;
+  overallSwimLane?: OverallSwimlaneData;
 }
 
 type MaxScoresByGroup = Dictionary<{
@@ -64,10 +82,26 @@ export const AnomalyDetectionPanel: FC<Props> = ({
   refreshCount,
 }) => {
   const {
-    services: { notifications },
+    services: {
+      notifications,
+      uiSettings,
+      mlServices: { mlApiServices },
+    },
   } = useMlKibana();
   const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
+
+  const { displayErrorToast } = useToastNotificationService();
+
+  const timefilter = useTimefilter();
+
+  const anomalyTimelineService = useMemo(
+    () =>
+      new AnomalyTimelineService(timefilter, uiSettings, mlResultsServiceProvider(mlApiServices)),
+    []
+  );
+
+  const { timeRange } = useRefresh();
 
   const redirectToJobsManagementPage = async () => {
     if (!mlLocator) return;
@@ -88,7 +122,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [groups, setGroups] = useState<GroupsDictionary>({});
   const [groupsCount, setGroupsCount] = useState<number>(0);
-  const [jobsList, setJobsList] = useState<MlSummaryJobs>([]);
+  const [jobsList, setJobsList] = useState<Record<string, MlSummaryJobs>>({});
   const [statsBarData, setStatsBarData] = useState<any>(undefined);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
 
@@ -114,11 +148,47 @@ export const AnomalyDetectionPanel: FC<Props> = ({
       setGroupsCount(count);
       setGroups(jobsGroups);
       setJobsList(jobsWithTimerange);
-      loadMaxAnomalyScores(jobsGroups);
+      loadOverallSwimLanes(jobsGroups);
       setLazyJobCount(lazyJobCount);
     } catch (e) {
       setErrorMessage(e.message !== undefined ? e.message : JSON.stringify(e));
       setIsLoading(false);
+    }
+  };
+
+  const loadOverallSwimLanes = async (groupsObject: GroupsDictionary) => {
+    try {
+      // Extract non-empty groups first
+      const nonEmptyGroups = Object.fromEntries(
+        Object.entries(groupsObject)
+          .filter(([groupId, group]) => group.jobs.length > 0)
+          .map(([groupId, group]) => {
+            return [groupId, anomalyTimelineService.loadOverallData(group.jobs, 300)];
+          })
+      );
+
+      const r = zipObject(
+        Object.keys(nonEmptyGroups),
+        await Promise.all(Object.values(nonEmptyGroups))
+      );
+
+      console.log(r, '___r___');
+
+      const tempGroups = { ...groupsObject };
+
+      // eslint-disable-next-line guard-for-in
+      for (const g in tempGroups) {
+        tempGroups[g].overallSwimLane = r[g];
+      }
+
+      setGroups(tempGroups);
+    } catch (e) {
+      displayErrorToast(
+        e,
+        i18n.translate('xpack.ml.overview.anomalyDetection.errorWithFetchingSwimLanesData', {
+          defaultMessage: 'An error occurred fetching anomaly results',
+        })
+      );
     }
   };
 
@@ -164,7 +234,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({
 
   useEffect(() => {
     loadJobs();
-  }, [refreshCount]);
+  }, [timeRange]);
 
   const onRefresh = () => {
     loadJobs();

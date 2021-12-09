@@ -12,7 +12,6 @@ import {
   EuiResizeObserver,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { throttle } from 'lodash';
@@ -50,7 +49,6 @@ import {
   Y_AXIS_LABEL_PADDING,
   X_AXIS_RIGHT_OVERFLOW,
 } from './swimlane_annotation_container';
-import { AnnotationsTable } from '../../../common/types/annotations';
 import { useCurrentEuiTheme } from '../components/color_range_legend';
 
 declare global {
@@ -141,7 +139,6 @@ const SwimLaneTooltip =
 
 export interface SwimlaneProps {
   filterActive?: boolean;
-  maskAll?: boolean;
   timeBuckets: InstanceType<typeof TimeBucketsClass>;
   showLegend?: boolean;
   swimlaneData: OverallSwimlaneData | ViewBySwimLaneData;
@@ -164,7 +161,7 @@ export interface SwimlaneProps {
    * Enables/disables timeline on the X-axis.
    */
   showTimeline?: boolean;
-  annotationsData?: AnnotationsTable['annotationsData'];
+  showYAxis?: boolean;
 }
 
 /**
@@ -186,10 +183,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   selection,
   onCellsSelection,
   timeBuckets,
-  maskAll,
   showTimeline = true,
+  showYAxis = true,
   showLegend = true,
-  annotationsData,
   'data-test-subj': dataTestSubj,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
@@ -256,10 +252,12 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       ? containerHeightRef.current
       : // TODO update when elastic charts X label will be fixed
         Math.max(
-          rowsCount * CELL_HEIGHT + (showLegend ? LEGEND_HEIGHT : 0) + (true ? Y_AXIS_HEIGHT : 0),
-          MIN_CONTAINER_HEIGHT
+          rowsCount * CELL_HEIGHT +
+            (showLegend ? LEGEND_HEIGHT : 0) +
+            (showYAxis ? Y_AXIS_HEIGHT : 0),
+          noDataWarning ? MIN_CONTAINER_HEIGHT : 0
         );
-  }, [isLoading, rowsCount, showTimeline]);
+  }, [isLoading, rowsCount]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -309,7 +307,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         },
       },
       yAxisLabel: {
-        visible: true,
+        visible: showYAxis,
         width: Y_AXIS_LABEL_WIDTH,
         textColor: euiTheme.euiTextSubduedColor,
         padding: Y_AXIS_LABEL_PADDING,
@@ -319,7 +317,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
       },
       xAxisLabel: {
-        visible: true,
+        visible: showTimeline,
         textColor: euiTheme.euiTextSubduedColor,
         formatter: (v: number) => {
           timeBuckets.setInterval(`${swimlaneData.interval}s`);
@@ -503,13 +501,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                       />
                     </EuiText>
                   )}
-                  {!isLoading && !showSwimlane && (
-                    <EuiEmptyPrompt
-                      titleSize="xxs"
-                      style={{ padding: 0 }}
-                      title={<h2>{noDataWarning}</h2>}
-                    />
-                  )}
+                  {!isLoading && !showSwimlane && noDataWarning ? noDataWarning : null}
                 </div>
               </div>
             </>

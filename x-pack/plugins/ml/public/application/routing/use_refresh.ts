@@ -16,7 +16,7 @@ import { useTimefilter } from '../contexts/kibana';
 
 export interface Refresh {
   lastRefresh: number;
-  timeRange?: { start: string; end: string };
+  timeRange: { start: string; end: string };
 }
 
 /**
@@ -26,18 +26,22 @@ export interface Refresh {
 export const useRefresh = () => {
   const timefilter = useTimefilter();
 
+  const getTimRange = () => {
+    const { from, to } = timefilter.getTime();
+    return { start: from, end: to };
+  };
+
   const refresh$ = useMemo(() => {
     return merge(
       mlTimefilterRefresh$,
       timefilter.getTimeUpdate$().pipe(
         map(() => {
-          const { from, to } = timefilter.getTime();
-          return { lastRefresh: Date.now(), timeRange: { start: from, end: to } };
+          return { lastRefresh: Date.now(), timeRange: getTimRange() };
         })
       ),
       annotationsRefresh$.pipe(map((d) => ({ lastRefresh: d })))
     );
   }, []);
 
-  return useObservable<Refresh>(refresh$);
+  return useObservable<Refresh>(refresh$, { timeRange: getTimRange() });
 };

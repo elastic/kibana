@@ -9,14 +9,16 @@ import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { Group, GroupsDictionary } from './anomaly_detection_panel';
 import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
+import { isDefined } from '../../../../../common/types/guards';
 
 export function getGroupsFromJobs(jobs: MlSummaryJobs): {
   groups: GroupsDictionary;
   count: number;
 } {
-  const groups: any = {
+  const groups: GroupsDictionary = {
     ungrouped: {
       id: 'ungrouped',
+      jobs: [],
       jobIds: [],
       docs_processed: 0,
       latest_timestamp: 0,
@@ -32,30 +34,33 @@ export function getGroupsFromJobs(jobs: MlSummaryJobs): {
         if (groups[g] === undefined) {
           groups[g] = {
             id: g,
+            jobs: [job],
             jobIds: [job.id],
-            docs_processed: job.processed_record_count,
+            docs_processed: job.processed_record_count!,
             latest_timestamp: job.latestTimestampMs,
             max_anomaly_score: null,
             jobs_in_group: 1,
           };
         } else {
+          groups[g].jobs.push(job);
           groups[g].jobIds.push(job.id);
-          groups[g].docs_processed += job.processed_record_count;
+          groups[g].docs_processed += job.processed_record_count!;
           groups[g].jobs_in_group++;
           // if incoming job latest timestamp is greater than the last saved one, replace it
           if (groups[g].latest_timestamp === undefined) {
             groups[g].latest_timestamp = job.latestTimestampMs;
-          } else if (job.latestTimestampMs && job.latestTimestampMs > groups[g].latest_timestamp) {
+          } else if (job.latestTimestampMs && job.latestTimestampMs > groups[g].latest_timestamp!) {
             groups[g].latest_timestamp = job.latestTimestampMs;
           }
         }
       });
     } else {
+      groups.ungrouped.jobs.push(job);
       groups.ungrouped.jobIds.push(job.id);
-      groups.ungrouped.docs_processed += job.processed_record_count;
+      groups.ungrouped.docs_processed += job.processed_record_count!;
       groups.ungrouped.jobs_in_group++;
       // if incoming job latest timestamp is greater than the last saved one, replace it
-      if (job.latestTimestampMs && job.latestTimestampMs > groups.ungrouped.latest_timestamp) {
+      if (job.latestTimestampMs && job.latestTimestampMs > groups.ungrouped.latest_timestamp!) {
         groups.ungrouped.latest_timestamp = job.latestTimestampMs;
       }
     }
@@ -157,11 +162,11 @@ export function getStatsBarData(jobsList: any) {
   return jobStats;
 }
 
-export function getJobsFromGroup(group: Group, jobs: any) {
-  return group.jobIds.map((jobId) => jobs[jobId]).filter((id) => id !== undefined);
+export function getJobsFromGroup(group: Group, jobs: Record<string, any>) {
+  return group.jobIds.map((jobId) => jobs[jobId]).filter(isDefined);
 }
 
-export function getJobsWithTimerange(jobsList: any) {
+export function getJobsWithTimerange(jobsList: any): Record<string, any> {
   const jobs: any = {};
   jobsList.forEach((job: any) => {
     if (jobs[job.id] === undefined) {

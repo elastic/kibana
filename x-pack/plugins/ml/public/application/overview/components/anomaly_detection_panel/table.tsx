@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useState } from 'react';
+import React, { FC, Fragment, useMemo, useState } from 'react';
 import {
   Direction,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiIcon,
   EuiInMemoryTable,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
@@ -21,24 +19,25 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 import { ExplorerLink } from './actions';
 import { getJobsFromGroup } from './utils';
-import { GroupsDictionary, Group } from './anomaly_detection_panel';
+import { Group, GroupsDictionary } from './anomaly_detection_panel';
 import { MlSummaryJobs } from '../../../../../common/types/anomaly_detection_jobs';
-import { StatsBar, JobStatsBarStats } from '../../../components/stats_bar';
-// @ts-ignore
-import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge/index';
+import { JobStatsBarStats, StatsBar } from '../../../components/stats_bar';
+import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge';
 import { toLocaleString } from '../../../util/string_utils';
-import {
-  getFormattedSeverityScore,
-  getSeverityColor,
-} from '../../../../../common/util/anomaly_utils';
+import { SwimlaneContainer } from '../../../explorer/swimlane_container';
+import { TimeBuckets } from '../../../util/time_buckets';
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
+import { useUiSettings } from '../../../contexts/kibana';
 
 // Used to pass on attribute names to table columns
 export enum AnomalyDetectionListColumns {
   id = 'id',
   maxAnomalyScore = 'max_anomaly_score',
+  overallSwimLane = 'overallSwimLane',
   jobIds = 'jobIds',
   latestTimestamp = 'latest_timestamp',
   docsProcessed = 'docs_processed',
@@ -57,7 +56,7 @@ type AnomalyDetectionTableColumns = [
 interface Props {
   items: GroupsDictionary;
   statsBarData: JobStatsBarStats;
-  jobsList: MlSummaryJobs;
+  jobsList: Record<string, MlSummaryJobs>;
 }
 
 export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData }) => {
@@ -67,6 +66,16 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
 
   const [sortField, setSortField] = useState<string>(AnomalyDetectionListColumns.id);
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
+
+  const uiSettings = useUiSettings();
+  const timeBuckets = useMemo(() => {
+    return new TimeBuckets({
+      'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+      'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+      dateFormat: uiSettings.get('dateFormat'),
+      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+    });
+  }, []);
 
   // columns: group, max anomaly, jobs in group, latest timestamp, docs processed, action to explorer
   const columns: AnomalyDetectionTableColumns = [
@@ -80,61 +89,47 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       truncateText: true,
       width: '20%',
     },
+    // @ts-ignore
     {
-      field: AnomalyDetectionListColumns.maxAnomalyScore,
       name: (
         <EuiToolTip
-          content={i18n.translate('xpack.ml.overview.anomalyDetection.tableMaxScoreTooltip', {
-            defaultMessage:
-              'Maximum score across all jobs in the group over its most recent 24 hour period',
+          content={i18n.translate('xpack.ml.overview.anomalyDetection.tableOverallScoreTooltip', {
+            defaultMessage: 'Overall anomaly scores within selected time range',
           })}
         >
           <span>
-            {i18n.translate('xpack.ml.overview.anomalyDetection.tableMaxScore', {
-              defaultMessage: 'Max anomaly score',
+            {i18n.translate('xpack.ml.overview.anomalyDetection.overallScore', {
+              defaultMessage: 'Overall score',
             })}
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       ),
       sortable: true,
-      render: (score: Group['max_anomaly_score']) => {
-        if (score === undefined) {
-          // score is not loaded yet
-          return <EuiLoadingSpinner />;
-        } else if (score === null) {
-          // an error occurred loading this group's score
-          return (
-            <EuiToolTip
-              content={i18n.translate(
-                'xpack.ml.overview.anomalyDetection.tableMaxScoreErrorTooltip',
-                {
-                  defaultMessage: 'There was a problem loading the maximum anomaly score',
-                }
-              )}
-            >
-              <EuiIcon type="alert" />
-            </EuiToolTip>
-          );
-        } else if (score === 0) {
-          return (
-            // @ts-ignore
-            <EuiHealth color={'transparent'} compressed="true">
-              {score}
-            </EuiHealth>
-          );
-        } else {
-          const color: string = getSeverityColor(score);
-          return (
-            // @ts-ignore
-            <EuiHealth color={color} compressed="true">
-              {getFormattedSeverityScore(score)}
-            </EuiHealth>
-          );
-        }
+      render: (group: Group) => {
+        return (
+          <SwimlaneContainer
+            timeBuckets={timeBuckets}
+            swimlaneData={group.overallSwimLane!}
+            swimlaneType={'overall'}
+            onCellsSelection={() => {}}
+            onResize={() => {}}
+            isLoading={false}
+            id={group.id}
+            showTimeline={false}
+            showYAxis={false}
+            showLegend={false}
+            noDataWarning={
+              <FormattedMessage
+                id="xpack.ml.overview.anomalyDetection.noAnomaliesFoundMessage"
+                defaultMessage="No anomalies found"
+              />
+            }
+          />
+        );
       },
-      truncateText: true,
-      width: '150px',
+      truncateText: false,
+      width: '300px',
     },
     {
       field: AnomalyDetectionListColumns.jobsInGroup,
