@@ -107,7 +107,7 @@ export class GisPageObject extends FtrService {
   }
 
   async waitForLayersToLoadMinimizedLayerControl() {
-    this.log.debug('Wait for layers to load (mimiized layer control)');
+    this.log.debug('Wait for layers to load (minimized layer control)');
     await this.retry.try(async () => {
       const tableOfContents = await this.testSubjects.find('mapExpandLayerControlButton');
       await tableOfContents.waitForDeletedByCssSelector('.euiLoadingSpinner');
