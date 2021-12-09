@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiListGroup,
   EuiPagination,
+  EuiFieldSearch,
   EuiText,
   EuiSpacer,
   EuiIcon,
@@ -68,6 +69,9 @@ export function SavedQueryManagementComponent({
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
   const [activePage, setActivePage] = useState(0);
+  const [searchValue, setSearchValue] = useState('');
+  const [savedQueriesBySearch, setSavedQueriesBySearch] = useState([] as SavedQuery[]);
+
   const cancelPendingListingRequest = useRef<() => void>(() => {});
 
   useEffect(() => {
@@ -86,6 +90,7 @@ export function SavedQueryManagementComponent({
       const sortedSavedQueryItems = sortBy(savedQueryItems, 'attributes.title');
       setTotalCount(savedQueryCount);
       setSavedQueries(sortedSavedQueryItems);
+      setSavedQueriesBySearch(sortedSavedQueryItems);
     };
     if (isOpen) {
       fetchCountAndSavedQueries();
@@ -187,7 +192,7 @@ export function SavedQueryManagementComponent({
     //     ? [loadedSavedQuery, ...savedQueriesWithoutCurrent]
     //     : [...savedQueriesWithoutCurrent];
     // DON'T SORT
-    return savedQueries.map((savedQuery) => (
+    return savedQueriesBySearch.map((savedQuery) => (
       <SavedQueryListItem
         key={savedQuery.id}
         savedQuery={savedQuery}
@@ -199,16 +204,35 @@ export function SavedQueryManagementComponent({
     ));
   };
 
+  const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearchValue(value);
+    const newSavedQueriesList = savedQueries.filter((savedQuery) => {
+      return savedQuery.attributes.title.toLowerCase().includes(value.toLowerCase());
+    });
+    setSavedQueriesBySearch(newSavedQueriesList);
+  };
+
   const list = (
-    <EuiListGroup
-      maxWidth="none"
-      bordered
-      size="s"
-      className="kbnSavedQueryManagement__list"
-      aria-labelledby={'savedQueryManagementPopoverTitle'}
-    >
-      {savedQueryRows()}
-    </EuiListGroup>
+    <>
+      <EuiFieldSearch
+        placeholder="Find a saved filter for this data view"
+        value={searchValue}
+        fullWidth
+        onChange={onInputChange}
+        isClearable={true}
+        aria-label="Search..."
+      />
+      <EuiListGroup
+        maxWidth="none"
+        bordered
+        size="s"
+        className="kbnSavedQueryManagement__list"
+        aria-labelledby={'savedQueryManagementPopoverTitle'}
+      >
+        {savedQueryRows()}
+      </EuiListGroup>
+    </>
   );
 
   // NEW RETURN : Just the list
