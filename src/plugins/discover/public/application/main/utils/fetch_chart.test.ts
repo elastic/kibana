@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { FetchStatus } from '../../types';
-import { BehaviorSubject, of, throwError as throwErrorRx } from 'rxjs';
+import { of, throwError as throwErrorRx } from 'rxjs';
 import { RequestAdapter } from '../../../../../inspector';
 import { savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { fetchChart, updateSearchSource } from './fetch_chart';
@@ -15,15 +14,6 @@ import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { calculateBounds, IKibanaSearchResponse } from '../../../../../data/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
-function getDataSubjects() {
-  return {
-    main$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
-    documents$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
-    totalHits$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
-    charts$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
-  };
-}
 
 describe('test fetchCharts', () => {
   test('updateSearchSource helper function', () => {
@@ -61,8 +51,7 @@ describe('test fetchCharts', () => {
     `);
   });
 
-  test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async (done) => {
-    const subjects = getDataSubjects();
+  test('resolves with summarized chart data', async () => {
     const deps = {
       appStateContainer: {
         getState: () => {
@@ -82,12 +71,6 @@ describe('test fetchCharts', () => {
     deps.data.query.timefilter.timefilter.calculateBounds = (timeRange) =>
       calculateBounds(timeRange);
 
-    const stateArrChart: FetchStatus[] = [];
-    const stateArrHits: FetchStatus[] = [];
-
-    subjects.charts$.subscribe((value) => stateArrChart.push(value.fetchStatus));
-    subjects.totalHits$.subscribe((value) => stateArrHits.push(value.fetchStatus));
-
     savedSearchMockWithTimeField.searchSource.fetch$ = () =>
       of({
         id: 'Fjk5bndxTHJWU2FldVRVQ0tYR0VqOFEcRWtWNDhOdG5SUzJYcFhONVVZVTBJQToxMDMwOQ==',
@@ -95,7 +78,7 @@ describe('test fetchCharts', () => {
           took: 2,
           timed_out: false,
           _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-          hits: { max_score: null, hits: [] },
+          hits: { max_score: null, hits: [], total: 42 },
           aggregations: {
             '2': {
               buckets: [
@@ -115,25 +98,13 @@ describe('test fetchCharts', () => {
         isRestored: false,
       } as unknown as IKibanaSearchResponse<estypes.SearchResponse<unknown>>);
 
-    fetchChart(subjects, savedSearchMockWithTimeField.searchSource, deps).subscribe({
-      complete: () => {
-        expect(stateArrChart).toEqual([
-          FetchStatus.UNINITIALIZED,
-          FetchStatus.LOADING,
-          FetchStatus.COMPLETE,
-        ]);
-        expect(stateArrHits).toEqual([
-          FetchStatus.UNINITIALIZED,
-          FetchStatus.LOADING,
-          FetchStatus.COMPLETE,
-        ]);
-        done();
-      },
-    });
+    const result = await fetchChart(savedSearchMockWithTimeField.searchSource, deps);
+    expect(result).toHaveProperty('totalHits', 42);
+    expect(result).toHaveProperty('bucketInterval.description', '0 milliseconds');
+    expect(result).toHaveProperty('chartData');
   });
-  test('change of fetchStatus on fetch error', async (done) => {
-    const subjects = getDataSubjects();
 
+  test('rejects promise on query failure', async () => {
     const deps = {
       appStateContainer: {
         getState: () => {
@@ -149,26 +120,8 @@ describe('test fetchCharts', () => {
 
     savedSearchMockWithTimeField.searchSource.fetch$ = () => throwErrorRx({ msg: 'Oh noes!' });
 
-    const stateArrChart: FetchStatus[] = [];
-    const stateArrHits: FetchStatus[] = [];
-
-    subjects.charts$.subscribe((value) => stateArrChart.push(value.fetchStatus));
-    subjects.totalHits$.subscribe((value) => stateArrHits.push(value.fetchStatus));
-
-    fetchChart(subjects, savedSearchMockWithTimeField.searchSource, deps).subscribe({
-      error: () => {
-        expect(stateArrChart).toEqual([
-          FetchStatus.UNINITIALIZED,
-          FetchStatus.LOADING,
-          FetchStatus.ERROR,
-        ]);
-        expect(stateArrHits).toEqual([
-          FetchStatus.UNINITIALIZED,
-          FetchStatus.LOADING,
-          FetchStatus.ERROR,
-        ]);
-        done();
-      },
+    await expect(fetchChart(savedSearchMockWithTimeField.searchSource, deps)).rejects.toEqual({
+      msg: 'Oh noes!',
     });
   });
 });
