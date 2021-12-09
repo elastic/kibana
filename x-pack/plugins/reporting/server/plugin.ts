@@ -20,6 +20,7 @@ import type {
   ReportingStart,
   ReportingStartDeps,
 } from './types';
+import { reportingStatusSavedObject } from './saved_objects';
 import { registerReportingUsageCollector } from './usage';
 
 export class ReportingPlugin
@@ -33,6 +34,8 @@ export class ReportingPlugin
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
+    core.savedObjects.registerType(reportingStatusSavedObject.type);
+
     const { http } = core;
     const { features, licensing, security, spaces, taskManager } = plugins;
 
@@ -95,6 +98,7 @@ export class ReportingPlugin
     // async background start
     (async () => {
       await reportingCore.pluginSetsUp();
+      await reportingStatusSavedObject.setStatus(core.savedObjects);
 
       const store = new ReportingStore(reportingCore, this.logger);
 
