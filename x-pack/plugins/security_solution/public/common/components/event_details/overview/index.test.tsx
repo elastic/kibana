@@ -11,6 +11,9 @@ import { Overview } from './';
 import { TestProviders } from '../../../../common/mock';
 
 jest.mock('../../../lib/kibana');
+jest.mock('../../utils', () => ({
+  useThrottledResizeObserver: () => ({ width: 400 }), // force row-chunking
+}));
 
 describe('Event Details Overview Cards', () => {
   it('renders all cards', () => {
@@ -27,35 +30,27 @@ describe('Event Details Overview Cards', () => {
   });
 
   it('renders all cards it has data for', () => {
-    const dataWithoutRiskScore = props.data.filter(
-      (data) => data.field !== 'kibana.alert.rule.risk_score'
-    );
-
-    const fieldsWithoutRiskScore = {
-      'kibana.alert.rule.severity': props.browserFields.kibana.fields['kibana.alert.rule.severity'],
-      'kibana.alert.rule.uuid': props.browserFields.kibana.fields['kibana.alert.rule.uuid'],
-      'kibana.alert.workflow_status':
-        props.browserFields.kibana.fields['kibana.alert.workflow_status'],
-      'kibana.alert.rule.name': props.browserFields.kibana.fields['kibana.alert.rule.name'],
-    };
-
-    const propsWithoutRiskScore = {
-      ...props,
-      browserFields: { kibana: { fields: fieldsWithoutRiskScore } },
-      data: dataWithoutRiskScore,
-    };
-
     const { getByText, queryByText } = render(
       <TestProviders>
-        <Overview {...propsWithoutRiskScore} />
+        <Overview {...propsWithoutSeverity} />
       </TestProviders>
     );
 
     getByText('Status');
-    getByText('Severity');
+    getByText('Risk Score');
     getByText('Rule');
 
-    expect(queryByText('Risk Score')).not.toBeInTheDocument();
+    expect(queryByText('Severity')).not.toBeInTheDocument();
+  });
+
+  it('renders rows and spacers correctly', () => {
+    const { asFragment } = render(
+      <TestProviders>
+        <Overview {...propsWithoutSeverity} />
+      </TestProviders>
+    );
+
+    expect(asFragment()).toMatchSnapshot();
   });
 });
 
@@ -183,4 +178,21 @@ const props = {
       },
     },
   },
+};
+
+const dataWithoutSeverity = props.data.filter(
+  (data) => data.field !== 'kibana.alert.rule.severity'
+);
+
+const fieldsWithoutSeverity = {
+  'kibana.alert.rule.risk_score': props.browserFields.kibana.fields['kibana.alert.rule.risk_score'],
+  'kibana.alert.rule.uuid': props.browserFields.kibana.fields['kibana.alert.rule.uuid'],
+  'kibana.alert.workflow_status': props.browserFields.kibana.fields['kibana.alert.workflow_status'],
+  'kibana.alert.rule.name': props.browserFields.kibana.fields['kibana.alert.rule.name'],
+};
+
+const propsWithoutSeverity = {
+  ...props,
+  browserFields: { kibana: { fields: fieldsWithoutSeverity } },
+  data: dataWithoutSeverity,
 };

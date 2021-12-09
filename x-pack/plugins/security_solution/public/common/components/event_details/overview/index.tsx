@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { find } from 'lodash/fp';
+import { chunk, find } from 'lodash/fp';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { BrowserFields } from '../../../containers/source';
@@ -30,6 +30,7 @@ import { OverviewCardWithActions } from '../overview/overview_card';
 import { StatusPopoverButton } from '../overview/status_popover_button';
 import { SeverityBadge } from '../../../../../public/detections/components/rules/severity_badge';
 import { useThrottledResizeObserver } from '../../utils';
+import { isNotNull } from '../../../../../public/timelines/store/timeline/helpers';
 
 export const NotGrowingFlexGroup = euiStyled(EuiFlexGroup)`
   flex-grow: 0;
@@ -105,8 +106,8 @@ export const Overview = React.memo<Props>(
       );
     }, [browserFields, contextId, data, eventId, timelineId]);
 
-    const signalCard = hasData(statusData) && (
-      <EuiFlexItem>
+    const signalCard = hasData(statusData) ? (
+      <EuiFlexItem key="status">
         <OverviewCardWithActions
           title={SIGNAL_STATUS}
           enrichedFieldInfo={statusData}
@@ -122,10 +123,10 @@ export const Overview = React.memo<Props>(
           />
         </OverviewCardWithActions>
       </EuiFlexItem>
-    );
+    ) : null;
 
-    const severityCard = hasData(severityData) && (
-      <EuiFlexItem>
+    const severityCard = hasData(severityData) ? (
+      <EuiFlexItem key="severity">
         <OverviewCardWithActions
           title={ALERTS_HEADERS_SEVERITY}
           enrichedFieldInfo={severityData}
@@ -134,10 +135,10 @@ export const Overview = React.memo<Props>(
           <SeverityBadge value={severityData.values[0] as Severity} />
         </OverviewCardWithActions>
       </EuiFlexItem>
-    );
+    ) : null;
 
-    const riskScoreCard = hasData(riskScoreData) && (
-      <EuiFlexItem>
+    const riskScoreCard = hasData(riskScoreData) ? (
+      <EuiFlexItem key="riskScore">
         <OverviewCardWithActions
           title={ALERTS_HEADERS_RISK_SCORE}
           enrichedFieldInfo={riskScoreData}
@@ -146,10 +147,10 @@ export const Overview = React.memo<Props>(
           {riskScoreData.values[0]}
         </OverviewCardWithActions>
       </EuiFlexItem>
-    );
+    ) : null;
 
-    const ruleNameCard = hasData(ruleNameData) && (
-      <EuiFlexItem>
+    const ruleNameCard = hasData(ruleNameData) ? (
+      <EuiFlexItem key="ruleName">
         <OverviewCardWithActions
           title={ALERTS_HEADERS_RULE}
           enrichedFieldInfo={ruleNameData}
@@ -168,7 +169,7 @@ export const Overview = React.memo<Props>(
           />
         </OverviewCardWithActions>
       </EuiFlexItem>
-    );
+    ) : null;
 
     const { width, ref } = useThrottledResizeObserver();
 
@@ -176,26 +177,25 @@ export const Overview = React.memo<Props>(
     // creates a visual overflow in a single row setup
     const showAsSingleRow = width === 0 || width >= 675;
 
+    // Only render cards with content
+    const cards = [signalCard, severityCard, riskScoreCard, ruleNameCard].filter(isNotNull);
+
     // If there is enough space, render a single row.
     // Otherwise, render two rows with each two cards.
     const content = showAsSingleRow ? (
-      <NotGrowingFlexGroup gutterSize="s">
-        {signalCard}
-        {severityCard}
-        {riskScoreCard}
-        {ruleNameCard}
-      </NotGrowingFlexGroup>
+      <NotGrowingFlexGroup gutterSize="s">{cards}</NotGrowingFlexGroup>
     ) : (
       <>
-        <NotGrowingFlexGroup gutterSize="s">
-          {signalCard}
-          {severityCard}
-        </NotGrowingFlexGroup>
-        <EuiSpacer size="s" />
-        <NotGrowingFlexGroup gutterSize="s">
-          {riskScoreCard}
-          {ruleNameCard}
-        </NotGrowingFlexGroup>
+        {chunk(2, cards).map((elements, index, { length }) => {
+          // Add a spacer between rows but not after the last row
+          const addSpacer = index < length - 1;
+          return (
+            <>
+              <NotGrowingFlexGroup gutterSize="s">{elements}</NotGrowingFlexGroup>
+              {addSpacer && <EuiSpacer size="s" />}
+            </>
+          );
+        })}
       </>
     );
 
