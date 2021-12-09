@@ -794,4 +794,4 @@ POST /api/apm/agent_keys
 }
 --------------------------------------------------
 
-Once created, you can copy the API key (Base64 encoded) and use it to to authorize requests from agents to the APM Server.
+Once created, you can copy the API key (Base64 encoded) and use it to to authorize requests from APM agents to the APM Server.
