@@ -742,6 +742,8 @@ include::api.asciidoc[tag=using-the-APIs]
 [[apm-create-agent-key]]
 ==== Create agent key
 
+Create an APM agent key. Specify privileges in the request body at creation time. If privileges are not specified at creation time, the created key will have all privileges.
+
 [[apm-create-agent-key-req]]
 ===== Request
 
