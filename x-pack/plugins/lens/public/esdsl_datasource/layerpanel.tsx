@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { DatasourceLayerPanelProps } from '../types';
 import { EsDSLPrivateState } from './types';
 import { ChangeIndexPattern } from './change_indexpattern';
