@@ -180,7 +180,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       pkgVersion: '',
     });
 
-    if (packageInfo.assets.elasticsearch?.ml_model?.length > 0) {
+    if (packageInfo.assets?.elasticsearch?.ml_model?.length > 0) {
       logger.warn(
         `Package ${pkg.name} contains Machine Learning models and cannot be installed via preconfiguration. Skipping.`
       );
