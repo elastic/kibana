@@ -80,7 +80,6 @@ ts_project(
   args = ['--pretty'],
   srcs = SRCS,
   deps = TYPES_DEPS,
-  resolve_json_module = True,
   declaration = True,
   declaration_map = True,
   emit_declaration_only = True,
