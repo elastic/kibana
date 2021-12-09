@@ -17,6 +17,7 @@ export type {
   UseRequestConfig,
   OnJsonEditorUpdateHandler,
 } from '../../../../src/plugins/es_ui_shared/public/';
+
 export {
   AuthorizationProvider,
   NotAuthorizedSection,
@@ -46,6 +47,7 @@ export type {
   FormOptions,
   SerializerFunc,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+
 export {
   FIELD_TYPES,
   useForm,
@@ -84,6 +86,9 @@ export {
   isEmptyString,
 } from '../../../../src/plugins/es_ui_shared/static/validators/string';
 
-export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+export {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../src/plugins/kibana_react/public';
 
 export const useKibana = () => _useKibana<AppServices>();
