@@ -28,8 +28,6 @@ interface AlertsPopoverProps {
 export function AlertsPopover(props: AlertsPopoverProps) {
   const dataView = props.searchSource.getField('index')!;
   const searchSource = props.searchSource;
-  const index = dataView.title;
-  const timeField = dataView.timeFieldName;
   const { services } = useKibana<DiscoverServices>();
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 
@@ -51,11 +49,9 @@ export function AlertsPopover(props: AlertsPopoverProps) {
     const serializedFields = nextSearchSource.getSerializedFields();
 
     return {
-      index,
-      timeField,
       searchSource: serializedFields,
     };
-  }, [searchSource, index, timeField, services]);
+  }, [searchSource, services]);
 
   const AddAlertFlyout = useMemo(() => {
     if (!alertFlyoutVisible) {
