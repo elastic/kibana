@@ -85,9 +85,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.openVisualOptions();
-      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMajor', 'custom title');
+      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMajor', 'custom title', {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
       await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor-select', 'custom');
-      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
+      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor', 'custom subtitle', {
+        clearWithKeyboard: true,
+      });
 
       await PageObjects.lens.waitForVisualization();
 
