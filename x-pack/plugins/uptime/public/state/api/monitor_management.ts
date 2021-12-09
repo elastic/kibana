@@ -15,7 +15,6 @@ import {
 } from '../../../common/runtime_types';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { apiService } from './utils';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
 
 // TODO, change to monitor runtime type
 export const setMonitor = async ({ monitor, id }: { monitor: any; id?: string }): Promise<void> => {
