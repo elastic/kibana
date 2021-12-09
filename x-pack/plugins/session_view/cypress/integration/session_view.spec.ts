@@ -8,7 +8,7 @@
 import { loginAndWaitForPage } from '../tasks/login';
 import { SESSION_VIEW_URL } from '../urls/navigation';
 import { cleanKibana } from '../tasks/common';
-import { esArchiverLoad } from '../tasks/es_archiver';
+import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import {
   PROCESS_TREE,
   PROCESS_TREE_NODE,
@@ -31,14 +31,20 @@ const ALERT_NODE_TEST_ID = getProcessTreeNodeAlertDetailViewRule(
 const ALERT_RULE_ID = '15b43080-5204-11ec-a8f5-f507bc52c10c';
 
 describe('Display session view test page', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
     esArchiverLoad('sessions');
+  });
+
+  beforeEach(() => {
     loginAndWaitForPage(SESSION_VIEW_URL);
   });
 
+  after(() => {
+    esArchiverUnload('sessions');
+  });
+
   it('General Layout for Session View', () => {
-    loginAndWaitForPage(SESSION_VIEW_URL);
     // Checking Search bar exist
     cy.get(SEARCH_BAR).should('be.visible');
 
@@ -82,7 +88,6 @@ describe('Display session view test page', () => {
   // });
 
   it('Alerts Check', () => {
-    loginAndWaitForPage(SESSION_VIEW_URL);
     cy.get(PROCESS_TREE_NODE_ALERT).first().click();
     cy.get(ALERT_NODE_TEST_ID).first().click();
     cy.location('pathname').should('contain', `app/security/rules/id/${ALERT_RULE_ID}`);
