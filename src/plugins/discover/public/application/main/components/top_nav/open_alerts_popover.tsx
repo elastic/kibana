@@ -37,7 +37,9 @@ export function AlertsPopover(props: AlertsPopoverProps) {
     () => setAlertFlyoutVisibility(false),
     [setAlertFlyoutVisibility]
   );
-
+  /**
+   * Provides the default parameters used to initialize the new rule
+   */
   const getParams = useCallback(() => {
     const nextSearchSource = searchSource.createCopy();
     updateSearchSource(nextSearchSource, true, {
@@ -46,10 +48,9 @@ export function AlertsPopover(props: AlertsPopoverProps) {
       sort: [],
       useNewFieldsApi: true,
     });
-    const serializedFields = nextSearchSource.getSerializedFields();
 
     return {
-      searchSource: serializedFields,
+      searchSource: nextSearchSource.getSerializedFields(),
     };
   }, [searchSource, services]);
 
