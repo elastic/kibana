@@ -18,7 +18,9 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/dashboard/async_search');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/kbn_archives/dashboard/async_search'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
       await PageObjects.common.navigateToApp('dashboard');
@@ -29,7 +31,9 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/async_search');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/kbn_archives/dashboard/async_search'
+      );
     });
 
     loadTestFile(require.resolve('./async_search'));

@@ -16,9 +16,17 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/dashboard/async_search');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/kbn_archives/dashboard/async_search'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/kbn_archives/dashboard/async_search'
+      );
     });
 
     loadTestFile(require.resolve('./sessions_management'));
