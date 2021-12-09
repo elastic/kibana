@@ -51,7 +51,7 @@ export const getExceptionProviderMock = (): ExceptionListItemSchema => {
           field: 'process.executable.caseless',
           operator: 'included',
           type: 'match',
-          value: '/one/two/three',
+          value: 'c:\\fol\\bin.exe',
         },
       ],
       tags: ['policy:all'],

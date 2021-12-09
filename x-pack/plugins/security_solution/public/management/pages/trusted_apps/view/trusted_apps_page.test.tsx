@@ -297,7 +297,7 @@ describe('When on the Trusted Apps Page', () => {
                   field: 'process.executable.caseless',
                   operator: 'included',
                   type: 'match',
-                  value: '/one/two/three',
+                  value: 'c:\\fol\\bin.exe',
                 },
               ],
               os_types: ['windows'],
