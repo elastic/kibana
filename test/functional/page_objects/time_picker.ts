@@ -194,8 +194,9 @@ export class TimePickerPageObject extends FtrService {
       })
     );
 
-    const toggleButtonText = await this.testSubjects.getVisibleText(
-      'superDatePickerToggleRefreshButton'
+    const toggleButtonChecked = await this.testSubjects.getAttribute(
+      'superDatePickerToggleRefreshButton',
+      'aria-checked'
     );
     if (!keepQuickSelectOpen) {
       await this.quickSelectTimeMenuToggle.close();
@@ -204,7 +205,7 @@ export class TimePickerPageObject extends FtrService {
     return {
       interval,
       units: selectedUnit,
-      isPaused: toggleButtonText === 'Start' ? true : false,
+      isPaused: toggleButtonChecked === 'true' ? true : false,
     };
   }
 
@@ -262,12 +263,12 @@ export class TimePickerPageObject extends FtrService {
 
   public async startAutoRefresh(intervalS = 3) {
     await this.quickSelectTimeMenuToggle.open();
-    await this.inputValue('superDatePickerRefreshIntervalInput', intervalS.toString());
-    const refreshConfig = await this.getRefreshConfig(true);
     if (refreshConfig.isPaused) {
       this.log.debug('start auto refresh');
       await this.testSubjects.click('superDatePickerToggleRefreshButton');
     }
+    await this.inputValue('superDatePickerRefreshIntervalInput', intervalS.toString());
+    const refreshConfig = await this.getRefreshConfig(true);
     await this.quickSelectTimeMenuToggle.close();
   }
 
