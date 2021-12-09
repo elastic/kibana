@@ -315,6 +315,21 @@ interface ReducedGroupByResult {
   documentCount: number;
 }
 
+const getFullNameTimeUnit = (shortcut: string): string => {
+  switch (shortcut) {
+    case 's':
+      return 'sec';
+    case 'm':
+      return 'min';
+    case 'h':
+      return 'hour';
+    case 'd':
+      return 'day';
+    default:
+      return '';
+  }
+};
+
 type ReducedGroupByResults = ReducedGroupByResult[];
 
 const getReducedGroupByResults = (
@@ -389,7 +404,7 @@ export const processGroupByRatioResults = (
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
 
   const numeratorGroupResults = getReducedGroupByResults(numeratorResults);
   const denominatorGroupResults = getReducedGroupByResults(denominatorResults);
@@ -413,7 +428,9 @@ export const processGroupByRatioResults = (
           ratio,
           count.value,
           count.comparator,
-          numeratorGroup.name
+          numeratorGroup.name,
+          timeSize,
+          getFullNameTimeUnit(timeUnit)
         ),
         ratio,
         count.value

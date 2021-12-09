@@ -62,15 +62,19 @@ export const getReasonMessageForGroupedRatioAlert = (
   actualRatio: number,
   expectedRatio: number,
   comparator: Comparator,
-  groupName: string
+  groupName: string,
+  timeSize: number,
+  timeUnit: string
 ) =>
   i18n.translate('xpack.infra.logs.alerting.threshold.groupedRatioAlertReasonDescription', {
     defaultMessage:
-      'The log entries ratio is {actualRatio} ({translatedComparator} {expectedRatio}) for {groupName}.',
+      'The ratio of selected logs is {actualRatio} in the last ({timeValue} {timeUnit}) for {groupName}. Alert when ({translatedComparator} {expectedRatio}).',
     values: {
       actualRatio,
       expectedRatio,
       groupName,
       translatedComparator: ComparatorToi18nMap[comparator],
+      timeSize,
+      timeUnit,
     },
   });
