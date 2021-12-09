@@ -92,7 +92,7 @@ export interface TGridStandaloneProps {
   loadingText: React.ReactNode;
   filters: Filter[];
   footerText: React.ReactNode;
-  filterStatus: AlertStatus;
+  filterStatus?: AlertStatus;
   hasAlertsCrudPermissions: ({
     ruleConsumer,
     ruleProducer,
