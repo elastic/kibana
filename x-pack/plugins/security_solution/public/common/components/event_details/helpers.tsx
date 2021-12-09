@@ -25,7 +25,7 @@ import {
 import { FieldsData } from './types';
 
 import * as i18n from './translations';
-import { ColumnHeaderOptions } from '../../../../common';
+import { ColumnHeaderOptions } from '../../../../common/types';
 
 /**
  * Defines the behavior of the search input that appears above the table of data

@@ -27,7 +27,7 @@ import { useGetCaseUserActions } from '../../containers/use_get_case_user_action
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { CaseType, ConnectorTypes } from '../../../common';
+import { CaseType, ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 
 jest.mock('../../containers/use_update_case');
