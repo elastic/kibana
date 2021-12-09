@@ -9,7 +9,7 @@
 import type { EMSClient } from '@elastic/ems-client';
 import type { EMSSettings } from '../../common';
 
-let lazyLoaded: (emsSettings: EMSSettings, version: string) => Promise<EMSClient>;
+let lazyLoaded: (emsSettings: EMSSettings, version: string) => EMSClient;
 
 export async function createEMSClientLazy(emsSettings: EMSSettings, version: string) {
   if (lazyLoaded) {

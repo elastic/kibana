@@ -10,10 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EMSClient } from '@elastic/ems-client';
 import { EMS_APP_NAME, EMSSettings } from '../../common';
 
-export async function createEMSClient(
-  emsSettings: EMSSettings,
-  kbnVersion: string
-): Promise<EMSClient> {
+export function createEMSClient(emsSettings: EMSSettings, kbnVersion: string): EMSClient {
   return new EMSClient({
     language: i18n.getLocale(),
     appVersion: kbnVersion,
