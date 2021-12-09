@@ -11,6 +11,7 @@ import { PolicyDetails } from './view';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD,
 } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
@@ -23,6 +24,7 @@ export const PolicyContainer = memo(() => {
         path={[
           MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
         ]}
         exact
         component={PolicyDetails}

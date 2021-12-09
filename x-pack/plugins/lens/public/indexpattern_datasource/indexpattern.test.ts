@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import 'jest-canvas-mock';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { getIndexPatternDatasource, GenericIndexPatternColumn } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource, FramePublicAPI } from '../types';
