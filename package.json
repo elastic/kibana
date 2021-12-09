@@ -555,7 +555,7 @@
     "@types/js-levenshtein": "^1.1.0",
     "@types/js-search": "^1.4.0",
     "@types/js-yaml": "^3.11.1",
-    "@types/jsdom": "^16.2.3",
+    "@types/jsdom": "^16.2.13",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/json5": "^0.0.30",
     "@types/kbn__ace": "link:bazel-bin/packages/kbn-ace/npm_module_types",
