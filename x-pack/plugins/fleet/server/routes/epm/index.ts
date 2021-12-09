@@ -172,7 +172,8 @@ export const registerRoutes = (routers: { rbac: FleetRouter; superuser: FleetRou
         response
       );
       if (resp.payload?.item) {
-        return response.ok({ body: { response: resp.payload.item } });
+        // returning item as well here, because pkgVersion is optional in new GET endpoint, and if not specified, the router selects the deprecated route
+        return response.ok({ body: { item: resp.payload.item, response: resp.payload.item } });
       }
       return resp;
     }
