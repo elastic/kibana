@@ -44,42 +44,71 @@ describe('bulk_action_update', () => {
   describe('appplyBulkActionUpdateToRule', () => {
     const ruleMock = {
       tags: ['tag1', 'tag2'],
+      index: ['initial-index-*'],
     };
-
-    test('should add new tags to rule', () => {
-      const updatedRule = appplyBulkActionUpdateToRule(ruleMock, {
-        type: BulkActionUpdateType.add_tags,
-        value: ['new_tag'],
+    describe('tags', () => {
+      test('should add new tags to rule', () => {
+        const updatedRule = appplyBulkActionUpdateToRule(ruleMock, {
+          type: BulkActionUpdateType.add_tags,
+          value: ['new_tag'],
+        });
+        expect(updatedRule.tags).toEqual(['tag1', 'tag2', 'new_tag']);
       });
-      expect(updatedRule.tags).toEqual(['tag1', 'tag2', 'new_tag']);
+      test('should remove tag from rule', () => {
+        const updatedRule = appplyBulkActionUpdateToRule(ruleMock, {
+          type: BulkActionUpdateType.delete_tags,
+          value: ['tag1'],
+        });
+        expect(updatedRule.tags).toEqual(['tag2']);
+      });
+
+      test('should rewrite tags in rule', () => {
+        const updatedRule = appplyBulkActionUpdateToRule(ruleMock, {
+          type: BulkActionUpdateType.set_tags,
+          value: ['tag_r_1', 'tag_r_2'],
+        });
+        expect(updatedRule.tags).toEqual(['tag_r_1', 'tag_r_2']);
+      });
     });
-    test('should remove tag from rule', () => {
-      const updatedRule = appplyBulkActionUpdateToRule(ruleMock, {
-        type: BulkActionUpdateType.delete_tags,
-        value: ['tag1'],
+
+    describe('index', () => {
+      test('should add new index to rule', () => {
+        const updatedRule = appplyBulkActionUpdateToRule(ruleMock, {
+          type: BulkActionUpdateType.add_index,
+          value: ['my-index-*'],
+        });
+        expect(updatedRule.index).toEqual(['initial-index-*', 'my-index-*']);
       });
-      expect(updatedRule.tags).toEqual(['tag2']);
+      test('should remove index from rule', () => {
+        const updatedRule = appplyBulkActionUpdateToRule(ruleMock, {
+          type: BulkActionUpdateType.delete_index,
+          value: ['initial-index-*'],
+        });
+        expect(updatedRule.index).toEqual([]);
+      });
+
+      test('should rewrite index in rule', () => {
+        const updatedRule = appplyBulkActionUpdateToRule(ruleMock, {
+          type: BulkActionUpdateType.set_index,
+          value: ['index'],
+        });
+        expect(updatedRule.index).toEqual(['index']);
+      });
     });
 
-    test('should rewrite tags in rule', () => {
-      const updatedRule = appplyBulkActionUpdateToRule(ruleMock, {
-        type: BulkActionUpdateType.set_tags,
-        value: ['tag_r_1', 'tag_r_2'],
-      });
-      expect(updatedRule.tags).toEqual(['tag_r_1', 'tag_r_2']);
-    });
+    describe('timeline', () => {
+      test('should set timeline', () => {
+        const updatedRule = appplyBulkActionUpdateToRule(ruleMock, {
+          type: BulkActionUpdateType.set_timeline,
+          value: {
+            timelineId: '91832785-286d-4ebe-b884-1a208d111a70',
+            timelineTitle: 'Test timeline',
+          },
+        });
 
-    test('should set timeline', () => {
-      const updatedRule = appplyBulkActionUpdateToRule(ruleMock, {
-        type: BulkActionUpdateType.set_timeline,
-        value: {
-          timelineId: '91832785-286d-4ebe-b884-1a208d111a70',
-          timelineTitle: 'Test timeline',
-        },
+        expect(updatedRule.timeline_id).toBe('91832785-286d-4ebe-b884-1a208d111a70');
+        expect(updatedRule.timeline_title).toBe('Test timeline');
       });
-
-      expect(updatedRule.timeline_id).toBe('91832785-286d-4ebe-b884-1a208d111a70');
-      expect(updatedRule.timeline_title).toBe('Test timeline');
     });
   });
 });
