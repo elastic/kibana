@@ -47,7 +47,6 @@ import {
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
-import { getDeprecations } from './deprecations';
 
 export class APMPlugin
   implements
@@ -193,14 +192,6 @@ export class APMPlugin
       ruleDataClient,
       config: currentConfig,
       logger: this.logger,
-    });
-
-    core.deprecations.registerDeprecations({
-      getDeprecations: getDeprecations({
-        cloudSetup: plugins.cloud,
-        fleet: resourcePlugins.fleet,
-        branch: this.initContext.env.packageInfo.branch,
-      }),
     });
 
     return {
