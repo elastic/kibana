@@ -13,14 +13,14 @@ import {
   setMapConfig,
   getIsEnterprisePlus,
 } from './kibana_services';
-import { MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart } from './index';
+import type { MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart } from './index';
 import type { MapConfig } from '../config';
 import { createEMSSettings } from '../common/ems_settings';
-import {
+import type {
   LicensingPluginSetup,
   LicensingPluginStart,
 } from '../../../../x-pack/plugins/licensing/public';
-import { createEMSClient } from './create_ems_client';
+import { createEMSClientLazy } from './lazy_load_bundle';
 
 interface MapsEmsStartPublicDependencies {
   licensing?: LicensingPluginStart;
@@ -50,7 +50,7 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
       },
       createEMSClient: async () => {
         const emsSettings = createEMSSettings(mapConfig, getIsEnterprisePlus);
-        return createEMSClient(emsSettings, kibanaVersion);
+        return createEMSClientLazy(emsSettings, kibanaVersion);
       },
     };
   }
