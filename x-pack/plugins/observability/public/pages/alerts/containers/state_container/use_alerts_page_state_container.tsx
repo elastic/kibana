@@ -29,11 +29,8 @@ export function useAlertsPageStateContainer() {
 
   useUrlStateSyncEffect(stateContainer);
 
-  const { setRangeFrom, setRangeTo, setKuery, setWorkflowStatus } = stateContainer.transitions;
-  const { rangeFrom, rangeTo, kuery, workflowStatus } = useContainerSelector(
-    stateContainer,
-    (state) => state
-  );
+  const { setRangeFrom, setRangeTo, setKuery } = stateContainer.transitions;
+  const { rangeFrom, rangeTo, kuery } = useContainerSelector(stateContainer, (state) => state);
 
   return {
     rangeFrom,
@@ -42,8 +39,6 @@ export function useAlertsPageStateContainer() {
     setRangeTo,
     kuery,
     setKuery,
-    workflowStatus,
-    setWorkflowStatus,
   };
 }
 

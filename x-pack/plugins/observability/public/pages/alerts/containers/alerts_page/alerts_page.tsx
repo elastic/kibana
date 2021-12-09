@@ -72,7 +72,7 @@ function AlertsPage() {
   const { prepend } = core.http.basePath;
   const refetch = useRef<() => void>();
   const timefilterService = useTimefilterService();
-  const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, workflowStatus } =
+  const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery } =
     useAlertsPageStateContainer();
   const {
     http,
@@ -173,15 +173,6 @@ function AlertsPage() {
       },
     ];
   }, [indexNames]);
-
-  // Keep the Workflow status code commented (no delete) as requested: https://github.com/elastic/kibana/issues/117686
-
-  // const setWorkflowStatusFilter = useCallback(
-  //   (value: AlertWorkflowStatus) => {
-  //     setWorkflowStatus(value);
-  //   },
-  //   [setWorkflowStatus]
-  // );
 
   const onQueryChange = useCallback(
     ({ dateRange, query }) => {
@@ -326,8 +317,6 @@ function AlertsPage() {
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              {/* Keep the Workflow status code commented (no delete) as requested: https://github.com/elastic/kibana/issues/117686*/}
-              {/* <WorkflowStatusFilter status={workflowStatus} onChange={setWorkflowStatusFilter} /> */}
               <AlertsStatusFilter status={alertFilterStatus} onChange={setAlertStatusFilter} />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -339,7 +328,6 @@ function AlertsPage() {
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             kuery={kuery}
-            workflowStatus={workflowStatus}
             setRefetch={setRefetch}
           />
         </EuiFlexItem>

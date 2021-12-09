@@ -14,7 +14,6 @@ import {
   ALERT_DURATION,
   ALERT_REASON,
   ALERT_STATUS,
-  ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils/technical_field_names';
 
@@ -31,7 +30,7 @@ import {
 
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
-import usePrevious from 'react-use/lib/usePrevious';
+
 import { pick } from 'lodash';
 import { getAlertsPermissions } from '../../../../hooks/use_alert_permission';
 import type {
@@ -46,7 +45,6 @@ import type { TopAlert } from '../alerts_page/alerts_page';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import type {
   ActionProps,
-  AlertWorkflowStatus,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowRenderer,
@@ -68,12 +66,10 @@ interface AlertsTableTGridProps {
   rangeFrom: string;
   rangeTo: string;
   kuery: string;
-  workflowStatus: AlertWorkflowStatus;
   setRefetch: (ref: () => void) => void;
 }
 
 interface ObservabilityActionsProps extends ActionProps {
-  currentStatus: AlertWorkflowStatus;
   setFlyoutAlert: React.Dispatch<React.SetStateAction<TopAlert | undefined>>;
 }
 
@@ -137,11 +133,7 @@ function ObservabilityActions({
   data,
   eventId,
   ecsData,
-  currentStatus,
-  refetch,
   setFlyoutAlert,
-  setEventsLoading,
-  setEventsDeleted,
 }: ObservabilityActionsProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
@@ -155,14 +147,6 @@ function ObservabilityActions({
     () => parseAlert(observabilityRuleTypeRegistry),
     [observabilityRuleTypeRegistry]
   );
-  // const alertDataConsumer = useMemo<string>(
-  //   () => get(dataFieldEs, ALERT_RULE_CONSUMER, [''])[0],
-  //   [dataFieldEs]
-  // );
-  // const alertDataProducer = useMemo<string>(
-  //   () => get(dataFieldEs, ALERT_RULE_PRODUCER, [''])[0],
-  //   [dataFieldEs]
-  // );
 
   const alert = parseObservabilityAlert(dataFieldEs);
   const { prepend } = core.http.basePath;
@@ -188,30 +172,6 @@ function ObservabilityActions({
     };
   }, [data, eventId, ecsData]);
 
-  // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
-
-  // const onAlertStatusUpdated = useCallback(() => {
-  //   setActionsPopover(null);
-  //   if (refetch) {
-  //     refetch();
-  //   }
-  // }, [setActionsPopover, refetch]);
-
-  // const alertPermissions = useGetUserAlertsPermissions(
-  //   capabilities,
-  //   alertDataConsumer === 'alerts' ? alertDataProducer : alertDataConsumer
-  // );
-
-  // const statusActionItems = useStatusBulkActionItems({
-  //   eventIds: [eventId],
-  //   currentStatus,
-  //   indexName: ecsData._index ?? '',
-  //   setEventsLoading,
-  //   setEventsDeleted,
-  //   onUpdateSuccess: onAlertStatusUpdated,
-  //   onUpdateFailure: onAlertStatusUpdated,
-  // });
-
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
   const linkToRule = ruleId ? prepend(paths.management.ruleDetails(ruleId)) : null;
 
@@ -235,8 +195,7 @@ function ObservabilityActions({
             }),
           ]
         : []),
-      // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
-      // ...(alertPermissions.crud ? statusActionItems : []),
+
       ...(!!linkToRule
         ? [
             <EuiContextMenuItem
@@ -309,8 +268,6 @@ function ObservabilityActions({
     </>
   );
 }
-// Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
-
 const FIELDS_WITHOUT_CELL_ACTIONS = [
   '@timestamp',
   'signal.rule.risk_score',
@@ -320,8 +277,8 @@ const FIELDS_WITHOUT_CELL_ACTIONS = [
 ];
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch } = props;
-  const prevWorkflowStatus = usePrevious(workflowStatus);
+  const { indexNames, rangeFrom, rangeTo, kuery, setRefetch } = props;
+
   const {
     timelines,
     application: { capabilities },
@@ -345,12 +302,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   );
 
   const [deletedEventIds, setDeletedEventIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (workflowStatus !== prevWorkflowStatus) {
-      setDeletedEventIds([]);
-    }
-  }, [workflowStatus, prevWorkflowStatus]);
 
   useEffect(() => {
     if (tGridState) {
@@ -385,14 +336,13 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
             <ObservabilityActions
               {...actionProps}
               setEventsDeleted={setEventsDeleted}
-              currentStatus={workflowStatus}
               setFlyoutAlert={setFlyoutAlert}
             />
           );
         },
       },
     ];
-  }, [workflowStatus, setEventsDeleted]);
+  }, [setEventsDeleted]);
 
   const onStateChange = useCallback(
     (state: TGridState) => {
@@ -418,8 +368,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       type,
       columns: tGridState?.columns ?? columns,
       deletedEventIds,
-      // Hide the WorkFlow filter, but keep its code as required in https://github.com/elastic/kibana/issues/117686
-      // defaultCellActions: getDefaultCellActions({ addToQuery }),
       disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
       end: rangeTo,
       filters: [],
@@ -430,7 +378,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       footerText: translations.alertsTable.footerTextLabel,
       onStateChange,
       query: {
-        query: `${ALERT_WORKFLOW_STATUS}: ${workflowStatus}${kuery !== '' ? ` and ${kuery}` : ''}`,
+        query: kuery,
         language: 'kuery',
       },
       renderCellValue: getRenderCellValue({ setFlyoutAlert }),
@@ -447,7 +395,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           sortDirection,
         },
       ],
-      filterStatus: workflowStatus as AlertWorkflowStatus,
+
       leadingControlColumns,
       trailingControlColumns,
       unit: (totalAlerts: number) => translations.alertsTable.showingAlertsTitle(totalAlerts),
@@ -457,7 +405,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     rangeTo,
     hasAlertsCrudPermissions,
     indexNames,
-    workflowStatus,
     kuery,
     rangeFrom,
     setRefetch,
