@@ -22,6 +22,8 @@ const getTerms = (alert: SimpleHit) => {
       string,
       Record<string, string[]>
     >;
+    console.log('threshold params');
+    console.log(JSON.stringify(parameters));
     return parameters.threshold.field.map((field) => ({
       field,
       value: alert._source[field] as string,
@@ -55,6 +57,8 @@ export const buildThresholdSignalHistory = ({
       return acc;
     }
 
+    console.log('building signal history');
+    console.log(JSON.stringify(alert));
     const terms = getTerms(alert as SimpleHit);
     const hash = getThresholdTermsHash(terms);
     const existing = acc[hash];

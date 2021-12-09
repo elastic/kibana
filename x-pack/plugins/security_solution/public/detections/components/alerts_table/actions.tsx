@@ -159,9 +159,10 @@ const getFiltersFromRule = (filters: string[]): Filter[] =>
 
 export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggregationData => {
   const thresholdEcsData: Ecs[] = Array.isArray(ecsData) ? ecsData : [ecsData];
+  console.log(thresholdEcsData);
   return thresholdEcsData.reduce<ThresholdAggregationData>(
     (outerAcc, thresholdData) => {
-      const threshold = thresholdData.signal?.rule?.threshold as string[];
+      const threshold = thresholdData.kibana?.alert?.rule?.parameters?.threshold as string[];
 
       let aggField: string[] = [];
       let thresholdResult: {

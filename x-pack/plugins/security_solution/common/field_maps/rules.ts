@@ -152,7 +152,7 @@ export const rulesFieldMap = {
     required: false,
   },
   'kibana.alert.rule.threshold.value': {
-    type: 'float', // TODO: should be 'long' (eventually, after we stabilize)
+    type: 'long',
     array: false,
     required: false,
   },

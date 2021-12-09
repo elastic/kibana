@@ -228,6 +228,8 @@ export const bulkCreateThresholdSignals = async (
   params: BulkCreateThresholdSignalsParams
 ): Promise<GenericBulkCreateResponse<{}>> => {
   const ruleParams = params.completeRule.ruleParams;
+  console.log('rule params');
+  console.log(ruleParams);
   const thresholdResults = params.someResult;
   const ecsResults = transformThresholdResultsToEcs(
     thresholdResults,

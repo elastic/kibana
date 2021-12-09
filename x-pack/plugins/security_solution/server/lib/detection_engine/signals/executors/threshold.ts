@@ -188,6 +188,9 @@ export const thresholdExecutor = async ({
     } as SearchHit<unknown>;
   });
 
+  console.log('CREATED ALERTS');
+  console.log(JSON.stringify(createdAlerts));
+
   const newSignalHistory = buildThresholdSignalHistory({
     alerts: createdAlerts,
   });
