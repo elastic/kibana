@@ -8,88 +8,83 @@
 
 import { ServiceSettings } from './service_settings';
 
-jest.mock('../../../services', () => ({
-  getMapsEms: () => {
-    function makeMockLayer({ id, min, max, attributions, url }) {
-      return {
-        getId() {
-          return id;
-        },
-        getMinZoom() {
-          return min;
-        },
-        getMaxZoom() {
-          return max;
-        },
-        getAttributions() {
-          return attributions;
-        },
-        getUrlTemplate() {
-          return url;
-        },
-      };
-    }
-    return {
-      createEMSClient() {
-        return {
-          addQueryParams() {},
-          getFileLayers() {
-            return [
-              {
-                getDefaultFormatType() {
-                  return 'geojson';
-                },
-                getDefaultFormatMeta() {
-                  return {};
-                },
-                getDisplayName() {
-                  return 'Foobar Countries';
-                },
-                getId() {
-                  return 'foobar_countries';
-                },
-                getCreatedAt() {
-                  return {};
-                },
-                getFieldsInLanguage() {
-                  return [];
-                },
-                getAttributions() {
-                  return [{ url: 'http://foobar/com', label: 'foobar' }];
-                },
-              },
-            ];
+function makeMockLayer({ id, min, max, attributions, url }) {
+  return {
+    getId() {
+      return id;
+    },
+    getMinZoom() {
+      return min;
+    },
+    getMaxZoom() {
+      return max;
+    },
+    getAttributions() {
+      return attributions;
+    },
+    getUrlTemplate() {
+      return url;
+    },
+  };
+}
+
+function createMockEMSClient() {
+  return {
+    addQueryParams() {},
+    getFileLayers() {
+      return [
+        {
+          getDefaultFormatType() {
+            return 'geojson';
           },
-          getTMSServices() {
-            return [
-              makeMockLayer({
-                id: 'road_map',
-                min: 0,
-                max: 10,
-                attributions: [{ url: 'https://foobar.com', label: 'foobar' }],
-                url: 'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl',
-              }),
-              makeMockLayer({
-                id: 'road_map_desaturated',
-                min: 0,
-                max: 18,
-                attributions: [{ url: 'https://foobar.com', label: 'foobar' }],
-                url: 'https://tiles.foobar/raster/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl',
-              }),
-              makeMockLayer({
-                id: 'dark_map',
-                min: 0,
-                max: 22,
-                attributions: [{ url: 'https://foobar.com', label: 'foobar' }],
-                url: 'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl',
-              }),
-            ];
+          getDefaultFormatMeta() {
+            return {};
           },
-        };
-      },
-    };
-  },
-}));
+          getDisplayName() {
+            return 'Foobar Countries';
+          },
+          getId() {
+            return 'foobar_countries';
+          },
+          getCreatedAt() {
+            return {};
+          },
+          getFieldsInLanguage() {
+            return [];
+          },
+          getAttributions() {
+            return [{ url: 'http://foobar/com', label: 'foobar' }];
+          },
+        },
+      ];
+    },
+    getTMSServices() {
+      return [
+        makeMockLayer({
+          id: 'road_map',
+          min: 0,
+          max: 10,
+          attributions: [{ url: 'https://foobar.com', label: 'foobar' }],
+          url: 'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl',
+        }),
+        makeMockLayer({
+          id: 'road_map_desaturated',
+          min: 0,
+          max: 18,
+          attributions: [{ url: 'https://foobar.com', label: 'foobar' }],
+          url: 'https://tiles.foobar/raster/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl',
+        }),
+        makeMockLayer({
+          id: 'dark_map',
+          min: 0,
+          max: 22,
+          attributions: [{ url: 'https://foobar.com', label: 'foobar' }],
+          url: 'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl',
+        }),
+      ];
+    },
+  };
+}
 
 describe('service_settings (FKA tile_map test)', function () {
   const emsFileApiUrl = 'https://files.foobar';
@@ -113,7 +108,8 @@ describe('service_settings (FKA tile_map test)', function () {
   function makeServiceSettings(mapConfigOptions = {}, tilemapOptions = {}) {
     return new ServiceSettings(
       { ...defaultMapConfig, ...mapConfigOptions },
-      { ...defaultTilemapConfig, ...tilemapOptions }
+      { ...defaultTilemapConfig, ...tilemapOptions },
+      createMockEMSClient()
     );
   }
 
