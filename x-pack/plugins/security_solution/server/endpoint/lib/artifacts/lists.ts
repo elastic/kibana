@@ -322,7 +322,7 @@ function translateEntry(
         ? {
             field: normalizeFieldName(entry.field),
             operator: entry.operator,
-            type: matcher,
+            type: os === 'linux' ? 'exact_cased' : matcher,
             value: entry.value,
           }
         : undefined;
@@ -349,7 +349,7 @@ function translateEntry(
           const wildcardProcessEntry: TranslatedEntryMatchWildcard = {
             field: normalizeFieldName(entry.field),
             operator: entry.operator,
-            type: wildcardMatcher,
+            type: os === 'linux' ? 'wildcard_cased' : wildcardMatcher,
             value: entry.value,
           };
 
