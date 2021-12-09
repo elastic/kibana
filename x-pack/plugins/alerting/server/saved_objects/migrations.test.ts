@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import { getMigrations, isAnyActionSupportIncidents } from './migrations';
-import { RawAlert } from '../types';
+import { RawRule } from '../types';
 import { SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { migrationMocks } from 'src/core/server/mocks';
@@ -512,7 +512,7 @@ describe('successful migrations', () => {
       (actionTypeId) => {
         const doc = {
           attributes: { actions: [{ actionTypeId }, { actionTypeId: '.server-log' }] },
-        } as SavedObjectUnsanitizedDoc<RawAlert>;
+        } as SavedObjectUnsanitizedDoc<RawRule>;
         expect(isAnyActionSupportIncidents(doc)).toBe(true);
       }
     );
@@ -520,7 +520,7 @@ describe('successful migrations', () => {
     test('isAnyActionSupportIncidents should return false when there is no connector that supports incidents', () => {
       const doc = {
         attributes: { actions: [{ actionTypeId: '.server-log' }] },
-      } as SavedObjectUnsanitizedDoc<RawAlert>;
+      } as SavedObjectUnsanitizedDoc<RawRule>;
       expect(isAnyActionSupportIncidents(doc)).toBe(false);
     });
 
@@ -2254,7 +2254,7 @@ function getUpdatedAt(): string {
 function getMockData(
   overwrites: Record<string, unknown> = {},
   withSavedObjectUpdatedAt: boolean = false
-): SavedObjectUnsanitizedDoc<Partial<RawAlert>> {
+): SavedObjectUnsanitizedDoc<Partial<RawRule>> {
   return {
     attributes: {
       enabled: true,
