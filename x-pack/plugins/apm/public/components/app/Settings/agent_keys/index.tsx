@@ -84,7 +84,7 @@ export function AgentKeys() {
           <EuiTitle>
             <h2>
               {i18n.translate('xpack.apm.settings.agentKeys.title', {
-                defaultMessage: 'APM Agent keys',
+                defaultMessage: 'APM agent keys',
               })}
             </h2>
           </EuiTitle>
