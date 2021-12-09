@@ -75,13 +75,31 @@ export const useWorkspaceLoader = ({
     }
 
     async function fetchIndexPatterns() {
-      return await savedObjectsClient
-        .find<{ title: string }>({
-          type: 'index-pattern',
-          fields: ['title', 'type'],
-          perPage: 10000,
-        })
-        .then((response) => response.savedObjects);
+      const fetchedIndexPatterns = [] as IndexPatternSavedObject[];
+      let prevPage = 0;
+      let page = 1;
+      let perPage = 1000;
+      let total = 0;
+      while (true) {
+        if (total < prevPage * perPage) {
+          break;
+        }
+        await savedObjectsClient
+          .find<{ title: string }>({
+            type: 'index-pattern',
+            fields: ['title', 'type'],
+            perPage,
+            page,
+          })
+          .then((response) => {
+            fetchedIndexPatterns.concat(response.savedObjects);
+            perPage = response.perPage;
+            total = response.total;
+            page = response.page;
+            prevPage++;
+          });
+      }
+      return fetchedIndexPatterns;
     }
 
     async function fetchSavedWorkspace(): Promise<{
