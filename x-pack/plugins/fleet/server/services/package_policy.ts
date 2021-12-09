@@ -710,6 +710,67 @@ class PackagePolicyService {
     }
   }
 
+  public async enrichPolicyWithDefaultsFromPackage(
+    soClient: SavedObjectsClientContract,
+    newPolicy: NewPackagePolicy
+  ): Promise<NewPackagePolicy> {
+    let newPackagePolicy: NewPackagePolicy = newPolicy;
+    if (newPolicy.package) {
+      const newPP = await this.buildPackagePolicyFromPackageWithVersion(
+        soClient,
+        newPolicy.package.name,
+        newPolicy.package.version
+      );
+      if (newPP) {
+        const inputs = newPolicy.inputs.map((input) => {
+          const defaultInput = newPP.inputs.find(
+            (i) =>
+              i.type === input.type &&
+              (!input.policy_template || input.policy_template === i.policy_template)
+          );
+          return {
+            ...defaultInput,
+            enabled: input.enabled,
+            type: input.type,
+            // to propagate "enabled: false" to streams
+            streams: defaultInput?.streams?.map((stream) => ({
+              ...stream,
+              enabled: input.enabled,
+            })),
+          } as NewPackagePolicyInput;
+        });
+        newPackagePolicy = {
+          ...newPP,
+          name: newPolicy.name,
+          namespace: newPolicy.namespace ?? 'default',
+          description: newPolicy.description ?? '',
+          enabled: newPolicy.enabled ?? true,
+          policy_id:
+            newPolicy.policy_id ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient)),
+          output_id: newPolicy.output_id ?? '',
+          inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
+          vars: newPolicy.vars || newPP.vars,
+        };
+      }
+    }
+    return newPackagePolicy;
+  }
+
+  public async buildPackagePolicyFromPackageWithVersion(
+    soClient: SavedObjectsClientContract,
+    pkgName: string,
+    pkgVersion: string
+  ): Promise<NewPackagePolicy | undefined> {
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName,
+      pkgVersion,
+    });
+    if (packageInfo) {
+      return packageToPackagePolicy(packageInfo, '', '');
+    }
+  }
+
   public async buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
     pkgName: string
@@ -1066,11 +1127,26 @@ export function updatePackageInputs(
   ];
 
   for (const update of inputsUpdated) {
-    // If update have an undefined policy template
-    // we only match on `type` .
-    let originalInput = update.policy_template
-      ? inputs.find((i) => i.type === update.type && i.policy_template === update.policy_template)
-      : inputs.find((i) => i.type === update.type);
+    let originalInput: NewPackagePolicyInput | undefined;
+
+    if (update.policy_template) {
+      // If the updated value defines a policy template, try to find an original input
+      // with the same policy template value
+      const matchingInput = inputs.find(
+        (i) => i.type === update.type && i.policy_template === update.policy_template
+      );
+
+      // If we didn't find an input with the same policy template, try to look for one
+      // with the same type, but with an undefined policy template. This ensures we catch
+      // cases where we're upgrading an older policy from before policy template was
+      // reliably define on package policy inputs.
+      originalInput =
+        matchingInput || inputs.find((i) => i.type === update.type && !i.policy_template);
+    } else {
+      // For inputs that don't specify a policy template, just grab the first input
+      // that matches its `type`
+      originalInput = inputs.find((i) => i.type === update.type);
+    }
 
     // If there's no corresponding input on the original package policy, just
     // take the override value from the new package as-is. This case typically
@@ -1089,6 +1165,12 @@ export function updatePackageInputs(
 
     if (originalInput.keep_enabled === undefined && update.keep_enabled !== undefined) {
       originalInput.keep_enabled = update.keep_enabled;
+    }
+
+    // `policy_template` should always be defined, so if we have an older policy here we need
+    // to ensure we set it
+    if (originalInput.policy_template === undefined && update.policy_template !== undefined) {
+      originalInput.policy_template = update.policy_template;
     }
 
     if (update.vars) {

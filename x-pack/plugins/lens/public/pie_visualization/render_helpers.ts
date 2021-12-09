@@ -8,8 +8,9 @@
 import type { Datum, LayerValue } from '@elastic/charts';
 import type { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
 import type { LensFilterEvent } from '../types';
-import type { PieChartTypes } from '../../common/expressions/pie_chart/types';
+import type { PieChartTypes, PieLayerState } from '../../common/expressions/pie_chart/types';
 import type { PaletteDefinition, PaletteOutput } from '../../../../../src/plugins/charts/public';
+import { PartitionChartsMeta } from './partition_charts_meta';
 
 export function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
   const value = d[metricColumn.id];
@@ -39,10 +40,18 @@ export function getFilterContext(
 }
 
 export const isPartitionShape = (shape: PieChartTypes | string) =>
-  ['donut', 'pie', 'treemap', 'mosaic'].includes(shape);
+  ['donut', 'pie', 'treemap', 'mosaic', 'waffle'].includes(shape);
 
 export const isTreemapOrMosaicShape = (shape: PieChartTypes | string) =>
   ['treemap', 'mosaic'].includes(shape);
+
+export const shouldShowValuesInLegend = (layer: PieLayerState, shape: PieChartTypes) => {
+  if ('showValues' in PartitionChartsMeta[shape]?.legend) {
+    return layer.showValuesInLegend ?? PartitionChartsMeta[shape]?.legend?.showValues ?? true;
+  }
+
+  return false;
+};
 
 export const extractUniqTermsMap = (dataTable: Datatable, columnId: string) =>
   [...new Set(dataTable.rows.map((item) => item[columnId]))].reduce(
@@ -94,4 +103,16 @@ export const byDataColorPaletteMap = (
       }
     },
   };
+};
+
+export const checkTableForContainsSmallValues = (
+  dataTable: Datatable,
+  columnId: string,
+  minPercentage: number
+) => {
+  const overallSum = dataTable.rows.reduce(
+    (partialSum, row) => Number(row[columnId]) + partialSum,
+    0
+  );
+  return dataTable.rows.some((row) => (row[columnId] / overallSum) * 100 < minPercentage);
 };

@@ -6,13 +6,13 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { NewPackagePolicy } from '../../../../../fleet/public';
-import { ConfigKeys, DataStream, Validation, ICustomFields } from '../types';
+import { ConfigKey, DataStream, Validation, MonitorFields } from '../types';
 import { formatters } from '../helpers/formatters';
 
 interface Props {
   monitorType: DataStream;
-  defaultConfig: Partial<ICustomFields>;
-  config: Partial<ICustomFields>;
+  defaultConfig: Partial<MonitorFields>;
+  config: Partial<MonitorFields>;
   newPolicy: NewPackagePolicy;
   onChange: (opts: {
     /** is current form state is valid */
@@ -33,11 +33,11 @@ export const useUpdatePolicy = ({
 }: Props) => {
   const [updatedPolicy, setUpdatedPolicy] = useState<NewPackagePolicy>(newPolicy);
   // Update the integration policy with our custom fields
-  const currentConfig = useRef<Partial<ICustomFields>>(defaultConfig);
+  const currentConfig = useRef<Partial<MonitorFields>>(defaultConfig);
 
   useEffect(() => {
-    const configKeys = Object.keys(config) as ConfigKeys[];
-    const validationKeys = Object.keys(validate[monitorType]) as ConfigKeys[];
+    const configKeys = Object.keys(config) as ConfigKey[];
+    const validationKeys = Object.keys(validate[monitorType]) as ConfigKey[];
     const configDidUpdate = configKeys.some((key) => config[key] !== currentConfig.current[key]);
     const isValid =
       !!newPolicy.name && !validationKeys.find((key) => validate[monitorType]?.[key]?.(config));

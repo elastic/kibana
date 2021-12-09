@@ -5,7 +5,7 @@
 <titleabbrev>Alerting and action settings</titleabbrev>
 ++++
 
-Alerts and actions are enabled by default in {kib}, but require you configure the following in order to use them:
+Alerting and actions are enabled by default in {kib}, but require you to configure the following:
 
 . <<using-kibana-with-security,Set up {kib} to work with {stack} {security-features}>>.
 . <<configuring-tls-kib-es,Set up TLS encryption between {kib} and {es}>>.
@@ -126,7 +126,7 @@ into a single string.  This configuration can be used for environments where
 the files cannot be made available.
 
 `xpack.actions.enabledActionTypes` {ess-icon}::
-A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, and `.webhook`. An empty list `[]` will disable all action types.
+A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, and `.webhook`. An empty list `[]` will disable all action types.
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
