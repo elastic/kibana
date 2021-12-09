@@ -97,7 +97,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getWaffleMap();
         const groups = await pageObjects.infraHome.groupByCustomField('host.os.platform');
         expect(groups).to.eql(['ubuntu']);
-        throw new Error('forced failure');
       });
 
       it('filter nodes by search term', async () => {
