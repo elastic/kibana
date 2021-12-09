@@ -153,7 +153,7 @@ export function Detail() {
       setPackageInfo(packageInfoResponse);
 
       let installedVersion;
-      const { name } = packageInfoData.response;
+      const { name } = packageInfoData.item;
       if ('savedObject' in packageInfoResponse) {
         installedVersion = packageInfoResponse.savedObject.attributes.version;
       }
