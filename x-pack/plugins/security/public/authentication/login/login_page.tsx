@@ -211,7 +211,7 @@ export class LoginPage extends Component<Props, State> {
             body={
               <p>
                 <FormattedMessage
-                  id="xpack.security.loginPage.requiresSecureConnectionTitle"
+                  id="xpack.security.loginPage.requiresNewWindowTitle"
                   defaultMessage="This content can't be viewed embedded in another website."
                 />
               </p>
@@ -225,7 +225,7 @@ export class LoginPage extends Component<Props, State> {
                 fill
               >
                 <FormattedMessage
-                  id="xpack.security.loginPage.requiresSecureConnectionMessage"
+                  id="xpack.security.loginPage.requiresNewWindowMessage"
                   defaultMessage="Open in Elastic"
                 />
               </EuiButton>
@@ -239,13 +239,13 @@ export class LoginPage extends Component<Props, State> {
         <DisabledLoginForm
           title={
             <FormattedMessage
-              id="xpack.security.loginPage.requiresSecureConnectionTitle"
+              id="xpack.security.loginPage.requiresCookiesTitle"
               defaultMessage="Cookies are required to log into Elastic"
             />
           }
           message={
             <FormattedMessage
-              id="xpack.security.loginPage.requiresSecureConnectionMessage"
+              id="xpack.security.loginPage.requiresCookiesMessage"
               defaultMessage="Enable cookies in your browser settings to continue."
             />
           }
