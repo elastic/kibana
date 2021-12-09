@@ -180,7 +180,7 @@ describe('SourceLogic', () => {
       });
 
       describe('errors', () => {
-        it('handles generic errors and does not show download diagnostics button', async () => {
+        it('handles generic errors', async () => {
           const mockError = Promise.reject('error');
           http.get.mockReturnValue(mockError);
 
