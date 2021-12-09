@@ -13,7 +13,8 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { MiddlewareActionSpyHelper } from '../../../../../../common/store/test_utils';
-
+import { sendGetEndpointSpecificPackagePolicies } from '../../../../../services/policies/policies';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../../services/policies/test_mock_utilts';
 import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
@@ -27,6 +28,7 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../form');
 jest.mock('../../../service');
+jest.mock('../../../../../services/policies/policies');
 
 jest.mock('../../hooks', () => {
   const originalModule = jest.requireActual('../../hooks');
@@ -37,6 +39,10 @@ jest.mock('../../hooks', () => {
     useEventFiltersNotification,
   };
 });
+
+(sendGetEndpointSpecificPackagePolicies as jest.Mock).mockImplementation(
+  sendGetEndpointSpecificPackagePoliciesMock
+);
 
 let component: reactTestingLibrary.RenderResult;
 let mockedContext: AppContextTestRender;

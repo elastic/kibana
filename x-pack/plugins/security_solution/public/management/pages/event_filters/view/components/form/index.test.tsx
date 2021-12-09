@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EventFiltersForm } from '.';
+import { EventFiltersForm, EventFiltersFormProps } from '.';
 import { RenderResult, act } from '@testing-library/react';
 import { fireEvent, waitFor } from '@testing-library/dom';
 import { stubIndexPattern } from 'src/plugins/data/common/stubs';
@@ -19,6 +19,9 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { EventFiltersListPageState } from '../../../types';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../../services/policies/test_mock_utilts';
+import { GetPolicyListResponse } from '../../../../policy/types';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../../../../../../common/containers/source');
@@ -26,14 +29,19 @@ jest.mock('../../../../../../common/containers/source');
 describe('Event filter form', () => {
   let component: RenderResult;
   let mockedContext: AppContextTestRender;
-  let render: () => ReturnType<AppContextTestRender['render']>;
+  let render: (
+    props?: Partial<EventFiltersFormProps>
+  ) => ReturnType<AppContextTestRender['render']>;
   let renderWithData: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let getState: () => EventFiltersListPageState;
+  let policiesRequest: GetPolicyListResponse;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockedContext = createAppRootMockRenderer();
+    policiesRequest = await sendGetEndpointSpecificPackagePoliciesMock();
     getState = () => mockedContext.store.getState().management.eventFilters;
-    render = () => mockedContext.render(<EventFiltersForm />);
+    render = (props) =>
+      mockedContext.render(<EventFiltersForm policies={policiesRequest.items} {...props} />);
     renderWithData = async () => {
       const renderResult = render();
       const entry = getInitialExceptionFromEvent(ecsEventMock());
@@ -142,5 +150,46 @@ describe('Event filter form', () => {
     });
 
     expect(getState().form.newComment).toBe('Exception comment');
+  });
+
+  it('should display the policy list when "per policy" is selected', async () => {
+    component = await renderWithData();
+    userEvent.click(component.getByTestId('perPolicy'));
+
+    // policy selector should show up
+    expect(component.getByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
+  });
+
+  it('should call onChange when a policy is selected from the policy selectiion', async () => {
+    component = await renderWithData();
+
+    const policyId = policiesRequest.items[0].id;
+    userEvent.click(component.getByTestId('perPolicy'));
+    userEvent.click(component.getByTestId(`policy-${policyId}`));
+    expect(getState().form.entry?.tags).toEqual([`policy:${policyId}`]);
+  });
+
+  it('should retain the previous policy selection when switching from per-policy to global', async () => {
+    const policyId = policiesRequest.items[0].id;
+
+    component = await renderWithData();
+
+    // move to per-policy and select the first
+    userEvent.click(component.getByTestId('perPolicy'));
+    userEvent.click(component.getByTestId(`policy-${policyId}`));
+    expect(component.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
+    expect(getState().form.entry?.tags).toEqual([`policy:${policyId}`]);
+
+    // move back to global
+    userEvent.click(component.getByTestId('globalPolicy'));
+    expect(component.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeFalsy();
+    expect(getState().form.entry?.tags).toEqual([`policy:all`]);
+
+    // move back to per-policy
+    userEvent.click(component.getByTestId('perPolicy'));
+    // the previous selected policy should be selected
+    expect(component.getByTestId(`policy-${policyId}`)).toHaveAttribute('aria-selected', 'true');
+    // on change called with the previous policy
+    expect(getState().form.entry?.tags).toEqual([`policy:${policyId}`]);
   });
 });

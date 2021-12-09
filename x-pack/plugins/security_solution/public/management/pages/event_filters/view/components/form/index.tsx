@@ -56,7 +56,7 @@ const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.LINUX,
 ];
 
-interface EventFiltersFormProps {
+export interface EventFiltersFormProps {
   allowSelectOs?: boolean;
   policies: PolicyData[];
 }
@@ -82,7 +82,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     // set current policies if not previously selected
     useEffect(() => {
       if (selection.selected.length === 0 && exception?.tags) {
-        setSelection(getEffectedPolicySelectionByTags(exception?.tags ?? [], policies));
+        setSelection(getEffectedPolicySelectionByTags(exception.tags, policies));
       }
     }, [exception?.tags, policies, selection.selected.length]);
 
@@ -321,6 +321,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           isGlobal={selection.isGlobal}
           isPlatinumPlus={true}
           onChange={handleOnChangeEffectScope}
+          data-test-subj={'effectedPolicies-select'}
         />
       ),
       [policies, selection, handleOnChangeEffectScope]
