@@ -52,9 +52,3 @@ export const fetchServiceLocations = async (): Promise<ServiceLocations> => {
   );
   return locations;
 };
-
-export const getAllMonitors = async (): Promise<{
-  saved_objects: SyntheticsMonitorSavedObject[];
-}> => {
-  return await apiService.get(API_URLS.SYNTHETICS_MONITORS);
-};

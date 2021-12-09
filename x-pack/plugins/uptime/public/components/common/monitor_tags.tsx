@@ -20,13 +20,13 @@ import {
 import { EXPAND_TAGS_LABEL } from '../overview/monitor_list/columns/translations';
 import { OVERVIEW_ROUTE } from '../../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
+import { MonitorManagementListResult } from '../../../common/runtime_types';
 
 interface Props {
   ping?: Ping | null;
   monitorId?: string;
   summary?: MonitorSummary;
-  allSavedMonitors?: SyntheticsMonitorSavedObject[];
+  allSavedMonitors?: MonitorManagementListResult['monitors'];
 }
 
 const getTagsFromSummary = (summary: MonitorSummary) => {

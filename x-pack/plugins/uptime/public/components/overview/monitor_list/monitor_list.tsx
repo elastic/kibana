@@ -19,7 +19,11 @@ import {
   getBreakpoint,
   EuiBadge,
 } from '@elastic/eui';
-import { X509Expiry } from '../../../../common/runtime_types';
+import {
+  MonitorManagementListResult,
+  SyntheticsMonitor,
+  X509Expiry,
+} from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './columns/monitor_status_column';
 import { ExpandedRowMap } from './types';
@@ -38,17 +42,16 @@ import { STATUS_ALERT_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
 import { MonitorTags } from '../../common/monitor_tags';
 import { useMonitorHistogram } from './use_monitor_histogram';
-import { SyntheticsMonitorSavedObject } from '../../../../common/types';
 
 interface Props extends MonitorListProps {
   pageSize: number;
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
-  pendingMonitors?: SyntheticsMonitorSavedObject[];
-  allSavedMonitors?: SyntheticsMonitorSavedObject[];
+  pendingMonitors?: MonitorManagementListResult['monitors'];
+  allSavedMonitors?: MonitorManagementListResult['monitors'];
 }
 
-export type SummaryOrMonitor = SyntheticsMonitorSavedObject | MonitorSummary;
+export type SummaryOrMonitor = SyntheticsMonitor | MonitorSummary;
 
 export const noItemsMessage = (loading: boolean, filters?: string) => {
   if (loading) return labels.LOADING;
@@ -130,9 +133,11 @@ export const MonitorListComponent = ({
           } else {
             return (
               <EuiBadge color="primary">
-                {i18n.translate('xpack.uptime.monitorList.statusColumn.pendingLabel', {
-                  defaultMessage: 'PENDING',
-                })}
+                {loading && items.length === 0
+                  ? '--'
+                  : i18n.translate('xpack.uptime.monitorList.statusColumn.pendingLabel', {
+                      defaultMessage: 'PENDING',
+                    })}
               </EuiBadge>
             );
           }
@@ -267,13 +272,13 @@ export const MonitorListComponent = ({
         hasActions={true}
         itemId="monitor_id"
         itemIdToExpandedRowMap={getExpandedRowMap()}
-        items={[...items, ...(pendingMonitors ?? [])]}
+        items={[...items, ...((pendingMonitors as unknown[] as MonitorSummary[]) ?? [])]}
         noItemsMessage={noItemsMessage(loading, filters)}
         columns={columns}
         tableLayout={'auto'}
         rowProps={
           hideExtraColumns
-            ? (item) => ({
+            ? (item: SummaryOrMonitor) => ({
                 onClick: () => toggleDrawer('state' in item ? item.monitor_id : item.id),
                 'aria-label': labels.getExpandDrawerLabel(
                   'state' in item ? item.monitor_id : item.id

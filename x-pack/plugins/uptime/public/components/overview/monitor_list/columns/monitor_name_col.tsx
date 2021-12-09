@@ -13,12 +13,12 @@ import { useGetUrlParams } from '../../../../hooks';
 import { stringifyUrlParams } from '../../../../lib/helper/stringify_url_params';
 import { MonitorSummary } from '../../../../../common/runtime_types/monitor';
 import { useFilterUpdate } from '../../../../hooks/use_filter_update';
-import { SyntheticsMonitorSavedObject } from '../../../../../common/types';
+import { MonitorManagementListResult } from '../../../../../common/runtime_types';
 
 interface Props {
   monitorId: string;
   summary?: MonitorSummary;
-  allSavedMonitors?: SyntheticsMonitorSavedObject[];
+  allSavedMonitors?: MonitorManagementListResult['monitors'];
 }
 
 export const parseCurrentFilters = (filters: string) => {
@@ -40,7 +40,7 @@ const MONITOR_TYPES: Record<string, string> = {
 
 export const getMonitorObject = (
   monitorId?: string,
-  monitorListObjects?: SyntheticsMonitorSavedObject[]
+  monitorListObjects?: MonitorManagementListResult['monitors']
 ) => {
   if (!monitorId) {
     return;
@@ -58,7 +58,7 @@ export const MonitorNameColumn = ({ monitorId, summary, allSavedMonitors }: Prop
     monitorType = summary.state.monitor.type;
   } else if (objMonitor) {
     monitorName = objMonitor.attributes.name;
-    monitorType = objMonitor.attributes.type;
+    monitorType = objMonitor.attributes.type!;
   }
 
   const params = useGetUrlParams();

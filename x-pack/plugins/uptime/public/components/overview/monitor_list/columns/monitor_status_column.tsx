@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, EuiBadge, EuiSpacer } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { parseTimestamp } from '../parse_timestamp';
-import { Ping } from '../../../../../common/runtime_types';
+import { MonitorManagementListResult, Ping } from '../../../../../common/runtime_types';
 import {
   STATUS,
   SHORT_TIMESPAN_LOCALE,
@@ -25,14 +25,13 @@ import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/comm
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../../common/translations';
 import { getMonitorObject } from './monitor_name_col';
 import { monitorListSelector } from '../../../../state/selectors';
-import { SyntheticsMonitorSavedObject } from '../../../../../common/types';
 
 interface MonitorListStatusColumnProps {
   status: string;
   monitorId?: string;
   timestamp: string;
   summaryPings: Ping[];
-  monitorListObjects?: SyntheticsMonitorSavedObject[];
+  monitorListObjects?: MonitorManagementListResult['monitors'];
 }
 
 const StatusColumnFlexG = styled(EuiFlexGroup)`
