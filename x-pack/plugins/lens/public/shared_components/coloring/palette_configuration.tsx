@@ -33,10 +33,9 @@ const idPrefix = htmlIdGenerator()();
 /**
  * Some name conventions here:
  * * `stops` => final steps used to table coloring. It is a rightShift of the colorStops
- * * `colorStops` => user's color stop inputs.  Used to compute range min.
+ * * `colorStops` => used for correct work other part of application based on `stops`.  Used to compute range min.
+ * * `colorRanges` => user's color ranges inputs.  Used to compute colorStops. The main diff here we have completely range for each color.
  *
- * When the user inputs the colorStops, they are designed to be the initial part of the color segment,
- * so the next stops indicate where the previous stop ends.
  * Both table coloring logic and EuiPaletteDisplay format implementation works differently than our current `colorStops`,
  * by having the stop values at the end of each color segment rather than at the beginning: `stops` values are computed by a rightShift of `colorStops`.
  * EuiPaletteDisplay has an additional requirement as it is always mapped against a domain [0, N]: from `stops` the `displayStops` are computed with
