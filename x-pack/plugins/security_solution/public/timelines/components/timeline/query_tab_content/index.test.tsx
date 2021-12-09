@@ -191,6 +191,7 @@ describe('Timeline', () => {
         loading: true,
         indexPattern: {},
         selectedPatterns: [],
+        missingPatterns: [],
       });
       const wrapper = mount(
         <TestProviders>

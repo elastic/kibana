@@ -118,6 +118,13 @@ export interface Sorting {
   direction: string;
 }
 
+interface CustomConnectorSelectionItem {
+  getText: (actionConnector: ActionConnector) => string;
+  getComponent: (
+    actionConnector: ActionConnector
+  ) => React.LazyExoticComponent<ComponentType<{ actionConnector: ActionConnector }>> | undefined;
+}
+
 export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
   id: string;
   iconClass: IconType;
@@ -135,6 +142,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
     >
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
+  customConnectorSelectItem?: CustomConnectorSelectionItem;
 }
 
 export interface GenericValidationResult<T> {
