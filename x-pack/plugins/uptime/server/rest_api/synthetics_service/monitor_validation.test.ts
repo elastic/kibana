@@ -54,6 +54,7 @@ describe('validateMonitor', () => {
     testTags = ['tag1', 'tag2'];
     testCommonFields = {
       [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
+      [ConfigKey.NAME]: 'test-monitor-name',
       [ConfigKey.ENABLED]: true,
       [ConfigKey.TAGS]: testTags,
       [ConfigKey.SCHEDULE]: testSchedule,
@@ -211,10 +212,7 @@ describe('validateMonitor', () => {
 
   describe('should validate', () => {
     it('when payload is a correct ICMP monitor', () => {
-      const testMonitor = {
-        ...testICMPFields,
-        [ConfigKey.NAME]: 'test-monitor-name',
-      } as MonitorFields;
+      const testMonitor = testICMPFields as MonitorFields;
       const result = validateMonitor(testMonitor);
       expect(result).toMatchObject({
         valid: true,
@@ -225,10 +223,7 @@ describe('validateMonitor', () => {
     });
 
     it('when payload is a correct TCP monitor', () => {
-      const testMonitor = {
-        ...testTCPFields,
-        [ConfigKey.NAME]: 'test-monitor-name',
-      } as MonitorFields;
+      const testMonitor = testTCPFields as MonitorFields;
       const result = validateMonitor(testMonitor);
       expect(result).toMatchObject({
         valid: true,
@@ -239,10 +234,7 @@ describe('validateMonitor', () => {
     });
 
     it('when payload is a correct HTTP monitor', () => {
-      const testMonitor = {
-        ...testHTTPFields,
-        [ConfigKey.NAME]: 'test-monitor-name',
-      } as MonitorFields;
+      const testMonitor = testHTTPFields as MonitorFields;
 
       const result = validateMonitor(testMonitor);
       expect(result).toMatchObject({
@@ -254,10 +246,7 @@ describe('validateMonitor', () => {
     });
 
     it('when payload is a correct Browser monitor', () => {
-      const testMonitor = {
-        ...testBrowserFields,
-        [ConfigKey.NAME]: 'test-monitor-name',
-      } as MonitorFields;
+      const testMonitor = testBrowserFields as MonitorFields;
       const result = validateMonitor(testMonitor);
       expect(result).toMatchObject({
         valid: true,
@@ -272,7 +261,6 @@ describe('validateMonitor', () => {
     it('for ICMP monitor', () => {
       const testMonitor = {
         ...testICMPFields,
-        [ConfigKey.NAME]: 'test-monitor-name',
         ...({
           [ConfigKey.HOSTS]: undefined,
         } as unknown as Partial<ICMPSimpleFields>),
@@ -292,7 +280,6 @@ describe('validateMonitor', () => {
     it('for TCP monitor', () => {
       const testMonitor = {
         ...testTCPFields,
-        [ConfigKey.NAME]: 'test-monitor-name',
         ...({
           [ConfigKey.TIMEOUT]: undefined,
         } as unknown as Partial<TCPFields>),
@@ -312,7 +299,6 @@ describe('validateMonitor', () => {
     it('for HTTP monitor', () => {
       const testMonitor = {
         ...testHTTPFields,
-        [ConfigKey.NAME]: 'test-monitor-name',
         ...({
           [ConfigKey.URLS]: undefined,
         } as unknown as Partial<HTTPFields>),
@@ -332,7 +318,6 @@ describe('validateMonitor', () => {
     it('for Browser monitor', () => {
       const testMonitor = {
         ...testBrowserFields,
-        [ConfigKey.NAME]: 'test-monitor-name',
         ...({
           [ConfigKey.SOURCE_INLINE]: undefined,
         } as unknown as Partial<BrowserFields>),
@@ -355,7 +340,6 @@ describe('validateMonitor', () => {
     it('of HTTP is provided into TCP', () => {
       const testMonitor = {
         ...testTCPFields,
-        [ConfigKey.NAME]: 'test-monitor-name',
         ...({
           [ConfigKey.RESPONSE_HEADERS_CHECK]: undefined,
         } as unknown as Partial<TCPFields>),
