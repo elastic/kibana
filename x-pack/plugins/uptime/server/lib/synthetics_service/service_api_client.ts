@@ -58,6 +58,8 @@ export class ServiceAPIClient {
     }
 
     const callServiceEndpoint = (monitors: ServiceData['monitors'], url: string) => {
+      // don't need to pass locations to heartbeat
+      monitors = monitors.map(({ locations, ...rest }) => rest);
       return axios({
         method,
         url: url + '/monitors',
