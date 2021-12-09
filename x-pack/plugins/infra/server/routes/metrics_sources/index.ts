@@ -159,7 +159,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       const results = await hasData(source.configuration.metricAlias, client);
 
       return response.ok({
-        body: { hasData: results },
+        body: { hasData: results, configuration: source.configuration },
       });
     }
   );

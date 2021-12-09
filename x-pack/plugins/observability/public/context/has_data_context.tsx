@@ -95,9 +95,15 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
 
                 break;
               case 'infra_logs':
-              case 'infra_metrics':
                 const resultInfra = await getDataHandler(app)?.hasData();
                 updateState({ hasData: resultInfra });
+                break;
+              case 'infra_metrics':
+                const resultInfraMetrics = await getDataHandler(app)?.hasData();
+                updateState({
+                  hasData: resultInfraMetrics?.hasData,
+                  indices: resultInfraMetrics?.indices,
+                });
                 break;
             }
           } catch (e) {
