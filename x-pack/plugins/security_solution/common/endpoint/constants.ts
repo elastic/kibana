@@ -44,6 +44,7 @@ export const LIMITED_CONCURRENCY_ENDPOINT_COUNT = 100;
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
 export const HOST_METADATA_GET_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/{id}`;
+export const METADATA_TRANSFORMS_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/transforms`;
 
 export const TRUSTED_APPS_GET_API = `${BASE_ENDPOINT_ROUTE}/trusted_apps/{id}`;
 export const TRUSTED_APPS_LIST_API = `${BASE_ENDPOINT_ROUTE}/trusted_apps`;
@@ -65,3 +66,9 @@ export const ENDPOINT_ACTION_LOG_ROUTE = `/api/endpoint/action_log/{agent_id}`;
 export const ACTION_STATUS_ROUTE = `/api/endpoint/action_status`;
 
 export const failedFleetActionErrorCode = '424';
+
+export const ENDPOINT_DEFAULT_PAGE = 0;
+export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
+
+export const FORBIDDEN_MESSAGE =
+  'You do not have permission to perform this action or license level does not allow for this action';

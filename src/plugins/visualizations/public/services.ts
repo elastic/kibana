@@ -15,6 +15,7 @@ import type {
   OverlayStart,
   SavedObjectsStart,
   DocLinksStart,
+  ThemeServiceStart,
 } from '../../../core/public';
 import type { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
@@ -26,6 +27,8 @@ import { EmbeddableStart } from '../../embeddable/public';
 import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
+
+export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
 
 export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');
 

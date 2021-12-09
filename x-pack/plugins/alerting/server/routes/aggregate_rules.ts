@@ -47,10 +47,14 @@ const rewriteQueryReq: RewriteRequestCase<AggregateOptions> = ({
 });
 const rewriteBodyRes: RewriteResponseCase<AggregateResult> = ({
   alertExecutionStatus,
+  ruleEnabledStatus,
+  ruleMutedStatus,
   ...rest
 }) => ({
   ...rest,
   rule_execution_status: alertExecutionStatus,
+  rule_enabled_status: ruleEnabledStatus,
+  rule_muted_status: ruleMutedStatus,
 });
 
 export const aggregateRulesRoute = (

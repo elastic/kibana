@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { service, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@elastic/apm-synthtrace';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
@@ -13,7 +13,8 @@ import {
 import { RecursivePartial } from '../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-type ErrorGroups = APIReturnType<'GET /internal/apm/services/{serviceName}/errors'>['errorGroups'];
+type ErrorGroups =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>['errorGroups'];
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -26,17 +27,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi(
     overrides?: RecursivePartial<
-      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/errors'>['params']
+      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>['params']
     >
   ) {
     return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/services/{serviceName}/errors`,
+      endpoint: 'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
       params: {
         path: { serviceName, ...overrides?.path },
         query: {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
           environment: 'ENVIRONMENT_ALL',
+          transactionType: 'request',
           kuery: '',
           ...overrides?.query,
         },
@@ -70,7 +72,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         };
 
         before(async () => {
-          const serviceInstance = service(serviceName, 'production', 'go').instance('instance-a');
+          const serviceInstance = apm
+            .service(serviceName, 'production', 'go')
+            .instance('instance-a');
 
           await synthtraceEsClient.index([
             ...timerange(start, end)
@@ -133,12 +137,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           it('returns correct number of errors', () => {
             expect(errorGroups.length).to.equal(2);
-            expect(errorGroups.map((error) => error.message).sort()).to.eql(['error 1', 'error 2']);
+            expect(errorGroups.map((error) => error.name).sort()).to.eql(['error 1', 'error 2']);
           });
 
           it('returns correct occurences', () => {
             const numberOfBuckets = 15;
-            expect(errorGroups.map((error) => error.occurrenceCount).sort()).to.eql([
+            expect(errorGroups.map((error) => error.occurrences).sort()).to.eql([
               appleTransaction.failureRate * numberOfBuckets,
               bananaTransaction.failureRate * numberOfBuckets,
             ]);

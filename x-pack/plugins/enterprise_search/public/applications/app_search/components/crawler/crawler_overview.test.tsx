@@ -17,6 +17,7 @@ import { getPageHeaderActions } from '../../../test_helpers';
 import { AddDomainFlyout } from './components/add_domain/add_domain_flyout';
 import { AddDomainForm } from './components/add_domain/add_domain_form';
 import { AddDomainFormSubmitButton } from './components/add_domain/add_domain_form_submit_button';
+import { CrawlDetailsFlyout } from './components/crawl_details_flyout';
 import { CrawlRequestsTable } from './components/crawl_requests_table';
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
@@ -77,6 +78,9 @@ const events: CrawlEventFromServer[] = [
     type: CrawlType.Full,
     crawl_config: {
       domain_allowlist: ['moviedatabase.com', 'swiftype.com'],
+      seed_urls: [],
+      sitemap_urls: [],
+      max_crawl_depth: 10,
     },
   },
   {
@@ -89,6 +93,9 @@ const events: CrawlEventFromServer[] = [
     type: CrawlType.Partial,
     crawl_config: {
       domain_allowlist: ['swiftype.com'],
+      seed_urls: [],
+      sitemap_urls: [],
+      max_crawl_depth: 10,
     },
   },
 ];
@@ -175,5 +182,13 @@ describe('CrawlerOverview', () => {
     expect(wrapper.find(AddDomainFlyout)).toHaveLength(1);
     expect(wrapper.find(DomainsTable)).toHaveLength(1);
     expect(wrapper.find(CrawlRequestsTable)).toHaveLength(1);
+  });
+
+  it('contains a crawl details flyout', () => {
+    setMockValues(mockValues);
+
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(wrapper.find(CrawlDetailsFlyout)).toHaveLength(1);
   });
 });

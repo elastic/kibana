@@ -20,7 +20,7 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy, PackagePolicy, SimplifiedAgentStatus } from '../../../types';
 import {
@@ -241,7 +241,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         .join(' or ');
 
       if (kueryBuilder) {
-        kueryBuilder = `(${kueryBuilder}) and ${kueryStatus}`;
+        kueryBuilder = `(${kueryBuilder}) and (${kueryStatus})`;
       } else {
         kueryBuilder = kueryStatus;
       }
@@ -308,7 +308,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           inactive: agentsRequest.data.totalInactive,
         });
 
-        setAgents(agentsRequest.data.list);
+        setAgents(agentsRequest.data.items);
         setTotalAgents(agentsRequest.data.total);
         setTotalInactiveAgents(agentsRequest.data.totalInactive);
       } catch (error) {

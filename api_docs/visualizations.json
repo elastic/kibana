@@ -2685,12 +2685,12 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-public.VisParams.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false
@@ -5861,12 +5861,12 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-common.VisParams.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false

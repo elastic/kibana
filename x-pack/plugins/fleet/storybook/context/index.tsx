@@ -11,7 +11,7 @@ import { EMPTY } from 'rxjs';
 import type { StoryContext } from '@storybook/react';
 import { createBrowserHistory } from 'history';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { ScopedHistory } from '../../../../../src/core/public';
 import { getStorybookContextProvider } from '../../../../../src/plugins/custom_integrations/storybook';
@@ -72,6 +72,24 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
       uiSettings: getUiSettings(),
       theme: {
         theme$: EMPTY,
+      },
+      authz: {
+        fleet: {
+          all: true,
+          setup: true,
+          readEnrollmentTokens: true,
+        },
+        integrations: {
+          readPackageInfo: true,
+          readInstalledPackages: true,
+          installPackages: true,
+          upgradePackages: true,
+          removePackages: true,
+          readPackageSettings: true,
+          writePackageSettings: true,
+          readIntegrationPolicies: true,
+          writeIntegrationPolicies: true,
+        },
       },
     }),
     [isCloudEnabled]

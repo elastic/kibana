@@ -1,0 +1,53 @@
+{
+  "id": "dataViewManagement",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "dataViewManagement",
+      "id": "def-public.IndexPatternManagementSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "IndexPatternManagementSetup",
+      "description": [],
+      "path": "src/plugins/data_view_management/public/plugin.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "dataViewManagement",
+      "id": "def-public.IndexPatternManagementStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "IndexPatternManagementStart",
+      "description": [],
+      "path": "src/plugins/data_view_management/public/plugin.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -29,7 +29,7 @@
     { "path": "../../src/plugins/es_ui_shared/tsconfig.json" },
     { "path": "../../src/plugins/expressions/tsconfig.json" },
     { "path": "../../src/plugins/home/tsconfig.json" },
-    { "path": "../../src/plugins/index_pattern_management/tsconfig.json" },
+    { "path": "../../src/plugins/data_view_management/tsconfig.json" },
     { "path": "../../src/plugins/kibana_overview/tsconfig.json" },
     { "path": "../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../src/plugins/kibana_usage_collection/tsconfig.json" },

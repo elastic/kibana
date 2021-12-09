@@ -1048,15 +1048,15 @@
                 "section": "def-common.UiComponent",
                 "text": "UiComponent"
               },
-              "<{ context: ",
+              "<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
                 "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionExecutionContext",
-                "text": "ActionExecutionContext"
+                "section": "def-public.ActionMenuItemProps",
+                "text": "ActionMenuItemProps"
               },
-              "<Context>; }> | undefined"
+              "<Context>> | undefined"
             ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false
@@ -1482,6 +1482,49 @@
                 "docId": "kibUiActionsPluginApi",
                 "section": "def-public.Trigger",
                 "text": "Trigger"
+              }
+            ],
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
+        "id": "def-public.ActionMenuItemProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ActionMenuItemProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.ActionMenuItemProps",
+            "text": "ActionMenuItemProps"
+          },
+          "<Context>"
+        ],
+        "path": "src/plugins/ui_actions/public/actions/action.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.ActionMenuItemProps.context",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "Context & ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionExecutionMeta",
+                "text": "ActionExecutionMeta"
               }
             ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",

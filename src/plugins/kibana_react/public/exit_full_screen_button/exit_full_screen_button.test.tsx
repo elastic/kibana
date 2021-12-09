@@ -7,45 +7,70 @@
  */
 
 import React from 'react';
-import sinon from 'sinon';
+import { mount, ReactWrapper } from 'enzyme';
 import { ExitFullScreenButton } from './exit_full_screen_button';
 import { keys } from '@elastic/eui';
-import { mount } from 'enzyme';
 import type { ChromeStart } from '../../../../core/public';
 
 const MockChrome = {
-  setIsVisible: () => {},
+  setIsVisible: jest.fn(),
 } as unknown as ChromeStart;
 
-test('is rendered', () => {
-  const component = mount(
-    <ExitFullScreenButton onExitFullScreenMode={() => {}} chrome={MockChrome} />
-  );
-
-  expect(component).toMatchSnapshot();
-});
-
-describe('onExitFullScreenMode', () => {
-  test('is called when the button is pressed', () => {
-    const onExitHandler = sinon.stub();
-
-    const component = mount(
-      <ExitFullScreenButton onExitFullScreenMode={onExitHandler} chrome={MockChrome} />
-    );
-
-    component.find('button').simulate('click');
-
-    sinon.assert.calledOnce(onExitHandler);
+describe('<ExitFullScreenButton />', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
-  test('is called when the ESC key is pressed', () => {
-    const onExitHandler = sinon.stub();
+  test('is rendered', () => {
+    const component = mount(
+      <ExitFullScreenButton onExitFullScreenMode={jest.fn()} chrome={MockChrome} />
+    );
 
-    mount(<ExitFullScreenButton onExitFullScreenMode={onExitHandler} chrome={MockChrome} />);
+    expect(component).toMatchSnapshot();
+  });
 
-    const escapeKeyEvent = new KeyboardEvent('keydown', { key: keys.ESCAPE } as any);
-    document.dispatchEvent(escapeKeyEvent);
+  test('passing `false` to toggleChrome does not toggle chrome', () => {
+    const component = mount(
+      <ExitFullScreenButton
+        onExitFullScreenMode={jest.fn()}
+        chrome={MockChrome}
+        toggleChrome={false}
+      />
+    );
+    expect(MockChrome.setIsVisible).toHaveBeenCalledTimes(0);
+    component.unmount();
+    expect(MockChrome.setIsVisible).toHaveBeenCalledTimes(0);
+  });
 
-    sinon.assert.calledOnce(onExitHandler);
+  describe('onExitFullScreenMode', () => {
+    const onExitHandler = jest.fn();
+    let component: ReactWrapper;
+
+    beforeEach(() => {
+      component = mount(
+        <ExitFullScreenButton onExitFullScreenMode={onExitHandler} chrome={MockChrome} />
+      );
+    });
+
+    test('is called when the button is pressed', () => {
+      expect(MockChrome.setIsVisible).toHaveBeenLastCalledWith(false);
+
+      component.find('button').simulate('click');
+
+      expect(onExitHandler).toHaveBeenCalledTimes(1);
+      component.unmount();
+      expect(MockChrome.setIsVisible).toHaveBeenLastCalledWith(true);
+    });
+
+    test('is called when the ESC key is pressed', () => {
+      expect(MockChrome.setIsVisible).toHaveBeenLastCalledWith(false);
+
+      const escapeKeyEvent = new KeyboardEvent('keydown', { key: keys.ESCAPE } as any);
+      document.dispatchEvent(escapeKeyEvent);
+
+      expect(onExitHandler).toHaveBeenCalledTimes(1);
+      component.unmount();
+      expect(MockChrome.setIsVisible).toHaveBeenLastCalledWith(true);
+    });
   });
 });
