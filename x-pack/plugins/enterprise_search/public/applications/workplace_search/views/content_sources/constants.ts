@@ -147,13 +147,6 @@ export const EXTERNAL_IDENTITIES_LINK = i18n.translate(
   }
 );
 
-export const ACCESS_TOKEN_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.accessToken.label',
-  {
-    defaultMessage: 'Access Token',
-  }
-);
-
 export const ID_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.id.label', {
   defaultMessage: 'Source Identifier',
 });
