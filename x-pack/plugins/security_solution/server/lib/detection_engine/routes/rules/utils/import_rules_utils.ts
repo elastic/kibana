@@ -225,11 +225,8 @@ export const importRules = async ({
                   });
                   await patchRules({
                     rulesClient,
-                    savedObjectsClient,
                     author,
                     buildingBlockType,
-                    spaceId,
-                    ruleStatusClient,
                     description,
                     enabled,
                     eventCategoryOverride,
