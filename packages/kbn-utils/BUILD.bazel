@@ -31,7 +31,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-config-schema",
+  "//packages/kbn-config-schema:npm_module_types",
   "@npm//load-json-file",
   "@npm//tslib",
   "@npm//@types/jest",

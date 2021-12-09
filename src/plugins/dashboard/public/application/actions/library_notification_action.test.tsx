@@ -62,6 +62,7 @@ beforeEach(async () => {
     uiActions: {} as any,
     uiSettings: uiSettingsServiceMock.createStartContract(),
     http: coreStart.http,
+    theme: coreStart.theme,
     presentationUtil: getStubPluginServices(),
     screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
@@ -90,7 +91,7 @@ beforeEach(async () => {
 });
 
 test('Notification is incompatible with Error Embeddables', async () => {
-  const action = new LibraryNotificationAction(unlinkAction);
+  const action = new LibraryNotificationAction(coreStart.theme, unlinkAction);
   const errorEmbeddable = new ErrorEmbeddable(
     'Wow what an awful error',
     { id: ' 404' },
@@ -100,19 +101,19 @@ test('Notification is incompatible with Error Embeddables', async () => {
 });
 
 test('Notification is shown when embeddable on dashboard has reference type input', async () => {
-  const action = new LibraryNotificationAction(unlinkAction);
+  const action = new LibraryNotificationAction(coreStart.theme, unlinkAction);
   embeddable.updateInput(await embeddable.getInputAsRefType());
   expect(await action.isCompatible({ embeddable })).toBe(true);
 });
 
 test('Notification is not shown when embeddable input is by value', async () => {
-  const action = new LibraryNotificationAction(unlinkAction);
+  const action = new LibraryNotificationAction(coreStart.theme, unlinkAction);
   embeddable.updateInput(await embeddable.getInputAsValueType());
   expect(await action.isCompatible({ embeddable })).toBe(false);
 });
 
 test('Notification is not shown when view mode is set to view', async () => {
-  const action = new LibraryNotificationAction(unlinkAction);
+  const action = new LibraryNotificationAction(coreStart.theme, unlinkAction);
   embeddable.updateInput(await embeddable.getInputAsRefType());
   embeddable.updateInput({ viewMode: ViewMode.VIEW });
   expect(await action.isCompatible({ embeddable })).toBe(false);
