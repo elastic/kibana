@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import { SavedObjectsMigrationLogger } from 'kibana/server';
+import { migrationMocks } from '../../../../../../src/core/server/mocks';
 import { noneConnectorId } from '../../../common';
 import { createExternalService, createJiraConnector } from '../../services/test_utils';
-import { transformConnectorIdToReference, transformPushConnectorIdToReference } from './utils';
+import {
+  logError,
+  transformConnectorIdToReference,
+  transformPushConnectorIdToReference,
+} from './utils';
 
 describe('migration utils', () => {
   describe('transformConnectorIdToReference', () => {
@@ -221,6 +227,34 @@ describe('migration utils', () => {
             "id": "100",
             "name": "pushConnectorId",
             "type": "action",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('logError', () => {
+    const context = migrationMocks.createContext();
+    it('logs an error', () => {
+      const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
+
+      logError({
+        id: '1',
+        context,
+        error: new Error('an error'),
+        docType: 'a document',
+        docKey: 'key',
+      });
+
+      expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "Failed to migrate a document with doc id: 1 version: 8.0.0 error: an error",
+          Object {
+            "migrations": Object {
+              "key": Object {
+                "id": "1",
+              },
+            },
           },
         ]
       `);
