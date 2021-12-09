@@ -36,6 +36,7 @@ import { useToastNotificationService } from '../../../services/toast_notificatio
 import { AnomalyTimelineService } from '../../../services/anomaly_timeline_service';
 import { mlResultsServiceProvider } from '../../../services/results_service';
 import type { OverallSwimlaneData } from '../../../explorer/explorer_utils';
+import { JobStatsBarStats } from '../../../components/stats_bar';
 
 export type GroupsDictionary = Dictionary<Group>;
 
@@ -54,7 +55,6 @@ export interface Group {
 interface Props {
   jobCreationDisabled: boolean;
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
-  refreshCount: number;
 }
 
 export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount }) => {
@@ -99,8 +99,8 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
   const [groups, setGroups] = useState<GroupsDictionary>({});
   const [groupsCount, setGroupsCount] = useState<number>(0);
   const [jobsList, setJobsList] = useState<Record<string, MlSummaryJobs>>({});
-  const [statsBarData, setStatsBarData] = useState<any>(undefined);
-  const [errorMessage, setErrorMessage] = useState<any>(undefined);
+  const [statsBarData, setStatsBarData] = useState<JobStatsBarStats>();
+  const [errorMessage, setErrorMessage] = useState<string>();
 
   const loadJobs = async () => {
     setIsLoading(true);
@@ -233,7 +233,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
       )}
       {isLoading === false && typeof errorMessage === 'undefined' && groupsCount > 0 && (
         <Fragment>
-          <AnomalyDetectionTable items={groups} jobsList={jobsList} statsBarData={statsBarData} />
+          <AnomalyDetectionTable items={groups} jobsList={jobsList} statsBarData={statsBarData!} />
           <EuiSpacer size="m" />
           <div className="mlOverviewPanel__buttons">
             <EuiButtonEmpty size="s" onClick={onRefresh} className="mlOverviewPanel__refreshButton">

@@ -8,13 +8,12 @@
 import React, { FC, Fragment, useMemo, useState } from 'react';
 import {
   Direction,
+  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
   EuiSpacer,
-  EuiTableComputedColumnType,
-  EuiTableFieldDataColumnType,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -44,15 +43,6 @@ export enum AnomalyDetectionListColumns {
   jobsInGroup = 'jobs_in_group',
 }
 
-type AnomalyDetectionTableColumns = [
-  EuiTableFieldDataColumnType<Group>,
-  EuiTableFieldDataColumnType<Group>,
-  EuiTableFieldDataColumnType<Group>,
-  EuiTableFieldDataColumnType<Group>,
-  EuiTableFieldDataColumnType<Group>,
-  EuiTableComputedColumnType<Group>
-];
-
 interface Props {
   items: GroupsDictionary;
   statsBarData: JobStatsBarStats;
@@ -78,7 +68,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
   }, []);
 
   // columns: group, max anomaly, jobs in group, latest timestamp, docs processed, action to explorer
-  const columns: AnomalyDetectionTableColumns = [
+  const columns: Array<EuiBasicTableColumn<Group>> = [
     {
       field: AnomalyDetectionListColumns.id,
       name: i18n.translate('xpack.ml.overview.anomalyDetection.tableId', {
@@ -89,7 +79,6 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       truncateText: true,
       width: '20%',
     },
-    // @ts-ignore
     {
       name: (
         <EuiToolTip
@@ -105,7 +94,6 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
           </span>
         </EuiToolTip>
       ),
-      sortable: true,
       render: (group: Group) => {
         return (
           <SwimlaneContainer
@@ -128,7 +116,6 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
           />
         );
       },
-      truncateText: false,
       width: '300px',
     },
     {
@@ -218,7 +205,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiInMemoryTable
+      <EuiInMemoryTable<Group>
         allowNeutralSort={false}
         className="mlAnomalyDetectionTable"
         columns={columns}

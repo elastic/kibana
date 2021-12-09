@@ -29,7 +29,6 @@ export const OverviewContent: FC<Props> = ({
     <AnomalyDetectionPanel
       jobCreationDisabled={createAnomalyDetectionJobDisabled}
       setLazyJobCount={setAdLazyJobCount}
-      refreshCount={refreshCount}
     />
     <EuiSpacer size="m" />
     <AnalyticsPanel

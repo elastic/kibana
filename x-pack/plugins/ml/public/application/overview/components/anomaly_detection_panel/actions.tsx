@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MlSummaryJobs } from '../../../../../common/types/anomaly_detection_jobs';
-import { useCreateADLinks } from '../../../components/custom_hooks/use_create_ad_links';
+import { useMlLocator } from '../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 
 interface Props {
   jobsList: MlSummaryJobs;
@@ -23,12 +24,31 @@ export const ExplorerLink: FC<Props> = ({ jobsList }) => {
       values: { jobsCount: jobsList.length, jobId: jobsList[0] && jobsList[0].id },
     }
   );
-  const { createLinkWithUserDefaults } = useCreateADLinks();
+  const [explorerPath, setExplorerPath] = useState<string>();
 
-  return (
+  const mlLocator = useMlLocator();
+
+  useEffect(
+    function generateExplorerUrl() {
+      mlLocator!
+        .getUrl({
+          page: ML_PAGES.ANOMALY_EXPLORER,
+          pageState: {
+            jobIds: jobsList.map((job) => job.id),
+          },
+        })
+        .then((path) => {
+          setExplorerPath(path);
+        })
+        .catch((e) => {});
+    },
+    [jobsList]
+  );
+
+  return explorerPath ? (
     <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
       <EuiButtonEmpty
-        href={createLinkWithUserDefaults('explorer', jobsList)}
+        href={explorerPath}
         color="text"
         size="xs"
         iconType="visTable"
@@ -41,5 +61,5 @@ export const ExplorerLink: FC<Props> = ({ jobsList }) => {
         })}
       </EuiButtonEmpty>
     </EuiToolTip>
-  );
+  ) : null;
 };

@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiPage,
-  EuiPageBody,
-  EuiPanel,
-  EuiSpacer,
-  EuiPageHeader,
-} from '@elastic/eui';
+import React, { FC, useEffect, useState } from 'react';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { checkPermission } from '../capabilities/check_capabilities';
-import { mlNodesAvailable } from '../ml_nodes_check/check_ml_nodes';
+import { mlNodesAvailable } from '../ml_nodes_check';
 import { NavigationMenu } from '../components/navigation_menu';
 import { GettingStartedCallout } from './components/getting_started_callout';
 import { OverviewContent } from './components/content';
@@ -28,6 +21,8 @@ import { HelpMenu } from '../components/help_menu';
 import { useMlKibana, useTimefilter } from '../contexts/kibana';
 import { NodesList } from '../trained_models/nodes_overview';
 import { DatePickerWrapper } from '../components/navigation_menu/date_picker_wrapper';
+import { useUrlState } from '../util/url_state';
+import { useRefresh } from '../routing/use_refresh';
 
 export const OverviewPage: FC = () => {
   const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
@@ -40,14 +35,33 @@ export const OverviewPage: FC = () => {
   } = useMlKibana();
   const helpLink = docLinks.links.ml.guide;
 
-  const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
+  const [lastRefresh, setLastRefresh] = useState(0);
+  const [globalState, setGlobalState] = useUrlState('_g');
+  const refresh = useRefresh();
+
+  useEffect(() => {
+    if (refresh !== undefined && lastRefresh !== refresh.lastRefresh) {
+      setLastRefresh(refresh?.lastRefresh);
+
+      if (refresh.timeRange !== undefined) {
+        const { start, end } = refresh.timeRange;
+        setGlobalState('time', {
+          from: start,
+          to: end,
+          ...(start === 'now' || end === 'now' ? { ts: Date.now() } : {}),
+        });
+      }
+    }
+  }, [refresh?.lastRefresh, lastRefresh, setLastRefresh, setGlobalState]);
+
+  useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const [adLazyJobCount, setAdLazyJobCount] = useState(0);
   const [dfaLazyJobCount, setDfaLazyJobCount] = useState(0);
   const [refreshCount, setRefreshCount] = useState(0);
 
   return (
-    <Fragment>
+    <>
       <NavigationMenu tabId="overview" />
       <EuiPage data-test-subj="mlPageOverview">
         <EuiPageBody>
@@ -79,7 +93,7 @@ export const OverviewPage: FC = () => {
         </EuiPageBody>
       </EuiPage>
       <HelpMenu docLink={helpLink} />
-    </Fragment>
+    </>
   );
 };
 
