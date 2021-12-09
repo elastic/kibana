@@ -46,7 +46,7 @@ export const SearchThresholdAlertTypeExpression: React.FunctionComponent<
     }
   );
 
-  const setDefaultExpressionValues = async () => {
+  const setDefaultExpressionValues = () => {
     setAlertProperty('params', {
       searchSource: searchSource ?? {},
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
