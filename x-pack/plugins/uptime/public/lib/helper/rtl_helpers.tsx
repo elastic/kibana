@@ -47,7 +47,7 @@ export interface KibanaProviderOptions<ExtraCore> {
 }
 
 interface MockKibanaProviderProps<ExtraCore> extends KibanaProviderOptions<ExtraCore> {
-  children: ReactElement;
+  children: React.ReactNode;
 }
 
 interface MockRouterProps<ExtraCore> extends MockKibanaProviderProps<ExtraCore> {
@@ -172,6 +172,27 @@ export function MockRouter<ExtraCore>({
   );
 }
 configure({ testIdAttribute: 'data-test-subj' });
+
+export const MockRedux = ({
+  state,
+  history = createMemoryHistory(),
+  children,
+}: {
+  state: Partial<AppState>;
+  history?: History;
+  children: React.ReactNode;
+}) => {
+  const testState: AppState = {
+    ...mockState,
+    ...state,
+  };
+
+  return (
+    <MountWithReduxProvider state={testState}>
+      <MockRouter history={history}>{children}</MockRouter>
+    </MountWithReduxProvider>
+  );
+};
 
 /* Custom react testing library render */
 export function render<ExtraCore>(
