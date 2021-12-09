@@ -899,9 +899,17 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
               aria-label="Pagination for table: "
               className="euiPagination"
             >
+              <span
+                aria-atomic="true"
+                aria-relevant="additions text"
+                className="euiScreenReaderOnly"
+                role="status"
+              >
+                Page 1 of 1
+              </span>
               <button
                 aria-label="Previous page"
-                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                 data-test-subj="pagination-button-previous"
                 disabled={true}
                 onClick={[Function]}
@@ -926,7 +934,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                     aria-controls="__table_generated-id"
                     aria-current={true}
                     aria-label="Page 1 of 1"
-                    className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive"
                     data-test-subj="pagination-button-0"
                     disabled={true}
                     onClick={[Function]}
@@ -946,7 +954,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
               </ul>
               <button
                 aria-label="Next page"
-                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                 data-test-subj="pagination-button-next"
                 disabled={true}
                 onClick={[Function]}

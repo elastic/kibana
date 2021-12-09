@@ -52,17 +52,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    X
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  X
+                </code>
               </span>
             </dd>
             <dt
@@ -74,17 +76,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    C
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  C
+                </code>
               </span>
             </dd>
             <dt
@@ -96,17 +100,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    V
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  V
+                </code>
               </span>
             </dd>
             <dt
@@ -118,17 +124,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    D
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  D
+                </code>
               </span>
             </dd>
             <dt
@@ -140,11 +148,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    DEL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  DEL
+                </code>
               </span>
               <span>
                  
@@ -152,11 +161,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                  
               </span>
               <span>
-                <span>
-                  <code>
-                    BACKSPACE
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  BACKSPACE
+                </code>
               </span>
             </dd>
             <dt
@@ -168,17 +178,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    ↑
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ↑
+                </code>
               </span>
             </dd>
             <dt
@@ -190,23 +202,26 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    SHIFT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  SHIFT
+                </code>
                  
-                <span>
-                  <code>
-                    ↑
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ↑
+                </code>
               </span>
             </dd>
             <dt
@@ -218,17 +233,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    ↓
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ↓
+                </code>
               </span>
             </dd>
             <dt
@@ -240,23 +257,26 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    SHIFT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  SHIFT
+                </code>
                  
-                <span>
-                  <code>
-                    ↓
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ↓
+                </code>
               </span>
             </dd>
             <dt
@@ -268,11 +288,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    G
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  G
+                </code>
               </span>
             </dd>
             <dt
@@ -284,11 +305,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    U
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  U
+                </code>
               </span>
             </dd>
             <dt
@@ -300,11 +322,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    ↑
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ↑
+                </code>
               </span>
             </dd>
             <dt
@@ -316,11 +339,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    ↓
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ↓
+                </code>
               </span>
             </dd>
             <dt
@@ -332,11 +356,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    ←
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ←
+                </code>
               </span>
             </dd>
             <dt
@@ -348,11 +373,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    →
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  →
+                </code>
               </span>
             </dd>
             <dt
@@ -364,17 +390,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    SHIFT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  SHIFT
+                </code>
                  
-                <span>
-                  <code>
-                    ↑
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ↑
+                </code>
               </span>
             </dd>
             <dt
@@ -386,17 +414,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    SHIFT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  SHIFT
+                </code>
                  
-                <span>
-                  <code>
-                    ↓
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ↓
+                </code>
               </span>
             </dd>
             <dt
@@ -408,17 +438,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    SHIFT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  SHIFT
+                </code>
                  
-                <span>
-                  <code>
-                    ←
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ←
+                </code>
               </span>
             </dd>
             <dt
@@ -430,17 +462,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    SHIFT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  SHIFT
+                </code>
                  
-                <span>
-                  <code>
-                    →
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  →
+                </code>
               </span>
             </dd>
           </dl>
@@ -471,17 +505,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    ENTER
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ENTER
+                </code>
               </span>
             </dd>
           </dl>
@@ -512,17 +548,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    SHIFT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  SHIFT
+                </code>
                  
-                <span>
-                  <code>
-                    CLICK
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CLICK
+                </code>
               </span>
             </dd>
             <dt
@@ -534,17 +572,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    DRAG
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  DRAG
+                </code>
               </span>
             </dd>
             <dt
@@ -556,17 +596,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    DRAG
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  DRAG
+                </code>
               </span>
             </dd>
             <dt
@@ -578,17 +620,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    CLICK
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CLICK
+                </code>
               </span>
             </dd>
             <dt
@@ -600,17 +644,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    Z
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  Z
+                </code>
               </span>
             </dd>
             <dt
@@ -622,23 +668,26 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    SHIFT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  SHIFT
+                </code>
                  
-                <span>
-                  <code>
-                    Z
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  Z
+                </code>
               </span>
             </dd>
             <dt
@@ -650,17 +699,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    [
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  [
+                </code>
               </span>
             </dd>
             <dt
@@ -672,17 +723,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    ]
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ]
+                </code>
               </span>
             </dd>
             <dt
@@ -694,17 +747,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    E
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  E
+                </code>
               </span>
             </dd>
             <dt
@@ -716,17 +771,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    G
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  G
+                </code>
               </span>
             </dd>
             <dt
@@ -738,17 +795,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    R
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  R
+                </code>
               </span>
             </dd>
             <dt
@@ -760,23 +819,26 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    +
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  +
+                </code>
               </span>
             </dd>
             <dt
@@ -788,23 +850,26 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    -
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  -
+                </code>
               </span>
             </dd>
             <dt
@@ -816,23 +881,26 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    CTRL
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  CTRL
+                </code>
                  
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    [
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  [
+                </code>
               </span>
             </dd>
             <dt
@@ -844,17 +912,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    F
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  F
+                </code>
               </span>
               <span>
                  
@@ -862,17 +932,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                  
               </span>
               <span>
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    P
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  P
+                </code>
               </span>
             </dd>
           </dl>
@@ -903,17 +975,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    F
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  F
+                </code>
               </span>
               <span>
                  
@@ -921,17 +995,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                  
               </span>
               <span>
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    P
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  P
+                </code>
               </span>
             </dd>
             <dt
@@ -943,11 +1019,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    ESC
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ESC
+                </code>
               </span>
             </dd>
             <dt
@@ -959,17 +1036,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    [
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  [
+                </code>
               </span>
               <span>
                  
@@ -977,11 +1056,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                  
               </span>
               <span>
-                <span>
-                  <code>
-                    BACKSPACE
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  BACKSPACE
+                </code>
               </span>
               <span>
                  
@@ -989,11 +1069,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                  
               </span>
               <span>
-                <span>
-                  <code>
-                    ←
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ←
+                </code>
               </span>
             </dd>
             <dt
@@ -1005,17 +1086,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    ]
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ]
+                </code>
               </span>
               <span>
                  
@@ -1023,11 +1106,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                  
               </span>
               <span>
-                <span>
-                  <code>
-                    SPACE
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  SPACE
+                </code>
               </span>
               <span>
                  
@@ -1035,11 +1119,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                  
               </span>
               <span>
-                <span>
-                  <code>
-                    →
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  →
+                </code>
               </span>
             </dd>
             <dt
@@ -1051,17 +1136,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    ALT
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  ALT
+                </code>
                  
-                <span>
-                  <code>
-                    R
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  R
+                </code>
               </span>
             </dd>
             <dt
@@ -1073,11 +1160,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
               className="euiDescriptionList__description"
             >
               <span>
-                <span>
-                  <code>
-                    P
-                  </code>
-                </span>
+                <code
+                  className="euiCode"
+                  data-code-language="text"
+                >
+                  P
+                </code>
               </span>
             </dd>
           </dl>
