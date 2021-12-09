@@ -171,11 +171,31 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     );
   }
 
+  const validPackages = [];
+
+  for (const pkg of packages) {
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: pkg.name,
+      pkgVersion: '',
+    });
+
+    if (packageInfo.assets.elasticsearch?.ml_model?.length > 0) {
+      logger.warn(
+        `Package ${pkg.name} contains Machine Learning models and cannot be installed via preconfiguration. Skipping.`
+      );
+
+      continue;
+    }
+
+    validPackages.push(pkg);
+  }
+
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({
     savedObjectsClient: soClient,
     esClient,
-    packagesToInstall: packages.map((pkg) =>
+    packagesToInstall: validPackages.map((pkg) =>
       pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
     ),
     force: true, // Always force outdated packages to be installed if a later version isn't installed
