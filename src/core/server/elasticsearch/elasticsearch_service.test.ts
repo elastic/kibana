@@ -21,7 +21,7 @@ import { MockClusterClient, isScriptingEnabledMock } from './elasticsearch_servi
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '../config';
 import { configServiceMock, getEnvOptions } from '../config/mocks';
 import { CoreContext } from '../core_context';

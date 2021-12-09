@@ -14,8 +14,10 @@ import {
   byDataColorPaletteMap,
   extractUniqTermsMap,
   checkTableForContainsSmallValues,
+  shouldShowValuesInLegend,
 } from './render_helpers';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import type { PieLayerState } from '../../common/expressions';
 
 describe('render helpers', () => {
   describe('#getSliceValue', () => {
@@ -372,6 +374,30 @@ describe('render helpers', () => {
         },
       ];
       expect(checkTableForContainsSmallValues(datatable, columnId, 1)).toBeFalsy();
+    });
+  });
+
+  describe('#shouldShowValuesInLegend', () => {
+    it('should firstly read the state value', () => {
+      expect(
+        shouldShowValuesInLegend({ showValuesInLegend: true } as PieLayerState, 'waffle')
+      ).toBeTruthy();
+
+      expect(
+        shouldShowValuesInLegend({ showValuesInLegend: false } as PieLayerState, 'waffle')
+      ).toBeFalsy();
+    });
+
+    it('should read value from meta in case of value in state is undefined', () => {
+      expect(
+        shouldShowValuesInLegend({ showValuesInLegend: undefined } as PieLayerState, 'waffle')
+      ).toBeTruthy();
+
+      expect(shouldShowValuesInLegend({} as PieLayerState, 'waffle')).toBeTruthy();
+
+      expect(
+        shouldShowValuesInLegend({ showValuesInLegend: undefined } as PieLayerState, 'pie')
+      ).toBeFalsy();
     });
   });
 });

@@ -113,6 +113,7 @@ export class DocLinksService {
           usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
         },
         workplaceSearch: {
+          apiKeys: `${WORKPLACE_SEARCH_DOCS}workplace-search-api-authentication.html`,
           box: `${WORKPLACE_SEARCH_DOCS}workplace-search-box-connector.html`,
           confluenceCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-cloud-connector.html`,
           confluenceServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-server-connector.html`,
@@ -485,6 +486,7 @@ export class DocLinksService {
           hdfsRepo: `${PLUGIN_DOCS}repository-hdfs.html`,
           s3Repo: `${PLUGIN_DOCS}repository-s3.html`,
           snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
+          mapperSize: `${PLUGIN_DOCS}mapper-size-usage.html`,
         },
         snapshotRestore: {
           guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
@@ -671,6 +673,7 @@ export interface DocLinksStart {
       readonly usersAccess: string;
     };
     readonly workplaceSearch: {
+      readonly apiKeys: string;
       readonly box: string;
       readonly confluenceCloud: string;
       readonly confluenceServer: string;
@@ -872,7 +875,14 @@ export interface DocLinksStart {
     }>;
     readonly watcher: Record<string, string>;
     readonly ccs: Record<string, string>;
-    readonly plugins: Record<string, string>;
+    readonly plugins: {
+      azureRepo: string;
+      gcsRepo: string;
+      hdfsRepo: string;
+      s3Repo: string;
+      snapshotRestoreRepos: string;
+      mapperSize: string;
+    };
     readonly snapshotRestore: Record<string, string>;
     readonly ingest: Record<string, string>;
     readonly fleet: Readonly<{

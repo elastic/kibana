@@ -27,7 +27,7 @@ export function registerCrawlerEntryPointRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/entry_points',
+      path: '/api/as/v1/engines/:engineName/crawler/domains/:domainId/entry_points',
       params: {
         respond_with: 'index',
       },
@@ -49,7 +49,7 @@ export function registerCrawlerEntryPointRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/entry_points/:entryPointId',
+      path: '/api/as/v1/engines/:engineName/crawler/domains/:domainId/entry_points/:entryPointId',
       params: {
         respond_with: 'index',
       },
@@ -68,7 +68,7 @@ export function registerCrawlerEntryPointRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/entry_points/:entryPointId',
+      path: '/api/as/v1/engines/:engineName/crawler/domains/:domainId/entry_points/:entryPointId',
       params: {
         respond_with: 'index',
       },
