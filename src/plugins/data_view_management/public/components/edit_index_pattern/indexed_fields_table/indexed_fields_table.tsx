@@ -68,25 +68,12 @@ class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTabl
       indexPattern.sourceFilters.map((f: Record<string, any>) => f.value);
     const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
 
-    const getDisplayEsType = (arr: string[]): string => {
-      const length = arr.length;
-      if (length < 1) {
-        return '';
-      }
-      if (length > 1) {
-        return i18n.translate('indexPatternManagement.editIndexPattern.fields.conflictType', {
-          defaultMessage: 'conflict',
-        });
-      }
-      return arr[0];
-    };
-
     return (
       (fields &&
         fields.map((field) => {
           return {
             ...field.spec,
-            type: getDisplayEsType(field.esTypes || []),
+            type: field.esTypes?.join(', ') || '',
             kbnType: field.type,
             displayName: field.displayName,
             format: indexPattern.getFormatterForFieldNoDefault(field.name)?.type?.title || '',
@@ -117,7 +104,12 @@ class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTabl
       }
 
       if (indexedFieldTypeFilter) {
-        fields = fields.filter((field) => field.type === indexedFieldTypeFilter);
+        fields = fields.filter((field) => {
+          if (indexedFieldTypeFilter === 'conflict' && field.kbnType === 'conflict') {
+            return true;
+          }
+          return field.esTypes?.length && field.esTypes?.indexOf(indexedFieldTypeFilter) !== -1;
+        });
       }
 
       return fields;

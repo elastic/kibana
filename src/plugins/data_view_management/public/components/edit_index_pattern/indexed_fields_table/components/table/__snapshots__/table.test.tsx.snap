@@ -107,6 +107,7 @@ exports[`Table render name 2`] = `
 
 exports[`Table should render conflicting type 1`] = `
 <span>
+  conflict
   <span>
     <EuiBadge
       color="warning"
