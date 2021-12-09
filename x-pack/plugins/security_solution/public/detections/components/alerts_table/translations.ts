@@ -273,7 +273,7 @@ export const CHANGE_ALERT_STATUS = i18n.translate(
 );
 
 export const CLICK_TO_CHANGE_ALERT_STATUS = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.overview.changeAlertStatus',
+  'xpack.securitySolution.eventsViewer.alerts.overview.clickToChangeAlertStatus',
   {
     defaultMessage: 'Click to change alert status',
   }
