@@ -17,7 +17,6 @@ import {
   EuiImage,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { zipObject } from 'lodash';
 import {
   useMlKibana,
@@ -27,11 +26,7 @@ import {
 } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
-import {
-  getGroupsFromJobs,
-  getStatsBarData,
-  getJobsWithTimerange,
-} from './utils';
+import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
 import { Dictionary } from '../../../../../common/types/common';
 import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
@@ -56,34 +51,15 @@ export interface Group {
   overallSwimLane?: OverallSwimlaneData;
 }
 
-type MaxScoresByGroup = Dictionary<{
-  maxScore: number;
-  index?: number;
-}>;
-
-function getDefaultAnomalyScores(groups: Group[]): MaxScoresByGroup {
-  const anomalyScores: MaxScoresByGroup = {};
-  groups.forEach((group) => {
-    anomalyScores[group.id] = { maxScore: 0 };
-  });
-
-  return anomalyScores;
-}
-
 interface Props {
   jobCreationDisabled: boolean;
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
   refreshCount: number;
 }
 
-export const AnomalyDetectionPanel: FC<Props> = ({
-  jobCreationDisabled,
-  setLazyJobCount,
-  refreshCount,
-}) => {
+export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount }) => {
   const {
     services: {
-      notifications,
       uiSettings,
       mlServices: { mlApiServices },
     },
@@ -167,18 +143,17 @@ export const AnomalyDetectionPanel: FC<Props> = ({
           })
       );
 
-      const r = zipObject(
+      const groupsOverallScoreData = zipObject(
         Object.keys(nonEmptyGroups),
         await Promise.all(Object.values(nonEmptyGroups))
       );
 
-      console.log(r, '___r___');
-
       const tempGroups = { ...groupsObject };
 
-      // eslint-disable-next-line guard-for-in
-      for (const g in tempGroups) {
-        tempGroups[g].overallSwimLane = r[g];
+      for (const groupId in tempGroups) {
+        if (tempGroups.hasOwnProperty(groupId)) {
+          tempGroups[groupId].overallSwimLane = groupsOverallScoreData[groupId];
+        }
       }
 
       setGroups(tempGroups);
@@ -188,46 +163,6 @@ export const AnomalyDetectionPanel: FC<Props> = ({
         i18n.translate('xpack.ml.overview.anomalyDetection.errorWithFetchingSwimLanesData', {
           defaultMessage: 'An error occurred fetching anomaly results',
         })
-      );
-    }
-  };
-
-  const loadMaxAnomalyScores = async (groupsObject: GroupsDictionary) => {
-    const groupsList: Group[] = Object.values(groupsObject);
-    const scores = getDefaultAnomalyScores(groupsList);
-
-    try {
-      const promises = groupsList
-        .filter((group) => group.jobIds.length > 0)
-        .map((group, i) => {
-          scores[group.id].index = i;
-          const latestTimestamp = group.latest_timestamp;
-          const startMoment = moment(latestTimestamp);
-          const twentyFourHoursAgo = startMoment.subtract(24, 'hours').valueOf();
-          return ml.results.getMaxAnomalyScore(group.jobIds, twentyFourHoursAgo, latestTimestamp);
-        });
-
-      const results = await Promise.all(promises);
-      const tempGroups = { ...groupsObject };
-      // Check results for each group's promise index and update state
-      Object.keys(scores).forEach((groupId) => {
-        const resultsIndex = scores[groupId] && scores[groupId].index;
-        // maxScore will be null if it was not loaded correctly
-        const { maxScore } = resultsIndex !== undefined && results[resultsIndex];
-        tempGroups[groupId].max_anomaly_score = maxScore;
-      });
-
-      setGroups(tempGroups);
-    } catch (e) {
-      const { toasts } = notifications;
-      toasts.addDanger(
-        i18n.translate(
-          'xpack.ml.overview.anomalyDetection.errorWithFetchingAnomalyScoreNotificationErrorMessage',
-          {
-            defaultMessage: 'An error occurred fetching anomaly scores: {error}',
-            values: { error: e.message !== undefined ? e.message : JSON.stringify(e) },
-          }
-        )
       );
     }
   };
