@@ -39,8 +39,8 @@ const getEsFields = memoizeOne(
 
 export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string) => void } => {
   const { data } = useKibana().services;
-  const abortCtrl = useRef(new AbortController());
-  const searchSubscription$ = useRef(new Subscription());
+  const abortCtrl = useRef<Record<string, AbortController>>({});
+  const searchSubscription$ = useRef<Record<string, Subscription>>({});
   const dispatch = useDispatch();
   const { addError, addWarning } = useAppToasts();
 
@@ -50,27 +50,28 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
     },
     [dispatch]
   );
-  const requestIds = useRef<string[]>([]);
+
   const indexFieldsSearch = useCallback(
     (selectedDataViewId: string) => {
       const asyncSearch = async () => {
-        requestIds.current = [...requestIds.current, selectedDataViewId];
-        abortCtrl.current = new AbortController();
+        abortCtrl.current = {
+          ...abortCtrl.current,
+          [selectedDataViewId]: new AbortController(),
+        };
         setLoading({ id: selectedDataViewId, loading: true });
-        searchSubscription$.current = data.search
+        const subscription = data.search
           .search<IndexFieldsStrategyRequest<'dataView'>, IndexFieldsStrategyResponse>(
             {
               dataViewId: selectedDataViewId,
               onlyCheckIfIndicesExist: false,
             },
             {
-              abortSignal: abortCtrl.current.signal,
+              abortSignal: abortCtrl.current[selectedDataViewId].signal,
               strategy: 'indexFields',
             }
           )
           .subscribe({
             next: (response) => {
-              requestIds.current = requestIds.current.filter((id) => id !== selectedDataViewId);
               if (isCompleteResponse(response)) {
                 const patternString = response.indicesExist.sort().join();
 
@@ -84,15 +85,14 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
                     runtimeMappings: response.runtimeMappings,
                   })
                 );
-                searchSubscription$.current.unsubscribe();
+                searchSubscription$.current[selectedDataViewId].unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading({ id: selectedDataViewId, loading: false });
                 addWarning(i18n.ERROR_BEAT_FIELDS);
-                searchSubscription$.current.unsubscribe();
+                searchSubscription$.current[selectedDataViewId].unsubscribe();
               }
             },
             error: (msg) => {
-              requestIds.current = requestIds.current.filter((id) => id !== selectedDataViewId);
               if (msg.message === DELETED_SECURITY_SOLUTION_DATA_VIEW) {
                 // reload app if security solution data view is deleted
                 return location.reload();
@@ -101,14 +101,20 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
               addError(msg, {
                 title: i18n.FAIL_BEAT_FIELDS,
               });
-              searchSubscription$.current.unsubscribe();
+              searchSubscription$.current[selectedDataViewId].unsubscribe();
             },
           });
+        searchSubscription$.current = {
+          ...searchSubscription$.current,
+          [selectedDataViewId]: subscription,
+        };
       };
-      // only abort requests for ids already in progress
-      if (requestIds.current.includes(selectedDataViewId)) {
-        searchSubscription$.current.unsubscribe();
-        abortCtrl.current.abort();
+      if (searchSubscription$.current[selectedDataViewId] != null) {
+        searchSubscription$.current[selectedDataViewId].unsubscribe();
+      }
+
+      if (abortCtrl.current[selectedDataViewId] != null) {
+        abortCtrl.current[selectedDataViewId].abort();
       }
       asyncSearch();
     },
@@ -117,8 +123,10 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
 
   useEffect(() => {
     return () => {
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
+      Object.values(searchSubscription$.current).forEach((subscription) =>
+        subscription.unsubscribe()
+      );
+      Object.values(abortCtrl.current).forEach((signal) => signal.abort());
     };
   }, []);
 
