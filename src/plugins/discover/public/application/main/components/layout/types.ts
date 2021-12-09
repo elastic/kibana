@@ -10,7 +10,7 @@ import {
   IndexPattern,
   IndexPatternAttributes,
   Query,
-  SavedObject,
+  DataViewCommonSavedObject,
   TimeRange,
 } from '../../../../../../data/common';
 import { ISearchSource } from '../../../../../../data/public';
@@ -23,7 +23,7 @@ import { ElasticSearchHit } from '../../../../types';
 
 export interface DiscoverLayoutProps {
   indexPattern: IndexPattern;
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  indexPatternList: Array<DataViewCommonSavedObject<IndexPatternAttributes>>;
   inspectorAdapters: { requests: RequestAdapter };
   navigateTo: (url: string) => void;
   onChangeIndexPattern: (id: string) => void;

@@ -10,7 +10,7 @@ import { coreMock } from '../../../../core/server/mocks';
 import {
   DATA_VIEW_SAVED_OBJECT_TYPE,
   FilterStateStore,
-  SavedObject,
+  DataViewCommonSavedObject,
   SavedQueryAttributes,
 } from '../../common';
 import { registerSavedQueryRouteHandlerContext } from './route_handler_context';
@@ -86,7 +86,7 @@ describe('saved query route handler context', () => {
 
   describe('create', function () {
     it('should create a saved object for the given attributes', async () => {
-      const mockResponse: SavedObject<SavedQueryAttributes> = {
+      const mockResponse: DataViewCommonSavedObject<SavedQueryAttributes> = {
         id: 'foo',
         type: 'query',
         attributes: savedQueryAttributes,
@@ -113,7 +113,7 @@ describe('saved query route handler context', () => {
           query: { match_all: {} },
         },
       };
-      const mockResponse: SavedObject<SavedQueryAttributes> = {
+      const mockResponse: DataViewCommonSavedObject<SavedQueryAttributes> = {
         id: 'foo',
         type: 'query',
         attributes: savedQueryAttributesWithQueryObject,
@@ -132,7 +132,7 @@ describe('saved query route handler context', () => {
         filters: savedQueryAttributesWithFilters.filters,
         timefilter: savedQueryAttributesWithFilters.timefilter,
       };
-      const mockResponse: SavedObject<SavedQueryAttributes> = {
+      const mockResponse: DataViewCommonSavedObject<SavedQueryAttributes> = {
         id: 'foo',
         type: 'query',
         attributes: serializedSavedQueryAttributesWithFilters,
@@ -155,7 +155,7 @@ describe('saved query route handler context', () => {
           error: '123',
           message: 'An Error',
         },
-      } as SavedObject);
+      } as DataViewCommonSavedObject);
 
       const response = context.create(savedQueryAttributes);
 
@@ -172,7 +172,7 @@ describe('saved query route handler context', () => {
 
   describe('update', function () {
     it('should update a saved object for the given attributes', async () => {
-      const mockResponse: SavedObject<SavedQueryAttributes> = {
+      const mockResponse: DataViewCommonSavedObject<SavedQueryAttributes> = {
         id: 'foo',
         type: 'query',
         attributes: savedQueryAttributes,

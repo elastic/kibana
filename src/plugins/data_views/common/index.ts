@@ -42,7 +42,7 @@ export type {
   GetFieldsOptionsTimePattern,
   IDataViewsApiClient,
   IIndexPatternsApiClient,
-  SavedObject,
+  SavedObject as DataViewCommonSavedObject,
   AggregationRestrictions,
   TypeMeta,
   FieldSpecConflictDescriptions,

@@ -11,13 +11,15 @@ import { SavedObjectsClient, SimpleSavedObject } from 'src/core/public';
 import {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
-  SavedObject,
   DataViewSavedObjectConflictError,
+  DataViewCommonSavedObject,
 } from '../common';
 
 type SOClient = Pick<SavedObjectsClient, 'find' | 'resolve' | 'update' | 'create' | 'delete'>;
 
-const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject): SavedObject<T> =>
+const simpleSavedObjectToSavedObject = <T>(
+  simpleSavedObject: SimpleSavedObject
+): DataViewCommonSavedObject<T> =>
   ({
     version: simpleSavedObject._version,
     ...omit(simpleSavedObject, '_version'),
@@ -30,7 +32,7 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   }
   async find<T = unknown>(options: SavedObjectsClientCommonFindArgs) {
     const response = (await this.savedObjectClient.find<T>(options)).savedObjects;
-    return response.map<SavedObject<T>>(simpleSavedObjectToSavedObject);
+    return response.map<DataViewCommonSavedObject<T>>(simpleSavedObjectToSavedObject);
   }
 
   async get<T = unknown>(type: string, id: string) {

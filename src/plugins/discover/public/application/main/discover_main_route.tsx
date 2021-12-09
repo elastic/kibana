@@ -11,7 +11,11 @@ import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-import { IndexPatternAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
+import {
+  IndexPatternAttributes,
+  ISearchSource,
+  DataViewCommonSavedObject,
+} from 'src/plugins/data/common';
 import { DiscoverServices } from '../../build_services';
 import {
   SavedSearch,
@@ -72,7 +76,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const indexPattern = savedSearch?.searchSource?.getField('index');
   const [indexPatternList, setIndexPatternList] = useState<
-    Array<SavedObject<IndexPatternAttributes>>
+    Array<DataViewCommonSavedObject<IndexPatternAttributes>>
   >([]);
 
   const { id } = useParams<DiscoverLandingParams>();
@@ -87,7 +91,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
         const { index } = appStateContainer.getState();
         const ip = await loadIndexPattern(index || '', data.indexPatterns, config);
 
-        const ipList = ip.list as Array<SavedObject<IndexPatternAttributes>>;
+        const ipList = ip.list as Array<DataViewCommonSavedObject<IndexPatternAttributes>>;
         const indexPatternData = await resolveIndexPattern(ip, searchSource, toastNotifications);
 
         setIndexPatternList(ipList);
