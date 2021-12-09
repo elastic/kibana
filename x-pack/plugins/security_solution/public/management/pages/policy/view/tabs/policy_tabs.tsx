@@ -16,6 +16,7 @@ import {
   isOnPolicyTrustedAppsView,
   isOnPolicyEventFiltersView,
   policyIdFromParams,
+  policyDetails,
 } from '../../store/policy_details/selectors';
 
 import { PolicyTrustedAppsLayout } from '../trusted_apps/layout';
@@ -33,6 +34,7 @@ export const PolicyTabs = React.memo(() => {
   const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsView);
   const isInEventFilters = usePolicyDetailsSelector(isOnPolicyEventFiltersView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
+  const policyItem = usePolicyDetailsSelector(policyDetails);
 
   const tabs = useMemo(
     () => [
@@ -68,12 +70,12 @@ export const PolicyTabs = React.memo(() => {
         content: (
           <>
             <EuiSpacer />
-            <PolicyEventFiltersLayout />
+            <PolicyEventFiltersLayout policyItem={policyItem} />
           </>
         ),
       },
     ],
-    []
+    [policyItem]
   );
 
   const currentSelectedTab = useMemo(() => {

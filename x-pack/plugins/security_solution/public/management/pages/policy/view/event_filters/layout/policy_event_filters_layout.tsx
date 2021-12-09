@@ -17,89 +17,92 @@ import {
   EuiLink,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { policyDetails } from '../../../store/policy_details/selectors';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
+import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { getEventFiltersListPath } from '../../../../../common/routing';
 import { useGetAllAssignedEventFilters } from '../hooks';
 import { ManagementEmptyStateWraper } from '../../../../../components/management_empty_state_wraper';
 
-export const PolicyEventFiltersLayout = React.memo(() => {
-  const { getAppUrl } = useAppUrl();
-  const policyItem = usePolicyDetailsSelector(policyDetails);
+interface PolicyEventFiltersLayoutProps {
+  policyItem?: ImmutableObject<PolicyData> | undefined;
+}
+export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps>(
+  ({ policyItem }) => {
+    const { getAppUrl } = useAppUrl();
 
-  const {
-    data: allAssigned,
-    isLoading: isLoadingAllAssigned,
-    isRefetching: isRefetchingAllAssigned,
-  } = useGetAllAssignedEventFilters(policyItem?.id);
+    const {
+      data: allAssigned,
+      isLoading: isLoadingAllAssigned,
+      isRefetching: isRefetchingAllAssigned,
+    } = useGetAllAssignedEventFilters(policyItem?.id);
 
-  const aboutInfo = useMemo(() => {
-    const link = (
-      <EuiLink
-        href={getAppUrl({ appId: APP_UI_ID, path: getEventFiltersListPath() })}
-        target="_blank"
-      >
+    const aboutInfo = useMemo(() => {
+      const link = (
+        <EuiLink
+          href={getAppUrl({ appId: APP_UI_ID, path: getEventFiltersListPath() })}
+          target="_blank"
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policy.eventFilters.layout.about.viewAllLinkLabel"
+            defaultMessage="view all event filters"
+          />
+        </EuiLink>
+      );
+
+      return (
         <FormattedMessage
-          id="xpack.securitySolution.endpoint.policy.eventFilters.layout.about.viewAllLinkLabel"
-          defaultMessage="view all event filters"
+          id="xpack.securitySolution.endpoint.policy.eventFilters.layout.about"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} event {count, plural, =1 {filter} other {filters}} associated with this policy. Click here to {link}"
+          values={{
+            count: allAssigned?.total || 0,
+            link,
+          }}
         />
-      </EuiLink>
+      );
+    }, [getAppUrl, allAssigned]);
+
+    const isGlobalLoading = useMemo(
+      () => isLoadingAllAssigned || isRefetchingAllAssigned,
+      [isLoadingAllAssigned, isRefetchingAllAssigned]
     );
 
-    return (
-      <FormattedMessage
-        id="xpack.securitySolution.endpoint.policy.eventFilters.layout.about"
-        defaultMessage="There {count, plural, one {is} other {are}} {count} event {count, plural, =1 {filter} other {filters}} associated with this policy. Click here to {link}"
-        values={{
-          count: allAssigned?.total || 0,
-          link,
-        }}
-      />
-    );
-  }, [getAppUrl, allAssigned]);
+    const isEmptyState = useMemo(() => allAssigned && allAssigned.total === 0, [allAssigned]);
 
-  const isGlobalLoading = useMemo(
-    () => isLoadingAllAssigned || isRefetchingAllAssigned,
-    [isLoadingAllAssigned, isRefetchingAllAssigned]
-  );
+    return policyItem && !isGlobalLoading ? (
+      isEmptyState ? (
+        // TODO: Display empty state when needed
+        <></>
+      ) : (
+        <div>
+          <EuiPageHeader alignItems="center">
+            <EuiPageHeaderSection>
+              <EuiTitle size="m">
+                <h2>
+                  {i18n.translate(
+                    'xpack.securitySolution.endpoint.policy.eventFilters.layout.title',
+                    {
+                      defaultMessage: 'Assigned event filters',
+                    }
+                  )}
+                </h2>
+              </EuiTitle>
 
-  const isEmptyState = useMemo(() => allAssigned && allAssigned.total === 0, [allAssigned]);
+              <EuiSpacer size="s" />
 
-  return policyItem && !isGlobalLoading ? (
-    isEmptyState ? (
-      // TODO: Display empty state when needed
-      <></>
+              <EuiText size="xs">
+                <p>{aboutInfo}</p>
+              </EuiText>
+            </EuiPageHeaderSection>
+          </EuiPageHeader>
+        </div>
+      )
     ) : (
-      <div>
-        <EuiPageHeader alignItems="center">
-          <EuiPageHeaderSection>
-            <EuiTitle size="m">
-              <h2>
-                {i18n.translate(
-                  'xpack.securitySolution.endpoint.policy.eventFilters.layout.title',
-                  {
-                    defaultMessage: 'Assigned event filters',
-                  }
-                )}
-              </h2>
-            </EuiTitle>
-
-            <EuiSpacer size="s" />
-
-            <EuiText size="xs">
-              <p>{aboutInfo}</p>
-            </EuiText>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-      </div>
-    )
-  ) : (
-    <ManagementEmptyStateWraper>
-      <EuiLoadingSpinner size="l" />
-    </ManagementEmptyStateWraper>
-  );
-});
+      <ManagementEmptyStateWraper>
+        <EuiLoadingSpinner size="l" />
+      </ManagementEmptyStateWraper>
+    );
+  }
+);
 
 PolicyEventFiltersLayout.displayName = 'PolicyEventFiltersLayout';

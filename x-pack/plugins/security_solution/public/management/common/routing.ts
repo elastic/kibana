@@ -133,11 +133,16 @@ export const getPolicyTrustedAppsPath = (policyId: string, search?: string) => {
   })}${appendSearch(search)}`;
 };
 
-export const getPolicyEventFiltersPath = (policyId: string, search?: string) => {
+export const getPolicyEventFiltersPath = (
+  policyId: string,
+  location?: Partial<PolicyDetailsArtifactsPageLocation>
+) => {
   return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH, {
     tabName: AdministrationSubTab.policies,
     policyId,
-  })}${appendSearch(search)}`;
+  })}${appendSearch(
+    querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
+  )}`;
 };
 
 const isDefaultOrMissing = <T>(value: T | undefined, defaultValue: T) => {
