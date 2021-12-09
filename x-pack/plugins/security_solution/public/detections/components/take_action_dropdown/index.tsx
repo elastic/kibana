@@ -81,6 +81,8 @@ export const TakeActionDropdown = React.memo(
       [detailsData]
     );
 
+    console.log('actions');
+    console.log(actionsData);
     const alertIds = useMemo(
       () => (isEmpty(actionsData.eventId) ? null : [actionsData.eventId]),
       [actionsData.eventId]

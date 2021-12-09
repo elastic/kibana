@@ -146,9 +146,14 @@ export const rulesFieldMap = {
     array: true,
     required: false,
   },
+  'kibana.alert.rule.threshold': {
+    type: 'object',
+    array: true,
+    required: false,
+  },
   'kibana.alert.rule.threshold.field': {
     type: 'keyword',
-    array: true,
+    array: false,
     required: false,
   },
   'kibana.alert.rule.threshold.value': {

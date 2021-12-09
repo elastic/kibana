@@ -62,16 +62,23 @@ export const toStringArray = (value: unknown): string[] => {
   }
 };
 
-export const formatAlertToEcsSignal = (alert: {}): Ecs =>
-  Object.keys(alert).reduce<Ecs>((accumulator, key) => {
+export const formatAlertToEcsSignal = (alert: {}): Ecs => {
+  console.log('formatting');
+  console.log(alert);
+  return Object.keys(alert).reduce<Ecs>((accumulator, key) => {
+    console.log(`key: ${key}`);
     const item = get(alert, key);
+    console.log(`item: ${item}`);
     if (item != null && isObject(item)) {
+      console.log(`object: ${formatAlertToEcsSignal(item)}`);
       return { ...accumulator, [key]: formatAlertToEcsSignal(item) };
     } else if (Array.isArray(item) || isString(item) || isNumber(item)) {
+      console.log(`array: ${toStringArray(item)}`);
       return { ...accumulator, [key]: toStringArray(item) };
     }
     return accumulator;
   }, {} as Ecs);
+};
 interface Signal {
   rule: {
     id: string;

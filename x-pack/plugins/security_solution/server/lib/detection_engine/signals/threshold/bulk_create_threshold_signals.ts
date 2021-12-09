@@ -231,6 +231,8 @@ export const bulkCreateThresholdSignals = async (
   console.log('rule params');
   console.log(ruleParams);
   const thresholdResults = params.someResult;
+  console.log('bulk create threshold');
+  console.log(JSON.stringify(ruleParams.threshold));
   const ecsResults = transformThresholdResultsToEcs(
     thresholdResults,
     params.inputIndexPattern.join(','),

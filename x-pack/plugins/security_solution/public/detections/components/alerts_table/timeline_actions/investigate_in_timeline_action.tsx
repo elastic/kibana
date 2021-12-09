@@ -31,6 +31,8 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
   buttonType,
   onInvestigateInTimelineAlertClick,
 }) => {
+  console.log('using');
+  // investigateInTimelineActionItems, showInvestigateInTimelineAction ??
   const { investigateInTimelineAlertClick } = useInvestigateInTimeline({
     ecsRowData,
     alertIds,

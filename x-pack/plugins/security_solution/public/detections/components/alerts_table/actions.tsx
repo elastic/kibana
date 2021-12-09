@@ -18,6 +18,7 @@ import {
   ALERT_RULE_FROM,
   ALERT_RULE_TYPE,
   ALERT_RULE_NOTE,
+  ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils/technical_field_names';
 
 import {
@@ -162,7 +163,11 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
   console.log(thresholdEcsData);
   return thresholdEcsData.reduce<ThresholdAggregationData>(
     (outerAcc, thresholdData) => {
-      const threshold = thresholdData.kibana?.alert?.rule?.parameters?.threshold as string[];
+      const threshold =
+        getField(thresholdData, ALERT_RULE_PARAMETERS).threshold ??
+        thresholdData.signal?.rule?.threshold;
+      console.log('here is the threshold');
+      console.log(threshold);
 
       let aggField: string[] = [];
       let thresholdResult: {
@@ -174,24 +179,12 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
         from: string;
       };
 
-      try {
-        thresholdResult = JSON.parse(
-          (getField(thresholdData, ALERT_THRESHOLD_RESULT) as string[])[0]
-        );
-        aggField = JSON.parse(threshold[0]).field;
-      } catch (err) {
-        // Legacy support
-        thresholdResult = {
-          terms: [
-            {
-              field: (thresholdData.rule?.threshold as { field: string }).field,
-              value: (thresholdData.signal?.threshold_result as { value: string }).value,
-            },
-          ],
-          count: (thresholdData.signal?.threshold_result as { count: number }).count,
-          from: (thresholdData.signal?.threshold_result as { from: string }).from,
-        };
-      }
+      console.log(threshold);
+      thresholdResult = getField(thresholdData, ALERT_THRESHOLD_RESULT) as string;
+      aggField = threshold.field;
+
+      console.log('threshold result');
+      console.log(thresholdResult);
 
       // Legacy support
       const ruleFromStr = getField(thresholdData, ALERT_RULE_FROM)[0];
@@ -212,10 +205,17 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
         dataProviders: [
           ...outerAcc.dataProviders,
           ...aggregationFields.reduce<DataProvider[]>((acc, aggregationField, i) => {
-            const aggregationValue = (thresholdResult.terms ?? []).filter(
+            /*
+            const aggregationValue = ([thresholdResult.terms['0']] ?? []).filter( // FIXME
               (term: { field?: string | undefined; value: string }) =>
                 term.field === aggregationField
             )[0].value;
+            */
+            const aggField = Object.values(aggregationField)[0][0];
+            console.log(aggField);
+            const aggregationValue = Object.values(thresholdResult.terms).filter(
+              (term) => term.field[0] === aggField
+            )[0].value[0];
             const dataProviderValue = Array.isArray(aggregationValue)
               ? aggregationValue[0]
               : aggregationValue;
@@ -224,15 +224,15 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
               return acc;
             }
 
-            const aggregationFieldId = aggregationField.replace('.', '-');
+            const aggregationFieldId = aggField.replace('.', '-');
             const dataProviderPartial = {
               id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
-              name: aggregationField,
+              name: aggField,
               enabled: true,
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                field: aggregationField,
+                field: aggField,
                 value: dataProviderValue,
                 operator: ':' as QueryOperator,
               },
@@ -386,8 +386,12 @@ export const sendAlertToTimelineAction = async ({
    * We are making an assumption here that if you have an array of ecs data they are all coming from the same rule
    * but we still want to determine the filter for each alerts
    */
+  console.log('sending alert to timeline');
   const ecsData: Ecs = Array.isArray(ecs) && ecs.length > 0 ? ecs[0] : (ecs as Ecs);
-  const alertIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [];
+  console.log(ecsData);
+  const alertIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [ecs._id];
+  console.log('alert ids');
+  console.log(alertIds);
   const ruleNote = getField(ecsData, ALERT_RULE_NOTE);
   const noteContent = Array.isArray(ruleNote) && ruleNote.length > 0 ? ruleNote[0] : '';
   const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);
@@ -477,13 +481,21 @@ export const sendAlertToTimelineAction = async ({
   if (isThresholdRule(ecsData)) {
     const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(ecsData);
 
+    console.log('printing rule params');
+    const filters = getField(ecsData, 'signal.rule.filters');
+    console.log(filters);
+    const language = getField(ecsData, 'signal.rule.language');
+    console.log(language);
+    const query = getField(ecsData, 'signal.rule.query');
+    console.log(query);
+
     return createTimeline({
       from: thresholdFrom,
       notes: null,
       timeline: {
         ...timelineDefaults,
         description: `_id: ${ecsData._id}`,
-        filters: getFiltersFromRule(ecsData.signal?.rule?.filters as string[]),
+        filters: getFiltersFromRule(getField(ecsData, 'signal.rule.filters') as string[]),
         dataProviders,
         id: TimelineId.active,
         indexNames: [],
@@ -498,10 +510,12 @@ export const sendAlertToTimelineAction = async ({
               kind: ecsData.signal?.rule?.language?.length
                 ? (ecsData.signal?.rule?.language[0] as KueryFilterQueryKind)
                 : 'kuery',
-              expression: ecsData.signal?.rule?.query?.length ? ecsData.signal?.rule?.query[0] : '',
+              expression: getField(ecsData, 'signal.rule.query').length
+                ? getField(ecsData, 'signal.rule.query')[0]
+                : '',
             },
-            serializedQuery: ecsData.signal?.rule?.query?.length
-              ? ecsData.signal?.rule?.query[0]
+            serializedQuery: getField(ecsData, 'signal.rule.query').length
+              ? getField(ecsData, 'signal.rule.query')[0]
               : '',
           },
         },

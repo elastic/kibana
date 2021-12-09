@@ -99,20 +99,15 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 console.log('made it here 3');
                 console.log(JSON.stringify(augmentedAlerts));
 
-                try {
-                  const response = await ruleDataClient
-                    .getWriter({ namespace: options.spaceId })
-                    .bulk({
-                      body: augmentedAlerts.flatMap((alert) => [
-                        { create: { _id: alert._id } },
-                        alert._source,
-                      ]),
-                      refresh,
-                    });
-                } catch (error) {
-                  console.log(error);
-                }
-
+                const response = await ruleDataClient
+                  .getWriter({ namespace: options.spaceId })
+                  .bulk({
+                    body: augmentedAlerts.flatMap((alert) => [
+                      { create: { _id: alert._id } },
+                      alert._source,
+                    ]),
+                    refresh,
+                  });
                 console.log('response');
                 console.log(JSON.stringify(response));
 
