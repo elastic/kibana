@@ -8,13 +8,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
-import { DataView } from '../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../src/plugins/data/common';
 import { FindingsTable } from './findings_table';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+
 import { CSPFinding, FetchState } from './types';
-import { CSP_KUBEBEAT_INDEX } from '../../../../common/constants';
+// import { CSP_KUBEBEAT_INDEX } from '../../../../common/constants';
 import { FindingsSearchBar } from './findings_search_bar';
 
+const CSP_KUBEBEAT_INDEX = 'kubebeat*';
 /**
  * This component syncs the FindingsTable with FindingsSearchBar
  */

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from 'src/core/server';
+import { ElasticsearchClient, IRouter } from 'src/core/server';
 import {
   SearchRequest,
   CountRequest,
@@ -14,7 +14,7 @@ import {
   DictionaryResponseBase,
   AggregationsKeyedBucketKeys,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { SecuritySolutionPluginRouter } from '../../types';
+
 import type { CloudPostureStats, BenchmarkStats, EvaluationStats } from '../types';
 
 const FINDINGS_INDEX = `kubebeat*`;
@@ -86,7 +86,7 @@ const getResourcesEvaluationEsQuery = (
         terms: { field: 'resource.filename.keyword' },
       },
     },
-    sort: 'resource.filename.keyword',
+    // sort: 'resource.filename.keyword',
   };
 };
 interface LastCycle {
@@ -211,7 +211,7 @@ const getBenchmarksStats = async (
   return benchmarkScores;
 };
 
-export const getScoreRoute = (router: SecuritySolutionPluginRouter, logger: Logger): void =>
+export const defineGetScoreRoute = (router: IRouter): void =>
   router.get(
     {
       path: '/api/csp/stats',
@@ -240,7 +240,9 @@ export const getScoreRoute = (router: SecuritySolutionPluginRouter, logger: Logg
         });
       } catch (err) {
         // TODO - validate err object and parse
-        return response.customError({ body: { message: 'Unknown error' }, statusCode: 500 });
+
+        console.log({ err });
+        return response.customError({ body: { message: 'sssUnknown error' }, statusCode: 500 });
       }
     }
   );

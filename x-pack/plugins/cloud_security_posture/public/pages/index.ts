@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-import { IRouter } from '../../../../../src/core/server';
-import { defineGetScoreRoute } from './score';
-
-export function defineRoutes(router: IRouter) {
-  defineGetScoreRoute(router);
-}
+export * from './findings';
+export * from './compliance_dashboard';
