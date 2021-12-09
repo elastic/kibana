@@ -6,12 +6,13 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
+import { ServiceLocations } from '../../../../common/runtime_types/monitor_management';
 import { DataStream } from '../types';
 
 interface IPolicyConfigContext {
   setMonitorType: React.Dispatch<React.SetStateAction<DataStream>>;
   setName: React.Dispatch<React.SetStateAction<string>>;
-  setLocations: React.Dispatch<React.SetStateAction<string[]>>;
+  setLocations: React.Dispatch<React.SetStateAction<ServiceLocations>>;
   setIsTLSEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   setIsZipUrlTLSEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   monitorType: DataStream;
@@ -23,17 +24,17 @@ interface IPolicyConfigContext {
   isEditable?: boolean;
   defaultName?: string;
   name?: string;
-  defaultLocations?: string[];
-  locations?: string[];
+  defaultLocations?: ServiceLocations;
+  locations?: ServiceLocations;
 }
 
-interface IPolicyConfigContextProvider {
+export interface IPolicyConfigContextProvider {
   children: React.ReactNode;
   defaultMonitorType?: DataStream;
   defaultIsTLSEnabled?: boolean;
   defaultIsZipUrlTLSEnabled?: boolean;
   defaultName?: string;
-  defaultLocations?: string[];
+  defaultLocations?: ServiceLocations;
   isEditable?: boolean;
 }
 
@@ -46,7 +47,7 @@ const defaultContext: IPolicyConfigContext = {
   setName: (_name: React.SetStateAction<string>) => {
     throw new Error('setName was not initialized, set it when you invoke the context');
   },
-  setLocations: (_locations: React.SetStateAction<string[]>) => {
+  setLocations: (_locations: React.SetStateAction<ServiceLocations>) => {
     throw new Error('setLocations was not initialized, set it when you invoke the context');
   },
   setIsTLSEnabled: (_isTLSEnabled: React.SetStateAction<boolean>) => {
@@ -79,7 +80,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
 }: IPolicyConfigContextProvider) {
   const [monitorType, setMonitorType] = useState<DataStream>(defaultMonitorType);
   const [name, setName] = useState<string>(defaultName);
-  const [locations, setLocations] = useState<string[]>(defaultLocations);
+  const [locations, setLocations] = useState<ServiceLocations>(defaultLocations);
   const [isTLSEnabled, setIsTLSEnabled] = useState<boolean>(defaultIsTLSEnabled);
   const [isZipUrlTLSEnabled, setIsZipUrlTLSEnabled] = useState<boolean>(defaultIsZipUrlTLSEnabled);
 
