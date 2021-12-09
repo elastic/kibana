@@ -35,6 +35,13 @@ interface CreatePageResult {
   driver: HeadlessChromiumDriver;
   unexpectedExit$: Rx.Observable<never>;
   metrics$: Rx.Observable<PerformanceMetrics>;
+  /**
+   * Close the page and the browser.
+   *
+   * @note Ensure this function gets called once all actions against the page
+   * have concluded. This ensures the browser is closed and gives the OS a chance
+   * to reclaim resources like memory.
+   */
   close: () => Rx.Observable<void>;
 }
 
@@ -186,10 +193,9 @@ export class HeadlessChromiumDriverFactory {
       };
       const { terminate$ } = safeChildProcess(logger, childProcess);
 
-      // this is adding unsubscribe logic to our observer
-      // so that if our observer unsubscribes, we terminate our child-process
+      // Ensure that the browser is closed once the observable completes.
       observer.add(() => {
-        logger.debug(`The browser process observer has unsubscribed. Closing the browser...`);
+        logger.debug(`It looks like the browser is no longer being used. Closing the browser...`);
         childProcess.kill(); // ignore async
       });
 

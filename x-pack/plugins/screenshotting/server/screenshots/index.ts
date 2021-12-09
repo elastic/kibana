@@ -94,7 +94,10 @@ export function getScreenshots(
         ),
         take(options.urls.length),
         toArray(),
-        mergeMap((results) => close().pipe(mapTo({ layout, metrics$, results })))
+        mergeMap((results) => {
+          // At this point we no longer need the page, close it.
+          return close().pipe(mapTo({ layout, metrics$, results }));
+        })
       );
     }),
     first()
