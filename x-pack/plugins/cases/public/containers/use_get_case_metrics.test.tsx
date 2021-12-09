@@ -50,6 +50,17 @@ describe('useGetCaseMetrics', () => {
     });
   });
 
+  it('does not call getCaseMetrics if empty feature parameter passed', async () => {
+    const spyOnGetCaseMetrics = jest.spyOn(api, 'getCaseMetrics');
+    await act(async () => {
+      const { waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
+        useGetCaseMetrics(basicCase.id, [])
+      );
+      await waitForNextUpdate();
+      expect(spyOnGetCaseMetrics).not.toBeCalled();
+    });
+  });
+
   it('fetch case metrics', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>

@@ -21,7 +21,6 @@ export interface CaseViewBaseProps {
    * **NOTE**: Do not hold on to the `.current` object, as it could become stale
    */
   refreshRef?: MutableRefObject<CaseViewRefreshPropInterface>;
-  hideSyncAlerts?: boolean;
 }
 
 export interface CaseViewProps extends CaseViewBaseProps {

@@ -72,6 +72,9 @@ export const useGetCaseMetrics = (
 
   const callFetch = useCallback(
     async (silent: boolean = false) => {
+      if (features.length === 0) {
+        return;
+      }
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
@@ -110,7 +113,7 @@ export const useGetCaseMetrics = (
       abortCtrlRef.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId]);
+  }, [caseId, features]);
 
   return { ...state, fetchCaseMetrics: callFetch };
 };

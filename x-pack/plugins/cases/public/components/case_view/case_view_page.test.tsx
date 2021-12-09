@@ -118,7 +118,7 @@ describe('CaseViewPage', () => {
       'Open'
     );
 
-    expect(wrapper.find(`[data-test-subj="case-view-metrics"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="case-view-metrics"]`).exists()).toBeFalsy();
 
     expect(
       wrapper
@@ -152,6 +152,17 @@ describe('CaseViewPage', () => {
     expect(
       wrapper.find('button[data-test-subj="case-view-status-action-button"]').first().text()
     ).toBe('Mark in progress');
+  });
+
+  it('should render CaseViewPage with metrics', async () => {
+    const wrapper = mount(
+      <TestProviders features={{ metrics: ['alerts.count'] }}>
+        <CaseViewPage {...caseProps} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find(`[data-test-subj="case-view-metrics"]`).exists()).toBeTruthy();
+    });
   });
 
   it('should show closed indicators in header when case is closed', async () => {

@@ -30,7 +30,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   value: { owner, userCanCrud, basePath = DEFAULT_BASE_PATH, features = {} },
 }) => {
   const { appId, appTitle } = useApplication();
-  const [value, setValue] = useState<CasesContextStateValue>({
+  const [value, setValue] = useState<CasesContextStateValue>(() => ({
     owner,
     userCanCrud,
     basePath,
@@ -39,7 +39,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
      * of the DEFAULT_FEATURES object
      */
     features: merge({}, DEFAULT_FEATURES, features),
-  });
+  }));
 
   /**
    * `userCanCrud` prop may change by the parent plugin.

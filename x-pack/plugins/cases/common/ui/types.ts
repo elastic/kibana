@@ -22,6 +22,7 @@ import {
 
 interface CasesFeatures {
   alerts: { sync: boolean };
+  metrics: CaseMetricsFeature[];
 }
 
 export interface CasesContextValue {

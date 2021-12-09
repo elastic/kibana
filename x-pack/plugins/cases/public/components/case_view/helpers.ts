@@ -7,7 +7,6 @@
 
 import { isEmpty } from 'lodash';
 import { CommentType } from '../../../common/api';
-import type { CaseMetricsFeature } from '../../../common/ui';
 import type { Comment } from '../../containers/types';
 
 export const getManualAlertIdsWithNoRuleId = (comments: Comment[]): string[] => {
@@ -20,12 +19,4 @@ export const getManualAlertIdsWithNoRuleId = (comments: Comment[]): string[] => 
     return alertIds;
   }, new Set<string>());
   return [...dedupeAlerts];
-};
-
-// TODO: temporary function to get metrics features, this needs to come from top level optional props with a default value
-export const getAllowedMetricFeatures = ({ owner }: { owner: string[] }): CaseMetricsFeature[] => {
-  if (owner.includes('securitySolution')) {
-    return ['alerts.count', 'connectors', 'alerts.hosts', 'alerts.users', 'lifespan'];
-  }
-  return ['alerts.count', 'connectors', 'lifespan'];
 };

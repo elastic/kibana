@@ -19,7 +19,7 @@ import { FieldHook } from '../shared_imports';
 interface Props {
   children: React.ReactNode;
   userCanCrud?: boolean;
-  features?: CasesContextValue['features'];
+  features?: Partial<CasesContextValue['features']>;
 }
 
 window.scrollTo = jest.fn();
