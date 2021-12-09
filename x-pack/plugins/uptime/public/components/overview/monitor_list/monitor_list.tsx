@@ -171,7 +171,7 @@ export const MonitorListComponent = ({
         name: URL_LABEL,
         width: '30%',
         render: (summaryUrl: string, summary: SummaryOrMonitor) => {
-          const url = 'state' in summary ? summaryUrl : summary.attributes?.urls?.[0];
+          const url = 'state' in summary ? summaryUrl : summary.attributes?.urls;
           return (
             <EuiLink href={url} target="_blank" color="text" external>
               {url}
