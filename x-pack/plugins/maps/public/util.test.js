@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEMSClient, getGlyphUrl } from './util';
+import { getGlyphUrl } from './util';
 
 const MOCK_EMS_SETTINGS = {
   isEMSEnabled: () => true,
@@ -29,12 +29,6 @@ describe('default ems-client creation', () => {
     require('./licensed_features').getLicenseId = () => {
       return 'foobarlicenseid';
     };
-  });
-
-  test('should memoize EMSClient', async () => {
-    const client1 = getEMSClient();
-    const client2 = getEMSClient();
-    expect(client1 === client2).toBe(true);
   });
 });
 

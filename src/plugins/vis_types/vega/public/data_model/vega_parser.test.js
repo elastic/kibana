@@ -21,7 +21,7 @@ describe(`VegaParser.parseAsync`, () => {
         resetSearchStats: jest.fn(),
       };
       expectedSpec = expectedSpec || cloneDeep(spec);
-      const mockGetServiceSettings = () => {
+      const mockGetServiceSettings = async () => {
         return {
           getFileLayers: async () => [],
           getUrlForRegionLayer: async (layer) => {
@@ -218,7 +218,7 @@ describe('VegaParser._resolveEsQueries', () => {
 
   function check(spec, expected, warnCount) {
     return async () => {
-      const mockGetServiceSettings = () => {
+      const mockGetServiceSettings = async () => {
         return {
           getFileLayers: async () => [{ name: 'file1', url: 'url1' }],
           getUrlForRegionLayer: async (layer) => {

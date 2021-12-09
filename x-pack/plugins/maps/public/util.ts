@@ -19,7 +19,7 @@ export async function getEmsFileLayers(): Promise<FileLayer[]> {
     return [];
   }
 
-  return getEMSClient().getFileLayers();
+  return (await getEMSClient()).getFileLayers();
 }
 
 export async function getEmsTmsServices(): Promise<TMSService[]> {
@@ -27,12 +27,12 @@ export async function getEmsTmsServices(): Promise<TMSService[]> {
     return [];
   }
 
-  return getEMSClient().getTMSServices();
+  return (await getEMSClient()).getTMSServices();
 }
 
 let emsClient: EMSClient | null = null;
 let latestLicenseId: string | undefined;
-export function getEMSClient(): EMSClient {
+async function getEMSClient(): Promise<EMSClient> {
   if (!emsClient) {
     emsClient = getMapsEmsSetup().createEMSClient();
   }

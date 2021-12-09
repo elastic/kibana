@@ -63,23 +63,6 @@ export class ServiceSettings implements IServiceSettings {
     return this._tilemapsConfig;
   }
 
-  __debugStubManifestCalls(manifestRetrieval: () => Promise<unknown>): { removeStub: () => void } {
-    const oldGetManifest = this._emsClient.getManifest;
-
-    // This legacy code used for debugging/testing only.
-    // @ts-expect-error
-    this._emsClient.getManifest = manifestRetrieval;
-    return {
-      removeStub: () => {
-        delete this._emsClient.getManifest;
-        // not strictly necessary since this is prototype method
-        if (this._emsClient.getManifest !== oldGetManifest) {
-          this._emsClient.getManifest = oldGetManifest;
-        }
-      },
-    };
-  }
-
   _backfillSettings = (fileLayer: EMSFileLayer): FileLayer => {
     // Older version of Kibana stored EMS state in the URL-params
     // Creates object literal with required parameters as key-value pairs

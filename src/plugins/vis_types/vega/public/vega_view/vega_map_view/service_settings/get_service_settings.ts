@@ -11,7 +11,7 @@ import { ServiceSettings } from './service_settings';
 import { getMapsEms } from '../../../services';
 import type { MapConfig } from '../../../../../../maps_ems/config';
 
-export function getServiceSettings(): IServiceSettings {
+export async function getServiceSettings(): Promise<IServiceSettings> {
   const mapsEmsConfig: MapConfig = getMapsEms().config;
   return new ServiceSettings(mapsEmsConfig, mapsEmsConfig.tilemap);
 }

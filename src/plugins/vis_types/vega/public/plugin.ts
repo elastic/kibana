@@ -39,7 +39,7 @@ export interface VegaVisualizationDependencies {
   plugins: {
     data: DataPublicPluginSetup;
   };
-  getServiceSettings: () => IServiceSettings;
+  getServiceSettings: () => Promise<IServiceSettings>;
 }
 
 /** @internal */
