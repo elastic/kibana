@@ -275,7 +275,7 @@ export const processUngroupedRatioResults = (
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
 
   const numeratorCount = numeratorResults.hits.total.value;
   const denominatorCount = denominatorResults.hits.total.value;
@@ -284,7 +284,13 @@ export const processUngroupedRatioResults = (
   if (ratio !== undefined && checkValueAgainstComparatorMap[count.comparator](ratio, count.value)) {
     const alert = alertFactory(
       UNGROUPED_FACTORY_KEY,
-      getReasonMessageForUngroupedRatioAlert(ratio, count.value, count.comparator),
+      getReasonMessageForUngroupedRatioAlert(
+        ratio,
+        count.value,
+        count.comparator,
+        timeSize,
+        timeUnit
+      ),
       ratio,
       count.value
     );
@@ -314,21 +320,6 @@ interface ReducedGroupByResult {
   name: string;
   documentCount: number;
 }
-
-const getFullNameTimeUnit = (shortcut: string): string => {
-  switch (shortcut) {
-    case 's':
-      return 'sec';
-    case 'm':
-      return 'min';
-    case 'h':
-      return 'hour';
-    case 'd':
-      return 'day';
-    default:
-      return '';
-  }
-};
 
 type ReducedGroupByResults = ReducedGroupByResult[];
 
@@ -430,7 +421,7 @@ export const processGroupByRatioResults = (
           count.comparator,
           numeratorGroup.name,
           timeSize,
-          getFullNameTimeUnit(timeUnit)
+          timeUnit
         ),
         ratio,
         count.value

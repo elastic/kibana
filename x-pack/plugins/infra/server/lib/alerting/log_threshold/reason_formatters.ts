@@ -9,7 +9,22 @@ import { i18n } from '@kbn/i18n';
 import {
   Comparator,
   ComparatorToi18nMap,
+  TimeUnit,
 } from '../../../../common/alerting/logs/log_threshold/types';
+
+// TODO: Do we need to i18n the returned value?
+const getTimeUnitFromOneChart = (shortcut: TimeUnit): string => {
+  switch (shortcut) {
+    case 's':
+      return 'sec';
+    case 'm':
+      return 'min';
+    case 'h':
+      return 'hour';
+    case 'd':
+      return 'day';
+  }
+};
 
 export const getReasonMessageForUngroupedCountAlert = (
   actualCount: number,
@@ -46,15 +61,19 @@ export const getReasonMessageForGroupedCountAlert = (
 export const getReasonMessageForUngroupedRatioAlert = (
   actualRatio: number,
   expectedRatio: number,
-  comparator: Comparator
+  comparator: Comparator,
+  timeSize: number,
+  timeUnit: TimeUnit
 ) =>
   i18n.translate('xpack.infra.logs.alerting.threshold.ungroupedRatioAlertReasonDescription', {
     defaultMessage:
-      'The log entries ratio is {actualRatio} ({translatedComparator} {expectedRatio}).',
+      'The ratio of selected logs is {actualRatio} in the last ({timeSize} {timeUnit}). Alert when ({translatedComparator} {expectedRatio}).',
     values: {
       actualRatio,
       expectedRatio,
       translatedComparator: ComparatorToi18nMap[comparator],
+      timeSize,
+      timeUnit: getTimeUnitFromOneChart(timeUnit),
     },
   });
 
@@ -64,17 +83,17 @@ export const getReasonMessageForGroupedRatioAlert = (
   comparator: Comparator,
   groupName: string,
   timeSize: number,
-  timeUnit: string
+  timeUnit: TimeUnit
 ) =>
   i18n.translate('xpack.infra.logs.alerting.threshold.groupedRatioAlertReasonDescription', {
     defaultMessage:
-      'The ratio of selected logs is {actualRatio} in the last ({timeValue} {timeUnit}) for {groupName}. Alert when ({translatedComparator} {expectedRatio}).',
+      'The ratio of selected logs is {actualRatio} in the last ({timeSize} {timeUnit}) for {groupName}. Alert when ({translatedComparator} {expectedRatio}).',
     values: {
       actualRatio,
       expectedRatio,
       groupName,
       translatedComparator: ComparatorToi18nMap[comparator],
       timeSize,
-      timeUnit,
+      timeUnit: getTimeUnitFromOneChart(timeUnit),
     },
   });
