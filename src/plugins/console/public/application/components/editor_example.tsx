@@ -9,9 +9,9 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
-import * as senseEditor from '../models/sense_editor';
+import { createReadOnlyAceEditor, CustomAceEditor } from '../models/sense_editor';
 // @ts-ignore
-import * as InputMode from '../models/legacy_core_editor/mode/input';
+import { Mode } from '../models/legacy_core_editor/mode/input';
 
 interface EditorExampleProps {
   panel: string;
@@ -29,32 +29,33 @@ GET index/_doc/1
 `;
 
 export function EditorExample(props: EditorExampleProps) {
-  const elemId = `help-example-${props.panel}`;
   const inputId = `help-example-${props.panel}-input`;
-
-  const editorRef = useRef<HTMLDivElement | null>(null);
-  const editorInstanceRef = useRef<senseEditor.CustomAceEditor | null>(null);
+  const wrapperDivRef = useRef<HTMLDivElement | null>(null);
+  const editorRef = useRef<CustomAceEditor>();
 
   useEffect(() => {
-    editorInstanceRef.current = senseEditor.createReadOnlyAceEditor(editorRef.current!);
-    const editor = editorInstanceRef.current;
-    const textareaElement = editorRef.current!.querySelector('textarea');
-    editor.update(exampleText.trim());
-    editor.session.setMode(new InputMode.Mode());
-    editor.session.setUseWorker(false);
-    editor.setHighlightActiveLine(false);
+    if (wrapperDivRef.current) {
+      editorRef.current = createReadOnlyAceEditor(wrapperDivRef.current);
 
-    if (textareaElement) {
-      textareaElement.setAttribute('id', inputId);
-      textareaElement.setAttribute('readonly', 'true');
+      const editor = editorRef.current;
+      editor.update(exampleText.trim());
+      editor.session.setMode(new Mode());
+      editor.session.setUseWorker(false);
+      editor.setHighlightActiveLine(false);
+
+      const textareaElement = wrapperDivRef.current.querySelector('textarea');
+      if (textareaElement) {
+        textareaElement.setAttribute('id', inputId);
+        textareaElement.setAttribute('readonly', 'true');
+      }
     }
 
     return () => {
-      if (editorInstanceRef.current) {
-        editorInstanceRef.current.destroy();
+      if (editorRef.current) {
+        editorRef.current.destroy();
       }
     };
-  }, [elemId, inputId]);
+  }, [inputId]);
 
   return (
     <>
@@ -65,7 +66,7 @@ export function EditorExample(props: EditorExampleProps) {
           })}
         </label>
       </EuiScreenReaderOnly>
-      <div id={elemId} ref={editorRef} className="conHelp__example" />
+      <div ref={wrapperDivRef} className="conHelp__example" />
     </>
   );
 }
