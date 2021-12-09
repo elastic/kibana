@@ -6,6 +6,9 @@
  */
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CspPluginSetup {}
+export interface CspSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CspStart {}
+
+export interface CspPluginSetup {}
 export interface CspPluginStart {}

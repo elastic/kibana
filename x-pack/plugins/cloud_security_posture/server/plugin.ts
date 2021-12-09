@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
@@ -13,17 +13,17 @@ import {
   Logger,
 } from '../../../../src/core/server';
 
-import { CspPluginSetup, CspPluginStart } from './types';
+import type { CspSetup, CspStart, CspPluginSetup, CspPluginStart } from './types';
 import { defineRoutes } from './routes';
 
-export class CspPlugin implements Plugin<CspPluginSetup, CspPluginStart> {
+export class CspPlugin implements Plugin<CspSetup, CspStart, CspPluginSetup, CspPluginStart> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup<CspPluginStart>) {
     this.logger.debug('csp: Setup');
     const router = core.http.createRouter();
 
