@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import React, { memo } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { PersistedState } from '../../../../visualizations/public';
 import { ThemeServiceStart } from '../../../../../core/public';
@@ -21,9 +21,7 @@ import {
 import { getFormatService, getPaletteService, getUISettings, getThemeService } from '../services';
 import { getTimeZone } from '../utils/get_timezone';
 
-import HeatmapComponent from '../components/heatmap_component';
 import './index.scss';
-const MemoizedChart = memo(HeatmapComponent);
 
 interface ExpressioHeatmapRendererDependencies {
   theme: ThemeServiceStart;
@@ -49,10 +47,11 @@ export const heatmapRenderer: (
     };
 
     const timeZone = getTimeZone(getUISettings());
+    const { HeatmapComponent } = await import('../components/heatmap_component');
     render(
       <KibanaThemeProvider theme$={theme.theme$}>
         <div className="heatmap-container" data-test-subj="heatmapChart">
-          <MemoizedChart
+          <HeatmapComponent
             {...config}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
