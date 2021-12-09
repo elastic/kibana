@@ -22,7 +22,7 @@ export default function (providerContext: FtrProviderContext) {
   function withTestPackageVersion(version: string) {
     before(async function () {
       await supertest
-        .post(`/api/fleet/epm/packages/package_policy_upgrade-${version}`)
+        .post(`/api/fleet/epm/packages/package_policy_upgrade/${version}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
@@ -30,7 +30,7 @@ export default function (providerContext: FtrProviderContext) {
 
     after(async function () {
       await supertest
-        .delete(`/api/fleet/epm/packages/package_policy_upgrade-${version}`)
+        .delete(`/api/fleet/epm/packages/package_policy_upgrade/${version}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);

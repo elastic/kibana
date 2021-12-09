@@ -40,7 +40,6 @@ export const CaseView = React.memo(
     timelineIntegration,
     useFetchAlertData,
     refreshRef,
-    hideSyncAlerts,
   }: CaseViewProps) => {
     const { spaces: spacesApi } = useKibana().services;
     const { detailName: caseId, subCaseId } = useCaseViewParams();
@@ -96,7 +95,6 @@ export const CaseView = React.memo(
             updateCase={updateCase}
             useFetchAlertData={useFetchAlertData}
             refreshRef={refreshRef}
-            hideSyncAlerts={hideSyncAlerts}
           />
         </CasesTimelineIntegrationProvider>
       )

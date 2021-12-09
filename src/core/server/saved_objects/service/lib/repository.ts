@@ -305,6 +305,7 @@ export class SavedObjectsRepository {
     const {
       id = SavedObjectsUtils.generateId(),
       migrationVersion,
+      coreMigrationVersion,
       overwrite = false,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
@@ -359,6 +360,7 @@ export class SavedObjectsRepository {
       originId,
       attributes,
       migrationVersion,
+      coreMigrationVersion,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
     });
@@ -523,6 +525,7 @@ export class SavedObjectsRepository {
             type: object.type,
             attributes: object.attributes,
             migrationVersion: object.migrationVersion,
+            coreMigrationVersion: object.coreMigrationVersion,
             ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
             ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
             updated_at: time,
@@ -927,7 +930,7 @@ export class SavedObjectsRepository {
       index: pit ? undefined : this.getIndicesForTypes(allowedTypes),
       // If `searchAfter` is provided, we drop `from` as it will not be used for pagination.
       from: searchAfter ? undefined : perPage * (page - 1),
-      _source: includedFields(type, fields),
+      _source: includedFields(allowedTypes, fields),
       preference,
       rest_total_hits_as_int: true,
       size: perPage,
@@ -935,7 +938,7 @@ export class SavedObjectsRepository {
         size: perPage,
         seq_no_primary_term: true,
         from: perPage * (page - 1),
-        _source: includedFields(type, fields),
+        _source: includedFields(allowedTypes, fields),
         ...(aggsObject ? { aggs: aggsObject } : {}),
         ...getSearchDsl(this._mappings, this._registry, {
           search,

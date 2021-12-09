@@ -26,7 +26,7 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { CaseType, ConnectorTypes } from '../../../common';
+import { CaseType, ConnectorTypes } from '../../../common/api';
 import { caseViewProps, caseData } from './index.test';
 
 jest.mock('../../containers/use_update_case');

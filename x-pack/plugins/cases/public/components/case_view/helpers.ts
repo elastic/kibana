@@ -6,8 +6,9 @@
  */
 
 import { isEmpty } from 'lodash';
-import { CaseMetricsFeature, CommentType } from '../../../common';
-import { Comment } from '../../containers/types';
+import { CommentType } from '../../../common/api';
+import type { CaseMetricsFeature } from '../../../common/ui';
+import type { Comment } from '../../containers/types';
 
 export const getManualAlertIdsWithNoRuleId = (comments: Comment[]): string[] => {
   const dedupeAlerts = comments.reduce((alertIds, comment: Comment) => {

@@ -81,7 +81,6 @@ const createAuthMock = () => {
 const createInternalPrebootContractMock = () => {
   const mock: InternalHttpServicePrebootMock = {
     registerRoutes: jest.fn(),
-    // @ts-expect-error tsc cannot infer ContextName and uses never
     registerRouteHandlerContext: jest.fn(),
     registerStaticDir: jest.fn(),
     basePath: createBasePathMock(),
@@ -89,6 +88,15 @@ const createInternalPrebootContractMock = () => {
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
     getServerInfo: jest.fn(),
+    server: {
+      name: 'http-preboot-server-test',
+      version: 'kibana',
+      route: jest.fn(),
+      start: jest.fn(),
+      stop: jest.fn(),
+      config: jest.fn().mockReturnValue(configMock.create()),
+      // @ts-expect-error somehow it thinks that `Server` isn't a `Construtable`
+    } as unknown as jest.MockedClass<Server>,
   };
   return mock;
 };
@@ -122,7 +130,6 @@ const createInternalSetupContractMock = () => {
     registerOnPreAuth: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
-    // @ts-expect-error tsc cannot infer ContextName and uses never
     registerRouteHandlerContext: jest.fn(),
     registerOnPreResponse: jest.fn(),
     createRouter: jest.fn().mockImplementation(() => mockRouter.create({})),
@@ -134,6 +141,7 @@ const createInternalSetupContractMock = () => {
     getAuthHeaders: jest.fn(),
     getServerInfo: jest.fn(),
     registerPrebootRoutes: jest.fn(),
+    registerRouterAfterListening: jest.fn(),
   };
   mock.createCookieSessionStorageFactory.mockResolvedValue(sessionStorageMock.createFactory());
   mock.createRouter.mockImplementation(() => mockRouter.create());
@@ -160,7 +168,6 @@ const createSetupContractMock = () => {
     basePath: internalMock.basePath,
     csp: CspConfig.DEFAULT,
     createRouter: jest.fn(),
-    // @ts-expect-error tsc cannot infer ContextName and uses never
     registerRouteHandlerContext: jest.fn(),
     auth: {
       get: internalMock.auth.get,

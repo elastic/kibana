@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { CaseMetricsFeature } from '../../common';
+import { CaseMetricsFeature } from '../../common/ui';
 import { useGetCaseMetrics, UseGetCaseMetrics } from './use_get_case_metrics';
 import { basicCase, basicCaseMetrics } from './mock';
 import * as api from './api';

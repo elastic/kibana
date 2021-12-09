@@ -29,15 +29,15 @@ import {
   respReporters,
   tags,
 } from '../mock';
+import { ResolvedCase } from '../../../common/ui/types';
 import {
   CasePatchRequest,
   CasePostRequest,
   CommentRequest,
   User,
   CaseStatuses,
-  ResolvedCase,
-  CaseMetrics,
-} from '../../../common';
+  CaseMetricsResponse,
+} from '../../../common/api';
 
 export const getCase = async (
   caseId: string,
@@ -51,8 +51,10 @@ export const resolveCase = async (
   signal: AbortSignal
 ): Promise<ResolvedCase> => Promise.resolve(basicResolvedCase);
 
-export const getCaseMetrics = async (caseId: string, signal: AbortSignal): Promise<CaseMetrics> =>
-  Promise.resolve(basicCaseMetrics);
+export const getCaseMetrics = async (
+  caseId: string,
+  signal: AbortSignal
+): Promise<CaseMetricsResponse> => Promise.resolve(basicCaseMetrics);
 
 export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> =>
   Promise.resolve(casesStatus);

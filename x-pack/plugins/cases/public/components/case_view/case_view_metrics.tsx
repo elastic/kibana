@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
-import { CaseMetrics } from '../../../common';
+import { CaseMetrics } from '../../../common/ui';
 import {
   ASSOCIATED_HOSTS_METRIC,
   ASSOCIATED_USERS_METRIC,

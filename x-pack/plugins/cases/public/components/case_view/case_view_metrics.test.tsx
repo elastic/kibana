@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { basicCaseMetrics } from '../../containers/mock';
 import { CaseViewMetrics } from './case_view_metrics';
-import { CaseMetrics } from '../../../common';
+import { CaseMetrics } from '../../../common/ui';
 import { TestProviders } from '../../common/mock';
 
 const renderCaseMetrics = ({

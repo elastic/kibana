@@ -31,6 +31,7 @@ const MOCK_EVENT: CrawlEvent = {
     domainAllowlist: ['https://www.elastic.co'],
     seedUrls: [],
     sitemapUrls: [],
+    maxCrawlDepth: 10,
   },
 };
 

@@ -14,15 +14,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import {
-  CaseStatuses,
-  CaseAttributes,
-  CaseType,
-  Case,
-  CaseConnector,
-  UpdateKey,
-  UpdateByKey,
-} from '../../../common';
+import { CaseStatuses, CaseAttributes, CaseType, CaseConnector } from '../../../common/api';
+import { Case, UpdateKey, UpdateByKey } from '../../../common/ui';
 import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';
 import { UserActionTree } from '../user_action_tree';
@@ -338,7 +331,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             caseData={caseData}
             currentExternalIncident={currentExternalIncident}
             userCanCrud={userCanCrud}
-            disableAlerting={ruleDetailsNavigation == null || hideSyncAlerts}
             isLoading={isLoading && (loadingKey === 'status' || loadingKey === 'settings')}
             onRefresh={handleRefresh}
             onUpdateField={onUpdateField}
