@@ -21,6 +21,6 @@ export type { MapConfig, TileMapConfig, EMSConfig } from '../config';
 export interface MapsEmsPluginPublicSetup {
   config: MapConfig;
   createEMSSettings(): EMSSettings;
-  createEMSClient(): EMSClient;
+  createEMSClient(): Promise<EMSClient>;
 }
 export type MapsEmsPluginPublicStart = ReturnType<MapsEmsPlugin['start']>;

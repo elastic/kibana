@@ -16,12 +16,7 @@ import {
   ORIGIN_LEGACY,
   TMS_IN_YML_ID,
 } from './service_settings_types';
-import { getMapsEms } from '../../../services';
-import {
-  MapsEmsPluginPublicSetup,
-  MapConfig,
-  TileMapConfig,
-} from '../../../../../../maps_ems/public';
+import type { MapConfig, TileMapConfig } from '../../../../../../maps_ems/public';
 /**
  * This class provides access to the EMS-layers and the kibana.yml configured layers through a single interface.
  */
@@ -32,16 +27,12 @@ export class ServiceSettings implements IServiceSettings {
   private readonly _emsClient: EMSClient;
   private readonly tmsOptionsFromConfig: any;
 
-  constructor(mapConfig: MapConfig, tilemapsConfig: TileMapConfig) {
+  constructor(mapConfig: MapConfig, tilemapsConfig: TileMapConfig, emsClient: EMSClient) {
     this._mapConfig = mapConfig;
     this._tilemapsConfig = tilemapsConfig;
     this._hasTmsConfigured = typeof tilemapsConfig.url === 'string' && tilemapsConfig.url !== '';
 
-    const mapsEms: MapsEmsPluginPublicSetup = getMapsEms();
-    this._emsClient = mapsEms.createEMSClient();
-    // any kibana user, regardless of distribution, should get all zoom levels
-    // use `sspl` license to indicate this
-    this._emsClient.addQueryParams({ license: 'sspl' });
+    this._emsClient = emsClient;
 
     const markdownIt = new MarkdownIt({
       html: false,

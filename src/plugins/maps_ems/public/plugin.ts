@@ -48,7 +48,7 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
       createEMSSettings: () => {
         return createEMSSettings(mapConfig, getIsEnterprisePlus);
       },
-      createEMSClient: () => {
+      createEMSClient: async () => {
         const emsSettings = createEMSSettings(mapConfig, getIsEnterprisePlus);
         return createEMSClient(emsSettings, kibanaVersion);
       },
