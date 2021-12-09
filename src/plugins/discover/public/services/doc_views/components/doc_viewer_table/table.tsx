@@ -112,6 +112,7 @@ export const DocViewerTable = ({
   const { storage, uiSettings } = getServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentIndexPatternId = indexPattern.id!;
+  const isSingleDocView = !filter;
 
   const {
     search: initialSearch,
@@ -120,17 +121,16 @@ export const DocViewerTable = ({
   }: Required<BrowseFieldsState> = useMemo(() => {
     const state = getAllBrowseFieldsStates(storage)[currentIndexPatternId] || {};
     return {
-      pinnedFields: state.pinnedFields || [],
+      pinnedFields: isSingleDocView ? [] : state.pinnedFields || [],
       search: state.search || '',
       pageSize: (validatePageSize(state.pageSize) && state.pageSize) || 25,
     };
-  }, [storage, currentIndexPatternId]);
+  }, [storage, currentIndexPatternId, isSingleDocView]);
   const [query, setQuery] = useState(initialSearch);
   const [pinnedFields, setPinnedFields] = useState<string[]>(initialPinnedFields);
 
   const flattened = flattenHit(hit, indexPattern, { source: true, includeIgnoredValues: true });
   const fieldsToShow = getFieldsToShow(Object.keys(flattened), indexPattern, showMultiFields);
-  const showActionsColumn = !!filter;
 
   const searchPlaceholder = i18n.translate('discover.docView.table.searchPlaceHolder', {
     defaultMessage: 'Search field names',
@@ -267,7 +267,7 @@ export const DocViewerTable = ({
   );
 
   const headers = [
-    showActionsColumn && (
+    !isSingleDocView && (
       <EuiTableHeaderCell align="left" width={62} isSorted={false}>
         <EuiText size="xs">
           <strong>
@@ -305,7 +305,7 @@ export const DocViewerTable = ({
         }: FieldRecord) => {
           return (
             <EuiTableRow key={field} className="kbnDocViewer__tableRow" isSelected={pinned}>
-              {showActionsColumn && (
+              {!isSingleDocView && (
                 <EuiTableRowCell
                   key={field + '-actions'}
                   align="center"
@@ -360,7 +360,7 @@ export const DocViewerTable = ({
         }
       );
     },
-    [onToggleColumn, onTogglePinned, showActionsColumn]
+    [onToggleColumn, onTogglePinned, isSingleDocView]
   );
 
   const rowElements = [
