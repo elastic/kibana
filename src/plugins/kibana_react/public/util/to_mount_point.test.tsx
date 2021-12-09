@@ -10,11 +10,12 @@ import React, { FC, useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 import { of, BehaviorSubject } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import type { CoreTheme } from 'src/core/public';
 import { toMountPoint } from './to_mount_point';
 
 describe('toMountPoint', () => {
-  let euiTheme: ReturnType<typeof useEuiTheme> | undefined;
+  let euiTheme: UseEuiTheme | undefined;
 
   beforeEach(() => {
     euiTheme = undefined;

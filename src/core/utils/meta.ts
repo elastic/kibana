@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
-
-export type EuiTheme = UseEuiTheme;
+export const EUI_STYLES_GLOBAL = 'eui-styles-global';
