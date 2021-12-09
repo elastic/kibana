@@ -12,7 +12,6 @@
       "explain": "__flag__",
       "stored_fields": [],
       "docvalue_fields": [],
-      "error_trace": "true",
       "from": "0",
       "ignore_unavailable": "__flag__",
       "ignore_throttled": "__flag__",
