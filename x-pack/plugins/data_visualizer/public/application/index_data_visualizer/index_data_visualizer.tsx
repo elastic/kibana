@@ -30,6 +30,8 @@ import {
 import { useDataVisualizerKibana } from '../kibana_context';
 import { DataView } from '../../../../../../src/plugins/data/common';
 import { ResultLink } from '../common/components/results_links';
+import { DATA_VISUALIZER_APP_LOCATOR, IndexDataVisualizerLocatorParams } from './locator';
+import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
 
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 
@@ -38,18 +40,43 @@ export interface DataVisualizerUrlStateContextProviderProps {
   additionalLinks: ResultLink[];
 }
 
+export const getLocatorParams = (params: {
+  indexPatternId?: string;
+  savedSearchId?: string;
+  searchString: string;
+  searchSessionId?: string;
+  shouldRestoreSearchSession: boolean;
+}): IndexDataVisualizerLocatorParams => {
+  const urlState = parseUrlState(params.searchString);
+
+  let locatorParams: IndexDataVisualizerLocatorParams = {
+    indexPatternId: urlState.index,
+    searchSessionId: params.searchSessionId,
+  };
+
+  if (urlState) {
+    if (urlState._g) {
+      const { time, refreshInterval } = urlState._g;
+
+      locatorParams.timeRange = time;
+      locatorParams.refreshInterval = refreshInterval;
+    }
+
+    if (urlState._a && urlState._a[DATA_VISUALIZER_INDEX_VIEWER]) {
+      locatorParams = { ...locatorParams, ...urlState._a[DATA_VISUALIZER_INDEX_VIEWER] };
+    }
+  }
+  return locatorParams;
+};
+
 export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateContextProviderProps> =
   ({ IndexDataVisualizerComponent, additionalLinks }) => {
+    const { services } = useDataVisualizerKibana();
     const {
-      services: {
-        data: {
-          indexPatterns,
-          search: { session },
-        },
-        savedObjects: { client: savedObjectsClient },
-        notifications: { toasts },
-      },
-    } = useDataVisualizerKibana();
+      data: { indexPatterns, search },
+      savedObjects: { client: savedObjectsClient },
+      notifications: { toasts },
+    } = services;
     const history = useHistory();
     const { search: searchString } = useLocation();
 
@@ -58,12 +85,53 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
       null
     );
 
+    const [currentSessionId, setCurrentSessionId] = useState<string | undefined>(undefined);
+
     useEffect(() => {
-      session.start();
+      if (search.session) {
+        search.session.enableStorage({
+          getName: async () => {
+            // return the name you want to give the saved Search Session
+            return `Data visualizer`;
+          },
+          getLocatorData: async () => {
+            return {
+              id: DATA_VISUALIZER_APP_LOCATOR,
+              initialState: getLocatorParams({
+                ...services,
+                searchString,
+                indexPatternId: currentIndexPattern?.id,
+                savedSearchId: currentSavedSearch?.id,
+                shouldRestoreSearchSession: false,
+                searchSessionId: search.session.getSessionId(),
+              }),
+              restoreState: getLocatorParams({
+                ...services,
+                searchString,
+                indexPatternId: currentIndexPattern?.id,
+                savedSearchId: currentSavedSearch?.id,
+                shouldRestoreSearchSession: true,
+                searchSessionId: search.session.getSessionId(),
+              }),
+            };
+          },
+        });
+      }
+
+      const urlState = parseUrlState(searchString);
+
+      if (urlState.searchSessionId !== undefined && urlState.searchSessionId !== currentSessionId) {
+        search.session?.restore(urlState.searchSessionId);
+        setCurrentSessionId(urlState.searchSessionId);
+      } else {
+        const newSessionId = search.session?.start();
+        setCurrentSessionId(newSessionId);
+      }
       return () => {
-        session.clear();
+        search.session.clear();
       };
-    }, [session]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [search.session, searchString]);
 
     useEffect(() => {
       const prevSearchString = searchString;
@@ -178,6 +246,7 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
             currentIndexPattern={currentIndexPattern}
             currentSavedSearch={currentSavedSearch}
             additionalLinks={additionalLinks}
+            currentSessionId={currentSessionId}
           />
         ) : (
           <div />

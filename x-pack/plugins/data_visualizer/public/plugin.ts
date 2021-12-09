@@ -7,7 +7,7 @@
 
 import { CoreSetup, CoreStart } from 'kibana/public';
 import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import type { SharePluginStart } from '../../../../src/plugins/share/public';
+import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import { Plugin } from '../../../../src/core/public';
 
 import { setStartServices } from './kibana_services';
@@ -24,14 +24,12 @@ import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_ho
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables';
 import { FieldFormatsStart } from '../../../../src/plugins/field_formats/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import {
-  DATA_VISUALIZER_APP_LOCATOR,
-  IndexDataVisualizerLocatorParams,
-} from './application/index_data_visualizer/locator';
+import { IndexDataVisualizerLocatorDefinition } from './application/index_data_visualizer/locator';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
+  share: SharePluginSetup;
 }
 export interface DataVisualizerStartDependencies {
   data: DataPublicPluginStart;
@@ -48,10 +46,6 @@ export interface DataVisualizerStartDependencies {
 
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
 export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;
-
-export const getLocatorParams = (params: any): IndexDataVisualizerLocatorParams => {
-  return {};
-};
 
 export class DataVisualizerPlugin
   implements
@@ -73,26 +67,14 @@ export class DataVisualizerPlugin
     if (plugins.embeddable) {
       registerEmbeddables(plugins.embeddable, core);
     }
+
+    if (plugins.share) {
+      plugins.share.url.locators.create(new IndexDataVisualizerLocatorDefinition());
+    }
   }
 
   public start(core: CoreStart, plugins: DataVisualizerStartDependencies) {
     setStartServices(core, plugins);
-
-    if (plugins.data) {
-      plugins.data.search.session.enableStorage({
-        getName: async () => {
-          // return the name you want to give the saved Search Session
-          return `Data visualizer`;
-        },
-        getLocatorData: async () => {
-          return {
-            id: DATA_VISUALIZER_APP_LOCATOR,
-            initialState: getLocatorParams({ ...plugins, shouldRestoreSearchSession: false }),
-            restoreState: getLocatorParams({ ...plugins, shouldRestoreSearchSession: true }),
-          };
-        },
-      });
-    }
 
     return {
       getFileDataVisualizerComponent,

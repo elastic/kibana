@@ -22,6 +22,7 @@ export function FieldStatsTableSavedSearchEmbeddable(renderProps: FieldStatistic
         columns={renderProps.columns}
         stateContainer={renderProps.stateContainer}
         onAddFilter={renderProps.onAddFilter}
+        searchSessionId={renderProps.searchSessionId}
       />
     </I18nProvider>
   );

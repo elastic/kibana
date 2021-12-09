@@ -401,6 +401,7 @@ export class SavedSearchEmbeddable
             filters={this.input.filters}
             query={this.input.query}
             onAddFilter={searchProps.onFilter}
+            searchSessionId={this.input.searchSessionId}
           />
         </KibanaThemeProvider>,
         domNode
