@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { countBy, partition } from 'lodash/fp';
+import { countBy } from 'lodash/fp';
 import uuid from 'uuid';
-import { Action, Actions } from '@kbn/securitysolution-io-ts-alerting-types';
+import { Action } from '@kbn/securitysolution-io-ts-alerting-types';
+import { ElasticsearchClient } from 'kibana/server';
 
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
@@ -27,7 +28,6 @@ import { RuleParams } from '../../schemas/rule_schemas';
 import { SanitizedAlert } from '../../../../../../alerting/common';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
-import { SavedObjectsClientContract } from 'kibana/server';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -195,15 +195,9 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };
 
-const swapActionIds = async (
-  action: Action,
-  savedObjectsClient: SavedObjectsClientContract
-): Promise<Action> => {
+const swapActionIds = async (action: Action, esClient: ElasticsearchClient): Promise<Action> => {
   try {
-    // const resolveResponse = await savedObjectsClient.find({
-    //   type: 'space',
-    // });
-    const resolveResponse = await savedObjectsClient.search(
+    const resolveResponse = await esClient.search(
       {
         index: '.kibana',
         body: {
@@ -218,35 +212,29 @@ const swapActionIds = async (
       },
       { meta: true }
     );
-    console.error('RESOLVE RESPONSE', JSON.stringify(resolveResponse.body, null, 2));
     if (resolveResponse.body.hits.hits.length === 1) {
       return { ...action, id: resolveResponse.body.hits.hits[0]._id.split(':')[1] };
     }
   } catch (exc) {
-    console.error('SWAP ACTION IDS EXCEPTION', JSON.stringify(exc, null, 2));
+    return action;
   }
   return action;
 };
 
 export const migrateLegacyActionsIds = async (
   rules: PromiseFromStreams[],
-  savedObjectsClient: SavedObjectsClientContract
+  esClient: ElasticsearchClient
 ): Promise<PromiseFromStreams[]> => {
-  console.error('\n\n\n\n\n********\nDID WE GET IN HERE?\n********\n');
   const isImportRule = (r: unknown): r is ImportRulesSchemaDecoded => !(r instanceof Error);
   const rulesToReturn = rules.map(async (rule) => {
     if (isImportRule(rule)) {
-      const newActions = await Promise.all<Actions>(
-        rule.actions.map<Action>((action) => swapActionIds(action, savedObjectsClient))
-      ).catch((err) => console.error('INTERIOR ERROR', err));
+      const actionsMap = rule.actions.map((action: Action) => swapActionIds(action, esClient));
+      const newActions = await Promise.all(actionsMap);
       return { ...rule, actions: newActions } as ImportRulesSchemaDecoded;
     }
     return rule;
   });
-  const resolvedRulesToReturn = await Promise.all(rulesToReturn).catch((err) =>
-    console.error('THERE WAS AN ERROR', err)
-  );
-  console.error('RULES TO RETURN', JSON.stringify(resolvedRulesToReturn, null, 2));
+  const resolvedRulesToReturn = await Promise.all(rulesToReturn);
   return resolvedRulesToReturn;
 };
 

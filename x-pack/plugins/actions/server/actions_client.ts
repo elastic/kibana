@@ -324,56 +324,6 @@ export class ActionsClient {
   }
 
   /**
-   * resolve an action
-   * @returns actionResult
-   */
-  public async resolve({ id }: { id: string }): Promise<ActionResult> {
-    try {
-      await this.authorization.ensureAuthorized('get');
-    } catch (error) {
-      this.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.GET,
-          savedObject: { type: 'action', id },
-          error,
-        })
-      );
-      throw error;
-    }
-
-    const preconfiguredActionsList = this.preconfiguredActions.find(
-      (preconfiguredAction) => preconfiguredAction.id === id
-    );
-    if (preconfiguredActionsList !== undefined) {
-      this.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.GET,
-          savedObject: { type: 'action', id },
-        })
-      );
-
-      return {
-        id,
-        actionTypeId: preconfiguredActionsList.actionTypeId,
-        name: preconfiguredActionsList.name,
-        isPreconfigured: true,
-      };
-    }
-
-    const result = await this.unsecuredSavedObjectsClient.resolve<RawAction>('action', id);
-
-    this.auditLogger?.log(
-      connectorAuditEvent({
-        action: ConnectorAuditAction.GET,
-        savedObject: { type: 'action', id },
-      })
-    );
-
-    return {
-      ...result,
-    };
-  }
-  /**
    * Get all actions with preconfigured list
    */
   public async getAll(): Promise<FindActionResult[]> {
@@ -597,7 +547,6 @@ function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResul
   return {
     id: savedObject.id,
     ...savedObject.attributes,
-    originId: savedObject.originId,
     isPreconfigured: false,
   };
 }

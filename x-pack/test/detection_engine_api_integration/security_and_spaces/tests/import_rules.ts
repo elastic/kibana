@@ -31,16 +31,10 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('importing rules with an index', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);
-        await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
-        );
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
-        );
         await deleteAllAlerts(supertest, log);
       });
 
@@ -484,27 +478,15 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it.only('importing a non-default-space 7.16 rule with a connector made in the non-default space should result in a 200', async () => {
+      it('importing a non-default-space 7.16 rule with a connector made in the non-default space should result in a 200', async () => {
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
+        );
         const spaceId = '714-space';
-        const connectorId = 'cf92c3c5-203e-54be-bb57-9348afc6651e';
-
-        // const rule1: ReturnType<typeof getSimpleRule> = {
-        //   ...getSimpleRule('rule-1'),
-        //   actions: [
-        //     {
-        //       group: 'default',
-        //       id: '51b17790-544e-11ec-a349-11361cc441c4',
-        //       action_type_id: '.slack',
-        //       params: {},
-        //     },
-        //   ],
-        // };
-
-        const connectorRes = await supertest
-          .get(`/s/${spaceId}/api/actions/connectors`) //${connectorId}`)
-          .set('kbn-xsrf', 'true')
-          .send();
-        console.error('DOES THE CONNECTOR ID EXIST?', JSON.stringify(connectorRes, null, 2));
+        // connectorId is from the 7.x connector here
+        // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+        // it
+        const connectorId = '51b17790-544e-11ec-a349-11361cc441c4';
 
         const rule1 = {
           id: '53aad690-544e-11ec-a349-11361cc441c4',
@@ -553,7 +535,7 @@ export default ({ getService }: FtrProviderContext): void => {
           actions: [
             {
               group: 'default',
-              id: '51b17790-544e-11ec-a349-11361cc441c4', //'cf92c3c5-203e-54be-bb57-9348afc6651e', // '51b17790-544e-11ec-a349-11361cc441c4'
+              id: connectorId,
               params: {
                 message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
@@ -568,8 +550,14 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', buffer, 'rules.ndjson');
-        console.error('BODY', JSON.stringify(body, null, 2));
+          .attach('file', buffer, 'rules.ndjson')
+          .expect(200);
+        expect(body.success).to.eql(true);
+        expect(body.success_count).to.eql(1);
+        expect(body.errors.length).to.eql(0);
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
+        );
       });
     });
   });
