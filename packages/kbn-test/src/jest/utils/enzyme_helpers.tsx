@@ -46,7 +46,10 @@ function getOptions(context = {}, childContextTypes = {}, props = {}) {
 /**
  * When using @kbn/i18n `injectI18n` on components, props.intl is required.
  */
-function nodeWithIntlProp<T>(node: ReactElement<T>): ReactElement<T & { intl: InjectedIntl }> {
+// This function is exported solely to fix the types output in TS 4.5.2, likely a bug
+export function nodeWithIntlProp<T>(
+  node: ReactElement<T>
+): ReactElement<T & { intl: InjectedIntl }> {
   return React.cloneElement<any>(node, { intl });
 }
 
