@@ -30,6 +30,7 @@ import { isEmpty } from 'lodash';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
 import { useCurrentUser } from '../../../../hooks/use_current_user';
+import { PrivilegeType } from '../../../../../common/privilege_type';
 
 interface Props {
   onCancel: () => void;
@@ -39,14 +40,19 @@ interface Props {
 
 export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
   const [formTouched, setFormTouched] = useState(false);
-  const [keyName, setKeyName] = useState('');
-  const [agentConfigChecked, setAgentConfigChecked] = useState(true);
-  const [eventWriteChecked, setEventWriteChecked] = useState(true);
-  const [sourcemapChecked, setSourcemapChecked] = useState(true);
+
+  const [agentKeyBody, setAgentKeyBody] = useState({
+    name: '',
+    sourcemap: true,
+    event: true,
+    agentConfig: true,
+  });
+
+  const { name, sourcemap, event, agentConfig } = agentKeyBody;
 
   const currentUser = useCurrentUser();
 
-  const isInputInvalid = isEmpty(keyName);
+  const isInputInvalid = isEmpty(name);
   const isFormInvalid = formTouched && isInputInvalid;
 
   const formError = i18n.translate(
@@ -56,7 +62,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
 
   const createAgentKeyTitle = i18n.translate(
     'xpack.apm.settings.agentKeys.createKeyFlyout.createAgentKey',
-    { defaultMessage: 'Create agent key' }
+    { defaultMessage: 'Create APM agent key' }
   );
 
   const createAgentKey = async () => {
@@ -66,22 +72,33 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
     }
 
     try {
+      const privileges: PrivilegeType[] = [];
+      if (sourcemap) {
+        privileges.push(PrivilegeType.SOURCEMAP);
+      }
+
+      if (event) {
+        privileges.push(PrivilegeType.EVENT);
+      }
+
+      if (agentConfig) {
+        privileges.push(PrivilegeType.AGENT_CONFIG);
+      }
+
       const { agentKey } = await callApmApi({
         endpoint: 'POST /api/apm/agent_keys',
         signal: null,
         params: {
           body: {
-            name: keyName,
-            sourcemap: sourcemapChecked,
-            event: eventWriteChecked,
-            agentConfig: agentConfigChecked,
+            name,
+            privileges,
           },
         },
       });
 
       onSuccess(agentKey);
     } catch (error) {
-      onError(keyName, error.body?.message || error.message);
+      onError(name, error.body?.message || error.message);
     }
   };
 
@@ -129,7 +146,9 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                   defaultMessage: 'e.g. apm-key',
                 }
               )}
-              onChange={(e) => setKeyName(e.target.value)}
+              onChange={(e) =>
+                setAgentKeyBody((state) => ({ ...state, name: e.target.value }))
+              }
               isInvalid={isFormInvalid}
               onBlur={() => setFormTouched(true)}
             />
@@ -157,8 +176,13 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
               <EuiCheckbox
                 id={htmlIdGenerator()()}
                 label="config_agent:read"
-                checked={agentConfigChecked}
-                onChange={() => setAgentConfigChecked((state) => !state)}
+                checked={agentConfig}
+                onChange={() =>
+                  setAgentKeyBody((state) => ({
+                    ...state,
+                    agentConfig: !state.agentConfig,
+                  }))
+                }
               />
             </EuiFormRow>
             <EuiSpacer size="s" />
@@ -173,8 +197,13 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
               <EuiCheckbox
                 id={htmlIdGenerator()()}
                 label="event:write"
-                checked={eventWriteChecked}
-                onChange={() => setEventWriteChecked((state) => !state)}
+                checked={event}
+                onChange={() =>
+                  setAgentKeyBody((state) => ({
+                    ...state,
+                    event: !state.event,
+                  }))
+                }
               />
             </EuiFormRow>
             <EuiSpacer size="s" />
@@ -189,8 +218,13 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
               <EuiCheckbox
                 id={htmlIdGenerator()()}
                 label="sourcemap:write"
-                checked={sourcemapChecked}
-                onChange={() => setSourcemapChecked((state) => !state)}
+                checked={sourcemap}
+                onChange={() =>
+                  setAgentKeyBody((state) => ({
+                    ...state,
+                    sourcemap: !state.sourcemap,
+                  }))
+                }
               />
             </EuiFormRow>
             <EuiSpacer size="s" />
