@@ -72,13 +72,11 @@ readonly links: {
             readonly indexingDocumentsSchema: string;
             readonly logSettings: string;
             readonly metaEngines: string;
-            readonly nativeAuth: string;
             readonly precisionTuning: string;
             readonly relevanceTuning: string;
             readonly resultSettings: string;
             readonly searchUI: string;
             readonly security: string;
-            readonly standardAuth: string;
             readonly synonyms: string;
             readonly webCrawler: string;
             readonly webCrawlerEventLogs: string;
@@ -106,7 +104,6 @@ readonly links: {
             readonly indexingSchedule: string;
             readonly jiraCloud: string;
             readonly jiraServer: string;
-            readonly nativeAuth: string;
             readonly oneDrive: string;
             readonly permissions: string;
             readonly salesforce: string;
@@ -114,7 +111,6 @@ readonly links: {
             readonly serviceNow: string;
             readonly sharePoint: string;
             readonly slack: string;
-            readonly standardAuth: string;
             readonly synch: string;
             readonly zendesk: string;
         };
@@ -290,7 +286,14 @@ readonly links: {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
-        readonly plugins: Record<string, string>;
+        readonly plugins: {
+            azureRepo: string;
+            gcsRepo: string;
+            hdfsRepo: string;
+            s3Repo: string;
+            snapshotRestoreRepos: string;
+            mapperSize: string;
+        };
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
