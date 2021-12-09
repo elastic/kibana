@@ -167,7 +167,7 @@ async function getArtifactSpecForSnapshot(
 
   if (archive.version !== desiredVersion) {
     log.warning(
-      `Snapshot found, but version does not Kibana. Kibana: ${desiredVersion}, Snapshot: ${archive.version}`
+      `Snapshot found, but version does not match Kibana. Kibana: ${desiredVersion}, Snapshot: ${archive.version}`
     );
   }
 
