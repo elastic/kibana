@@ -9,6 +9,6 @@
   "description": "",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation"],
+  "requiredPlugins": ["navigation", "data", "kibanaReact"],
   "optionalPlugins": []
 }

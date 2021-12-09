@@ -10,9 +10,9 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { SummarySection } from './dashboard_sections/summary_section';
 import { AccumulatedSection } from './dashboard_sections/accumulated_section';
 import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
-import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { HeaderPage } from '../../../common/components/header_page';
 import { useCloudPostureStatsApi } from '../../common/api';
+
+import { CspPageTemplate } from '../../components/page_template';
 
 export const dateValueToTuple = ({ date, value }: { date: number; value: number }) => [date, value];
 
@@ -40,12 +40,12 @@ const CompliancePage = () => {
   );
 };
 
-export const ComplianceDashboard = () => {
-  return (
-    <SecuritySolutionPageWrapper noPadding={false}>
-      <HeaderPage border title="Compliance" />
-      <CompliancePage />
-      {/* <SpyRoute pageName={CloudPosturePage.dashboard} /> */}
-    </SecuritySolutionPageWrapper>
-  );
-};
+export const ComplianceDashboard = () => (
+  <CspPageTemplate
+    pageHeader={{
+      pageTitle: 'Compliance',
+    }}
+  >
+    <CompliancePage />
+  </CspPageTemplate>
+);

@@ -8,14 +8,9 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { decode, encode } from 'rison-node';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { useLocation, useHistory } from 'react-router-dom';
-import {
-  DataView,
-  IKibanaSearchResponse,
-  Filter,
-} from '../../../../../../../src/plugins/data/common';
-import { SearchBarProps } from '../../../../../../../src/plugins/data/public';
-import { useKibana } from '../../../common/lib/kibana';
-import { CSPFinding, FetchState } from './types';
+import { DataView, IKibanaSearchResponse, Filter } from '../../../../../../src/plugins/data/common';
+import { SearchBarProps } from '../../../../../../src/plugins/data/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 // TODO: find kibanas' equivalent fn
 const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>

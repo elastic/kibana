@@ -1,4 +1,4 @@
-# csp
+# CSP
 
 A Kibana plugin
 

@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
+import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 
 export interface CspPluginSetup {
   getGreeting: () => string;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspPluginStart {}
+
+export interface CspSetupPlugins {
+  data: DataPublicPluginStart;
+}
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
