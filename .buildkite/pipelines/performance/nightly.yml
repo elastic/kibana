@@ -16,7 +16,7 @@ steps:
   - label: ":factory_worker: Build Kibana Distribution and Plugins"
     command: .buildkite/scripts/steps/build_kibana.sh
     agents:
-      queue: n2-4
+      queue: c2-16
     key: build
 
   - label: ":muscle: Performance Tests with FTR config"
