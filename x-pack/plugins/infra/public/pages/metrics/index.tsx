@@ -196,11 +196,11 @@ const PageContent = (props: {
   );
 };
 
-const EXPLORE_DATA = i18n.translate('xpack.uptime.analyzeDataButtonLabel', {
+const EXPLORE_DATA = i18n.translate('xpack.infra.metrics.exploreDataButtonLabel', {
   defaultMessage: 'Explore data',
 });
 
-const EXPLORE_MESSAGE = i18n.translate('xpack.uptime.analyzeDataButtonLabel.message', {
+const EXPLORE_MESSAGE = i18n.translate('xpack.infra.metrics.exploreDataButtonLabel.message', {
   defaultMessage:
     'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
 });
