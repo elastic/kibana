@@ -719,7 +719,7 @@ curl -X DELETE "http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-644fd5a9"
 [[agent-key-api]]
 === APM agent Key API
 
-The Agent Key API allows you to configure agent keys to authorize requests from agents to the APM Server.
+The Agent Key API allows you to configure agent keys to authorize requests from APM agents to the APM Server.
 
 The following Agent key APIs are available:
 
