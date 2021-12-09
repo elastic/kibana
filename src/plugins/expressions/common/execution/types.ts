@@ -30,6 +30,11 @@ export interface ExecutionContext<
   getSearchContext: () => ExecutionContextSearch;
 
   /**
+   * Assets that can be consumed using `asset` function
+   */
+  getAsset: (assetId: string) => AssetType | undefined;
+
+  /**
    * Context variables that can be consumed using `var` and `var_set` functions.
    */
   variables: Record<string, unknown>;
@@ -75,6 +80,13 @@ export interface ExecutionContext<
    * Logs datatable.
    */
   logDatatable?(name: string, datatable: Datatable): void;
+}
+
+export interface AssetType {
+  '@created': string;
+  id: string;
+  type: ValidAssetType;
+  value: string;
 }
 
 /**

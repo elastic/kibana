@@ -15,7 +15,7 @@ import type { KibanaExecutionContext } from 'src/core/public';
 import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
-import { ExecutionContract, ExecutionResult } from '../execution';
+import { AssetType, ExecutionContract, ExecutionResult } from '../execution';
 import { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
 import { SavedObjectReference } from '../../../../core/types';
@@ -126,6 +126,7 @@ export interface ExpressionExecutionParams {
   searchContext?: SerializableRecord;
 
   variables?: Record<string, unknown>;
+  assets?: Record<string, AssetType>;
 
   /**
    * Whether to execute expression in *debug mode*. In *debug mode* inputs and

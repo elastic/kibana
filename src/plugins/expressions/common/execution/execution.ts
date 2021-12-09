@@ -36,7 +36,7 @@ import {
   parseExpression,
   ExpressionAstNode,
 } from '../ast';
-import { ExecutionContext, DefaultInspectorAdapters } from './types';
+import { ExecutionContext, DefaultInspectorAdapters, AssetType } from './types';
 import { getType, Datatable } from '../expression_types';
 import { ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
@@ -183,6 +183,8 @@ export class Execution<
 
   public readonly expression: string;
 
+  private assets: Record<string, AssetType>;
+
   public get inspectorAdapters(): InspectorAdapters {
     return this.context.inspectorAdapters;
   }
@@ -210,8 +212,11 @@ export class Execution<
     const inspectorAdapters =
       (execution.params.inspectorAdapters as InspectorAdapters) || createDefaultInspectorAdapters();
 
+    this.assets = execution.params.assets || {};
+
     this.context = {
       getSearchContext: () => this.execution.params.searchContext || {},
+      getAsset: (assetId: string) => this.assets[assetId],
       getSearchSessionId: () => execution.params.searchSessionId,
       getKibanaRequest: execution.params.kibanaRequest
         ? () => execution.params.kibanaRequest!
