@@ -134,7 +134,12 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
           <EuiSearchBar query={searchQuery} onChange={onSearch} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={toggleDetailPanel} iconType="list" fill>
+          <EuiButton
+            onClick={toggleDetailPanel}
+            iconType="list"
+            fill
+            data-test-subj="sessionViewDetailPanelToggle"
+          >
             <FormattedMessage
               id="xpack.sessionView.buttonOpenDetailPanel"
               defaultMessage="Detail panel"

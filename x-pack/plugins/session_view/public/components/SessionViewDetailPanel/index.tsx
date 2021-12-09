@@ -145,6 +145,7 @@ export const SessionViewDetailPanel = ({
       color="plain"
       css={isDetailMounted ? styles.detailPanelIn : styles.detailPanelOut}
       onAnimationEnd={handleAnimationEnd}
+      data-test-subj="sessionViewDetailPanel"
     >
       {renderSelectedProcessCommandDetail()}
       <div data-test-subj="sessionViewDetailPanelSessionDetail">

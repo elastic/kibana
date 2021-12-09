@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const SESSION_VIEW_URL = 'app/sessionView';
+export const SESSION_VIEW_URL = 'app/sessionView/process_tree';

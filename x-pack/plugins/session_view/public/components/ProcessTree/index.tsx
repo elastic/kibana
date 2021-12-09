@@ -141,7 +141,7 @@ export const ProcessTree = ({
   };
 
   return (
-    <div ref={scrollerRef} css={styles.scroller}>
+    <div ref={scrollerRef} css={styles.scroller} data-test-subj="sessionViewProcessTree">
       {sessionLeader && (
         <ProcessTreeNode
           isSessionLeader
