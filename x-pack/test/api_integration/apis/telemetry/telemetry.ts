@@ -20,6 +20,7 @@ import ossPluginsTelemetrySchema from '../../../../../src/plugins/telemetry/sche
 import xpackPluginsTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_plugins.json';
 import { assertTelemetryPayload } from '../../../../../test/api_integration/apis/telemetry/utils';
 import type { UnencryptedTelemetryPayload } from '../../../../../src/plugins/telemetry/common/types';
+import type { UsageStatsPayload } from '../../../../../src/plugins/telemetry_collection_manager/server/types';
 
 /**
  * Update the .monitoring-* documents loaded via the archiver to the recent `timestamp`
@@ -96,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body }: { body: UnencryptedTelemetryPayload } = await supertest
           .post('/api/telemetry/v2/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
-          .send({ unencrypted: true })
+          .send({ unencrypted: true, refreshCache: true })
           .expect(200);
 
         expect(body.length).to.be.greaterThan(1);
@@ -116,6 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
           monitoringRootTelemetrySchema.properties.monitoringTelemetry.properties.stats.items
         );
         const plugins = deepmerge(ossPluginsTelemetrySchema, xpackPluginsTelemetrySchema);
+
         try {
           assertTelemetryPayload({ root, plugins }, localXPack);
           monitoring.forEach((stats) => {
@@ -147,7 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body }: { body: UnencryptedTelemetryPayload } = await supertest
           .post('/api/telemetry/v2/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
-          .send({ unencrypted: true })
+          .send({ unencrypted: true, refreshCache: true })
           .expect(200);
 
         expect(body).length(2);
@@ -156,6 +158,57 @@ export default function ({ getService }: FtrProviderContext) {
         const [localXPack, ...monitoring] = telemetryStats;
         expect((localXPack as Record<string, unknown>).collectionSource).to.eql('local_xpack');
         expect(monitoring).to.eql(basicClusterFixture.map((item) => ({ ...item, timestamp })));
+      });
+    });
+
+    describe('Telemetry caching', () => {
+      const archive = 'x-pack/test/functional/es_archives/monitoring/basic_6.3.x';
+      const fromTimestamp = '2018-07-23T22:54:59.087Z';
+      const toTimestamp = '2018-07-23T22:55:05.933Z';
+      before(async () => {
+        await esArchiver.load(archive);
+        await updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestamp);
+        // hit the endpoint to cache results
+        await supertest
+          .post('/api/telemetry/v2/clusters/_stats')
+          .set('kbn-xsrf', 'xxx')
+          .send({ unencrypted: true, refreshCache: true })
+          .expect(200);
+      });
+      after(() => esArchiver.unload(archive));
+
+      it('returns cached results by default', async () => {
+        const { body }: { body: UnencryptedTelemetryPayload } = await supertest
+          .post('/api/telemetry/v2/clusters/_stats')
+          .set('kbn-xsrf', 'xxx')
+          .send({ unencrypted: true })
+          .expect(200);
+
+        expect(body).length(2);
+
+        const telemetryStats = body.map(({ stats }) => stats) as UsageStatsPayload[];
+
+        const today = moment().format('DD-MM-YYYY');
+        telemetryStats.forEach(({ cacheDetails }) => {
+          expect(typeof cacheDetails.cacheTimestamp).to.eql('string');
+          expect(moment(cacheDetails.cacheTimestamp).format('DD-MM-YYYY')).to.eql(today);
+          expect(cacheDetails.isCached).to.eql(true);
+        });
+      });
+    });
+
+    it('grabs a fresh copy on refresh', async () => {
+      const { body }: { body: UnencryptedTelemetryPayload } = await supertest
+        .post('/api/telemetry/v2/clusters/_stats')
+        .set('kbn-xsrf', 'xxx')
+        .send({ unencrypted: true, refreshCache: true })
+        .expect(200);
+
+      expect(body).length(1);
+      const telemetryStats = body.map(({ stats }) => stats) as UsageStatsPayload[];
+
+      telemetryStats.forEach(({ cacheDetails }) => {
+        expect(cacheDetails.isCached).to.eql(false);
       });
     });
   });

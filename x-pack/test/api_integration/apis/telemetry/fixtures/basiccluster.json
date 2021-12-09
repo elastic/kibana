@@ -2,6 +2,9 @@
   {
     "cluster_name": "docker-cluster",
     "collectionSource": "monitoring",
+    "cacheDetails": {
+      "isCached": false
+    },
     "cluster_stats": {
       "indices": {
         "completion": {

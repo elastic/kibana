@@ -287,6 +287,9 @@
     },
     "timestamp": "2017-08-15T22:10:59.952Z",
     "version": "7.0.0-alpha1",
+    "cacheDetails": {
+      "isCached": false
+    },
     "collectionSource": "monitoring"
   },
   {
@@ -604,6 +607,9 @@
     },
     "timestamp": "2017-08-15T22:10:54.610Z",
     "version": "7.0.0-alpha1",
+    "cacheDetails": {
+      "isCached": false
+    },
     "collectionSource": "monitoring"
   },
   {
@@ -1022,6 +1028,9 @@
     },
     "timestamp": "2017-08-15T22:10:52.642Z",
     "version": "7.0.0-alpha1",
+    "cacheDetails": {
+      "isCached": false
+    },
     "collectionSource": "monitoring"
   }
 ]

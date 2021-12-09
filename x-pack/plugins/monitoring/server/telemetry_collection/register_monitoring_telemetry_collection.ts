@@ -14,7 +14,7 @@ import { getAllStats } from './get_all_stats';
 import { getClusterUuids } from './get_cluster_uuids';
 import { getLicenses } from './get_licenses';
 
-interface MonitoringStats extends UsageStatsPayload {
+interface MonitoringStats extends Omit<UsageStatsPayload, 'cacheDetails'> {
   stack_stats: {
     logstash?: LogstashBaseStats;
     beats?: BeatsBaseStats;
@@ -50,10 +50,6 @@ export function registerMonitoringTelemetryCollection(
           cluster_name: { type: 'keyword' },
           version: { type: 'keyword' },
           cluster_stats: {},
-          cacheDetails: {
-            isCached: { type: 'boolean' },
-            cacheTimestamp: { type: 'date' },
-          },
           stack_stats: {
             logstash: {
               versions: {
@@ -153,6 +149,7 @@ export function registerMonitoringTelemetryCollection(
         getLicenses(clusterDetails, callCluster, maxBucketSize),
         getAllStats(clusterDetails, callCluster, timestamp, maxBucketSize),
       ]);
+
       return {
         stats: stats.map((stat) => {
           const license = licenses[stat.cluster_uuid];

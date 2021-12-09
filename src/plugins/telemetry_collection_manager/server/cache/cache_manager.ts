@@ -8,7 +8,7 @@
 import moment from 'moment';
 export interface CachedObject<T = unknown> {
   data: T;
-  cacheTimestamp: number;
+  cacheTimestamp: string;
 }
 
 export interface CacheManagerConfig {
@@ -24,11 +24,10 @@ export class CacheManager {
   }
 
   public setCache = (cacheKey: string, data: unknown): void => {
-    this.cachedUsage.set(cacheKey, { data, cacheTimestamp: Date.now() });
+    this.cachedUsage.set(cacheKey, { data, cacheTimestamp: moment().format() });
   };
 
   public isCacheValid = (cacheKey: string): boolean => {
-    const now = Date.now();
     const cachedObject = this.cachedUsage.get(cacheKey);
 
     if (!cachedObject) {
@@ -37,7 +36,7 @@ export class CacheManager {
     const { cacheTimestamp } = cachedObject;
 
     const cacheValidUntil = moment(cacheTimestamp).add(this.cacheDurationMs, 'milliseconds');
-    return moment(now).isBefore(cacheValidUntil);
+    return moment().isBefore(cacheValidUntil);
   };
 
   public getFromCache = <T>(cacheKey: string): CachedObject<T> | undefined => {
@@ -52,6 +51,12 @@ export class CacheManager {
   public unrefCachedObject = (cacheKey: string): void => {
     this.cachedUsage.delete(cacheKey);
   };
+
+  public unrefAllCacheObjects(): void {
+    for (const cacheKey of this.cachedUsage.keys()) {
+      this.unrefCachedObject(cacheKey);
+    }
+  }
 
   public unrefExpiredCacheObjects(): void {
     for (const cacheKey of this.cachedUsage.keys()) {

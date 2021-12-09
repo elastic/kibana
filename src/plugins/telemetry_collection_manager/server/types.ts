@@ -37,15 +37,18 @@ export interface TelemetryOptInStats {
 
 export interface BaseStatsGetterConfig {
   unencrypted: boolean;
+  refreshCache?: boolean;
   request?: KibanaRequest;
 }
 
 export interface EncryptedStatsGetterConfig extends BaseStatsGetterConfig {
   unencrypted: false;
+  refreshCache?: boolean;
 }
 
 export interface UnencryptedStatsGetterConfig extends BaseStatsGetterConfig {
   unencrypted: true;
+  refreshCache?: boolean;
   request: KibanaRequest;
 }
 
@@ -58,11 +61,12 @@ export interface StatsCollectionConfig {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   kibanaRequest: KibanaRequest | undefined; // intentionally `| undefined` to enforce providing the parameter
+  refreshCache: boolean;
 }
 
 export interface CacheDetails {
   isCached: boolean;
-  cacheTimestamp?: number;
+  cacheTimestamp?: string;
 }
 
 export interface BasicStatsPayload {

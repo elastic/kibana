@@ -54,7 +54,7 @@ export class TelemetryCollectionManagerPlugin
   private savedObjectsService?: SavedObjectsServiceStart;
   private readonly isDistributable: boolean;
   private readonly version: string;
-  private readonly cacheManager = new CacheManager({ cacheDurationMs: CACHE_DURATION_MS });
+  private cacheManager = new CacheManager({ cacheDurationMs: CACHE_DURATION_MS });
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -129,9 +129,10 @@ export class TelemetryCollectionManagerPlugin
     const soClient = this.getSavedObjectsClient(config);
     // Provide the kibanaRequest so opted-in plugins can scope their custom clients only if the request is not encrypted
     const kibanaRequest = config.unencrypted ? config.request : void 0;
+    const refreshCache = !!config.refreshCache;
 
     if (esClient && soClient) {
-      return { usageCollection, esClient, soClient, kibanaRequest };
+      return { usageCollection, esClient, soClient, kibanaRequest, refreshCache };
     }
   }
 
@@ -289,12 +290,12 @@ export class TelemetryCollectionManagerPlugin
   }
 
   private createCacheKey(strategy: CollectionStrategy, clustersDetails: ClusterDetails[]) {
-    const clusterUUid = clustersDetails
+    const clusterUUids = clustersDetails
       .map(({ clusterUuid }) => clusterUuid)
       .sort()
       .join('_');
 
-    return `${strategy.title}::${clusterUUid}`;
+    return `${strategy.title}::${clusterUUids}`;
   }
 
   private async getUsageForCollection(
@@ -306,14 +307,20 @@ export class TelemetryCollectionManagerPlugin
       version: this.version,
     };
     const clustersDetails = await collection.clusterDetailsGetter(statsCollectionConfig, context);
+    const { refreshCache } = statsCollectionConfig;
+    const { title: collectionSource } = collection;
     this.cacheManager.unrefExpiredCacheObjects();
+
+    // on `refreshCache: true` clear all cache to store a fresh copy
+    if (refreshCache) {
+      this.cacheManager.unrefAllCacheObjects();
+    }
 
     if (clustersDetails.length === 0) {
       return [];
     }
 
     const cacheKey = this.createCacheKey(collection, clustersDetails);
-    const { title: collectionSource } = collection;
     if (this.cacheManager.isCacheValid(cacheKey)) {
       const cachedData = this.cacheManager.getFromCache<BasicStatsPayload[]>(cacheKey);
       if (cachedData) {

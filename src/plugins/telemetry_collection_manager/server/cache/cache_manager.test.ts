@@ -7,6 +7,8 @@
  */
 
 import { CacheManager } from './cache_manager';
+import moment from 'moment';
+
 describe('CacheManager', () => {
   const mockCacheKey = 'mock_key';
   const mockCacheItem = 'cache_item';
@@ -25,7 +27,7 @@ describe('CacheManager', () => {
     const cacheManager = new CacheManager({ cacheDurationMs });
     cacheManager.setCache(mockCacheKey, mockCacheItem);
     expect(cacheManager.getFromCache(mockCacheKey)).toEqual({
-      cacheTimestamp: mockNow,
+      cacheTimestamp: moment(mockNow).format(),
       data: mockCacheItem,
     });
     jest.advanceTimersByTime(cacheDurationMs);
@@ -38,13 +40,13 @@ describe('CacheManager', () => {
     cacheManager.setCache(mockCacheKey, mockCacheItem);
     cacheManager.setCache(sndMockCacheKey, mockCacheItem);
     expect(cacheManager.getFromCache(mockCacheKey)).toEqual({
-      cacheTimestamp: mockNow,
+      cacheTimestamp: moment(mockNow).format(),
       data: mockCacheItem,
     });
     cacheManager.unrefCachedObject(mockCacheKey);
     expect(cacheManager.getFromCache(mockCacheKey)).toEqual(undefined);
     expect(cacheManager.getFromCache(sndMockCacheKey)).toEqual({
-      cacheTimestamp: mockNow,
+      cacheTimestamp: moment(mockNow).format(),
       data: mockCacheItem,
     });
   });

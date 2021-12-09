@@ -11,6 +11,7 @@ import { usageCollectionPluginMock } from '../../usage_collection/server/mocks';
 import { TelemetryCollectionManagerPlugin } from './plugin';
 import type { BasicStatsPayload, CollectionStrategyConfig, StatsGetterConfig } from './types';
 import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
+import { CacheManager } from './cache';
 
 function createCollectionStrategy(priority: number): jest.Mocked<CollectionStrategyConfig> {
   return {
@@ -45,6 +46,12 @@ describe('Telemetry Collection Manager', () => {
     const telemetryCollectionManager = new TelemetryCollectionManagerPlugin(initializerContext);
     const setupApi = telemetryCollectionManager.setup(coreMock.createSetup(), { usageCollection });
     const collectionStrategy = createCollectionStrategy(1);
+    beforeEach(() => {
+      // Reset cache on every request.
+      // 10s cache to avoid misatekly invalidating cache during test runs
+      // eslint-disable-next-line dot-notation
+      telemetryCollectionManager['cacheManager'] = new CacheManager({ cacheDurationMs: 10000 });
+    });
 
     describe('before start', () => {
       test('registers a collection strategy', () => {
@@ -203,23 +210,25 @@ describe('Telemetry Collection Manager', () => {
                 },
               },
             ]);
+
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
             ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
           });
+
           test('returns cached object on multiple calls', async () => {
             collectionStrategy.clusterDetailsGetter.mockResolvedValue([
               { clusterUuid: 'clusterUuid' },
             ]);
             collectionStrategy.statsGetter.mockResolvedValue([basicStats]);
-            await expect(setupApi.getStats(config));
+            await setupApi.getStats(config);
 
             await expect(setupApi.getStats(config)).resolves.toStrictEqual([
               {
                 clusterUuid: 'clusterUuid',
                 stats: {
                   ...basicStats,
-                  cacheDetails: { isCached: true, cacheTimestamp: expect.any(Number) },
+                  cacheDetails: { isCached: true, cacheTimestamp: expect.any(String) },
                   collectionSource: 'test_collection',
                 },
               },
