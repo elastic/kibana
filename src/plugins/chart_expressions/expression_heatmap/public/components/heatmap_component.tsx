@@ -268,7 +268,8 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
 
   // adds a very small number to the max value to make sure the max value will be included
   const endValue =
-    paletteParams && paletteParams.range === 'number' ? paletteParams.rangeMax : max + 0.00000001;
+    (paletteParams && paletteParams.range === 'number' ? paletteParams.rangeMax : max) + 0.00000001;
+
   const overwriteColors = uiState?.get('vis.colors') ?? null;
 
   const bands = ranges.map((start, index, array) => {
