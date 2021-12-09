@@ -9,14 +9,16 @@ import {
   sendCompleteMsg,
   sendErrorMsg,
   sendLoadingMsg,
+  sendNoResultsFoundMsg,
   sendPartialMsg,
 } from './use_saved_search_messages';
 import { FetchStatus } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import { DataMainMsg } from './use_saved_search';
+import { filter } from 'rxjs/operators';
 
 describe('test useSavedSearch message generators', () => {
-  test('sendCompleteMsg', async (done) => {
+  test('sendCompleteMsg', (done) => {
     const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.LOADING });
     main$.subscribe((value) => {
       if (value.fetchStatus !== FetchStatus.LOADING) {
@@ -28,7 +30,18 @@ describe('test useSavedSearch message generators', () => {
     });
     sendCompleteMsg(main$, true);
   });
-  test('sendPartialMessage', async (done) => {
+  test('sendNoResultsFoundMsg', (done) => {
+    const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.LOADING });
+    main$
+      .pipe(filter(({ fetchStatus }) => fetchStatus !== FetchStatus.LOADING))
+      .subscribe((value) => {
+        expect(value.fetchStatus).toBe(FetchStatus.COMPLETE);
+        expect(value.foundDocuments).toBe(false);
+        done();
+      });
+    sendNoResultsFoundMsg(main$);
+  });
+  test('sendPartialMessage', (done) => {
     const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.LOADING });
     main$.subscribe((value) => {
       if (value.fetchStatus !== FetchStatus.LOADING) {
@@ -38,7 +51,7 @@ describe('test useSavedSearch message generators', () => {
     });
     sendPartialMsg(main$);
   });
-  test('sendLoadingMsg', async (done) => {
+  test('sendLoadingMsg', (done) => {
     const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.COMPLETE });
     main$.subscribe((value) => {
       if (value.fetchStatus !== FetchStatus.COMPLETE) {
@@ -48,7 +61,7 @@ describe('test useSavedSearch message generators', () => {
     });
     sendLoadingMsg(main$);
   });
-  test('sendErrorMsg', async (done) => {
+  test('sendErrorMsg', (done) => {
     const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.PARTIAL });
     main$.subscribe((value) => {
       if (value.fetchStatus === FetchStatus.ERROR) {
@@ -60,7 +73,7 @@ describe('test useSavedSearch message generators', () => {
     sendErrorMsg(main$, new Error('Pls help!'));
   });
 
-  test('sendCompleteMsg cleaning error state message', async (done) => {
+  test('sendCompleteMsg cleaning error state message', (done) => {
     const initialState = {
       fetchStatus: FetchStatus.ERROR,
       error: new Error('Oh noes!'),
