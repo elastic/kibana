@@ -11,9 +11,9 @@
 import { AlertsHealth } from './alert';
 
 export * from './alert';
-export * from './alert_type';
+export * from './rule_type';
 export * from './alert_instance';
-export * from './alert_task_instance';
+export * from './rule_task_instance';
 export * from './alert_navigation';
 export * from './alert_summary';
 export * from './builtin_action_groups';

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export function getAlertTypeFeatureUsageName(alertTypeName: string) {
-  return `Alert: ${alertTypeName}`;
+export function getRuleTypeFeatureUsageName(ruleTypeName: string) {
+  return `Rule: ${ruleTypeName}`;
 }

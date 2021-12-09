@@ -6,11 +6,11 @@
  */
 
 import { createAlertEventLogRecordObject } from './create_alert_event_log_record_object';
-import { UntypedNormalizedAlertType } from '../rule_type_registry';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { RecoveredActionGroup } from '../types';
 
 describe('createAlertEventLogRecordObject', () => {
-  const ruleType: jest.Mocked<UntypedNormalizedAlertType> = {
+  const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
     id: 'test',
     name: 'My test alert',
     actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],

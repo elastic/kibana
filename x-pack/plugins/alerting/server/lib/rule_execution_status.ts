@@ -6,16 +6,16 @@
  */
 
 import { Logger } from 'src/core/server';
-import { AlertTaskState, AlertExecutionStatus, RawAlertExecutionStatus } from '../types';
+import { RuleTaskState, AlertExecutionStatus, RawRuleExecutionStatus } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
 import { AlertExecutionStatuses } from '../../common';
 
-export function executionStatusFromState(state: AlertTaskState): AlertExecutionStatus {
-  const instanceIds = Object.keys(state.alertInstances ?? {});
+export function executionStatusFromState(state: RuleTaskState): AlertExecutionStatus {
+  const alertIds = Object.keys(state.alertInstances ?? {});
   return {
     lastExecutionDate: new Date(),
-    status: instanceIds.length === 0 ? 'ok' : 'active',
+    status: alertIds.length === 0 ? 'ok' : 'active',
   };
 }
 
@@ -30,12 +30,12 @@ export function executionStatusFromError(error: Error): AlertExecutionStatus {
   };
 }
 
-export function alertExecutionStatusToRaw({
+export function ruleExecutionStatusToRaw({
   lastExecutionDate,
   lastDuration,
   status,
   error,
-}: AlertExecutionStatus): RawAlertExecutionStatus {
+}: AlertExecutionStatus): RawRuleExecutionStatus {
   return {
     lastExecutionDate: lastExecutionDate.toISOString(),
     lastDuration: lastDuration ?? 0,
@@ -45,19 +45,19 @@ export function alertExecutionStatusToRaw({
   };
 }
 
-export function alertExecutionStatusFromRaw(
+export function ruleExecutionStatusFromRaw(
   logger: Logger,
-  alertId: string,
-  rawAlertExecutionStatus?: Partial<RawAlertExecutionStatus> | null | undefined
+  ruleId: string,
+  rawRuleExecutionStatus?: Partial<RawRuleExecutionStatus> | null | undefined
 ): AlertExecutionStatus | undefined {
-  if (!rawAlertExecutionStatus) return undefined;
+  if (!rawRuleExecutionStatus) return undefined;
 
-  const { lastExecutionDate, lastDuration, status = 'unknown', error } = rawAlertExecutionStatus;
+  const { lastExecutionDate, lastDuration, status = 'unknown', error } = rawRuleExecutionStatus;
 
   let parsedDateMillis = lastExecutionDate ? Date.parse(lastExecutionDate) : Date.now();
   if (isNaN(parsedDateMillis)) {
     logger.debug(
-      `invalid alertExecutionStatus lastExecutionDate "${lastExecutionDate}" in raw alert ${alertId}`
+      `invalid ruleExecutionStatus lastExecutionDate "${lastExecutionDate}" in raw rule ${ruleId}`
     );
     parsedDateMillis = Date.now();
   }
@@ -78,7 +78,7 @@ export function alertExecutionStatusFromRaw(
   return executionStatus;
 }
 
-export const getAlertExecutionStatusPending = (lastExecutionDate: string) => ({
+export const getRuleExecutionStatusPending = (lastExecutionDate: string) => ({
   status: 'pending' as AlertExecutionStatuses,
   lastExecutionDate,
   error: null,

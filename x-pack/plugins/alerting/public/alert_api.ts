@@ -7,9 +7,9 @@
 
 import { HttpSetup } from 'kibana/public';
 import { LEGACY_BASE_ALERT_API_PATH } from '../common';
-import type { Alert, AlertType } from '../common';
+import type { Alert, RuleType } from '../common';
 
-export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
+export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<RuleType[]> {
   return await http.get(`${LEGACY_BASE_ALERT_API_PATH}/list_alert_types`);
 }
 
@@ -18,11 +18,11 @@ export async function loadAlertType({
   id,
 }: {
   http: HttpSetup;
-  id: AlertType['id'];
-}): Promise<AlertType | undefined> {
+  id: RuleType['id'];
+}): Promise<RuleType | undefined> {
   const alertTypes = (await http.get(
     `${LEGACY_BASE_ALERT_API_PATH}/list_alert_types`
-  )) as AlertType[];
+  )) as RuleType[];
   return alertTypes.find((type) => type.id === id);
 }
 

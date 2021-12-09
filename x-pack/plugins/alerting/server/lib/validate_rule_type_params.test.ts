@@ -6,17 +6,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { validateAlertTypeParams } from './validate_alert_type_params';
+import { validateRuleTypeParams } from './validate_rule_type_params';
 
 test('should return passed in params when validation not defined', () => {
-  const result = validateAlertTypeParams({
+  const result = validateRuleTypeParams({
     foo: true,
   });
   expect(result).toEqual({ foo: true });
 });
 
 test('should validate and apply defaults when params is valid', () => {
-  const result = validateAlertTypeParams(
+  const result = validateRuleTypeParams(
     { param1: 'value' },
     schema.object({
       param1: schema.string(),
@@ -31,7 +31,7 @@ test('should validate and apply defaults when params is valid', () => {
 
 test('should validate and throw error when params is invalid', () => {
   expect(() =>
-    validateAlertTypeParams(
+    validateRuleTypeParams(
       {},
       schema.object({
         param1: schema.string(),

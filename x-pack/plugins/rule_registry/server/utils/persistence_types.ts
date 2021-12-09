@@ -10,7 +10,7 @@ import {
   AlertExecutorOptions,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertType,
+  RuleType,
   AlertTypeParams,
   AlertTypeState,
 } from '../../../alerting/server';
@@ -39,7 +39,7 @@ export type PersistenceAlertType<
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 > = Omit<
-  AlertType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
+  RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
   'executor'
 > & {
   executor: (
@@ -65,4 +65,4 @@ export type CreatePersistenceRuleTypeWrapper = (options: {
   TActionGroupIds extends string = never
 >(
   type: PersistenceAlertType<TParams, TState, TInstanceContext, TActionGroupIds>
-) => AlertType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>;
+) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>;

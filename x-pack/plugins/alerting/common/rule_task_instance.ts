@@ -9,15 +9,15 @@ import * as t from 'io-ts';
 import { rawAlertInstance } from './alert_instance';
 import { DateFromString } from './date_from_string';
 
-export const alertStateSchema = t.partial({
+export const ruleStateSchema = t.partial({
   alertTypeState: t.record(t.string, t.unknown),
   alertInstances: t.record(t.string, rawAlertInstance),
   previousStartedAt: t.union([t.null, DateFromString]),
 });
 
-export type AlertTaskState = t.TypeOf<typeof alertStateSchema>;
+export type RuleTaskState = t.TypeOf<typeof ruleStateSchema>;
 
-export const alertParamsSchema = t.intersection([
+export const ruleParamsSchema = t.intersection([
   t.type({
     alertId: t.string,
   }),
@@ -25,4 +25,4 @@ export const alertParamsSchema = t.intersection([
     spaceId: t.string,
   }),
 ]);
-export type AlertTaskParams = t.TypeOf<typeof alertParamsSchema>;
+export type RuleTaskParams = t.TypeOf<typeof ruleParamsSchema>;

@@ -8,7 +8,7 @@
 import { LicenseType } from '../../licensing/common/types';
 import { RecoveredActionGroupId, DefaultActionGroupId } from './builtin_action_groups';
 
-export interface AlertType<
+export interface RuleType<
   ActionGroupIds extends Exclude<string, RecoveredActionGroupId> = DefaultActionGroupId,
   RecoveryActionGroupId extends string = RecoveredActionGroupId
 > {

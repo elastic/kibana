@@ -10,14 +10,14 @@ import { AlertExecutionStatusErrorReasons } from '../types';
 import {
   executionStatusFromState,
   executionStatusFromError,
-  alertExecutionStatusToRaw,
-  alertExecutionStatusFromRaw,
-} from './alert_execution_status';
+  ruleExecutionStatusToRaw,
+  ruleExecutionStatusFromRaw,
+} from './rule_execution_status';
 import { ErrorWithReason } from './error_with_reason';
 
 const MockLogger = loggingSystemMock.create().get();
 
-describe('AlertExecutionStatus', () => {
+describe('RuleExecutionStatus', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -71,14 +71,14 @@ describe('AlertExecutionStatus', () => {
     });
   });
 
-  describe('alertExecutionStatusToRaw()', () => {
+  describe('ruleExecutionStatusToRaw()', () => {
     const date = new Date('2020-09-03T16:26:58Z');
     const status = 'ok';
     const reason = AlertExecutionStatusErrorReasons.Decrypt;
     const error = { reason, message: 'wops' };
 
     test('status without an error', () => {
-      expect(alertExecutionStatusToRaw({ lastExecutionDate: date, status })).toMatchInlineSnapshot(`
+      expect(ruleExecutionStatusToRaw({ lastExecutionDate: date, status })).toMatchInlineSnapshot(`
         Object {
           "error": null,
           "lastDuration": 0,
@@ -89,7 +89,7 @@ describe('AlertExecutionStatus', () => {
     });
 
     test('status with an error', () => {
-      expect(alertExecutionStatusToRaw({ lastExecutionDate: date, status, error }))
+      expect(ruleExecutionStatusToRaw({ lastExecutionDate: date, status, error }))
         .toMatchInlineSnapshot(`
         Object {
           "error": Object {
@@ -104,7 +104,7 @@ describe('AlertExecutionStatus', () => {
     });
 
     test('status with a duration', () => {
-      expect(alertExecutionStatusToRaw({ lastExecutionDate: date, status, lastDuration: 1234 }))
+      expect(ruleExecutionStatusToRaw({ lastExecutionDate: date, status, lastDuration: 1234 }))
         .toMatchInlineSnapshot(`
       Object {
         "error": null,
@@ -116,41 +116,41 @@ describe('AlertExecutionStatus', () => {
     });
   });
 
-  describe('alertExecutionStatusFromRaw()', () => {
+  describe('ruleExecutionStatusFromRaw()', () => {
     const date = new Date('2020-09-03T16:26:58Z').toISOString();
     const status = 'active';
     const reason = AlertExecutionStatusErrorReasons.Execute;
     const error = { reason, message: 'wops' };
 
     test('no input', () => {
-      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id');
+      const result = ruleExecutionStatusFromRaw(MockLogger, 'rule-id');
       expect(result).toBe(undefined);
     });
 
     test('undefined input', () => {
-      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', undefined);
+      const result = ruleExecutionStatusFromRaw(MockLogger, 'rule-id', undefined);
       expect(result).toBe(undefined);
     });
 
     test('null input', () => {
-      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', null);
+      const result = ruleExecutionStatusFromRaw(MockLogger, 'rule-id', null);
       expect(result).toBe(undefined);
     });
 
     test('invalid date', () => {
-      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', {
+      const result = ruleExecutionStatusFromRaw(MockLogger, 'rule-id', {
         lastExecutionDate: 'an invalid date',
       })!;
       checkDateIsNearNow(result.lastExecutionDate);
       expect(result.status).toBe('unknown');
       expect(result.error).toBe(undefined);
       expect(MockLogger.debug).toBeCalledWith(
-        'invalid alertExecutionStatus lastExecutionDate "an invalid date" in raw alert alert-id'
+        'invalid ruleExecutionStatus lastExecutionDate "an invalid date" in raw rule rule-id'
       );
     });
 
     test('valid date', () => {
-      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', {
+      const result = ruleExecutionStatusFromRaw(MockLogger, 'rule-id', {
         lastExecutionDate: date,
       });
       expect(result).toMatchInlineSnapshot(`
@@ -162,7 +162,7 @@ describe('AlertExecutionStatus', () => {
     });
 
     test('valid status and date', () => {
-      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', {
+      const result = ruleExecutionStatusFromRaw(MockLogger, 'rule-id', {
         status,
         lastExecutionDate: date,
       });
@@ -175,7 +175,7 @@ describe('AlertExecutionStatus', () => {
     });
 
     test('valid status, date and error', () => {
-      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', {
+      const result = ruleExecutionStatusFromRaw(MockLogger, 'rule-id', {
         status,
         lastExecutionDate: date,
         error,
@@ -193,7 +193,7 @@ describe('AlertExecutionStatus', () => {
     });
 
     test('valid status, date and duration', () => {
-      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', {
+      const result = ruleExecutionStatusFromRaw(MockLogger, 'rule-id', {
         status,
         lastExecutionDate: date,
         lastDuration: 1234,
@@ -208,7 +208,7 @@ describe('AlertExecutionStatus', () => {
     });
 
     test('valid status, date, error and duration', () => {
-      const result = alertExecutionStatusFromRaw(MockLogger, 'alert-id', {
+      const result = ruleExecutionStatusFromRaw(MockLogger, 'rule-id', {
         status,
         lastExecutionDate: date,
         error,
