@@ -35,10 +35,10 @@ export function getMetricsKPIConfig({ indexPattern }: ConfigProps): SeriesConfig
       },
     ],
     hasOperationType: false,
-    filterFields: ['agent.type', ''],
+    filterFields: ['agent.type', 'service.type'],
     breakdownFields: ['agent.hostname', 'service.type'],
     baseFilters: [],
-    definitionFields: ['agent.hostname'],
+    definitionFields: ['agent.hostname', 'service.type'],
     metricOptions: [
       {
         label: SYSTEM_CPU_USAGE,
