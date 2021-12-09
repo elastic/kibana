@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
@@ -75,6 +76,20 @@ describe('LoginPage', () => {
   });
 
   describe('disabled form states', () => {
+    const originalNavigator = window.navigator;
+    const originalTop = window.top;
+
+    afterEach(function () {
+      Object.defineProperty(window, 'navigator', {
+        value: originalNavigator,
+        writable: true,
+      });
+      Object.defineProperty(window, 'top', {
+        value: originalTop,
+        writable: true,
+      });
+    });
+
     it('renders as expected when secure connection is required but not present', async () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState({ requiresSecureConnection: true }));
@@ -166,6 +181,62 @@ describe('LoginPage', () => {
       httpMock.get.mockResolvedValue(
         createLoginState({ selector: { enabled: false, providers: [] } })
       );
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
+    });
+
+    it('renders open in new window button when cookies are disabled and document is embedded inside iframe', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      Object.defineProperty(window, 'navigator', {
+        value: { cookieEnabled: false },
+        writable: true,
+      });
+      Object.defineProperty(window, 'top', {
+        value: {},
+        writable: true,
+      });
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(EuiEmptyPrompt)).toMatchSnapshot();
+    });
+
+    it('renders open in new window button when cookies are disabled and document is not embedded inside iframe', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      Object.defineProperty(window, 'navigator', {
+        value: { cookieEnabled: false },
+        writable: true,
+      });
 
       const wrapper = shallow(
         <LoginPage

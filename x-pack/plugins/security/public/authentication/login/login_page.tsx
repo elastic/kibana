@@ -7,7 +7,15 @@
 
 import './login_page.scss';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
@@ -96,10 +104,13 @@ export class LoginPage extends Component<Props, State> {
     }
 
     const isSecureConnection = !!window.location.protocol.match(/^https/);
+    const isCookiesEnabled = window.navigator.cookieEnabled;
     const { allowLogin, layout, requiresSecureConnection } = loginState;
 
     const loginIsSupported =
-      requiresSecureConnection && !isSecureConnection ? false : allowLogin && layout === 'form';
+      (requiresSecureConnection && !isSecureConnection) || !isCookiesEnabled
+        ? false
+        : allowLogin && layout === 'form';
 
     const contentHeaderClasses = classNames('loginWelcome__content', 'eui-textCenter', {
       ['loginWelcome__contentDisabledForm']: !loginIsSupported,
@@ -130,7 +141,13 @@ export class LoginPage extends Component<Props, State> {
         </header>
         <div className={contentBodyClasses}>
           <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem>{this.getLoginForm({ ...loginState, isSecureConnection })}</EuiFlexItem>
+            <EuiFlexItem>
+              {this.getLoginForm({
+                ...loginState,
+                isSecureConnection,
+                isCookiesEnabled,
+              })}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </div>
       </div>
@@ -141,9 +158,13 @@ export class LoginPage extends Component<Props, State> {
     layout,
     requiresSecureConnection,
     isSecureConnection,
+    isCookiesEnabled,
     selector,
     loginHelp,
-  }: LoginState & { isSecureConnection: boolean }) => {
+  }: LoginState & {
+    isSecureConnection: boolean;
+    isCookiesEnabled: boolean;
+  }) => {
     const isLoginExplicitlyDisabled = selector.providers.length === 0;
     if (isLoginExplicitlyDisabled) {
       return (
@@ -177,6 +198,55 @@ export class LoginPage extends Component<Props, State> {
             <FormattedMessage
               id="xpack.security.loginPage.requiresSecureConnectionMessage"
               defaultMessage="Contact your system administrator."
+            />
+          }
+        />
+      );
+    }
+
+    if (!isCookiesEnabled) {
+      if (isWindowEmbedded()) {
+        return (
+          <EuiEmptyPrompt
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.security.loginPage.requiresSecureConnectionTitle"
+                  defaultMessage="This content can't be viewed embedded in another website."
+                />
+              </p>
+            }
+            actions={
+              <EuiButton
+                href={window.location.href}
+                target="_blank"
+                iconType="popout"
+                iconSide="right"
+                fill
+              >
+                <FormattedMessage
+                  id="xpack.security.loginPage.requiresSecureConnectionMessage"
+                  defaultMessage="Open in Elastic"
+                />
+              </EuiButton>
+            }
+            style={{ paddingTop: 0 }}
+          />
+        );
+      }
+
+      return (
+        <DisabledLoginForm
+          title={
+            <FormattedMessage
+              id="xpack.security.loginPage.requiresSecureConnectionTitle"
+              defaultMessage="Cookies are required to log into Elastic"
+            />
+          }
+          message={
+            <FormattedMessage
+              id="xpack.security.loginPage.requiresSecureConnectionMessage"
+              defaultMessage="Enable cookies in your browser settings to continue."
             />
           }
         />
@@ -273,4 +343,12 @@ export function renderLoginPage(
   );
 
   return () => ReactDOM.unmountComponentAtNode(element);
+}
+
+function isWindowEmbedded() {
+  try {
+    return window.self !== window.top;
+  } catch (error) {
+    return true;
+  }
 }

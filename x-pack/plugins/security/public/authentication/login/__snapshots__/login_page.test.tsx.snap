@@ -95,6 +95,59 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
 />
 `;
 
+exports[`LoginPage disabled form states renders open in new window button when cookies are disabled and document is embedded inside iframe 1`] = `
+<EuiEmptyPrompt
+  actions={
+    <EuiButton
+      fill={true}
+      href="http://some-host/bar"
+      iconSide="right"
+      iconType="popout"
+      target="_blank"
+    >
+      <FormattedMessage
+        defaultMessage="Open in Elastic"
+        id="xpack.security.loginPage.requiresSecureConnectionMessage"
+        values={Object {}}
+      />
+    </EuiButton>
+  }
+  body={
+    <p>
+      <FormattedMessage
+        defaultMessage="This content can't be viewed embedded in another website."
+        id="xpack.security.loginPage.requiresSecureConnectionTitle"
+        values={Object {}}
+      />
+    </p>
+  }
+  style={
+    Object {
+      "paddingTop": 0,
+    }
+  }
+/>
+`;
+
+exports[`LoginPage disabled form states renders open in new window button when cookies are disabled and document is not embedded inside iframe 1`] = `
+<DisabledLoginForm
+  message={
+    <FormattedMessage
+      defaultMessage="Enable cookies in your browser settings to continue."
+      id="xpack.security.loginPage.requiresSecureConnectionMessage"
+      values={Object {}}
+    />
+  }
+  title={
+    <FormattedMessage
+      defaultMessage="Cookies are required to log into Elastic"
+      id="xpack.security.loginPage.requiresSecureConnectionTitle"
+      values={Object {}}
+    />
+  }
+/>
+`;
+
 exports[`LoginPage enabled form state renders as expected 1`] = `
 <LoginForm
   http={
