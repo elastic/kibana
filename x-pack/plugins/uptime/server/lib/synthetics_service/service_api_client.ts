@@ -8,29 +8,14 @@
 import axios from 'axios';
 import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { ServiceLocations } from '../../../common/runtime_types/monitor_management';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { getServiceLocations } from './get_service_locations';
 import { Logger } from '../../../../../../src/core/server';
+import { MonitorFields, ServiceLocations } from '../../../common/runtime_types/monitor_management';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 
-export type MonitorConfigs = Array<
-  SyntheticsMonitorSavedObject['attributes'] & {
-    id: string;
-    source?: {
-      inline: {
-        script: string;
-      };
-    };
-  }
->;
-
-// TODO: Proper type for formatted montior config in heartbeat json format
-export type FormattedMonitorConfigs = Array<Record<string, any> & { locations: string[] }>;
-
 export interface ServiceData {
-  monitors: FormattedMonitorConfigs;
+  monitors: Array<Partial<MonitorFields>>;
   output: {
     hosts: string[];
     api_key: string;
@@ -73,6 +58,8 @@ export class ServiceAPIClient {
     }
 
     const callServiceEndpoint = (monitors: ServiceData['monitors'], url: string) => {
+      // don't need to pass locations to heartbeat
+      monitors = monitors.map(({ locations, ...rest }) => rest);
       return axios({
         method,
         url: url + '/monitors',
@@ -89,7 +76,8 @@ export class ServiceAPIClient {
 
     this.locations.forEach(({ id, url }) => {
       const locMonitors = allMonitors.filter(
-        ({ locations }) => !locations || locations?.includes(id)
+        ({ locations }) =>
+          !locations || locations.length === 0 || locations?.find((loc) => loc.id === id)
       );
       if (locMonitors.length > 0) {
         promises.push(

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TLSFields, ConfigKey } from '../../fleet_package/types';
 import { arrayFormatter, Formatter } from './common';
+import { ConfigKey, TLSFields } from '../../../../common/runtime_types/monitor_management';
 
 type TLSFormatMap = Record<keyof TLSFields, Formatter>;
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TCPFields, ConfigKey } from '../../fleet_package/types';
 import { Formatter, commonFormatters } from './common';
 import { tlsFormatters } from './tls';
+import { ConfigKey, TCPFields } from '../../../../common/runtime_types/monitor_management';
 
 export type TCPFormatMap = Record<keyof TCPFields, Formatter>;
 
