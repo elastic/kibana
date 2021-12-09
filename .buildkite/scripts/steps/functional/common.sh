@@ -4,9 +4,6 @@ set -euo pipefail
 
 # Note, changes here might also need to be made in other scripts, e.g. uptime.sh
 
-# DO NOT MERGE ME
-export KBN_ES_SNAPSHOT_USE_UNVERIFIED=true
-
 source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
