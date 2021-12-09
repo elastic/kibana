@@ -27,7 +27,7 @@ import {
   ResolvedSanitizedRule,
   AlertAction,
   AlertAggregations,
-  AlertTaskState,
+  RuleTaskState,
   AlertSummary,
   ExecutionDuration,
   AlertStatus,
@@ -36,7 +36,7 @@ import {
   AlertNotifyWhenType,
   AlertTypeParams,
   ActionVariable,
-  AlertType as CommonAlertType,
+  RuleType as CommonRuleType,
 } from '../../alerting/common';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
@@ -48,7 +48,7 @@ export type {
   Alert,
   AlertAction,
   AlertAggregations,
-  AlertTaskState,
+  RuleTaskState,
   AlertSummary,
   ExecutionDuration,
   AlertStatus,
@@ -208,7 +208,7 @@ export interface AlertType<
   ActionGroupIds extends string = string,
   RecoveryActionGroupId extends string = string
 > extends Pick<
-    CommonAlertType<ActionGroupIds, RecoveryActionGroupId>,
+    CommonRuleType<ActionGroupIds, RecoveryActionGroupId>,
     | 'id'
     | 'name'
     | 'actionGroups'
