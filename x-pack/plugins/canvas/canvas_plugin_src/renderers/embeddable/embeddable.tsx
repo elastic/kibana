@@ -7,7 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from '../../../../../../src/core/public';
+import { CoreStart, StartServicesAccessor } from '../../../../../../src/core/public';
 import { StartDeps } from '../../plugin';
 import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 import {
@@ -57,16 +57,18 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
 };
 
 export const embeddableRendererFactory = (
-  core: CoreStart,
-  plugins: StartDeps
+  getStartServices: StartServicesAccessor<StartDeps>
 ): RendererFactory<EmbeddableExpression<EmbeddableInput>> => {
-  const renderEmbeddable = renderEmbeddableFactory(core, plugins);
   return () => ({
     name: 'embeddable',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render: async (domNode, { input, embeddableType }, handlers) => {
+      const [core, plugins] = await getStartServices();
+
+      const renderEmbeddable = renderEmbeddableFactory(core, plugins);
+
       const uniqueId = handlers.getElementId();
       const isByValueEnabled = plugins.presentationUtil.labsService.isProjectEnabled(
         'labs:canvas:byValueEmbeddable'

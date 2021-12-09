@@ -41,18 +41,19 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
 
     plugins.canvas.addRenderers(renderFunctions);
 
-    core.getStartServices().then(([coreStart, depsStart]) => {
-      const externalFunctions = initFunctions({
-        embeddablePersistableStateService: {
-          extract: depsStart.embeddable.extract,
-          inject: depsStart.embeddable.inject,
-        },
-      });
-      plugins.canvas.addFunctions(externalFunctions);
-      plugins.canvas.addRenderers(
-        renderFunctionFactories.map((factory: any) => factory(coreStart, depsStart))
-      );
+    const externalFunctions = initFunctions({
+      embeddablePersistableStateService: {
+        extract: plugins.embeddable.extract,
+        inject: plugins.embeddable.inject,
+      },
     });
+    plugins.canvas.addFunctions(externalFunctions);
+
+    // pass core.getStartServices into your  factories (don't await and pass in results)
+    // this allows us to register things at setup time
+    plugins.canvas.addRenderers(
+      renderFunctionFactories.map((factory: any) => factory(core.getStartServices))
+    );
 
     plugins.canvas.addDatasourceUIs(async () => {
       // @ts-expect-error

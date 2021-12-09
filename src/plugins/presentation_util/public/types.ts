@@ -13,8 +13,9 @@ import { DataViewsPublicPluginStart } from '../../data_views/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import { registerExpressionsLanguage } from '.';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PresentationUtilPluginSetup {}
+export interface PresentationUtilPluginSetup {
+  registerExpressionsLanguage: typeof registerExpressionsLanguage;
+}
 
 export interface PresentationUtilPluginStart {
   ContextProvider: React.FC;

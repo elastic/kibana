@@ -37,7 +37,7 @@ import { PresentationUtilPluginStart } from '../../../../src/plugins/presentatio
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
 import { pluginServiceRegistry } from './services/kibana';
-
+import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
 export type { CoreStart, CoreSetup };
 
 /**
@@ -103,6 +103,12 @@ export class CanvasPlugin
       }));
     }
 
+    setupExpressions({ coreSetup, setupPlugins });
+
+    const srcPlugin = new CanvasSrcPlugin();
+
+    srcPlugin.setup(coreSetup, { canvas: canvasApi });
+
     coreSetup.application.register({
       category: DEFAULT_APP_CATEGORIES.kibana,
       id: CANVAS_APP,
@@ -111,12 +117,6 @@ export class CanvasPlugin
       order: 3000,
       updater$: this.appUpdater,
       mount: async (params: AppMountParameters) => {
-        const { CanvasSrcPlugin } = await import('../canvas_plugin_src/plugin');
-        const srcPlugin = new CanvasSrcPlugin();
-
-        srcPlugin.setup(coreSetup, { canvas: canvasApi });
-        setupExpressions({ coreSetup, setupPlugins });
-
         // Get start services
         const [coreStart, startPlugins] = await coreSetup.getStartServices();
 

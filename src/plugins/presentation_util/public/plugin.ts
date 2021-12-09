@@ -67,7 +67,9 @@ export class PresentationUtilPlugin
     };
     embeddable.registerEmbeddableFactory(OPTIONS_LIST_CONTROL, optionsListFactory);
 
-    return {};
+    return {
+      registerExpressionsLanguage,
+    };
   }
 
   public start(
