@@ -20,5 +20,6 @@ export type {
   DataViewBase,
   DataViewFieldBase,
   IFieldSubTypeMulti,
+  IFieldSubTypeMultiOptional,
   IFieldSubTypeNested,
 } from './types';
