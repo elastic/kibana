@@ -107,7 +107,7 @@ exports[`LoginPage disabled form states renders open in new window button when c
     >
       <FormattedMessage
         defaultMessage="Open in Elastic"
-        id="xpack.security.loginPage.requiresSecureConnectionMessage"
+        id="xpack.security.loginPage.requiresNewWindowMessage"
         values={Object {}}
       />
     </EuiButton>
@@ -116,7 +116,7 @@ exports[`LoginPage disabled form states renders open in new window button when c
     <p>
       <FormattedMessage
         defaultMessage="This content can't be viewed embedded in another website."
-        id="xpack.security.loginPage.requiresSecureConnectionTitle"
+        id="xpack.security.loginPage.requiresNewWindowTitle"
         values={Object {}}
       />
     </p>
@@ -134,14 +134,14 @@ exports[`LoginPage disabled form states renders open in new window button when c
   message={
     <FormattedMessage
       defaultMessage="Enable cookies in your browser settings to continue."
-      id="xpack.security.loginPage.requiresSecureConnectionMessage"
+      id="xpack.security.loginPage.requiresCookiesMessage"
       values={Object {}}
     />
   }
   title={
     <FormattedMessage
       defaultMessage="Cookies are required to log into Elastic"
-      id="xpack.security.loginPage.requiresSecureConnectionTitle"
+      id="xpack.security.loginPage.requiresCookiesTitle"
       values={Object {}}
     />
   }
