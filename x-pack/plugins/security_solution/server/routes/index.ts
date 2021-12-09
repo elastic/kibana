@@ -64,7 +64,7 @@ import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_
 import { CreateRuleOptions } from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
-import { createSourcererDataViewRoute } from '../lib/sourcerer/routes';
+import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
 import { createPreviewIndexRoute } from '../lib/detection_engine/routes/index/create_preview_index_route';
 
 export const initRoutes = (
@@ -151,4 +151,5 @@ export const initRoutes = (
 
   // Sourcerer API to generate default pattern
   createSourcererDataViewRoute(router, getStartServices, security);
+  getSourcererDataViewRoute(router, getStartServices, security);
 };

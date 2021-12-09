@@ -10,16 +10,11 @@ import type { AuditEvent } from '../../../../../security/server';
 import { SavedObjectAction } from '../../../../../security/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../../../../src/plugins/data_views/common';
 
-function getSourcererSavedObjectAction(value: string): string {
-  return Object.entries(SourcererSavedObjectAction).find(
-    ([key, val]) => val === value
-  )?.[0] as string;
-}
-export const SourcererSavedObjectAction = {
-  [getSourcererSavedObjectAction(SavedObjectAction.CREATE)]: SavedObjectAction.CREATE,
-  [getSourcererSavedObjectAction(SavedObjectAction.UPDATE)]: SavedObjectAction.UPDATE,
-} as const;
-export type SourcererSavedObjectAction = SavedObjectAction.CREATE | SavedObjectAction.UPDATE;
+export type SourcererSavedObjectAction =
+  | SavedObjectAction.CREATE
+  | SavedObjectAction.GET
+  | SavedObjectAction.UPDATE;
+
 export interface SourcererSavedObjectEventParams {
   action: SourcererSavedObjectAction;
   outcome?: EcsEventOutcome;
@@ -29,11 +24,13 @@ export interface SourcererSavedObjectEventParams {
 
 const savedObjectAuditVerbs: Record<SourcererSavedObjectAction, [string, string, string]> = {
   [SavedObjectAction.CREATE]: ['create', 'creating', 'created'],
+  [SavedObjectAction.GET]: ['access', 'accessing', 'accessed'],
   [SavedObjectAction.UPDATE]: ['update', 'updating', 'updated'],
 };
 
 const savedObjectAuditTypes: Record<SourcererSavedObjectAction, EcsEventType> = {
   [SavedObjectAction.CREATE]: 'creation',
+  [SavedObjectAction.GET]: 'access',
   [SavedObjectAction.UPDATE]: 'change',
 };
 

@@ -19,6 +19,8 @@ import styled, { css } from 'styled-components';
 import { sourcererModel } from '../../store/sourcerer';
 
 import * as i18n from './translations';
+import { KibanaServices } from '../../lib/kibana';
+import { SOURCERER_API_URL } from '../../../../common/constants';
 
 export const FormRow = styled(EuiFormRow)<EuiFormRowProps & { $expandAdvancedOptions: boolean }>`
   display: ${({ $expandAdvancedOptions }) => ($expandAdvancedOptions ? 'flex' : 'none')};
@@ -138,3 +140,15 @@ export const getPatternListWithoutSignals = (
   patternList: string[],
   signalIndexName: string | null
 ): string[] => patternList.filter((p) => p !== signalIndexName);
+
+export const getSourcererDataview = async (
+  dataViewId: string,
+  signal: AbortSignal
+): Promise<void> => {
+  return KibanaServices.get().http.fetch(SOURCERER_API_URL, {
+    method: 'GET',
+    query: { dataViewId },
+    asSystemRequest: true,
+    signal,
+  });
+};

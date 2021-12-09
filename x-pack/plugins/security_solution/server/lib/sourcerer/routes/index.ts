@@ -6,17 +6,21 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { StartServicesAccessor } from 'kibana/server';
+import type { ElasticsearchClient, StartServicesAccessor } from 'kibana/server';
 
-import { DataViewListItem } from '../../../../../../../src/plugins/data_views/common';
+import type {
+  DataView,
+  DataViewListItem,
+} from '../../../../../../../src/plugins/data_views/common';
+import { SavedObjectAction } from '../../../../../security/server';
 import { DEFAULT_TIME_FIELD, SOURCERER_API_URL } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { SetupPlugins, StartPlugins } from '../../../plugin';
+import type { SetupPlugins, StartPlugins } from '../../../plugin';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
-import { sourcererSavedObjectEvent, SourcererSavedObjectAction } from './audit_log';
+import { sourcererSavedObjectEvent } from './audit_log';
 import { findExistingIndices } from './helpers';
-import { sourcererSchema } from './schema';
+import { sourcererDataViewSchema, sourcererSchema } from './schema';
 
 export const createSourcererDataViewRoute = (
   router: SecuritySolutionPluginRouter,
@@ -30,6 +34,7 @@ export const createSourcererDataViewRoute = (
         body: buildRouteValidation(sourcererSchema),
       },
       options: {
+        authRequired: true,
         tags: ['access:securitySolution'],
       },
     },
@@ -83,7 +88,7 @@ export const createSourcererDataViewRoute = (
         if (siemDataView == null) {
           auditLogger?.log(
             sourcererSavedObjectEvent({
-              action: SourcererSavedObjectAction.CREATE,
+              action: SavedObjectAction.CREATE,
               outcome: 'unknown',
               id: dataViewId,
             })
@@ -100,7 +105,7 @@ export const createSourcererDataViewRoute = (
           } catch (error) {
             auditLogger?.log(
               sourcererSavedObjectEvent({
-                action: SourcererSavedObjectAction.CREATE,
+                action: SavedObjectAction.CREATE,
                 id: dataViewId,
                 error,
               })
@@ -109,61 +114,47 @@ export const createSourcererDataViewRoute = (
           }
         } else if (patternListAsTitle !== siemDataViewTitle) {
           siemDataView.title = patternListAsTitle;
-          let didUpdate = true;
           auditLogger?.log(
             sourcererSavedObjectEvent({
-              action: SourcererSavedObjectAction.UPDATE,
+              action: SavedObjectAction.UPDATE,
               outcome: 'unknown',
               id: dataViewId,
             })
           );
           try {
-            await unsecuredDataViewService.updateSavedObject(siemDataView).catch((err) => {
-              const error = transformError(err);
-              if (error.statusCode === 403) {
-                didUpdate = false;
-                return;
-              }
-              throw err;
-            });
+            await unsecuredDataViewService.updateSavedObject(siemDataView);
           } catch (error) {
             auditLogger?.log(
               sourcererSavedObjectEvent({
-                action: SourcererSavedObjectAction.UPDATE,
+                action: SavedObjectAction.UPDATE,
                 id: dataViewId,
                 error,
               })
             );
             throw error;
           }
-
-          // update the data view in allDataViews
-          if (didUpdate) {
-            if (allDataViews.some((dv) => dv.id === dataViewId)) {
-              allDataViews = allDataViews.map((v) =>
-                v.id === dataViewId ? { ...v, title: patternListAsTitle } : v
-              );
-            } else {
-              allDataViews.push({ ...siemDataView, id: siemDataView.id ?? dataViewId });
-            }
+          if (allDataViews.some((dv) => dv.id === dataViewId)) {
+            allDataViews = allDataViews.map((v) =>
+              v.id === dataViewId ? { ...v, title: patternListAsTitle } : v
+            );
+          } else {
+            allDataViews.push({ ...siemDataView, id: siemDataView.id ?? dataViewId });
           }
         }
-        const siemPatternList = siemDataView.title.split(',');
-        const siemActivePatternBools: boolean[] = await findExistingIndices(
-          siemPatternList,
+
+        const defaultDataView = await buildDefaultDataview(
+          siemDataView,
           context.core.elasticsearch.client.asCurrentUser
         );
-        const siemActivePatternLists: string[] = siemPatternList.filter(
-          (pattern, j, self) => self.indexOf(pattern) === j && siemActivePatternBools[j]
-        );
 
-        const defaultDataView = { ...siemDataView, patternList: siemActivePatternLists };
-        const body = {
-          defaultDataView,
-          kibanaDataViews: allDataViews.map((dv) => (dv.id === dataViewId ? defaultDataView : dv)),
-        };
-
-        return response.ok({ body });
+        return response.ok({
+          body: {
+            defaultDataView,
+            kibanaDataViews: allDataViews.map((dv) =>
+              dv.id === dataViewId ? defaultDataView : dv
+            ),
+          },
+        });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({
@@ -176,4 +167,102 @@ export const createSourcererDataViewRoute = (
       }
     }
   );
+};
+
+export const getSourcererDataViewRoute = (
+  router: SecuritySolutionPluginRouter,
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  security: SetupPlugins['security']
+) => {
+  router.get(
+    {
+      path: SOURCERER_API_URL,
+      validate: {
+        query: buildRouteValidation(sourcererDataViewSchema),
+      },
+      options: {
+        authRequired: true,
+        tags: ['access:securitySolution'],
+      },
+    },
+    async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+      const siemClient = context.securitySolution?.getAppClient();
+      const { dataViewId } = request.query;
+      const dataViewBySecuritySolutionId = siemClient.getSourcererDataViewId();
+      const unsecuredSavedObjectClient = context.core.savedObjects.getClient({
+        excludedWrappers: ['security'],
+      });
+      try {
+        const [
+          ,
+          {
+            data: { indexPatterns },
+          },
+        ] = await getStartServices();
+        const auditLogger = security?.audit.asScoped(request);
+        /*
+         * Note for future engineer
+         * We need to have two different DataViewService because one will be to access all
+         * the data views that the user can access and the UnsecuredDataViewService will be
+         * to get the security solution data view
+         */
+        const unsecuredDataViewService = await indexPatterns.dataViewsServiceFactory(
+          unsecuredSavedObjectClient,
+          context.core.elasticsearch.client.asInternalUser
+        );
+        const dataViewService = await indexPatterns.dataViewsServiceFactory(
+          context.core.savedObjects.client,
+          context.core.elasticsearch.client.asInternalUser,
+          request
+        );
+
+        let siemDataView;
+        if (dataViewId === dataViewBySecuritySolutionId) {
+          siemDataView = await unsecuredDataViewService.get(dataViewId);
+          auditLogger?.log(
+            sourcererSavedObjectEvent({
+              action: SavedObjectAction.GET,
+              id: dataViewId,
+              error,
+            })
+          );
+        } else {
+          siemDataView = await dataViewService.get(dataViewId);
+        }
+
+        const defaultDataView = await buildDefaultDataview(
+          siemDataView,
+          context.core.elasticsearch.client.asCurrentUser
+        );
+
+        return response.ok({
+          body: {
+            defaultDataView,
+          },
+        });
+      } catch (err) {
+        const error = transformError(err);
+        return siemResponse.error({
+          body:
+            error.statusCode === 403
+              ? 'Users with write permissions need to access the Elastic Security app to initialize the app source data.'
+              : error.message,
+          statusCode: error.statusCode,
+        });
+      }
+    }
+  );
+};
+
+const buildDefaultDataview = async (
+  dataView: DataView,
+  clientAsCurrentUser: ElasticsearchClient
+) => {
+  const patternList = dataView.title.split(',');
+  const activePatternBools: boolean[] = await findExistingIndices(patternList, clientAsCurrentUser);
+  const activePatternLists: string[] = patternList.filter(
+    (pattern, j, self) => self.indexOf(pattern) === j && activePatternBools[j]
+  );
+  return { ...dataView, patternList: activePatternLists };
 };

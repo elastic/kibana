@@ -28,6 +28,7 @@ export type ModifiedTypes = 'modified' | 'alerts' | 'deprecated' | 'missingPatte
 interface UsePickIndexPatterns {
   allOptions: Array<EuiComboBoxOptionOption<string>>;
   dataViewSelectOptions: Array<EuiSuperSelectOption<string>>;
+  loadingIndexPatterns: boolean;
   isModified: ModifiedTypes;
   onChangeCombo: (newSelectedDataViewId: Array<EuiComboBoxOptionOption<string>>) => void;
   renderOption: ({ value }: EuiComboBoxOptionOption<string>) => React.ReactElement;
@@ -52,9 +53,17 @@ export const usePickIndexPatterns = ({
   selectedPatterns,
   signalIndexName,
 }: UsePickIndexPatternsProps): UsePickIndexPatterns => {
+  const [loadingIndexPatterns, setLoadingIndexPatterns] = useState(false);
+  const [kibanaDataViewsLocal, setKibanaDataViewsLocal] = useState(kibanaDataViews);
   const alertsOptions = useMemo(
     () => (signalIndexName ? patternListToOptions([signalIndexName]) : []),
     [signalIndexName]
+  );
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    isOnlyDetectionAlerts ? alertsOptions : patternListToOptions(selectedPatterns)
+  );
+  const [isModified, setIsModified] = useState<ModifiedTypes>(
+    dataViewId == null ? 'deprecated' : missingPatterns.length > 0 ? 'missingPatterns' : ''
   );
 
   const { allPatterns, selectablePatterns } = useMemo<{
@@ -67,7 +76,7 @@ export const usePickIndexPatterns = ({
         selectablePatterns: [signalIndexName],
       };
     }
-    const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
+    const theDataView = kibanaDataViewsLocal.find((dataView) => dataView.id === dataViewId);
 
     if (theDataView == null) {
       return {
@@ -90,14 +99,11 @@ export const usePickIndexPatterns = ({
           allPatterns: titleAsList,
           selectablePatterns: theDataView.patternList,
         };
-  }, [dataViewId, isOnlyDetectionAlerts, kibanaDataViews, scopeId, signalIndexName]);
+  }, [dataViewId, isOnlyDetectionAlerts, kibanaDataViewsLocal, scopeId, signalIndexName]);
 
   const allOptions = useMemo(
     () => patternListToOptions(allPatterns, selectablePatterns),
     [allPatterns, selectablePatterns]
-  );
-  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    isOnlyDetectionAlerts ? alertsOptions : patternListToOptions(selectedPatterns)
   );
 
   const getDefaultSelectedOptionsByDataView = useCallback(
@@ -106,13 +112,13 @@ export const usePickIndexPatterns = ({
         ? alertsOptions
         : patternListToOptions(
             getScopePatternListSelection(
-              kibanaDataViews.find((dataView) => dataView.id === id),
+              kibanaDataViewsLocal.find((dataView) => dataView.id === id),
               scopeId,
               signalIndexName,
               id === defaultDataViewId
             )
           ),
-    [alertsOptions, kibanaDataViews, scopeId, signalIndexName, defaultDataViewId]
+    [alertsOptions, kibanaDataViewsLocal, scopeId, signalIndexName, defaultDataViewId]
   );
 
   const defaultSelectedPatternsAsOptions = useMemo(
@@ -120,9 +126,6 @@ export const usePickIndexPatterns = ({
     [dataViewId, getDefaultSelectedOptionsByDataView]
   );
 
-  const [isModified, setIsModified] = useState<ModifiedTypes>(
-    dataViewId == null ? 'deprecated' : missingPatterns.length > 0 ? 'missingPatterns' : ''
-  );
   const onSetIsModified = useCallback(
     (patterns: string[], id: string | null) => {
       if (id == null) {
@@ -170,9 +173,18 @@ export const usePickIndexPatterns = ({
     []
   );
 
-  const setIndexPatternsByDataView = (newSelectedDataViewId: string, isAlerts?: boolean) => {
-    setSelectedOptions(getDefaultSelectedOptionsByDataView(newSelectedDataViewId, isAlerts));
-  };
+  const setIndexPatternsByDataView = useCallback(
+    (newSelectedDataViewId: string, isAlerts?: boolean) => {
+      // if (
+      //   kibanaDataViewsLocal.some(
+      //     (kdv) => kdv.id === newSelectedDataViewId && kdv.indexFields.length === 0
+      //   )
+      // ) {
+      // }
+      setSelectedOptions(getDefaultSelectedOptionsByDataView(newSelectedDataViewId, isAlerts));
+    },
+    [getDefaultSelectedOptionsByDataView]
+  );
 
   const dataViewSelectOptions = useMemo(
     () =>
@@ -182,10 +194,10 @@ export const usePickIndexPatterns = ({
             defaultDataViewId,
             isModified: isModified === 'modified',
             isOnlyDetectionAlerts,
-            kibanaDataViews,
+            kibanaDataViews: kibanaDataViewsLocal,
           })
         : [],
-    [dataViewId, defaultDataViewId, isModified, isOnlyDetectionAlerts, kibanaDataViews]
+    [dataViewId, defaultDataViewId, isModified, isOnlyDetectionAlerts, kibanaDataViewsLocal]
   );
 
   return {
