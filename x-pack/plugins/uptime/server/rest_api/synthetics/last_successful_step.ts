@@ -6,15 +6,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isRefResult, isFullScreenshot } from '../../../common/runtime_types/ping/synthetics';
-import { Ping } from '../../../common/runtime_types/ping/ping';
+import {
+  isRefResult,
+  isFullScreenshot,
+  JourneyStep,
+} from '../../../common/runtime_types/ping/synthetics';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 
-export const createLastSuccessfulCheckRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createLastSuccessfulStepRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
+  path: API_URLS.SYNTHETICS_SUCCESSFUL_STEP,
   validate: {
     query: schema.object({
       monitorId: schema.string(),
@@ -26,38 +29,37 @@ export const createLastSuccessfulCheckRoute: UMRestApiRouteFactory = (libs: UMSe
   handler: async ({ uptimeEsClient, request, response }) => {
     const { timestamp, monitorId, stepIndex, location } = request.query;
 
-    const check: Ping | null = await libs.requests.getLastSuccessfulCheck({
+    const step: JourneyStep | null = await libs.requests.getStepLastSuccessfulStep({
       uptimeEsClient,
       monitorId,
+      stepIndex,
       timestamp,
       location,
     });
 
-    if (check === null) {
+    if (step === null) {
       return response.notFound();
     }
 
-    if (!check.monitor.check_group) {
-      return response.ok({ body: check });
+    if (!step.synthetics?.step?.index) {
+      return response.ok({ body: step });
     }
 
     const screenshot = await libs.requests.getJourneyScreenshot({
       uptimeEsClient,
-      checkGroup: check.monitor.check_group,
-      stepIndex,
+      checkGroup: step.monitor.check_group,
+      stepIndex: step.synthetics.step.index,
     });
 
     if (screenshot === null) {
-      return response.ok({ body: check });
+      return response.ok({ body: step });
     }
 
-    if (check.synthetics) {
-      check.synthetics.isScreenshotRef = isRefResult(screenshot);
-      check.synthetics.isFullScreenshot = isFullScreenshot(screenshot);
-    }
+    step.synthetics.isScreenshotRef = isRefResult(screenshot);
+    step.synthetics.isFullScreenshot = isFullScreenshot(screenshot);
 
     return response.ok({
-      body: check,
+      body: step,
     });
   },
 });

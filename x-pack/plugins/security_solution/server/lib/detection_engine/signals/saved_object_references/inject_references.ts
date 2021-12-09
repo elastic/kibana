@@ -28,21 +28,21 @@ import { injectExceptionsReferences } from './inject_exceptions_list';
  * @param savedObjectReferences The saved object references to merge with the rule params
  * @returns The rule parameters with the saved object references.
  */
-export const injectReferences = <TParams extends RuleParams>({
+export const injectReferences = ({
   logger,
   params,
   savedObjectReferences,
 }: {
   logger: Logger;
-  params: TParams;
+  params: RuleParams;
   savedObjectReferences: SavedObjectReference[];
-}): TParams => {
+}): RuleParams => {
   const exceptionsList = injectExceptionsReferences({
     logger,
     exceptionsList: params.exceptionsList,
     savedObjectReferences,
   });
-  const ruleParamsWithSavedObjectReferences: TParams = {
+  const ruleParamsWithSavedObjectReferences: RuleParams = {
     ...params,
     exceptionsList,
   };

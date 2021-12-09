@@ -341,7 +341,7 @@ describe('registerDataHandler', () => {
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: makeRequest,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'metrics-*' }),
     });
 
     it('registered data handler', () => {

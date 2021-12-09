@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { getLastSuccessfulStepParams } from './get_last_successful_check';
+import { getLastSuccessfulStepParams } from './get_last_successful_step';
 
 describe('getLastSuccessfulStep', () => {
   describe('getLastSuccessfulStepParams', () => {
     it('formats ES params with location', () => {
       const monitorId = 'my-monitor';
+      const stepIndex = 1;
       const location = 'au-heartbeat';
       const timestamp = '2021-10-31T19:47:52.392Z';
       const params = getLastSuccessfulStepParams({
         monitorId,
+        stepIndex,
         location,
         timestamp,
       });
@@ -32,24 +34,27 @@ describe('getLastSuccessfulStep', () => {
               },
               {
                 term: {
-                  'monitor.id': 'my-monitor',
+                  'monitor.id': monitorId,
                 },
               },
               {
                 term: {
-                  'synthetics.type': 'heartbeat/summary',
-                },
-              },
-              {
-                range: {
-                  'summary.down': {
-                    lte: '0',
-                  },
+                  'synthetics.type': 'step/end',
                 },
               },
               {
                 term: {
-                  'observer.geo.name': 'au-heartbeat',
+                  'synthetics.step.status': 'succeeded',
+                },
+              },
+              {
+                term: {
+                  'synthetics.step.index': stepIndex,
+                },
+              },
+              {
+                term: {
+                  'observer.geo.name': location,
                 },
               },
             ],
@@ -69,6 +74,7 @@ describe('getLastSuccessfulStep', () => {
     it('formats ES params without location', () => {
       const params = getLastSuccessfulStepParams({
         monitorId: 'my-monitor',
+        stepIndex: 1,
         location: undefined,
         timestamp: '2021-10-31T19:47:52.392Z',
       });
@@ -91,14 +97,17 @@ describe('getLastSuccessfulStep', () => {
               },
               {
                 term: {
-                  'synthetics.type': 'heartbeat/summary',
+                  'synthetics.type': 'step/end',
                 },
               },
               {
-                range: {
-                  'summary.down': {
-                    lte: '0',
-                  },
+                term: {
+                  'synthetics.step.status': 'succeeded',
+                },
+              },
+              {
+                term: {
+                  'synthetics.step.index': 1,
                 },
               },
             ],

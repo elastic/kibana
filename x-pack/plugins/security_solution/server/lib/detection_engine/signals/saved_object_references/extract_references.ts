@@ -31,13 +31,13 @@ import { extractExceptionsList } from './extract_exceptions_list';
  * @param params The params of the base rule(s).
  * @returns The rule parameters and the saved object references to store.
  */
-export const extractReferences = <TParams extends RuleParams>({
+export const extractReferences = ({
   logger,
   params,
 }: {
   logger: Logger;
-  params: TParams;
-}): RuleParamsAndRefs<TParams> => {
+  params: RuleParams;
+}): RuleParamsAndRefs<RuleParams> => {
   const exceptionReferences = extractExceptionsList({
     logger,
     exceptionsList: params.exceptionsList,

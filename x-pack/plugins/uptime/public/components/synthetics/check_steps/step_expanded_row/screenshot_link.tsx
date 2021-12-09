@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
-import { Ping } from '../../../../../common/runtime_types/ping/ping';
+import { JourneyStep } from '../../../../../common/runtime_types/ping/synthetics';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 
 const LabelLink = euiStyled.div`
@@ -17,10 +17,10 @@ const LabelLink = euiStyled.div`
 `;
 
 interface Props {
-  lastSuccessfulCheck: Ping;
+  lastSuccessfulStep: JourneyStep;
 }
 
-export const ScreenshotLink = ({ lastSuccessfulCheck }: Props) => {
+export const ScreenshotLink = ({ lastSuccessfulStep }: Props) => {
   return (
     <span>
       <FormattedMessage
@@ -29,7 +29,7 @@ export const ScreenshotLink = ({ lastSuccessfulCheck }: Props) => {
         values={{
           link: (
             <ReactRouterEuiLink
-              to={`/journey/${lastSuccessfulCheck?.monitor?.check_group}/steps`}
+              to={`/journey/${lastSuccessfulStep?.monitor?.check_group}/steps`}
               className="eui-displayInlineBlock"
             >
               <LabelLink>

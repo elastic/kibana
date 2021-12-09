@@ -23,7 +23,7 @@ import { getJourneyScreenshot } from './get_journey_screenshot';
 import { getJourneyDetails } from './get_journey_details';
 import { getNetworkEvents } from './get_network_events';
 import { getJourneyFailedSteps } from './get_journey_failed_steps';
-import { getLastSuccessfulCheck } from './get_last_successful_check';
+import { getStepLastSuccessfulStep } from './get_last_successful_step';
 import { getJourneyScreenshotBlocks } from './get_journey_screenshot_blocks';
 
 export const requests = {
@@ -42,7 +42,7 @@ export const requests = {
   getIndexStatus,
   getJourneySteps,
   getJourneyFailedSteps,
-  getLastSuccessfulCheck,
+  getStepLastSuccessfulStep,
   getJourneyScreenshot,
   getJourneyScreenshotBlocks,
   getJourneyDetails,

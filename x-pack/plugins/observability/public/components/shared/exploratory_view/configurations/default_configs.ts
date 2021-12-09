@@ -22,9 +22,9 @@ export const getDefaultConfigs = ({
   indexPattern,
   reportConfigMap,
 }: Props): SeriesConfig => {
-  let configResult: SeriesConfig;
+  let configResult: SeriesConfig | undefined;
 
-  reportConfigMap[dataType].some((fn) => {
+  reportConfigMap[dataType]?.some((fn) => {
     const config = fn({ indexPattern });
     if (config.reportType === reportType) {
       configResult = config;
@@ -32,5 +32,11 @@ export const getDefaultConfigs = ({
     return config.reportType === reportType;
   });
 
-  return configResult!;
+  if (!configResult) {
+    throw new Error(
+      `No report config provided for dataType: ${dataType} and reportType: ${reportType}`
+    );
+  }
+
+  return configResult;
 };

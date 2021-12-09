@@ -131,12 +131,12 @@ function getLensAttributes(
     references: [
       {
         id: 'logs-*',
-        name: 'indexpattern-datasource-current-indexpattern',
+        name: 'dataView-datasource-current-dataView',
         type: 'index-pattern',
       },
       {
         id: 'logs-*',
-        name: 'indexpattern-datasource-layer-layer1',
+        name: 'dataView-datasource-layer-layer1',
         type: 'index-pattern',
       },
       {

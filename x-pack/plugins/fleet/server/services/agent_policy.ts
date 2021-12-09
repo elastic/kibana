@@ -34,12 +34,7 @@ import type {
   ListWithKuery,
   NewPackagePolicy,
 } from '../types';
-import {
-  agentPolicyStatuses,
-  packageToPackagePolicy,
-  AGENT_POLICY_INDEX,
-  UUID_V5_NAMESPACE,
-} from '../../common';
+import { agentPolicyStatuses, packageToPackagePolicy, AGENT_POLICY_INDEX } from '../../common';
 import type {
   DeleteAgentPolicyResponse,
   FleetServerPolicy,
@@ -65,6 +60,9 @@ import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
+
+// UUID v5 values require a namespace
+const UUID_V5_NAMESPACE = 'dde7c2de-1370-4c19-9975-b473d0e03508';
 
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
@@ -134,11 +132,14 @@ class AgentPolicyService {
     };
 
     let searchParams;
-
-    const isDefaultPolicy =
-      preconfiguredAgentPolicy.is_default || preconfiguredAgentPolicy.is_default_fleet_server;
-
-    if (isDefaultPolicy) {
+    if (id) {
+      searchParams = {
+        id: String(id),
+      };
+    } else if (
+      preconfiguredAgentPolicy.is_default ||
+      preconfiguredAgentPolicy.is_default_fleet_server
+    ) {
       searchParams = {
         searchFields: [
           preconfiguredAgentPolicy.is_default_fleet_server
@@ -147,15 +148,10 @@ class AgentPolicyService {
         ],
         search: 'true',
       };
-    } else if (id) {
-      searchParams = {
-        id: String(id),
-      };
     }
-
     if (!searchParams) throw new Error('Missing ID');
 
-    return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams, id);
+    return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams);
   }
 
   private async ensureAgentPolicy(
@@ -167,8 +163,7 @@ class AgentPolicyService {
       | {
           searchFields: string[];
           search: string;
-        },
-    id?: string | number
+        }
   ): Promise<{
     created: boolean;
     policy: AgentPolicy;
@@ -206,7 +201,7 @@ class AgentPolicyService {
     if (agentPolicies.total === 0) {
       return {
         created: true,
-        policy: await this.create(soClient, esClient, newAgentPolicy, { id: String(id) }),
+        policy: await this.create(soClient, esClient, newAgentPolicy),
       };
     }
 

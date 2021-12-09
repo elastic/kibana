@@ -86,12 +86,7 @@ export function handleMbLastRecoveries(resp: ElasticsearchResponse, start: numbe
   return filtered;
 }
 
-export async function getLastRecovery(
-  req: LegacyRequest,
-  esIndexPattern: string,
-  mbIndexPattern: string,
-  size: number
-) {
+export async function getLastRecovery(req: LegacyRequest, esIndexPattern: string, size: number) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getLastRecovery');
 
   const start = req.payload.timeRange.min;
@@ -110,7 +105,7 @@ export async function getLastRecovery(
     },
   };
   const mbParams = {
-    index: mbIndexPattern,
+    index: esIndexPattern,
     size,
     ignore_unavailable: true,
     body: {

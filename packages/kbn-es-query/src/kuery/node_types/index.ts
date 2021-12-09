@@ -10,9 +10,9 @@ import * as functionType from './function';
 import * as literal from './literal';
 import * as namedArg from './named_arg';
 import * as wildcard from './wildcard';
-import { FunctionTypeBuildNode, NodeTypes } from './types';
+import { NodeTypes } from './types';
 
-export type { FunctionTypeBuildNode, NodeTypes };
+export type { NodeTypes };
 export { nodeBuilder } from './node_builder';
 
 /**

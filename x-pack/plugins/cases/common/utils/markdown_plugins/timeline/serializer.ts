@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import { Plugin } from 'unified';
 export interface TimelineSerializerProps {
   match: string;
 }
 
-const serializeTimeline = ({ match }: TimelineSerializerProps) => match;
-
-export const TimelineSerializer: Plugin = function () {
-  const Compiler = this.Compiler;
-  Compiler.prototype.visitors.timeline = serializeTimeline;
-};
+export const TimelineSerializer = ({ match }: TimelineSerializerProps) => match;

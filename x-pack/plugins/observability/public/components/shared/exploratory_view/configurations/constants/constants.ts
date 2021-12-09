@@ -135,6 +135,7 @@ export enum DataTypes {
   SYNTHETICS = 'synthetics',
   UX = 'ux',
   MOBILE = 'mobile',
+  METRICS = 'infra_metrics',
 }
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
