@@ -128,14 +128,17 @@ export const EndpointList = () => {
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
   const [showTransformFailedCallout, setShowTransformFailedCallout] = useState(false);
+  const [shouldCheckTransforms, setShouldCheckTransforms] = useState(true);
 
   useEffect(() => {
-    if (!endpointsExist || !listData?.length) {
+    // if no endpoint policy, skip transform check
+    if (!shouldCheckTransforms || !policyItems || !policyItems.length) {
       return;
     }
 
     dispatch({ type: 'loadMetadataTransformStats' });
-  }, [endpointsExist, listData.length, dispatch]);
+    setShouldCheckTransforms(false);
+  }, [policyItems, shouldCheckTransforms, dispatch]);
 
   useEffect(() => {
     const hasFailure = metadataTransformStats.some((transform) =>
