@@ -75,30 +75,10 @@ export function getEsSQLDatasource({
     async initialize(state?: EsSQLPersistedState) {
       const initState = state || { layers: {} };
       const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(data.dataViews);
-      const responses = await Promise.all(
-        Object.entries(initState.layers).map(([id, layer]) => {
-          return data.search
-            .search({
-              params: {
-                size: 0,
-                index: layer.index,
-                body: JSON.parse(layer.query),
-              },
-            })
-            .toPromise();
-        })
-      );
       const cachedFieldList: Record<
         string,
         { fields: Array<{ name: string; type: string }>; singleRow: boolean }
       > = {};
-      responses.forEach((response, index) => {
-        const layerId = Object.keys(initState.layers)[index];
-        // @ts-expect-error this is hacky, should probably run expression instead
-        const { rows, columns } = esRawResponse.to!.datatable({ body: response.rawResponse });
-        // todo hack some logic in for dates
-        cachedFieldList[layerId] = { fields: columns, singleRow: rows.length === 1 };
-      });
       return {
         ...initState,
         cachedFieldList,
@@ -359,7 +339,7 @@ export function getEsSQLDatasource({
           const column = layer?.columns.find((c) => c.columnId === columnId);
 
           if (column) {
-            const field = state.cachedFieldList[layerId].fields.find(
+            const field = state.cachedFieldList[layerId]?.fields?.find(
               (f) => f.name === column.fieldName
             )!;
             const overwrite = layer.overwrittenFieldTypes?.[column.fieldName];

@@ -72,30 +72,10 @@ export function getExpressionBasedDatasource({
     async initialize(state?: ExpressionBasedPersistedState) {
       const initState = state || { layers: {} };
       const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(data.dataViews);
-      const responses = await Promise.all(
-        Object.entries(initState.layers).map(([id, layer]) => {
-          return data.search
-            .search({
-              params: {
-                size: 0,
-                index: layer.index,
-                body: JSON.parse(layer.query),
-              },
-            })
-            .toPromise();
-        })
-      );
       const cachedFieldList: Record<
         string,
         { fields: Array<{ name: string; type: string }>; singleRow: boolean }
       > = {};
-      responses.forEach((response, index) => {
-        const layerId = Object.keys(initState.layers)[index];
-        // @ts-expect-error this is hacky, should probably run expression instead
-        const { rows, columns } = esRawResponse.to!.datatable({ body: response.rawResponse });
-        // todo hack some logic in for dates
-        cachedFieldList[layerId] = { fields: columns, singleRow: rows.length === 1 };
-      });
       return {
         ...initState,
         cachedFieldList,
@@ -356,7 +336,7 @@ export function getExpressionBasedDatasource({
           const column = layer?.columns.find((c) => c.columnId === columnId);
 
           if (column) {
-            const field = state.cachedFieldList[layerId].fields.find(
+            const field = state.cachedFieldList[layerId]?.fields?.find(
               (f) => f.name === column.fieldName
             )!;
             const overwrite = layer.overwrittenFieldTypes?.[column.fieldName];
@@ -369,6 +349,7 @@ export function getExpressionBasedDatasource({
           }
           return null;
         },
+        getVisualDefaults: () => ({}),
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
@@ -393,7 +374,7 @@ export function getExpressionBasedDatasource({
                 isMultiRow: !state.cachedFieldList[id].singleRow,
                 layerId: id,
                 columns: layer.columns.map((column) => {
-                  const field = state.cachedFieldList[id].fields.find(
+                  const field = state.cachedFieldList[id]?.fields?.find(
                     (f) => f.name === column.fieldName
                   )!;
                   const operation = {
@@ -416,7 +397,7 @@ export function getExpressionBasedDatasource({
                 layers: {
                   [id]: {
                     ...state.layers[id],
-                    columns: state.cachedFieldList[id].fields.map((f) => ({
+                    columns: state.cachedFieldList[id]?.fields?.map((f) => ({
                       columnId: f.name,
                       fieldName: f.name,
                     })),

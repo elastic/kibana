@@ -350,7 +350,7 @@ export function getEsDSLDatasource({
           const column = layer?.columns.find((c) => c.columnId === columnId);
 
           if (column) {
-            const field = state.cachedFieldList[layerId].fields.find(
+            const field = state.cachedFieldList[layerId]?.fields?.find(
               (f) => f.name === column.fieldName
             )!;
             const overwrite = layer.overwrittenFieldTypes?.[column.fieldName];
@@ -362,6 +362,7 @@ export function getEsDSLDatasource({
           }
           return null;
         },
+        getVisualDefaults: () => ({}),
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
