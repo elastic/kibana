@@ -12,7 +12,7 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { Query } from '../..';
 import { Filter } from '../../es_query';
 import { IndexPattern } from '../..';
-import { SearchSource } from './search_source';
+import type { SearchSource } from './search_source';
 import { PersistableStateService } from '../../../../kibana_utils/common';
 
 /**

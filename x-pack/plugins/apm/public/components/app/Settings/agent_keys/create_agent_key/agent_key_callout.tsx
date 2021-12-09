@@ -12,7 +12,7 @@ import {
   EuiCallOut,
   EuiButtonIcon,
   EuiCopy,
-  EuiFormControlLayout,
+  EuiFieldText,
 } from '@elastic/eui';
 
 interface Props {
@@ -43,9 +43,15 @@ export function AgentKeyCallOut({ name, token }: Props) {
             }
           )}
         </p>
-        <EuiFormControlLayout
-          style={{ backgroundColor: 'transparent' }}
+        <EuiFieldText
           readOnly
+          value={token}
+          aria-label={i18n.translate(
+            'xpack.apm.settings.agentKeys.copyAgentKeyField.agentKeyLabel',
+            {
+              defaultMessage: 'APM agent key',
+            }
+          )}
           prepend="Base64"
           append={
             <EuiCopy textToCopy={token}>
@@ -65,20 +71,7 @@ export function AgentKeyCallOut({ name, token }: Props) {
               )}
             </EuiCopy>
           }
-        >
-          <input
-            type="text"
-            className="euiFieldText euiFieldText--inGroup"
-            readOnly
-            value={token}
-            aria-label={i18n.translate(
-              'xpack.apm.settings.agentKeys.copyAgentKeyField.agentKeyLabel',
-              {
-                defaultMessage: 'Agent key',
-              }
-            )}
-          />
-        </EuiFormControlLayout>
+        />
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>
