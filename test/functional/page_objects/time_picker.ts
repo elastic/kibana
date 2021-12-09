@@ -205,7 +205,7 @@ export class TimePickerPageObject extends FtrService {
     return {
       interval,
       units: selectedUnit,
-      isPaused: toggleButtonChecked === 'true' ? true : false,
+      isPaused: toggleButtonChecked === 'true' ? false : true,
     };
   }
 
