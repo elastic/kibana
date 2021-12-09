@@ -33,7 +33,7 @@ const createApiResponse = <T>({
   statusCode?: number;
   headers?: Record<string, string>;
   warnings?: string[] | null;
-  params?: TransportRequestParams;
+  params?: TransportRequestParams & { headers?: Record<string, string> };
   requestOptions?: TransportRequestOptions;
 }): RequestEvent<T> => {
   return {
@@ -512,7 +512,6 @@ describe('instrumentQueryAndDeprecationLogger', () => {
         'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
       );
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch('Origin:user');
-      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(/Stack trace:\n.*at/);
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         /Query:\n.*400\n.*GET \/_path\?hello\=dolly \[illegal_argument_exception\]: request \[\/_path\] contains unrecognized parameter: \[name\]/
       );
@@ -528,8 +527,6 @@ describe('instrumentQueryAndDeprecationLogger', () => {
           method: 'GET',
           path: '/_path',
           querystring: { hello: 'dolly' },
-        },
-        requestOptions: {
           // Set the request header to indicate to Elasticsearch that this is a request over which users have no control
           headers: { 'x-elastic-product-origin': 'kibana' },
         },
@@ -548,7 +545,6 @@ describe('instrumentQueryAndDeprecationLogger', () => {
         'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
       );
       expect(loggingSystemMock.collect(logger).info[0][0]).toMatch('Origin:kibana');
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(/Stack trace:\n.*at/);
       expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(
         /Query:\n.*400\n.*GET \/_path\?hello\=dolly \[illegal_argument_exception\]: request \[\/_path\] contains unrecognized parameter: \[name\]/
       );
@@ -581,7 +577,6 @@ describe('instrumentQueryAndDeprecationLogger', () => {
         'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
       );
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch('Origin:user');
-      expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(/Stack trace:\n.*at/);
       expect(loggingSystemMock.collect(logger).debug[1][0]).toMatch(
         /Query:\n.*200\n.*GET \/_path\?hello\=dolly/
       );
@@ -597,8 +592,6 @@ describe('instrumentQueryAndDeprecationLogger', () => {
           method: 'GET',
           path: '/_path',
           querystring: { hello: 'dolly' },
-        },
-        requestOptions: {
           // Set the request header to indicate to Elasticsearch that this is a request over which users have no control
           headers: { 'x-elastic-product-origin': 'kibana' },
         },
@@ -618,7 +611,6 @@ describe('instrumentQueryAndDeprecationLogger', () => {
         'Elasticsearch deprecation: 299 Elasticsearch-8.1.0 "GET /_path is deprecated"'
       );
       expect(loggingSystemMock.collect(logger).info[0][0]).toMatch('Origin:kibana');
-      expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(/Stack trace:\n.*at/);
       expect(loggingSystemMock.collect(logger).info[0][0]).toMatch(
         /Query:\n.*200\n.*GET \/_path\?hello\=dolly/
       );
