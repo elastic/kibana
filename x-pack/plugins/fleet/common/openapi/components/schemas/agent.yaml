@@ -11,9 +11,6 @@ properties:
     type: string
   unenrollment_started_at:
     type: string
-  shared_id:
-    type: string
-    deprecated: true
   access_api_key_id:
     type: string
   default_api_key_id:

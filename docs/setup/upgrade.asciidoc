@@ -44,13 +44,20 @@ a|
 [[upgrade-before-you-begin]]
 === Before you begin
 
-WARNING: {kib} automatically runs upgrade migrations when required. To roll back to an earlier version in case of an upgrade failure, you **must** have a {ref}/snapshot-restore.html[backup snapshot] available. This snapshot must include the `kibana` feature state or all `kibana*` indices. For more information see <<upgrade-migrations, upgrade migrations>>.
+[WARNING]
+====
+{kib} automatically runs upgrade migrations when required. To roll back to an
+earlier version in case of an upgrade failure, you **must** have a
+{ref}/snapshot-restore.html[backup snapshot] that includes the `kibana` feature
+state. Snapshots include this feature state by default.
+
+For more information, refer to <<upgrade-migrations, upgrade migrations>>.
+====
 
 Before you upgrade {kib}:
 
 * Consult the <<breaking-changes,breaking changes>>.
-* {ref}/snapshots-take-snapshot.html[Take a snapshot] of your data. To roll back to an earlier version, the snapshot must include the `kibana` feature state or all `.kibana*` indices. 
-* Although not a requirement for rollbacks, we recommend taking a snapshot of all {kib} indices created by the plugins you use such as the `.reporting*` indices created by the reporting plugin.  
+* {ref}/snapshots-take-snapshot.html[Take a snapshot] of your data. To roll back to an earlier version, the snapshot must include the `kibana` feature state.
 * Before you upgrade production servers, test the upgrades in a dev environment.
 * See <<preventing-migration-failures, preventing migration failures>> for common reasons upgrades fail and how to prevent these.
 * If you are using custom plugins, check that a compatible version is

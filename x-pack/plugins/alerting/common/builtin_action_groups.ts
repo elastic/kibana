@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ActionGroup } from './alert_type';
+import { ActionGroup } from './rule_type';
 
 export type DefaultActionGroupId = 'default';
 
