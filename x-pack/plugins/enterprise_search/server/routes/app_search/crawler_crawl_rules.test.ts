@@ -28,7 +28,7 @@ describe('crawler crawl rules routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/crawl_rules',
+        path: '/api/as/v1/engines/:engineName/crawler/domains/:domainId/crawl_rules',
         params: {
           respond_with: 'index',
         },
@@ -71,7 +71,7 @@ describe('crawler crawl rules routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/crawl_rules/:crawlRuleId',
+        path: '/api/as/v1/engines/:engineName/crawler/domains/:domainId/crawl_rules/:crawlRuleId',
         params: {
           respond_with: 'index',
         },
@@ -115,7 +115,7 @@ describe('crawler crawl rules routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/crawl_rules/:crawlRuleId',
+        path: '/api/as/v1/engines/:engineName/crawler/domains/:domainId/crawl_rules/:crawlRuleId',
         params: {
           respond_with: 'index',
         },

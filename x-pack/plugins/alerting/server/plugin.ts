@@ -46,7 +46,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertsHealth,
-  AlertType,
+  RuleType,
   AlertTypeParams,
   AlertTypeState,
   Services,
@@ -91,7 +91,7 @@ export interface PluginSetupContract {
     ActionGroupIds extends string = never,
     RecoveryActionGroupId extends string = never
   >(
-    alertType: AlertType<
+    ruleType: RuleType<
       Params,
       ExtractedParams,
       State,
@@ -273,7 +273,7 @@ export class AlertingPlugin {
         ActionGroupIds extends string = never,
         RecoveryActionGroupId extends string = never
       >(
-        alertType: AlertType<
+        ruleType: RuleType<
           Params,
           ExtractedParams,
           State,
@@ -283,15 +283,15 @@ export class AlertingPlugin {
           RecoveryActionGroupId
         >
       ) {
-        if (!(alertType.minimumLicenseRequired in LICENSE_TYPE)) {
-          throw new Error(`"${alertType.minimumLicenseRequired}" is not a valid license type`);
+        if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
+          throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
         }
 
         alertingConfig.then((config) => {
-          alertType.ruleTaskTimeout = alertType.ruleTaskTimeout ?? config.defaultRuleTaskTimeout;
-          alertType.cancelAlertsOnRuleTimeout =
-            alertType.cancelAlertsOnRuleTimeout ?? config.cancelAlertsOnRuleTimeout;
-          ruleTypeRegistry.register(alertType);
+          ruleType.ruleTaskTimeout = ruleType.ruleTaskTimeout ?? config.defaultRuleTaskTimeout;
+          ruleType.cancelAlertsOnRuleTimeout =
+            ruleType.cancelAlertsOnRuleTimeout ?? config.cancelAlertsOnRuleTimeout;
+          ruleTypeRegistry.register(ruleType);
         });
       },
       getSecurityHealth: async () => {
@@ -390,7 +390,7 @@ export class AlertingPlugin {
         ruleTypeRegistry: this.ruleTypeRegistry!,
         kibanaBaseUrl: this.kibanaBaseUrl,
         supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
-        maxEphemeralActionsPerAlert: config.maxEphemeralActionsPerAlert,
+        maxEphemeralActionsPerRule: config.maxEphemeralActionsPerAlert,
         cancelAlertsOnRuleTimeout: config.cancelAlertsOnRuleTimeout,
       });
     });

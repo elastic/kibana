@@ -12,10 +12,12 @@ import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_r
 import { ErrorStatePrompt } from '../../../shared/error_state';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
-export const ErrorConnecting: React.FC = () => (
+export const ErrorConnecting: React.FC<{ errorConnectingMessage?: string }> = ({
+  errorConnectingMessage,
+}) => (
   <KibanaPageTemplate isEmptyState>
     <SendTelemetry action="error" metric="cannot_connect" />
 
-    <ErrorStatePrompt />
+    <ErrorStatePrompt errorConnectingMessage={errorConnectingMessage} />
   </KibanaPageTemplate>
 );

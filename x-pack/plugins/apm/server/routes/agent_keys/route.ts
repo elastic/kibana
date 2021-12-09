@@ -13,6 +13,8 @@ import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_
 import { getAgentKeys } from './get_agent_keys';
 import { getAgentKeysPrivileges } from './get_agent_keys_privileges';
 import { invalidateAgentKey } from './invalidate_agent_key';
+import { createAgentKey } from './create_agent_key';
+import { privilegesTypeRt } from '../../../common/privilege_type';
 
 const agentKeysRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/agent_keys',
@@ -74,10 +76,34 @@ const invalidateAgentKeyRoute = createApmServerRoute({
   },
 });
 
+const createAgentKeyRoute = createApmServerRoute({
+  endpoint: 'POST /api/apm/agent_keys',
+  options: { tags: ['access:apm', 'access:apm_write'] },
+  params: t.type({
+    body: t.type({
+      name: t.string,
+      privileges: privilegesTypeRt,
+    }),
+  }),
+  handler: async (resources) => {
+    const { context, params } = resources;
+
+    const { body: requestBody } = params;
+
+    const agentKey = await createAgentKey({
+      context,
+      requestBody,
+    });
+
+    return agentKey;
+  },
+});
+
 export const agentKeysRouteRepository = createApmServerRouteRepository()
   .add(agentKeysRoute)
   .add(agentKeysPrivilegesRoute)
-  .add(invalidateAgentKeyRoute);
+  .add(invalidateAgentKeyRoute)
+  .add(createAgentKeyRoute);
 
 const SECURITY_REQUIRED_MESSAGE = i18n.translate(
   'xpack.apm.api.apiKeys.securityRequired',
