@@ -24,7 +24,8 @@ import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Que
 import { useKibana, withKibana } from '../../../../kibana_react/public';
 import QueryStringInputUI from './query_string_input';
 import { UI_SETTINGS } from '../../../common';
-import { PersistedLog, getQueryLog } from '../../query';
+import { getQueryLog } from '../../query';
+import type { PersistedLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 import { AutocompleteFtuePopover } from './autocomplete_ftue_popover';
 
