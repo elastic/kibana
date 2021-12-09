@@ -9,7 +9,7 @@
 const Fs = require('fs');
 const Path = require('path');
 const ts = require('typescript');
-const { REPO_ROOT } = require('@kbn/dev-utils');
+const { REPO_ROOT } = require('@kbn/utils');
 const { ExportSet } = require('./export_set');
 
 /** @typedef {import("@typescript-eslint/types").TSESTree.ExportAllDeclaration} ExportAllDeclaration */
