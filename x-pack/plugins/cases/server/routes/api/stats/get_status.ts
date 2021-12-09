@@ -8,7 +8,8 @@
 import { RouteDeps } from '../types';
 import { escapeHatch, wrapError } from '../utils';
 
-import { CASE_STATUS_URL, CasesStatusRequest } from '../../../../common';
+import { CasesStatusRequest } from '../../../../common/api';
+import { CASE_STATUS_URL } from '../../../../common/constants';
 
 export function initGetCasesStatusApi({ router, logger }: RouteDeps) {
   router.get(
