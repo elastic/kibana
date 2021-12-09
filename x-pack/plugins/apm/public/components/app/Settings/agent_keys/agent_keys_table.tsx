@@ -144,7 +144,7 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
         tableCaption={i18n.translate(
           'xpack.apm.settings.agentKeys.tableCaption',
           {
-            defaultMessage: 'APM Agent keys',
+            defaultMessage: 'APM agent keys',
           }
         )}
         items={agentKeys ?? []}
