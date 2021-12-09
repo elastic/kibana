@@ -29,10 +29,10 @@ import { alertsMock, rulesClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { IEventLogger } from '../../../event_log/server';
 import { Alert, RecoveredActionGroup } from '../../common';
-import { UntypedNormalizedAlertType } from '../rule_type_registry';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 
-const ruleType: jest.Mocked<UntypedNormalizedAlertType> = {
+const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test',
   name: 'My test rule',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
@@ -100,7 +100,7 @@ describe('Task Runner Cancel', () => {
     ruleTypeRegistry,
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: false,
-    maxEphemeralActionsPerAlert: 10,
+    maxEphemeralActionsPerRule: 10,
     cancelAlertsOnRuleTimeout: true,
   };
 
@@ -215,7 +215,7 @@ describe('Task Runner Cancel', () => {
           scheduled: '1970-01-01T00:00:00.000Z',
         },
       },
-      message: 'alert execution start: "1"',
+      message: 'rule execution start: "1"',
       rule: {
         category: 'test',
         id: '1',
@@ -271,7 +271,7 @@ describe('Task Runner Cancel', () => {
           scheduled: '1970-01-01T00:00:00.000Z',
         },
       },
-      message: `alert executed: test:1: 'rule-name'`,
+      message: `rule executed: test:1: 'rule-name'`,
       rule: {
         category: 'test',
         id: '1',
@@ -395,7 +395,7 @@ describe('Task Runner Cancel', () => {
 
     const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(6);
-    expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
       `Cancelling rule type test with id 1 - execution exceeded rule type timeout of 5m`
@@ -406,15 +406,15 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       4,
-      `alert test:1: 'rule-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+      `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
     );
     expect(logger.debug).nthCalledWith(
       5,
-      `no scheduling of actions for alert test:1: 'rule-name': alert execution has been cancelled.`
+      `no scheduling of actions for rule test:1: 'rule-name': rule execution has been cancelled.`
     );
     expect(logger.debug).nthCalledWith(
       6,
-      'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -440,7 +440,7 @@ describe('Task Runner Cancel', () => {
           },
         ],
       },
-      message: `alert execution start: \"1\"`,
+      message: `rule execution start: \"1\"`,
       rule: {
         category: 'test',
         id: '1',
@@ -498,7 +498,7 @@ describe('Task Runner Cancel', () => {
           },
         ],
       },
-      message: "alert executed: test:1: 'rule-name'",
+      message: "rule executed: test:1: 'rule-name'",
       rule: {
         category: 'test',
         id: '1',
@@ -512,7 +512,7 @@ describe('Task Runner Cancel', () => {
   function testActionsExecute() {
     const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(5);
-    expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
       `Cancelling rule type test with id 1 - execution exceeded rule type timeout of 5m`
@@ -523,11 +523,11 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       4,
-      `alert test:1: 'rule-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+      `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
     );
     expect(logger.debug).nthCalledWith(
       5,
-      'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -553,7 +553,7 @@ describe('Task Runner Cancel', () => {
           },
         ],
       },
-      message: `alert execution start: "1"`,
+      message: `rule execution start: "1"`,
       rule: {
         category: 'test',
         id: '1',
@@ -609,7 +609,7 @@ describe('Task Runner Cancel', () => {
           },
         ],
       },
-      message: "test:1: 'rule-name' created new instance: '1'",
+      message: "test:1: 'rule-name' created new alert: '1'",
       rule: {
         category: 'test',
         id: '1',
@@ -636,7 +636,7 @@ describe('Task Runner Cancel', () => {
           { id: '1', namespace: undefined, rel: 'primary', type: 'alert', type_id: 'test' },
         ],
       },
-      message: "test:1: 'rule-name' active instance: '1' in actionGroup: 'default'",
+      message: "test:1: 'rule-name' active alert: '1' in actionGroup: 'default'",
       rule: {
         category: 'test',
         id: '1',
@@ -700,7 +700,7 @@ describe('Task Runner Cancel', () => {
           },
         ],
       },
-      message: "alert executed: test:1: 'rule-name'",
+      message: "rule executed: test:1: 'rule-name'",
       rule: {
         category: 'test',
         id: '1',
