@@ -6,7 +6,7 @@
  */
 
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LogIndexPatternReference } from '../../../../common/log_sources';

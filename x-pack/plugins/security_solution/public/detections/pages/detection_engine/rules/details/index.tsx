@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n as i18nTranslate } from '@kbn/i18n';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';

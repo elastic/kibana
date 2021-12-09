@@ -26,7 +26,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];

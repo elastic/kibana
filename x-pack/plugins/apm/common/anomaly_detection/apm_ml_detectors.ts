@@ -5,8 +5,28 @@
  * 2.0.
  */
 
-export const enum ApmMlDetectorIndex {
-  txLatency = 0,
-  txThroughput = 1,
-  txFailureRate = 2,
+export const enum ApmMlDetectorType {
+  txLatency = 'txLatency',
+  txThroughput = 'txThroughput',
+  txFailureRate = 'txFailureRate',
+}
+
+const detectorIndices = {
+  [ApmMlDetectorType.txLatency]: 0,
+  [ApmMlDetectorType.txThroughput]: 1,
+  [ApmMlDetectorType.txFailureRate]: 2,
+};
+
+export function getApmMlDetectorIndex(type: ApmMlDetectorType) {
+  return detectorIndices[type];
+}
+
+export function getApmMlDetectorType(detectorIndex: number) {
+  let type: ApmMlDetectorType;
+  for (type in detectorIndices) {
+    if (detectorIndices[type] === detectorIndex) {
+      return type;
+    }
+  }
+  throw new Error('Could not map detector index to type');
 }

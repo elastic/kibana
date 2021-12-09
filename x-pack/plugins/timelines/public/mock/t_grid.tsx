@@ -11,7 +11,7 @@ import { TGridIntegratedProps } from '../components/t_grid/integrated';
 import { mockBrowserFields, mockDocValueFields, mockRuntimeMappings } from './browser_fields';
 import { mockDataProviders } from './mock_data_providers';
 import { mockTimelineData } from './mock_timeline_data';
-import { ColumnHeaderOptions, TimelineId } from '../../common';
+import { ColumnHeaderOptions, TimelineId } from '../../common/types';
 import { mockIndexNames, mockIndexPattern } from './index_pattern';
 import { EventRenderedViewProps } from '../components/t_grid/event_rendered_view';
 
@@ -92,6 +92,7 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   columns: columnHeaders,
   dataProviders: mockDataProviders,
   deletedEventIds: [],
+  disabledCellActions: [],
   docValueFields: mockDocValueFields,
   end: '2021-08-19T00:30:00.000Z',
   entityType: 'alerts',

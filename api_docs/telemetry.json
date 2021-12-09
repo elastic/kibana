@@ -612,7 +612,7 @@
         "signature": [
           "{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: Pick<",
           "ClusterStatsResponse",
-          ", \"status\" | \"indices\" | \"nodes\" | \"cluster_uuid\" | \"timestamp\">; collection: string; stack_stats: { data: ",
+          ", \"indices\" | \"nodes\" | \"status\" | \"cluster_uuid\" | \"timestamp\">; collection: string; stack_stats: { data: ",
           {
             "pluginId": "telemetry",
             "scope": "server",

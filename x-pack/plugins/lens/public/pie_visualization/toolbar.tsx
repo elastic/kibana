@@ -18,76 +18,11 @@ import {
 import type { Position } from '@elastic/charts';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
+import { PartitionChartsMeta } from './partition_charts_meta';
 import type { PieVisualizationState, SharedPieLayerState } from '../../common/expressions';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
 import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
 import { PalettePicker } from '../shared_components';
-
-const numberOptions: Array<{
-  value: SharedPieLayerState['numberDisplay'];
-  inputDisplay: string;
-}> = [
-  {
-    value: 'hidden',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.hiddenNumbersLabel', {
-      defaultMessage: 'Hide from chart',
-    }),
-  },
-  {
-    value: 'percent',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.showPercentValuesLabel', {
-      defaultMessage: 'Show percent',
-    }),
-  },
-  {
-    value: 'value',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.showFormatterValuesLabel', {
-      defaultMessage: 'Show value',
-    }),
-  },
-];
-
-const categoryOptions: Array<{
-  value: SharedPieLayerState['categoryDisplay'];
-  inputDisplay: string;
-}> = [
-  {
-    value: 'default',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.showCategoriesLabel', {
-      defaultMessage: 'Inside or outside',
-    }),
-  },
-  {
-    value: 'inside',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.fitInsideOnlyLabel', {
-      defaultMessage: 'Inside only',
-    }),
-  },
-  {
-    value: 'hide',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.categoriesInLegendLabel', {
-      defaultMessage: 'Hide labels',
-    }),
-  },
-];
-
-const categoryOptionsTreemap: Array<{
-  value: SharedPieLayerState['categoryDisplay'];
-  inputDisplay: string;
-}> = [
-  {
-    value: 'default',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.showTreemapCategoriesLabel', {
-      defaultMessage: 'Show labels',
-    }),
-  },
-  {
-    value: 'hide',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.categoriesInLegendLabel', {
-      defaultMessage: 'Hide labels',
-    }),
-  },
-];
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -123,56 +58,70 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   if (!layer) {
     return null;
   }
+  const {
+    categoryOptions,
+    numberOptions,
+    isDisabled: isToolbarPopoverDisabled,
+  } = PartitionChartsMeta[state.shape].toolbarPopover;
+
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
       <ToolbarPopover
         title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
           defaultMessage: 'Labels',
         })}
+        isDisabled={Boolean(isToolbarPopoverDisabled)}
         type="labels"
         groupPosition="left"
         buttonDataTestSubj="lnsLabelsButton"
       >
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.pieChart.labelPositionLabel', {
-            defaultMessage: 'Position',
-          })}
-          fullWidth
-          display="columnCompressed"
-        >
-          <EuiSuperSelect
-            compressed
-            valueOfSelected={layer.categoryDisplay}
-            options={state.shape === 'treemap' ? categoryOptionsTreemap : categoryOptions}
-            onChange={(option) => {
-              setState({
-                ...state,
-                layers: [{ ...layer, categoryDisplay: option }],
-              });
-            }}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.pieChart.numberLabels', {
-            defaultMessage: 'Values',
-          })}
-          fullWidth
-          display="columnCompressed"
-        >
-          <EuiSuperSelect
-            compressed
-            disabled={layer.categoryDisplay === 'hide'}
-            valueOfSelected={layer.categoryDisplay === 'hide' ? 'hidden' : layer.numberDisplay}
-            options={numberOptions}
-            onChange={(option) => {
-              setState({
-                ...state,
-                layers: [{ ...layer, numberDisplay: option }],
-              });
-            }}
-          />
-        </EuiFormRow>
-        <EuiHorizontalRule margin="s" />
+        {categoryOptions.length ? (
+          <EuiFormRow
+            label={i18n.translate('xpack.lens.pieChart.labelPositionLabel', {
+              defaultMessage: 'Position',
+            })}
+            fullWidth
+            display="columnCompressed"
+          >
+            <EuiSuperSelect
+              compressed
+              valueOfSelected={layer.categoryDisplay}
+              options={categoryOptions}
+              onChange={(option) => {
+                setState({
+                  ...state,
+                  layers: [{ ...layer, categoryDisplay: option }],
+                });
+              }}
+            />
+          </EuiFormRow>
+        ) : null}
+
+        {numberOptions.length ? (
+          <EuiFormRow
+            label={i18n.translate('xpack.lens.pieChart.numberLabels', {
+              defaultMessage: 'Values',
+            })}
+            fullWidth
+            display="columnCompressed"
+          >
+            <EuiSuperSelect
+              compressed
+              disabled={layer.categoryDisplay === 'hide'}
+              valueOfSelected={layer.categoryDisplay === 'hide' ? 'hidden' : layer.numberDisplay}
+              options={numberOptions}
+              onChange={(option) => {
+                setState({
+                  ...state,
+                  layers: [{ ...layer, numberDisplay: option }],
+                });
+              }}
+            />
+          </EuiFormRow>
+        ) : null}
+
+        {numberOptions.length + categoryOptions.length ? <EuiHorizontalRule margin="s" /> : null}
+
         <EuiFormRow
           label={i18n.translate('xpack.lens.pieChart.percentDecimalsLabel', {
             defaultMessage: 'Maximum decimal places for percent',

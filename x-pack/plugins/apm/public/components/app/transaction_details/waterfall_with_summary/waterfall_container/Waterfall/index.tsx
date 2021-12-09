@@ -12,7 +12,6 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { Timeline } from '../../../../../shared/charts/Timeline';
-import { HeightRetainer } from '../../../../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../../../../shared/Links/url_helpers';
 import { getAgentMarks } from '../Marks/get_agent_marks';
 import { getErrorMarks } from '../Marks/get_error_marks';
@@ -76,62 +75,60 @@ export function Waterfall({ waterfall, waterfallItemId }: Props) {
   };
 
   return (
-    <HeightRetainer>
-      <Container>
-        {waterfall.apiResponse.exceedsMax && (
-          <EuiCallOut
-            color="warning"
-            size="s"
-            iconType="alert"
-            title={i18n.translate('xpack.apm.waterfall.exceedsMax', {
-              defaultMessage:
-                'Number of items in this trace exceed what is displayed',
-            })}
-          />
-        )}
-        <div>
-          <div style={{ display: 'flex' }}>
-            <EuiButtonEmpty
-              style={{ zIndex: 3, position: 'absolute' }}
-              iconType={isAccordionOpen ? 'fold' : 'unfold'}
-              onClick={() => {
-                setIsAccordionOpen((isOpen) => !isOpen);
-              }}
-            />
-            <Timeline
-              marks={[...agentMarks, ...errorMarks]}
-              xMax={duration}
-              height={waterfallHeight}
-              margins={timelineMargins}
-            />
-          </div>
-          <WaterfallItemsContainer>
-            {!waterfall.entryWaterfallTransaction ? null : (
-              <AccordionWaterfall
-                // used to recreate the entire tree when `isAccordionOpen` changes, collapsing or expanding all elements.
-                key={`accordion_state_${isAccordionOpen}`}
-                isOpen={isAccordionOpen}
-                item={waterfall.entryWaterfallTransaction}
-                level={0}
-                setMaxLevel={setMaxLevel}
-                waterfallItemId={waterfallItemId}
-                duration={duration}
-                waterfall={waterfall}
-                timelineMargins={timelineMargins}
-                onClickWaterfallItem={(item: IWaterfallItem) =>
-                  toggleFlyout({ history, item })
-                }
-              />
-            )}
-          </WaterfallItemsContainer>
-        </div>
-
-        <WaterfallFlyout
-          waterfallItemId={waterfallItemId}
-          waterfall={waterfall}
-          toggleFlyout={toggleFlyout}
+    <Container>
+      {waterfall.apiResponse.exceedsMax && (
+        <EuiCallOut
+          color="warning"
+          size="s"
+          iconType="alert"
+          title={i18n.translate('xpack.apm.waterfall.exceedsMax', {
+            defaultMessage:
+              'Number of items in this trace exceed what is displayed',
+          })}
         />
-      </Container>
-    </HeightRetainer>
+      )}
+      <div>
+        <div style={{ display: 'flex' }}>
+          <EuiButtonEmpty
+            style={{ zIndex: 3, position: 'absolute' }}
+            iconType={isAccordionOpen ? 'fold' : 'unfold'}
+            onClick={() => {
+              setIsAccordionOpen((isOpen) => !isOpen);
+            }}
+          />
+          <Timeline
+            marks={[...agentMarks, ...errorMarks]}
+            xMax={duration}
+            height={waterfallHeight}
+            margins={timelineMargins}
+          />
+        </div>
+        <WaterfallItemsContainer>
+          {!waterfall.entryWaterfallTransaction ? null : (
+            <AccordionWaterfall
+              // used to recreate the entire tree when `isAccordionOpen` changes, collapsing or expanding all elements.
+              key={`accordion_state_${isAccordionOpen}`}
+              isOpen={isAccordionOpen}
+              item={waterfall.entryWaterfallTransaction}
+              level={0}
+              setMaxLevel={setMaxLevel}
+              waterfallItemId={waterfallItemId}
+              duration={duration}
+              waterfall={waterfall}
+              timelineMargins={timelineMargins}
+              onClickWaterfallItem={(item: IWaterfallItem) =>
+                toggleFlyout({ history, item })
+              }
+            />
+          )}
+        </WaterfallItemsContainer>
+      </div>
+
+      <WaterfallFlyout
+        waterfallItemId={waterfallItemId}
+        waterfall={waterfall}
+        toggleFlyout={toggleFlyout}
+      />
+    </Container>
   );
 }

@@ -23,7 +23,7 @@ import {
   TimelineStatus,
   TimelineTabs,
 } from '../../../../common/types/timeline';
-import { ISearchStart } from '../../../../../../../src/plugins/data/public';
+import type { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';

@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { SavedObjectNotFound } from '../../../../../../src/plugins/kibana_utils/common';
 import {

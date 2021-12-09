@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiTitle, EuiLink, EuiText, EuiSpacer, EuiBasicTable, EuiButtonEmpty } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { useLink, useStartServices } from '../../../../hooks';

@@ -6,7 +6,7 @@
  */
 
 import { EuiCard, EuiIcon, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { SetupStatus } from '../../../../../common/log_analysis';
 import { CreateJobButton, RecreateJobButton } from '../../log_analysis_setup/create_job_button';
@@ -65,7 +65,7 @@ export const LogAnalysisModuleListCard: React.FC<{
     moduleStatus.type === 'required' ? (
       <EuiIcon size="xxl" type="machineLearningApp" />
     ) : (
-      <EuiIcon color="secondary" size="xxl" type="check" />
+      <EuiIcon color="success" size="xxl" type="check" />
     );
 
   const moduleSetupButton =

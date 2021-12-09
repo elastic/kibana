@@ -8,7 +8,7 @@
 import { EuiLink } from '@elastic/eui';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface SettingsMessageExpressionPopoverProps {
@@ -37,7 +37,7 @@ export const SettingsMessageExpressionPopover: React.FC<SettingsMessageExpressio
       button={
         <EuiExpression
           aria-label={ariaLabel}
-          color="secondary"
+          color="success"
           description={description}
           isActive={isOpen}
           onClick={() => setIsOpen(!isOpen)}
