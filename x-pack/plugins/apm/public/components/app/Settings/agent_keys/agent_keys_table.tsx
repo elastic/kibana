@@ -82,7 +82,7 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
           description: i18n.translate(
             'xpack.apm.settings.agentKeys.table.deleteActionDescription',
             {
-              defaultMessage: 'Delete this agent key',
+              defaultMessage: 'Delete this APM agent key',
             }
           ),
           icon: 'trash',
@@ -144,7 +144,7 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
         tableCaption={i18n.translate(
           'xpack.apm.settings.agentKeys.tableCaption',
           {
-            defaultMessage: 'Agent keys',
+            defaultMessage: 'APM agent keys',
           }
         )}
         items={agentKeys ?? []}

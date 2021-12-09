@@ -8,17 +8,14 @@
 import Boom from '@hapi/boom';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import { CreateApiKeyResponse } from '../../../common/agent_key_types';
+import { PrivilegeType } from '../../../common/privilege_type';
 
-const enum PrivilegeType {
-  SOURCEMAP = 'sourcemap:write',
-  EVENT = 'event:write',
-  AGENT_CONFIG = 'config_agent:read',
-}
+const resource = '*';
 
 interface SecurityHasPrivilegesResponse {
   application: {
     apm: {
-      '-': {
+      [resource]: {
         [PrivilegeType.SOURCEMAP]: boolean;
         [PrivilegeType.EVENT]: boolean;
         [PrivilegeType.AGENT_CONFIG]: boolean;
@@ -36,73 +33,54 @@ export async function createAgentKey({
   context: ApmPluginRequestHandlerContext;
   requestBody: {
     name: string;
-    sourcemap?: boolean;
-    event?: boolean;
-    agentConfig?: boolean;
+    privileges: string[];
   };
 }) {
+  const { name, privileges } = requestBody;
+  const application = {
+    application: 'apm',
+    privileges,
+    resources: [resource],
+  };
+
   // Elasticsearch will allow a user without the right apm privileges to create API keys, but the keys won't validate
   // check first whether the user has the right privileges, and bail out early if not
   const {
-    body: { application, username, has_all_requested: hasRequiredPrivileges },
+    body: {
+      application: userApplicationPrivileges,
+      username,
+      has_all_requested: hasRequiredPrivileges,
+    },
   } = await context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges<SecurityHasPrivilegesResponse>(
     {
       body: {
-        application: [
-          {
-            application: 'apm',
-            privileges: [
-              PrivilegeType.SOURCEMAP,
-              PrivilegeType.EVENT,
-              PrivilegeType.AGENT_CONFIG,
-            ],
-            resources: ['-'],
-          },
-        ],
+        application: [application],
       },
     }
   );
 
   if (!hasRequiredPrivileges) {
-    const missingPrivileges = Object.entries(application.apm['-'])
+    const missingPrivileges = Object.entries(
+      userApplicationPrivileges.apm[resource]
+    )
       .filter((x) => !x[1])
-      .map((x) => x[0])
-      .join(', ');
-    const error = `${username} is missing the following requested privilege(s): ${missingPrivileges}.\
-    You might try with the superuser, or add the APM application privileges to the role of the authenticated user, eg.:
-    PUT /_security/role/my_role {
+      .map((x) => x[0]);
+
+    const error = `${username} is missing the following requested privilege(s): ${missingPrivileges.join(
+      ', '
+    )}.\
+    You might try with the superuser, or add the missing APM application privileges to the role of the authenticated user, eg.:
+    PUT /_security/role/my_role
+    {
       ...
       "applications": [{
         "application": "apm",
-        "privileges": ["sourcemap:write", "event:write", "config_agent:read"],
-        "resources": ["*"]
+        "privileges": ${JSON.stringify(missingPrivileges)},
+        "resources": [${resource}]
       }],
       ...
     }`;
     throw Boom.internal(error);
-  }
-
-  const { name = 'apm-key', sourcemap, event, agentConfig } = requestBody;
-
-  const privileges: PrivilegeType[] = [];
-  if (!sourcemap && !event && !agentConfig) {
-    privileges.push(
-      PrivilegeType.SOURCEMAP,
-      PrivilegeType.EVENT,
-      PrivilegeType.AGENT_CONFIG
-    );
-  }
-
-  if (sourcemap) {
-    privileges.push(PrivilegeType.SOURCEMAP);
-  }
-
-  if (event) {
-    privileges.push(PrivilegeType.EVENT);
-  }
-
-  if (agentConfig) {
-    privileges.push(PrivilegeType.AGENT_CONFIG);
   }
 
   const body = {
@@ -114,13 +92,7 @@ export async function createAgentKey({
       apm: {
         cluster: [],
         index: [],
-        applications: [
-          {
-            application: 'apm',
-            privileges,
-            resources: ['*'],
-          },
-        ],
+        applications: [application],
       },
     },
   };
