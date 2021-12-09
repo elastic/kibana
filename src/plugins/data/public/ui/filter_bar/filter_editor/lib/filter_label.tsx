@@ -13,7 +13,6 @@ import { existsOperator, isOneOfOperator } from './filter_operators';
 import { Filter, FILTERS } from '../../../../../common';
 import type { FilterLabelStatus } from '../../filter_item';
 
-// @internal
 export interface FilterLabelProps {
   filter: Filter;
   valueLabel?: string;
