@@ -7,12 +7,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ElasticsearchClient } from 'kibana/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
-  ALERT_REASON,
-} from '@kbn/rule-data-utils';
-import { ElasticsearchClient } from 'kibana/server';
+} from '../../../../../observability/common/technical_field_names';
 import {
   ActionGroup,
   ActionGroupIdsOf,

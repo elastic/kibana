@@ -134,6 +134,7 @@ export class IndexInfo {
    * @example '.alerts-security.alerts-mappings'
    */
   public getComponentTemplateName(relativeName: string): string {
+    console.log(this.baseName, relativeName);
     return joinWithDash(this.baseName, relativeName);
   }
 
