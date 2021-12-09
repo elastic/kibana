@@ -42,7 +42,10 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
   ({ IndexDataVisualizerComponent, additionalLinks }) => {
     const {
       services: {
-        data: { indexPatterns },
+        data: {
+          indexPatterns,
+          search: { session },
+        },
         savedObjects: { client: savedObjectsClient },
         notifications: { toasts },
       },
@@ -54,6 +57,13 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
     const [currentSavedSearch, setCurrentSavedSearch] = useState<SimpleSavedObject<unknown> | null>(
       null
     );
+
+    useEffect(() => {
+      session.start();
+      return () => {
+        session.clear();
+      };
+    }, [session]);
 
     useEffect(() => {
       const prevSearchString = searchString;

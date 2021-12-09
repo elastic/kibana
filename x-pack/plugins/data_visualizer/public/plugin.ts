@@ -24,6 +24,10 @@ import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_ho
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables';
 import { FieldFormatsStart } from '../../../../src/plugins/field_formats/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import {
+  DATA_VISUALIZER_APP_LOCATOR,
+  IndexDataVisualizerLocatorParams,
+} from './application/index_data_visualizer/locator';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -44,6 +48,10 @@ export interface DataVisualizerStartDependencies {
 
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
 export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;
+
+export const getLocatorParams = (params: any): IndexDataVisualizerLocatorParams => {
+  return {};
+};
 
 export class DataVisualizerPlugin
   implements
@@ -69,6 +77,23 @@ export class DataVisualizerPlugin
 
   public start(core: CoreStart, plugins: DataVisualizerStartDependencies) {
     setStartServices(core, plugins);
+
+    if (plugins.data) {
+      plugins.data.search.session.enableStorage({
+        getName: async () => {
+          // return the name you want to give the saved Search Session
+          return `Data visualizer`;
+        },
+        getLocatorData: async () => {
+          return {
+            id: DATA_VISUALIZER_APP_LOCATOR,
+            initialState: getLocatorParams({ ...plugins, shouldRestoreSearchSession: false }),
+            restoreState: getLocatorParams({ ...plugins, shouldRestoreSearchSession: true }),
+          };
+        },
+      });
+    }
+
     return {
       getFileDataVisualizerComponent,
       getIndexDataVisualizerComponent,

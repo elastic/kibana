@@ -270,6 +270,7 @@ export class SessionService {
    */
   public clear() {
     // make sure apps can't clear other apps' sessions
+    debugger;
     const currentSessionApp = this.state.get().appName;
     if (currentSessionApp && currentSessionApp !== this.currentApp) {
       // eslint-disable-next-line no-console

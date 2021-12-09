@@ -382,7 +382,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   useEffect(
     () => {
-      // If query in the filt
+      // If query in the filter
       data?.query.queryString.setQuery({
         query: searchString,
         language: searchQueryLanguage,
