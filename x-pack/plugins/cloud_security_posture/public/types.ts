@@ -8,16 +8,14 @@
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 
-export interface CspPluginSetup {
-  getGreeting: () => string;
-}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CspPluginStart {}
+export interface CspSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CspStart {}
 
-export interface CspSetupPlugins {
+export interface CspPluginSetup {
   data: DataPublicPluginStart;
 }
-
-export interface AppPluginStartDependencies {
+export interface CspPluginStart {
   navigation: NavigationPublicPluginStart;
 }

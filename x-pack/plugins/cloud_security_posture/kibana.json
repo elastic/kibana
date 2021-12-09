@@ -6,9 +6,9 @@
     "name": "csp",
     "githubTeam": "csp"
   },
-  "description": "",
+  "description": "the cloud security posture plugin",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation", "data", "kibanaReact"],
-  "optionalPlugins": []
+  "requiredPlugins": ["navigation", "data"],
+  "requiredBundles": ["kibanaReact"]
 }

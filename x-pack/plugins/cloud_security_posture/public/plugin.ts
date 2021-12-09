@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../../src/core/public';
-import type {
-  CspPluginSetup,
-  CspPluginStart,
-  AppPluginStartDependencies,
-  CspSetupPlugins,
-} from './types';
+import type { CspSetup, CspStart, CspPluginSetup, CspPluginStart } from './types';
 import { PLUGIN_NAME } from '../common';
 
-export class CspPlugin implements Plugin<CspPluginSetup, CspPluginStart, CspSetupPlugins> {
-  public setup(core: CoreSetup, plugins: CspSetupPlugins): CspPluginSetup {
+export class CspPlugin implements Plugin<CspSetup, CspStart, CspPluginSetup, CspPluginStart> {
+  public setup(core: CoreSetup, plugins: CspPluginSetup): CspSetup {
+    console.log({ coreSetup: core, setupPlugins: plugins });
     // Register an application into the side navigation menu
+
     core.application.register({
       id: 'csp_root',
       title: PLUGIN_NAME,
@@ -27,23 +23,15 @@ export class CspPlugin implements Plugin<CspPluginSetup, CspPluginStart, CspSetu
         // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();
         // Render the application
-        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
+        return renderApp(coreStart, depsStart as CspStart, params);
       },
     });
 
     // Return methods that should be available to other plugins
-    return {
-      getGreeting() {
-        return i18n.translate('csp.greetingText', {
-          defaultMessage: 'Hello from {name}!',
-          values: {
-            name: PLUGIN_NAME,
-          },
-        });
-      },
-    };
+    return {};
   }
-  public start(core: CoreStart): CspPluginStart {
+  public start(core: CoreStart, plugins: CspPluginStart): CspStart {
+    console.log({ coreStart: core, startPlugins: plugins });
     return {};
   }
 
