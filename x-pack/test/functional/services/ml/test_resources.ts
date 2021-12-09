@@ -474,24 +474,27 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       log.debug(`Installing Fleet package '${packageName}'`);
 
       const version = await this.getFleetPackageVersion(packageName);
-      const packageWithVersion = `${packageName}-${version}`;
 
-      await supertest
-        .post(`/api/fleet/epm/packages/${packageWithVersion}`)
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+      await retry.tryForTime(30 * 1000, async () => {
+        await supertest
+          .post(`/api/fleet/epm/packages/${packageName}/${version}`)
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(200);
+      });
 
       log.debug(` > Installed`);
-      return packageWithVersion;
+      return version;
     },
 
-    async removeFleetPackage(packageWithVersion: string) {
-      log.debug(`Removing Fleet package '${packageWithVersion}'`);
+    async removeFleetPackage(packageName: string, version: string) {
+      log.debug(`Removing Fleet package '${packageName}-${version}'`);
 
-      await supertest
-        .delete(`/api/fleet/epm/packages/${packageWithVersion}`)
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+      await retry.tryForTime(30 * 1000, async () => {
+        await supertest
+          .delete(`/api/fleet/epm/packages/${packageName}/${version}`)
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(200);
+      });
 
       log.debug(` > Removed`);
     },
