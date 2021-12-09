@@ -22,7 +22,7 @@ import {
   AlertConditions,
   AlertConditionsGroup,
   AlertTypeModel,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
 } from '../../../../plugins/triggers_actions_ui/public';
 import {
   AlwaysFiringParams,
@@ -64,7 +64,7 @@ const DEFAULT_THRESHOLDS: AlwaysFiringParams['thresholds'] = {
 };
 
 export const AlwaysFiringExpression: React.FunctionComponent<
-  AlertTypeParamsExpressionProps<AlwaysFiringParams>
+  RuleTypeParamsExpressionProps<AlwaysFiringParams>
 > = ({ alertParams, setAlertParams, actionGroups, defaultActionGroupId }) => {
   const {
     instances = DEFAULT_INSTANCES_TO_GENERATE,

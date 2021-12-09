@@ -17,7 +17,7 @@ import {
   handleDisabledApiKeysError,
 } from './lib';
 import {
-  AlertTypeParams,
+  RuleTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   validateNotifyWhenType,
@@ -47,7 +47,7 @@ const bodySchema = schema.object({
   notify_when: schema.string({ validate: validateNotifyWhenType }),
 });
 
-const rewriteBodyReq: RewriteRequestCase<UpdateOptions<AlertTypeParams>> = (result) => {
+const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (result) => {
   const { notify_when: notifyWhen, ...rest } = result.data;
   return {
     ...result,
@@ -57,7 +57,7 @@ const rewriteBodyReq: RewriteRequestCase<UpdateOptions<AlertTypeParams>> = (resu
     },
   };
 };
-const rewriteBodyRes: RewriteResponseCase<PartialAlert<AlertTypeParams>> = ({
+const rewriteBodyRes: RewriteResponseCase<PartialAlert<RuleTypeParams>> = ({
   actions,
   alertTypeId,
   scheduledTaskId,

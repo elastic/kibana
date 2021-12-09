@@ -15,7 +15,7 @@ import { AlertExecutorOptions, RuleType } from '../../../../../alerting/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeState,
+  RuleTypeState,
   WithoutReservedActionGroups,
 } from '../../../../../alerting/common';
 import { ListClient } from '../../../../../lists/server';
@@ -38,7 +38,7 @@ import { IEventLogService } from '../../../../../event_log/server';
 import { AlertsFieldMap, RulesFieldMap } from '../../../../common/field_maps';
 import { IRuleExecutionLogClient } from '../rule_execution_log';
 
-export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
+export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
   createdSignalsCount: number;
   createdSignals: unknown[];
@@ -69,7 +69,7 @@ export interface RunOpts<TParams extends RuleParams> {
 
 export type SecurityAlertType<
   TParams extends RuleParams,
-  TState extends AlertTypeState,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 > = Omit<
@@ -103,7 +103,7 @@ export type CreateSecurityRuleTypeWrapper = (
   options: CreateSecurityRuleTypeWrapperProps
 ) => <
   TParams extends RuleParams,
-  TState extends AlertTypeState,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {}
 >(
   type: SecurityAlertType<TParams, TState, TInstanceContext, 'default'>

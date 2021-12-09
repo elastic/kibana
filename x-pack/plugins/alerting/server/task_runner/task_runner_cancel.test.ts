@@ -8,8 +8,8 @@
 import sinon from 'sinon';
 import {
   AlertExecutorOptions,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
 } from '../types';
@@ -106,7 +106,7 @@ describe('Task Runner Cancel', () => {
 
   const mockDate = new Date('2019-02-12T21:01:22.479Z');
 
-  const mockedRuleSavedObject: Alert<AlertTypeParams> = {
+  const mockedRuleSavedObject: Alert<RuleTypeParams> = {
     id: '1',
     consumer: 'bar',
     createdAt: mockDate,
@@ -309,8 +309,8 @@ describe('Task Runner Cancel', () => {
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -341,8 +341,8 @@ describe('Task Runner Cancel', () => {
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -373,8 +373,8 @@ describe('Task Runner Cancel', () => {
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string

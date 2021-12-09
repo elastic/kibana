@@ -27,8 +27,8 @@ import { Comparator, Aggregators } from '../../../../common/alerting/metrics';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import {
   IErrorObject,
-  AlertTypeParams,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParams,
+  RuleTypeParamsExpressionProps,
 } from '../../../../../triggers_actions_ui/public';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
@@ -45,7 +45,7 @@ const FILTER_TYPING_DEBOUNCE_MS = 500;
 export const QUERY_INVALID = Symbol('QUERY_INVALID');
 
 type Props = Omit<
-  AlertTypeParamsExpressionProps<AlertTypeParams & AlertParams, AlertContextMeta>,
+  RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
   'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
 >;
 

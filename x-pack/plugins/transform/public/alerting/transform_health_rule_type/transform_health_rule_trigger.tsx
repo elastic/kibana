@@ -9,7 +9,7 @@ import { EuiForm, EuiSpacer } from '@elastic/eui';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { AlertTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
+import type { RuleTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
 import type { TransformHealthRuleParams } from '../../../common/types/alerting';
 import { TestsSelectionControl } from './tests_selection_control';
 import { TransformSelectorControl } from './transform_selector_control';
@@ -19,7 +19,7 @@ import { GetTransformsResponseSchema } from '../../../common/api_schemas/transfo
 import { ALL_TRANSFORMS_SELECTION } from '../../../common/constants';
 
 export type TransformHealthRuleTriggerProps =
-  AlertTypeParamsExpressionProps<TransformHealthRuleParams>;
+  RuleTypeParamsExpressionProps<TransformHealthRuleParams>;
 
 const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
   alertParams,

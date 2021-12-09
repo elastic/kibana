@@ -11,8 +11,8 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleType,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
 } from '../../../alerting/server';
 import { WithoutReservedActionGroups } from '../../../alerting/common';
 import { IRuleDataClient } from '../rule_data_client';
@@ -34,8 +34,8 @@ export interface PersistenceServices {
 }
 
 export type PersistenceAlertType<
-  TParams extends AlertTypeParams,
-  TState extends AlertTypeState,
+  TParams extends RuleTypeParams,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 > = Omit<
@@ -59,8 +59,8 @@ export type CreatePersistenceRuleTypeWrapper = (options: {
   ruleDataClient: IRuleDataClient;
   logger: Logger;
 }) => <
-  TParams extends AlertTypeParams,
-  TState extends AlertTypeState,
+  TParams extends RuleTypeParams,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 >(

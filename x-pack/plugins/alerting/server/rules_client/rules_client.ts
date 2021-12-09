@@ -33,7 +33,7 @@ import {
   AlertSummary,
   AlertExecutionStatusValues,
   AlertNotifyWhenType,
-  AlertTypeParams,
+  RuleTypeParams,
   ResolvedSanitizedRule,
   AlertWithLegacyId,
   SanitizedRuleWithLegacyId,
@@ -173,14 +173,14 @@ export interface AggregateResult {
   ruleMutedStatus?: { muted: number; unmuted: number };
 }
 
-export interface FindResult<Params extends AlertTypeParams> {
+export interface FindResult<Params extends RuleTypeParams> {
   page: number;
   perPage: number;
   total: number;
   data: Array<SanitizedAlert<Params>>;
 }
 
-export interface CreateOptions<Params extends AlertTypeParams> {
+export interface CreateOptions<Params extends RuleTypeParams> {
   data: Omit<
     Alert<Params>,
     | 'id'
@@ -201,7 +201,7 @@ export interface CreateOptions<Params extends AlertTypeParams> {
   };
 }
 
-export interface UpdateOptions<Params extends AlertTypeParams> {
+export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
   data: {
     name: string;
@@ -283,7 +283,7 @@ export class RulesClient {
     this.eventLogger = eventLogger;
   }
 
-  public async create<Params extends AlertTypeParams = never>({
+  public async create<Params extends RuleTypeParams = never>({
     data,
     options,
   }: CreateOptions<Params>): Promise<SanitizedAlert<Params>> {
@@ -312,7 +312,7 @@ export class RulesClient {
     // Throws an error if alert type isn't registered
     const ruleType = this.ruleTypeRegistry.get(data.alertTypeId);
 
-    const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
+    const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
     const username = await this.getUserName();
 
     let createdAPIKey = null;
@@ -342,7 +342,7 @@ export class RulesClient {
       references,
       params: updatedParams,
       actions,
-    } = await this.extractReferences(ruleType, data.actions, validatedAlertTypeParams);
+    } = await this.extractReferences(ruleType, data.actions, validatedRuleTypeParams);
 
     const createTime = Date.now();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
@@ -426,7 +426,7 @@ export class RulesClient {
     );
   }
 
-  public async get<Params extends AlertTypeParams = never>({
+  public async get<Params extends RuleTypeParams = never>({
     id,
     includeLegacyId = false,
   }: {
@@ -466,7 +466,7 @@ export class RulesClient {
     );
   }
 
-  public async resolve<Params extends AlertTypeParams = never>({
+  public async resolve<Params extends RuleTypeParams = never>({
     id,
     includeLegacyId,
   }: {
@@ -580,7 +580,7 @@ export class RulesClient {
     });
   }
 
-  public async find<Params extends AlertTypeParams = never>({
+  public async find<Params extends RuleTypeParams = never>({
     options: { fields, ...options } = {},
   }: { options?: FindOptions } = {}): Promise<FindResult<Params>> {
     let authorizationTuple;
@@ -832,7 +832,7 @@ export class RulesClient {
     return removeResult;
   }
 
-  public async update<Params extends AlertTypeParams = never>({
+  public async update<Params extends RuleTypeParams = never>({
     id,
     data,
   }: UpdateOptions<Params>): Promise<PartialAlert<Params>> {
@@ -843,7 +843,7 @@ export class RulesClient {
     );
   }
 
-  private async updateWithOCC<Params extends AlertTypeParams>({
+  private async updateWithOCC<Params extends RuleTypeParams>({
     id,
     data,
   }: UpdateOptions<Params>): Promise<PartialAlert<Params>> {
@@ -928,14 +928,14 @@ export class RulesClient {
     return updateResult;
   }
 
-  private async updateAlert<Params extends AlertTypeParams>(
+  private async updateAlert<Params extends RuleTypeParams>(
     { id, data }: UpdateOptions<Params>,
     { attributes, version }: SavedObject<RawRule>
   ): Promise<PartialAlert<Params>> {
     const ruleType = this.ruleTypeRegistry.get(attributes.alertTypeId);
 
     // Validate
-    const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
+    const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
     await this.validateActions(ruleType, data.actions);
 
     // Validate intervals, if configured
@@ -954,7 +954,7 @@ export class RulesClient {
       references,
       params: updatedParams,
       actions,
-    } = await this.extractReferences(ruleType, data.actions, validatedAlertTypeParams);
+    } = await this.extractReferences(ruleType, data.actions, validatedRuleTypeParams);
 
     const username = await this.getUserName();
 
@@ -1706,7 +1706,7 @@ export class RulesClient {
     }) as Alert['actions'];
   }
 
-  private getAlertFromRaw<Params extends AlertTypeParams>(
+  private getAlertFromRaw<Params extends RuleTypeParams>(
     id: string,
     ruleTypeId: string,
     rawRule: RawRule,
@@ -1732,7 +1732,7 @@ export class RulesClient {
     return omit(res, ['legacyId']) as Alert;
   }
 
-  private getPartialAlertFromRaw<Params extends AlertTypeParams>(
+  private getPartialAlertFromRaw<Params extends RuleTypeParams>(
     id: string,
     ruleType: UntypedNormalizedRuleType,
     {
@@ -1821,8 +1821,8 @@ export class RulesClient {
   }
 
   private async extractReferences<
-    Params extends AlertTypeParams,
-    ExtractedParams extends AlertTypeParams
+    Params extends RuleTypeParams,
+    ExtractedParams extends RuleTypeParams
   >(
     ruleType: UntypedNormalizedRuleType,
     ruleActions: NormalizedAlertAction[],
@@ -1857,8 +1857,8 @@ export class RulesClient {
   }
 
   private injectReferencesIntoParams<
-    Params extends AlertTypeParams,
-    ExtractedParams extends AlertTypeParams
+    Params extends RuleTypeParams,
+    ExtractedParams extends RuleTypeParams
   >(
     ruleId: string,
     ruleType: UntypedNormalizedRuleType,

@@ -9,21 +9,21 @@ import { RequestHandlerContext } from 'kibana/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
 } from '../../alerting/common';
 import { AlertExecutorOptions, AlertServices, RuleType } from '../../alerting/server';
 import { AlertsClient } from './alert_data_client/alerts_client';
 
 type SimpleAlertType<
-  TState extends AlertTypeState,
-  TParams extends AlertTypeParams = {},
+  TState extends RuleTypeState,
+  TParams extends RuleTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {}
 > = RuleType<TParams, TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>;
 
 export type AlertTypeExecutor<
-  TState extends AlertTypeState,
-  TParams extends AlertTypeParams = {},
+  TState extends RuleTypeState,
+  TParams extends RuleTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {},
   TServices extends Record<string, any> = {}
 > = (
@@ -33,8 +33,8 @@ export type AlertTypeExecutor<
 ) => Promise<TState | void>;
 
 export type AlertTypeWithExecutor<
-  TState extends AlertTypeState = {},
-  TParams extends AlertTypeParams = {},
+  TState extends RuleTypeState = {},
+  TParams extends RuleTypeParams = {},
   TAlertInstanceContext extends AlertInstanceContext = {},
   TServices extends Record<string, any> = {}
 > = Omit<
@@ -45,8 +45,8 @@ export type AlertTypeWithExecutor<
 };
 
 export type AlertExecutorOptionsWithExtraServices<
-  Params extends AlertTypeParams = never,
-  State extends AlertTypeState = never,
+  Params extends RuleTypeParams = never,
+  State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,

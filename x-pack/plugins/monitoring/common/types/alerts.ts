@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Alert, AlertTypeParams, SanitizedAlert } from '../../../alerting/common';
+import { Alert, RuleTypeParams, SanitizedAlert } from '../../../alerting/common';
 import {
   AlertParamType,
   AlertMessageTokenType,
@@ -13,14 +13,14 @@ import {
   AlertClusterHealthType,
 } from '../enums';
 
-export type CommonAlert = Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
+export type CommonAlert = Alert<RuleTypeParams> | SanitizedAlert<RuleTypeParams>;
 
 export interface RulesByType {
   [type: string]: CommonAlertStatus[];
 }
 export interface CommonAlertStatus {
   states: CommonAlertState[];
-  sanitizedRule: Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
+  sanitizedRule: Alert<RuleTypeParams> | SanitizedAlert<RuleTypeParams>;
 }
 
 export interface CommonAlertState {

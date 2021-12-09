@@ -241,7 +241,7 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
   iconClass: string;
   validate: (alertParams: any) => ValidationResult;
   alertParamsExpression: React.LazyExoticComponent<
-        ComponentType<AlertTypeParamsExpressionProps<AlertParamsType>>
+        ComponentType<RuleTypeParamsExpressionProps<AlertParamsType>>
       >;
   defaultActionMessage?: string;
 ```

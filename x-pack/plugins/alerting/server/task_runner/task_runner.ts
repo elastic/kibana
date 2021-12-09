@@ -43,8 +43,8 @@ import { RulesClient } from '../rules_client';
 import { partiallyUpdateAlert } from '../saved_objects';
 import {
   ActionGroup,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   WithoutReservedActionGroups,
@@ -71,9 +71,9 @@ interface RuleTaskInstance extends ConcreteTaskInstance {
 }
 
 export class TaskRunner<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
@@ -842,9 +842,9 @@ interface GenerateNewAndRecoveredAlertEventsParams<
   ruleLabel: string;
   namespace: string | undefined;
   ruleType: NormalizedRuleType<
-    AlertTypeParams,
-    AlertTypeParams,
-    AlertTypeState,
+    RuleTypeParams,
+    RuleTypeParams,
+    RuleTypeState,
     {
       [x: string]: unknown;
     },
@@ -854,7 +854,7 @@ interface GenerateNewAndRecoveredAlertEventsParams<
     string,
     string
   >;
-  rule: SanitizedAlert<AlertTypeParams>;
+  rule: SanitizedAlert<RuleTypeParams>;
 }
 
 function generateNewAndRecoveredAlertEvents<

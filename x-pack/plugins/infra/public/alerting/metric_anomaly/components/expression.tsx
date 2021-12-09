@@ -18,8 +18,8 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/common';
 import {
-  AlertTypeParams,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParams,
+  RuleTypeParamsExpressionProps,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/types';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
@@ -39,11 +39,11 @@ export interface AlertContextMeta {
   nodeType?: InventoryItemType;
 }
 
-type AlertParams = AlertTypeParams &
+type AlertParams = RuleTypeParams &
   MetricAnomalyParams & { sourceId: string; spaceId: string; hasInfraMLCapabilities: boolean };
 
 type Props = Omit<
-  AlertTypeParamsExpressionProps<AlertParams, AlertContextMeta>,
+  RuleTypeParamsExpressionProps<AlertParams, AlertContextMeta>,
   'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
 >;
 

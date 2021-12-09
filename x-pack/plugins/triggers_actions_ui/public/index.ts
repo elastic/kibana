@@ -17,13 +17,13 @@ export type {
   ActionType,
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
   ValidationResult,
   ActionVariables,
   ActionConnector,
   IErrorObject,
   AlertFlyoutCloseReason,
-  AlertTypeParams,
+  RuleTypeParams,
   AsApiContract,
 } from './types';
 

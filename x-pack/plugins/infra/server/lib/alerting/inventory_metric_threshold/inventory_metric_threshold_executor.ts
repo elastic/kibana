@@ -19,10 +19,7 @@ import {
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import {
-  AlertInstance as Alert,
-  AlertTypeState as RuleTypeState,
-} from '../../../../../alerting/server';
+import { AlertInstance as Alert, RuleTypeState } from '../../../../../alerting/server';
 import { SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';

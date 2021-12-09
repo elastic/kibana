@@ -15,8 +15,8 @@ import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
 import {
   AlertAction,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   RawRule,
@@ -26,9 +26,9 @@ import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 
 export interface CreateExecutionHandlerOptions<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
@@ -54,7 +54,7 @@ export interface CreateExecutionHandlerOptions<
   logger: Logger;
   eventLogger: IEventLogger;
   request: KibanaRequest;
-  ruleParams: AlertTypeParams;
+  ruleParams: RuleTypeParams;
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerRule: number;
 }
@@ -72,9 +72,9 @@ export type ExecutionHandler<ActionGroupIds extends string> = (
 ) => Promise<void>;
 
 export function createExecutionHandler<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,

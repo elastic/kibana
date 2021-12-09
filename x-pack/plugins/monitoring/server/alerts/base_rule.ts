@@ -14,7 +14,7 @@ import {
   RulesClient,
   AlertServices,
 } from '../../../alerting/server';
-import { Alert, AlertTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
+import { Alert, RuleTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
 import { ActionsClient } from '../../../actions/server';
 import {
   AlertState,
@@ -116,7 +116,7 @@ export class BaseRule {
     rulesClient: RulesClient,
     actionsClient: ActionsClient,
     actions: AlertEnableAction[]
-  ): Promise<SanitizedAlert<AlertTypeParams>> {
+  ): Promise<SanitizedAlert<RuleTypeParams>> {
     const existingRuleData = await rulesClient.find({
       options: {
         search: this.ruleOptions.id,
@@ -150,7 +150,7 @@ export class BaseRule {
       throttle = '1d',
       interval = '1m',
     } = this.ruleOptions;
-    return await rulesClient.create<AlertTypeParams>({
+    return await rulesClient.create<RuleTypeParams>({
       data: {
         enabled: true,
         tags: [],

@@ -9,7 +9,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { EuiCallOut, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { AlertTypeParamsExpressionProps } from '../../../../../triggers_actions_ui/public';
+import { RuleTypeParamsExpressionProps } from '../../../../../triggers_actions_ui/public';
 import { GeoContainmentAlertParams } from '../types';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
@@ -50,7 +50,7 @@ function validateQuery(query: Query) {
 }
 
 export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
-  AlertTypeParamsExpressionProps<GeoContainmentAlertParams>
+  RuleTypeParamsExpressionProps<GeoContainmentAlertParams>
 > = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, data }) => {
   const {
     index,

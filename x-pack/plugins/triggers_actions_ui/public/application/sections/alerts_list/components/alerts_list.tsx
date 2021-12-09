@@ -88,7 +88,7 @@ import {
 
 const ENTER_KEY = 13;
 
-interface AlertTypeState {
+interface RuleTypeState {
   isLoading: boolean;
   isInitialized: boolean;
   data: RuleTypeIndex;
@@ -146,7 +146,7 @@ export const AlertsList: React.FunctionComponent = () => {
       {}
     )
   );
-  const [alertTypesState, setAlertTypesState] = useState<AlertTypeState>({
+  const [alertTypesState, setAlertTypesState] = useState<RuleTypeState>({
     isLoading: false,
     isInitialized: false,
     data: new Map(),

@@ -38,7 +38,7 @@ import {
 } from '../../../../../triggers_actions_ui/public/common';
 import {
   IErrorObject,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
 } from '../../../../../triggers_actions_ui/public';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
@@ -81,7 +81,7 @@ export interface AlertContextMeta {
 
 type Criteria = InventoryMetricConditions[];
 type Props = Omit<
-  AlertTypeParamsExpressionProps<
+  RuleTypeParamsExpressionProps<
     {
       criteria: Criteria;
       nodeType: InventoryItemType;
@@ -412,7 +412,7 @@ interface ExpressionRowProps {
   expression: Omit<InventoryMetricConditions, 'metric'> & {
     metric?: SnapshotMetricType;
   };
-  errors: AlertTypeParamsExpressionProps['errors'];
+  errors: RuleTypeParamsExpressionProps['errors'];
   canDelete: boolean;
   addExpression(): void;
   remove(id: number): void;

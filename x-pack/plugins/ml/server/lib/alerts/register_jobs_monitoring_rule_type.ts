@@ -24,7 +24,7 @@ import {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeState,
+  RuleTypeState,
 } from '../../../../alerting/common';
 import type { AlertExecutorOptions } from '../../../../alerting/server';
 import type { JobMessage } from '../../../common/types/audit_message';
@@ -101,7 +101,7 @@ export function registerJobsMonitoringRuleType({
   alerting.registerType<
     AnomalyDetectionJobsHealthRuleParams,
     never, // Only use if defining useSavedObjectReferences hook
-    AlertTypeState,
+    RuleTypeState,
     AlertInstanceState,
     AnomalyDetectionJobsHealthAlertContext,
     AnomalyDetectionJobRealtimeIssue

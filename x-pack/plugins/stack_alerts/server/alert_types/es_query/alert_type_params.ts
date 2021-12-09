@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ComparatorFnNames } from '../lib';
 import { validateTimeWindowUnits } from '../../../../triggers_actions_ui/server';
-import { AlertTypeState } from '../../../../alerting/server';
+import { RuleTypeState } from '../../../../alerting/server';
 
 export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
 
 // alert type parameters
 export type EsQueryAlertParams = TypeOf<typeof EsQueryAlertParamsSchema>;
-export interface EsQueryAlertState extends AlertTypeState {
+export interface EsQueryAlertState extends RuleTypeState {
   latestTimestamp: string | undefined;
 }
 

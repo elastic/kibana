@@ -47,8 +47,8 @@ import {
   AlertInstanceState,
   AlertsHealth,
   RuleType,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   Services,
 } from './types';
 import { registerAlertsUsageCollector } from './usage';
@@ -83,9 +83,9 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
 
 export interface PluginSetupContract {
   registerType<
-    Params extends AlertTypeParams = AlertTypeParams,
-    ExtractedParams extends AlertTypeParams = AlertTypeParams,
-    State extends AlertTypeState = AlertTypeState,
+    Params extends RuleTypeParams = RuleTypeParams,
+    ExtractedParams extends RuleTypeParams = RuleTypeParams,
+    State extends RuleTypeState = RuleTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = never,
@@ -265,9 +265,9 @@ export class AlertingPlugin {
     const alertingConfig = this.config;
     return {
       registerType<
-        Params extends AlertTypeParams = AlertTypeParams,
-        ExtractedParams extends AlertTypeParams = AlertTypeParams,
-        State extends AlertTypeState = AlertTypeState,
+        Params extends RuleTypeParams = RuleTypeParams,
+        ExtractedParams extends RuleTypeParams = RuleTypeParams,
+        State extends RuleTypeState = RuleTypeState,
         InstanceState extends AlertInstanceState = AlertInstanceState,
         InstanceContext extends AlertInstanceContext = AlertInstanceContext,
         ActionGroupIds extends string = never,

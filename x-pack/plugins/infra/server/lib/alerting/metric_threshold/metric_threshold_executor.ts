@@ -15,10 +15,7 @@ import {
   AlertInstanceState as AlertState,
   AlertInstanceContext as AlertContext,
 } from '../../../../../alerting/common';
-import {
-  AlertTypeState as RuleTypeState,
-  AlertInstance as Alert,
-} from '../../../../../alerting/server';
+import { RuleTypeState, AlertInstance as Alert } from '../../../../../alerting/server';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,

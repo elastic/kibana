@@ -29,12 +29,12 @@ import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs'
 import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../common/util/alerts';
 import { isDefined } from '../../common/types/guards';
-import { AlertTypeParamsExpressionProps } from '../../../triggers_actions_ui/public';
+import { RuleTypeParamsExpressionProps } from '../../../triggers_actions_ui/public';
 import { parseInterval } from '../../common/util/parse_interval';
 import { BetaBadge } from './beta_badge';
 
 export type MlAnomalyAlertTriggerProps =
-  AlertTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
+  RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
 
 const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   alertParams,

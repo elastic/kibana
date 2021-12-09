@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Alert, AlertTypeParams } from '../../../alerting/common';
+import type { Alert, RuleTypeParams } from '../../../alerting/common';
 
 export type TransformHealthRuleParams = {
   includeTransforms?: string[];
@@ -15,7 +15,7 @@ export type TransformHealthRuleParams = {
       enabled: boolean;
     } | null;
   } | null;
-} & AlertTypeParams;
+} & RuleTypeParams;
 
 export type TransformHealthRuleTestsConfig = TransformHealthRuleParams['testsConfig'];
 

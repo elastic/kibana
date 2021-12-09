@@ -15,8 +15,8 @@ import {
   AlertInstance,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
 } from '../../../alerting/server';
 import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_technical_fields';
 import {
@@ -70,8 +70,8 @@ export interface LifecycleAlertServices<
 }
 
 export type LifecycleRuleExecutor<
-  Params extends AlertTypeParams = never,
-  State extends AlertTypeState = never,
+  Params extends RuleTypeParams = never,
+  State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never
@@ -94,10 +94,10 @@ const trackedAlertStateRt = rt.type({
 
 export type TrackedLifecycleAlertState = rt.TypeOf<typeof trackedAlertStateRt>;
 
-const alertTypeStateRt = <State extends AlertTypeState>() =>
+const alertTypeStateRt = <State extends RuleTypeState>() =>
   rt.record(rt.string, rt.unknown) as rt.Type<State, State, unknown>;
 
-const wrappedStateRt = <State extends AlertTypeState>() =>
+const wrappedStateRt = <State extends RuleTypeState>() =>
   rt.type({
     wrapped: alertTypeStateRt<State>(),
     trackedAlerts: rt.record(rt.string, trackedAlertStateRt),
@@ -108,7 +108,7 @@ const wrappedStateRt = <State extends AlertTypeState>() =>
  * there's no easy way to instantiate generic values such as the runtime type
  * factory function.
  */
-export type WrappedLifecycleRuleState<State extends AlertTypeState> = AlertTypeState & {
+export type WrappedLifecycleRuleState<State extends RuleTypeState> = RuleTypeState & {
   wrapped: State | void;
   trackedAlerts: Record<string, TrackedLifecycleAlertState>;
 };
@@ -116,8 +116,8 @@ export type WrappedLifecycleRuleState<State extends AlertTypeState> = AlertTypeS
 export const createLifecycleExecutor =
   (logger: Logger, ruleDataClient: PublicContract<IRuleDataClient>) =>
   <
-    Params extends AlertTypeParams = never,
-    State extends AlertTypeState = never,
+    Params extends RuleTypeParams = never,
+    State extends RuleTypeState = never,
     InstanceState extends AlertInstanceState = never,
     InstanceContext extends AlertInstanceContext = never,
     ActionGroupIds extends string = never

@@ -21,7 +21,7 @@ import {
   GroupByExpression,
   WhenExpression,
   builtInAggregationTypes,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
 } from '../../../../triggers_actions_ui/public';
 import { ThresholdVisualization } from './visualization';
 import { IndexThresholdAlertParams } from './types';
@@ -64,7 +64,7 @@ function indexParamToArray(index: string | string[]): string[] {
 }
 
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
-  AlertTypeParamsExpressionProps<IndexThresholdAlertParams>
+  RuleTypeParamsExpressionProps<IndexThresholdAlertParams>
 > = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, charts, data }) => {
   const {
     index,

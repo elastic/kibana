@@ -12,7 +12,7 @@ import { handleDisabledApiKeysError } from './../lib/error_handler';
 import {
   SanitizedAlert,
   AlertNotifyWhenType,
-  AlertTypeParams,
+  RuleTypeParams,
   LEGACY_BASE_ALERT_API_PATH,
   validateNotifyWhenType,
 } from '../../types';
@@ -78,11 +78,12 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         });
 
         try {
-          const alertRes: SanitizedAlert<AlertTypeParams> =
-            await rulesClient.create<AlertTypeParams>({
+          const alertRes: SanitizedAlert<RuleTypeParams> = await rulesClient.create<RuleTypeParams>(
+            {
               data: { ...alert, notifyWhen },
               options: { id: params?.id },
-            });
+            }
+          );
           return res.ok({
             body: alertRes,
           });

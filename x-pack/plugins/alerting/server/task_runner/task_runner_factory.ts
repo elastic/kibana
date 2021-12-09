@@ -17,11 +17,11 @@ import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 import {
-  AlertTypeParams,
+  RuleTypeParams,
   RuleTypeRegistry,
   GetServicesFunction,
   SpaceIdToNamespaceFunction,
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
 } from '../types';
@@ -61,9 +61,9 @@ export class TaskRunnerFactory {
   }
 
   public create<
-    Params extends AlertTypeParams,
-    ExtractedParams extends AlertTypeParams,
-    State extends AlertTypeState,
+    Params extends RuleTypeParams,
+    ExtractedParams extends RuleTypeParams,
+    State extends RuleTypeState,
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,

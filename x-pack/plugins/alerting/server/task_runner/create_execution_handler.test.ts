@@ -17,21 +17,16 @@ import { KibanaRequest } from 'kibana/server';
 import { asSavedObjectExecutionSource } from '../../../actions/server';
 import { InjectActionParamsOpts } from './inject_action_params';
 import { NormalizedRuleType } from '../rule_type_registry';
-import {
-  AlertTypeParams,
-  AlertTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-} from '../types';
+import { RuleTypeParams, RuleTypeState, AlertInstanceState, AlertInstanceContext } from '../types';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
 }));
 
 const ruleType: NormalizedRuleType<
-  AlertTypeParams,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   'default' | 'other-group',
@@ -60,9 +55,9 @@ const mockActionsPlugin = actionsMock.createStart();
 const mockEventLogger = eventLoggerMock.create();
 const createExecutionHandlerParams: jest.Mocked<
   CreateExecutionHandlerOptions<
-    AlertTypeParams,
-    AlertTypeParams,
-    AlertTypeState,
+    RuleTypeParams,
+    RuleTypeParams,
+    RuleTypeState,
     AlertInstanceState,
     AlertInstanceContext,
     'default' | 'other-group',

@@ -8,9 +8,9 @@
 // TODO: https://github.com/elastic/kibana/issues/110895
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { AlertsHealth } from './alert';
+import { AlertsHealth } from './rule';
 
-export * from './alert';
+export * from './rule';
 export * from './rule_type';
 export * from './alert_instance';
 export * from './rule_task_instance';

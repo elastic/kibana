@@ -11,7 +11,7 @@ import { IRouter } from 'kibana/server';
 import { ILicenseState } from '../lib';
 import { verifyAccessAndContext, RewriteResponseCase } from './lib';
 import {
-  AlertTypeParams,
+  RuleTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   SanitizedAlert,
@@ -21,7 +21,7 @@ const paramSchema = schema.object({
   id: schema.string(),
 });
 
-const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
+const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<RuleTypeParams>> = ({
   alertTypeId,
   createdBy,
   updatedBy,

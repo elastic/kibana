@@ -12,11 +12,11 @@ import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { getGeoContainmentExecutor } from './geo_containment';
 import {
   RuleType,
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   RuleParamsAndRefs,
-  AlertTypeParams,
+  RuleTypeParams,
 } from '../../../../alerting/server';
 import { Query } from '../../../../../../src/plugins/data/common/query';
 
@@ -24,7 +24,7 @@ export const ActionGroupId = 'Tracked entity contained';
 export const RecoveryActionGroupId = 'notGeoContained';
 
 export const GEO_CONTAINMENT_ID = '.geo-containment';
-export interface GeoContainmentParams extends AlertTypeParams {
+export interface GeoContainmentParams extends RuleTypeParams {
   index: string;
   indexId: string;
   geoField: string;
@@ -126,7 +126,7 @@ export const ParamsSchema = schema.object({
   boundaryIndexQuery: schema.maybe(schema.any({})),
 });
 
-export interface GeoContainmentState extends AlertTypeState {
+export interface GeoContainmentState extends RuleTypeState {
   shapesFilters: Record<string, unknown>;
   shapesIdsNamesMap: Record<string, unknown>;
   prevLocationMap: Record<string, unknown>;

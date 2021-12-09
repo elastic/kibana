@@ -18,7 +18,7 @@ import {
 import {
   SanitizedAlert,
   validateNotifyWhenType,
-  AlertTypeParams,
+  RuleTypeParams,
   BASE_ALERTING_API_PATH,
   AlertNotifyWhenType,
 } from '../types';
@@ -46,7 +46,7 @@ export const bodySchema = schema.object({
   notify_when: schema.string({ validate: validateNotifyWhenType }),
 });
 
-const rewriteBodyReq: RewriteRequestCase<CreateOptions<AlertTypeParams>['data']> = ({
+const rewriteBodyReq: RewriteRequestCase<CreateOptions<RuleTypeParams>['data']> = ({
   rule_type_id: alertTypeId,
   notify_when: notifyWhen,
   ...rest
@@ -55,7 +55,7 @@ const rewriteBodyReq: RewriteRequestCase<CreateOptions<AlertTypeParams>['data']>
   alertTypeId,
   notifyWhen,
 });
-const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
+const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<RuleTypeParams>> = ({
   actions,
   alertTypeId,
   scheduledTaskId,
@@ -121,8 +121,8 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           });
 
           try {
-            const createdRule: SanitizedAlert<AlertTypeParams> =
-              await rulesClient.create<AlertTypeParams>({
+            const createdRule: SanitizedAlert<RuleTypeParams> =
+              await rulesClient.create<RuleTypeParams>({
                 data: rewriteBodyReq({
                   ...rule,
                   notify_when: rule.notify_when as AlertNotifyWhenType,

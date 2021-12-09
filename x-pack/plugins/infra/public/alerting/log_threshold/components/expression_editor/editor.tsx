@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
   ForLastExpression,
 } from '../../../../../../triggers_actions_ui/public';
 import {
@@ -90,7 +90,7 @@ const createDefaultRatioAlertParams = (
 });
 
 export const ExpressionEditor: React.FC<
-  AlertTypeParamsExpressionProps<PartialAlertParams, LogsContextMeta>
+  RuleTypeParamsExpressionProps<PartialAlertParams, LogsContextMeta>
 > = (props) => {
   const isInternal = props.metadata?.isInternal ?? false;
   const [sourceId] = useSourceId();
@@ -159,7 +159,7 @@ export const SourceStatusWrapper: React.FC = ({ children }) => {
   );
 };
 
-export const Editor: React.FC<AlertTypeParamsExpressionProps<PartialAlertParams, LogsContextMeta>> =
+export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialAlertParams, LogsContextMeta>> =
   (props) => {
     const { setAlertParams, alertParams, errors } = props;
     const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);

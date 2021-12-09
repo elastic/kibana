@@ -9,14 +9,14 @@ import { RuleParams } from '../../schemas/rule_schemas';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeState,
+  RuleTypeState,
 } from '../../../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertInstance } from '../../../../../../alerting/server/alert_instance';
 
 export const alertInstanceFactoryStub = <
   TParams extends RuleParams,
-  TState extends AlertTypeState,
+  TState extends RuleTypeState,
   TInstanceState extends AlertInstanceState,
   TInstanceContext extends AlertInstanceContext,
   TActionGroupIds extends string = ''

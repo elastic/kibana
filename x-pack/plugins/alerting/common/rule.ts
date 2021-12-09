@@ -12,8 +12,8 @@ import {
 } from 'kibana/server';
 import { AlertNotifyWhenType } from './alert_notify_when_type';
 
-export type AlertTypeState = Record<string, unknown>;
-export type AlertTypeParams = Record<string, unknown>;
+export type RuleTypeState = Record<string, unknown>;
+export type RuleTypeParams = Record<string, unknown>;
 
 export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
@@ -60,7 +60,7 @@ export interface AlertAggregations {
   ruleMutedStatus: { muted: number; unmuted: number };
 }
 
-export interface Alert<Params extends AlertTypeParams = never> {
+export interface Alert<Params extends RuleTypeParams = never> {
   id: string;
   enabled: boolean;
   name: string;
@@ -84,8 +84,8 @@ export interface Alert<Params extends AlertTypeParams = never> {
   executionStatus: AlertExecutionStatus;
 }
 
-export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
-export type ResolvedSanitizedRule<Params extends AlertTypeParams = never> = SanitizedAlert<Params> &
+export type SanitizedAlert<Params extends RuleTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
+export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedAlert<Params> &
   Omit<SavedObjectsResolveResponse, 'saved_object'>;
 
 export type SanitizedRuleConfig = Pick<

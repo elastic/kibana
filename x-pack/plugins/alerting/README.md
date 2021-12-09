@@ -194,28 +194,28 @@ This example rule type receives server and threshold as parameters. It will read
 
 ```typescript
 import { schema } from '@kbn/config-schema';
-import { AlertType, AlertExecutorOptions } from '../../../alerting/server';
+import { RuleType, AlertExecutorOptions } from '../../../alerting/server';
 // These type names will eventually be updated to reflect the new terminology
 import {
-	AlertTypeParams,
-	AlertTypeState,
+	RuleTypeParams,
+	RuleTypeState,
 	AlertInstanceState,
 	AlertInstanceContext,
 } from '../../../alerting/common';
 ...
-interface MyRuleTypeParams extends AlertTypeParams {
+interface MyRuleTypeParams extends RuleTypeParams {
 	server: string;
 	threshold: number;
 	testSavedObjectId: string;
 }
 
-interface MyRuleTypeExtractedParams extends AlertTypeParams {
+interface MyRuleTypeExtractedParams extends RuleTypeParams {
 	server: string;
 	threshold: number;
 	testSavedObjectRef: string;
 }
 
-interface MyRuleTypeState extends AlertTypeState {
+interface MyRuleTypeState extends RuleTypeState {
 	lastChecked: Date;
 }
 

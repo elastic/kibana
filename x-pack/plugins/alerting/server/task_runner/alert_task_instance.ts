@@ -15,7 +15,7 @@ import {
   ruleParamsSchema,
   ruleStateSchema,
   RuleTaskParams,
-  AlertTypeParams,
+  RuleTypeParams,
 } from '../../common';
 
 export interface AlertTaskInstance extends ConcreteTaskInstance {
@@ -26,7 +26,7 @@ export interface AlertTaskInstance extends ConcreteTaskInstance {
 const enumerateErrorFields = (e: t.Errors) =>
   `${e.map(({ context }) => context.map(({ key }) => key).join('.'))}`;
 
-export function taskInstanceToAlertTaskInstance<Params extends AlertTypeParams>(
+export function taskInstanceToAlertTaskInstance<Params extends RuleTypeParams>(
   taskInstance: ConcreteTaskInstance,
   alert?: SanitizedAlert<Params>
 ): AlertTaskInstance {

@@ -34,15 +34,15 @@ import {
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
-  AlertTypeParams,
+  RuleTypeParams,
   ActionVariable,
   RuleType as CommonRuleType,
 } from '../../alerting/common';
 
-// In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
+// In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
-type Alert = SanitizedAlert<AlertTypeParams>;
-type ResolvedRule = ResolvedSanitizedRule<AlertTypeParams>;
+type Alert = SanitizedAlert<RuleTypeParams>;
+type ResolvedRule = ResolvedSanitizedRule<RuleTypeParams>;
 
 export type {
   Alert,
@@ -55,7 +55,7 @@ export type {
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
-  AlertTypeParams,
+  RuleTypeParams,
   ResolvedRule,
 };
 export type { ActionType, AsApiContract };
@@ -237,8 +237,8 @@ export interface AlertTableItem extends Alert {
   enabledInLicense: boolean;
 }
 
-export interface AlertTypeParamsExpressionProps<
-  Params extends AlertTypeParams = AlertTypeParams,
+export interface RuleTypeParamsExpressionProps<
+  Params extends RuleTypeParams = RuleTypeParams,
   MetaData = Record<string, unknown>,
   ActionGroupIds extends string = string
 > {
@@ -259,7 +259,7 @@ export interface AlertTypeParamsExpressionProps<
   data: DataPublicPluginStart;
 }
 
-export interface AlertTypeModel<Params extends AlertTypeParams = AlertTypeParams> {
+export interface AlertTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
   description: string;
   iconClass: string;
@@ -267,7 +267,7 @@ export interface AlertTypeModel<Params extends AlertTypeParams = AlertTypeParams
   validate: (alertParams: Params) => ValidationResult;
   alertParamsExpression:
     | React.FunctionComponent<any>
-    | React.LazyExoticComponent<ComponentType<AlertTypeParamsExpressionProps<Params>>>;
+    | React.LazyExoticComponent<ComponentType<RuleTypeParamsExpressionProps<Params>>>;
   requiresAppContext: boolean;
   defaultActionMessage?: string;
 }

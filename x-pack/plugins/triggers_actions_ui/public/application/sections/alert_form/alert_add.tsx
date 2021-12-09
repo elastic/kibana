@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import {
   Alert,
-  AlertTypeParams,
+  RuleTypeParams,
   AlertUpdates,
   AlertFlyoutCloseReason,
   IErrorObject,
@@ -68,7 +68,7 @@ const AlertAdd = ({
   const [{ alert }, dispatch] = useReducer(alertReducer as InitialAlertReducer, {
     alert: initialAlert,
   });
-  const [initialAlertParams, setInitialAlertParams] = useState<AlertTypeParams>({});
+  const [initialAlertParams, setInitialAlertParams] = useState<RuleTypeParams>({});
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmAlertSaveModalOpen, setIsConfirmAlertSaveModalOpen] = useState<boolean>(false);
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);

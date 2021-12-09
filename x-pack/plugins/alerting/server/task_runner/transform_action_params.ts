@@ -9,7 +9,7 @@ import {
   AlertActionParams,
   AlertInstanceState,
   AlertInstanceContext,
-  AlertTypeParams,
+  RuleTypeParams,
 } from '../types';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 
@@ -27,7 +27,7 @@ interface TransformActionParamsOptions {
   alertActionGroupName: string;
   alertActionSubgroup?: string;
   actionParams: AlertActionParams;
-  alertParams: AlertTypeParams;
+  alertParams: RuleTypeParams;
   state: AlertInstanceState;
   kibanaBaseUrl?: string;
   context: AlertInstanceContext;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams } from '../../../plugins/alerting/common';
+import { RuleTypeParams } from '../../../plugins/alerting/common';
 
 export const ALERTING_EXAMPLE_APP_ID = 'AlertingExample';
 
@@ -16,7 +16,7 @@ export interface AlwaysFiringThresholds {
   medium?: number;
   large?: number;
 }
-export interface AlwaysFiringParams extends AlertTypeParams {
+export interface AlwaysFiringParams extends RuleTypeParams {
   instances?: number;
   thresholds?: AlwaysFiringThresholds;
 }

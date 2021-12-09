@@ -6,8 +6,8 @@
  */
 
 import {
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
 } from '../../../../plugins/alerting/server';
@@ -17,8 +17,8 @@ import { LifecycleAlertServices, LifecycleRuleExecutor } from './create_lifecycl
 
 export const createLifecycleRuleExecutorMock =
   <
-    Params extends AlertTypeParams = never,
-    State extends AlertTypeState = never,
+    Params extends RuleTypeParams = never,
+    State extends RuleTypeState = never,
     InstanceState extends AlertInstanceState = never,
     InstanceContext extends AlertInstanceContext = never,
     ActionGroupIds extends string = never

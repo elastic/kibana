@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { FindOptions, FindResult } from '../rules_client';
 import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
-import { AlertTypeParams, AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import { RuleTypeParams, AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';
 
 // query definition
@@ -57,7 +57,7 @@ const rewriteQueryReq: RewriteRequestCase<FindOptions> = ({
   ...(hasReference ? { hasReference } : {}),
   ...(searchFields ? { searchFields } : {}),
 });
-const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
+const rewriteBodyRes: RewriteResponseCase<FindResult<RuleTypeParams>> = ({
   perPage,
   data,
   ...restOfResult

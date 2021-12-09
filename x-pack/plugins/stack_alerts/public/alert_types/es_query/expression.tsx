@@ -32,7 +32,7 @@ import {
   ThresholdExpression,
   ForLastExpression,
   ValueExpression,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
 } from '../../../../triggers_actions_ui/public';
 import { validateExpression } from './validation';
 import { parseDuration } from '../../../../alerting/common';
@@ -76,7 +76,7 @@ interface KibanaDeps {
 }
 
 export const EsQueryAlertTypeExpression: React.FunctionComponent<
-  AlertTypeParamsExpressionProps<EsQueryAlertParams>
+  RuleTypeParamsExpressionProps<EsQueryAlertParams>
 > = ({ alertParams, setAlertParams, setAlertProperty, errors, data }) => {
   const {
     index,

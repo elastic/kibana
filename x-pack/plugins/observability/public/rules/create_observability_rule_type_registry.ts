@@ -7,7 +7,7 @@
 
 import {
   AlertTypeModel,
-  AlertTypeParams,
+  RuleTypeParams,
   RuleTypeRegistryContract,
 } from '../../../triggers_actions_ui/public';
 import { ParsedTechnicalFields } from '../../../rule_registry/common/parse_technical_fields';
@@ -18,7 +18,7 @@ export type ObservabilityRuleTypeFormatter = (options: {
   formatters: { asDuration: AsDuration; asPercent: AsPercent };
 }) => { reason: string; link: string };
 
-export interface ObservabilityRuleTypeModel<Params extends AlertTypeParams = AlertTypeParams>
+export interface ObservabilityRuleTypeModel<Params extends RuleTypeParams = RuleTypeParams>
   extends AlertTypeModel<Params> {
   format: ObservabilityRuleTypeFormatter;
 }

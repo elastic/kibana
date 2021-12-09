@@ -12,14 +12,14 @@ import {
   AlertExecutorOptions,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
 } from '../../../alerting/server';
 import { alertsMock } from '../../../alerting/server/mocks';
 
 export const createDefaultAlertExecutorOptions = <
-  Params extends AlertTypeParams = never,
-  State extends AlertTypeState = never,
+  Params extends RuleTypeParams = never,
+  State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = {},
   InstanceContext extends AlertInstanceContext = {},
   ActionGroupIds extends string = ''

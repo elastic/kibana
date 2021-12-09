@@ -10,7 +10,7 @@ import { EuiComboBoxOptionOption, EuiForm, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { AlertTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
+import { RuleTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { JobSelectorControl } from '../job_selector';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
@@ -23,7 +23,7 @@ import { BetaBadge } from '../beta_badge';
 import { isDefined } from '../../../common/types/guards';
 
 export type MlAnomalyAlertTriggerProps =
-  AlertTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
+  RuleTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
 
 const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   alertParams,

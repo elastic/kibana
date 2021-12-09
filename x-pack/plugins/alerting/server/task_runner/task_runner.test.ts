@@ -9,8 +9,8 @@ import sinon from 'sinon';
 import { schema } from '@kbn/config-schema';
 import {
   AlertExecutorOptions,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
 } from '../types';
@@ -133,7 +133,7 @@ describe('Task Runner', () => {
 
   const mockDate = new Date('2019-02-12T21:01:22.479Z');
 
-  const mockedRuleTypeSavedObject: Alert<AlertTypeParams> = {
+  const mockedRuleTypeSavedObject: Alert<RuleTypeParams> = {
     id: '1',
     consumer: 'bar',
     createdAt: mockDate,
@@ -377,8 +377,8 @@ describe('Task Runner', () => {
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
-            AlertTypeParams,
-            AlertTypeState,
+            RuleTypeParams,
+            RuleTypeState,
             AlertInstanceState,
             AlertInstanceContext,
             string
@@ -618,8 +618,8 @@ describe('Task Runner', () => {
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -816,8 +816,8 @@ describe('Task Runner', () => {
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
-            AlertTypeParams,
-            AlertTypeState,
+            RuleTypeParams,
+            RuleTypeState,
             AlertInstanceState,
             AlertInstanceContext,
             string
@@ -872,8 +872,8 @@ describe('Task Runner', () => {
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -1052,8 +1052,8 @@ describe('Task Runner', () => {
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
-            AlertTypeParams,
-            AlertTypeState,
+            RuleTypeParams,
+            RuleTypeState,
             AlertInstanceState,
             AlertInstanceContext,
             string
@@ -1115,8 +1115,8 @@ describe('Task Runner', () => {
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
-            AlertTypeParams,
-            AlertTypeState,
+            RuleTypeParams,
+            RuleTypeState,
             AlertInstanceState,
             AlertInstanceContext,
             string
@@ -1184,8 +1184,8 @@ describe('Task Runner', () => {
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
-            AlertTypeParams,
-            AlertTypeState,
+            RuleTypeParams,
+            RuleTypeState,
             AlertInstanceState,
             AlertInstanceContext,
             string
@@ -1470,8 +1470,8 @@ describe('Task Runner', () => {
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
-            AlertTypeParams,
-            AlertTypeState,
+            RuleTypeParams,
+            RuleTypeState,
             AlertInstanceState,
             AlertInstanceContext,
             string
@@ -1835,8 +1835,8 @@ describe('Task Runner', () => {
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
-            AlertTypeParams,
-            AlertTypeState,
+            RuleTypeParams,
+            RuleTypeState,
             AlertInstanceState,
             AlertInstanceContext,
             string
@@ -1944,8 +1944,8 @@ describe('Task Runner', () => {
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
-            AlertTypeParams,
-            AlertTypeState,
+            RuleTypeParams,
+            RuleTypeState,
             AlertInstanceState,
             AlertInstanceContext,
             string
@@ -2053,8 +2053,8 @@ describe('Task Runner', () => {
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -2423,8 +2423,8 @@ describe('Task Runner', () => {
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -3044,8 +3044,8 @@ describe('Task Runner', () => {
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -3171,8 +3171,8 @@ describe('Task Runner', () => {
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -3439,8 +3439,8 @@ describe('Task Runner', () => {
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -3652,8 +3652,8 @@ describe('Task Runner', () => {
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -4053,8 +4053,8 @@ describe('Task Runner', () => {
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string

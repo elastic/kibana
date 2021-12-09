@@ -15,7 +15,7 @@ import {
 
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 
-import { AlertTypeParams as RuleTypeParams } from '../../../../alerting/common';
+import { RuleTypeParams } from '../../../../alerting/common';
 import { validateMetricThreshold } from './components/validation';
 import { formatReason } from './rule_data_formatters';
 

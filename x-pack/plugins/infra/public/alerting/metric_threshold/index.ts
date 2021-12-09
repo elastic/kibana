@@ -10,7 +10,7 @@ import React from 'react';
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import { validateMetricThreshold } from './components/validation';
 import { formatReason } from './rule_data_formatters';
-import { AlertTypeParams as RuleTypeParams } from '../../../../alerting/common';
+import { RuleTypeParams } from '../../../../alerting/common';
 import {
   MetricExpressionParams,
   METRIC_THRESHOLD_ALERT_TYPE_ID,

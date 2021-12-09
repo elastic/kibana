@@ -13,7 +13,7 @@ import { Status } from '../../../../common/detection_engine/schemas/common/schem
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
   RuleType,
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   AlertExecutorOptions,
@@ -187,7 +187,7 @@ export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 
 export type RuleExecutorOptions = AlertExecutorOptions<
   RuleParams,
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext
 >;
@@ -199,7 +199,7 @@ export const isAlertExecutor = (
 ): obj is RuleType<
   RuleParams,
   RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   'default'
@@ -210,7 +210,7 @@ export const isAlertExecutor = (
 export type SignalRuleAlertTypeDefinition = RuleType<
   RuleParams,
   RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   'default'
@@ -364,7 +364,7 @@ export interface ThresholdQueryBucket extends TermAggregationBucket {
   };
 }
 
-export interface ThresholdAlertState extends AlertTypeState {
+export interface ThresholdAlertState extends RuleTypeState {
   initialized: boolean;
   signalHistory: ThresholdSignalHistory;
 }

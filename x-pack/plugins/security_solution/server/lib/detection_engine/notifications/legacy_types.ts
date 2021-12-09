@@ -11,8 +11,8 @@ import {
   RulesClient,
   PartialAlert,
   RuleType,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   AlertExecutorOptions,
@@ -23,7 +23,7 @@ import { LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export interface LegacyRuleNotificationAlertTypeParams extends AlertTypeParams {
+export interface LegacyRuleNotificationAlertTypeParams extends RuleTypeParams {
   ruleAlertId: string;
 }
 
@@ -81,7 +81,7 @@ export interface LegacyReadNotificationParams {
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyIsAlertType = (
-  partialAlert: PartialAlert<AlertTypeParams>
+  partialAlert: PartialAlert<RuleTypeParams>
 ): partialAlert is LegacyRuleNotificationAlertType => {
   return partialAlert.alertTypeId === LEGACY_NOTIFICATIONS_ID;
 };
@@ -91,7 +91,7 @@ export const legacyIsAlertType = (
  */
 export type LegacyNotificationExecutorOptions = AlertExecutorOptions<
   LegacyRuleNotificationAlertTypeParams,
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext
 >;
@@ -106,7 +106,7 @@ export const legacyIsNotificationAlertExecutor = (
 ): obj is RuleType<
   LegacyRuleNotificationAlertTypeParams,
   LegacyRuleNotificationAlertTypeParams,
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext
 > => {
@@ -120,7 +120,7 @@ export type LegacyNotificationAlertTypeDefinition = Omit<
   RuleType<
     LegacyRuleNotificationAlertTypeParams,
     LegacyRuleNotificationAlertTypeParams,
-    AlertTypeState,
+    RuleTypeState,
     AlertInstanceState,
     AlertInstanceContext,
     'default'
@@ -131,7 +131,7 @@ export type LegacyNotificationAlertTypeDefinition = Omit<
     services,
     params,
     state,
-  }: LegacyNotificationExecutorOptions) => Promise<AlertTypeState | void>;
+  }: LegacyNotificationExecutorOptions) => Promise<RuleTypeState | void>;
 };
 
 /**
