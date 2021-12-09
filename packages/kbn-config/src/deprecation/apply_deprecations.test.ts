@@ -116,7 +116,7 @@ describe('applyDeprecations', () => {
     expect(migrated).toEqual({ foo: 'bar', newname: 'renamed' });
   });
 
-  it('works for nested properties', () => {
+  it('nested properties take into account if their parents are empty objects, and remove them if so', () => {
     const initialConfig = {
       foo: 'bar',
       deprecated: { nested: 'deprecated' },
@@ -135,7 +135,7 @@ describe('applyDeprecations', () => {
       wrapHandler(deprecations.rename('nested.from.rename', 'nested.to.renamed')),
     ]);
 
-    expect(migrated).toEqual({
+    expect(migrated).toStrictEqual({
       foo: 'bar',
       nested: {
         to: {
