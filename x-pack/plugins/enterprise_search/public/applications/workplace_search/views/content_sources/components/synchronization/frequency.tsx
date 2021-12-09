@@ -21,10 +21,10 @@ import {
 } from '@elastic/eui';
 
 import { SAVE_BUTTON_LABEL } from '../../../../../shared/constants';
+import { docLinks } from '../../../../../shared/doc_links';
 import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prompt';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { NAV, RESET_BUTTON } from '../../../../constants';
-import { DIFFERENT_SYNC_TYPES_DOCS_URL } from '../../../../routes';
 import {
   LEARN_MORE_LINK,
   SOURCE_FREQUENCY_DESCRIPTION,
@@ -102,7 +102,7 @@ export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
         description={
           <>
             {SOURCE_FREQUENCY_DESCRIPTION}{' '}
-            <EuiLink href={DIFFERENT_SYNC_TYPES_DOCS_URL} external>
+            <EuiLink href={docLinks.workplaceSearchIndexingSchedule} external>
               {LEARN_MORE_LINK}
             </EuiLink>
           </>
