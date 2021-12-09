@@ -10,7 +10,7 @@ import type { IServiceSettings } from '../service_settings/service_settings_type
 import { ServiceSettings } from './service_settings';
 import { getMapsEms } from '../../../services';
 import type { MapConfig } from '../../../../../../maps_ems/config';
-import { MapsEmsPluginPublicSetup } from '../../../../../../maps_ems/public';
+import type { MapsEmsPluginPublicSetup } from '../../../../../../maps_ems/public';
 
 export async function getServiceSettings(): Promise<IServiceSettings> {
   const mapsEms: MapsEmsPluginPublicSetup = getMapsEms();

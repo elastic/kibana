@@ -8,8 +8,8 @@
 
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
-import { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-client';
-import {
+import type { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-client';
+import type {
   FileLayer,
   IServiceSettings,
   TmsLayer,
