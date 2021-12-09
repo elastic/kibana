@@ -25,7 +25,7 @@ describe('getMetrics', () => {
   };
 
   const client = createMockClient();
-  const clientArgs = createMockClientArgs();
+  const { mockServices, clientArgs } = createMockClientArgs();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -71,7 +71,7 @@ describe('getMetrics', () => {
       creationDate: mockCreateCloseInfo.created_at,
       closeDate: mockCreateCloseInfo.closed_at,
     });
-    expect(metrics.alerts?.count).toBeDefined();
+    expect(metrics.alerts?.count).toEqual(5);
   });
 
   it('populates multiple alerts sections at a time', async () => {
@@ -101,13 +101,28 @@ describe('getMetrics', () => {
 
     try {
       await getCaseMetrics(
-        { caseId: '', features: ['bananas', 'lifespan', 'alertsCount'] },
+        { caseId: '1', features: ['bananas', 'lifespan', 'alertsCount'] },
         client,
         clientArgs
       );
     } catch (error) {
-      expect(error.message).toContain('invalid features: [bananas]');
+      expect(error.message).toMatchInlineSnapshot(
+        `"Failed to retrieve metrics within client for case id: 1: Error: invalid features: [bananas], please only provide valid features: [alertHosts, alertUsers, alertsCount, connectors, lifespan]"`
+      );
     }
+  });
+
+  it('calls the alert handler once to compute the metrics for both hosts and users', async () => {
+    expect.assertions(2);
+
+    await getCaseMetrics(
+      { caseId: '', features: ['alertUsers', 'alertHosts'] },
+      client,
+      clientArgs
+    );
+
+    expect(mockServices.alertsService.countUniqueValuesForFields).toBeCalledTimes(1);
+    expect(mockServices.alertsService.getMostFrequentValuesForFields).toBeCalledTimes(1);
   });
 });
 
@@ -169,7 +184,7 @@ function createMockClientArgs() {
     logger,
     attachmentService,
     alertsService,
-  } as unknown as CasesClientArgs;
+  };
 
-  return clientArgs;
+  return { mockServices: clientArgs, clientArgs: clientArgs as unknown as CasesClientArgs };
 }

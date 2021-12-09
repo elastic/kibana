@@ -15,8 +15,7 @@ import { CasesClientArgs } from '../types';
 import { MetricsHandler } from './types';
 
 export class AlertDetails implements MetricsHandler {
-  private retrievedMetrics: AlertMetrics | undefined;
-  private requestedFeatures: AggregationFields[] = [];
+  private requestedFeatures: Set<AggregationFields> = new Set();
 
   constructor(
     private readonly caseId: string,
@@ -31,10 +30,10 @@ export class AlertDetails implements MetricsHandler {
   public setupFeature(feature: string) {
     switch (feature) {
       case 'alertHosts':
-        this.requestedFeatures.push(AggregationFields.Hosts);
+        this.requestedFeatures.add(AggregationFields.Hosts);
         break;
       case 'alertUsers':
-        this.requestedFeatures.push(AggregationFields.Users);
+        this.requestedFeatures.add(AggregationFields.Users);
         break;
     }
   }
@@ -43,37 +42,31 @@ export class AlertDetails implements MetricsHandler {
     const { alertsService, logger } = this.clientArgs;
 
     try {
-      if (this.retrievedMetrics != null) {
-        return this.retrievedMetrics;
-      }
-
       const alerts = await this.casesClient.attachments.getAllAlertsAttachToCase({
         caseId: this.caseId,
       });
 
-      if (alerts.length > 0 && this.requestedFeatures.length > 0) {
-        const [frequentValues, counts] = await Promise.all([
-          alertsService.getMostFrequentValuesForFields({
-            fields: this.requestedFeatures,
-            alerts,
-          }),
-          alertsService.countUniqueValuesForFields({
-            fields: this.requestedFeatures,
-            alerts,
-          }),
-        ]);
-
-        this.setRetrievedMetrics({
-          frequentValues,
-          counts,
-        });
-      } else {
-        this.setRetrievedMetrics();
+      if (alerts.length <= 0 || this.requestedFeatures.size <= 0) {
+        return this.formatResponse();
       }
 
-      return {
-        ...(this.retrievedMetrics ?? {}),
-      };
+      const requestedFeatures = Array.from(this.requestedFeatures);
+
+      const [frequentValues, counts] = await Promise.all([
+        alertsService.getMostFrequentValuesForFields({
+          fields: requestedFeatures,
+          alerts,
+        }),
+        alertsService.countUniqueValuesForFields({
+          fields: requestedFeatures,
+          alerts,
+        }),
+      ]);
+
+      return this.formatResponse({
+        frequentValues,
+        counts,
+      });
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve alerts details attached case id: ${this.caseId}: ${error}`,
@@ -83,36 +76,41 @@ export class AlertDetails implements MetricsHandler {
     }
   }
 
-  private setRetrievedMetrics({
+  private formatResponse({
     frequentValues,
     counts,
   }: {
     frequentValues?: FrequencyResult;
     counts?: UniqueCountResult;
-  } = {}) {
+  } = {}): AlertMetrics {
     const { hosts: uniqueHosts, users: uniqueUsers } = frequentValues ?? {};
     const { totalHosts, totalUsers } = counts ?? {};
 
-    let mergedMetrics: AlertMetrics = {};
-    if (uniqueHosts && totalHosts) {
-      mergedMetrics = merge(mergedMetrics, {
-        alerts: {
-          hosts: { total: totalHosts, values: uniqueHosts },
-        },
-      });
-    }
+    const mergedMetrics: AlertMetrics = Array.from(this.requestedFeatures).reduce(
+      (acc, feature) => {
+        switch (feature) {
+          case AggregationFields.Hosts:
+            const hostFields =
+              uniqueHosts && totalHosts
+                ? { total: totalHosts, values: uniqueHosts }
+                : { total: 0, values: [] };
 
-    if (uniqueUsers && totalUsers) {
-      mergedMetrics = merge(mergedMetrics, {
-        alerts: {
-          users: { total: totalUsers, values: uniqueUsers },
-        },
-      });
-    }
+            return merge(acc, { alerts: { hosts: hostFields } });
+          case AggregationFields.Users:
+            const userFields =
+              uniqueUsers && totalUsers
+                ? { total: totalUsers, values: uniqueUsers }
+                : { total: 0, values: [] };
 
-    this.retrievedMetrics = {
-      ...mergedMetrics,
-    };
+            return merge(acc, { alerts: { users: userFields } });
+          default:
+            return acc;
+        }
+      },
+      {}
+    );
+
+    return mergedMetrics;
   }
 }
 

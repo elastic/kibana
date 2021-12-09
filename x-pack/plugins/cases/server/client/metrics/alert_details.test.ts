@@ -28,6 +28,97 @@ describe('AlertDetails', () => {
     expect(await handler.compute()).toEqual({});
   });
 
+  it('returns the default zero values when there are no alerts but features are requested', async () => {
+    const client = createCasesClientMock();
+    client.attachments.getAllAlertsAttachToCase.mockImplementation(async () => {
+      return [];
+    });
+
+    const handler = new AlertDetails('', client, {} as CasesClientArgs);
+    handler.setupFeature('alertHosts');
+
+    expect(await handler.compute()).toEqual({
+      alerts: {
+        hosts: {
+          total: 0,
+          values: [],
+        },
+      },
+    });
+  });
+
+  it('returns the default zero values for hosts when the count aggregation returns undefined', async () => {
+    const client = createMockClient();
+    const { mockServices, clientArgs } = createMockClientArgs();
+    mockServices.alertsService.countUniqueValuesForFields.mockImplementation(async () => ({}));
+
+    const handler = new AlertDetails('', client, clientArgs);
+    handler.setupFeature('alertHosts');
+
+    expect(await handler.compute()).toEqual({
+      alerts: {
+        hosts: {
+          total: 0,
+          values: [],
+        },
+      },
+    });
+  });
+
+  it('returns the default zero values for users when the count aggregation returns undefined', async () => {
+    const client = createMockClient();
+    const { mockServices, clientArgs } = createMockClientArgs();
+    mockServices.alertsService.countUniqueValuesForFields.mockImplementation(async () => ({}));
+
+    const handler = new AlertDetails('', client, clientArgs);
+    handler.setupFeature('alertUsers');
+
+    expect(await handler.compute()).toEqual({
+      alerts: {
+        users: {
+          total: 0,
+          values: [],
+        },
+      },
+    });
+  });
+
+  it('returns the default zero values for hosts when the top hits aggregation returns undefined', async () => {
+    const client = createMockClient();
+    const { mockServices, clientArgs } = createMockClientArgs();
+    mockServices.alertsService.getMostFrequentValuesForFields.mockImplementation(async () => ({}));
+
+    const handler = new AlertDetails('', client, clientArgs);
+    handler.setupFeature('alertHosts');
+
+    expect(await handler.compute()).toEqual({
+      alerts: {
+        hosts: {
+          total: 0,
+          values: [],
+        },
+      },
+    });
+  });
+
+  it('returns the default zero values for users when the top hits aggregation returns undefined', async () => {
+    const client = createMockClient();
+    const { mockServices, clientArgs } = createMockClientArgs();
+    mockServices.alertsService.getMostFrequentValuesForFields.mockImplementation(async () => ({}));
+
+    const handler = new AlertDetails('', client, clientArgs);
+    handler.setupFeature('alertUsers');
+
+    expect(await handler.compute()).toEqual({
+      alerts: {
+        users: {
+          total: 0,
+          values: [],
+        },
+      },
+    });
+  });
+
   it('returns empty alert details metrics when no features were setup', async () => {
     const client = createCasesClientMock();
     client.attachments.getAllAlertsAttachToCase.mockImplementation(async () => {
@@ -51,7 +142,7 @@ describe('AlertDetails', () => {
 
   it('returns host details when the host feature is setup', async () => {
     const client = createMockClient();
-    const clientArgs = createMockClientArgs();
+    const { clientArgs } = createMockClientArgs();
     const handler = new AlertDetails('', client, clientArgs);
 
     handler.setupFeature('alertHosts');
@@ -66,29 +157,10 @@ describe('AlertDetails', () => {
     });
   });
 
-  it('only performs a single query to retrieve the details when compute is called twice', async () => {
-    expect.assertions(2);
-
-    const client = createMockClient();
-    const alertsService = mockAlertsService();
-
-    const clientArgs = {
-      alertsService,
-    } as unknown as CasesClientArgs;
-
-    const handler = new AlertDetails('', client, clientArgs);
-
-    handler.setupFeature('alertHosts');
-
-    await handler.compute();
-    await handler.compute();
-    expect(alertsService.getMostFrequentValuesForFields).toHaveBeenCalledTimes(1);
-    expect(alertsService.countUniqueValuesForFields).toHaveBeenCalledTimes(1);
-  });
-
   it('returns user details when the user feature is setup', async () => {
     const client = createMockClient();
-    const clientArgs = createMockClientArgs();
+    const { clientArgs } = createMockClientArgs();
+
     const handler = new AlertDetails('', client, clientArgs);
 
     handler.setupFeature('alertUsers');
@@ -105,7 +177,8 @@ describe('AlertDetails', () => {
 
   it('returns user and host details when the user and host features are setup', async () => {
     const client = createMockClient();
-    const clientArgs = createMockClientArgs();
+    const { clientArgs } = createMockClientArgs();
+
     const handler = new AlertDetails('', client, clientArgs);
 
     handler.setupFeature('alertUsers');
@@ -143,9 +216,9 @@ function createMockClientArgs() {
   const clientArgs = {
     logger,
     alertsService,
-  } as unknown as CasesClientArgs;
+  };
 
-  return clientArgs;
+  return { mockServices: clientArgs, clientArgs: clientArgs as unknown as CasesClientArgs };
 }
 
 function mockAlertsService() {
