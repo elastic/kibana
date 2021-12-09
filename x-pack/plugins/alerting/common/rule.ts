@@ -10,7 +10,7 @@ import {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from 'kibana/server';
-import { AlertNotifyWhenType } from './alert_notify_when_type';
+import { RuleNotifyWhenType } from './rule_notify_when_type';
 
 export type RuleTypeState = Record<string, unknown>;
 export type RuleTypeParams = Record<string, unknown>;
@@ -78,18 +78,18 @@ export interface Alert<Params extends RuleTypeParams = never> {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
-  notifyWhen: AlertNotifyWhenType | null;
+  notifyWhen: RuleNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
   executionStatus: AlertExecutionStatus;
 }
 
-export type SanitizedAlert<Params extends RuleTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
-export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedAlert<Params> &
+export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
+export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
   Omit<SavedObjectsResolveResponse, 'saved_object'>;
 
 export type SanitizedRuleConfig = Pick<
-  SanitizedAlert,
+  SanitizedRule,
   | 'name'
   | 'tags'
   | 'consumer'

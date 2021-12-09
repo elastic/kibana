@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SanitizedAlert } from '../../../../../alerting/common';
+import { SanitizedRule } from '../../../../../alerting/common';
 import { RulesClient } from '../../../../../alerting/server';
 import { RuleParams } from '../schemas/rule_schemas';
 
 interface EnableRuleArgs {
-  rule: SanitizedAlert<RuleParams>;
+  rule: SanitizedRule<RuleParams>;
   rulesClient: RulesClient;
 }
 

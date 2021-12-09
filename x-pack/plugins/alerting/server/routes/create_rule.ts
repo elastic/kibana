@@ -16,11 +16,11 @@ import {
   countUsageOfPredefinedIds,
 } from './lib';
 import {
-  SanitizedAlert,
+  SanitizedRule,
   validateNotifyWhenType,
   RuleTypeParams,
   BASE_ALERTING_API_PATH,
-  AlertNotifyWhenType,
+  RuleNotifyWhenType,
 } from '../types';
 import { RouteOptions } from '.';
 
@@ -55,7 +55,7 @@ const rewriteBodyReq: RewriteRequestCase<CreateOptions<RuleTypeParams>['data']> 
   alertTypeId,
   notifyWhen,
 });
-const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<RuleTypeParams>> = ({
+const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   actions,
   alertTypeId,
   scheduledTaskId,
@@ -121,11 +121,11 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           });
 
           try {
-            const createdRule: SanitizedAlert<RuleTypeParams> =
+            const createdRule: SanitizedRule<RuleTypeParams> =
               await rulesClient.create<RuleTypeParams>({
                 data: rewriteBodyReq({
                   ...rule,
-                  notify_when: rule.notify_when as AlertNotifyWhenType,
+                  notify_when: rule.notify_when as RuleNotifyWhenType,
                 }),
                 options: { id: params?.id },
               });

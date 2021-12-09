@@ -31,13 +31,13 @@ import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions'
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { parseDuration } from '../../../alerting/common/parse_duration';
-import { SanitizedAlert, RawAlertInstance } from '../../../alerting/common';
+import { SanitizedRule, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
 export class CCRReadExceptionsRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_CCR_READ_EXCEPTIONS,
       name: RULE_DETAILS[RULE_CCR_READ_EXCEPTIONS].label,

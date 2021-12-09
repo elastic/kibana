@@ -12,7 +12,7 @@ import { LegacyServer, RouteDependencies } from '../../../../types';
 import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
 import { ActionResult } from '../../../../../../actions/common';
 import { disableWatcherClusterAlerts } from '../../../../lib/alerts/disable_watcher_cluster_alerts';
-import { RuleTypeParams, SanitizedAlert } from '../../../../../../alerting/common';
+import { RuleTypeParams, SanitizedRule } from '../../../../../../alerting/common';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 
@@ -90,7 +90,7 @@ export function enableAlertsRoute(server: LegacyServer, npRoute: RouteDependenci
           },
         ];
 
-        let createdAlerts: Array<SanitizedAlert<RuleTypeParams>> = [];
+        let createdAlerts: Array<SanitizedRule<RuleTypeParams>> = [];
         const disabledWatcherClusterAlerts = await disableWatcherClusterAlerts(
           npRoute.cluster.asScoped(request).asCurrentUser,
           npRoute.logger

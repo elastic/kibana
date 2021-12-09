@@ -26,7 +26,7 @@ import {
   INDEX_PATTERN_ELASTICSEARCH,
 } from '../../common/constants';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerting/common';
+import { SanitizedRule } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
@@ -64,7 +64,7 @@ function getNodeStates(nodes: AlertClusterStatsNodes): AlertNodesChangedStates {
 }
 
 export class NodesChangedRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_NODES_CHANGED,
       name: LEGACY_RULE_DETAILS[RULE_NODES_CHANGED].label,

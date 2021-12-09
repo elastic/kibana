@@ -14,7 +14,7 @@ import {
   RulesClient,
   AlertServices,
 } from '../../../alerting/server';
-import { Alert, RuleTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
+import { Alert, RuleTypeParams, RawAlertInstance, SanitizedRule } from '../../../alerting/common';
 import { ActionsClient } from '../../../actions/server';
 import {
   AlertState,
@@ -68,7 +68,7 @@ export class BaseRule {
   protected scopedLogger: Logger;
 
   constructor(
-    public sanitizedRule?: SanitizedAlert,
+    public sanitizedRule?: SanitizedRule,
     public ruleOptions: RuleOptions = defaultRuleOptions()
   ) {
     const defaultOptions = defaultRuleOptions();
@@ -116,7 +116,7 @@ export class BaseRule {
     rulesClient: RulesClient,
     actionsClient: ActionsClient,
     actions: AlertEnableAction[]
-  ): Promise<SanitizedAlert<RuleTypeParams>> {
+  ): Promise<SanitizedRule<RuleTypeParams>> {
     const existingRuleData = await rulesClient.find({
       options: {
         search: this.ruleOptions.id,

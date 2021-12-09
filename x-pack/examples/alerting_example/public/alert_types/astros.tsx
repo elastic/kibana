@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { flatten } from 'lodash';
 import { ALERTING_EXAMPLE_APP_ID, Craft, Operator } from '../../common/constants';
-import { SanitizedAlert } from '../../../../plugins/alerting/common';
+import { SanitizedRule } from '../../../../plugins/alerting/common';
 import { PluginSetupContract as AlertingSetup } from '../../../../plugins/alerting/public';
 import { AlertTypeModel } from '../../../../plugins/triggers_actions_ui/public';
 
@@ -28,7 +28,7 @@ export function registerNavigation(alerting: AlertingSetup) {
   alerting.registerNavigation(
     ALERTING_EXAMPLE_APP_ID,
     'example.people-in-space',
-    (alert: SanitizedAlert) => `/astros/${alert.id}`
+    (alert: SanitizedRule) => `/astros/${alert.id}`
   );
 }
 

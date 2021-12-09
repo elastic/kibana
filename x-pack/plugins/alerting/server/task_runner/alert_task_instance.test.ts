@@ -8,9 +8,9 @@
 import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { AlertTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import uuid from 'uuid';
-import { SanitizedAlert } from '../types';
+import { SanitizedRule } from '../types';
 
-const alert: SanitizedAlert<{
+const alert: SanitizedRule<{
   bar: boolean;
 }> = {
   id: 'alert-123',

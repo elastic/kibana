@@ -28,7 +28,7 @@ import {
 } from '../../common/constants';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerting/common';
+import { SanitizedRule } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
@@ -37,7 +37,7 @@ import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 const EXPIRES_DAYS = [60, 30, 14, 7];
 
 export class LicenseExpirationRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_LICENSE_EXPIRATION,
       name: LEGACY_RULE_DETAILS[RULE_LICENSE_EXPIRATION].label,

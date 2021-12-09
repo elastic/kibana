@@ -6,7 +6,7 @@
  */
 
 import { AlertNavigationRegistry } from './alert_navigation_registry';
-import { RuleType, RecoveredActionGroup, SanitizedAlert } from '../../common';
+import { RuleType, RecoveredActionGroup, SanitizedRule } from '../../common';
 import uuid from 'uuid';
 
 beforeEach(() => jest.resetAllMocks());
@@ -24,7 +24,7 @@ const mockAlertType = (id: string): RuleType => ({
 });
 
 describe('AlertNavigationRegistry', () => {
-  function handler(alert: SanitizedAlert) {
+  function handler(alert: SanitizedRule) {
     return {};
   }
 
@@ -144,7 +144,7 @@ describe('AlertNavigationRegistry', () => {
     test('returns registered handlers by consumer & Alert Type', () => {
       const registry = new AlertNavigationRegistry();
 
-      function indexThresholdHandler(alert: SanitizedAlert) {
+      function indexThresholdHandler(alert: SanitizedRule) {
         return {};
       }
 
@@ -156,7 +156,7 @@ describe('AlertNavigationRegistry', () => {
     test('returns default handlers by consumer when there is no handler for requested alert type', () => {
       const registry = new AlertNavigationRegistry();
 
-      function defaultHandler(alert: SanitizedAlert) {
+      function defaultHandler(alert: SanitizedRule) {
         return {};
       }
 
@@ -169,7 +169,7 @@ describe('AlertNavigationRegistry', () => {
 
       registry.register('siem', mockAlertType('indexThreshold').id, () => ({}));
 
-      function defaultHandler(alert: SanitizedAlert) {
+      function defaultHandler(alert: SanitizedRule) {
         return {};
       }
 

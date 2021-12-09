@@ -29,7 +29,7 @@ import {
   AlertExecutionStatuses,
   AlertExecutionStatusErrorReasons,
   AlertsHealth,
-  AlertNotifyWhenType,
+  RuleNotifyWhenType,
   WithoutReservedActionGroups,
   ActionVariable,
   SanitizedRuleConfig,
@@ -230,7 +230,7 @@ export interface RawRule extends SavedObjectAttributes {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
-  notifyWhen: AlertNotifyWhenType | null;
+  notifyWhen: RuleNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
   meta?: AlertMeta;

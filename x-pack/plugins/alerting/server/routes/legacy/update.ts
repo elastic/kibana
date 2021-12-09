@@ -15,7 +15,7 @@ import { handleDisabledApiKeysError } from './../lib/error_handler';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import {
-  AlertNotifyWhenType,
+  RuleNotifyWhenType,
   LEGACY_BASE_ALERT_API_PATH,
   validateNotifyWhenType,
 } from '../../../common';
@@ -77,7 +77,7 @@ export const updateAlertRoute = (
               schedule,
               tags,
               throttle,
-              notifyWhen: notifyWhen as AlertNotifyWhenType,
+              notifyWhen: notifyWhen as RuleNotifyWhenType,
             },
           });
           return res.ok({

@@ -635,8 +635,8 @@ The signature of such a handler is:
 
 ```typescript
 type AlertNavigationHandler = (
-  alert: SanitizedAlert,
-  alertType: AlertType
+  alert: SanitizedRule,
+  alertType: RuleType
 ) => string;
 ```
 
@@ -650,7 +650,7 @@ The _registerNavigation_ api allows you to register a handler for a specific ale
 alerting.registerNavigation(
 	'my-application-id',
 	'my-application-id.my-rule-type',
-	(alert: SanitizedAlert) => `/my-unique-rule/${rule.id}`
+	(rule: SanitizedRule) => `/my-unique-rule/${rule.id}`
 );
 ```
 
@@ -666,7 +666,7 @@ The _registerDefaultNavigation_ API allows you to register a handler for any rul
 ```
 alerting.registerDefaultNavigation(
 	'my-application-id',
-	(alert: SanitizedAlert) => `/my-other-rules/${rule.id}`
+	(rule: SanitizedRule) => `/my-other-rules/${rule.id}`
 );
 ```
 

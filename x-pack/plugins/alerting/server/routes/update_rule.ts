@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 import { ILicenseState, AlertTypeDisabledError, validateDurationSchema } from '../lib';
-import { AlertNotifyWhenType } from '../../common';
+import { RuleNotifyWhenType } from '../../common';
 import { UpdateOptions } from '../rules_client';
 import {
   verifyAccessAndContext,
@@ -128,7 +128,7 @@ export const updateRuleRoute = (
                 id,
                 data: {
                   ...rule,
-                  notify_when: rule.notify_when as AlertNotifyWhenType,
+                  notify_when: rule.notify_when as RuleNotifyWhenType,
                 },
               })
             );

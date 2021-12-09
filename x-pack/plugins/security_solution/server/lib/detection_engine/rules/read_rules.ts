@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResolvedSanitizedRule, SanitizedAlert } from '../../../../../alerting/common';
+import { ResolvedSanitizedRule, SanitizedRule } from '../../../../../alerting/common';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { RuleParams } from '../schemas/rule_schemas';
 import { findRules } from './find_rules';
@@ -25,7 +25,7 @@ export const readRules = async ({
   id,
   ruleId,
 }: ReadRuleOptions): Promise<
-  SanitizedAlert<RuleParams> | ResolvedSanitizedRule<RuleParams> | null
+  SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams> | null
 > => {
   if (id != null) {
     try {

@@ -23,7 +23,7 @@ import { TypeRegistry } from './application/type_registry';
 import {
   ActionGroup,
   AlertActionParam,
-  SanitizedAlert,
+  SanitizedRule,
   ResolvedSanitizedRule,
   AlertAction,
   AlertAggregations,
@@ -33,15 +33,15 @@ import {
   AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
-  AlertNotifyWhenType,
+  RuleNotifyWhenType,
   RuleTypeParams,
   ActionVariable,
   RuleType as CommonRuleType,
 } from '../../alerting/common';
 
-// In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<RuleTypeParams>`
+// In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
-type Alert = SanitizedAlert<RuleTypeParams>;
+type Alert = SanitizedRule<RuleTypeParams>;
 type ResolvedRule = ResolvedSanitizedRule<RuleTypeParams>;
 
 export type {
@@ -54,7 +54,7 @@ export type {
   AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
-  AlertNotifyWhenType,
+  RuleNotifyWhenType,
   RuleTypeParams,
   ResolvedRule,
 };
@@ -245,11 +245,11 @@ export interface RuleTypeParamsExpressionProps<
   alertParams: Params;
   alertInterval: string;
   alertThrottle: string;
-  alertNotifyWhen: AlertNotifyWhenType;
+  alertNotifyWhen: RuleNotifyWhenType;
   setAlertParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
   setAlertProperty: <Prop extends keyof Alert>(
     key: Prop,
-    value: SanitizedAlert<Params>[Prop] | null
+    value: SanitizedRule<Params>[Prop] | null
   ) => void;
   errors: IErrorObject;
   defaultActionGroupId: string;

@@ -12,7 +12,7 @@ import {
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { SanitizedAlert } from '../../../../../alerting/common';
+import { SanitizedRule } from '../../../../../alerting/common';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -76,7 +76,7 @@ export const createRules = async ({
   exceptionsList,
   actions,
   isRuleRegistryEnabled,
-}: CreateRulesOptions): Promise<SanitizedAlert<RuleTypeParams>> => {
+}: CreateRulesOptions): Promise<SanitizedRule<RuleTypeParams>> => {
   const rule = await rulesClient.create<RuleTypeParams>({
     data: {
       name,

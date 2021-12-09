@@ -23,7 +23,7 @@ import {
 import { createBulkErrorObject, BulkError, OutputError } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { SanitizedAlert } from '../../../../../../alerting/common';
+import { SanitizedRule } from '../../../../../../alerting/common';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 
@@ -95,7 +95,7 @@ export const transformTags = (tags: string[]): string[] => {
 // Transforms the data but will remove any null or undefined it encounters and not include
 // those on the export
 export const transformAlertToRule = (
-  alert: SanitizedAlert<RuleParams>,
+  alert: SanitizedRule<RuleParams>,
   ruleStatus?: IRuleStatusSOAttributes,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> => {

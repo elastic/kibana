@@ -8,7 +8,7 @@
 import { Alert } from '../../../types';
 import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
 import { updateAlert } from './update';
-import { AlertNotifyWhenType } from '../../../../../alerting/common';
+import { RuleNotifyWhenType } from '../../../../../alerting/common';
 
 const http = httpServiceMock.createStartContract();
 
@@ -28,7 +28,7 @@ describe('updateAlert', () => {
       updatedAt: new Date('1970-01-01T00:00:00.000Z'),
       apiKey: null,
       apiKeyOwner: null,
-      notifyWhen: 'onThrottleInterval' as AlertNotifyWhenType,
+      notifyWhen: 'onThrottleInterval' as RuleNotifyWhenType,
     };
     const resolvedValue: Alert = {
       ...alertToUpdate,

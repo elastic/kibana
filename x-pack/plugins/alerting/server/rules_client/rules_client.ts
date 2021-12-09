@@ -28,11 +28,11 @@ import {
   RuleTypeRegistry,
   AlertAction,
   IntervalSchedule,
-  SanitizedAlert,
+  SanitizedRule,
   RuleTaskState,
   AlertSummary,
   AlertExecutionStatusValues,
-  AlertNotifyWhenType,
+  RuleNotifyWhenType,
   RuleTypeParams,
   ResolvedSanitizedRule,
   AlertWithLegacyId,
@@ -40,7 +40,7 @@ import {
   PartialAlertWithLegacyId,
   RawAlertInstance,
 } from '../types';
-import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getAlertNotifyWhenType } from '../lib';
+import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getRuleNotifyWhenType } from '../lib';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
@@ -177,7 +177,7 @@ export interface FindResult<Params extends RuleTypeParams> {
   page: number;
   perPage: number;
   total: number;
-  data: Array<SanitizedAlert<Params>>;
+  data: Array<SanitizedRule<Params>>;
 }
 
 export interface CreateOptions<Params extends RuleTypeParams> {
@@ -210,7 +210,7 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     actions: NormalizedAlertAction[];
     params: Params;
     throttle: string | null;
-    notifyWhen: AlertNotifyWhenType | null;
+    notifyWhen: RuleNotifyWhenType | null;
   };
 }
 
@@ -286,7 +286,7 @@ export class RulesClient {
   public async create<Params extends RuleTypeParams = never>({
     data,
     options,
-  }: CreateOptions<Params>): Promise<SanitizedAlert<Params>> {
+  }: CreateOptions<Params>): Promise<SanitizedRule<Params>> {
     const id = options?.id || SavedObjectsUtils.generateId();
 
     try {
@@ -346,7 +346,7 @@ export class RulesClient {
 
     const createTime = Date.now();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
-    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
     const rawRule: RawRule = {
       ...data,
@@ -432,7 +432,7 @@ export class RulesClient {
   }: {
     id: string;
     includeLegacyId?: boolean;
-  }): Promise<SanitizedAlert<Params> | SanitizedRuleWithLegacyId<Params>> {
+  }): Promise<SanitizedRule<Params> | SanitizedRuleWithLegacyId<Params>> {
     const result = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
     try {
       await this.authorization.ensureAuthorized({
@@ -968,7 +968,7 @@ export class RulesClient {
     }
 
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
-    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
     let updatedObject: SavedObject<RawRule>;
     const createAttributes = this.updateMeta({
@@ -1284,7 +1284,7 @@ export class RulesClient {
       try {
         const { state } = taskInstanceToAlertTaskInstance(
           await this.taskManager.get(attributes.scheduledTaskId),
-          attributes as unknown as SanitizedAlert
+          attributes as unknown as SanitizedRule
         );
 
         const recoveredAlertInstances = mapValues<Record<string, RawAlertInstance>, AlertInstance>(

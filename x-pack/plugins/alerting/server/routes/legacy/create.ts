@@ -10,8 +10,8 @@ import { verifyApiAccess } from '../../lib/license_api_access';
 import { validateDurationSchema } from '../../lib';
 import { handleDisabledApiKeysError } from './../lib/error_handler';
 import {
-  SanitizedAlert,
-  AlertNotifyWhenType,
+  SanitizedRule,
+  RuleNotifyWhenType,
   RuleTypeParams,
   LEGACY_BASE_ALERT_API_PATH,
   validateNotifyWhenType,
@@ -67,7 +67,7 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         const rulesClient = context.alerting.getRulesClient();
         const alert = req.body;
         const params = req.params;
-        const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
+        const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as RuleNotifyWhenType) : null;
 
         trackLegacyRouteUsage('create', usageCounter);
 
@@ -78,12 +78,10 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         });
 
         try {
-          const alertRes: SanitizedAlert<RuleTypeParams> = await rulesClient.create<RuleTypeParams>(
-            {
-              data: { ...alert, notifyWhen },
-              options: { id: params?.id },
-            }
-          );
+          const alertRes: SanitizedRule<RuleTypeParams> = await rulesClient.create<RuleTypeParams>({
+            data: { ...alert, notifyWhen },
+            options: { id: params?.id },
+          });
           return res.ok({
             body: alertRes,
           });

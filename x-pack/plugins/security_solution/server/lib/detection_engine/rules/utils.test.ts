@@ -14,7 +14,7 @@ import {
   transformFromAlertThrottle,
   transformActions,
 } from './utils';
-import { AlertAction, SanitizedAlert } from '../../../../../alerting/common';
+import { AlertAction, SanitizedRule } from '../../../../../alerting/common';
 import { RuleParams } from '../schemas/rule_schemas';
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -297,7 +297,7 @@ describe('utils', () => {
                 params: {},
               },
             ],
-          } as SanitizedAlert<RuleParams>,
+          } as SanitizedRule<RuleParams>,
           undefined
         )
       ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
@@ -310,7 +310,7 @@ describe('utils', () => {
             muteAll: false,
             notifyWhen: 'onActiveAlert',
             actions: [],
-          } as unknown as SanitizedAlert<RuleParams>,
+          } as unknown as SanitizedRule<RuleParams>,
           undefined
         )
       ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
@@ -324,7 +324,7 @@ describe('utils', () => {
             notifyWhen: 'onThrottleInterval',
             actions: [],
             throttle: '1d',
-          } as unknown as SanitizedAlert<RuleParams>,
+          } as unknown as SanitizedRule<RuleParams>,
           undefined
         )
       ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
@@ -344,7 +344,7 @@ describe('utils', () => {
                 params: {},
               },
             ],
-          } as SanitizedAlert<RuleParams>,
+          } as SanitizedRule<RuleParams>,
           undefined
         )
       ).toEqual(NOTIFICATION_THROTTLE_RULE);
@@ -363,7 +363,7 @@ describe('utils', () => {
                 params: {},
               },
             ],
-          } as SanitizedAlert<RuleParams>,
+          } as SanitizedRule<RuleParams>,
           undefined
         )
       ).toEqual(NOTIFICATION_THROTTLE_RULE);
@@ -397,7 +397,7 @@ describe('utils', () => {
                 params: {},
               },
             ],
-          } as SanitizedAlert<RuleParams>,
+          } as SanitizedRule<RuleParams>,
           legacyRuleActions
         )
       ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
@@ -424,7 +424,7 @@ describe('utils', () => {
             muteAll: true,
             notifyWhen: 'onActiveAlert',
             actions: [],
-          } as unknown as SanitizedAlert<RuleParams>,
+          } as unknown as SanitizedRule<RuleParams>,
           legacyRuleActions
         )
       ).toEqual(NOTIFICATION_THROTTLE_RULE);
@@ -451,7 +451,7 @@ describe('utils', () => {
             muteAll: true,
             notifyWhen: 'onActiveAlert',
             actions: null,
-          } as unknown as SanitizedAlert<RuleParams>,
+          } as unknown as SanitizedRule<RuleParams>,
           legacyRuleActions
         )
       ).toEqual(NOTIFICATION_THROTTLE_RULE);

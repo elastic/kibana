@@ -101,12 +101,12 @@ import {
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
 import { RulesClient, PartialAlert } from '../../../../../alerting/server';
-import { SanitizedAlert } from '../../../../../alerting/common';
+import { SanitizedRule } from '../../../../../alerting/common';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 
-export type RuleAlertType = SanitizedAlert<RuleParams>;
+export type RuleAlertType = SanitizedRule<RuleParams>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleStatusSOAttributes extends Record<string, any> {
@@ -267,7 +267,7 @@ export interface UpdateRulesOptions {
   ruleStatusClient: IRuleExecutionLogClient;
   rulesClient: RulesClient;
   defaultOutputIndex: string;
-  existingRule: SanitizedAlert<RuleParams> | null | undefined;
+  existingRule: SanitizedRule<RuleParams> | null | undefined;
   ruleUpdate: UpdateRulesSchema;
 }
 
@@ -323,7 +323,7 @@ export interface PatchRulesOptions {
   version: VersionOrUndefined;
   exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
-  rule: SanitizedAlert<RuleParams> | null | undefined;
+  rule: SanitizedRule<RuleParams> | null | undefined;
   namespace?: NamespaceOrUndefined;
 }
 
@@ -354,5 +354,5 @@ export interface FindRuleOptions {
 export interface LegacyMigrateParams {
   rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
-  rule: SanitizedAlert<RuleParams> | null | undefined;
+  rule: SanitizedRule<RuleParams> | null | undefined;
 }

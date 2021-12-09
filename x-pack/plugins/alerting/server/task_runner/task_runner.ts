@@ -29,7 +29,7 @@ import {
   RawAlertInstance,
   RuleTaskState,
   Alert,
-  SanitizedAlert,
+  SanitizedRule,
   AlertExecutionStatus,
   AlertExecutionStatusErrorReasons,
   RuleTypeRegistry,
@@ -259,7 +259,7 @@ export class TaskRunner<
 
   async executeAlerts(
     services: Services,
-    rule: SanitizedAlert<Params>,
+    rule: SanitizedRule<Params>,
     params: Params,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
     spaceId: string,
@@ -476,7 +476,7 @@ export class TaskRunner<
   async validateAndExecuteRule(
     services: Services,
     apiKey: RawRule['apiKey'],
-    rule: SanitizedAlert<Params>,
+    rule: SanitizedRule<Params>,
     event: Event
   ) {
     const {
@@ -521,7 +521,7 @@ export class TaskRunner<
 
     const [services, rulesClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
 
-    let rule: SanitizedAlert<Params>;
+    let rule: SanitizedRule<Params>;
 
     // Ensure API key is still valid and user has access
     try {
@@ -854,7 +854,7 @@ interface GenerateNewAndRecoveredAlertEventsParams<
     string,
     string
   >;
-  rule: SanitizedAlert<RuleTypeParams>;
+  rule: SanitizedRule<RuleTypeParams>;
 }
 
 function generateNewAndRecoveredAlertEvents<

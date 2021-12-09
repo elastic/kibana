@@ -24,11 +24,11 @@ import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { InitialAlert } from './alert_reducer';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
-import { AlertNotifyWhenType } from '../../../types';
+import { RuleNotifyWhenType } from '../../../types';
 
-const DEFAULT_NOTIFY_WHEN_VALUE: AlertNotifyWhenType = 'onActionGroupChange';
+const DEFAULT_NOTIFY_WHEN_VALUE: RuleNotifyWhenType = 'onActionGroupChange';
 
-const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
+const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
   {
     value: 'onActionGroupChange',
     inputDisplay: i18n.translate(
@@ -119,7 +119,7 @@ interface AlertNotifyWhenProps {
   alert: InitialAlert;
   throttle: number | null;
   throttleUnit: string;
-  onNotifyWhenChange: (notifyWhen: AlertNotifyWhenType) => void;
+  onNotifyWhenChange: (notifyWhen: RuleNotifyWhenType) => void;
   onThrottleChange: (throttle: number | null, throttleUnit: string) => void;
 }
 
@@ -133,7 +133,7 @@ export const AlertNotifyWhen = ({
   const [alertThrottle, setAlertThrottle] = useState<number>(throttle || 1);
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
   const [notifyWhenValue, setNotifyWhenValue] =
-    useState<AlertNotifyWhenType>(DEFAULT_NOTIFY_WHEN_VALUE);
+    useState<RuleNotifyWhenType>(DEFAULT_NOTIFY_WHEN_VALUE);
 
   useEffect(() => {
     if (alert.notifyWhen) {
@@ -148,7 +148,7 @@ export const AlertNotifyWhen = ({
     setShowCustomThrottleOpts(notifyWhenValue === 'onThrottleInterval');
   }, [notifyWhenValue]);
 
-  const onNotifyWhenValueChange = useCallback((newValue: AlertNotifyWhenType) => {
+  const onNotifyWhenValueChange = useCallback((newValue: RuleNotifyWhenType) => {
     onThrottleChange(newValue === 'onThrottleInterval' ? alertThrottle : null, throttleUnit);
     onNotifyWhenChange(newValue);
     setNotifyWhenValue(newValue);

@@ -30,13 +30,13 @@ import {
 import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { SanitizedAlert, RawAlertInstance } from '../../../alerting/common';
+import { SanitizedRule, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
 export class LargeShardSizeRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_LARGE_SHARD_SIZE,
       name: RULE_DETAILS[RULE_LARGE_SHARD_SIZE].label,

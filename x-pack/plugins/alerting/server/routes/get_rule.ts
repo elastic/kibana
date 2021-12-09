@@ -14,14 +14,14 @@ import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
-  SanitizedAlert,
+  SanitizedRule,
 } from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<RuleTypeParams>> = ({
+const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   alertTypeId,
   createdBy,
   updatedBy,

@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
 import {
-  SanitizedAlert,
+  SanitizedRule,
   RuleTaskState,
   ruleParamsSchema,
   ruleStateSchema,
@@ -28,7 +28,7 @@ const enumerateErrorFields = (e: t.Errors) =>
 
 export function taskInstanceToAlertTaskInstance<Params extends RuleTypeParams>(
   taskInstance: ConcreteTaskInstance,
-  alert?: SanitizedAlert<Params>
+  alert?: SanitizedRule<Params>
 ): AlertTaskInstance {
   return {
     ...taskInstance,

@@ -29,14 +29,14 @@ import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
+import { RawAlertInstance, SanitizedRule } from '../../../alerting/common';
 import { parseDuration } from '../../../alerting/common/parse_duration';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
 export class CpuUsageRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_CPU_USAGE,
       name: RULE_DETAILS[RULE_CPU_USAGE].label,

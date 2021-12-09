@@ -7,7 +7,7 @@
 
 import { has, snakeCase } from 'lodash/fp';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { SanitizedAlert } from '../../../../../alerting/common';
+import { SanitizedRule } from '../../../../../alerting/common';
 
 import {
   RouteValidationFunction,
@@ -229,7 +229,7 @@ export const mergeStatuses = (
   } as RuleStatusResponse;
 };
 
-export type GetFailingRulesResult = Record<string, SanitizedAlert<RuleParams>>;
+export type GetFailingRulesResult = Record<string, SanitizedRule<RuleParams>>;
 
 export const getFailingRules = async (
   ids: string[],

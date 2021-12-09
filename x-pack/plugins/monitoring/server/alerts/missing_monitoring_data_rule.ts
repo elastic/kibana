@@ -23,7 +23,7 @@ import { AlertInstance } from '../../../alerting/server';
 import { INDEX_PATTERN, RULE_MISSING_MONITORING_DATA, RULE_DETAILS } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
+import { RawAlertInstance, SanitizedRule } from '../../../alerting/common';
 import { parseDuration } from '../../../alerting/common/parse_duration';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
@@ -34,7 +34,7 @@ import { Globals } from '../static_globals';
 const LIMIT_BUFFER = 3 * 60 * 1000;
 
 export class MissingMonitoringDataRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_MISSING_MONITORING_DATA,
       name: RULE_DETAILS[RULE_MISSING_MONITORING_DATA].label,

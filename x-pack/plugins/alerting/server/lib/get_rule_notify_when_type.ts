@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { AlertNotifyWhenType } from '../types';
+import { RuleNotifyWhenType } from '../types';
 
-export function getAlertNotifyWhenType(
-  notifyWhen: AlertNotifyWhenType | null,
+export function getRuleNotifyWhenType(
+  notifyWhen: RuleNotifyWhenType | null,
   throttle: string | null
-): AlertNotifyWhenType {
+): RuleNotifyWhenType {
   // We allow notifyWhen to be null for backwards compatibility. If it is null, determine its
   // value based on whether the throttle is set to a value or null
   return notifyWhen ? notifyWhen! : throttle ? 'onThrottleInterval' : 'onActiveAlert';
