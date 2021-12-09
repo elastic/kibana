@@ -12,7 +12,7 @@ import { set } from '@elastic/safer-lodash-set';
 import { uniq, without, merge, flatten } from 'lodash';
 import * as histogram from 'hdr-histogram-js';
 import {
-  HOST_HOSTNAME,
+  HOST_NAME,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
@@ -90,7 +90,7 @@ export async function aggregateLatencyMetrics() {
     SERVICE_VERSION,
     SERVICE_ENVIRONMENT,
     AGENT_NAME,
-    HOST_HOSTNAME,
+    HOST_NAME,
     POD_NAME,
     CONTAINER_ID,
     TRANSACTION_NAME,

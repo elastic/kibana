@@ -21,12 +21,6 @@ Object {
           "size": 1,
         },
       },
-      "hostname": Object {
-        "terms": Object {
-          "field": "host.hostname",
-          "size": 1,
-        },
-      },
       "nodes": Object {
         "terms": Object {
           "field": "service.node.name",
@@ -81,12 +75,6 @@ Object {
       "host": Object {
         "terms": Object {
           "field": "host.name",
-          "size": 1,
-        },
-      },
-      "hostname": Object {
-        "terms": Object {
-          "field": "host.hostname",
           "size": 1,
         },
       },
@@ -158,9 +146,6 @@ Object {
               "metrics": Array [
                 Object {
                   "field": "host.name",
-                },
-                Object {
-                  "field": "host.hostname",
                 },
               ],
               "sort": Object {

@@ -10,7 +10,6 @@ import {
   METRIC_JAVA_NON_HEAP_MEMORY_USED,
   METRIC_JAVA_THREAD_COUNT,
   METRIC_PROCESS_CPU_PERCENT,
-  HOST_HOSTNAME,
   HOST_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
@@ -67,7 +66,7 @@ const getServiceNodes = async ({
           aggs: {
             latest: {
               top_metrics: {
-                metrics: asMutableArray([{ field: HOST_NAME }, { field: HOST_HOSTNAME }] as const),
+                metrics: asMutableArray([{ field: HOST_NAME }] as const),
                 sort: {
                   '@timestamp': 'desc' as const,
                 },
@@ -110,7 +109,7 @@ const getServiceNodes = async ({
       name: bucket.key as string,
       cpu: bucket.cpu.value,
       heapMemory: bucket.heapMemory.value,
-      hostName: bucket.latest.top?.[0]?.metrics?.['host.name'] || bucket.latest.top?.[0]?.metrics?.['host.hostname'] as
+      hostName: bucket.latest.top?.[0]?.metrics?.[HOST_NAME] as
         | string
         | null
         | undefined,

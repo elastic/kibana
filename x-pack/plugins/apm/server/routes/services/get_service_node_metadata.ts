@@ -7,7 +7,6 @@
 
 import { Setup } from '../../lib/helpers/setup_request';
 import {
-  HOST_HOSTNAME,
   HOST_NAME,
   CONTAINER_ID,
 } from '../../../common/elasticsearch_fieldnames';
@@ -70,12 +69,6 @@ export async function getServiceNodeMetadata({
             size: 1,
           },
         },
-        hostname: {
-          terms: {
-            field: HOST_HOSTNAME,
-            size: 1,
-          },
-        },
         containerId: {
           terms: {
             field: CONTAINER_ID,
@@ -92,7 +85,7 @@ export async function getServiceNodeMetadata({
   );
 
   return {
-    host: response.aggregations?.host.buckets[0]?.key || response.aggregations?.hostname.buckets[0]?.key || NOT_AVAILABLE_LABEL,
+    host: response.aggregations?.host.buckets[0]?.key || NOT_AVAILABLE_LABEL,
     containerId:
       response.aggregations?.containerId.buckets[0]?.key || NOT_AVAILABLE_LABEL,
   };
