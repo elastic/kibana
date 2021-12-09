@@ -13,10 +13,7 @@ import { KibanaThemeProvider } from '../../../../kibana_react/public';
 import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
 import { EXPRESSION_GAUGE_NAME, GaugeExpressionProps } from '../../common';
 import { getFormatService, getPaletteService, getThemeService } from '../services';
-
-import GaugeComponent from '../components/gauge_component';
 import './index.scss';
-const MemoizedChart = memo(GaugeComponent);
 
 interface ExpressionGaugeRendererDependencies {
   theme: ThemeServiceStart;
@@ -35,10 +32,11 @@ export const gaugeRenderer: (
       unmountComponentAtNode(domNode);
     });
 
+    const GaugeComponent = await import('../components/gauge_component');
     render(
       <KibanaThemeProvider theme$={theme.theme$}>
         <div className="gauge-container" data-test-subj="gaugeChart">
-          <MemoizedChart
+          <GaugeComponent
             {...config}
             formatFactory={getFormatService().deserialize}
             chartsThemeService={getThemeService()}

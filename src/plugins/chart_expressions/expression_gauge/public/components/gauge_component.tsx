@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC } from 'react';
+import React, { FC, memo } from 'react';
 import { Chart, Goal, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CustomPaletteState } from '../../../../charts/public';
@@ -216,6 +216,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
   );
 };
 
+const MemoizedChart = memo(GaugeComponent);
+
 // default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export
-export { GaugeComponent as default };
+export { MemoizedChart as default };
