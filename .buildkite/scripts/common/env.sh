@@ -98,3 +98,6 @@ export TEST_ES_TRANSPORT_PORT=6301-6309
 export TEST_CORS_SERVER_PORT=6106
 export ALERTING_PROXY_PORT=6105
 export TEST_PROXY_SERVER_PORT=6107
+
+# TODO, testing - remove
+export ES_SNAPSHOT_MANIFEST="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/7.15.3/archives/20211209-151346_693d8133/manifest.json"
