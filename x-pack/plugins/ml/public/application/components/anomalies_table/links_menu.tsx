@@ -99,11 +99,11 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       if (record.influencers) {
         kqlQuery = record.influencers
           // No need to add categorization detectors to query
-          .filter((i) => i.influencer_field_name !== 'mlcategory')
+          .filter((influencer) => influencer.influencer_field_name !== 'mlcategory')
           .map(
-            (i) =>
-              `${escapeForElasticsearchQuery(i.influencer_field_name)}:"${
-                i.influencer_field_values[0] ?? ''
+            (influencer) =>
+              `${escapeForElasticsearchQuery(influencer.influencer_field_name)}:"${
+                influencer.influencer_field_values[0] ?? ''
               }"`
           )
           .join(' AND ');
