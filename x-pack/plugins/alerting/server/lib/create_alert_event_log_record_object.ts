@@ -7,14 +7,14 @@
 
 import { AlertInstanceState } from '../types';
 import { IEvent } from '../../../event_log/server';
-import { UntypedNormalizedAlertType } from '../rule_type_registry';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 
 export type Event = Exclude<IEvent, undefined>;
 
 interface CreateAlertEventLogRecordParams {
   executionId?: string;
   ruleId: string;
-  ruleType: UntypedNormalizedAlertType;
+  ruleType: UntypedNormalizedRuleType;
   action: string;
   ruleName?: string;
   instanceId?: string;
