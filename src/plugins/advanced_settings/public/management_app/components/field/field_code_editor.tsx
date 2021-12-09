@@ -93,6 +93,7 @@ export const FieldCodeEditor = ({
         lineNumbers: 'off',
         scrollBeyondLastLine: false,
         automaticLayout: true,
+        folding: false,
         tabSize: 2,
         scrollbar: {
           alwaysConsumeMouseWheel: false,
