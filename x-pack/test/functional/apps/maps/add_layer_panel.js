@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('Add layer panel', () => {
     before(async () => {
-      await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader',]);
+      await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader']);
       await PageObjects.maps.openNewMap();
       await PageObjects.maps.clickAddLayer();
       await PageObjects.maps.selectDocumentsSource();
