@@ -13,6 +13,7 @@ import { CoreStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { EuiButton, EuiSelect } from '@elastic/eui';
+import { ExpressionsStart } from 'src/plugins/expressions/public';
 import {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -30,7 +31,6 @@ import { EsSQLLayer, EsSQLPrivateState, EsSQLPersistedState } from './types';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { Datasource } from '../types';
 import { esRawResponse } from '../../../../../src/plugins/data/common';
-import { ExpressionsStart } from 'src/plugins/expressions/public';
 
 async function loadIndexPatternRefs(
   indexPatternsService: DataViewsService
@@ -68,6 +68,9 @@ export function getEsSQLDatasource({
     },
     getErrorMessages: () => {
       return [];
+    },
+    hideFilterBar: (state) => {
+      return Object.values(state.layers).some((layer) => layer.hideFilterBar);
     },
     async initialize(state?: EsSQLPersistedState) {
       const initState = state || { layers: {} };
@@ -369,6 +372,7 @@ export function getEsSQLDatasource({
           }
           return null;
         },
+        getVisualDefaults: () => ({}),
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
@@ -452,6 +456,7 @@ function blankLayer(index: string) {
   return {
     index,
     query: '',
+    hideFilterBar: true,
     columns: [],
   };
 }

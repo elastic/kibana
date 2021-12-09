@@ -239,6 +239,7 @@ export interface Datasource<T = unknown, P = unknown> {
     columnId: string;
     state: T;
   }) => T | undefined;
+  hideFilterBar?: (state: T) => boolean;
 
   toExpression: (state: T, layerId: string) => ExpressionAstExpression | string | null;
 

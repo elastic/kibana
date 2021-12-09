@@ -34,6 +34,7 @@ function getExpressionForLayer(layer: EsSQLLayer, refs: any): Ast | null {
         type: 'function',
         function: 'essql',
         arguments: {
+          discardFilters: [layer.hideFilterBar],
           query: [layer.query],
           timefield: [refs.find((r) => r.id === layer.index)!.timeField],
         },

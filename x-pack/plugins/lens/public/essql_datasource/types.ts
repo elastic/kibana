@@ -11,6 +11,7 @@ export interface EsSQLLayer {
   columns: Array<{ columnId: string; fieldName: string }>;
   timeField?: string;
   overwrittenFieldTypes?: Record<string, string>;
+  hideFilterBar: boolean;
 }
 
 export interface EsSQLPersistedState {

@@ -21,6 +21,7 @@ interface Arguments {
   parameter: Array<string | number | boolean>;
   count: number;
   timezone: string;
+  discardFilters: boolean;
 }
 
 export function essql(): ExpressionFunctionDefinition<
@@ -65,15 +66,20 @@ export function essql(): ExpressionFunctionDefinition<
         types: ['string'],
         help: '',
       },
+      discardFilters: {
+        types: ['boolean'],
+        help: '',
+        default: false,
+      },
     },
     fn: (input, args, handlers) => {
       const search = searchService.getService().search;
-      const { parameter, ...restOfArgs } = args;
+      const { parameter, discardFilters, ...restOfArgs } = args;
       const req = {
         ...restOfArgs,
         params: parameter,
         filter:
-          input.type === 'kibana_context'
+          !args.discardFilters && input.type === 'kibana_context'
             ? [
                 {
                   filterType: 'direct',
@@ -94,7 +100,7 @@ export function essql(): ExpressionFunctionDefinition<
                   },
                 },
               ]
-            : input.and,
+            : input.and || [],
       };
 
       return search

@@ -408,6 +408,12 @@ export const LensTopNavMenu = ({
     });
   }, [data.query.filterManager, data.query.queryString, dispatchSetState]);
 
+  const hideFilterBar = Boolean(
+    allLoaded &&
+      activeDatasourceId &&
+      datasourceMap[activeDatasourceId].hideFilterBar?.(datasourceStates[activeDatasourceId].state)
+  );
+
   return (
     <TopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
@@ -423,19 +429,20 @@ export const LensTopNavMenu = ({
       dateRangeFrom={from}
       dateRangeTo={to}
       indicateNoData={indicateNoData}
-      showSearchBar={true}
+      showSearchBar={!hideFilterBar}
       showDatePicker={
-        indexPatterns.some((ip) => ip.isTimeBased()) ||
-        Boolean(
-          allLoaded &&
-            activeDatasourceId &&
-            datasourceMap[activeDatasourceId].isTimeBased(
-              datasourceStates[activeDatasourceId].state
-            )
-        )
+        !hideFilterBar &&
+        (indexPatterns.some((ip) => ip.isTimeBased()) ||
+          Boolean(
+            allLoaded &&
+              activeDatasourceId &&
+              datasourceMap[activeDatasourceId].isTimeBased(
+                datasourceStates[activeDatasourceId].state
+              )
+          ))
       }
-      showQueryBar={true}
-      showFilterBar={true}
+      showQueryBar={!hideFilterBar}
+      showFilterBar={!hideFilterBar}
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}
       appName={'lens'}

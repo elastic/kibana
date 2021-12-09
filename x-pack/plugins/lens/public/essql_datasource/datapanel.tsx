@@ -30,17 +30,17 @@ import {
   EuiPanel,
   EuiCheckbox,
 } from '@elastic/eui';
-import { CodeEditor } from '../../../../../src/plugins/kibana_react/public';
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { EuiFieldText, EuiSelect } from '@elastic/eui';
 import { ExpressionsStart } from 'src/plugins/expressions/public';
+import { FieldButton } from '@kbn/react-field/field_button';
+import { CodeEditor } from '../../../../../src/plugins/kibana_react/public';
 import { buildExpressionFunction } from '../../../../../src/plugins/expressions/public';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { IndexPattern, EsSQLPrivateState, IndexPatternField, IndexPatternRef } from './types';
 import { esRawResponse } from '../../../../../src/plugins/data/common';
 import { ChangeIndexPattern } from './change_indexpattern';
-import { FieldButton } from '@kbn/react-field/field_button';
 import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { LensFieldIcon } from '../indexpattern_datasource/lens_field_icon';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
@@ -51,6 +51,10 @@ export type Props = DatasourceDataPanelProps<EsSQLPrivateState> & {
 };
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { flatten } from './flatten';
+
+function getIndexPattern(sql: string) {
+  return /.*FROM (\S+).*/.exec(sql)?.[1].replaceAll(/\"/g, '');
+}
 
 export function EsSQLDataPanel({
   setState,
@@ -347,7 +351,6 @@ export function EsSQLHorizontalDataPanel({
         ...core,
       }}
     >
-      <EuiSpacer size="xxl" />
       <EuiFlexGroup direction="column">
         {Object.entries(layers).map(([id, layer]) => {
           const ref = state.indexPatternRefs.find((r) => r.id === layer.index);
@@ -375,6 +378,10 @@ export function EsSQLHorizontalDataPanel({
                           [id]: {
                             ...layer,
                             query: val,
+                            index: layer.hideFilterBar
+                              ? layer.index
+                              : state.indexPatternRefs.find((r) => r.title === getIndexPattern(val))
+                                  ?.id || layer.index,
                           },
                         },
                       });
@@ -402,7 +409,41 @@ export function EsSQLHorizontalDataPanel({
           </EuiFlexItem>
         ))}
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup>
+            <EuiFlexItem grow={true}>
+              <>
+                <EuiCheckbox
+                  id={'myId2'}
+                  label="Integrate with unified search (filter and time range will be applied to query)"
+                  checked={!Object.values(layers)[0].hideFilterBar}
+                  disabled={
+                    !state.indexPatternRefs.some(
+                      (r) => r.title === getIndexPattern(Object.values(layers)[0].query)
+                    )
+                  }
+                  onChange={(e) => {
+                    setState({
+                      ...localState,
+                      layers: {
+                        ...layers,
+                        [Object.keys(layers)[0]]: {
+                          ...Object.values(layers)[0],
+                          hideFilterBar: !e.target.checked,
+                        },
+                      },
+                    });
+                  }}
+                />
+                {!Object.values(layers)[0].hideFilterBar &&
+                  !state.indexPatternRefs.some(
+                    (r) => r.title === getIndexPattern(Object.values(layers)[0].query)
+                  ) && (
+                    <span style={{ color: 'red' }}>
+                      Can't find data view for FROM clause, please create or change
+                    </span>
+                  )}
+              </>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiCheckbox
                 id={'myId'}
@@ -416,7 +457,24 @@ export function EsSQLHorizontalDataPanel({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton disabled={state === localState} onClick={onSubmit}>
+              <EuiButton
+                disabled={
+                  state === localState ||
+                  (!Object.values(layers)[0].hideFilterBar &&
+                    !state.indexPatternRefs.some(
+                      (r) => r.title === getIndexPattern(Object.values(layers)[0].query)
+                    ))
+                }
+                color={
+                  !Object.values(layers)[0].hideFilterBar &&
+                  !state.indexPatternRefs.some(
+                    (r) => r.title === getIndexPattern(Object.values(layers)[0].query)
+                  )
+                    ? 'danger'
+                    : 'primary'
+                }
+                onClick={onSubmit}
+              >
                 Apply changes
               </EuiButton>
             </EuiFlexItem>
