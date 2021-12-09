@@ -13,7 +13,7 @@ import React from 'react';
 import { useUiTracker } from '../../../../../../observability/public';
 import { ContentsProps } from '.';
 import { NodeStats } from '../../../../../common/service_map';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { ApmRoutes } from '../../../routing/apm_route_config';
@@ -25,8 +25,7 @@ export function BackendContents({
   start,
   end,
 }: ContentsProps) {
-  // @ts-ignore 4.3.5 upgrade - Type instantiation is excessively deep and possibly infinite.
-  const { query } = useApmParams(
+  const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map'
   );

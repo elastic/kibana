@@ -16,7 +16,7 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { APMQueryParams } from '../../shared/Links/url_helpers';
 import { CytoscapeContext } from './Cytoscape';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 
 const ControlsContainer = euiStyled('div')`
   left: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
@@ -107,7 +107,7 @@ export function Controls() {
 
   const {
     query: { kuery },
-  } = useApmParams('/service-map', '/services/{serviceName}/service-map');
+  } = useAnyOfApmParams('/service-map', '/services/{serviceName}/service-map');
 
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
   const duration = parseInt(theme.eui.euiAnimSpeedFast, 10);

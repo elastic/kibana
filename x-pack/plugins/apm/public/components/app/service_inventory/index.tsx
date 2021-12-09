@@ -19,7 +19,7 @@ import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detecti
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
@@ -46,9 +46,7 @@ function useServicesFetcher() {
 
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
-  } =
-    // @ts-ignore 4.3.5 upgrade - Type instantiation is excessively deep and possibly infinite.
-    useApmParams('/services/{serviceName}', '/services');
+  } = useAnyOfApmParams('/services/{serviceName}', '/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
