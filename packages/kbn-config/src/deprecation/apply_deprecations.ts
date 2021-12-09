@@ -13,6 +13,7 @@ import type {
   ChangedDeprecatedPaths,
   ConfigDeprecationWithContext,
 } from './types';
+import { unsetAndCleanEmptyParent } from './unset_and_clean_empty_parent';
 
 const noopAddDeprecationFactory: () => AddConfigDeprecation = () => () => undefined;
 
@@ -45,7 +46,7 @@ export const applyDeprecations = (
       if (commands.unset) {
         changedPaths.unset.push(...commands.unset.map((c) => c.path));
         commands.unset.forEach(function ({ path: commandPath }) {
-          unset(result, commandPath);
+          unsetAndCleanEmptyParent(result, commandPath);
         });
       }
     }
