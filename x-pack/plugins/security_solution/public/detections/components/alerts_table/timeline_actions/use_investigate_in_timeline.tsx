@@ -85,6 +85,9 @@ export const useInvestigateInTimeline = ({
     skip: ecsRowData != null || alertIds == null,
   });
   console.log('use investigate 3');
+  console.log('row data');
+  console.log(ecsRowData);
+  console.log('alert data');
   console.log(alertsEcsData);
 
   const investigateInTimelineAlertClick = useCallback(async () => {
