@@ -99,125 +99,120 @@ function getTicks(
   ];
 }
 
-export const GaugeComponent: FC<GaugeRenderProps> = ({
-  data,
-  args,
-  formatFactory,
-  chartsThemeService,
-}) => {
-  const {
-    shape: subtype,
-    metricAccessor,
-    palette,
-    colorMode,
-    labelMinor,
-    labelMajor,
-    labelMajorMode,
-    ticksPosition,
-  } = args;
-  if (!metricAccessor) {
-    // Chart is not ready
-    return null;
-  }
+export const GaugeComponent: FC<GaugeRenderProps> = memo(
+  ({ data, args, formatFactory, chartsThemeService }) => {
+    const {
+      shape: subtype,
+      metricAccessor,
+      palette,
+      colorMode,
+      labelMinor,
+      labelMajor,
+      labelMajorMode,
+      ticksPosition,
+    } = args;
+    if (!metricAccessor) {
+      // Chart is not ready
+      return null;
+    }
 
-  const chartTheme = chartsThemeService.useChartsTheme();
+    const chartTheme = chartsThemeService.useChartsTheme();
 
-  const table = data;
-  // const table = Object.values(data.tables)[0];
-  const metricColumn = table.columns.find((col) => col.id === metricAccessor);
+    const table = data;
+    // const table = Object.values(data.tables)[0];
+    const metricColumn = table.columns.find((col) => col.id === metricAccessor);
 
-  const chartData = table.rows.filter(
-    (v) => typeof v[metricAccessor!] === 'number' || Array.isArray(v[metricAccessor!])
-  );
-  const row = chartData?.[0];
-
-  const metricValue = getValueFromAccessor('metricAccessor', row, args);
-
-  const icon = subtype === GaugeShapes.horizontalBullet ? GaugeIconHorizontal : GaugeIconVertical;
-
-  if (typeof metricValue !== 'number') {
-    return <EmptyPlaceholder icon={icon} />;
-  }
-
-  const goal = getValueFromAccessor('goalAccessor', row, args);
-  const min = getMinValue(row, args);
-  const max = getMaxValue(row, args);
-
-  if (min === max) {
-    return (
-      <EmptyPlaceholder
-        icon={icon}
-        message={
-          <FormattedMessage
-            id="expressionGauge.renderer.chartCannotRenderEqual"
-            defaultMessage="Minimum and maximum values may not be equal"
-          />
-        }
-      />
+    const chartData = table.rows.filter(
+      (v) => typeof v[metricAccessor!] === 'number' || Array.isArray(v[metricAccessor!])
     );
-  } else if (min > max) {
+    const row = chartData?.[0];
+
+    const metricValue = getValueFromAccessor('metricAccessor', row, args);
+
+    const icon = subtype === GaugeShapes.horizontalBullet ? GaugeIconHorizontal : GaugeIconVertical;
+
+    if (typeof metricValue !== 'number') {
+      return <EmptyPlaceholder icon={icon} />;
+    }
+
+    const goal = getValueFromAccessor('goalAccessor', row, args);
+    const min = getMinValue(row, args);
+    const max = getMaxValue(row, args);
+
+    if (min === max) {
+      return (
+        <EmptyPlaceholder
+          icon={icon}
+          message={
+            <FormattedMessage
+              id="expressionGauge.renderer.chartCannotRenderEqual"
+              defaultMessage="Minimum and maximum values may not be equal"
+            />
+          }
+        />
+      );
+    } else if (min > max) {
+      return (
+        <EmptyPlaceholder
+          icon={icon}
+          message={
+            <FormattedMessage
+              id="expressionGauge.renderer.chartCannotRenderMinGreaterMax"
+              defaultMessage="Minimum value may not be greater than maximum value"
+            />
+          }
+        />
+      );
+    }
+
+    const tickFormatter = formatFactory(
+      metricColumn?.meta?.params?.params
+        ? metricColumn?.meta?.params
+        : {
+            id: 'number',
+            params: {
+              pattern: max - min > 5 ? `0,0` : `0,0.0`,
+            },
+          }
+    );
+    const colors = palette?.params?.colors ? normalizeColors(palette.params, min) : undefined;
+    const bands: number[] = (palette?.params as CustomPaletteState)
+      ? normalizeBands(args.palette?.params as CustomPaletteState, { min, max })
+      : [min, max];
+
+    // TODO: format in charts
+    const formattedActual = Math.round(Math.min(Math.max(metricValue, min), max) * 1000) / 1000;
+
     return (
-      <EmptyPlaceholder
-        icon={icon}
-        message={
-          <FormattedMessage
-            id="expressionGauge.renderer.chartCannotRenderMinGreaterMax"
-            defaultMessage="Minimum value may not be greater than maximum value"
-          />
-        }
-      />
+      <Chart>
+        <Settings debugState={window._echDebugStateFlag ?? false} theme={chartTheme} />
+        <Goal
+          id="goal"
+          subtype={subtype}
+          base={min}
+          target={goal && goal >= min && goal <= max ? goal : undefined}
+          actual={formattedActual}
+          tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
+          bands={bands}
+          ticks={getTicks(ticksPosition, [min, max], bands)}
+          bandFillColor={
+            colorMode === 'palette' && colors
+              ? (val) => {
+                  const index = bands && bands.indexOf(val.value) - 1;
+                  return colors && index >= 0 && colors[index]
+                    ? colors[index]
+                    : colors[colors.length - 1];
+                }
+              : () => `rgba(255,255,255,0)`
+          }
+          labelMajor={getTitle(labelMajorMode, labelMajor, metricColumn?.name)}
+          labelMinor={labelMinor ? labelMinor + '  ' : ''}
+        />
+      </Chart>
     );
   }
-
-  const tickFormatter = formatFactory(
-    metricColumn?.meta?.params?.params
-      ? metricColumn?.meta?.params
-      : {
-          id: 'number',
-          params: {
-            pattern: max - min > 5 ? `0,0` : `0,0.0`,
-          },
-        }
-  );
-  const colors = palette?.params?.colors ? normalizeColors(palette.params, min) : undefined;
-  const bands: number[] = (palette?.params as CustomPaletteState)
-    ? normalizeBands(args.palette?.params as CustomPaletteState, { min, max })
-    : [min, max];
-
-  // TODO: format in charts
-  const formattedActual = Math.round(Math.min(Math.max(metricValue, min), max) * 1000) / 1000;
-
-  return (
-    <Chart>
-      <Settings debugState={window._echDebugStateFlag ?? false} theme={chartTheme} />
-      <Goal
-        id="goal"
-        subtype={subtype}
-        base={min}
-        target={goal && goal >= min && goal <= max ? goal : undefined}
-        actual={formattedActual}
-        tickValueFormatter={({ value: tickValue }) => tickFormatter.convert(tickValue)}
-        bands={bands}
-        ticks={getTicks(ticksPosition, [min, max], bands)}
-        bandFillColor={
-          colorMode === 'palette' && colors
-            ? (val) => {
-                const index = bands && bands.indexOf(val.value) - 1;
-                return colors && index >= 0 && colors[index]
-                  ? colors[index]
-                  : colors[colors.length - 1];
-              }
-            : () => `rgba(255,255,255,0)`
-        }
-        labelMajor={getTitle(labelMajorMode, labelMajor, metricColumn?.name)}
-        labelMinor={labelMinor ? labelMinor + '  ' : ''}
-      />
-    </Chart>
-  );
-};
-
-const MemoizedChart = memo(GaugeComponent);
+);
 
 // default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export
-export { MemoizedChart as default };
+export { GaugeComponent as default };

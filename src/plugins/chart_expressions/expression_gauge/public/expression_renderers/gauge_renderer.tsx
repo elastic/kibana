@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import React, { memo } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ThemeServiceStart } from '../../../../../core/public';
 import { KibanaThemeProvider } from '../../../../kibana_react/public';
@@ -32,7 +32,7 @@ export const gaugeRenderer: (
       unmountComponentAtNode(domNode);
     });
 
-    const GaugeComponent = await import('../components/gauge_component');
+    const { GaugeComponent } = await import('../components/gauge_component');
     render(
       <KibanaThemeProvider theme$={theme.theme$}>
         <div className="gauge-container" data-test-subj="gaugeChart">
