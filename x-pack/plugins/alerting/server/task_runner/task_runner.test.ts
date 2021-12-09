@@ -4702,6 +4702,13 @@ describe('Task Runner', () => {
         category: ['alerts'],
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: undefined,
+            },
+          },
+        },
         saved_objects: [
           { rel: 'primary', type: 'alert', id: '1', namespace: undefined, type_id: 'test' },
         ],
@@ -4724,6 +4731,13 @@ describe('Task Runner', () => {
         outcome: 'failure',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: undefined,
+            },
+          },
+        },
         saved_objects: [
           { rel: 'primary', type: 'alert', id: '1', namespace: undefined, type_id: 'test' },
         ],
