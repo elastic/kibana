@@ -1867,6 +1867,7 @@ Default: `"throw"`
 === `mathColumn`
 
 Adds a column by evaluating `TinyMath` on each row. This function is optimized for math, so it performs better than the <<mapColumn_fn>> with a <<math_fn>>.
+
 *Accepts:* `datatable`
 
 [cols="3*^<"]
