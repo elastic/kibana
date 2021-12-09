@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Fields } from '../../../../common/search_strategy';
+import { Fields } from '../../../../../common/search_strategy';
 
 /**
  * If a prefix of our full field path is present as a field, we know that our field is nested

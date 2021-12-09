@@ -6,7 +6,7 @@
  */
 
 import { eventHit } from '@kbn/securitysolution-t-grid';
-import { EventHit } from '../../../../common/search_strategy';
+import { EventHit } from '../../../../../common/search_strategy';
 import { buildObjectForFieldPath } from './build_object_for_field_path';
 
 describe('buildObjectForFieldPath', () => {

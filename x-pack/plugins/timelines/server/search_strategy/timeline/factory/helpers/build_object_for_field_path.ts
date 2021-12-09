@@ -7,9 +7,9 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { get, has } from 'lodash/fp';
-import { Ecs } from '../../../../common/ecs';
-import { EventHit, Fields } from '../../../../common/search_strategy';
-import { toStringArray } from '../../../../common/utils/to_array';
+import { Ecs } from '../../../../../common/ecs';
+import { EventHit, Fields } from '../../../../../common/search_strategy';
+import { toStringArray } from '../../../../../common/utils/to_array';
 import { getNestedParentPath } from './get_nested_parent_path';
 
 const buildObjectRecursive = (fieldPath: string, fields: Fields): Partial<Ecs> => {

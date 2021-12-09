@@ -6,17 +6,20 @@
  */
 
 import { has, merge } from 'lodash/fp';
-import { EventHit } from '../../../../common/search_strategy';
+import { EventHit } from '../../../../../common/search_strategy';
 import { ECS_METADATA_FIELDS, TIMELINE_EVENTS_FIELDS } from './constants';
-import { Ecs } from '../../../../common/ecs';
+import { Ecs } from '../../../../../common/ecs';
 import { getTimestamp } from './get_timestamp';
 import { buildObjectForFieldPath } from './build_object_for_field_path';
+import { getNestedParentPath } from './get_nested_parent_path';
 
 export const buildEcsObjects = (hit: EventHit): Ecs => {
   const ecsFields = [...TIMELINE_EVENTS_FIELDS];
   return ecsFields.reduce(
     (acc, field) => {
+      const nestedParentPath = getNestedParentPath(field, hit.fields);
       if (
+        nestedParentPath != null ||
         has(field, hit._source) ||
         has(field, hit.fields) ||
         ECS_METADATA_FIELDS.includes(field)

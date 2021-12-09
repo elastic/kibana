@@ -24,7 +24,7 @@ import {
   getDataFromSourceHits,
   getDataSafety,
 } from '../../../../../../common/utils/field_formatters';
-import { buildEcsObjects } from '../../../utils/build_ecs_objects';
+import { buildEcsObjects } from '../../helpers/build_ecs_objects';
 
 export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.details> = {
   buildDsl: ({ authFilter, ...options }: TimelineEventsDetailsRequestOptions) => {

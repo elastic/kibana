@@ -6,16 +6,17 @@
  */
 
 import { eventHit } from '@kbn/securitysolution-t-grid';
-import { EventHit } from '../../../../common/search_strategy';
+import { EventHit } from '../../../../../common/search_strategy';
 import { buildEcsObjects } from './build_ecs_objects';
 
 describe('buildEcsObjects', () => {
-  it('should not populate empty or null ecs fields', () => {
+  it('should not populate null ecs fields', () => {
     const hitWithMissingInfo: EventHit = {
       _index: '.test-index',
       _id: 'test-id',
       _score: 0,
       _source: {
+        '@timestamp': 123456,
         host: {
           architecture: 'windows98',
           hostname: 'test-name',
@@ -25,6 +26,7 @@ describe('buildEcsObjects', () => {
         },
       },
       fields: {
+        '@timestamp': [123456],
         'host.architecture': ['windows98'],
         'host.hostname': ['test-name'],
         'host.id': ['some-id'],
@@ -44,7 +46,8 @@ describe('buildEcsObjects', () => {
         ip: [],
         name: ['test-name'],
       },
-      timestamp: '',
+      timestamp: '123456',
+      '@timestamp': ['123456'],
     });
   });
 
@@ -88,6 +91,38 @@ describe('buildEcsObjects', () => {
         ppid: ['3977'],
         working_directory: [
           '/var/lib/jenkins/workspace/Beats_beats_PR-22624/src/github.com/elastic/beats/libbeat',
+        ],
+      },
+      threat: {
+        enrichments: [
+          {
+            feed: {
+              name: [],
+            },
+            indicator: {
+              provider: ['yourself'],
+              reference: [],
+            },
+            matched: {
+              atomic: ['matched_atomic'],
+              field: ['matched_field', 'other_matched_field'],
+              type: [],
+            },
+          },
+          {
+            feed: {
+              name: [],
+            },
+            indicator: {
+              provider: ['other_you'],
+              reference: [],
+            },
+            matched: {
+              atomic: ['matched_atomic_2'],
+              field: ['matched_field_2'],
+              type: [],
+            },
+          },
         ],
       },
       timestamp: '2020-11-17T14:48:08.922Z',

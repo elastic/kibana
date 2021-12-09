@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EventHit } from '../../../../common/search_strategy';
+import { EventHit } from '../../../../../common/search_strategy';
 
 export const getTimestamp = (hit: EventHit): string => {
   if (hit.fields && hit.fields['@timestamp']) {

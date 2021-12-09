@@ -6,9 +6,9 @@
  */
 
 import { get, has, merge, uniq } from 'lodash/fp';
-import { EventHit, TimelineEdges, TimelineNonEcsData } from '../../../../common/search_strategy';
-import { toStringArray } from '../../../../common/utils/to_array';
-import { getDataFromFieldsHits, getDataSafety } from '../../../../common/utils/field_formatters';
+import { EventHit, TimelineEdges, TimelineNonEcsData } from '../../../../../common/search_strategy';
+import { toStringArray } from '../../../../../common/utils/to_array';
+import { getDataFromFieldsHits, getDataSafety } from '../../../../../common/utils/field_formatters';
 import { getTimestamp } from './get_timestamp';
 import { getNestedParentPath } from './get_nested_parent_path';
 import { buildObjectForFieldPath } from './build_object_for_field_path';
