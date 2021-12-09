@@ -5,23 +5,30 @@
  * 2.0.
  */
 
-import { CommonFields, MonitorFields, ConfigKey } from '../../fleet_package/types';
+import {
+  CommonFields,
+  ConfigKey,
+  MonitorFields,
+} from '../../../../common/runtime_types/monitor_management';
 
 export type Formatter =
   | null
-  | ((fields: Partial<MonitorFields>) => string | string[] | Record<string, string> | null);
+  | ((
+      fields: Partial<MonitorFields>
+    ) => boolean | string | string[] | Record<string, string> | null);
 
-export type CommonFormatMap = Record<keyof CommonFields | ConfigKey.NAME, Formatter>;
+export type CommonFormatMap = Record<keyof CommonFields, Formatter>;
 
 export const commonFormatters: CommonFormatMap = {
   [ConfigKey.NAME]: null,
+  [ConfigKey.LOCATIONS]: null,
   [ConfigKey.ENABLED]: null,
   [ConfigKey.MONITOR_TYPE]: null,
   [ConfigKey.LOCATIONS]: null,
   [ConfigKey.SCHEDULE]: (fields) =>
     `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`,
   [ConfigKey.APM_SERVICE_NAME]: null,
-  [ConfigKey.TAGS]: null,
+  [ConfigKey.TAGS]: (fields) => arrayFormatter(fields[ConfigKey.TAGS]),
   [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT]),
 };
 

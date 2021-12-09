@@ -133,7 +133,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   savedObjects: [
                     { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
                   ],
-                  message: `alert execution start: "${alertId}"`,
+                  message: `rule execution start: "${alertId}"`,
                   shouldHaveTask: true,
                   rule: {
                     id: alertId,
@@ -150,7 +150,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
                   ],
                   outcome: 'success',
-                  message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
+                  message: `rule executed: test.patternFiring:${alertId}: 'abc'`,
                   status: executeStatuses[executeCount++],
                   shouldHaveTask: true,
                   rule: {
@@ -182,15 +182,15 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 });
                 break;
               case 'new-instance':
-                validateInstanceEvent(event, `created new instance: 'instance'`, false);
+                validateInstanceEvent(event, `created new alert: 'instance'`, false);
                 break;
               case 'recovered-instance':
-                validateInstanceEvent(event, `instance 'instance' has recovered`, true);
+                validateInstanceEvent(event, `alert 'instance' has recovered`, true);
                 break;
               case 'active-instance':
                 validateInstanceEvent(
                   event,
-                  `active instance: 'instance' in actionGroup: 'default'`,
+                  `active alert: 'instance' in actionGroup: 'default'`,
                   false
                 );
                 break;
@@ -344,7 +344,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   savedObjects: [
                     { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
                   ],
-                  message: `alert execution start: "${alertId}"`,
+                  message: `rule execution start: "${alertId}"`,
                   shouldHaveTask: true,
                   rule: {
                     id: alertId,
@@ -361,7 +361,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
                   ],
                   outcome: 'success',
-                  message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
+                  message: `rule executed: test.patternFiring:${alertId}: 'abc'`,
                   status: executeStatuses[executeCount++],
                   shouldHaveTask: true,
                   rule: {
@@ -398,10 +398,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 });
                 break;
               case 'new-instance':
-                validateInstanceEvent(event, `created new instance: 'instance'`, false);
+                validateInstanceEvent(event, `created new alert: 'instance'`, false);
                 break;
               case 'recovered-instance':
-                validateInstanceEvent(event, `instance 'instance' has recovered`, true);
+                validateInstanceEvent(event, `alert 'instance' has recovered`, true);
                 break;
               case 'active-instance':
                 expect(
@@ -411,7 +411,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 ).to.be(true);
                 validateInstanceEvent(
                   event,
-                  `active instance: 'instance' in actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})'`,
+                  `active alert: 'instance' in actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})'`,
                   false
                 );
                 break;
@@ -490,7 +490,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             savedObjects: [
               { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
             ],
-            message: `alert execution start: "${alertId}"`,
+            message: `rule execution start: "${alertId}"`,
             shouldHaveTask: true,
             rule: {
               id: alertId,
@@ -504,7 +504,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             spaceId: space.id,
             savedObjects: [{ type: 'alert', id: alertId, rel: 'primary', type_id: 'test.throw' }],
             outcome: 'failure',
-            message: `alert execution failure: test.throw:${alertId}: 'abc'`,
+            message: `rule execution failure: test.throw:${alertId}: 'abc'`,
             errorMessage: 'this alert is intended to fail',
             status: 'error',
             reason: 'execute',
