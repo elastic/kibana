@@ -228,6 +228,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
                 'emptySizeRatioOption-medium'
               }
               onChange={onEmptySizeRatioChange}
+              data-test-subj="lnsEmptySizeRatioButtonGroup"
             />
           </EuiFormRow>
         </ToolbarPopover>

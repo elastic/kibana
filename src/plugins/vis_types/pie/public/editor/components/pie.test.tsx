@@ -135,4 +135,18 @@ describe('PalettePicker', function () {
       expect(findTestSubject(component, 'visTypePieValueDecimals').length).toBe(1);
     });
   });
+
+  it('renders the donut size button group for the elastic charts implementation', async () => {
+    component = mountWithIntl(<PieOptions {...props} />);
+    await act(async () => {
+      expect(findTestSubject(component, 'visTypePieEmptySizeRatioButtonGroup').length).toBe(1);
+    });
+  });
+
+  it('not renders the donut size button group for the vislib implementation', async () => {
+    component = mountWithIntl(<PieOptions {...props} showElasticChartsOptions={false} />);
+    await act(async () => {
+      expect(findTestSubject(component, 'visTypePieEmptySizeRatioButtonGroup').length).toBe(0);
+    });
+  });
 });

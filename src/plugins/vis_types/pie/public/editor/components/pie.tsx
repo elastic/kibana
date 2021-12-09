@@ -142,6 +142,7 @@ const PieOptions = (props: PieOptionsProps) => {
                   ?.id ?? 'emptySizeRatioOption-medium'
               }
               onChange={handleEmptySizeRatioChange}
+              data-test-subj="visTypePieEmptySizeRatioButtonGroup"
             />
           </EuiFormRow>
         )}
