@@ -54,7 +54,7 @@ export default function ({ getPageObjects, getService }) {
       it('should create filters when create filter button is clicked', async () => {
         await testSubjects.click('mapTooltipCreateFilterButton');
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-        await PageObjects.maps.waitForLayersToLoad();
+        await PageObjects.maps.waitForLayersToLoadMinimizedLayerControl();
 
         const numFilters = await filterBar.getFilterCount();
         expect(numFilters).to.be(1);
