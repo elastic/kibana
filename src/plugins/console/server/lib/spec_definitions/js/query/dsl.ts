@@ -748,6 +748,7 @@ export const query = (specService: SpecDefinitionsService) => {
     script_score: {
       __template: {
         script: {},
+        query: {},
       },
       script: {},
       query: {},
