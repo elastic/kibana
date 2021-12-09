@@ -7,35 +7,40 @@
 
 import {
   ALERT_REASON,
-  ALERT_RULE_PARAMS,
+  ALERT_RULE_PARAMETERS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils/technical_field_names';
 import { encode } from 'rison-node';
 import { stringify } from 'query-string';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
-import { InventoryMetricThresholdParams } from '../../../common/alerting/metrics';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
+  console.log(fields, '!!fieldss');
   const reason = fields[ALERT_REASON] ?? '-';
-  const ruleParams = parseRuleParams(fields[ALERT_RULE_PARAMS]);
-
+  const nodeTypeField = `${ALERT_RULE_PARAMETERS}.nodeType`;
+  const nodeType = fields[nodeTypeField];
   let link = '/app/metrics/link-to/inventory?';
 
-  if (ruleParams) {
+  if (nodeType) {
     const linkToParams: Record<string, any> = {
-      nodeType: ruleParams.nodeType,
+      nodeType: fields[nodeTypeField][0],
       timestamp: Date.parse(fields[TIMESTAMP]),
       customMetric: '',
     };
 
     // We always pick the first criteria metric for the URL
-    const criteria = ruleParams.criteria[0];
-    if (criteria.customMetric && criteria.customMetric.id !== 'alert-custom-metric') {
-      const customMetric = encode(criteria.customMetric);
-      linkToParams.customMetric = customMetric;
-      linkToParams.metric = customMetric;
+    const criteriaMetricField = `${ALERT_RULE_PARAMETERS}.criteria.metric`;
+    const criteriaMetric = fields[criteriaMetricField][0];
+    const criteriaCustomMetricField = `${ALERT_RULE_PARAMETERS}.criteria.customMetric`;
+    const criteriaCustomMetric = fields[criteriaCustomMetricField][0];
+    const criteriaCustomMetricIdField = `${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`;
+    const criteriaCustomMetricId = fields[criteriaCustomMetricIdField][0];
+    if (criteriaCustomMetric && criteriaCustomMetricId !== 'alert-custom-metric') {
+      const customMetric = encode(criteriaCustomMetric);
+      linkToParams.customMetric = criteriaCustomMetric;
+      linkToParams.metric = criteriaCustomMetric;
     } else {
-      linkToParams.metric = encode({ type: criteria.metric });
+      linkToParams.metric = encode({ type: criteriaMetric });
     }
 
     link += stringify(linkToParams);
@@ -46,11 +51,3 @@ export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
     link,
   };
 };
-
-function parseRuleParams(params?: string): InventoryMetricThresholdParams | undefined {
-  try {
-    return typeof params === 'string' ? JSON.parse(params) : undefined;
-  } catch (_) {
-    return;
-  }
-}
