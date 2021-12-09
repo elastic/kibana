@@ -47,7 +47,6 @@ import {
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
-import { getDeprecations } from './deprecations';
 
 export class APMPlugin
   implements
@@ -195,14 +194,6 @@ export class APMPlugin
       config: currentConfig,
       logger: this.logger,
       kibanaVersion: this.initContext.env.packageInfo.version,
-    });
-
-    core.deprecations.registerDeprecations({
-      getDeprecations: getDeprecations({
-        cloudSetup: plugins.cloud,
-        fleet: resourcePlugins.fleet,
-        branch: this.initContext.env.packageInfo.branch,
-      }),
     });
 
     return {
