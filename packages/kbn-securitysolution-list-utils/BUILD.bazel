@@ -38,11 +38,12 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-es-query",
-  "//packages/kbn-i18n",
+  "//packages/kbn-es-query:npm_module_types",
+  "//packages/kbn-i18n:npm_module_types",
   "//packages/kbn-securitysolution-io-ts-list-types",
   "//packages/kbn-securitysolution-list-constants",
   "//packages/kbn-securitysolution-utils",
+  "@npm//@elastic/elasticsearch",
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//@types/node",
