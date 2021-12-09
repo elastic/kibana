@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, unset } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 import type {
   AddConfigDeprecation,
