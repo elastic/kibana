@@ -24,7 +24,7 @@ import {
 
 import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
 import { PushedUserAction } from '../../../../../../../plugins/cases/common/api/cases/user_actions/pushed';
-import { CaseUserActionWithPayload } from '../../../../../../../plugins/cases/common/api';
+import { SpecificUserActionResponse } from '../../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -68,9 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
-      const pushUserAction = userActions[1] as CaseUserActionWithPayload<PushedUserAction>;
-      const { pushed_at: pushedAt, ...payloadWithoutDates } =
-        pushUserAction.payload.externalService;
+      const pushUserAction = userActions[1] as SpecificUserActionResponse<PushedUserAction>;
 
       expect(userActions.length).to.eql(2);
       expect(pushUserAction.fields).to.eql(['pushed']);
@@ -79,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(pushUserAction.case_id).to.eql(postedCase.id);
       expect(pushUserAction.comment_id).to.eql(null);
       expect(pushUserAction.owner).to.eql('securitySolutionFixture');
-      expect(payloadWithoutDates).to.eql({
+      expect(pushUserAction.payload.externalService).to.eql({
         pushed_at: theCase.external_service!.pushed_at,
         connector_id: connector.id,
         connector_name: connector.name,

@@ -7,13 +7,16 @@
 
 import * as rt from 'io-ts';
 import { Actions, Fields } from './common';
-import { ConnectorUserActionPayloadRt } from './connector';
+import {
+  ConnectorUserActionPayloadRt,
+  ConnectorUserActionPayloadWithoutConnectorIdRt,
+} from './connector';
 import { DescriptionUserActionPayloadRt } from './description';
 import { SettingsUserActionPayloadRt } from './settings';
 import { TagsUserActionPayloadRt } from './tags';
 import { TitleUserActionPayloadRt } from './title';
 
-export const CreateCaseUserActionRt = rt.type({
+export const CommonFieldsRt = rt.type({
   fields: rt.array(
     rt.union([
       rt.literal(Fields.description),
@@ -26,15 +29,35 @@ export const CreateCaseUserActionRt = rt.type({
     ])
   ),
   action: rt.literal(Actions.create),
-  payload: rt.type({
-    description: DescriptionUserActionPayloadRt.props.description,
-    status: rt.string,
-    tags: TagsUserActionPayloadRt.props.tags,
-    title: TitleUserActionPayloadRt.props.title,
-    settings: SettingsUserActionPayloadRt.props.settings,
-    connector: ConnectorUserActionPayloadRt.props.connector,
-    owner: rt.string,
-  }),
 });
 
+const CommonPayloadAttributesRt = rt.type({
+  description: DescriptionUserActionPayloadRt.props.description,
+  status: rt.string,
+  tags: TagsUserActionPayloadRt.props.tags,
+  title: TitleUserActionPayloadRt.props.title,
+  settings: SettingsUserActionPayloadRt.props.settings,
+  owner: rt.string,
+});
+
+export const CreateCaseUserActionRt = rt.intersection([
+  CommonFieldsRt,
+  rt.type({
+    payload: rt.intersection([ConnectorUserActionPayloadRt, CommonPayloadAttributesRt]),
+  }),
+]);
+
+export const CreateCaseUserActionWithoutConnectorIdRt = rt.intersection([
+  CommonFieldsRt,
+  rt.type({
+    payload: rt.intersection([
+      ConnectorUserActionPayloadWithoutConnectorIdRt,
+      CommonPayloadAttributesRt,
+    ]),
+  }),
+]);
+
 export type CreateCaseUserAction = rt.TypeOf<typeof CreateCaseUserActionRt>;
+export type CreateCaseUserActionWithoutConnectorId = rt.TypeOf<
+  typeof CreateCaseUserActionWithoutConnectorIdRt
+>;

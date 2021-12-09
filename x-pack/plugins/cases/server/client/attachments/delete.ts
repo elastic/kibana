@@ -111,6 +111,7 @@ export async function deleteAll(
       attachments: comments.saved_objects.map((comment) => ({
         id: comment.id,
         owner: comment.attributes.owner,
+        attachment: comment.attributes,
       })),
       user,
     });

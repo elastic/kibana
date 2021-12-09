@@ -21,6 +21,8 @@ import * as i18n from './translations';
 import { TagsUserAction } from '../../../common/api/cases/user_actions/tags';
 import { TitleUserAction } from '../../../common/api/cases/user_actions/title';
 import { PushedUserAction } from '../../../common/api/cases/user_actions/pushed';
+import { ConnectorUserAction } from '../../../common/api/cases/user_actions/connector';
+import { SnakeToCamelCase } from '../../../common/types';
 
 describe('User action tree helpers', () => {
   const connectors = connectorsMock;
@@ -136,9 +138,9 @@ describe('User action tree helpers', () => {
   it('label title generated for pushed incident', () => {
     const action = getUserAction(['pushed'], 'push_to_service', {
       payload: { externalService: basicPush },
-    });
+    }) as SnakeToCamelCase<PushedUserAction>;
     const result: string | JSX.Element = getPushedServiceLabelTitle(action, true);
-    const externalService = (action as PushedUserAction).payload.externalService;
+    const externalService = (action as SnakeToCamelCase<PushedUserAction>).payload.externalService;
 
     const wrapper = mount(<>{result}</>);
     expect(wrapper.find(`[data-test-subj="pushed-label"]`).first().text()).toEqual(
@@ -150,9 +152,12 @@ describe('User action tree helpers', () => {
   });
 
   it('label title generated for needs update incident', () => {
-    const action = getUserAction(['pushed'], 'push_to_service');
+    const action = getUserAction(
+      ['pushed'],
+      'push_to_service'
+    ) as SnakeToCamelCase<PushedUserAction>;
     const result: string | JSX.Element = getPushedServiceLabelTitle(action, false);
-    const externalService = (action as PushedUserAction).payload.externalService;
+    const externalService = (action as SnakeToCamelCase<PushedUserAction>).payload.externalService;
 
     const wrapper = mount(<>{result}</>);
     expect(wrapper.find(`[data-test-subj="pushed-label"]`).first().text()).toEqual(
@@ -180,7 +185,7 @@ describe('User action tree helpers', () => {
           payload: {
             connector: { id: '123', type: ConnectorTypes.resilient, name: 'a', fields: null },
           },
-        }),
+        }) as ConnectorUserAction,
         connectors,
       });
 
@@ -190,8 +195,10 @@ describe('User action tree helpers', () => {
     it('returns the removed connector label', () => {
       const result: string | JSX.Element = getConnectorLabelTitle({
         action: getUserAction(['connector'], 'update', {
-          payload: { id: 'none', connector: { type: ConnectorTypes.none, name: '', fields: null } },
-        }),
+          payload: {
+            connector: { id: 'none', type: ConnectorTypes.none, name: 'test', fields: null },
+          },
+        }) as ConnectorUserAction,
         connectors,
       });
 

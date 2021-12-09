@@ -1,0 +1,491 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { CaseStatuses, CommentType, ConnectorTypes } from '../../../common/api';
+import { UserActionBuilder } from './builder';
+import { casePayload, externalService } from './mocks';
+
+describe('UserActionBuilder', () => {
+  const commonArgs = {
+    caseId: '123',
+    user: { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' },
+    owner: SECURITY_SOLUTION_OWNER,
+  };
+
+  beforeAll(() => {
+    jest.useFakeTimers('modern');
+    jest.setSystemTime(new Date(2021, 12, 10));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('builds a title user action correctly', () => {
+    const builder = new UserActionBuilder();
+    const userAction = builder.buildUserAction<'title'>('title', { title: 'test', ...commonArgs });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "update",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "fields": Array [
+            "title",
+          ],
+          "owner": "securitySolution",
+          "payload": Object {
+            "title": "test",
+          },
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+        ],
+      }
+    `);
+  });
+
+  it('builds a connector user action correctly', () => {
+    const builder = new UserActionBuilder();
+    const userAction = builder.buildUserAction<'connector'>('connector', {
+      connector: {
+        id: '456',
+        name: 'ServiceNow SN',
+        type: ConnectorTypes.serviceNowSIR,
+        fields: {
+          category: 'Denial of Service',
+          destIp: true,
+          malwareHash: true,
+          malwareUrl: true,
+          priority: '2',
+          sourceIp: true,
+          subcategory: '45',
+        },
+      },
+      ...commonArgs,
+    });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "update",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "fields": Array [
+            "connector",
+          ],
+          "owner": "securitySolution",
+          "payload": Object {
+            "connector": Object {
+              "fields": Object {
+                "category": "Denial of Service",
+                "destIp": true,
+                "malwareHash": true,
+                "malwareUrl": true,
+                "priority": "2",
+                "sourceIp": true,
+                "subcategory": "45",
+              },
+              "name": "ServiceNow SN",
+              "type": ".servicenow-sir",
+            },
+          },
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+          Object {
+            "id": "456",
+            "name": "connectorId",
+            "type": "action",
+          },
+        ],
+      }
+    `);
+  });
+
+  it('builds a comment user action correctly', () => {
+    const builder = new UserActionBuilder();
+    const userAction = builder.buildUserAction<'comment'>('comment', {
+      action: 'update',
+      comment: { comment: 'a comment!', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER },
+      attachmentId: 'test-id',
+      ...commonArgs,
+    });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "update",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "fields": Array [
+            "comment",
+          ],
+          "owner": "securitySolution",
+          "payload": Object {
+            "comment": Object {
+              "comment": "a comment!",
+              "owner": "securitySolution",
+              "type": "user",
+            },
+          },
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+          Object {
+            "id": "test-id",
+            "name": "associated-cases-comments",
+            "type": "cases-comments",
+          },
+        ],
+      }
+    `);
+  });
+
+  it('builds a description user action correctly', () => {
+    const builder = new UserActionBuilder();
+    const userAction = builder.buildUserAction<'description'>('description', {
+      description: 'test',
+      ...commonArgs,
+    });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "update",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "fields": Array [
+            "description",
+          ],
+          "owner": "securitySolution",
+          "payload": Object {
+            "description": "test",
+          },
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+        ],
+      }
+    `);
+  });
+
+  it('builds a pushed user action correctly', () => {
+    const builder = new UserActionBuilder();
+    const userAction = builder.buildUserAction<'pushed'>('pushed', {
+      externalService,
+      ...commonArgs,
+    });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "push_to_service",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "fields": Array [
+            "pushed",
+          ],
+          "owner": "securitySolution",
+          "payload": Object {
+            "externalService": Object {
+              "connector_name": "ServiceNow SN",
+              "external_id": "external-id",
+              "external_title": "SIR0010037",
+              "external_url": "https://dev92273.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=external-id",
+              "pushed_at": "2021-02-03T17:41:26.108Z",
+              "pushed_by": Object {
+                "email": "elastic@elastic.co",
+                "full_name": "Elastic",
+                "username": "elastic",
+              },
+            },
+          },
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+          Object {
+            "id": "456",
+            "name": "pushConnectorId",
+            "type": "action",
+          },
+        ],
+      }
+    `);
+  });
+
+  it('builds a tags user action correctly', () => {
+    const builder = new UserActionBuilder();
+    const userAction = builder.buildUserAction<'tags'>('tags', {
+      action: 'add',
+      tags: ['one', 'two'],
+      ...commonArgs,
+    });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "add",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "fields": Array [
+            "tags",
+          ],
+          "owner": "securitySolution",
+          "payload": Object {
+            "tags": Array [
+              "one",
+              "two",
+            ],
+          },
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+        ],
+      }
+    `);
+  });
+
+  it('builds a status user action correctly', () => {
+    const builder = new UserActionBuilder();
+    const userAction = builder.buildUserAction<'status'>('status', {
+      status: CaseStatuses.open,
+      ...commonArgs,
+    });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "update",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "fields": Array [
+            "status",
+          ],
+          "owner": "securitySolution",
+          "payload": Object {
+            "status": "open",
+          },
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+        ],
+      }
+    `);
+  });
+
+  it('builds a settings user action correctly', () => {
+    const builder = new UserActionBuilder();
+    const userAction = builder.buildUserAction<'settings'>('settings', {
+      settings: { syncAlerts: true },
+      ...commonArgs,
+    });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "update",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "fields": Array [
+            "settings",
+          ],
+          "owner": "securitySolution",
+          "payload": Object {
+            "settings": Object {
+              "syncAlerts": true,
+            },
+          },
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+        ],
+      }
+    `);
+  });
+
+  it('builds a create case user action correctly', () => {
+    const builder = new UserActionBuilder();
+    const userAction = builder.buildUserAction<'create_case'>('create_case', {
+      payload: casePayload,
+      ...commonArgs,
+    });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "create",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "fields": Array [
+            "description",
+            "status",
+            "tags",
+            "title",
+            "connector",
+            "settings",
+            "owner",
+          ],
+          "owner": "securitySolution",
+          "payload": Object {
+            "connector": Object {
+              "fields": Object {
+                "category": "Denial of Service",
+                "destIp": true,
+                "malwareHash": true,
+                "malwareUrl": true,
+                "priority": "2",
+                "sourceIp": true,
+                "subcategory": "45",
+              },
+              "name": "ServiceNow SN",
+              "type": ".servicenow-sir",
+            },
+            "description": "testing sir",
+            "owner": "securitySolution",
+            "settings": Object {
+              "syncAlerts": true,
+            },
+            "status": "open",
+            "tags": Array [
+              "sir",
+            ],
+            "title": "Case SIR",
+          },
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+          Object {
+            "id": "456",
+            "name": "connectorId",
+            "type": "action",
+          },
+        ],
+      }
+    `);
+  });
+
+  it('builds a delete case user action correctly', () => {
+    const builder = new UserActionBuilder();
+    const userAction = builder.buildUserAction<'delete_case'>('delete_case', {
+      connectorId: '456',
+      ...commonArgs,
+    });
+
+    expect(userAction).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "action": "delete",
+          "created_at": "2022-01-09T22:00:00.000Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic User",
+            "username": "elastic",
+          },
+          "fields": Array [
+            "description",
+            "status",
+            "tags",
+            "title",
+            "connector",
+            "settings",
+            "owner",
+            "comment",
+          ],
+          "owner": "securitySolution",
+          "payload": null,
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "associated-cases",
+            "type": "cases",
+          },
+          Object {
+            "id": "456",
+            "name": "connectorId",
+            "type": "action",
+          },
+        ],
+      }
+    `);
+  });
+});

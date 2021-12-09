@@ -18,7 +18,6 @@ export const Fields = {
   title: 'title',
   status: 'status',
   settings: 'settings',
-  sub_case: 'sub_case',
   owner: OWNER_FIELD,
 } as const;
 

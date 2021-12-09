@@ -30,3 +30,6 @@ export const ConnectorUserActionRt = rt.type({
 });
 
 export type ConnectorUserAction = rt.TypeOf<typeof ConnectorUserActionRt>;
+export type ConnectorUserActionWithoutConnectorId = rt.TypeOf<
+  typeof ConnectorUserActionWithoutConnectorIdRt
+>;

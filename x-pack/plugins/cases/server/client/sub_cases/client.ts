@@ -19,7 +19,7 @@ import {
   SubCasesFindResponseRt,
   SubCasesPatchRequest,
 } from '../../../common/api';
-import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
+import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { CasesClientArgs } from '..';
 import { createCaseError } from '../../common/error';
 import { countAlertsForID, flattenSubCaseSavedObject, transformSubCases } from '../../common/utils';
@@ -90,8 +90,7 @@ export function createSubCasesClient(clientArgs: CasesClientArgs): SubCasesClien
 
 async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   try {
-    const { unsecuredSavedObjectsClient, user, userActionService, caseService, attachmentService } =
-      clientArgs;
+    const { unsecuredSavedObjectsClient, caseService, attachmentService } = clientArgs;
 
     const [comments, subCases] = await Promise.all([
       caseService.getAllSubCaseComments({ unsecuredSavedObjectsClient, id: ids }),
@@ -108,12 +107,6 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
       );
     }
 
-    const subCaseIDToParentID = subCases.saved_objects.reduce((acc, subCase) => {
-      const parentID = subCase.references.find((ref) => ref.type === CASE_SAVED_OBJECT);
-      acc.set(subCase.id, parentID?.id);
-      return acc;
-    }, new Map<string, string | undefined>());
-
     const deleteCommentMapper = async (comment: SavedObject<CommentAttributes>) =>
       attachmentService.delete({ unsecuredSavedObjectsClient, attachmentId: comment.id });
 
@@ -129,18 +122,7 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
       concurrency: MAX_CONCURRENT_SEARCHES,
     });
 
-    await userActionService.bulkCreateSubCaseDeletionUserAction({
-      unsecuredSavedObjectsClient,
-      cases: subCases.saved_objects.map((subCase) => ({
-        // if for some reason the sub case didn't have a reference to its parent, we'll still log a user action
-        // but we won't have the case ID
-        id: subCaseIDToParentID.get(subCase.id) ?? '',
-        subCaseId: subCase.id,
-        owner: subCase.attributes.owner,
-        connectorId: '',
-      })),
-      user,
-    });
+    // Code for creating a sub case user action has been removed
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete sub cases ids: ${JSON.stringify(ids)}: ${error}`,

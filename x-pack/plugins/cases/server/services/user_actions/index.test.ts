@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging/mocks';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsFindResult } from 'kibana/server';
 import { ConnectorUserAction } from '../../../common/api/cases/user_actions/connector';
-import { transformFindResponseToExternalModel } from '.';
+import { CaseUserActionService, transformFindResponseToExternalModel } from '.';
 import {
   Actions,
+  CaseStatuses,
   CaseUserActionAttributes,
   UserAction,
   UserActionField,
@@ -17,6 +20,7 @@ import {
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  SECURITY_SOLUTION_OWNER,
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
 import { CASE_REF_NAME, SUB_CASE_REF_NAME } from '../../common/constants';
@@ -27,6 +31,14 @@ import {
   createJiraConnector,
   createSOFindResponse,
 } from '../test_utils';
+import {
+  casePayload,
+  externalService,
+  originalCases,
+  updatedCases,
+  comment,
+  attachments,
+} from './mocks';
 
 const createConnectorUserAction = (
   subCaseId?: string,
@@ -152,6 +164,15 @@ const createUserActionSO = ({
 };
 
 describe('CaseUserActionService', () => {
+  beforeAll(() => {
+    jest.useFakeTimers('modern');
+    jest.setSystemTime(new Date(2021, 12, 10));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   describe('transformFindResponseToExternalModel', () => {
     it('does not populate the ids when the response is an empty array', () => {
       expect(transformFindResponseToExternalModel(createSOFindResponse([]))).toMatchInlineSnapshot(`
@@ -418,6 +439,470 @@ describe('CaseUserActionService', () => {
         ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
         expect(transformed.saved_objects[0].attributes.payload.connector.id).toEqual('100');
+      });
+    });
+  });
+
+  describe('methods', () => {
+    let service: CaseUserActionService;
+    const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+    const mockLogger = loggerMock.create();
+    const commonArgs = {
+      unsecuredSavedObjectsClient,
+      caseId: '123',
+      user: { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' },
+      owner: SECURITY_SOLUTION_OWNER,
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      service = new CaseUserActionService(mockLogger);
+    });
+
+    describe('createCaseCreationUserAction', () => {
+      it('creates a create case user action', async () => {
+        await service.createCaseCreationUserAction({ ...commonArgs, payload: casePayload });
+        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+          'cases-user-actions',
+          {
+            action: 'create',
+            created_at: '2022-01-09T22:00:00.000Z',
+            created_by: {
+              email: 'elastic@elastic.co',
+              full_name: 'Elastic User',
+              username: 'elastic',
+            },
+            fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', 'owner'],
+            owner: 'securitySolution',
+            payload: {
+              connector: {
+                fields: {
+                  category: 'Denial of Service',
+                  destIp: true,
+                  malwareHash: true,
+                  malwareUrl: true,
+                  priority: '2',
+                  sourceIp: true,
+                  subcategory: '45',
+                },
+                name: 'ServiceNow SN',
+                type: '.servicenow-sir',
+              },
+              description: 'testing sir',
+              owner: 'securitySolution',
+              settings: { syncAlerts: true },
+              status: 'open',
+              tags: ['sir'],
+              title: 'Case SIR',
+            },
+          },
+          {
+            references: [
+              { id: '123', name: 'associated-cases', type: 'cases' },
+              { id: '456', name: 'connectorId', type: 'action' },
+            ],
+          }
+        );
+      });
+    });
+
+    describe('bulkCreateCaseDeletionUserAction', () => {
+      it('creates a delete case user action', async () => {
+        await service.bulkCreateCaseDeletionUserAction({
+          unsecuredSavedObjectsClient,
+          cases: [
+            { id: '1', owner: SECURITY_SOLUTION_OWNER, connectorId: '3' },
+            { id: '2', owner: SECURITY_SOLUTION_OWNER, connectorId: '4' },
+          ],
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+          {
+            attributes: {
+              action: 'delete',
+              created_at: '2022-01-09T22:00:00.000Z',
+              created_by: {
+                email: 'elastic@elastic.co',
+                full_name: 'Elastic User',
+                username: 'elastic',
+              },
+              fields: [
+                'description',
+                'status',
+                'tags',
+                'title',
+                'connector',
+                'settings',
+                'owner',
+                'comment',
+              ],
+              owner: 'securitySolution',
+              payload: null,
+            },
+            references: [
+              { id: '1', name: 'associated-cases', type: 'cases' },
+              { id: '3', name: 'connectorId', type: 'action' },
+            ],
+            type: 'cases-user-actions',
+          },
+          {
+            attributes: {
+              action: 'delete',
+              created_at: '2022-01-09T22:00:00.000Z',
+              created_by: {
+                email: 'elastic@elastic.co',
+                full_name: 'Elastic User',
+                username: 'elastic',
+              },
+              fields: [
+                'description',
+                'status',
+                'tags',
+                'title',
+                'connector',
+                'settings',
+                'owner',
+                'comment',
+              ],
+              owner: 'securitySolution',
+              payload: null,
+            },
+            references: [
+              { id: '2', name: 'associated-cases', type: 'cases' },
+              { id: '4', name: 'connectorId', type: 'action' },
+            ],
+            type: 'cases-user-actions',
+          },
+        ]);
+      });
+    });
+
+    describe('createStatusUpdateUserAction', () => {
+      it('creates an update status user action', async () => {
+        await service.createStatusUpdateUserAction({ ...commonArgs, status: CaseStatuses.closed });
+        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+          'cases-user-actions',
+          {
+            action: 'update',
+            created_at: '2022-01-09T22:00:00.000Z',
+            created_by: {
+              email: 'elastic@elastic.co',
+              full_name: 'Elastic User',
+              username: 'elastic',
+            },
+            fields: ['status'],
+            owner: 'securitySolution',
+            payload: { status: 'closed' },
+          },
+          { references: [{ id: '123', name: 'associated-cases', type: 'cases' }] }
+        );
+      });
+    });
+
+    describe('createPushToServiceUserAction', () => {
+      it('creates a push user action', async () => {
+        await service.createPushToServiceUserAction({ ...commonArgs, externalService });
+        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+          'cases-user-actions',
+          {
+            action: 'push_to_service',
+            created_at: '2022-01-09T22:00:00.000Z',
+            created_by: {
+              email: 'elastic@elastic.co',
+              full_name: 'Elastic User',
+              username: 'elastic',
+            },
+            fields: ['pushed'],
+            owner: 'securitySolution',
+            payload: {
+              externalService: {
+                connector_name: 'ServiceNow SN',
+                external_id: 'external-id',
+                external_title: 'SIR0010037',
+                external_url:
+                  'https://dev92273.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=external-id',
+                pushed_at: '2021-02-03T17:41:26.108Z',
+                pushed_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic',
+                  username: 'elastic',
+                },
+              },
+            },
+          },
+          {
+            references: [
+              { id: '123', name: 'associated-cases', type: 'cases' },
+              { id: '456', name: 'pushConnectorId', type: 'action' },
+            ],
+          }
+        );
+      });
+    });
+
+    describe('bulkCreateBulkUpdateCaseUserActions', () => {
+      it('creates the correct user actions when bulk updating cases', async () => {
+        await service.bulkCreateBulkUpdateCaseUserActions({
+          ...commonArgs,
+          originalCases,
+          updatedCases,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+          {
+            attributes: {
+              action: 'update',
+              created_at: '2022-01-09T22:00:00.000Z',
+              created_by: {
+                email: 'elastic@elastic.co',
+                full_name: 'Elastic User',
+                username: 'elastic',
+              },
+              fields: ['title'],
+              owner: 'securitySolution',
+              payload: { title: 'updated title' },
+            },
+            references: [{ id: '1', name: 'associated-cases', type: 'cases' }],
+            type: 'cases-user-actions',
+          },
+          {
+            attributes: {
+              action: 'update',
+              created_at: '2022-01-09T22:00:00.000Z',
+              created_by: {
+                email: 'elastic@elastic.co',
+                full_name: 'Elastic User',
+                username: 'elastic',
+              },
+              fields: ['status'],
+              owner: 'securitySolution',
+              payload: { status: 'closed' },
+            },
+            references: [{ id: '1', name: 'associated-cases', type: 'cases' }],
+            type: 'cases-user-actions',
+          },
+          {
+            attributes: {
+              action: 'update',
+              created_at: '2022-01-09T22:00:00.000Z',
+              created_by: {
+                email: 'elastic@elastic.co',
+                full_name: 'Elastic User',
+                username: 'elastic',
+              },
+              fields: ['connector'],
+              owner: 'securitySolution',
+              payload: {
+                connector: {
+                  fields: {
+                    category: 'Denial of Service',
+                    destIp: true,
+                    malwareHash: true,
+                    malwareUrl: true,
+                    priority: '2',
+                    sourceIp: true,
+                    subcategory: '45',
+                  },
+                  name: 'ServiceNow SN',
+                  type: '.servicenow-sir',
+                },
+              },
+            },
+            references: [
+              { id: '1', name: 'associated-cases', type: 'cases' },
+              { id: '456', name: 'connectorId', type: 'action' },
+            ],
+            type: 'cases-user-actions',
+          },
+          {
+            attributes: {
+              action: 'update',
+              created_at: '2022-01-09T22:00:00.000Z',
+              created_by: {
+                email: 'elastic@elastic.co',
+                full_name: 'Elastic User',
+                username: 'elastic',
+              },
+              fields: ['description'],
+              owner: 'securitySolution',
+              payload: { description: 'updated desc' },
+            },
+            references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
+            type: 'cases-user-actions',
+          },
+          {
+            attributes: {
+              action: 'add',
+              created_at: '2022-01-09T22:00:00.000Z',
+              created_by: {
+                email: 'elastic@elastic.co',
+                full_name: 'Elastic User',
+                username: 'elastic',
+              },
+              fields: ['tags'],
+              owner: 'securitySolution',
+              payload: { tags: ['one', 'two'] },
+            },
+            references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
+            type: 'cases-user-actions',
+          },
+          {
+            attributes: {
+              action: 'delete',
+              created_at: '2022-01-09T22:00:00.000Z',
+              created_by: {
+                email: 'elastic@elastic.co',
+                full_name: 'Elastic User',
+                username: 'elastic',
+              },
+              fields: ['tags'],
+              owner: 'securitySolution',
+              payload: { tags: ['defacement'] },
+            },
+            references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
+            type: 'cases-user-actions',
+          },
+          {
+            attributes: {
+              action: 'update',
+              created_at: '2022-01-09T22:00:00.000Z',
+              created_by: {
+                email: 'elastic@elastic.co',
+                full_name: 'Elastic User',
+                username: 'elastic',
+              },
+              fields: ['settings'],
+              owner: 'securitySolution',
+              payload: { settings: { syncAlerts: false } },
+            },
+            references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
+            type: 'cases-user-actions',
+          },
+        ]);
+      });
+    });
+
+    describe('createAttachmentUserAction', () => {
+      type MethodsOfService =
+        | 'createAttachmentCreationUserAction'
+        | 'createAttachmentDeletionUserAction'
+        | 'createAttachmentUpdateUserAction';
+      type TestParameters = [MethodsOfService, string];
+
+      it.each<TestParameters>([
+        ['createAttachmentCreationUserAction', 'create'],
+        ['createAttachmentDeletionUserAction', 'delete'],
+        ['createAttachmentUpdateUserAction', 'update'],
+      ])('creates a create case user action', async (func, action) => {
+        await service[func]({
+          ...commonArgs,
+          attachmentId: 'test-id',
+          attachment: comment,
+        });
+
+        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+          'cases-user-actions',
+          {
+            action,
+            created_at: '2022-01-09T22:00:00.000Z',
+            created_by: {
+              email: 'elastic@elastic.co',
+              full_name: 'Elastic User',
+              username: 'elastic',
+            },
+            fields: ['comment'],
+            owner: 'securitySolution',
+            payload: {
+              comment: {
+                comment: 'a comment',
+                type: 'user',
+                owner: 'securitySolution',
+              },
+            },
+          },
+          {
+            references: [
+              { id: '123', name: 'associated-cases', type: 'cases' },
+              { id: 'test-id', name: 'associated-cases-comments', type: 'cases-comments' },
+            ],
+          }
+        );
+      });
+    });
+
+    describe('bulkCreateAttachmentDeletionUserAction', () => {
+      it('creates delete comment user action', async () => {
+        await service.bulkCreateAttachmentDeletionUserAction({
+          ...commonArgs,
+          attachments,
+        });
+        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
+          {
+            attributes: {
+              action: 'delete',
+              created_at: '2022-01-09T22:00:00.000Z',
+              created_by: {
+                email: 'elastic@elastic.co',
+                full_name: 'Elastic User',
+                username: 'elastic',
+              },
+              fields: ['comment'],
+              owner: 'securitySolution',
+              payload: {
+                comment: { comment: 'a comment', owner: 'securitySolution', type: 'user' },
+              },
+            },
+            references: [
+              { id: '123', name: 'associated-cases', type: 'cases' },
+              { id: '1', name: 'associated-cases-comments', type: 'cases-comments' },
+            ],
+            type: 'cases-user-actions',
+          },
+          {
+            attributes: {
+              action: 'delete',
+              created_at: '2022-01-09T22:00:00.000Z',
+              created_by: {
+                email: 'elastic@elastic.co',
+                full_name: 'Elastic User',
+                username: 'elastic',
+              },
+              fields: ['comment'],
+              owner: 'securitySolution',
+              payload: {
+                comment: {
+                  alertId: 'alert-id-1',
+                  index: 'alert-index-1',
+                  owner: 'securitySolution',
+                  rule: { id: 'rule-id-1', name: 'rule-name-1' },
+                  type: 'alert',
+                },
+              },
+            },
+            references: [
+              { id: '123', name: 'associated-cases', type: 'cases' },
+              { id: '2', name: 'associated-cases-comments', type: 'cases-comments' },
+            ],
+            type: 'cases-user-actions',
+          },
+        ]);
+      });
+    });
+
+    describe('create', () => {
+      it('creates user actions', async () => {
+        await service.create<{ title: string }>({
+          unsecuredSavedObjectsClient,
+          attributes: { title: 'test' },
+          references: [],
+        });
+        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+          'cases-user-actions',
+          { title: 'test' },
+          { references: [] }
+        );
       });
     });
   });

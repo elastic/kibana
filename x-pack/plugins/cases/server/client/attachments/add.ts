@@ -92,14 +92,7 @@ async function getSubCase({
     createdBy: user,
   });
 
-  await userActionService.createSubCaseCreationUserAction({
-    unsecuredSavedObjectsClient,
-    caseId,
-    subCaseId: newSubCase.id,
-    status: newSubCase.attributes.status,
-    owner: newSubCase.attributes.owner,
-    user,
-  });
+  // Code for creating a sub case user action has been removed
 
   return newSubCase;
 }

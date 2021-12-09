@@ -21,11 +21,14 @@ import {
   CommentResponse,
   CommentType,
   ConnectorTypes,
+  SpecificUserActionResponse,
   UserAction,
   UserActionField,
 } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
+import { CommentUserAction } from '../../common/api/cases/user_actions/comment';
+import { SnakeToCamelCase } from '../../common/types';
 export { connectorsMock } from './configure/mock';
 
 export const basicCaseId = 'basic-case-id';
@@ -448,13 +451,22 @@ export const getAlertUserAction = () => ({
   payload: { comment: { type: 'alert', alertId: 'alert-id-1', index: 'index-id-1' } },
 });
 
-export const getHostIsolationUserAction = () => ({
+export const getHostIsolationUserAction = (): SnakeToCamelCase<
+  SpecificUserActionResponse<CommentUserAction>
+> => ({
   ...basicAction,
   actionId: 'isolate-action-id',
-  fields: ['comment'] as UserActionField,
-  action: 'create' as UserAction,
+  fields: ['comment'] as Array<'comment'>,
+  action: 'create',
   commentId: 'isolate-comment-id',
-  payload: { comment: { type: 'actions', comment: 'a comment', actions: [] } },
+  payload: {
+    comment: {
+      type: CommentType.actions,
+      comment: 'a comment',
+      actions: { targets: [], type: 'test' },
+      owner: SECURITY_SOLUTION_OWNER,
+    },
+  },
 });
 
 export const caseUserActions: CaseUserActions[] = [

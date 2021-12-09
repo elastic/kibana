@@ -19,7 +19,6 @@ import { SettingsUserActionRt, SettingsUserActionPayloadRt } from './settings';
 import { StatusUserActionRt, StatusUserActionPayloadRt } from './status';
 
 export * from './common';
-export * from './description';
 
 export const UserActionsRt = rt.union([
   CreateCaseUserActionRt,
@@ -34,16 +33,18 @@ export const UserActionsRt = rt.union([
 ]);
 
 const CaseUserActionBasicRt = rt.intersection([UserActionsRt, UserActionCommonAttributesRt]);
-const CaseUserActionSavedObjectIdsRt = rt.type({
-  action_id: rt.string,
-  case_id: rt.string,
-  comment_id: rt.union([rt.string, rt.null]),
-});
+const CaseUserActionSavedObjectIdsRt = rt.intersection([
+  rt.type({
+    action_id: rt.string,
+    case_id: rt.string,
+    comment_id: rt.union([rt.string, rt.null]),
+  }),
+  rt.partial({ sub_case_id: rt.string }),
+]);
 
 const CaseUserActionResponseRt = rt.intersection([
   CaseUserActionBasicRt,
   CaseUserActionSavedObjectIdsRt,
-  rt.partial({ sub_case_id: rt.string }),
 ]);
 
 const CaseUserActionESRt = rt.type({
@@ -74,6 +75,6 @@ export type UserActionFieldType = rt.TypeOf<typeof FieldTypeRt>;
 
 export type CaseUserActionResponseES = rt.TypeOf<typeof CaseUserActionESRt>;
 export type CaseUserAction = rt.TypeOf<typeof CaseUserActionBasicRt>;
-export type CaseUserActionWithPayload<T> = rt.TypeOf<typeof UserActionCommonAttributesRt> &
-  rt.TypeOf<typeof CaseUserActionSavedObjectIdsRt> &
-  T;
+export type SpecificUserActionAttributes<T> = rt.TypeOf<typeof UserActionCommonAttributesRt> & T;
+export type SpecificUserActionResponse<T> = SpecificUserActionAttributes<T> &
+  rt.TypeOf<typeof CaseUserActionSavedObjectIdsRt>;
