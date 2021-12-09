@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { get } from 'lodash';
 import { buildEsQuery } from '@kbn/es-query';
 import { overwrite } from '../../helpers';
 
@@ -15,19 +16,28 @@ export const applyFilters: TableRequestProcessorsFunction =
   ({ panel, esQueryConfig, seriesIndex }) =>
   (next) =>
   (doc) => {
-    const indexPattern = seriesIndex.indexPattern || undefined;
-
     panel.series.forEach((column) => {
       const hasAggregateByApplied = Boolean(column.aggregate_by && column.aggregate_function);
-      const filterSelector = !hasAggregateByApplied
-        ? `aggs.pivot.aggs.${column.id}.filter`
-        : `aggs.pivot.aggs.${column.id}.aggs.timeseries.aggs.column_filter.filter`;
+      let filterSelector = `aggs.pivot.aggs.${column.id}.filter`;
+
+      if (hasAggregateByApplied && column.filter?.query) {
+        const originalAggsSelector = `aggs.pivot.aggs.${column.id}.aggs`;
+        const originalAggs = get(doc, originalAggsSelector);
+
+        overwrite(doc, originalAggsSelector, {
+          column_filter: {
+            aggs: originalAggs,
+          },
+        });
+
+        filterSelector = `${originalAggsSelector}.column_filter.filter`;
+      }
 
       if (column.filter?.query) {
         overwrite(
           doc,
           filterSelector,
-          buildEsQuery(indexPattern, [column.filter], [], esQueryConfig)
+          buildEsQuery(seriesIndex.indexPattern || undefined, [column.filter], [], esQueryConfig)
         );
       } else {
         if (!hasAggregateByApplied) {

@@ -84,9 +84,10 @@ export class RollupSearchCapabilities extends DefaultSearchCapabilities {
     });
   }
 
-  public get whiteListedUIControls() {
+  public get whiteListedConfigurationFeatures() {
     return this.createUiRestriction({
       aggregate_function: false,
+      filter: false,
     });
   }
 

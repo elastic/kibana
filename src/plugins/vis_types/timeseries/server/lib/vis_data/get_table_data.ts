@@ -17,6 +17,8 @@ import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
 import { extractFieldLabel } from '../../../common/fields_utils';
 import { isAggSupported } from './helpers/check_aggs';
 import { isEntireTimeRangeMode } from './helpers/get_timerange_mode';
+import { isConfigurationFeatureEnabled } from '../../../common/check_ui_restrictions';
+import { FilterCannotBeAppliedError } from '../../../common/errors';
 
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -76,11 +78,14 @@ export async function getTableData(
   const handleError = handleErrorResponse(panel);
 
   try {
-    if (isEntireTimeRangeMode(panel)) {
-      panel.series.forEach((column) => {
-        isAggSupported(column.metrics);
-      });
-    }
+    panel.series.forEach((series) => {
+      if (isEntireTimeRangeMode(panel)) {
+        isAggSupported(series.metrics);
+      }
+      if (series.filter?.query && !isConfigurationFeatureEnabled('filter', capabilities)) {
+        throw new FilterCannotBeAppliedError();
+      }
+    });
 
     const body = await buildTableRequest({
       req,

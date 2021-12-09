@@ -94,7 +94,7 @@ export const isTimerangeModeEnabled = (key: string, restrictions: TimeseriesUIRe
 };
 
 /**
- * Using this method, you can check whether a specific UI control is allowed
+ * Using this method, you can check whether a specific configuration feature is allowed
  *  for current panel configuration or not.
  * @public
  * @param key - string value of the time range mode.
@@ -102,6 +102,13 @@ export const isTimerangeModeEnabled = (key: string, restrictions: TimeseriesUIRe
  * @param restrictions - uiRestrictions object. Comes from the /data request.
  * @return {boolean}
  */
-export const isUIControlEnabled = (key: string, restrictions: TimeseriesUIRestrictions) => {
-  return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.WHITE_LISTED_UI_CONTROLS);
+export const isConfigurationFeatureEnabled = (
+  key: string,
+  restrictions: TimeseriesUIRestrictions
+) => {
+  return checkUIRestrictions(
+    key,
+    restrictions,
+    RESTRICTIONS_KEYS.WHITE_LISTED_CONFIGURATION_FEATURES
+  );
 };

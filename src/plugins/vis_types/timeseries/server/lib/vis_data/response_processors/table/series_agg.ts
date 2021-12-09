@@ -16,17 +16,11 @@ import { SeriesAgg } from './_series_agg';
 import type { TableResponseProcessorsFunction } from './types';
 import type { PanelDataArray } from '../../../../../common/types/vis_data';
 
-import { isUIControlEnabled } from '../../../../../common/check_ui_restrictions';
-
 export const seriesAgg: TableResponseProcessorsFunction =
-  ({ series, meta, extractFields, capabilities }) =>
+  ({ series, meta, extractFields }) =>
   (next) =>
   async (results) => {
-    if (
-      series.aggregate_by &&
-      series.aggregate_function &&
-      isUIControlEnabled('aggregate_function', capabilities.uiRestrictions)
-    ) {
+    if (series.aggregate_by && series.aggregate_function) {
       const targetSeries: PanelDataArray[][] = [];
 
       // Filter out the seires with the matching metric and store them

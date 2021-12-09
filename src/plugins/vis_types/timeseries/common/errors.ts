@@ -56,3 +56,16 @@ export class AggNotSupportedInMode extends UIError {
     );
   }
 }
+
+export const filterCannotBeAppliedErrorMessage = i18n.translate(
+  'visTypeTimeseries.filterCannotBeAppliedError',
+  {
+    defaultMessage: 'The "filter" cannot be applied with this configuration',
+  }
+);
+
+export class FilterCannotBeAppliedError extends UIError {
+  constructor() {
+    super(filterCannotBeAppliedErrorMessage);
+  }
+}

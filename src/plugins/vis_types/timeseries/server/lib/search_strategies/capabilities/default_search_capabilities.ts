@@ -77,7 +77,7 @@ export class DefaultSearchCapabilities {
     return this.createUiRestriction();
   }
 
-  public get whiteListedUIControls() {
+  public get whiteListedConfigurationFeatures() {
     return this.createUiRestriction();
   }
 
@@ -86,7 +86,8 @@ export class DefaultSearchCapabilities {
       [RESTRICTIONS_KEYS.WHITE_LISTED_METRICS]: this.whiteListedMetrics,
       [RESTRICTIONS_KEYS.WHITE_LISTED_GROUP_BY_FIELDS]: this.whiteListedGroupByFields,
       [RESTRICTIONS_KEYS.WHITE_LISTED_TIMERANGE_MODES]: this.whiteListedTimerangeModes,
-      [RESTRICTIONS_KEYS.WHITE_LISTED_UI_CONTROLS]: this.whiteListedUIControls,
+      [RESTRICTIONS_KEYS.WHITE_LISTED_CONFIGURATION_FEATURES]:
+        this.whiteListedConfigurationFeatures,
     } as TimeseriesUIRestrictions;
   }
 

@@ -30,9 +30,9 @@ export enum RESTRICTIONS_KEYS {
   WHITE_LISTED_TIMERANGE_MODES = 'whiteListedTimerangeModes',
 
   /**
-   * Key for getting the white listed UI Controls from the UIRestrictions object.
+   * Key for getting the white listed Configuration Features from the UIRestrictions object.
    */
-  WHITE_LISTED_UI_CONTROLS = 'whiteListedUIControls',
+  WHITE_LISTED_CONFIGURATION_FEATURES = 'whiteListedConfigurationFeatures',
 }
 
 export interface UIRestrictions {
@@ -44,7 +44,7 @@ export interface TimeseriesUIRestrictions extends UIRestrictions {
   [RESTRICTIONS_KEYS.WHITE_LISTED_GROUP_BY_FIELDS]: UIRestrictions;
   [RESTRICTIONS_KEYS.WHITE_LISTED_METRICS]: UIRestrictions;
   [RESTRICTIONS_KEYS.WHITE_LISTED_TIMERANGE_MODES]: UIRestrictions;
-  [RESTRICTIONS_KEYS.WHITE_LISTED_UI_CONTROLS]: UIRestrictions;
+  [RESTRICTIONS_KEYS.WHITE_LISTED_CONFIGURATION_FEATURES]: UIRestrictions;
 }
 
 /**

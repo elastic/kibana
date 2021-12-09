@@ -35,7 +35,8 @@ import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { QueryBarWrapper } from '../../query_bar_wrapper';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
-import { isUIControlEnabled } from '../../../../../common/check_ui_restrictions';
+import { isConfigurationFeatureEnabled } from '../../../../../common/check_ui_restrictions';
+import { filterCannotBeAppliedErrorMessage } from '../../../../../common/errors';
 
 export class TableSeriesConfig extends Component {
   UNSAFE_componentWillMount() {
@@ -124,10 +125,8 @@ export class TableSeriesConfig extends Component {
     const isKibanaIndexPattern =
       this.props.panel.use_kibana_indexes || this.props.indexPatternForQuery === '';
 
-    const isAggregationFunctionsEnabled = isUIControlEnabled(
-      'aggregate_function',
-      this.props.uiRestrictions
-    );
+    const isFilterCannotBeApplied =
+      model.filter?.query && !isConfigurationFeatureEnabled('filter', this.props.uiRestrictions);
 
     return (
       <div className="tvbAggRow">
@@ -180,6 +179,8 @@ export class TableSeriesConfig extends Component {
                   defaultMessage="Filter"
                 />
               }
+              isInvalid={isFilterCannotBeApplied}
+              error={filterCannotBeAppliedErrorMessage}
               fullWidth
             >
               <QueryBarWrapper
@@ -187,6 +188,7 @@ export class TableSeriesConfig extends Component {
                   language: model?.filter?.language || getDefaultQueryLanguage(),
                   query: model?.filter?.query || '',
                 }}
+                isInvalid={isFilterCannotBeApplied}
                 onChange={(filter) => this.props.onChange({ filter })}
                 indexPatterns={[this.props.indexPatternForQuery]}
               />
@@ -219,7 +221,6 @@ export class TableSeriesConfig extends Component {
               indexPattern={this.props.panel.index_pattern}
               value={model.aggregate_by}
               onChange={handleSelectChange('aggregate_by')}
-              disabled={!isAggregationFunctionsEnabled}
               fullWidth
             />
           </EuiFlexItem>
@@ -239,7 +240,6 @@ export class TableSeriesConfig extends Component {
                 selectedOptions={selectedAggFuncOption ? [selectedAggFuncOption] : []}
                 onChange={handleSelectChange('aggregate_function')}
                 singleSelection={{ asPlainText: true }}
-                isDisabled={!isAggregationFunctionsEnabled}
                 fullWidth
               />
             </EuiFormRow>
