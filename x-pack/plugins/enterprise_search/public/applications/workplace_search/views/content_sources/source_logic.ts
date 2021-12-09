@@ -210,7 +210,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         }
         if (response.errors) {
           setErrorMessage(response.errors);
-          if (filterErrorMessage(response.errors as unknown as string[])) {
+          if (errorsHaveDiagnosticBundleString(response.errors as unknown as string[])) {
             actions.showDiagnosticDownloadButton();
           }
         } else {
@@ -357,7 +357,7 @@ const setPage = (state: Meta, page: number) => ({
   },
 });
 
-const filterErrorMessage = (errors: string[]) => {
+const errorsHaveDiagnosticBundleString = (errors: string[]) => {
   const ERROR_SUBSTRING = 'Check diagnostic bundle for details';
   return errors.find((e) => e.includes(ERROR_SUBSTRING));
 };
