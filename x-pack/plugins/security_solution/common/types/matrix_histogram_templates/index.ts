@@ -5,16 +5,52 @@
  * 2.0.
  */
 
-export interface SecuritySolutionTemplate {
+import {
+  XYState,
+  PieVisualizationState,
+  DatatableVisualizationState,
+  MetricState,
+} from '../../../../lens/public';
+
+export interface MatrixHistogramTemplateReference {
   id: string;
+  name: string;
   type: string;
-  namespaces: string;
+}
+
+export interface MatrixHistogramTemplateAttribute<TVisType, TVisState> {
+  description: string;
+  state: TVisState;
+  title: string;
+  visualizationType: TVisType;
+  references: MatrixHistogramTemplateReference[];
+}
+
+export type MatrixHistogramTemplateAttributes =
+  | MatrixHistogramTemplateAttribute<'lnsXY', XYState>
+  | MatrixHistogramTemplateAttribute<'lnsPie', PieVisualizationState>
+  | MatrixHistogramTemplateAttribute<'lnsDatatable', DatatableVisualizationState>
+  | MatrixHistogramTemplateAttribute<'lnsMetric', MetricState>;
+
+export interface MatrixHistogramTemplate {
+  id: string;
+  attributes: MatrixHistogramTemplateAttributes;
+}
+
+export interface MatrixHistogramTemplateSavedObject {
+  attributes: MatrixHistogramTemplateAttributes;
+  coreMigrationVersion: string;
+  id: string;
+  migrationVersion: string;
+  namespaces: string[];
+  references: MatrixHistogramTemplateReference[];
+  score: number | null;
+  sort: number[];
+  type: string;
   updated_at: string;
-  version: 1;
-  template_key: string;
-  attributes?: {};
+  version: string;
 }
 
 export interface TemplateFindResponse {
-  templates: SecuritySolutionTemplate[];
+  templates: MatrixHistogramTemplateSavedObject[];
 }

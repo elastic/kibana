@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { MATRIX_HISTOGRAM_TEMPLATE_TYPE } from '../../common/constants';
-
 export const hostName = {
   id: '6853a880-5451-99ec-b0fd-2f7a10a18ba6',
   title: '[Security Solution] KPI Hosts',

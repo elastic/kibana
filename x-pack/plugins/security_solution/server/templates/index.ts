@@ -6,7 +6,10 @@
  */
 
 import { SavedObjectsRepository } from 'src/core/server';
-import { MATRIX_HISTOGRAM_TEMPLATE_TYPE } from '../../common/constants';
+import {
+  MATRIX_HISTOGRAM_TEMPLATE_TYPE,
+  MATRIX_HISTOGRAM_TEMPLATE_TAG_TYPE,
+} from '../../common/constants';
 
 // only load templates when requested to reduce require() cost on startup
 export function loadTemplates() {
@@ -24,30 +27,15 @@ export const loadTags = () => {
 export async function initializeTemplates(
   client: Pick<SavedObjectsRepository, 'bulkCreate' | 'create' | 'find' | 'get'>
 ) {
-  // try {
-  //   existingTag = await client.get('tag', hardCodedTagId);
-  // } catch (e) {
-  //   if (existingTag == null) {
-
-  //     client.create('tag', tagTemplate, { id: hardCodedTagId }).catch((err) => {});
-  //   }
-  // }
-
   for (const tag of loadTags()) {
     let existingTag = null;
 
     try {
-      existingTag = await client.get('tag', tag.id);
+      existingTag = await client.get(MATRIX_HISTOGRAM_TEMPLATE_TAG_TYPE, tag.id);
     } catch (e) {
-      console.log(e);
       if (existingTag == null) {
         const { id, ...tagToCreate } = tag;
-        await client
-          .create('tag', tagToCreate, { id })
-          .then(() => {
-            console.log(`creating ${id}: ${tagToCreate.name}`);
-          })
-          .catch((err) => {});
+        await client.create('tag', tagToCreate, { id }).catch((err) => {});
       }
     }
   }
@@ -62,9 +50,8 @@ export async function initializeTemplates(
     let existingTemplate = null;
 
     try {
-      existingTemplate = await client.get('lens', template.id);
+      existingTemplate = await client.get(MATRIX_HISTOGRAM_TEMPLATE_TYPE, template.id);
     } catch (e) {
-      console.log(e);
       if (existingTemplate == null) {
         const { id, references, ...templateToCreate } = template;
         await client
@@ -73,12 +60,7 @@ export async function initializeTemplates(
             references,
             id,
           })
-          .then(() => {
-            console.log(`creating ${id}: ${templateToCreate.name}`);
-          })
-          .catch((err) => {
-            console.log('creattion error----', err);
-          });
+          .catch((err) => {});
       }
     }
   }

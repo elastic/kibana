@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
@@ -55,7 +55,6 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hook
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { MatrixHistogramTemplates } from '../../common/components/matrix_histogram/templates';
-import { EmbeddablePanelExample } from './embeddables/embeddable_pannel';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -66,7 +65,7 @@ const StyledFullHeightContainer = styled.div`
   flex: 1 1 auto;
 `;
 
-const HostsComponent = ({ plugins }) => {
+const HostsComponent = () => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -195,13 +194,8 @@ const HostsComponent = ({ plugins }) => {
               />
               <EuiSpacer />
 
-              <MatrixHistogramTemplates plugins={plugins} />
+              <MatrixHistogramTemplates from={from} to={to} />
 
-              {/* <EmbeddablePanelExample
-                embeddableServices={plugins.embeddable}
-                // doesn't look right to use embeddableExamples as dependency, needs an update
-                searchListContainerFactory={plugins.embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}/>
-              */}
               <EuiSpacer />
 
               <SecuritySolutionTabNavigation

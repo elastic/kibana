@@ -10,7 +10,7 @@ import {
   MATRIX_HISTOGRAM_TEMPLATES,
   MATRIX_HISTOGRAM_TEMPLATE_TYPE,
 } from '../../../../common/constants';
-import { SecuritySolutionTemplate } from '../../../../common/types/matrix_histogram_templates';
+import { MatrixHistogramTemplateSavedObject } from '../../../../common/types/matrix_histogram_templates';
 import { SecuritySolutionPluginRouter } from '../../../types';
 
 export function getMatrixHistogramTemplates(router: SecuritySolutionPluginRouter) {
@@ -24,8 +24,8 @@ export function getMatrixHistogramTemplates(router: SecuritySolutionPluginRouter
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
-      const templates = await savedObjectsClient.find<SecuritySolutionTemplate>({
-        type: 'lens',
+      const templates = await savedObjectsClient.find<MatrixHistogramTemplateSavedObject>({
+        type: MATRIX_HISTOGRAM_TEMPLATE_TYPE,
         sortField: 'updated_at',
         sortOrder: 'desc',
         search: '*',

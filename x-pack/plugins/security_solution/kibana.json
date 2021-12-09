@@ -25,8 +25,7 @@
     "taskManager",
     "timelines",
     "triggersActionsUi",
-    "uiActions",
-    "embeddableExamples"
+    "uiActions"
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",

@@ -11,7 +11,7 @@ import { useMatrixHistogramTemplatesService } from '../services';
 export const useFindTemplates = () => {
   const matrixHistogramTemplatesService = useMatrixHistogramTemplatesService();
   return useCallback(
-    async () => await matrixHistogramTemplatesService.findTemplates(),
+    async () => matrixHistogramTemplatesService.findTemplates(),
     [matrixHistogramTemplatesService]
   );
 };

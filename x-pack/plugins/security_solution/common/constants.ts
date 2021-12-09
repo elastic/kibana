@@ -282,7 +282,8 @@ export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/api/sourcerer' as const;
 
-export const MATRIX_HISTOGRAM_TEMPLATE_TYPE = `security-solution-matrix-histogram-template`;
+export const MATRIX_HISTOGRAM_TEMPLATE_TYPE = `lens`;
+export const MATRIX_HISTOGRAM_TEMPLATE_TAG_TYPE = `tag`;
 export const MATRIX_HISTOGRAM = '/api/matrix_histogram';
 export const MATRIX_HISTOGRAM_TEMPLATES = `${MATRIX_HISTOGRAM}/templates`;
 

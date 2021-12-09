@@ -140,3 +140,9 @@ export interface BarchartConfigs {
   };
   customHeight: number;
 }
+
+export interface MatrixHistogramTemplatesProps {
+  from: string;
+  to: string;
+  inputsModelId?: InputsModelId;
+}
