@@ -195,25 +195,37 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };
 
+/**
+ * Query for a saved object with a given origin id and replace the
+ * id in the provided action with the _id from the query result
+ * @param action
+ * @param esClient
+ * @returns
+ */
 const swapActionIds = async (action: Action, esClient: ElasticsearchClient): Promise<Action> => {
   try {
-    const resolveResponse = await esClient.search(
-      {
-        index: '.kibana',
-        body: {
-          query: {
-            term: {
-              originId: {
-                value: action.id,
-              },
+    // actions are hidden SO types so we need to query
+    // with the elasticsearch client.. unless there
+    // is a better way to do this..
+    const actionWithRequestedOriginId = await esClient.search({
+      index: '.kibana',
+      body: {
+        query: {
+          term: {
+            originId: {
+              // we are attempting to import a rule that contains an action.
+              // That action (connector) has the old, pre-8.0 _id.
+              // We need to swap the old, pre-8.0 _id for the new id (alias_target_id)
+              // and replace the id of the action in the rule with the new _id
+              value: action.id,
             },
           },
         },
       },
-      { meta: true }
-    );
-    if (resolveResponse.body.hits.hits.length === 1) {
-      return { ...action, id: resolveResponse.body.hits.hits[0]._id.split(':')[1] };
+    });
+    if (actionWithRequestedOriginId.body.hits.hits.length === 1) {
+      // id is of the form 'action:1234-5678...' so I need to split off the 'action' prefix
+      return { ...action, id: actionWithRequestedOriginId.body.hits.hits[0]._id.split(':')[1] };
     }
   } catch (exc) {
     return action;
@@ -221,6 +233,36 @@ const swapActionIds = async (action: Action, esClient: ElasticsearchClient): Pro
   return action;
 };
 
+/**
+ * In 8.0 all saved objects made in a non-default space will have their
+ * _id's regenerated. Security Solution rules have references to the
+ * actions SO id inside the 'actions' param.
+ * When users import these rules, we need to ensure any rule with
+ * an action that has an old, pre-8.0 id will need to be updated
+ * to point to the new _id for that action (alias_target_id)
+ *
+ * ex:
+ * import rule.ndjson:
+ * {
+ *   rule_id: 'myrule_id'
+ *   name: 'my favorite rule'
+ *   ...
+ *   actions:[{id: '1111-2222-3333-4444', group...}]
+ * }
+ *
+ * In 8.0 the 'id' field of this action is no longer a reference
+ * to the _id of the action (connector). Querying against the connector
+ * endpoint for this id will yield 0 results / 404.
+ *
+ * The solution: If we query the .kibana index for '1111-2222-3333-4444' as an originId,
+ * we should get the original connector back
+ * (with the new, migrated 8.0 _id of 'xxxx-yyyy-zzzz-0000') and can then replace
+ * '1111-2222-3333-4444' in the example above with 'xxxx-yyyy-zzzz-0000'
+ * And the rule will then import successfully.
+ * @param rules
+ * @param esClient
+ * @returns
+ */
 export const migrateLegacyActionsIds = async (
   rules: PromiseFromStreams[],
   esClient: ElasticsearchClient
