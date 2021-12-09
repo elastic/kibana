@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge, useInnerText } from '@elastic/eui';
+import { EuiBadge, useInnerText, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { Filter, isFilterPinned } from '@kbn/es-query';
@@ -73,6 +73,9 @@ export const FilterView: FC<Props> = ({
       {...rest}
     >
       <span ref={ref}>
+        {Boolean(filter.meta?.isFromSavedQuery) && (
+          <EuiIcon type="save" className="globalFilterItem-isFromSavedQuery" />
+        )}
         <FilterLabel
           filter={filter}
           valueLabel={valueLabel}

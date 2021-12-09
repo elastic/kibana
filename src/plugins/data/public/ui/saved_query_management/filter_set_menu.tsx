@@ -38,7 +38,7 @@ interface Props {
   dateRangeTo?: string;
   toggleAddFilterModal?: (value: boolean, addFilterMode?: string) => void;
   savedQueryService: SavedQueryService;
-  applySelectedSavedQueries: (selectedSavedQuery?: SavedQuery) => void;
+  applySelectedSavedQueries: (selectedSavedQuery?: SavedQuery[]) => void;
   saveQueryFormComponent?: JSX.Element;
 }
 
@@ -135,7 +135,7 @@ export function FilterSetMenu({
       icon: 'timefilter' in savedQuery.attributes ? 'calendar' : undefined,
       onClick: () => {
         closePopover();
-        applySelectedSavedQueries(savedQuery);
+        applySelectedSavedQueries([savedQuery]);
       },
     };
   });

@@ -19,6 +19,9 @@ import {
   EuiFieldSearch,
   EuiText,
   EuiSpacer,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiBasicTableProps,
   EuiIcon,
 } from '@elastic/eui';
 
@@ -33,8 +36,15 @@ import React, {
   ReactNode,
 } from 'react';
 import { sortBy } from 'lodash';
-import { SavedQuery, SavedQueryService } from '../..';
+import { SavedQuery, SavedQueryService, SavedQueryTimeFilter } from '../..';
 import { SavedQueryListItem } from './saved_query_list_item';
+
+interface TablePage {
+  page: {
+    index: number;
+    size: number;
+  };
+}
 
 const perPage = 50;
 interface Props {
@@ -43,7 +53,7 @@ interface Props {
   savedQueryService: SavedQueryService;
   onSave: () => void;
   onSaveAsNew: () => void;
-  onLoad: (savedQuery: SavedQuery) => void;
+  onLoad: (savedQueries: SavedQuery[]) => void;
   onClearSavedQuery: () => void;
   /**
    * Function that takes the `list` node and then
@@ -69,8 +79,10 @@ export function SavedQueryManagementComponent({
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
   const [activePage, setActivePage] = useState(0);
+  const [pageSize, setPageSize] = useState(perPage);
   const [searchValue, setSearchValue] = useState('');
   const [savedQueriesBySearch, setSavedQueriesBySearch] = useState([] as SavedQuery[]);
+  const [selectedQueries, setSelectedQueries] = useState([] as SavedQuery[]);
 
   const cancelPendingListingRequest = useRef<() => void>(() => {});
 
@@ -83,7 +95,7 @@ export function SavedQueryManagementComponent({
       };
 
       const { total: savedQueryCount, queries: savedQueryItems } =
-        await savedQueryService.findSavedQueries('', perPage, activePage + 1);
+        await savedQueryService.findSavedQueries('', pageSize, activePage + 1);
 
       if (requestGotCancelled) return;
 
@@ -95,7 +107,7 @@ export function SavedQueryManagementComponent({
     if (isOpen) {
       fetchCountAndSavedQueries();
     }
-  }, [isOpen, activePage, savedQueryService]);
+  }, [isOpen, activePage, savedQueryService, pageSize]);
 
   const handleTogglePopover = useCallback(
     () => setIsOpen((currentState) => !currentState),
@@ -123,9 +135,11 @@ export function SavedQueryManagementComponent({
     (savedQueryToDelete: SavedQuery) => {
       const onDeleteSavedQuery = async (savedQuery: SavedQuery) => {
         cancelPendingListingRequest.current();
-        setSavedQueries(
-          savedQueries.filter((currentSavedQuery) => currentSavedQuery.id !== savedQuery.id)
+        const updatedSavedQueries = savedQueries.filter(
+          (currentSavedQuery) => currentSavedQuery.id !== savedQuery.id
         );
+        setSavedQueries(updatedSavedQueries);
+        setSavedQueriesBySearch(updatedSavedQueries);
 
         if (loadedSavedQuery && loadedSavedQuery.id === savedQuery.id) {
           onClearSavedQuery();
@@ -136,9 +150,8 @@ export function SavedQueryManagementComponent({
       };
 
       onDeleteSavedQuery(savedQueryToDelete);
-      handleClosePopover();
     },
-    [handleClosePopover, loadedSavedQuery, onClearSavedQuery, savedQueries, savedQueryService]
+    [loadedSavedQuery, onClearSavedQuery, savedQueries, savedQueryService]
   );
 
   const savedQueryDescriptionText = i18n.translate(
@@ -213,7 +226,63 @@ export function SavedQueryManagementComponent({
     setSavedQueriesBySearch(newSavedQueriesList);
   };
 
-  const list = (
+  const onSelectionChange = useCallback(
+    (selectedItems: SavedQuery[]) => {
+      setSelectedQueries(selectedItems);
+      onLoad(selectedItems);
+    },
+    [onLoad]
+  );
+
+  const onTableChange = ({ page }: TablePage) => {
+    const { index: pageIndex, size } = page;
+    setActivePage(pageIndex);
+    setPageSize(size);
+  };
+
+  const tableActions = [
+    {
+      name: <span>Delete</span>,
+      description: 'Delete this saved filter',
+      icon: 'trash',
+      color: 'danger',
+      type: 'icon',
+      onClick: handleDelete,
+      isPrimary: true,
+      'data-test-subj': 'action-delete',
+    },
+  ];
+
+  const tableColumns = [
+    {
+      field: 'attributes.title',
+      name: 'Label',
+      truncateText: false,
+      sortable: true,
+    },
+    {
+      field: 'attributes.query.language',
+      name: 'Language',
+      truncateText: false,
+    },
+    {
+      field: 'attributes.timefilter',
+      name: 'Time filter',
+      render: (timefilter: SavedQueryTimeFilter) => <span> {timefilter?.from ?? ''}</span>,
+    },
+    {
+      name: 'Actions',
+      actions: tableActions,
+    } as EuiBasicTableColumn<SavedQuery>,
+  ];
+
+  const pagination = {
+    pageIndex: activePage,
+    pageSize,
+    totalItemCount: count,
+  };
+
+  const component = (
     <>
       <EuiFieldSearch
         placeholder="Find a saved filter for this data view"
@@ -223,7 +292,18 @@ export function SavedQueryManagementComponent({
         isClearable={true}
         aria-label="Search..."
       />
-      <EuiListGroup
+      <EuiSpacer size="s" />
+      <EuiBasicTable
+        tableCaption="Saved filters list"
+        items={savedQueriesBySearch}
+        itemId="id"
+        columns={tableColumns}
+        pagination={pagination}
+        selection={{ onSelectionChange }}
+        hasActions={true}
+        onChange={onTableChange}
+      />
+      {/* <EuiListGroup
         maxWidth="none"
         bordered
         size="s"
@@ -231,12 +311,12 @@ export function SavedQueryManagementComponent({
         aria-labelledby={'savedQueryManagementPopoverTitle'}
       >
         {savedQueryRows()}
-      </EuiListGroup>
+      </EuiListGroup> */}
     </>
   );
 
   // NEW RETURN : Just the list
-  return children && children(list);
+  return children && children(component);
 
   // OLD RETURN
   // return (

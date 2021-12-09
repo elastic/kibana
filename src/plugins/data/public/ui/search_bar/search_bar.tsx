@@ -105,6 +105,7 @@ interface State {
   dateRangeTo: string;
   isAddFilterModalOpen?: boolean;
   addFilterMode?: string;
+  filtersIdsFromSavedQueries?: string[];
 }
 
 class SearchBarUI extends Component<SearchBarProps, State> {
@@ -189,6 +190,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
     isAddFilterModalOpen: false,
     addFilterMode: 'quick_form',
+    filtersIdsFromSavedQueries: [],
   };
 
   public isDirty = () => {
@@ -345,33 +347,50 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   };
 
-  public onLoadSavedQuery = (savedQuery: SavedQuery) => {
-    // const dateRangeFrom = get(savedQuery, 'attributes.timefilter.from', this.state.dateRangeFrom);
-    // const dateRangeTo = get(savedQuery, 'attributes.timefilter.to', this.state.dateRangeTo);
-
+  public onLoadSavedQuery = (savedQueries: SavedQuery[]) => {
+    // Should I take under consideration the existing queries here?
     this.setState({
-      // query: savedQuery.attributes.query,
-      // dateRangeFrom,
-      // dateRangeTo,
-      selectedSavedQueries: [...this.state.selectedSavedQueries, savedQuery],
+      selectedSavedQueries: [...savedQueries],
     });
   };
 
-  public applySelectedSavedQueries = (selectedSavedQuery?: SavedQuery) => {
+  public applySelectedSavedQueries = (selectedSavedQueries?: SavedQuery[]) => {
     // temporary work with only one selection
-    const savedQuery = selectedSavedQuery ?? (this.state.selectedSavedQueries[0] as SavedQuery);
-    const dateRangeFrom = get(savedQuery, 'attributes.timefilter.from', this.state.dateRangeFrom);
-    const dateRangeTo = get(savedQuery, 'attributes.timefilter.to', this.state.dateRangeTo);
+    const savedQueries = selectedSavedQueries ?? (this.state.selectedSavedQueries as SavedQuery[]);
+    const dateRangeFrom = get(
+      savedQueries[0],
+      'attributes.timefilter.from',
+      this.state.dateRangeFrom
+    );
+    const dateRangeTo = get(savedQueries[0], 'attributes.timefilter.to', this.state.dateRangeTo);
+    const filters: Filter[] = [];
+    savedQueries.forEach((savedQuery) => {
+      if (savedQuery.attributes.filters) {
+        // filtersIdsFromSavedQueries
+        const updatedWithIconFilters = savedQuery.attributes.filters.map((filter) => {
+          return {
+            ...filter,
+            meta: {
+              ...filter.meta,
+              isFromSavedQuery: true,
+            },
+          };
+        });
+        filters.push(...updatedWithIconFilters);
+      }
+    });
 
     this.setState({
-      query: savedQuery.attributes.query,
+      query: savedQueries[0].attributes.query,
       dateRangeFrom,
       dateRangeTo,
     });
 
-    if (this.props.onSavedQueryUpdated) {
-      this.props.onSavedQueryUpdated(savedQuery);
-    }
+    this.props?.onFiltersUpdated?.(filters!);
+
+    // savedQueries.forEach((savedQuery) => {
+    //   this.props?.onSavedQueryUpdated?.(savedQuery);
+    // });
   };
 
   public onEnableAll = () => {
