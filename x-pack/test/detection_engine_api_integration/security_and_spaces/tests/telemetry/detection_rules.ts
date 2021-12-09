@@ -399,7 +399,7 @@ export default ({ getService }: FtrProviderContext) => {
           // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint_security.json
           // We have to search by "rule_name" since the "rule_id" it is storing is the Saved Object ID and not the rule_id
           const foundRule = stats.detection_rules.detection_rule_detail.find(
-            (rule) => rule.rule_name === 'Endpoint Security'
+            (rule) => rule.rule_id === '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
           );
           if (foundRule == null) {
             throw new Error('Found rule should not be null');

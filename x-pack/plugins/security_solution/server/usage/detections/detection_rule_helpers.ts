@@ -6,6 +6,7 @@
  */
 
 import {
+  SIGNALS_ID,
   EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
@@ -203,6 +204,7 @@ export const getDetectionRuleMetrics = async (
           filter: {
             terms: {
               'alert.alertTypeId': [
+                SIGNALS_ID,
                 EQL_RULE_TYPE_ID,
                 ML_RULE_TYPE_ID,
                 QUERY_RULE_TYPE_ID,
@@ -278,7 +280,7 @@ export const getDetectionRuleMetrics = async (
         const isElastic = isElasticRule(hit._source?.alert.tags);
         return {
           rule_name: hit._source?.alert.name,
-          rule_id: ruleId,
+          rule_id: hit._source?.alert.params.ruleId,
           rule_type: hit._source?.alert.params.type,
           rule_version: hit._source?.alert.params.version,
           enabled: hit._source?.alert.enabled,
