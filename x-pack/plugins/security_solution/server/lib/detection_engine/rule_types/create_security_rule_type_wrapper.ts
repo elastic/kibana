@@ -38,15 +38,21 @@ import { RuleExecutionLogClient, truncateMessageList } from '../rule_execution_l
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
+import { extractReferences, injectReferences } from '../signals/saved_object_references';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
-  ({ lists, logger, config, ruleDataClient, eventLogService }) =>
+  ({ lists, logger, config, ruleDataClient, eventLogService, ruleExecutionLogClientOverride }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
     return persistenceRuleType({
       ...type,
+      useSavedObjectReferences: {
+        extractReferences: (params) => extractReferences({ logger, params }),
+        injectReferences: (params, savedObjectReferences) =>
+          injectReferences({ logger, params, savedObjectReferences }),
+      },
       async executor(options) {
         const {
           alertId,
@@ -66,12 +72,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
         const esClient = scopedClusterClient.asCurrentUser;
 
-        const ruleStatusClient = new RuleExecutionLogClient({
-          underlyingClient: config.ruleExecutionLog.underlyingClient,
-          savedObjectsClient,
-          eventLogService,
-          logger,
-        });
+        const ruleStatusClient = ruleExecutionLogClientOverride
+          ? ruleExecutionLogClientOverride
+          : new RuleExecutionLogClient({
+              underlyingClient: config.ruleExecutionLog.underlyingClient,
+              savedObjectsClient,
+              eventLogService,
+              logger,
+            });
 
         const completeRule = {
           ruleConfig: rule,

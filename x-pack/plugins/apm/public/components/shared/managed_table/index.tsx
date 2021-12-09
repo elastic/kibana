@@ -44,6 +44,7 @@ interface Props<T> {
   pagination?: boolean;
   isLoading?: boolean;
   error?: boolean;
+  tableLayout?: 'auto' | 'fixed';
 }
 
 function defaultSortFn<T extends any>(
@@ -70,6 +71,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     pagination = true,
     isLoading = false,
     error = false,
+    tableLayout,
   } = props;
 
   const {
@@ -141,6 +143,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     // @ts-expect-error TS thinks pagination should be non-nullable, but it's not
     <EuiBasicTable
       loading={isLoading}
+      tableLayout={tableLayout}
       error={
         error
           ? i18n.translate('xpack.apm.managedTable.errorMessage', {

@@ -9,6 +9,7 @@ import { CommonFields, ConfigKey, ScheduleUnit, DataStream } from '../types';
 
 export const defaultValues: CommonFields = {
   [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
+  [ConfigKey.LOCATIONS]: [],
   [ConfigKey.ENABLED]: true,
   [ConfigKey.SCHEDULE]: {
     number: '3',
@@ -17,4 +18,6 @@ export const defaultValues: CommonFields = {
   [ConfigKey.APM_SERVICE_NAME]: '',
   [ConfigKey.TAGS]: [],
   [ConfigKey.TIMEOUT]: '16',
+  [ConfigKey.NAME]: '',
+  [ConfigKey.LOCATIONS]: [],
 };
