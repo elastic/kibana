@@ -55,9 +55,24 @@
         { "id": "kibRepoStructure" },
         { "id": "kibDevPrinciples" },
         { "id": "kibStandards" },
+        { "id": "ktRFCProcess" },
         { "id": "kibBestPractices" },
         { "id": "kibStyleGuide" },
         { "id": "kibGitHub" }
+      ]
+    },
+    {
+      "category": "Contributors Newsletters",
+      "items": [
+        { "id": "kibNovember2021ContributorNewsletter" },
+        { "id": "kibOctober2021ContributorNewsletter" },
+        { "id": "kibSeptember2021ContributorNewsletter" },
+        { "id": "kibAugust2021ContributorNewsletter" },
+        { "id": "kibJuly2021ContributorNewsletter" },
+        { "id": "kibJune2021ContributorNewsletter" },
+        { "id": "kibMay2021ContributorNewsletter" },
+        { "id": "kibApril2021ContributorNewsletter" },
+        { "id": "kibMarch2021ContributorNewsletter" }
       ]
     },
     {
