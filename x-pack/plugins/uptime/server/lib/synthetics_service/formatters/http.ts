@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HTTPFields, ConfigKey } from '../../fleet_package/types';
 import { Formatter, commonFormatters, objectFormatter, arrayFormatter } from './common';
 import { tlsFormatters } from './tls';
+import { ConfigKey, HTTPFields } from '../../../../common/runtime_types/monitor_management';
 
 export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;
 
