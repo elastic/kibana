@@ -46,7 +46,9 @@ import { groupAxesByType } from './axes_configuration';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
+
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
+const isNumericDynamicMetric = (op: OperationMetadata) => isNumericMetric(op) && !op.isStaticValue;
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
 function getVisualizationType(state: State): VisualizationType | 'mixed' {
@@ -438,7 +440,7 @@ export const getXyVisualization = ({
           groupId: 'y',
           groupLabel: getAxisName('y', { isHorizontal }),
           accessors: mappedAccessors,
-          filterOperations: isNumericMetric,
+          filterOperations: isNumericDynamicMetric,
           supportsMoreColumns: true,
           required: true,
           dataTestSubj: 'lnsXY_yDimensionPanel',
@@ -704,8 +706,7 @@ export const getXyVisualization = ({
       <FormattedMessage
         key={label}
         id="xpack.lens.xyVisualization.arrayValues"
-        defaultMessage="{label} contains array values. Your visualization may not render as
-        expected."
+        defaultMessage="{label} contains array values. Your visualization may not render as expected."
         values={{
           label: <strong>{label}</strong>,
         }}

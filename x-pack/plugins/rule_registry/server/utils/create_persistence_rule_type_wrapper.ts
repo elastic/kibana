@@ -106,14 +106,16 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 }
 
                 return {
-                  createdAlerts: augmentedAlerts.map((alert, idx) => {
-                    const responseItem = response.body.items[idx].create;
-                    return {
-                      _id: responseItem?._id ?? '',
-                      _index: responseItem?._index ?? '',
-                      ...alert._source,
-                    };
-                  }),
+                  createdAlerts: augmentedAlerts
+                    .map((alert, idx) => {
+                      const responseItem = response.body.items[idx].create;
+                      return {
+                        _id: responseItem?._id ?? '',
+                        _index: responseItem?._index ?? '',
+                        ...alert._source,
+                      };
+                    })
+                    .filter((_, idx) => response.body.items[idx].create?.status === 201),
                 };
               } else {
                 logger.debug('Writing is disabled.');

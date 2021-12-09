@@ -47,7 +47,7 @@ export interface KibanaProviderOptions<ExtraCore> {
 }
 
 interface MockKibanaProviderProps<ExtraCore> extends KibanaProviderOptions<ExtraCore> {
-  children: ReactElement;
+  children: React.ReactNode;
 }
 
 interface MockRouterProps<ExtraCore> extends MockKibanaProviderProps<ExtraCore> {
@@ -124,6 +124,7 @@ const mockCore: () => Partial<CoreStart> = () => {
         // @ts-ignore
         PageTemplate: EuiPageTemplate,
       },
+      ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
     },
   };
 
@@ -143,7 +144,10 @@ export function MockKibanaProvider<ExtraCore>({
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
       <UptimeRefreshContextProvider>
-        <UptimeStartupPluginsContextProvider data={(coreOptions as any).data}>
+        <UptimeStartupPluginsContextProvider
+          data={(coreOptions as any).data}
+          observability={(coreOptions as any).observability}
+        >
           <EuiThemeProvider darkMode={false}>
             <I18nProvider>{children}</I18nProvider>
           </EuiThemeProvider>
@@ -168,6 +172,27 @@ export function MockRouter<ExtraCore>({
   );
 }
 configure({ testIdAttribute: 'data-test-subj' });
+
+export const MockRedux = ({
+  state,
+  history = createMemoryHistory(),
+  children,
+}: {
+  state: Partial<AppState>;
+  history?: History;
+  children: React.ReactNode;
+}) => {
+  const testState: AppState = {
+    ...mockState,
+    ...state,
+  };
+
+  return (
+    <MountWithReduxProvider state={testState}>
+      <MockRouter history={history}>{children}</MockRouter>
+    </MountWithReduxProvider>
+  );
+};
 
 /* Custom react testing library render */
 export function render<ExtraCore>(
