@@ -13,12 +13,12 @@ import {
   StyleDictionary,
   TDocumentDefinitions,
 } from 'pdfmake/interfaces';
-import { LayoutInstance } from '../../../lib/layouts';
+import type { Layout } from '../../../../../screenshotting/server';
 import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
 
 export function getTemplate(
-  layout: LayoutInstance,
+  layout: Layout,
   logo: string | undefined,
   title: string,
   tableBorderWidth: number,

@@ -537,6 +537,11 @@ Elastic.
 |Add tagging capability to saved objects
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/screenshotting/README.md[screenshotting]
+|This plugin provides functionality to take screenshots of the Kibana pages.
+It uses Chromium and Puppeteer underneath to run the browser in headless mode.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/searchprofiler/README.md[searchprofiler]
 |The search profiler consumes the Profile API
 by sending a search API with profile: true enabled in the request body. The response contains
