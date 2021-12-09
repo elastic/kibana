@@ -17,12 +17,11 @@ import type { VisualizeEditorContext } from '../types';
 
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
-import { Document, injectFilterReferences } from '../persistence';
+import { Document, injectFilterReferences, checkForDuplicateTitle } from '../persistence';
 import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
 import { esFilters } from '../../../../../src/plugins/data/public';
 import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects/public';
 import type { LensAppState } from '../state_management';
 import { getPersisted } from '../state_management/init_middleware/load_initial';
 

@@ -57,6 +57,7 @@ import type {
   PieVisualizationPluginSetupPlugins,
 } from './pie_visualization';
 import type { HeatmapVisualization as HeatmapVisualizationType } from './heatmap_visualization';
+import type { GaugeVisualization as GaugeVisualizationType } from './visualizations/gauge';
 import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 
 import { AppNavLinkStatus } from '../../../../src/core/public';
@@ -171,6 +172,7 @@ export class LensPlugin {
   private metricVisualization: MetricVisualizationType | undefined;
   private pieVisualization: PieVisualizationType | undefined;
   private heatmapVisualization: HeatmapVisualizationType | undefined;
+  private gaugeVisualization: GaugeVisualizationType | undefined;
 
   private stopReportManager?: () => void;
 
@@ -310,6 +312,7 @@ export class LensPlugin {
       MetricVisualization,
       PieVisualization,
       HeatmapVisualization,
+      GaugeVisualization,
     } = await import('./async_services');
     this.datatableVisualization = new DatatableVisualization();
     this.editorFrameService = new EditorFrameService();
@@ -318,6 +321,7 @@ export class LensPlugin {
     this.metricVisualization = new MetricVisualization();
     this.pieVisualization = new PieVisualization();
     this.heatmapVisualization = new HeatmapVisualization();
+    this.gaugeVisualization = new GaugeVisualization();
 
     const editorFrameSetupInterface = this.editorFrameService.setup();
 
@@ -339,6 +343,7 @@ export class LensPlugin {
     this.metricVisualization.setup(core, dependencies);
     this.pieVisualization.setup(core, dependencies);
     this.heatmapVisualization.setup(core, dependencies);
+    this.gaugeVisualization.setup(core, dependencies);
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {

@@ -617,7 +617,9 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         visualizationState,
         framePublicAPI: {
           // any better idea to avoid `as`?
-          activeData: state.activeData as TableInspectorAdapter,
+          activeData: state.activeData
+            ? (current(state.activeData) as TableInspectorAdapter)
+            : undefined,
           datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
         },
         activeVisualization,
@@ -654,7 +656,9 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         visualizationState: state.visualization.state,
         framePublicAPI: {
           // any better idea to avoid `as`?
-          activeData: state.activeData as TableInspectorAdapter,
+          activeData: state.activeData
+            ? (current(state.activeData) as TableInspectorAdapter)
+            : undefined,
           datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
         },
         activeVisualization,

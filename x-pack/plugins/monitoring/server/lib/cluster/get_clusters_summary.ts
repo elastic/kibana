@@ -39,6 +39,7 @@ export function getClustersSummary(
       ml,
       beats,
       apm,
+      enterpriseSearch,
       alerts,
       ccs,
       cluster_settings: clusterSettings,
@@ -149,6 +150,7 @@ export function getClustersSummary(
       ccs,
       beats,
       apm,
+      enterpriseSearch,
       alerts,
       isPrimary: kibana ? (kibana as EnhancedKibana).uuids?.includes(kibanaUuid) : false,
       status: calculateOverallStatus([
