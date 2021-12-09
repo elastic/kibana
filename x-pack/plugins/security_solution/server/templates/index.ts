@@ -10,14 +10,7 @@ import {
   MATRIX_HISTOGRAM_TEMPLATE_TYPE,
   MATRIX_HISTOGRAM_TEMPLATE_TAG_TYPE,
 } from '../../common/constants';
-
-// only load templates when requested to reduce require() cost on startup
-export function loadTemplates() {
-  return [
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('./host.name').hostName,
-  ];
-}
+import { hostsTemplates } from './hosts_templates';
 
 export const loadTags = () => {
   const tags = require('./tag.security_solution').securitySolutionTags;
@@ -46,7 +39,7 @@ export async function initializeTemplates(
   // So, rather than doing a bulk create of templates, we're going to fire off individual
   // creates and catch and throw-away any errors that happen.
   // Once packages are ready, we should probably move that pitch that is so large to a package
-  for (const template of loadTemplates()) {
+  for (const template of hostsTemplates) {
     let existingTemplate = null;
 
     try {

@@ -13,13 +13,13 @@ export const securitySolutionTags = [
   },
   {
     id: '9853a880-5455-11ec-b0fd-2f7a10a18ba6',
-    name: 'Secutiry Solution - Host',
+    name: 'Host',
     description: 'This visualisation is consumed by Security Solution - Host',
     color: '#F04E98',
   },
   {
     id: '4453a000-5455-11ec-b0fd-2f7a10a18ba6',
-    name: 'Secutiry Solution - Network',
+    name: 'Network',
     description: 'This visualisation is consumed by Security Solution - Network',
     color: '#FEC514',
   },
