@@ -143,5 +143,13 @@ describe('Policy Details', () => {
       expect(agentsSummary).toHaveLength(1);
       expect(agentsSummary.text()).toBe('Total agents5Healthy3Unhealthy1Offline1');
     });
+    it('should display event filters tab', async () => {
+      await asyncActions;
+      policyView.update();
+
+      const eventFiltersTab = policyView.find('button#eventFilters');
+      expect(eventFiltersTab).toHaveLength(1);
+      expect(eventFiltersTab.text()).toBe('Event filters');
+    });
   });
 });

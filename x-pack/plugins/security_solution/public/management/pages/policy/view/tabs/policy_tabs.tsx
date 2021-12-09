@@ -14,18 +14,27 @@ import { usePolicyDetailsSelector } from '../policy_hooks';
 import {
   isOnPolicyFormView,
   isOnPolicyTrustedAppsView,
+  isOnPolicyEventFiltersView,
   policyIdFromParams,
+  policyDetails,
 } from '../../store/policy_details/selectors';
 
 import { PolicyTrustedAppsLayout } from '../trusted_apps/layout';
+import { PolicyEventFiltersLayout } from '../event_filters/layout';
 import { PolicyFormLayout } from '../policy_forms/components';
-import { getPolicyDetailPath, getPolicyTrustedAppsPath } from '../../../../common/routing';
+import {
+  getPolicyDetailPath,
+  getPolicyTrustedAppsPath,
+  getPolicyEventFiltersPath,
+} from '../../../../common/routing';
 
 export const PolicyTabs = React.memo(() => {
   const history = useHistory();
   const isInSettingsTab = usePolicyDetailsSelector(isOnPolicyFormView);
   const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsView);
+  const isInEventFilters = usePolicyDetailsSelector(isOnPolicyEventFiltersView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
+  const policyItem = usePolicyDetailsSelector(policyDetails);
 
   const tabs = useMemo(
     () => [
@@ -53,8 +62,20 @@ export const PolicyTabs = React.memo(() => {
           </>
         ),
       },
+      {
+        id: 'eventFilters',
+        name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.eventFilters', {
+          defaultMessage: 'Event filters',
+        }),
+        content: (
+          <>
+            <EuiSpacer />
+            <PolicyEventFiltersLayout policyItem={policyItem} />
+          </>
+        ),
+      },
     ],
-    []
+    [policyItem]
   );
 
   const currentSelectedTab = useMemo(() => {
@@ -64,17 +85,21 @@ export const PolicyTabs = React.memo(() => {
       initialTab = tabs[0];
     } else if (isInTrustedAppsTab) {
       initialTab = tabs[1];
+    } else if (isInEventFilters) {
+      initialTab = tabs[2];
     }
 
     return initialTab;
-  }, [isInSettingsTab, isInTrustedAppsTab, tabs]);
+  }, [isInSettingsTab, isInTrustedAppsTab, isInEventFilters, tabs]);
 
   const onTabClickHandler = useCallback(
     (selectedTab: EuiTabbedContentTab) => {
       const path =
         selectedTab.id === 'settings'
           ? getPolicyDetailPath(policyId)
-          : getPolicyTrustedAppsPath(policyId);
+          : selectedTab.id === 'trustedApps'
+          ? getPolicyTrustedAppsPath(policyId)
+          : getPolicyEventFiltersPath(policyId);
       history.push(path);
     },
     [history, policyId]
