@@ -74,16 +74,13 @@ export const useWorkspaceLoader = ({
       store.dispatch({ type: 'x-pack/graph/RESET' });
     }
 
-    async function fetchIndexPatterns() {
-      const fetchedIndexPatterns = [] as IndexPatternSavedObject[];
-      let prevPage = 0;
+    async function* pageThroughIndexPatterns() {
       let page = 1;
       let perPage = 1000;
       let total = 0;
-      while (true) {
-        if (total < prevPage * perPage) {
-          break;
-        }
+      let savedObjects = [] as IndexPatternSavedObject[];
+
+      async function* makeRequest(): AsyncGenerator<IndexPatternSavedObject[]> {
         await savedObjectsClient
           .find<{ title: string }>({
             type: 'index-pattern',
@@ -92,12 +89,26 @@ export const useWorkspaceLoader = ({
             page,
           })
           .then((response) => {
-            fetchedIndexPatterns.concat(response.savedObjects);
             perPage = response.perPage;
             total = response.total;
             page = response.page;
-            prevPage++;
+            savedObjects = response.savedObjects;
           });
+
+        yield savedObjects;
+
+        if (total >= page * perPage) {
+          yield* makeRequest();
+        }
+      }
+      yield* makeRequest();
+    }
+
+    async function fetchIndexPatterns() {
+      const result = pageThroughIndexPatterns();
+      let fetchedIndexPatterns = [] as IndexPatternSavedObject[];
+      for await (const page of result) {
+        fetchedIndexPatterns = fetchedIndexPatterns.concat(page);
       }
       return fetchedIndexPatterns;
     }
