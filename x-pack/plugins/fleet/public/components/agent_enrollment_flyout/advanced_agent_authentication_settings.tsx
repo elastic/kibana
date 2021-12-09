@@ -103,7 +103,7 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
   onKeyChange,
 }) => {
   const { notifications } = useStartServices();
-  const [enrollmentAPIKeys, setEnrollmentAPIKeys] = useState<GetEnrollmentAPIKeysResponse['list']>(
+  const [enrollmentAPIKeys, setEnrollmentAPIKeys] = useState<GetEnrollmentAPIKeysResponse['items']>(
     []
   );
 
@@ -143,7 +143,7 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
             throw new Error('No data while fetching enrollment API keys');
           }
 
-          const enrollmentAPIKeysResponse = res.data.list.filter(
+          const enrollmentAPIKeysResponse = res.data.items.filter(
             (key) => key.policy_id === agentPolicyId && key.active === true
           );
 

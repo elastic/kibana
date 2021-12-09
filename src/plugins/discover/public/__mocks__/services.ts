@@ -97,4 +97,5 @@ export const discoverServiceMock = {
   storage: {
     get: jest.fn(),
   },
+  addBasePath: jest.fn(),
 } as unknown as DiscoverServices;

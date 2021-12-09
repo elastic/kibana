@@ -14,7 +14,7 @@ import {
   EuiFormRow,
   EuiFormRowProps,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { sourcererModel } from '../../store/sourcerer';
 
@@ -50,11 +50,25 @@ export const PopoverContent = styled.div`
 
 export const StyledBadge = styled(EuiBadge)`
   margin-left: 8px;
+  &,
+  .euiBadge__text {
+    cursor: pointer;
+  }
+`;
+
+export const Blockquote = styled.span`
+  ${({ theme }) => css`
+    display: block;
+    border-color: ${theme.eui.euiColorDarkShade};
+    border-left: ${theme.eui.euiBorderThick};
+    margin: ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS} ${theme.eui.euiSizeS};
+    padding: ${theme.eui.euiSizeS};
+  `}
 `;
 
 interface GetDataViewSelectOptionsProps {
   dataViewId: string;
-  defaultDataView: sourcererModel.KibanaDataView;
+  defaultDataViewId: sourcererModel.KibanaDataView['id'];
   isModified: boolean;
   isOnlyDetectionAlerts: boolean;
   kibanaDataViews: sourcererModel.KibanaDataView[];
@@ -62,7 +76,7 @@ interface GetDataViewSelectOptionsProps {
 
 export const getDataViewSelectOptions = ({
   dataViewId,
-  defaultDataView,
+  defaultDataViewId,
   isModified,
   isOnlyDetectionAlerts,
   kibanaDataViews,
@@ -78,12 +92,12 @@ export const getDataViewSelectOptions = ({
               </StyledBadge>
             </span>
           ),
-          value: defaultDataView.id,
+          value: defaultDataViewId,
         },
       ]
     : kibanaDataViews.map(({ title, id }) => ({
         inputDisplay:
-          id === defaultDataView.id ? (
+          id === defaultDataViewId ? (
             <span data-test-subj="security-option-super">
               <EuiIcon type="logoSecurity" size="s" /> {i18n.SECURITY_DEFAULT_DATA_VIEW_LABEL}
               {isModified && id === dataViewId && (
