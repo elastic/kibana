@@ -11,7 +11,7 @@ import { curry, times } from 'lodash';
 import { ES_TEST_INDEX_NAME } from '../../../../lib';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import {
-  AlertType,
+  RuleType,
   AlertInstanceState,
   AlertInstanceContext,
   AlertTypeState,
@@ -62,7 +62,7 @@ function getAlwaysFiringAlertType() {
   interface InstanceContext extends AlertInstanceContext {
     instanceContextValue: boolean;
   }
-  const result: AlertType<
+  const result: RuleType<
     ParamsType & AlertTypeParams,
     never, // Only use if defining useSavedObjectReferences hook
     State,
@@ -159,7 +159,7 @@ function getCumulativeFiringAlertType() {
   interface InstanceState extends AlertInstanceState {
     instanceStateValue: boolean;
   }
-  const result: AlertType<{}, {}, State, InstanceState, {}, 'default' | 'other'> = {
+  const result: RuleType<{}, {}, State, InstanceState, {}, 'default' | 'other'> = {
     id: 'test.cumulative-firing',
     name: 'Test: Cumulative Firing',
     actionGroups: [
@@ -200,7 +200,7 @@ function getNeverFiringAlertType() {
   interface State extends AlertTypeState {
     globalStateValue: boolean;
   }
-  const result: AlertType<ParamsType, never, State, {}, {}, 'default'> = {
+  const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
     id: 'test.never-firing',
     name: 'Test: Never firing',
     actionGroups: [
@@ -241,7 +241,7 @@ function getFailingAlertType() {
     reference: schema.string(),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  const result: AlertType<ParamsType, never, {}, {}, {}, 'default'> = {
+  const result: RuleType<ParamsType, never, {}, {}, {}, 'default'> = {
     id: 'test.failing',
     name: 'Test: Failing',
     validate: {
@@ -283,7 +283,7 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
     reference: schema.string(),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  const result: AlertType<ParamsType, never, {}, {}, {}, 'default'> = {
+  const result: RuleType<ParamsType, never, {}, {}, {}, 'default'> = {
     id: 'test.authorization',
     name: 'Test: Authorization',
     actionGroups: [
@@ -371,7 +371,7 @@ function getValidationAlertType() {
     param1: schema.string(),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  const result: AlertType<ParamsType, never, {}, {}, {}, 'default'> = {
+  const result: RuleType<ParamsType, never, {}, {}, {}, 'default'> = {
     id: 'test.validation',
     name: 'Test: Validation',
     actionGroups: [
@@ -404,7 +404,7 @@ function getPatternFiringAlertType() {
   interface State extends AlertTypeState {
     patternIndex?: number;
   }
-  const result: AlertType<ParamsType, never, State, {}, {}, 'default'> = {
+  const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
     id: 'test.patternFiring',
     name: 'Test: Firing on a Pattern',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -473,7 +473,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
   interface State extends AlertTypeState {
     patternIndex?: number;
   }
-  const result: AlertType<ParamsType, never, State, {}, {}, 'default'> = {
+  const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
     id: `test.patternLongRunning${
       cancelAlertsOnRuleTimeout === true ? '.cancelAlertsOnRuleTimeout' : ''
     }`,
@@ -519,7 +519,7 @@ export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
   { alerting }: Pick<FixtureSetupDeps, 'alerting'>
 ) {
-  const noopAlertType: AlertType<{}, {}, {}, {}, {}, 'default'> = {
+  const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.noop',
     name: 'Test: Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -529,7 +529,7 @@ export function defineAlertTypes(
     isExportable: true,
     async executor() {},
   };
-  const goldNoopAlertType: AlertType<{}, {}, {}, {}, {}, 'default'> = {
+  const goldNoopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.gold.noop',
     name: 'Test: Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -539,7 +539,7 @@ export function defineAlertTypes(
     isExportable: true,
     async executor() {},
   };
-  const onlyContextVariablesAlertType: AlertType<{}, {}, {}, {}, {}, 'default'> = {
+  const onlyContextVariablesAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.onlyContextVariables',
     name: 'Test: Only Context Variables',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -552,7 +552,7 @@ export function defineAlertTypes(
     },
     async executor() {},
   };
-  const onlyStateVariablesAlertType: AlertType<{}, {}, {}, {}, {}, 'default'> = {
+  const onlyStateVariablesAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.onlyStateVariables',
     name: 'Test: Only State Variables',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -565,7 +565,7 @@ export function defineAlertTypes(
     isExportable: true,
     async executor() {},
   };
-  const throwAlertType: AlertType<{}, {}, {}, {}, {}, 'default'> = {
+  const throwAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.throw',
     name: 'Test: Throw',
     actionGroups: [
@@ -582,7 +582,7 @@ export function defineAlertTypes(
       throw new Error('this alert is intended to fail');
     },
   };
-  const longRunningAlertType: AlertType<{}, {}, {}, {}, {}, 'default'> = {
+  const longRunningAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.longRunning',
     name: 'Test: Long Running',
     actionGroups: [
@@ -599,21 +599,20 @@ export function defineAlertTypes(
       await new Promise((resolve) => setTimeout(resolve, 5000));
     },
   };
-  const exampleAlwaysFiringAlertType: AlertType<{}, {}, {}, {}, {}, 'small' | 'medium' | 'large'> =
-    {
-      id: 'example.always-firing',
-      name: 'Always firing',
-      actionGroups: [
-        { id: 'small', name: 'Small t-shirt' },
-        { id: 'medium', name: 'Medium t-shirt' },
-        { id: 'large', name: 'Large t-shirt' },
-      ],
-      defaultActionGroupId: 'small',
-      minimumLicenseRequired: 'basic',
-      isExportable: true,
-      async executor() {},
-      producer: 'alertsFixture',
-    };
+  const exampleAlwaysFiringAlertType: RuleType<{}, {}, {}, {}, {}, 'small' | 'medium' | 'large'> = {
+    id: 'example.always-firing',
+    name: 'Always firing',
+    actionGroups: [
+      { id: 'small', name: 'Small t-shirt' },
+      { id: 'medium', name: 'Medium t-shirt' },
+      { id: 'large', name: 'Large t-shirt' },
+    ],
+    defaultActionGroupId: 'small',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor() {},
+    producer: 'alertsFixture',
+  };
 
   alerting.registerType(getAlwaysFiringAlertType());
   alerting.registerType(getCumulativeFiringAlertType());
