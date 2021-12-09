@@ -531,7 +531,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Single',
     }),
     'euiDisplaySelector.labelAuto': i18n.translate('core.euiDisplaySelector.labelAuto', {
-      defaultMessage: 'Auto',
+      defaultMessage: 'Auto fit',
     }),
     'euiDisplaySelector.labelCustom': i18n.translate('core.euiDisplaySelector.labelCustom', {
       defaultMessage: 'Custom',
