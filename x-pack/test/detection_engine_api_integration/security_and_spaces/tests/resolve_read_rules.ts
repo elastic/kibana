@@ -37,19 +37,19 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it.only('should create a "migrated" rule where querying for the new SO _id will resolve the new object and not return the outcome field when outcome === exactMatch', async () => {
+      it('should create a "migrated" rule where querying for the new SO _id will resolve the new object and not return the outcome field when outcome === exactMatch', async () => {
         // link to the new URL with migrated SO id 74f3e6d7-b7bb-477d-ac28-92ee22728e6e
-        // const URL = `/s/${spaceId}${DETECTION_ENGINE_RULES_URL}?id=90e3ca0e-71f7-513a-b60a-ac678efd8887`;
-        // const readRulesAliasMatchRes = await supertest.get(URL).set('kbn-xsrf', 'true').send();
-        // expect(readRulesAliasMatchRes.body.outcome).to.eql('aliasMatch');
-        // // now that we have the migrated alias_target_id, let's attempt an 'exactMatch' query
-        // // the result of which should have the outcome as undefined when querying the read rules api.
-        // const exactMatchURL = `/s/${spaceId}${DETECTION_ENGINE_RULES_URL}?id=${readRulesAliasMatchRes.body.alias_target_id}`;
-        // const readRulesExactMatchRes = await supertest
-        //   .get(exactMatchURL)
-        //   .set('kbn-xsrf', 'true')
-        //   .send();
-        // expect(readRulesExactMatchRes.body.outcome).to.eql(undefined);
+        const URL = `/s/${spaceId}${DETECTION_ENGINE_RULES_URL}?id=90e3ca0e-71f7-513a-b60a-ac678efd8887`;
+        const readRulesAliasMatchRes = await supertest.get(URL).set('kbn-xsrf', 'true').send();
+        expect(readRulesAliasMatchRes.body.outcome).to.eql('aliasMatch');
+        // now that we have the migrated alias_target_id, let's attempt an 'exactMatch' query
+        // the result of which should have the outcome as undefined when querying the read rules api.
+        const exactMatchURL = `/s/${spaceId}${DETECTION_ENGINE_RULES_URL}?id=${readRulesAliasMatchRes.body.alias_target_id}`;
+        const readRulesExactMatchRes = await supertest
+          .get(exactMatchURL)
+          .set('kbn-xsrf', 'true')
+          .send();
+        expect(readRulesExactMatchRes.body.outcome).to.eql(undefined);
       });
 
       it('should create a rule and a "conflicting rule" where the SO _id matches the sourceId (see legacy-url-alias SO) of a migrated rule', async () => {
