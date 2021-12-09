@@ -8,9 +8,9 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Query } from '../filters';
-import type { KqlNode } from '../kuery/node_types/types';
 import type { BoolQuery, DataViewBase } from './types';
-import { fromKueryExpression, toElasticsearchQuery, nodeTypes } from '../kuery';
+import { fromKueryExpression, functions } from '../kuery';
+import { KqlFunctionNode } from '../kuery/node_types/function';
 
 /** @internal */
 export function buildQueryFromKuery(
@@ -21,7 +21,10 @@ export function buildQueryFromKuery(
   filtersInMustClause: boolean = false
 ): BoolQuery {
   const queryASTs = queries.map((query) => {
-    return fromKueryExpression(query.query, { allowLeadingWildcards });
+    if (typeof query.query !== 'string') {
+      throw new Error(`Cannot parse KQL expression: ${query.query}`);
+    }
+    return fromKueryExpression<KqlFunctionNode>(query.query, { allowLeadingWildcards });
   });
 
   return buildQuery(indexPattern, queryASTs, { dateFormatTZ, filtersInMustClause });
@@ -29,11 +32,11 @@ export function buildQueryFromKuery(
 
 function buildQuery(
   indexPattern: DataViewBase | undefined,
-  queryASTs: KqlNode[],
+  queryASTs: KqlFunctionNode[],
   config: SerializableRecord = {}
 ): BoolQuery {
-  const compoundQueryAST = nodeTypes.function.buildNode('and', queryASTs);
-  const kueryQuery = toElasticsearchQuery(compoundQueryAST, indexPattern, config);
+  const compoundQueryAST = functions.and.buildNode(queryASTs);
+  const kueryQuery = functions.and.toElasticsearchQuery(compoundQueryAST, indexPattern, config);
 
   return Object.assign(
     {

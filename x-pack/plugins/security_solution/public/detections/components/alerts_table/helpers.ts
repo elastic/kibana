@@ -6,7 +6,15 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { Filter, FilterStateStore, KueryNode, fromKueryExpression } from '@kbn/es-query';
+import {
+  Filter,
+  FilterStateStore,
+  fromKueryExpression,
+  KqlFunctionNode,
+  functions as kqlFunctions,
+  nodeTypes as kqlNodeTypes,
+  KqlNode,
+} from '@kbn/es-query';
 import {
   DataProvider,
   DataProviderType,
@@ -75,34 +83,39 @@ export const getStringArray = (
 };
 
 export const findValueToChangeInQuery = (
-  kueryNode: KueryNode,
+  kueryNode: KqlFunctionNode,
   valueToChange: FindValueToChangeInQuery[] = []
 ): FindValueToChangeInQuery[] => {
   let localValueToChange = valueToChange;
-  if (kueryNode.function === 'is' && templateFields.includes(kueryNode.arguments[0].value)) {
+  if (
+    kqlFunctions.is.isNode(kueryNode) &&
+    templateFields.includes(`${kueryNode.arguments[0].value}`)
+  ) {
     localValueToChange = [
       ...localValueToChange,
       {
-        field: kueryNode.arguments[0].value,
-        valueToChange: kueryNode.arguments[1].value,
+        field: `${kueryNode.arguments[0].value}`,
+        valueToChange: `${kueryNode.arguments[1].value}`,
       },
     ];
   }
+
   return kueryNode.arguments.reduce(
-    (addValueToChange: FindValueToChangeInQuery[], ast: KueryNode) => {
-      if (ast.function === 'is' && templateFields.includes(ast.arguments[0].value)) {
-        return [
-          ...addValueToChange,
-          {
-            field: ast.arguments[0].value,
-            valueToChange: ast.arguments[1].value,
-          },
-        ];
-      }
-      if (ast.arguments) {
+    (addValueToChange: FindValueToChangeInQuery[], ast: KqlNode) => {
+      if (kqlNodeTypes.function.isNode(ast)) {
+        if (kqlFunctions.is.isNode(ast) && templateFields.includes(`${ast.arguments[0].value}`)) {
+          return [
+            ...addValueToChange,
+            {
+              field: `${ast.arguments[0].value}`,
+              valueToChange: `${ast.arguments[1].value}`,
+            },
+          ];
+        }
         return findValueToChangeInQuery(ast, addValueToChange);
+      } else {
+        return addValueToChange;
       }
-      return addValueToChange;
     },
     localValueToChange
   );

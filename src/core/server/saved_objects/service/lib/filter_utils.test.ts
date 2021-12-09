@@ -15,6 +15,7 @@ import {
   fieldDefined,
   hasFilterKeyError,
 } from './filter_utils';
+import { nodeBuilder } from '@kbn/es-query';
 
 const mockMappings = {
   properties: {
@@ -100,19 +101,14 @@ describe('Filter Utils', () => {
       expect(
         validateConvertFilterToKueryNode(
           ['foo'],
-          esKuery.nodeTypes.function.buildNode('is', `foo.attributes.title`, 'best', true),
+          nodeBuilder.is(`foo.attributes.title`, 'best', true),
           mockMappings
         )
       ).toEqual(esKuery.fromKueryExpression('foo.title: "best"'));
     });
 
     test('does not mutate the input KueryNode', () => {
-      const input = esKuery.nodeTypes.function.buildNode(
-        'is',
-        `foo.attributes.title`,
-        'best',
-        true
-      );
+      const input = nodeBuilder.is(`foo.attributes.title`, 'best', true);
 
       const inputCopy = cloneDeep(input);
 

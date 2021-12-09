@@ -8,7 +8,7 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { get, cloneDeep } from 'lodash';
-import * as esKuery from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
 
@@ -23,7 +23,7 @@ export const validateConvertFilterToKueryNode = (
 ): KueryNode | undefined => {
   if (filter && indexMapping) {
     const filterKueryNode =
-      typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : cloneDeep(filter);
+      typeof filter === 'string' ? fromKueryExpression(filter) : cloneDeep(filter);
 
     const validationFilterKuery = validateFilterKueryNode({
       astFilter: filterKueryNode,
@@ -60,10 +60,7 @@ export const validateConvertFilterToKueryNode = (
           set(
             filterKueryNode,
             path,
-            esKuery.nodeTypes.function.buildNode('and', [
-              esKuery.nodeTypes.function.buildNode('is', 'type', itemType[0]),
-              existingKueryNode,
-            ])
+            nodeBuilder.and([nodeBuilder.is('type', itemType[0]), existingKueryNode])
           );
         }
       } else {

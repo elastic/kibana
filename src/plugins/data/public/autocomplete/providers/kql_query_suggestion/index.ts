@@ -9,7 +9,7 @@
 import { CoreSetup } from 'kibana/public';
 import { $Keys } from 'utility-types';
 import { flatten, uniqBy } from 'lodash';
-import { fromKueryExpression } from '@kbn/es-query';
+import { fromKueryExpression, KqlSuggestionNode } from '@kbn/es-query';
 import { setupGetFieldSuggestions } from './field';
 import { setupGetValueSuggestions } from './value';
 import { setupGetOperatorSuggestions } from './operator';
@@ -43,7 +43,7 @@ export const setupKqlQuerySuggestionProvider = (
     querySuggestionsArgs: QuerySuggestionGetFnArgs
   ): Array<Promise<QuerySuggestion[]>> | [] => {
     try {
-      const cursorNode = fromKueryExpression(cursoredQuery, {
+      const cursorNode = fromKueryExpression<KqlSuggestionNode>(cursoredQuery, {
         cursorSymbol,
         parseCursor: true,
       });

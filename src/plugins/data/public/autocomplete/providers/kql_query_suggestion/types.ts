@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KueryNode } from '@kbn/es-query';
+import type { KqlSuggestionNode } from '@kbn/es-query';
 import { CoreSetup } from 'kibana/public';
 import {
   DataPublicPluginStart,
@@ -16,4 +16,7 @@ import {
 
 export type KqlQuerySuggestionProvider<T = QuerySuggestionBasic> = (
   core: CoreSetup<object, DataPublicPluginStart>
-) => (querySuggestionsGetFnArgs: QuerySuggestionGetFnArgs, kueryNode: KueryNode) => Promise<T[]>;
+) => (
+  querySuggestionsGetFnArgs: QuerySuggestionGetFnArgs,
+  kueryNode: KqlSuggestionNode
+) => Promise<T[]>;

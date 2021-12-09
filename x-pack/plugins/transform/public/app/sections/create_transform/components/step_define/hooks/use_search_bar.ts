@@ -7,7 +7,7 @@
 
 import { useState } from 'react';
 
-import { esKuery, esQuery, Query } from '../../../../../../../../../../src/plugins/data/public';
+import { Query, luceneStringToDsl, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { getPivotQuery } from '../../../../../common';
 
@@ -51,15 +51,10 @@ export const useSearchBar = (
     try {
       switch (query.language) {
         case QUERY_LANGUAGE_KUERY:
-          setSearchQuery(
-            esKuery.toElasticsearchQuery(
-              esKuery.fromKueryExpression(query.query as string),
-              indexPattern
-            )
-          );
+          setSearchQuery(toElasticsearchQuery(fromKueryExpression(query.query), indexPattern));
           return;
         case QUERY_LANGUAGE_LUCENE:
-          setSearchQuery(esQuery.luceneStringToDsl(query.query as string));
+          setSearchQuery(luceneStringToDsl(query.query));
           return;
       }
     } catch (e) {

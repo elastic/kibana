@@ -31,6 +31,10 @@ export type KqlFunctionName =
   | typeof KQL_FUNCTION_NAME_OR
   | typeof KQL_FUNCTION_NAME_RANGE;
 
+/**
+ * KQL node representing that a function should be executed with the given arguments (e.g. an
+ * "exists" node would execute the "exists" function, returning an "exists" query in ES)
+ */
 export interface KqlFunctionNode extends KqlNode {
   type: typeof KQL_NODE_TYPE_FUNCTION;
   function: KqlFunctionName;

@@ -13,7 +13,7 @@ import {
 } from 'kibana/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { KueryNode } from '@kbn/es-query';
+import type { KqlFunctionNode } from '@kbn/es-query';
 import {
   AttributesTypeAlerts,
   CommentAttributes as AttachmentAttributes,
@@ -31,7 +31,7 @@ import { defaultSortField } from '../../common/utils';
 
 interface GetAllAlertsAttachToCaseArgs extends ClientArgs {
   caseId: string;
-  filter?: KueryNode;
+  filter?: KqlFunctionNode;
 }
 
 type CountAlertsAttachedToCaseArgs = GetAllAlertsAttachToCaseArgs;

@@ -8,7 +8,7 @@
 
 import { omit, isObject } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import * as esKuery from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 import type { ElasticsearchClient } from '../../../elasticsearch/';
 import type { Logger } from '../../../logging';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
@@ -781,10 +781,9 @@ export class SavedObjectsRepository {
     ];
 
     // Construct kueryNode to filter legacy URL aliases (these space-agnostic objects do not use root-level "namespace/s" fields)
-    const { buildNode } = esKuery.nodeTypes.function;
-    const match1 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.targetNamespace`, namespace);
-    const match2 = buildNode('not', buildNode('is', 'type', LEGACY_URL_ALIAS_TYPE));
-    const kueryNode = buildNode('or', [match1, match2]);
+    const match1 = nodeBuilder.is(`${LEGACY_URL_ALIAS_TYPE}.targetNamespace`, namespace);
+    const match2 = nodeBuilder.not(nodeBuilder.is('type', LEGACY_URL_ALIAS_TYPE));
+    const kueryNode = nodeBuilder.or([match1, match2]);
 
     const { body } = await this.client.updateByQuery(
       {

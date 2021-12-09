@@ -6,15 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { KQL_NODE_TYPE_LITERAL } from './literal';
-import { KQL_NODE_TYPE_WILDCARD } from './wildcard';
-import { KQL_NODE_TYPE_FUNCTION } from './function';
+import { KQL_NODE_TYPE_LITERAL, KqlLiteralNode } from './literal';
+import { KQL_NODE_TYPE_WILDCARD, KqlWildcardNode } from './wildcard';
+import { KQL_NODE_TYPE_FUNCTION, KqlFunctionNode } from './function';
+import { KQL_NODE_TYPE_SUGGESTION, KqlSuggestionNode } from './suggestion';
 
 export type KqlNodeType =
   | typeof KQL_NODE_TYPE_FUNCTION
   | typeof KQL_NODE_TYPE_LITERAL
-  | typeof KQL_NODE_TYPE_WILDCARD;
+  | typeof KQL_NODE_TYPE_WILDCARD
+  | typeof KQL_NODE_TYPE_SUGGESTION;
 
+/**
+ * Generic KQL AST node (extended by the types below)
+ */
 export interface KqlNode {
   type: KqlNodeType;
 }
+
+export type { KqlLiteralNode, KqlWildcardNode, KqlFunctionNode, KqlSuggestionNode };

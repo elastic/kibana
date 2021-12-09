@@ -58,7 +58,7 @@ export const validateQuery = (input: Query, indexPattern: IndexPattern) => {
   let error: string | undefined;
 
   try {
-    if (input.language === 'kuery') {
+    if (input.language === 'kuery' && typeof input.query === 'string') {
       toElasticsearchQuery(fromKueryExpression(input.query), indexPattern);
     } else {
       luceneStringToDsl(input.query);

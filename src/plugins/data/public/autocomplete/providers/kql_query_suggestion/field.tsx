@@ -42,9 +42,7 @@ const keywordComparator = (first: IFieldType, second: IFieldType) => {
   return first.name.localeCompare(second.name);
 };
 
-export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestionField> = (
-  core
-) => {
+export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestionField> = () => {
   return ({ indexPatterns }, { start, end, prefix, suffix, nestedPath = '' }) => {
     const allFields = flatten(
       indexPatterns.map((indexPattern) => {

@@ -19,7 +19,7 @@ import { Query } from '../../query/types';
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
   if (!has(query, 'language')) {
-    return { query, language: 'lucene' };
+    return { query: `${query}`, language: 'lucene' };
   }
 
   return query as Query;

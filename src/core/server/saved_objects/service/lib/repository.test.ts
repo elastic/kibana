@@ -55,7 +55,6 @@ import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { mockKibanaMigrator } from '../../migrations/kibana_migrator.mock';
 import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import * as esKuery from '@kbn/es-query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import {
   SavedObjectsBulkCreateObject,
@@ -76,8 +75,7 @@ import {
   SavedObjectsUpdateObjectsSpacesOptions,
 } from 'kibana/server';
 import { InternalBulkResolveError } from './internal_bulk_resolve';
-
-const { nodeTypes } = esKuery;
+import { nodeBuilder } from '@kbn/es-query';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -3664,7 +3662,7 @@ describe('SavedObjectsRepository', () => {
             type: 'foo',
             id: '1',
           },
-          filter: nodeTypes.function.buildNode('is', `dashboard.attributes.otherField`, '*'),
+          filter: nodeBuilder.is(`dashboard.attributes.otherField`, '*'),
         };
 
         await findSuccess(findOpts, namespace);

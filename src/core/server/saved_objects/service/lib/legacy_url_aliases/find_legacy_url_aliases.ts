@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as esKuery from '@kbn/es-query';
+import { KqlFunctionNode, nodeBuilder } from '@kbn/es-query';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../../object_types';
 import { getObjectKey } from '../internal_utils';
 import type { CreatePointInTimeFinderFn } from '../point_in_time_finder';
@@ -67,16 +67,15 @@ export async function findLegacyUrlAliases(
 }
 
 function createAliasKueryFilter(objects: Array<{ type: string; id: string }>) {
-  const { buildNode } = esKuery.nodeTypes.function;
   // Note: these nodes include '.attributes' for type-level fields because these are eventually passed to `validateConvertFilterToKueryNode`, which requires it
-  const kueryNodes = objects.reduce<unknown[]>((acc, { type, id }) => {
-    const match1 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.attributes.targetType`, type);
-    const match2 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.attributes.sourceId`, id);
-    acc.push(buildNode('and', [match1, match2]));
+  const kueryNodes = objects.reduce<KqlFunctionNode[]>((acc, { type, id }) => {
+    const match1 = nodeBuilder.is(`${LEGACY_URL_ALIAS_TYPE}.attributes.targetType`, type);
+    const match2 = nodeBuilder.is(`${LEGACY_URL_ALIAS_TYPE}.attributes.sourceId`, id);
+    acc.push(nodeBuilder.and([match1, match2]));
     return acc;
   }, []);
-  return buildNode('and', [
-    buildNode('not', buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.attributes.disabled`, true)), // ignore aliases that have been disabled
-    buildNode('or', kueryNodes),
+  return nodeBuilder.and([
+    nodeBuilder.not(nodeBuilder.is(`${LEGACY_URL_ALIAS_TYPE}.attributes.disabled`, true)), // ignore aliases that have been disabled
+    nodeBuilder.or(kueryNodes),
   ]);
 }

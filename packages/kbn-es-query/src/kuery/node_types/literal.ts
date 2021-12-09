@@ -12,6 +12,9 @@ export const KQL_NODE_TYPE_LITERAL = 'literal';
 
 export type KqlLiteralType = null | boolean | number | string;
 
+/**
+ * KQL node representing a literal value (i.e. null, boolean, number, string)
+ */
 export interface KqlLiteralNode extends KqlNode {
   type: typeof KQL_NODE_TYPE_LITERAL;
   value: KqlLiteralType;

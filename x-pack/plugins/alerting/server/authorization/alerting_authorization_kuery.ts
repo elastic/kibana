@@ -6,7 +6,13 @@
  */
 
 import { remove } from 'lodash';
-import { EsQueryConfig, nodeBuilder, toElasticsearchQuery, KueryNode } from '@kbn/es-query';
+import {
+  EsQueryConfig,
+  nodeBuilder,
+  toElasticsearchQuery,
+  KueryNode,
+  KqlFunctionNode,
+} from '@kbn/es-query';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RegistryAlertTypeWithAuth } from './alerting_authorization';
@@ -38,9 +44,9 @@ export function asFiltersByRuleTypeAndConsumer(
   ruleTypes: Set<RegistryAlertTypeWithAuth>,
   opts: AlertingAuthorizationFilterOpts,
   spaceId: string | undefined
-): KueryNode | estypes.QueryDslQueryContainer {
+): KqlFunctionNode | estypes.QueryDslQueryContainer {
   const kueryNode = nodeBuilder.or(
-    Array.from(ruleTypes).reduce<KueryNode[]>((filters, { id, authorizedConsumers }) => {
+    Array.from(ruleTypes).reduce<KqlFunctionNode[]>((filters, { id, authorizedConsumers }) => {
       ensureFieldIsSafeForQuery('ruleTypeId', id);
       const andNodes = [
         nodeBuilder.is(opts.fieldNames.ruleTypeId, id),

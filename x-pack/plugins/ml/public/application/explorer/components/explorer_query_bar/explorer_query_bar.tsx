@@ -8,7 +8,14 @@
 import React, { FC, useState, useEffect } from 'react';
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import {
+  fromKueryExpression,
+  KqlFunctionNode,
+  luceneStringToDsl,
+  toElasticsearchQuery,
+  nodeTypes as kqlNodeTypes,
+  functions as kqlFunctions,
+} from '@kbn/es-query';
 import { Query, QueryStringInput } from '../../../../../../../../src/plugins/data/public';
 import { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
@@ -28,23 +35,21 @@ export function getKqlQueryValues({
 }): { clearSettings: boolean; settings: any } {
   let influencersFilterQuery: InfluencersFilterQuery = {};
   const filteredFields: string[] = [];
-  const ast = fromKueryExpression(inputString);
-  const isAndOperator = ast && ast.function === 'and';
+  const ast = fromKueryExpression<KqlFunctionNode>(inputString);
+  const isAndOperator = kqlFunctions.and.isNode(ast);
   // if ast.type == 'function' then layout of ast.arguments:
   // [{ arguments: [ { type: 'literal', value: 'AAL' } ] },{ arguments: [ { type: 'literal', value: 'AAL' } ] }]
-  if (ast && Array.isArray(ast.arguments)) {
-    ast.arguments.forEach((arg) => {
-      if (arg.arguments !== undefined) {
-        arg.arguments.forEach((nestedArg: { type: string; value: string }) => {
-          if (typeof nestedArg.value === 'string') {
-            filteredFields.push(nestedArg.value);
-          }
-        });
-      } else if (typeof arg.value === 'string') {
-        filteredFields.push(arg.value);
-      }
-    });
-  }
+  ast.arguments.forEach((arg) => {
+    if (kqlNodeTypes.function.isNode(arg)) {
+      arg.arguments.forEach((nestedArg) => {
+        if (kqlNodeTypes.literal.isNode(nestedArg)) {
+          filteredFields.push(`${nestedArg.value}`);
+        }
+      });
+    } else if (kqlNodeTypes.literal.isNode(arg)) {
+      filteredFields.push(`${arg.value}`);
+    }
+  });
   if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
     influencersFilterQuery = toElasticsearchQuery(fromKueryExpression(inputString), indexPattern);
   } else if (queryLanguage === SEARCH_QUERY_LANGUAGE.LUCENE) {

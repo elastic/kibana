@@ -9,9 +9,12 @@
 import * as functionType from './function';
 import * as literal from './literal';
 import * as wildcard from './wildcard';
+import * as suggestion from './suggestion';
+
 import { KQL_NODE_TYPE_FUNCTION } from './function';
 import { KQL_NODE_TYPE_LITERAL } from './literal';
 import { KQL_NODE_TYPE_WILDCARD } from './wildcard';
+import { KQL_NODE_TYPE_SUGGESTION } from './suggestion';
 
 export { nodeBuilder } from './node_builder';
 
@@ -22,4 +25,5 @@ export const nodeTypes = {
   [KQL_NODE_TYPE_FUNCTION]: functionType,
   [KQL_NODE_TYPE_LITERAL]: literal,
   [KQL_NODE_TYPE_WILDCARD]: wildcard,
+  [KQL_NODE_TYPE_SUGGESTION]: suggestion,
 };

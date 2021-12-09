@@ -9,18 +9,14 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { EuiCallOut, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { fromKueryExpression, luceneStringToDsl, Query } from '@kbn/es-query';
 import { AlertTypeParamsExpressionProps } from '../../../../../triggers_actions_ui/public';
 import { GeoContainmentAlertParams } from '../types';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
-import {
-  esQuery,
-  esKuery,
-  Query,
-  QueryStringInput,
-} from '../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../../src/plugins/data/public';
 
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',
@@ -40,9 +36,7 @@ const DEFAULT_VALUES = {
 function validateQuery(query: Query) {
   try {
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    query.language === 'kuery'
-      ? esKuery.fromKueryExpression(query.query)
-      : esQuery.luceneStringToDsl(query.query);
+    query.language === 'kuery' ? fromKueryExpression(query.query) : luceneStringToDsl(query.query);
   } catch (err) {
     return false;
   }

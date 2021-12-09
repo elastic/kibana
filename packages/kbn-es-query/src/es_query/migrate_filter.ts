@@ -23,7 +23,7 @@ export interface DeprecatedMatchPhraseFilter extends Filter {
 }
 
 function isDeprecatedMatchPhraseFilter(filter: Filter): filter is DeprecatedMatchPhraseFilter {
-  const [fieldName] = Object.keys(get(filter, 'match') || get(filter, 'query.match'));
+  const [fieldName] = Object.keys(get(filter, 'match') ?? get(filter, 'query.match') ?? {});
   return Boolean(
     fieldName &&
       (get(filter, ['query', 'match', fieldName, 'type']) === 'phrase' ||

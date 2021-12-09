@@ -8,15 +8,16 @@
 
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 
+import { KqlSuggestionNode } from '@kbn/es-query';
 import { setupGetFieldSuggestions } from './field';
 import {
   indexPatterns as indexPatternsUtils,
   QuerySuggestionGetFnArgs,
-  KueryNode,
 } from '../../../../../../../src/plugins/data/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 
-const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
+const mockKueryNode = (kueryNode: Partial<KqlSuggestionNode>) =>
+  kueryNode as unknown as KqlSuggestionNode;
 
 describe('Kuery field suggestions', () => {
   let querySuggestionsArgs: QuerySuggestionGetFnArgs;

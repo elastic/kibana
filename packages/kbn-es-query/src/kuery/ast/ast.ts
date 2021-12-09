@@ -44,10 +44,11 @@ export const fromLiteralExpression = (
  * Generates the KQL AST from the given expression
  * @see grammar.peggy
  */
-export const fromKueryExpression = (
-  expression: string,
+export const fromKueryExpression = <T extends KqlNode = KqlNode>(
+  expression: string | Record<string, any>,
   parseOptions: Partial<KueryParseOptions> = {}
-) => {
+): T => {
+  if (typeof expression !== 'string') throw new Error('Cannot parse KQL expression from object');
   try {
     return fromExpression(expression, parseOptions);
   } catch (error) {

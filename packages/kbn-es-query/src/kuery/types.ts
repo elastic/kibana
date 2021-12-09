@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 /**
  * @public
  */
-export type DslQuery = estypes.QueryDslQueryContainer;
+export type { QueryDslQueryContainer as DslQuery } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+export type {
+  KqlNode,
+  KqlLiteralNode,
+  KqlWildcardNode,
+  KqlFunctionNode,
+  KqlSuggestionNode,
+} from './node_types/types';
 
 /** @internal */
 export interface KueryParseOptions {
@@ -27,8 +32,6 @@ export interface KqlContext {
     path: string;
   };
 }
-
-export { nodeTypes } from './node_types';
 
 /** @public */
 export interface KueryQueryOptions {

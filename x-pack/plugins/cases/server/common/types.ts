@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KueryNode } from '@kbn/es-query';
+import type { KqlFunctionNode } from '@kbn/es-query';
 import { SavedObjectFindOptions } from '../../common/api';
 
 /**
@@ -17,5 +17,5 @@ export interface AlertInfo {
 }
 
 export type SavedObjectFindOptionsKueryNode = Omit<SavedObjectFindOptions, 'filter'> & {
-  filter?: KueryNode;
+  filter?: KqlFunctionNode;
 };

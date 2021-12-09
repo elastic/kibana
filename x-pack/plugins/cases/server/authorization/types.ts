@@ -6,7 +6,7 @@
  */
 
 import { EcsEventType, KibanaRequest } from 'kibana/server';
-import type { KueryNode } from '@kbn/es-query';
+import type { KqlFunctionNode } from '@kbn/es-query';
 import { Space } from '../../../spaces/server';
 
 /**
@@ -115,7 +115,7 @@ export interface AuthFilterHelpers {
   /**
    * The owner filter to pass to the saved object client's find operation that is scoped to the authorized owners
    */
-  filter?: KueryNode;
+  filter?: KqlFunctionNode;
   /**
    * Utility function for checking that the returned entities are in fact authorized for the user making the request
    */

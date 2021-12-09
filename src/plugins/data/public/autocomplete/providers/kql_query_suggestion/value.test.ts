@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { KqlSuggestionNode } from '@kbn/es-query';
 import { setupGetValueSuggestions } from './value';
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { QuerySuggestionGetFnArgs, KueryNode } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestionGetFnArgs } from '../../../../../../../src/plugins/data/public';
 
-const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
+const mockKueryNode = (kueryNode: Partial<KqlSuggestionNode>) =>
+  kueryNode as unknown as KqlSuggestionNode;
 
 describe('Kuery value suggestions', () => {
   let getSuggestions: ReturnType<typeof setupGetValueSuggestions>;

@@ -79,7 +79,7 @@ export function createMergedEsQuery(
 ) {
   let combinedQuery: QueryDslQueryContainer = getDefaultQuery();
 
-  if (query && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+  if (query && query.language === SEARCH_QUERY_LANGUAGE.KUERY && typeof query.query === 'string') {
     const ast = fromKueryExpression(query.query);
     if (query.query !== '') {
       combinedQuery = toElasticsearchQuery(ast, indexPattern);

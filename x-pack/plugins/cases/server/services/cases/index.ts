@@ -20,7 +20,7 @@ import {
 } from 'kibana/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { nodeBuilder, KueryNode } from '@kbn/es-query';
+import { nodeBuilder, KqlFunctionNode } from '@kbn/es-query';
 
 import { SecurityPluginSetup } from '../../../../security/server';
 import {
@@ -71,7 +71,7 @@ import { ESCaseAttributes } from './types';
 
 interface GetCaseIdsByAlertIdArgs extends ClientArgs {
   alertId: string;
-  filter?: KueryNode;
+  filter?: KqlFunctionNode;
 }
 
 interface PushedArgs {
@@ -198,12 +198,12 @@ type FindCaseOptions = CasesFindRequest & SavedObjectFindOptionsKueryNode;
 
 interface GetTagsArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  filter?: KueryNode;
+  filter?: KqlFunctionNode;
 }
 
 interface GetReportersArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  filter?: KueryNode;
+  filter?: KqlFunctionNode;
 }
 
 const transformNewSubCase = ({
@@ -955,7 +955,7 @@ export class CasesService {
         };
       }
 
-      let filter: KueryNode | undefined;
+      let filter: KqlFunctionNode | undefined;
       if (!includeSubCaseComments) {
         // if other filters were passed in then combine them to filter out sub case comments
         const associationTypeFilter = nodeBuilder.is(

@@ -78,7 +78,7 @@ export type Filter = {
 
 // eslint-disable-next-line
 export type Query = {
-  query: string;
+  query: string | Record<string, any>;
   language: string;
 };
 

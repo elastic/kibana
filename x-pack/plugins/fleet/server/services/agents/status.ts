@@ -8,8 +8,8 @@
 import type { ElasticsearchClient } from 'src/core/server';
 import pMap from 'p-map';
 
-import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression } from '@kbn/es-query';
+import type { KqlFunctionNode } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 
 import { AGENTS_PREFIX } from '../../constants';
 import type { AgentStatus } from '../../types';
@@ -27,24 +27,11 @@ export async function getAgentStatusById(
 export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
 
 function joinKuerys(...kuerys: Array<string | undefined>) {
-  return kuerys
-    .filter((kuery) => kuery !== undefined)
-    .reduce((acc: KueryNode | undefined, kuery: string | undefined): KueryNode | undefined => {
-      if (kuery === undefined) {
-        return acc;
-      }
-      const normalizedKuery: KueryNode = fromKueryExpression(removeSOAttributes(kuery || ''));
-
-      if (!acc) {
-        return normalizedKuery;
-      }
-
-      return {
-        type: 'function',
-        function: 'and',
-        arguments: [acc, normalizedKuery],
-      };
-    }, undefined as KueryNode | undefined);
+  const nodes = kuerys
+    .filter((kuery): kuery is string => kuery !== undefined)
+    .map((kuery) => removeSOAttributes(kuery))
+    .map((kuery) => fromKueryExpression<KqlFunctionNode>(kuery));
+  return nodeBuilder.and(nodes);
 }
 
 export async function getAgentStatusForAgentPolicy(

@@ -12,6 +12,10 @@ import { KqlLiteralNode, KqlLiteralType } from './literal';
 export const KQL_NODE_TYPE_WILDCARD = 'wildcard';
 export const KQL_WILDCARD_SYMBOL = '@kuery-wildcard@';
 
+/**
+ * KQL node representing a wildcard (e.g. "logs*"), which can be used to represent multiple field
+ * names or multiple values
+ */
 export interface KqlWildcardNode extends KqlNode {
   type: typeof KQL_NODE_TYPE_WILDCARD;
   value: KqlLiteralType;

@@ -33,11 +33,7 @@ describe('nodeBuilder', () => {
     });
 
     test('KueryNode value', () => {
-      const literalValue = {
-        type: 'literal' as 'literal',
-        value: 'bar',
-      };
-      const nodes = nodeBuilder.is('foo', literalValue);
+      const nodes = nodeBuilder.is('foo', 'bar');
       const query = toElasticsearchQuery(nodes);
       expect(query).toMatchInlineSnapshot(`
         Object {

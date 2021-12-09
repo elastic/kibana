@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { KqlFunctionNode, nodeBuilder } from '@kbn/es-query';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -75,7 +76,6 @@ import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from './audit_events';
-import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField } from './lib';
 import { getAlertExecutionStatusPending } from '../lib/alert_execution_status';
 import { AlertInstance } from '../alert_instance';
@@ -619,7 +619,7 @@ export class RulesClient {
         (authorizationFilter && options.filter
           ? nodeBuilder.and([
               esKuery.fromKueryExpression(options.filter),
-              authorizationFilter as KueryNode,
+              authorizationFilter as KqlFunctionNode,
             ])
           : authorizationFilter) ?? options.filter,
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
@@ -691,7 +691,10 @@ export class RulesClient {
       ...options,
       filter:
         (authorizationFilter && filter
-          ? nodeBuilder.and([esKuery.fromKueryExpression(filter), authorizationFilter as KueryNode])
+          ? nodeBuilder.and([
+              esKuery.fromKueryExpression(filter),
+              authorizationFilter as KqlFunctionNode,
+            ])
           : authorizationFilter) ?? filter,
       page: 1,
       perPage: 0,

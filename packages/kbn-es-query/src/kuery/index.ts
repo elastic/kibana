@@ -6,8 +6,22 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { KqlNode, DslQuery } from './types';
 import { toElasticsearchQuery as astToElasticsearchQuery } from './ast';
+
+export type {
+  DslQuery,
+  KueryQueryOptions,
+  KqlNode,
+  KqlLiteralNode,
+  KqlWildcardNode,
+  KqlFunctionNode,
+  KqlSuggestionNode,
+} from './types';
+export { fromKueryExpression } from './ast';
+export { KQLSyntaxError } from './kuery_syntax_error';
+export { nodeTypes, nodeBuilder } from './node_types';
+export { functions } from './functions';
 
 /**
  * @params {String} indexPattern
@@ -17,10 +31,10 @@ import { toElasticsearchQuery as astToElasticsearchQuery } from './ast';
  * about how we craft the queries (e.g. scripted fields)
  */
 export const toElasticsearchQuery = (...params: Parameters<typeof astToElasticsearchQuery>) => {
-  return astToElasticsearchQuery(...params) as estypes.QueryDslQueryContainer;
+  return astToElasticsearchQuery(...params) as DslQuery;
 };
 
-export type { DslQuery, KueryQueryOptions } from './types';
-export { KQLSyntaxError } from './kuery_syntax_error';
-export { nodeTypes, nodeBuilder } from './node_types';
-export { fromKueryExpression } from './ast';
+/**
+ * @deprecated Use KqlNode instead
+ */
+export type KueryNode = KqlNode;

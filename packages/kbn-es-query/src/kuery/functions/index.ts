@@ -31,6 +31,8 @@ export {
   KQL_FUNCTION_NAME_RANGE,
 };
 
+export { and, exists, is, nested, not, or, range };
+
 export const functions = {
   [KQL_FUNCTION_NAME_AND]: and,
   [KQL_FUNCTION_NAME_EXISTS]: exists,

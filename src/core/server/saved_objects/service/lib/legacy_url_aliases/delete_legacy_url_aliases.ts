@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import * as esKuery from '@kbn/es-query';
-
 import { getErrorMessage as getEsErrorMessage } from '../../../../elasticsearch';
 import type { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 import type { IndexMapping } from '../../../mappings';
@@ -15,6 +13,7 @@ import { LEGACY_URL_ALIAS_TYPE } from '../../../object_types';
 import type { RepositoryEsClient } from '../repository_es_client';
 import { getSearchDsl } from '../search_dsl';
 import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
+import { nodeBuilder } from '../../../../../../../../../../../private/var/tmp/_bazel_lukas/0e089c5e2da9a36b2c2982c0e50789cb/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-es-query';
 
 /** @internal */
 export interface DeleteLegacyUrlAliasesParams {
@@ -66,10 +65,9 @@ export async function deleteLegacyUrlAliases(params: DeleteLegacyUrlAliasesParam
     return;
   }
 
-  const { buildNode } = esKuery.nodeTypes.function;
-  const match1 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.targetType`, type);
-  const match2 = buildNode('is', `${LEGACY_URL_ALIAS_TYPE}.targetId`, id);
-  const kueryNode = buildNode('and', [match1, match2]);
+  const match1 = nodeBuilder.is(`${LEGACY_URL_ALIAS_TYPE}.targetType`, type);
+  const match2 = nodeBuilder.is(`${LEGACY_URL_ALIAS_TYPE}.targetId`, id);
+  const kueryNode = nodeBuilder.and([match1, match2]);
 
   try {
     await client.updateByQuery(
