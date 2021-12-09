@@ -60,8 +60,8 @@ export function panwLogsSpecProvider(context: TutorialContext): TutorialSchema {
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/panw_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['security'],
   };
 }
