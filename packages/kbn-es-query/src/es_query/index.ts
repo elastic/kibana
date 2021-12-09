@@ -22,4 +22,5 @@ export type {
   IFieldSubTypeMulti,
   IFieldSubTypeMultiOptional,
   IFieldSubTypeNested,
+  IFieldSubTypeNestedOptional,
 } from './types';
