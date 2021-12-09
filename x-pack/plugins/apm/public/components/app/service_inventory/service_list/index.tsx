@@ -159,7 +159,6 @@ export function getServiceColumns({
         <ListMetric
           series={comparisonData?.currentPeriod[serviceName]?.latency}
           comparisonSeries={
-            // @ts-expect-error ts 4.5 upgrade
             comparisonData?.previousPeriod[serviceName]?.latency
           }
           hideSeries={!showWhenSmallOrGreaterThanLarge}
@@ -180,7 +179,6 @@ export function getServiceColumns({
         <ListMetric
           series={comparisonData?.currentPeriod[serviceName]?.throughput}
           comparisonSeries={
-            // @ts-expect-error ts 4.5 upgrade
             comparisonData?.previousPeriod[serviceName]?.throughput
           }
           hideSeries={!showWhenSmallOrGreaterThanLarge}
@@ -205,7 +203,6 @@ export function getServiceColumns({
               comparisonData?.currentPeriod[serviceName]?.transactionErrorRate
             }
             comparisonSeries={
-              // @ts-expect-error ts 4.5 upgrade
               comparisonData?.previousPeriod[serviceName]?.transactionErrorRate
             }
             hideSeries={!showWhenSmallOrGreaterThanLarge}
