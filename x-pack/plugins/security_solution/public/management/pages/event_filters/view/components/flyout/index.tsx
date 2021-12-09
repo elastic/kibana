@@ -32,7 +32,9 @@ import {
 } from '../../../store/selector';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
 import { Ecs } from '../../../../../../../common/ecs';
-import { useKibana } from '../../../../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
+import { useGetEndpointSpecificPolicies } from '../../../../../services/policies/hooks';
+import { getLoadPoliciesError } from '../../../../../common/translations';
 
 export interface EventFiltersFlyoutProps {
   type?: 'create' | 'edit';
@@ -45,6 +47,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
   ({ onCancel, id, type = 'create', data }) => {
     useEventFiltersNotification();
     const [enrichedData, setEnrichedData] = useState<Ecs | null>();
+    const toasts = useToasts();
     const dispatch = useDispatch<Dispatch<AppAction>>();
     const formHasError = useEventFiltersSelector(getFormHasError);
     const creationInProgress = useEventFiltersSelector(isCreationInProgress);
@@ -52,6 +55,13 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
     const {
       data: { search },
     } = useKibana().services;
+
+    // load the list of policies>
+    const policiesRequest = useGetEndpointSpecificPolicies({
+      onError: (error) => {
+        toasts.addWarning(getLoadPoliciesError(error));
+      },
+    });
 
     useEffect(() => {
       if (creationSuccessful) {
@@ -204,7 +214,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          <EventFiltersForm allowSelectOs={!data} />
+          <EventFiltersForm allowSelectOs={!data} policies={policiesRequest?.data?.items ?? []} />
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>

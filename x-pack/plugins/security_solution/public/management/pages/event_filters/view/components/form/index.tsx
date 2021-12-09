@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback, useState } from 'react';
+import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import {
@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
 
-import { OperatingSystem } from '../../../../../../../common/endpoint/types';
+import { OperatingSystem, PolicyData } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
 import { filterIndexPatterns } from '../../../../../../common/components/exceptions/helpers';
 import { Loader } from '../../../../../../common/components/loader';
@@ -43,6 +43,12 @@ import {
   EffectedPolicySelection,
   EffectedPolicySelectProps,
 } from '../../../../../components/effected_policy_select';
+import {
+  getArtifactTagsByEffectedPolicySelection,
+  getArtifactTagsWithoutPolicies,
+  getEffectedPolicySelectionByTags,
+  isGlobalPolicyEffected,
+} from '../../../../../components/effected_policy_select/utils';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -52,10 +58,12 @@ const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
 
 interface EventFiltersFormProps {
   allowSelectOs?: boolean;
+  policies: PolicyData[];
 }
 export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
-  ({ allowSelectOs = false }) => {
+  ({ allowSelectOs = false, policies }) => {
     const { http, data } = useKibana().services;
+
     const dispatch = useDispatch<Dispatch<AppAction>>();
     const exception = useEventFiltersSelector(getFormEntryStateMutable);
     const hasNameError = useEventFiltersSelector(getHasNameError);
@@ -68,8 +76,15 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
 
     const [selection, setSelection] = useState<EffectedPolicySelection>({
       selected: [],
-      isGlobal: true,
+      isGlobal: isGlobalPolicyEffected(exception?.tags),
     });
+
+    // set current policies if not previously selected
+    useEffect(() => {
+      if (selection.selected.length === 0 && exception?.tags) {
+        setSelection(getEffectedPolicySelectionByTags(exception?.tags ?? [], policies));
+      }
+    }, [exception?.tags, policies, selection.selected.length]);
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
@@ -272,23 +287,43 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
       [allowSelectOs, exceptionBuilderComponentMemo, osInputMemo]
     );
 
+    const handleOnChangeEffectScope: EffectedPolicySelectProps['onChange'] = useCallback(
+      (currentSelection) => {
+        if (currentSelection.isGlobal) {
+          // Preserve last selection inputs
+          setSelection({ ...selection, isGlobal: true });
+        } else {
+          setSelection(currentSelection);
+        }
+
+        if (!exception) return;
+
+        dispatch({
+          type: 'eventFiltersChangeForm',
+          payload: {
+            entry: {
+              ...exception,
+              tags: getArtifactTagsByEffectedPolicySelection(
+                currentSelection,
+                getArtifactTagsWithoutPolicies(exception?.tags ?? [])
+              ),
+            },
+          },
+        });
+      },
+      [dispatch, exception, selection]
+    );
     const policiesSection = useMemo(
       () => (
         <EffectedPolicySelect
-          options={[]}
+          selected={selection.selected}
+          options={policies}
           isGlobal={selection.isGlobal}
           isPlatinumPlus={true}
-          onChange={(currentSelection) => {
-            if (currentSelection.isGlobal) {
-              // Preserve last selection inputs
-              setSelection({ ...selection, isGlobal: true });
-            } else {
-              setSelection(currentSelection);
-            }
-          }}
+          onChange={handleOnChangeEffectScope}
         />
       ),
-      [selection]
+      [policies, selection, handleOnChangeEffectScope]
     );
 
     const commentsSection = useMemo(
