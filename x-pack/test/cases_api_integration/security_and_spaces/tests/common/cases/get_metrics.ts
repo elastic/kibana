@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         caseId: closedCaseId,
         features: ['bananas'],
-        expectedHttpCode: 500,
+        expectedHttpCode: 400,
         // casting here because we're expecting an error with a message field
       })) as unknown as { message: string };
 
