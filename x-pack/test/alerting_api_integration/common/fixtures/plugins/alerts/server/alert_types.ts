@@ -521,7 +521,7 @@ function getCancellableRuleType() {
     doLongPostProcessing: schema.boolean(),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  const result: AlertType<ParamsType, never, {}, {}, {}, 'default'> = {
+  const result: RuleType<ParamsType, never, {}, {}, {}, 'default'> = {
     id: 'test.cancellableRule',
     name: 'Test: Rule That Implements Cancellation',
     actionGroups: [{ id: 'default', name: 'Default' }],
