@@ -8,7 +8,6 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { Logger } from 'src/core/server';
 import { chunk } from 'lodash';
-import { asyncForEach } from '@kbn/std';
 
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -43,10 +42,12 @@ interface ActionPerformError {
   };
 }
 
+type ActionPerform = undefined | ActionPerformError;
+// wraps bulk action and catches errors
 const actionPerformWrapper = async (
   func: () => Promise<void>,
   rule: FindResult<RuleParams>['data'][number]
-): Promise<undefined | ActionPerformError> => {
+): Promise<ActionPerform> => {
   try {
     await func();
   } catch (err) {
@@ -57,21 +58,26 @@ const actionPerformWrapper = async (
   }
 };
 
+// to avoid large number of concurrent requests, we split request in chunks and run them sequentially
 const chunkifyRulesAction = async <T extends FindResult<RuleParams>['data'][number]>(
   rules: T[],
   action: (rule: T) => Promise<void>
-): Promise<Array<undefined | ActionPerformError>> => {
-  const processedChunks: Array<Array<undefined | ActionPerformError>> = [];
-  const chunks = chunk(rules, BULK_ACTION_RULES_CHUNK);
-
-  await asyncForEach(chunks, async (rulesChunk) => {
-    const processedChunk = await Promise.all(
-      rulesChunk.map(async (rule) => actionPerformWrapper(async () => action(rule), rule))
+): Promise<ActionPerform[]> => {
+  const processChunks = async (
+    rulesChunks: T[][],
+    acc: ActionPerform[]
+  ): Promise<ActionPerform[]> => {
+    if (rulesChunks.length === 0) {
+      return acc;
+    }
+    const processed = await Promise.all(
+      rulesChunks[0].map(async (rule) => actionPerformWrapper(async () => action(rule), rule))
     );
-    processedChunks.push(processedChunk);
-  });
 
-  return processedChunks.flat();
+    return processChunks(rulesChunks.slice(1), [...acc, ...processed]);
+  };
+
+  return processChunks(chunk(rules, BULK_ACTION_RULES_CHUNK), []);
 };
 
 export const performBulkActionRoute = (

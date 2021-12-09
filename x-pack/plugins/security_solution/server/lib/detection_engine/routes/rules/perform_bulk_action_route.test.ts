@@ -217,4 +217,19 @@ describe.each([
       });
     });
   });
+
+  it('should process large number of rules, larger than request chunk', async () => {
+    const rulesNumber = 3_000;
+    clients.rulesClient.find.mockResolvedValue(
+      getFindResultWithMultiHits({
+        data: Array.from({ length: rulesNumber }).map(() => mockRule),
+        total: rulesNumber,
+      })
+    );
+
+    const response = await server.inject(getBulkActionRequest(), context);
+
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual({ success: true, rules_count: rulesNumber });
+  });
 });
