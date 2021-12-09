@@ -31,7 +31,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         ruleTypeId: 'test.patternLongRunning.cancelAlertsOnRuleTimeout',
         pattern: [true, true, true, true, true],
       });
-      const statuses = [];
+      const statuses: Array<{ status: string; error: { message: string; reason: string } }> = [];
       // get the events we're expecting
       const events = await retry.try(async () => {
         const { body: rule } = await supertest.get(
@@ -70,14 +70,20 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
       // We can't actually guarantee an execution didn't happen again and not timeout
       // so we need to be a bit safe in how we detect this situation by looking at the last
-      // two instead of the last one
-      const lastTwo = [statuses.pop(), statuses.pop()];
-      const lastErrorStatus = lastTwo[0].status === 'error' ? lastTwo[0] : lastTwo[1];
-      expect(lastErrorStatus.status).to.eql('error');
-      expect(lastErrorStatus.error.message).to.eql(
+      // n instead of the last one
+      const lookBackCount = 5;
+      let lastErrorStatus = null;
+      for (let i = 0; i < lookBackCount; i++) {
+        lastErrorStatus = statuses.pop();
+        if (lastErrorStatus?.status === 'error') {
+          break;
+        }
+      }
+      expect(lastErrorStatus?.status).to.eql('error');
+      expect(lastErrorStatus?.error.message).to.eql(
         `test.patternLongRunning.cancelAlertsOnRuleTimeout:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of 3s`
       );
-      expect(lastErrorStatus.error.reason).to.eql('timeout');
+      expect(lastErrorStatus?.error.reason).to.eql('timeout');
     });
 
     it('writes event log document for timeout for each rule execution that ends in timeout - some executions times out', async () => {
