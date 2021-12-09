@@ -27,7 +27,8 @@ function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisua
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.changeType === 'reorder' ||
-    shouldRejectIntervals
+    shouldRejectIntervals ||
+    table.columns.some((col) => col.operation.isStaticValue)
   );
 }
 
@@ -232,11 +233,7 @@ export function suggestions({
         ],
       },
       previewIcon: 'bullseye',
-      hide:
-        groups.length !== 2 ||
-        table.changeType === 'reduced' ||
-        hasIntervalScale(groups) ||
-        (state && state.shape === 'mosaic'),
+      hide: true,
     });
   }
 
@@ -275,11 +272,7 @@ export function suggestions({
         ],
       },
       previewIcon: 'bullseye',
-      hide:
-        groups.length !== 1 ||
-        table.changeType === 'reduced' ||
-        hasIntervalScale(groups) ||
-        (state && state.shape === 'waffle'),
+      hide: true,
     });
   }
 
