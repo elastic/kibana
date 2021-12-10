@@ -45,7 +45,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
   meta: TMeta,
   extractFields: Function
 ): Promise<Array<SplittedData<TMeta>>> {
-  if (!meta) {
+  if (!Object.keys(meta ?? {}).length) {
     meta = get(resp, `aggregations.${series.id}.meta`);
   }
 

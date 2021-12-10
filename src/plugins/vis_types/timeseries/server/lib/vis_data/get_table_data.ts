@@ -18,7 +18,7 @@ import { extractFieldLabel } from '../../../common/fields_utils';
 import { isAggSupported } from './helpers/check_aggs';
 import { isEntireTimeRangeMode } from './helpers/get_timerange_mode';
 import { isConfigurationFeatureEnabled } from '../../../common/check_ui_restrictions';
-import { FilterCannotBeAppliedError } from '../../../common/errors';
+import { FilterCannotBeAppliedError, PivotNotSelectedForTableError } from '../../../common/errors';
 
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -86,6 +86,10 @@ export async function getTableData(
         throw new FilterCannotBeAppliedError();
       }
     });
+
+    if (!panel.pivot_id) {
+      throw new PivotNotSelectedForTableError();
+    }
 
     const body = await buildTableRequest({
       req,

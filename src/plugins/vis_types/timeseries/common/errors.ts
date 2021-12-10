@@ -69,3 +69,14 @@ export class FilterCannotBeAppliedError extends UIError {
     super(filterCannotBeAppliedErrorMessage);
   }
 }
+
+export class PivotNotSelectedForTableError extends UIError {
+  constructor() {
+    super(
+      i18n.translate('visTypeTimeseries.table.noResultsAvailableWithDescriptionMessage', {
+        defaultMessage:
+          'No results available. You must choose a group by field for this visualization.',
+      })
+    );
+  }
+}
