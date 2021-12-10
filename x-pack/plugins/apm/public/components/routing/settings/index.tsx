@@ -110,11 +110,11 @@ export const settings = {
       element: <ApmIndices />,
     }),
     page({
-      path: '/settings/customize-ui',
+      path: '/settings/custom-links',
       title: i18n.translate('xpack.apm.views.settings.customizeUI.title', {
-        defaultMessage: 'Customize app',
+        defaultMessage: 'Custom Links',
       }),
-      tab: 'customize-ui',
+      tab: 'custom-links',
       element: <CustomizeUI />,
     }),
     page({
