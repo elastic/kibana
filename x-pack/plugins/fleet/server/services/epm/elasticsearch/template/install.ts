@@ -341,7 +341,7 @@ export async function ensureDefaultComponentTemplate(
     await putComponentTemplate(esClient, logger, {
       name: FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
       body: FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
-    });
+    }).clusterPromise;
   }
 
   return { isCreated: !existingTemplate };

@@ -19,8 +19,7 @@ async function removeLogFile() {
   await fs.unlink(logFilePath).catch(() => void 0);
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/118626
-describe.skip('migration from 7.13 to 7.14+ with many failed action_tasks', () => {
+describe('migration from 7.13 to 7.14+ with many failed action_tasks', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let root: Root;
   let startES: () => Promise<kbnTestServer.TestElasticsearchUtils>;
