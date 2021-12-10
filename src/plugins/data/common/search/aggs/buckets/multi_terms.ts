@@ -34,6 +34,7 @@ export interface AggParamsMultiTerms extends BaseAggParams {
   size?: number;
   otherBucket?: boolean;
   otherBucketLabel?: string;
+  separatorLabel?: string;
 }
 
 export const getMultiTermsBucketAgg = () => {
@@ -83,6 +84,7 @@ export const getMultiTermsBucketAgg = () => {
         params: {
           otherBucketLabel: params.otherBucketLabel,
           paramsPerField: formats,
+          separator: agg.params.separatorLabel,
         },
       };
     },
@@ -140,6 +142,11 @@ export const getMultiTermsBucketAgg = () => {
           defaultMessage: 'Label for other bucket',
         }),
         shouldShow: (agg) => agg.getParam('otherBucket'),
+        write: noop,
+      },
+      {
+        name: 'separatorLabel',
+        type: 'string',
         write: noop,
       },
     ],
