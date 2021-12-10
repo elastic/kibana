@@ -28,29 +28,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
           kuery: '',
-          environment: 'ENVIRONMENT_ALL'
+          environment: 'ENVIRONMENT_ALL',
         },
       },
     });
   }
 
-  registry.when(
-    'Service nodes when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
-      it('handles the empty state', async () => {
-        const response = await callApi();
+  registry.when('Service nodes when data is not loaded', { config: 'basic', archives: [] }, () => {
+    it('handles the empty state', async () => {
+      const response = await callApi();
 
-        expect(response.status).to.be(200);
+      expect(response.status).to.be(200);
 
-        expectSnapshot(response.body).toMatchInline(`
+      expectSnapshot(response.body).toMatchInline(`
           Object {
             "serviceNodes": Array [],
           }
         `);
-      });
-    }
-  );
+    });
+  });
 
   registry.when(
     'Service nodes when data is loaded',
@@ -64,14 +60,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(1)
             .flatMap((timestamp) =>
               instance
-              .appMetrics({
-                'system.process.cpu.total.norm.pct': 1,
-                'jvm.memory.heap.used': 1000,
-                'jvm.memory.non_heap.used': 100,
-                'jvm.thread.count': 25,
-              })
-              .timestamp(timestamp)
-              .serialize()
+                .appMetrics({
+                  'system.process.cpu.total.norm.pct': 1,
+                  'jvm.memory.heap.used': 1000,
+                  'jvm.memory.non_heap.used': 100,
+                  'jvm.thread.count': 25,
+                })
+                .timestamp(timestamp)
+                .serialize()
             )
         );
       });
