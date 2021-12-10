@@ -31,8 +31,6 @@ import {
   buildSiemResponse,
 } from '../utils';
 
-import { patchRules } from '../../rules/patch_rules';
-import { legacyMigrate } from '../../rules/utils';
 import {
   getTupleDuplicateErrorsAndUniqueRules,
   getInvalidConnectors,
