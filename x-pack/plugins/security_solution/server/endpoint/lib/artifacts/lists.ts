@@ -272,7 +272,7 @@ function appendProcessNameEntry({
     type: 'wildcard';
     value: string;
   };
-  os: ExceptionListItemSchema['os_types'][0];
+  os: ExceptionListItemSchema['os_types'][number];
 }): TranslatedPerformantEntries {
   const entries: TranslatedPerformantEntries = [
     wildcardProcessEntry,
@@ -296,7 +296,7 @@ function appendProcessNameEntry({
 function translateEntry(
   schemaVersion: string,
   entry: Entry | EntryNested,
-  os: ExceptionListItemSchema['os_types'][0]
+  os: ExceptionListItemSchema['os_types'][number]
 ): TranslatedEntry | TranslatedPerformantEntries | undefined {
   switch (entry.type) {
     case 'nested': {
