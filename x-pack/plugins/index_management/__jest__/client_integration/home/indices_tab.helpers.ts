@@ -45,7 +45,6 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
   /**
    * User Actions
    */
-
   const clickContextMenuOption = async (optionDataTestSubject: string) => {
     const { find, component } = testBed;
 
