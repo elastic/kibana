@@ -97,7 +97,7 @@ describe('CurationsSettingsLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions/settings'
+          '/internal/app_search/engines/some-engine/adaptive_relevance/settings'
         );
         expect(CurationsSettingsLogic.actions.onCurationsSettingsLoad).toHaveBeenCalledWith({
           enabled: true,
@@ -204,7 +204,7 @@ describe('CurationsSettingsLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions/settings',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/settings',
           {
             body: JSON.stringify({
               curation: {

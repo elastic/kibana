@@ -332,6 +332,7 @@ describe('policy preconfiguration', () => {
         id: 'test-id',
         package_policies: [
           {
+            id: 'test-package',
             package: { name: 'test_package' },
             name: 'Test package',
           },
@@ -542,6 +543,17 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
             name: 'Different package',
           },
         ],
+      },
+      basePackagePolicy
+    );
+    expect(hasChanged).toBe(false);
+  });
+
+  it('should not return hasChanged when only namespace field changes', () => {
+    const { hasChanged } = comparePreconfiguredPolicyToCurrent(
+      {
+        ...baseConfig,
+        namespace: 'newnamespace',
       },
       basePackagePolicy
     );

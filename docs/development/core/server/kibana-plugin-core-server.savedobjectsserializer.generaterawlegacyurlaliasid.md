@@ -16,11 +16,11 @@ generateRawLegacyUrlAliasId(namespace: string, type: string, id: string): string
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  namespace | <code>string</code> |  |
-|  type | <code>string</code> |  |
-|  id | <code>string</code> |  |
+|  namespace | string | The namespace of the saved object |
+|  type | string | The saved object type |
+|  id | string | The id of the saved object |
 
 <b>Returns:</b>
 
-`string`
+string
 

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ENABLE_ITOM } from '../../actions/server/constants/connectors';
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 import { METADATA_TRANSFORMS_PATTERN } from './endpoint/constants';
@@ -63,10 +61,10 @@ export const DEFAULT_SPACE_ID = 'default';
 
 // Document path where threat indicator fields are expected. Fields are used
 // to enrich signals, and are copied to threat.enrichments.
-export const DEFAULT_INDICATOR_SOURCE_PATH = 'threat.indicator';
+export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
 export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex';
-export const DEFAULT_THREAT_INDEX_VALUE = ['logs-ti_*'];
+export const DEFAULT_THREAT_INDEX_VALUE = ['filebeat-*'];
 export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
 
 export enum SecurityPageName {
@@ -237,6 +235,11 @@ export const INTERNAL_RULE_ALERT_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_alert_id`
 export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable`;
 
 /**
+ * Internal actions route
+ */
+export const UPDATE_OR_CREATE_LEGACY_ACTIONS = '/internal/api/detection/legacy/notifications';
+
+/**
  * Detection engine routes
  */
 export const DETECTION_ENGINE_URL = '/api/detection_engine';
@@ -304,6 +307,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.resilient',
   '.servicenow',
   '.servicenow-sir',
+  '.servicenow-itom',
   '.slack',
   '.swimlane',
   '.teams',
@@ -312,11 +316,6 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
 
 if (ENABLE_CASE_CONNECTOR) {
   NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.case');
-}
-
-// TODO: Remove when ITOM is ready
-if (ENABLE_ITOM) {
-  NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.push('.servicenow-itom');
 }
 
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';

@@ -44,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
           const { body: result } = await client.search({
             index,
+            // @ts-expect-error buckets_path is incompatible. expected 'string | string[] | Record<string, string> | undefined'.
             body: searchBody,
           });
 
@@ -67,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         const { body: result } = await client.search({
           index,
+          // @ts-expect-error search is incompatible
           body: searchBody,
         });
 
@@ -89,6 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
           const { body: result } = await client.search({
             index,
+            // @ts-expect-error search is incompatible
             body: searchBody,
           });
 
@@ -110,6 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         const { body: result } = await client.search({
           index,
+          // @ts-expect-error search is incompatible
           body: searchBody,
         });
 

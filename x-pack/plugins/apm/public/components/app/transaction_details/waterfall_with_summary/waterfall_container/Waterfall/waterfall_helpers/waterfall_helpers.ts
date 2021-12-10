@@ -271,6 +271,7 @@ const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
 
 const getWaterfallItems = (items: TraceAPIResponse['traceDocs']) =>
   items.map((item) => {
+    // @ts-expect-error processor doesn't exist on Profile
     const docType = item.processor.event;
     switch (docType) {
       case 'span':
@@ -278,7 +279,7 @@ const getWaterfallItems = (items: TraceAPIResponse['traceDocs']) =>
       case 'transaction':
         return getTransactionItem(item as Transaction);
     }
-  });
+  }) as IWaterfallSpanOrTransaction[];
 
 function reparentSpans(waterfallItems: IWaterfallSpanOrTransaction[]) {
   // find children that needs to be re-parented and map them to their correct parent id

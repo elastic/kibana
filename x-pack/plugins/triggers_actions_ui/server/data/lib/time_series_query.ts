@@ -12,7 +12,7 @@ import { DEFAULT_GROUPS } from '../index';
 import { getDateRangeInfo } from './date_range_info';
 
 import { TimeSeriesQuery, TimeSeriesResult, TimeSeriesResultRow } from './time_series_types';
-export { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
+export type { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
 
 export interface TimeSeriesQueryParameters {
   logger: Logger;
@@ -152,6 +152,7 @@ export function getResultFromEs(
     const dateAgg = aggregations.dateAgg;
 
     aggregations.groupAgg = {
+      // @ts-expect-error doesn't contain required doc_count, key_as_string
       buckets: [{ key: 'all documents', dateAgg }],
     };
 

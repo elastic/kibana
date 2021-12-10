@@ -485,7 +485,7 @@ export class ManifestManager {
               try {
                 await this.packagePolicyService.update(
                   this.savedObjectsClient,
-                  // @ts-ignore
+                  // @ts-expect-error TS2345
                   undefined,
                   id,
                   newPackagePolicy

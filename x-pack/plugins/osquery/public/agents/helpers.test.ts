@@ -81,6 +81,7 @@ describe('processAggregations', () => {
         ],
       },
     };
+    // @ts-expect-error input doesn't implement a full interface
     const { platforms, policies, overlap } = processAggregations(input);
     expect(platforms).toEqual([
       {
@@ -107,6 +108,7 @@ describe('processAggregations', () => {
         ],
       },
     };
+    // @ts-expect-error input doesn't implement a full interface
     const { platforms, policies, overlap } = processAggregations(input);
     expect(platforms).toEqual([]);
     expect(policies).toEqual([
@@ -158,6 +160,7 @@ describe('processAggregations', () => {
         ],
       },
     };
+    // @ts-expect-error input doesn't implement a full interface
     const { platforms, policies, overlap } = processAggregations(input);
     expect(platforms).toEqual([
       {

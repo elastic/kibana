@@ -52,7 +52,7 @@ import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from './types';
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 
-export { FleetConfigType } from '../common/types';
+export type { FleetConfigType } from '../common/types';
 
 import { setCustomIntegrations } from './services/custom_integrations';
 

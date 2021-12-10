@@ -51,7 +51,7 @@ export class Aggs extends PureComponent<AggsProps> {
                 name={name}
                 model={row}
                 onAdd={() => handleAdd(this.props, newMetricAggFn)}
-                onChange={onChange}
+                onModelChange={onChange}
                 onDelete={() => handleDelete(this.props, row)}
                 panel={panel}
                 series={model}

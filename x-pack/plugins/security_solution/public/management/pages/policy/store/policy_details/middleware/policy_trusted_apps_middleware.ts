@@ -114,7 +114,7 @@ const checkIfThereAreAssignableTrustedApps = async (
   store.dispatch({
     type: 'policyArtifactsAssignableListExistDataChanged',
     // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
+    // @ts-expect-error TS2345
     payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
   });
   try {
@@ -132,7 +132,7 @@ const checkIfThereAreAssignableTrustedApps = async (
     store.dispatch({
       type: 'policyArtifactsAssignableListExistDataChanged',
       // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-      // @ts-ignore
+      // @ts-expect-error TS2741
       payload: createFailedResourceState(err.body ?? err),
     });
   }
@@ -181,7 +181,7 @@ const searchTrustedApps = async (
   store.dispatch({
     type: 'policyArtifactsAssignableListPageDataChanged',
     // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
+    // @ts-expect-error TS2345
     payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
   });
 
@@ -213,7 +213,7 @@ const searchTrustedApps = async (
     store.dispatch({
       type: 'policyArtifactsAssignableListPageDataChanged',
       // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-      // @ts-ignore
+      // @ts-expect-error TS2322
       payload: createFailedResourceState(err.body ?? err),
     });
   }

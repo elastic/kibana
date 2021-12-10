@@ -10,7 +10,17 @@ import path from 'path';
 
 import { ToolingLog } from '@kbn/dev-utils';
 
-import { deleteAll, download, gunzip, untar, Task, Config, Build, Platform, read } from '../lib';
+import {
+  deleteAll,
+  downloadToDisk,
+  gunzip,
+  untar,
+  Task,
+  Config,
+  Build,
+  Platform,
+  read,
+} from '../lib';
 
 const DOWNLOAD_DIRECTORY = '.native_modules';
 
@@ -100,12 +110,13 @@ async function patchModule(
   log.debug(`Patching ${pkg.name} binaries from ${archive.url} to ${extractPath}`);
 
   await deleteAll([extractPath], log);
-  await download({
+  await downloadToDisk({
     log,
     url: archive.url,
     destination: downloadPath,
-    sha256: archive.sha256,
-    retries: 3,
+    shaChecksum: archive.sha256,
+    shaAlgorithm: 'sha256',
+    maxAttempts: 3,
   });
   switch (pkg.extractMethod) {
     case 'gunzip':

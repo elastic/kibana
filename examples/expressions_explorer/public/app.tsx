@@ -46,7 +46,7 @@ const ExpressionsExplorer = ({ expressions, inspector, actions }: Props) => {
                 demonstrated. You can read more about it{' '}
                 <EuiLink
                   href={
-                    'https://github.com/elastic/kibana/blob/master/src/plugins/expressions/README.asciidoc'
+                    'https://github.com/elastic/kibana/blob/main/src/plugins/expressions/README.asciidoc'
                   }
                 >
                   here

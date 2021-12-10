@@ -38,6 +38,7 @@ export class TelemetryReceiver {
   private exceptionListClient?: ExceptionListClient;
   private soClient?: SavedObjectsClientContract;
   private kibanaIndex?: string;
+  private clusterInfo?: ESClusterInfo;
   private readonly max_records = 10_000;
 
   constructor(logger: Logger) {
@@ -57,6 +58,11 @@ export class TelemetryReceiver {
     this.exceptionListClient = exceptionListClient;
     this.soClient =
       core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
+    this.clusterInfo = await this.fetchClusterInfo();
+  }
+
+  public getClusterInfo(): ESClusterInfo | undefined {
+    return this.clusterInfo;
   }
 
   public async fetchFleetAgents() {
@@ -304,7 +310,7 @@ export class TelemetryReceiver {
     };
   }
 
-  public async fetchClusterInfo(): Promise<ESClusterInfo> {
+  private async fetchClusterInfo(): Promise<ESClusterInfo> {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }

@@ -638,7 +638,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     }
 
     const jobConfig = jobsResponse.jobs[0];
-    const timefield = jobConfig.data_description.time_field;
+    const timefield = jobConfig.data_description.time_field!;
     const bucketSpan = jobConfig.analysis_config.bucket_span;
 
     if (datafeedConfig === undefined) {
@@ -708,6 +708,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     const [bucketResp, annotationResp, { body: modelSnapshotsResp }] = await Promise.all([
       mlClient.getBuckets({
         job_id: jobId,
+        // @ts-expect-error page is not defined on body
         body: { desc: true, start: String(start), end: String(end), page: { from: 0, size: 1000 } },
       }),
       getAnnotations({

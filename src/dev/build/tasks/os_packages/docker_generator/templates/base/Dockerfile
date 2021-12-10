@@ -16,7 +16,7 @@ RUN {{packageManager}} install -y findutils tar gzip
 {{/ubi}}
 
 {{#usePublicArtifact}}
-RUN cd /opt && \
+RUN cd /tmp && \
   curl --retry 8 -s -L \
     --output kibana.tar.gz \
      https://artifacts.elastic.co/downloads/kibana/{{artifactPrefix}}-$(arch).tar.gz && \

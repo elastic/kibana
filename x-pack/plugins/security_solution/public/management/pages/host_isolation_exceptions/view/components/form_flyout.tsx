@@ -94,7 +94,7 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
           type: 'hostIsolationExceptionsMarkToEdit',
           payload: { id: location.id },
         });
-      } else {
+      } else if (exception === undefined) {
         setException(exceptionToEdit);
       }
     }
@@ -181,12 +181,12 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
         {exception?.item_id ? (
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.flyout.editButton"
-            defaultMessage="Edit Host isolation exception"
+            defaultMessage="Edit host isolation exception"
           />
         ) : (
           <FormattedMessage
             id="xpack.securitySolution.hostIsolationExceptions.flyout.createButton"
-            defaultMessage="Add Host isolation exception"
+            defaultMessage="Add host isolation exception"
           />
         )}
       </EuiButton>
@@ -206,14 +206,14 @@ export const HostIsolationExceptionsFormFlyout: React.FC<{}> = memo(() => {
             <h2>
               <FormattedMessage
                 id="xpack.securitySolution.hostIsolationExceptions.flyout.editTitle"
-                defaultMessage="Edit Host isolation exception"
+                defaultMessage="Edit host isolation exception"
               />
             </h2>
           ) : (
             <h2>
               <FormattedMessage
                 id="xpack.securitySolution.hostIsolationExceptions.flyout.title"
-                defaultMessage="Add Host isolation exception"
+                defaultMessage="Add host isolation exception"
               />
             </h2>
           )}

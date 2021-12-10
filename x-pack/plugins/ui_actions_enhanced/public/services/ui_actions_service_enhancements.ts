@@ -22,7 +22,7 @@ import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_ut
 
 import { DynamicActionsState } from '../../common/types';
 
-export { DynamicActionsState };
+export type { DynamicActionsState };
 
 export interface UiActionsServiceEnhancementsParams {
   readonly actionFactories?: ActionFactoryRegistry;

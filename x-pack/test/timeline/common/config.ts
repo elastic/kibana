@@ -7,6 +7,7 @@
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { resolve } from 'path';
 
 import { services } from './services';
 import { getAllExternalServiceSimulatorPaths } from '../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
@@ -40,6 +41,7 @@ const enabledActionTypes = [
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [], ssl = false, testFiles = [] } = options;
+  const auditLogPath = resolve(__dirname, './audit.log');
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
@@ -83,7 +85,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           // TO DO: Remove feature flags once we're good to go
           '--xpack.securitySolution.enableExperimental=["ruleRegistryEnabled"]',
           '--xpack.ruleRegistry.write.enabled=true',
-          `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
+          '--xpack.security.audit.enabled=true',
+          '--xpack.security.audit.appender.type=file',
+          `--xpack.security.audit.appender.fileName=${auditLogPath}`,
+          '--xpack.security.audit.appender.layout.type=json',
+          `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

@@ -11,9 +11,9 @@ import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_a
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
@@ -113,7 +113,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     };
   }
 
-  let latencyMetricValues: PromiseReturnType<typeof getLatencyValues>;
   let latencyTransactionValues: PromiseReturnType<typeof getLatencyValues>;
 
   registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
@@ -157,13 +156,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('compare latency value between service inventory, latency chart, service inventory and transactions apis', () => {
         before(async () => {
-          [latencyTransactionValues, latencyMetricValues] = await Promise.all([
-            getLatencyValues({ processorEvent: 'transaction' }),
-            getLatencyValues({ processorEvent: 'metric' }),
-          ]);
+          latencyTransactionValues = await getLatencyValues({ processorEvent: 'transaction' });
         });
 
-        it('returns same avg latency value for Transaction-based and Metric-based data', () => {
+        it('returns the expected avg latency value for all APIs', () => {
           const expectedLatencyAvgValueMs =
             ((GO_PROD_RATE * GO_PROD_DURATION + GO_DEV_RATE * GO_DEV_DURATION) /
               (GO_PROD_RATE + GO_DEV_RATE)) *
@@ -171,18 +167,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           [
             latencyTransactionValues.latencyChartApiMean,
             latencyTransactionValues.serviceInventoryLatency,
-            latencyMetricValues.latencyChartApiMean,
-            latencyMetricValues.serviceInventoryLatency,
           ].forEach((value) => expect(value).to.be.equal(expectedLatencyAvgValueMs));
         });
 
-        it('returns same sum latency value for Transaction-based and Metric-based data', () => {
+        it('returns the expected sum latency value for all APIs', () => {
           const expectedLatencySumValueMs = (GO_PROD_DURATION + GO_DEV_DURATION) * 1000;
           [
             latencyTransactionValues.transactionsGroupLatencySum,
             latencyTransactionValues.serviceInstancesLatencySum,
-            latencyMetricValues.transactionsGroupLatencySum,
-            latencyMetricValues.serviceInstancesLatencySum,
           ].forEach((value) => expect(value).to.be.equal(expectedLatencySumValueMs));
         });
       });

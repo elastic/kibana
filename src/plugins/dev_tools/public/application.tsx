@@ -12,6 +12,7 @@ import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom'
 import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 
 import { ApplicationStart, ChromeStart, ScopedHistory } from 'src/core/public';
 
@@ -43,21 +44,22 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
 
   return (
     <main className="devApp">
-      <EuiTabs>
+      <EuiTabs style={{ paddingLeft: euiThemeVars.euiSizeS }} size="l">
         {devTools.map((currentDevTool) => (
-          <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
-            <EuiTab
-              disabled={currentDevTool.isDisabled()}
-              isSelected={currentDevTool === activeDevTool}
-              onClick={() => {
-                if (!currentDevTool.isDisabled()) {
-                  updateRoute(`/${currentDevTool.id}`);
-                }
-              }}
-            >
-              {currentDevTool.title}
-            </EuiTab>
-          </EuiToolTip>
+          <EuiTab
+            key={currentDevTool.id}
+            disabled={currentDevTool.isDisabled()}
+            isSelected={currentDevTool === activeDevTool}
+            onClick={() => {
+              if (!currentDevTool.isDisabled()) {
+                updateRoute(`/${currentDevTool.id}`);
+              }
+            }}
+          >
+            <EuiToolTip content={currentDevTool.tooltipContent}>
+              <span>{currentDevTool.title}</span>
+            </EuiToolTip>
+          </EuiTab>
         ))}
       </EuiTabs>
       <div

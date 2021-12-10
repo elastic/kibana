@@ -8,10 +8,10 @@
 import _ from 'lodash';
 import {
   FieldFormat,
-  IFieldFormatsRegistry,
   FieldFormatConfig,
+  IFieldFormatsRegistry,
 } from 'src/plugins/field_formats/common';
-import { IndexPatternSavedObjectDeprecatedCSV } from '../types';
+import { IndexPatternSavedObjectDeprecatedCSV } from '../../../../common/types';
 
 /**
  *  Create a map of FieldFormat instances for index pattern fields

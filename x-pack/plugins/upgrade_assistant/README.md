@@ -20,7 +20,7 @@ These surface runtime deprecations, e.g. a Painless script that uses a deprecate
 request to a deprecated API. These are also generally surfaced as deprecation headers within the
 response. Even if the cluster state is good, app maintainers need to watch the logs in case
 deprecations are discovered as data is migrated. Starting in 7.x, deprecation logs can be written to a file or a data stream ([#58924](https://github.com/elastic/elasticsearch/pull/58924)). When the data stream exists, the Upgrade Assistant provides a way to analyze the logs through Observability or Discover ([#106521](https://github.com/elastic/kibana/pull/106521)).
-* [**Kibana deprecations API.**](https://github.com/elastic/kibana/blob/master/src/core/server/deprecations/README.mdx) This is information about deprecated features and configs in Kibana. These deprecations are only communicated to the user if the deployment is using these features. Kibana engineers are responsible for adding deprecations to the deprecations API for their respective team. 
+* [**Kibana deprecations API.**](https://github.com/elastic/kibana/blob/main/src/core/server/deprecations/README.mdx) This is information about deprecated features and configs in Kibana. These deprecations are only communicated to the user if the deployment is using these features. Kibana engineers are responsible for adding deprecations to the deprecations API for their respective team. 
 
 ### Fixing problems
 
@@ -109,7 +109,7 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
 
 **3. Removing deprecated index settings**
 
-  The Upgrade Assistant currently only supports fixing deprecated translog index settings. However [the code](https://github.com/elastic/kibana/blob/master/x-pack/plugins/upgrade_assistant/common/constants.ts#L22) is written in a way to add support for more if necessary. Run the following Console command to trigger the deprecation warning:
+  The Upgrade Assistant currently only supports fixing deprecated translog index settings. However [the code](https://github.com/elastic/kibana/blob/main/x-pack/plugins/upgrade_assistant/common/constants.ts#L22) is written in a way to add support for more if necessary. Run the following Console command to trigger the deprecation warning:
 
   ```
   PUT deprecated_settings
@@ -230,7 +230,7 @@ This is a non-exhaustive list of different error scenarios in Upgrade Assistant.
 
 ### Telemetry
 
-The Upgrade Assistant tracks several triggered events in the UI, using Kibana Usage Collection service's [UI counters](https://github.com/elastic/kibana/blob/master/src/plugins/usage_collection/README.mdx#ui-counters).
+The Upgrade Assistant tracks several triggered events in the UI, using Kibana Usage Collection service's [UI counters](https://github.com/elastic/kibana/blob/main/src/plugins/usage_collection/README.mdx#ui-counters).
 
 **Overview page**
 - Component loaded
@@ -249,6 +249,6 @@ The Upgrade Assistant tracks several triggered events in the UI, using Kibana Us
 - Component loaded
 - Click event for "Quick resolve" button
 
-In addition to UI counters, the Upgrade Assistant has a [custom usage collector](https://github.com/elastic/kibana/blob/master/src/plugins/usage_collection/README.mdx#custom-collector). It currently is only responsible for tracking whether the user has deprecation logging enabled or not.
+In addition to UI counters, the Upgrade Assistant has a [custom usage collector](https://github.com/elastic/kibana/blob/main/src/plugins/usage_collection/README.mdx#custom-collector). It currently is only responsible for tracking whether the user has deprecation logging enabled or not.
 
-For testing instructions, refer to the [Kibana Usage Collection service README](https://github.com/elastic/kibana/blob/master/src/plugins/usage_collection/README.mdx#testing).
+For testing instructions, refer to the [Kibana Usage Collection service README](https://github.com/elastic/kibana/blob/main/src/plugins/usage_collection/README.mdx#testing).

@@ -127,11 +127,11 @@ export const cloneIndex = ({
         // If the cluster state was updated and all shards ackd we're done
         return TaskEither.right(res);
       } else {
-        // Otherwise, wait until the target index has a 'green' status.
+        // Otherwise, wait until the target index has a 'yellow' status.
         return pipe(
           waitForIndexStatusYellow({ client, index: target, timeout }),
           TaskEither.map((value) => {
-            /** When the index status is 'green' we know that all shards were started */
+            /** When the index status is 'yellow' we know that all shards were started */
             return { acknowledged: true, shardsAcknowledged: true };
           })
         );

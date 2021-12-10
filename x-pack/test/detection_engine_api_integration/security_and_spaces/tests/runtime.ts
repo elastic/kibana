@@ -53,7 +53,9 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((signal) => (signal._source?.host as Runtime).name);
+        const hits = signalsOpen.hits.hits
+          .map((signal) => (signal._source?.host as Runtime).name)
+          .sort();
         expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
       });
 
@@ -63,9 +65,9 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map(
-          (signal) => (signal._source?.host as Runtime).hostname
-        );
+        const hits = signalsOpen.hits.hits
+          .map((signal) => (signal._source?.host as Runtime).hostname)
+          .sort();
         expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
       });
     });
@@ -97,7 +99,16 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((signal) => signal._source?.host);
+        const hits = signalsOpen.hits.hits
+          .map((signal) => signal._source?.host as Array<{ name: string }>)
+          .map((host) => {
+            // sort the inner array elements first
+            return host.sort((a, b) => a.name.localeCompare(b.name));
+          })
+          .sort((aArray, bArray) => {
+            // since these are all unique, using just the first element should give us stability
+            return aArray[0].name.localeCompare(bArray[0].name);
+          });
         expect(hits).to.eql([
           [
             {

@@ -146,11 +146,11 @@ and Kibana instance that the tests will be run against.
 You can find the ML shared functions in the following files in GitHub:
 
 ```
-https://github.com/elastic/kibana/blob/master/x-pack/plugins/ml/public/shared.ts
+https://github.com/elastic/kibana/blob/main/x-pack/plugins/ml/public/shared.ts
 ```
 
 ```
-https://github.com/elastic/kibana/blob/master/x-pack/plugins/ml/server/shared.ts
+https://github.com/elastic/kibana/blob/main/x-pack/plugins/ml/server/shared.ts
 ```
 
 These functions are shared from the root of the ML plugin, you can import them with an import statement. For example:

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { HighlightDetailsFlyout, Props } from './highlight_details_flyout';
+export type { Props } from './highlight_details_flyout';
+export { HighlightDetailsFlyout } from './highlight_details_flyout';

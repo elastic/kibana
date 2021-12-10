@@ -105,16 +105,18 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
       cluster={cluster}
     >
       {data.pipelines && (
-        <PipelineListing
-          className="monitoringLogstashPipelinesTable"
-          onBrush={onBrush}
-          zoomInfo={zoomInfo}
-          stats={data.nodeSummary}
-          data={data.pipelines}
-          statusComponent={DetailStatus}
-          {...getPaginationTableProps()}
-          upgradeMessage={makeUpgradeMessage(data.nodeSummary.version)}
-        />
+        <div data-test-subj="logstashPipelinesListing">
+          <PipelineListing
+            className="monitoringLogstashPipelinesTable"
+            onBrush={onBrush}
+            zoomInfo={zoomInfo}
+            stats={data.nodeSummary}
+            data={data.pipelines}
+            statusComponent={DetailStatus}
+            {...getPaginationTableProps()}
+            upgradeMessage={makeUpgradeMessage(data.nodeSummary.version)}
+          />
+        </div>
       )}
     </LogstashTemplate>
   );

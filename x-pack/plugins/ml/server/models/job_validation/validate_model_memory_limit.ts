@@ -63,7 +63,7 @@ export async function validateModelMemoryLimit(
       job.analysis_config,
       job.datafeed_config.indices.join(','),
       job.datafeed_config.query,
-      job.data_description.time_field,
+      job.data_description.time_field!,
       duration!.start as number,
       duration!.end as number,
       true,

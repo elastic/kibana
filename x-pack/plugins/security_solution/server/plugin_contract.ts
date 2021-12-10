@@ -33,7 +33,7 @@ import {
   RuleRegistryPluginStartContract as RuleRegistryPluginStart,
 } from '../../rule_registry/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import { SpacesPluginSetup } from '../../spaces/server';
+import { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
 import {
   TaskManagerSetupContract as TaskManagerPluginSetup,
   TaskManagerStartContract as TaskManagerPluginStart,
@@ -68,6 +68,7 @@ export interface SecuritySolutionPluginStartDependencies {
   licensing: LicensingPluginStart;
   ruleRegistry: RuleRegistryPluginStart;
   security: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
   taskManager?: TaskManagerPluginStart;
   telemetry?: TelemetryPluginStart;
 }

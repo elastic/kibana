@@ -34,6 +34,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       }
     },
     async setAlertName(name: string) {
+      await testSubjects.exists('alertNameInput');
       await testSubjects.setValue('alertNameInput', name);
     },
     async setAlertInterval(value: string) {
@@ -104,7 +105,12 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('uptimeAlertAddFilter.monitor.type');
       await testSubjects.click('uptimeCreateStatusAlert.filter_scheme');
     },
-    async clickSaveAlertButton() {
+    async clickSaveAlertButton(name: string) {
+      /* The most common cause of flakiness in this test is the absence of value for the name field,
+       * While this field is set in previous step, it is possible that component rerendering could be
+       * clearing out the value after it's filled in. To prevent this particular issue with flakiness,
+       * we should attempt to set the name again before saving the alert */
+      await testSubjects.setValue('alertNameInput', name);
       await testSubjects.click('saveAlertButton');
     },
     async clickSaveAlertsConfirmButton() {

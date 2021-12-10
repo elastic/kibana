@@ -37,11 +37,8 @@ describe.each([
   it('should call rulesClient.enable if the rule was disabled and enabled is true', async () => {
     const rulesOptionsMock = getUpdateRulesOptionsMock(isRuleRegistryEnabled);
     rulesOptionsMock.ruleUpdate.enabled = true;
+    rulesOptionsMock.existingRule.enabled = false;
 
-    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).resolve.mockResolvedValue({
-      ...resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
-      enabled: false,
-    });
     (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );

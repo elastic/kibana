@@ -259,7 +259,6 @@ export async function updateObjectsSpaces({
         // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
         bulkOperationParams.push({ update: documentMetadata }, { doc: documentToSave });
       } else {
-        // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
         bulkOperationParams.push({ delete: documentMetadata });
       }
     }

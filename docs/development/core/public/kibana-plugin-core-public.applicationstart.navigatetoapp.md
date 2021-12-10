@@ -16,10 +16,10 @@ navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  appId | <code>string</code> |  |
-|  options | <code>NavigateToAppOptions</code> | navigation options |
+|  appId | string |  |
+|  options | NavigateToAppOptions | navigation options |
 
 <b>Returns:</b>
 
-`Promise<void>`
+Promise&lt;void&gt;
 

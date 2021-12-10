@@ -14,4 +14,4 @@ export { LoadMappingsFromJsonButton, LoadMappingsProvider } from './components/l
 export { MappingsEditorProvider } from './mappings_editor_context';
 
 export { doMappingsHaveType } from './lib';
-export { IndexSettings, OnUpdateHandler } from './types';
+export type { IndexSettings, OnUpdateHandler } from './types';

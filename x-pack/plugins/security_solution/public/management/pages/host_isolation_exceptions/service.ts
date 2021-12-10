@@ -42,8 +42,8 @@ export async function getHostIsolationExceptionItems({
   http,
   perPage,
   page,
-  sortField,
-  sortOrder,
+  sortField = 'created_at',
+  sortOrder = 'desc',
   filter,
 }: {
   http: HttpStart;

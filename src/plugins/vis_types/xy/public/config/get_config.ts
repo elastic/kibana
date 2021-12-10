@@ -118,8 +118,6 @@ const shouldEnableHistogramMode = (
   }
 
   return bars.every(({ valueAxis: groupId, mode }) => {
-    const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
-
-    return mode === 'stacked' || yAxisScale?.mode === 'percentage';
+    return mode === 'stacked';
   });
 };

@@ -11,9 +11,9 @@ import { MonitoringPlugin } from './plugin';
 import { configSchema } from './config';
 import { deprecations } from './deprecations';
 
-export { KibanaSettingsCollector } from './kibana_monitoring/collectors';
-export { MonitoringConfig } from './config';
-export { MonitoringPluginSetup, IBulkUploader } from './types';
+export type { KibanaSettingsCollector } from './kibana_monitoring/collectors';
+export type { MonitoringConfig } from './config';
+export type { MonitoringPluginSetup, IBulkUploader } from './types';
 
 export const plugin = (initContext: PluginInitializerContext) => new MonitoringPlugin(initContext);
 export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {

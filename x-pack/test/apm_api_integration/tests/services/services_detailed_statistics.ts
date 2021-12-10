@@ -7,7 +7,6 @@
 import expect from '@kbn/expect';
 import url from 'url';
 import moment from 'moment';
-import { registry } from '../../common/registry';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
@@ -17,6 +16,7 @@ type ServicesDetailedStatisticsReturn =
   APIReturnType<'GET /internal/apm/services/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';

@@ -50,8 +50,7 @@ const defaultValidation = centralValidation[DataStream.HTTP];
 const defaultHTTPConfig = defaultConfig[DataStream.HTTP];
 const defaultTCPConfig = defaultConfig[DataStream.TCP];
 
-// unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
-describe.skip('<CustomFields />', () => {
+describe('<CustomFields />', () => {
   const WrappedComponent = ({
     validate = defaultValidation,
     isEditable = false,
@@ -234,7 +233,7 @@ describe.skip('<CustomFields />', () => {
     ).toBeInTheDocument();
 
     // expect tls options to be available for browser
-    expect(queryByLabelText('Zip Proxy URL')).toBeInTheDocument();
+    expect(queryByLabelText('Proxy Zip URL')).toBeInTheDocument();
     expect(queryByLabelText('Enable TLS configuration for Zip URL')).toBeInTheDocument();
 
     // ensure at least one browser advanced option is present
@@ -317,7 +316,7 @@ describe.skip('<CustomFields />', () => {
       expect(getByText('HTTP')).toBeInTheDocument();
       expect(getByText('TCP')).toBeInTheDocument();
       expect(getByText('ICMP')).toBeInTheDocument();
-      expect(queryByText('Browser')).not.toBeInTheDocument();
+      expect(queryByText('Browser (Beta)')).not.toBeInTheDocument();
     });
   });
 });

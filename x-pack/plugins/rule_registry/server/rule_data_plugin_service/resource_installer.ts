@@ -309,10 +309,9 @@ export class ResourceInstaller {
 
         template: {
           settings: {
+            hidden: true,
             'index.lifecycle': {
               name: ilmPolicyName,
-              // TODO: fix the types in the ES package, they don't include rollover_alias???
-              // @ts-expect-error
               rollover_alias: primaryNamespacedAlias,
             },
           },
@@ -399,7 +398,7 @@ export class ResourceInstaller {
     return clusterClient.cluster.putComponentTemplate(template);
   }
 
-  private async createOrUpdateIndexTemplate(template: estypes.IndicesPutIndexTemplateRequest) {
+  private async createOrUpdateIndexTemplate(template: estypes.IndicesSimulateTemplateRequest) {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
 
@@ -414,6 +413,7 @@ export class ResourceInstaller {
       );
     }
 
+    // @ts-expect-error estypes.IndicesSimulateTemplateRequest.name is option but requied in estypes.IndicesPutIndexTemplateRequest
     return clusterClient.indices.putIndexTemplate(template);
   }
 

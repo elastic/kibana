@@ -28,14 +28,14 @@ export type {
 export { Direction } from '../common/search_strategy/common';
 export { tGridReducer } from './store/t_grid/reducer';
 export type { TGridModelForTimeline, TimelineState, TimelinesUIStart } from './types';
-export { TGridType, SortDirection } from './types';
+export type { TGridType, SortDirection } from './types';
+export type { OnColumnFocused } from '../common/utils/accessibility';
 export {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
   FIRST_ARIA_INDEX,
-  OnColumnFocused,
   arrayIndexToAriaIndex,
   elementOrChildrenHasFocus,
   isArrowDownOrArrowUp,
@@ -59,6 +59,8 @@ export {
   addFieldToTimelineColumns,
   getTimelineIdFromColumnDroppableId,
 } from './components/drag_and_drop/helpers';
+export { getActionsColumnWidth } from './components/t_grid/body/column_headers/helpers';
+export { DEFAULT_ACTION_BUTTON_WIDTH } from './components/t_grid/body/constants';
 export { StatefulFieldsBrowser } from './components/t_grid/toolbar/fields_browser';
 export { useStatusBulkActionItems } from './hooks/use_status_bulk_action_items';
 // This exports static code and TypeScript types,

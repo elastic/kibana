@@ -21,6 +21,7 @@ import {
   getSimpleMlRuleOutput,
   createRule,
   getSimpleMlRule,
+  createLegacyRuleAction,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -184,6 +185,46 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.version = 3;
 
         const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(outputRule);
+      });
+
+      it('should return the rule with migrated actions after the enable patch', async () => {
+        const [connector, rule] = await Promise.all([
+          supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: '.slack',
+              secrets: {
+                webhookUrl: 'http://localhost:1234',
+              },
+            }),
+          createRule(supertest, getSimpleRule('rule-1')),
+        ]);
+        await createLegacyRuleAction(supertest, rule.id, connector.body.id);
+
+        // patch disable the rule
+        const patchResponse = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ id: rule.id, enabled: false })
+          .expect(200);
+
+        const outputRule = getSimpleRuleOutput();
+        outputRule.actions = [
+          {
+            action_type_id: '.slack',
+            group: 'default',
+            id: connector.body.id,
+            params: {
+              message:
+                'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            },
+          },
+        ];
+        outputRule.throttle = '1m';
+        const bodyToCompare = removeServerGeneratedProperties(patchResponse.body);
         expect(bodyToCompare).to.eql(outputRule);
       });
 

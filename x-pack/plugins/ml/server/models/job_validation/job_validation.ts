@@ -69,7 +69,7 @@ export async function validateJob(
         const timeField = job.data_description.time_field;
         const timeRange = await fs.getTimeFieldRange(
           index,
-          timeField,
+          timeField!,
           job.datafeed_config.query,
           job.datafeed_config.runtime_mappings,
           job.datafeed_config.indices_options

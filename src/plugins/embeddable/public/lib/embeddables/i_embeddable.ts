@@ -16,7 +16,7 @@ export interface EmbeddableError {
   message: string;
 }
 
-export { EmbeddableInput };
+export type { EmbeddableInput };
 
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.

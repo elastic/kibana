@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceCount } from '../lib/observability_overview/get_service_count';
 import { getTransactionsPerMinute } from '../lib/observability_overview/get_transactions_per_minute';

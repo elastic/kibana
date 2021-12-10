@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
+import { jsonRt } from '@kbn/io-ts-utils/json_rt';
+import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
 import * as t from 'io-ts';
 import {
   LatencyAggregationType,

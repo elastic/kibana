@@ -383,7 +383,7 @@ The corresponding code was previously moved to the new platform.
 
 For more information on where to locate new platform `data` services,
 refer to the
-https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
+https://github.com/elastic/kibana/blob/main/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
 in `src/core/MIGRATION.md`.
 
 *via https://github.com/elastic/kibana/pull/61618[#61618]*

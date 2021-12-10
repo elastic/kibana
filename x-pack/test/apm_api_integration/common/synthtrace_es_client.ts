@@ -66,6 +66,8 @@ export async function synthtraceEsClient(context: InheritedFtrProviderContext) {
     clean: () => {
       return es.deleteByQuery({
         index: 'apm-*',
+        conflicts: 'proceed',
+        refresh: true,
         body: {
           query: {
             match_all: {},

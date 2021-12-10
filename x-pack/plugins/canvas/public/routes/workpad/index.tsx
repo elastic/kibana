@@ -9,7 +9,8 @@ import { RouteComponentProps } from 'react-router-dom';
 
 export { WorkpadRoute, ExportWorkpadRoute } from './workpad_route';
 
-export { WorkpadRoutingContext, WorkpadRoutingContextType } from './workpad_routing_context';
+export type { WorkpadRoutingContextType } from './workpad_routing_context';
+export { WorkpadRoutingContext } from './workpad_routing_context';
 
 export interface WorkpadRouteParams {
   id: string;

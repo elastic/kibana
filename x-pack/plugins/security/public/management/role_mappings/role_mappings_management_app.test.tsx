@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
+import { noop } from 'lodash';
+
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import type { Unmount } from 'src/plugins/management/public/types';
+
+import { roleMappingsManagementApp } from './role_mappings_management_app';
+
 jest.mock('./role_mappings_grid', () => ({
   RoleMappingsGridPage: (props: any) =>
     // `docLinks` object is too big to include into test snapshot, so we just check its existence.
@@ -23,24 +31,25 @@ jest.mock('./edit_role_mapping', () => ({
     })}`,
 }));
 
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
-
-import { roleMappingsManagementApp } from './role_mappings_management_app';
-
 async function mountApp(basePath: string, pathname: string) {
   const container = document.createElement('div');
   const setBreadcrumbs = jest.fn();
 
-  const unmount = await roleMappingsManagementApp
-    .create({ getStartServices: coreMock.createSetup().getStartServices as any })
-    .mount({
-      basePath,
-      element: container,
-      setBreadcrumbs,
-      history: scopedHistoryMock.create({ pathname }),
-    });
+  const startServices = await coreMock.createSetup().getStartServices();
 
-  return { unmount, container, setBreadcrumbs };
+  let unmount: Unmount = noop;
+  await act(async () => {
+    unmount = await roleMappingsManagementApp
+      .create({ getStartServices: () => Promise.resolve(startServices) as any })
+      .mount({
+        basePath,
+        element: container,
+        setBreadcrumbs,
+        history: scopedHistoryMock.create({ pathname }),
+      });
+  });
+
+  return { unmount, container, setBreadcrumbs, docTitle: startServices[0].chrome.docTitle };
 }
 
 describe('roleMappingsManagementApp', () => {
@@ -60,10 +69,12 @@ describe('roleMappingsManagementApp', () => {
   });
 
   it('mount() works for the `grid` page', async () => {
-    const { setBreadcrumbs, container, unmount } = await mountApp('/', '/');
+    const { setBreadcrumbs, container, unmount, docTitle } = await mountApp('/', '/');
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Role Mappings' }]);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Role Mappings' }]);
+    expect(docTitle.change).toHaveBeenCalledWith('Role Mappings');
+    expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
         Role Mappings Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}}}
@@ -72,17 +83,21 @@ describe('roleMappingsManagementApp', () => {
 
     unmount();
 
+    expect(docTitle.reset).toHaveBeenCalledTimes(1);
+
     expect(container).toMatchInlineSnapshot(`<div />`);
   });
 
   it('mount() works for the `create role mapping` page', async () => {
-    const { setBreadcrumbs, container, unmount } = await mountApp('/', '/edit');
+    const { setBreadcrumbs, container, unmount, docTitle } = await mountApp('/', '/edit');
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       { href: `/`, text: 'Role Mappings' },
       { text: 'Create' },
     ]);
+    expect(docTitle.change).toHaveBeenCalledWith('Role Mappings');
+    expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
         Role Mapping Edit Page: {"roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}}}
@@ -91,19 +106,26 @@ describe('roleMappingsManagementApp', () => {
 
     unmount();
 
+    expect(docTitle.reset).toHaveBeenCalledTimes(1);
+
     expect(container).toMatchInlineSnapshot(`<div />`);
   });
 
   it('mount() works for the `edit role mapping` page', async () => {
     const roleMappingName = 'role@mapping';
 
-    const { setBreadcrumbs, container, unmount } = await mountApp('/', `/edit/${roleMappingName}`);
+    const { setBreadcrumbs, container, unmount, docTitle } = await mountApp(
+      '/',
+      `/edit/${roleMappingName}`
+    );
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { href: `/`, text: 'Role Mappings' },
-      { href: `/edit/${encodeURIComponent(roleMappingName)}`, text: roleMappingName },
+      { href: '/', text: 'Role Mappings' },
+      { text: roleMappingName },
     ]);
+    expect(docTitle.change).toHaveBeenCalledWith('Role Mappings');
+    expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
         Role Mapping Edit Page: {"name":"role@mapping","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/role@mapping","search":"","hash":""}}}
@@ -111,6 +133,8 @@ describe('roleMappingsManagementApp', () => {
     `);
 
     unmount();
+
+    expect(docTitle.reset).toHaveBeenCalledTimes(1);
 
     expect(container).toMatchInlineSnapshot(`<div />`);
   });
@@ -122,9 +146,8 @@ describe('roleMappingsManagementApp', () => {
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { href: `/`, text: 'Role Mappings' },
+      { href: '/', text: 'Role Mappings' },
       {
-        href: '/edit/some%20%E5%AE%89%E5%85%A8%E6%80%A7%20role%20mapping',
         text: roleMappingName,
       },
     ]);

@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-export {
-  IndexPattern,
-  IndexPatternField,
+export type {
   DataPublicPluginStart,
   IndexPatternSpec,
   GetFieldsOptions,
   IndexPatternAggRestrictions,
 } from '../../data/public';
+export { IndexPattern, IndexPatternField } from '../../data/public';
 
 export {
   createKibanaReactContext,
@@ -22,18 +21,20 @@ export {
   useKibana,
 } from '../../kibana_react/public';
 
+export type {
+  FormSchema,
+  FormHook,
+  ValidationFunc,
+  FieldConfig,
+  ValidationConfig,
+} from '../../es_ui_shared/static/forms/hook_form_lib';
 export {
   useForm,
   useFormData,
   useFormContext,
   Form,
-  FormSchema,
   UseField,
-  FormHook,
-  ValidationFunc,
-  FieldConfig,
   getFieldValidityAndErrorMessage,
-  ValidationConfig,
 } from '../../es_ui_shared/static/forms/hook_form_lib';
 
 export { fieldValidators } from '../../es_ui_shared/static/forms/helpers';
@@ -47,4 +48,4 @@ export {
   SuperSelectField,
 } from '../../es_ui_shared/static/forms/components';
 
-export { HttpStart } from '../../../core/public';
+export type { HttpStart } from '../../../core/public';

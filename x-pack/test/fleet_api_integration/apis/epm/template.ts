@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  // This test was inspired by https://github.com/elastic/kibana/blob/master/x-pack/test/api_integration/apis/monitoring/common/mappings_exist.js
+  // This test was inspired by https://github.com/elastic/kibana/blob/main/x-pack/test/api_integration/apis/monitoring/common/mappings_exist.js
   describe('EPM - template', async () => {
     beforeEach(async () => {
       appContextService.start({

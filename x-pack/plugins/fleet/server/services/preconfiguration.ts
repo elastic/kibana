@@ -20,7 +20,11 @@ import type {
   PreconfigurationError,
   PreconfiguredOutput,
 } from '../../common';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, normalizeHostsForAgents } from '../../common';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+  normalizeHostsForAgents,
+} from '../../common';
 import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_LATEST_KEYWORD,
@@ -33,7 +37,7 @@ import { ensurePackagesCompletedInstall } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
-import { overridePackageInputs } from './package_policy';
+import { preconfigurePackageInputs, packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
@@ -349,14 +353,16 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     }
   }
 
-  const fulfilledPolicyPackagePolicyIds = fulfilledPolicies
-    .filter(({ policy }) => policy?.package_policies)
-    .flatMap<string>(({ policy }) => policy?.package_policies as string[]);
-
+  // Handle automatic package policy upgrades for managed packages and package with
+  // the `keep_policies_up_to_date` setting enabled
+  const allPackagePolicyIds = await packagePolicyService.listIds(soClient, {
+    page: 1,
+    perPage: SO_SEARCH_LIMIT,
+  });
   const packagePolicyUpgradeResults = await upgradeManagedPackagePolicies(
     soClient,
     esClient,
-    fulfilledPolicyPackagePolicyIds
+    allPackagePolicyIds.items
   );
 
   return {
@@ -383,7 +389,9 @@ export function comparePreconfiguredPolicyToCurrent(
   policyFromConfig: PreconfiguredAgentPolicy,
   currentPolicy: AgentPolicy
 ) {
-  const configTopLevelFields = omit(policyFromConfig, 'package_policies', 'id');
+  // Namespace is omitted from being compared because even for managed policies, we still
+  // want users to be able to pick their own namespace: https://github.com/elastic/kibana/issues/110533
+  const configTopLevelFields = omit(policyFromConfig, 'package_policies', 'id', 'namespace');
   const currentTopLevelFields = pick(currentPolicy, ...Object.keys(configTopLevelFields));
 
   return {
@@ -398,6 +406,7 @@ async function addPreconfiguredPolicyPackages(
   agentPolicy: AgentPolicy,
   installedPackagePolicies: Array<
     Partial<Omit<NewPackagePolicy, 'inputs'>> & {
+      id?: string | number;
       name: string;
       installedPackage: Installation;
       inputs?: InputsOverride[];
@@ -406,7 +415,7 @@ async function addPreconfiguredPolicyPackages(
   defaultOutput: Output
 ) {
   // Add packages synchronously to avoid overwriting
-  for (const { installedPackage, name, description, inputs } of installedPackagePolicies) {
+  for (const { installedPackage, id, name, description, inputs } of installedPackagePolicies) {
     const packageInfo = await getPackageInfo({
       savedObjectsClient: soClient,
       pkgName: installedPackage.name,
@@ -420,8 +429,9 @@ async function addPreconfiguredPolicyPackages(
       agentPolicy,
       defaultOutput,
       name,
+      id,
       description,
-      (policy) => overridePackageInputs(policy, packageInfo, inputs)
+      (policy) => preconfigurePackageInputs(policy, packageInfo, inputs)
     );
   }
 }

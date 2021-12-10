@@ -54,7 +54,6 @@ export const saveTemplate = async ({
 
     return await client.asCurrentUser.indices.putTemplate({
       name: template.name,
-      // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/533
       order,
       include_type_name,
       body: {

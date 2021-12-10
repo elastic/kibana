@@ -308,7 +308,7 @@ describe('execution duration overview', () => {
     const rule = mockAlert();
     const ruleType = mockAlertType({ ruleTaskTimeout: '10m' });
     const alertSummary = mockAlertInstanceSummary({
-      executionDuration: { average: 60284, values: [] },
+      executionDuration: { average: 60284, valuesWithTimestamp: {} },
     });
 
     const wrapper = mountWithIntl(
@@ -339,7 +339,7 @@ describe('execution duration overview', () => {
     const rule = mockAlert();
     const ruleType = mockAlertType({ ruleTaskTimeout: '10m' });
     const alertSummary = mockAlertInstanceSummary({
-      executionDuration: { average: 60284345, values: [] },
+      executionDuration: { average: 60284345, valuesWithTimestamp: {} },
     });
 
     const wrapper = mountWithIntl(
@@ -460,7 +460,7 @@ function mockAlertInstanceSummary(
     },
     executionDuration: {
       average: 0,
-      values: [],
+      valuesWithTimestamp: {},
     },
   };
   return { ...summary, ...overloads };

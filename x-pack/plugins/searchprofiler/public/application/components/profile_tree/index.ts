@@ -6,4 +6,4 @@
  */
 
 export { ProfileTree } from './profile_tree';
-export { OnHighlightChangeArgs } from './highlight_context';
+export type { OnHighlightChangeArgs } from './highlight_context';

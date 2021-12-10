@@ -18,5 +18,5 @@ constructor(deps: {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  deps | <code>{</code><br/><code>        uiSettings: IUiSettingsClient;</code><br/><code>    }</code> |  |
+|  deps | { uiSettings: IUiSettingsClient; } |  |
 

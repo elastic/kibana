@@ -28,6 +28,14 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setReloadIndicesResponse = (response: HttpResponse = []) => {
+    server.respondWith('POST', `${API_BASE_PATH}/indices/reload`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(response),
+    ]);
+  };
+
   const setLoadDataStreamsResponse = (response: HttpResponse = []) => {
     server.respondWith('GET', `${API_BASE_PATH}/data_streams`, [
       200,
@@ -115,9 +123,21 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setLoadNodesPluginsResponse = (response?: HttpResponse, error?: any) => {
+    const status = error ? error.status || 400 : 200;
+    const body = error ? error.body : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/nodes/plugins`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
+    setReloadIndicesResponse,
     setLoadDataStreamsResponse,
     setLoadDataStreamResponse,
     setDeleteDataStreamResponse,
@@ -127,6 +147,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setUpdateTemplateResponse,
     setSimulateTemplateResponse,
     setLoadComponentTemplatesResponse,
+    setLoadNodesPluginsResponse,
   };
 };
 

@@ -33,6 +33,7 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
         body: { has_all_requested: hasAllPrivileges, cluster },
       } = await ctx.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
         body: {
+          // @ts-expect-error SecurityClusterPrivilege doesn't contain all possible priviledges
           cluster: APP_CLUSTER_PRIVILEGES,
         },
       });

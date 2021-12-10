@@ -16,10 +16,10 @@ responseError?(httpErrorResponse: HttpInterceptorResponseError, controller: IHtt
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  httpErrorResponse | <code>HttpInterceptorResponseError</code> |  |
-|  controller | <code>IHttpInterceptController</code> |  |
+|  httpErrorResponse | HttpInterceptorResponseError | [HttpInterceptorResponseError](./kibana-plugin-core-public.httpinterceptorresponseerror.md) |
+|  controller | IHttpInterceptController | [IHttpInterceptController](./kibana-plugin-core-public.ihttpinterceptcontroller.md) |
 
 <b>Returns:</b>
 
-`MaybePromise<IHttpResponseInterceptorOverrides> | void`
+MaybePromise&lt;IHttpResponseInterceptorOverrides&gt; \| void
 

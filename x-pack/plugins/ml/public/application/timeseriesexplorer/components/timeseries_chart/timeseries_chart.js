@@ -1203,15 +1203,16 @@ class TimeseriesChartIntl extends Component {
       .call(brush)
       .selectAll('rect')
       .attr('y', -1)
-      .attr('height', contextChartHeight + swimlaneHeight + 1);
+      .attr('height', contextChartHeight + swimlaneHeight + 1)
+      .attr('width', this.vizWidth);
+
+    const handleBrushExtent = brush.extent();
 
     // move the left and right resize areas over to
     // be under the handles
     contextGroup.selectAll('.w rect').attr('x', -10).attr('width', 10);
 
-    contextGroup.selectAll('.e rect').attr('x', 0).attr('width', 10);
-
-    const handleBrushExtent = brush.extent();
+    contextGroup.selectAll('.e rect').attr('transform', null).attr('width', 10);
 
     const topBorder = contextGroup
       .append('rect')
@@ -1247,6 +1248,7 @@ class TimeseriesChartIntl extends Component {
     function brushing() {
       const brushExtent = brush.extent();
       mask.reveal(brushExtent);
+
       leftHandle.attr('x', contextXScale(brushExtent[0]) - 10);
       rightHandle.attr('x', contextXScale(brushExtent[1]) + 0);
 

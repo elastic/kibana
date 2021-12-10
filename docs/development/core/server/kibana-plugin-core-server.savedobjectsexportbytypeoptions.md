@@ -11,12 +11,13 @@ Options for the [export by type API](./kibana-plugin-core-server.savedobjectsexp
 ```typescript
 export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOptions 
 ```
+<b>Extends:</b> SavedObjectExportBaseOptions
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [hasReference](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.hasreference.md) | <code>SavedObjectsFindOptionsReference[]</code> | optional array of references to search object for. |
-|  [search](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.search.md) | <code>string</code> | optional query string to filter exported objects. |
-|  [types](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.types.md) | <code>string[]</code> | array of saved object types. |
+|  [hasReference?](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.hasreference.md) | SavedObjectsFindOptionsReference\[\] | <i>(Optional)</i> optional array of references to search object for. |
+|  [search?](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.search.md) | string | <i>(Optional)</i> optional query string to filter exported objects. |
+|  [types](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.types.md) | string\[\] | array of saved object types. |
 

@@ -58,6 +58,7 @@ describe('Transaction error rate alert', () => {
     });
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
+      // @ts-expect-error not full interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           hits: [],
