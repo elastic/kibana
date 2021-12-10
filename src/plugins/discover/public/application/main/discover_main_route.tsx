@@ -10,7 +10,6 @@ import { History } from 'history';
 import { useParams } from 'react-router-dom';
 
 import { IndexPatternAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
-import { DiscoverServices } from '../../build_services';
 import {
   SavedSearch,
   getSavedSearch,
@@ -25,18 +24,15 @@ import { DataViewSavedObjectConflictError } from '../../../../data_views/common'
 import { getUrlTracker } from '../../kibana_services';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
+import { DiscoverRouteProps } from '../types';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
-export interface DiscoverMainProps {
+export interface DiscoverMainProps extends DiscoverRouteProps {
   /**
    * Instance of browser history
    */
   history: History;
-  /**
-   * Kibana core services used by discover
-   */
-  services: DiscoverServices;
 }
 
 interface DiscoverLandingParams {
