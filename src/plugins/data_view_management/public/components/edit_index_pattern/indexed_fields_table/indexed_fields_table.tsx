@@ -7,7 +7,6 @@
  */
 
 import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
 import { createSelector } from 'reselect';
 import { OverlayStart } from 'src/core/public';
 import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';
@@ -104,10 +103,12 @@ class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTabl
       }
 
       if (indexedFieldTypeFilter) {
+        // match conflict fields
         fields = fields.filter((field) => {
           if (indexedFieldTypeFilter === 'conflict' && field.kbnType === 'conflict') {
             return true;
           }
+          // match one of multiple types on a field
           return field.esTypes?.length && field.esTypes?.indexOf(indexedFieldTypeFilter) !== -1;
         });
       }

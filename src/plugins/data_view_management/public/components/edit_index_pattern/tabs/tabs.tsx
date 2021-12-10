@@ -102,10 +102,12 @@ export function Tabs({
           tempScriptedFieldLanguages.push(field.lang);
         }
       } else {
+        // for conflicted fields, add conflict as a type
         if (field.type === 'conflict') {
           tempIndexedFieldTypes.push('conflict');
         }
         if (field.esTypes) {
+          // add all types, may be multiple
           field.esTypes.forEach((item) => tempIndexedFieldTypes.push(item));
         }
       }
