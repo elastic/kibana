@@ -9,7 +9,7 @@
 import { SavedObject } from '../../types';
 import { SavedObjectsImportHook, SavedObjectsImportWarning } from '../types';
 
-interface ExecuteImportHooksOptions {
+export interface ExecuteImportHooksOptions {
   objects: SavedObject[];
   importHooks: Record<string, SavedObjectsImportHook[]>;
 }

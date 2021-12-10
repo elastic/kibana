@@ -10,7 +10,7 @@ import { SavedObject, SavedObjectsClientContract, SavedObjectsImportFailure } fr
 import { extractErrors } from './extract_errors';
 import { CreatedObject } from '../types';
 
-interface CreateSavedObjectsParams<T> {
+export interface CreateSavedObjectsParams<T> {
   objects: Array<SavedObject<T>>;
   accumulatedErrors: SavedObjectsImportFailure[];
   savedObjectsClient: SavedObjectsClientContract;
@@ -18,7 +18,7 @@ interface CreateSavedObjectsParams<T> {
   namespace?: string;
   overwrite?: boolean;
 }
-interface CreateSavedObjectsResult<T> {
+export interface CreateSavedObjectsResult<T> {
   createdObjects: Array<CreatedObject<T>>;
   errors: SavedObjectsImportFailure[];
 }

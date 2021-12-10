@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { mockUuidv4 } from './__mocks__';
 import {
   SavedObjectsClientContract,
   SavedObjectReference,
@@ -18,6 +17,10 @@ import { checkOriginConflicts, getImportIdMapForRetries } from './check_origin_c
 import { savedObjectsClientMock } from '../../../mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+
+jest.mock('uuid', () => ({
+  v4: () => 'uuidv4',
+}));
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 type CheckOriginConflictsParams = Parameters<typeof checkOriginConflicts>[0];
@@ -41,10 +44,6 @@ const createObject = (
 
 const MULTI_NS_TYPE = 'multi';
 const OTHER_TYPE = 'other';
-
-beforeEach(() => {
-  mockUuidv4.mockClear();
-});
 
 describe('#checkOriginConflicts', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
@@ -386,7 +385,6 @@ describe('#checkOriginConflicts', () => {
           errors: [],
           pendingOverwrites: new Set(),
         };
-        expect(mockUuidv4).toHaveBeenCalledTimes(4);
         expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
 
@@ -413,7 +411,6 @@ describe('#checkOriginConflicts', () => {
           ],
           pendingOverwrites: new Set(),
         };
-        expect(mockUuidv4).not.toHaveBeenCalled();
         expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
 
@@ -446,7 +443,6 @@ describe('#checkOriginConflicts', () => {
           errors: [],
           pendingOverwrites: new Set(),
         };
-        expect(mockUuidv4).toHaveBeenCalledTimes(4);
         expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
     });
@@ -498,7 +494,6 @@ describe('#checkOriginConflicts', () => {
           ],
           pendingOverwrites: new Set(),
         };
-        expect(mockUuidv4).toHaveBeenCalledTimes(2);
         expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
 
@@ -514,7 +509,6 @@ describe('#checkOriginConflicts', () => {
           errors: [createAmbiguousConflictError(obj6, [objB, objC])],
           pendingOverwrites: new Set([`${obj5.type}:${obj5.id}`]),
         };
-        expect(mockUuidv4).toHaveBeenCalledTimes(2);
         expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
     });
