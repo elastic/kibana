@@ -57,7 +57,7 @@ describe('SearchSessionService', () => {
     attributes: {
       name: 'my_name',
       appId: 'my_app_id',
-      urlGeneratorId: 'my_url_generator_id',
+      locatorId: 'my_locator_id',
       idMapping: {},
       realmType: mockUser1.authentication_realm.type,
       realmName: mockUser1.authentication_realm.name,
@@ -202,13 +202,13 @@ describe('SearchSessionService', () => {
         ).rejects.toMatchInlineSnapshot(`[Error: AppId is required]`);
       });
 
-      it('throws if `generator id` is not provided', () => {
+      it('throws if `locatorId` is not provided', () => {
         expect(
           service.save({ savedObjectsClient }, mockUser1, sessionId, {
             name: 'banana',
             appId: 'nanana',
           })
-        ).rejects.toMatchInlineSnapshot(`[Error: UrlGeneratorId is required]`);
+        ).rejects.toMatchInlineSnapshot(`[Error: locatorId is required]`);
       });
 
       it('saving updates an existing saved object and persists it', async () => {
@@ -222,7 +222,7 @@ describe('SearchSessionService', () => {
         await service.save({ savedObjectsClient }, mockUser1, sessionId, {
           name: 'banana',
           appId: 'nanana',
-          urlGeneratorId: 'panama',
+          locatorId: 'panama',
         });
 
         expect(savedObjectsClient.update).toHaveBeenCalled();
@@ -236,7 +236,7 @@ describe('SearchSessionService', () => {
         expect(callAttributes).toHaveProperty('persisted', true);
         expect(callAttributes).toHaveProperty('name', 'banana');
         expect(callAttributes).toHaveProperty('appId', 'nanana');
-        expect(callAttributes).toHaveProperty('urlGeneratorId', 'panama');
+        expect(callAttributes).toHaveProperty('locatorId', 'panama');
         expect(callAttributes).toHaveProperty('initialState', {});
         expect(callAttributes).toHaveProperty('restoreState', {});
       });
@@ -255,7 +255,7 @@ describe('SearchSessionService', () => {
         await service.save({ savedObjectsClient }, mockUser1, sessionId, {
           name: 'banana',
           appId: 'nanana',
-          urlGeneratorId: 'panama',
+          locatorId: 'panama',
         });
 
         expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
@@ -271,7 +271,7 @@ describe('SearchSessionService', () => {
         expect(callAttributes).toHaveProperty('persisted', true);
         expect(callAttributes).toHaveProperty('name', 'banana');
         expect(callAttributes).toHaveProperty('appId', 'nanana');
-        expect(callAttributes).toHaveProperty('urlGeneratorId', 'panama');
+        expect(callAttributes).toHaveProperty('locatorId', 'panama');
         expect(callAttributes).toHaveProperty('initialState', {});
         expect(callAttributes).toHaveProperty('restoreState', {});
         expect(callAttributes).toHaveProperty('realmType', mockUser1.authentication_realm.type);
@@ -300,7 +300,7 @@ describe('SearchSessionService', () => {
           {
             name: 'my_name',
             appId: 'my_app_id',
-            urlGeneratorId: 'my_url_generator_id',
+            locatorId: 'my_locator_id',
           }
         );
 

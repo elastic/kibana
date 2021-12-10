@@ -7,7 +7,7 @@
 
 import React, { FC, Fragment, useEffect, useMemo, useRef } from 'react';
 import { debounce } from 'lodash';
-import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -25,14 +25,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
 
   const { advancedEditorMessages, advancedEditorRawString, isJobCreated } = state;
 
-  const {
-    createIndexPattern,
-    destinationIndexPatternTitleExists,
-    jobId,
-    jobIdEmpty,
-    jobIdExists,
-    jobIdValid,
-  } = state.form;
+  const { jobId, jobIdEmpty, jobIdExists, jobIdValid } = state.form;
 
   const forceInput = useRef<HTMLInputElement | null>(null);
   const { toasts } = useNotifications();
@@ -197,34 +190,6 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
           <EuiSpacer />
         </Fragment>
       ))}
-      {!isJobCreated && (
-        <Fragment>
-          <EuiFormRow
-            isInvalid={createIndexPattern && destinationIndexPatternTitleExists}
-            error={
-              createIndexPattern &&
-              destinationIndexPatternTitleExists && [
-                i18n.translate(
-                  'xpack.ml.dataframe.analytics.create.indexPatternAlreadyExistsError',
-                  {
-                    defaultMessage: 'An index pattern with this title already exists.',
-                  }
-                ),
-              ]
-            }
-          >
-            <EuiSwitch
-              disabled={isJobCreated}
-              name="mlDataFrameAnalyticsCreateIndexPattern"
-              label={i18n.translate('xpack.ml.dataframe.analytics.create.createIndexPatternLabel', {
-                defaultMessage: 'Create index pattern',
-              })}
-              checked={createIndexPattern === true}
-              onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
-            />
-          </EuiFormRow>
-        </Fragment>
-      )}
       <EuiSpacer />
       <CreateStep {...props} step={ANALYTICS_STEPS.CREATE} />
     </EuiForm>

@@ -45,7 +45,7 @@ describe('trace', () => {
       },
     });
     await root.preboot();
-  }, 30000);
+  }, 60000);
 
   afterEach(async () => {
     await root.shutdown();

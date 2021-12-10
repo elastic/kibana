@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 import { NewSavedQueryForm } from './form';
 import { useCreateSavedQuery } from '../../../saved_queries/use_create_saved_query';
 
@@ -20,7 +19,7 @@ const NewSavedQueryPageComponent = () => {
   useBreadcrumbs('saved_query_new');
   const savedQueryListProps = useRouterNavigate('saved_queries');
 
-  const createSavedQueryMutation = useCreateSavedQuery({ withRedirect: true });
+  const { mutateAsync } = useCreateSavedQuery({ withRedirect: true });
 
   const LeftColumn = useMemo(
     () => (
@@ -34,15 +33,14 @@ const NewSavedQueryPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.addSavedQuery.pageTitle"
                 defaultMessage="Add saved query"
               />
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
@@ -51,10 +49,7 @@ const NewSavedQueryPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn}>
-      {
-        // @ts-expect-error update types
-        <NewSavedQueryForm handleSubmit={createSavedQueryMutation.mutateAsync} />
-      }
+      <NewSavedQueryForm handleSubmit={mutateAsync} />
     </WithHeaderLayout>
   );
 };

@@ -56,8 +56,44 @@ export const ACTIVITY_LOG = {
           defaultMessage: 'submitted request: Release host',
         }
       ),
+      failedEndpointReleaseAction: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.failedEndpointReleaseAction',
+        {
+          defaultMessage: 'failed to submit request: Release host',
+        }
+      ),
+      failedEndpointIsolateAction: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.failedEndpointIsolateAction',
+        {
+          defaultMessage: 'failed to submit request: Isolate host',
+        }
+      ),
     },
     response: {
+      isolationCompletedAndSuccessful: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.isolationCompletedAndSuccessful',
+        {
+          defaultMessage: 'Host isolation request completed by Endpoint',
+        }
+      ),
+      isolationCompletedAndUnsuccessful: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.isolationCompletedAndUnsuccessful',
+        {
+          defaultMessage: 'Host isolation request completed by Endpoint with errors',
+        }
+      ),
+      unisolationCompletedAndSuccessful: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolationCompletedAndSuccessful',
+        {
+          defaultMessage: 'Release request completed by Endpoint',
+        }
+      ),
+      unisolationCompletedAndUnsuccessful: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolationCompletedAndUnsuccessful',
+        {
+          defaultMessage: 'Release request completed by Endpoint with errors',
+        }
+      ),
       isolationSuccessful: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.isolationSuccessful',
         {

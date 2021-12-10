@@ -10,12 +10,17 @@ import { addons } from '@storybook/addons';
 import { create } from '@storybook/theming';
 import { PANEL_ID } from '@storybook/addon-actions';
 
+// @ts-expect-error There's probably a better way to do this.
+import { registerThemeSwitcherAddon } from '@kbn/storybook/target_node/lib/register_theme_switcher_addon';
+
 addons.setConfig({
   theme: create({
     base: 'light',
     brandTitle: 'Kibana Presentation Utility Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/master/src/plugins/presentation_util',
+    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/plugins/presentation_util',
   }),
   showPanel: true.valueOf,
   selectedPanel: PANEL_ID,
 });
+
+registerThemeSwitcherAddon();

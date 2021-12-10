@@ -75,3 +75,5 @@ export const MarkdownEditorForm = React.memo(
     }
   )
 );
+
+MarkdownEditorForm.displayName = 'MarkdownEditorForm';

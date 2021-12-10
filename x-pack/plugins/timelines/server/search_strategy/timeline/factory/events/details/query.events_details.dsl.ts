@@ -6,14 +6,22 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DocValueFields } from '../../../../../../common/search_strategy';
 
-export const buildTimelineDetailsQuery = (
-  indexName: string,
-  id: string,
-  docValueFields: DocValueFields[],
-  authFilter?: JsonObject
-) => {
+export const buildTimelineDetailsQuery = ({
+  authFilter,
+  docValueFields,
+  id,
+  indexName,
+  runtimeMappings,
+}: {
+  authFilter?: JsonObject;
+  docValueFields: DocValueFields[];
+  id: string;
+  indexName: string;
+  runtimeMappings: MappingRuntimeFields;
+}) => {
   const basicFilter = {
     terms: {
       _id: [id],
@@ -33,13 +41,15 @@ export const buildTimelineDetailsQuery = (
         };
 
   return {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: indexName,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       docvalue_fields: docValueFields,
       query,
       fields: [{ field: '*', include_unmapped: true }],
+      // Remove and instead pass index_pattern.id once issue resolved: https://github.com/elastic/kibana/issues/111762
+      runtime_mappings: runtimeMappings,
       _source: true,
     },
     size: 1,

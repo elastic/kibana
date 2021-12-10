@@ -12,7 +12,7 @@ for the elastic endpoint and winlogbeat's sysmon data.
 
 ## Schema Format
 
-The predefined schemas are located here <https://github.com/elastic/kibana/blob/master/x-pack/plugins/security_solution/server/endpoint/routes/resolver/entity.ts#L34>
+The predefined schemas are located here <https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/endpoint/routes/resolver/entity.ts#L34>
 
 ```typescript
 const supportedSchemas: SupportedSchema[] = [

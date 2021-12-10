@@ -46,9 +46,13 @@ export const getCheckPermissionsHandler: RequestHandler = async (context, reques
 };
 
 export const generateServiceTokenHandler: RequestHandler = async (context, request, response) => {
+  // Generate the fleet server service token as the current user as the internal user do not have the correct permissions
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   try {
-    const { body: tokenResponse } = await esClient.transport.request({
+    const { body: tokenResponse } = await esClient.transport.request<{
+      created?: boolean;
+      token?: GenerateServiceTokenResponse;
+    }>({
       method: 'POST',
       path: `_security/service/elastic/fleet-server/credential/token/token-${Date.now()}`,
     });
@@ -81,6 +85,15 @@ export const registerRoutes = (router: IRouter) => {
   router.post(
     {
       path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
+      validate: {},
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    generateServiceTokenHandler
+  );
+
+  router.post(
+    {
+      path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED,
       validate: {},
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },

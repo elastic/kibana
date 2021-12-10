@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export const AGENT_SAVED_OBJECT_TYPE = 'fleet-agents';
-export const AGENT_ACTION_SAVED_OBJECT_TYPE = 'fleet-agent-actions';
+export const AGENTS_PREFIX = 'fleet-agents';
 
 export const AGENT_TYPE_PERMANENT = 'PERMANENT';
 export const AGENT_TYPE_EPHEMERAL = 'EPHEMERAL';

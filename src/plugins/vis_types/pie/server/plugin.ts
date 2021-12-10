@@ -14,8 +14,8 @@ import { CoreSetup, Plugin, UiSettingsParams } from 'kibana/server';
 import { LEGACY_PIE_CHARTS_LIBRARY } from '../common';
 
 export const getUiSettingsConfig: () => Record<string, UiSettingsParams<boolean>> = () => ({
-  // TODO: Remove this when vis_type_vislib is removed
-  // https://github.com/elastic/kibana/issues/56143
+  // TODO: Remove this when vislib pie is removed
+  // https://github.com/elastic/kibana/issues/111246
   [LEGACY_PIE_CHARTS_LIBRARY]: {
     name: i18n.translate('visTypePie.advancedSettings.visualization.legacyPieChartsLibrary.name', {
       defaultMessage: 'Pie legacy charts library',
@@ -33,7 +33,7 @@ export const getUiSettingsConfig: () => Record<string, UiSettingsParams<boolean>
         'visTypePie.advancedSettings.visualization.legacyPieChartsLibrary.deprecation',
         {
           defaultMessage:
-            'The legacy charts library for pie in visualize is deprecated and will not be supported as of 8.0.',
+            'The legacy charts library for pie in visualize is deprecated and will not be supported in a future version.',
         }
       ),
       docLinksKey: 'visualizationSettings',

@@ -23,16 +23,16 @@ export function kubernetesMetricsSpecProvider(context: TutorialContext): Tutoria
   return {
     id: 'kubernetesMetrics',
     name: i18n.translate('home.tutorials.kubernetesMetrics.nameTitle', {
-      defaultMessage: 'Kubernetes metrics',
+      defaultMessage: 'Kubernetes Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.kubernetesMetrics.shortDescription', {
-      defaultMessage: 'Fetch metrics from your Kubernetes installation.',
+      defaultMessage: 'Collect metrics from Kubernetes installations with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.kubernetesMetrics.longDescription', {
       defaultMessage:
-        'The `kubernetes` Metricbeat module fetches metrics from the Kubernetes APIs. \
+        'The `kubernetes` Metricbeat module fetches metrics from Kubernetes APIs. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kubernetes.html',
@@ -59,8 +59,8 @@ export function kubernetesMetricsSpecProvider(context: TutorialContext): Tutoria
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/kubernetes_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['containers', 'kubernetes'],
   };
 }

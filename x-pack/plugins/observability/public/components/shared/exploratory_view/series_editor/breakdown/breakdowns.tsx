@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,6 +17,8 @@ import {
   PERCENTILE,
 } from '../../configurations/constants';
 import { SeriesConfig, SeriesUrl } from '../../types';
+import { SYNTHETICS_STEP_NAME } from '../../configurations/constants/field_names/synthetics';
+import { isStepLevelMetric } from '../../configurations/synthetics/kpi_over_time_config';
 
 interface Props {
   seriesId: number;
@@ -51,6 +53,18 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
     }
   };
 
+  useEffect(() => {
+    if (
+      !isStepLevelMetric(series.selectedMetricField) &&
+      selectedBreakdown === SYNTHETICS_STEP_NAME
+    ) {
+      setSeries(seriesId, {
+        ...series,
+        breakdown: undefined,
+      });
+    }
+  });
+
   if (!seriesConfig) {
     return null;
   }
@@ -71,11 +85,26 @@ export function Breakdowns({ seriesConfig, seriesId, series }: Props) {
   }
 
   const options = items
-    .map(({ id, label }) => ({
-      inputDisplay: label,
-      value: id,
-      dropdownDisplay: label,
-    }))
+    .map(({ id, label }) => {
+      if (id === SYNTHETICS_STEP_NAME && !isStepLevelMetric(series.selectedMetricField)) {
+        return {
+          inputDisplay: label,
+          value: id,
+          dropdownDisplay: (
+            <EuiToolTip content={BREAKDOWN_UNAVAILABLE}>
+              <>{label}</>
+            </EuiToolTip>
+          ),
+          disabled: true,
+        };
+      } else {
+        return {
+          inputDisplay: label,
+          value: id,
+          dropdownDisplay: label,
+        };
+      }
+    })
     .filter(({ value }) => !(value === PERCENTILE && isRecordsMetric));
 
   let valueOfSelected =
@@ -120,6 +149,14 @@ export const NO_BREAK_DOWN_LABEL = i18n.translate(
 export const BREAKDOWN_WARNING = i18n.translate('xpack.observability.exp.breakDownFilter.warning', {
   defaultMessage: 'Breakdowns can be applied to only one series at a time.',
 });
+
+export const BREAKDOWN_UNAVAILABLE = i18n.translate(
+  'xpack.observability.exp.breakDownFilter.unavailable',
+  {
+    defaultMessage:
+      'Step name breakdown is not available for monitor duration metric. Use step duration metric to breakdown by step name.',
+  }
+);
 
 const Wrapper = styled.span`
   .euiToolTipAnchor {

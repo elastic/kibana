@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -17,27 +17,25 @@ import { HttpStart } from '../../../../../../../src/core/public';
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
 import {
-  buildAlertsRuleIdFilter,
+  buildAlertsFilter,
   buildAlertStatusesFilter,
-  buildAlertStatusesFilterRuleRegistry,
 } from '../../../detections/components/alerts_table/default_config';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import { Index } from '../../../../common/detection_engine/schemas/common/schemas';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from './helpers';
 import { useKibana } from '../../lib/kibana';
 
 /**
  * Adds exception items to the list. Also optionally closes alerts.
  *
- * @param ruleId id of the rule where the exception updates will be applied
+ * @param ruleStaticId static id of the rule (rule.ruleId, not rule.id) where the exception updates will be applied
  * @param exceptionItemsToAddOrUpdate array of ExceptionListItemSchema to add or update
  * @param alertIdToClose - optional string representing alert to close
  * @param bulkCloseIndex - optional index used to create bulk close query
  *
  */
 export type AddOrUpdateExceptionItemsFunc = (
-  ruleId: string,
+  ruleStaticId: string,
   exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   alertIdToClose?: string,
   bulkCloseIndex?: Index
@@ -72,10 +70,10 @@ export const useAddOrUpdateException = ({
   const addOrUpdateExceptionRef = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
   const { addExceptionListItem, updateExceptionListItem } = useApi(services.http);
   const addOrUpdateException = useCallback<AddOrUpdateExceptionItemsFunc>(
-    async (ruleId, exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
+    async (ruleStaticId, exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
       if (addOrUpdateExceptionRef.current != null) {
         addOrUpdateExceptionRef.current(
-          ruleId,
+          ruleStaticId,
           exceptionItemsToAddOrUpdate,
           alertIdToClose,
           bulkCloseIndex
@@ -84,15 +82,13 @@ export const useAddOrUpdateException = ({
     },
     []
   );
-  // TODO: Once we are past experimental phase this code should be removed
-  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
     const onUpdateExceptionItemsAndAlertStatus: AddOrUpdateExceptionItemsFunc = async (
-      ruleId,
+      ruleStaticId,
       exceptionItemsToAddOrUpdate,
       alertIdToClose,
       bulkCloseIndex
@@ -131,15 +127,16 @@ export const useAddOrUpdateException = ({
         }
 
         if (bulkCloseIndex != null) {
-          // TODO: Once we are past experimental phase this code should be removed
-          const alertStatusFilter = ruleRegistryEnabled
-            ? buildAlertStatusesFilterRuleRegistry(['open', 'acknowledged', 'in-progress'])
-            : buildAlertStatusesFilter(['open', 'acknowledged', 'in-progress']);
+          const alertStatusFilter = buildAlertStatusesFilter([
+            'open',
+            'acknowledged',
+            'in-progress',
+          ]);
 
           const filter = getQueryFilter(
             '',
             'kuery',
-            [...buildAlertsRuleIdFilter(ruleId), ...alertStatusFilter],
+            [...buildAlertsFilter(ruleStaticId), ...alertStatusFilter],
             bulkCloseIndex,
             prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
             false
@@ -185,14 +182,7 @@ export const useAddOrUpdateException = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [
-    addExceptionListItem,
-    http,
-    onSuccess,
-    onError,
-    ruleRegistryEnabled,
-    updateExceptionListItem,
-  ]);
+  }, [addExceptionListItem, http, onSuccess, onError, updateExceptionListItem]);
 
   return [{ isLoading }, addOrUpdateException];
 };

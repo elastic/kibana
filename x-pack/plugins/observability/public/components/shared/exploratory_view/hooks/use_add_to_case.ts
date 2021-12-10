@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
-import { isEmpty } from 'lodash';
+import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, MountPoint } from 'kibana/public';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -14,12 +13,7 @@ import { Case, SubCase } from '../../../../../../cases/common';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { AddToCaseProps } from '../header/add_to_case_action';
 import { observabilityFeatureId } from '../../../../../common';
-
-const appendSearch = (search?: string) =>
-  isEmpty(search) ? '' : `${search?.startsWith('?') ? search : `?${search}`}`;
-
-const getCreateCaseUrl = (search?: string | null) =>
-  `/cases/create${appendSearch(search ?? undefined)}`;
+import { CasesDeepLinkId } from '../../../../../../cases/public';
 
 async function addToCase(
   http: HttpSetup,
@@ -53,24 +47,9 @@ export const useAddToCase = ({
 
   const {
     http,
-    application: { navigateToApp, getUrlForApp },
+    application: { navigateToApp },
     notifications: { toasts },
   } = useKibana().services;
-
-  const createCaseUrl = useMemo(
-    () => getUrlForApp(observabilityFeatureId) + getCreateCaseUrl(),
-    [getUrlForApp]
-  );
-
-  const goToCreateCase = useCallback(
-    async (ev) => {
-      ev.preventDefault();
-      return navigateToApp(observabilityFeatureId, {
-        path: getCreateCaseUrl(),
-      });
-    },
-    [navigateToApp]
-  );
 
   const onCaseClicked = useCallback(
     (theCase?: Case | SubCase) => {
@@ -109,7 +88,7 @@ export const useAddToCase = ({
         );
       } else {
         navigateToApp(observabilityFeatureId, {
-          path: getCreateCaseUrl(),
+          deepLinkId: CasesDeepLinkId.casesCreate,
           openInNewTab: true,
         });
       }
@@ -118,8 +97,6 @@ export const useAddToCase = ({
   );
 
   return {
-    createCaseUrl,
-    goToCreateCase,
     onCaseClicked,
     isSaving,
     isCasesOpen,

@@ -6,10 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getUrlPrefix } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import type { RawAlert, RawAlertAction } from '../../../../../plugins/alerting/server/types';
+import type { RawRule, RawAlertAction } from '../../../../../plugins/alerting/server/types';
+import { FILEBEAT_7X_INDICATOR_PATH } from '../../../../../plugins/alerting/server/saved_objects/migrations';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -181,10 +182,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     it('7.15.0 migrates security_solution alerts with exceptionLists to be saved object references', async () => {
       // NOTE: We hae to use elastic search directly against the ".kibana" index because alerts do not expose the references which we want to test exists
-      const response = await es.get<{ references: [{}] }>({
-        index: '.kibana',
-        id: 'alert:38482620-ef1b-11eb-ad71-7de7959be71c',
-      });
+      const response = await es.get<{ references: [{}] }>(
+        {
+          index: '.kibana',
+          id: 'alert:38482620-ef1b-11eb-ad71-7de7959be71c',
+        },
+        { meta: true }
+      );
       expect(response.statusCode).to.eql(200);
       expect(response.body._source?.references).to.eql([
         {
@@ -201,39 +205,45 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it('7.16.0 migrates existing alerts to contain legacyId field', async () => {
-      const searchResult: ApiResponse<estypes.SearchResponse<RawAlert>> = await es.search({
-        index: '.kibana',
-        body: {
-          query: {
-            term: {
-              _id: 'alert:74f3e6d7-b7bb-477d-ac28-92ee22728e6e',
+      const searchResult = await es.search<RawRule>(
+        {
+          index: '.kibana',
+          body: {
+            query: {
+              term: {
+                _id: 'alert:74f3e6d7-b7bb-477d-ac28-92ee22728e6e',
+              },
             },
           },
         },
-      });
+        { meta: true }
+      );
       expect(searchResult.statusCode).to.equal(200);
       expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
       const hit = searchResult.body.hits.hits[0];
-      expect((hit!._source!.alert! as RawAlert).legacyId).to.equal(
+      expect((hit!._source!.alert! as RawRule).legacyId).to.equal(
         '74f3e6d7-b7bb-477d-ac28-92ee22728e6e'
       );
     });
 
     it('7.16.0 migrates existing rules so predefined connectors are not stored in references', async () => {
-      const searchResult: ApiResponse<estypes.SearchResponse<RawAlert>> = await es.search({
-        index: '.kibana',
-        body: {
-          query: {
-            term: {
-              _id: 'alert:9c003b00-00ee-11ec-b067-2524946ba327',
+      const searchResult = await es.search<RawRule>(
+        {
+          index: '.kibana',
+          body: {
+            query: {
+              term: {
+                _id: 'alert:9c003b00-00ee-11ec-b067-2524946ba327',
+              },
             },
           },
         },
-      });
+        { meta: true }
+      );
       expect(searchResult.statusCode).to.equal(200);
       expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
       const hit = searchResult.body.hits.hits[0];
-      expect((hit!._source!.alert! as RawAlert).actions! as RawAlertAction[]).to.eql([
+      expect((hit!._source!.alert! as RawRule).actions! as RawAlertAction[]).to.eql([
         {
           actionRef: 'action_0',
           actionTypeId: 'test.noop',
@@ -260,10 +270,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     it('7.16.0 migrates security_solution (Legacy) siem.notifications with "ruleAlertId" to be saved object references', async () => {
       // NOTE: We hae to use elastic search directly against the ".kibana" index because alerts do not expose the references which we want to test exists
-      const response = await es.get<{ references: [{}] }>({
-        index: '.kibana',
-        id: 'alert:d7a8c6a1-9394-48df-a634-d5457c35d747',
-      });
+      const response = await es.get<{ references: [{}] }>(
+        {
+          index: '.kibana',
+          id: 'alert:d7a8c6a1-9394-48df-a634-d5457c35d747',
+        },
+        { meta: true }
+      );
       expect(response.statusCode).to.eql(200);
       expect(response.body._source?.references).to.eql([
         {
@@ -272,6 +285,80 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           type: 'alert',
         },
       ]);
+    });
+
+    it('8.0 migrates security_solution (Legacy) threat match rules to add default threatIndicatorPath value if missing', async () => {
+      const response = await es.get<{
+        alert: {
+          params: {
+            threatIndicatorPath: string;
+          };
+        };
+      }>(
+        {
+          index: '.kibana',
+          id: 'alert:ece1ece2-9394-48df-a634-d5457c351ece',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.params?.threatIndicatorPath).to.eql(
+        FILEBEAT_7X_INDICATOR_PATH
+      );
+    });
+
+    it('8.0 does not migrate security_solution (Legacy) threat match rules if threatIndicatorPath value is present', async () => {
+      const response = await es.get<{
+        alert: {
+          params: {
+            threatIndicatorPath: string;
+          };
+        };
+      }>(
+        {
+          index: '.kibana',
+          id: 'alert:fce1ece2-9394-48df-a634-d5457c351fce',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.params?.threatIndicatorPath).to.eql(
+        'custom.indicator.path'
+      );
+    });
+
+    it('8.0 does not migrate security_solution (Legacy) rules other than threat_match rules if threatIndicatorPath value is missing', async () => {
+      const response = await es.get<{
+        alert: {
+          params: {
+            threatIndicatorPath: string;
+          };
+        };
+      }>(
+        {
+          index: '.kibana',
+          id: 'alert:1ce1ece2-9394-48df-a634-d5457c3511ce',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.params?.threatIndicatorPath).not.to.eql(
+        FILEBEAT_7X_INDICATOR_PATH
+      );
+    });
+
+    it('8.0 migrates incorrect action group spellings on the Metrics Inventory Threshold rule type', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: '.kibana',
+          id: 'alert:92237b30-4e03-11ec-9ab9-d980518a2d28',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.actions?.[0].group).to.be(
+        'metrics.inventory_threshold.fired'
+      );
     });
   });
 }

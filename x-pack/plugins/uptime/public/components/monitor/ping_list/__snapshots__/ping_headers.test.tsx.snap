@@ -16,6 +16,8 @@ exports[`Ping Headers shallow renders expected elements for valid props 1`] = `
         </h3>
       </EuiText>
     }
+    buttonElement="button"
+    element="div"
     id="responseHeaderAccord"
     initialIsOpen={false}
     isLoading={false}

@@ -3,7 +3,6 @@
 exports[`DatatableComponent it renders actions column when there are row actions 1`] = `
 <VisualizationContainer
   className="lnsDataTableContainer"
-  reportTitle="My fanci metric chart"
 >
   <ContextProvider
     value={
@@ -253,7 +252,6 @@ exports[`DatatableComponent it renders actions column when there are row actions
 exports[`DatatableComponent it renders the title and value 1`] = `
 <VisualizationContainer
   className="lnsDataTableContainer"
-  reportTitle="My fanci metric chart"
 >
   <ContextProvider
     value={
@@ -487,10 +485,9 @@ exports[`DatatableComponent it renders the title and value 1`] = `
 </VisualizationContainer>
 `;
 
-exports[`DatatableComponent it should render hide and reset actions on header even when it is in read only mode 1`] = `
+exports[`DatatableComponent it should render hide, reset, and sort actions on header even when it is in read only mode 1`] = `
 <VisualizationContainer
   className="lnsDataTableContainer"
-  reportTitle="My fanci metric chart"
 >
   <ContextProvider
     value={
@@ -605,8 +602,12 @@ exports[`DatatableComponent it should render hide and reset actions on header ev
               "showHide": false,
               "showMoveLeft": false,
               "showMoveRight": false,
-              "showSortAsc": false,
-              "showSortDesc": false,
+              "showSortAsc": Object {
+                "label": "Sort ascending",
+              },
+              "showSortDesc": Object {
+                "label": "Sort descending",
+              },
             },
             "cellActions": undefined,
             "display": <div
@@ -642,8 +643,12 @@ exports[`DatatableComponent it should render hide and reset actions on header ev
               "showHide": false,
               "showMoveLeft": false,
               "showMoveRight": false,
-              "showSortAsc": false,
-              "showSortDesc": false,
+              "showSortAsc": Object {
+                "label": "Sort ascending",
+              },
+              "showSortDesc": Object {
+                "label": "Sort descending",
+              },
             },
             "cellActions": undefined,
             "display": <div
@@ -679,8 +684,12 @@ exports[`DatatableComponent it should render hide and reset actions on header ev
               "showHide": false,
               "showMoveLeft": false,
               "showMoveRight": false,
-              "showSortAsc": false,
-              "showSortDesc": false,
+              "showSortAsc": Object {
+                "label": "Sort ascending",
+              },
+              "showSortDesc": Object {
+                "label": "Sort descending",
+              },
             },
             "cellActions": undefined,
             "display": <div

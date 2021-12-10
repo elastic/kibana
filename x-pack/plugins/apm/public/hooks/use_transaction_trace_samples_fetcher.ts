@@ -6,7 +6,7 @@
  */
 
 import { useFetcher } from './use_fetcher';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { useApmParams } from './use_apm_params';
 import { useTimeRange } from './use_time_range';
@@ -17,7 +17,6 @@ export interface TraceSample {
 }
 
 const INITIAL_DATA = {
-  noHits: true,
   traceSamples: [] as TraceSample[],
 };
 
@@ -40,7 +39,7 @@ export function useTransactionTraceSamplesFetcher({
 
   const {
     urlParams: { transactionId, traceId, sampleRangeFrom, sampleRangeTo },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const {
     data = INITIAL_DATA,
@@ -71,16 +70,7 @@ export function useTransactionTraceSamplesFetcher({
           },
         });
 
-        if (response.noHits) {
-          return response;
-        }
-
-        const { traceSamples } = response;
-
-        return {
-          noHits: false,
-          traceSamples,
-        };
+        return response;
       }
     },
     // the samples should not be refetched if the transactionId or traceId changes

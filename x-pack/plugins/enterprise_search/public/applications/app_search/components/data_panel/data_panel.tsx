@@ -20,12 +20,13 @@ import {
   EuiTitle,
   EuiTitleProps,
 } from '@elastic/eui';
+import { _EuiPanelDivlike } from '@elastic/eui/src/components/panel/panel';
 
 import { LoadingOverlay } from '../../../shared/loading';
 
 import './data_panel.scss';
 
-interface Props {
+type Props = Omit<_EuiPanelDivlike, 'title'> & {
   title: React.ReactElement; // e.g., h2 tag
   titleSize?: EuiTitleProps['size'];
   subtitle?: React.ReactNode;
@@ -33,10 +34,9 @@ interface Props {
   action?: React.ReactNode;
   responsive?: boolean;
   filled?: boolean;
-  hasBorder?: boolean;
   isLoading?: boolean;
   className?: string;
-}
+};
 
 export const DataPanel: React.FC<Props> = ({
   title,
@@ -46,7 +46,6 @@ export const DataPanel: React.FC<Props> = ({
   action,
   responsive = false,
   filled,
-  hasBorder,
   isLoading,
   className,
   children,
@@ -58,12 +57,11 @@ export const DataPanel: React.FC<Props> = ({
 
   return (
     <EuiPanel
-      {...props}
       color={filled ? 'subdued' : 'plain'}
-      hasBorder={hasBorder}
       className={classes}
       hasShadow={false}
       aria-busy={isLoading}
+      {...props}
     >
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={responsive}>
         <EuiFlexItem>

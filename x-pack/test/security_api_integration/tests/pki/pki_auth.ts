@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
@@ -150,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
           enabled: true,
           metadata: {
             pki_delegated_by_realm: 'reserved',
-            pki_delegated_by_user: 'kibana',
+            pki_delegated_by_user: 'kibana_system',
             pki_dn: 'CN=first_client',
           },
           authentication_realm: { name: 'pki1', type: 'pki' },
@@ -187,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
           enabled: true,
           metadata: {
             pki_delegated_by_realm: 'reserved',
-            pki_delegated_by_user: 'kibana',
+            pki_delegated_by_user: 'kibana_system',
             pki_dn: 'CN=second_client',
           },
           authentication_realm: { name: 'pki1', type: 'pki' },
@@ -358,7 +358,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
-        await delay(20000);
+        await setTimeoutAsync(20000);
 
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access token.
@@ -382,7 +382,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
-        await delay(20000);
+        await setTimeoutAsync(20000);
 
         // This request should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.

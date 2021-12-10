@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { get } from 'lodash/fp';
-import { ConnectorServiceNowSIRTypeFields } from '../../../common';
+import { ConnectorServiceNowSIRTypeFields } from '../../../common/api';
 import { ServiceNowSIRFormat, SirFieldKey, AlertFieldMappingAndValues } from './types';
 
 export const format: ServiceNowSIRFormat = (theCase, alerts) => {
@@ -45,12 +45,16 @@ export const format: ServiceNowSIRFormat = (theCase, alerts) => {
 
   if (fieldsToAdd.length > 0) {
     sirFields = alerts.reduce<Record<SirFieldKey, string[]>>((acc, alert) => {
+      let temp = {};
       fieldsToAdd.forEach((alertField) => {
         const field = get(alertFieldMapping[alertField].alertPath, alert);
+
         if (field && !manageDuplicate[alertFieldMapping[alertField].sirFieldKey].has(field)) {
           manageDuplicate[alertFieldMapping[alertField].sirFieldKey].add(field);
-          acc = {
+
+          temp = {
             ...acc,
+            ...temp,
             [alertFieldMapping[alertField].sirFieldKey]: [
               ...acc[alertFieldMapping[alertField].sirFieldKey],
               field,
@@ -58,7 +62,8 @@ export const format: ServiceNowSIRFormat = (theCase, alerts) => {
           };
         }
       });
-      return acc;
+
+      return { ...acc, ...temp };
     }, sirFields);
   }
 

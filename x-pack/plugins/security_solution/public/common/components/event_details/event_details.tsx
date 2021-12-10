@@ -39,7 +39,7 @@ import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { Reason } from './reason';
 
 import { InvestigationGuideView } from './investigation_guide_view';
-import { HostRisk } from '../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
+import { HostRisk } from '../../containers/hosts_risk/use_hosts_risk_score';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -61,6 +61,7 @@ interface Props {
   id: string;
   isAlert: boolean;
   isDraggable?: boolean;
+  rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
   hostRisk: HostRisk | null;
@@ -106,6 +107,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   id,
   isAlert,
   isDraggable,
+  rawEventData,
   timelineId,
   timelineTabType,
   hostRisk,
@@ -278,12 +280,12 @@ const EventDetailsComponent: React.FC<Props> = ({
         <>
           <EuiSpacer size="m" />
           <TabContentWrapper data-test-subj="jsonViewWrapper">
-            <JsonView data={data} />
+            <JsonView rawEventData={rawEventData} />
           </TabContentWrapper>
         </>
       ),
     }),
-    [data]
+    [rawEventData]
   );
 
   const tabs = useMemo(() => {

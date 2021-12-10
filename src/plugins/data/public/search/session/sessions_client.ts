@@ -37,26 +37,26 @@ export class SessionsClient {
   public create({
     name,
     appId,
-    urlGeneratorId,
+    locatorId,
     initialState,
     restoreState,
     sessionId,
   }: {
     name: string;
     appId: string;
+    locatorId: string;
     initialState: Record<string, unknown>;
     restoreState: Record<string, unknown>;
-    urlGeneratorId: string;
     sessionId: string;
   }): Promise<SearchSessionSavedObject> {
     return this.http.post(`/internal/session`, {
       body: JSON.stringify({
         name,
+        appId,
+        locatorId,
         initialState,
         restoreState,
         sessionId,
-        appId,
-        urlGeneratorId,
       }),
     });
   }

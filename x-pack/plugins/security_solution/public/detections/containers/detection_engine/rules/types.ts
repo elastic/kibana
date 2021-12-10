@@ -19,6 +19,7 @@ import {
   threats,
   type,
   severity_mapping,
+  severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   SortOrder,
@@ -54,6 +55,11 @@ export const action = t.exact(
 
 export interface CreateRulesProps {
   rule: CreateRulesSchema;
+  signal: AbortSignal;
+}
+
+export interface PreviewRulesProps {
+  rule: CreateRulesSchema & { invocationCount: number };
   signal: AbortSignal;
 }
 
@@ -96,7 +102,7 @@ export const RuleSchema = t.intersection([
     risk_score: t.number,
     risk_score_mapping,
     rule_id: t.string,
-    severity: t.string,
+    severity,
     severity_mapping,
     tags: t.array(t.string),
     type,
@@ -120,6 +126,9 @@ export const RuleSchema = t.intersection([
     last_failure_message: t.string,
     last_success_message: t.string,
     last_success_at: t.string,
+    last_gap: t.string,
+    bulk_create_time_durations: t.array(t.string),
+    search_after_time_durations: t.array(t.string),
     meta: MetaRule,
     machine_learning_job_id: t.array(t.string),
     output_index: t.string,
@@ -140,6 +149,7 @@ export const RuleSchema = t.intersection([
     timestamp_override,
     note: t.string,
     exceptions_list: listArray,
+    uuid: t.string,
     version: t.number,
   }),
 ]);

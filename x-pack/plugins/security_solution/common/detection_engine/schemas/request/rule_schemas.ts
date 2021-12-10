@@ -71,6 +71,9 @@ import {
   last_failure_at,
   last_failure_message,
   namespace,
+  last_gap,
+  bulk_create_time_durations,
+  search_after_time_durations,
 } from '../common/schemas';
 
 export const createSchema = <
@@ -362,6 +365,12 @@ export type MachineLearningCreateSchema = CreateSchema<
 
 export const createRulesSchema = t.intersection([sharedCreateSchema, createTypeSpecific]);
 export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
+export const previewRulesSchema = t.intersection([
+  sharedCreateSchema,
+  createTypeSpecific,
+  t.type({ invocationCount: t.number }),
+]);
+export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
 
 type UpdateSchema<T> = SharedUpdateSchema & T;
 export type EqlUpdateSchema = UpdateSchema<t.TypeOf<typeof eqlCreateParams>>;
@@ -417,6 +426,9 @@ const responseOptionalFields = {
   last_success_message,
   last_failure_at,
   last_failure_message,
+  last_gap,
+  bulk_create_time_durations,
+  search_after_time_durations,
 };
 
 export const fullResponseSchema = t.intersection([
@@ -426,3 +438,9 @@ export const fullResponseSchema = t.intersection([
   t.exact(t.partial(responseOptionalFields)),
 ]);
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
+
+export interface PreviewResponse {
+  previewId: string | undefined;
+  errors: string[] | undefined;
+  warnings: string[] | undefined;
+}

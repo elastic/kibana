@@ -31,6 +31,7 @@ import { createMonitoringStats, MonitoringStats } from './monitoring';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
+import { TASK_MANAGER_INDEX } from './constants';
 
 export interface TaskManagerSetupContract {
   /**
@@ -65,12 +66,14 @@ export class TaskManagerPlugin
   private middleware: Middleware = createInitialMiddleware();
   private elasticsearchAndSOAvailability$?: Observable<boolean>;
   private monitoringStats$ = new Subject<MonitoringStats>();
+  private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.logger = initContext.logger.get();
     this.config = initContext.config.get<TaskManagerConfig>();
     this.definitions = new TaskTypeDictionary(this.logger);
+    this.kibanaVersion = initContext.env.packageInfo.version;
   }
 
   public setup(
@@ -91,15 +94,26 @@ export class TaskManagerPlugin
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${this.taskManagerId}`);
     }
 
+    const startServicesPromise = core.getStartServices().then(([coreServices]) => ({
+      elasticsearch: coreServices.elasticsearch,
+    }));
+
+    const usageCounter = plugins.usageCollection?.createUsageCounter(`taskManager`);
+
     // Routes
     const router = core.http.createRouter();
-    const { serviceStatus$, monitoredHealth$ } = healthRoute(
+    const { serviceStatus$, monitoredHealth$ } = healthRoute({
       router,
-      this.monitoringStats$,
-      this.logger,
-      this.taskManagerId,
-      this.config!
-    );
+      monitoringStats$: this.monitoringStats$,
+      logger: this.logger,
+      taskManagerId: this.taskManagerId,
+      config: this.config!,
+      usageCounter,
+      kibanaVersion: this.kibanaVersion,
+      kibanaIndexName: core.savedObjects.getKibanaIndex(),
+      getClusterClient: () =>
+        startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
+    });
 
     core.status.derivedStatus$.subscribe((status) =>
       this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
@@ -135,7 +149,7 @@ export class TaskManagerPlugin
     }
 
     return {
-      index: this.config.index,
+      index: TASK_MANAGER_INDEX,
       addMiddleware: (middleware: Middleware) => {
         this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
@@ -158,8 +172,8 @@ export class TaskManagerPlugin
     const taskStore = new TaskStore({
       serializer,
       savedObjectsRepository,
-      esClient: elasticsearch.createClient('taskManager').asInternalUser,
-      index: this.config!.index,
+      esClient: elasticsearch.client.asInternalUser,
+      index: TASK_MANAGER_INDEX,
       definitions: this.definitions,
       taskManagerId: `kibana:${this.taskManagerId!}`,
     });

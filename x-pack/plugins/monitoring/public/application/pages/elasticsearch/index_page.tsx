@@ -11,9 +11,9 @@ import { find } from 'lodash';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
-import { IndexReact } from '../../../components/elasticsearch/index/index_react';
+import { Index } from '../../../components/elasticsearch/index/index';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useCharts } from '../../hooks/use_charts';
 import { ItemTemplate } from './item_template';
@@ -69,7 +69,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices/${index}`;
     if (services.http?.fetch && clusterUuid) {
-      const response = await services.http?.fetch(url, {
+      const response = await services.http?.fetch<{ shards: unknown[]; nodes: unknown[] }>(url, {
         method: 'POST',
         body: JSON.stringify({
           timeRange: {
@@ -118,7 +118,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}
-            <IndexReact
+            <Index
               setupMode={setupMode}
               labels={indexLabel}
               alerts={alerts}

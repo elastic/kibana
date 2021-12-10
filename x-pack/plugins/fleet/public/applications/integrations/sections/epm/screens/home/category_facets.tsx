@@ -25,6 +25,13 @@ export const ALL_CATEGORY = {
   }),
 };
 
+export const INSTALLED_CATEGORY = {
+  id: '',
+  title: i18n.translate('xpack.fleet.epmList.allPackagesInstalledFilterLinkText', {
+    defaultMessage: 'All installed',
+  }),
+};
+
 export interface Props {
   isLoading?: boolean;
   categories: CategoryFacet[];

@@ -6,7 +6,7 @@
  */
 
 import { get, isEmpty } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
 
@@ -28,6 +28,7 @@ interface ConstructorOptions {
   getClusterClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isWriteEnabled: boolean;
+  disabledRegistrationContexts: string[];
 }
 
 export class ResourceInstaller {
@@ -40,7 +41,6 @@ export class ResourceInstaller {
     try {
       const installResources = async (): Promise<void> => {
         const { logger, isWriteEnabled } = this.options;
-
         if (!isWriteEnabled) {
           logger.info(`Write is disabled; not installing ${resources}`);
           return;
@@ -85,7 +85,7 @@ export class ResourceInstaller {
       // We can install them in parallel
       await Promise.all([
         this.createOrUpdateLifecyclePolicy({
-          policy: getResourceName(DEFAULT_ILM_POLICY_ID),
+          name: getResourceName(DEFAULT_ILM_POLICY_ID),
           body: defaultLifecyclePolicy,
         }),
 
@@ -113,10 +113,9 @@ export class ResourceInstaller {
   public async installIndexLevelResources(indexInfo: IndexInfo): Promise<void> {
     await this.installWithTimeout(`resources for index ${indexInfo.baseName}`, async () => {
       const { componentTemplates, ilmPolicy } = indexInfo.indexOptions;
-
       if (ilmPolicy != null) {
         await this.createOrUpdateLifecyclePolicy({
-          policy: indexInfo.getIlmPolicyName(),
+          name: indexInfo.getIlmPolicyName(),
           body: { policy: ilmPolicy },
         });
       }
@@ -309,12 +308,14 @@ export class ResourceInstaller {
 
         template: {
           settings: {
+            hidden: true,
             'index.lifecycle': {
               name: ilmPolicyName,
               // TODO: fix the types in the ES package, they don't include rollover_alias???
               // @ts-expect-error
               rollover_alias: primaryNamespacedAlias,
             },
+            'index.mapping.total_fields.limit': 1200,
           },
           mappings: {
             dynamic: false,
@@ -385,7 +386,7 @@ export class ResourceInstaller {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
 
-    logger.debug(`Installing lifecycle policy ${policy.policy}`);
+    logger.debug(`Installing lifecycle policy ${policy.name}`);
     return clusterClient.ilm.putLifecycle(policy);
   }
 

@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { UsageCollectionSetup } from '../../../usage_collection/public';
+export type { UsageCollectionSetup } from '../../../usage_collection/public';

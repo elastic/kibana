@@ -87,6 +87,7 @@ export const expectedExportedTimelineTemplate = (
         },
       },
     },
+    dataViewId: timelineTemplateBody.dataViewId,
     dateRange: {
       start: timelineTemplateBody.dateRange?.start,
       end: timelineTemplateBody.dateRange?.end,
@@ -127,6 +128,7 @@ export const expectedExportedTimeline = (timelineResponse: Cypress.Response<Time
       },
     },
     dateRange: { start: timelineBody.dateRange?.start, end: timelineBody.dateRange?.end },
+    dataViewId: timelineBody.dataViewId,
     description: timelineBody.description,
     title: timelineBody.title,
     created: timelineBody.created,

@@ -10,24 +10,18 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { getPolicyDetailsArtifactsListPath } from '../../../../../common/routing';
-import { PolicyTrustedAppsList } from './policy_trusted_apps_list';
+import { PolicyTrustedAppsList, PolicyTrustedAppsListProps } from './policy_trusted_apps_list';
 import React from 'react';
 import { policyDetailsPageAllApiHttpMocks } from '../../../test_utils';
-import {
-  createLoadingResourceState,
-  createUninitialisedResourceState,
-  isFailedResourceState,
-  isLoadedResourceState,
-} from '../../../../../state';
+import { isFailedResourceState, isLoadedResourceState } from '../../../../../state';
 import { fireEvent, within, act, waitFor } from '@testing-library/react';
-import { APP_ID } from '../../../../../../../common/constants';
-import {
-  EndpointPrivileges,
-  useEndpointPrivileges,
-} from '../../../../../../common/components/user_privileges/use_endpoint_privileges';
+import { APP_UI_ID } from '../../../../../../../common/constants';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
+import { EndpointPrivileges } from '../../../../../../../common/endpoint/types';
 
-jest.mock('../../../../../../common/components/user_privileges/use_endpoint_privileges');
-const mockUseEndpointPrivileges = useEndpointPrivileges as jest.Mock;
+jest.mock('../../../../../../common/components/user_privileges');
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
 describe('when rendering the PolicyTrustedAppsList', () => {
   // The index (zero based) of the card created by the generator that is policy specific
@@ -38,14 +32,12 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   let render: (waitForLoadedState?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
   let mockedApis: ReturnType<typeof policyDetailsPageAllApiHttpMocks>;
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
+  let componentRenderProps: PolicyTrustedAppsListProps;
 
   const loadedUserEndpointPrivilegesState = (
     endpointOverrides: Partial<EndpointPrivileges> = {}
   ): EndpointPrivileges => ({
-    loading: false,
-    canAccessFleet: true,
-    canAccessEndpointManagement: true,
-    isPlatinumPlus: true,
+    ...getEndpointPrivilegesInitialStateMock(),
     ...endpointOverrides,
   });
 
@@ -84,15 +76,19 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   };
 
   afterAll(() => {
-    mockUseEndpointPrivileges.mockReset();
+    mockUseUserPrivileges.mockReset();
   });
   beforeEach(() => {
     appTestContext = createAppRootMockRenderer();
-    mockUseEndpointPrivileges.mockReturnValue(loadedUserEndpointPrivilegesState());
+    mockUseUserPrivileges.mockReturnValue({
+      ...mockUseUserPrivileges(),
+      endpointPrivileges: loadedUserEndpointPrivilegesState(),
+    });
 
     mockedApis = policyDetailsPageAllApiHttpMocks(appTestContext.coreStart.http);
     appTestContext.setExperimentalFlag({ trustedAppsByPolicyEnabled: true });
     waitForAction = appTestContext.middlewareSpy.waitForAction;
+    componentRenderProps = {};
 
     render = async (waitForLoadedState: boolean = true) => {
       appTestContext.history.push(
@@ -106,25 +102,20 @@ describe('when rendering the PolicyTrustedAppsList', () => {
           })
         : Promise.resolve();
 
-      renderResult = appTestContext.render(<PolicyTrustedAppsList />);
+      const checkTrustedAppDataAssignedReceived = waitForLoadedState
+        ? waitForAction('policyArtifactsHasTrustedApps', {
+            validate({ payload }) {
+              return isLoadedResourceState(payload);
+            },
+          })
+        : Promise.resolve();
+
+      renderResult = appTestContext.render(<PolicyTrustedAppsList {...componentRenderProps} />);
+      await checkTrustedAppDataAssignedReceived;
       await trustedAppDataReceived;
 
       return renderResult;
     };
-  });
-
-  it('should show loading spinner if checking to see if trusted apps exist', async () => {
-    await render();
-    act(() => {
-      appTestContext.store.dispatch({
-        type: 'policyArtifactsDeosAnyTrustedAppExists',
-        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-        // @ts-ignore
-        payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
-      });
-    });
-
-    expect(renderResult.getByTestId('policyTrustedAppsGrid-loading')).not.toBeNull();
   });
 
   it('should show total number of of items being displayed', async () => {
@@ -133,6 +124,13 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     expect(renderResult.getByTestId('policyDetailsTrustedAppsCount').textContent).toBe(
       'Showing 20 trusted applications'
     );
+  });
+
+  it('should NOT show total number if `hideTotalShowingLabel` prop is true', async () => {
+    componentRenderProps.hideTotalShowingLabel = true;
+    await render();
+
+    expect(renderResult.queryByTestId('policyDetailsTrustedAppsCount')).toBeNull();
   });
 
   it('should show card grid', async () => {
@@ -196,9 +194,9 @@ describe('when rendering the PolicyTrustedAppsList', () => {
     });
 
     expect(appTestContext.coreStart.application.navigateToApp).toHaveBeenCalledWith(
-      APP_ID,
+      APP_UI_ID,
       expect.objectContaining({
-        path: '/administration/trusted_apps?show=edit&id=89f72d8a-05b5-4350-8cad-0dc3661d6e67',
+        path: '/administration/trusted_apps?filter=6f12b025-fcb0-4db4-99e5-4927e3502bb8',
       })
     );
   });
@@ -244,11 +242,11 @@ describe('when rendering the PolicyTrustedAppsList', () => {
       expect(
         renderResult.getByTestId('policyTrustedAppsGrid-card-header-effectScope-popupMenu-item-0')
           .textContent
-      ).toEqual('Endpoint Policy 0');
+      ).toEqual('Endpoint Policy 0View details');
       expect(
         renderResult.getByTestId('policyTrustedAppsGrid-card-header-effectScope-popupMenu-item-1')
           .textContent
-      ).toEqual('Endpoint Policy 1');
+      ).toEqual('Endpoint Policy 1View details');
     });
 
     it('should navigate to policy details when clicking policy on assignment context menu', async () => {
@@ -320,14 +318,30 @@ describe('when rendering the PolicyTrustedAppsList', () => {
   });
 
   it('does not show remove option in actions menu if license is downgraded to gold or below', async () => {
+    mockUseUserPrivileges.mockReturnValue({
+      ...mockUseUserPrivileges(),
+      endpointPrivileges: loadedUserEndpointPrivilegesState({
+        canCreateArtifactsByPolicy: false,
+      }),
+    });
     await render();
-    mockUseEndpointPrivileges.mockReturnValue(
-      loadedUserEndpointPrivilegesState({
-        isPlatinumPlus: false,
-      })
-    );
     await toggleCardActionMenu(POLICY_SPECIFIC_CARD_INDEX);
 
     expect(renderResult.queryByTestId('policyTrustedAppsGrid-removeAction')).toBeNull();
+  });
+
+  it('should handle search changes', async () => {
+    await render();
+
+    expect(appTestContext.history.location.search).not.toBeTruthy();
+
+    act(() => {
+      fireEvent.change(renderResult.getByTestId('searchField'), {
+        target: { value: 'search' },
+      });
+      fireEvent.submit(renderResult.getByTestId('searchField'));
+    });
+
+    expect(appTestContext.history.location.search).toMatch('?filter=search');
   });
 });

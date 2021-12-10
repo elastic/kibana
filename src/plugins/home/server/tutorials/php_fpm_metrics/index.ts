@@ -23,17 +23,17 @@ export function phpfpmMetricsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: 'phpfpmMetrics',
     name: i18n.translate('home.tutorials.phpFpmMetrics.nameTitle', {
-      defaultMessage: 'PHP-FPM metrics',
+      defaultMessage: 'PHP-FPM Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     isBeta: false,
     shortDescription: i18n.translate('home.tutorials.phpFpmMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from PHP-FPM.',
+      defaultMessage: 'Collect metrics from PHP-FPM with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.phpFpmMetrics.longDescription', {
       defaultMessage:
-        'The `php_fpm` Metricbeat module fetches internal metrics from the PHP-FPM server. \
+        'The `php_fpm` Metricbeat module fetches metrics from PHP-FPM server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-php_fpm.html',
@@ -54,8 +54,8 @@ export function phpfpmMetricsSpecProvider(context: TutorialContext): TutorialSch
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['security'],
   };
 }

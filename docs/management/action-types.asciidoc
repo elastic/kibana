@@ -43,6 +43,10 @@ a| <<servicenow-sir-action-type, ServiceNow SecOps>>
 
 | Create a security incident in ServiceNow.
 
+a| <<servicenow-itom-action-type, ServiceNow ITOM>>
+
+| Create an event in ServiceNow.
+
 a| <<slack-action-type, Slack>>
 
 | Send a message to a Slack channel or user.

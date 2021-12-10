@@ -1,6 +1,6 @@
-# OpenAPI
+# OpenAPI (Experimental)
 
-The current self-contained spec file is [as JSON](https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/fleet/common/openapi/bundled.json) or [as YAML](https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/fleet/common/openapi/bundled.yaml) and can be used for online tools like those found at https://openapi.tools/
+The current self-contained spec file is [as JSON](https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/fleet/common/openapi/bundled.json) or [as YAML](https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/fleet/common/openapi/bundled.yaml) and can be used for online tools like those found at https://openapi.tools/. This spec is experiemental and may be incomplete or change later.
 
 For example, online viewers for the specification like these:
 

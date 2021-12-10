@@ -23,17 +23,17 @@ export function windowsMetricsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'windowsMetrics',
     name: i18n.translate('home.tutorials.windowsMetrics.nameTitle', {
-      defaultMessage: 'Windows metrics',
+      defaultMessage: 'Windows Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.windowsMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from Windows.',
+      defaultMessage: 'Collect metrics from Windows with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.windowsMetrics.longDescription', {
       defaultMessage:
-        'The `windows` Metricbeat module fetches internal metrics from Windows. \
+        'The `windows` Metricbeat module fetches metrics from Windows. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-windows.html',
@@ -54,8 +54,8 @@ export function windowsMetricsSpecProvider(context: TutorialContext): TutorialSc
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['os_system', 'security'],
   };
 }

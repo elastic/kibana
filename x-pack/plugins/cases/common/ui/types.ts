@@ -19,6 +19,19 @@ import {
   ActionConnector,
 } from '../api';
 
+interface CasesFeatures {
+  alerts: { sync: boolean };
+}
+
+export interface CasesContextValue {
+  owner: string[];
+  appId: string;
+  appTitle: string;
+  userCanCrud: boolean;
+  basePath: string;
+  features: CasesFeatures;
+}
+
 export interface CasesUiConfigType {
   markdownPlugins: {
     lens: boolean;
@@ -255,10 +268,19 @@ export interface SignalEcs {
   threshold_result?: unknown;
 }
 
+export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
+  rule?: Exclude<RuleEcs, 'id'> & { uuid: string[] };
+  building_block_type?: string[];
+  workflow_status?: string[];
+};
+
 export interface Ecs {
   _id: string;
   _index?: string;
   signal?: SignalEcs;
+  kibana?: {
+    alert: SignalEcsAAD;
+  };
 }
 
 export type CaseActionConnector = ActionConnector;

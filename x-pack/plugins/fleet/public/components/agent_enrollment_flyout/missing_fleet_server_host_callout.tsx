@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, EuiButton, EuiSpacer } from '@elastic/eui';
 
-import { useUrlModal, useStartServices } from '../../hooks';
+import { useLink, useStartServices } from '../../hooks';
 
 export const MissingFleetServerHostCallout: React.FunctionComponent = () => {
-  const { setModal } = useUrlModal();
   const { docLinks } = useStartServices();
+  const { getHref } = useLink();
 
   return (
     <EuiCallOut
@@ -37,13 +37,7 @@ export const MissingFleetServerHostCallout: React.FunctionComponent = () => {
         }}
       />
       <EuiSpacer size="m" />
-      <EuiButton
-        fill
-        iconType="gear"
-        onClick={() => {
-          setModal('settings');
-        }}
-      >
+      <EuiButton fill iconType="gear" href={getHref('settings')}>
         <FormattedMessage
           id="xpack.fleet.agentEnrollment.fleetSettingsLink"
           defaultMessage="Fleet Settings"

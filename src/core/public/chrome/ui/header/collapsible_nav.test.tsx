@@ -71,7 +71,10 @@ function expectNavIsClosed(component: ReactWrapper) {
 }
 
 function clickGroup(component: ReactWrapper, group: string) {
-  component.find(`[data-test-subj="collapsibleNavGroup-${group}"] button`).simulate('click');
+  component
+    .find(`[data-test-subj="collapsibleNavGroup-${group}"] button`)
+    .first()
+    .simulate('click');
 }
 
 describe('CollapsibleNav', () => {

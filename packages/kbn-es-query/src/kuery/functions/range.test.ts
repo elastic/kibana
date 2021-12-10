@@ -13,7 +13,7 @@ import { DataViewBase } from '../..';
 import { RangeFilterParams } from '../../filters';
 
 import * as range from './range';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 jest.mock('../grammar');
 
 describe('kuery functions', () => {

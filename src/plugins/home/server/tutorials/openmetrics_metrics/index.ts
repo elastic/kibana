@@ -23,12 +23,13 @@ export function openmetricsMetricsSpecProvider(context: TutorialContext): Tutori
   return {
     id: 'openmetricsMetrics',
     name: i18n.translate('home.tutorials.openmetricsMetrics.nameTitle', {
-      defaultMessage: 'OpenMetrics metrics',
+      defaultMessage: 'OpenMetrics Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.openmetricsMetrics.shortDescription', {
-      defaultMessage: 'Fetch metrics from an endpoint that serves metrics in OpenMetrics format.',
+      defaultMessage:
+        'Collect metrics from an endpoint that serves metrics in OpenMetrics format with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.openmetricsMetrics.longDescription', {
       defaultMessage:
@@ -47,8 +48,8 @@ export function openmetricsMetricsSpecProvider(context: TutorialContext): Tutori
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['security'],
   };
 }

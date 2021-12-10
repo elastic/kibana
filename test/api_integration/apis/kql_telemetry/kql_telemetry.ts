@@ -7,7 +7,6 @@
  */
 
 import expect from '@kbn/expect';
-import Bluebird from 'bluebird';
 import { get } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -40,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
           index: '.kibana',
           q: 'type:kql-telemetry',
         })
-        .then(({ body: response }) => {
+        .then((response) => {
           const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
           expect(kqlTelemetryDoc.optInCount).to.be(1);
         });
@@ -58,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
           index: '.kibana',
           q: 'type:kql-telemetry',
         })
-        .then(({ body: response }) => {
+        .then((response) => {
           const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
           expect(kqlTelemetryDoc.optOutCount).to.be(1);
         });
@@ -89,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should only accept literal boolean values for the opt_in POST body param', function () {
-      return Bluebird.all([
+      return Promise.all([
         supertest
           .post('/api/kibana/kql_opt_in_stats')
           .set('content-type', 'application/json')

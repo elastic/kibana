@@ -31,7 +31,7 @@ import {
   EuiHorizontalRule,
   EuiIconTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
@@ -98,6 +98,7 @@ export function LogstashPanel(props) {
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
                   href={goToLogstash()}
+                  data-test-subj="lsOverview"
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel',
                     {

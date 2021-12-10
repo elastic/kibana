@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { DeprecatedCallout } from './deprecated_callout';
 
@@ -19,7 +19,7 @@ describe('DeprecatedCallout', () => {
       wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
     });
 
-    expect(screen.getByText('Deprecated connector type')).toBeInTheDocument();
+    expect(screen.getByText('This connector type is deprecated')).toBeInTheDocument();
   });
 
   test('it calls onMigrate when pressing the button', () => {

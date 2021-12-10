@@ -16,7 +16,6 @@ import { ConfiguredLimits, Account, Role } from './types';
 import { getRoleAbilities } from './utils/role';
 
 interface AppValues {
-  ilmEnabled: boolean;
   configuredLimits: ConfiguredLimits;
   account: Account;
   myRole: Role;
@@ -41,7 +40,6 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions, Required<Initia
       },
     ],
     configuredLimits: [props.configuredLimits.appSearch, {}],
-    ilmEnabled: [props.ilmEnabled, {}],
   }),
   selectors: {
     myRole: [

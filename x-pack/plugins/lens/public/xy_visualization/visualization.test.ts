@@ -16,6 +16,7 @@ import { LensIconChartBar } from '../assets/chart_bar';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { Datatable } from 'src/plugins/expressions';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 function exampleState(): State {
   return {
@@ -40,6 +41,8 @@ const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
+  useLegacyTimeAxis: false,
+  kibanaTheme: themeServiceMock.createStartContract(),
 });
 
 describe('xy_visualization', () => {
@@ -538,6 +541,214 @@ describe('xy_visualization', () => {
       expect(ops.filter(filterOperations).map((x) => x.dataType)).toEqual(['number']);
     });
 
+    describe('breakdown group: percentage chart checks', () => {
+      const baseState = exampleState();
+
+      it('should require break down group with one accessor + one split accessor configuration', () => {
+        const [, , splitGroup] = xyVisualization.getConfiguration({
+          state: {
+            ...baseState,
+            layers: [
+              { ...baseState.layers[0], accessors: ['a'], seriesType: 'bar_percentage_stacked' },
+            ],
+          },
+          frame,
+          layerId: 'first',
+        }).groups;
+        expect(splitGroup.required).toBe(true);
+      });
+
+      test.each([
+        [
+          'multiple accessors on the same layer',
+          [
+            {
+              ...baseState.layers[0],
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on compatible layers',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+            },
+            {
+              ...baseState.layers[0],
+              splitAccessor: undefined,
+              xAccessor: 'd',
+              accessors: ['e'],
+              seriesType: 'bar_percentage_stacked',
+            },
+          ],
+        ],
+      ] as Array<[string, State['layers']]>)(
+        'should not require break down group for %s',
+        (_, layers) => {
+          const [, , splitGroup] = xyVisualization.getConfiguration({
+            state: { ...baseState, layers },
+            frame,
+            layerId: 'first',
+          }).groups;
+          expect(splitGroup.required).toBe(false);
+        }
+      );
+
+      it.each([
+        [
+          'one accessor only',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+              splitAccessor: undefined,
+              xAccessor: undefined,
+            },
+          ],
+        ],
+        [
+          'one accessor only with split accessor',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+              xAccessor: undefined,
+            },
+          ],
+        ],
+        [
+          'one accessor only with xAccessor',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+              splitAccessor: undefined,
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on incompatible layers (different xAccessor)',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+              splitAccessor: undefined,
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['e'],
+              seriesType: 'bar_percentage_stacked',
+              splitAccessor: undefined,
+              xAccessor: undefined,
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on incompatible layers (different splitAccessor)',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['e'],
+              seriesType: 'bar_percentage_stacked',
+              splitAccessor: undefined,
+              xAccessor: undefined,
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on incompatible layers (different seriesType)',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['e'],
+              seriesType: 'bar',
+            },
+          ],
+        ],
+        [
+          'one data layer with one accessor + one reference layer',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              seriesType: 'bar_percentage_stacked',
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['e'],
+              seriesType: 'bar_percentage_stacked',
+              layerType: layerTypes.REFERENCELINE,
+            },
+          ],
+        ],
+
+        [
+          'multiple accessors on the same layers with different axis assigned',
+          [
+            {
+              ...baseState.layers[0],
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+              yConfig: [
+                { forAccessor: 'a', axisMode: 'left' },
+                { forAccessor: 'b', axisMode: 'right' },
+              ],
+            },
+          ],
+        ],
+        [
+          'multiple accessors spread on multiple layers with different axis assigned',
+          [
+            {
+              ...baseState.layers[0],
+              accessors: ['a'],
+              xAccessor: undefined,
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+              yConfig: [{ forAccessor: 'a', axisMode: 'left' }],
+            },
+            {
+              ...baseState.layers[0],
+              accessors: ['b'],
+              xAccessor: undefined,
+              splitAccessor: undefined,
+              seriesType: 'bar_percentage_stacked',
+              yConfig: [{ forAccessor: 'b', axisMode: 'right' }],
+            },
+          ],
+        ],
+      ] as Array<[string, State['layers']]>)(
+        'should require break down group for %s',
+        (_, layers) => {
+          const [, , splitGroup] = xyVisualization.getConfiguration({
+            state: { ...baseState, layers },
+            frame,
+            layerId: 'first',
+          }).groups;
+          expect(splitGroup.required).toBe(true);
+        }
+      );
+    });
+
     describe('reference lines', () => {
       beforeEach(() => {
         frame.datasourceLayers = {
@@ -573,13 +784,12 @@ describe('xy_visualization', () => {
         const state = getStateWithBaseReferenceLine();
         state.layers[0].accessors = [];
         state.layers[1].yConfig = undefined;
-
         expect(
           xyVisualization.getConfiguration({
             state: getStateWithBaseReferenceLine(),
             frame,
             layerId: 'referenceLine',
-          }).supportStaticValue
+          }).groups[0].supportStaticValue
         ).toBeTruthy();
       });
 
@@ -829,6 +1039,21 @@ describe('xy_visualization', () => {
             expect.objectContaining({ groupId: 'yReferenceLineRight' }),
           ])
         );
+      });
+
+      it('should be excluded and not crash when a custom palette is used for data layer', () => {
+        const state = getStateWithBaseReferenceLine();
+        // now add a breakdown on the data layer with a custom palette
+        state.layers[0].palette = { type: 'palette', name: 'custom', params: {} };
+        state.layers[0].splitAccessor = 'd';
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'referenceLine',
+        }).groups;
+        // it should not crash basically
+        expect(options).toHaveLength(1);
       });
     });
 

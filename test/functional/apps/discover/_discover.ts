@@ -28,17 +28,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
-
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
-
-    describe('query', function () {
+    after(async () => {
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+    });
+    // FLAKY: https://github.com/elastic/kibana/issues/86602
+    describe.skip('query', function () {
       const queryName1 = 'Query # 1';
 
       it('should show correct time range string by timepicker', async function () {

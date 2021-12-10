@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { Datatable } from '../../expression_types';
-import { buildResultColumns, getBucketIdentifier } from '../series_calculation_helpers';
 
 export interface OverallMetricArgs {
   by?: string[];
@@ -23,16 +22,8 @@ export type ExpressionFunctionOverallMetric = ExpressionFunctionDefinition<
   'overall_metric',
   Datatable,
   OverallMetricArgs,
-  Datatable
+  Promise<Datatable>
 >;
-
-function getValueAsNumberArray(value: unknown) {
-  if (Array.isArray(value)) {
-    return value.map((innerVal) => Number(innerVal));
-  } else {
-    return [Number(value)];
-  }
-}
 
 /**
  * Calculates the overall metric of a specified column in the data table.
@@ -109,73 +100,8 @@ export const overallMetric: ExpressionFunctionOverallMetric = {
     },
   },
 
-  fn(input, { by, inputColumnId, outputColumnId, outputColumnName, metric }) {
-    const resultColumns = buildResultColumns(
-      input,
-      outputColumnId,
-      inputColumnId,
-      outputColumnName
-    );
-
-    if (!resultColumns) {
-      return input;
-    }
-
-    const accumulators: Partial<Record<string, number>> = {};
-    const valueCounter: Partial<Record<string, number>> = {};
-    input.rows.forEach((row) => {
-      const bucketIdentifier = getBucketIdentifier(row, by);
-      const accumulatorValue = accumulators[bucketIdentifier];
-
-      const currentValue = row[inputColumnId];
-      if (currentValue != null) {
-        const currentNumberValues = getValueAsNumberArray(currentValue);
-        switch (metric) {
-          case 'average':
-            valueCounter[bucketIdentifier] =
-              (valueCounter[bucketIdentifier] ?? 0) + currentNumberValues.length;
-          case 'sum':
-            accumulators[bucketIdentifier] = currentNumberValues.reduce(
-              (a, b) => a + b,
-              accumulatorValue || 0
-            );
-            break;
-          case 'min':
-            if (typeof accumulatorValue !== 'undefined') {
-              accumulators[bucketIdentifier] = Math.min(accumulatorValue, ...currentNumberValues);
-            } else {
-              accumulators[bucketIdentifier] = Math.min(...currentNumberValues);
-            }
-            break;
-          case 'max':
-            if (typeof accumulatorValue !== 'undefined') {
-              accumulators[bucketIdentifier] = Math.max(accumulatorValue, ...currentNumberValues);
-            } else {
-              accumulators[bucketIdentifier] = Math.max(...currentNumberValues);
-            }
-            break;
-        }
-      }
-    });
-    if (metric === 'average') {
-      Object.keys(accumulators).forEach((bucketIdentifier) => {
-        const accumulatorValue = accumulators[bucketIdentifier];
-        const valueCount = valueCounter[bucketIdentifier];
-        if (typeof accumulatorValue !== 'undefined' && typeof valueCount !== 'undefined') {
-          accumulators[bucketIdentifier] = accumulatorValue / valueCount;
-        }
-      });
-    }
-    return {
-      ...input,
-      columns: resultColumns,
-      rows: input.rows.map((row) => {
-        const newRow = { ...row };
-        const bucketIdentifier = getBucketIdentifier(row, by);
-        newRow[outputColumnId] = accumulators[bucketIdentifier];
-
-        return newRow;
-      }),
-    };
+  async fn(input, args) {
+    const { overallMetricFn } = await import('./overall_metric_fn');
+    return overallMetricFn(input, args);
   },
 };

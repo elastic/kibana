@@ -29,7 +29,7 @@ import type {
   GetAnalyticsMapArgs,
   ExtendAnalyticsMapArgs,
 } from '../models/data_frame_analytics/types';
-import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
+import { DataViewHandler } from '../models/data_frame_analytics/index_patterns';
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
 import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
 import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_service';
@@ -38,14 +38,14 @@ import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { MlClient } from '../lib/ml_client';
 import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
 
-function getIndexPatternId(dataViewsService: DataViewsService, patternName: string) {
-  const iph = new IndexPatternHandler(dataViewsService);
-  return iph.getIndexPatternId(patternName);
+function getDataViewId(dataViewsService: DataViewsService, patternName: string) {
+  const iph = new DataViewHandler(dataViewsService);
+  return iph.getDataViewId(patternName);
 }
 
-function deleteDestIndexPatternById(dataViewsService: DataViewsService, indexPatternId: string) {
-  const iph = new IndexPatternHandler(dataViewsService);
-  return iph.deleteIndexPatternById(indexPatternId);
+function deleteDestDataViewById(dataViewsService: DataViewsService, dataViewId: string) {
+  const iph = new DataViewHandler(dataViewsService);
+  return iph.deleteDataViewById(dataViewId);
 }
 
 function getAnalyticsMap(
@@ -427,9 +427,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
             if (destinationIndex && deleteDestIndexPattern) {
               try {
                 const dataViewsService = await getDataViewsService();
-                const indexPatternId = await getIndexPatternId(dataViewsService, destinationIndex);
-                if (indexPatternId) {
-                  await deleteDestIndexPatternById(dataViewsService, indexPatternId);
+                const dataViewId = await getDataViewId(dataViewsService, destinationIndex);
+                if (dataViewId) {
+                  await deleteDestDataViewById(dataViewsService, dataViewId);
                 }
                 destIndexPatternDeleted.success = true;
               } catch (deleteDestIndexPatternError) {
@@ -708,7 +708,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
   /**
    * @apiGroup DataFrameAnalytics
    *
-   * @api {get} api/data_frame/analytics/fields/:indexPattern Get index pattern fields for analytics
+   * @api {get} api/data_frame/analytics/fields/:indexPattern Get fields for a pattern of indices used for analytics
    * @apiName AnalyticsNewJobCaps
    * @apiDescription Retrieve the index fields for analytics
    */

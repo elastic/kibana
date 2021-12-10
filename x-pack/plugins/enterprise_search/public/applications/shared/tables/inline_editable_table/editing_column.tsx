@@ -25,20 +25,25 @@ export const EditingColumn = <Item extends ItemWithAnID>({
   column,
   isLoading = false,
 }: EditingColumnProps<Item>) => {
-  const { formErrors, editingItemValue } = useValues(InlineEditableTableLogic);
+  const { fieldErrors, rowErrors, editingItemValue } = useValues(InlineEditableTableLogic);
   const { setEditingItemValue } = useActions(InlineEditableTableLogic);
 
   if (!editingItemValue) return null;
+
+  const fieldError = fieldErrors[column.field];
+  const isInvalid = !!fieldError || rowErrors.length > 0;
 
   return (
     <EuiFormRow
       fullWidth
       helpText={
-        <EuiText color="danger" size="s">
-          {formErrors[column.field]}
-        </EuiText>
+        fieldError && (
+          <EuiText color="danger" size="s">
+            {fieldError}
+          </EuiText>
+        )
       }
-      isInvalid={!!formErrors[column.field]}
+      isInvalid={isInvalid}
     >
       <>
         {column.editingRender(
@@ -50,7 +55,7 @@ export const EditingColumn = <Item extends ItemWithAnID>({
             });
           },
           {
-            isInvalid: !!formErrors[column.field],
+            isInvalid,
             isLoading,
           }
         )}

@@ -8,7 +8,7 @@
 import { ReactNode } from 'react';
 
 import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
-import { IFieldSubType } from '../../../../../../../src/plugins/data/common';
+import type { IFieldSubType } from '@kbn/es-query';
 import { BrowserFields } from '../../../search_strategy/index_fields';
 import { TimelineNonEcsData } from '../../../search_strategy/timeline';
 import { Ecs } from '../../../ecs';

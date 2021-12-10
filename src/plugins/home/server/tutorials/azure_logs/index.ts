@@ -24,13 +24,13 @@ export function azureLogsSpecProvider(context: TutorialContext): TutorialSchema 
   return {
     id: 'azureLogs',
     name: i18n.translate('home.tutorials.azureLogs.nameTitle', {
-      defaultMessage: 'Azure logs',
+      defaultMessage: 'Azure Logs',
     }),
     moduleName,
     isBeta: true,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.azureLogs.shortDescription', {
-      defaultMessage: 'Collects Azure activity and audit related logs.',
+      defaultMessage: 'Collect and parse logs from Azure with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.azureLogs.longDescription', {
       defaultMessage:
@@ -58,8 +58,8 @@ export function azureLogsSpecProvider(context: TutorialContext): TutorialSchema 
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/azure_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['azure', 'cloud', 'network', 'security'],
   };
 }

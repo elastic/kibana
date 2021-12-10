@@ -7,17 +7,17 @@
 
 import { DataViewsService } from '../../../../../../src/plugins/data_views/common';
 
-export class IndexPatternHandler {
+export class DataViewHandler {
   constructor(private dataViewService: DataViewsService) {}
   // returns a id based on an index pattern name
-  async getIndexPatternId(indexName: string) {
+  async getDataViewId(indexName: string) {
     const dv = (await this.dataViewService.find(indexName)).find(
       ({ title }) => title === indexName
     );
     return dv?.id;
   }
 
-  async deleteIndexPatternById(indexId: string) {
-    return await this.dataViewService.delete(indexId);
+  async deleteDataViewById(dataViewId: string) {
+    return await this.dataViewService.delete(dataViewId);
   }
 }

@@ -16,6 +16,6 @@ constructor(client: SavedObjectsClientContract, { id, type, version, attributes,
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  client | <code>SavedObjectsClientContract</code> |  |
-|  { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, } | <code>SavedObjectType&lt;T&gt;</code> |  |
+|  client | SavedObjectsClientContract |  |
+|  { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, } | SavedObjectType&lt;T&gt; |  |
 

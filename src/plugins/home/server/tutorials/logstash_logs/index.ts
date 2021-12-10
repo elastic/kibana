@@ -24,12 +24,12 @@ export function logstashLogsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'logstashLogs',
     name: i18n.translate('home.tutorials.logstashLogs.nameTitle', {
-      defaultMessage: 'Logstash logs',
+      defaultMessage: 'Logstash Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.logstashLogs.shortDescription', {
-      defaultMessage: 'Collect Logstash main and slow logs.',
+      defaultMessage: 'Collect and parse main and slow logs from Logstash with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.logstashLogs.longDescription', {
       defaultMessage:
@@ -56,8 +56,8 @@ export function logstashLogsSpecProvider(context: TutorialContext): TutorialSche
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['custom'],
   };
 }

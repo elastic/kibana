@@ -17,6 +17,8 @@ import {
   ENDPOINT_ACTION_RESPONSES_DS,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
+  failedFleetActionErrorCode,
+  FORBIDDEN_MESSAGE,
 } from '../../../../common/endpoint/constants';
 import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
 import {
@@ -32,7 +34,7 @@ import {
 import { getMetadataForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
 import { APP_ID } from '../../../../common/constants';
-import { userCanIsolate } from '../../../../common/endpoint/actions';
+import { doLogsEndpointActionDsExists } from '../../utils';
 
 /**
  * Registers the Host-(un-)isolation routes
@@ -78,38 +80,13 @@ const createFailedActionResponseEntry = async ({
       body: {
         ...doc,
         error: {
-          code: '424',
+          code: failedFleetActionErrorCode,
           message: 'Failed to deliver action request to fleet',
         },
       },
     });
   } catch (e) {
     logger.error(e);
-  }
-};
-
-const doLogsEndpointActionDsExists = async ({
-  context,
-  logger,
-  dataStreamName,
-}: {
-  context: SecuritySolutionRequestHandlerContext;
-  logger: Logger;
-  dataStreamName: string;
-}): Promise<boolean> => {
-  try {
-    const esClient = context.core.elasticsearch.client.asInternalUser;
-    const doesIndexTemplateExist = await esClient.indices.existsIndexTemplate({
-      name: dataStreamName,
-    });
-    return doesIndexTemplateExist.statusCode === 404 ? false : true;
-  } catch (error) {
-    const errorType = error?.type ?? '';
-    if (errorType !== 'resource_not_found_exception') {
-      logger.error(error);
-      throw error;
-    }
-    return false;
   }
 };
 
@@ -123,24 +100,18 @@ export const isolationRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
-    // only allow admin users
-    const user = endpointContext.service.security?.authc.getCurrentUser(req);
-    if (!userCanIsolate(user?.roles)) {
+    const { canIsolateHost, canUnIsolateHost } = context.securitySolution.endpointAuthz;
+
+    // Ensure user has authorization to use this api
+    if ((!canIsolateHost && isolate) || (!canUnIsolateHost && !isolate)) {
       return res.forbidden({
         body: {
-          message: 'You do not have permission to perform this action',
+          message: FORBIDDEN_MESSAGE,
         },
       });
     }
 
-    // isolation requires plat+
-    if (isolate && !endpointContext.service.getLicenseService()?.isPlatinumPlus()) {
-      return res.forbidden({
-        body: {
-          message: 'Your license level does not allow for this action',
-        },
-      });
-    }
+    const user = endpointContext.service.security?.authc.getCurrentUser(req);
 
     // fetch the Agent IDs to send the commands to
     const endpointIDs = [...new Set(req.body.endpoint_ids)]; // dedupe
@@ -232,13 +203,9 @@ export const isolationRequestHandler = function (
     }
 
     try {
-      let esClient = context.core.elasticsearch.client.asCurrentUser;
-      if (doesLogsEndpointActionsDsExist) {
-        // create action request record as system user with user in .fleet-actions
-        esClient = context.core.elasticsearch.client.asInternalUser;
-      }
-      // write as the current user if the new indices do not exist
-      // <v7.16 requires the current user to be super user
+      const esClient = context.core.elasticsearch.client.asInternalUser;
+      // write as the internal user if the new indices do not exist
+      // 8.0+ requires internal user to write to system indices
       fleetActionIndexResult = await esClient.index<EndpointAction>({
         index: AGENT_ACTIONS_INDEX,
         body: {

@@ -13,14 +13,9 @@ import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../common/containers/use_full_screen';
-import { mockTimelineModel, TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import { GraphOverlay } from '.';
-
-jest.mock('../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel.savedObjectId),
-  useDeepEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
-}));
 
 jest.mock('../../../common/containers/use_full_screen', () => ({
   useGlobalFullScreen: jest.fn(),

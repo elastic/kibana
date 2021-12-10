@@ -6,21 +6,24 @@
  * Side Public License, v 1.
  */
 
-import type { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
-import type { Search } from '@elastic/elasticsearch/api/requestParams';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IUiSettingsClient, SharedGlobalConfig } from 'kibana/server';
 import { UI_SETTINGS } from '../../../../common';
 
-export function getShardTimeout(config: SharedGlobalConfig): Pick<Search, 'timeout'> {
+export function getShardTimeout(
+  config: SharedGlobalConfig
+): Pick<estypes.SearchRequest, 'timeout'> {
   const timeout = config.elasticsearch.shardTimeout.asMilliseconds();
   return timeout ? { timeout: `${timeout}ms` } : {};
 }
 
 export async function getDefaultSearchParams(
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>
-): Promise<
-  Pick<Search, 'max_concurrent_shard_requests' | 'ignore_unavailable' | 'track_total_hits'>
-> {
+): Promise<{
+  max_concurrent_shard_requests?: number;
+  ignore_unavailable: boolean;
+  track_total_hits: boolean;
+}> {
   const maxConcurrentShardRequests = await uiSettingsClient.get<number>(
     UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS
   );
@@ -31,25 +34,3 @@ export async function getDefaultSearchParams(
     track_total_hits: true,
   };
 }
-
-/**
- * Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297 is resolved.
- * Shims the `AbortSignal` behavior so that, if the given `signal` aborts, the `abort` method on the
- * `TransportRequestPromise` is called, actually performing the cancellation.
- * @internal
- */
-export const shimAbortSignal = <T>(promise: TransportRequestPromise<T>, signal?: AbortSignal) => {
-  if (!signal) return promise;
-  const abortHandler = () => {
-    promise.abort();
-    cleanup();
-  };
-  const cleanup = () => signal.removeEventListener('abort', abortHandler);
-  if (signal.aborted) {
-    promise.abort();
-  } else {
-    signal.addEventListener('abort', abortHandler);
-    promise.then(cleanup, cleanup);
-  }
-  return promise;
-};

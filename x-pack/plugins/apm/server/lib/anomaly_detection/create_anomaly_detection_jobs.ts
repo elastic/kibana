@@ -5,39 +5,33 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
-import uuid from 'uuid/v4';
-import { snakeCase } from 'lodash';
 import Boom from '@hapi/boom';
+import { Logger } from 'kibana/server';
+import { snakeCase } from 'lodash';
 import moment from 'moment';
+import uuid from 'uuid/v4';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { Setup } from '../helpers/setup_request';
 import {
-  TRANSACTION_DURATION,
+  METRICSET_NAME,
   PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
-import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
+import { Environment } from '../../../common/environment_rt';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
+import { Setup } from '../helpers/setup_request';
+import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
 
 export async function createAnomalyDetectionJobs(
   setup: Setup,
-  environments: string[],
+  environments: Environment[],
   logger: Logger
 ) {
   const { ml, indices } = setup;
 
   if (!ml) {
     throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
-  }
-
-  const mlCapabilities = await withApmSpan('get_ml_capabilities', () =>
-    ml.mlSystem.mlCapabilities()
-  );
-  if (!mlCapabilities.mlFeatureEnabledInSpace) {
-    throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
   }
 
   const uniqueMlJobEnvs = await getUniqueMlJobEnvs(setup, environments, logger);
@@ -50,12 +44,13 @@ export async function createAnomalyDetectionJobs(
       `Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`
     );
 
-    const indexPatternName = indices.metric;
+    const dataViewName = indices.metric;
     const responses = await Promise.all(
       uniqueMlJobEnvs.map((environment) =>
-        createAnomalyDetectionJob({ ml, environment, indexPatternName })
+        createAnomalyDetectionJob({ ml, environment, dataViewName })
       )
     );
+
     const jobResponses = responses.flatMap((response) => response.jobs);
     const failedJobs = jobResponses.filter(({ success }) => !success);
 
@@ -73,11 +68,11 @@ export async function createAnomalyDetectionJobs(
 async function createAnomalyDetectionJob({
   ml,
   environment,
-  indexPatternName,
+  dataViewName,
 }: {
   ml: Required<Setup>['ml'];
   environment: string;
-  indexPatternName: string;
+  dataViewName: string;
 }) {
   return withApmSpan('create_anomaly_detection_job', async () => {
     const randomToken = uuid().substr(-4);
@@ -86,14 +81,14 @@ async function createAnomalyDetectionJob({
       moduleId: ML_MODULE_ID_APM_TRANSACTION,
       prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
       groups: [APM_ML_JOB_GROUP],
-      indexPatternName,
+      indexPatternName: dataViewName,
       applyToAllSpaces: true,
       start: moment().subtract(4, 'weeks').valueOf(),
       query: {
         bool: {
           filter: [
-            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-            { exists: { field: TRANSACTION_DURATION } },
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } },
+            { term: { [METRICSET_NAME]: 'transaction' } },
             ...environmentQuery(environment),
           ],
         },
@@ -105,7 +100,7 @@ async function createAnomalyDetectionJob({
             job_tags: {
               environment,
               // identifies this as an APM ML job & facilitates future migrations
-              apm_ml_version: 2,
+              apm_ml_version: 3,
             },
           },
         },
@@ -116,12 +111,15 @@ async function createAnomalyDetectionJob({
 
 async function getUniqueMlJobEnvs(
   setup: Setup,
-  environments: string[],
+  environments: Environment[],
   logger: Logger
 ) {
   // skip creation of duplicate ML jobs
-  const jobs = await getAnomalyDetectionJobs(setup, logger);
-  const existingMlJobEnvs = jobs.map(({ environment }) => environment);
+  const jobs = await getAnomalyDetectionJobs(setup);
+  const existingMlJobEnvs = jobs
+    .filter((job) => job.version === 3)
+    .map(({ environment }) => environment);
+
   const requestedExistingMlJobEnvs = environments.filter((env) =>
     existingMlJobEnvs.includes(env)
   );

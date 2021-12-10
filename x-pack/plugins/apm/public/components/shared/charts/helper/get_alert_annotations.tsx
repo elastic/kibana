@@ -12,23 +12,14 @@ import {
 } from '@elastic/charts';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  ALERT_DURATION as ALERT_DURATION_TYPED,
-  ALERT_SEVERITY as ALERT_SEVERITY_TYPED,
-  ALERT_START as ALERT_START_TYPED,
-  ALERT_UUID as ALERT_UUID_TYPED,
-  ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_TYPED,
-  ALERT_RULE_NAME as ALERT_RULE_NAME_TYPED,
-} from '@kbn/rule-data-utils';
 import {
-  ALERT_DURATION as ALERT_DURATION_NON_TYPED,
-  ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
-  ALERT_START as ALERT_START_NON_TYPED,
-  ALERT_UUID as ALERT_UUID_NON_TYPED,
-  ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_NON_TYPED,
-  ALERT_RULE_NAME as ALERT_RULE_NAME_NON_TYPED,
-  // @ts-expect-error
-} from '@kbn/rule-data-utils/target_node/technical_field_names';
+  ALERT_DURATION,
+  ALERT_SEVERITY,
+  ALERT_START,
+  ALERT_UUID,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_NAME,
+} from '@kbn/rule-data-utils/technical_field_names';
 import React, { Dispatch, SetStateAction } from 'react';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { ValuesType } from 'utility-types';
@@ -36,14 +27,6 @@ import type { ObservabilityRuleTypeRegistry } from '../../../../../../observabil
 import { parseTechnicalFields } from '../../../../../../rule_registry/common';
 import { asDuration, asPercent } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-
-const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
-const ALERT_SEVERITY: typeof ALERT_SEVERITY_TYPED = ALERT_SEVERITY_NON_TYPED;
-const ALERT_START: typeof ALERT_START_TYPED = ALERT_START_NON_TYPED;
-const ALERT_UUID: typeof ALERT_UUID_TYPED = ALERT_UUID_NON_TYPED;
-const ALERT_RULE_TYPE_ID: typeof ALERT_RULE_TYPE_ID_TYPED =
-  ALERT_RULE_TYPE_ID_NON_TYPED;
-const ALERT_RULE_NAME: typeof ALERT_RULE_NAME_TYPED = ALERT_RULE_NAME_NON_TYPED;
 
 type Alert = ValuesType<
   APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
@@ -122,7 +105,13 @@ export function getAlertAnnotations({
     const end = start + parsed[ALERT_DURATION]! / 1000;
     const severityLevel = parsed[ALERT_SEVERITY];
     const color = getAlertColor({ severityLevel, theme });
-    const header = getAlertHeader({ severityLevel });
+    const experimentalLabel = i18n.translate(
+      'xpack.apm.alertAnnotationTooltipExperimentalText',
+      { defaultMessage: 'Experimental' }
+    );
+    const header = `${getAlertHeader({
+      severityLevel,
+    })} - ${experimentalLabel}`;
     const formatter = getFormatter(parsed[ALERT_RULE_TYPE_ID]!);
     const formatted = {
       link: undefined,
@@ -133,13 +122,18 @@ export function getAlertAnnotations({
       }) ?? {}),
     };
     const isSelected = uuid === selectedAlertId;
+    const moreDetails = i18n.translate(
+      'xpack.apm.alertAnnotationTooltipMoreDetailsText',
+      { defaultMessage: 'Click to see more details.' }
+    );
+    const details = `${formatted.reason}. ${moreDetails}`;
 
     return [
       <LineAnnotation
         dataValues={[
           {
             dataValue: start,
-            details: formatted.reason,
+            details,
             header,
           },
         ]}

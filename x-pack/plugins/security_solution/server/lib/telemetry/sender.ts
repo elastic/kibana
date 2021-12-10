@@ -67,6 +67,10 @@ export class TelemetryEventsSender {
     }
   }
 
+  public getClusterID(): string | undefined {
+    return this.receiver?.getClusterInfo()?.cluster_uuid;
+  }
+
   public start(
     telemetryStart?: TelemetryPluginStart,
     taskManager?: TaskManagerStartContract,
@@ -149,9 +153,10 @@ export class TelemetryEventsSender {
         return;
       }
 
-      const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
+      const clusterInfo = this.receiver?.getClusterInfo();
+
+      const [telemetryUrl, licenseInfo] = await Promise.all([
         this.fetchTelemetryUrl('alerts-endpoint'),
-        this.receiver?.fetchClusterInfo(),
         this.receiver?.fetchLicenseInfo(),
       ]);
 
@@ -198,10 +203,10 @@ export class TelemetryEventsSender {
    * @param toSend telemetry events
    */
   public async sendOnDemand(channel: string, toSend: unknown[]) {
+    const clusterInfo = this.receiver?.getClusterInfo();
     try {
-      const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
+      const [telemetryUrl, licenseInfo] = await Promise.all([
         this.fetchTelemetryUrl(channel),
-        this.receiver?.fetchClusterInfo(),
         this.receiver?.fetchLicenseInfo(),
       ]);
 
@@ -255,11 +260,12 @@ export class TelemetryEventsSender {
     const ndjson = transformDataToNdjson(events);
 
     try {
+      this.logger.debug(`Sending ${events.length} telemetry events to ${channel}`);
       const resp = await axios.post(telemetryUrl, ndjson, {
         headers: {
           'Content-Type': 'application/x-ndjson',
           'X-Elastic-Cluster-ID': clusterUuid,
-          'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '7.10.0',
+          'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.0.0',
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         },
       });
@@ -275,9 +281,7 @@ export class TelemetryEventsSender {
       });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
-      this.logger.warn(
-        `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
-      );
+      this.logger.debug(`Error sending events: ${err}`);
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
         counterType: 'docs_lost',

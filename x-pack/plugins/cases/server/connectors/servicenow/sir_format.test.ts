@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CaseResponse } from '../../../common';
+import { CaseResponse } from '../../../common/api';
 import { format } from './sir_format';
 
-describe('ITSM formatter', () => {
+describe('SIR formatter', () => {
   const theCase = {
     id: 'case-id',
     connector: {

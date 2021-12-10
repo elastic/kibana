@@ -21,10 +21,10 @@ import {
 
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
 import { defaultNewTrustedApp } from '../../store/builders';
-import { forceHTMLElementOffsetWidth } from './effected_policy_select/test_utils';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { licenseService } from '../../../../../common/hooks/use_license';
+import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -153,7 +153,11 @@ describe('When using the Trusted App Form', () => {
   describe('and the form is rendered', () => {
     beforeEach(() => render());
 
-    it('should show Name as required', () => {
+    it('should show Name as required after blur', () => {
+      expect(getNameField().required).toBe(false);
+      reactTestingLibrary.act(() => {
+        fireEvent.blur(getNameField());
+      });
       expect(getNameField().required).toBe(true);
     });
 
@@ -224,7 +228,11 @@ describe('When using the Trusted App Form', () => {
       ]);
     });
 
-    it('should show the value field as required', () => {
+    it('should show the value field as required after blur', () => {
+      expect(getConditionValue(getCondition()).required).toEqual(false);
+      reactTestingLibrary.act(() => {
+        fireEvent.blur(getConditionValue(getCondition()));
+      });
       expect(getConditionValue(getCondition()).required).toEqual(true);
     });
 

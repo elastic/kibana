@@ -50,15 +50,15 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
    * all the fields to their initial values.
    */
   reset: (options?: { resetValues?: boolean; defaultValue?: Partial<T> }) => void;
-  readonly __options: Required<FormOptions>;
-  __getFormData$: () => Subject<FormData>;
-  __addField: (field: FieldHook) => void;
-  __removeField: (fieldNames: string | string[]) => void;
-  __validateFields: (
+  validateFields: (
     fieldNames: string[],
     /** Run only blocking validations */
     onlyBlocking?: boolean
   ) => Promise<{ areFieldsValid: boolean; isFormValid: boolean | undefined }>;
+  readonly __options: Required<FormOptions>;
+  __getFormData$: () => Subject<FormData>;
+  __addField: (field: FieldHook) => void;
+  __removeField: (fieldNames: string | string[]) => void;
   __updateFormDataAt: (field: string, value: unknown) => void;
   __updateDefaultValueAt: (field: string, value: unknown) => void;
   __readFieldConfigFromSchema: (field: string) => FieldConfig;
@@ -206,7 +206,14 @@ export type ValidationFunc<
   V = unknown
 > = (
   data: ValidationFuncArg<I, V>
-) => ValidationError<E> | void | undefined | Promise<ValidationError<E> | void | undefined>;
+) => ValidationError<E> | void | undefined | ValidationCancelablePromise;
+
+export type ValidationResponsePromise<E extends string = string> = Promise<
+  ValidationError<E> | void | undefined
+>;
+
+export type ValidationCancelablePromise<E extends string = string> =
+  ValidationResponsePromise<E> & { cancel?(): void };
 
 export interface FieldValidateResponse {
   isValid: boolean;
@@ -239,4 +246,12 @@ export interface ValidationConfig<
    */
   isBlocking?: boolean;
   exitOnFail?: boolean;
+  /**
+   * Flag to indicate if the validation is asynchronous. If not specified the lib will
+   * first try to run all the validations synchronously and if it detects a Promise it
+   * will run the validations a second time asynchronously.
+   * This means that HTTP request will be called twice which is not ideal. It is then
+   * recommended to set the "isAsync" flag to `true` to all asynchronous validations.
+   */
+  isAsync?: boolean;
 }

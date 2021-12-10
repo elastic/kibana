@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { HostMetadata, LogsEndpointAction, LogsEndpointActionResponse } from '../types';
 import { EndpointActionGenerator } from '../data_generators/endpoint_action_generator';
 import { wrapErrorAndRejectPromise } from './utils';
@@ -144,8 +144,8 @@ export const indexEndpointActionsForHost = async (
 };
 
 export interface DeleteIndexedEndpointActionsResponse {
-  endpointActionRequests: DeleteByQueryResponse | undefined;
-  endpointActionResponses: DeleteByQueryResponse | undefined;
+  endpointActionRequests: estypes.DeleteByQueryResponse | undefined;
+  endpointActionResponses: estypes.DeleteByQueryResponse | undefined;
 }
 
 export const deleteIndexedEndpointActions = async (
@@ -158,55 +158,51 @@ export const deleteIndexedEndpointActions = async (
   };
 
   if (indexedData.endpointActions.length) {
-    response.endpointActionRequests = (
-      await esClient
-        .deleteByQuery({
-          index: `${indexedData.endpointActionsIndex}-*`,
-          wait_for_completion: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      action_id: indexedData.endpointActions.map(
-                        (action) => action.EndpointActions.action_id
-                      ),
-                    },
+    response.endpointActionRequests = await esClient
+      .deleteByQuery({
+        index: `${indexedData.endpointActionsIndex}-*`,
+        wait_for_completion: true,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    action_id: indexedData.endpointActions.map(
+                      (action) => action.EndpointActions.action_id
+                    ),
                   },
-                ],
-              },
+                },
+              ],
             },
           },
-        })
-        .catch(wrapErrorAndRejectPromise)
-    ).body;
+        },
+      })
+      .catch(wrapErrorAndRejectPromise);
   }
 
   if (indexedData.endpointActionResponses) {
-    response.endpointActionResponses = (
-      await esClient
-        .deleteByQuery({
-          index: `${indexedData.endpointActionResponsesIndex}-*`,
-          wait_for_completion: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      action_id: indexedData.endpointActionResponses.map(
-                        (action) => action.EndpointActions.action_id
-                      ),
-                    },
+    response.endpointActionResponses = await esClient
+      .deleteByQuery({
+        index: `${indexedData.endpointActionResponsesIndex}-*`,
+        wait_for_completion: true,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    action_id: indexedData.endpointActionResponses.map(
+                      (action) => action.EndpointActions.action_id
+                    ),
                   },
-                ],
-              },
+                },
+              ],
             },
           },
-        })
-        .catch(wrapErrorAndRejectPromise)
-    ).body;
+        },
+      })
+      .catch(wrapErrorAndRejectPromise);
   }
 
   return response;

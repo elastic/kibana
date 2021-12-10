@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { LogSourceConfigurationProperties } from '../../../containers/logs/log_source';
 import { useCompositeFormElement } from './form_elements';
-import { useFieldsFormElement, useLogIndicesFormElement } from './indices_configuration_form_state';
+import { useLogIndicesFormElement } from './indices_configuration_form_state';
 import { useLogColumnsFormElement } from './log_columns_configuration_form_state';
 import { useNameFormElement } from './name_configuration_form_state';
 
@@ -28,17 +28,6 @@ export const useLogSourceConfigurationFormState = (
     )
   );
 
-  const { fieldsFormElement, tiebreakerFieldFormElement, timestampFieldFormElement } =
-    useFieldsFormElement(
-      useMemo(
-        () => ({
-          tiebreakerField: configuration?.fields?.tiebreaker ?? '_doc',
-          timestampField: configuration?.fields?.timestamp ?? '@timestamp',
-        }),
-        [configuration]
-      )
-    );
-
   const logColumnsFormElement = useLogColumnsFormElement(
     useMemo(() => configuration?.logColumns ?? [], [configuration])
   );
@@ -49,12 +38,11 @@ export const useLogSourceConfigurationFormState = (
         childFormElements: {
           name: nameFormElement,
           logIndices: logIndicesFormElement,
-          fields: fieldsFormElement,
           logColumns: logColumnsFormElement,
         },
         validate: async () => [],
       }),
-      [nameFormElement, logIndicesFormElement, fieldsFormElement, logColumnsFormElement]
+      [nameFormElement, logIndicesFormElement, logColumnsFormElement]
     )
   );
 
@@ -64,7 +52,5 @@ export const useLogSourceConfigurationFormState = (
     logColumnsFormElement,
     nameFormElement,
     sourceConfigurationFormElement,
-    tiebreakerFieldFormElement,
-    timestampFieldFormElement,
   };
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { UrlDrilldownConfig, UrlDrilldownGlobalScope, UrlDrilldownScope } from './types';
+export type { UrlDrilldownConfig, UrlDrilldownGlobalScope, UrlDrilldownScope } from './types';
 export { UrlDrilldownCollectConfig } from './components';
 export {
   validateUrlTemplate as urlDrilldownValidateUrlTemplate,

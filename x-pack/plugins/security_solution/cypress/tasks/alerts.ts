@@ -23,7 +23,7 @@ import {
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
 } from '../screens/alerts';
-import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
+import { REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
 import {
   UPDATE_ENRICHMENT_RANGE_BUTTON,
@@ -34,7 +34,7 @@ import {
 } from '../screens/alerts_details';
 
 export const addExceptionFromFirstAlert = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
   cy.get(ADD_EXCEPTION_BTN).click();
 };
 
@@ -58,6 +58,10 @@ export const closeAlerts = () => {
   cy.get(CLOSE_SELECTED_ALERTS_BTN)
     .pipe(($el) => $el.trigger('click'))
     .should('not.be.visible');
+};
+
+export const expandFirstAlertActions = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
 };
 
 export const expandFirstAlert = () => {
@@ -98,8 +102,12 @@ export const goToOpenedAlerts = () => {
   cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
   cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
   cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
-  cy.get(LOADING_INDICATOR).should('exist');
-  cy.get(LOADING_INDICATOR).should('not.exist');
+};
+
+export const refreshAlerts = () => {
+  // ensure we've refetched fields the first time index is defined
+  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(REFRESH_BUTTON).first().click({ force: true });
 };
 
 export const openFirstAlert = () => {

@@ -8,10 +8,14 @@
 import { Boom, isBoom } from '@hapi/boom';
 import { Logger } from 'src/core/server';
 
+export interface HTTPError extends Error {
+  statusCode: number;
+}
+
 /**
  * Helper class for wrapping errors while preserving the original thrown error.
  */
-class CaseError extends Error {
+export class CaseError extends Error {
   public readonly wrappedError?: Error;
   constructor(message?: string, originalError?: Error) {
     super(message);
@@ -49,6 +53,13 @@ class CaseError extends Error {
  */
 export function isCaseError(error: unknown): error is CaseError {
   return error instanceof CaseError;
+}
+
+/**
+ * Type guard for determining if an error is an HTTPError
+ */
+export function isHTTPError(error: unknown): error is HTTPError {
+  return (error as HTTPError)?.statusCode != null;
 }
 
 /**

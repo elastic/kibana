@@ -24,12 +24,12 @@ export function cylanceLogsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'cylanceLogs',
     name: i18n.translate('home.tutorials.cylanceLogs.nameTitle', {
-      defaultMessage: 'CylancePROTECT logs',
+      defaultMessage: 'CylancePROTECT Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.cylanceLogs.shortDescription', {
-      defaultMessage: 'Collect CylancePROTECT logs over syslog or from a file.',
+      defaultMessage: 'Collect and parse logs from CylancePROTECT with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.cylanceLogs.longDescription', {
       defaultMessage:
@@ -54,8 +54,8 @@ export function cylanceLogsSpecProvider(context: TutorialContext): TutorialSchem
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['security'],
   };
 }

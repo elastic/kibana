@@ -106,7 +106,7 @@ export interface ConfigDeprecationCommand {
  *
  * @example
  * ```typescript
- * const provider: ConfigDeprecationProvider = ({ rename, unused }) => [
+ * const provider: ConfigDeprecationProvider = ({ deprecate, rename, unused }) => [
  *   deprecate('deprecatedKey', '8.0.0'),
  *   rename('oldKey', 'newKey'),
  *   unused('deprecatedKey'),
@@ -164,7 +164,7 @@ export interface ConfigDeprecationFactory {
    * @example
    * Log a deprecation warning indicating 'myplugin.deprecatedKey' should be removed by `8.0.0`
    * ```typescript
-   * const provider: ConfigDeprecationProvider = ({ deprecate }) => [
+   * const provider: ConfigDeprecationProvider = ({ deprecateFromRoot }) => [
    *   deprecateFromRoot('deprecatedKey', '8.0.0'),
    * ]
    * ```

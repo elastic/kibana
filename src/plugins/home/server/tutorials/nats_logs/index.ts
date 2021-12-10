@@ -24,13 +24,13 @@ export function natsLogsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
     id: 'natsLogs',
     name: i18n.translate('home.tutorials.natsLogs.nameTitle', {
-      defaultMessage: 'NATS logs',
+      defaultMessage: 'NATS Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     isBeta: true,
     shortDescription: i18n.translate('home.tutorials.natsLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs created by Nats.',
+      defaultMessage: 'Collect and parse logs from NATS servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.natsLogs.longDescription', {
       defaultMessage:
@@ -58,8 +58,8 @@ export function natsLogsSpecProvider(context: TutorialContext): TutorialSchema {
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/nats_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['message_queue'],
   };
 }

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
-
 import { appContextService } from '../../services';
 import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common';
-import { setupFleet } from '../../services/setup';
+import { formatNonFatalErrors, setupFleet } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
 import type { FleetRequestHandler } from '../../types';
 
-export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
+export const getFleetStatusHandler: FleetRequestHandler = async (context, request, response) => {
   try {
     const isApiKeysEnabled = await appContextService
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
-    const isFleetServerSetup = await hasFleetServers(appContextService.getInternalUserESClient());
+    const isFleetServerSetup = await hasFleetServers(
+      context.core.elasticsearch.client.asInternalUser
+    );
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
     if (!isApiKeysEnabled) {
@@ -50,24 +50,8 @@ export const fleetSetupHandler: FleetRequestHandler = async (context, request, r
     const setupStatus = await setupFleet(soClient, esClient);
     const body: PostFleetSetupResponse = {
       ...setupStatus,
-      nonFatalErrors: setupStatus.nonFatalErrors.flatMap((e) => {
-        // JSONify the error object so it can be displayed properly in the UI
-        if ('error' in e) {
-          return {
-            name: e.error.name,
-            message: e.error.message,
-          };
-        } else {
-          return e.errors.map((upgradePackagePolicyError: any) => {
-            return {
-              name: upgradePackagePolicyError.key,
-              message: upgradePackagePolicyError.message,
-            };
-          });
-        }
-      }),
+      nonFatalErrors: formatNonFatalErrors(setupStatus.nonFatalErrors),
     };
-
     return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

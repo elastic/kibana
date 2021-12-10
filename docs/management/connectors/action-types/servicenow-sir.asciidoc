@@ -1,24 +1,82 @@
 [role="xpack"]
 [[servicenow-sir-action-type]]
-=== ServiceNow connector and action
+=== ServiceNow SecOps connector and action
 ++++
 <titleabbrev>ServiceNow SecOps</titleabbrev>
 ++++
 
-The ServiceNow SecOps connector uses the https://docs.servicenow.com/bundle/orlando-application-development/page/integrate/inbound-rest/concept/c_TableAPI.html[V2 Table API] to create ServiceNow security incidents.
+The {sn} SecOps connector uses the https://docs.servicenow.com/bundle/orlando-application-development/page/integrate/inbound-rest/concept/c_TableAPI.html[V2 Table API] to create {sn} security incidents.
+
+[float]
+[[servicenow-sir-connector-prerequisites]]
+==== Prerequisites
+After upgrading from {stack} version 7.15.0 or earlier to version 7.16.0 or later, you must complete the following within your {sn} instance before creating a new {sn} SecOps connector or <<servicenow-sir-connector-update, updating an existing one>>:
+
+* Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f[Elastic for Security Operations (SecOps)] from the {sn} Store.
+* Create a {sn} integration user and assign it the appropriate roles.
+* Create a Cross-Origin Resource Sharing (CORS) rule.
+
+*Create a {sn} integration user*
+
+To ensure authenticated communication between Elastic and {sn}, create a {sn} integration user and assign it the appropriate roles. 
+
+. In your {sn} instance, go to *System Security -> Users and Groups -> Users*.
+. Click *New*.
+. Complete the form, then right-click on the menu bar and click *Save*.
+. Go to the *Roles* tab and click *Edit*.
+. Assign the integration user the following roles: 
+* `import_set_loader`
+* `import_transformer`
+* `personalize_choices`
+* `sn_si.basic`
+* `x_elas2_sir_int.integration_user`
+. Click *Save*.
+
+*Create a CORS rule*
+
+A CORS rule is required for communication between Elastic and {sn}. To create a CORS rule:
+
+. In your {sn} instance, go to *System Web Services -> REST -> CORS Rules*.
+. Click *New*.
+. Configure the rule as follows:
+* *Name*: Name the rule.
+* *REST API*: Set the rule to use the Elastic SecOps API by choosing `Elastic SIR API [x_elas2_sir_int/elastic_api]`.
+* *Domain*: Enter the Kibana URL.
+. Go to the *HTTP methods* tab and select *GET*.
+. Click *Submit* to create the rule.
+
+[float]
+[[servicenow-sir-connector-update]]
+==== Update a deprecated {sn} SecOps connector
+
+{sn} SecOps connectors created in {stack} version 7.15.0 or earlier are marked as deprecated after you upgrade to version 7.16.0 or later. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-sir-update-connector.png[Shows deprecated ServiceNow connectors]
+
+IMPORTANT: Deprecated connectors will continue to function with the rules they were added to and can be assigned to new rules. However, it is strongly recommended to update deprecated connectors or <<creating-new-connector, create new ones>> to ensure you have access to connector enhancements, such as updating incidents.
+
+To update a deprecated connector:
+
+. Open the main menu and go to *Stack Management -> Rules and connectors -> Connectors*.
+. Select the deprecated connector to open the *Edit connector* flyout.
+. In the warning message, click *Update this connector*.
+. Complete the guided steps in the *Edit connector* flyout.
+.. Install https://store.servicenow.com/sn_appstore_store.do#!/store/application/2f0746801baeb01019ae54e4604bcb0f[Elastic for Security Operations (SecOps)] from the {sn} Store and complete the <<servicenow-sir-connector-prerequisites, required prerequisites>>.
+.. Enter the URL of your {sn} instance.
+.. Enter the username and password of your {sn} instance.
+. Click *Update*.
 
 [float]
 [[servicenow-sir-connector-configuration]]
 ==== Connector configuration
 
-ServiceNow SecOps connectors have the following configuration properties.
+{sn} SecOps connectors have the following configuration properties.
 
 Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
-URL::       ServiceNow instance URL.
+URL::       {sn} instance URL.
 Username::  Username for HTTP Basic authentication.
 Password::  Password for HTTP Basic authentication.
-
-The ServiceNow user requires at minimum read, create, and update access to the Security Incident table and read access to the https://docs.servicenow.com/bundle/paris-platform-administration/page/administer/localization/reference/r_ChoicesTable.html[sys_choice]. If you don't provide access to sys_choice, then the choices will not render.
 
 [float]
 [[servicenow-sir-connector-networking-configuration]]
@@ -36,7 +94,8 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
    name: preconfigured-servicenow-connector-type
    actionTypeId: .servicenow-sir
    config:
-     apiUrl: https://dev94428.service-now.com/
+     apiUrl: https://example.service-now.com/
+     usesTableApi: false
    secrets:
      username: testuser
      password: passwordkeystorevalue
@@ -45,6 +104,9 @@ Use the <<action-settings, Action configuration settings>> to customize connecto
 Config defines information for the connector type.
 
 `apiUrl`:: An address that corresponds to *URL*.
+`usesTableApi`:: A boolean that indicates if the connector uses the Table API or the Import Set API.
+
+NOTE: If `usesTableApi` is set to false, the Elastic application should be installed in {sn}.
 
 Secrets defines sensitive information for the connector type.
 
@@ -55,12 +117,12 @@ Secrets defines sensitive information for the connector type.
 [[define-servicenow-sir-ui]]
 ==== Define connector in Stack Management
 
-Define ServiceNow SecOps connector properties.
+Define {sn} SecOps connector properties.
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-connector.png[ServiceNow SecOps connector]
 
-Test ServiceNow SecOps action parameters.
+Test {sn} SecOps action parameters.
 
 [role="screenshot"]
 image::management/connectors/images/servicenow-sir-params-test.png[ServiceNow SecOps params test]
@@ -72,18 +134,19 @@ image::management/connectors/images/servicenow-sir-params-test.png[ServiceNow Se
 ServiceNow SecOps actions have the following configuration properties.
 
 Short description::    A short description for the incident, used for searching the contents of the knowledge base.
-Source Ips::           A list of source IPs related to the incident. The IPs will be added as observables to the security incident.
-Destination Ips::      A list of destination IPs related to the incident. The IPs will be added as observables to the security incident.
-Malware URLs::         A list of malware URLs related to the incident. The URLs will be added as observables to the security incident.
-Malware Hashes::       A list of malware hashes related to the incident. The hashes  will be added as observables to the security incident.
 Priority::             The priority of the incident.
 Category::             The category of the incident.
 Subcategory::          The subcategory of the incident.
+Correlation ID::       Connectors using the same Correlation ID will be associated with the same {sn} incident. This value determines whether a new {sn} incident will be created or an existing one is updated. Modifying this value is optional; if not modified, the rule ID and alert ID are combined as `{{ruleID}}:{{alert ID}}` to form the Correlation ID value in {sn}. The maximum character length for this value is 100 characters.
+
+NOTE: Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures that {sn} will create a separate incident record for every generated alert that uses a unique alert ID. If the rule generates multiple alerts that use the same alert IDs, {sn} creates and continually updates a single incident record for the alert.
+
+Correlation Display::  A descriptive label of the alert for correlation purposes in {sn}.
 Description::          The details about the incident.
 Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
 
 [float]
 [[configuring-servicenow-sir]]
-==== Configure ServiceNow SecOps
+==== Configure {sn} SecOps
 
-ServiceNow offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.
+{sn} offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.

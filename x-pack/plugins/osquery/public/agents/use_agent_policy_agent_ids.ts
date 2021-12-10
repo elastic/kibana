@@ -9,7 +9,7 @@ import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
-import { AGENT_SAVED_OBJECT_TYPE, Agent } from '../../../fleet/common';
+import { AGENTS_PREFIX, Agent } from '../../../fleet/common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 
@@ -30,7 +30,7 @@ export const useAgentPolicyAgentIds = ({
   return useQuery<{ agents: Agent[] }, unknown, string[]>(
     ['agentPolicyAgentIds', agentPolicyId],
     () => {
-      const kuery = `${AGENT_SAVED_OBJECT_TYPE}.policy_id:${agentPolicyId}`;
+      const kuery = `${AGENTS_PREFIX}.policy_id:${agentPolicyId}`;
 
       return http.get(`/internal/osquery/fleet_wrapper/agents`, {
         query: {

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
+import type { Filter } from '@kbn/es-query';
 import { TimelineId } from '../../../../common/types/timeline';
 import { AlertsView } from '../../../common/components/alerts_viewer';
 import { NetworkComponentQueryProps } from './types';

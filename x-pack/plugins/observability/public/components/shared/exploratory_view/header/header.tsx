@@ -7,19 +7,20 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import { LastUpdated } from './last_updated';
 import { ExpViewActionMenu } from '../components/action_menu';
 import { useExpViewTimeRange } from '../hooks/use_time_range';
+import { LastUpdated } from './last_updated';
+import type { ChartTimeRange } from './last_updated';
 
 interface Props {
-  lastUpdated?: number;
+  chartTimeRange?: ChartTimeRange;
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
 
-export function ExploratoryViewHeader({ lensAttributes, lastUpdated }: Props) {
+export function ExploratoryViewHeader({ lensAttributes, chartTimeRange }: Props) {
   const { setLastRefresh } = useSeriesStorage();
 
   const timeRange = useExpViewTimeRange();
@@ -33,20 +34,12 @@ export function ExploratoryViewHeader({ lensAttributes, lastUpdated }: Props) {
             <h2>
               {i18n.translate('xpack.observability.expView.heading.label', {
                 defaultMessage: 'Explore data',
-              })}{' '}
-              <EuiBetaBadge
-                style={{
-                  verticalAlign: `middle`,
-                }}
-                label={i18n.translate('xpack.observability.expView.heading.experimental', {
-                  defaultMessage: 'Experimental',
-                })}
-              />
+              })}
             </h2>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <LastUpdated lastUpdated={lastUpdated} />
+          <LastUpdated chartTimeRange={chartTimeRange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton iconType="refresh" onClick={() => setLastRefresh(Date.now())}>

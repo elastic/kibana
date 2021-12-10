@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { SearchSourceFields } from 'src/plugins/data/common';
-import supertest from 'supertest';
+import { SerializedSearchSourceFields } from 'src/plugins/data/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
+  const supertest = getService('supertest');
 
   describe('Security Roles and Privileges for Applications', () => {
     before(async () => {
@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Dashboard: CSV download file', () => {
       it('does not allow user that does not have the role-based privilege', async () => {
-        const res = (await reportingAPI.downloadCsv(
+        const res = await reportingAPI.downloadCsv(
           reportingAPI.DATA_ANALYST_USERNAME,
           reportingAPI.DATA_ANALYST_PASSWORD,
           {
@@ -33,16 +33,16 @@ export default function ({ getService }: FtrProviderContext) {
               query: { query: '', language: 'kuery' },
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
               filter: [],
-            } as unknown as SearchSourceFields,
+            } as unknown as SerializedSearchSourceFields,
             browserTimezone: 'UTC',
             title: 'testfooyu78yt90-',
           }
-        )) as supertest.Response;
+        );
         expect(res.status).to.eql(403);
       });
 
       it('does allow user with the role privilege', async () => {
-        const res = (await reportingAPI.downloadCsv(
+        const res = await reportingAPI.downloadCsv(
           reportingAPI.REPORTING_USER_USERNAME,
           reportingAPI.REPORTING_USER_PASSWORD,
           {
@@ -50,11 +50,11 @@ export default function ({ getService }: FtrProviderContext) {
               query: { query: '', language: 'kuery' },
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
               filter: [],
-            } as unknown as SearchSourceFields,
+            } as unknown as SerializedSearchSourceFields,
             browserTimezone: 'UTC',
             title: 'testfooyu78yt90-',
           }
-        )) as supertest.Response;
+        );
         expect(res.status).to.eql(200);
       });
     });
@@ -166,7 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
         const res = await reportingAPI.generateCsv(
           {
             browserTimezone: 'UTC',
-            searchSource: {} as SearchSourceFields,
+            searchSource: {} as SerializedSearchSourceFields,
             objectType: 'search',
             title: 'test disallowed',
             version: '7.14.0',
@@ -187,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
               version: true,
               fields: [{ field: '*', include_unmapped: 'true' }],
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
-            } as unknown as SearchSourceFields,
+            } as unknown as SerializedSearchSourceFields,
             columns: [],
             version: '7.13.0',
           },
@@ -196,6 +196,22 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(res.status).to.eql(200);
       });
+    });
+
+    // This tests the same API as x-pack/test/api_integration/apis/security/privileges.ts, but it uses the non-deprecated config
+    it('should register reporting privileges with the security privileges API', async () => {
+      await supertest
+        .get('/api/security/privileges')
+        .set('kbn-xsrf', 'xxx')
+        .send()
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.features.canvas).match(/generate_report/);
+          expect(res.body.features.dashboard).match(/download_csv_report/);
+          expect(res.body.features.dashboard).match(/generate_report/);
+          expect(res.body.features.discover).match(/generate_report/);
+          expect(res.body.features.visualize).match(/generate_report/);
+        });
     });
   });
 }

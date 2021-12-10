@@ -14,7 +14,8 @@ import { SourceDestination } from './source_destination';
 import { FilesProgress, BytesProgress, TranslogProgress } from './progress';
 import { parseProps } from './parse_props';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 const columns = [
   {
@@ -67,14 +68,19 @@ const columns = [
   },
 ];
 
-export class ShardActivity extends React.Component {
-  constructor(props) {
-    super(props);
-    this.getNoDataMessage = this.getNoDataMessage.bind(this);
-  }
-
-  getNoDataMessage() {
-    if (this.props.showShardActivityHistory) {
+export const ShardActivity = (props) => {
+  const {
+    data: rawData,
+    sorting,
+    pagination,
+    onTableChange,
+    toggleShardActivityHistory,
+    showShardActivityHistory,
+  } = props;
+  const { services } = useKibana();
+  const timezone = services.uiSettings?.get('dateFormat:tz');
+  const getNoDataMessage = () => {
+    if (showShardActivityHistory) {
       return i18n.translate('xpack.monitoring.elasticsearch.shardActivity.noDataMessage', {
         defaultMessage:
           'There are no historical shard activity records for the selected time range.',
@@ -92,7 +98,7 @@ export class ShardActivity extends React.Component {
           defaultMessage="Try viewing {shardActivityHistoryLink}."
           values={{
             shardActivityHistoryLink: (
-              <EuiLink onClick={this.props.toggleShardActivityHistory}>
+              <EuiLink onClick={toggleShardActivityHistory}>
                 <FormattedMessage
                   id="xpack.monitoring.elasticsearch.shardActivity.noActiveShardRecoveriesMessage.completedRecoveriesLinkText"
                   defaultMessage="completed recoveries"
@@ -103,64 +109,48 @@ export class ShardActivity extends React.Component {
         />
       </Fragment>
     );
-  }
+  };
 
-  render() {
-    // data prop is an array of table row data, or null (which triggers no data message)
-    const {
-      data: rawData,
-      sorting,
-      pagination,
-      onTableChange,
-      toggleShardActivityHistory,
-      showShardActivityHistory,
-    } = this.props;
+  const rows = rawData.map((data) => parseProps({ ...data, timezone }));
 
-    if (rawData === null) {
-      return null;
-    }
-
-    const rows = rawData.map(parseProps);
-
-    return (
-      <Fragment>
-        <EuiText>
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.monitoring.elasticsearch.shardActivityTitle"
-                defaultMessage="Shard Activity"
-              />
-            </h2>
-          </EuiTitle>
-        </EuiText>
-        <EuiSpacer />
-        <EuiSwitch
-          id="monitoring_completed_recoveries"
-          label={
+  return (
+    <Fragment>
+      <EuiText>
+        <EuiTitle size="s">
+          <h2>
             <FormattedMessage
-              id="xpack.monitoring.elasticsearch.shardActivity.completedRecoveriesLabel"
-              defaultMessage="Completed recoveries"
+              id="xpack.monitoring.elasticsearch.shardActivityTitle"
+              defaultMessage="Shard Activity"
             />
-          }
-          onChange={toggleShardActivityHistory}
-          checked={showShardActivityHistory}
-        />
-        <EuiSpacer />
-        <EuiMonitoringTable
-          className="esShardActivityTable"
-          rows={rows}
-          columns={columns}
-          message={this.getNoDataMessage()}
-          sorting={sorting}
-          search={false}
-          pagination={pagination}
-          onTableChange={onTableChange}
-          executeQueryOptions={{
-            defaultFields: ['name'],
-          }}
-        />
-      </Fragment>
-    );
-  }
-}
+          </h2>
+        </EuiTitle>
+      </EuiText>
+      <EuiSpacer />
+      <EuiSwitch
+        id="monitoring_completed_recoveries"
+        label={
+          <FormattedMessage
+            id="xpack.monitoring.elasticsearch.shardActivity.completedRecoveriesLabel"
+            defaultMessage="Completed recoveries"
+          />
+        }
+        onChange={toggleShardActivityHistory}
+        checked={showShardActivityHistory}
+      />
+      <EuiSpacer />
+      <EuiMonitoringTable
+        className="esShardActivityTable"
+        rows={rows}
+        columns={columns}
+        message={getNoDataMessage()}
+        sorting={sorting}
+        search={false}
+        pagination={pagination}
+        onTableChange={onTableChange}
+        executeQueryOptions={{
+          defaultFields: ['name'],
+        }}
+      />
+    </Fragment>
+  );
+};

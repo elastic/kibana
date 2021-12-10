@@ -13,7 +13,8 @@ import { savedObjectMigrations } from './saved_object_migrations';
 export const mapSavedObjects: SavedObjectsType = {
   name: 'map',
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
       description: { type: 'text' },

@@ -26,6 +26,7 @@ import {
 } from './types';
 import { createMockedRestrictedIndexPattern, createMockedIndexPattern } from './mocks';
 import { documentField } from './document_field';
+import { DateHistogramIndexPatternColumn } from './operations';
 
 const createMockStorage = (lastData?: Record<string, string>) => {
   return {
@@ -512,7 +513,7 @@ describe('loader', () => {
                   interval: 'm',
                 },
                 sourceField: 'timestamp',
-              },
+              } as DateHistogramIndexPatternColumn,
               col2: {
                 dataType: 'number',
                 isBucketed: false,
@@ -563,7 +564,7 @@ describe('loader', () => {
                   interval: 'm',
                 },
                 sourceField: 'timestamp',
-              },
+              } as DateHistogramIndexPatternColumn,
               col2: {
                 dataType: 'number',
                 isBucketed: false,
@@ -602,6 +603,97 @@ describe('loader', () => {
 
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
         indexPatternId: '2',
+      });
+    });
+
+    it('should default to the first loaded index pattern if could not load any used one or one from the storage', async () => {
+      function mockIndexPatternsServiceWithConflict() {
+        return {
+          get: jest.fn(async (id: '1' | '2' | 'conflictId') => {
+            if (id === 'conflictId') {
+              return Promise.reject(new Error('Oh noes conflict boom'));
+            }
+            const result = { ...sampleIndexPatternsFromService[id], metaFields: [] };
+            if (!result.fields) {
+              result.fields = [];
+            }
+            return result;
+          }),
+          getIdsWithTitle: jest.fn(async () => {
+            return [
+              {
+                id: sampleIndexPatterns[1].id,
+                title: sampleIndexPatterns[1].title,
+              },
+              {
+                id: sampleIndexPatterns[2].id,
+                title: sampleIndexPatterns[2].title,
+              },
+              {
+                id: 'conflictId',
+                title: 'conflictId title',
+              },
+            ];
+          }),
+        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
+      }
+      const savedState: IndexPatternPersistedState = {
+        layers: {
+          layerb: {
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                dataType: 'date',
+                isBucketed: true,
+                label: 'My date',
+                operationType: 'date_histogram',
+                params: {
+                  interval: 'm',
+                },
+                sourceField: 'timestamp',
+              } as DateHistogramIndexPatternColumn,
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Sum of bytes',
+                operationType: 'sum',
+                sourceField: 'bytes',
+              },
+            },
+          },
+        },
+      };
+      const storage = createMockStorage({ indexPatternId: 'conflictId' });
+      const state = await loadInitialState({
+        persistedState: savedState,
+        references: [
+          {
+            name: 'indexpattern-datasource-current-indexpattern',
+            id: 'conflictId',
+            type: 'index-pattern',
+          },
+          { name: 'indexpattern-datasource-layer-layerb', id: 'conflictId', type: 'index-pattern' },
+        ],
+        indexPatternsService: mockIndexPatternsServiceWithConflict(),
+        storage,
+        options: { isFullEditor: true },
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: '1',
+        indexPatternRefs: [
+          { id: 'conflictId', title: 'conflictId title' },
+          { id: '1', title: sampleIndexPatterns['1'].title },
+          { id: '2', title: sampleIndexPatterns['2'].title },
+        ],
+        indexPatterns: {
+          '1': sampleIndexPatterns['1'],
+        },
+        layers: { layerb: { ...savedState.layers.layerb, indexPatternId: 'conflictId' } },
+      });
+
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: '1',
       });
     });
   });
@@ -779,7 +871,7 @@ describe('loader', () => {
                   interval: 'm',
                 },
                 sourceField: 'timestamp',
-              },
+              } as DateHistogramIndexPatternColumn,
             },
             indexPatternId: '1',
           },

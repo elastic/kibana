@@ -9,18 +9,22 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { SavedObjectsManagementPlugin } from './plugin';
 
-export { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './plugin';
-export {
+export type {
+  SavedObjectsManagementPluginSetup,
+  SavedObjectsManagementPluginStart,
+} from './plugin';
+export type {
   SavedObjectsManagementActionServiceSetup,
   SavedObjectsManagementActionServiceStart,
-  SavedObjectsManagementAction,
   SavedObjectsManagementColumnServiceSetup,
   SavedObjectsManagementColumnServiceStart,
   SavedObjectsManagementColumn,
   SavedObjectsManagementRecord,
 } from './services';
-export { ProcessedImportResponse, processImportResponse, FailedImport } from './lib';
-export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
+export { SavedObjectsManagementAction } from './services';
+export type { ProcessedImportResponse, FailedImport } from './lib';
+export { processImportResponse } from './lib';
+export type { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new SavedObjectsManagementPlugin();

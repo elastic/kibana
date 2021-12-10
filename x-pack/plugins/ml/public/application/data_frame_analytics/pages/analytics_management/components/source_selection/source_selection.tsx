@@ -7,7 +7,7 @@
 
 import React, { useState, FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiCallOut,
@@ -23,9 +23,11 @@ import type { SimpleSavedObject } from 'src/core/public';
 import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/saved_objects/public';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 
+import { useToastNotificationService } from '../../../../../services/toast_notification_service';
+
 import { getNestedProperty } from '../../../../../util/object_utils';
 
-import { getIndexPatternAndSavedSearch, isCcsIndexPattern } from '../../../../../util/index_utils';
+import { getDataViewAndSavedSearch, isCcsIndexPattern } from '../../../../../util/index_utils';
 
 const fixedPageSize: number = 8;
 
@@ -41,6 +43,7 @@ export const SourceSelection: FC<Props> = ({ onClose }) => {
 
   const [isCcsCallOut, setIsCcsCallOut] = useState(false);
   const [ccsCallOutBodyText, setCcsCallOutBodyText] = useState<string>();
+  const toastNotificationService = useToastNotificationService();
 
   const onSearchSelected = async (
     id: string,
@@ -48,30 +51,44 @@ export const SourceSelection: FC<Props> = ({ onClose }) => {
     fullName: string,
     savedObject: SimpleSavedObject
   ) => {
-    // Kibana index patterns including `:` are cross-cluster search indices
+    // Kibana data views including `:` are cross-cluster search indices
     // and are not supported by Data Frame Analytics yet. For saved searches
-    // and index patterns that use cross-cluster search we intercept
+    // and data views that use cross-cluster search we intercept
     // the selection before redirecting and show an error callout instead.
-    let indexPatternTitle = '';
+    let dataViewName = '';
 
     if (type === 'index-pattern') {
-      indexPatternTitle = getNestedProperty(savedObject, 'attributes.title');
+      dataViewName = getNestedProperty(savedObject, 'attributes.title');
     } else if (type === 'search') {
-      const indexPatternAndSavedSearch = await getIndexPatternAndSavedSearch(id);
-      indexPatternTitle = indexPatternAndSavedSearch.indexPattern?.title ?? '';
+      try {
+        const dataViewAndSavedSearch = await getDataViewAndSavedSearch(id);
+        dataViewName = dataViewAndSavedSearch.dataView?.title ?? '';
+      } catch (error) {
+        // an unexpected error has occurred. This could be caused by a saved search for which the data view no longer exists.
+        toastNotificationService.displayErrorToast(
+          error,
+          i18n.translate(
+            'xpack.ml.dataFrame.analytics.create.searchSelection.errorGettingDataViewTitle',
+            {
+              defaultMessage: 'Error loading data view used by the saved search',
+            }
+          )
+        );
+        return;
+      }
     }
 
-    if (isCcsIndexPattern(indexPatternTitle)) {
+    if (isCcsIndexPattern(dataViewName)) {
       setIsCcsCallOut(true);
       if (type === 'search') {
         setCcsCallOutBodyText(
           i18n.translate(
             'xpack.ml.dataFrame.analytics.create.searchSelection.CcsErrorCallOutBody',
             {
-              defaultMessage: `The saved search '{savedSearchTitle}' uses the index pattern '{indexPatternTitle}'.`,
+              defaultMessage: `The saved search '{savedSearchTitle}' uses the data view '{dataViewName}'.`,
               values: {
                 savedSearchTitle: getNestedProperty(savedObject, 'attributes.title'),
-                indexPatternTitle,
+                dataViewName,
               },
             }
           )
@@ -104,7 +121,7 @@ export const SourceSelection: FC<Props> = ({ onClose }) => {
           /{' '}
           <FormattedMessage
             id="xpack.ml.dataframe.analytics.create.chooseSourceTitle"
-            defaultMessage="Choose a source index pattern"
+            defaultMessage="Choose a source data view"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -116,7 +133,7 @@ export const SourceSelection: FC<Props> = ({ onClose }) => {
               title={i18n.translate(
                 'xpack.ml.dataFrame.analytics.create.searchSelection.CcsErrorCallOutTitle',
                 {
-                  defaultMessage: 'Index patterns using cross-cluster search are not supported.',
+                  defaultMessage: 'Data views using cross-cluster search are not supported.',
                 }
               )}
               color="danger"
@@ -153,7 +170,7 @@ export const SourceSelection: FC<Props> = ({ onClose }) => {
               name: i18n.translate(
                 'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.indexPattern',
                 {
-                  defaultMessage: 'Index pattern',
+                  defaultMessage: 'Data view',
                 }
               ),
             },

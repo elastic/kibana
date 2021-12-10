@@ -24,6 +24,7 @@ import { transformValidateBulkError } from './validate';
 import { patchRules } from '../../rules/patch_rules';
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
+import { legacyMigrate } from '../../rules/utils';
 
 export const patchRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
@@ -97,6 +98,7 @@ export const patchRulesBulkRoute = (
             threshold,
             threat_filters: threatFilters,
             threat_index: threatIndex,
+            threat_indicator_path: threatIndicatorPath,
             threat_query: threatQuery,
             threat_mapping: threatMapping,
             threat_language: threatLanguage,
@@ -133,9 +135,16 @@ export const patchRulesBulkRoute = (
               throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
             }
 
-            const rule = await patchRules({
-              rule: existingRule,
+            const migratedRule = await legacyMigrate({
               rulesClient,
+              savedObjectsClient,
+              rule: existingRule,
+            });
+
+            const rule = await patchRules({
+              rule: migratedRule,
+              rulesClient,
+              savedObjectsClient,
               author,
               buildingBlockType,
               description,
@@ -170,6 +179,7 @@ export const patchRulesBulkRoute = (
               threshold,
               threatFilters,
               threatIndex,
+              threatIndicatorPath,
               threatQuery,
               threatMapping,
               threatLanguage,
@@ -186,12 +196,11 @@ export const patchRulesBulkRoute = (
               exceptionsList,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
-              const ruleStatuses = await ruleStatusClient.find({
-                logsCount: 1,
+              const ruleStatus = await ruleStatusClient.getCurrentStatus({
                 ruleId: rule.id,
                 spaceId: context.securitySolution.getSpaceId(),
               });
-              return transformValidateBulkError(rule.id, rule, ruleStatuses, isRuleRegistryEnabled);
+              return transformValidateBulkError(rule.id, rule, ruleStatus, isRuleRegistryEnabled);
             } else {
               return getIdBulkError({ id, ruleId });
             }

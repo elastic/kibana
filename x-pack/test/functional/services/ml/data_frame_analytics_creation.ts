@@ -18,10 +18,11 @@ import {
 } from '../../../../plugins/ml/common/util/analytics_utils';
 
 export function MachineLearningDataFrameAnalyticsCreationProvider(
-  { getService }: FtrProviderContext,
+  { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
   mlApi: MlApi
 ) {
+  const headerPage = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -111,10 +112,12 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertSourceDataPreviewExists() {
+      await headerPage.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('mlAnalyticsCreationDataGrid loaded', { timeout: 5000 });
     },
 
     async assertIndexPreviewHistogramChartButtonExists() {
+      await headerPage.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('mlAnalyticsCreationDataGridHistogramButton');
     },
 
@@ -529,15 +532,15 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertCreateIndexPatternSwitchExists() {
-      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardCreateIndexPatternSwitch`, {
+      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox`, {
         allowHidden: true,
       });
     },
 
     async getCreateIndexPatternSwitchCheckState(): Promise<boolean> {
       const state = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobWizardCreateIndexPatternSwitch',
-        'aria-checked'
+        'mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox',
+        'checked'
       );
       return state === 'true';
     },
@@ -546,7 +549,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       const actualCheckState = await this.getCreateIndexPatternSwitchCheckState();
       expect(actualCheckState).to.eql(
         expectedCheckState,
-        `Create index pattern switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+        `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
     },
 
@@ -581,7 +584,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async setCreateIndexPatternSwitchState(checkState: boolean) {
       if ((await this.getCreateIndexPatternSwitchCheckState()) !== checkState) {
-        await testSubjects.click('mlAnalyticsCreateJobWizardCreateIndexPatternSwitch');
+        await testSubjects.click('mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox');
       }
       await this.assertCreateIndexPatternSwitchCheckState(checkState);
     },

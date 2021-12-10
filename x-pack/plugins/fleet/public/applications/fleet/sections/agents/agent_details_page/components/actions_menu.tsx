@@ -7,7 +7,7 @@
 
 import React, { memo, useState, useMemo } from 'react';
 import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy, PackagePolicy } from '../../../../types';
 import { useCapabilities, useKibanaVersion } from '../../../../hooks';

@@ -8,12 +8,12 @@
 import React, { useState } from 'react';
 
 import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LinkedAgentCount, AddAgentHelpPopover } from '../../../../../../components';
 
 const AddAgentButton = ({ onAddAgent }: { onAddAgent: () => void }) => (
-  <EuiButton iconType="plusInCircle" data-test-subj="addAgentButton" onClick={onAddAgent}>
+  <EuiButton iconType="plusInCircle" data-test-subj="addAgentButton" onClick={onAddAgent} size="s">
     <FormattedMessage
       id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
       defaultMessage="Add agent"
@@ -22,8 +22,12 @@ const AddAgentButton = ({ onAddAgent }: { onAddAgent: () => void }) => (
 );
 
 const AddAgentButtonWithPopover = ({ onAddAgent }: { onAddAgent: () => void }) => {
-  const button = <AddAgentButton onAddAgent={onAddAgent} />;
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(true);
+  const onAddAgentCloseHelp = () => {
+    setIsHelpOpen(false);
+    onAddAgent();
+  };
+  const button = <AddAgentButton onAddAgent={onAddAgentCloseHelp} />;
   return (
     <AddAgentHelpPopover
       button={button}

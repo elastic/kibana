@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mockCreateWriteStream } from './file_appender.test.mocks';
+import { mockCreateWriteStream, mockMkdirSync } from './file_appender.test.mocks';
 
 import { LogRecord, LogLevel } from '@kbn/logging';
 import { FileAppender } from './file_appender';
@@ -15,6 +15,7 @@ const tickMs = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 beforeEach(() => {
   mockCreateWriteStream.mockReset();
+  mockMkdirSync.mockReset();
 });
 
 test('`createConfigSchema()` creates correct schema.', () => {
@@ -49,8 +50,10 @@ test('file stream is created only once and only after first `append()` is called
   });
 
   const mockPath = 'mock://path/file.log';
+  const mockDir = 'mock://path';
   const appender = new FileAppender({ format: () => '' }, mockPath);
 
+  expect(mockMkdirSync).not.toHaveBeenCalled();
   expect(mockCreateWriteStream).not.toHaveBeenCalled();
 
   appender.append({
@@ -61,12 +64,17 @@ test('file stream is created only once and only after first `append()` is called
     pid: 5355,
   });
 
+  expect(mockMkdirSync).toHaveBeenCalledTimes(1);
+  expect(mockMkdirSync).toHaveBeenCalledWith(mockDir, {
+    recursive: true,
+  });
   expect(mockCreateWriteStream).toHaveBeenCalledTimes(1);
   expect(mockCreateWriteStream).toHaveBeenCalledWith(mockPath, {
     encoding: 'utf8',
     flags: 'a',
   });
 
+  mockMkdirSync.mockClear();
   mockCreateWriteStream.mockClear();
   appender.append({
     context: 'context-2',
@@ -76,6 +84,7 @@ test('file stream is created only once and only after first `append()` is called
     pid: 5355,
   });
 
+  expect(mockMkdirSync).not.toHaveBeenCalled();
   expect(mockCreateWriteStream).not.toHaveBeenCalled();
 });
 

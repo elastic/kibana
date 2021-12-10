@@ -24,10 +24,10 @@ getUrlForApp(appId: string, options?: {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  appId | <code>string</code> |  |
-|  options | <code>{</code><br/><code>        path?: string;</code><br/><code>        absolute?: boolean;</code><br/><code>        deepLinkId?: string;</code><br/><code>    }</code> |  |
+|  appId | string |  |
+|  options | { path?: string; absolute?: boolean; deepLinkId?: string; } |  |
 
 <b>Returns:</b>
 
-`string`
+string
 

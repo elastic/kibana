@@ -25,13 +25,18 @@ export const {
   updateState,
   updateDatasourceState,
   updateVisualizationState,
-  updateLayer,
+  insertLayer,
   switchVisualization,
   rollbackSuggestion,
   submitSuggestion,
   switchDatasource,
   setToggleFullscreen,
   initEmpty,
+  editVisualizationAction,
+  removeLayers,
+  removeOrClearLayer,
+  addLayer,
+  setLayerDefaultDimension,
 } = lensActions;
 
 export const makeConfigureStore = (
