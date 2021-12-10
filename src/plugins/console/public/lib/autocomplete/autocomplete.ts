@@ -930,8 +930,8 @@ export default function ({
     }
 
     if (
-      lastEvaluatedToken.position.column !== currentToken.position.column ||
-      lastEvaluatedToken.position.lineNumber !== currentToken.position.lineNumber ||
+      (lastEvaluatedToken.position.column !== currentToken.position.column ||
+        lastEvaluatedToken.position.lineNumber !== currentToken.position.lineNumber) &&
       lastEvaluatedToken.value === currentToken.value
     ) {
       // not on the same place or nothing changed, cache and wait for the next time

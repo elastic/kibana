@@ -115,6 +115,7 @@ export class UrlPatternMatcher {
   }
 
   getTopLevelComponents = function (method) {
+    method = method.toUpperCase();
     const methodRoot = this[method];
     if (!methodRoot) {
       return [];
