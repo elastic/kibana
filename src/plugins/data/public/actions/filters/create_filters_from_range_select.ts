@@ -13,8 +13,7 @@ import { esFilters, IFieldType, RangeFilterParams } from '../../../public';
 import { getIndexPatterns, getSearchService } from '../../../public/services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 
-/** @internal */
-export interface RangeSelectDataContext {
+interface RangeSelectDataContext {
   table: Datatable;
   column: number;
   range: number[];
