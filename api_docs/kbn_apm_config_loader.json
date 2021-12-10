@@ -219,6 +219,40 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-config-loader",
+        "id": "def-server.shouldInstrumentClient",
+        "type": "Function",
+        "tags": [],
+        "label": "shouldInstrumentClient",
+        "description": [],
+        "signature": [
+          "(config: ",
+          "AgentConfigOptions",
+          " | undefined) => boolean"
+        ],
+        "path": "packages/kbn-apm-config-loader/src/rum_agent_configuration.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-config-loader",
+            "id": "def-server.shouldInstrumentClient.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "AgentConfigOptions",
+              " | undefined"
+            ],
+            "path": "packages/kbn-apm-config-loader/src/rum_agent_configuration.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],

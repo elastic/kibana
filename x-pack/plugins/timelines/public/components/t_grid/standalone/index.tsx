@@ -75,6 +75,8 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
   overflow: auto;
 `;
 
+const casesFeatures = { alerts: { sync: false } };
+
 export interface TGridStandaloneProps {
   appId: string;
   casesOwner: string;
@@ -86,12 +88,13 @@ export interface TGridStandaloneProps {
   columns: ColumnHeaderOptions[];
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
+  disabledCellActions: string[];
   end: string;
   entityType?: EntityType;
   loadingText: React.ReactNode;
   filters: Filter[];
   footerText: React.ReactNode;
-  filterStatus: AlertStatus;
+  filterStatus?: AlertStatus;
   hasAlertsCrudPermissions: ({
     ruleConsumer,
     ruleProducer,
@@ -104,6 +107,7 @@ export interface TGridStandaloneProps {
   itemsPerPageOptions: number[];
   query: Query;
   onRuleChange?: () => void;
+  onStateChange?: (state: State) => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   runtimeMappings: MappingRuntimeFields;
@@ -116,6 +120,7 @@ export interface TGridStandaloneProps {
   bulkActions?: BulkActionsProp;
   data?: DataPublicPluginStart;
   unit?: (total: number) => React.ReactNode;
+  showCheckboxes?: boolean;
 }
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
@@ -126,6 +131,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   columns,
   defaultCellActions,
   deletedEventIds,
+  disabledCellActions,
   end,
   entityType = 'alerts',
   loadingText,
@@ -148,6 +154,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   trailingControlColumns,
   data,
   unit,
+  showCheckboxes = true,
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -317,7 +324,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         indexNames,
         itemsPerPage: itemsPerPageStore,
         itemsPerPageOptions,
-        showCheckboxes: true,
+        showCheckboxes,
       })
     );
     dispatch(
@@ -381,6 +388,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       browserFields={browserFields}
                       data={nonDeletedEvents}
                       defaultCellActions={defaultCellActions}
+                      disabledCellActions={disabledCellActions}
                       filterQuery={filterQuery}
                       hasAlertsCrud={hasAlertsCrud}
                       hasAlertsCrudPermissions={hasAlertsCrudPermissions}
@@ -402,6 +410,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       unit={unit}
                       filterStatus={filterStatus}
                       trailingControlColumns={trailingControlColumns}
+                      showCheckboxes={showCheckboxes}
                     />
                   </ScrollableFlexItem>
                 </FullWidthFlexGroup>
@@ -409,7 +418,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
             </EventsContainerLoading>
           </TimelineContext.Provider>
         ) : null}
-        <AddToCaseAction {...addToCaseActionProps} disableAlerts />
+        <AddToCaseAction {...addToCaseActionProps} casesFeatures={casesFeatures} />
       </AlertsTableWrapper>
     </InspectButtonContainer>
   );

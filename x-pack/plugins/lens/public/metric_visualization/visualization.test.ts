@@ -13,6 +13,7 @@ import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { ColorMode } from 'src/plugins/charts/common';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 jest.mock('../id_generator');
 
@@ -36,6 +37,7 @@ function mockFrame(): FramePublicAPI {
 
 const metricVisualization = getMetricVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
+  theme: themeServiceMock.createStartContract(),
 });
 
 describe('metric_visualization', () => {

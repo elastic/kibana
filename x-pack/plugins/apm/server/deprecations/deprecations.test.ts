@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kibanaPackageJson } from '@kbn/dev-utils';
+import { kibanaPackageJson } from '@kbn/utils';
 
 import { GetDeprecationsContext } from '../../../../../src/core/server';
 import { CloudSetup } from '../../../cloud/server';
@@ -57,7 +57,13 @@ describe('getDeprecations', () => {
         cloudSetup: { isCloudEnabled: true } as unknown as CloudSetup,
         fleet: {
           start: () => ({
-            agentPolicyService: { get: () => ({ id: 'foo' } as AgentPolicy) },
+            agentPolicyService: {
+              get: () =>
+                ({
+                  id: 'foo',
+                  package_policies: [{ package: { name: 'apm' } }],
+                } as AgentPolicy),
+            },
           }),
         } as unknown as APMRouteHandlerResources['plugins']['fleet'],
       });

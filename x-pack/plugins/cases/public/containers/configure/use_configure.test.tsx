@@ -15,7 +15,7 @@ import {
 } from './use_configure';
 import { mappings, caseConfigurationCamelCaseResponseMock } from './mock';
 import * as api from './api';
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
 import { TestProviders } from '../../common/mock';
 
 const mockErrorToast = jest.fn();
@@ -50,14 +50,11 @@ describe('useConfigure', () => {
   });
 
   test('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
-        () => useCaseConfigure(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
+    const { result } = renderHook<string, ReturnUseCaseConfigure>(() => useCaseConfigure(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    await act(async () =>
       expect(result.current).toEqual({
         ...initialState,
         refetchCaseConfigure: result.current.refetchCaseConfigure,
@@ -66,8 +63,8 @@ describe('useConfigure', () => {
         setConnector: result.current.setConnector,
         setClosureType: result.current.setClosureType,
         setMappings: result.current.setMappings,
-      });
-    });
+      })
+    );
   });
 
   test('fetch case configuration', async () => {
@@ -78,7 +75,6 @@ describe('useConfigure', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
         ...initialState,
@@ -114,7 +110,6 @@ describe('useConfigure', () => {
         }
       );
       await waitForNextUpdate();
-      await waitForNextUpdate();
       result.current.refetchCaseConfigure();
       expect(spyOnGetCaseConfigure).toHaveBeenCalledTimes(2);
     });
@@ -128,7 +123,6 @@ describe('useConfigure', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current.mappings).toEqual([]);
       result.current.setMappings(mappings);
@@ -145,7 +139,6 @@ describe('useConfigure', () => {
         }
       );
       await waitForNextUpdate();
-      await waitForNextUpdate();
       result.current.refetchCaseConfigure();
 
       expect(result.current.loading).toBe(true);
@@ -160,7 +153,6 @@ describe('useConfigure', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
       await waitForNextUpdate();
       result.current.persistCaseConfigure(configuration);
       expect(result.current.persistLoading).toBeTruthy();
@@ -193,7 +185,6 @@ describe('useConfigure', () => {
         }
       );
       await waitForNextUpdate();
-      await waitForNextUpdate();
       expect(mockErrorToast).not.toHaveBeenCalled();
 
       result.current.persistCaseConfigure(configuration);
@@ -221,7 +212,6 @@ describe('useConfigure', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
       await waitForNextUpdate();
       expect(mockErrorToast).toHaveBeenCalled();
     });
@@ -254,7 +244,6 @@ describe('useConfigure', () => {
         }
       );
       await waitForNextUpdate();
-      await waitForNextUpdate();
       expect(mockErrorToast).not.toHaveBeenCalled();
 
       result.current.persistCaseConfigure(configuration);
@@ -281,7 +270,6 @@ describe('useConfigure', () => {
         }
       );
       await waitForNextUpdate();
-      await waitForNextUpdate();
 
       result.current.persistCaseConfigure(configuration);
 
@@ -305,7 +293,6 @@ describe('useConfigure', () => {
         }
       );
 
-      await waitForNextUpdate();
       await waitForNextUpdate();
 
       expect(result.current).toEqual({
@@ -344,7 +331,6 @@ describe('useConfigure', () => {
         }
       );
 
-      await waitForNextUpdate();
       await waitForNextUpdate();
 
       result.current.persistCaseConfigure(configuration);

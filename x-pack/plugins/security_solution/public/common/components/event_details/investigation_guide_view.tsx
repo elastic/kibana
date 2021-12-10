@@ -6,6 +6,7 @@
  */
 
 import { EuiSpacer, EuiHorizontalRule, EuiTitle, EuiText } from '@elastic/eui';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -14,7 +15,7 @@ import * as i18n from './translations';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
-import { TimelineEventsDetailsItem } from '../../../../common';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
 export const Indent = styled.div`
   padding: 0 8px;
@@ -25,7 +26,7 @@ const InvestigationGuideViewComponent: React.FC<{
   data: TimelineEventsDetailsItem[];
 }> = ({ data }) => {
   const ruleId = useMemo(() => {
-    const item = data.find((d) => d.field === 'signal.rule.id');
+    const item = data.find((d) => d.field === 'signal.rule.id' || d.field === ALERT_RULE_UUID);
     return Array.isArray(item?.originalValue)
       ? item?.originalValue[0]
       : item?.originalValue ?? null;

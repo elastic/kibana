@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';

@@ -56,7 +56,7 @@ export class LogstashVersionMismatchRule extends BaseRule {
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
     clusters: AlertCluster[],
-    availableCcs: string[]
+    availableCcs: boolean
   ): Promise<AlertData[]> {
     let logstashIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_LOGSTASH);
     if (availableCcs) {

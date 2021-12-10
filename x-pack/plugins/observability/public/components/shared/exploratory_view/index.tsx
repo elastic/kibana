@@ -23,23 +23,34 @@ import { UrlStorageContextProvider } from './hooks/use_series_storage';
 import { useTrackPageview } from '../../..';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 
-export function ExploratoryViewPage({
-  saveAttributes,
-  useSessionStorage = false,
-}: {
+export interface ExploratoryViewPageProps {
   useSessionStorage?: boolean;
   saveAttributes?: (attr: TypedLensByValueInput['attributes'] | null) => void;
-}) {
-  useTrackPageview({ app: 'observability-overview', path: 'exploratory-view' });
-  useTrackPageview({ app: 'observability-overview', path: 'exploratory-view', delay: 15000 });
+  app?: { id: string; label: string };
+}
 
-  useBreadcrumbs([
-    {
-      text: i18n.translate('xpack.observability.overview.exploratoryView', {
-        defaultMessage: 'Explore data',
-      }),
-    },
-  ]);
+export function ExploratoryViewPage({
+  app,
+  saveAttributes,
+  useSessionStorage = false,
+}: ExploratoryViewPageProps) {
+  useTrackPageview({ app: 'observability-overview', path: 'exploratory-view' });
+  useTrackPageview({
+    app: 'observability-overview',
+    path: 'exploratory-view',
+    delay: 15000,
+  });
+
+  useBreadcrumbs(
+    [
+      {
+        text: i18n.translate('xpack.observability.overview.exploratoryView', {
+          defaultMessage: 'Explore data',
+        }),
+      },
+    ],
+    app
+  );
 
   const {
     services: { uiSettings, notifications },
@@ -69,3 +80,6 @@ export function ExploratoryViewPage({
 const Wrapper = euiStyled.div`
   padding: ${(props) => props.theme.eui.paddingSizes.l};
 `;
+
+// eslint-disable-next-line import/no-default-export
+export default ExploratoryViewPage;

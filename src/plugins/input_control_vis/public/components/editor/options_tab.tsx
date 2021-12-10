@@ -9,7 +9,7 @@
 import React, { PureComponent } from 'react';
 
 import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSwitchEvent } from '@elastic/eui';
 
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
