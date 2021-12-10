@@ -257,7 +257,7 @@ export function SavedQueryManagementComponent({
   const tableColumns = [
     {
       field: 'attributes.title',
-      name: 'Label',
+      name: 'Name',
       sortable: true,
       render: (title: string) => <EuiHighlight search={searchValue}>{title}</EuiHighlight>,
     },
