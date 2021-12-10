@@ -145,15 +145,6 @@ export function FilterSetMenu({
       id: 0,
       title: savedQueries.length ? 'Recently used' : undefined,
       items: [
-        ...recentSavedQueriesPanels,
-        {
-          name: 'Load filter set...',
-          onClick: () => {
-            toggleAddFilterModal!(true, 'saved_filters');
-            closePopover();
-          },
-        },
-        { isSeparator: true },
         {
           name: i18n.translate('data.filter.options.saveCurrentFilterSetLabel', {
             defaultMessage: 'Save current filter set',
@@ -251,6 +242,20 @@ export function FilterSetMenu({
       ),
     },
   ] as EuiContextMenuPanelDescriptor[];
+
+  if (savedQueries.length) {
+    panels[0].items?.unshift(
+      ...recentSavedQueriesPanels,
+      {
+        name: 'Load filter set...',
+        onClick: () => {
+          toggleAddFilterModal!(true, 'saved_filters');
+          closePopover();
+        },
+      },
+      { isSeparator: true }
+    );
+  }
 
   const buttonLabel = i18n.translate('data.filter.options.filterSetButtonLabel', {
     defaultMessage: 'Filter set menu',

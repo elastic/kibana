@@ -9,7 +9,7 @@
 import {
   EuiPopover,
   EuiPopoverTitle,
-  EuiPopoverFooter,
+  EuiEmptyPrompt,
   EuiButtonEmpty,
   EuiButton,
   EuiFlexGroup,
@@ -21,8 +21,9 @@ import {
   EuiSpacer,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiBasicTableProps,
+  EuiHighlight,
   EuiIcon,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -257,13 +258,15 @@ export function SavedQueryManagementComponent({
     {
       field: 'attributes.title',
       name: 'Label',
-      truncateText: false,
       sortable: true,
+      render: (title: string) => <EuiHighlight search={searchValue}>{title}</EuiHighlight>,
     },
     {
       field: 'attributes.query.language',
       name: 'Language',
       truncateText: false,
+      width: '100px',
+      render: (language: string) => <EuiBadge>{language === 'kuery' ? 'KQL' : language}</EuiBadge>,
     },
     {
       field: 'attributes.timefilter',
@@ -273,6 +276,7 @@ export function SavedQueryManagementComponent({
     {
       name: 'Actions',
       actions: tableActions,
+      width: '70px',
     } as EuiBasicTableColumn<SavedQuery>,
   ];
 
@@ -282,17 +286,32 @@ export function SavedQueryManagementComponent({
     totalItemCount: count,
   };
 
+  const emptyState = (
+    <EuiEmptyPrompt
+      title={<h3>No saved filters</h3>}
+      titleSize="s"
+      body={
+        <p>
+          Saved filters allow you to reuse all or parts of your query including the time filter. To
+          create a saved filter, open the <EuiIcon type="filter" color="primary" /> Filter Menu and
+          select “Save current filter set”.
+        </p>
+      }
+    />
+  );
+
   const component = (
     <>
       <EuiFieldSearch
-        placeholder="Find a saved filter for this data view"
+        placeholder="Find a saved filter..."
         value={searchValue}
         fullWidth
         onChange={onInputChange}
         isClearable={true}
         aria-label="Search..."
+        compressed
       />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiBasicTable
         tableCaption="Saved filters list"
         items={savedQueriesBySearch}
@@ -303,20 +322,11 @@ export function SavedQueryManagementComponent({
         hasActions={true}
         onChange={onTableChange}
       />
-      {/* <EuiListGroup
-        maxWidth="none"
-        bordered
-        size="s"
-        className="kbnSavedQueryManagement__list"
-        aria-labelledby={'savedQueryManagementPopoverTitle'}
-      >
-        {savedQueryRows()}
-      </EuiListGroup> */}
     </>
   );
 
   // NEW RETURN : Just the list
-  return children && children(component);
+  return children(savedQueries.length ? component : emptyState);
 
   // OLD RETURN
   // return (
