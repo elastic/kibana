@@ -24,6 +24,7 @@ export async function startLiveDataUpload({
   logLevel,
   workers,
   writeTarget,
+  scenarioOpts,
 }: RunOptions & { start: number }) {
   let queuedEvents: ElasticsearchOutput[] = [];
   let requestedUntil: number = start;
@@ -41,6 +42,7 @@ export async function startLiveDataUpload({
     target,
     workers,
     writeTarget,
+    scenarioOpts,
   });
 
   function uploadNextBatch() {

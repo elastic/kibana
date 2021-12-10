@@ -12,14 +12,14 @@ import { getApmWriteTargets } from '../../lib/apm/utils/get_apm_write_targets';
 import { Scenario } from '../scenario';
 import { getCommonServices } from '../utils/get_common_services';
 
-const scenario: Scenario = async ({ target, logLevel }) => {
+const scenario: Scenario = async ({ target, logLevel, scenarioOpts }) => {
   const { client, logger } = getCommonServices({ target, logLevel });
   const writeTargets = await getApmWriteTargets({ client });
 
+  const { numServices = 3 } = scenarioOpts || {};
+
   return {
     generate: ({ from, to }) => {
-      const numServices = 3;
-
       const range = timerange(from, to);
 
       const transactionName = '240rpm/75% 1000ms';
