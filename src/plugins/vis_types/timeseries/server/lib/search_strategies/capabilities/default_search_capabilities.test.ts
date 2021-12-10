@@ -33,7 +33,7 @@ describe('DefaultSearchCapabilities', () => {
       whiteListedMetrics: { '*': true },
       whiteListedGroupByFields: { '*': true },
       whiteListedTimerangeModes: { '*': true },
-      whiteListedUIControls: { '*': true },
+      whiteListedConfigurationFeatures: { '*': true },
     });
   });
 
