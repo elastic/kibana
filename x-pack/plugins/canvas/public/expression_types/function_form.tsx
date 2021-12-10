@@ -16,7 +16,8 @@ import { SidebarSection } from '../components/sidebar/sidebar_section';
 import { SidebarSectionTitle } from '../components/sidebar/sidebar_section_title';
 import { BaseForm, BaseFormProps } from './base_form';
 import { Arg, ArgProps } from './arg';
-import { ArgType, ArgTypeDef, ExpressionType } from './types';
+import { ArgDisplayType, ArgType, ArgTypeDef, ExpressionType } from './types';
+import { Model, Transform, View } from '../expression_types';
 import {
   AssetType,
   CanvasElement,
@@ -35,6 +36,7 @@ export interface DataArg {
 
 export type RenderArgData = BaseFormProps & {
   argType: ArgType;
+  type?: ArgDisplayType;
   argTypeDef?: ArgTypeDef;
   args: Record<string, Array<Ast | string>> | null;
   argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
@@ -78,7 +80,6 @@ export class FunctionForm extends BaseForm {
     const { onValueRemove, onValueChange, ...passedProps } = props;
     const { arg, argValues, skipRender, label } = dataArg;
     const { argType, expressionIndex } = passedProps;
-
     // TODO: show some information to the user than an argument was skipped
     if (!arg || skipRender) {
       return null;
@@ -129,6 +130,15 @@ export class FunctionForm extends BaseForm {
     return {};
   }
 
+  private isExpressionFunctionForm(
+    argTypeDef?: ArgTypeDef
+  ): argTypeDef is View | Model | Transform {
+    return (
+      !!argTypeDef &&
+      (argTypeDef instanceof View || argTypeDef instanceof Model || argTypeDef instanceof Transform)
+    );
+  }
+
   render(data: RenderArgData) {
     if (!data) {
       data = {
@@ -139,13 +149,22 @@ export class FunctionForm extends BaseForm {
     const { args, argTypeDef } = data;
 
     // Don't instaniate these until render time, to give the registries a chance to populate.
-    const argInstances = this.args.map((argSpec) => new Arg(argSpec));
+    let argInstances: Arg[] = [];
+    if (this.isExpressionFunctionForm(argTypeDef)) {
+      const argNames = argTypeDef.args.map(({ name }) => name);
+      argInstances = this.args
+        .filter((arg) => argNames.includes(arg.name))
+        .map((argSpec) => new Arg(argSpec));
+    } else {
+      argInstances = this.args.map((argSpec) => new Arg(argSpec));
+    }
+
     if (args === null || !isPlainObject(args)) {
       throw new Error(`Form "${this.name}" expects "args" object`);
     }
-
     // get a mapping of arg values from the expression and from the renderable's schema
     const argNames = uniq(argInstances.map((arg) => arg.name).concat(Object.keys(args)));
+
     const dataArgs = argNames.map((argName) => {
       const arg = argInstances.find((argument) => argument.name === argName);
       // if arg is not multi, only preserve the last value found

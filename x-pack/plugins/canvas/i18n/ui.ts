@@ -591,6 +591,20 @@ export const ModelStrings = {
         defaultMessage: 'Data along the vertical axis. Usually a number',
       }),
   },
+  HeatmapLegend: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap.title', {
+        defaultMessage: "Configure the heatmap chart's legend",
+      }),
+    getIsVisibleDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap.args.isVisibleTitle', {
+        defaultMessage: 'Show legend',
+      }),
+    getIsVisibleHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap.args.isVisibleLabel', {
+        defaultMessage: 'Specifies whether or not the legend is visible',
+      }),
+  },
 };
 
 export const TransformStrings = {
@@ -1347,6 +1361,36 @@ export const ViewStrings = {
     getColorModeBackgroundOption: () =>
       i18n.translate('xpack.canvas.uis.views.metricVis.args.colorMode.backgroundOption', {
         defaultMessage: 'Background',
+      }),
+  },
+  Heatmap: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmapTitle', {
+        defaultMessage: 'Heatmap Visualization',
+      }),
+    getXAccessorDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.xAccessorDisplayName', {
+        defaultMessage: 'X-axis',
+      }),
+    getXAccessorHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.xAccessorHelp', {
+        defaultMessage: 'The name of the x axis column or the corresponding dimension',
+      }),
+    getYAccessorDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.yAccessorDisplayName', {
+        defaultMessage: 'Y-axis',
+      }),
+    getYAccessorHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.yAccessorHelp', {
+        defaultMessage: 'The name of the y axis column or the corresponding dimension',
+      }),
+    getValueAccessorDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.valueAccessorDisplayName', {
+        defaultMessage: 'Value',
+      }),
+    getValueAccessorHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.valueAccessorHelp', {
+        defaultMessage: 'The name of the value column or the corresponding dimension',
       }),
   },
 };

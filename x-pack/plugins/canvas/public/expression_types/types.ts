@@ -11,6 +11,7 @@ import type { Datasource } from './datasource';
 import type { Model } from './model';
 
 export type ArgType = string;
+export type ArgDisplayType = 'model' | 'argument';
 
 export type ArgTypeDef = View | Model | Transform | Datasource;
 

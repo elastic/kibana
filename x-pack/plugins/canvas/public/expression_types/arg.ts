@@ -26,6 +26,7 @@ interface ArtOwnProps {
   multi?: boolean;
   required?: boolean;
   types?: string[];
+  type?: 'model' | 'argument';
   default?: string | null;
   resolve?: (...args: any[]) => any;
   options?: {

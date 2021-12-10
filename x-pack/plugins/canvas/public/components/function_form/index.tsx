@@ -45,10 +45,12 @@ interface FunctionFormProps {
   argTypeDef: ArgTypeDef;
   expressionIndex: number;
   nextArgType?: ArgType;
+  path: string;
 }
 
 export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) => {
-  const { expressionIndex, argType, nextArgType } = props;
+  const { expressionIndex, argType, nextArgType, path } = props;
+
   const dispatch = useDispatch();
   const context = useSelector<State, ExpressionContext>(
     (state) => getContextForIndex(state, expressionIndex),
@@ -74,10 +76,11 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
           pageId,
           argName,
           value: argValue,
+          path,
         })
       );
     },
-    [dispatch, element, expressionIndex, pageId]
+    [dispatch, element, expressionIndex, pageId, path]
   );
 
   const updateContext = useCallback(
@@ -95,10 +98,11 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
           argName,
           value,
           valueIndex,
+          path,
         })
       );
     },
-    [dispatch, element, expressionIndex, pageId]
+    [dispatch, element, expressionIndex, pageId, path]
   );
 
   const deleteArgument = useCallback(
@@ -110,10 +114,11 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
           pageId,
           argName,
           argIndex,
+          path,
         })
       );
     },
-    [dispatch, element, expressionIndex, pageId]
+    [dispatch, element, expressionIndex, pageId, path]
   );
 
   const onAssetAddDispatch = useCallback(
@@ -138,6 +143,7 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
     },
     [assets, onAssetAddDispatch]
   );
+
   return (
     <Component
       {...props}

@@ -75,7 +75,7 @@ const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
       <EuiFlexItem>
-        <EuiSelect options={options} value={column} onChange={onChange} />
+        <EuiSelect compressed options={options} value={column} onChange={onChange} />
       </EuiFlexItem>
       {confirm && (
         <EuiFlexItem grow={false}>

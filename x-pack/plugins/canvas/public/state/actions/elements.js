@@ -7,7 +7,7 @@
 
 import { createAction } from 'redux-actions';
 import immutable from 'object-path-immutable';
-import { get, pick, cloneDeep, without } from 'lodash';
+import { get, pick, cloneDeep, without, last } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
 import { createThunk } from '../../lib/create_thunk';
 import {
@@ -364,15 +364,18 @@ export const setAstAtIndex = createThunk(
 // argIndex is the index in multi-value arguments, and is optional. excluding it will cause
 // the entire argument from be set to the passed value
 export const setArgumentAtIndex = createThunk('setArgumentAtIndex', ({ dispatch }, args) => {
-  const { index, argName, value, valueIndex, element, pageId } = args;
-  let selector = `ast.chain.${index}.arguments.${argName}`;
+  const { argName, value, valueIndex, element, pageId, path } = args;
+  let selector = `${path}.${argName}`;
   if (valueIndex != null) {
     selector += '.' + valueIndex;
   }
 
   const newElement = set(element, selector, value);
-  const newAst = get(newElement, ['ast', 'chain', index]);
-  dispatch(setAstAtIndex(index, newAst, element, pageId));
+  const pathTerms = path.split('.');
+  const argumentChainPath = pathTerms.slice(0, 3);
+  const argumnentChainIndex = last(argumentChainPath);
+  const newAst = get(newElement, argumentChainPath);
+  dispatch(setAstAtIndex(argumnentChainIndex, newAst, element, pageId));
 });
 
 // index here is the top-level argument in the expression. for example in the expression
@@ -380,11 +383,9 @@ export const setArgumentAtIndex = createThunk('setArgumentAtIndex', ({ dispatch 
 export const addArgumentValueAtIndex = createThunk(
   'addArgumentValueAtIndex',
   ({ dispatch }, args) => {
-    const { index, argName, value, element } = args;
-
-    const values = get(element, ['ast', 'chain', index, 'arguments', argName], []);
+    const { argName, value, element, path } = args;
+    const values = get(element, [...path.split('.'), argName], []);
     const newValue = values.concat(value);
-
     dispatch(
       setArgumentAtIndex({
         ...args,
@@ -394,22 +395,21 @@ export const addArgumentValueAtIndex = createThunk(
   }
 );
 
-// index here is the top-level argument in the expression. for example in the expression
-// demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
-// argIndex is the index in multi-value arguments, and is optional. excluding it will remove
-// the entire argument from the expresion
 export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dispatch }, args) => {
-  const { index, element, pageId, argName, argIndex } = args;
-  const curVal = get(element, ['ast', 'chain', index, 'arguments', argName]);
+  const { element, pageId, argName, argIndex, path } = args;
+  const pathTerms = path.split('.');
+  const argumentChainPath = pathTerms.slice(0, 3);
+  const argumnentChainIndex = last(argumentChainPath);
+  const curVal = get(element, [...pathTerms, argName]);
 
   const newElement =
     argIndex != null && curVal.length > 1
       ? // if more than one val, remove the specified val
-        del(element, `ast.chain.${index}.arguments.${argName}.${argIndex}`)
+        del(element, `${path}.${argName}.${argIndex}`)
       : // otherwise, remove the entire key
-        del(element, `ast.chain.${index}.arguments.${argName}`);
+        del(element, `${path}.${argName}`);
 
-  dispatch(setAstAtIndex(index, get(newElement, ['ast', 'chain', index]), element, pageId));
+  dispatch(setAstAtIndex(argumnentChainIndex, get(newElement, argumentChainPath), element, pageId));
 });
 
 /*
