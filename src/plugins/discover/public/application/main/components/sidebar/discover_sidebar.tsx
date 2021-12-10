@@ -336,16 +336,19 @@ export function DiscoverSidebarComponent({
                 selectedIndexPattern={selectedIndexPattern}
                 indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
                 onChangeIndexPattern={onChangeIndexPattern}
+                services={services}
+                useNewFieldsApi={useNewFieldsApi}
+                editField={editField}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            {/* <EuiFlexItem grow={false}>
               <DiscoverIndexPatternManagement
                 services={services}
                 selectedIndexPattern={selectedIndexPattern}
                 useNewFieldsApi={useNewFieldsApi}
                 editField={editField}
               />
-            </EuiFlexItem>
+            </EuiFlexItem> */}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

@@ -11,12 +11,20 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiPopover,
-  EuiPopoverTitle,
+  EuiHorizontalRule,
   EuiSelectable,
   EuiButtonProps,
+  EuiSpacer,
+  EuiPanel,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
 import { IndexPatternRef } from './types';
+import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
+import { IndexPattern } from 'src/plugins/data/public';
+import { DiscoverServices } from '../../../../build_services';
 
 export type ChangeIndexPatternTriggerProps = EuiButtonProps & {
   label: string;
@@ -31,12 +39,20 @@ export function ChangeIndexPattern({
   onChangeIndexPattern,
   selectableProps,
   trigger,
+  services,
+  selectedIndexPattern,
+  useNewFieldsApi,
+  editField,
 }: {
   indexPatternId?: string;
   indexPatternRefs: IndexPatternRef[];
   onChangeIndexPattern: (newId: string) => void;
   selectableProps?: EuiSelectableProps<{ value: string }>;
   trigger: ChangeIndexPatternTriggerProps;
+  selectedIndexPattern: IndexPattern;
+  services: DiscoverServices;
+  useNewFieldsApi?: boolean;
+  editField: (fieldName?: string) => void;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
@@ -63,14 +79,19 @@ export function ChangeIndexPattern({
       isOpen={isPopoverOpen}
       closePopover={() => setPopoverIsOpen(false)}
       display="block"
-      panelPaddingSize="s"
+      panelPaddingSize="none"
     >
       <div style={{ width: 320 }}>
-        <EuiPopoverTitle>
-          {i18n.translate('discover.fieldChooser.indexPattern.changeDataViewTitle', {
-            defaultMessage: 'Change data view',
-          })}
-        </EuiPopoverTitle>
+        <DiscoverIndexPatternManagement
+          services={services}
+          selectedIndexPattern={selectedIndexPattern}
+          useNewFieldsApi={useNewFieldsApi}
+          editField={() => {
+            setPopoverIsOpen(false);
+            editField(undefined);
+          }}
+        />
+        <EuiHorizontalRule margin="none" />
         <EuiSelectable<{ value: string }>
           data-test-subj="indexPattern-switcher"
           {...selectableProps}
@@ -93,16 +114,35 @@ export function ChangeIndexPattern({
           }}
           searchProps={{
             compressed: true,
+            placeholder: 'Find a data view',
             ...(selectableProps ? selectableProps.searchProps : undefined),
           }}
         >
           {(list, search) => (
             <>
-              {search}
+              <EuiPanel color="transparent" paddingSize="s">
+                {search}
+              </EuiPanel>
               {list}
             </>
           )}
         </EuiSelectable>
+        <EuiHorizontalRule margin="none" />
+        <EuiContextMenuPanel
+          size="s"
+          items={[
+            <EuiContextMenuItem disabled key="new" icon="plusInCircleFilled" onClick={() => {}}>
+              New data view...
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem disabled key="save" icon="save" onClick={() => {}}>
+              Save current as new data view...
+            </EuiContextMenuItem>,
+            <EuiHorizontalRule key="hr" margin="none" />,
+            <EuiContextMenuItem hasPanel disabled key="language" onClick={() => {}}>
+              Language: KQL
+            </EuiContextMenuItem>,
+          ]}
+        />
       </div>
     </EuiPopover>
   );
