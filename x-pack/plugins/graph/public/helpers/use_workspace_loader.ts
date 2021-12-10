@@ -97,7 +97,7 @@ export const useWorkspaceLoader = ({
 
         yield savedObjects;
 
-        if (total >= page * perPage) {
+        if (total > page * perPage) {
           yield* makeRequest();
         }
       }
