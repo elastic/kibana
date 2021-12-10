@@ -806,7 +806,7 @@ POST /api/apm/agent_keys
     "name": "apm-key",
     "api_key": "PjGloCGOTzaZr8ilUPvkjA",
     "encoded": "M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ=="
-    }
+  }
 }
 --------------------------------------------------
 
