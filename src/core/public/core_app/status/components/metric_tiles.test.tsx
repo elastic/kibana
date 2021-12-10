@@ -35,6 +35,17 @@ const timeMetric: Metric = {
   value: 1234,
 };
 
+const metricWithMeta: Metric = {
+  name: 'Delay',
+  type: 'time',
+  value: 1,
+  meta: {
+    description: 'Percentiles',
+    value: [1, 5, 10],
+    type: 'time',
+  },
+};
+
 describe('MetricTile', () => {
   it('correct displays an untyped metric', () => {
     const component = shallow(<MetricTile metric={untypedMetric} />);
@@ -53,6 +64,11 @@ describe('MetricTile', () => {
 
   it('correct displays a time metric', () => {
     const component = shallow(<MetricTile metric={timeMetric} />);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('correctly displays a metric with metadata', () => {
+    const component = shallow(<MetricTile metric={metricWithMeta} />);
     expect(component).toMatchSnapshot();
   });
 });

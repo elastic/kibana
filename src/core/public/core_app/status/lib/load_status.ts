@@ -6,19 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { MetricsMeta } from '@kbn/dev-utils/target_types/run/metrics';
 import { i18n } from '@kbn/i18n';
 import type { UnwrapPromise } from '@kbn/utility-types';
 import type { StatusResponse, ServiceStatus, ServiceStatusLevel } from '../../../../types/status';
 import type { HttpSetup } from '../../../http';
 import type { NotificationsSetup } from '../../../notifications';
 import type { DataType } from '../lib';
-
+export interface MetricMeta {
+  description: string;
+  value?: any | any[];
+  type?: DataType;
+}
 export interface Metric {
   name: string;
   value: number | number[];
   type?: DataType;
-  meta?: any; // create a type for this to accets a value and value descriptor property
+  meta?: MetricMeta;
 }
 
 export interface FormattedStatus {
@@ -63,16 +66,44 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
       type: 'byte',
     },
     {
+      name: i18n.translate('core.statusPage.metricsTiles.columns.requestsPerSecHeader', {
+        defaultMessage: 'Requests per second',
+      }),
+      value: (metrics.requests.total * 1000) / metrics.collection_interval_in_millis,
+      type: 'float',
+    },
+    {
       name: i18n.translate('core.statusPage.metricsTiles.columns.loadHeader', {
         defaultMessage: 'Load',
       }),
       value: [metrics.os.load['1m'], metrics.os.load['5m'], metrics.os.load['15m']],
       type: 'float',
       meta: {
-        name: i18n.translate('core.statusPage.metricsTiles.columns.load.metaHeader', {
-          defaultMessage: 'average',
+        description: i18n.translate('core.statusPage.metricsTiles.columns.load.metaHeader', {
+          defaultMessage: 'Load interval',
         }),
-        value: ['1 min', '5 min', '15 min'],
+        value: Object.keys(metrics.os.load),
+      },
+    },
+    {
+      name: i18n.translate('core.statusPage.metricsTiles.columns.processDelayHeader', {
+        defaultMessage: 'Delay',
+      }),
+      value: metrics.process.event_loop_delay,
+      type: 'time',
+      meta: {
+        description: i18n.translate(
+          'core.statusPage.metricsTiles.columns.processDelayDetailsHeader',
+          {
+            defaultMessage: 'Percentiles',
+          }
+        ),
+        value: [
+          metrics.process.event_loop_delay_histogram?.percentiles['50'],
+          metrics.process.event_loop_delay_histogram?.percentiles['95'],
+          metrics.process.event_loop_delay_histogram?.percentiles['99'],
+        ],
+        type: 'time',
       },
     },
     {
@@ -81,36 +112,11 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
       }),
       value: metrics.response_times.avg_in_millis,
       type: 'time',
-    },
-    {
-      name: i18n.translate('core.statusPage.metricsTiles.columns.resTimeMaxHeader', {
-        defaultMessage: 'Response time max',
-      }),
-      value: metrics.response_times.max_in_millis,
-      type: 'time',
-    },
-    {
-      name: i18n.translate('core.statusPage.metricsTiles.columns.requestsPerSecHeader', {
-        defaultMessage: 'Requests per second',
-      }),
-      value: (metrics.requests.total * 1000) / metrics.collection_interval_in_millis,
-      type: 'float',
-    },
-    {
-      name: i18n.translate('core.statusPage.metricsTiles.columns.processDelayHeader', {
-        defaultMessage: 'Mean delay',
-      }),
-      value: metrics.process.event_loop_delay,
-      type: 'time',
       meta: {
-        name: i18n.translate('core.statusPage.metricsTiles.columns.processDelayDetailsHeader', {
-          defaultMessage: 'Percentiles',
+        description: i18n.translate('core.statusPage.metricsTiles.columns.resTimeMaxHeader', {
+          defaultMessage: 'Response time max',
         }),
-        value: [
-          metrics.process.event_loop_delay_histogram.percentiles['50'],
-          metrics.process.event_loop_delay_histogram.percentiles['95'],
-          metrics.process.event_loop_delay_histogram.percentiles['99'],
-        ],
+        value: metrics.response_times.max_in_millis,
         type: 'time',
       },
     },
