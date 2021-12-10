@@ -23254,7 +23254,6 @@
     "xpack.securitySolution.eventsViewer.alerts.defaultHeaders.versionTitle": "版本",
     "xpack.securitySolution.eventsViewer.alerts.overviewTable.signalStatusTitle": "状态",
     "xpack.securitySolution.eventsViewer.alerts.overviewTable.targetImportHash": "导入哈希",
-    "xpack.securitySolution.eventsViewer.alerts.overviewTable.timestampTitle": "时间戳",
     "xpack.securitySolution.eventsViewer.errorFetchingEventsData": "无法查询事件数据",
     "xpack.securitySolution.eventsViewer.eventsLabel": "事件",
     "xpack.securitySolution.eventsViewer.showingLabel": "正在显示",

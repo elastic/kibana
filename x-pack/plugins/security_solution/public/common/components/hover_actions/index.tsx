@@ -37,8 +37,6 @@ const StyledHoverActionsContainer = styled.div<{
   $hideTopN: boolean;
   $isActive: boolean;
 }>`
-  min-width: ${({ $hideTopN }) => `${$hideTopN ? '112px' : '138px'}`};
-  padding: ${(props) => `0 ${props.theme.eui.paddingSizes.s}`};
   display: flex;
 
   ${(props) =>
@@ -82,8 +80,14 @@ const StyledHoverActionsContainer = styled.div<{
       : ''}
 `;
 
+const StyledHoverActionsContainerWithPaddingsAndMinWidth = styled(StyledHoverActionsContainer)`
+  min-width: ${({ $hideTopN }) => `${$hideTopN ? '112px' : '138px'}`};
+  padding: ${(props) => `0 ${props.theme.eui.paddingSizes.s}`};
+`;
+
 interface Props {
   additionalContent?: React.ReactNode;
+  applyWidthAndPadding?: boolean;
   closeTopN?: () => void;
   closePopOver?: () => void;
   dataProvider?: DataProvider | DataProvider[];
@@ -128,6 +132,7 @@ export const HoverActions: React.FC<Props> = React.memo(
     dataType,
     draggableId,
     enableOverflowButton = false,
+    applyWidthAndPadding = true,
     field,
     goGetTimelineId,
     isObjectArray,
@@ -227,6 +232,10 @@ export const HoverActions: React.FC<Props> = React.memo(
       values,
     });
 
+    const Container = applyWidthAndPadding
+      ? StyledHoverActionsContainerWithPaddingsAndMinWidth
+      : StyledHoverActionsContainer;
+
     return (
       <EuiFocusTrap
         disabled={isFocusTrapDisabled({
@@ -234,7 +243,7 @@ export const HoverActions: React.FC<Props> = React.memo(
           showTopN,
         })}
       >
-        <StyledHoverActionsContainer
+        <Container
           onKeyDown={onKeyDown}
           $showTopN={showTopN}
           $showOwnFocus={showOwnFocus}
@@ -249,7 +258,7 @@ export const HoverActions: React.FC<Props> = React.memo(
           {additionalContent != null && <AdditionalContent>{additionalContent}</AdditionalContent>}
 
           {enableOverflowButton && !isCaseView ? overflowActionItems : allActionItems}
-        </StyledHoverActionsContainer>
+        </Container>
       </EuiFocusTrap>
     );
   }

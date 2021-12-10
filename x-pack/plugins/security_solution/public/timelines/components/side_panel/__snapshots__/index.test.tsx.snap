@@ -439,6 +439,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
           "indexName": "my-index",
         }
       }
+      handleOnEventClosed={[Function]}
       hostRisk={null}
       isAlert={false}
       isDraggable={false}
@@ -760,6 +761,7 @@ Array [
               isAlert={false}
               loading={true}
               ruleName=""
+              timestamp=""
             >
               <Styled(EuiFlexGroup)
                 gutterSize="none"
@@ -960,6 +962,7 @@ Array [
                         "indexName": "my-index",
                       }
                     }
+                    handleOnEventClosed={[Function]}
                     hostRisk={null}
                     isAlert={false}
                     isDraggable={false}
@@ -1800,6 +1803,7 @@ Array [
             isAlert={false}
             loading={true}
             ruleName=""
+            timestamp=""
           >
             <Styled(EuiFlexGroup)
               gutterSize="none"
@@ -2000,6 +2004,7 @@ Array [
                       "indexName": "my-index",
                     }
                   }
+                  handleOnEventClosed={[Function]}
                   hostRisk={null}
                   isAlert={false}
                   isDraggable={false}
