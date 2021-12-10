@@ -225,7 +225,8 @@ describe('<IndexManagementHome />', () => {
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('closeIndexMenuButton');
 
-      const latestRequest = server.requests[server.requests.length - 1];
+      // A refresh call was added after closing an index so we need to check the second to last request.
+      const latestRequest = server.requests[server.requests.length - 2];
       expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/close`);
     });
 
