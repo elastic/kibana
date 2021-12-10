@@ -12,6 +12,7 @@ import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
 import { LevelLogger, ReportingStore } from './lib';
 import { registerRoutes } from './routes';
+import { reportingStatusSavedObject } from './saved_objects';
 import { setFieldFormats } from './services';
 import type {
   ReportingRequestHandlerContext,
@@ -20,7 +21,6 @@ import type {
   ReportingStart,
   ReportingStartDeps,
 } from './types';
-import { reportingStatusSavedObject } from './saved_objects';
 import { registerReportingUsageCollector } from './usage';
 
 export class ReportingPlugin
