@@ -18,6 +18,7 @@ import { EuiCallOut } from '@elastic/eui';
 
 import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../../components/layout';
 
+import { DownloadDiagnosticsButton } from './download_diagnostics_button';
 import { SourceInfoCard } from './source_info_card';
 import { SourceLayout } from './source_layout';
 
@@ -26,6 +27,7 @@ describe('SourceLayout', () => {
   const mockValues = {
     contentSource,
     dataLoading: false,
+    diagnosticDownloadButtonVisible: false,
     isOrganization: true,
   };
 
@@ -86,5 +88,15 @@ describe('SourceLayout', () => {
     const wrapper = shallow(<SourceLayout />);
 
     expect(wrapper.find(EuiCallOut)).toHaveLength(1);
+  });
+
+  it('renders DownloadDiagnosticsButton', () => {
+    setMockValues({
+      ...mockValues,
+      diagnosticDownloadButtonVisible: true,
+    });
+    const wrapper = shallow(<SourceLayout />);
+
+    expect(wrapper.find(DownloadDiagnosticsButton)).toHaveLength(1);
   });
 });

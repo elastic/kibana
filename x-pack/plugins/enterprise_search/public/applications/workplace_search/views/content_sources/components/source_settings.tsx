@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { HttpLogic } from '../../../../shared/http';
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import { ContentSection } from '../../../components/shared/content_section';
@@ -61,11 +60,11 @@ import {
 import { staticSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
 
+import { DownloadDiagnosticsButton } from './download_diagnostics_button';
+
 import { SourceLayout } from './source_layout';
 
 export const SourceSettings: React.FC = () => {
-  const { http } = useValues(HttpLogic);
-
   const {
     updateContentSource,
     removeContentSource,
@@ -109,12 +108,6 @@ export const SourceSettings: React.FC = () => {
   const showGithubAppConfig = isGithubApp;
 
   const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
-
-  const diagnosticsPath = isOrganization
-    ? http.basePath.prepend(`/internal/workplace_search/org/sources/${id}/download_diagnostics`)
-    : http.basePath.prepend(
-        `/internal/workplace_search/account/sources/${id}/download_diagnostics`
-      );
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
@@ -241,15 +234,7 @@ export const SourceSettings: React.FC = () => {
         </ContentSection>
       )}
       <ContentSection title={SYNC_DIAGNOSTICS_TITLE} description={SYNC_DIAGNOSTICS_DESCRIPTION}>
-        <EuiButton
-          target="_blank"
-          href={diagnosticsPath}
-          isLoading={buttonLoading}
-          data-test-subj="DownloadDiagnosticsButton"
-          download={`${id}_${serviceType}_${Date.now()}_diagnostics.json`}
-        >
-          {SYNC_DIAGNOSTICS_BUTTON}
-        </EuiButton>
+        <DownloadDiagnosticsButton label={SYNC_DIAGNOSTICS_BUTTON} />
       </ContentSection>
       <ContentSection title={SOURCE_REMOVE_TITLE} description={SOURCE_REMOVE_DESCRIPTION}>
         <EuiButton
