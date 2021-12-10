@@ -17,6 +17,8 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiPanel,
+  EuiHorizontalRule,
+  EuiTitle,
 } from '@elastic/eui';
 import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
@@ -90,6 +92,21 @@ const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
             <EuiFlexItem grow={true}>
               <MonitoringTimeseriesContainer
                 series={data.metrics.kibana_process_delay}
+                onBrush={onBrush}
+                zoomInfo={zoomInfo}
+              />
+              <EuiSpacer />
+            </EuiFlexItem>
+          </EuiFlexGrid>
+          <EuiHorizontalRule />
+          <EuiTitle>
+            <h2>Alerting</h2>
+          </EuiTitle>
+          <EuiHorizontalRule />
+          <EuiFlexGrid columns={2} gutterSize="s">
+            <EuiFlexItem grow={true}>
+              <MonitoringTimeseriesContainer
+                series={data.metrics.kibana_alerting_event_log_average_duration}
                 onBrush={onBrush}
                 zoomInfo={zoomInfo}
               />

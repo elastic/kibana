@@ -95,7 +95,7 @@ export interface LegacyShimDependencies {
   router: IRouter<RequestHandlerContextMonitoringPlugin>;
   instanceUuid: string;
   esDataClient: ElasticsearchClient;
-  kibanaStatsCollector: any;
+  KibanaMetricsCollector: any;
 }
 
 export interface IBulkUploader {
@@ -118,7 +118,7 @@ export interface LegacyRequest {
   params: {
     [key: string]: string;
   };
-  getKibanaStatsCollector: () => any;
+  getKibanaMetricsCollector: () => any;
   getUiSettingsService: () => any;
   getActionTypeRegistry: () => any;
   getRulesClient: () => any;

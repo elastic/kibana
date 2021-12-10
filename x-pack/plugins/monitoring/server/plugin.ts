@@ -112,6 +112,7 @@ export class MonitoringPlugin
         version: this.initializerContext.env.packageInfo.version,
         snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
       },
+      usageCollection: plugins.usageCollection,
     });
 
     Globals.init({
@@ -176,7 +177,7 @@ export class MonitoringPlugin
       router,
       instanceUuid: this.initializerContext.env.instanceUuid,
       esDataClient: coreStart.elasticsearch.client.asInternalUser,
-      kibanaStatsCollector: plugins.usageCollection?.getCollectorByType(
+      KibanaMetricsCollector: plugins.usageCollection?.getCollectorByType(
         KIBANA_STATS_TYPE_MONITORING
       ),
     };
@@ -350,7 +351,7 @@ export class MonitoringPlugin
             logger: this.log,
             getLogger: this.getLogger,
             payload: req.body,
-            getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
+            getKibanaMetricsCollector: () => this.legacyShimDependencies.KibanaMetricsCollector,
             getUiSettingsService: () => context.core.uiSettings.client,
             getActionTypeRegistry: () => context.actions?.listTypes(),
             getRulesClient: () => {

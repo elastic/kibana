@@ -11,6 +11,7 @@ import { getSeries } from './get_series';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 import { getTimezone } from '../get_timezone';
 import { LegacyRequest } from '../../types';
+import { metrics } from '../metrics';
 
 type Metric = string | { keys: string | string[]; name: string };
 
@@ -39,8 +40,8 @@ export async function getMetrics(
     min = max - numOfBuckets * bucketSize * 1000;
   }
 
-  return Promise.all(
-    metricSet.map((metric: Metric) => {
+  const rows = await Promise.all(
+    metricSet.map(async (metric: Metric) => {
       // metric names match the literal metric name, but they can be supplied in groups or individually
       let metricNames;
 
@@ -61,14 +62,16 @@ export async function getMetrics(
         })
       );
     })
-  ).then((rows) => {
-    const data: Record<string, any> = {};
-    metricSet.forEach((key, index) => {
-      // keyName must match the value stored in the html template
-      const keyName = typeof key === 'string' ? key : key.name;
+  );
+  const data: Record<string, any> = {};
+  metricSet.forEach((key, index) => {
+    // keyName must match the value stored in the html template
+    const keyName = typeof key === 'string' ? key : key.name;
+    if (metrics[keyName].postProcess) {
+      data[keyName] = metrics[keyName].postProcess(rows[index]);
+    } else {
       data[keyName] = rows[index];
-    });
-
-    return data;
+    }
   });
+  return data;
 }

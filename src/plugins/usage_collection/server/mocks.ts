@@ -33,11 +33,15 @@ export const createUsageCollectionSetupMock = () => {
     getUsageCounterByType,
     areAllCollectorsReady: jest.fn().mockImplementation(collectorSet.areAllCollectorsReady),
     bulkFetch: jest.fn().mockImplementation(collectorSet.bulkFetch),
+    bulkFetchKibanaMetrics: jest.fn().mockImplementation(collectorSet.bulkFetchKibanaMetrics),
     getCollectorByType: jest.fn().mockImplementation(collectorSet.getCollectorByType),
     toApiFieldNames: jest.fn().mockImplementation(collectorSet.toApiFieldNames),
     toObject: jest.fn().mockImplementation(collectorSet.toObject),
     makeStatsCollector: jest.fn().mockImplementation(collectorSet.makeStatsCollector),
     makeUsageCollector: jest.fn().mockImplementation(collectorSet.makeUsageCollector),
+    makeKibanaMetricsCollector: jest
+      .fn()
+      .mockImplementation(collectorSet.makeKibanaMetricsCollector),
     registerCollector: jest.fn().mockImplementation(collectorSet.registerCollector),
   };
 

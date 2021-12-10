@@ -35,6 +35,7 @@ interface Metric {
     defaultSizeInSeconds: number
   ) => number | null;
   serialize: () => string;
+  postProcess: (data: number[][]) => number[][];
 }
 
 /**
@@ -189,6 +190,10 @@ async function fetchSeries(
     },
   };
 
+  if (metric.debug) {
+    // console.log(JSON.stringify(params.body));
+  }
+
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return await callWithRequest(req, 'search', params);
 }
@@ -299,6 +304,12 @@ function handleSeries(
       metric: metric.serialize(),
       data,
     };
+
+    // if (postProcess) {
+    //   return postProcess(metricData);
+    // }
+
+    // return metricData;
   }
 
   if (groupBy) {
@@ -346,6 +357,7 @@ export async function getSeries(
   if (!metric) {
     throw new Error(`Not a valid metric: ${metricName}`);
   }
+
   const response = await fetchSeries(
     req,
     indexPattern,

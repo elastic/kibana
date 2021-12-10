@@ -6,6 +6,8 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { flatten } from 'lodash';
+import type { Request } from '@hapi/hapi';
 import { first } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -35,7 +37,7 @@ import {
   SavedObjectsBulkGetObject,
   ServiceStatusLevels,
 } from '../../../../src/core/server';
-import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID } from './types';
+import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID, RawAlert } from './types';
 import { defineRoutes } from './routes';
 import { LICENSE_TYPE, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import {
@@ -53,7 +55,12 @@ import {
 } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
-import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
+import {
+  IEventLogger,
+  IEventLogService,
+  IEventLogClientService,
+  IValidatedEvent,
+} from '../../event_log/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
 import {
@@ -66,6 +73,7 @@ import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
+import { EventSchema } from '../../event_log/generated/schemas';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -251,6 +259,75 @@ export class AlertingPlugin {
       'alerting',
       this.createRouteHandlerContext(core)
     );
+
+    if (plugins.usageCollection) {
+      plugins.usageCollection.registerCollector(
+        plugins.usageCollection.makeKibanaMetricsCollector<IValidatedEvent[], false>({
+          type: 'event_log',
+          isReady: () => true,
+          schema: EventSchema,
+          fetch: async () => {
+            const services = await core.getStartServices();
+            const savedObjectClient = await services[0].savedObjects.createInternalRepository([
+              'alert',
+            ]);
+            const esoClient = await services[1].encryptedSavedObjects.getClient({
+              includedHiddenTypes: ['alert'],
+            });
+
+            // Find all rules
+            const response = await savedObjectClient.find<RawAlert>({ type: 'alert' });
+            const rules = response.saved_objects;
+
+            // Get event log entries
+            const eventLogEntries = flatten(
+              await Promise.all(
+                rules.map(async ({ attributes: rule, id, namespaces }) => {
+                  // Get the actual API key for each rule
+                  const {
+                    attributes: { apiKey },
+                  } = await esoClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+                    namespace: namespaces ? namespaces[0] : undefined,
+                  });
+
+                  // rule.
+                  const requestHeaders: Record<string, string> = {};
+                  if (apiKey) {
+                    requestHeaders.authorization = `ApiKey ${apiKey}`;
+                  }
+                  const fakeRequest = KibanaRequest.from({
+                    headers: requestHeaders,
+                    path: '/',
+                    route: { settings: {} },
+                    url: {
+                      href: '/',
+                    },
+                    raw: {
+                      req: {
+                        url: '/',
+                      },
+                    },
+                  } as unknown as Request);
+
+                  const eventLogClient = services[1].eventLog.getClient(fakeRequest);
+
+                  const events = await eventLogClient.findEventsBySavedObjectIds('alert', [id], {
+                    page: 1,
+                    per_page: 1,
+                    sort_order: 'desc',
+                    filter: '(event.action: "execute")',
+                  });
+
+                  return events.data;
+                })
+              )
+            );
+
+            return eventLogEntries;
+          },
+        })
+      );
+    }
 
     // Routes
     const router = core.http.createRouter<AlertingRequestHandlerContext>();

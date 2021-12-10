@@ -67,6 +67,12 @@ export function registerStatsRoute({
     return collectorSet.toObject(usage);
   };
 
+  const getKibanaStats = async (
+    esClient: ElasticsearchClient
+  ): Promise<Array<{ type: string; result: unknown }>> => {
+    return await collectorSet.bulkFetchKibanaMetrics(esClient);
+  };
+
   const getClusterUuid = async (asCurrentUser: ElasticsearchClient): Promise<string> => {
     const { body } = await asCurrentUser.info({ filter_path: 'cluster_uuid' });
     const { cluster_uuid: uuid } = body;
@@ -95,11 +101,11 @@ export function registerStatsRoute({
       const isLegacy = req.query.legacy === '' || req.query.legacy;
       const shouldGetUsage = req.query.exclude_usage === false;
 
+      const { asCurrentUser } = context.core.elasticsearch.client;
+      const savedObjectsClient = context.core.savedObjects.client;
+
       let extended;
       if (isExtended) {
-        const { asCurrentUser } = context.core.elasticsearch.client;
-        const savedObjectsClient = context.core.savedObjects.client;
-
         if (shouldGetUsage) {
           const collectorsReady = await collectorSet.areAllCollectorsReady();
           if (!collectorsReady) {
@@ -163,9 +169,11 @@ export function registerStatsRoute({
         .pipe(first())
         .toPromise();
 
+      const stats = await getKibanaStats(asCurrentUser);
       const overallStatus = await overallStatus$.pipe(first()).toPromise();
       const kibanaStats = collectorSet.toApiFieldNames({
         ...lastMetrics,
+        ...stats,
         kibana: {
           uuid: config.uuid,
           name: config.server.name,

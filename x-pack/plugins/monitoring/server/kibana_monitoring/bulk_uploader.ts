@@ -15,8 +15,13 @@ import type {
   ServiceStatus,
   ServiceStatusLevel,
 } from 'src/core/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ServiceStatusLevels } from '../../../../../src/core/server';
-import { KIBANA_STATS_TYPE_MONITORING, KIBANA_SETTINGS_TYPE } from '../../common/constants';
+import {
+  KIBANA_STATS_TYPE_MONITORING,
+  KIBANA_SETTINGS_TYPE,
+  KIBANA_METRICS_TYPE_MONITORING,
+} from '../../common/constants';
 
 import { sendBulkPayload } from './lib';
 import { getKibanaSettings } from './collectors';
@@ -30,6 +35,7 @@ export interface BulkUploaderOptions {
   statusGetter$: Observable<ServiceStatus>;
   opsMetrics$: Observable<OpsMetrics>;
   kibanaStats: KibanaStats;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface KibanaStats {
@@ -70,6 +76,9 @@ export class BulkUploader implements IBulkUploader {
   private _timer: NodeJS.Timer | null;
   private readonly _interval: number;
   private readonly config: MonitoringConfig;
+  private readonly usageCollection?: UsageCollectionSetup;
+  private esClient!: ElasticsearchClient;
+
   constructor({
     log,
     config,
@@ -77,6 +86,7 @@ export class BulkUploader implements IBulkUploader {
     statusGetter$,
     opsMetrics$,
     kibanaStats,
+    usageCollection,
   }: BulkUploaderOptions) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
@@ -93,6 +103,8 @@ export class BulkUploader implements IBulkUploader {
 
     this.kibanaStatus = null;
     this.kibanaStatusGetter$ = statusGetter$;
+
+    this.usageCollection = usageCollection;
   }
 
   /*
@@ -102,6 +114,8 @@ export class BulkUploader implements IBulkUploader {
    */
   public start(esClient: ElasticsearchClient) {
     this._log.info('Starting monitoring stats collection');
+
+    this.esClient = esClient;
 
     this.kibanaStatusSubscription = this.kibanaStatusGetter$.subscribe((nextStatus) => {
       this.kibanaStatus = nextStatus.level;
@@ -163,10 +177,54 @@ export class BulkUploader implements IBulkUploader {
     };
   }
 
+  private async getKibanaMetrics() {
+    const kibanaMetrics = await this.usageCollection?.bulkFetchKibanaMetrics(this.esClient);
+    if (!kibanaMetrics) {
+      return [
+        {
+          type: KIBANA_METRICS_TYPE_MONITORING,
+          result: {},
+        },
+      ];
+    }
+    const metrics = kibanaMetrics?.reduce(
+      (accum: Array<{ type: string; result: unknown }>, { type, result }) => {
+        if (Array.isArray(result)) {
+          accum.push(
+            ...result.map((item) => {
+              return {
+                type: KIBANA_METRICS_TYPE_MONITORING,
+                result: {
+                  type,
+                  timestamp: new Date(),
+                  [type]: item,
+                },
+              };
+            })
+          );
+        } else {
+          accum.push({
+            type: KIBANA_METRICS_TYPE_MONITORING,
+            result: {
+              type,
+              timestamp: new Date(),
+              [type]: result,
+            },
+          });
+        }
+        return accum;
+      },
+      []
+    );
+    return metrics;
+  }
+
   private async _fetchAndUpload(esClient: ElasticsearchClient) {
     const data = await Promise.all([
       { type: KIBANA_STATS_TYPE_MONITORING, result: await this.getOpsMetrics() },
+      // { type: KIBANA_METRICS_TYPE_MONITORING, result: await this.getKibanaMetrics() },
       { type: KIBANA_SETTINGS_TYPE, result: await getKibanaSettings(this._log, this.config) },
+      ...(await this.getKibanaMetrics()),
     ]);
 
     const payload = this.toBulkUploadFormat(data);
