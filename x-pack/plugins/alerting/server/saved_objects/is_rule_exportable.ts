@@ -6,7 +6,7 @@
  */
 
 import { Logger, SavedObject } from 'kibana/server';
-import { RawAlert } from '../types';
+import { RawRule } from '../types';
 import { RuleTypeRegistry } from '../rule_type_registry';
 
 export function isRuleExportable(
@@ -14,7 +14,7 @@ export function isRuleExportable(
   ruleTypeRegistry: RuleTypeRegistry,
   logger: Logger
 ): boolean {
-  const ruleSO = rule as SavedObject<RawAlert>;
+  const ruleSO = rule as SavedObject<RawRule>;
   try {
     const ruleType = ruleTypeRegistry.get(ruleSO.attributes.alertTypeId);
     if (!ruleType.isExportable) {

@@ -12,7 +12,7 @@ import {
   ElasticsearchClient,
 } from 'kibana/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../../security/server';
-import { SAVED_OBJECT_TYPES } from '../../common';
+import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import { GetSpaceFn } from '../authorization/types';
 import {
@@ -95,8 +95,7 @@ export class CasesClientFactory {
     const userInfo = caseService.getUser({ request });
 
     return createCasesClient({
-      alertsService: new AlertService(),
-      scopedClusterClient,
+      alertsService: new AlertService(scopedClusterClient, this.logger),
       unsecuredSavedObjectsClient: savedObjectsService.getScopedClient(request, {
         includedHiddenTypes: SAVED_OBJECT_TYPES,
         // this tells the security plugin to not perform SO authorization and audit logging since we are handling

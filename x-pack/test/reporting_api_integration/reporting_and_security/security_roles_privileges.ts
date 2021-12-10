@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SearchSourceFields } from 'src/plugins/data/common';
+import { SerializedSearchSourceFields } from 'src/plugins/data/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
               query: { query: '', language: 'kuery' },
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
               filter: [],
-            } as unknown as SearchSourceFields,
+            } as unknown as SerializedSearchSourceFields,
             browserTimezone: 'UTC',
             title: 'testfooyu78yt90-',
           }
@@ -50,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
               query: { query: '', language: 'kuery' },
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
               filter: [],
-            } as unknown as SearchSourceFields,
+            } as unknown as SerializedSearchSourceFields,
             browserTimezone: 'UTC',
             title: 'testfooyu78yt90-',
           }
@@ -166,7 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
         const res = await reportingAPI.generateCsv(
           {
             browserTimezone: 'UTC',
-            searchSource: {} as SearchSourceFields,
+            searchSource: {} as SerializedSearchSourceFields,
             objectType: 'search',
             title: 'test disallowed',
             version: '7.14.0',
@@ -187,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
               version: true,
               fields: [{ field: '*', include_unmapped: 'true' }],
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
-            } as unknown as SearchSourceFields,
+            } as unknown as SerializedSearchSourceFields,
             columns: [],
             version: '7.13.0',
           },

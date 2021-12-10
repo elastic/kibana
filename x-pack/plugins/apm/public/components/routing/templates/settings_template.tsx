@@ -18,11 +18,11 @@ import { getLegacyApmHref } from '../../shared/Links/apm/APMLink';
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
     | 'agent-configurations'
+    | 'agent-keys'
     | 'anomaly-detection'
     | 'apm-indices'
     | 'customize-ui'
-    | 'schema'
-    | 'agent-keys';
+    | 'schema';
   hidden?: boolean;
 };
 
@@ -38,12 +38,12 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
 
   return (
     <ApmMainTemplate
+      environmentFilter={false}
       pageHeader={{
         tabs,
         pageTitle: i18n.translate('xpack.apm.settings.title', {
           defaultMessage: 'Settings',
         }),
-        rightSideItems: [], // hide EnvironmentFilter
       }}
     >
       {children}
@@ -73,6 +73,17 @@ function getTabs({
       href: getLegacyApmHref({
         basePath,
         path: `/settings/agent-configuration`,
+        search,
+      }),
+    },
+    {
+      key: 'agent-keys',
+      label: i18n.translate('xpack.apm.settings.agentKeys', {
+        defaultMessage: 'Agent Keys',
+      }),
+      href: getLegacyApmHref({
+        basePath,
+        path: `/settings/agent-keys`,
         search,
       }),
     },
@@ -116,17 +127,6 @@ function getTabs({
         defaultMessage: 'Schema',
       }),
       href: getLegacyApmHref({ basePath, path: `/settings/schema`, search }),
-    },
-    {
-      key: 'agent-keys',
-      label: i18n.translate('xpack.apm.settings.agentKeys', {
-        defaultMessage: 'Agent Keys',
-      }),
-      href: getLegacyApmHref({
-        basePath,
-        path: `/settings/agent-keys`,
-        search,
-      }),
     },
   ];
 

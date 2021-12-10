@@ -10,11 +10,12 @@ import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
-import { Doc } from './components/doc';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../utils/use_index_pattern';
-import { DiscoverRouteProps } from '../types';
 import { withQueryParams } from '../../utils/with_query_params';
+import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
+import { DiscoverRouteProps } from '../types';
+import { Doc } from './components/doc';
 
 export interface SingleDocRouteProps extends DiscoverRouteProps {
   /**
@@ -33,15 +34,16 @@ const SingleDoc = (props: SingleDocRouteProps) => {
   const { chrome, timefilter } = services;
 
   const { indexPatternId, index } = useParams<DocUrlParams>();
+  const breadcrumb = useMainRouteBreadcrumb();
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(),
+      ...getRootBreadcrumbs(breadcrumb),
       {
         text: `${index}#${id}`,
       },
     ]);
-  }, [chrome, index, id]);
+  }, [chrome, index, id, breadcrumb]);
 
   useEffect(() => {
     timefilter.disableAutoRefreshSelector();

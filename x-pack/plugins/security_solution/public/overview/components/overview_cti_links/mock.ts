@@ -15,6 +15,13 @@ export const mockTheme = getMockTheme({
   },
 });
 
+export const mockTiDataSources = {
+  totalCount: 5,
+  tiDataSources: [
+    { dataset: 'ti_abusech', name: 'AbuseCH', count: 5, path: '/dashboard_path_abuseurl' },
+  ],
+};
+
 export const mockEventCountsByDataset = {
   abuseurl: 1,
   abusemalware: 1,
@@ -31,8 +38,6 @@ export const mockCtiEventCountsResponse = {
 };
 
 export const mockCtiLinksResponse = {
-  isPluginDisabled: false,
-  buttonHref: '/button',
   listItems: [
     { title: 'abuseurl', count: 1, path: '/dashboard_path_abuseurl' },
     { title: 'abusemalware', count: 2, path: '/dashboard_path_abusemalware' },
@@ -63,6 +68,10 @@ export const mockProps = {
   from: '2020-01-21T20:49:57.080Z',
   setQuery: jest.fn(),
   deleteQuery: jest.fn(),
+  allIntegrationsInstalled: true,
+  allTiDataSources: [
+    { dataset: 'ti_abusech', name: 'AbuseCH', count: 5, path: '/dashboard_path_abuseurl' },
+  ],
 };
 
 export const mockCtiWithEventsProps = {
