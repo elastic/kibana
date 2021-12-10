@@ -31,18 +31,11 @@ export interface Deps {
   packageInfo: PackageInfo;
 }
 
-function getDeprecationTitle() {
-  return i18n.translate('xpack.security.deprecations.kibanaDashboardOnlyUser.deprecationTitle', {
-    defaultMessage: 'The "{roleName}" role is deprecated',
-    values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
-  });
-}
-
 function getDeprecationMessage() {
   return i18n.translate('xpack.security.deprecations.kibanaDashboardOnlyUser.deprecationMessage', {
     defaultMessage:
-      'Users with the "{roleName}" role will not be able to access the Dashboard app. Use Kibana privileges instead.',
-    values: { roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
+      'Users with the "{kibanaDashboardOnlyUserRoleName}" role will not be able to access the Dashboard app. Use Kibana privileges instead.',
+    values: { kibanaDashboardOnlyUserRoleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
   });
 }
 
@@ -72,6 +65,14 @@ async function getUsersDeprecations(
   logger: Logger,
   packageInfo: PackageInfo
 ): Promise<DeprecationsDetails[]> {
+  const deprecationTitle = i18n.translate(
+    'xpack.security.deprecations.kibanaDashboardOnlyUser.usersDeprecationTitle',
+    {
+      defaultMessage:
+        'The "{kibanaDashboardOnlyUserRoleName}" role is deprecated: check user roles',
+      values: { kibanaDashboardOnlyUserRoleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
+    }
+  );
   let users: SecurityGetUserResponse;
   try {
     users = (await client.security.getUser()).body;
@@ -87,7 +88,7 @@ async function getUsersDeprecations(
         )}.`
       );
     }
-    return deprecationError(packageInfo, err);
+    return deprecationError(deprecationTitle, packageInfo, err);
   }
 
   const usersWithKibanaDashboardOnlyRole = Object.values(users)
@@ -99,7 +100,7 @@ async function getUsersDeprecations(
 
   return [
     {
-      title: getDeprecationTitle(),
+      title: deprecationTitle,
       message: getDeprecationMessage(),
       level: 'warning',
       deprecationType: 'feature',
@@ -117,9 +118,9 @@ async function getUsersDeprecations(
             'xpack.security.deprecations.kibanaDashboardOnlyUser.usersDeprecationCorrectiveActionTwo',
             {
               defaultMessage:
-                'Remove the "{roleName}" role from all users and add the custom role. The affected users are: {users}.',
+                'Remove the "{kibanaDashboardOnlyUserRoleName}" role from all users and add the custom role. The affected users are: {users}.',
               values: {
-                roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME,
+                kibanaDashboardOnlyUserRoleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME,
                 users: usersWithKibanaDashboardOnlyRole.join(', '),
               },
             }
@@ -135,6 +136,14 @@ async function getRoleMappingsDeprecations(
   logger: Logger,
   packageInfo: PackageInfo
 ): Promise<DeprecationsDetails[]> {
+  const deprecationTitle = i18n.translate(
+    'xpack.security.deprecations.kibanaDashboardOnlyUser.roleMappingsDeprecationTitle',
+    {
+      defaultMessage:
+        'The "{kibanaDashboardOnlyUserRoleName}" role is deprecated: check role mappings',
+      values: { kibanaDashboardOnlyUserRoleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME },
+    }
+  );
   let roleMappings: SecurityGetRoleMappingResponse;
   try {
     roleMappings = (await client.security.getRoleMapping()).body;
@@ -150,7 +159,7 @@ async function getRoleMappingsDeprecations(
         )}.`
       );
     }
-    return deprecationError(packageInfo, err);
+    return deprecationError(deprecationTitle, packageInfo, err);
   }
 
   const roleMappingsWithKibanaDashboardOnlyRole = Object.entries(roleMappings)
@@ -162,7 +171,7 @@ async function getRoleMappingsDeprecations(
 
   return [
     {
-      title: getDeprecationTitle(),
+      title: deprecationTitle,
       message: getDeprecationMessage(),
       level: 'warning',
       deprecationType: 'feature',
@@ -180,9 +189,9 @@ async function getRoleMappingsDeprecations(
             'xpack.security.deprecations.kibanaDashboardOnlyUser.roleMappingsDeprecationCorrectiveActionTwo',
             {
               defaultMessage:
-                'Remove the "{roleName}" role from all role mappings and add the custom role. The affected role mappings are: {roleMappings}.',
+                'Remove the "{kibanaDashboardOnlyUserRoleName}" role from all role mappings and add the custom role. The affected role mappings are: {roleMappings}.',
               values: {
-                roleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME,
+                kibanaDashboardOnlyUserRoleName: KIBANA_DASHBOARD_ONLY_USER_ROLE_NAME,
                 roleMappings: roleMappingsWithKibanaDashboardOnlyRole.join(', '),
               },
             }
@@ -193,13 +202,15 @@ async function getRoleMappingsDeprecations(
   ];
 }
 
-function deprecationError(packageInfo: PackageInfo, error: Error): DeprecationsDetails[] {
-  const title = getDeprecationTitle();
-
+function deprecationError(
+  deprecationTitle: string,
+  packageInfo: PackageInfo,
+  error: Error
+): DeprecationsDetails[] {
   if (getErrorStatusCode(error) === 403) {
     return [
       {
-        title,
+        title: deprecationTitle,
         level: 'fetch_error',
         deprecationType: 'feature',
         message: i18n.translate(
@@ -224,7 +235,7 @@ function deprecationError(packageInfo: PackageInfo, error: Error): DeprecationsD
 
   return [
     {
-      title,
+      title: deprecationTitle,
       level: 'fetch_error',
       deprecationType: 'feature',
       message: i18n.translate(
