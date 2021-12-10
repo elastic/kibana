@@ -19,6 +19,7 @@ interface CheckOriginConflictsParams {
   namespace?: string;
   ignoreRegularConflicts?: boolean;
   importStateMap: ImportStateMap;
+  pendingOverwrites: Set<string>;
 }
 
 type CheckOriginConflictParams = Omit<CheckOriginConflictsParams, 'objects'> & {
@@ -71,18 +72,21 @@ const getAmbiguousConflictSourceKey = <T>({ object }: InexactMatch<T>) =>
  * specified namespace:
  *  - A `Right` result indicates that no conflict destinations were found in this namespace ("no match").
  *  - A `Left` result indicates that one or more conflict destinations exist in this namespace, none of which exactly match this object's ID
- *    ("inexact match"). We can make this assumption because any "exact match" results would have been obtained and filtered out by the
- *    `checkConflicts` submodule, which is called before this.
+ *    ("inexact match"). We can make this assumption because any "exact match" conflict errors would have been obtained and filtered out by
+ *    the `checkConflicts` submodule, which is called before this, *or* if `overwrite: true` is used, we explicitly filter out any pending
+ *    overwrites for exact matches.
  */
 const checkOriginConflict = async (
   params: CheckOriginConflictParams
 ): Promise<Either<{ title?: string }>> => {
-  const { object, savedObjectsClient, typeRegistry, namespace, importStateMap } = params;
+  const { object, savedObjectsClient, typeRegistry, namespace, importStateMap, pendingOverwrites } =
+    params;
   const importIds = new Set(importStateMap.keys());
   const { type, originId } = object;
 
-  if (!typeRegistry.isMultiNamespace(type)) {
+  if (!typeRegistry.isMultiNamespace(type) || pendingOverwrites.has(`${type}:${object.id}`)) {
     // Skip the search request for non-multi-namespace types, since by definition they cannot have inexact matches or ambiguous conflicts.
+    // Also skip the search request for objects that we've already determined have an "exact match" conflict.
     return { tag: 'right', value: object };
   }
 

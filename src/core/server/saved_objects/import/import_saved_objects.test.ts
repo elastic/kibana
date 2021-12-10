@@ -215,11 +215,12 @@ describe('#importSavedObjectsFromStream', () => {
         const options = setupOptions();
         const filteredObjects = [createObject()];
         const importStateMap = new Map();
+        const pendingOverwrites = new Set<string>();
         mockCheckConflicts.mockResolvedValue({
           errors: [],
           filteredObjects,
           importStateMap,
-          pendingOverwrites: new Set(),
+          pendingOverwrites,
         });
 
         await importSavedObjectsFromStream(options);
@@ -230,6 +231,7 @@ describe('#importSavedObjectsFromStream', () => {
           namespace,
           ignoreRegularConflicts: overwrite,
           importStateMap,
+          pendingOverwrites,
         };
         expect(mockCheckOriginConflicts).toHaveBeenCalledWith(checkOriginConflictsParams);
       });

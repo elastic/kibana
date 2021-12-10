@@ -107,6 +107,7 @@ export async function importSavedObjectsFromStream({
       namespace,
       ignoreRegularConflicts: overwrite,
       importStateMap,
+      pendingOverwrites,
     };
     const checkOriginConflictsResult = await checkOriginConflicts(checkOriginConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkOriginConflictsResult.errors];

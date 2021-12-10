@@ -60,8 +60,9 @@ describe('#checkOriginConflicts', () => {
   const setupParams = (partial: {
     objects: SavedObjectType[];
     namespace?: string;
-    importStateMap?: ImportStateMap;
     ignoreRegularConflicts?: boolean;
+    importStateMap?: ImportStateMap;
+    pendingOverwrites?: Set<string>;
   }): CheckOriginConflictsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
     find = savedObjectsClient.find;
@@ -70,6 +71,7 @@ describe('#checkOriginConflicts', () => {
     typeRegistry.isMultiNamespace.mockImplementation((type) => type === MULTI_NS_TYPE);
     return {
       importStateMap: new Map(), // empty by default
+      pendingOverwrites: new Set<string>(), // empty by default
       ...partial,
       savedObjectsClient,
       typeRegistry,
@@ -99,6 +101,18 @@ describe('#checkOriginConflicts', () => {
     test('does not execute searches for non-multi-namespace objects', async () => {
       const objects = [otherObj, otherObjWithOriginId];
       const params = setupParams({ objects });
+
+      await checkOriginConflicts(params);
+      expect(find).not.toHaveBeenCalled();
+    });
+
+    test('does not execute searches for multi-namespace objects that already have pending overwrites (exact match conflicts)', async () => {
+      const objects = [multiNsObj, multiNsObjWithOriginId];
+      const pendingOverwrites = new Set([
+        `${multiNsObj.type}:${multiNsObj.id}`,
+        `${multiNsObjWithOriginId.type}:${multiNsObjWithOriginId.id}`,
+      ]);
+      const params = setupParams({ objects, pendingOverwrites });
 
       await checkOriginConflicts(params);
       expect(find).not.toHaveBeenCalled();

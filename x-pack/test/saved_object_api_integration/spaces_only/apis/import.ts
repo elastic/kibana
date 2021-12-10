@@ -87,6 +87,18 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     { ...CASES.CONFLICT_2C_OBJ, ...ambiguousConflict('2c') }, // "ambiguous destination" conflict
   ];
   const group3 = [
+    // This group needs to be executed *after* the previous test case, because those error assertions include metadata of the destinations,
+    // and *these* test cases would change that metadata.
+    { ...CASES.CONFLICT_2A_OBJ, ...fail409(!overwrite) }, // "exact match" conflict with 2a
+    {
+      // "inexact match" conflict with 2b (since 2a already has a conflict source, this is not an ambiguous destination conflict)
+      ...CASES.CONFLICT_2C_OBJ,
+      ...fail409(!overwrite),
+      ...destinationId(),
+      expectedNewId: 'conflict_2b',
+    },
+  ];
+  const group4 = [
     // when overwrite=true, all of the objects in this group are created successfully, so we can check the created object attributes
     { ...CASES.CONFLICT_1_OBJ, ...fail409(!overwrite) }, // "exact match" conflict
     CASES.CONFLICT_1A_OBJ, // no conflict because CONFLICT_1_OBJ is an exact match
@@ -94,7 +106,7 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     { ...CASES.CONFLICT_2C_OBJ, ...newCopy() }, // "ambiguous source and destination" conflict which results in a new destination ID and empty origin ID
     { ...CASES.CONFLICT_2D_OBJ, ...newCopy() }, // "ambiguous source and destination" conflict which results in a new destination ID and empty origin ID
   ];
-  return { group1, group2, group3 };
+  return { group1, group2, group3, group4 };
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -110,11 +122,12 @@ export default function ({ getService }: FtrProviderContext) {
       return createTestDefinitions(cases, false, { createNewCopies, spaceId, singleRequest });
     }
 
-    const { group1, group2, group3 } = createTestCases(overwrite, spaceId);
+    const { group1, group2, group3, group4 } = createTestCases(overwrite, spaceId);
     return [
       createTestDefinitions(group1, false, { overwrite, spaceId, singleRequest }),
       createTestDefinitions(group2, false, { overwrite, spaceId, singleRequest }),
       createTestDefinitions(group3, false, { overwrite, spaceId, singleRequest }),
+      createTestDefinitions(group4, false, { overwrite, spaceId, singleRequest }),
     ].flat();
   };
 

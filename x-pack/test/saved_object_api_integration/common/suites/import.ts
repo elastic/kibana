@@ -43,6 +43,7 @@ export const TEST_CASES: Record<string, ImportTestCase> = Object.freeze({
   CONFLICT_1_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}1` }),
   CONFLICT_1A_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}1a`, originId: `${CID}1` }),
   CONFLICT_1B_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}1b`, originId: `${CID}1` }),
+  CONFLICT_2A_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}2a`, originId: `${CID}2` }),
   CONFLICT_2C_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}2c`, originId: `${CID}2` }),
   CONFLICT_2D_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}2d`, originId: `${CID}2` }),
   CONFLICT_3A_OBJ: Object.freeze({
