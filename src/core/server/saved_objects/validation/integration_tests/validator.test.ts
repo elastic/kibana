@@ -103,10 +103,14 @@ const savedObjectTypes: SavedObjectsType[] = [
     schemas: {
       [kibanaVersion]: ({ attributes }) => {
         if (isRecord(attributes) && typeof attributes.a !== 'number') {
-          throw new Error(`[a]: expected value of type [number] but got [${typeof attributes.a}]`);
+          throw new Error(
+            `[attributes.a]: expected value of type [number] but got [${typeof attributes.a}]`
+          );
         }
         if (isRecord(attributes) && typeof attributes.b !== 'string') {
-          throw new Error(`[b]: expected value of type [string] but got [${typeof attributes.b}]`);
+          throw new Error(
+            `[attributes.b]: expected value of type [string] but got [${typeof attributes.b}]`
+          );
         }
       },
     },
@@ -248,7 +252,9 @@ describe('validates saved object types when a schema is provided', () => {
       expect.arrayContaining([
         expect.objectContaining(validObj),
         expect.objectContaining({
-          error: new Error('[a]: expected value of type [number] but got [string]: Bad Request'),
+          error: new Error(
+            '[attributes.a]: expected value of type [number] but got [string]: Bad Request'
+          ),
           id: 'bulk-invalid',
           type: 'schema-using-kbn-config',
         }),
@@ -268,7 +274,7 @@ describe('validates saved object types when a schema is provided', () => {
           { migrationVersion: { foo: '7.16.0' } }
         );
       }).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"[b]: expected value of type [string] but got [number]: Bad Request"`
+        `"[attributes.b]: expected value of type [string] but got [number]: Bad Request"`
       );
     });
 
@@ -302,7 +308,7 @@ describe('validates saved object types when a schema is provided', () => {
           { migrationVersion: { bar: '7.16.0' } }
         );
       }).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"[b]: expected value of type [string] but got [number]: Bad Request"`
+        `"[attributes.b]: expected value of type [string] but got [number]: Bad Request"`
       );
     });
 

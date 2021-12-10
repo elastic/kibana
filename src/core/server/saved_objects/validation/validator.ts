@@ -7,8 +7,9 @@
  */
 
 import { ValidationError, isConfigSchema } from '@kbn/config-schema';
-import { SavedObjectsValidationError } from './validator_error';
+import { createSavedObjectSanitizedDocSchema } from './schema';
 import { SavedObjectsValidationMap, SavedObjectsValidationFunction } from './types';
+import { SavedObjectsValidationError } from './validator_error';
 import { SavedObjectSanitizedDoc } from '../serialization';
 import { Logger } from '../../logging';
 
@@ -44,9 +45,10 @@ export class SavedObjectsTypeValidator {
     }
 
     this.log.debug(`Validating object of type [${this.type}] against version [${objectVersion}]`);
-    if (isConfigSchema(validationRule)) {
-      validationRule.validate(data.attributes);
-    } else if (isValidationFunction(validationRule)) {
+    const validationSchema = createSavedObjectSanitizedDocSchema(validationRule);
+    validationSchema.validate(data);
+
+    if (!isConfigSchema(validationRule) && isValidationFunction(validationRule)) {
       this.validateFunction(data, validationRule);
     }
   }

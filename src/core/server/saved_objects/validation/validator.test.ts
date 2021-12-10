@@ -98,8 +98,42 @@ describe('Saved Objects type validator', () => {
     it('should work with a schema', () => {
       const data = createMockObject({ foo: false });
       expect(() => validator.validate('2.0.0', data)).toThrowErrorMatchingInlineSnapshot(
-        `"[foo]: expected value of type [string] but got [boolean]"`
+        `"[attributes.foo]: expected value of type [string] but got [boolean]"`
       );
+    });
+
+    it('should create an error if fields other than attributes are malformed', () => {
+      const data = createMockObject({ foo: 'hi' });
+      // @ts-expect-error Intentionally malformed object
+      data.updated_at = false;
+      expect(() => validator.validate('1.0.0', data)).toThrowErrorMatchingInlineSnapshot(
+        `"[updated_at]: expected value of type [string] but got [boolean]"`
+      );
+      expect(() => validator.validate('2.0.0', data)).toThrowErrorMatchingInlineSnapshot(
+        `"[updated_at]: expected value of type [string] but got [boolean]"`
+      );
+    });
+  });
+
+  describe('when the validation map is a function', () => {
+    const fnValidationMap: SavedObjectsValidationMap = {
+      '1.0.0': () => validationMap['1.0.0'],
+      '2.0.0': () => validationMap['2.0.0'],
+    };
+    validator = new SavedObjectsTypeValidator({
+      logger,
+      type,
+      validationMap: fnValidationMap,
+    });
+
+    it('should work with a custom function', () => {
+      const data = createMockObject({ foo: 'hi' });
+      expect(() => validator.validate('1.0.0', data)).not.toThrowError();
+    });
+
+    it('should work with a schema', () => {
+      const data = createMockObject({ foo: 'hi' });
+      expect(() => validator.validate('2.0.0', data)).not.toThrowError();
     });
   });
 });

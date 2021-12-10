@@ -999,7 +999,7 @@ describe('SavedObjectsRepository', () => {
             expect.objectContaining(obj3),
             expect.objectContaining({
               error: new Error(
-                '[title]: expected value of type [string] but got [number]: Bad Request'
+                '[attributes.title]: expected value of type [string] but got [number]: Bad Request'
               ),
               id: 'three-again',
               type: 'dashboard',
@@ -2570,7 +2570,7 @@ describe('SavedObjectsRepository', () => {
         await expect(
           savedObjectsRepository.create('dashboard', { title: 123 })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"[title]: expected value of type [string] but got [number]: Bad Request"`
+          `"[attributes.title]: expected value of type [string] but got [number]: Bad Request"`
         );
         expect(client.create).not.toHaveBeenCalled();
       });
