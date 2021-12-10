@@ -182,23 +182,6 @@ describe('<IndexManagementHome />', () => {
     });
   });
 
-
-//   describe('index actions from detail panel', () => {
-//     const indexName = 'testOpenIndex';
-//     beforeEach(async () => {
-//       const index = {
-//         health: 'green',
-//         status: 'open',
-//         primary: 1,
-//         replica: 1,
-//         documents: 10000,
-//         documents_deleted: 100,
-//         size: '156kb',
-//         primary_size: '156kb',
-//         name: indexName,
-//       };
-//       httpRequestsMockHelpers.setLoadIndicesResponse([index]);
-  
   describe('index actions', () => {
     const indexName = 'testIndex';
     const indexMock = createNonDataStreamIndex(indexName);
