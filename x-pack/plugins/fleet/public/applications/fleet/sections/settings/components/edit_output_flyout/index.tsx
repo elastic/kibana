@@ -136,6 +136,27 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             {...inputs.elasticsearchUrlInput.props}
           />
           <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.caTrustedFingerprintInputLabel"
+                defaultMessage="Elasticsearch CA trusted fingerprint (optional)"
+              />
+            }
+            {...inputs.caTrustedFingerprintInput.formRowProps}
+          >
+            <EuiFieldText
+              fullWidth
+              {...inputs.caTrustedFingerprintInput.props}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.caTrustedFingerprintInputPlaceholder',
+                {
+                  defaultMessage: 'Specify Elasticsearch CA trusted fingerprint',
+                }
+              )}
+            />
+          </EuiFormRow>
+          <EuiFormRow
             label={i18n.translate('xpack.fleet.settings.editOutputFlyout.yamlConfigInputLabel', {
               defaultMessage: 'Advanced YAML configuration',
             })}
