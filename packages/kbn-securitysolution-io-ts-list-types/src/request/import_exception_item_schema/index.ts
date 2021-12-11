@@ -16,7 +16,7 @@ import { description } from '../../common/description';
 import { namespace_type } from '../../common/namespace_type';
 import { tags } from '../../common/tags';
 import { meta } from '../../common/meta';
-import { list_id } from '../../common/list_id';
+import { ListId, list_id } from '../../common/list_id';
 import { item_id } from '../../common/item_id';
 import { id } from '../../common/id';
 import { created_at } from '../../common/created_at';
@@ -81,6 +81,7 @@ export type ImportExceptionListItemSchemaDecoded = Omit<
   comments: CreateCommentsArray;
   tags: Tags;
   item_id: ItemId;
+  list_id: ListId;
   entries: EntriesArray;
   namespace_type: NamespaceType;
   os_types: OsTypeArray;
