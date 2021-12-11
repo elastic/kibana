@@ -511,6 +511,23 @@ test('logs a warning when alert executor returns invalid status', async () => {
   );
 });
 
+test('return executed action info', async () => {
+  const executorMock = setupActionExecutorMock();
+  // object typed as any as it has an invalid status value, but we want to test that
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const alertExecutionStatus: any = {
+    actionId: '1',
+    status: 'invalid-status',
+    message: 'message for action execution error',
+    serviceMessage: 'serviceMessage for action execution error',
+  };
+  executorMock.mockResolvedValue(alertExecutionStatus);
+  await actionExecutor.execute(executeParams);
+  expect(loggerMock.warn).toBeCalledWith(
+    'action execution failure: test:1: action-1: returned unexpected result "invalid-status"'
+  );
+});
+
 test('writes to event log for execute and execute start', async () => {
   const executorMock = setupActionExecutorMock();
   executorMock.mockResolvedValue({

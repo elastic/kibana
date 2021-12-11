@@ -19,8 +19,8 @@ import {
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
   GetServicesFunction,
-  RawAction,
   PreConfiguredAction,
+  RawAction,
 } from '../types';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceStart } from '../../../spaces/server';
@@ -124,7 +124,7 @@ export class ActionExecutor {
         const spaceId = spaces && spaces.getSpaceId(request);
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
-        const { actionTypeId, name, config, secrets } = await getActionInfo(
+        const { actionTypeId, name, config, secrets } = await getActionInfoInern(
           await getActionsClientWithRequest(request, source),
           encryptedSavedObjectsClient,
           preconfiguredActions,
@@ -269,22 +269,34 @@ export class ActionExecutor {
       }
     );
   }
-}
 
-function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string {
-  let message = result.message || 'unknown error running action';
+  public async getActionInfo<Source = unknown>({
+    actionId,
+    request,
+    source,
+  }: {
+    actionId: string;
+    request: KibanaRequest;
+    source?: ActionExecutionSource<Source>;
+  }): Promise<ActionInfo> {
+    const {
+      spaces,
+      encryptedSavedObjectsClient,
+      preconfiguredActions,
+      getActionsClientWithRequest,
+    } = this.actionExecutorContext!;
 
-  if (result.serviceMessage) {
-    message = `${message}: ${result.serviceMessage}`;
+    const spaceId = spaces && spaces.getSpaceId(request);
+    const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
+
+    return await getActionInfoInern(
+      await getActionsClientWithRequest(request, source),
+      encryptedSavedObjectsClient,
+      preconfiguredActions,
+      actionId,
+      namespace.namespace
+    );
   }
-
-  if (result.retry instanceof Date) {
-    message = `${message}; retry at ${result.retry.toISOString()}`;
-  } else if (result.retry) {
-    message = `${message}; retry: ${JSON.stringify(result.retry)}`;
-  }
-
-  return message;
 }
 
 interface ActionInfo {
@@ -294,7 +306,7 @@ interface ActionInfo {
   secrets: unknown;
 }
 
-async function getActionInfo(
+async function getActionInfoInern(
   actionsClient: PublicMethodsOf<ActionsClient>,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],
@@ -330,4 +342,20 @@ async function getActionInfo(
     config,
     secrets,
   };
+}
+
+function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string {
+  let message = result.message || 'unknown error running action';
+
+  if (result.serviceMessage) {
+    message = `${message}: ${result.serviceMessage}`;
+  }
+
+  if (result.retry instanceof Date) {
+    message = `${message}; retry at ${result.retry.toISOString()}`;
+  } else if (result.retry) {
+    message = `${message}; retry: ${JSON.stringify(result.retry)}`;
+  }
+
+  return message;
 }

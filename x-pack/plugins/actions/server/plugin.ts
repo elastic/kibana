@@ -420,6 +420,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
       getUnsecuredSavedObjectsClient: (request: KibanaRequest) =>
         this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
+      eventLogger: this.eventLogger!,
     });
 
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);

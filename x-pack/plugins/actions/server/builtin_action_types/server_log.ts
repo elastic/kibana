@@ -64,6 +64,9 @@ async function executor(
   const actionId = execOptions.actionId;
   const params = execOptions.params;
 
+  console.log('task is started');
+  await new Promise((resolve) => setTimeout(resolve, 400000));
+
   const sanitizedMessage = withoutControlCharacters(params.message);
   try {
     (logger[params.level] as Logger['info'])<LogMeta>(`Server log: ${sanitizedMessage}`);

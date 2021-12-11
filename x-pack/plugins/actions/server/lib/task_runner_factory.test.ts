@@ -22,6 +22,7 @@ const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockedEncryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const mockedActionExecutor = actionExecutorMock.create();
+const eventLogger = eventLoggerMock.create();
 
 let fakeTimer: sinon.SinonFakeTimers;
 let taskRunnerFactory: TaskRunnerFactory;
@@ -72,6 +73,7 @@ const taskRunnerFactoryInitializerParams = {
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   basePathService: httpServiceMock.createBasePath(),
   getUnsecuredSavedObjectsClient: jest.fn().mockReturnValue(services.savedObjectsClient),
+  eventLogger,
 };
 
 beforeEach(() => {
@@ -242,8 +244,26 @@ test('task runner should implement CancellableTask cancel method with logging wa
   });
 
   await taskRunner.cancel();
+  expect(eventLogger.logEvent.mock.calls[0][0]).toMatchObject({
+    event: {
+      action: 'execute-timeout',
+    },
+    kibana: {
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: '1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+      ],
+    },
+    message: 'action started: test:1: action-1',
+  });
+
   expect(taskRunnerFactoryInitializerParams.logger.warn).toHaveBeenCalledWith(
-    `Action task with params '{"actionTaskParamsId":"3","spaceId":"test"}' was cancelled due to the timeout.`
+    `Task with Id '123' and taskType 'hjhk' was cancelled due to the timeout.`
   );
 });
 
