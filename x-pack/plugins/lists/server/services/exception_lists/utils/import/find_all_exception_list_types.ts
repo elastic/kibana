@@ -20,23 +20,22 @@ import { CHUNK_PARSED_OBJECT_SIZE } from '../../import_exception_list_and_items'
 
 /**
  * Helper to build out a filter using list_id
- * @param objects {array} - exception lists to add to filter
+ * @param ids {array} - exception list_ids to add to filter
  * @param savedObjectsClient {object}
  * @returns {string} filter
  */
 export const getListFilter = ({
-  objects,
+  ids,
   namespaceType,
 }: {
-  objects: ImportExceptionListSchemaDecoded[] | ImportExceptionListItemSchemaDecoded[];
+  ids: string[];
   namespaceType: NamespaceType;
 }): string => {
-  const [soType] = getSavedObjectTypes({
-    namespaceType: [namespaceType],
-  });
-  const listIds = objects.map<string>(({ list_id: listId }) => listId);
-
-  return `${soType}.attributes.list_id:(${listIds.join(' OR ')})`;
+  return `${
+    getSavedObjectTypes({
+      namespaceType: [namespaceType],
+    })[0]
+  }.attributes.list_id:(${ids.join(' OR ')})`;
 };
 
 /**
@@ -53,14 +52,14 @@ export const findAllListTypes = async (
 ): Promise<FoundExceptionListSchema | null> => {
   // Agnostic filter
   const agnosticFilter = getListFilter({
+    ids: agnosticListItems.map(({ list_id: listId }) => listId),
     namespaceType: 'agnostic',
-    objects: agnosticListItems,
   });
 
   // Non-agnostic filter
   const nonAgnosticFilter = getListFilter({
+    ids: nonAgnosticListItems.map(({ list_id: listId }) => listId),
     namespaceType: 'single',
-    objects: nonAgnosticListItems,
   });
 
   if (!agnosticListItems.length && !nonAgnosticListItems.length) {
