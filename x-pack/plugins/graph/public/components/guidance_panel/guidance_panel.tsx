@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { connect } from 'react-redux';
 import { IDataPluginServices } from 'src/plugins/data/public';
 import {
@@ -174,13 +174,13 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
           <p>
             <FormattedMessage
               id="xpack.graph.noDataSourceNotificationMessageText"
-              defaultMessage="No data sources found. Go to {managementIndexPatternsLink} and create an index pattern for your Elasticsearch indices."
+              defaultMessage="No data sources found. Go to {managementIndexPatternsLink} and create a data view for your Elasticsearch indices."
               values={{
                 managementIndexPatternsLink: (
                   <a href={indexPatternUrl}>
                     <FormattedMessage
-                      id="xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText"
-                      defaultMessage="Management &gt; Index Patterns"
+                      id="xpack.graph.noDataSourceNotificationMessageText.managementDataViewLinkText"
+                      defaultMessage="Management &gt; Data views"
                     />
                   </a>
                 ),

@@ -28,7 +28,11 @@ describe('ExecutedStep', () => {
       synthetics: {
         step: {
           index: 4,
+          status: 'succeeded',
           name: 'STEP_NAME',
+          duration: {
+            us: 9999,
+          },
         },
         type: 'step/end',
       },
@@ -43,7 +47,11 @@ describe('ExecutedStep', () => {
       },
       step: {
         index: 3,
+        status: 'succeeded',
         name: 'STEP_NAME',
+        duration: {
+          us: 9999,
+        },
       },
       type: 'step/end',
     };
@@ -71,14 +79,30 @@ describe('ExecutedStep', () => {
   });
 
   it('renders accordions for console output', () => {
-    const browserConsole =
-      "Refused to execute script from because its MIME type ('image/gif') is not executable";
+    const browserConsole = [
+      "Refused to execute script from because its MIME type ('image/gif') is not executable",
+    ];
 
     const { getByText } = render(
-      <ExecutedStep browserConsole={browserConsole} index={3} step={step} loading={false} />
+      <ExecutedStep browserConsoles={browserConsole} index={3} step={step} loading={false} />
     );
 
     expect(getByText('Console output'));
-    expect(getByText(browserConsole));
+    expect(getByText(browserConsole[0]));
+  });
+
+  it('renders multi-line console output', () => {
+    const browserConsole = ['line1', 'line2', 'line3'];
+
+    const { getByText } = render(
+      <ExecutedStep browserConsoles={browserConsole} index={3} step={step} loading={false} />
+    );
+
+    expect(getByText('Console output'));
+
+    const codeBlock = getByText('line1 line2', { exact: false });
+    expect(codeBlock.innerHTML).toEqual(`line1
+line2
+line3`);
   });
 });

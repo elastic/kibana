@@ -7,15 +7,17 @@
  */
 
 import { share } from 'rxjs/operators';
-import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
+import { HttpStart, IUiSettingsClient } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { buildEsQuery } from '@kbn/es-query';
 import { FilterManager } from './filter_manager';
 import { createAddToQueryLog } from './lib';
-import { TimefilterService, TimefilterSetup } from './timefilter';
+import { TimefilterService } from './timefilter';
+import type { TimefilterSetup } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
 import { createQueryStateObservable } from './state_sync/create_global_query_observable';
-import { QueryStringManager, QueryStringContract } from './query_string';
+import type { QueryStringContract } from './query_string';
+import { QueryStringManager } from './query_string';
 import { getEsQueryConfig, TimeRange } from '../../common';
 import { getUiSettings } from '../services';
 import { NowProviderInternalContract } from '../now_provider';
@@ -33,9 +35,9 @@ interface QueryServiceSetupDependencies {
 }
 
 interface QueryServiceStartDependencies {
-  savedObjectsClient: SavedObjectsClientContract;
   storage: IStorageWrapper;
   uiSettings: IUiSettingsClient;
+  http: HttpStart;
 }
 
 export class QueryService {
@@ -70,7 +72,7 @@ export class QueryService {
     };
   }
 
-  public start({ savedObjectsClient, storage, uiSettings }: QueryServiceStartDependencies) {
+  public start({ storage, uiSettings, http }: QueryServiceStartDependencies) {
     return {
       addToQueryLog: createAddToQueryLog({
         storage,
@@ -78,7 +80,7 @@ export class QueryService {
       }),
       filterManager: this.filterManager,
       queryString: this.queryStringManager,
-      savedQueries: createSavedQueryService(savedObjectsClient),
+      savedQueries: createSavedQueryService(http),
       state$: this.state$,
       timefilter: this.timefilter,
       getEsQuery: (indexPattern: IndexPattern, timeRange?: TimeRange) => {

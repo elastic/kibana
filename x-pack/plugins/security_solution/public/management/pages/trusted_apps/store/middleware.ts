@@ -63,7 +63,6 @@ import {
   editItemId,
   editingTrustedApp,
   getListItems,
-  editItemState,
   getCurrentLocationIncludedPolicies,
   getCurrentLocationExcludedPolicies,
 } from './selectors';
@@ -191,6 +190,7 @@ const submitCreationIfNeeded = async (
       if (editMode) {
         responseTrustedApp = (
           await trustedAppsService.updateTrustedApp(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             { id: editItemId(currentState)! },
             // TODO: try to remove the cast
             entry as PostTrustedAppCreateRequest
@@ -413,8 +413,6 @@ const fetchEditTrustedAppIfNeeded = async (
           type: 'trustedAppCreationEditItemStateChanged',
           payload: {
             type: 'LoadingResourceState',
-            // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
-            previousState: editItemState(currentState)!,
           },
         });
 

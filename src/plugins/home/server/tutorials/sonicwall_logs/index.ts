@@ -24,12 +24,12 @@ export function sonicwallLogsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: 'sonicwallLogs',
     name: i18n.translate('home.tutorials.sonicwallLogs.nameTitle', {
-      defaultMessage: 'Sonicwall FW logs',
+      defaultMessage: 'Sonicwall FW Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.sonicwallLogs.shortDescription', {
-      defaultMessage: 'Collect Sonicwall-FW logs over syslog or from a file.',
+      defaultMessage: 'Collect and parse logs from Sonicwall-FW with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.sonicwallLogs.longDescription', {
       defaultMessage:
@@ -54,8 +54,8 @@ export function sonicwallLogsSpecProvider(context: TutorialContext): TutorialSch
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['network', 'security'],
   };
 }

@@ -6,7 +6,5 @@
  */
 
 export { EmbeddableFlyoutPortal, AddEmbeddablePanel } from './flyout';
-export {
-  AddEmbeddableFlyout as AddEmbeddableFlyoutComponent,
-  Props as AddEmbeddableFlyoutComponentProps,
-} from './flyout.component';
+export type { Props as AddEmbeddableFlyoutComponentProps } from './flyout.component';
+export { AddEmbeddableFlyout as AddEmbeddableFlyoutComponent } from './flyout.component';

@@ -15,6 +15,8 @@ import {
 import { render } from '../../../../lib/helper/rtl_helpers';
 
 describe('alert monitor status component', () => {
+  jest.setTimeout(10_000);
+
   describe('hasFilters', () => {
     const EMPTY_FILTERS = {
       tags: [],

@@ -16,6 +16,7 @@ import {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
+  getActionsColumnWidth,
 } from '../../../../../../timelines/public';
 import { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
@@ -34,14 +35,13 @@ import { TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { OnRowSelected, OnSelectAll } from '../events';
-import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helpers';
+import { getColumnHeaders } from './column_headers/helpers';
 import { getEventIdToDataMapping } from './helpers';
 import { Sort } from './sort';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { Events } from './events';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 interface OwnProps {
@@ -61,14 +61,10 @@ interface OwnProps {
   onRuleChange?: () => void;
 }
 
-const NUM_OF_ICON_IN_TIMELINE_ROW = 2;
-
 export const hasAdditionalActions = (id: TimelineId): boolean =>
   [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage, TimelineId.active].includes(
     id
   );
-
-const EXTRA_WIDTH = 4; // px
 
 export type StatefulBodyProps = OwnProps & PropsFromRedux;
 
@@ -108,10 +104,11 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     const { queryFields, selectAll } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
     );
+    const ACTION_BUTTON_COUNT = 5;
 
     const onRowSelected: OnRowSelected = useCallback(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
-        setSelected!({
+        setSelected({
           id,
           eventIds: getEventIdToDataMapping(data, eventIds, queryFields),
           isSelected,
@@ -125,7 +122,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     const onSelectAll: OnSelectAll = useCallback(
       ({ isSelected }: { isSelected: boolean }) =>
         isSelected
-          ? setSelected!({
+          ? setSelected({
               id,
               eventIds: getEventIdToDataMapping(
                 data,
@@ -135,7 +132,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               isSelected,
               isSelectAllChecked: isSelected,
             })
-          : clearSelected!({ id }),
+          : clearSelected({ id }),
       [setSelected, clearSelected, id, data, queryFields]
     );
 
@@ -158,17 +155,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
     }, [excludedRowRendererIds, rowRenderers]);
 
-    const actionsColumnWidth = useMemo(
-      () =>
-        getActionsColumnWidth(
-          isEventViewer,
-          showCheckboxes,
-          hasAdditionalActions(id as TimelineId)
-            ? DEFAULT_ICON_BUTTON_WIDTH * NUM_OF_ICON_IN_TIMELINE_ROW + EXTRA_WIDTH
-            : 0
-        ),
-      [isEventViewer, showCheckboxes, id]
-    );
+    const actionsColumnWidth = useMemo(() => getActionsColumnWidth(ACTION_BUTTON_COUNT), []);
 
     const columnWidths = useMemo(
       () =>

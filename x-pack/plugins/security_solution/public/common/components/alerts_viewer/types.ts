@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
 import type { EntityType } from '../../../../../timelines/common';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';

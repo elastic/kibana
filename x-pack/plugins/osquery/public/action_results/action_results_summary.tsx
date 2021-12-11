@@ -13,7 +13,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AgentIdToName } from '../agents/agent_id_to_name';
 import { useActionResults } from './use_action_results';
-import { useAllResults } from '../results/use_all_results';
 import { Direction } from '../../common/search_strategy';
 import { useActionResultsPrivileges } from './use_action_privileges';
 
@@ -70,38 +69,8 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     });
   }
 
-  const { data: logsResults } = useAllResults({
-    actionId,
-    activePage: pageIndex,
-    limit: pageSize,
-    sort: [
-      {
-        field: '@timestamp',
-        direction: Direction.asc,
-      },
-    ],
-    isLive,
-    skip: !hasActionResultsPrivileges,
-  });
-
   const renderAgentIdColumn = useCallback((agentId) => <AgentIdToName agentId={agentId} />, []);
-
-  const renderRowsColumn = useCallback(
-    (_, item) => {
-      if (!logsResults) return '-';
-      const agentId = item.fields.agent_id[0];
-
-      return (
-        // @ts-expect-error update types
-        logsResults?.rawResponse?.aggregations?.count_by_agent_id?.buckets?.find(
-          // @ts-expect-error update types
-          (bucket) => bucket.key === agentId
-        )?.doc_count ?? '-'
-      );
-    },
-    [logsResults]
-  );
-
+  const renderRowsColumn = useCallback((rowsCount) => rowsCount ?? '-', []);
   const renderStatusColumn = useCallback(
     (_, item) => {
       if (!item.fields.completed_at) {
@@ -145,7 +114,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         render: renderAgentIdColumn,
       },
       {
-        field: 'fields.rows[0]',
+        field: '_source.action_response.osquery.count',
         name: i18n.translate(
           'xpack.osquery.liveQueryActionResults.table.resultRowsNumberColumnTitle',
           {
@@ -177,18 +146,9 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     setIsLive(() => {
       if (!agentIds?.length || expired) return false;
 
-      const uniqueAgentsRepliedCount =
-        // @ts-expect-error update types
-        logsResults?.rawResponse.aggregations?.unique_agents.value ?? 0;
-
-      return !!(uniqueAgentsRepliedCount !== agentIds?.length - aggregations.failed);
+      return !!(aggregations.totalResponded !== agentIds?.length);
     });
-  }, [
-    agentIds?.length,
-    aggregations.failed,
-    expired,
-    logsResults?.rawResponse.aggregations?.unique_agents,
-  ]);
+  }, [agentIds?.length, aggregations.totalResponded, expired]);
 
   return edges.length ? (
     <EuiInMemoryTable loading={isLive} items={edges} columns={columns} pagination={pagination} />

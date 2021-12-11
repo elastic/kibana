@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import {
   categorizationFieldExamplesSchema,
   basicChartSchema,
@@ -32,7 +32,7 @@ import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 import { jobServiceProvider } from '../models/job_service';
 import { categorizationExamplesProvider } from '../models/job_service/new_job';
 import { getAuthorizationHeader } from '../lib/request_authorization';
-import { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
+import type { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
 
 /**
  * Routes for job service
@@ -535,21 +535,24 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
-      try {
-        const { indexPattern } = request.params;
-        const isRollup = request.query?.rollup === 'true';
-        const savedObjectsClient = context.core.savedObjects.client;
-        const { newJobCaps } = jobServiceProvider(client, mlClient);
-        const resp = await newJobCaps(indexPattern, isRollup, savedObjectsClient);
+    routeGuard.fullLicenseAPIGuard(
+      async ({ client, mlClient, request, response, getDataViewsService }) => {
+        try {
+          const { indexPattern } = request.params;
+          const isRollup = request.query?.rollup === 'true';
+          const { newJobCaps } = jobServiceProvider(client, mlClient);
 
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
+          const dataViewsService = await getDataViewsService();
+          const resp = await newJobCaps(indexPattern, isRollup, dataViewsService);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
       }
-    })
+    )
   );
 
   /**

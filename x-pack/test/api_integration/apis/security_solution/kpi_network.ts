@@ -7,16 +7,28 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { NetworkKpiQueries } from '../../../../plugins/security_solution/common/search_strategy';
+import {
+  NetworkKpiDnsStrategyResponse,
+  NetworkKpiNetworkEventsStrategyResponse,
+  NetworkKpiQueries,
+  NetworkKpiTlsHandshakesStrategyResponse,
+  NetworkKpiUniqueFlowsStrategyResponse,
+  NetworkKpiUniquePrivateIpsStrategyResponse,
+} from '../../../../plugins/security_solution/common/search_strategy';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
 
   describe('Kpi Network', () => {
     describe('With filebeat', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/filebeat/default'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default')
+      );
+      after(
+        async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
+      );
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -66,10 +78,9 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       it('Make sure that we get KpiNetwork uniqueFlows data', async () => {
-        const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const kpiNetwork = await bsearch.send<NetworkKpiUniqueFlowsStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkKpiQueries.uniqueFlows,
             timerange: {
               interval: '12h',
@@ -79,18 +90,16 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
-
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(kpiNetwork.uniqueFlowId).to.eql(expectedResult.uniqueFlowId);
       });
 
       it('Make sure that we get KpiNetwork networkEvents data', async () => {
-        const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const kpiNetwork = await bsearch.send<NetworkKpiNetworkEventsStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkKpiQueries.networkEvents,
             timerange: {
               interval: '12h',
@@ -100,18 +109,16 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
-
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(kpiNetwork.networkEvents).to.eql(expectedResult.networkEvents);
       });
 
       it('Make sure that we get KpiNetwork DNS data', async () => {
-        const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const kpiNetwork = await bsearch.send<NetworkKpiDnsStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkKpiQueries.dns,
             timerange: {
               interval: '12h',
@@ -121,18 +128,16 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
-
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(kpiNetwork.dnsQueries).to.eql(expectedResult.dnsQueries);
       });
 
       it('Make sure that we get KpiNetwork networkEvents data', async () => {
-        const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const kpiNetwork = await bsearch.send<NetworkKpiNetworkEventsStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkKpiQueries.networkEvents,
             timerange: {
               interval: '12h',
@@ -142,18 +147,16 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
-
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(kpiNetwork.networkEvents).to.eql(expectedResult.networkEvents);
       });
 
       it('Make sure that we get KpiNetwork tlsHandshakes data', async () => {
-        const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const kpiNetwork = await bsearch.send<NetworkKpiTlsHandshakesStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkKpiQueries.tlsHandshakes,
             timerange: {
               interval: '12h',
@@ -163,18 +166,17 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
 
         expect(kpiNetwork.tlsHandshakes).to.eql(expectedResult.tlsHandshakes);
       });
 
       it('Make sure that we get KpiNetwork uniquePrivateIps data', async () => {
-        const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const kpiNetwork = await bsearch.send<NetworkKpiUniquePrivateIpsStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkKpiQueries.uniquePrivateIps,
             timerange: {
               interval: '12h',
@@ -184,9 +186,9 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
 
         expect(kpiNetwork.uniqueDestinationPrivateIps).to.eql(
           expectedResult.uniqueDestinationPrivateIps
@@ -202,8 +204,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('With packetbeat', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/packetbeat/default'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/default'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/default')
+      );
+      after(
+        async () => await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/default')
+      );
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -219,10 +225,9 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       it('Make sure that we get KpiNetwork uniqueFlows data', async () => {
-        const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const kpiNetwork = await bsearch.send<NetworkKpiUniqueFlowsStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkKpiQueries.uniqueFlows,
             timerange: {
               interval: '12h',
@@ -232,18 +237,16 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
-
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(kpiNetwork.uniqueFlowId).to.eql(expectedResult.uniqueFlowId);
       });
 
       it('Make sure that we get KpiNetwork DNS data', async () => {
-        const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const kpiNetwork = await bsearch.send<NetworkKpiDnsStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkKpiQueries.dns,
             timerange: {
               interval: '12h',
@@ -253,18 +256,16 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
-
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(kpiNetwork.dnsQueries).to.eql(expectedResult.dnsQueries);
       });
 
       it('Make sure that we get KpiNetwork networkEvents data', async () => {
-        const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const kpiNetwork = await bsearch.send<NetworkKpiNetworkEventsStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkKpiQueries.networkEvents,
             timerange: {
               interval: '12h',
@@ -274,18 +275,17 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
 
         expect(kpiNetwork.networkEvents).to.eql(expectedResult.networkEvents);
       });
 
       it('Make sure that we get KpiNetwork tlsHandshakes data', async () => {
-        const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const kpiNetwork = await bsearch.send<NetworkKpiTlsHandshakesStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkKpiQueries.tlsHandshakes,
             timerange: {
               interval: '12h',
@@ -295,18 +295,16 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
-
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(kpiNetwork.tlsHandshakes).to.eql(expectedResult.tlsHandshakes);
       });
 
       it('Make sure that we get KpiNetwork uniquePrivateIps data', async () => {
-        const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const kpiNetwork = await bsearch.send<NetworkKpiUniquePrivateIpsStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: NetworkKpiQueries.uniquePrivateIps,
             timerange: {
               interval: '12h',
@@ -316,9 +314,9 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
 
         expect(kpiNetwork.uniqueDestinationPrivateIps).to.eql(
           expectedResult.uniqueDestinationPrivateIps

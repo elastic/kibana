@@ -7,7 +7,7 @@
  */
 
 import { compact } from 'lodash';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { get, isEqual } from 'lodash';
@@ -18,14 +18,14 @@ import { Query, Filter } from '@kbn/es-query';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
-import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
+import type { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { TimeRange, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
 
-interface SearchBarInjectedDeps {
+export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
   timeHistory: TimeHistoryContract;
@@ -245,11 +245,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     try {
       let response;
       if (this.props.savedQuery && !saveAsNew) {
-        response = await this.savedQueryService.saveQuery(savedQueryAttributes, {
-          overwrite: true,
-        });
+        response = await this.savedQueryService.updateQuery(
+          savedQueryMeta.id!,
+          savedQueryAttributes
+        );
       } else {
-        response = await this.savedQueryService.saveQuery(savedQueryAttributes);
+        response = await this.savedQueryService.createQuery(savedQueryAttributes);
       }
 
       this.services.notifications.toasts.addSuccess(
@@ -423,7 +424,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
-            savedQuery={this.props.savedQuery ? this.props.savedQuery.attributes : undefined}
+            savedQuery={this.props.savedQuery ? this.props.savedQuery : undefined}
             savedQueryService={this.savedQueryService}
             onSave={this.onSave}
             onClose={() => this.setState({ showSaveQueryModal: false })}

@@ -35,5 +35,5 @@ const handler = (request: http.IncomingMessage, response: http.ServerResponse) =
   // Return an 400 error if http method is not supported
   response.statusCode = 400;
   response.setHeader('Content-Type', 'application/json');
-  response.end('Not supported http method to request slack simulator');
+  response.end('Not supported http method to request swimlane simulator');
 };

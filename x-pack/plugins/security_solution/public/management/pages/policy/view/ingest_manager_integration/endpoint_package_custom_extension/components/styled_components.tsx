@@ -7,12 +7,9 @@
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-export const StyledEuiFlexGridGroup = styled(EuiFlexGroup)<{
-  cardSize?: 'm' | 'l';
-}>`
+export const StyledEuiFlexGridGroup = styled(EuiFlexGroup)`
   display: grid;
-  grid-template-columns: ${({ cardSize = 'l' }) =>
-    cardSize === 'l' ? '25% 45% 30%' : '30% 35% 35%'};
+  grid-template-columns: 33% 45% 22%;
   grid-template-areas: 'title summary link';
 `;
 
@@ -24,4 +21,8 @@ export const StyledEuiFlexGridItem = styled(EuiFlexItem)<{
   align-items: ${({ alignitems }) => alignitems ?? 'center'};
   margin: 0px;
   padding: 12px;
+`;
+
+export const StyledEuiFlexItem = styled(EuiFlexItem)`
+  flex-direction: row-reverse;
 `;

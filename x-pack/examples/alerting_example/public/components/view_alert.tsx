@@ -9,7 +9,7 @@ import React, { useState, useEffect, Fragment } from 'react';
 
 import {
   EuiText,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiCallOut,
   EuiTextColor,
   EuiDescriptionList,
@@ -24,7 +24,7 @@ import { isEmpty } from 'lodash';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 import {
   Alert,
-  AlertTaskState,
+  RuleTaskState,
   LEGACY_BASE_ALERT_API_PATH,
 } from '../../../../plugins/alerting/common';
 
@@ -34,14 +34,16 @@ type Props = RouteComponentProps & {
 };
 export const ViewAlertPage = withRouter(({ http, id }: Props) => {
   const [alert, setAlert] = useState<Alert | null>(null);
-  const [alertState, setAlertState] = useState<AlertTaskState | null>(null);
+  const [alertState, setAlertState] = useState<RuleTaskState | null>(null);
 
   useEffect(() => {
     if (!alert) {
-      http.get(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}`).then(setAlert);
+      http.get<Alert | null>(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}`).then(setAlert);
     }
     if (!alertState) {
-      http.get(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/state`).then(setAlertState);
+      http
+        .get<RuleTaskState | null>(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/state`)
+        .then(setAlertState);
     }
   }, [alert, alertState, http, id]);
 
@@ -104,6 +106,6 @@ export const ViewAlertPage = withRouter(({ http, id }: Props) => {
       )}
     </Fragment>
   ) : (
-    <EuiLoadingKibana size="xl" />
+    <EuiLoadingLogo logo="logoKibana" size="xl" />
   );
 });

@@ -9,7 +9,7 @@ import { TimelineStatus, TimelineType } from '../../../../../common/types/timeli
 
 export const mockTimeline = {
   data: {
-    getOneTimeline: {
+    timeline: {
       savedObjectId: 'eb2781c0-1df5-11eb-8589-2f13958b79f7',
       columns: [
         {
@@ -163,6 +163,7 @@ export const mockTimeline = {
       version: 'WzQ4NSwxXQ==',
       __typename: 'TimelineResult',
     },
+    outcome: 'exactMatch',
   },
   loading: false,
   networkStatus: 7,
@@ -171,7 +172,7 @@ export const mockTimeline = {
 
 export const mockTemplate = {
   data: {
-    getOneTimeline: {
+    timeline: {
       savedObjectId: '0c70a200-1de0-11eb-885c-6fc13fca1850',
       columns: [
         {
@@ -416,6 +417,7 @@ export const mockTemplate = {
       version: 'WzQwMywxXQ==',
       __typename: 'TimelineResult',
     },
+    outcome: 'exactMatch',
   },
   loading: false,
   networkStatus: 7,

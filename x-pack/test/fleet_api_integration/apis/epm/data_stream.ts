@@ -18,18 +18,16 @@ export default function (providerContext: FtrProviderContext) {
   const pkgName = 'datastreams';
   const pkgVersion = '0.1.0';
   const pkgUpdateVersion = '0.2.0';
-  const pkgKey = `${pkgName}-${pkgVersion}`;
-  const pkgUpdateKey = `${pkgName}-${pkgUpdateVersion}`;
   const logsTemplateName = `logs-${pkgName}.test_logs`;
   const metricsTemplateName = `metrics-${pkgName}.test_metrics`;
   const namespaces = ['default', 'foo', 'bar'];
 
-  const uninstallPackage = async (pkg: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+  const uninstallPackage = async (name: string, version: string) => {
+    await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
-  const installPackage = async (pkg: string) => {
+  const installPackage = async (name: string, version: string) => {
     return await supertest
-      .post(`/api/fleet/epm/packages/${pkg}`)
+      .post(`/api/fleet/epm/packages/${name}/${version}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true })
       .expect(200);
@@ -40,35 +38,41 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
 
     beforeEach(async () => {
-      await installPackage(pkgKey);
+      await installPackage(pkgName, pkgVersion);
       await Promise.all(
         namespaces.map(async (namespace) => {
-          const createLogsRequest = es.transport.request({
-            method: 'POST',
-            path: `/${logsTemplateName}-${namespace}/_doc`,
-            body: {
-              '@timestamp': '2015-01-01',
-              logs_test_name: 'test',
-              data_stream: {
-                dataset: `${pkgName}.test_logs`,
-                namespace,
-                type: 'logs',
+          const createLogsRequest = es.transport.request(
+            {
+              method: 'POST',
+              path: `/${logsTemplateName}-${namespace}/_doc`,
+              body: {
+                '@timestamp': '2015-01-01',
+                logs_test_name: 'test',
+                data_stream: {
+                  dataset: `${pkgName}.test_logs`,
+                  namespace,
+                  type: 'logs',
+                },
               },
             },
-          });
-          const createMetricsRequest = es.transport.request({
-            method: 'POST',
-            path: `/${metricsTemplateName}-${namespace}/_doc`,
-            body: {
-              '@timestamp': '2015-01-01',
-              logs_test_name: 'test',
-              data_stream: {
-                dataset: `${pkgName}.test_metrics`,
-                namespace,
-                type: 'metrics',
+            { meta: true }
+          );
+          const createMetricsRequest = es.transport.request(
+            {
+              method: 'POST',
+              path: `/${metricsTemplateName}-${namespace}/_doc`,
+              body: {
+                '@timestamp': '2015-01-01',
+                logs_test_name: 'test',
+                data_stream: {
+                  dataset: `${pkgName}.test_metrics`,
+                  namespace,
+                  type: 'metrics',
+                },
               },
             },
-          });
+            { meta: true }
+          );
           return Promise.all([createLogsRequest, createMetricsRequest]);
         })
       );
@@ -77,31 +81,43 @@ export default function (providerContext: FtrProviderContext) {
     afterEach(async () => {
       await Promise.all(
         namespaces.map(async (namespace) => {
-          const deleteLogsRequest = es.transport.request({
-            method: 'DELETE',
-            path: `/_data_stream/${logsTemplateName}-${namespace}`,
-          });
-          const deleteMetricsRequest = es.transport.request({
-            method: 'DELETE',
-            path: `/_data_stream/${metricsTemplateName}-${namespace}`,
-          });
+          const deleteLogsRequest = es.transport.request(
+            {
+              method: 'DELETE',
+              path: `/_data_stream/${logsTemplateName}-${namespace}`,
+            },
+            { meta: true }
+          );
+          const deleteMetricsRequest = es.transport.request(
+            {
+              method: 'DELETE',
+              path: `/_data_stream/${metricsTemplateName}-${namespace}`,
+            },
+            { meta: true }
+          );
           return Promise.all([deleteLogsRequest, deleteMetricsRequest]);
         })
       );
-      await uninstallPackage(pkgKey);
-      await uninstallPackage(pkgUpdateKey);
+      await uninstallPackage(pkgName, pkgVersion);
+      await uninstallPackage(pkgName, pkgUpdateVersion);
     });
 
     it('should list the logs and metrics datastream', async function () {
       await asyncForEach(namespaces, async (namespace) => {
-        const resLogsDatastream = await es.transport.request({
-          method: 'GET',
-          path: `/_data_stream/${logsTemplateName}-${namespace}`,
-        });
-        const resMetricsDatastream = await es.transport.request({
-          method: 'GET',
-          path: `/_data_stream/${metricsTemplateName}-${namespace}`,
-        });
+        const resLogsDatastream = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/_data_stream/${logsTemplateName}-${namespace}`,
+          },
+          { meta: true }
+        );
+        const resMetricsDatastream = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/_data_stream/${metricsTemplateName}-${namespace}`,
+          },
+          { meta: true }
+        );
         expect(resLogsDatastream.body.data_streams.length).equal(1);
         expect(resLogsDatastream.body.data_streams[0].indices.length).equal(1);
         expect(resMetricsDatastream.body.data_streams.length).equal(1);
@@ -110,16 +126,22 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('after update, it should have rolled over logs datastream because mappings are not compatible and not metrics', async function () {
-      await installPackage(pkgUpdateKey);
+      await installPackage(pkgName, pkgUpdateVersion);
       await asyncForEach(namespaces, async (namespace) => {
-        const resLogsDatastream = await es.transport.request({
-          method: 'GET',
-          path: `/_data_stream/${logsTemplateName}-${namespace}`,
-        });
-        const resMetricsDatastream = await es.transport.request({
-          method: 'GET',
-          path: `/_data_stream/${metricsTemplateName}-${namespace}`,
-        });
+        const resLogsDatastream = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/_data_stream/${logsTemplateName}-${namespace}`,
+          },
+          { meta: true }
+        );
+        const resMetricsDatastream = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/_data_stream/${metricsTemplateName}-${namespace}`,
+          },
+          { meta: true }
+        );
         expect(resLogsDatastream.body.data_streams[0].indices.length).equal(2);
         expect(resMetricsDatastream.body.data_streams[0].indices.length).equal(1);
       });
@@ -127,17 +149,23 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should be able to upgrade a package after a rollover', async function () {
       await asyncForEach(namespaces, async (namespace) => {
-        await es.transport.request({
-          method: 'POST',
-          path: `/${logsTemplateName}-${namespace}/_rollover`,
-        });
-        const resLogsDatastream = await es.transport.request({
-          method: 'GET',
-          path: `/_data_stream/${logsTemplateName}-${namespace}`,
-        });
+        await es.transport.request<any>(
+          {
+            method: 'POST',
+            path: `/${logsTemplateName}-${namespace}/_rollover`,
+          },
+          { meta: true }
+        );
+        const resLogsDatastream = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/_data_stream/${logsTemplateName}-${namespace}`,
+          },
+          { meta: true }
+        );
         expect(resLogsDatastream.body.data_streams[0].indices.length).equal(2);
       });
-      await installPackage(pkgUpdateKey);
+      await installPackage(pkgName, pkgUpdateVersion);
     });
   });
 }

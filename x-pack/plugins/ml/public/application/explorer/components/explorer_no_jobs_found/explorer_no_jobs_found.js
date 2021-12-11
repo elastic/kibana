@@ -9,7 +9,7 @@
  * React component for rendering EuiEmptyPrompt when no jobs were found.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useMlLink } from '../../../contexts/kibana/use_create_url';

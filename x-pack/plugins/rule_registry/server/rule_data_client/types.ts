@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
-import { BulkRequest, BulkResponse } from '@elastic/elasticsearch/api/types';
+import type { TransportResult } from '@elastic/elasticsearch';
+import { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ESSearchRequest, ESSearchResponse } from 'src/core/types/elasticsearch';
 import { FieldDescriptor } from 'src/plugins/data/server';
-import { TechnicalRuleDataFieldName } from '../../common/technical_rule_data_field_names';
+import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 
 export interface IRuleDataClient {
   indexName: string;
+  indexNameWithNamespace(namespace: string): string;
   kibanaVersion: string;
   isWriteEnabled(): boolean;
   getReader(options?: { namespace?: string }): IRuleDataReader;
@@ -23,9 +24,7 @@ export interface IRuleDataClient {
 export interface IRuleDataReader {
   search<TSearchRequest extends ESSearchRequest>(
     request: TSearchRequest
-  ): Promise<
-    ESSearchResponse<Partial<Record<TechnicalRuleDataFieldName, unknown[]>>, TSearchRequest>
-  >;
+  ): Promise<ESSearchResponse<Partial<ParsedTechnicalFields>, TSearchRequest>>;
 
   getDynamicIndexPattern(target?: string): Promise<{
     title: string;
@@ -35,5 +34,5 @@ export interface IRuleDataReader {
 }
 
 export interface IRuleDataWriter {
-  bulk(request: BulkRequest): Promise<ApiResponse<BulkResponse>>;
+  bulk(request: BulkRequest): Promise<TransportResult<BulkResponse, unknown> | undefined>;
 }

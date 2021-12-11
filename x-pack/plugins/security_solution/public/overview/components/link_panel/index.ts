@@ -6,6 +6,5 @@
  */
 
 export { InnerLinkPanel } from './inner_link_panel';
-export { isLinkPanelListItem } from './helpers';
 export { LinkPanel } from './link_panel';
-export { LinkPanelListItem } from './types';
+export type { LinkPanelListItem } from './types';

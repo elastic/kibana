@@ -18,6 +18,7 @@ import {
 import { throttle } from 'lodash';
 import {
   Chart,
+  BrushEndListener,
   Settings,
   Heatmap,
   HeatmapElementEvent,
@@ -286,16 +287,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     if (!showSwimlane) return {};
 
     const config: HeatmapSpec['config'] = {
-      onBrushEnd: (e: HeatmapBrushEvent) => {
-        if (!e.cells.length) return;
-
-        onCellsSelection({
-          lanes: e.y as string[],
-          times: e.x.map((v) => (v as number) / 1000) as [number, number],
-          type: swimlaneType,
-          viewByFieldName: swimlaneData.fieldName,
-        });
-      },
       grid: {
         cellHeight: {
           min: CELL_HEIGHT,
@@ -396,6 +387,17 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     [swimlaneData]
   );
 
+  const onBrushEnd = (e: HeatmapBrushEvent) => {
+    if (!e.cells.length) return;
+
+    onCellsSelection({
+      lanes: e.y as string[],
+      times: e.x!.map((v) => (v as number) / 1000) as [number, number],
+      type: swimlaneType,
+      viewByFieldName: swimlaneData.fieldName,
+    });
+  };
+
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
     <EuiResizeObserver onResize={resizeHandler}>
@@ -427,6 +429,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         xDomain={xDomain}
                         tooltip={tooltipOptions}
                         debugState={window._echDebugStateFlag ?? false}
+                        onBrushEnd={onBrushEnd as BrushEndListener}
                       />
 
                       <Heatmap
@@ -467,7 +470,16 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         valueAccessor="value"
                         highlightedData={highlightedData}
                         valueFormatter={getFormattedSeverityScore}
-                        xScaleType={ScaleType.Time}
+                        xScale={{
+                          type: ScaleType.Time,
+                          interval: {
+                            type: 'fixed',
+                            unit: 'ms',
+                            // the xDomain.minInterval should always be available at rendering time
+                            // adding a fallback to 1m bucket
+                            value: xDomain?.minInterval ?? 1000 * 60,
+                          },
+                        }}
                         ySortPredicate="dataIndex"
                         config={swimLaneConfig}
                       />

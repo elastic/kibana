@@ -7,3 +7,4 @@
 
 export { AddSource } from './add_source';
 export { AddSourceList } from './add_source_list';
+export { GitHubViaApp } from './github_via_app';

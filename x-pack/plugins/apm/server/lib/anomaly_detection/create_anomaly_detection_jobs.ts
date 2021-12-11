@@ -15,6 +15,7 @@ import {
   METRICSET_NAME,
   PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
+import { Environment } from '../../../common/environment_rt';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
@@ -24,20 +25,13 @@ import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
 
 export async function createAnomalyDetectionJobs(
   setup: Setup,
-  environments: string[],
+  environments: Environment[],
   logger: Logger
 ) {
   const { ml, indices } = setup;
 
   if (!ml) {
     throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
-  }
-
-  const mlCapabilities = await withApmSpan('get_ml_capabilities', () =>
-    ml.mlSystem.mlCapabilities()
-  );
-  if (!mlCapabilities.mlFeatureEnabledInSpace) {
-    throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
   }
 
   const uniqueMlJobEnvs = await getUniqueMlJobEnvs(setup, environments, logger);
@@ -50,12 +44,13 @@ export async function createAnomalyDetectionJobs(
       `Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`
     );
 
-    const indexPatternName = indices['apm_oss.metricsIndices'];
+    const dataViewName = indices.metric;
     const responses = await Promise.all(
       uniqueMlJobEnvs.map((environment) =>
-        createAnomalyDetectionJob({ ml, environment, indexPatternName })
+        createAnomalyDetectionJob({ ml, environment, dataViewName })
       )
     );
+
     const jobResponses = responses.flatMap((response) => response.jobs);
     const failedJobs = jobResponses.filter(({ success }) => !success);
 
@@ -73,11 +68,11 @@ export async function createAnomalyDetectionJobs(
 async function createAnomalyDetectionJob({
   ml,
   environment,
-  indexPatternName,
+  dataViewName,
 }: {
   ml: Required<Setup>['ml'];
   environment: string;
-  indexPatternName: string;
+  dataViewName: string;
 }) {
   return withApmSpan('create_anomaly_detection_job', async () => {
     const randomToken = uuid().substr(-4);
@@ -86,7 +81,7 @@ async function createAnomalyDetectionJob({
       moduleId: ML_MODULE_ID_APM_TRANSACTION,
       prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
       groups: [APM_ML_JOB_GROUP],
-      indexPatternName,
+      indexPatternName: dataViewName,
       applyToAllSpaces: true,
       start: moment().subtract(4, 'weeks').valueOf(),
       query: {
@@ -116,12 +111,15 @@ async function createAnomalyDetectionJob({
 
 async function getUniqueMlJobEnvs(
   setup: Setup,
-  environments: string[],
+  environments: Environment[],
   logger: Logger
 ) {
   // skip creation of duplicate ML jobs
-  const jobs = await getAnomalyDetectionJobs(setup, logger);
-  const existingMlJobEnvs = jobs.map(({ environment }) => environment);
+  const jobs = await getAnomalyDetectionJobs(setup);
+  const existingMlJobEnvs = jobs
+    .filter((job) => job.version === 3)
+    .map(({ environment }) => environment);
+
   const requestedExistingMlJobEnvs = environments.filter((env) =>
     existingMlJobEnvs.includes(env)
   );

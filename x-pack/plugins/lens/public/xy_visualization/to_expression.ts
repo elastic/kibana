@@ -13,8 +13,9 @@ import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type { ValidLayer, XYLayerConfig } from '../../common/expressions';
 import { layerTypes } from '../../common';
-import { hasIcon } from './xy_config_panel/threshold_panel';
-import { defaultThresholdColor } from './color_assignment';
+import { hasIcon } from './xy_config_panel/reference_line_panel';
+import { defaultReferenceLineColor } from './color_assignment';
+import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: XYLayerConfig) => {
   const originalOrder = datasource
@@ -59,7 +60,7 @@ export function toPreviewExpression(
       layers: state.layers.map((layer) =>
         layer.layerType === layerTypes.DATA
           ? { ...layer, hide: true }
-          : // cap the threshold line to 1px
+          : // cap the reference line to 1px
             {
               ...layer,
               hide: true,
@@ -173,7 +174,10 @@ export const buildExpression = (
                       ? [Math.min(5, state.legend.floatingColumns)]
                       : [],
                     maxLines: state.legend.maxLines ? [state.legend.maxLines] : [],
-                    shouldTruncate: [state.legend.shouldTruncate ?? true],
+                    shouldTruncate: [
+                      state.legend.shouldTruncate ??
+                        getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
+                    ],
                   },
                 },
               ],
@@ -338,8 +342,8 @@ export const buildExpression = (
                                 forAccessor: [yConfig.forAccessor],
                                 axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
                                 color:
-                                  layer.layerType === layerTypes.THRESHOLD
-                                    ? [yConfig.color || defaultThresholdColor]
+                                  layer.layerType === layerTypes.REFERENCELINE
+                                    ? [yConfig.color || defaultReferenceLineColor]
                                     : yConfig.color
                                     ? [yConfig.color]
                                     : [],

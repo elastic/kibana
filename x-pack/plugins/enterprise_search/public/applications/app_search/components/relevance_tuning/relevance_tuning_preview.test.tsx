@@ -22,7 +22,7 @@ describe('RelevanceTuningPreview', () => {
   const result3 = { id: { raw: 3 } };
 
   const actions = {
-    updateSearchValue: jest.fn(),
+    setSearchQuery: jest.fn(),
   };
 
   const values = {
@@ -79,7 +79,7 @@ describe('RelevanceTuningPreview', () => {
 
     wrapper.find(EuiFieldSearch).simulate('change', { target: { value: 'some search text' } });
 
-    expect(actions.updateSearchValue).toHaveBeenCalledWith('some search text');
+    expect(actions.setSearchQuery).toHaveBeenCalledWith('some search text');
   });
 
   it('will show user a prompt to enter a query if they have not entered one', () => {

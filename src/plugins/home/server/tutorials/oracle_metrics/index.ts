@@ -23,17 +23,17 @@ export function oracleMetricsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: moduleName + 'Metrics',
     name: i18n.translate('home.tutorials.oracleMetrics.nameTitle', {
-      defaultMessage: 'oracle metrics',
+      defaultMessage: 'oracle Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.oracleMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from a Oracle server.',
+      defaultMessage: 'Collect metrics from Oracle servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.oracleMetrics.longDescription', {
       defaultMessage:
-        'The `{moduleName}` Metricbeat module fetches internal metrics from a Oracle server. \
+        'The `{moduleName}` Metricbeat module fetches metrics from a Oracle server. \
 [Learn more]({learnMoreLink}).',
       values: {
         moduleName,
@@ -55,8 +55,8 @@ export function oracleMetricsSpecProvider(context: TutorialContext): TutorialSch
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['security'],
   };
 }

@@ -8,15 +8,14 @@
     "target/**/*"
   ],
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["es5", "dom"],
+    "target": "ES2019",
     "outDir": "target/types",
     "types": [
       "cypress",
+      "cypress-file-upload",
       "cypress-pipe",
-      "node"
+      "node",
     ],
-    "resolveJsonModule": true,
   },
   "references": [
     { "path": "../tsconfig.json" }

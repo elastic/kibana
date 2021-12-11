@@ -11,15 +11,18 @@ import { useValues } from 'kea';
 
 import { EuiSpacer } from '@elastic/eui';
 
+import { EngineLogic } from '../../engine';
 import { CurationsTable, EmptyState } from '../components';
 import { SuggestionsTable } from '../components/suggestions_table';
 import { CurationsLogic } from '../curations_logic';
 
 export const CurationsOverview: React.FC = () => {
   const { curations } = useValues(CurationsLogic);
+  const {
+    engine: { adaptive_relevance_suggestions_active: adaptiveRelevanceSuggestionsActive },
+  } = useValues(EngineLogic);
 
-  // TODO
-  const shouldShowSuggestions = true;
+  const shouldShowSuggestions = adaptiveRelevanceSuggestionsActive;
 
   return (
     <>

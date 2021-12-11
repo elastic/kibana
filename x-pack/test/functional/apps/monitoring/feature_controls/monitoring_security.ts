@@ -13,6 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
   const appsMenu = getService('appsMenu');
   const PageObjects = getPageObjects(['common', 'security']);
+  const noData = getService('monitoringNoData');
 
   describe('security', () => {
     before(async () => {
@@ -35,11 +36,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+      await PageObjects.security.forceLogout();
+
       await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       await security.role.delete('global_all_role');
-
-      // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
     });
 
     describe('monitoring_user', () => {
@@ -101,6 +103,33 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('shows monitoring navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Stack Monitoring');
+      });
+    });
+
+    describe('monitoring_user and kibana_admin roles', function () {
+      this.tags(['skipCloud']);
+      before(async () => {
+        await security.user.create('monitoring_kibana_admin_user', {
+          password: 'monitoring_user-password',
+          roles: ['monitoring_user', 'kibana_admin'],
+          full_name: 'monitoring user',
+        });
+
+        await PageObjects.security.login(
+          'monitoring_kibana_admin_user',
+          'monitoring_user-password'
+        );
+      });
+
+      after(async () => {
+        await security.user.delete('monitoring_kibana_admin_user');
+      });
+
+      it('denies enabling monitoring without enough permissions', async () => {
+        await PageObjects.common.navigateToApp('monitoring');
+        await noData.isOnNoDataPage();
+        await noData.clickSetupWithSelfMonitoring();
+        expect(await noData.isOnNoDataPageMonitoringEnablementDenied()).to.be(true);
       });
     });
   });

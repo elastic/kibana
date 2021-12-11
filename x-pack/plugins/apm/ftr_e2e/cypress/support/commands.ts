@@ -21,6 +21,7 @@ Cypress.Commands.add(
     cy.log(`Logging in as ${username}`);
     const kibanaUrl = Cypress.env('KIBANA_URL');
     cy.request({
+      log: false,
       method: 'POST',
       url: `${kibanaUrl}/internal/security/login`,
       body: {
@@ -40,6 +41,22 @@ Cypress.Commands.add('changeTimeRange', (value: string) => {
   cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"]').click();
   cy.contains(value).click();
 });
+
+Cypress.Commands.add(
+  'selectAbsoluteTimeRange',
+  (start: string, end: string) => {
+    cy.get('[data-test-subj="superDatePickerstartDatePopoverButton"]').click();
+    cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]')
+      .eq(0)
+      .clear()
+      .type(start, { force: true });
+    cy.get('[data-test-subj="superDatePickerendDatePopoverButton"]').click();
+    cy.get('[data-test-subj="superDatePickerAbsoluteDateInput"]')
+      .eq(1)
+      .clear()
+      .type(end, { force: true });
+  }
+);
 
 Cypress.Commands.add(
   'expectAPIsToHaveBeenCalledWith',

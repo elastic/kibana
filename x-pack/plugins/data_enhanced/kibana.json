@@ -8,7 +8,15 @@
     "githubTeam": "kibana-app-services"
   },
   "configPath": ["xpack", "data_enhanced"],
-  "requiredPlugins": ["bfetch", "data", "features", "management", "share", "taskManager"],
+  "requiredPlugins": [
+    "bfetch",
+    "data",
+    "features",
+    "management",
+    "share",
+    "taskManager",
+    "screenshotMode"
+  ],
   "optionalPlugins": ["kibanaUtils", "usageCollection", "security"],
   "server": true,
   "ui": true,

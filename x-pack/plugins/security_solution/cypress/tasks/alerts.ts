@@ -17,15 +17,13 @@ import {
   LOADING_ALERTS_PANEL,
   MANAGE_ALERT_DETECTION_RULES_BTN,
   MARK_ALERT_ACKNOWLEDGED_BTN,
-  MARK_SELECTED_ALERTS_ACKNOWLEDGED_BTN,
   OPEN_ALERT_BTN,
   OPENED_ALERTS_FILTER_BTN,
   SEND_ALERT_TO_TIMELINE_BTN,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
-  SELECT_EVENT_CHECKBOX,
 } from '../screens/alerts';
-import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
+import { REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
 import {
   UPDATE_ENRICHMENT_RANGE_BUTTON,
@@ -36,7 +34,7 @@ import {
 } from '../screens/alerts_details';
 
 export const addExceptionFromFirstAlert = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
   cy.get(ADD_EXCEPTION_BTN).click();
 };
 
@@ -62,6 +60,10 @@ export const closeAlerts = () => {
     .should('not.be.visible');
 };
 
+export const expandFirstAlertActions = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+};
+
 export const expandFirstAlert = () => {
   cy.get(EXPAND_ALERT_BTN).should('exist');
 
@@ -72,10 +74,6 @@ export const expandFirstAlert = () => {
 };
 
 export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
-
-export const viewThreatDetails = () => {
-  cy.get(EXPAND_ALERT_BTN).first().click({ force: true });
-};
 
 export const setEnrichmentDates = (from?: string, to?: string) => {
   cy.get(ENRICHMENT_QUERY_RANGE_PICKER).within(() => {
@@ -104,8 +102,12 @@ export const goToOpenedAlerts = () => {
   cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
   cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
   cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
-  cy.get(LOADING_INDICATOR).should('exist');
-  cy.get(LOADING_INDICATOR).should('not.exist');
+};
+
+export const refreshAlerts = () => {
+  // ensure we've refetched fields the first time index is defined
+  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(REFRESH_BUTTON).first().click({ force: true });
 };
 
 export const openFirstAlert = () => {
@@ -128,11 +130,6 @@ export const goToAcknowledgedAlerts = () => {
 export const markAcknowledgedFirstAlert = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
   cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
-};
-
-export const markAcknowledgedAlerts = () => {
-  cy.get(TAKE_ACTION_POPOVER_BTN).click({ force: true });
-  cy.get(MARK_SELECTED_ALERTS_ACKNOWLEDGED_BTN).click();
 };
 
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
@@ -173,9 +170,4 @@ export const waitForAlertsIndexToBeCreated = () => {
 export const waitForAlertsPanelToBeLoaded = () => {
   cy.get(LOADING_ALERTS_PANEL).should('exist');
   cy.get(LOADING_ALERTS_PANEL).should('not.exist');
-};
-
-export const waitForAlertsToBeLoaded = () => {
-  const expectedNumberOfDisplayedAlerts = 25;
-  cy.get(SELECT_EVENT_CHECKBOX).should('have.length', expectedNumberOfDisplayedAlerts);
 };

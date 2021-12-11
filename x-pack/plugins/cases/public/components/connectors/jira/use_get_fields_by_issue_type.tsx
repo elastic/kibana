@@ -6,18 +6,15 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup, ToastsApi } from 'kibana/public';
-import { ActionConnector } from '../../../../common';
+import { HttpSetup, IToasts } from 'kibana/public';
+import { ActionConnector } from '../../../../common/api';
 import { getFieldsByIssueType } from './api';
 import { Fields } from './types';
 import * as i18n from './translations';
 
 interface Props {
   http: HttpSetup;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  toastNotifications: IToasts;
   issueType: string | null;
   connector?: ActionConnector;
 }

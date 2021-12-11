@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { ErrorResponse } from './helpers';
 
-export const getValidEqlResponse = (): ApiResponse['body'] => ({
+export const getValidEqlResponse = (): TransportResult['body'] => ({
   is_partial: false,
   is_running: false,
   took: 162,
@@ -56,7 +56,7 @@ export const getEqlResponseWithValidationErrors = (): ErrorResponse => ({
   },
 });
 
-export const getEqlResponseWithNonValidationError = (): ApiResponse['body'] => ({
+export const getEqlResponseWithNonValidationError = (): TransportResult['body'] => ({
   error: {
     root_cause: [
       {

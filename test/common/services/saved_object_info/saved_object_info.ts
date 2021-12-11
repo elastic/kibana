@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import url from 'url';
 import { Either, fromNullable, chain, getOrElse, toError } from 'fp-ts/Either';
 import { flow, pipe } from 'fp-ts/function';
@@ -37,7 +37,7 @@ export const types =
     await pipe(
       TE.tryCatch(
         async () => {
-          const { body } = await new Client({ node }).search({
+          const body = await new Client({ node, Connection: HttpConnection }).search({
             index,
             size: 0,
             body: query,

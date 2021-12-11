@@ -7,9 +7,10 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiEmptyPrompt, EuiButton, EuiPageTemplate, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { usePolicyDetailsNavigateCallback } from '../../policy_hooks';
 import { useGetLinkTo } from './use_policy_trusted_apps_empty_hooks';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
 interface CommonProps {
   policyId: string;
@@ -17,6 +18,7 @@ interface CommonProps {
 }
 
 export const PolicyTrustedAppsEmptyUnassigned = memo<CommonProps>(({ policyId, policyName }) => {
+  const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
   const navigateCallback = usePolicyDetailsNavigateCallback();
   const { onClickHandler, toRouteUrl } = useGetLinkTo(policyId, policyName);
   const onClickPrimaryButtonHandler = useCallback(
@@ -47,12 +49,21 @@ export const PolicyTrustedAppsEmptyUnassigned = memo<CommonProps>(({ policyId, p
           />
         }
         actions={[
-          <EuiButton color="primary" fill onClick={onClickPrimaryButtonHandler}>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policy.trustedApps.empty.unassigned.primaryAction"
-              defaultMessage="Assign trusted applications"
-            />
-          </EuiButton>,
+          ...(canCreateArtifactsByPolicy
+            ? [
+                <EuiButton
+                  color="primary"
+                  fill
+                  onClick={onClickPrimaryButtonHandler}
+                  data-test-subj="assign-ta-button"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.policy.trustedApps.empty.unassigned.primaryAction"
+                    defaultMessage="Assign trusted applications"
+                  />
+                </EuiButton>,
+              ]
+            : []),
           // eslint-disable-next-line @elastic/eui/href-or-on-click
           <EuiLink onClick={onClickHandler} href={toRouteUrl}>
             <FormattedMessage

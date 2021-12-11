@@ -24,13 +24,13 @@ export function panwLogsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
     id: 'panwLogs',
     name: i18n.translate('home.tutorials.panwLogs.nameTitle', {
-      defaultMessage: 'Palo Alto Networks PAN-OS logs',
+      defaultMessage: 'Palo Alto Networks PAN-OS Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.panwLogs.shortDescription', {
       defaultMessage:
-        'Collect Palo Alto Networks PAN-OS threat and traffic logs over syslog or from a log file.',
+        'Collect and parse threat and traffic logs from Palo Alto Networks PAN-OS with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.panwLogs.longDescription', {
       defaultMessage:
@@ -60,8 +60,8 @@ export function panwLogsSpecProvider(context: TutorialContext): TutorialSchema {
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/panw_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['security'],
   };
 }

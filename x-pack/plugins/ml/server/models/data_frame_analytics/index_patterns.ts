@@ -5,29 +5,19 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import { IndexPatternAttributes } from 'src/plugins/data/server';
+import { DataViewsService } from '../../../../../../src/plugins/data_views/common';
 
-export class IndexPatternHandler {
-  constructor(private savedObjectsClient: SavedObjectsClientContract) {}
+export class DataViewHandler {
+  constructor(private dataViewService: DataViewsService) {}
   // returns a id based on an index pattern name
-  async getIndexPatternId(indexName: string) {
-    const response = await this.savedObjectsClient.find<IndexPatternAttributes>({
-      type: 'index-pattern',
-      perPage: 10,
-      search: `"${indexName}"`,
-      searchFields: ['title'],
-      fields: ['title'],
-    });
-
-    const ip = response.saved_objects.find(
-      (obj) => obj.attributes.title.toLowerCase() === indexName.toLowerCase()
+  async getDataViewId(indexName: string) {
+    const dv = (await this.dataViewService.find(indexName)).find(
+      ({ title }) => title === indexName
     );
-
-    return ip?.id;
+    return dv?.id;
   }
 
-  async deleteIndexPatternById(indexId: string) {
-    return await this.savedObjectsClient.delete('index-pattern', indexId);
+  async deleteDataViewById(dataViewId: string) {
+    return await this.dataViewService.delete(dataViewId);
   }
 }

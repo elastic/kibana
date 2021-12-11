@@ -68,7 +68,6 @@ class MyPlugin {
     }
   }
 }
-
 ```
 
 ## Methods

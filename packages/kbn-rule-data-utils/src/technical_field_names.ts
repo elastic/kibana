@@ -13,10 +13,10 @@ const KIBANA_NAMESPACE = 'kibana' as const;
 const ALERT_NAMESPACE = `${KIBANA_NAMESPACE}.alert` as const;
 const ALERT_RULE_NAMESPACE = `${ALERT_NAMESPACE}.rule` as const;
 
-const CONSUMERS = `${KIBANA_NAMESPACE}.consumers` as const;
 const ECS_VERSION = 'ecs.version' as const;
 const EVENT_ACTION = 'event.action' as const;
 const EVENT_KIND = 'event.kind' as const;
+const EVENT_MODULE = 'event.module' as const;
 const SPACE_IDS = `${KIBANA_NAMESPACE}.space_ids` as const;
 const TAGS = 'tags' as const;
 const TIMESTAMP = '@timestamp' as const;
@@ -24,6 +24,7 @@ const VERSION = `${KIBANA_NAMESPACE}.version` as const;
 
 // Fields pertaining to the alert
 const ALERT_ACTION_GROUP = `${ALERT_NAMESPACE}.action_group` as const;
+const ALERT_BUILDING_BLOCK_TYPE = `${ALERT_NAMESPACE}.building_block_type` as const;
 const ALERT_DURATION = `${ALERT_NAMESPACE}.duration.us` as const;
 const ALERT_END = `${ALERT_NAMESPACE}.end` as const;
 const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as const;
@@ -84,13 +85,14 @@ const namespaces = {
 };
 
 const fields = {
-  CONSUMERS,
   ECS_VERSION,
   EVENT_KIND,
   EVENT_ACTION,
+  EVENT_MODULE,
   TAGS,
   TIMESTAMP,
   ALERT_ACTION_GROUP,
+  ALERT_BUILDING_BLOCK_TYPE,
   ALERT_DURATION,
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
@@ -141,6 +143,7 @@ const fields = {
 
 export {
   ALERT_ACTION_GROUP,
+  ALERT_BUILDING_BLOCK_TYPE,
   ALERT_DURATION,
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
@@ -185,10 +188,10 @@ export {
   ALERT_START,
   ALERT_SYSTEM_STATUS,
   ALERT_UUID,
-  CONSUMERS,
   ECS_VERSION,
   EVENT_ACTION,
   EVENT_KIND,
+  EVENT_MODULE,
   KIBANA_NAMESPACE,
   ALERT_RULE_UUID,
   ALERT_RULE_CATEGORY,

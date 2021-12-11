@@ -23,7 +23,7 @@ import {
   EuiButtonEmpty,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { toggleSetupMode } from '../../lib/setup_mode';
 import { CheckingSettings } from './checking_settings';
 import { ReasonFound, WeTried } from './reasons';
@@ -56,9 +56,13 @@ export function NoData(props) {
     window.location.hash = getSafeForExternalLink('#/elasticsearch/nodes');
   }
 
+  const NoDataContainer = ({ children }) => {
+    return <EuiPage data-test-subj="noDataContainer">{children}</EuiPage>;
+  };
+
   if (isCloudEnabled) {
     return (
-      <EuiPage>
+      <NoDataContainer>
         <EuiScreenReaderOnly>
           <h1>
             <FormattedMessage
@@ -97,13 +101,13 @@ export function NoData(props) {
             <CloudDeployment />
           </EuiPageContent>
         </EuiPageBody>
-      </EuiPage>
+      </NoDataContainer>
     );
   }
 
   if (useInternalCollection) {
     return (
-      <EuiPage>
+      <NoDataContainer>
         <EuiScreenReaderOnly>
           <h1>
             <FormattedMessage
@@ -140,12 +144,12 @@ export function NoData(props) {
             ) : null}
           </EuiPageContent>
         </EuiPageBody>
-      </EuiPage>
+      </NoDataContainer>
     );
   }
 
   return (
-    <EuiPage>
+    <NoDataContainer>
       <EuiScreenReaderOnly>
         <h1>
           <FormattedMessage
@@ -211,7 +215,7 @@ export function NoData(props) {
           </EuiButtonEmpty>
         </EuiPageContent>
       </EuiPageBody>
-    </EuiPage>
+    </NoDataContainer>
   );
 }
 

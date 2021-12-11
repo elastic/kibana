@@ -16,17 +16,25 @@ import { EngineLogic, generateEnginePath } from '../../engine';
 
 export const SuggestedCurationsCallout: React.FC = () => {
   const {
-    engine: { search_relevance_suggestions: searchRelevanceSuggestions },
+    engine: {
+      adaptive_relevance_suggestions: adaptiveRelevanceSuggestions,
+      adaptive_relevance_suggestions_active: adaptiveRelevanceSuggestionsActive,
+    },
   } = useValues(EngineLogic);
 
-  const pendingCount = searchRelevanceSuggestions?.curation.pending;
+  const pendingCount = adaptiveRelevanceSuggestions?.curation.pending;
 
-  if (typeof searchRelevanceSuggestions === 'undefined' || pendingCount === 0) {
+  if (
+    typeof adaptiveRelevanceSuggestions === 'undefined' ||
+    pendingCount === 0 ||
+    adaptiveRelevanceSuggestionsActive === false
+  ) {
     return null;
   }
 
   return (
     <SuggestionsCallout
+      style={{ marginBottom: '24px' }}
       title={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.suggestedCurationsCallout.title',
         { defaultMessage: 'New suggested curations to review' }
@@ -39,7 +47,7 @@ export const SuggestedCurationsCallout: React.FC = () => {
         }
       )}
       buttonTo={generateEnginePath(ENGINE_CURATIONS_PATH)}
-      lastUpdatedTimestamp={searchRelevanceSuggestions.curation.last_updated}
+      lastUpdatedTimestamp={adaptiveRelevanceSuggestions.curation.last_updated}
     />
   );
 };

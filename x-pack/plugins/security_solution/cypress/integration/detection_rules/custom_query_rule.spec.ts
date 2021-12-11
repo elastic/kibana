@@ -215,9 +215,7 @@ describe('Custom detection rules creation', () => {
     waitForAlertsToPopulate();
 
     cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.gte(1));
-    cy.get(ALERT_GRID_CELL).eq(3).contains(this.rule.name);
-    cy.get(ALERT_GRID_CELL).eq(4).contains(this.rule.severity.toLowerCase());
-    cy.get(ALERT_GRID_CELL).eq(5).contains(this.rule.riskScore);
+    cy.get(ALERT_GRID_CELL).contains(this.rule.name);
   });
 });
 
@@ -351,10 +349,10 @@ describe('Custom detection rules deletion and edition', () => {
       goToRuleDetails();
 
       cy.wait('@fetchRuleDetails').then(({ response }) => {
-        cy.wrap(response!.statusCode).should('eql', 200);
+        cy.wrap(response?.statusCode).should('eql', 200);
 
-        cy.wrap(response!.body.max_signals).should('eql', getExistingRule().maxSignals);
-        cy.wrap(response!.body.enabled).should('eql', false);
+        cy.wrap(response?.body.max_signals).should('eql', getExistingRule().maxSignals);
+        cy.wrap(response?.body.enabled).should('eql', false);
       });
     });
 
@@ -414,9 +412,9 @@ describe('Custom detection rules deletion and edition', () => {
       saveEditedRule();
 
       cy.wait('@getRule').then(({ response }) => {
-        cy.wrap(response!.statusCode).should('eql', 200);
+        cy.wrap(response?.statusCode).should('eql', 200);
         // ensure that editing rule does not modify max_signals
-        cy.wrap(response!.body.max_signals).should('eql', getExistingRule().maxSignals);
+        cy.wrap(response?.body.max_signals).should('eql', getExistingRule().maxSignals);
       });
 
       cy.get(RULE_NAME_HEADER).should('contain', `${getEditedRule().name}`);

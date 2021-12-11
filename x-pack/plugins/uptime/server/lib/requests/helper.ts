@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/api/types';
+import {
+  AggregationsAggregate,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ElasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import {
@@ -88,8 +91,7 @@ export function mockSearchResult(
 ): UptimeESClient {
   const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
-  // @ts-expect-error incomplete search response
-  mockEsClient.search.mockResolvedValue({
+  mockEsClient.search = jest.fn().mockResolvedValue({
     body: {
       took: 18,
       timed_out: false,
@@ -110,5 +112,6 @@ export function mockSearchResult(
       aggregations,
     },
   });
+
   return uptimeEsClient;
 }

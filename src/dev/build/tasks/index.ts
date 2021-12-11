@@ -16,6 +16,7 @@ export * from './create_archives_sources_task';
 export * from './create_archives_task';
 export * from './create_empty_dirs_and_files_task';
 export * from './create_readme_task';
+export * from './download_cloud_dependencies';
 export * from './generate_packages_optimized_assets';
 export * from './install_dependencies_task';
 export * from './license_file_task';

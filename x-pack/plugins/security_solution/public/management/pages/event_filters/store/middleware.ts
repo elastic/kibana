@@ -44,6 +44,7 @@ import {
   EventFiltersServiceGetListOptions,
 } from '../types';
 import {
+  asStaleResourceState,
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
@@ -203,8 +204,9 @@ const checkIfEventFilterDataExist: MiddlewareActionHandler = async (
 ) => {
   dispatch({
     type: 'eventFiltersListPageDataExistsChanged',
-    // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
-    payload: createLoadingResourceState(getListPageDataExistsState(getState())),
+    payload: createLoadingResourceState(
+      asStaleResourceState(getListPageDataExistsState(getState()))
+    ),
   });
 
   try {
@@ -232,8 +234,7 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
       type: 'eventFiltersListPageDataChanged',
       payload: {
         type: 'LoadingResourceState',
-        // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
-        previousState: getCurrentListPageDataState(state),
+        previousState: asStaleResourceState(getCurrentListPageDataState(state)),
       },
     });
 
@@ -298,8 +299,7 @@ const eventFilterDeleteEntry: MiddlewareActionHandler = async (
 
   dispatch({
     type: 'eventFilterDeleteStatusChanged',
-    // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
-    payload: createLoadingResourceState(getDeletionState(state).status),
+    payload: createLoadingResourceState(asStaleResourceState(getDeletionState(state).status)),
   });
 
   try {

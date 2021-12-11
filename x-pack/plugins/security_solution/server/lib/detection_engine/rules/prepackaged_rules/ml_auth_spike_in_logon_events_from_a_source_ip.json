@@ -3,7 +3,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "A machine learning job found an unusually large spike in successful authentication events events from a particular source IP address. This can be due to password spraying, user enumeration or brute force activity.",
+  "description": "A machine learning job found an unusually large spike in successful authentication events from a particular source IP address. This can be due to password spraying, user enumeration or brute force activity.",
   "false_positives": [
     "Build servers and CI systems can sometimes trigger this alert. Security test cycles that include brute force or password spraying activities may trigger this alert."
   ],
@@ -25,5 +25,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 1
+  "version": 2
 }

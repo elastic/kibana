@@ -15,6 +15,7 @@ import type {
   OverlayStart,
   SavedObjectsStart,
   DocLinksStart,
+  ThemeServiceStart,
 } from '../../../core/public';
 import type { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
@@ -22,11 +23,12 @@ import { DataPublicPluginStart, TimefilterContract } from '../../../plugins/data
 import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
 import { ExpressionsStart } from '../../../plugins/expressions/public';
 import { UiActionsStart } from '../../../plugins/ui_actions/public';
-import { SavedVisualizationsLoader } from './saved_visualizations';
-import { SavedObjectLoader } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
+import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
+
+export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
 
 export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');
 
@@ -47,15 +49,14 @@ export const [getTimeFilter, setTimeFilter] = createGetterSetter<TimefilterContr
 
 export const [getSearch, setSearch] = createGetterSetter<DataPublicPluginStart['search']>('Search');
 
-export const [getUsageCollector, setUsageCollector] =
-  createGetterSetter<UsageCollectionSetup>('UsageCollection');
+export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionSetup>(
+  'UsageCollection',
+  false
+);
 
 export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');
 
 export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UiActions');
-
-export const [getSavedVisualizationsLoader, setSavedVisualizationsLoader] =
-  createGetterSetter<SavedVisualizationsLoader>('SavedVisualisationsLoader');
 
 export const [getAggs, setAggs] =
   createGetterSetter<DataPublicPluginStart['search']['aggs']>('AggConfigs');
@@ -64,5 +65,4 @@ export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Over
 
 export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
 
-export const [getSavedSearchLoader, setSavedSearchLoader] =
-  createGetterSetter<SavedObjectLoader>('savedSearchLoader');
+export const [getSpaces, setSpaces] = createGetterSetter<SpacesPluginStart>('Spaces', false);

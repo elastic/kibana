@@ -20,6 +20,23 @@ parameters:
     name: outputId
     in: path
     required: true
+delete:
+  summary: Output - Delete
+  operationId: delete-output
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id: 
+                type: string
+            required:
+              - id
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
 put:
   summary: Output - Update
   operationId: update-output
@@ -29,14 +46,28 @@ put:
         schema:
           type: object
           properties:
-            hosts:
+            name:
               type: string
+            type:
+              type: string
+              enum: ["elasticsearch"]            
+            is_default:
+              type: boolean
+            is_default_monitoring:
+              type: boolean
+            hosts:
+              type: array
+              items: 
+                type: string
             ca_sha256:
               type: string
-            config:
-              type: object
+            ca_trusted_fingerprint:
+              type: string
             config_yaml:
               type: string
+          required:
+            - name
+            - type
   responses:
     '200':
       description: OK

@@ -18,6 +18,7 @@ import { parseExperimentalConfigValue } from '../../../../common/experimental_fe
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
+  createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createMockPackageService,
   createRouteHandlerContext,
@@ -34,17 +35,20 @@ import {
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   metadataTransformPrefix,
+  ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
 import {
   EndpointAction,
   HostIsolationRequestBody,
   HostIsolationResponse,
   HostMetadata,
+  LogsEndpointAction,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { legacyMetadataSearchResponse } from '../metadata/support/test_support';
-import { ElasticsearchAssetType } from '../../../../../fleet/common';
+import { legacyMetadataSearchResponseMock } from '../metadata/support/test_support';
+import { AGENT_ACTIONS_INDEX, ElasticsearchAssetType } from '../../../../../fleet/common';
 import { CasesClientMock } from '../../../../../cases/server/client/mocks';
+import { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 
 interface CallRouteInterface {
   body?: HostIsolationRequestBody;
@@ -52,6 +56,7 @@ interface CallRouteInterface {
   searchResponse?: HostMetadata;
   mockUser?: any;
   license?: License;
+  authz?: Partial<EndpointAuthz>;
 }
 
 const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
@@ -109,7 +114,8 @@ describe('Host Isolation', () => {
 
     let callRoute: (
       routePrefix: string,
-      opts: CallRouteInterface
+      opts: CallRouteInterface,
+      indexExists?: { endpointDsExists: boolean }
     ) => Promise<jest.Mocked<SecuritySolutionRequestHandlerContext>>;
     const superUser = {
       username: 'superuser',
@@ -154,9 +160,12 @@ describe('Host Isolation', () => {
           keep_policies_up_to_date: false,
         })
       );
+
       licenseEmitter = new Subject();
       licenseService = new LicenseService();
       licenseService.start(licenseEmitter);
+
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start({
         ...startContract,
         licenseService,
@@ -175,30 +184,63 @@ describe('Host Isolation', () => {
       // it returns the requestContext mock used in the call, to assert internal calls (e.g. the indexed document)
       callRoute = async (
         routePrefix: string,
-        { body, idxResponse, searchResponse, mockUser, license }: CallRouteInterface
+        { body, idxResponse, searchResponse, mockUser, license, authz = {} }: CallRouteInterface,
+        indexExists?: { endpointDsExists: boolean }
       ): Promise<jest.Mocked<SecuritySolutionRequestHandlerContext>> => {
         const asUser = mockUser ? mockUser : superUser;
         (startContract.security.authc.getCurrentUser as jest.Mock).mockImplementationOnce(
           () => asUser
         );
+
         const ctx = createRouteHandlerContext(mockScopedClient, mockSavedObjectClient);
-        const withIdxResp = idxResponse ? idxResponse : { statusCode: 201 };
-        ctx.core.elasticsearch.client.asCurrentUser.index = jest
+
+        ctx.securitySolution.endpointAuthz = {
+          ...ctx.securitySolution.endpointAuthz,
+          ...authz,
+        };
+
+        // mock _index_template
+        ctx.core.elasticsearch.client.asInternalUser.indices.existsIndexTemplate = jest
           .fn()
-          .mockImplementationOnce(() => Promise.resolve(withIdxResp));
-        ctx.core.elasticsearch.client.asCurrentUser.search = jest
+          .mockImplementationOnce(() => {
+            if (indexExists) {
+              return Promise.resolve({
+                body: true,
+                statusCode: 200,
+              });
+            }
+            return Promise.resolve({
+              body: false,
+              statusCode: 404,
+            });
+          });
+
+        const withIdxResp = idxResponse ? idxResponse : { statusCode: 201 };
+        const mockIndexResponse = jest.fn().mockImplementation(() => Promise.resolve(withIdxResp));
+        const mockSearchResponse = jest
           .fn()
           .mockImplementation(() =>
-            Promise.resolve({ body: legacyMetadataSearchResponse(searchResponse) })
+            Promise.resolve({ body: legacyMetadataSearchResponseMock(searchResponse) })
           );
+
+        if (indexExists) {
+          ctx.core.elasticsearch.client.asCurrentUser.index = mockIndexResponse;
+        }
+
+        ctx.core.elasticsearch.client.asInternalUser.index = mockIndexResponse;
+        ctx.core.elasticsearch.client.asCurrentUser.search = mockSearchResponse;
+
         const withLicense = license ? license : Platinum;
         licenseEmitter.next(withLicense);
+
         const mockRequest = httpServerMock.createKibanaRequest({ body });
         const [, routeHandler]: [
           RouteConfig<any, any, any, any>,
           RequestHandler<any, any, any, any>
         ] = routerMock.post.mock.calls.find(([{ path }]) => path.startsWith(routePrefix))!;
+
         await routeHandler(ctx, mockRequest, mockResponse);
+
         return ctx as unknown as jest.Mocked<SecuritySolutionRequestHandlerContext>;
       };
     });
@@ -241,7 +283,7 @@ describe('Host Isolation', () => {
         searchResponse: metadataResponse,
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       expect(actionDoc.agents).toContain(AgentID);
     });
@@ -252,7 +294,7 @@ describe('Host Isolation', () => {
         mockUser: testU,
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       expect(actionDoc.user_id).toEqual(testU.username);
     });
@@ -262,7 +304,7 @@ describe('Host Isolation', () => {
         body: { endpoint_ids: ['XYZ'], comment: CommentText },
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       expect(actionDoc.data.comment).toEqual(CommentText);
     });
@@ -271,7 +313,7 @@ describe('Host Isolation', () => {
         body: { endpoint_ids: ['XYZ'], comment: 'XYZ' },
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       const actionID = actionDoc.action_id;
       expect(mockResponse.ok).toBeCalled();
@@ -284,14 +326,9 @@ describe('Host Isolation', () => {
         body: { endpoint_ids: ['XYZ'] },
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       expect(actionDoc.timeout).toEqual(300);
-    });
-
-    it('succeeds when just an endpoint ID is provided', async () => {
-      await callRoute(ISOLATE_HOST_ROUTE, { body: { endpoint_ids: ['XYZ'] } });
-      expect(mockResponse.ok).toBeCalled();
     });
     it('sends the action to the correct agent when endpoint ID is given', async () => {
       const doc = docGen.generateHostMetadata();
@@ -302,7 +339,7 @@ describe('Host Isolation', () => {
         searchResponse: doc,
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       expect(actionDoc.agents).toContain(AgentID);
     });
@@ -312,7 +349,7 @@ describe('Host Isolation', () => {
         body: { endpoint_ids: ['XYZ'] },
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       expect(actionDoc.data.command).toEqual('isolate');
     });
@@ -321,9 +358,77 @@ describe('Host Isolation', () => {
         body: { endpoint_ids: ['XYZ'] },
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock
+        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
       ).mock.calls[0][0].body;
       expect(actionDoc.data.command).toEqual('unisolate');
+    });
+
+    describe('With endpoint data streams', () => {
+      it('handles unisolation', async () => {
+        const ctx = await callRoute(
+          UNISOLATE_HOST_ROUTE,
+          {
+            body: { endpoint_ids: ['XYZ'] },
+          },
+          { endpointDsExists: true }
+        );
+        const actionDocs: [
+          { index: string; body: LogsEndpointAction },
+          { index: string; body: EndpointAction }
+        ] = [
+          (ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock).mock.calls[0][0],
+          (ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock).mock.calls[1][0],
+        ];
+
+        expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
+        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
+        expect(actionDocs[0].body.EndpointActions.data.command).toEqual('unisolate');
+        expect(actionDocs[1].body.data.command).toEqual('unisolate');
+      });
+
+      it('handles isolation', async () => {
+        const ctx = await callRoute(
+          ISOLATE_HOST_ROUTE,
+          {
+            body: { endpoint_ids: ['XYZ'] },
+          },
+          { endpointDsExists: true }
+        );
+        const actionDocs: [
+          { index: string; body: LogsEndpointAction },
+          { index: string; body: EndpointAction }
+        ] = [
+          (ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock).mock.calls[0][0],
+          (ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock).mock.calls[1][0],
+        ];
+
+        expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
+        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
+        expect(actionDocs[0].body.EndpointActions.data.command).toEqual('isolate');
+        expect(actionDocs[1].body.data.command).toEqual('isolate');
+      });
+
+      it('handles errors', async () => {
+        const ErrMessage = 'Uh oh!';
+        await callRoute(
+          UNISOLATE_HOST_ROUTE,
+          {
+            body: { endpoint_ids: ['XYZ'] },
+            idxResponse: {
+              statusCode: 500,
+              body: {
+                result: ErrMessage,
+              },
+            },
+          },
+          { endpointDsExists: true }
+        );
+
+        expect(mockResponse.ok).not.toBeCalled();
+        const response = mockResponse.customError.mock.calls[0][0];
+        expect(response.statusCode).toEqual(500);
+        expect((response.body as Error).message).toEqual(ErrMessage);
+      });
     });
 
     describe('License Level', () => {
@@ -334,14 +439,17 @@ describe('Host Isolation', () => {
         });
         expect(mockResponse.ok).toBeCalled();
       });
-      it('prohibits license levels less than platinum from isolating hosts', async () => {
-        licenseEmitter.next(Gold);
+
+      it('prohibits isolating hosts if no authz for it', async () => {
         await callRoute(ISOLATE_HOST_ROUTE, {
           body: { endpoint_ids: ['XYZ'] },
+          authz: { canIsolateHost: false },
           license: Gold,
         });
+
         expect(mockResponse.forbidden).toBeCalled();
       });
+
       it('allows any license level to unisolate', async () => {
         licenseEmitter.next(Gold);
         await callRoute(UNISOLATE_HOST_ROUTE, {
@@ -352,37 +460,33 @@ describe('Host Isolation', () => {
       });
     });
 
-    describe('User Level', () => {
-      it('allows superuser to perform isolation', async () => {
-        const superU = { username: 'foo', roles: ['superuser'] };
+    describe('User Authorization Level', () => {
+      it('allows user to perform isolation when canIsolateHost is true', async () => {
         await callRoute(ISOLATE_HOST_ROUTE, {
           body: { endpoint_ids: ['XYZ'] },
-          mockUser: superU,
-        });
-        expect(mockResponse.ok).toBeCalled();
-      });
-      it('allows superuser to perform unisolation', async () => {
-        const superU = { username: 'foo', roles: ['superuser'] };
-        await callRoute(UNISOLATE_HOST_ROUTE, {
-          body: { endpoint_ids: ['XYZ'] },
-          mockUser: superU,
         });
         expect(mockResponse.ok).toBeCalled();
       });
 
-      it('prohibits non-admin user from performing isolation', async () => {
-        const superU = { username: 'foo', roles: ['user'] };
+      it('allows user to perform unisolation when canUnIsolateHost is true', async () => {
+        await callRoute(UNISOLATE_HOST_ROUTE, {
+          body: { endpoint_ids: ['XYZ'] },
+        });
+        expect(mockResponse.ok).toBeCalled();
+      });
+
+      it('prohibits user from performing isolation if canIsolateHost is false', async () => {
         await callRoute(ISOLATE_HOST_ROUTE, {
           body: { endpoint_ids: ['XYZ'] },
-          mockUser: superU,
+          authz: { canIsolateHost: false },
         });
         expect(mockResponse.forbidden).toBeCalled();
       });
-      it('prohibits non-admin user from performing unisolation', async () => {
-        const superU = { username: 'foo', roles: ['user'] };
+
+      it('prohibits user from performing un-isolation if canUnIsolateHost is false', async () => {
         await callRoute(UNISOLATE_HOST_ROUTE, {
           body: { endpoint_ids: ['XYZ'] },
-          mockUser: superU,
+          authz: { canUnIsolateHost: false },
         });
         expect(mockResponse.forbidden).toBeCalled();
       });

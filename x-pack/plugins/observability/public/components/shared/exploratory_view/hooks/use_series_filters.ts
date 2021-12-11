@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { concat } from 'lodash';
 import { useSeriesStorage } from './use_series_storage';
 import { SeriesUrl, UrlFilter } from '../types';
 
@@ -12,6 +13,8 @@ export interface UpdateFilter {
   field: string;
   value: string | string[];
   negate?: boolean;
+  wildcards?: string[];
+  isWildcard?: boolean;
 }
 
 export const useSeriesFilters = ({ seriesId, series }: { seriesId: number; series: SeriesUrl }) => {
@@ -19,16 +22,60 @@ export const useSeriesFilters = ({ seriesId, series }: { seriesId: number; serie
 
   const filters = series.filters ?? [];
 
-  const removeFilter = ({ field, value, negate }: UpdateFilter) => {
+  const replaceFilter = ({
+    field,
+    values,
+    notValues,
+    wildcards,
+    notWildcards,
+  }: {
+    field: string;
+    values: string[];
+    notValues: string[];
+    wildcards?: string[];
+    notWildcards?: string[];
+  }) => {
+    const currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd) ?? {
+      field,
+    };
+
+    currFilter.notValues = notValues.length > 0 ? notValues : undefined;
+    currFilter.values = values.length > 0 ? values : undefined;
+
+    currFilter.wildcards = wildcards;
+    currFilter.notWildcards = notWildcards;
+
+    const otherFilters = filters.filter(({ field: fd }) => fd !== field);
+
+    if (concat(values, notValues, wildcards, notWildcards).length > 0) {
+      setSeries(seriesId, { ...series, filters: [...otherFilters, currFilter] });
+    } else {
+      setSeries(seriesId, { ...series, filters: otherFilters });
+    }
+  };
+
+  const removeFilter = ({ field, value, negate, isWildcard }: UpdateFilter) => {
     const filtersN = filters
       .map((filter) => {
         if (filter.field === field) {
           if (negate) {
+            if (isWildcard) {
+              const notWildcardsN = filter.notWildcards?.filter((val) =>
+                value instanceof Array ? !value.includes(val) : val !== value
+              );
+              return { ...filter, notWildcards: notWildcardsN };
+            }
             const notValuesN = filter.notValues?.filter((val) =>
               value instanceof Array ? !value.includes(val) : val !== value
             );
             return { ...filter, notValues: notValuesN };
           } else {
+            if (isWildcard) {
+              const wildcardsN = filter.wildcards?.filter((val) =>
+                value instanceof Array ? !value.includes(val) : val !== value
+              );
+              return { ...filter, wildcards: wildcardsN };
+            }
             const valuesN = filter.values?.filter((val) =>
               value instanceof Array ? !value.includes(val) : val !== value
             );
@@ -38,7 +85,13 @@ export const useSeriesFilters = ({ seriesId, series }: { seriesId: number; serie
 
         return filter;
       })
-      .filter(({ values = [], notValues = [] }) => values.length > 0 || notValues.length > 0);
+      .filter(
+        ({ values = [], notValues = [], wildcards = [], notWildcards = [] }) =>
+          values.length > 0 ||
+          notValues.length > 0 ||
+          wildcards.length > 0 ||
+          notWildcards.length > 0
+      );
     setSeries(seriesId, { ...series, filters: filtersN });
   };
 
@@ -49,6 +102,7 @@ export const useSeriesFilters = ({ seriesId, series }: { seriesId: number; serie
     } else {
       currFilter.values = value instanceof Array ? value : [value];
     }
+
     if (filters.length === 0) {
       setSeries(seriesId, { ...series, filters: [currFilter] });
     } else {
@@ -59,7 +113,7 @@ export const useSeriesFilters = ({ seriesId, series }: { seriesId: number; serie
     }
   };
 
-  const updateFilter = ({ field, value, negate }: UpdateFilter) => {
+  const updateFilter = ({ field, value, negate, wildcards }: UpdateFilter) => {
     const currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd) ?? {
       field,
     };
@@ -89,25 +143,40 @@ export const useSeriesFilters = ({ seriesId, series }: { seriesId: number; serie
       }
     }
 
-    currFilter.notValues = notValues.length > 0 ? notValues : undefined;
-    currFilter.values = values.length > 0 ? values : undefined;
-
-    const otherFilters = filters.filter(({ field: fd }) => fd !== field);
-
-    if (notValues.length > 0 || values.length > 0) {
-      setSeries(seriesId, { ...series, filters: [...otherFilters, currFilter] });
-    } else {
-      setSeries(seriesId, { ...series, filters: otherFilters });
-    }
+    replaceFilter({ field, values, notValues, wildcards });
   };
 
-  const setFilter = ({ field, value, negate }: UpdateFilter) => {
+  const setFilter = ({ field, value, negate, wildcards }: UpdateFilter) => {
     const currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd);
 
     if (!currFilter) {
-      addFilter({ field, value, negate });
+      addFilter({ field, value, negate, wildcards });
     } else {
-      updateFilter({ field, value, negate });
+      updateFilter({ field, value, negate, wildcards });
+    }
+  };
+
+  const setFiltersWildcard = ({ field, wildcards }: { field: string; wildcards: string[] }) => {
+    let currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd);
+
+    if (!currFilter) {
+      currFilter = { field, wildcards };
+
+      if (filters.length === 0) {
+        setSeries(seriesId, { ...series, filters: [currFilter] });
+      } else {
+        setSeries(seriesId, {
+          ...series,
+          filters: [currFilter, ...filters.filter((ft) => ft.field !== field)],
+        });
+      }
+    } else {
+      replaceFilter({
+        field,
+        values: currFilter.values ?? [],
+        notValues: currFilter.notValues ?? [],
+        wildcards,
+      });
     }
   };
 
@@ -115,5 +184,5 @@ export const useSeriesFilters = ({ seriesId, series }: { seriesId: number; serie
     updateFilter({ field, value, negate: !negate });
   };
 
-  return { invertFilter, setFilter, removeFilter };
+  return { invertFilter, setFilter, removeFilter, replaceFilter, setFiltersWildcard };
 };

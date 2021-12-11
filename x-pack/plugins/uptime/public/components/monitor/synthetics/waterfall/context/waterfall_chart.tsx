@@ -9,6 +9,7 @@ import React, { createContext, useContext, Context } from 'react';
 import { WaterfallData, WaterfallDataEntry, WaterfallMetadata } from '../types';
 import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../components/use_flyout';
 import { SidebarItems } from '../../step_detail/waterfall/types';
+import { JourneyStep } from '../../../../../../common/runtime_types';
 
 export type MarkerItems = Array<{
   id:
@@ -38,6 +39,7 @@ export interface IWaterfallContext {
     index?: number
   ) => JSX.Element;
   markerItems?: MarkerItems;
+  activeStep?: JourneyStep;
 }
 
 export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
@@ -56,6 +58,7 @@ interface ProviderProps {
   metadata: IWaterfallContext['metadata'];
   renderTooltipItem: IWaterfallContext['renderTooltipItem'];
   markerItems?: MarkerItems;
+  activeStep?: JourneyStep;
 }
 
 export const WaterfallProvider: React.FC<ProviderProps> = ({
@@ -73,11 +76,13 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
   totalNetworkRequests,
   highlightedNetworkRequests,
   fetchedNetworkRequests,
+  activeStep,
 }) => {
   return (
     <WaterfallContext.Provider
       value={{
         data,
+        activeStep,
         markerItems,
         showOnlyHighlightedNetworkRequests,
         sidebarItems,

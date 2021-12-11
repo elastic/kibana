@@ -22,10 +22,11 @@ import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../../../timelines/components/timeline/body/constants';
-import { FieldsData } from './types';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
+import type { EnrichedFieldInfo, EventSummaryField } from './types';
 
 import * as i18n from './translations';
-import { ColumnHeaderOptions } from '../../../../common';
+import { ColumnHeaderOptions } from '../../../../common/types';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -56,14 +57,8 @@ export interface Item {
 
 export interface AlertSummaryRow {
   title: string;
-  description: {
-    data: FieldsData;
-    eventId: string;
+  description: EnrichedFieldInfo & {
     isDraggable?: boolean;
-    fieldFromBrowserField?: BrowserField;
-    linkValue: string | undefined;
-    timelineId: string;
-    values: string[] | null | undefined;
   };
 }
 
@@ -127,7 +122,7 @@ export const getColumnsWithTimestamp = ({
 export const getExampleText = (example: string | number | null | undefined): string =>
   !isEmpty(example) ? `Example: ${example}` : '';
 
-export const getIconFromType = (type: string | null) => {
+export const getIconFromType = (type: string | null | undefined) => {
   switch (type) {
     case 'string': // fall through
     case 'keyword':
@@ -232,3 +227,47 @@ export const getSummaryColumns = (
     },
   ];
 };
+
+export function getEnrichedFieldInfo({
+  browserFields,
+  contextId,
+  eventId,
+  field,
+  item,
+  linkValueField,
+  timelineId,
+}: {
+  browserFields: BrowserFields;
+  contextId: string;
+  item: TimelineEventsDetailsItem;
+  eventId: string;
+  field?: EventSummaryField;
+  timelineId: string;
+  linkValueField?: TimelineEventsDetailsItem;
+}): EnrichedFieldInfo {
+  const fieldInfo = {
+    contextId,
+    eventId,
+    fieldType: 'string',
+    linkValue: undefined,
+    timelineId,
+  };
+  const linkValue = getOr(null, 'originalValue.0', linkValueField);
+  const category = item.category ?? '';
+  const fieldName = item.field ?? '';
+
+  const browserField = get([category, 'fields', fieldName], browserFields);
+  const overrideField = field?.overrideField;
+  return {
+    ...fieldInfo,
+    data: {
+      field: overrideField ?? fieldName,
+      format: browserField?.format ?? '',
+      type: browserField?.type ?? '',
+      isObjectArray: item.isObjectArray,
+    },
+    values: item.values,
+    linkValue: linkValue ?? undefined,
+    fieldFromBrowserField: browserField,
+  };
+}

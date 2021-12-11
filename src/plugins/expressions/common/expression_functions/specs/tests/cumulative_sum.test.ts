@@ -14,10 +14,10 @@ import { Datatable } from '../../../expression_types/specs/datatable';
 describe('interpreter/functions#cumulative_sum', () => {
   const fn = functionWrapper(cumulativeSum);
   const runFn = (input: Datatable, args: CumulativeSumArgs) =>
-    fn(input, args, {} as ExecutionContext) as Datatable;
+    fn(input, args, {} as ExecutionContext) as Promise<Datatable>;
 
-  it('calculates cumulative sum', () => {
-    const result = runFn(
+  it('calculates cumulative sum', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -33,8 +33,8 @@ describe('interpreter/functions#cumulative_sum', () => {
     expect(result.rows.map((row) => row.output)).toEqual([5, 12, 15, 17]);
   });
 
-  it('replaces null or undefined data with zeroes until there is real data', () => {
-    const result = runFn(
+  it('replaces null or undefined data with zeroes until there is real data', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -50,8 +50,8 @@ describe('interpreter/functions#cumulative_sum', () => {
     expect(result.rows.map((row) => row.output)).toEqual([0, 0, 0, 1]);
   });
 
-  it('calculates cumulative sum for multiple series', () => {
-    const result = runFn(
+  it('calculates cumulative sum for multiple series', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -84,8 +84,8 @@ describe('interpreter/functions#cumulative_sum', () => {
     ]);
   });
 
-  it('treats missing split column as separate series', () => {
-    const result = runFn(
+  it('treats missing split column as separate series', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -117,8 +117,8 @@ describe('interpreter/functions#cumulative_sum', () => {
     ]);
   });
 
-  it('treats null like undefined and empty string for split columns', () => {
-    const result = runFn(
+  it('treats null like undefined and empty string for split columns', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -152,8 +152,8 @@ describe('interpreter/functions#cumulative_sum', () => {
     ]);
   });
 
-  it('calculates cumulative sum for multiple series by multiple split columns', () => {
-    const result = runFn(
+  it('calculates cumulative sum for multiple series by multiple split columns', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -177,8 +177,8 @@ describe('interpreter/functions#cumulative_sum', () => {
     expect(result.rows.map((row) => row.output)).toEqual([1, 2, 3, 1 + 4, 5, 6, 7, 7 + 8]);
   });
 
-  it('splits separate series by the string representation of the cell values', () => {
-    const result = runFn(
+  it('splits separate series by the string representation of the cell values', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -198,8 +198,8 @@ describe('interpreter/functions#cumulative_sum', () => {
     expect(result.rows.map((row) => row.output)).toEqual([1, 1 + 2, 10, 21]);
   });
 
-  it('casts values to number before calculating cumulative sum', () => {
-    const result = runFn(
+  it('casts values to number before calculating cumulative sum', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -210,8 +210,8 @@ describe('interpreter/functions#cumulative_sum', () => {
     expect(result.rows.map((row) => row.output)).toEqual([5, 12, 15, 17]);
   });
 
-  it('casts values to number before calculating cumulative sum for NaN like values', () => {
-    const result = runFn(
+  it('casts values to number before calculating cumulative sum for NaN like values', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -222,8 +222,8 @@ describe('interpreter/functions#cumulative_sum', () => {
     expect(result.rows.map((row) => row.output)).toEqual([5, 12, NaN, NaN]);
   });
 
-  it('skips undefined and null values', () => {
-    const result = runFn(
+  it('skips undefined and null values', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -244,8 +244,8 @@ describe('interpreter/functions#cumulative_sum', () => {
     expect(result.rows.map((row) => row.output)).toEqual([0, 7, 7, 7, 7, 7, 10, 12, 12]);
   });
 
-  it('copies over meta information from the source column', () => {
-    const result = runFn(
+  it('copies over meta information from the source column', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -286,8 +286,8 @@ describe('interpreter/functions#cumulative_sum', () => {
     });
   });
 
-  it('sets output name on output column if specified', () => {
-    const result = runFn(
+  it('sets output name on output column if specified', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -310,7 +310,7 @@ describe('interpreter/functions#cumulative_sum', () => {
     });
   });
 
-  it('returns source table if input column does not exist', () => {
+  it('returns source table if input column does not exist', async () => {
     const input: Datatable = {
       type: 'datatable',
       columns: [
@@ -324,11 +324,13 @@ describe('interpreter/functions#cumulative_sum', () => {
       ],
       rows: [{ val: 5 }],
     };
-    expect(runFn(input, { inputColumnId: 'nonexisting', outputColumnId: 'output' })).toBe(input);
+    expect(await runFn(input, { inputColumnId: 'nonexisting', outputColumnId: 'output' })).toBe(
+      input
+    );
   });
 
-  it('throws an error if output column exists already', () => {
-    expect(() =>
+  it('throws an error if output column exists already', async () => {
+    await expect(
       runFn(
         {
           type: 'datatable',
@@ -345,6 +347,6 @@ describe('interpreter/functions#cumulative_sum', () => {
         },
         { inputColumnId: 'val', outputColumnId: 'val' }
       )
-    ).toThrow();
+    ).rejects.toBeDefined();
   });
 });

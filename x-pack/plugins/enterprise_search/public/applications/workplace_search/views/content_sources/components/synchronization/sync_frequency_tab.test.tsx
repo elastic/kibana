@@ -22,9 +22,12 @@ describe('SyncFrequency', () => {
   const sourceWithNoDLP = cloneDeep(contentSource);
   sourceWithNoDLP.indexing.schedule.permissions = undefined as any;
   sourceWithNoDLP.indexing.schedule.estimates.permissions = undefined as any;
+  const {
+    indexing: { schedule },
+  } = contentSource;
 
   it('renders with DLP', () => {
-    setMockValues({ contentSource });
+    setMockValues({ contentSource, schedule });
     const wrapper = shallow(<SyncFrequency />);
 
     expect(wrapper.find(FrequencyItem)).toHaveLength(4);
@@ -32,7 +35,7 @@ describe('SyncFrequency', () => {
 
   it('renders without DLP', () => {
     setMockValues({
-      contentSource: sourceWithNoDLP,
+      schedule: sourceWithNoDLP.indexing.schedule,
     });
     const wrapper = shallow(<SyncFrequency />);
 

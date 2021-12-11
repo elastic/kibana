@@ -24,12 +24,12 @@ export function fortinetLogsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'fortinetLogs',
     name: i18n.translate('home.tutorials.fortinetLogs.nameTitle', {
-      defaultMessage: 'Fortinet logs',
+      defaultMessage: 'Fortinet Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.fortinetLogs.shortDescription', {
-      defaultMessage: 'Collect Fortinet FortiOS logs over syslog.',
+      defaultMessage: 'Collect and parse logs from Fortinet FortiOS with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.fortinetLogs.longDescription', {
       defaultMessage:
@@ -54,8 +54,8 @@ export function fortinetLogsSpecProvider(context: TutorialContext): TutorialSche
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['security'],
   };
 }

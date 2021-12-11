@@ -9,6 +9,7 @@ import { HostStatus } from '../../../../common/endpoint/types';
 import { createMockMetadataRequestContext } from '../../mocks';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { enrichHostMetadata, MetadataRequestContext } from './handlers';
+import { AgentClient } from '../../../../../fleet/server';
 
 describe('test document enrichment', () => {
   let metaReqCtx: jest.Mocked<MetadataRequestContext>;
@@ -23,11 +24,9 @@ describe('test document enrichment', () => {
 
     beforeEach(() => {
       statusFn = jest.fn();
-      (metaReqCtx.endpointAppContextService.getAgentService as jest.Mock).mockImplementation(() => {
-        return {
-          getAgentStatusById: statusFn,
-        };
-      });
+      metaReqCtx.requestHandlerContext!.fleet!.agentClient.asCurrentUser = {
+        getAgentStatusById: statusFn,
+      } as unknown as AgentClient;
     });
 
     it('should return host healthy for online agent', async () => {
@@ -87,12 +86,10 @@ describe('test document enrichment', () => {
     beforeEach(() => {
       agentMock = jest.fn();
       agentPolicyMock = jest.fn();
-      (metaReqCtx.endpointAppContextService.getAgentService as jest.Mock).mockImplementation(() => {
-        return {
-          getAgent: agentMock,
-          getAgentStatusById: jest.fn(),
-        };
-      });
+      metaReqCtx.requestHandlerContext!.fleet!.agentClient.asCurrentUser = {
+        getAgent: agentMock,
+        getAgentStatusById: jest.fn(),
+      } as unknown as AgentClient;
       (metaReqCtx.endpointAppContextService.getAgentPolicyService as jest.Mock).mockImplementation(
         () => {
           return {
@@ -114,8 +111,8 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
       expect(enrichedHostList.policy_info).toBeDefined();
-      expect(enrichedHostList.policy_info!.agent.applied.id).toEqual(policyID);
-      expect(enrichedHostList.policy_info!.agent.applied.revision).toEqual(policyRev);
+      expect(enrichedHostList.policy_info?.agent.applied.id).toEqual(policyID);
+      expect(enrichedHostList.policy_info?.agent.applied.revision).toEqual(policyRev);
     });
 
     it('reflects current fleet agent info', async () => {
@@ -130,8 +127,8 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
       expect(enrichedHostList.policy_info).toBeDefined();
-      expect(enrichedHostList.policy_info!.agent.configured.id).toEqual(policyID);
-      expect(enrichedHostList.policy_info!.agent.configured.revision).toEqual(policyRev);
+      expect(enrichedHostList.policy_info?.agent.configured.id).toEqual(policyID);
+      expect(enrichedHostList.policy_info?.agent.configured.revision).toEqual(policyRev);
     });
 
     it('reflects current endpoint policy info', async () => {
@@ -151,8 +148,8 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(docGen.generateHostMetadata(), metaReqCtx);
       expect(enrichedHostList.policy_info).toBeDefined();
-      expect(enrichedHostList.policy_info!.endpoint.id).toEqual(policyID);
-      expect(enrichedHostList.policy_info!.endpoint.revision).toEqual(policyRev);
+      expect(enrichedHostList.policy_info?.endpoint.id).toEqual(policyID);
+      expect(enrichedHostList.policy_info?.endpoint.revision).toEqual(policyRev);
     });
   });
 });

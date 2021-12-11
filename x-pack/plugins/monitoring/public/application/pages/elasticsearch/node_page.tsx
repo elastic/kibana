@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ItemTemplate } from './item_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-import { NodeReact } from '../../../components/elasticsearch';
+import { Node } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useCharts } from '../../hooks/use_charts';
@@ -30,9 +31,11 @@ import {
   RULE_DISK_USAGE,
   RULE_MEMORY_USAGE,
 } from '../../../../common/constants';
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
-export const ElasticsearchNodePage: React.FC<ComponentProps> = () => {
+export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
+  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
   const { zoomInfo, onBrush } = useCharts();
   const [showSystemIndices, setShowSystemIndices] = useLocalStorage<boolean>(
     'showSystemIndices',
@@ -42,10 +45,23 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = () => {
 
   const { node }: { node: string } = useParams();
   const { services } = useKibana<{ data: any }>();
+  const [data, setData] = useState({} as any);
 
   const clusterUuid = globalState.cluster_uuid;
+  const cluster = find(clusters, {
+    cluster_uuid: clusterUuid,
+  }) as any;
+
+  useEffect(() => {
+    if (cluster) {
+      generateBreadcrumbs(cluster.cluster_name, {
+        inElasticsearch: true,
+        name: 'nodes',
+        instance: data?.nodeSummary?.name,
+      });
+    }
+  }, [cluster, generateBreadcrumbs, data?.nodeSummary?.name]);
   const ccs = globalState.ccs;
-  const [data, setData] = useState({} as any);
   const [nodesByIndicesData, setNodesByIndicesData] = useState([]);
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.node.overview.title', {
@@ -66,7 +82,7 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes/${node}`;
     if (services.http?.fetch && clusterUuid) {
-      const response = await services.http?.fetch(url, {
+      const response = await services.http?.fetch<{ shards: unknown[]; nodes: unknown[] }>(url, {
         method: 'POST',
         body: JSON.stringify({
           showSystemIndices,
@@ -127,7 +143,7 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = () => {
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}
-            <NodeReact
+            <Node
               alerts={alerts}
               labels={labels.node}
               nodeId={node}

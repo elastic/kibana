@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import Bluebird from 'bluebird';
 import _ from 'lodash';
 
 /* @param {Array} args
@@ -18,7 +17,7 @@ import _ from 'lodash';
 
 export default function alter(args, fn) {
   // In theory none of the args should ever be promises. This is probably a waste.
-  return Bluebird.all(args)
+  return Promise.all(args)
     .then(function (args) {
       const seriesList = args.shift();
 

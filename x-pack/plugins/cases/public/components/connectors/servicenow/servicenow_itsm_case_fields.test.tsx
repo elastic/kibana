@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor, act, render, screen } from '@testing-library/react';
 import { EuiSelect } from '@elastic/eui';
 import { mount } from 'enzyme';
 
@@ -125,6 +125,17 @@ describe('ServiceNowITSM Fields', () => {
         { value: '4', text: '4 - Low' },
       ])
     );
+  });
+
+  test('it shows the deprecated callout when the connector uses the table API', async () => {
+    const tableApiConnector = { ...connector, config: { usesTableApi: true } };
+    render(<Fields fields={fields} onChange={onChange} connector={tableApiConnector} />);
+    expect(screen.getByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
+  });
+
+  test('it does not show the deprecated callout when the connector does not uses the table API', async () => {
+    render(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
   });
 
   describe('onChange calls', () => {

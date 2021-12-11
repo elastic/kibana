@@ -10,7 +10,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { APMLinkExtendProps, getAPMHref } from './APMLink';
+import { APMLinkExtendProps, getLegacyApmHref } from './APMLink';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
@@ -29,7 +29,7 @@ export function useTransactionsOverviewHref({
 
   const query = { latencyAggregationType, transactionType };
 
-  return getAPMHref({
+  return getLegacyApmHref({
     basePath: core.http.basePath,
     path: `/services/${serviceName}/transactions`,
     query: removeUndefinedProps(query),

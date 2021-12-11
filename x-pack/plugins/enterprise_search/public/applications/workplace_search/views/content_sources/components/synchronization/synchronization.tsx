@@ -11,16 +11,16 @@ import { useActions, useValues } from 'kea';
 
 import { EuiCallOut, EuiLink, EuiPanel, EuiSwitch, EuiSpacer, EuiText } from '@elastic/eui';
 
+import { docLinks } from '../../../../../shared/doc_links';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { NAV } from '../../../../constants';
-import { SYNCHRONIZATION_DOCS_URL } from '../../../../routes';
 import {
-  SOURCE_SYNCRONIZATION_DESCRIPTION,
+  LEARN_MORE_LINK,
+  SOURCE_SYNCHRONIZATION_DESCRIPTION,
   SYNCHRONIZATION_DISABLED_TITLE,
   SYNCHRONIZATION_DISABLED_DESCRIPTION,
-  SOURCE_SYNCRONIZATION_TOGGLE_LABEL,
-  SOURCE_SYNCRONIZATION_TOGGLE_DESCRIPTION,
-  SYNCHRONIZATION_LINK_LABEL,
+  SOURCE_SYNCHRONIZATION_TOGGLE_LABEL,
+  SOURCE_SYNCHRONIZATION_TOGGLE_DESCRIPTION,
 } from '../../constants';
 import { SourceLogic } from '../../source_logic';
 import { SourceLayout } from '../source_layout';
@@ -40,13 +40,13 @@ export const Synchronization: React.FC = () => {
   const syncToggle = (
     <EuiPanel hasBorder>
       <EuiSwitch
-        label={SOURCE_SYNCRONIZATION_TOGGLE_LABEL}
+        label={SOURCE_SYNCHRONIZATION_TOGGLE_LABEL}
         checked={enabled}
         onChange={(e) => onChange(e.target.checked)}
       />
       <EuiSpacer size="m" />
       <EuiText size="s" color="subdued">
-        {SOURCE_SYNCRONIZATION_TOGGLE_DESCRIPTION}
+        {SOURCE_SYNCHRONIZATION_TOGGLE_DESCRIPTION}
       </EuiText>
     </EuiPanel>
   );
@@ -65,11 +65,15 @@ export const Synchronization: React.FC = () => {
     >
       <ViewContentHeader
         title={NAV.SYNCHRONIZATION}
-        description={SOURCE_SYNCRONIZATION_DESCRIPTION}
+        description={
+          <>
+            {SOURCE_SYNCHRONIZATION_DESCRIPTION}{' '}
+            <EuiLink href={docLinks.workplaceSearchSynch} external>
+              {LEARN_MORE_LINK}
+            </EuiLink>
+          </>
+        }
       />
-      <EuiLink href={SYNCHRONIZATION_DOCS_URL} external>
-        {SYNCHRONIZATION_LINK_LABEL}
-      </EuiLink>
       <EuiSpacer />
       {isSyncConfigEnabled ? syncToggle : syncDisabledCallout}
     </SourceLayout>

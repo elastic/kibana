@@ -42,6 +42,10 @@ export class JsonLayout implements Layout {
   }
 
   public format(record: LogRecord): string {
+    const spanId = record.meta?.span?.id ?? record.spanId;
+    const traceId = record.meta?.trace?.id ?? record.traceId;
+    const transactionId = record.meta?.transaction?.id ?? record.transactionId;
+
     const log: Ecs = {
       ecs: { version: '8.0.0' },
       '@timestamp': moment(record.timestamp).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
@@ -54,6 +58,9 @@ export class JsonLayout implements Layout {
       process: {
         pid: record.pid,
       },
+      span: spanId ? { id: spanId } : undefined,
+      trace: traceId ? { id: traceId } : undefined,
+      transaction: transactionId ? { id: transactionId } : undefined,
     };
     const output = record.meta ? merge({ ...record.meta }, log) : log;
 

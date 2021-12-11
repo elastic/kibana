@@ -17,9 +17,9 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new CustomIntegrationsPlugin(initializerContext);
 }
 
-export { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './types';
+export type { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './types';
 
-export type { IntegrationCategory, IntegrationCategoryCount, CustomIntegration } from '../common';
+export type { IntegrationCategory, CustomIntegration } from '../common';
 
 export const config = {
   schema: schema.object({}),

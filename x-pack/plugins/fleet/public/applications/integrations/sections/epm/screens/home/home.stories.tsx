@@ -14,7 +14,6 @@ import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { EPMHomePage as Component } from '.';
 
 export default {
-  component: Component,
   title: 'Sections/EPM/Home',
 };
 

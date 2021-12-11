@@ -84,7 +84,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
             </EuiHeaderLink>
             <AlertDropdown />
             <EuiHeaderLink
-              href={kibana.services?.application?.getUrlForApp('/home#/tutorial_directory/logging')}
+              href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
               color="primary"
               iconType="indexOpen"
             >

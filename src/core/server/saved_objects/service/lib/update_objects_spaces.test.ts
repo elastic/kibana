@@ -10,12 +10,14 @@ import {
   mockGetBulkOperationError,
   mockGetExpectedVersionProperties,
   mockRawDocExistsInNamespace,
+  mockDeleteLegacyUrlAliases,
 } from './update_objects_spaces.test.mock';
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { ElasticsearchClient } from 'src/core/server/elasticsearch';
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
+import { loggerMock } from '../../../logging/logger.mock';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { SavedObjectsSerializer } from '../../serialization';
 import type {
@@ -23,7 +25,7 @@ import type {
   UpdateObjectsSpacesParams,
 } from './update_objects_spaces';
 import { updateObjectsSpaces } from './update_objects_spaces';
-import { SavedObjectsErrorHelpers } from './errors';
+import { ALL_NAMESPACES_STRING } from './utils';
 
 type SetupParams = Partial<
   Pick<UpdateObjectsSpacesParams, 'objects' | 'spacesToAdd' | 'spacesToRemove' | 'options'>
@@ -54,6 +56,8 @@ beforeEach(() => {
   mockGetExpectedVersionProperties.mockReturnValue(EXPECTED_VERSION_PROPS);
   mockRawDocExistsInNamespace.mockReset();
   mockRawDocExistsInNamespace.mockReturnValue(true); // return true by default
+  mockDeleteLegacyUrlAliases.mockReset();
+  mockDeleteLegacyUrlAliases.mockResolvedValue(); // resolve an empty promise by default
 });
 
 afterAll(() => {
@@ -72,10 +76,12 @@ describe('#updateObjectsSpaces', () => {
     client = elasticsearchClientMock.createElasticsearchClient();
     const serializer = new SavedObjectsSerializer(registry);
     return {
+      mappings: { properties: {} }, // doesn't matter, only used as an argument to deleteLegacyUrlAliases which is mocked
       registry,
       allowedTypes: [SHAREABLE_OBJ_TYPE, NON_SHAREABLE_OBJ_TYPE], // SHAREABLE_HIDDEN_OBJ_TYPE is excluded
       client,
       serializer,
+      logger: loggerMock.create(),
       getIndexForType: (type: string) => `index-for-${type}`,
       objects,
       spacesToAdd,
@@ -104,32 +110,6 @@ describe('#updateObjectsSpaces', () => {
               }
         ),
       })
-    );
-  }
-  /** Mocks the saved objects client so as to test unsupported server responding with 404 */
-  function mockMgetResultsNotFound(...results: Array<{ found: boolean }>) {
-    client.mget.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        {
-          docs: results.map((x) =>
-            x.found
-              ? {
-                  _id: 'doesnt-matter',
-                  _index: 'doesnt-matter',
-                  _source: { namespaces: [EXISTING_SPACE] },
-                  ...VERSION_PROPS,
-                  found: true,
-                }
-              : {
-                  _id: 'doesnt-matter',
-                  _index: 'doesnt-matter',
-                  found: false,
-                }
-          ),
-        },
-        { statusCode: 404 },
-        {}
-      )
     );
   }
 
@@ -266,17 +246,6 @@ describe('#updateObjectsSpaces', () => {
         { ...obj6, spaces: [], error: BULK_ERROR },
         { ...obj7, spaces: [EXISTING_SPACE, 'foo-space'] },
       ]);
-    });
-
-    it('throws when mget not found response is missing the Elasticsearch header', async () => {
-      const objects = [{ type: SHAREABLE_OBJ_TYPE, id: 'id-1' }];
-      const spacesToAdd = ['foo-space'];
-      const params = setup({ objects, spacesToAdd });
-      mockMgetResultsNotFound({ found: true });
-
-      await expect(() => updateObjectsSpaces(params)).rejects.toThrowError(
-        SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError()
-      );
     });
   });
 
@@ -418,6 +387,149 @@ describe('#updateObjectsSpaces', () => {
 
         await updateObjectsSpaces(params);
         expect(client.bulk).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('legacy URL aliases', () => {
+      it('does not delete aliases for objects that were not removed from any spaces', async () => {
+        const space1 = 'space-to-add';
+        const space2 = 'space-to-remove';
+        const space3 = 'other-space';
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1] }; // will not be changed
+        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2', spaces: [space3] }; // will be updated
+
+        const objects = [obj1, obj2];
+        const spacesToAdd = [space1];
+        const spacesToRemove = [space2];
+        const params = setup({ objects, spacesToAdd, spacesToRemove });
+        // this test case does not call mget
+        mockBulkResults({ error: false }); // result for obj2
+
+        await updateObjectsSpaces(params);
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expectBulkArgs({ action: 'update', object: { ...obj2, namespaces: [space3, space1] } });
+        expect(mockDeleteLegacyUrlAliases).not.toHaveBeenCalled();
+        expect(params.logger.error).not.toHaveBeenCalled();
+      });
+
+      it('does not delete aliases for objects that were removed from spaces but were also added to All Spaces (*)', async () => {
+        const space2 = 'space-to-remove';
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space2] };
+
+        const objects = [obj1];
+        const spacesToAdd = [ALL_NAMESPACES_STRING];
+        const spacesToRemove = [space2];
+        const params = setup({ objects, spacesToAdd, spacesToRemove });
+        // this test case does not call mget
+        mockBulkResults({ error: false }); // result for obj1
+
+        await updateObjectsSpaces(params);
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expectBulkArgs({
+          action: 'update',
+          object: { ...obj1, namespaces: [ALL_NAMESPACES_STRING] },
+        });
+        expect(mockDeleteLegacyUrlAliases).not.toHaveBeenCalled();
+        expect(params.logger.error).not.toHaveBeenCalled();
+      });
+
+      it('deletes aliases for objects that were removed from specific spaces using "deleteBehavior: exclusive"', async () => {
+        const space1 = 'space-to-remove';
+        const space2 = 'another-space-to-remove';
+        const space3 = 'other-space';
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space3] }; // will not be changed
+        const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1, space2, space3] }; // will be updated
+        const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1] }; // will be deleted
+
+        const objects = [obj1, obj2, obj3];
+        const spacesToRemove = [space1, space2];
+        const params = setup({ objects, spacesToRemove });
+        // this test case does not call mget
+        mockBulkResults({ error: false }, { error: false }); // result2 for obj2 and obj3
+
+        await updateObjectsSpaces(params);
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expectBulkArgs(
+          { action: 'update', object: { ...obj2, namespaces: [space3] } },
+          { action: 'delete', object: obj3 }
+        );
+        expect(mockDeleteLegacyUrlAliases).toHaveBeenCalledTimes(2);
+        expect(mockDeleteLegacyUrlAliases).toHaveBeenNthCalledWith(
+          1, // the first call resulted in an error which generated a log message (see assertion below)
+          expect.objectContaining({
+            type: obj2.type,
+            id: obj2.id,
+            namespaces: [space1, space2],
+            deleteBehavior: 'inclusive',
+          })
+        );
+        expect(mockDeleteLegacyUrlAliases).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            type: obj3.type,
+            id: obj3.id,
+            namespaces: [space1],
+            deleteBehavior: 'inclusive',
+          })
+        );
+        expect(params.logger.error).not.toHaveBeenCalled();
+      });
+
+      it('deletes aliases for objects that were removed from all spaces using "deleteBehavior: inclusive"', async () => {
+        const space1 = 'space-to-add';
+        const space2 = 'other-space';
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space2] }; // will be updated to add space1
+        const obj2 = {
+          type: SHAREABLE_OBJ_TYPE,
+          id: 'id-2',
+          spaces: [space2, ALL_NAMESPACES_STRING], // will be updated to add space1 and remove *
+        };
+
+        const objects = [obj1, obj2];
+        const spacesToAdd = [space1];
+        const spacesToRemove = [ALL_NAMESPACES_STRING];
+        const params = setup({ objects, spacesToAdd, spacesToRemove });
+        // this test case does not call mget
+        mockBulkResults({ error: false }); // result for obj1
+
+        await updateObjectsSpaces(params);
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expectBulkArgs(
+          { action: 'update', object: { ...obj1, namespaces: [space2, space1] } },
+          { action: 'update', object: { ...obj2, namespaces: [space2, space1] } }
+        );
+        expect(mockDeleteLegacyUrlAliases).toHaveBeenCalledTimes(1);
+        expect(mockDeleteLegacyUrlAliases).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: obj2.type,
+            id: obj2.id,
+            namespaces: [space2, space1],
+            deleteBehavior: 'exclusive',
+          })
+        );
+        expect(params.logger.error).not.toHaveBeenCalled();
+      });
+
+      it('logs a message when deleteLegacyUrlAliases returns an error', async () => {
+        const space1 = 'space-to-remove';
+        const space2 = 'other-space';
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1, space2] }; // will be updated
+
+        const objects = [obj1];
+        const spacesToRemove = [space1];
+        const params = setup({ objects, spacesToRemove });
+        // this test case does not call mget
+        mockBulkResults({ error: false }); // result for obj1
+        mockDeleteLegacyUrlAliases.mockRejectedValueOnce(new Error('Oh no!')); // result for deleting aliases for obj1
+
+        await updateObjectsSpaces(params);
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expectBulkArgs({ action: 'update', object: { ...obj1, namespaces: [space2] } });
+        expect(mockDeleteLegacyUrlAliases).toHaveBeenCalledTimes(1); // don't assert deleteLegacyUrlAliases args, we have tests for that above
+        expect(params.logger.error).toHaveBeenCalledTimes(1);
+        expect(params.logger.error).toHaveBeenCalledWith(
+          'Unable to delete aliases when unsharing an object: Oh no!'
+        );
       });
     });
   });

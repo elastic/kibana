@@ -9,7 +9,7 @@ import uuid from 'uuid';
 import React, { FunctionComponent } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormLabel } from '@elastic/eui';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import AlertAdd from './alert_add';
@@ -64,7 +64,8 @@ export const TestExpression: FunctionComponent<any> = () => {
   );
 };
 
-describe('alert_add', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/g
+describe.skip('alert_add', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(

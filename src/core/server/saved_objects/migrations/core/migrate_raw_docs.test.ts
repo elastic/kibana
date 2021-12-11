@@ -139,7 +139,6 @@ describe('migrateRawDocsSafely', () => {
     ]);
     const task = migrateRawDocsSafely({
       serializer: new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
-      knownTypes: new Set(['a', 'c']),
       migrateDoc: transform,
       rawDocs: [
         { _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } },
@@ -184,7 +183,6 @@ describe('migrateRawDocsSafely', () => {
     ]);
     const task = migrateRawDocsSafely({
       serializer: new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
-      knownTypes: new Set(['a', 'c']),
       migrateDoc: transform,
       rawDocs: [
         { _id: 'foo:b', _source: { type: 'a', a: { name: 'AAA' } } },
@@ -206,7 +204,6 @@ describe('migrateRawDocsSafely', () => {
     ]);
     const task = migrateRawDocsSafely({
       serializer: new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
-      knownTypes: new Set(['a', 'c']),
       migrateDoc: transform,
       rawDocs: [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }],
     });
@@ -240,7 +237,6 @@ describe('migrateRawDocsSafely', () => {
     });
     const task = migrateRawDocsSafely({
       serializer: new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
-      knownTypes: new Set(['a', 'c']),
       migrateDoc: transform,
       rawDocs: [{ _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } }], // this is the raw doc
     });
@@ -255,44 +251,5 @@ describe('migrateRawDocsSafely', () => {
         "rawId": "a:b",
       }
     `);
-  });
-
-  test('skips documents of unknown types', async () => {
-    const transform = jest.fn<any, any>((doc: any) => [
-      set(_.cloneDeep(doc), 'attributes.name', 'HOI!'),
-    ]);
-    const task = migrateRawDocsSafely({
-      serializer: new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
-      knownTypes: new Set(['a']),
-      migrateDoc: transform,
-      rawDocs: [
-        { _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } },
-        { _id: 'c:d', _source: { type: 'c', c: { name: 'DDD' } } },
-      ],
-    });
-
-    const result = (await task()) as Either.Right<DocumentsTransformSuccess>;
-    expect(result._tag).toEqual('Right');
-    expect(result.right.processedDocs).toEqual([
-      {
-        _id: 'a:b',
-        _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-      },
-      {
-        _id: 'c:d',
-        // name field is not migrated on unknown type
-        _source: { type: 'c', c: { name: 'DDD' } },
-      },
-    ]);
-
-    const obj1 = {
-      id: 'b',
-      type: 'a',
-      attributes: { name: 'AAA' },
-      migrationVersion: {},
-      references: [],
-    };
-    expect(transform).toHaveBeenCalledTimes(1);
-    expect(transform).toHaveBeenNthCalledWith(1, obj1);
   });
 });

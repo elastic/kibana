@@ -6,7 +6,7 @@
  */
 
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
-import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -31,7 +31,7 @@ import {
 import { defaultRiskScoreBySeverity, severityOptions } from './data';
 import { stepAboutDefaultValue } from './default_value';
 import { isUrlInvalid } from '../../../../common/utils/validators';
-import { schema } from './schema';
+import { schema as defaultSchema, threatIndicatorPathRequiredSchemaValue } from './schema';
 import * as I18n from './translations';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
@@ -73,7 +73,28 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   onSubmit,
   setForm,
 }) => {
-  const initialState = defaultValues ?? stepAboutDefaultValue;
+  const isThreatMatchRuleValue = useMemo(
+    () => isThreatMatchRule(defineRuleData?.ruleType),
+    [defineRuleData?.ruleType]
+  );
+
+  const initialState: AboutStepRule = useMemo(
+    () =>
+      defaultValues ??
+      (isThreatMatchRuleValue
+        ? { ...stepAboutDefaultValue, threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH }
+        : stepAboutDefaultValue),
+    [defaultValues, isThreatMatchRuleValue]
+  );
+
+  const schema = useMemo(
+    () =>
+      isThreatMatchRuleValue
+        ? { ...defaultSchema, threatIndicatorPath: threatIndicatorPathRequiredSchemaValue }
+        : defaultSchema,
+    [isThreatMatchRuleValue]
+  );
+
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
   const [indexPatternLoading, { indexPatterns }] = useFetchIndex(defineRuleData?.index ?? []);
 
@@ -300,7 +321,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               />
             </EuiFormRow>
             <EuiSpacer size="l" />
-            {isThreatMatchRule(defineRuleData?.ruleType) && (
+            {isThreatMatchRuleValue && (
               <>
                 <CommonUseField
                   path="threatIndicatorPath"

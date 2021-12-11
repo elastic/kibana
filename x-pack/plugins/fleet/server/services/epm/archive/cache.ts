@@ -67,3 +67,11 @@ export const setPackageInfo = ({
 };
 
 export const deletePackageInfo = (args: SharedKey) => packageInfoCache.delete(sharedKey(args));
+
+export const clearPackageFileCache = (args: SharedKey) => {
+  const fileList = getArchiveFilelist(args) ?? [];
+  fileList.forEach((filePath) => {
+    deleteArchiveEntry(filePath);
+  });
+  deleteArchiveFilelist(args);
+};

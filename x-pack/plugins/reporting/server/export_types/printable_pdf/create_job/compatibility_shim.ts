@@ -22,7 +22,10 @@ const getSavedObjectTitle = async (
   savedObjectId: string,
   savedObjectsClient: SavedObjectsClientContract
 ) => {
-  const savedObject = await savedObjectsClient.get<{ title: string }>(objectType, savedObjectId);
+  const { saved_object: savedObject } = await savedObjectsClient.resolve<{ title: string }>(
+    objectType,
+    savedObjectId
+  );
   return savedObject.attributes.title;
 };
 

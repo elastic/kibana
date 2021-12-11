@@ -23,16 +23,16 @@ export function rabbitmqMetricsSpecProvider(context: TutorialContext): TutorialS
   return {
     id: 'rabbitmqMetrics',
     name: i18n.translate('home.tutorials.rabbitmqMetrics.nameTitle', {
-      defaultMessage: 'RabbitMQ metrics',
+      defaultMessage: 'RabbitMQ Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.rabbitmqMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the RabbitMQ server.',
+      defaultMessage: 'Collect metrics from RabbitMQ servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.rabbitmqMetrics.longDescription', {
       defaultMessage:
-        'The `rabbitmq` Metricbeat module fetches internal metrics from the RabbitMQ server. \
+        'The `rabbitmq` Metricbeat module fetches metrics from RabbitMQ server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-rabbitmq.html',
@@ -60,8 +60,8 @@ export function rabbitmqMetricsSpecProvider(context: TutorialContext): TutorialS
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/rabbitmq_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['message_queue'],
   };
 }

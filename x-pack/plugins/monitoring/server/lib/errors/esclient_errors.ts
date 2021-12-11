@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { boomify } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { ErrorTypes } from '../../types';
@@ -38,12 +38,12 @@ const mapTypeMessage: { [key: string]: string } = {
 };
 
 export function isESClientError(err: ErrorTypes) {
-  if (err instanceof ElasticsearchClientError === false) return false;
+  if (err instanceof errors.ElasticsearchClientError === false) return false;
   const knownTypes = Object.keys(mapTypeMessage);
   return knownTypes.includes(err.constructor.name);
 }
 
-export function handleESClientError(err: ElasticsearchClientError) {
+export function handleESClientError(err: errors.ElasticsearchClientError) {
   err.message = mapTypeMessage[err.constructor.name];
   return boomify(err, { statusCode: 503 });
 }

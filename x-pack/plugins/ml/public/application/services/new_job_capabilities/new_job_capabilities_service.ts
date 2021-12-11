@@ -11,7 +11,8 @@ import {
   FieldId,
   EVENT_RATE_FIELD_ID,
 } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
 import { ml } from '../ml_api_service';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 
@@ -35,8 +36,8 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
     return filterCategoryFields(this._fields);
   }
 
-  public async initializeFromIndexPattern(
-    indexPattern: IIndexPattern,
+  public async initializeFromDataVIew(
+    dataView: DataView,
     includeEventRateField = true,
     removeTextFields = true
   ) {
@@ -44,8 +45,8 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
       this._includeEventRateField = includeEventRateField;
       this._removeTextFields = removeTextFields;
 
-      const resp = await ml.jobs.newJobCaps(indexPattern.title, indexPattern.type === 'rollup');
-      const { fields: allFields, aggs } = createObjects(resp, indexPattern.title);
+      const resp = await ml.jobs.newJobCaps(dataView.title, dataView.type === 'rollup');
+      const { fields: allFields, aggs } = createObjects(resp, dataView.title);
 
       if (this._includeEventRateField === true) {
         addEventRateField(aggs, allFields);

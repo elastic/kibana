@@ -30,7 +30,7 @@ import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_d
 import { getToolTipContent } from '../../../../common/utils/privileges';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useKibana } from '../../../../common/lib/kibana';
-import { APP_ID, SecurityPageName } from '../../../../../common/constants';
+import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   &.euiButtonIcon {
@@ -62,7 +62,7 @@ const RuleActionsOverflowComponent = ({
   const [, dispatchToaster] = useStateToaster();
 
   const onRuleDeletedCallback = useCallback(() => {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRulesUrl(),
     });

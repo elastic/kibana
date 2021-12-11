@@ -49,6 +49,10 @@ const searchSourceMock = { ...searchSourceInstanceMock };
 const mockSearchSourceService: jest.Mocked<ISearchStartSearchSource> = {
   create: jest.fn().mockReturnValue(searchSourceMock),
   createEmpty: jest.fn().mockReturnValue(searchSourceMock),
+  telemetry: jest.fn(),
+  inject: jest.fn(),
+  extract: jest.fn(),
+  getAllMigrations: jest.fn(),
 };
 const mockDataClientSearchDefault = jest.fn().mockImplementation(
   (): Rx.Observable<{ rawResponse: SearchResponse<unknown> }> =>
@@ -75,6 +79,7 @@ const mockSearchSourceGetFieldDefault = jest.fn().mockImplementation((key: strin
           getByName: jest.fn().mockImplementation(() => []),
           getByType: jest.fn().mockImplementation(() => []),
         },
+        metaFields: ['_id', '_index', '_type', '_score'],
         getFormatterForField: jest.fn(),
       };
   }
@@ -337,19 +342,20 @@ it('uses the scrollId to page all the data', async () => {
 
   expect(mockDataClient.search).toHaveBeenCalledTimes(1);
   expect(mockDataClient.search).toBeCalledWith(
-    { params: { ignore_throttled: true, scroll: '30s', size: 500 } },
+    { params: { ignore_throttled: undefined, scroll: '30s', size: 500 } },
     { strategy: 'es' }
   );
 
   // `scroll` and `clearScroll` must be called with scroll ID in the post body!
   expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledTimes(9);
   expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledWith({
-    body: { scroll: '30s', scroll_id: 'awesome-scroll-hero' },
+    scroll: '30s',
+    scroll_id: 'awesome-scroll-hero',
   });
 
   expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledTimes(1);
   expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledWith({
-    body: { scroll_id: ['awesome-scroll-hero'] },
+    scroll_id: ['awesome-scroll-hero'],
   });
 });
 
@@ -812,4 +818,31 @@ describe('formulas', () => {
     expect(content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(true);
   });
+});
+
+it('can override ignoring frozen indices', async () => {
+  const originalGet = uiSettingsClient.get;
+  uiSettingsClient.get = jest.fn().mockImplementation((key): any => {
+    if (key === 'search:includeFrozen') {
+      return true;
+    }
+    return originalGet(key);
+  });
+
+  const generateCsv = new CsvGenerator(
+    createMockJob({}),
+    mockConfig,
+    { es: mockEsClient, data: mockDataClient, uiSettings: uiSettingsClient },
+    { searchSourceStart: mockSearchSourceService, fieldFormatsRegistry: mockFieldFormatsRegistry },
+    new CancellationToken(),
+    logger,
+    stream
+  );
+
+  await generateCsv.generateData();
+
+  expect(mockDataClient.search).toBeCalledWith(
+    { params: { ignore_throttled: false, scroll: '30s', size: 500 } },
+    { strategy: 'es' }
+  );
 });

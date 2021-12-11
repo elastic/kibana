@@ -15,9 +15,11 @@ import { UiActionsService } from '../service';
  * within `ui_actions` plugin.
  */
 export class TriggerInternal<Context extends object = object> {
-  public readonly contract: TriggerContract<Context> = new TriggerContract<Context>(this);
+  public readonly contract: TriggerContract<Context>;
 
-  constructor(public readonly service: UiActionsService, public readonly trigger: Trigger) {}
+  constructor(public readonly service: UiActionsService, public readonly trigger: Trigger) {
+    this.contract = new TriggerContract<Context>(this);
+  }
 
   public async execute(context: Context, alwaysShowPopup?: boolean) {
     const triggerId = this.trigger.id;

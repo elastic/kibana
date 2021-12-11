@@ -26,14 +26,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...kibanaCommonTestsConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...kibanaCommonTestsConfig.get('kbnTestServer.serverArgs'),
-        // Enable plugins that are disabled by default to include their metrics
-        // TODO: Find a way to automatically enable all discovered plugins
-        '--xpack.fleet.enabled=true',
-        '--xpack.lists.enabled=true',
-        '--xpack.securitySolution.enabled=true',
-      ],
+      serverArgs: [...kibanaCommonTestsConfig.get('kbnTestServer.serverArgs')],
     },
   };
 }

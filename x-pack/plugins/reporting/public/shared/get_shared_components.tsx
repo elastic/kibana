@@ -16,7 +16,8 @@ interface IncludeOnCloseFn {
   onClose: () => void;
 }
 
-type Props = Pick<PanelPropsScreenCapture, 'getJobParams' | 'layoutOption'> & IncludeOnCloseFn;
+type Props = Pick<PanelPropsScreenCapture, 'getJobParams' | 'layoutOption' | 'objectId'> &
+  IncludeOnCloseFn;
 
 /*
  * As of 7.14, the only shared component is a PDF report that is suited for Canvas integration.

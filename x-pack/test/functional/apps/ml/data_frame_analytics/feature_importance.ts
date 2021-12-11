@@ -63,6 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
                 training_percent: 35,
                 prediction_field_name: 'CentralAir_prediction',
                 num_top_classes: -1,
+                max_trees: 10,
               },
             },
             model_memory_limit: '60mb',
@@ -108,6 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
                 training_percent: 35,
                 prediction_field_name: 'heatingqc',
                 num_top_classes: -1,
+                max_trees: 10,
               },
             },
             model_memory_limit: '60mb',
@@ -139,6 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
                 dependent_variable: 'stab',
                 num_top_feature_importance_values: 5,
                 training_percent: 35,
+                max_trees: 10,
               },
             },
             analyzed_fields: {

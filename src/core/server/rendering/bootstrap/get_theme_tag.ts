@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
+
 /**
  * Computes the themeTag that will be used on the client-side as `__kbnThemeTag__`
  * @see `packages/kbn-ui-shared-deps-src/theme.ts`
@@ -14,8 +16,8 @@ export const getThemeTag = ({
   themeVersion,
   darkMode,
 }: {
-  themeVersion: string;
+  themeVersion: ThemeVersion;
   darkMode: boolean;
 }) => {
-  return `${themeVersion === 'v7' ? 'v7' : 'v8'}${darkMode ? 'dark' : 'light'}`;
+  return `${themeVersion}${darkMode ? 'dark' : 'light'}`;
 };

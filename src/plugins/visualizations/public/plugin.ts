@@ -18,14 +18,14 @@ import {
   setUsageCollector,
   setExpressions,
   setUiActions,
-  setSavedVisualizationsLoader,
   setTimeFilter,
   setAggs,
   setChrome,
   setOverlays,
-  setSavedSearchLoader,
   setEmbeddable,
   setDocLinks,
+  setSpaces,
+  setTheme,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -39,7 +39,6 @@ import { visDimension as visDimensionExpressionFunction } from '../common/expres
 import { xyDimension as xyDimensionExpressionFunction } from '../common/expression_functions/xy_dimension';
 
 import { createStartServicesGetter, StartServicesGetter } from '../../kibana_utils/public';
-import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
 import type { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';
 
@@ -50,8 +49,6 @@ import {
   saveVisualization,
   findListItems,
 } from './utils/saved_visualize_utils';
-
-import { createSavedSearchesLoader } from '../../discover/public';
 
 import type {
   PluginInitializerContext,
@@ -85,7 +82,6 @@ import type { VisSavedObject, SaveVisOptions, GetVisOptions } from './types';
 export type VisualizationsSetup = TypesSetup;
 
 export interface VisualizationsStart extends TypesStart {
-  savedVisualizationsLoader: SavedVisualizationsLoader;
   createVis: (visType: string, visState: SerializedVis) => Promise<Vis>;
   convertToSerializedVis: typeof convertToSerializedVis;
   convertFromSerializedVis: typeof convertFromSerializedVis;
@@ -152,6 +148,7 @@ export class VisualizationsPlugin
 
     setUISettings(core.uiSettings);
     setUsageCollector(usageCollection);
+    setTheme(core.theme);
 
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
@@ -191,18 +188,11 @@ export class VisualizationsPlugin
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
     setChrome(core.chrome);
-    const savedVisualizationsLoader = createSavedVisLoader({
-      savedObjectsClient: core.savedObjects.client,
-      indexPatterns: data.indexPatterns,
-      savedObjects,
-      visualizationTypes: types,
-    });
-    setSavedVisualizationsLoader(savedVisualizationsLoader);
-    const savedSearchLoader = createSavedSearchesLoader({
-      savedObjectsClient: core.savedObjects.client,
-      savedObjects,
-    });
-    setSavedSearchLoader(savedSearchLoader);
+
+    if (spaces) {
+      setSpaces(spaces);
+    }
+
     return {
       ...types,
       showNewVisModal,
@@ -237,7 +227,6 @@ export class VisualizationsPlugin
         await createVisAsync(visType, visState),
       convertToSerializedVis,
       convertFromSerializedVis,
-      savedVisualizationsLoader,
       __LEGACY: {
         createVisEmbeddableFromObject: createVisEmbeddableFromObject({
           start: this.getStartServicesOrDie!,

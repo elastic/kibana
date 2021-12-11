@@ -11,5 +11,5 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["alerting", "cases", "data", "dataEnhanced", "kibanaReact", "kibanaUtils"],
-  "optionalPlugins": []
+  "optionalPlugins": ["security"]
 }

@@ -9,16 +9,48 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable @typescript-eslint/no-useless-constructor */
 
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import moment from 'moment';
 import uuid from 'uuid';
 import {
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
   EndpointAction,
   EndpointActionResponse,
   ISOLATION_ACTIONS,
 } from '../../../../common/endpoint/types';
 
-export const mockSearchResult = (results: any = []): ApiResponse<any> => {
+export interface Results {
+  _index: string;
+  _source:
+    | LogsEndpointAction
+    | LogsEndpointActionResponse
+    | EndpointAction
+    | EndpointActionResponse;
+}
+export const mockAuditLogSearchResult = (results?: Results[]) => {
+  const response = {
+    body: {
+      hits: {
+        total: { value: results?.length ?? 0, relation: 'eq' },
+        hits:
+          results?.map((a: Results) => ({
+            _index: a._index,
+            _id: Math.random().toString(36).split('.')[1],
+            _score: 0.0,
+            _source: a._source,
+          })) ?? [],
+      },
+    },
+    statusCode: 200,
+    headers: {},
+    warnings: [],
+    meta: {} as any,
+  };
+  return response;
+};
+
+export const mockSearchResult = (results: any = []): TransportResult<any> => {
   return {
     body: {
       hits: {
@@ -107,6 +139,7 @@ export class MockResponse {
   private command: ISOLATION_ACTIONS = 'isolate';
   private comment?: string;
   private error?: string;
+  private ack?: boolean;
 
   constructor() {}
 
@@ -122,7 +155,17 @@ export class MockResponse {
         command: this.command,
         comment: this.comment,
       },
+      action_response: {
+        endpoint: {
+          ack: this.ack,
+        },
+      },
     };
+  }
+
+  public withAck(ack?: boolean) {
+    this.ack = ack;
+    return this;
   }
 
   public forAction(id: string) {
@@ -135,6 +178,48 @@ export class MockResponse {
   }
 }
 
-export const aMockResponse = (actionID: string, agentID: string): MockResponse => {
-  return new MockResponse().forAction(actionID).forAgent(agentID);
+export const aMockResponse = (actionID: string, agentID: string, ack?: boolean): MockResponse => {
+  return new MockResponse().forAction(actionID).forAgent(agentID).withAck(ack);
+};
+
+export class MockEndpointResponse {
+  private actionID: string = uuid.v4();
+  private ts: moment.Moment = moment();
+  private started: moment.Moment = moment();
+  private completed: moment.Moment = moment();
+  private agent: string = '';
+  private command: ISOLATION_ACTIONS = 'isolate';
+  private comment?: string;
+  private error?: string;
+
+  constructor() {}
+
+  public build(): LogsEndpointActionResponse {
+    return {
+      '@timestamp': this.ts.toISOString(),
+      EndpointActions: {
+        action_id: this.actionID,
+        completed_at: this.completed.toISOString(),
+        data: {
+          command: this.command,
+          comment: this.comment,
+        },
+        started_at: this.started.toISOString(),
+      },
+      agent: { id: this.agent },
+      error: { message: this.error ?? '' },
+    };
+  }
+  public forAction(id: string) {
+    this.actionID = id;
+    return this;
+  }
+  public forAgent(id: string) {
+    this.agent = id;
+    return this;
+  }
+}
+
+export const aMockEndpointResponse = (actionID: string, agentID: string): MockEndpointResponse => {
+  return new MockEndpointResponse().forAction(actionID).forAgent(agentID);
 };

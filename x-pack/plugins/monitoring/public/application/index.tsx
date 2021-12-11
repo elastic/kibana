@@ -28,6 +28,7 @@ import {
   CODE_PATH_KIBANA,
   CODE_PATH_LOGSTASH,
   CODE_PATH_APM,
+  CODE_PATH_ENTERPRISE_SEARCH,
 } from '../../common/constants';
 import { BeatsInstancePage } from './pages/beats/instance';
 import { ApmOverviewPage, ApmInstancesPage, ApmInstancePage } from './pages/apm';
@@ -43,6 +44,7 @@ import { ElasticsearchMLJobsPage } from './pages/elasticsearch/ml_jobs_page';
 import { ElasticsearchNodeAdvancedPage } from './pages/elasticsearch/node_advanced_page';
 import { ElasticsearchCcrPage } from './pages/elasticsearch/ccr_page';
 import { ElasticsearchCcrShardPage } from './pages/elasticsearch/ccr_shard_page';
+import { EntSearchOverviewPage } from './pages/enterprise_search/overview';
 import { MonitoringTimeContainer } from './hooks/use_monitoring_time';
 import { BreadcrumbContainer } from './hooks/use_breadcrumbs';
 import { HeaderActionMenuContext } from './contexts/header_action_menu_context';
@@ -55,13 +57,20 @@ import { LogStashNodeAdvancedPage } from './pages/logstash/advanced';
 // import { LogStashNodePipelinesPage } from './pages/logstash/node_pipelines';
 import { LogStashNodePage } from './pages/logstash/node';
 import { LogStashNodePipelinesPage } from './pages/logstash/node_pipelines';
+import { AccessDeniedPage } from './pages/access_denied';
 
 export const renderApp = (
   core: CoreStart,
   plugins: MonitoringStartPluginDependencies,
-  { element, setHeaderActionMenu }: AppMountParameters,
+  { element, history, setHeaderActionMenu }: AppMountParameters,
   externalConfig: ExternalConfig
 ) => {
+  // dispatch synthetic hash change event to update hash history objects
+  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+  const unlistenParentHistory = history.listen(() => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
+
   ReactDOM.render(
     <MonitoringApp
       core={core}
@@ -74,6 +83,7 @@ export const renderApp = (
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
+    unlistenParentHistory();
   };
 };
 
@@ -94,6 +104,7 @@ const MonitoringApp: React.FC<{
               <BreadcrumbContainer.Provider history={history}>
                 <Router history={history}>
                   <Switch>
+                    <Route path="/access-denied" component={AccessDeniedPage} />
                     <Route path="/no-data" component={NoDataPage} />
                     <Route path="/loading" component={LoadingPage} />
                     <RouteInit
@@ -300,6 +311,13 @@ const MonitoringApp: React.FC<{
                       path="/apm"
                       component={ApmOverviewPage}
                       codePaths={[CODE_PATH_APM]}
+                      fetchAllClusters={false}
+                    />
+
+                    <RouteInit
+                      path="/enterprise_search"
+                      component={EntSearchOverviewPage}
+                      codePaths={[CODE_PATH_ENTERPRISE_SEARCH]}
                       fetchAllClusters={false}
                     />
 

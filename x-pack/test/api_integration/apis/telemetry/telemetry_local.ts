@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(body.length).to.be(1);
-      stats = body[0];
+      stats = body[0].stats;
     });
 
     it('should pass the schema validation', () => {

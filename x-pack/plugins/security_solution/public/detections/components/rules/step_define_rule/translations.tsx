@@ -21,20 +21,6 @@ export const INVALID_CUSTOM_QUERY = i18n.translate(
   }
 );
 
-export const CONFIG_INDICES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.indicesFromConfigDescription',
-  {
-    defaultMessage: 'Use Elasticsearch indices from Security Solution advanced settings',
-  }
-);
-
-export const CUSTOM_INDICES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.indicesCustomDescription',
-  {
-    defaultMessage: 'Provide custom list of indices',
-  }
-);
-
 export const INDEX_HELPER_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.indicesHelperDescription',
   {

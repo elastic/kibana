@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { last } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React, { useMemo, useCallback } from 'react';
 import { DataFormatPicker } from './data_format_picker';
@@ -119,8 +119,8 @@ export const SeriesConfig = (props) => {
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
           <EuiFormRow
-            label={i18n.translate('visTypeTimeseries.seriesConfig.overrideIndexPatternLabel', {
-              defaultMessage: 'Override Index Pattern?',
+            label={i18n.translate('visTypeTimeseries.seriesConfig.overrideDataViewLabel', {
+              defaultMessage: 'Override data view?',
             })}
           >
             <YesNo

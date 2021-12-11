@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Microsoft Exchange Worker Spawning Suspicious Processes",
-  "query": "process where event.type == \"start\" and\n  process.parent.name : \"w3wp.exe\" and process.parent.args : \"MSExchange*AppPool\" and\n  (process.name : (\"cmd.exe\", \"powershell.exe\", \"pwsh.exe\") or\n  process.pe.original_file_name : (\"cmd.exe\", \"powershell.exe\", \"pwsh.exe\"))\n",
+  "query": "process where event.type == \"start\" and\n  process.parent.name : \"w3wp.exe\" and process.parent.args : \"MSExchange*AppPool\" and\n  (process.name : (\"cmd.exe\", \"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\") or\n  process.pe.original_file_name in (\"cmd.exe\", \"powershell.exe\", \"pwsh.dll\", \"powershell_ise.exe\"))\n",
   "references": [
     "https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers",
     "https://www.volexity.com/blog/2021/03/02/active-exploitation-of-microsoft-exchange-zero-day-vulnerabilities",
@@ -47,5 +47,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

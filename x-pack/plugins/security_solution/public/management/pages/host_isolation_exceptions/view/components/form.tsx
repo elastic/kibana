@@ -15,9 +15,24 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { PolicyData } from '../../../../../../common/endpoint/types';
+import {
+  EffectedPolicySelect,
+  EffectedPolicySelection,
+  EffectedPolicySelectProps,
+} from '../../../../components/effected_policy_select';
+import {
+  getArtifactTagsByEffectedPolicySelection,
+  getArtifactTagsWithoutPolicies,
+  getEffectedPolicySelectionByTags,
+  isGlobalPolicyEffected,
+} from '../../../../components/effected_policy_select/utils';
 import { isValidIPv4OrCIDR } from '../../utils';
 import {
   DESCRIPTION_LABEL,
@@ -34,18 +49,34 @@ interface ExceptionIpEntry {
   field: 'destination.ip';
   operator: 'included';
   type: 'match';
-  value: '';
+  value: string;
 }
 
 export const HostIsolationExceptionsForm: React.FC<{
-  exception: CreateExceptionListItemSchema;
+  exception: CreateExceptionListItemSchema | UpdateExceptionListItemSchema;
+  policies: PolicyData[];
   onError: (error: boolean) => void;
-  onChange: (exception: CreateExceptionListItemSchema) => void;
-}> = memo(({ exception, onError, onChange }) => {
+  onChange: (
+    exception: Partial<CreateExceptionListItemSchema> | Partial<UpdateExceptionListItemSchema>
+  ) => void;
+}> = memo(({ exception, onError, policies, onChange }) => {
+  const ipEntry = exception.entries[0] as ExceptionIpEntry;
   const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
   const [hasBeenInputIpVisited, setHasBeenInputIpVisited] = useState(false);
-  const [hasNameError, setHasNameError] = useState(true);
-  const [hasIpError, setHasIpError] = useState(true);
+  const [hasNameError, setHasNameError] = useState(!exception.name);
+  const [hasIpError, setHasIpError] = useState(!ipEntry.value);
+
+  const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
+    isGlobal: isGlobalPolicyEffected(exception.tags),
+    selected: [],
+  });
+
+  // set current policies if not previously selected
+  useEffect(() => {
+    if (selectedPolicies.selected.length === 0 && exception.tags) {
+      setSelectedPolicies(getEffectedPolicySelectionByTags(exception.tags, policies));
+    }
+  }, [exception.tags, policies, selectedPolicies.selected.length]);
 
   useEffect(() => {
     onError(hasNameError || hasIpError);
@@ -59,9 +90,9 @@ export const HostIsolationExceptionsForm: React.FC<{
         return;
       }
       setHasNameError(false);
-      onChange({ ...exception, name });
+      onChange({ name });
     },
-    [exception, onChange]
+    [onChange]
   );
 
   const handleOnIpChange = useCallback(
@@ -73,7 +104,6 @@ export const HostIsolationExceptionsForm: React.FC<{
       }
       setHasIpError(false);
       onChange({
-        ...exception,
         entries: [
           {
             field: 'destination.ip',
@@ -84,14 +114,33 @@ export const HostIsolationExceptionsForm: React.FC<{
         ],
       });
     },
-    [exception, onChange]
+    [onChange]
+  );
+
+  const handlePolicySelectChange: EffectedPolicySelectProps['onChange'] = useCallback(
+    (selection) => {
+      // preseve the previous selection between global and not global toggle
+      if (selection.isGlobal) {
+        setSelectedPolicies({ isGlobal: true, selected: selection.selected });
+      } else {
+        setSelectedPolicies(selection);
+      }
+
+      onChange({
+        tags: getArtifactTagsByEffectedPolicySelection(
+          selection,
+          getArtifactTagsWithoutPolicies(exception.tags)
+        ),
+      });
+    },
+    [exception.tags, onChange]
   );
 
   const handleOnDescriptionChange = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-      onChange({ ...exception, description: event.target.value });
+      onChange({ description: event.target.value });
     },
-    [exception, onChange]
+    [onChange]
   );
 
   const nameInput = useMemo(
@@ -116,7 +165,7 @@ export const HostIsolationExceptionsForm: React.FC<{
         />
       </EuiFormRow>
     ),
-    [hasNameError, hasBeenInputNameVisited, exception.name, handleOnChangeName]
+    [exception.name, handleOnChangeName, hasBeenInputNameVisited, hasNameError]
   );
 
   const ipInput = useMemo(
@@ -141,7 +190,7 @@ export const HostIsolationExceptionsForm: React.FC<{
         />
       </EuiFormRow>
     ),
-    [hasIpError, hasBeenInputIpVisited, exception.entries, handleOnIpChange]
+    [exception.entries, handleOnIpChange, hasBeenInputIpVisited, hasIpError]
   );
 
   const descriptionInput = useMemo(
@@ -175,7 +224,7 @@ export const HostIsolationExceptionsForm: React.FC<{
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.form.description"
-          defaultMessage="Add an IP to the Host Isolation Exceptions. Only accepts IPv4 with optional CIDR"
+          defaultMessage="Allows isolated hosts to connect to these IP addresses. Only accepts IPv4 with optional CIDR."
         />
       </EuiText>
       <EuiSpacer size="m" />
@@ -194,11 +243,22 @@ export const HostIsolationExceptionsForm: React.FC<{
       <EuiText size="s">
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.form.conditions.subtitle"
-          defaultMessage="IP exceptions will apply to all OS Types"
+          defaultMessage="Host Isolation exceptions will apply to all operating systems."
         />
       </EuiText>
       <EuiSpacer size="m" />
       {ipInput}
+      <EuiHorizontalRule />
+      <EuiFormRow fullWidth={true} data-test-subj={'effectedPolicies-container'}>
+        <EffectedPolicySelect
+          isGlobal={selectedPolicies.isGlobal}
+          isPlatinumPlus={true}
+          selected={selectedPolicies.selected}
+          options={policies}
+          onChange={handlePolicySelectChange}
+          data-test-subj={'effectedPolicies-select'}
+        />
+      </EuiFormRow>
     </EuiForm>
   );
 });

@@ -11,13 +11,17 @@ import { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Writable } from 'stream';
+import type {
+  ScreenshottingStart,
+  ScreenshotOptions as BaseScreenshotOptions,
+} from '../../screenshotting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { CancellationToken } from '../common';
-import { BaseParams, BasePayload, TaskRunResult } from '../common/types';
+import { BaseParams, BasePayload, TaskRunResult, UrlOrUrlLocatorTuple } from '../common/types';
 import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { LevelLogger } from './lib';
@@ -39,6 +43,7 @@ export interface ReportingSetupDeps {
 
 export interface ReportingStartDeps {
   data: DataPluginStart;
+  screenshotting: ScreenshottingStart;
   taskManager: TaskManagerStartContract;
 }
 
@@ -57,7 +62,7 @@ export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export { BaseParams, BasePayload };
+export type { BaseParams, BasePayload };
 
 // default fn type for CreateJobFnFactory
 export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
@@ -109,3 +114,10 @@ export interface ReportingRequestHandlerContext {
  * @internal
  */
 export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
+
+/**
+ * @internal
+ */
+export interface ScreenshotOptions extends Omit<BaseScreenshotOptions, 'timeouts' | 'urls'> {
+  urls: UrlOrUrlLocatorTuple[];
+}

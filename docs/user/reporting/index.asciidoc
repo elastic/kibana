@@ -13,9 +13,9 @@
 
 You access the options from the *Share* menu in the toolbar. The sharing options include the following:
 
-* *PDF Reports* &mdash; Generate and download a PDF file of a dashboard, visualization, or *Canvas* workpad.
+* *PDF Reports* &mdash; Generate and download a PDF file of a dashboard, visualization, or *Canvas* workpad. PDF reports are a link:https://www.elastic.co/subscriptions[subscription feature].
 
-* *PNG Reports* &mdash; Generate and download a PNG file of a dashboard or visualization.
+* *PNG Reports* &mdash; Generate and download a PNG file of a dashboard or visualization. PNG reports are a link:https://www.elastic.co/subscriptions[subscription feature].
 
 * *CSV Reports* &mdash; Generate and download a CSV file of a *Discover* saved search.
 

@@ -8,11 +8,11 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { isEmpty } from 'lodash/fp';
 
-import { User } from '../../common';
+import { User } from '../../common/api';
 import { getReporters } from './api';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
-import { useOwnerContext } from '../components/owner_context/use_owner_context';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
 
 interface ReportersState {
   reporters: string[];
@@ -33,7 +33,7 @@ export interface UseGetReporters extends ReportersState {
 }
 
 export const useGetReporters = (): UseGetReporters => {
-  const owner = useOwnerContext();
+  const { owner } = useCasesContext();
   const [reportersState, setReporterState] = useState<ReportersState>(initialData);
 
   const toasts = useToasts();

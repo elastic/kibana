@@ -116,7 +116,7 @@ describe('Table Navigation', () => {
       `EuiTab[data-test-subj="navigation-${HostsTableType.authentications}"]`
     );
     expect(firstTab.props().href).toBe(
-      `/app/securitySolution/hosts/siem-window/authentications${SEARCH_QUERY}`
+      `/app/securitySolutionUI/hosts/siem-window/authentications${SEARCH_QUERY}`
     );
   });
 });

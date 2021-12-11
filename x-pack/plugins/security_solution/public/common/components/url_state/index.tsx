@@ -25,6 +25,7 @@ export const UseUrlStateMemo = React.memo(
     prevProps.pathName === nextProps.pathName &&
     deepEqual(prevProps.urlState, nextProps.urlState) &&
     deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
+    prevProps.search === nextProps.search &&
     deepEqual(prevProps.navTabs, nextProps.navTabs)
 );
 

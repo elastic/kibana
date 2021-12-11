@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostsRiskScoreRequestOptions } from '../../../../../../common';
+import { HostsRiskScoreRequestOptions } from '../../../../../../common/search_strategy';
 
 export const buildHostsRiskScoreQuery = ({
   timerange,
@@ -32,8 +32,8 @@ export const buildHostsRiskScoreQuery = ({
 
   const dslQuery = {
     index: defaultIndex,
-    allowNoIndices: false,
-    ignoreUnavailable: true,
+    allow_no_indices: false,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
       query: {

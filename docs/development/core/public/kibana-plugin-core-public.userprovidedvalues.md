@@ -16,6 +16,6 @@ export interface UserProvidedValues<T = any>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [isOverridden](./kibana-plugin-core-public.userprovidedvalues.isoverridden.md) | <code>boolean</code> |  |
-|  [userValue](./kibana-plugin-core-public.userprovidedvalues.uservalue.md) | <code>T</code> |  |
+|  [isOverridden?](./kibana-plugin-core-public.userprovidedvalues.isoverridden.md) | boolean | <i>(Optional)</i> |
+|  [userValue?](./kibana-plugin-core-public.userprovidedvalues.uservalue.md) | T | <i>(Optional)</i> |
 

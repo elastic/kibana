@@ -18,7 +18,7 @@ import { actionsConfigMock } from './actions_config.mock';
 import { getActionsConfigurationUtilities } from './actions_config';
 import { licenseStateMock } from './lib/license_state.mock';
 import { licensingMock } from '../../licensing/server/mocks';
-import { httpServerMock } from '../../../../src/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '../../../../src/core/server/mocks';
 import { auditServiceMock } from '../../security/server/audit/index.mock';
 import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 
@@ -37,6 +37,10 @@ import { actionsAuthorizationMock } from './authorization/actions_authorization.
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../src/core/server/elasticsearch/client/mocks';
+import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
+import { Logger } from 'kibana/server';
+import { connectorTokenClientMock } from './builtin_action_types/lib/connector_token_client.mock';
 
 jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -71,7 +75,7 @@ const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditServiceMock.create().asScoped(request);
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
-
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const mockTaskManager = taskManagerMock.createSetup();
 
 let actionsClient: ActionsClient;
@@ -81,6 +85,8 @@ let actionTypeRegistryParams: ActionTypeRegistryOpts;
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
+
+const connectorTokenClient = connectorTokenClientMock.create();
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -107,6 +113,7 @@ beforeEach(() => {
     authorization: authorization as unknown as ActionsAuthorization,
     auditLogger,
     usageCounter: mockUsageCounter,
+    connectorTokenClient,
   });
 });
 
@@ -353,6 +360,36 @@ describe('create()', () => {
     );
   });
 
+  test('validates connector: config and secrets', async () => {
+    const connectorValidator = ({}, secrets: { param1: '1' }) => {
+      if (secrets.param1 == null) {
+        return '[param1] is required';
+      }
+      return null;
+    };
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      validate: {
+        connector: connectorValidator,
+      },
+      executor,
+    });
+    await expect(
+      actionsClient.create({
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-action-type',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: [param1] is required"`
+    );
+  });
+
   test(`throws an error when an action type doesn't exist`, async () => {
     await expect(
       actionsClient.create({
@@ -482,6 +519,7 @@ describe('create()', () => {
       ephemeralExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
+      connectorTokenClient: connectorTokenClientMock.create(),
     });
 
     const savedObjectCreateResult = {
@@ -597,6 +635,7 @@ describe('get()', () => {
             },
           },
         ],
+        connectorTokenClient: connectorTokenClientMock.create(),
       });
 
       await actionsClient.get({ id: 'testPreconfigured' });
@@ -653,6 +692,7 @@ describe('get()', () => {
             },
           },
         ],
+        connectorTokenClient: connectorTokenClientMock.create(),
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
@@ -770,6 +810,7 @@ describe('get()', () => {
           },
         },
       ],
+      connectorTokenClient: connectorTokenClientMock.create(),
     });
 
     const result = await actionsClient.get({ id: 'testPreconfigured' });
@@ -838,6 +879,7 @@ describe('getAll()', () => {
             },
           },
         ],
+        connectorTokenClient: connectorTokenClientMock.create(),
       });
       return actionsClient.getAll();
     }
@@ -976,6 +1018,7 @@ describe('getAll()', () => {
           },
         },
       ],
+      connectorTokenClient: connectorTokenClientMock.create(),
     });
     const result = await actionsClient.getAll();
     expect(result).toEqual([
@@ -1052,6 +1095,7 @@ describe('getBulk()', () => {
             },
           },
         ],
+        connectorTokenClient: connectorTokenClientMock.create(),
       });
       return actionsClient.getBulk(['1', 'testPreconfigured']);
     }
@@ -1184,6 +1228,7 @@ describe('getBulk()', () => {
           },
         },
       ],
+      connectorTokenClient: connectorTokenClientMock.create(),
     });
     const result = await actionsClient.getBulk(['1', 'testPreconfigured']);
     expect(result).toEqual([
@@ -1216,6 +1261,7 @@ describe('delete()', () => {
     test('ensures user is authorised to delete actions', async () => {
       await actionsClient.delete({ id: '1' });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('delete');
+      expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -1536,6 +1582,40 @@ describe('update()', () => {
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [param1]: expected value of type [string] but got [undefined]"`
+    );
+  });
+
+  test('validates connector: config and secrets', async () => {
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      validate: {
+        connector: () => {
+          return '[param1] is required';
+        },
+      },
+      executor,
+    });
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: 'my-action',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-action-type',
+      },
+      references: [],
+    });
+    await expect(
+      actionsClient.update({
+        id: 'my-action',
+        action: {
+          name: 'my name',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: [param1] is required"`
     );
   });
 
@@ -1919,6 +1999,11 @@ describe('isPreconfigured()', () => {
           },
         },
       ],
+      connectorTokenClient: new ConnectorTokenClient({
+        unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+        encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+        logger,
+      }),
     });
 
     expect(actionsClient.isPreconfigured('testPreconfigured')).toEqual(true);
@@ -1949,6 +2034,11 @@ describe('isPreconfigured()', () => {
           },
         },
       ],
+      connectorTokenClient: new ConnectorTokenClient({
+        unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+        encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+        logger,
+      }),
     });
 
     expect(actionsClient.isPreconfigured(uuid.v4())).toEqual(false);

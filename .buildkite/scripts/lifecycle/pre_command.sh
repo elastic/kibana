@@ -4,16 +4,17 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
+export BUILDKITE_TOKEN
+
+echo '--- Install buildkite dependencies'
+cd '.buildkite'
+retry 5 15 yarn install --production --pure-lockfile
+cd -
+
 node .buildkite/scripts/lifecycle/print_agent_links.js || true
 
 echo '--- Job Environment Setup'
-
-cd '.buildkite'
-retry 5 15 yarn install
-cd -
-
-BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
-export BUILDKITE_TOKEN
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
 {
@@ -70,6 +71,12 @@ export GITHUB_TOKEN
 
 KIBANA_CI_REPORTER_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
 export KIBANA_CI_REPORTER_KEY
+
+KIBANA_DOCKER_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/container-registry)"
+export KIBANA_DOCKER_USERNAME
+
+KIBANA_DOCKER_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/container-registry)"
+export KIBANA_DOCKER_PASSWORD
 
 # Setup Failed Test Reporter Elasticsearch credentials
 {

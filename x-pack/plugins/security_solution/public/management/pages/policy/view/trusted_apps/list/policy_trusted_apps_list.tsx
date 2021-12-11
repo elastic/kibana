@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiLoadingSpinner, EuiSpacer, EuiText, Pagination, EuiPageTemplate } from '@elastic/eui';
+import { EuiSpacer, EuiText, Pagination } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
@@ -14,16 +14,16 @@ import {
   ArtifactCardGridCardComponentProps,
   ArtifactCardGridProps,
 } from '../../../../../components/artifact_card_grid';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
+import { usePolicyDetailsSelector, usePolicyDetailsNavigateCallback } from '../../policy_hooks';
 import {
-  doesPolicyHaveTrustedApps,
   getCurrentArtifactsLocation,
   getPolicyTrustedAppList,
+  getPolicyTrustedAppListError,
   getPolicyTrustedAppsListPagination,
   getTrustedAppsAllPoliciesById,
   isPolicyTrustedAppListLoading,
   policyIdFromParams,
-  doesTrustedAppExistsLoading,
+  getCurrentPolicyArtifactsFilter,
 } from '../../../store/policy_details/selectors';
 import {
   getPolicyDetailPath,
@@ -31,159 +31,252 @@ import {
   getTrustedAppsListPath,
 } from '../../../../../common/routing';
 import { Immutable, TrustedApp } from '../../../../../../../common/endpoint/types';
-import { useAppUrl } from '../../../../../../common/lib/kibana';
-import { APP_ID } from '../../../../../../../common/constants';
+import { useAppUrl, useToasts } from '../../../../../../common/lib/kibana';
+import { APP_UI_ID } from '../../../../../../../common/constants';
+import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { ContextMenuItemNavByRouterProps } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { ArtifactEntryCollapsibleCardProps } from '../../../../../components/artifact_entry_card';
+import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
+import { RemoveTrustedAppFromPolicyModal } from './remove_trusted_app_from_policy_modal';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
-export const PolicyTrustedAppsList = memo(() => {
-  const history = useHistory();
-  const { getAppUrl } = useAppUrl();
-  const policyId = usePolicyDetailsSelector(policyIdFromParams);
-  const hasTrustedApps = usePolicyDetailsSelector(doesPolicyHaveTrustedApps);
-  const isLoading = usePolicyDetailsSelector(isPolicyTrustedAppListLoading);
-  const isTrustedAppExistsCheckLoading = usePolicyDetailsSelector(doesTrustedAppExistsLoading);
-  const trustedAppItems = usePolicyDetailsSelector(getPolicyTrustedAppList);
-  const pagination = usePolicyDetailsSelector(getPolicyTrustedAppsListPagination);
-  const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
-  const allPoliciesById = usePolicyDetailsSelector(getTrustedAppsAllPoliciesById);
+const DATA_TEST_SUBJ = 'policyTrustedAppsGrid';
 
-  const [isCardExpanded, setCardExpanded] = useState<Record<string, boolean>>({});
+export interface PolicyTrustedAppsListProps {
+  hideTotalShowingLabel?: boolean;
+}
 
-  // TODO:PT show load errors if any
+export const PolicyTrustedAppsList = memo<PolicyTrustedAppsListProps>(
+  ({ hideTotalShowingLabel = false }) => {
+    const getTestId = useTestIdGenerator(DATA_TEST_SUBJ);
+    const toasts = useToasts();
+    const history = useHistory();
+    const { getAppUrl } = useAppUrl();
+    const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
+    const policyId = usePolicyDetailsSelector(policyIdFromParams);
+    const isLoading = usePolicyDetailsSelector(isPolicyTrustedAppListLoading);
+    const defaultFilter = usePolicyDetailsSelector(getCurrentPolicyArtifactsFilter);
+    const trustedAppItems = usePolicyDetailsSelector(getPolicyTrustedAppList);
+    const pagination = usePolicyDetailsSelector(getPolicyTrustedAppsListPagination);
+    const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+    const allPoliciesById = usePolicyDetailsSelector(getTrustedAppsAllPoliciesById);
+    const trustedAppsApiError = usePolicyDetailsSelector(getPolicyTrustedAppListError);
+    const navigateCallback = usePolicyDetailsNavigateCallback();
 
-  const handlePageChange = useCallback<ArtifactCardGridProps['onPageChange']>(
-    ({ pageIndex, pageSize }) => {
-      history.push(
-        getPolicyDetailsArtifactsListPath(policyId, {
-          ...urlParams,
-          // If user changed page size, then reset page index back to the first page
-          page_index: pageSize !== pagination.pageSize ? 0 : pageIndex,
-          page_size: pageSize,
-        })
-      );
-    },
-    [history, pagination.pageSize, policyId, urlParams]
-  );
+    const [isCardExpanded, setCardExpanded] = useState<Record<string, boolean>>({});
+    const [trustedAppsForRemoval, setTrustedAppsForRemoval] = useState<typeof trustedAppItems>([]);
+    const [showRemovalModal, setShowRemovalModal] = useState<boolean>(false);
 
-  const handleExpandCollapse = useCallback<ArtifactCardGridProps['onExpandCollapse']>(
-    ({ expanded, collapsed }) => {
-      const newCardExpandedSettings: Record<string, boolean> = {};
+    const handlePageChange = useCallback<ArtifactCardGridProps['onPageChange']>(
+      ({ pageIndex, pageSize }) => {
+        history.push(
+          getPolicyDetailsArtifactsListPath(policyId, {
+            ...urlParams,
+            // If user changed page size, then reset page index back to the first page
+            page_index: pageSize !== pagination.pageSize ? 0 : pageIndex,
+            page_size: pageSize,
+          })
+        );
+      },
+      [history, pagination.pageSize, policyId, urlParams]
+    );
 
-      for (const trustedApp of expanded) {
-        newCardExpandedSettings[trustedApp.id] = true;
-      }
+    const handleExpandCollapse = useCallback<ArtifactCardGridProps['onExpandCollapse']>(
+      ({ expanded, collapsed }) => {
+        const newCardExpandedSettings: Record<string, boolean> = {};
 
-      for (const trustedApp of collapsed) {
-        newCardExpandedSettings[trustedApp.id] = false;
-      }
+        for (const trustedApp of expanded) {
+          newCardExpandedSettings[trustedApp.id] = true;
+        }
 
-      setCardExpanded(newCardExpandedSettings);
-    },
-    []
-  );
+        for (const trustedApp of collapsed) {
+          newCardExpandedSettings[trustedApp.id] = false;
+        }
 
-  const totalItemsCountLabel = useMemo<string>(() => {
-    return i18n.translate('xpack.securitySolution.endpoint.policy.trustedApps.list.totalCount', {
-      defaultMessage:
-        'Showing {totalItemsCount, plural, one {# trusted application} other {# trusted applications}}',
-      values: { totalItemsCount: pagination.totalItemCount },
-    });
-  }, [pagination.totalItemCount]);
+        setCardExpanded(newCardExpandedSettings);
+      },
+      []
+    );
 
-  const cardProps = useMemo<Map<Immutable<TrustedApp>, ArtifactCardGridCardComponentProps>>(() => {
-    const newCardProps = new Map();
+    const totalItemsCountLabel = useMemo<string>(() => {
+      return i18n.translate('xpack.securitySolution.endpoint.policy.trustedApps.list.totalCount', {
+        defaultMessage:
+          'Showing {totalItemsCount, plural, one {# trusted application} other {# trusted applications}}',
+        values: { totalItemsCount: pagination.totalItemCount },
+      });
+    }, [pagination.totalItemCount]);
 
-    for (const trustedApp of trustedAppItems) {
-      const viewUrlPath = getTrustedAppsListPath({ id: trustedApp.id, show: 'edit' });
-      const assignedPoliciesMenuItems: ArtifactEntryCollapsibleCardProps['policies'] =
-        trustedApp.effectScope.type === 'global'
-          ? undefined
-          : trustedApp.effectScope.policies.reduce<
-              Required<ArtifactEntryCollapsibleCardProps>['policies']
-            >((byIdPolicies, trustedAppAssignedPolicyId) => {
-              if (!allPoliciesById[trustedAppAssignedPolicyId]) {
-                byIdPolicies[trustedAppAssignedPolicyId] = { children: trustedAppAssignedPolicyId };
+    const cardProps = useMemo<
+      Map<Immutable<TrustedApp>, ArtifactCardGridCardComponentProps>
+    >(() => {
+      const newCardProps = new Map();
+
+      for (const trustedApp of trustedAppItems) {
+        const isGlobal = trustedApp.effectScope.type === 'global';
+        const viewUrlPath = getTrustedAppsListPath({ filter: trustedApp.id });
+        const assignedPoliciesMenuItems: ArtifactEntryCollapsibleCardProps['policies'] =
+          trustedApp.effectScope.type === 'global'
+            ? undefined
+            : trustedApp.effectScope.policies.reduce<
+                Required<ArtifactEntryCollapsibleCardProps>['policies']
+              >((byIdPolicies, trustedAppAssignedPolicyId) => {
+                if (!allPoliciesById[trustedAppAssignedPolicyId]) {
+                  byIdPolicies[trustedAppAssignedPolicyId] = {
+                    children: trustedAppAssignedPolicyId,
+                  };
+                  return byIdPolicies;
+                }
+
+                const policyDetailsPath = getPolicyDetailPath(trustedAppAssignedPolicyId);
+
+                const thisPolicyMenuProps: ContextMenuItemNavByRouterProps = {
+                  navigateAppId: APP_UI_ID,
+                  navigateOptions: {
+                    path: policyDetailsPath,
+                  },
+                  href: getAppUrl({ path: policyDetailsPath }),
+                  children: allPoliciesById[trustedAppAssignedPolicyId].name,
+                };
+
+                byIdPolicies[trustedAppAssignedPolicyId] = thisPolicyMenuProps;
+
                 return byIdPolicies;
-              }
+              }, {});
 
-              const policyDetailsPath = getPolicyDetailPath(trustedAppAssignedPolicyId);
-
-              const thisPolicyMenuProps: ContextMenuItemNavByRouterProps = {
-                navigateAppId: APP_ID,
-                navigateOptions: {
-                  path: policyDetailsPath,
-                },
-                href: getAppUrl({ path: policyDetailsPath }),
-                children: allPoliciesById[trustedAppAssignedPolicyId].name,
-              };
-
-              byIdPolicies[trustedAppAssignedPolicyId] = thisPolicyMenuProps;
-
-              return byIdPolicies;
-            }, {});
-
-      const thisTrustedAppCardProps: ArtifactCardGridCardComponentProps = {
-        expanded: Boolean(isCardExpanded[trustedApp.id]),
-        actions: [
+        const fullDetailsAction: ArtifactCardGridCardComponentProps['actions'] = [
           {
             icon: 'controlsHorizontal',
             children: i18n.translate(
               'xpack.securitySolution.endpoint.policy.trustedApps.list.viewAction',
               { defaultMessage: 'View full details' }
             ),
-            href: getAppUrl({ appId: APP_ID, path: viewUrlPath }),
-            navigateAppId: APP_ID,
+            href: getAppUrl({ appId: APP_UI_ID, path: viewUrlPath }),
+            navigateAppId: APP_UI_ID,
             navigateOptions: { path: viewUrlPath },
+            'data-test-subj': getTestId('viewFullDetailsAction'),
           },
-        ],
-        policies: assignedPoliciesMenuItems,
-      };
+        ];
+        const thisTrustedAppCardProps: ArtifactCardGridCardComponentProps = {
+          expanded: Boolean(isCardExpanded[trustedApp.id]),
+          actions: canCreateArtifactsByPolicy
+            ? [
+                ...fullDetailsAction,
+                {
+                  icon: 'trash',
+                  children: i18n.translate(
+                    'xpack.securitySolution.endpoint.policy.trustedApps.list.removeAction',
+                    { defaultMessage: 'Remove from policy' }
+                  ),
+                  onClick: () => {
+                    setTrustedAppsForRemoval([trustedApp]);
+                    setShowRemovalModal(true);
+                  },
+                  disabled: isGlobal,
+                  toolTipContent: isGlobal
+                    ? i18n.translate(
+                        'xpack.securitySolution.endpoint.policy.trustedApps.list.removeActionNotAllowed',
+                        {
+                          defaultMessage:
+                            'Globally applied trusted applications cannot be removed from policy.',
+                        }
+                      )
+                    : undefined,
+                  toolTipPosition: 'top',
+                  'data-test-subj': getTestId('removeAction'),
+                },
+              ]
+            : fullDetailsAction,
 
-      newCardProps.set(trustedApp, thisTrustedAppCardProps);
-    }
+          policies: assignedPoliciesMenuItems,
+        };
 
-    return newCardProps;
-  }, [allPoliciesById, getAppUrl, isCardExpanded, trustedAppItems]);
+        newCardProps.set(trustedApp, thisTrustedAppCardProps);
+      }
 
-  const provideCardProps = useCallback<Required<ArtifactCardGridProps>['cardComponentProps']>(
-    (item) => {
-      return cardProps.get(item as Immutable<TrustedApp>)!;
-    },
-    [cardProps]
-  );
+      return newCardProps;
+    }, [
+      allPoliciesById,
+      getAppUrl,
+      getTestId,
+      isCardExpanded,
+      trustedAppItems,
+      canCreateArtifactsByPolicy,
+    ]);
 
-  // Anytime a new set of data (trusted apps) is retrieved, reset the card expand state
-  useEffect(() => {
-    setCardExpanded({});
-  }, [trustedAppItems]);
+    const provideCardProps = useCallback<Required<ArtifactCardGridProps>['cardComponentProps']>(
+      (item) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return cardProps.get(item as Immutable<TrustedApp>)!;
+      },
+      [cardProps]
+    );
 
-  if (hasTrustedApps.loading || isTrustedAppExistsCheckLoading) {
+    const handleRemoveModalClose = useCallback(() => {
+      setShowRemovalModal(false);
+    }, []);
+
+    // Anytime a new set of data (trusted apps) is retrieved, reset the card expand state
+    useEffect(() => {
+      setCardExpanded({});
+    }, [trustedAppItems]);
+
+    // if an error occurred while loading the data, show toast
+    useEffect(() => {
+      if (trustedAppsApiError) {
+        toasts.addError(trustedAppsApiError as unknown as Error, {
+          title: i18n.translate(
+            'xpack.securitySolution.endpoint.policy.trustedApps.list.apiError',
+            {
+              defaultMessage: 'Error while retrieving list of trusted applications',
+            }
+          ),
+        });
+      }
+    }, [toasts, trustedAppsApiError]);
+
     return (
-      <EuiPageTemplate template="centeredContent">
-        <EuiLoadingSpinner className="essentialAnimation" size="xl" />
-      </EuiPageTemplate>
+      <>
+        <SearchExceptions
+          placeholder={i18n.translate(
+            'xpack.securitySolution.endpoint.olicy.trustedApps.layout.search.placeholder',
+            {
+              defaultMessage: 'Search on the fields below: name, description, value',
+            }
+          )}
+          defaultValue={defaultFilter}
+          hideRefreshButton
+          onSearch={(filter) => {
+            navigateCallback({ filter });
+          }}
+        />
+        <EuiSpacer size="s" />
+        {!hideTotalShowingLabel && (
+          <EuiText color="subdued" size="xs" data-test-subj="policyDetailsTrustedAppsCount">
+            {totalItemsCountLabel}
+          </EuiText>
+        )}
+
+        <EuiSpacer size="m" />
+
+        <ArtifactCardGrid
+          items={trustedAppItems}
+          onPageChange={handlePageChange}
+          onExpandCollapse={handleExpandCollapse}
+          cardComponentProps={provideCardProps}
+          loading={isLoading}
+          error={trustedAppsApiError?.message}
+          pagination={pagination as Pagination}
+          data-test-subj={DATA_TEST_SUBJ}
+        />
+
+        {showRemovalModal && (
+          <RemoveTrustedAppFromPolicyModal
+            trustedApps={trustedAppsForRemoval}
+            onClose={handleRemoveModalClose}
+          />
+        )}
+      </>
     );
   }
-
-  return (
-    <>
-      <EuiText color="subdued" size="xs" data-test-subj="policyDetailsTrustedAppsCount">
-        {totalItemsCountLabel}
-      </EuiText>
-
-      <EuiSpacer size="m" />
-
-      <ArtifactCardGrid
-        items={trustedAppItems}
-        onPageChange={handlePageChange}
-        onExpandCollapse={handleExpandCollapse}
-        cardComponentProps={provideCardProps}
-        loading={isLoading}
-        pagination={pagination as Pagination}
-        data-test-subj="policyTrustedAppsGrid"
-      />
-    </>
-  );
-});
+);
 PolicyTrustedAppsList.displayName = 'PolicyTrustedAppsList';

@@ -39,7 +39,7 @@
     "lists",
     "home",
     "telemetry",
-    "telemetryManagementSection"
+    "dataViewFieldEditor"
   ],
   "server": true,
   "ui": true,

@@ -8,7 +8,7 @@
 
 import { uniqBy } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { Observable, pipe } from 'rxjs';
+import { Observable, pipe, combineLatest } from 'rxjs';
 import { distinctUntilChanged, switchMap, filter, mapTo, map } from 'rxjs/operators';
 
 import { DashboardContainer } from '..';
@@ -30,6 +30,7 @@ export const syncDashboardIndexPatterns = ({
     filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
     map((container: DashboardContainer): IndexPattern[] | undefined => {
       let panelIndexPatterns: IndexPattern[] = [];
+
       Object.values(container.getChildIds()).forEach((id) => {
         const embeddableInstance = container.getChild(id);
         if (isErrorEmbeddable(embeddableInstance)) return;
@@ -37,6 +38,9 @@ export const syncDashboardIndexPatterns = ({
         if (!embeddableIndexPatterns) return;
         panelIndexPatterns.push(...embeddableIndexPatterns);
       });
+      if (container.controlGroup) {
+        panelIndexPatterns.push(...(container.controlGroup.getOutput().dataViews ?? []));
+      }
       panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
 
       /**
@@ -77,8 +81,11 @@ export const syncDashboardIndexPatterns = ({
     })
   );
 
-  return dashboardContainer
-    .getOutput$()
+  const indexPatternSources = [dashboardContainer.getOutput$()];
+  if (dashboardContainer.controlGroup)
+    indexPatternSources.push(dashboardContainer.controlGroup.getOutput$());
+
+  return combineLatest(indexPatternSources)
     .pipe(mapTo(dashboardContainer), updateIndexPatternsOperator)
     .subscribe();
 };

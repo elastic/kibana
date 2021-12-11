@@ -13,7 +13,7 @@ It requires a Basic license and the following cluster privileges: `manage_pipeli
 
 A new app called Ingest Pipelines is registered in the Management section and follows a typical CRUD UI pattern. The client-side portion of this app lives in [public/application](public/application) and uses endpoints registered in [server/routes/api](server/routes/api). For more information on the pipeline processors editor component, check out the [component readme](public/application/components/pipeline_processors_editor/README.md).
 
-See the [kibana contributing guide](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md) for instructions on setting up your development environment.
+See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for instructions on setting up your development environment.
 
 ### Test coverage
 

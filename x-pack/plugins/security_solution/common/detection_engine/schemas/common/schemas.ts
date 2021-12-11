@@ -35,6 +35,18 @@ export type Description = t.TypeOf<typeof description>;
 export const descriptionOrUndefined = t.union([description, t.undefined]);
 export type DescriptionOrUndefined = t.TypeOf<typeof descriptionOrUndefined>;
 
+// outcome is a property of the saved object resolve api
+// will tell us info about the rule after 8.0 migrations
+export const outcome = t.union([
+  t.literal('exactMatch'),
+  t.literal('aliasMatch'),
+  t.literal('conflict'),
+]);
+export type Outcome = t.TypeOf<typeof outcome>;
+
+export const alias_target_id = t.string;
+export type AliasTargetId = t.TypeOf<typeof alias_target_id>;
+
 export const enabled = t.boolean;
 export type Enabled = t.TypeOf<typeof enabled>;
 
@@ -331,6 +343,15 @@ export type LastFailureAt = t.TypeOf<typeof last_failure_at>;
 
 export const last_failure_message = t.string;
 export type LastFailureMessage = t.TypeOf<typeof last_failure_message>;
+
+export const last_gap = t.string;
+export type LastGap = t.TypeOf<typeof last_gap>;
+
+export const bulk_create_time_durations = t.array(t.string);
+export type BulkCreateTimeDurations = t.TypeOf<typeof bulk_create_time_durations>;
+
+export const search_after_time_durations = t.array(t.string);
+export type SearchAfterTimeDurations = t.TypeOf<typeof search_after_time_durations>;
 
 export const status_date = IsoDateString;
 export type StatusDate = t.TypeOf<typeof status_date>;

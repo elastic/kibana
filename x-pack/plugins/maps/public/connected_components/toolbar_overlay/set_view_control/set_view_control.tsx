@@ -21,7 +21,7 @@ import {
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiRadioGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as usng from 'usng.js';
 import { isNaN, isNull } from 'lodash';
 import { MapCenter } from '../../../../common/descriptor_types';

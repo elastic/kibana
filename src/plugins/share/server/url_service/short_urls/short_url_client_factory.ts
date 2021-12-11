@@ -8,7 +8,7 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 import { ShortUrlStorage } from './types';
-import type { IShortUrlClientFactory } from '../../../common/url_service';
+import type { IShortUrlClientFactory, ILocatorClient } from '../../../common/url_service';
 import { ServerShortUrlClient } from './short_url_client';
 import { SavedObjectShortUrlStorage } from './storage/saved_object_short_url_storage';
 
@@ -20,6 +20,11 @@ export interface ServerShortUrlClientFactoryDependencies {
    * Current version of Kibana, e.g. 7.15.0.
    */
   currentVersion: string;
+
+  /**
+   * Locators service.
+   */
+  locators: ILocatorClient;
 }
 
 export interface ServerShortUrlClientFactoryCreateParams {
@@ -39,9 +44,11 @@ export class ServerShortUrlClientFactory
         savedObjects: params.savedObjects!,
         savedObjectType: 'url',
       });
+    const { currentVersion, locators } = this.dependencies;
     const client = new ServerShortUrlClient({
       storage,
-      currentVersion: this.dependencies.currentVersion,
+      currentVersion,
+      locators,
     });
 
     return client;

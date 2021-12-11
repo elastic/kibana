@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublicContract } from '@kbn/utility-types';
+import { PublicContract, SerializableRecord } from '@kbn/utility-types';
 import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
 import {
@@ -15,14 +15,13 @@ import {
   ToastsStart as ToastService,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { UrlGeneratorId, UrlGeneratorStateMapping } from '../../../../share/public/';
 import { ConfigSchema } from '../../../config';
-import {
-  createSessionStateContainer,
+import { createSessionStateContainer } from './search_session_state';
+import type {
   SearchSessionState,
-  SessionStateInternal,
   SessionMeta,
   SessionStateContainer,
+  SessionStateInternal,
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
 import { ISearchOptions } from '../../../common';
@@ -32,7 +31,7 @@ import { formatSessionName } from './lib/session_name_formatter';
 
 export type ISessionService = PublicContract<SessionService>;
 
-export interface TrackSearchDescriptor {
+interface TrackSearchDescriptor {
   abort: () => void;
 }
 
@@ -44,7 +43,7 @@ export type SessionSnapshot = SessionStateInternal<TrackSearchDescriptor>;
 /**
  * Provide info about current search session to be stored in the Search Session saved object
  */
-export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId> {
+export interface SearchSessionInfoProvider<P extends SerializableRecord = SerializableRecord> {
   /**
    * User-facing name of the session.
    * e.g. will be displayed in saved Search Sessions management list
@@ -57,17 +56,17 @@ export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGenera
    */
   appendSessionStartTimeToName?: boolean;
 
-  getUrlGeneratorData: () => Promise<{
-    urlGeneratorId: ID;
-    initialState: UrlGeneratorStateMapping[ID]['State'];
-    restoreState: UrlGeneratorStateMapping[ID]['State'];
+  getLocatorData: () => Promise<{
+    id: string;
+    initialState: P;
+    restoreState: P;
   }>;
 }
 
 /**
  * Configure a "Search session indicator" UI
  */
-export interface SearchSessionIndicatorUiConfig {
+interface SearchSessionIndicatorUiConfig {
   /**
    * App controls if "Search session indicator" UI should be disabled.
    * reasonText will appear in a tooltip.
@@ -316,9 +315,9 @@ export class SessionService {
     if (!this.hasAccess()) throw new Error('No access to search sessions');
     const currentSessionInfoProvider = this.searchSessionInfoProvider;
     if (!currentSessionInfoProvider) throw new Error('No info provider for current session');
-    const [name, { initialState, restoreState, urlGeneratorId }] = await Promise.all([
+    const [name, { initialState, restoreState, id: locatorId }] = await Promise.all([
       currentSessionInfoProvider.getName(),
-      currentSessionInfoProvider.getUrlGeneratorData(),
+      currentSessionInfoProvider.getLocatorData(),
     ]);
 
     const formattedName = formatSessionName(name, {
@@ -329,9 +328,9 @@ export class SessionService {
     const searchSessionSavedObject = await this.sessionsClient.create({
       name: formattedName,
       appId: currentSessionApp,
-      restoreState: restoreState as unknown as Record<string, unknown>,
-      initialState: initialState as unknown as Record<string, unknown>,
-      urlGeneratorId,
+      locatorId,
+      restoreState,
+      initialState,
       sessionId,
     });
 
@@ -411,8 +410,8 @@ export class SessionService {
    * @param searchSessionInfoProvider - info provider for saving a search session
    * @param searchSessionIndicatorUiConfig - config for "Search session indicator" UI
    */
-  public enableStorage<ID extends UrlGeneratorId = UrlGeneratorId>(
-    searchSessionInfoProvider: SearchSessionInfoProvider<ID>,
+  public enableStorage<P extends SerializableRecord>(
+    searchSessionInfoProvider: SearchSessionInfoProvider<P>,
     searchSessionIndicatorUiConfig?: SearchSessionIndicatorUiConfig
   ) {
     this.searchSessionInfoProvider = {

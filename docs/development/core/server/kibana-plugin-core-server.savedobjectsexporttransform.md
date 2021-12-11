@@ -45,7 +45,6 @@ export class Plugin() {
     });
   }
 }
-
 ```
 
 ## Example 2
@@ -81,6 +80,5 @@ export class Plugin() {
     });
   }
 }
-
 ```
 

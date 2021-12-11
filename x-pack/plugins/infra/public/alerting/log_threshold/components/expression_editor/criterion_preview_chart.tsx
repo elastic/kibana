@@ -19,7 +19,7 @@ import {
   LineAnnotation,
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   ChartContainer,
@@ -224,7 +224,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
         <Chart>
           <BarSeries
             id="criterion-preview"
-            xScaleType={ScaleType.Linear}
+            xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="timestamp"
             yAccessors={['value']}

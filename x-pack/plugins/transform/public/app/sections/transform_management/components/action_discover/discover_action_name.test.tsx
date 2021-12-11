@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { render, waitFor, screen } from '@testing-library/react';
 
@@ -29,20 +29,20 @@ describe('Transform: Transform List Actions isDiscoverActionDisabled()', () => {
   it('should be disabled when forceDisable is true', () => {
     expect(isDiscoverActionDisabled([item], true, true)).toBe(true);
   });
-  it('should be disabled when the index pattern is not available', () => {
+  it('should be disabled when the data view is not available', () => {
     expect(isDiscoverActionDisabled([item], false, false)).toBe(true);
   });
-  it('should be disabled when the transform started but has no index pattern', () => {
+  it('should be disabled when the transform started but has no data view', () => {
     const itemCopy = cloneDeep(item);
     itemCopy.stats.state = 'started';
     expect(isDiscoverActionDisabled([itemCopy], false, false)).toBe(true);
   });
-  it('should be enabled when the transform started and has an index pattern', () => {
+  it('should be enabled when the transform started and has a data view', () => {
     const itemCopy = cloneDeep(item);
     itemCopy.stats.state = 'started';
     expect(isDiscoverActionDisabled([itemCopy], false, true)).toBe(false);
   });
-  it('should be enabled when the index pattern is available', () => {
+  it('should be enabled when the data view is available', () => {
     expect(isDiscoverActionDisabled([item], false, true)).toBe(false);
   });
 });

@@ -62,23 +62,23 @@ export function getActions(
     });
   }
 
-  // Allow to edit index pattern field
-  if (services.indexPatternFieldEditor?.userPermissions.editIndexPattern()) {
+  // Allow to edit data view field
+  if (services.dataViewFieldEditor?.userPermissions.editIndexPattern()) {
     actions.push({
-      name: i18n.translate('xpack.dataVisualizer.index.dataGrid.editIndexPatternFieldTitle', {
-        defaultMessage: 'Edit index pattern field',
+      name: i18n.translate('xpack.dataVisualizer.index.dataGrid.editDataViewFieldTitle', {
+        defaultMessage: 'Edit data view field',
       }),
       description: i18n.translate(
-        'xpack.dataVisualizer.index.dataGrid.editIndexPatternFieldDescription',
+        'xpack.dataVisualizer.index.dataGrid.editDataViewFieldDescription',
         {
-          defaultMessage: 'Edit index pattern field',
+          defaultMessage: 'Edit data view field',
         }
       ),
       type: 'icon',
       icon: 'indexEdit',
       onClick: (item: FieldVisConfig) => {
-        actionFlyoutRef.current = services.indexPatternFieldEditor?.openEditor({
-          ctx: { indexPattern },
+        actionFlyoutRef.current = services.dataViewFieldEditor?.openEditor({
+          ctx: { dataView: indexPattern },
           fieldName: item.fieldName,
           onSave: refreshPage,
         });
@@ -86,13 +86,13 @@ export function getActions(
       'data-test-subj': 'dataVisualizerActionEditIndexPatternFieldButton',
     });
     actions.push({
-      name: i18n.translate('xpack.dataVisualizer.index.dataGrid.deleteIndexPatternFieldTitle', {
-        defaultMessage: 'Delete index pattern field',
+      name: i18n.translate('xpack.dataVisualizer.index.dataGrid.deleteDataViewFieldTitle', {
+        defaultMessage: 'Delete data view field',
       }),
       description: i18n.translate(
         'xpack.dataVisualizer.index.dataGrid.deleteIndexPatternFieldDescription',
         {
-          defaultMessage: 'Delete index pattern field',
+          defaultMessage: 'Delete data view field',
         }
       ),
       type: 'icon',
@@ -101,8 +101,8 @@ export function getActions(
         return item.deletable === true;
       },
       onClick: (item: FieldVisConfig) => {
-        actionFlyoutRef.current = services.indexPatternFieldEditor?.openDeleteModal({
-          ctx: { indexPattern },
+        actionFlyoutRef.current = services.dataViewFieldEditor?.openDeleteModal({
+          ctx: { dataView: indexPattern },
           fieldName: item.fieldName!,
           onDelete: refreshPage,
         });

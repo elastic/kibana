@@ -44,7 +44,7 @@ describe('NotePreviews', () => {
 
     const wrapper = mountWithIntl(<NotePreviews notes={hasNotes[0].notes} />);
 
-    hasNotes[0].notes!.forEach(({ savedObjectId }) => {
+    hasNotes[0].notes?.forEach(({ savedObjectId }) => {
       expect(wrapper.find(`[data-test-subj="note-preview-${savedObjectId}"]`).exists()).toBe(true);
     });
   });
@@ -54,7 +54,7 @@ describe('NotePreviews', () => {
 
     const wrapper = mountWithIntl(<NotePreviews notes={hasNotes[0].notes} />);
 
-    hasNotes[0].notes!.forEach(({ savedObjectId }) => {
+    hasNotes[0].notes?.forEach(({ savedObjectId }) => {
       expect(wrapper.find(`[data-test-subj="note-preview-${savedObjectId}"]`).exists()).toBe(true);
     });
   });

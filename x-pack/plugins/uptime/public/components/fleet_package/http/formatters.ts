@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HTTPFields, ConfigKeys } from '../types';
+import { HTTPFields, ConfigKey } from '../types';
 import {
   Formatter,
   commonFormatters,
@@ -17,28 +17,29 @@ import { tlsFormatters } from '../tls/formatters';
 export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;
 
 export const httpFormatters: HTTPFormatMap = {
-  [ConfigKeys.URLS]: null,
-  [ConfigKeys.MAX_REDIRECTS]: null,
-  [ConfigKeys.USERNAME]: null,
-  [ConfigKeys.PASSWORD]: null,
-  [ConfigKeys.PROXY_URL]: null,
-  [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: (fields) =>
-    arrayToJsonFormatter(fields[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]),
-  [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: (fields) =>
-    arrayToJsonFormatter(fields[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]),
-  [ConfigKeys.RESPONSE_BODY_INDEX]: null,
-  [ConfigKeys.RESPONSE_HEADERS_CHECK]: (fields) =>
-    objectToJsonFormatter(fields[ConfigKeys.RESPONSE_HEADERS_CHECK]),
-  [ConfigKeys.RESPONSE_HEADERS_INDEX]: null,
-  [ConfigKeys.RESPONSE_STATUS_CHECK]: (fields) =>
-    arrayToJsonFormatter(fields[ConfigKeys.RESPONSE_STATUS_CHECK]),
-  [ConfigKeys.REQUEST_BODY_CHECK]: (fields) =>
-    fields[ConfigKeys.REQUEST_BODY_CHECK]?.value
-      ? JSON.stringify(fields[ConfigKeys.REQUEST_BODY_CHECK]?.value)
+  [ConfigKey.METADATA]: (fields) => objectToJsonFormatter(fields[ConfigKey.METADATA]),
+  [ConfigKey.URLS]: null,
+  [ConfigKey.MAX_REDIRECTS]: null,
+  [ConfigKey.USERNAME]: null,
+  [ConfigKey.PASSWORD]: null,
+  [ConfigKey.PROXY_URL]: null,
+  [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: (fields) =>
+    arrayToJsonFormatter(fields[ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]),
+  [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: (fields) =>
+    arrayToJsonFormatter(fields[ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]),
+  [ConfigKey.RESPONSE_BODY_INDEX]: null,
+  [ConfigKey.RESPONSE_HEADERS_CHECK]: (fields) =>
+    objectToJsonFormatter(fields[ConfigKey.RESPONSE_HEADERS_CHECK]),
+  [ConfigKey.RESPONSE_HEADERS_INDEX]: null,
+  [ConfigKey.RESPONSE_STATUS_CHECK]: (fields) =>
+    arrayToJsonFormatter(fields[ConfigKey.RESPONSE_STATUS_CHECK]),
+  [ConfigKey.REQUEST_BODY_CHECK]: (fields) =>
+    fields[ConfigKey.REQUEST_BODY_CHECK]?.value
+      ? JSON.stringify(fields[ConfigKey.REQUEST_BODY_CHECK]?.value)
       : null,
-  [ConfigKeys.REQUEST_HEADERS_CHECK]: (fields) =>
-    objectToJsonFormatter(fields[ConfigKeys.REQUEST_HEADERS_CHECK]),
-  [ConfigKeys.REQUEST_METHOD_CHECK]: null,
+  [ConfigKey.REQUEST_HEADERS_CHECK]: (fields) =>
+    objectToJsonFormatter(fields[ConfigKey.REQUEST_HEADERS_CHECK]),
+  [ConfigKey.REQUEST_METHOD_CHECK]: null,
   ...tlsFormatters,
   ...commonFormatters,
 };

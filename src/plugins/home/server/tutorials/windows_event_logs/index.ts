@@ -23,17 +23,17 @@ export function windowsEventLogsSpecProvider(context: TutorialContext): Tutorial
   return {
     id: 'windowsEventLogs',
     name: i18n.translate('home.tutorials.windowsEventLogs.nameTitle', {
-      defaultMessage: 'Windows Event Log',
+      defaultMessage: 'Windows Event Logs',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.windowsEventLogs.shortDescription', {
-      defaultMessage: 'Fetch logs from the Windows Event Log.',
+      defaultMessage: 'Collect and parse logs from Windows Event Logs with WinLogBeat.',
     }),
     longDescription: i18n.translate('home.tutorials.windowsEventLogs.longDescription', {
       defaultMessage:
-        'Use Winlogbeat to collect the logs from the Windows Event Log. \
+        'Use Winlogbeat to collect the logs from Windows Event Logs. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.winlogbeat}/index.html',
@@ -54,8 +54,8 @@ export function windowsEventLogsSpecProvider(context: TutorialContext): Tutorial
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(context),
-    elasticCloud: cloudInstructions(),
-    onPremElasticCloud: onPremCloudInstructions(),
+    elasticCloud: cloudInstructions(context),
+    onPremElasticCloud: onPremCloudInstructions(context),
     integrationBrowserCategories: ['os_system', 'security'],
   };
 }

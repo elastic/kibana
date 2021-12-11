@@ -6,22 +6,16 @@
  * Side Public License, v 1.
  */
 
+import type { MaybePromise } from '@kbn/utility-types';
 import type { SavedObjectsClientContract } from '../saved_objects/types';
 import type { IScopedClusterClient } from '../elasticsearch';
 
-type MaybePromise<T> = T | Promise<T>;
-
 /**
- * @internal
- */
-export interface DomainDeprecationDetails extends DeprecationsDetails {
-  domainId: string;
-}
-
-/**
+ * Base properties shared by all types of deprecations
+ *
  * @public
  */
-export interface DeprecationsDetails {
+export interface BaseDeprecationDetails {
   /**
    * The title of the deprecation.
    * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
@@ -81,6 +75,33 @@ export interface DeprecationsDetails {
     manualSteps: string[];
   };
 }
+
+/**
+ * @public
+ */
+export interface ConfigDeprecationDetails extends BaseDeprecationDetails {
+  configPath: string;
+  deprecationType: 'config';
+}
+
+/**
+ * @public
+ */
+export interface FeatureDeprecationDetails extends BaseDeprecationDetails {
+  deprecationType?: 'feature' | undefined;
+}
+
+/**
+ * @public
+ */
+export type DeprecationsDetails = ConfigDeprecationDetails | FeatureDeprecationDetails;
+
+/**
+ * @internal
+ */
+export type DomainDeprecationDetails = DeprecationsDetails & {
+  domainId: string;
+};
 
 /**
  * @public

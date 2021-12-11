@@ -35,7 +35,7 @@ export const useAllAgents = (
   return useQuery<GetAgentsResponse>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {
-      let kuery = `${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')}`;
+      let kuery = `(${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')})`;
 
       if (searchValue) {
         kuery += ` and (local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*)`;
@@ -54,10 +54,13 @@ export const useAllAgents = (
       enabled: !osqueryPoliciesLoading && osqueryPolicies.length > 0,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
-        setErrorToast(error as Error, {
+        // @ts-expect-error update types
+        setErrorToast(error?.body, {
           title: i18n.translate('xpack.osquery.agents.fetchError', {
             defaultMessage: 'Error while fetching agents',
           }),
+          // @ts-expect-error update types
+          toastMessage: error?.body?.error,
         }),
     }
   );

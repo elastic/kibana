@@ -22,8 +22,8 @@ describe('isAlertFromEndpointEvent', () => {
     mockDetailItemData.push(
       // Must be an Alert
       {
-        field: 'signal.rule.id',
-        category: 'signal',
+        field: 'kibana.alert.rule.uuid',
+        category: 'kibana',
         originalValue: 'endpoint',
         values: ['endpoint'],
         isObjectArray: false,
@@ -43,7 +43,7 @@ describe('isAlertFromEndpointEvent', () => {
   });
 
   it('should return false if it is not an Alert (ex. maybe an event)', () => {
-    _.remove(mockDetailItemData, { field: 'signal.rule.id' });
+    _.remove(mockDetailItemData, { field: 'kibana.alert.rule.uuid' });
     expect(isAlertFromEndpointEvent({ data: mockDetailItemData })).toBeFalsy();
   });
 
@@ -57,8 +57,8 @@ describe('isAlertFromEndpointAlert', () => {
   it('should return true if detections data comes from an endpoint rule', () => {
     const mockEcsData = {
       _id: 'mockId',
-      'signal.original_event.module': ['endpoint'],
-      'signal.original_event.kind': ['alert'],
+      'kibana.alert.original_event.module': ['endpoint'],
+      'kibana.alert.original_event.kind': ['alert'],
     } as Ecs;
     expect(isAlertFromEndpointAlert({ ecsData: mockEcsData })).toBe(true);
   });
@@ -70,7 +70,7 @@ describe('isAlertFromEndpointAlert', () => {
   it('should return false if it is not an Alert', () => {
     const mockEcsData = {
       _id: 'mockId',
-      'signal.original_event.module': ['endpoint'],
+      'kibana.alert.original_event.module': ['endpoint'],
     } as Ecs;
     expect(isAlertFromEndpointAlert({ ecsData: mockEcsData })).toBeFalsy();
   });
@@ -78,7 +78,7 @@ describe('isAlertFromEndpointAlert', () => {
   it('should return false if it is not an endpoint module', () => {
     const mockEcsData = {
       _id: 'mockId',
-      'signal.original_event.kind': ['alert'],
+      'kibana.alert.original_event.kind': ['alert'],
     } as Ecs;
     expect(isAlertFromEndpointAlert({ ecsData: mockEcsData })).toBeFalsy();
   });

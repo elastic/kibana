@@ -14,7 +14,7 @@ tags:
 # Build args passed to Dockerfile ARGs
 args:
   BASE_IMAGE: 'redhat/ubi/ubi8'
-  BASE_TAG: '8.4'
+  BASE_TAG: '8.5'
 
 # Docker image labels
 labels:
@@ -55,4 +55,8 @@ maintainers:
   - email: 'klepal_alexander@bah.com'
     name: 'Alexander Klepal'
     username: 'alexander.klepal'
+    cht_member: true
+  - email: "yalabe.dukuly@anchore.com"
+    name: "Yalabe Dukuly"
+    username: "yalabe.dukuly"
     cht_member: true

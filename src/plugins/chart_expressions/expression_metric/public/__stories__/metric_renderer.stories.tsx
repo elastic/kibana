@@ -8,12 +8,33 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
+import { from } from 'rxjs';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { DatatableColumn, Range } from '../../../../expressions';
+import { Datatable, DatatableColumn } from '../../../../expressions';
 import { Render } from '../../../../presentation_util/public/__stories__';
-import { ColorMode, ColorSchemas } from '../../../../charts/common';
-import { metricVisRenderer } from '../expression_renderers';
-import { MetricVisRenderConfig, visType } from '../../common/types';
+import { ColorMode, CustomPaletteState } from '../../../../charts/common';
+import { getMetricVisRenderer } from '../expression_renderers';
+import { MetricStyle, MetricVisRenderConfig, visType } from '../../common/types';
+
+const palette: CustomPaletteState = {
+  colors: ['rgb(219 231 38)', 'rgb(112 38 231)', 'rgb(38 124 231)'],
+  stops: [0, 50, 150],
+  gradient: false,
+  rangeMin: 0,
+  rangeMax: 150,
+  range: 'number',
+};
+
+const style: MetricStyle = {
+  spec: { fontSize: '12px' },
+
+  /* stylelint-disable */
+  type: 'style',
+  css: '',
+  bgColor: false,
+  labelColor: false,
+  /* stylelint-enable */
+};
 
 const config: MetricVisRenderConfig = {
   visType,
@@ -35,20 +56,10 @@ const config: MetricVisRenderConfig = {
   },
   visConfig: {
     metric: {
-      percentageMode: false,
-      useRanges: false,
-      colorSchema: ColorSchemas.GreenToRed,
       metricColorMode: ColorMode.None,
-      colorsRange: [],
       labels: { show: true },
-      invertColors: false,
-      style: {
-        bgColor: false,
-        bgFill: '#000',
-        fontSize: 60,
-        labelColor: false,
-        subText: '',
-      },
+      percentageMode: false,
+      style,
     },
     dimensions: {
       metrics: [
@@ -102,15 +113,12 @@ const dataWithBuckets = [
   { 'col-0-1': 56, 'col-0-2': 52, 'col-0-3': 'Wednesday' },
 ];
 
-const colorsRange: Range[] = [
-  { type: 'range', from: 0, to: 50 },
-  { type: 'range', from: 51, to: 150 },
-];
-
 const containerSize = {
   width: '700px',
   height: '700px',
 };
+
+const metricVisRenderer = getMetricVisRenderer({ theme$: from([{ darkMode: false }]) });
 
 storiesOf('renderers/visMetric', module)
   .add('Default', () => {
@@ -141,7 +149,10 @@ storiesOf('renderers/visMetric', module)
             ...config.visConfig,
             metric: {
               ...config.visConfig.metric,
-              style: { ...config.visConfig.metric.style, fontSize: 120 },
+              style: {
+                ...config.visConfig.metric.style,
+                spec: { ...config.visConfig.metric.style.spec, fontSize: '120px' },
+              },
             },
           },
         }}
@@ -159,7 +170,7 @@ storiesOf('renderers/visMetric', module)
             ...config.visConfig,
             metric: {
               ...config.visConfig.metric,
-              colorsRange,
+              palette,
               metricColorMode: ColorMode.Background,
               style: {
                 ...config.visConfig.metric.style,
@@ -182,7 +193,7 @@ storiesOf('renderers/visMetric', module)
             ...config.visConfig,
             metric: {
               ...config.visConfig.metric,
-              colorsRange,
+              palette,
               metricColorMode: ColorMode.Labels,
               style: {
                 ...config.visConfig.metric.style,
@@ -205,13 +216,12 @@ storiesOf('renderers/visMetric', module)
             ...config.visConfig,
             metric: {
               ...config.visConfig.metric,
-              colorsRange,
+              palette,
               metricColorMode: ColorMode.Labels,
               style: {
                 ...config.visConfig.metric.style,
                 labelColor: true,
               },
-              invertColors: true,
             },
           },
         }}
@@ -226,8 +236,8 @@ storiesOf('renderers/visMetric', module)
         config={{
           ...config,
           visData: {
-            ...config.visData,
-            columns: [...config.visData.columns, dayColumn],
+            ...(config.visData as Datatable),
+            columns: [...(config.visData as Datatable).columns, dayColumn],
             rows: dataWithBuckets,
           },
           visConfig: {
@@ -243,7 +253,7 @@ storiesOf('renderers/visMetric', module)
     return (
       <Render
         renderer={metricVisRenderer}
-        config={{ ...config, visData: { ...config.visData, rows: [] } }}
+        config={{ ...config, visData: { ...config.visData, rows: [] } as Datatable }}
         {...containerSize}
       />
     );

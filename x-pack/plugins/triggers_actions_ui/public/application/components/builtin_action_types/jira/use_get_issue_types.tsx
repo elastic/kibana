@@ -6,19 +6,16 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, IToasts } from 'kibana/public';
+
 import { ActionConnector } from '../../../../types';
+import { IssueTypes } from './types';
 import { getIssueTypes } from './api';
 import * as i18n from './translations';
 
-type IssueTypes = Array<{ id: string; name: string }>;
-
 interface Props {
   http: HttpSetup;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  toastNotifications: IToasts;
   actionConnector?: ActionConnector;
 }
 

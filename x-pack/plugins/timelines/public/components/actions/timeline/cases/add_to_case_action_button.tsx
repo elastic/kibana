@@ -20,11 +20,11 @@ import { ActionIconItem } from '../../action_icon_item';
 import * as i18n from './translations';
 
 const AddToCaseActionButtonComponent: React.FC<AddToCaseActionProps> = ({
-  ariaLabel = i18n.ACTION_ADD_TO_CASE_ARIA_LABEL,
   event,
   useInsertTimeline,
   casePermissions,
   appId,
+  owner,
   onClose,
 }) => {
   const {
@@ -36,7 +36,7 @@ const AddToCaseActionButtonComponent: React.FC<AddToCaseActionProps> = ({
     openPopover,
     closePopover,
     isPopoverOpen,
-  } = useAddToCase({ event, useInsertTimeline, casePermissions, appId, onClose });
+  } = useAddToCase({ event, useInsertTimeline, casePermissions, appId, owner, onClose });
   const tooltipContext = userCanCrud
     ? isEventSupported
       ? i18n.ACTION_ADD_TO_CASE_TOOLTIP
@@ -70,16 +70,16 @@ const AddToCaseActionButtonComponent: React.FC<AddToCaseActionProps> = ({
     () => (
       <EuiToolTip data-test-subj="attach-alert-to-case-tooltip" content={tooltipContext}>
         <EuiButtonIcon
-          aria-label={ariaLabel}
           data-test-subj="attach-alert-to-case-button"
           size="s"
           iconType="folderClosed"
           onClick={openPopover}
           isDisabled={isDisabled}
+          aria-label={tooltipContext}
         />
       </EuiToolTip>
     ),
-    [ariaLabel, isDisabled, openPopover, tooltipContext]
+    [isDisabled, openPopover, tooltipContext]
   );
 
   return (

@@ -10,6 +10,7 @@ import { copyAllowlistedFields } from './filters';
 describe('Security Telemetry filters', () => {
   describe('allowlistEventFields', () => {
     const allowlist = {
+      _id: true,
       a: true,
       b: true,
       c: {
@@ -19,12 +20,14 @@ describe('Security Telemetry filters', () => {
 
     it('filters top level', () => {
       const event = {
+        _id: 'id',
         a: 'a',
         a1: 'a1',
         b: 'b',
         b1: 'b1',
       };
       expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
+        _id: 'id',
         a: 'a',
         b: 'b',
       });

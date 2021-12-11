@@ -15,7 +15,6 @@ export {
   flushIndices,
   forcemergeIndices,
   clearCacheIndices,
-  freezeIndices,
   unfreezeIndices,
   loadIndexSettings,
   updateIndexSettings,
@@ -24,6 +23,7 @@ export {
   loadIndexData,
   useLoadIndexTemplates,
   simulateIndexTemplate,
+  useLoadNodesPlugins,
 } from './api';
 export { sortTable } from './sort_table';
 

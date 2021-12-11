@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
+import {
+  Axis,
+  BarSeries,
+  niceTimeFormatter,
+  Position,
+  ScaleType,
+  Settings,
+  XYBrushEvent,
+} from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -22,9 +30,10 @@ import { useHasData } from '../../../../hooks/use_has_data';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
+import { BucketSize } from '../../../../pages/overview';
 
 interface Props {
-  bucketSize?: string;
+  bucketSize: BucketSize;
 }
 
 function formatTpm(value?: number) {
@@ -57,7 +66,7 @@ export function APMSection({ bucketSize }: Props) {
         return getDataHandler('apm')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
-          bucketSize,
+          ...bucketSize,
         });
       }
     },
@@ -117,7 +126,7 @@ export function APMSection({ bucketSize }: Props) {
       </EuiFlexGroup>
       <ChartContainer isInitialLoad={isLoading && !data}>
         <Settings
-          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
+          onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
           theme={chartTheme}
           showLegend={false}
           xDomain={{ min, max }}

@@ -5,21 +5,34 @@
  * 2.0.
  */
 
-import type { IRouter } from 'src/core/server';
+import type { IKibanaResponse } from 'src/core/server';
+
+import type {
+  DeletePackageResponse,
+  GetInfoResponse,
+  InstallPackageResponse,
+  UpdatePackageResponse,
+} from '../../../common';
 
 import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
+import { splitPkgKey } from '../../services/epm/registry';
 import {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
+  GetInfoRequestSchemaDeprecated,
   InstallPackageFromRegistryRequestSchema,
+  InstallPackageFromRegistryRequestSchemaDeprecated,
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
+  DeletePackageRequestSchemaDeprecated,
   BulkUpgradePackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
   UpdatePackageRequestSchema,
+  UpdatePackageRequestSchemaDeprecated,
 } from '../../types';
+import type { FleetRouter } from '../../types/request_context';
 
 import {
   getCategoriesHandler,
@@ -37,8 +50,8 @@ import {
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
-export const registerRoutes = (router: IRouter) => {
-  router.get(
+export const registerRoutes = (routers: { rbac: FleetRouter; superuser: FleetRouter }) => {
+  routers.rbac.get(
     {
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
       validate: GetCategoriesRequestSchema,
@@ -47,7 +60,7 @@ export const registerRoutes = (router: IRouter) => {
     getCategoriesHandler
   );
 
-  router.get(
+  routers.rbac.get(
     {
       path: EPM_API_ROUTES.LIST_PATTERN,
       validate: GetPackagesRequestSchema,
@@ -56,25 +69,25 @@ export const registerRoutes = (router: IRouter) => {
     getListHandler
   );
 
-  router.get(
+  routers.rbac.get(
     {
       path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
       validate: false,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getLimitedListHandler
   );
 
-  router.get(
+  routers.rbac.get(
     {
       path: EPM_API_ROUTES.STATS_PATTERN,
       validate: GetStatsRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getStatsHandler
   );
 
-  router.get(
+  routers.rbac.get(
     {
       path: EPM_API_ROUTES.FILEPATH_PATTERN,
       validate: GetFileRequestSchema,
@@ -83,7 +96,7 @@ export const registerRoutes = (router: IRouter) => {
     getFileHandler
   );
 
-  router.get(
+  routers.rbac.get(
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: GetInfoRequestSchema,
@@ -92,7 +105,7 @@ export const registerRoutes = (router: IRouter) => {
     getInfoHandler
   );
 
-  router.put(
+  routers.superuser.put(
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: UpdatePackageRequestSchema,
@@ -101,7 +114,7 @@ export const registerRoutes = (router: IRouter) => {
     updatePackageHandler
   );
 
-  router.post(
+  routers.superuser.post(
     {
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN,
       validate: InstallPackageFromRegistryRequestSchema,
@@ -110,7 +123,7 @@ export const registerRoutes = (router: IRouter) => {
     installPackageFromRegistryHandler
   );
 
-  router.post(
+  routers.superuser.post(
     {
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
       validate: BulkUpgradePackagesFromRegistryRequestSchema,
@@ -119,7 +132,7 @@ export const registerRoutes = (router: IRouter) => {
     bulkInstallPackagesFromRegistryHandler
   );
 
-  router.post(
+  routers.superuser.post(
     {
       path: EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
       validate: InstallPackageByUploadRequestSchema,
@@ -135,12 +148,94 @@ export const registerRoutes = (router: IRouter) => {
     installPackageByUploadHandler
   );
 
-  router.delete(
+  routers.superuser.delete(
     {
       path: EPM_API_ROUTES.DELETE_PATTERN,
       validate: DeletePackageRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     deletePackageHandler
+  );
+
+  // deprecated since 8.0
+  routers.rbac.get(
+    {
+      path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
+      validate: GetInfoRequestSchemaDeprecated,
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
+    },
+    async (context, request, response) => {
+      const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
+      const resp: IKibanaResponse<GetInfoResponse> = await getInfoHandler(
+        context,
+        newRequest,
+        response
+      );
+      if (resp.payload?.item) {
+        // returning item as well here, because pkgVersion is optional in new GET endpoint, and if not specified, the router selects the deprecated route
+        return response.ok({ body: { item: resp.payload.item, response: resp.payload.item } });
+      }
+      return resp;
+    }
+  );
+
+  routers.superuser.put(
+    {
+      path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
+      validate: UpdatePackageRequestSchemaDeprecated,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    async (context, request, response) => {
+      const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
+      const resp: IKibanaResponse<UpdatePackageResponse> = await updatePackageHandler(
+        context,
+        newRequest,
+        response
+      );
+      if (resp.payload?.item) {
+        return response.ok({ body: { response: resp.payload.item } });
+      }
+      return resp;
+    }
+  );
+
+  routers.superuser.post(
+    {
+      path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED,
+      validate: InstallPackageFromRegistryRequestSchemaDeprecated,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    async (context, request, response) => {
+      const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
+      const resp: IKibanaResponse<InstallPackageResponse> = await installPackageFromRegistryHandler(
+        context,
+        newRequest,
+        response
+      );
+      if (resp.payload?.items) {
+        return response.ok({ body: { response: resp.payload.items } });
+      }
+      return resp;
+    }
+  );
+
+  routers.superuser.delete(
+    {
+      path: EPM_API_ROUTES.DELETE_PATTERN_DEPRECATED,
+      validate: DeletePackageRequestSchemaDeprecated,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    async (context, request, response) => {
+      const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
+      const resp: IKibanaResponse<DeletePackageResponse> = await deletePackageHandler(
+        context,
+        newRequest,
+        response
+      );
+      if (resp.payload?.items) {
+        return response.ok({ body: { response: resp.payload.items } });
+      }
+      return resp;
+    }
   );
 };

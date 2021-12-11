@@ -8,36 +8,22 @@
 import React, { memo, useEffect, useMemo } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
 import { useTrackPageview } from '../../../../observability/public';
+import { DataStream } from './types';
+import { PolicyConfig } from './types';
 import {
-  PolicyConfig,
-  DataStream,
-  ConfigKeys,
-  HTTPFields,
-  TCPFields,
-  ICMPFields,
-  BrowserFields,
-} from './types';
-import {
-  useMonitorTypeContext,
-  useTCPSimpleFieldsContext,
-  useTCPAdvancedFieldsContext,
-  useICMPSimpleFieldsContext,
-  useHTTPSimpleFieldsContext,
-  useHTTPAdvancedFieldsContext,
-  useTLSFieldsContext,
-  useBrowserSimpleFieldsContext,
-  useBrowserAdvancedFieldsContext,
-  defaultHTTPAdvancedFields,
+  usePolicyConfigContext,
   defaultHTTPSimpleFields,
-  defaultICMPSimpleFields,
+  defaultHTTPAdvancedFields,
   defaultTCPSimpleFields,
   defaultTCPAdvancedFields,
+  defaultICMPSimpleFields,
   defaultBrowserSimpleFields,
   defaultBrowserAdvancedFields,
   defaultTLSFields,
 } from './contexts';
 import { CustomFields } from './custom_fields';
-import { useUpdatePolicy } from './use_update_policy';
+import { useUpdatePolicy } from './hooks/use_update_policy';
+import { usePolicy } from './hooks/use_policy';
 import { validate } from './validation';
 
 export const defaultConfig: PolicyConfig = {
@@ -55,6 +41,7 @@ export const defaultConfig: PolicyConfig = {
   [DataStream.BROWSER]: {
     ...defaultBrowserSimpleFields,
     ...defaultBrowserAdvancedFields,
+    ...defaultTLSFields,
   },
 };
 
@@ -64,42 +51,11 @@ export const defaultConfig: PolicyConfig = {
  */
 export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
-    const { monitorType } = useMonitorTypeContext();
-    const { fields: httpSimpleFields } = useHTTPSimpleFieldsContext();
-    const { fields: tcpSimpleFields } = useTCPSimpleFieldsContext();
-    const { fields: icmpSimpleFields } = useICMPSimpleFieldsContext();
-    const { fields: browserSimpleFields } = useBrowserSimpleFieldsContext();
-    const { fields: httpAdvancedFields } = useHTTPAdvancedFieldsContext();
-    const { fields: tcpAdvancedFields } = useTCPAdvancedFieldsContext();
-    const { fields: browserAdvancedFields } = useBrowserAdvancedFieldsContext();
-    const { fields: tlsFields } = useTLSFieldsContext();
-
-    const policyConfig: PolicyConfig = {
-      [DataStream.HTTP]: {
-        ...httpSimpleFields,
-        ...httpAdvancedFields,
-        ...tlsFields,
-        [ConfigKeys.NAME]: newPolicy.name,
-      } as HTTPFields,
-      [DataStream.TCP]: {
-        ...tcpSimpleFields,
-        ...tcpAdvancedFields,
-        ...tlsFields,
-        [ConfigKeys.NAME]: newPolicy.name,
-      } as TCPFields,
-      [DataStream.ICMP]: {
-        ...icmpSimpleFields,
-        [ConfigKeys.NAME]: newPolicy.name,
-      } as ICMPFields,
-      [DataStream.BROWSER]: {
-        ...browserSimpleFields,
-        ...browserAdvancedFields,
-        [ConfigKeys.NAME]: newPolicy.name,
-      } as BrowserFields,
-    };
-
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate' });
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate', delay: 15000 });
+
+    const { monitorType } = usePolicyConfigContext();
+    const policyConfig: PolicyConfig = usePolicy(newPolicy.name);
 
     const dataStreams: DataStream[] = useMemo(() => {
       return newPolicy.inputs.map((input) => {
@@ -130,7 +86,7 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    return <CustomFields typeEditable validate={validate[monitorType]} dataStreams={dataStreams} />;
+    return <CustomFields validate={validate[monitorType]} dataStreams={dataStreams} />;
   }
 );
 SyntheticsPolicyCreateExtension.displayName = 'SyntheticsPolicyCreateExtension';

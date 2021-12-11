@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, CoreStart } from 'kibana/public';
-import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { SharePluginStart } from '../../../../src/plugins/share/public';
 import { Plugin } from '../../../../src/core/public';
 
@@ -17,13 +17,16 @@ import type { FileUploadPluginStart } from '../../file_upload/public';
 import type { MapsStartApi } from '../../maps/public';
 import type { SecurityPluginSetup } from '../../security/public';
 import type { LensPublicStart } from '../../lens/public';
-import type { IndexPatternFieldEditorStart } from '../../../../src/plugins/index_pattern_field_editor/public';
+import type { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
 import { getFileDataVisualizerComponent, getIndexDataVisualizerComponent } from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
+import { registerEmbeddables } from './application/index_data_visualizer/embeddables';
+import { FieldFormatsStart } from '../../../../src/plugins/field_formats/public';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
+  embeddable: EmbeddableSetup;
 }
 export interface DataVisualizerStartDependencies {
   data: DataPublicPluginStart;
@@ -33,7 +36,8 @@ export interface DataVisualizerStartDependencies {
   security?: SecurityPluginSetup;
   share: SharePluginStart;
   lens?: LensPublicStart;
-  indexPatternFieldEditor?: IndexPatternFieldEditorStart;
+  dataViewFieldEditor?: IndexPatternFieldEditorStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
@@ -55,6 +59,9 @@ export class DataVisualizerPlugin
     if (plugins.home) {
       registerHomeAddData(plugins.home);
       registerHomeFeatureCatalogue(plugins.home);
+    }
+    if (plugins.embeddable) {
+      registerEmbeddables(plugins.embeddable, core);
     }
   }
 

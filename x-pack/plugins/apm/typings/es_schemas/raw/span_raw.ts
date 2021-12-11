@@ -7,8 +7,10 @@
 
 import { APMBaseDoc } from './apm_base_doc';
 import { EventOutcome } from './fields/event_outcome';
+import { Http } from './fields/http';
 import { Stackframe } from './fields/stackframe';
 import { TimestampUs } from './fields/timestamp_us';
+import { Url } from './fields/url';
 
 interface Processor {
   name: 'transaction';
@@ -67,4 +69,6 @@ export interface SpanRaw extends APMBaseDoc {
     id: string;
   };
   child?: { id: string[] };
+  http?: Http;
+  url?: Url;
 }

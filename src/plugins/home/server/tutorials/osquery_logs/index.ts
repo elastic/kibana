@@ -24,12 +24,12 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'osqueryLogs',
     name: i18n.translate('home.tutorials.osqueryLogs.nameTitle', {
-      defaultMessage: 'Osquery logs',
+      defaultMessage: 'Osquery Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.osqueryLogs.shortDescription', {
-      defaultMessage: 'Collect osquery logs in JSON format.',
+      defaultMessage: 'Collect and parse logs from Osquery with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.osqueryLogs.longDescription', {
       defaultMessage:
@@ -60,8 +60,8 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['security', 'os_system'],
   };
 }

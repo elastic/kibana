@@ -19,8 +19,9 @@ import type {
   ChromeRecentlyAccessed,
   IBasePath,
 } from 'kibana/public';
-import type { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/data/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
+import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
 import type { SecurityPluginSetup } from '../../../../security/public';
 import type { MapsStartApi } from '../../../../maps/public';
 import type { DataVisualizerPluginStart } from '../../../../data_visualizer/public';
@@ -28,7 +29,7 @@ import type { DataVisualizerPluginStart } from '../../../../data_visualizer/publ
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
   config: IUiSettingsClient | null;
-  indexPatterns: IndexPatternsContract | null;
+  indexPatterns: DataViewsContract | null;
   chrome: ChromeStart | null;
   docLinks: DocLinksStart | null;
   toastNotifications: ToastsStart | null;
@@ -45,6 +46,7 @@ export interface DependencyCache {
   urlGenerators: SharePluginStart['urlGenerators'] | null;
   maps: MapsStartApi | null;
   dataVisualizer: DataVisualizerPluginStart | null;
+  dataViews: DataViewsContract | null;
 }
 
 const cache: DependencyCache = {
@@ -67,6 +69,7 @@ const cache: DependencyCache = {
   urlGenerators: null,
   maps: null,
   dataVisualizer: null,
+  dataViews: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -88,6 +91,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.i18n = deps.i18n || null;
   cache.urlGenerators = deps.urlGenerators || null;
   cache.dataVisualizer = deps.dataVisualizer || null;
+  cache.dataViews = deps.dataViews || null;
 }
 
 export function getTimefilter() {
@@ -206,6 +210,13 @@ export function getGetUrlGenerator() {
     throw new Error("urlGenerators hasn't been initialized");
   }
   return cache.urlGenerators.getUrlGenerator;
+}
+
+export function getDataViews() {
+  if (cache.dataViews === null) {
+    throw new Error("dataViews hasn't been initialized");
+  }
+  return cache.dataViews;
 }
 
 export function clearCache() {

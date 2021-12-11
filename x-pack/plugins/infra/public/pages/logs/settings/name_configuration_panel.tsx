@@ -13,7 +13,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { FormElement } from './form_elements';
 import { getFormRowProps, getStringInputFieldProps } from './form_field_props';

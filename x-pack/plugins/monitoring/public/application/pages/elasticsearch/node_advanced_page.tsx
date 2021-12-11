@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ItemTemplate } from './item_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -24,18 +25,34 @@ import {
   RULE_DISK_USAGE,
   RULE_MEMORY_USAGE,
 } from '../../../../common/constants';
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
-export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = () => {
+export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
+  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
   const { zoomInfo, onBrush } = useCharts();
+  const [data, setData] = useState({} as any);
 
   const { node }: { node: string } = useParams();
   const { services } = useKibana<{ data: any }>();
 
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
-  const [data, setData] = useState({} as any);
   const [alerts, setAlerts] = useState<AlertsByName>({});
+
+  const cluster = find(clusters, {
+    cluster_uuid: clusterUuid,
+  }) as any;
+
+  useEffect(() => {
+    if (cluster) {
+      generateBreadcrumbs(cluster.cluster_name, {
+        inElasticsearch: true,
+        name: 'nodes',
+        instance: data?.nodeSummary?.name,
+      });
+    }
+  }, [cluster, generateBreadcrumbs, data?.nodeSummary?.name]);
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.node.advanced.title', {
     defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Advanced',

@@ -23,17 +23,17 @@ export function awsMetricsSpecProvider(context: TutorialContext): TutorialSchema
   return {
     id: 'awsMetrics',
     name: i18n.translate('home.tutorials.awsMetrics.nameTitle', {
-      defaultMessage: 'AWS metrics',
+      defaultMessage: 'AWS Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.awsMetrics.shortDescription', {
       defaultMessage:
-        'Fetch monitoring metrics for EC2 instances from the AWS APIs and Cloudwatch.',
+        'Collect metrics for EC2 instances from AWS APIs and Cloudwatch with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.awsMetrics.longDescription', {
       defaultMessage:
-        'The `aws` Metricbeat module fetches monitoring metrics from the AWS APIs and Cloudwatch. \
+        'The `aws` Metricbeat module fetches metrics from AWS APIs and Cloudwatch. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-aws.html',
@@ -58,8 +58,8 @@ export function awsMetricsSpecProvider(context: TutorialContext): TutorialSchema
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/aws_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['aws', 'cloud', 'datastore', 'security', 'network'],
   };
 }
