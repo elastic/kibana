@@ -31,11 +31,12 @@ export const getListFilter = ({
   objects: ImportExceptionListSchemaDecoded[] | ImportExceptionListItemSchemaDecoded[];
   namespaceType: NamespaceType;
 }): string => {
-  return `${
-    getSavedObjectTypes({
-      namespaceType: [namespaceType],
-    })[0]
-  }.attributes.list_id:(${objects.map((list) => list.list_id).join(' OR ')})`;
+  const [soType] = getSavedObjectTypes({
+    namespaceType: [namespaceType],
+  });
+  const listIds = objects.map<string>(({ list_id: listId }) => listId);
+
+  return `${soType}.attributes.list_id:(${listIds.join(' OR ')})`;
 };
 
 /**
