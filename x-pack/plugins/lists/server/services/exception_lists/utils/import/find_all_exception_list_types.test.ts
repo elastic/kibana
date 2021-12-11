@@ -25,8 +25,11 @@ describe('find_all_exception_list_item_types', () => {
   describe('getListFilter', () => {
     it('formats agnostic filter', () => {
       const result = getListFilter({
-        ids: ['1', '2'],
         namespaceType: 'agnostic',
+        objects: [
+          getImportExceptionsListSchemaDecodedMock('1'),
+          getImportExceptionsListSchemaDecodedMock('2'),
+        ],
       });
 
       expect(result).toEqual('exception-list-agnostic.attributes.list_id:(1 OR 2)');
@@ -34,8 +37,11 @@ describe('find_all_exception_list_item_types', () => {
 
     it('formats single filter', () => {
       const result = getListFilter({
-        ids: ['1', '2'],
         namespaceType: 'single',
+        objects: [
+          getImportExceptionsListSchemaDecodedMock('1'),
+          getImportExceptionsListSchemaDecodedMock('2'),
+        ],
       });
 
       expect(result).toEqual('exception-list.attributes.list_id:(1 OR 2)');
