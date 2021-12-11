@@ -9,8 +9,8 @@ import apm from 'elastic-apm-node';
 
 interface PdfTracker {
   setByteLength: (byteLength: number) => void;
-  startLayout: () => void;
-  endLayout: () => void;
+  setCpuUsage: (cpu: number) => void;
+  setMemoryUsage: (memory: number) => void;
   startScreenshots: () => void;
   endScreenshots: () => void;
   startSetup: () => void;
@@ -34,7 +34,6 @@ interface ApmSpan {
 export function getTracker(): PdfTracker {
   const apmTrans = apm.startTransaction('reporting generate_pdf', 'reporting');
 
-  let apmLayout: ApmSpan | null = null;
   let apmScreenshots: ApmSpan | null = null;
   let apmSetup: ApmSpan | null = null;
   let apmAddImage: ApmSpan | null = null;
@@ -42,12 +41,6 @@ export function getTracker(): PdfTracker {
   let apmGetBuffer: ApmSpan | null = null;
 
   return {
-    startLayout() {
-      apmLayout = apmTrans?.startSpan('create_layout', SPANTYPE_SETUP) || null;
-    },
-    endLayout() {
-      if (apmLayout) apmLayout.end();
-    },
     startScreenshots() {
       apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', SPANTYPE_SETUP) || null;
     },
@@ -80,6 +73,12 @@ export function getTracker(): PdfTracker {
     },
     setByteLength(byteLength: number) {
       apmTrans?.setLabel('byte_length', byteLength, false);
+    },
+    setCpuUsage(cpu: number) {
+      apmTrans?.setLabel('cpu', cpu, false);
+    },
+    setMemoryUsage(memory: number) {
+      apmTrans?.setLabel('memory', memory, false);
     },
     end() {
       if (apmTrans) apmTrans.end();
