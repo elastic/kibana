@@ -17,7 +17,6 @@ const PROJECT_CONFIG_DOCS_LINK =
 const GLOBAL_CONFIG_DOCS_LINK =
   'https://github.com/sqren/backport/blob/e119d71d6dc03cd061f6ad9b9a8b1cd995f98961/docs/configuration.md#global-config-backportconfigjson';
 
-export type ValidatedOptions = ReturnType<typeof parseRequiredOptions>;
 export function parseRequiredOptions(
   optionsFromConfigFiles: OptionsFromConfigFiles,
   optionsFromCliArgs: OptionsFromCliArgs,

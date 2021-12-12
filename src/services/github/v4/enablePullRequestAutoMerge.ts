@@ -50,10 +50,12 @@ export async function enablePullRequestAutoMerge(
     spinner.succeed();
     return res.enablePullRequestAutoMerge.pullRequest?.number;
   } catch (e) {
-    spinner.fail();
-    logger.info(
-      `Could not enable auto merging for ${targetPullRequestNumber}`,
-      e.stack
-    );
+    if (e instanceof Error) {
+      spinner.fail();
+      logger.info(
+        `Could not enable auto merging for ${targetPullRequestNumber}`,
+        e.stack
+      );
+    }
   }
 }

@@ -27,10 +27,16 @@ export async function main(
       results,
     };
   } catch (e) {
-    const isHandledError = e instanceof HandledError;
-    if (isHandledError) {
+    if (e instanceof HandledError) {
       consoleLog(e.message);
-    } else {
+
+      return {
+        success: false,
+        results: [],
+        errorMessage: redact(e.message),
+        error: e,
+      };
+    } else if (e instanceof Error) {
       // output
       consoleLog('\n');
       consoleLog(chalk.bold('⚠️  Ouch! An unknown error occured 😿'));
@@ -46,17 +52,20 @@ export async function main(
 
       // log file
       logger.info('Unknown error:', e);
-    }
 
-    const errorMessage = redact(e.message);
+      return {
+        success: false,
+        results: [],
+        errorMessage: `An unhandled error occurred: ${redact(e.message)}`,
+        error: e,
+      };
+    }
 
     return {
       success: false,
       results: [],
-      errorMessage: isHandledError
-        ? errorMessage
-        : `An unhandled error occurred: ${errorMessage}`,
-      error: e,
+      errorMessage: 'Unknown error',
+      error: new Error('Unknown error'),
     };
   }
 }

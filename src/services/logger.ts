@@ -36,10 +36,10 @@ export const logger = {
   },
 };
 
-let redactedAccessToken: string | undefined;
+let accessToken: string | undefined;
 
 export function updateLogger(options: ConfigOptions) {
-  redactedAccessToken = options.accessToken;
+  accessToken = options.accessToken;
 
   // set log level
   winstonInstance.level = options.verbose ? 'debug' : 'info';
@@ -51,8 +51,9 @@ export function updateLogger(options: ConfigOptions) {
 }
 
 export function redact(str: string) {
-  if (redactedAccessToken) {
-    return str.replace(new RegExp(redactedAccessToken, 'g'), '<REDACTED>');
+  // redact might be called before access token is set
+  if (accessToken) {
+    return str.replace(new RegExp(accessToken, 'g'), '<REDACTED>');
   }
 
   return str;

@@ -119,6 +119,7 @@ describe('getOptions', () => {
       gitHostname: 'github.com',
       githubApiBaseUrlV3: 'https://api.github.com',
       githubApiBaseUrlV4: 'http://localhost/graphql',
+      mainline: 1,
       maxNumber: 10,
       multipleBranches: true,
       multipleCommits: false,

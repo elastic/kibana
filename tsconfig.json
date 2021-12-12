@@ -2,13 +2,14 @@
   "include": ["src/**/*"],
   "compilerOptions": {
     "declaration": true,
-    "target": "es2018",
-    "lib": ["es2019"],
-    "module": "commonjs",
+    "target": "ES2021",
+    "lib": ["ES2021"],
+    "module": "CommonJS",
     "outDir": "./dist",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noUnusedLocals": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "useUnknownInCatchVariables": false
   }
 }

@@ -3,8 +3,7 @@ os:
   - osx
 language: node_js
 node_js:
-  - '12'
-  - '14'
+  - '16'
 cache: yarn
 before_script:
   - yarn

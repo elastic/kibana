@@ -275,18 +275,28 @@ export function getOptionsFromCliArgs(
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-  const { $0, _, verify, multiple, ...rest } = yargsInstance.argv;
+  const {
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    $0,
+    _,
+    /* eslint-enable @typescript-eslint/no-unused-vars */
+    verify,
+    multiple,
+    multipleBranches,
+    multipleCommits,
+    noVerify,
+    ...restOptions
+  } = yargsInstance.parseSync();
 
   return excludeUndefined({
-    ...rest,
+    ...restOptions,
 
     // `multiple` is a cli-only flag to override `multipleBranches` and `multipleCommits`
-    multipleBranches: multiple ?? yargsInstance.argv.multipleBranches,
-    multipleCommits: multiple ?? yargsInstance.argv.multipleCommits,
+    multipleBranches: multiple ?? multipleBranches,
+    multipleCommits: multiple ?? multipleCommits,
 
     // `verify` is a cli-only flag to flip the default of `no-verify`
-    noVerify: verify ?? yargsInstance.argv.noVerify,
+    noVerify: verify ?? noVerify,
   });
 }
 

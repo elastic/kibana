@@ -31,6 +31,7 @@ describe('getOptionsFromCliArgs', () => {
         accessToken: 'my access token',
         upstream: 'elastic/kibana',
         username: 'sqren',
+        mainline: 1,
       });
     });
   });
