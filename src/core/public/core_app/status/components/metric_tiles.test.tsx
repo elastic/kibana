@@ -41,6 +41,7 @@ const metricWithMeta: Metric = {
   value: 1,
   meta: {
     description: 'Percentiles',
+    title: '',
     value: [1, 5, 10],
     type: 'time',
   },
