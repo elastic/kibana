@@ -12,9 +12,11 @@ import type { StatusResponse, ServiceStatus, ServiceStatusLevel } from '../../..
 import type { HttpSetup } from '../../../http';
 import type { NotificationsSetup } from '../../../notifications';
 import type { DataType } from '../lib';
-export interface MetricMeta {
+
+interface MetricMeta {
+  title: string;
   description: string;
-  value?: any | any[];
+  value?: number[];
   type?: DataType;
 }
 export interface Metric {
@@ -82,7 +84,7 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
         description: i18n.translate('core.statusPage.metricsTiles.columns.load.metaHeader', {
           defaultMessage: 'Load interval',
         }),
-        value: Object.keys(metrics.os.load),
+        title: Object.keys(metrics.os.load).join('; '),
       },
     },
     {
@@ -98,6 +100,7 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
             defaultMessage: 'Percentiles',
           }
         ),
+        title: '',
         value: [
           metrics.process.event_loop_delay_histogram?.percentiles['50'],
           metrics.process.event_loop_delay_histogram?.percentiles['95'],
@@ -116,7 +119,8 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
         description: i18n.translate('core.statusPage.metricsTiles.columns.resTimeMaxHeader', {
           defaultMessage: 'Response time max',
         }),
-        value: metrics.response_times.max_in_millis,
+        title: '',
+        value: [metrics.response_times.max_in_millis],
         type: 'time',
       },
     },
