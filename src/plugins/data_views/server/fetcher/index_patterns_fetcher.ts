@@ -139,7 +139,7 @@ export class IndexPatternsFetcher {
       patternList
         .map((pattern) => {
           if (pattern.startsWith('-')) {
-            return true;
+            return Promise.resolve(true);
           }
           return this.elasticsearchClient.count({
             index: pattern,
