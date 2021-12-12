@@ -2,7 +2,7 @@
 # Build stage 0
 # Extract Kibana and make various file manipulations.
 ################################################################################
-ARG BASE_REGISTRY=registry1.dsop.io
+ARG BASE_REGISTRY=registry1.dso.mil
 ARG BASE_IMAGE=redhat/ubi/ubi8
 ARG BASE_TAG=8.5
 
