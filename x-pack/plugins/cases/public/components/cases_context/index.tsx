@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { merge } from 'lodash';
-import { CasesContextValue } from '../../../common/ui/types';
+import { CasesContextValue, CasesFeatures } from '../../../common/ui/types';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import { useApplication } from './use_application';
@@ -17,7 +17,7 @@ export const CasesContext = React.createContext<CasesContextValue | undefined>(u
 export interface CasesContextProps
   extends Omit<CasesContextValue, 'appId' | 'appTitle' | 'basePath' | 'features'> {
   basePath?: string;
-  features?: Partial<CasesContextValue['features']>;
+  features?: Partial<CasesFeatures>;
 }
 
 export interface CasesContextStateValue extends Omit<CasesContextValue, 'appId' | 'appTitle'> {

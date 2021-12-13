@@ -23,7 +23,7 @@ export type {
   SubCase,
   Case,
   Ecs,
-  CasesContextValue,
+  CasesFeatures,
   CaseViewRefreshPropInterface,
 } from './ui/types';
 

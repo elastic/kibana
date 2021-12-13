@@ -20,10 +20,12 @@ import {
   CaseMetricsResponse,
 } from '../api';
 
-interface CasesFeatures {
+export interface CasesContextFeatures {
   alerts: { sync: boolean };
   metrics: CaseMetricsFeature[];
 }
+
+export type CasesFeatures = Partial<CasesContextFeatures>;
 
 export interface CasesContextValue {
   owner: string[];
@@ -31,7 +33,7 @@ export interface CasesContextValue {
   appTitle: string;
   userCanCrud: boolean;
   basePath: string;
-  features: CasesFeatures;
+  features: CasesContextFeatures;
 }
 
 export interface CasesUiConfigType {
