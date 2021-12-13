@@ -211,7 +211,7 @@ const EventRenderedViewComponent = ({
         width: '60%',
       },
     ],
-    [ActionTitle, browserFields, events, leadingControlColumns, rowRenderers]
+    [ActionTitle, browserFields, events, leadingControlColumns, rowRenderers, appId]
   );
 
   const handleTableChange = useCallback(
