@@ -19,8 +19,8 @@ import {
   TimelineEqlResponse,
 } from '../../../../common/search_strategy/timeline/events/eql';
 import { inspectStringifyObject } from '../../../utils/build_query';
-import { TIMELINE_EVENTS_FIELDS } from '../factory/events/all/constants';
-import { formatTimelineData } from '../factory/events/all/helpers';
+import { TIMELINE_EVENTS_FIELDS } from '../factory/helpers/constants';
+import { formatTimelineData } from '../factory/helpers/format_timeline_data';
 
 export const buildEqlDsl = (options: TimelineEqlRequestOptions): Record<string, unknown> => {
   if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {

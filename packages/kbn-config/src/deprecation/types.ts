@@ -186,6 +186,25 @@ export interface ConfigDeprecationFactory {
    *   rename('oldKey', 'newKey'),
    * ]
    * ```
+   *
+   * @remarks
+   * If the oldKey is a nested property and it's the last property in an object, it may remove any empty-object parent keys.
+   * ```
+   * // Original object
+   * {
+   * 	a: {
+   * 		b: { c: 1 },
+   * 		d: { e: 1 }
+   * 	}
+   * }
+   *
+   * // If rename('a.b.c', 'a.d.c'), the resulting object removes the entire "a.b" tree because "c" was the last property in that branch
+   * {
+   * 	a: {
+   * 		d: { c: 1, e: 1 }
+   * 	}
+   * }
+   * ```
    */
   rename(
     oldKey: string,
@@ -207,6 +226,25 @@ export interface ConfigDeprecationFactory {
    *   renameFromRoot('oldplugin.key', 'newplugin.key'),
    * ]
    * ```
+   *
+   * @remarks
+   * If the oldKey is a nested property and it's the last property in an object, it may remove any empty-object parent keys.
+   * ```
+   * // Original object
+   * {
+   * 	a: {
+   * 		b: { c: 1 },
+   * 		d: { e: 1 }
+   * 	}
+   * }
+   *
+   * // If renameFromRoot('a.b.c', 'a.d.c'), the resulting object removes the entire "a.b" tree because "c" was the last property in that branch
+   * {
+   * 	a: {
+   * 		d: { c: 1, e: 1 }
+   * 	}
+   * }
+   * ```
    */
   renameFromRoot(
     oldKey: string,
@@ -225,6 +263,25 @@ export interface ConfigDeprecationFactory {
    *   unused('deprecatedKey'),
    * ]
    * ```
+   *
+   * @remarks
+   * If the path is a nested property and it's the last property in an object, it may remove any empty-object parent keys.
+   * ```
+   * // Original object
+   * {
+   * 	a: {
+   * 		b: { c: 1 },
+   * 		d: { e: 1 }
+   * 	}
+   * }
+   *
+   * // If unused('a.b.c'), the resulting object removes the entire "a.b" tree because "c" was the last property in that branch
+   * {
+   * 	a: {
+   * 		d: { e: 1 }
+   * 	}
+   * }
+   * ```
    */
   unused(unusedKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation;
 
@@ -241,6 +298,25 @@ export interface ConfigDeprecationFactory {
    * const provider: ConfigDeprecationProvider = ({ unusedFromRoot }) => [
    *   unusedFromRoot('somepath.deprecatedProperty'),
    * ]
+   * ```
+   *
+   * @remarks
+   * If the path is a nested property and it's the last property in an object, it may remove any empty-object parent keys.
+   * ```
+   * // Original object
+   * {
+   * 	a: {
+   * 		b: { c: 1 },
+   * 		d: { e: 1 }
+   * 	}
+   * }
+   *
+   * // If unused('a.b.c'), the resulting object removes the entire "a.b" tree because "c" was the last property in that branch
+   * {
+   * 	a: {
+   * 		d: { e: 1 }
+   * 	}
+   * }
    * ```
    */
   unusedFromRoot(unusedKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation;

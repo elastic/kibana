@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import 'jest-canvas-mock';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { getIndexPatternDatasource, GenericIndexPatternColumn } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource, FramePublicAPI } from '../types';
@@ -1250,6 +1249,7 @@ describe('IndexPattern Data Source', () => {
           label: 'My Op',
           dataType: 'string',
           isBucketed: true,
+          isStaticValue: false,
         } as Operation);
       });
 
@@ -1723,6 +1723,7 @@ describe('IndexPattern Data Source', () => {
               ...state.layers.first.columns,
               newStatic: {
                 dataType: 'number',
+                isStaticValue: true,
                 isBucketed: false,
                 label: 'Static value: 0',
                 operationType: 'static_value',

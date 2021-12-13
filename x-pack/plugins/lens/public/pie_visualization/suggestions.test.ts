@@ -288,6 +288,35 @@ describe('suggestions', () => {
       ).toHaveLength(0);
     });
 
+    it('should reject when metric value isStaticValue', () => {
+      const results = suggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'a',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'e',
+              operation: {
+                label: 'Count',
+                dataType: 'number' as DataType,
+                isBucketed: false,
+                isStaticValue: true,
+              },
+            },
+          ],
+          changeType: 'initial',
+        },
+        state: undefined,
+        keptLayerIds: ['first'],
+      });
+
+      expect(results.length).toEqual(0);
+    });
+
     it('should hide suggestions when there are no buckets', () => {
       const currentSuggestions = suggestions({
         table: {
