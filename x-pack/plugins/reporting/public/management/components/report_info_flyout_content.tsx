@@ -185,11 +185,14 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       <EuiTitle size="xs">
         <h3>Output</h3>
       </EuiTitle>
+      <EuiSpacer size="s" />
       <EuiDescriptionList listItems={outputInfo} type="column" align="center" compressed />
 
+      <EuiSpacer />
       <EuiTitle size="xs">
         <h3>Timestamps</h3>
       </EuiTitle>
+      <EuiSpacer size="s" />
       <EuiDescriptionList listItems={timestampsInfo} type="column" align="center" compressed />
     </>
   );
