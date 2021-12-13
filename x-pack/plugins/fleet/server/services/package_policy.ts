@@ -26,6 +26,7 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
   validatePackagePolicy,
   validationHasErrors,
+  SO_SEARCH_LIMIT,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
@@ -1320,7 +1321,7 @@ export async function incrementPackageName(
 ) {
   // Fetch all packagePolicies having the package name
   const packagePolicyData = await packagePolicyService.list(soClient, {
-    perPage: 1,
+    perPage: SO_SEARCH_LIMIT,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
   });
 
