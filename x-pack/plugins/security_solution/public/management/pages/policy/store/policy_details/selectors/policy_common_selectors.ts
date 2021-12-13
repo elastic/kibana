@@ -11,6 +11,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
 } from '../../../../../common/constants';
 import { PolicyDetailsSelector, PolicyDetailsState } from '../../../types';
 
@@ -44,6 +45,19 @@ export const isOnPolicyTrustedAppsView: PolicyDetailsSelector<boolean> = createS
     return (
       matchPath(pathname ?? '', {
         path: MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+        exact: true,
+      }) !== null
+    );
+  }
+);
+
+/** Returns a boolean of whether the user is on the policy event filters page or not */
+export const isOnPolicyEventFiltersView: PolicyDetailsSelector<boolean> = createSelector(
+  getUrlLocationPathname,
+  (pathname) => {
+    return (
+      matchPath(pathname ?? '', {
+        path: MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
         exact: true,
       }) !== null
     );

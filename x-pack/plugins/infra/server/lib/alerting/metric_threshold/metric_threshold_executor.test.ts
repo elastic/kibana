@@ -19,7 +19,10 @@ import { createLifecycleRuleExecutorMock } from '../../../../../rule_registry/se
 import { InfraSources } from '../../sources';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
-import { AlertInstanceContext, AlertInstanceState } from '../../../../../alerting/server';
+import {
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+} from '../../../../../alerting/server';
 import {
   Aggregators,
   Comparator,
@@ -763,8 +766,7 @@ const mockLibs: any = {
 const executor = createMetricThresholdExecutor(mockLibs);
 
 const alertsServices = alertsMock.createAlertServices();
-const services: AlertServicesMock &
-  LifecycleAlertServices<AlertInstanceState, AlertInstanceContext, string> = {
+const services: AlertServicesMock & LifecycleAlertServices<AlertState, AlertContext, string> = {
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
 };

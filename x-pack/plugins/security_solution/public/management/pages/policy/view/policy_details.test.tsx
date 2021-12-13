@@ -144,6 +144,15 @@ describe('Policy Details', () => {
       expect(agentsSummary.text()).toBe('Total agents5Healthy3Unhealthy1Offline1');
     });
 
+    it('should display event filters tab', async () => {
+      await asyncActions;
+      policyView.update();
+
+      const eventFiltersTab = policyView.find('button#eventFilters');
+      expect(eventFiltersTab).toHaveLength(1);
+      expect(eventFiltersTab.text()).toBe('Event filters');
+    });
+
     it('should display the host isolation exceptions tab', async () => {
       await asyncActions;
       policyView.update();
