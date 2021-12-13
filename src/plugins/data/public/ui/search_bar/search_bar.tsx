@@ -11,7 +11,15 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { get, isEqual } from 'lodash';
-import { EuiIconProps } from '@elastic/eui';
+import {
+  EuiIconProps,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiButton,
+  EuiModalHeaderTitle,
+} from '@elastic/eui';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
@@ -35,6 +43,8 @@ import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
 import { FilterSetMenu } from '../saved_query_management/filter_set_menu';
+
+const LOCAL_STORAGE_TIMEFILTER_OVERRIDE_MODAL_HIDDEN = 'TIMEFILTER_OVERRIDE_MODAL_HIDDEN';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -106,6 +116,7 @@ interface State {
   isAddFilterModalOpen?: boolean;
   addFilterMode?: string;
   filtersIdsFromSavedQueries?: string[];
+  overrideTimeFilterModalShow: boolean;
 }
 
 class SearchBarUI extends Component<SearchBarProps, State> {
@@ -191,6 +202,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     isAddFilterModalOpen: false,
     addFilterMode: 'quick_form',
     filtersIdsFromSavedQueries: [],
+    overrideTimeFilterModalShow: false,
   };
 
   public isDirty = () => {
@@ -354,6 +366,27 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     });
   };
 
+  public applyTimeFilterOverrideModal = (selectedQueries?: SavedQuery[]) => {
+    if (selectedQueries) {
+      this.setState({
+        selectedSavedQueries: [...selectedQueries],
+      });
+    }
+    if (!Boolean(this.services.storage.get(LOCAL_STORAGE_TIMEFILTER_OVERRIDE_MODAL_HIDDEN))) {
+      this.setState({ overrideTimeFilterModalShow: true });
+    } else {
+      this.applySelectedSavedQueries(selectedQueries);
+    }
+  };
+
+  public timeFilterOverrideModalApplyQueries = (notShowAgain: boolean) => {
+    if (notShowAgain) {
+      this.services.storage.set(LOCAL_STORAGE_TIMEFILTER_OVERRIDE_MODAL_HIDDEN, true);
+    }
+    this.setState({ overrideTimeFilterModalShow: false });
+    this.applySelectedSavedQueries();
+  };
+
   public applySelectedSavedQueries = (selectedSavedQuery?: SavedQuery[]) => {
     const savedQueries = selectedSavedQuery ?? (this.state.selectedSavedQueries as SavedQuery[]);
     const filters: Filter[] = [];
@@ -401,15 +434,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     });
 
     this.props?.onFiltersUpdated?.(filters!);
-    if (selectedSavedQuery) {
-      this.setState({
-        selectedSavedQueries: [...selectedSavedQuery],
-      });
-    }
   };
 
   public applySelectedQuery = (selectedSavedQuery: SavedQuery) => {
-    this.applySelectedSavedQueries([selectedSavedQuery]);
+    this.applyTimeFilterOverrideModal([selectedSavedQuery]);
   };
 
   public removeSelectedSavedQuery = (savedQuery: SavedQuery) => {
@@ -543,7 +571,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           isLoading={this.props.isLoading}
           prepend={this.props.showFilterBar ? filterMenu : undefined}
           savedQueryManagement={savedQueryManagement}
-          applySelectedSavedQueries={this.applySelectedSavedQueries}
+          applySelectedSavedQueries={this.applyTimeFilterOverrideModal}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}
@@ -570,6 +598,42 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           isAddFilterModalOpen={this.state.isAddFilterModalOpen}
           addFilterMode={this.state.addFilterMode}
         />
+      );
+    }
+
+    // move this to a separate file
+    if (this.state.overrideTimeFilterModalShow) {
+      return (
+        <EuiModal
+          onClose={() => this.setState({ overrideTimeFilterModalShow: false })}
+          style={{ width: 450 }}
+        >
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <h1>Overriding time filter</h1>
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody>
+            Saved filters that also contain time filters will override the currently selected time
+            filter
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButton onClick={() => this.setState({ overrideTimeFilterModalShow: false })}>
+              Cancel
+            </EuiButton>
+            <EuiButton
+              onClick={() => this.timeFilterOverrideModalApplyQueries(true)}
+              color="warning"
+            >
+              Never Show again
+            </EuiButton>
+            <EuiButton onClick={() => this.timeFilterOverrideModalApplyQueries(false)} fill>
+              OK
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
       );
     }
 
