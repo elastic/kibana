@@ -6,7 +6,7 @@
  */
 
 import type { IRouter } from '../../../../../src/core/server';
-import { defineGetScoreRoute } from './score';
+import { defineGetScoreRoute } from './stats/stats';
 
 export function defineRoutes(router: IRouter) {
   defineGetScoreRoute(router);
