@@ -82,17 +82,21 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       const dataViewId = (await getDataViewIdFromName(index)) || index;
       const record = props.anomaly.source;
 
-      // Add or subtract a day our hour to the original timestamp
-      // If interval is Show all then +/- bucket span
-      // else add or subtract a day our hour to the original timestamp
-      const timeRangeBound = {
-        day: 24 * 60 * 60 * 1000,
-        hour: 60 * 60 * 1000,
-        second: record.bucket_span * 1000,
-      };
-
-      const from = dateFormatter(record.timestamp - timeRangeBound[interval]); // e.g. 2016-02-08T16:00:00.000Z
-      const to = dateFormatter(record.timestamp + timeRangeBound[interval]);
+      const earliestMoment = moment(record.timestamp).startOf(interval);
+      if (interval === 'hour') {
+        // Start from the previous hour.
+        earliestMoment.subtract(1, 'h');
+      }
+      let latestMoment = moment(record.timestamp).add(record.bucket_span, 's');
+      if (props.isAggregatedData === true) {
+        latestMoment = moment(record.timestamp).endOf(interval);
+        if (interval === 'hour') {
+          // Show to the end of the next hour.
+          latestMoment.add(1, 'h'); // e.g. 2016-02-08T18:59:59.999Z
+        }
+      }
+      const from = dateFormatter(earliestMoment.unix() * 1000); // e.g. 2016-02-08T16:00:00.000Z
+      const to = dateFormatter(latestMoment.unix() * 1000);
 
       let kqlQuery = '';
 
@@ -125,7 +129,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           language: 'kuery',
           query: kqlQuery,
         },
-        interval,
+        // interval,
         sort: [['timestamp, asc']],
       });
 
