@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useMemo, useState } from 'react';
+import React, { FC, Fragment, useState } from 'react';
 import {
   Direction,
   EuiBasicTableColumn,
@@ -28,9 +28,7 @@ import { JobStatsBarStats, StatsBar } from '../../../components/stats_bar';
 import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge';
 import { toLocaleString } from '../../../util/string_utils';
 import { SwimlaneContainer } from '../../../explorer/swimlane_container';
-import { TimeBuckets } from '../../../util/time_buckets';
-import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
-import { useUiSettings } from '../../../contexts/kibana';
+import { useTimeBuckets } from '../../../components/custom_hooks/use_time_buckets';
 
 // Used to pass on attribute names to table columns
 export enum AnomalyDetectionListColumns {
@@ -57,15 +55,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
   const [sortField, setSortField] = useState<string>(AnomalyDetectionListColumns.id);
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
-  const uiSettings = useUiSettings();
-  const timeBuckets = useMemo(() => {
-    return new TimeBuckets({
-      'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-      'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-      dateFormat: uiSettings.get('dateFormat'),
-      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
-    });
-  }, []);
+  const timeBuckets = useTimeBuckets();
 
   // columns: group, max anomaly, jobs in group, latest timestamp, docs processed, action to explorer
   const columns: Array<EuiBasicTableColumn<Group>> = [

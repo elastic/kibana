@@ -35,8 +35,10 @@ export const OverviewPage: FC = () => {
   } = useMlKibana();
   const helpLink = docLinks.links.ml.guide;
 
-  const [lastRefresh, setLastRefresh] = useState(0);
   const [globalState, setGlobalState] = useUrlState('_g');
+  const [lastRefresh, setLastRefresh] = useState(0);
+
+  const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
   const refresh = useRefresh();
 
   useEffect(() => {
@@ -54,7 +56,14 @@ export const OverviewPage: FC = () => {
     }
   }, [refresh?.lastRefresh, lastRefresh, setLastRefresh, setGlobalState]);
 
-  useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
+  useEffect(() => {
+    if (globalState?.time !== undefined) {
+      timefilter.setTime({
+        from: globalState.time.from,
+        to: globalState.time.to,
+      });
+    }
+  }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const [adLazyJobCount, setAdLazyJobCount] = useState(0);
   const [dfaLazyJobCount, setDfaLazyJobCount] = useState(0);
@@ -63,8 +72,8 @@ export const OverviewPage: FC = () => {
   return (
     <>
       <NavigationMenu tabId="overview" />
-      <EuiPage data-test-subj="mlPageOverview">
-        <EuiPageBody>
+      <EuiPage data-test-subj="mlPageOverview" restrictWidth>
+        <EuiPageBody panelled>
           <EuiPageHeader
             pageTitle={<FormattedMessage id="xpack.ml.overview.header" defaultMessage="Overview" />}
             rightSideItems={[<DatePickerWrapper />]}

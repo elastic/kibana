@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useState, useEffect, useMemo } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
-  EuiImage,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { zipObject } from 'lodash';
@@ -26,9 +25,9 @@ import {
 } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
-import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
+import { getGroupsFromJobs, getJobsWithTimerange, getStatsBarData } from './utils';
 import { Dictionary } from '../../../../../common/types/common';
-import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
+import { MlSummaryJob, MlSummaryJobs } from '../../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import adImage from './blog-machine-learning-720x420.png';
 import { useRefresh } from '../../../routing/use_refresh';
@@ -77,7 +76,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
     []
   );
 
-  const { timeRange } = useRefresh();
+  const refresh = useRefresh();
 
   const redirectToJobsManagementPage = async () => {
     if (!mlLocator) return;
@@ -168,12 +167,9 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
   };
 
   useEffect(() => {
+    if (!refresh?.timeRange) return;
     loadJobs();
-  }, [timeRange]);
-
-  const onRefresh = () => {
-    loadJobs();
-  };
+  }, [refresh?.timeRange]);
 
   const errorDisplay = (
     <Fragment>
@@ -191,63 +187,70 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
 
   const panelClass = isLoading ? 'mlOverviewPanel__isLoading' : 'mlOverviewPanel';
 
+  const noAdJobs =
+    !errorMessage &&
+    isLoading === false &&
+    typeof errorMessage === 'undefined' &&
+    groupsCount === 0;
+
+  if (noAdJobs) {
+    return (
+      <EuiEmptyPrompt
+        layout="horizontal"
+        hasBorder={false}
+        hasShadow={false}
+        icon={<EuiImage size="fullWidth" src={adImage} alt="anomaly_detection" />}
+        color="plain"
+        title={
+          <h2>
+            {i18n.translate('xpack.ml.overview.anomalyDetection.createFirstJobMessage', {
+              defaultMessage: 'Create your first anomaly detection job',
+            })}
+          </h2>
+        }
+        body={
+          <>
+            <p>
+              {i18n.translate('xpack.ml.overview.anomalyDetection.emptyPromptText', {
+                defaultMessage: `Anomaly detection enables you to find unusual behavior in time series data. Start automatically spotting the anomalies hiding in your data and resolve issues faster.`,
+              })}
+            </p>
+          </>
+        }
+        actions={
+          <EuiButton
+            color="primary"
+            onClick={redirectToCreateJobSelectIndexPage}
+            fill
+            isDisabled={jobCreationDisabled}
+            data-test-subj="mlOverviewCreateADJobButton"
+          >
+            {i18n.translate('xpack.ml.overview.anomalyDetection.createJobButtonText', {
+              defaultMessage: 'Create job',
+            })}
+          </EuiButton>
+        }
+      />
+    );
+  }
+
   return (
     <EuiPanel className={panelClass}>
       {typeof errorMessage !== 'undefined' && errorDisplay}
       {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}
-      {isLoading === false && typeof errorMessage === 'undefined' && groupsCount === 0 && (
-        <EuiEmptyPrompt
-          layout="horizontal"
-          icon={<EuiImage size="fullWidth" src={adImage} alt="anomaly_detection" />}
-          color="plain"
-          title={
-            <h2>
-              {i18n.translate('xpack.ml.overview.anomalyDetection.createFirstJobMessage', {
-                defaultMessage: 'Create your first anomaly detection job',
-              })}
-            </h2>
-          }
-          body={
-            <>
-              <p>
-                {i18n.translate('xpack.ml.overview.anomalyDetection.emptyPromptText', {
-                  defaultMessage: `Anomaly detection enables you to find unusual behavior in time series data. Start automatically spotting the anomalies hiding in your data and resolve issues faster.`,
-                })}
-              </p>
-            </>
-          }
-          actions={
-            <EuiButton
-              color="primary"
-              onClick={redirectToCreateJobSelectIndexPage}
-              fill
-              isDisabled={jobCreationDisabled}
-              data-test-subj="mlOverviewCreateADJobButton"
-            >
-              {i18n.translate('xpack.ml.overview.anomalyDetection.createJobButtonText', {
-                defaultMessage: 'Create job',
-              })}
-            </EuiButton>
-          }
-        />
-      )}
+
       {isLoading === false && typeof errorMessage === 'undefined' && groupsCount > 0 && (
-        <Fragment>
+        <>
           <AnomalyDetectionTable items={groups} jobsList={jobsList} statsBarData={statsBarData!} />
           <EuiSpacer size="m" />
           <div className="mlOverviewPanel__buttons">
-            <EuiButtonEmpty size="s" onClick={onRefresh} className="mlOverviewPanel__refreshButton">
-              {i18n.translate('xpack.ml.overview.anomalyDetection.refreshJobsButtonText', {
-                defaultMessage: 'Refresh',
-              })}
-            </EuiButtonEmpty>
             <EuiButton size="s" fill onClick={redirectToJobsManagementPage}>
               {i18n.translate('xpack.ml.overview.anomalyDetection.manageJobsButtonText', {
                 defaultMessage: 'Manage jobs',
               })}
             </EuiButton>
           </div>
-        </Fragment>
+        </>
       )}
     </EuiPanel>
   );
