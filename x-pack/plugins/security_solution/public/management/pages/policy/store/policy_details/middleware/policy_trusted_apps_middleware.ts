@@ -371,6 +371,7 @@ const fetchAllPoliciesIfNeeded = async (
 
   dispatch({
     type: 'policyDetailsListOfAllPoliciesStateChanged',
+    // @ts-expect-error ts 4.5 upgrade
     payload: createLoadingResourceState(asStaleResourceState(currentPoliciesState)),
   });
 

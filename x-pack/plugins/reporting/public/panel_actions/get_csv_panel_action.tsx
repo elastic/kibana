@@ -147,7 +147,9 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
         const blob = new Blob([rawResponse as BlobPart], { type: 'text/csv;charset=utf-8;' });
 
         // Hack for IE11 Support
+        // @ts-expect-error
         if (window.navigator.msSaveOrOpenBlob) {
+          // @ts-expect-error
           return window.navigator.msSaveOrOpenBlob(blob, download);
         }
 
