@@ -12,12 +12,36 @@ export function createAlertInstanceFactory<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string
->(alertInstances: Record<string, AlertInstance<InstanceState, InstanceContext, ActionGroupIds>>) {
-  return (id: string): AlertInstance<InstanceState, InstanceContext, ActionGroupIds> => {
-    if (!alertInstances[id]) {
-      alertInstances[id] = new AlertInstance<InstanceState, InstanceContext, ActionGroupIds>();
-    }
+>(
+  alerts: Record<string, AlertInstance<InstanceState, InstanceContext, ActionGroupIds>>,
+  hasRecoveryUtils: boolean,
+  originalAlertIds: Set<string>,
+  getRecoveredAlertIds: (
+    alerts: Record<string, AlertInstance<InstanceState, InstanceContext, ActionGroupIds>>,
+    originalAlertIds: Set<string>
+  ) => string[],
+  recoveryContext: Record<string, InstanceContext>
+) {
+  return {
+    create: (id: string): AlertInstance<InstanceState, InstanceContext, ActionGroupIds> => {
+      if (!alerts[id]) {
+        alerts[id] = new AlertInstance<InstanceState, InstanceContext, ActionGroupIds>();
+      }
 
-    return alertInstances[id];
+      return alerts[id];
+    },
+    done: () => {
+      return hasRecoveryUtils
+        ? {
+            recoveryUtils: {
+              getRecoveredAlertIds: (): string[] => getRecoveredAlertIds(alerts, originalAlertIds),
+
+              setRecoveryContext: (id: string, context: InstanceContext) => {
+                recoveryContext[id] = context;
+              },
+            },
+          }
+        : {};
+    },
   };
 }

@@ -321,20 +321,14 @@ export class TaskRunner<
               InstanceState,
               InstanceContext,
               WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-            >(alerts),
+            >(
+              alerts,
+              ruleType.doesSetRecoveryContext ?? false,
+              originalAlertIds,
+              getRecoveredAlertIds,
+              recoveryContext
+            ),
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
-            ...(ruleType.doesSetRecoveryContext
-              ? {
-                  recoveryUtils: {
-                    getRecoveredAlertIds: (): string[] =>
-                      getRecoveredAlertIds(alerts, originalAlertIds),
-
-                    setRecoveryContext: (id: string, context: InstanceContext) => {
-                      recoveryContext[id] = context;
-                    },
-                  },
-                }
-              : {}),
           },
           params,
           state: alertTypeState as State,
@@ -1110,14 +1104,15 @@ function logActiveAndRecoveredAlerts<
 
 function getRecoveredAlerts<
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string
 >(
-  alerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>,
+  alerts: Record<string, AlertInstance<InstanceState, InstanceContext, ActionGroupIds>>,
   originalAlertIds: Set<string>
-): Dictionary<AlertInstance<InstanceState, InstanceContext>> {
+): Dictionary<AlertInstance<InstanceState, InstanceContext, ActionGroupIds>> {
   const recoveredAlertInstances = pickBy(
     alerts,
-    (alert: AlertInstance<InstanceState, InstanceContext>, id) =>
+    (alert: AlertInstance<InstanceState, InstanceContext, ActionGroupIds>, id) =>
       !alert.hasScheduledActions() && originalAlertIds.has(id)
   );
   return recoveredAlertInstances;
@@ -1125,9 +1120,10 @@ function getRecoveredAlerts<
 
 function getRecoveredAlertIds<
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string
 >(
-  alerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>,
+  alerts: Record<string, AlertInstance<InstanceState, InstanceContext, ActionGroupIds>>,
   originalAlertIds: Set<string>
 ): string[] {
   return Object.keys(getRecoveredAlerts(alerts, originalAlertIds));

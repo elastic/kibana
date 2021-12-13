@@ -213,15 +213,17 @@ export function getAlertType(
         conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
-      const alertInstance = options.services.alertInstanceFactory(instanceId);
+      const alertInstance = options.services.alertInstanceFactory.create(instanceId);
       alertInstance.scheduleActions(ActionGroupId, actionContext);
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
     }
 
-    if (options.services.recoveryUtils) {
+    const { recoveryUtils } = services.alertInstanceFactory.done();
+
+    if (recoveryUtils) {
       // handling for recovered alerts
       // can either get a list via helper function or determine within the rule executor
-      const recoveredAlertIds = options.services.recoveryUtils.getRecoveredAlertIds();
+      const recoveredAlertIds = recoveryUtils.getRecoveredAlertIds();
 
       // for each recovered alert id, explicitly set the context
       for (const recoveredAlertId of recoveredAlertIds) {
@@ -236,7 +238,7 @@ export function getAlertType(
           conditions: humanFn,
         };
         const recoveryContext = addRecoveryMessages(options, baseContext, params);
-        options.services.recoveryUtils.setRecoveryContext(recoveredAlertId, recoveryContext);
+        recoveryUtils.setRecoveryContext(recoveredAlertId, recoveryContext);
       }
     }
   }

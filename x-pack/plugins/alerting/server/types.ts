@@ -72,14 +72,16 @@ export interface AlertServices<
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
 > extends Services {
-  alertInstanceFactory: (
-    id: string
-  ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
-  shouldWriteAlerts: () => boolean;
-  recoveryUtils?: {
-    getRecoveredAlertIds: () => string[];
-    setRecoveryContext: (id: string, context: InstanceContext) => void;
+  alertInstanceFactory: {
+    create: (id: string) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+    done: () => {
+      recoveryUtils?: {
+        getRecoveredAlertIds: () => string[];
+        setRecoveryContext: (id: string, context: InstanceContext) => void;
+      };
+    };
   };
+  shouldWriteAlerts: () => boolean;
 }
 
 export interface AlertExecutorOptions<
