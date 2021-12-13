@@ -139,6 +139,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
             placeholder={getDataViewSelectPlaceholder()}
             onNoIndexPatterns={this._onNoIndexPatterns}
             isClearable={false}
+            data-test-subj="mapGeoIndexPatternSelect"
           />
         </EuiFormRow>
       </>
