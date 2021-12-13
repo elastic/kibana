@@ -17,8 +17,9 @@ import { notificationServiceMock, docLinksServiceMock } from '../../../../../../
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Field, getEditableValue } from './field';
 
-jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
-jest.mock('brace/mode/markdown', () => 'brace/mode/markdown');
+jest.mock('../../../../../kibana_react/public/ui_settings/use_ui_setting', () => ({
+  useUiSetting: jest.fn(),
+}));
 
 const defaults = {
   requiresPageReload: false,

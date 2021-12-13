@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { repeatImageRenderer } from './repeat_image_renderer';
-
-export const renderers = [repeatImageRenderer];
-
-export { repeatImageRenderer };
+export { getRepeatImageRenderer, repeatImageRendererFactory } from './repeat_image_renderer';

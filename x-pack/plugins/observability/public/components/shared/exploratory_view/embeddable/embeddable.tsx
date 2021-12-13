@@ -28,7 +28,7 @@ export interface ExploratoryEmbeddableProps {
   showExploreButton?: boolean;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
   legendIsVisible?: boolean;
-  dataTypesIndexPatterns?: Record<AppDataType, string>;
+  dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
   reportConfigMap?: ReportConfigMap;
   appId?: 'security' | 'observability';
 }

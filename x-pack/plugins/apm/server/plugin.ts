@@ -23,7 +23,7 @@ import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './routes/alerts/register_apm_alerts';
 import { registerFleetPolicyCallbacks } from './routes/fleet/register_fleet_policy_callbacks';
 import { createApmTelemetry } from './lib/apm_telemetry';
-import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
+import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
 import { createApmAgentConfigurationIndex } from './routes/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './routes/settings/apm_indices/get_apm_indices';
@@ -47,7 +47,6 @@ import {
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
-import { getDeprecations } from './deprecations';
 
 export class APMPlugin
   implements
@@ -66,7 +65,7 @@ export class APMPlugin
 
   public setup(
     core: CoreSetup<APMPluginStartDependencies>,
-    plugins: Omit<APMPluginSetupDependencies, 'core'>
+    plugins: APMPluginSetupDependencies
   ) {
     this.logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMConfig>();
@@ -176,6 +175,7 @@ export class APMPlugin
       ruleDataClient,
       plugins: resourcePlugins,
       telemetryUsageCounter,
+      kibanaVersion: this.initContext.env.packageInfo.version,
     });
 
     if (plugins.alerting) {
@@ -193,14 +193,7 @@ export class APMPlugin
       ruleDataClient,
       config: currentConfig,
       logger: this.logger,
-    });
-
-    core.deprecations.registerDeprecations({
-      getDeprecations: getDeprecations({
-        cloudSetup: plugins.cloud,
-        fleet: resourcePlugins.fleet,
-        branch: this.initContext.env.packageInfo.branch,
-      }),
+      kibanaVersion: this.initContext.env.packageInfo.version,
     });
 
     return {
@@ -222,7 +215,7 @@ export class APMPlugin
 
         const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-        return createApmEventClient({
+        return new APMEventClient({
           debug: debug ?? false,
           esClient,
           request,

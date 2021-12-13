@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ICMPFields, ConfigKeys } from '../types';
+import { ICMPFields, ConfigKey } from '../types';
 import {
   Normalizer,
   commonNormalizers,
@@ -16,16 +16,16 @@ import { defaultICMPSimpleFields } from '../contexts';
 
 export type ICMPNormalizerMap = Record<keyof ICMPFields, Normalizer>;
 
-export const getICMPNormalizer = (key: ConfigKeys) => {
+export const getICMPNormalizer = (key: ConfigKey) => {
   return getNormalizer(key, defaultICMPSimpleFields);
 };
 
-export const getICMPCronToSecondsNormalizer = (key: ConfigKeys) => {
+export const getICMPCronToSecondsNormalizer = (key: ConfigKey) => {
   return getCronNormalizer(key, defaultICMPSimpleFields);
 };
 
 export const icmpNormalizers: ICMPNormalizerMap = {
-  [ConfigKeys.HOSTS]: getICMPNormalizer(ConfigKeys.HOSTS),
-  [ConfigKeys.WAIT]: getICMPCronToSecondsNormalizer(ConfigKeys.WAIT),
+  [ConfigKey.HOSTS]: getICMPNormalizer(ConfigKey.HOSTS),
+  [ConfigKey.WAIT]: getICMPCronToSecondsNormalizer(ConfigKey.WAIT),
   ...commonNormalizers,
 };

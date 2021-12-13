@@ -51,13 +51,7 @@ export const HostsKpiBaseComponent = React.memo<HostsKpiBaseComponentProps>(
     );
 
     if (loading) {
-      return (
-        <FlexGroup justifyContent="center" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </FlexGroup>
-      );
+      return <HostsKpiBaseComponentLoader />;
     }
 
     return (
@@ -83,3 +77,11 @@ export const HostsKpiBaseComponent = React.memo<HostsKpiBaseComponentProps>(
 HostsKpiBaseComponent.displayName = 'HostsKpiBaseComponent';
 
 export const HostsKpiBaseComponentManage = manageQuery(HostsKpiBaseComponent);
+
+export const HostsKpiBaseComponentLoader: React.FC = () => (
+  <FlexGroup justifyContent="center" alignItems="center" data-test-subj="hostsKpiLoader">
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="xl" />
+    </EuiFlexItem>
+  </FlexGroup>
+);

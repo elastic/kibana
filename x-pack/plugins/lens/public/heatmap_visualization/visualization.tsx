@@ -58,7 +58,7 @@ function getAxisName(axis: 'x' | 'y') {
 }
 
 export const isBucketed = (op: OperationMetadata) => op.isBucketed && op.scale === 'ordinal';
-const isNumericMetric = (op: OperationMetadata) => op.dataType === 'number';
+const isNumericMetric = (op: OperationMetadata) => op.dataType === 'number' && !op.isStaticValue;
 
 export const filterOperationsAxis = (op: OperationMetadata) =>
   isBucketed(op) || op.scale === 'interval';
@@ -74,7 +74,6 @@ function getInitialState(): Omit<HeatmapVisualizationState, 'layerId' | 'layerTy
       isVisible: true,
       position: Position.Right,
       maxLines: 1,
-      shouldTruncate: true,
       type: LEGEND_FUNCTION,
     },
     gridConfig: {
@@ -315,8 +314,6 @@ export const getHeatmapVisualization = ({
           type: 'function',
           function: FUNCTION_NAME,
           arguments: {
-            title: [attributes?.title ?? ''],
-            description: [attributes?.description ?? ''],
             xAccessor: [state.xAccessor ?? ''],
             yAccessor: [state.yAccessor ?? ''],
             valueAccessor: [state.valueAccessor ?? ''],
@@ -403,8 +400,6 @@ export const getHeatmapVisualization = ({
           type: 'function',
           function: FUNCTION_NAME,
           arguments: {
-            title: [''],
-            description: [''],
             xAccessor: [state.xAccessor ?? ''],
             yAccessor: [state.yAccessor ?? ''],
             valueAccessor: [state.valueAccessor ?? ''],
