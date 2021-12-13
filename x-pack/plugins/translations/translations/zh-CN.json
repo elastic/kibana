@@ -6484,7 +6484,7 @@
     "xpack.apm.views.settings.agentConfiguration.title": "代理配置",
     "xpack.apm.views.settings.anomalyDetection.title": "异常检测",
     "xpack.apm.views.settings.createAgentConfiguration.title": "创建代理配置",
-    "xpack.apm.views.settings.customLink.title": "定制应用",
+    "xpack.apm.views.settings.customLink.title": "自定义链接",
     "xpack.apm.views.settings.editAgentConfiguration.title": "编辑代理配置",
     "xpack.apm.views.settings.indices.title": "索引",
     "xpack.apm.views.settings.schema.title": "架构",

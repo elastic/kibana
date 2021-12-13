@@ -6439,7 +6439,7 @@
     "xpack.apm.views.settings.agentConfiguration.title": "エージェントの編集",
     "xpack.apm.views.settings.anomalyDetection.title": "異常検知",
     "xpack.apm.views.settings.createAgentConfiguration.title": "エージェント構成の作成",
-    "xpack.apm.views.settings.customLink.title": "アプリをカスタマイズ",
+    "xpack.apm.views.settings.customLink.title": "リンクをカスタマイズする",
     "xpack.apm.views.settings.editAgentConfiguration.title": "エージェント構成の編集",
     "xpack.apm.views.settings.indices.title": "インデックス",
     "xpack.apm.views.settings.schema.title": "スキーマ",
