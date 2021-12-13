@@ -38,6 +38,7 @@ import { RuleExecutionLogClient, truncateMessageList } from '../rule_execution_l
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
+import { extractReferences, injectReferences } from '../signals/saved_object_references';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
@@ -47,6 +48,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
     return persistenceRuleType({
       ...type,
+      useSavedObjectReferences: {
+        extractReferences: (params) => extractReferences({ logger, params }),
+        injectReferences: (params, savedObjectReferences) =>
+          injectReferences({ logger, params, savedObjectReferences }),
+      },
       async executor(options) {
         const {
           alertId,
