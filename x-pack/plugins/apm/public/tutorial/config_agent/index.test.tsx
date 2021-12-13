@@ -86,13 +86,13 @@ describe('TutorialConfigAgent', () => {
       let commands = component.getByTestId('commands').innerHTML;
       expect(commands).not.toEqual('');
       expect(commands).toMatchInlineSnapshot(`
-        "<span class=\\"euiCodeBlock__line\\">java -javaagent:/path/to/elastic-apm-agent-<span class=\\"token operator\\">&lt;</span>version<span class=\\"token operator\\">&gt;</span>.jar <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.service_name<span class=\\"token operator\\">=</span>my-application <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.server_urls<span class=\\"token operator\\">=</span>http://localhost:8200 <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.secret_token<span class=\\"token operator\\">=</span> <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.environment<span class=\\"token operator\\">=</span>production <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.application_packages<span class=\\"token operator\\">=</span>org.example <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-jar my-application.jar</span>"
+        "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
+        -Delastic.apm.service_name=my-application \\\\
+        -Delastic.apm.server_urls=http://localhost:8200 \\\\
+        -Delastic.apm.secret_token= \\\\
+        -Delastic.apm.environment=production \\\\
+        -Delastic.apm.application_packages=org.example \\\\
+        -jar my-application.jar"
       `);
 
       fireEvent.click(component.getByTestId('comboBoxToggleListButton'));
@@ -100,13 +100,13 @@ describe('TutorialConfigAgent', () => {
       commands = component.getByTestId('commands').innerHTML;
       expect(commands).not.toEqual('');
       expect(commands).toMatchInlineSnapshot(`
-        "<span class=\\"euiCodeBlock__line\\">java -javaagent:/path/to/elastic-apm-agent-<span class=\\"token operator\\">&lt;</span>version<span class=\\"token operator\\">&gt;</span>.jar <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.service_name<span class=\\"token operator\\">=</span>my-application <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.server_urls<span class=\\"token operator\\">=</span>foo <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.secret_token<span class=\\"token operator\\">=</span>foo <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.environment<span class=\\"token operator\\">=</span>production <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.application_packages<span class=\\"token operator\\">=</span>org.example <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-jar my-application.jar</span>"
+        "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
+        -Delastic.apm.service_name=my-application \\\\
+        -Delastic.apm.server_urls=foo \\\\
+        -Delastic.apm.secret_token=foo \\\\
+        -Delastic.apm.environment=production \\\\
+        -Delastic.apm.application_packages=org.example \\\\
+        -jar my-application.jar"
       `);
     });
     describe('running on prem', () => {
@@ -137,13 +137,13 @@ describe('TutorialConfigAgent', () => {
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
-          "<span class=\\"euiCodeBlock__line\\">java -javaagent:/path/to/elastic-apm-agent-<span class=\\"token operator\\">&lt;</span>version<span class=\\"token operator\\">&gt;</span>.jar <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.service_name<span class=\\"token operator\\">=</span>my-application <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.server_urls<span class=\\"token operator\\">=</span>http://localhost:8200 <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.secret_token<span class=\\"token operator\\">=</span> <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.environment<span class=\\"token operator\\">=</span>production <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.application_packages<span class=\\"token operator\\">=</span>org.example <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-jar my-application.jar</span>"
+          "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
+          -Delastic.apm.service_name=my-application \\\\
+          -Delastic.apm.server_urls=http://localhost:8200 \\\\
+          -Delastic.apm.secret_token= \\\\
+          -Delastic.apm.environment=production \\\\
+          -Delastic.apm.application_packages=org.example \\\\
+          -jar my-application.jar"
         `);
       });
       it('shows get started with fleet link when there are no fleet agents', async () => {
@@ -173,13 +173,13 @@ describe('TutorialConfigAgent', () => {
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
-          "<span class=\\"euiCodeBlock__line\\">java -javaagent:/path/to/elastic-apm-agent-<span class=\\"token operator\\">&lt;</span>version<span class=\\"token operator\\">&gt;</span>.jar <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.service_name<span class=\\"token operator\\">=</span>my-application <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.server_urls<span class=\\"token operator\\">=</span>http://localhost:8200 <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.secret_token<span class=\\"token operator\\">=</span> <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.environment<span class=\\"token operator\\">=</span>production <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.application_packages<span class=\\"token operator\\">=</span>org.example <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-jar my-application.jar</span>"
+          "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
+          -Delastic.apm.service_name=my-application \\\\
+          -Delastic.apm.server_urls=http://localhost:8200 \\\\
+          -Delastic.apm.secret_token= \\\\
+          -Delastic.apm.environment=production \\\\
+          -Delastic.apm.application_packages=org.example \\\\
+          -jar my-application.jar"
         `);
         expectTextsInDocument(component, ['Get started with fleet']);
       });
@@ -215,13 +215,13 @@ describe('TutorialConfigAgent', () => {
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
-          "<span class=\\"euiCodeBlock__line\\">java -javaagent:/path/to/elastic-apm-agent-<span class=\\"token operator\\">&lt;</span>version<span class=\\"token operator\\">&gt;</span>.jar <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.service_name<span class=\\"token operator\\">=</span>my-application <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.server_urls<span class=\\"token operator\\">=</span>cloud_url <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.secret_token<span class=\\"token operator\\">=</span>cloud_token <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.environment<span class=\\"token operator\\">=</span>production <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.application_packages<span class=\\"token operator\\">=</span>org.example <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-jar my-application.jar</span>"
+          "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
+          -Delastic.apm.service_name=my-application \\\\
+          -Delastic.apm.server_urls=cloud_url \\\\
+          -Delastic.apm.secret_token=cloud_token \\\\
+          -Delastic.apm.environment=production \\\\
+          -Delastic.apm.application_packages=org.example \\\\
+          -jar my-application.jar"
         `);
       });
       it('selects policy elastic agent on cloud when available by default', async () => {
@@ -254,13 +254,13 @@ describe('TutorialConfigAgent', () => {
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
-          "<span class=\\"euiCodeBlock__line\\">java -javaagent:/path/to/elastic-apm-agent-<span class=\\"token operator\\">&lt;</span>version<span class=\\"token operator\\">&gt;</span>.jar <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.service_name<span class=\\"token operator\\">=</span>my-application <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.server_urls<span class=\\"token operator\\">=</span>apm_cloud_url <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.secret_token<span class=\\"token operator\\">=</span>apm_cloud_token <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.environment<span class=\\"token operator\\">=</span>production <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.application_packages<span class=\\"token operator\\">=</span>org.example <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-jar my-application.jar</span>"
+          "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
+          -Delastic.apm.service_name=my-application \\\\
+          -Delastic.apm.server_urls=apm_cloud_url \\\\
+          -Delastic.apm.secret_token=apm_cloud_token \\\\
+          -Delastic.apm.environment=production \\\\
+          -Delastic.apm.application_packages=org.example \\\\
+          -jar my-application.jar"
         `);
       });
 
@@ -286,13 +286,13 @@ describe('TutorialConfigAgent', () => {
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
-          "<span class=\\"euiCodeBlock__line\\">java -javaagent:/path/to/elastic-apm-agent-<span class=\\"token operator\\">&lt;</span>version<span class=\\"token operator\\">&gt;</span>.jar <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.service_name<span class=\\"token operator\\">=</span>my-application <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.server_urls<span class=\\"token operator\\">=</span>http://localhost:8200 <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.secret_token<span class=\\"token operator\\">=</span> <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.environment<span class=\\"token operator\\">=</span>production <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.application_packages<span class=\\"token operator\\">=</span>org.example <span class=\\"token punctuation\\">\\\\</span>
-          </span><span class=\\"euiCodeBlock__line\\">-jar my-application.jar</span>"
+          "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
+          -Delastic.apm.service_name=my-application \\\\
+          -Delastic.apm.server_urls=http://localhost:8200 \\\\
+          -Delastic.apm.secret_token= \\\\
+          -Delastic.apm.environment=production \\\\
+          -Delastic.apm.application_packages=org.example \\\\
+          -jar my-application.jar"
         `);
       });
     });
@@ -349,13 +349,13 @@ describe('TutorialConfigAgent', () => {
       const commands = component.getByTestId('commands').innerHTML;
       expect(commands).not.toEqual('');
       expect(commands).toMatchInlineSnapshot(`
-        "<span class=\\"euiCodeBlock__line\\">java -javaagent:/path/to/elastic-apm-agent-<span class=\\"token operator\\">&lt;</span>version<span class=\\"token operator\\">&gt;</span>.jar <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.service_name<span class=\\"token operator\\">=</span>my-application <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.server_urls<span class=\\"token operator\\">=</span>http://localhost:8200 <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.secret_token<span class=\\"token operator\\">=</span> <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.environment<span class=\\"token operator\\">=</span>production <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.application_packages<span class=\\"token operator\\">=</span>org.example <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-jar my-application.jar</span>"
+        "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
+        -Delastic.apm.service_name=my-application \\\\
+        -Delastic.apm.server_urls=http://localhost:8200 \\\\
+        -Delastic.apm.secret_token= \\\\
+        -Delastic.apm.environment=production \\\\
+        -Delastic.apm.application_packages=org.example \\\\
+        -jar my-application.jar"
       `);
     });
     it('shows default standalone on cloud', async () => {
@@ -386,13 +386,13 @@ describe('TutorialConfigAgent', () => {
       const commands = component.getByTestId('commands').innerHTML;
       expect(commands).not.toEqual('');
       expect(commands).toMatchInlineSnapshot(`
-        "<span class=\\"euiCodeBlock__line\\">java -javaagent:/path/to/elastic-apm-agent-<span class=\\"token operator\\">&lt;</span>version<span class=\\"token operator\\">&gt;</span>.jar <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.service_name<span class=\\"token operator\\">=</span>my-application <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.server_urls<span class=\\"token operator\\">=</span>cloud_url <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.secret_token<span class=\\"token operator\\">=</span>cloud_token <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.environment<span class=\\"token operator\\">=</span>production <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-Delastic.apm.application_packages<span class=\\"token operator\\">=</span>org.example <span class=\\"token punctuation\\">\\\\</span>
-        </span><span class=\\"euiCodeBlock__line\\">-jar my-application.jar</span>"
+        "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
+        -Delastic.apm.service_name=my-application \\\\
+        -Delastic.apm.server_urls=cloud_url \\\\
+        -Delastic.apm.secret_token=cloud_token \\\\
+        -Delastic.apm.environment=production \\\\
+        -Delastic.apm.application_packages=org.example \\\\
+        -jar my-application.jar"
       `);
     });
   });

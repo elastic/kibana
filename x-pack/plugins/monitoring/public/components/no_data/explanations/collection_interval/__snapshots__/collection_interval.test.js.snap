@@ -360,19 +360,13 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
         >
           We checked the cluster settings and found that 
           <EuiCode>
-            <code
-              className="euiCode"
-              data-code-language="text"
-            >
+            <code>
               xpack.monitoring.collection.interval
             </code>
           </EuiCode>
            is set to 
           <EuiCode>
-            <code
-              className="euiCode"
-              data-code-language="text"
-            >
+            <code>
               -1
             </code>
           </EuiCode>
@@ -681,19 +675,13 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
         >
           We checked the cluster settings and found that 
           <EuiCode>
-            <code
-              className="euiCode"
-              data-code-language="text"
-            >
+            <code>
               xpack.monitoring.collection.interval
             </code>
           </EuiCode>
            is set to 
           <EuiCode>
-            <code
-              className="euiCode"
-              data-code-language="text"
-            >
+            <code>
               -1
             </code>
           </EuiCode>
