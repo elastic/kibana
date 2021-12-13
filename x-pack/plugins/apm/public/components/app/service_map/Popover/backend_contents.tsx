@@ -22,8 +22,8 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
 type BackendReturn = APIReturnType<'GET /internal/apm/service-map/backend'>;
 
-const INITIAL_STATE: BackendReturn = {
-  currentPeriod: {},
+const INITIAL_STATE: Partial<BackendReturn> = {
+  currentPeriod: undefined,
   previousPeriod: undefined,
 };
 
