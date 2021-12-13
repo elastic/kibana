@@ -12,7 +12,7 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import {
   SERVICE_NAME,
   CONTAINER_ID,
-  HOSTNAME,
+  HOST_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 
 export const getServiceInfrastructure = async ({
@@ -57,7 +57,7 @@ export const getServiceInfrastructure = async ({
         },
         hostNames: {
           terms: {
-            field: HOSTNAME,
+            field: HOST_NAME,
             size: 500,
           },
         },

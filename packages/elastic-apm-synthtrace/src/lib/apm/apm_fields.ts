@@ -15,6 +15,9 @@ export type ApmApplicationMetricFields = Partial<{
   'system.cpu.total.norm.pct': number;
   'system.process.memory.rss.bytes': number;
   'system.process.cpu.total.norm.pct': number;
+  'jvm.memory.heap.used': number;
+  'jvm.memory.non_heap.used': number;
+  'jvm.thread.count': number;
 }>;
 
 export type ApmUserAgentFields = Partial<{
