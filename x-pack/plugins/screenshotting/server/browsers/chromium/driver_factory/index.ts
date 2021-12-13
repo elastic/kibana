@@ -159,10 +159,8 @@ export class HeadlessChromiumDriverFactory {
 
       logger.debug(`Browser page driver created`);
 
-      let isClosed = false;
       const childProcess = {
         async kill() {
-          if (isClosed) return;
           try {
             if (devTools && startMetrics) {
               const endMetrics = await devTools.send('Performance.getMetrics');
@@ -183,7 +181,6 @@ export class HeadlessChromiumDriverFactory {
           try {
             logger.debug('Attempting to close browser...');
             await browser?.close();
-            isClosed = true;
             logger.debug('Browser closed.');
           } catch (err) {
             // do not throw
@@ -195,6 +192,8 @@ export class HeadlessChromiumDriverFactory {
 
       // Ensure that the browser is closed once the observable completes.
       observer.add(() => {
+        if (page.isClosed()) return;
+
         logger.debug(`It looks like the browser is no longer being used. Closing the browser...`);
         childProcess.kill(); // ignore async
       });
