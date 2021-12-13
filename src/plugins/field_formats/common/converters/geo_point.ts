@@ -34,6 +34,46 @@ const TRANSFORM_OPTIONS = [
   },
 ];
 
+/*
+ * Convert value to GeoJson point
+ *
+ * When value is read from fields API, its a GeoJSON Point geometry
+ * When value is ready from source, its as provided during ingest which supports multiple formats
+ */
+function toPoint(val: Point | { lat: number, lon: number } | string): Point | null {
+  let lat: number = NaN;
+  let lon: number = NaN;
+
+  if (typeof val === 'object' && 'lat' in val && 'lon' in val) {
+    lat = val.lat;
+    lon = val.lon;
+  } else if (typeof val === 'string') {
+    if (val.startsWith('POINT(')) {
+      const pointArg = val.slice('POINT('.length, val.length);
+      const split = pointArg.split(' ');
+      if (split.length === 2) {
+        lat = parseFloat(split[1]);
+        lon = parseFloat(split[0]);
+      }
+    } else if (val.includes(',')) {
+      const split = val.split(',');
+      lat = parseFloat(split[0]);
+      lon = parseFloat(split[1]);
+    }
+  }
+
+  return Number.isNaN(lat) || Number.isNaN(lon)
+    ? null
+    : {
+      type: 'Point',
+      coordinates: [lon, lat]
+    };
+}
+
+function isPoint(val: Point | { lat: number, lon: number } | string): boolean {
+  return typeof val === 'object' && 'type' in val && val.type === 'Point' && 'coordinates' in val && val.coordinates.length === 2;
+}
+
 /** @public */
 export class GeoPointFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.GEO_POINT;
@@ -49,20 +89,21 @@ export class GeoPointFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = (val: Point) => {
-    if (!val || typeof val !== 'object') {
+  textConvert: TextContextTypeConvert = (val: Point | { lat: number, lon: number } | string) => {
+    if (!val) {
       return '';
     }
 
-    if (typeof val !== 'object' || val.type !== 'Point' || val.coordinates?.length !== 2) {
+    const point = isPoint(val) ? val : toPoint(val);
+    if (!point) {
       return asPrettyString(val);
     }
 
     switch (this.param('transform')) {
       case 'string':
-        return `${val.coordinates[1]},${val.coordinates[0]}`;
+        return `${point.coordinates[1]},${point.coordinates[0]}`;
       case 'wkt':
-        return `POINT(${val.coordinates[0]},${val.coordinates[1]})`;
+        return `POINT(${point.coordinates[0]} ${point.coordinates[1]})`;
       default:
         return asPrettyString(val);
     }
