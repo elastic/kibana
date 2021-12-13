@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 
 import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/mock';
 import { schema, FormProps } from './schema';
-import { CreateCaseForm, CreateCaseFormFields, CreateCaseFormProps } from './form';
+import { CreateCaseForm, CreateCaseFormProps } from './form';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { TestProviders } from '../../common/mock';
@@ -114,34 +114,22 @@ describe('CreateCaseForm', () => {
     expect(queryByText('Sync alert')).not.toBeInTheDocument();
   });
 
-  describe('CreateCaseFormFields', () => {
-    it('should render spinner when loading', async () => {
-      const wrapper = mount(
-        <MockHookWrapperComponent>
-          <CreateCaseFormFields
-            connectors={[]}
-            isLoadingConnectors={false}
-            hideConnectorServiceNowSir={false}
-            withSteps={true}
-          />
-        </MockHookWrapperComponent>
-      );
+  it('should render spinner when loading', async () => {
+    const wrapper = mount(
+      <MockHookWrapperComponent>
+        <CreateCaseForm {...casesFormProps} />
+      </MockHookWrapperComponent>
+    );
 
-      await act(async () => {
-        globalForm.setFieldValue('title', 'title');
-        globalForm.setFieldValue('description', 'description');
-        globalForm.submit();
-        // For some weird reason this is needed to pass the test.
-        // It does not do anything useful
-        await wrapper.find(`[data-test-subj="caseTitle"]`);
-        await wrapper.update();
-      });
+    expect(wrapper.find(`[data-test-subj="create-case-submit"]`).exists()).toBeTruthy();
 
-      await waitFor(() => {
-        expect(
-          wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()
-        ).toBeTruthy();
-      });
+    await act(async () => {
+      globalForm.setFieldValue('title', 'title');
+      globalForm.setFieldValue('description', 'description');
+      await wrapper.find(`button[data-test-subj="create-case-submit"]`).simulate('click');
+      wrapper.update();
     });
+
+    expect(wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()).toBeTruthy();
   });
 });
