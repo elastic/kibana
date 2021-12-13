@@ -149,6 +149,14 @@ export class Job {
     );
   }
 
+  public get canLinkToKibanaApp(): boolean {
+    return Boolean(this.locatorParams);
+  }
+
+  public get isDownloadReady(): boolean {
+    return this.status === JOB_STATUSES.COMPLETED || this.status === JOB_STATUSES.WARNINGS;
+  }
+
   public get prettyTimeout(): string {
     if (this.timeout == null) {
       return i18n.translate('xpack.reporting.jobStatusDetail.timeoutSecondsUnknown', {

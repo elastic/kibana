@@ -78,6 +78,7 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ onClose, job }) => 
     <EuiContextMenuItem
       key="download"
       icon="download"
+      disabled={!job.isDownloadReady}
       onClick={() => {
         apiClient.downloadReport(job.id);
       }}
@@ -87,6 +88,7 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ onClose, job }) => 
       })}
     </EuiContextMenuItem>,
     <EuiContextMenuItem
+      disabled={!job.canLinkToKibanaApp}
       key="openInKibanaApp"
       icon="popout"
       onClick={() => {
