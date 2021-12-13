@@ -45,16 +45,20 @@ export const getReasonMessageForGroupedCountAlert = (
   actualCount: number,
   expectedCount: number,
   comparator: Comparator,
-  groupName: string
+  groupName: string,
+  timeSize: number,
+  timeUnit: TimeUnit
 ) =>
   i18n.translate('xpack.infra.logs.alerting.threshold.groupedCountAlertReasonDescription', {
     defaultMessage:
-      '{actualCount, plural, one {{actualCount} log entry} other {{actualCount} log entries} } ({translatedComparator} {expectedCount}) match the conditions for {groupName}.',
+      '{actualCount, plural, one {{actualCount} log entry} other {{actualCount} log entries}} in the last ({timeSize} {timeUnit}) for {groupName}. Alert when ({translatedComparator} {expectedCount}).',
     values: {
       actualCount,
       expectedCount,
       groupName,
       translatedComparator: ComparatorToi18nMap[comparator],
+      timeSize,
+      timeUnit: getTimeUnitFromOneChart(timeUnit),
     },
   });
 

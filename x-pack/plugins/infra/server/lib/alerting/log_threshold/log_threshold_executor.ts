@@ -354,7 +354,7 @@ export const processGroupByResults = (
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
 
   const groupResults = getReducedGroupByResults(results);
 
@@ -368,7 +368,9 @@ export const processGroupByResults = (
           documentCount,
           count.value,
           count.comparator,
-          group.name
+          group.name,
+          timeSize,
+          timeUnit
         ),
         documentCount,
         count.value
