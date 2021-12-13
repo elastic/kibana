@@ -47,12 +47,12 @@ import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import { getCaseToUpdate } from '../utils';
 
 import { AlertService, CasesService } from '../../services';
+import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateRequest,
-  createCaseError,
   flattenCaseSavedObject,
   isCommentRequestTypeAlertOrGenAlert,
-} from '../../common';
+} from '../../common/utils';
 import { UpdateAlertRequest } from '../alerts/types';
 import { CasesClientArgs } from '..';
 import { Operations, OwnerEntity } from '../../authorization';

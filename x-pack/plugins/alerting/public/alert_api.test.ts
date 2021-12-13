@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertType, RecoveredActionGroup } from '../common';
+import { RuleType, RecoveredActionGroup } from '../common';
 import { httpServiceMock } from '../../../../src/core/public/mocks';
 import { loadAlert, loadAlertType, loadAlertTypes } from './alert_api';
 import uuid from 'uuid';
@@ -16,7 +16,7 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('loadAlertTypes', () => {
   test('should call get alert types API', async () => {
-    const resolvedValue: AlertType[] = [
+    const resolvedValue: RuleType[] = [
       {
         id: 'test',
         name: 'Test',
@@ -43,7 +43,7 @@ describe('loadAlertTypes', () => {
 
 describe('loadAlertType', () => {
   test('should call get alert types API', async () => {
-    const alertType: AlertType = {
+    const alertType: RuleType = {
       id: 'test',
       name: 'Test',
       actionVariables: ['var1'],
@@ -66,7 +66,7 @@ describe('loadAlertType', () => {
   });
 
   test('should find the required alertType', async () => {
-    const alertType: AlertType = {
+    const alertType: RuleType = {
       id: 'test-another',
       name: 'Test Another',
       actionVariables: [],

@@ -23,7 +23,7 @@ import {
 } from '../../../common/constants';
 import { ClientArgs } from '..';
 import { UserActionFieldType } from './types';
-import { CASE_REF_NAME, COMMENT_REF_NAME, SUB_CASE_REF_NAME } from '../../common';
+import { CASE_REF_NAME, COMMENT_REF_NAME, SUB_CASE_REF_NAME } from '../../common/constants';
 import { ConnectorIdReferenceName, PushConnectorIdReferenceName } from './transform';
 import { findConnectorIdReference } from '../transform';
 
