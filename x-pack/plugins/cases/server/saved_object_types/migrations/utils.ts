@@ -8,7 +8,11 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { noneConnectorId } from '../../../common';
-import { SavedObjectReference } from '../../../../../../src/core/server';
+import {
+  SavedObjectReference,
+  SavedObjectMigrationContext,
+  LogMeta,
+} from '../../../../../../src/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import {
   getNoneCaseConnector,
@@ -71,3 +75,36 @@ export const transformPushConnectorIdToReference = (
     references,
   };
 };
+
+interface MigrationLogMeta extends LogMeta {
+  migrations: {
+    [x: string]: {
+      id: string;
+    };
+  };
+}
+
+export function logError({
+  id,
+  context,
+  error,
+  docType,
+  docKey,
+}: {
+  id: string;
+  context: SavedObjectMigrationContext;
+  error: Error;
+  docType: string;
+  docKey: string;
+}) {
+  context.log.error<MigrationLogMeta>(
+    `Failed to migrate ${docType} with doc id: ${id} version: ${context.migrationVersion} error: ${error.message}`,
+    {
+      migrations: {
+        [docKey]: {
+          id,
+        },
+      },
+    }
+  );
+}

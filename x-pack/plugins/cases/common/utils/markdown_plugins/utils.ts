@@ -16,14 +16,17 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { LENS_ID, LensParser, LensSerializer } from './lens';
 import { TimelineSerializer, TimelineParser } from './timeline';
 
-interface LensMarkdownNode extends Node {
+export interface LensMarkdownNode extends Node {
   timeRange: TimeRange;
   attributes: SerializableRecord;
   type: string;
   id: string;
 }
 
-interface LensMarkdownParent extends Node {
+/**
+ * A node that has children of other nodes describing the markdown elements or a specific lens visualization.
+ */
+export interface MarkdownNode extends Node {
   children: Array<LensMarkdownNode | Node>;
 }
 
@@ -32,25 +35,28 @@ export const getLensVisualizations = (parsedComment?: Array<LensMarkdownNode | N
 
 export const parseCommentString = (comment: string) => {
   const processor = unified().use([[markdown, {}], LensParser, TimelineParser]);
-  return processor.parse(comment) as LensMarkdownParent;
+  return processor.parse(comment) as MarkdownNode;
 };
 
-export const stringifyComment = (comment: LensMarkdownParent) =>
+export const stringifyComment = (comment: MarkdownNode) =>
   unified()
     .use([
-      [
-        remarkStringify,
-        {
-          allowDangerousHtml: true,
-          handlers: {
-            /*
-              because we're using rison in the timeline url we need
-              to make sure that markdown parser doesn't modify the url
-            */
-            timeline: TimelineSerializer,
-            lens: LensSerializer,
-          },
-        },
-      ],
+      [remarkStringify],
+      /*
+        because we're using rison in the timeline url we need
+        to make sure that markdown parser doesn't modify the url
+      */
+      LensSerializer,
+      TimelineSerializer,
     ])
     .stringify(comment);
+
+export const isLensMarkdownNode = (node?: unknown): node is LensMarkdownNode => {
+  const unsafeNode = node as LensMarkdownNode;
+  return (
+    unsafeNode != null &&
+    unsafeNode.timeRange != null &&
+    unsafeNode.attributes != null &&
+    unsafeNode.type === 'lens'
+  );
+};
