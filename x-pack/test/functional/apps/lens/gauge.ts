@@ -67,32 +67,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openDimensionEditor(
         'lnsGauge_minDimensionPanel > lns-empty-dimension-suggested-value'
       );
-
-      await testSubjects.setValue('lns-indexPattern-static_value-input', '1000', {
-        clearWithKeyboard: true,
-      });
+      await PageObjects.lens.retrySetValue('lns-indexPattern-static_value-input', '1000');
       await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.openDimensionEditor(
         'lnsGauge_maxDimensionPanel > lns-empty-dimension-suggested-value'
       );
-
-      await testSubjects.setValue('lns-indexPattern-static_value-input', '25000', {
-        clearWithKeyboard: true,
-      });
+      await PageObjects.lens.retrySetValue('lns-indexPattern-static_value-input', '25000');
       await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.openVisualOptions();
-      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMajor', 'custom title', {
-        clearWithKeyboard: true,
-        typeCharByChar: true,
-      });
+      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMajor', 'custom title');
       await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor-select', 'custom');
-      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor', 'custom subtitle', {
-        clearWithKeyboard: true,
-      });
+      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
 
       await PageObjects.lens.waitForVisualization();
 
