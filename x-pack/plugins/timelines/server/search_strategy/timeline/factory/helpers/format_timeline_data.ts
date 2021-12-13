@@ -5,39 +5,14 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
 import { get, has, merge, uniq } from 'lodash/fp';
-import { Ecs } from '../../../../../../common/ecs';
-import {
-  EventHit,
-  Fields,
-  TimelineEdges,
-  TimelineNonEcsData,
-} from '../../../../../../common/search_strategy';
-import { toStringArray } from '../../../../../../common/utils/to_array';
-import {
-  getDataFromFieldsHits,
-  getDataSafety,
-} from '../../../../../../common/utils/field_formatters';
-import { TIMELINE_EVENTS_FIELDS } from './constants';
-
-const getTimestamp = (hit: EventHit): string => {
-  if (hit.fields && hit.fields['@timestamp']) {
-    return `${hit.fields['@timestamp'][0] ?? ''}`;
-  } else if (hit._source && hit._source['@timestamp']) {
-    return hit._source['@timestamp'];
-  }
-  return '';
-};
-
-export const buildFieldsRequest = (fields: string[], excludeEcsData?: boolean) =>
-  uniq([
-    ...fields.filter((f) => !f.startsWith('_')),
-    ...(excludeEcsData ? [] : TIMELINE_EVENTS_FIELDS),
-  ]).map((field) => ({
-    field,
-    include_unmapped: true,
-  }));
+import { EventHit, TimelineEdges, TimelineNonEcsData } from '../../../../../common/search_strategy';
+import { toStringArray } from '../../../../../common/utils/to_array';
+import { getDataFromFieldsHits, getDataSafety } from '../../../../../common/utils/field_formatters';
+import { getTimestamp } from './get_timestamp';
+import { getNestedParentPath } from './get_nested_parent_path';
+import { buildObjectForFieldPath } from './build_object_for_field_path';
+import { ECS_METADATA_FIELDS } from './constants';
 
 export const formatTimelineData = async (
   dataFields: readonly string[],
@@ -74,14 +49,12 @@ export const formatTimelineData = async (
     })
   );
 
-const specialFields = ['_id', '_index', '_type', '_score'];
-
 const getValuesFromFields = async (
   fieldName: string,
   hit: EventHit,
   nestedParentFieldName?: string
 ): Promise<TimelineNonEcsData[]> => {
-  if (specialFields.includes(fieldName)) {
+  if (ECS_METADATA_FIELDS.includes(fieldName)) {
     return [{ field: fieldName, value: toStringArray(get(fieldName, hit)) }];
   }
 
@@ -110,37 +83,6 @@ const getValuesFromFields = async (
   );
 };
 
-const buildObjectRecursive = (fieldPath: string, fields: Fields): Partial<Ecs> => {
-  const nestedParentPath = getNestedParentPath(fieldPath, fields);
-  if (!nestedParentPath) {
-    return set({}, fieldPath, toStringArray(get(fieldPath, fields)));
-  }
-
-  const subPath = fieldPath.replace(`${nestedParentPath}.`, '');
-  const subFields = (get(nestedParentPath, fields) ?? []) as Fields[];
-  return set(
-    {},
-    nestedParentPath,
-    subFields.map((subField) => buildObjectRecursive(subPath, subField))
-  );
-};
-
-export const buildObjectForFieldPath = (fieldPath: string, hit: EventHit): Partial<Ecs> => {
-  if (has(fieldPath, hit._source)) {
-    const value = get(fieldPath, hit._source);
-    return set({}, fieldPath, toStringArray(value));
-  }
-
-  return buildObjectRecursive(fieldPath, hit.fields);
-};
-
-/**
- * If a prefix of our full field path is present as a field, we know that our field is nested
- */
-const getNestedParentPath = (fieldPath: string, fields: Fields | undefined): string | undefined =>
-  fields &&
-  Object.keys(fields).find((field) => field !== fieldPath && fieldPath.startsWith(`${field}.`));
-
 const mergeTimelineFieldsWithHit = async <T>(
   fieldName: string,
   flattenedFields: T,
@@ -154,7 +96,7 @@ const mergeTimelineFieldsWithHit = async <T>(
       nestedParentPath != null ||
       has(fieldName, hit._source) ||
       has(fieldName, hit.fields) ||
-      specialFields.includes(fieldName)
+      ECS_METADATA_FIELDS.includes(fieldName)
     ) {
       const objectWithProperty = {
         node: {
