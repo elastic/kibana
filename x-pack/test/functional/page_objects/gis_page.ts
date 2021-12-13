@@ -106,6 +106,14 @@ export class GisPageObject extends FtrService {
     });
   }
 
+  async waitForLayersToLoadMinimizedLayerControl() {
+    this.log.debug('Wait for layers to load (minimized layer control)');
+    await this.retry.try(async () => {
+      const tableOfContents = await this.testSubjects.find('mapExpandLayerControlButton');
+      await tableOfContents.waitForDeletedByCssSelector('.euiLoadingSpinner');
+    });
+  }
+
   async waitForLayerDeleted(layerName: string) {
     this.log.debug('Wait for layer deleted');
     await this.retry.waitFor('Layer to be deleted', async () => {
@@ -521,6 +529,17 @@ export class GisPageObject extends FtrService {
     await this.waitForLayersToLoad();
   }
 
+  async selectDocumentsSource() {
+    this.log.debug(`Select Documents source`);
+    await this.testSubjects.click('documents');
+  }
+
+  async selectGeoIndexPatternLayer(name: string) {
+    this.log.debug(`Select index pattern ${name}`);
+    await this.comboBox.set('mapGeoIndexPatternSelect', name);
+    await this.waitForLayersToLoad();
+  }
+
   async selectEMSBoundariesSource() {
     this.log.debug(`Select Elastic Maps Service boundaries source`);
     await this.testSubjects.click('emsBoundaries');
@@ -539,7 +558,6 @@ export class GisPageObject extends FtrService {
     await this.waitForLayersToLoad();
   }
 
-  // Returns first layer by default
   async selectVectorLayer(vectorLayerName: string) {
     this.log.debug(`Select EMS vector layer ${vectorLayerName}`);
     if (!vectorLayerName) {
