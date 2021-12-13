@@ -401,7 +401,7 @@ export function LayerPanel(
                   defaultMessage: 'Requires field',
                 });
 
-            const isOptional = !group.required;
+            const isOptional = !group.required && !group.suggestedValue;
             return (
               <EuiFormRow
                 className="lnsLayerPanel__row"
@@ -411,7 +411,6 @@ export function LayerPanel(
                     {group.groupLabel}
                     {group.groupTooltip && (
                       <>
-                        {' '}
                         <EuiIconTip
                           color="subdued"
                           content={group.groupTooltip}
