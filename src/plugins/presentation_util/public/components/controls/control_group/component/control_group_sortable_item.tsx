@@ -76,6 +76,9 @@ const SortableControlInner = forwardRef<
   return (
     <EuiFlexItem
       grow={width === 'auto'}
+      data-control-id={embeddableId}
+      data-test-subj={`control-frame`}
+      data-render-complete="true"
       className={classNames('controlFrameWrapper', {
         'controlFrameWrapper-isDragging': isDragging,
         'controlFrameWrapper--small': width === 'small',

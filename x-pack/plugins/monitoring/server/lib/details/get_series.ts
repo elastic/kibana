@@ -17,6 +17,7 @@ import {
   NORMALIZED_DERIVATIVE_UNIT,
   CALCULATE_DURATION_UNTIL,
   INDEX_PATTERN_TYPES,
+  STANDALONE_CLUSTER_CLUSTER_UUID,
 } from '../../../common/constants';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
@@ -192,7 +193,9 @@ async function fetchSeries(
         start: adjustedMin,
         end: Number(max),
         metric,
-        clusterUuid: req.params.clusterUuid,
+        clusterUuid: metricOptions.skipClusterUuidFilter
+          ? STANDALONE_CLUSTER_CLUSTER_UUID
+          : req.params.clusterUuid,
         // TODO: Pass in the UUID as an explicit function parameter
         uuid: getUuid(req, metric),
         filters,

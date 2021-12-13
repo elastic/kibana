@@ -16,6 +16,7 @@ import {
   DS_INDEX_PATTERN_TYPES,
   DS_INDEX_PATTERN_METRICS,
   INDEX_PATTERN_TYPES,
+  INDEX_PATTERN_ENTERPRISE_SEARCH,
 } from '../../../common/constants';
 import { MonitoringConfig } from '../..';
 
@@ -31,6 +32,11 @@ export function getIndexPatterns(
   const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
   const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
   const alertsIndex = prefixIndexPattern(config, INDEX_ALERTS, ccs);
+  const enterpriseSearchIndexPattern = prefixIndexPattern(
+    config,
+    INDEX_PATTERN_ENTERPRISE_SEARCH,
+    ccs
+  );
   const indexPatterns = {
     esIndexPattern,
     kbnIndexPattern,
@@ -38,6 +44,7 @@ export function getIndexPatterns(
     beatsIndexPattern,
     apmIndexPattern,
     alertsIndex,
+    enterpriseSearchIndexPattern,
     ...Object.keys(additionalPatterns).reduce((accum, varName) => {
       return {
         ...accum,

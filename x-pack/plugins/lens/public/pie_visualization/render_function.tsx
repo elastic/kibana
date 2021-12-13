@@ -36,7 +36,7 @@ import {
   byDataColorPaletteMap,
   extractUniqTermsMap,
 } from './render_helpers';
-import { EmptyPlaceholder } from '../shared_components';
+import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import './visualization.scss';
 import {
   ChartsPluginSetup,
@@ -86,6 +86,7 @@ export function PieComponent(
     truncateLegend,
     hideLabels,
     palette,
+    showValuesInLegend,
   } = props.args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
@@ -186,7 +187,7 @@ export function PieComponent(
           const outputColor = paletteService.get(palette.name).getCategoricalColor(
             seriesLayers,
             {
-              behindText: categoryDisplay !== 'hide',
+              behindText: categoryDisplay !== 'hide' || isTreemapOrMosaicShape(shape),
               maxDepth: bucketColumns.length,
               totalSeries: totalSeriesCount,
               syncColors,
@@ -315,7 +316,7 @@ export function PieComponent(
                 (legend.getShowLegendDefault?.(bucketColumns) ?? false)))
           }
           flatLegend={legend.flat}
-          showLegendExtra={legend.showValues}
+          showLegendExtra={showValuesInLegend}
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={props.interactive ?? true ? onElementClickHandler : undefined}

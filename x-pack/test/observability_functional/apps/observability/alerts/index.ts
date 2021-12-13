@@ -7,16 +7,11 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
-async function asyncForEach<T>(array: T[], callback: (item: T, index: number) => void) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index);
-  }
-}
+import { asyncForEach } from '../helpers';
 
 const ACTIVE_ALERTS_CELL_COUNT = 78;
-const RECOVERED_ALERTS_CELL_COUNT = 120;
-const TOTAL_ALERTS_CELL_COUNT = 165;
+const RECOVERED_ALERTS_CELL_COUNT = 150;
+const TOTAL_ALERTS_CELL_COUNT = 200;
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
