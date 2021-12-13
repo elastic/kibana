@@ -12,6 +12,12 @@ import { createMemoryHistory } from 'history';
 import { mountWithIntl } from '@kbn/test/jest';
 import { withQueryParams } from './with_query_params';
 import { DiscoverServices } from '../build_services';
+import { DiscoverRouteProps } from '../application/types';
+
+interface ComponentProps extends DiscoverRouteProps {
+  id: string;
+  query: string;
+}
 
 const mountComponent = (children: ReactElement, query = '') => {
   const history = createMemoryHistory({
@@ -25,16 +31,25 @@ describe('withQueryParams', () => {
     const Component = withQueryParams(() => <div />, ['id', 'query']);
     const component = mountComponent(<Component services={{} as DiscoverServices} />);
 
+    expect(component.html()).toContain('Error loading Discover');
     expect(component.html()).toContain('Query should contain id, query.');
   });
 
   it('should not display error message, when query contain required parameters', () => {
-    const Component = withQueryParams(() => <div />, ['id', 'query']);
+    const Component = withQueryParams(
+      ({ id, query }: ComponentProps) => (
+        <div>
+          {id} and {query} are presented
+        </div>
+      ),
+      ['id', 'query']
+    );
     const component = mountComponent(
       <Component services={{} as DiscoverServices} />,
       '?id=one&query=another'
     );
 
+    expect(component.html()).toContain('one and another are presented');
     expect(component.html()).not.toContain('Query should contain id, query.');
   });
 });

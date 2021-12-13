@@ -21,6 +21,7 @@ export const DiscoverError = ({ error }: { error: Error }) => {
 
   return (
     <EuiEmptyPrompt
+      paddingSize="l"
       iconType="alert"
       iconColor="danger"
       title={
