@@ -9,7 +9,11 @@
 
 import * as rt from 'io-ts';
 
-import { SavedObjectReference } from '../../../../../../src/core/server';
+import {
+  LogMeta,
+  SavedObjectMigrationContext,
+  SavedObjectReference,
+} from '../../../../../../src/core/server';
 import {
   CaseAttributes,
   CaseConnector,
@@ -290,3 +294,36 @@ export const transformPushConnectorIdToReference = (
     references,
   };
 };
+
+interface MigrationLogMeta extends LogMeta {
+  migrations: {
+    [x: string]: {
+      id: string;
+    };
+  };
+}
+
+export function logError({
+  id,
+  context,
+  error,
+  docType,
+  docKey,
+}: {
+  id: string;
+  context: SavedObjectMigrationContext;
+  error: Error;
+  docType: string;
+  docKey: string;
+}) {
+  context.log.error<MigrationLogMeta>(
+    `Failed to migrate ${docType} with doc id: ${id} version: ${context.migrationVersion} error: ${error.message}`,
+    {
+      migrations: {
+        [docKey]: {
+          id,
+        },
+      },
+    }
+  );
+}

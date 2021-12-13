@@ -25,6 +25,7 @@ import {
   isCreateConnector,
   UserActionFieldType,
   extractConnectorIdFromJson,
+  logError,
 } from './utils';
 
 import {
@@ -48,10 +49,6 @@ interface UserActionUnmigratedConnectorDocument {
   old_value?: string | null;
 }
 
-interface UserActionLogMeta extends LogMeta {
-  migrations: { userAction: { id: string } };
-}
-
 export function userActionsConnectorIdMigration(
   doc: SavedObjectUnsanitizedDoc<UserActionUnmigratedConnectorDocument>,
   context: SavedObjectMigrationContext
@@ -65,7 +62,13 @@ export function userActionsConnectorIdMigration(
   try {
     return formatDocumentWithConnectorReferences(doc);
   } catch (error) {
-    logError(doc.id, context, error);
+    logError({
+      id: doc.id,
+      context,
+      error,
+      docType: 'user action connector',
+      docKey: 'userAction',
+    });
 
     return originalDocWithReferences;
   }
@@ -112,19 +115,6 @@ function formatDocumentWithConnectorReferences(
     },
     references: [...references, ...newValueConnectorRefs, ...oldValueConnectorRefs],
   };
-}
-
-function logError(id: string, context: SavedObjectMigrationContext, error: Error) {
-  context.log.error<UserActionLogMeta>(
-    `Failed to migrate user action connector doc id: ${id} version: ${context.migrationVersion} error: ${error.message}`,
-    {
-      migrations: {
-        userAction: {
-          id,
-        },
-      },
-    }
-  );
 }
 
 const getSingleFieldPayload = (field: string, value: string | undefined) => {

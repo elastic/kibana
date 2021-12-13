@@ -42,7 +42,8 @@ import {
   getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
 
-import { isColumnInvalid, isDraggedField, normalizeOperationDataType } from './utils';
+import { getVisualDefaultsForLayer, isColumnInvalid } from './utils';
+import { normalizeOperationDataType, isDraggedField } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import { GenericIndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
@@ -68,12 +69,13 @@ export function columnToOperation(
   column: GenericIndexPatternColumn,
   uniqueLabel?: string
 ): Operation {
-  const { dataType, label, isBucketed, scale } = column;
+  const { dataType, label, isBucketed, scale, operationType } = column;
   return {
     dataType: normalizeOperationDataType(dataType),
     isBucketed,
     scale,
     label: uniqueLabel || label,
+    isStaticValue: operationType === 'static_value',
   };
 }
 
@@ -446,6 +448,10 @@ export function getIndexPatternDatasource({
             }
           }
           return null;
+        },
+        getVisualDefaults: () => {
+          const layer = state.layers[layerId];
+          return getVisualDefaultsForLayer(layer);
         },
       };
     },
