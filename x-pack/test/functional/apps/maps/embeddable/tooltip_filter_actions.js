@@ -41,8 +41,7 @@ export default function ({ getPageObjects, getService }) {
       await security.testUser.restoreDefaults();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/117780
-    describe.skip('apply filter to current view', () => {
+    describe('apply filter to current view', () => {
       before(async () => {
         await loadDashboardAndOpenTooltip();
       });
