@@ -14,3 +14,4 @@ export { LevelLogger } from './level_logger';
 export { statuses } from './statuses';
 export { ReportingStore, IlmPolicyManager } from './store';
 export { startTrace } from './trace';
+export { logCreatorFactory } from './event_logger';

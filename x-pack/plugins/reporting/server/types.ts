@@ -11,21 +11,22 @@ import { DataPluginStart } from 'src/plugins/data/server/plugin';
 import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Writable } from 'stream';
+import { IEventLogService } from '../../../event_log/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../features/server';
+import { LicensingPluginSetup } from '../../../licensing/server';
 import type {
-  ScreenshottingStart,
   ScreenshotOptions as BaseScreenshotOptions,
-} from '../../screenshotting/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
-import { SpacesPluginSetup } from '../../spaces/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { CancellationToken } from '../common';
-import { BaseParams, BasePayload, TaskRunResult, UrlOrUrlLocatorTuple } from '../common/types';
-import { ReportingConfigType } from './config';
-import { ReportingCore } from './core';
-import { LevelLogger } from './lib';
-import { ReportTaskParams } from './lib/tasks';
+  ScreenshottingStart,
+} from '../../../screenshotting/server';
+import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
+import { SpacesPluginSetup } from '../../../spaces/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../../task_manager/server';
+import { CancellationToken } from '../../common';
+import { BaseParams, BasePayload, TaskRunResult, UrlOrUrlLocatorTuple } from '../../common/types';
+import { ReportingConfigType } from '../config';
+import { ReportingCore } from '../core';
+import { LevelLogger } from '../lib';
+import { ReportTaskParams } from '../lib/tasks';
 
 /*
  * Plugin Contract
@@ -33,6 +34,7 @@ import { ReportTaskParams } from './lib/tasks';
 
 export interface ReportingSetupDeps {
   licensing: LicensingPluginSetup;
+  eventLog: IEventLogService;
   features: FeaturesPluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
   security?: SecurityPluginSetup;

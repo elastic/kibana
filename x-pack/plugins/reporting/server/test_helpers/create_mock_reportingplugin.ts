@@ -36,6 +36,10 @@ export const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup =
     taskManager: taskManagerMock.createSetup(),
     logger: createMockLevelLogger(),
     status: statusServiceMock.createSetupContract(),
+    eventLog: setupMock.eventLog || {
+      registerProviderActions: jest.fn(),
+      getLogger: jest.fn(),
+    },
     ...setupMock,
   };
 };

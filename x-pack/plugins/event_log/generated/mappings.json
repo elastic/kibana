@@ -303,6 +303,41 @@
                         }
                     }
                 },
+                "reporting": {
+                    "properties": {
+                        "appName": {
+                            "type": "keyword"
+                        },
+                        "contentType": {
+                            "type": "keyword"
+                        },
+                        "jobType": {
+                            "type": "keyword"
+                        },
+                        "attempt": {
+                            "type": "long"
+                        },
+                        "status": {
+                            "type": "keyword"
+                        },
+                        "csv": {
+                            "properties": {
+                                "numRows": {
+                                    "type": "long"
+                                },
+                                "numColumns": {
+                                    "type": "long"
+                                },
+                                "byteLength": {
+                                    "type": "long"
+                                },
+                                "scrollTime": {
+                                    "type": "long"
+                                }
+                            }
+                        }
+                    }
+                },
                 "saved_objects": {
                     "type": "nested",
                     "properties": {

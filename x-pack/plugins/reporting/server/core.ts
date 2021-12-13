@@ -8,7 +8,6 @@
 import Hapi from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { filter, first, map, switchMap, take } from 'rxjs/operators';
-import type { ScreenshottingStart, ScreenshotResult } from '../../screenshotting/server';
 import {
   BasePath,
   IClusterClient,
@@ -22,8 +21,10 @@ import {
   UiSettingsServiceStart,
 } from '../../../../src/core/server';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+import { IEventLogService } from '../../event_log/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
+import type { ScreenshotResult, ScreenshottingStart } from '../../screenshotting/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import { SpacesPluginSetup } from '../../spaces/server';
@@ -38,6 +39,7 @@ import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/t
 import { ReportingPluginRouter, ScreenshotOptions } from './types';
 
 export interface ReportingInternalSetup {
+  eventLog: IEventLogService;
   basePath: Pick<BasePath, 'set'>;
   router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
