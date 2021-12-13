@@ -2,7 +2,7 @@
 === kibana-encryption-keys
 
 The `kibana-encryption-keys` command helps you set up encryption keys that {kib} uses
-to protect sensitived information.
+to protect sensitive information.
 
 [discrete]
 === Synopsis
