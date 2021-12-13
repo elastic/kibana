@@ -124,11 +124,13 @@ export function runFailedTestsReporterCli() {
               continue;
             }
 
-            let existingIssue: GithubIssueMini | undefined = await githubApi.findFailedTestIssue(
-              (i) =>
-                getIssueMetadata(i.body, 'test.class') === failure.classname &&
-                getIssueMetadata(i.body, 'test.name') === failure.name
-            );
+            let existingIssue: GithubIssueMini | undefined = updateGithub
+              ? await githubApi.findFailedTestIssue(
+                  (i) =>
+                    getIssueMetadata(i.body, 'test.class') === failure.classname &&
+                    getIssueMetadata(i.body, 'test.name') === failure.name
+                )
+              : undefined;
 
             if (!existingIssue) {
               const newlyCreated = newlyCreatedIssues.find(
