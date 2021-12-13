@@ -25,7 +25,7 @@ interface Props extends OverviewStepProps {
 const BackupStep = ({ cloud, setIsComplete }: Omit<Props, 'isComplete'>) => {
   const [forceOnPremStep, setForceOnPremStep] = useState(false);
 
-  if (!cloud?.isCloudEnabled && !forceOnPremStep) {
+  if (cloud?.isCloudEnabled && !forceOnPremStep) {
     return (
       <CloudBackup
         setIsComplete={setIsComplete}
