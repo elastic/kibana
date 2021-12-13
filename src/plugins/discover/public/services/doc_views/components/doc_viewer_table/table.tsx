@@ -56,13 +56,14 @@ interface ItemsEntry {
 }
 
 interface BrowseFieldsState {
-  search?: string;
+  searchField?: string;
   pinnedFields?: string[];
   pageSize?: number;
 }
 
 const MOBILE_OPTIONS = { header: false };
 const PAGE_SIZE_OPTIONS = [25, 50, 100];
+const DEFAULT_PAGE_SIZE = 25;
 const BROWSE_FIELDS_STATE_KEY = 'discover:browseFieldsState';
 
 const validatePageSize = (pageSize?: number) => {
@@ -82,63 +83,63 @@ const getAllBrowseFieldsStates = (
 
 const setBrowseFieldsState = (
   newState: BrowseFieldsState,
-  indexPatternId: string,
+  dataViewId: string,
   storage: Storage
 ) => {
   const entry = getAllBrowseFieldsStates(storage);
-  const prev = entry[indexPatternId] || {};
+  const prev = entry[dataViewId] || {};
 
   const newBrowseFieldsState = Object.assign(prev, newState);
   const newBrowseFieldsStateEntry = Object.assign(entry, {
-    [indexPatternId]: newBrowseFieldsState,
+    [dataViewId]: newBrowseFieldsState,
   });
   storage.set(BROWSE_FIELDS_STATE_KEY, JSON.stringify(newBrowseFieldsStateEntry));
 };
 
-const saveQueryOptimized = debounce(
-  (query: string, indexPattern: string, storage: Storage) =>
-    setBrowseFieldsState({ search: query }, indexPattern, storage),
+const saveFieldSearchOptimized = debounce(
+  (searchField: string, dataView: string, storage: Storage) =>
+    setBrowseFieldsState({ searchField }, dataView, storage),
   500
 );
 
 export const DocViewerTable = ({
   columns,
   hit,
-  indexPattern,
+  indexPattern: dataView,
   filter,
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
   const { storage, uiSettings } = getServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
-  const currentIndexPatternId = indexPattern.id!;
+  const currentDataViewId = dataView.id!;
   const isSingleDocView = !filter;
 
   const {
-    search: initialSearch,
+    searchField: initialSearchField,
     pinnedFields: initialPinnedFields,
     pageSize: initialPageSize,
   }: Required<BrowseFieldsState> = useMemo(() => {
-    const state = getAllBrowseFieldsStates(storage)[currentIndexPatternId] || {};
+    const state = getAllBrowseFieldsStates(storage)[currentDataViewId] || {};
     return {
       pinnedFields: isSingleDocView ? [] : state.pinnedFields || [],
-      search: state.search || '',
-      pageSize: (validatePageSize(state.pageSize) && state.pageSize) || 25,
+      searchField: state.searchField || '',
+      pageSize: (validatePageSize(state.pageSize) && state.pageSize) || DEFAULT_PAGE_SIZE,
     };
-  }, [storage, currentIndexPatternId, isSingleDocView]);
-  const [query, setQuery] = useState(initialSearch);
+  }, [storage, currentDataViewId, isSingleDocView]);
+  const [searchField, setSearchField] = useState(initialSearchField);
   const [pinnedFields, setPinnedFields] = useState<string[]>(initialPinnedFields);
 
-  const flattened = flattenHit(hit, indexPattern, { source: true, includeIgnoredValues: true });
-  const fieldsToShow = getFieldsToShow(Object.keys(flattened), indexPattern, showMultiFields);
+  const flattened = flattenHit(hit, dataView, { source: true, includeIgnoredValues: true });
+  const fieldsToShow = getFieldsToShow(Object.keys(flattened), dataView, showMultiFields);
 
   const searchPlaceholder = i18n.translate('discover.docView.table.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
 
   const mapping = useCallback(
-    (name: string) => indexPattern?.fields.getByName(name),
-    [indexPattern?.fields]
+    (name: string) => dataView?.fields.getByName(name),
+    [dataView?.fields]
   );
 
   const onToggleColumn = useCallback(
@@ -161,17 +162,17 @@ export const DocViewerTable = ({
         ? pinnedFields.filter((curField) => curField !== field)
         : [...pinnedFields, field];
 
-      setBrowseFieldsState({ pinnedFields: newPinned }, currentIndexPatternId, storage);
+      setBrowseFieldsState({ pinnedFields: newPinned }, currentDataViewId, storage);
       setPinnedFields(newPinned);
     },
-    [currentIndexPatternId, pinnedFields, storage]
+    [currentDataViewId, pinnedFields, storage]
   );
 
   const fieldToItem = useCallback(
     (field: string) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
-      const fieldType = isNestedFieldParent(field, indexPattern) ? 'nested' : fieldMapping?.type;
+      const fieldType = isNestedFieldParent(field, dataView) ? 'nested' : fieldMapping?.type;
 
       const ignored = getIgnoredReason(fieldMapping ?? field, hit._ignored);
 
@@ -192,7 +193,7 @@ export const DocViewerTable = ({
           onTogglePinned,
         },
         value: {
-          formattedValue: formatFieldValue(flattened[field], hit, indexPattern, fieldMapping),
+          formattedValue: formatFieldValue(flattened[field], hit, dataView, fieldMapping),
           ignored,
         },
       };
@@ -202,7 +203,7 @@ export const DocViewerTable = ({
       filter,
       flattened,
       hit,
-      indexPattern,
+      dataView,
       mapping,
       onToggleColumn,
       onTogglePinned,
@@ -212,11 +213,11 @@ export const DocViewerTable = ({
 
   const handleOnChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newQuery = event.currentTarget.value;
-      saveQueryOptimized(newQuery, currentIndexPatternId, storage);
-      setQuery(newQuery);
+      const newSearchField = event.currentTarget.value;
+      saveFieldSearchOptimized(newSearchField, currentDataViewId, storage);
+      setSearchField(newSearchField);
     },
-    [currentIndexPatternId, storage]
+    [currentDataViewId, storage]
   );
 
   const { pinnedItems, restItems } = Object.keys(flattened)
@@ -238,7 +239,7 @@ export const DocViewerTable = ({
         } else {
           const fieldMapping = mapping(curFieldName);
           const displayName = fieldMapping?.displayName ?? curFieldName;
-          if (displayName.includes(query)) {
+          if (displayName.includes(searchField)) {
             acc.restItems.push(fieldToItem(curFieldName));
           }
         }
@@ -260,10 +261,10 @@ export const DocViewerTable = ({
 
   const onChangePageSize = useCallback(
     (newPageSize: number) => {
-      setBrowseFieldsState({ pageSize: newPageSize }, currentIndexPatternId, storage);
+      setBrowseFieldsState({ pageSize: newPageSize }, currentDataViewId, storage);
       changePageSize(newPageSize);
     },
-    [changePageSize, currentIndexPatternId, storage]
+    [changePageSize, currentDataViewId, storage]
   );
 
   const headers = [
@@ -380,7 +381,7 @@ export const DocViewerTable = ({
           fullWidth
           onChange={handleOnChange}
           placeholder={searchPlaceholder}
-          value={query}
+          value={searchField}
         />
       </EuiFlexItem>
 
