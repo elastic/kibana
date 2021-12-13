@@ -24,7 +24,7 @@ import {
 import { EuiMonitoringTable } from '../../table';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import { mountReactNode } from '../../../../../../../src/core/public/utils';
 import { AlertsStatus } from '../../../alerts/status';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
@@ -254,14 +254,14 @@ const licenseWarning = (scope, { title, text }) => {
 
 const handleClickIncompatibleLicense = (scope, clusterName) => {
   licenseWarning(scope, {
-    title: toMountPoint(
+    title: mountReactNode(
       <FormattedMessage
         id="xpack.monitoring.cluster.listing.incompatibleLicense.warningMessageTitle"
         defaultMessage="You can't view the {clusterName} cluster"
         values={{ clusterName: '"' + clusterName + '"' }}
       />
     ),
-    text: toMountPoint(
+    text: mountReactNode(
       <Fragment>
         <p>
           <FormattedMessage
@@ -294,14 +294,14 @@ const handleClickInvalidLicense = (scope, clusterName) => {
   const licensingPath = `${Legacy.shims.getBasePath()}/app/management/stack/license_management/home`;
 
   licenseWarning(scope, {
-    title: toMountPoint(
+    title: mountReactNode(
       <FormattedMessage
         id="xpack.monitoring.cluster.listing.invalidLicense.warningMessageTitle"
         defaultMessage="You can't view the {clusterName} cluster"
         values={{ clusterName: '"' + clusterName + '"' }}
       />
     ),
-    text: toMountPoint(
+    text: mountReactNode(
       <Fragment>
         <p>
           <FormattedMessage

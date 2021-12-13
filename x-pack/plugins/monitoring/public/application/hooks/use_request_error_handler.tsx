@@ -11,7 +11,8 @@ import { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { formatMsg } from '../../lib/format_msg';
-import { toMountPoint, useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { mountReactNode } from '../../../../../../src/core/public/utils';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { MonitoringStartPluginDependencies } from '../../types';
 
 export function formatMonitoringError(err: IHttpFetchError<ResponseErrorBody>) {
@@ -45,13 +46,13 @@ export const useRequestErrorHandler = () => {
         // pass through if this is a 404 and we're already on the no-data page
         const formattedError = formatMonitoringError(err);
         services.notifications?.toasts.addDanger({
-          title: toMountPoint(
+          title: mountReactNode(
             <FormattedMessage
               id="xpack.monitoring.ajaxErrorHandler.requestFailedNotificationTitle"
               defaultMessage="Monitoring Request Failed"
             />
           ),
-          text: toMountPoint(
+          text: mountReactNode(
             <div>
               {formattedError}
               <EuiSpacer />
@@ -66,13 +67,13 @@ export const useRequestErrorHandler = () => {
         });
       } else {
         services.notifications?.toasts.addDanger({
-          title: toMountPoint(
+          title: mountReactNode(
             <FormattedMessage
               id="xpack.monitoring.ajaxErrorHandler.requestErrorNotificationTitle"
               defaultMessage="Monitoring Request Error"
             />
           ),
-          text: toMountPoint(formatMonitoringError(err)),
+          text: mountReactNode(formatMonitoringError(err)),
         });
       }
     },

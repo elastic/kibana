@@ -11,7 +11,7 @@ import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Legacy } from '../legacy_shims';
 import { formatMsg } from './format_msg';
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import { mountReactNode } from '../../../../../src/core/public/utils';
 
 export function formatMonitoringError(err: any) {
   // TODO: We should stop using Boom for errors and instead write a custom handler to return richer error objects
@@ -42,13 +42,13 @@ export function ajaxErrorHandlersProvider() {
     } else if (err.status === 404 && !includes(window.location.hash, 'no-data')) {
       // pass through if this is a 404 and we're already on the no-data page
       Legacy.shims.toastNotifications.addDanger({
-        title: toMountPoint(
+        title: mountReactNode(
           <FormattedMessage
             id="xpack.monitoring.ajaxErrorHandler.requestFailedNotificationTitle"
             defaultMessage="Monitoring Request Failed"
           />
         ),
-        text: toMountPoint(
+        text: mountReactNode(
           <div>
             {formatMonitoringError(err)}
             <EuiSpacer />
@@ -63,13 +63,13 @@ export function ajaxErrorHandlersProvider() {
       });
     } else {
       Legacy.shims.toastNotifications.addDanger({
-        title: toMountPoint(
+        title: mountReactNode(
           <FormattedMessage
             id="xpack.monitoring.ajaxErrorHandler.requestErrorNotificationTitle"
             defaultMessage="Monitoring Request Error"
           />
         ),
-        text: toMountPoint(formatMonitoringError(err)),
+        text: mountReactNode(formatMonitoringError(err)),
       });
     }
 

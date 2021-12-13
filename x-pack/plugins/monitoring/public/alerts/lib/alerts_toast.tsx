@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiLink } from '@elastic/eui';
 import { Legacy } from '../../legacy_shims';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import { mountReactNode } from '../../../../../../src/core/public/utils';
 
 export interface EnableAlertResponse {
   isSufficientlySecure?: boolean;
@@ -22,13 +22,13 @@ const showApiKeyAndEncryptionError = () => {
   const settingsUrl = Legacy.shims.docLinks.links.alerting.generalSettings;
 
   Legacy.shims.toastNotifications.addWarning({
-    title: toMountPoint(
+    title: mountReactNode(
       <FormattedMessage
         id="xpack.monitoring.healthCheck.tlsAndEncryptionErrorTitle"
         defaultMessage="Additional setup required"
       />
     ),
-    text: toMountPoint(
+    text: mountReactNode(
       <div>
         <p>
           {i18n.translate('xpack.monitoring.healthCheck.tlsAndEncryptionError', {
@@ -50,13 +50,13 @@ const showUnableToDisableWatcherClusterAlertsError = () => {
   const settingsUrl = Legacy.shims.docLinks.links.alerting.generalSettings;
 
   Legacy.shims.toastNotifications.addWarning({
-    title: toMountPoint(
+    title: mountReactNode(
       <FormattedMessage
         id="xpack.monitoring.healthCheck.unableToDisableWatches.title"
         defaultMessage="Legacy cluster alerts still active"
       />
     ),
-    text: toMountPoint(
+    text: mountReactNode(
       <div>
         <p>
           {i18n.translate('xpack.monitoring.healthCheck.unableToDisableWatches.text', {
@@ -76,13 +76,13 @@ const showUnableToDisableWatcherClusterAlertsError = () => {
 
 const showDisabledWatcherClusterAlertsError = () => {
   Legacy.shims.toastNotifications.addWarning({
-    title: toMountPoint(
+    title: mountReactNode(
       <FormattedMessage
         id="xpack.monitoring.healthCheck.disabledWatches.title"
         defaultMessage="New alerts created"
       />
     ),
-    text: toMountPoint(
+    text: mountReactNode(
       <p>
         {i18n.translate('xpack.monitoring.healthCheck.disabledWatches.text', {
           defaultMessage: `Review the alert definition using Setup mode and configure additional action connectors to get notified via your favorite method.`,
