@@ -50,13 +50,11 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
     },
     [dispatch]
   );
-
-  const dataViewId = useRef('');
+  const requestIds = useRef<string[]>([]);
   const indexFieldsSearch = useCallback(
     (selectedDataViewId: string) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
-        dataViewId.current = selectedDataViewId;
         setLoading({ id: selectedDataViewId, loading: true });
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest<'dataView'>, IndexFieldsStrategyResponse>(
@@ -73,6 +71,7 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
             next: (response) => {
               if (isCompleteResponse(response)) {
                 const patternString = response.indicesExist.sort().join();
+
                 dispatch(
                   sourcererActions.setDataView({
                     browserFields: getBrowserFields(patternString, response.indexFields),
@@ -103,7 +102,8 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
             },
           });
       };
-      if (dataViewId.current === selectedDataViewId) {
+      // only abort requests for ids already in progress
+      if (requestIds.current.includes(selectedDataViewId)) {
         searchSubscription$.current.unsubscribe();
         abortCtrl.current.abort();
       }

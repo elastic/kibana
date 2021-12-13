@@ -84,8 +84,15 @@ export const useInitSourcerer = (
   );
   const { indexFieldsSearch } = useDataView();
 
+  const searchedIds = useRef<string[]>([]);
   useEffect(
-    () => activeDataViewIds.forEach((id) => id != null && id.length > 0 && indexFieldsSearch(id)),
+    () =>
+      activeDataViewIds.forEach((id) => {
+        if (id != null && id.length > 0 && !searchedIds.current.includes(id)) {
+          searchedIds.current = [...searchedIds.current, id];
+          indexFieldsSearch(id);
+        }
+      }),
     [activeDataViewIds, indexFieldsSearch]
   );
 
