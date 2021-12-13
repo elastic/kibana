@@ -267,11 +267,16 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     if (addOrUpdateExceptionItems !== null) {
       const bulkCloseIndex =
         shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
-      addOrUpdateExceptionItems(ruleId, enrichExceptionItems(), undefined, bulkCloseIndex);
+      addOrUpdateExceptionItems(
+        maybeRule?.rule_id ?? '',
+        enrichExceptionItems(),
+        undefined,
+        bulkCloseIndex
+      );
     }
   }, [
     addOrUpdateExceptionItems,
-    ruleId,
+    maybeRule,
     enrichExceptionItems,
     shouldBulkCloseAlert,
     signalIndexName,

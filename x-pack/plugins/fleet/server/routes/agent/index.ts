@@ -116,6 +116,15 @@ export const registerAPIRoutes = (router: IRouter, config: FleetConfigType) => {
     },
     getAgentStatusForAgentPolicyHandler
   );
+  router.get(
+    {
+      path: AGENT_API_ROUTES.STATUS_PATTERN_DEPRECATED,
+      validate: GetAgentStatusRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
+    },
+    getAgentStatusForAgentPolicyHandler
+  );
+
   // upgrade agent
   router.post(
     {
