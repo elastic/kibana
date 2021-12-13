@@ -21,6 +21,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./check_privileges'));
       loadTestFile(require.resolve('./create_index'));
       loadTestFile(require.resolve('./create_rules'));
+      loadTestFile(require.resolve('./preview_rules'));
       loadTestFile(require.resolve('./create_rules_bulk'));
       loadTestFile(require.resolve('./create_ml'));
       loadTestFile(require.resolve('./create_threat_matching'));
@@ -66,6 +67,10 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
 
     describe('', function () {
       loadTestFile(require.resolve('./alerts/index'));
+    });
+
+    describe('', function () {
+      loadTestFile(require.resolve('./telemetry/index'));
     });
   });
 };
