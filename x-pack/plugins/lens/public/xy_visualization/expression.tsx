@@ -44,6 +44,7 @@ import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
 import { ThemeServiceStart } from 'kibana/public';
+import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
 import type { LensMultiTable, FormatFactory } from '../../common';
@@ -61,7 +62,6 @@ import {
   useActiveCursor,
 } from '../../../../../src/plugins/charts/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../src/plugins/charts/common';
-import { EmptyPlaceholder } from '../shared_components';
 import { getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';

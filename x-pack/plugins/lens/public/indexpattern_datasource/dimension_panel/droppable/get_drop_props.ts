@@ -10,6 +10,7 @@ import {
   isDraggedOperation,
   DraggedOperation,
   DropType,
+  VisualizationDimensionGroupConfig,
 } from '../../../types';
 import { getOperationDisplay, hasOperationSupportForMultipleFields } from '../../operations';
 import { hasField, isDraggedField } from '../../pure_utils';
@@ -36,7 +37,8 @@ const operationLabels = getOperationDisplay();
 export function getNewOperation(
   field: IndexPatternField | undefined | false,
   filterOperations: (meta: OperationMetadata) => boolean,
-  targetColumn: GenericIndexPatternColumn
+  targetColumn: GenericIndexPatternColumn,
+  prioritizedOperation?: GenericIndexPatternColumn['operationType']
 ) {
   if (!field) {
     return;
@@ -47,7 +49,12 @@ export function getNewOperation(
   }
   // Detects if we can change the field only, otherwise change field + operation
   const shouldOperationPersist = targetColumn && newOperations.includes(targetColumn.operationType);
-  return shouldOperationPersist ? targetColumn.operationType : newOperations[0];
+  if (shouldOperationPersist) {
+    return targetColumn.operationType;
+  }
+  const existsPrioritizedOperation =
+    prioritizedOperation && newOperations.includes(prioritizedOperation);
+  return existsPrioritizedOperation ? prioritizedOperation : newOperations[0];
 }
 
 export function getField(
@@ -86,7 +93,13 @@ export function getDropProps(props: GetDropProps) {
     } else if (hasTheSameField(sourceColumn, targetColumn)) {
       return;
     } else if (filterOperations(sourceColumn)) {
-      return getDropPropsForCompatibleGroup(targetColumn, sourceColumn, layerIndexPattern);
+      return getDropPropsForCompatibleGroup(
+        props.dimensionGroups,
+        dragging.columnId,
+        sourceColumn,
+        targetColumn,
+        layerIndexPattern
+      );
     } else {
       return getDropPropsFromIncompatibleGroup({ ...props, dragging });
     }
@@ -145,21 +158,30 @@ function getDropPropsForSameGroup(targetColumn?: GenericIndexPatternColumn): Dro
 }
 
 function getDropPropsForCompatibleGroup(
-  targetColumn?: GenericIndexPatternColumn,
+  dimensionGroups: VisualizationDimensionGroupConfig[],
+  sourceId: string,
   sourceColumn?: GenericIndexPatternColumn,
+  targetColumn?: GenericIndexPatternColumn,
   indexPattern?: IndexPattern
 ): DropProps {
+  const canSwap =
+    targetColumn &&
+    dimensionGroups
+      .find((group) => group.accessors.some((accessor) => accessor.columnId === sourceId))
+      ?.filterOperations(targetColumn);
+  const swapType = canSwap ? ['swap_compatible' as const] : [];
+
   if (!targetColumn) {
-    return { dropTypes: ['move_compatible', 'duplicate_compatible'] };
+    return { dropTypes: ['move_compatible', 'duplicate_compatible', ...swapType] };
   }
   if (!indexPattern || !hasField(targetColumn)) {
-    return { dropTypes: ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible'] };
+    return { dropTypes: ['replace_compatible', 'replace_duplicate_compatible', ...swapType] };
   }
   return {
     dropTypes: [
       'replace_compatible',
       'replace_duplicate_compatible',
-      'swap_compatible',
+      ...swapType,
       ...(hasOperationSupportForMultipleFields(targetColumn, sourceColumn)
         ? ['combine_compatible']
         : []),

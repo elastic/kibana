@@ -27,7 +27,7 @@ const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
 
-const ACTION_COLUMN_INDEX = 1;
+const ACTION_COLUMN_INDEX = 0;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
@@ -271,7 +271,7 @@ export function ObservabilityAlertsCommonProvider({
     return actionsOverflowButtons[index] || null;
   };
 
-  const getAlertStatValue = async (testSubj: string) => {
+  const getRuleStatValue = async (testSubj: string) => {
     const stat = await testSubjects.find(testSubj);
     const title = await stat.findByCssSelector('.euiStat__title');
     const count = await title.getVisibleText();
@@ -317,6 +317,6 @@ export function ObservabilityAlertsCommonProvider({
     viewRuleDetailsButtonClick,
     viewRuleDetailsLinkClick,
     getAlertsFlyoutViewRuleDetailsLinkOrFail,
-    getAlertStatValue,
+    getRuleStatValue,
   };
 }

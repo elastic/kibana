@@ -133,6 +133,10 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
     dimensionGroups,
   } = props;
 
+  const prioritizedOperation = dimensionGroups.find(
+    (g) => g.groupId === groupId
+  )?.prioritizedOperation;
+
   const layer = state.layers[layerId];
   const indexPattern = state.indexPatterns[layer.indexPatternId];
   const targetColumn = layer.columns[columnId];
