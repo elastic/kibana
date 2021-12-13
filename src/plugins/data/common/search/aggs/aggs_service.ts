@@ -32,12 +32,10 @@ export const aggsRequiredUiSettings = [
   UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX,
 ];
 
-/** @internal */
 export interface AggsCommonSetupDependencies {
   registerFunction: ExpressionsServiceSetup['registerFunction'];
 }
 
-/** @internal */
 export interface AggsCommonStartDependencies {
   getConfig: GetConfigFn;
   getIndexPattern(id: string): Promise<IndexPattern>;
