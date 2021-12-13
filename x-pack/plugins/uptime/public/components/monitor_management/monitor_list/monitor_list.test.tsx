@@ -9,7 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { DataStream, ScheduleUnit } from '../../fleet_package/types';
+import { DataStream, HTTPFields, ScheduleUnit } from '../../fleet_package/types';
 import { MonitorManagementList } from './monitor_list';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
 
@@ -30,7 +30,7 @@ describe('<ActionBar />', () => {
         urls: `https://test-${i}.co`,
         type: DataStream.HTTP,
         tags: [`tag-${i}`],
-      },
+      } as HTTPFields,
     });
   }
   const state = {
@@ -39,7 +39,7 @@ describe('<ActionBar />', () => {
         perPage: 5,
         page: 1,
         total: 6,
-        monitors: [],
+        monitors,
       },
       locations: [],
       error: {
