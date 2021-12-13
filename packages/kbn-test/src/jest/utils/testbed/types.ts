@@ -72,20 +72,10 @@ export interface TestBed<T = string> {
     /**
      * Set the value of a form text input.
      *
-     * In some cases, changing an input value triggers an HTTP request to validate
-     * the field. Even if we return immediately the response on the mock server we
-     * still need to wait until the next tick before the DOM updates.
-     * Setting isAsync to "true" takes care of that.
-     *
      * @param input The form input. Can either be a data-test-subj or a reactWrapper (can be a nested path. e.g. "myForm.myInput").
      * @param value The value to set
-     * @param isAsync If set to true will return a Promise that resolves on the next "tick"
      */
-    setInputValue: (
-      input: T | ReactWrapper,
-      value: string,
-      isAsync?: boolean
-    ) => Promise<void> | void;
+    setInputValue: (input: T | ReactWrapper, value: string) => void;
     /**
      * Set the value of a <EuiSelect /> or a mocked <EuiSuperSelect />
      * For the <EuiSuperSelect /> you need to mock it like this

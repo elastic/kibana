@@ -158,6 +158,8 @@ export function registerTestBed<T extends string = string>(
       };
 
       const waitForFn: TestBed<T>['waitForFn'] = async (predicate, errMessage) => {
+        throw new Error(`waitForFn() helper is not supported anymore.`);
+
         const triggeredAt = Date.now();
 
         const MAX_WAIT_TIME = 30000;
@@ -198,11 +200,11 @@ export function registerTestBed<T extends string = string>(
        * ----------------------------------------------------------------
        */
 
-      const setInputValue: TestBed<T>['form']['setInputValue'] = (
-        input,
-        value,
-        isAsync = false
-      ) => {
+      const setInputValue: TestBed<T>['form']['setInputValue'] = function (input, value) {
+        if (arguments.length === 3) {
+          throw new Error(`Passing the "isAsync" arg is not supported anymore.`);
+        }
+
         const formInput = typeof input === 'string' ? find(input) : input;
 
         if (!formInput.length) {
@@ -210,11 +212,6 @@ export function registerTestBed<T extends string = string>(
         }
         formInput.simulate('change', { target: { value } });
         component.update();
-
-        if (!isAsync) {
-          return;
-        }
-        return new Promise((resolve) => setTimeout(resolve));
       };
 
       const setSelectValue: TestBed<T>['form']['setSelectValue'] = (
