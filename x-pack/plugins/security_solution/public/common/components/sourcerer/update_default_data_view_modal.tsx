@@ -25,7 +25,7 @@ import { Blockquote, ResetButton } from './helpers';
 interface Props {
   isShowing: boolean;
   missingPatterns: string[];
-  onClose: () => void;
+  onDismissModal: () => void;
   onContinue: () => void;
   onUpdate: () => void;
 }
@@ -41,9 +41,9 @@ const MyEuiModal = styled(EuiModal)`
 `;
 
 export const UpdateDefaultDataViewModal = React.memo<Props>(
-  ({ isShowing, onClose, onContinue, onUpdate, missingPatterns }) =>
+  ({ isShowing, onDismissModal, onContinue, onUpdate, missingPatterns }) =>
     isShowing ? (
-      <MyEuiModal onClose={onClose} data-test-subj="sourcerer-update-data-view-modal">
+      <MyEuiModal onClose={onDismissModal} data-test-subj="sourcerer-update-data-view-modal">
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <h1>{i18n.UPDATE_SECURITY_DATA_VIEW}</h1>
