@@ -4698,7 +4698,6 @@
     "visTypeTimeseries.table.labelPlaceholder": "ラベル",
     "visTypeTimeseries.table.maxLabel": "最高",
     "visTypeTimeseries.table.minLabel": "最低",
-    "visTypeTimeseries.table.noResultsAvailableMessage": "結果がありません。",
     "visTypeTimeseries.table.noResultsAvailableWithDescriptionMessage": "結果がありません。このビジュアライゼーションは、フィールドでグループを選択する必要があります。",
     "visTypeTimeseries.table.optionsTab.dataLabel": "データ",
     "visTypeTimeseries.table.optionsTab.ignoreGlobalFilterLabel": "グローバルフィルターを無視しますか？",

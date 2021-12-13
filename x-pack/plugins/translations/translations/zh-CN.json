@@ -4731,7 +4731,6 @@
     "visTypeTimeseries.table.labelPlaceholder": "标签",
     "visTypeTimeseries.table.maxLabel": "最大值",
     "visTypeTimeseries.table.minLabel": "最小值",
-    "visTypeTimeseries.table.noResultsAvailableMessage": "没有可用结果。",
     "visTypeTimeseries.table.noResultsAvailableWithDescriptionMessage": "没有可用结果。必须为此可视化选择分组依据字段。",
     "visTypeTimeseries.table.optionsTab.dataLabel": "数据",
     "visTypeTimeseries.table.optionsTab.ignoreGlobalFilterLabel": "忽略全局筛选？",

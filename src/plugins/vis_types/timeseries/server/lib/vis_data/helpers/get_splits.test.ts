@@ -31,7 +31,7 @@ describe('getSplits(resp, panel, series)', () => {
       ],
     } as Series;
 
-    expect(await getSplits(resp, panel, series, {}, () => {})).toEqual([
+    expect(await getSplits(resp, panel, series, undefined, () => {})).toEqual([
       {
         id: 'SERIES',
         label: 'Overall Average of Average of cpu',
@@ -77,7 +77,7 @@ describe('getSplits(resp, panel, series)', () => {
     } as unknown as Series;
     const panel = { type: 'top_n' } as Panel;
 
-    expect(await getSplits(resp, panel, series, {}, () => [])).toEqual([
+    expect(await getSplits(resp, panel, series, undefined, () => [])).toEqual([
       {
         id: 'SERIES:example-01',
         key: 'example-01',
@@ -136,7 +136,7 @@ describe('getSplits(resp, panel, series)', () => {
       ],
     } as unknown as Series;
     const panel = { type: 'top_n' } as Panel;
-    expect(await getSplits(resp, panel, series, {}, () => [])).toEqual([
+    expect(await getSplits(resp, panel, series, undefined, () => [])).toEqual([
       {
         id: 'SERIES:example-01',
         key: 'example-01',
@@ -198,7 +198,7 @@ describe('getSplits(resp, panel, series)', () => {
     } as unknown as Series;
     const panel = { type: 'top_n' } as Panel;
 
-    expect(await getSplits(resp, panel, series, {}, () => [])).toEqual([
+    expect(await getSplits(resp, panel, series, undefined, () => [])).toEqual([
       {
         id: 'SERIES:example-01',
         key: 'example-01',
@@ -254,7 +254,7 @@ describe('getSplits(resp, panel, series)', () => {
     } as unknown as Series;
     const panel = { type: 'timeseries' } as Panel;
 
-    expect(await getSplits(resp, panel, series, {}, () => [])).toEqual([
+    expect(await getSplits(resp, panel, series, undefined, () => [])).toEqual([
       {
         id: 'SERIES:filter-1',
         key: 'filter-1',
