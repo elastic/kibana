@@ -89,7 +89,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Pagination controls', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/120440
+      describe.skip('Pagination controls', () => {
         before(async () => {
           await (await observability.alerts.pagination.getPageSizeSelector()).click();
           await (await observability.alerts.pagination.getTenRowsPageSelector()).click();
