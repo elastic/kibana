@@ -71,8 +71,6 @@ Review important information about the {kib} 7.16.x releases.
 [[release-notes-7.16.1]]
 == {kib} 7.16.1
 
-coming::[7.16.1]
-
 Review the following information about the 7.16.1 release.
 
 [float]
@@ -114,6 +112,8 @@ Metrics::
 Handle invalid KQL in filterQuery {kibana-pull}119557[#119557]
 Monitoring::
 Separate out mb and legacy index patterns from requests {kibana-pull}120841[#120841]
+Osquery::
+Fixes Pack uploader and *View in Lens* link {kibana-pull}120845[#120845]
 Platform::
 * Fixes expressions performance regression {kibana-pull}117714[#117714]
 * Fixes an issue where banners were unintentionally appearing in reports {kibana-pull}116147[#116147]
