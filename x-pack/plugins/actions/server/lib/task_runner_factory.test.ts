@@ -239,6 +239,28 @@ test('cleans up action_task_params object', async () => {
 });
 
 test('task runner should implement CancellableTask cancel method with logging warning message', async () => {
+  mockedActionExecutor.getActionInfo.mockResolvedValueOnce({
+    actionTypeId: 'test',
+    name: 'action 1',
+    config: {},
+    secrets: {},
+  });
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [
+      {
+        id: '2',
+        name: 'actionRef',
+        type: 'action',
+      },
+    ],
+  });
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
@@ -253,19 +275,19 @@ test('task runner should implement CancellableTask cancel method with logging wa
         {
           rel: 'primary',
           type: 'action',
-          id: '1',
+          id: '2',
           type_id: 'test',
-          namespace: 'some-namespace',
+          namespace: 'test',
         },
       ],
     },
-    message: `action: 1: 'action 1' execution cancelled due to timeout - exceeded default timeout of "5m"`,
+    message: `action: test:2: 'action 1' execution cancelled due to timeout - exceeded default timeout of "5m"`,
   });
 
   expect(mockedActionExecutor.getActionInfo.mock.calls.length).toBe(1);
 
-  expect(taskRunnerFactoryInitializerParams.logger.warn).toHaveBeenCalledWith(
-    `Task with Id '123' and taskType 'hjhk' was cancelled due to the timeout.`
+  expect(taskRunnerFactoryInitializerParams.logger.debug).toHaveBeenCalledWith(
+    `Cancelling action task for test action with id 2 - execution error due to timeout.`
   );
 });
 

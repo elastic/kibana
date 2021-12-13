@@ -22,7 +22,7 @@ describe('createActionEventLogRecordObject', () => {
           {
             id: '1',
             type: 'action',
-            typeId: '1',
+            typeId: 'test',
             relation: 'primary',
           },
         ],
@@ -31,7 +31,7 @@ describe('createActionEventLogRecordObject', () => {
       '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute-start',
-        kind: 'ation',
+        kind: 'action',
       },
       kibana: {
         saved_objects: [
@@ -76,11 +76,11 @@ describe('createActionEventLogRecordObject', () => {
       kibana: {
         saved_objects: [
           {
-            id: '1',
+            id: '2',
             namespace: 'default',
             rel: 'primary',
             type: 'action',
-            type_id: 'test',
+            type_id: '.email',
           },
         ],
       },
@@ -121,6 +121,7 @@ describe('createActionEventLogRecordObject', () => {
           },
         ],
         task: {
+          schedule_delay: undefined,
           scheduled: '1970-01-01T00:00:00.000Z',
         },
       },

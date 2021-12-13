@@ -115,6 +115,7 @@ test('successfully executes', async () => {
         Object {
           "event": Object {
             "action": "execute-start",
+            "kind": "action",
           },
           "kibana": Object {
             "saved_objects": Array [
@@ -134,6 +135,7 @@ test('successfully executes', async () => {
         Object {
           "event": Object {
             "action": "execute",
+            "kind": "action",
             "outcome": "success",
           },
           "kibana": Object {
@@ -519,10 +521,14 @@ test('return executed action info', async () => {
     request: {} as KibanaRequest,
   });
   expect(actionInfo).toEqual({
-    actionTypeId: 'action1',
-    name: 'action1',
-    config: {},
-    secrets: {},
+    actionTypeId: 'test',
+    config: {
+      bar: true,
+    },
+    name: 'action-1',
+    secrets: {
+      baz: true,
+    },
   });
 });
 
