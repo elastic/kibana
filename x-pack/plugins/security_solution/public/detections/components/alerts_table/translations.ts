@@ -265,6 +265,20 @@ export const STATUS = i18n.translate(
   }
 );
 
+export const CHANGE_ALERT_STATUS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overview.changeAlertStatus',
+  {
+    defaultMessage: 'Change alert status',
+  }
+);
+
+export const CLICK_TO_CHANGE_ALERT_STATUS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overview.clickToChangeAlertStatus',
+  {
+    defaultMessage: 'Click to change alert status',
+  }
+);
+
 export const SIGNAL_STATUS = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.overviewTable.signalStatusTitle',
   {
@@ -276,12 +290,5 @@ export const TRIGGERED = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.triggeredTitle',
   {
     defaultMessage: 'Triggered',
-  }
-);
-
-export const TIMESTAMP = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.overviewTable.timestampTitle',
-  {
-    defaultMessage: 'Timestamp',
   }
 );
