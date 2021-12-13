@@ -44,11 +44,26 @@ export const createCaseCommentSavedObjectType = ({
           type: { type: 'keyword' },
         },
       },
-      alertId: {
-        type: 'keyword',
-      },
-      index: {
-        type: 'keyword',
+      alerts: {
+        type: 'nested',
+        properties: {
+          id: {
+            type: 'keyword',
+          },
+          index: {
+            type: 'keyword',
+          },
+          rule: {
+            properties: {
+              id: {
+                type: 'keyword',
+              },
+              name: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
       },
       created_at: {
         type: 'date',
@@ -78,16 +93,6 @@ export const createCaseCommentSavedObjectType = ({
             type: 'keyword',
           },
           email: {
-            type: 'keyword',
-          },
-        },
-      },
-      rule: {
-        properties: {
-          id: {
-            type: 'keyword',
-          },
-          name: {
             type: 'keyword',
           },
         },

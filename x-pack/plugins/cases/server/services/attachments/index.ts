@@ -96,6 +96,7 @@ export class AttachmentService {
     }
   }
 
+  // TODO: switch to new alerts object
   private buildCountAlertsAggs(): Record<string, estypes.AggregationsAggregationContainer> {
     return {
       alerts: {

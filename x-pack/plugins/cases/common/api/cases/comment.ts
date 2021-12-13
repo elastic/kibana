@@ -80,7 +80,10 @@ export const ActionsCommentRequestRt = rt.type({
 });
 
 const AttributesTypeUserRt = rt.intersection([ContextTypeUserRt, CommentAttributesBasicRt]);
-const AttributesTypeAlertsRt = rt.intersection([AlertCommentRequestRt, CommentAttributesBasicRt]);
+export const AttributesTypeAlertsRt = rt.intersection([
+  AlertCommentRequestRt,
+  CommentAttributesBasicRt,
+]);
 const AttributesTypeActionsRt = rt.intersection([
   ActionsCommentRequestRt,
   CommentAttributesBasicRt,

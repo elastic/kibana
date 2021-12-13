@@ -261,6 +261,7 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to GET all cases for alert id ${alertId}`);
       const combinedFilter = combineFilters([
+        // TODO: switch to new alerts object
         nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
         filter,
       ]);

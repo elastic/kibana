@@ -19,7 +19,12 @@ import {
   SavedObjectMigrationContext,
 } from '../../../../../../src/core/server';
 import { LensServerPluginSetup } from '../../../../lens/server';
-import { CommentType, AssociationType } from '../../../common/api';
+import {
+  CommentType,
+  AssociationType,
+  AttributesTypeAlerts,
+  AttributesTypeAlertsRt,
+} from '../../../common/api';
 import {
   isLensMarkdownNode,
   LensMarkdownNode,
@@ -29,6 +34,7 @@ import {
 } from '../../../common/utils/markdown_plugins/utils';
 import { addOwnerToSO, SanitizedCaseOwner } from '.';
 import { logError } from './utils';
+import { getIDsAndIndicesAsArrays } from '../../common/utils';
 
 interface UnsanitizedComment {
   comment: string;
@@ -45,6 +51,8 @@ interface SanitizedCommentForSubCases {
   rule?: { id: string | null; name: string | null };
 }
 
+type SeparatedAlertFields = Partial<AttributesTypeAlerts>;
+
 export interface CreateCommentsMigrationsDeps {
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
@@ -52,14 +60,6 @@ export interface CreateCommentsMigrationsDeps {
 export const createCommentsMigrations = (
   migrationDeps: CreateCommentsMigrationsDeps
 ): SavedObjectMigrationMap => {
-  const embeddableMigrations = mapValues<
-    MigrateFunctionsObject,
-    SavedObjectMigrationFn<{ comment?: string }>
-  >(
-    migrationDeps.lensEmbeddableFactory().migrations,
-    migrateByValueLensVisualizations
-  ) as MigrateFunctionsObject;
-
   const commentsMigrations = {
     '7.11.0': (
       doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
@@ -98,9 +98,79 @@ export const createCommentsMigrations = (
     ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
       return addOwnerToSO(doc);
     },
+    '8.1.0': migrateAlertsToObjects810,
   };
 
+  const embeddableMigrations = mapValues<
+    MigrateFunctionsObject,
+    SavedObjectMigrationFn<{ comment?: string }>
+  >(
+    migrationDeps.lensEmbeddableFactory().migrations,
+    migrateByValueLensVisualizations
+  ) as MigrateFunctionsObject;
+
   return mergeMigrationFunctionMaps(commentsMigrations, embeddableMigrations);
+};
+
+const migrateAlertsToObjects810 = (
+  doc: SavedObjectUnsanitizedDoc<SeparatedAlertFields>,
+  context: SavedObjectMigrationContext
+): SavedObjectSanitizedDoc<{
+  alerts?: Array<{
+    id: string;
+    index: string;
+    rule: { id: string | null; name: string | null };
+  }>;
+}> => {
+  const docWithReferences = { ...doc, references: doc.references ?? [] };
+
+  try {
+    const { attributes } = doc;
+
+    if (!isAlertAttachment(attributes)) {
+      return docWithReferences;
+    }
+
+    const { ids, indices } = getIDsAndIndicesAsArrays(attributes);
+    validateIdsAndIndices(ids, indices);
+
+    // intentionally removing alertId, index, and rule, so we can create a new document with those fields
+    // in a different place
+    const { alertId, index, rule, ...restAttributes } = attributes;
+
+    const alerts = ids.map((id, iterIndex) => ({
+      id,
+      index: indices[iterIndex],
+      rule,
+    }));
+
+    return {
+      ...doc,
+      attributes: {
+        ...restAttributes,
+        alerts,
+      },
+      references: doc.references ?? [],
+    };
+  } catch (error) {
+    logError({ id: doc.id, context, error, docType: 'comment alert', docKey: 'comment' });
+
+    return docWithReferences;
+  }
+};
+
+const isAlertAttachment = (
+  attributes: SeparatedAlertFields
+): attributes is AttributesTypeAlerts => {
+  return AttributesTypeAlertsRt.is(attributes);
+};
+
+const validateIdsAndIndices = (ids: string[], indices: string[]) => {
+  if (ids.length !== indices.length) {
+    throw new Error(
+      `alertIds array size [${ids.length}] does not equal index array size [${indices.length}]`
+    );
+  }
 };
 
 export const migrateByValueLensVisualizations =
