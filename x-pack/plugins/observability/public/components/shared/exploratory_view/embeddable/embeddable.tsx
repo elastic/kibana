@@ -15,7 +15,7 @@ import { getLayerConfigs } from '../hooks/use_lens_attributes';
 import { LensPublicStart, XYState } from '../../../../../../lens/public';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
 import { IndexPatternState } from '../hooks/use_app_index_pattern';
-import { ReportConfigMap } from '../contexts/exploatory_view_config';
+import { ReportConfigMap } from '../contexts/exploratory_view_config';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 
 export interface ExploratoryEmbeddableProps {

@@ -24,7 +24,7 @@ import { ALL_VALUES_SELECTED } from '../../field_value_suggestions/field_value_c
 import { useTheme } from '../../../../hooks/use_theme';
 import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { LABEL_FIELDS_BREAKDOWN } from '../configurations/constants';
-import { ReportConfigMap, useExploratoryView } from '../contexts/exploatory_view_config';
+import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
 
 export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitions']) => {
   return Object.entries(reportDefinitions ?? {})

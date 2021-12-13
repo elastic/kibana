@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { AppDataType, SeriesUrl } from '../../types';
 import { DataTypes, ReportTypes } from '../../configurations/constants';
-import { useExploratoryView } from '../../contexts/exploatory_view_config';
+import { useExploratoryView } from '../../contexts/exploratory_view_config';
 
 interface Props {
   seriesId: number;
