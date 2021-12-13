@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 
 import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/mock';
 import { schema, FormProps } from './schema';
-import { CreateCaseForm, CreateCaseFormFields, CreateCaseFormProps } from './form';
+import { CreateCaseForm, CreateCaseFormProps } from './form';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { TestProviders } from '../../common/mock';
