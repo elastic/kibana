@@ -17,6 +17,7 @@ import { LensSavedObjectAttributes } from '../async_services';
 
 export interface Document {
   savedObjectId?: string;
+  hasInitialContext?: boolean;
   type?: string;
   visualizationType: string | null;
   title: string;
@@ -52,11 +53,11 @@ export class SavedObjectIndexStore implements SavedObjectStore {
   }
 
   save = async (vis: Document) => {
-    const { savedObjectId, type, references, ...rest } = vis;
+    const { savedObjectId, type, hasInitialContext, references, ...rest } = vis;
     // TODO: SavedObjectAttributes should support this kind of object,
     // remove this workaround when SavedObjectAttributes is updated.
     const attributes = rest as unknown as SavedObjectAttributes;
-    if (savedObjectId) {
+    if (savedObjectId && hasInitialContext) {
       // check if an existing visualization type saved object exists, if yes delete it
       const existingVisualizationDoc = await this.loadExistingVisualizationDoc(savedObjectId);
       if (existingVisualizationDoc) {
@@ -64,7 +65,6 @@ export class SavedObjectIndexStore implements SavedObjectStore {
           .attributes as SavedObjectAttributes;
         attributes.title = existingVisualizationDocAttrs.title;
         attributes.description = existingVisualizationDocAttrs.description;
-        await this.client.delete(VISUALIZE_EDITOR_DOC_TYPE, savedObjectId);
       }
     }
 

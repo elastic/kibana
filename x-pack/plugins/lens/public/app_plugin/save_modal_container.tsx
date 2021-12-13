@@ -249,7 +249,9 @@ export const runSaveLensVisualization = async (
 
   // check that the incoming context is saved to library
   if (initialContext && 'savedObjectId' in initialContext && initialContext.savedObjectId) {
-    initialContextInput = { savedObjectId: initialContext.savedObjectId } as LensByReferenceInput;
+    initialContextInput = {
+      savedObjectId: initialContext.savedObjectId,
+    } as LensByReferenceInput;
     docToSave.savedObjectId = initialContext.savedObjectId;
   }
 
@@ -295,7 +297,8 @@ export const runSaveLensVisualization = async (
     const newInput = (await attributeService.wrapAttributes(
       docToSave,
       options.saveToLibrary || Boolean(initialContextInput),
-      originalInput
+      originalInput,
+      Boolean(initialContext && 'savedObjectId' in initialContext && initialContext.savedObjectId)
     )) as LensEmbeddableInput;
 
     if (saveProps.returnToOrigin && redirectToOrigin) {

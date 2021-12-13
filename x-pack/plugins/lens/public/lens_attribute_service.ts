@@ -37,11 +37,16 @@ export function getLensAttributeService(
     LensByReferenceInput,
     LensUnwrapMetaInfo
   >(DOC_TYPE, {
-    saveMethod: async (attributes: LensSavedObjectAttributes, savedObjectId?: string) => {
+    saveMethod: async (
+      attributes: LensSavedObjectAttributes,
+      savedObjectId?: string,
+      hasInitialContext?: boolean
+    ) => {
       const savedDoc = await savedObjectStore.save({
         ...attributes,
         savedObjectId,
         type: DOC_TYPE,
+        hasInitialContext,
       });
       return { id: savedDoc.savedObjectId };
     },
