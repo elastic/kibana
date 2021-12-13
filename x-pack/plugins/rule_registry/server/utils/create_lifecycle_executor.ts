@@ -18,7 +18,7 @@ import {
   AlertTypeParams,
   AlertTypeState,
 } from '../../../alerting/server';
-import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_technical_fields';
+import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
   ALERT_DURATION,
   ALERT_END,
@@ -216,8 +216,6 @@ export const createLifecycleExecutor =
           collapse: {
             field: ALERT_UUID,
           },
-          _source: false,
-          fields: [{ field: '*', include_unmapped: true }],
           sort: {
             [TIMESTAMP]: 'desc' as const,
           },
@@ -226,13 +224,13 @@ export const createLifecycleExecutor =
       });
 
       hits.hits.forEach((hit) => {
-        const fields = parseTechnicalFields(hit.fields);
-        const indexName = hit._index;
-        const alertId = fields[ALERT_INSTANCE_ID];
-        trackedAlertsDataMap[alertId] = {
-          indexName,
-          fields,
-        };
+        const alertId = hit._source[ALERT_INSTANCE_ID];
+        if (alertId) {
+          trackedAlertsDataMap[alertId] = {
+            indexName: hit._index,
+            fields: hit._source,
+          };
+        }
       });
     }
 

@@ -1,0 +1,8 @@
+[[cli-commands]]
+== Command line tools
+
+{kib} provides the following tools for configuring security and performing other tasks from the command line:
+
+* <<kibana-verification-code,`kibana-verification-code`>>
+
+include::kibana-verification-code.asciidoc[]

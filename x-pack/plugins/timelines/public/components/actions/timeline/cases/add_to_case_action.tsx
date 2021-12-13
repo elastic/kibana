@@ -8,12 +8,12 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { CaseStatuses, StatusAll } from '../../../../../../cases/common';
-import { TimelineItem } from '../../../../../common/';
+import { TimelineItem } from '../../../../../common/search_strategy';
 import { useAddToCase, normalizedEventFields } from '../../../../hooks/use_add_to_case';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimelinesStartServices } from '../../../../types';
+import { setOpenAddToExistingCase, setOpenAddToNewCase } from '../../../../store/t_grid/actions';
 import { CreateCaseFlyout } from './create/flyout';
-import { tGridActions } from '../../../../';
 import * as i18n from './translations';
 
 export interface AddToCaseActionProps {
@@ -78,8 +78,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
       updateCase: onCaseSuccess,
       userCanCrud: casePermissions?.crud ?? false,
       owner: [owner],
-      onClose: () =>
-        dispatch(tGridActions.setOpenAddToExistingCase({ id: eventId, isOpen: false })),
+      onClose: () => dispatch(setOpenAddToExistingCase({ id: eventId, isOpen: false })),
     };
   }, [
     casePermissions?.crud,
@@ -96,7 +95,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   ]);
 
   const closeCaseFlyoutOpen = useCallback(() => {
-    dispatch(tGridActions.setOpenAddToNewCase({ id: eventId, isOpen: false }));
+    dispatch(setOpenAddToNewCase({ id: eventId, isOpen: false }));
   }, [dispatch, eventId]);
 
   return (

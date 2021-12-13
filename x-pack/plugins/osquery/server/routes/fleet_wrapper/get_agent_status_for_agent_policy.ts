@@ -17,7 +17,7 @@ export const getAgentStatusForAgentPolicyRoute = (
 ) => {
   router.get(
     {
-      path: '/internal/osquery/fleet_wrapper/agent-status',
+      path: '/internal/osquery/fleet_wrapper/agent_status',
       validate: {
         query: schema.object({
           policyId: schema.string(),

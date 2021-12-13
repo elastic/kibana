@@ -13,7 +13,7 @@ import {
   AllTagsFindRequest,
   AllReportersFindRequest,
   CasesByAlertId,
-} from '../../../common';
+} from '../../../common/api';
 import { CasesClient } from '../client';
 import { CasesClientInternal } from '../client_internal';
 import {

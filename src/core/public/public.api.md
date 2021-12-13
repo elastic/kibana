@@ -543,13 +543,11 @@ export interface DocLinksStart {
             readonly indexingDocumentsSchema: string;
             readonly logSettings: string;
             readonly metaEngines: string;
-            readonly nativeAuth: string;
             readonly precisionTuning: string;
             readonly relevanceTuning: string;
             readonly resultSettings: string;
             readonly searchUI: string;
             readonly security: string;
-            readonly standardAuth: string;
             readonly synonyms: string;
             readonly webCrawler: string;
             readonly webCrawlerEventLogs: string;
@@ -561,6 +559,7 @@ export interface DocLinksStart {
             readonly usersAccess: string;
         };
         readonly workplaceSearch: {
+            readonly apiKeys: string;
             readonly box: string;
             readonly confluenceCloud: string;
             readonly confluenceServer: string;
@@ -576,7 +575,6 @@ export interface DocLinksStart {
             readonly indexingSchedule: string;
             readonly jiraCloud: string;
             readonly jiraServer: string;
-            readonly nativeAuth: string;
             readonly oneDrive: string;
             readonly permissions: string;
             readonly salesforce: string;
@@ -584,7 +582,6 @@ export interface DocLinksStart {
             readonly serviceNow: string;
             readonly sharePoint: string;
             readonly slack: string;
-            readonly standardAuth: string;
             readonly synch: string;
             readonly zendesk: string;
         };
@@ -760,7 +757,14 @@ export interface DocLinksStart {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
-        readonly plugins: Record<string, string>;
+        readonly plugins: {
+            azureRepo: string;
+            gcsRepo: string;
+            hdfsRepo: string;
+            s3Repo: string;
+            snapshotRestoreRepos: string;
+            mapperSize: string;
+        };
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
