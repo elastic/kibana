@@ -136,6 +136,20 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
+        alertingFrameworkHeath: { // Legacy: pre-v8.0 typo
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+        },
         alertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
@@ -178,6 +192,20 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
+        alertingFrameworkHeath: { // Legacy: pre-v8.0 typo
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+        },
         alertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
@@ -220,6 +248,20 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
+        alertingFrameworkHeath: { // Legacy: pre-v8.0 typo
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+        },
         alertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
@@ -262,6 +304,20 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
+        alertingFrameworkHeath: { // Legacy: pre-v8.0 typo
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+        },
         alertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,
@@ -304,6 +360,20 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
+        alertingFrameworkHeath: { // Legacy: pre-v8.0 typo
+          decryptionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          executionHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          readHealth: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+        },
         alertingFrameworkHealth: {
           decryptionHealth: {
             status: HealthStatus.OK,

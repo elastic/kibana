@@ -49,7 +49,10 @@ export function healthRoute(
           };
 
           return res.ok({
-            body: frameworkHealth,
+            body: {
+              ...frameworkHealth,
+              alertingFrameworkHeath: alertingFrameworkHealth, // Legacy: pre-v8.0 typo
+            }
           });
         } else {
           return res.forbidden({
