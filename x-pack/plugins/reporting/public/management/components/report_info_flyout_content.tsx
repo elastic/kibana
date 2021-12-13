@@ -75,7 +75,6 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       title: i18n.translate('xpack.reporting.listing.infoPanel.attemptsInfo', {
         defaultMessage: 'Attempts',
       }),
-      description:
       description: info.max_attempts
         ? i18n.translate('xpack.reporting.listing.infoPanel.attempts', {
             defaultMessage: '{attempts} of {maxAttempts}',
@@ -104,7 +103,6 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
         info.layout?.dimensions?.height != null
           ? Math.ceil(info.layout.dimensions.height)
           : UNKNOWN,
-
     },
     hasScreenshot && {
       title: i18n.translate('xpack.reporting.listing.infoPanel.dimensionsInfoWidth', {
@@ -112,7 +110,6 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       }),
       description:
         info.layout?.dimensions?.width != null ? Math.ceil(info.layout.dimensions.width) : UNKNOWN,
-
     },
 
     {
