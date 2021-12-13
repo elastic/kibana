@@ -8,10 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-import { MonitorFields } from '../../../common/runtime_types';
+import { MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
 import { getMonitorNotFoundResponse } from './service_errors';
@@ -27,9 +26,9 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     body: schema.any(),
   },
   handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
-    const monitor = request.body as SyntheticsMonitorSavedObject['attributes'];
+    const monitor = request.body as SyntheticsMonitor;
 
-    const validationResult = validateMonitor(monitor);
+    const validationResult = validateMonitor(monitor as MonitorFields);
 
     if (!validationResult.valid) {
       const { reason: message, details, payload } = validationResult;
@@ -46,7 +45,7 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
 
       const errors = await syntheticsService.pushConfigs(request, [
         {
-          ...(editMonitor.attributes as SyntheticsMonitorSavedObject['attributes']),
+          ...(editMonitor.attributes as SyntheticsMonitor),
           id: editMonitor.id,
         },
       ]);

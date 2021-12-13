@@ -6,10 +6,10 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { SyntheticsMonitor } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { getMonitorNotFoundResponse } from './service_errors';
 
 export const deleteSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
@@ -26,7 +26,7 @@ export const deleteSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     const { syntheticsService } = server;
 
     try {
-      const monitor = await savedObjectsClient.get<SyntheticsMonitorSavedObject['attributes']>(
+      const monitor = await savedObjectsClient.get<SyntheticsMonitor>(
         syntheticsMonitorType,
         monitorId
       );

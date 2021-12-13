@@ -8,7 +8,6 @@ import { schema } from '@kbn/config-schema';
 import { MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
 
@@ -19,7 +18,7 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     body: schema.any(),
   },
   handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
-    const monitor: SyntheticsMonitor = request.body as SyntheticsMonitorSavedObject['attributes'];
+    const monitor: SyntheticsMonitor = request.body as SyntheticsMonitor;
 
     const validationResult = validateMonitor(monitor as MonitorFields);
 
