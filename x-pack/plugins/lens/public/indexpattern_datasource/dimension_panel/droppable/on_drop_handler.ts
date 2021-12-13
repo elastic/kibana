@@ -142,7 +142,7 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
   const targetColumn = layer.columns[columnId];
   const newOperation = shouldAddField
     ? targetColumn.operationType
-    : getNewOperation(droppedItem.field, filterOperations, targetColumn);
+    : getNewOperation(droppedItem.field, filterOperations, targetColumn, prioritizedOperation);
 
   if (
     !isDraggedField(droppedItem) ||
