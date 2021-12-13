@@ -78,7 +78,7 @@ export const discoverServiceMock = {
   http: {
     basePath: '/',
   },
-  indexPatternFieldEditor: {
+  dataViewFieldEditor: {
     openEditor: jest.fn(),
     userPermissions: {
       editIndexPattern: jest.fn(),
