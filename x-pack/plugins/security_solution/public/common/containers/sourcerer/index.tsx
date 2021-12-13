@@ -72,9 +72,11 @@ export const useInitSourcerer = (
     getTimelineSelector(state, TimelineId.active)
   );
   const scopeIdSelector = useMemo(() => sourcererSelectors.scopeIdSelector(), []);
-  const { selectedDataViewId: scopeDataViewId } = useDeepEqualSelector((state) =>
-    scopeIdSelector(state, scopeId)
-  );
+  const {
+    selectedDataViewId: scopeDataViewId,
+    selectedPatterns,
+    missingPatterns,
+  } = useDeepEqualSelector((state) => scopeIdSelector(state, scopeId));
   const { selectedDataViewId: timelineDataViewId } = useDeepEqualSelector((state) =>
     scopeIdSelector(state, SourcererScopeName.timeline)
   );
@@ -84,8 +86,21 @@ export const useInitSourcerer = (
   );
   const { indexFieldsSearch } = useDataView();
 
+  const searchedIds = useRef<string[]>([]);
   useEffect(
-    () => activeDataViewIds.forEach((id) => id != null && id.length > 0 && indexFieldsSearch(id)),
+    () =>
+      activeDataViewIds.forEach((id) => {
+        if (id != null && id.length > 0 && !searchedIds.current.includes(id)) {
+          searchedIds.current = [...searchedIds.current, id];
+          indexFieldsSearch(
+            id,
+            id === scopeDataViewId
+              ? selectedPatterns.length === 0 && missingPatterns.length === 0
+              : false
+          );
+        }
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [activeDataViewIds, indexFieldsSearch]
   );
 
@@ -322,12 +337,14 @@ export const useSourcererDataView = (
 
   const indicesExist = useMemo(
     () =>
-      checkIfIndicesExist({
-        scopeId,
-        signalIndexName,
-        patternList: sourcererDataView.patternList,
-      }),
-    [scopeId, signalIndexName, sourcererDataView]
+      loading || sourcererDataView.loading
+        ? true
+        : checkIfIndicesExist({
+            scopeId,
+            signalIndexName,
+            patternList: sourcererDataView.patternList,
+          }),
+    [loading, scopeId, signalIndexName, sourcererDataView.loading, sourcererDataView.patternList]
   );
 
   return useMemo(

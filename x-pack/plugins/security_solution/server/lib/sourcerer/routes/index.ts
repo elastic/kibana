@@ -231,15 +231,13 @@ export const getSourcererDataViewRoute = (
           siemDataView = await dataViewService.get(dataViewId);
         }
 
-        const defaultDataView = await buildDefaultDataview(
+        const kibanaDataView = await buildDefaultDataview(
           siemDataView,
           context.core.elasticsearch.client.asCurrentUser
         );
 
         return response.ok({
-          body: {
-            defaultDataView,
-          },
+          body: kibanaDataView,
         });
       } catch (err) {
         const error = transformError(err);

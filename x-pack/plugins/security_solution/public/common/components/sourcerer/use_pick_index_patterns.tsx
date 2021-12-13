@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
+import { useDispatch } from 'react-redux';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
-import { sourcererModel } from '../../store/sourcerer';
-import { getDataViewSelectOptions, getPatternListWithoutSignals } from './helpers';
+import { sourcererActions, sourcererModel } from '../../store/sourcerer';
+import {
+  getDataViewSelectOptions,
+  getPatternListWithoutSignals,
+  getSourcererDataview,
+} from './helpers';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
 interface UsePickIndexPatternsProps {
@@ -53,8 +58,9 @@ export const usePickIndexPatterns = ({
   selectedPatterns,
   signalIndexName,
 }: UsePickIndexPatternsProps): UsePickIndexPatterns => {
+  const abortCtrl = useRef<AbortController>(new AbortController());
+  const dispatch = useDispatch();
   const [loadingIndexPatterns, setLoadingIndexPatterns] = useState(false);
-  const [kibanaDataViewsLocal, setKibanaDataViewsLocal] = useState(kibanaDataViews);
   const alertsOptions = useMemo(
     () => (signalIndexName ? patternListToOptions([signalIndexName]) : []),
     [signalIndexName]
@@ -76,7 +82,7 @@ export const usePickIndexPatterns = ({
         selectablePatterns: [signalIndexName],
       };
     }
-    const theDataView = kibanaDataViewsLocal.find((dataView) => dataView.id === dataViewId);
+    const theDataView = kibanaDataViews.find((dataView) => dataView.id === dataViewId);
 
     if (theDataView == null) {
       return {
@@ -99,7 +105,7 @@ export const usePickIndexPatterns = ({
           allPatterns: titleAsList,
           selectablePatterns: theDataView.patternList,
         };
-  }, [dataViewId, isOnlyDetectionAlerts, kibanaDataViewsLocal, scopeId, signalIndexName]);
+  }, [dataViewId, isOnlyDetectionAlerts, kibanaDataViews, scopeId, signalIndexName]);
 
   const allOptions = useMemo(
     () => patternListToOptions(allPatterns, selectablePatterns),
@@ -112,13 +118,13 @@ export const usePickIndexPatterns = ({
         ? alertsOptions
         : patternListToOptions(
             getScopePatternListSelection(
-              kibanaDataViewsLocal.find((dataView) => dataView.id === id),
+              kibanaDataViews.find((dataView) => dataView.id === id),
               scopeId,
               signalIndexName,
               id === defaultDataViewId
             )
           ),
-    [alertsOptions, kibanaDataViewsLocal, scopeId, signalIndexName, defaultDataViewId]
+    [alertsOptions, kibanaDataViews, scopeId, signalIndexName, defaultDataViewId]
   );
 
   const defaultSelectedPatternsAsOptions = useMemo(
@@ -174,16 +180,45 @@ export const usePickIndexPatterns = ({
   );
 
   const setIndexPatternsByDataView = useCallback(
-    (newSelectedDataViewId: string, isAlerts?: boolean) => {
-      // if (
-      //   kibanaDataViewsLocal.some(
-      //     (kdv) => kdv.id === newSelectedDataViewId && kdv.indexFields.length === 0
-      //   )
-      // ) {
-      // }
-      setSelectedOptions(getDefaultSelectedOptionsByDataView(newSelectedDataViewId, isAlerts));
+    async (newSelectedDataViewId: string, isAlerts?: boolean) => {
+      if (
+        kibanaDataViews.some(
+          (kdv) => kdv.id === newSelectedDataViewId && kdv.indexFields.length === 0
+        )
+      ) {
+        try {
+          setLoadingIndexPatterns(true);
+          setSelectedOptions([]);
+          abortCtrl.current = new AbortController();
+          const pickedDataViewData = await getSourcererDataview(
+            newSelectedDataViewId,
+            abortCtrl.current.signal
+          );
+          dispatch(
+            sourcererActions.updateSourcererDataViews({
+              dataView: pickedDataViewData,
+            })
+          );
+          setSelectedOptions(
+            isOnlyDetectionAlerts
+              ? alertsOptions
+              : patternListToOptions(pickedDataViewData.patternList)
+          );
+        } catch (err) {
+          abortCtrl.current.abort();
+        }
+        setLoadingIndexPatterns(false);
+      } else {
+        setSelectedOptions(getDefaultSelectedOptionsByDataView(newSelectedDataViewId, isAlerts));
+      }
     },
-    [getDefaultSelectedOptionsByDataView]
+    [
+      alertsOptions,
+      dispatch,
+      getDefaultSelectedOptionsByDataView,
+      isOnlyDetectionAlerts,
+      kibanaDataViews,
+    ]
   );
 
   const dataViewSelectOptions = useMemo(
@@ -194,15 +229,22 @@ export const usePickIndexPatterns = ({
             defaultDataViewId,
             isModified: isModified === 'modified',
             isOnlyDetectionAlerts,
-            kibanaDataViews: kibanaDataViewsLocal,
+            kibanaDataViews,
           })
         : [],
-    [dataViewId, defaultDataViewId, isModified, isOnlyDetectionAlerts, kibanaDataViewsLocal]
+    [dataViewId, defaultDataViewId, isModified, isOnlyDetectionAlerts, kibanaDataViews]
   );
+
+  useEffect(() => {
+    return () => {
+      abortCtrl.current.abort();
+    };
+  });
 
   return {
     allOptions,
     dataViewSelectOptions,
+    loadingIndexPatterns,
     isModified,
     onChangeCombo,
     renderOption,

@@ -21,6 +21,7 @@ import { sourcererModel } from '../../store/sourcerer';
 import * as i18n from './translations';
 import { KibanaServices } from '../../lib/kibana';
 import { SOURCERER_API_URL } from '../../../../common/constants';
+import { KibanaDataView } from '../../store/sourcerer/model';
 
 export const FormRow = styled(EuiFormRow)<EuiFormRowProps & { $expandAdvancedOptions: boolean }>`
   display: ${({ $expandAdvancedOptions }) => ($expandAdvancedOptions ? 'flex' : 'none')};
@@ -143,9 +144,9 @@ export const getPatternListWithoutSignals = (
 
 export const getSourcererDataview = async (
   dataViewId: string,
-  signal: AbortSignal
-): Promise<void> => {
-  return KibanaServices.get().http.fetch(SOURCERER_API_URL, {
+  signal?: AbortSignal
+): Promise<KibanaDataView> => {
+  return KibanaServices.get().http.fetch<KibanaDataView>(SOURCERER_API_URL, {
     method: 'GET',
     query: { dataViewId },
     asSystemRequest: true,

@@ -38,6 +38,7 @@ interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
 }
 
+// eslint-disable-next-line complexity
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
   const isDetectionsSourcerer = scopeId === SourcererScopeName.detections;
@@ -79,6 +80,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const {
     allOptions,
     dataViewSelectOptions,
+    loadingIndexPatterns,
     isModified,
     onChangeCombo: onChangeIndexPatterns,
     renderOption,
@@ -131,7 +133,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const onChangeDataView = useCallback(
     (newSelectedOption) => {
-
       setDataViewId(newSelectedOption);
       setIndexPatternsByDataView(newSelectedOption);
     },
@@ -299,6 +300,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                   <StyledFormRow label={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}>
                     <EuiSuperSelect
                       data-test-subj="sourcerer-select"
+                      isLoading={loadingIndexPatterns}
                       disabled={isOnlyDetectionAlerts}
                       fullWidth
                       onChange={onChangeDataView}
@@ -320,6 +322,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                 </StyledButton>
                 {expandAdvancedOptions && <EuiSpacer size="m" />}
                 <FormRow
+                  isDisabled={loadingIndexPatterns}
                   $expandAdvancedOptions={expandAdvancedOptions}
                   helpText={isOnlyDetectionAlerts ? undefined : i18n.INDEX_PATTERNS_DESCRIPTIONS}
                   label={i18n.INDEX_PATTERNS_LABEL}
@@ -327,7 +330,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                   <EuiComboBox
                     data-test-subj="sourcerer-combo-box"
                     fullWidth
-                    isDisabled={isOnlyDetectionAlerts}
+                    isDisabled={isOnlyDetectionAlerts || loadingIndexPatterns}
                     onChange={onChangeIndexPatterns}
                     options={allOptions}
                     placeholder={i18n.PICK_INDEX_PATTERNS}
