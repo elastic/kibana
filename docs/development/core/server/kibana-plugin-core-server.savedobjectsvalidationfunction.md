@@ -6,10 +6,14 @@
 
 The custom validation function if @<!-- -->kbn/config-schema is not a valid solution for your specific plugin requirements.
 
+Be careful not to mutate the provided attributes.
+
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectsValidationFunction<A extends SavedObjectAttributes = SavedObjectAttributes> = (data: A) => void;
+export declare type SavedObjectsValidationFunction = (data: {
+    attributes: unknown;
+}) => void;
 ```
 
 ## Example
@@ -17,9 +21,9 @@ export declare type SavedObjectsValidationFunction<A extends SavedObjectAttribut
 The validation should look something like:
 
 ```typescript
-const myAttributesValidation: SavedObjectsValidationFunction = (data) => {
-  if (typeof data.bar !== 'string') {
-    throw new Error(`[bar]: expected value of type [string] but got [${typeof data.bar}]`);
+const myAttributesValidation: SavedObjectsValidationFunction = ({ attributes }) => {
+  if (typeof attributes.bar !== 'string') {
+    throw new Error(`[bar]: expected value of type [string] but got [${typeof attributes.bar}]`);
   }
 }
 ```

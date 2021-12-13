@@ -11,7 +11,7 @@ Any time you change the schema of a [SavedObjectsType](./kibana-plugin-core-serv
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsValidationMap<A extends SavedObjectAttributes = SavedObjectAttributes> 
+export interface SavedObjectsValidationMap 
 ```
 
 ## Example
@@ -25,12 +25,12 @@ const validationMap: SavedObjectValidationMap = {
   '1.1.0': schema.object({
     foo: schema.oneOf([schema.string(), schema.boolean()]),
   }),
-  '2.1.0': (data) => {
-    if (typeof data.bar !== 'string') {
+  '2.1.0': ({ attributes }) => {
+    if (typeof attributes.bar !== 'string') {
       throw new Error(`[bar]: expected value of type [string] but got [${typeof data.bar}]`);
     }
-    if (typeof data.foo !== 'string' && typeof data.foo !== 'boolean') {
-      throw new Error(`[foo]: expected value of type [string,boolean] but got [${typeof data.foo}]`);
+    if (typeof attributes.foo !== 'string' && typeof attributes.foo !== 'boolean') {
+      throw new Error(`[foo]: expected value of type [string,boolean] but got [${typeof attributes.foo}]`);
     }
   }
 }

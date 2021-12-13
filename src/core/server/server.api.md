@@ -2771,7 +2771,7 @@ export interface SavedObjectStatusMeta {
 }
 
 // @public (undocumented)
-export interface SavedObjectsType<Attributes extends SavedObjectAttributes = any> {
+export interface SavedObjectsType<Attributes = any> {
     convertToAliasScript?: string;
     convertToMultiNamespaceTypeVersion?: string;
     excludeOnUpgrade?: SavedObjectTypeExcludeFromUpgradeFilterHook;
@@ -2782,7 +2782,7 @@ export interface SavedObjectsType<Attributes extends SavedObjectAttributes = any
     migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
     name: string;
     namespaceType: SavedObjectsNamespaceType;
-    schemas?: SavedObjectsValidationMap<Attributes> | (() => SavedObjectsValidationMap<Attributes>);
+    schemas?: SavedObjectsValidationMap | (() => SavedObjectsValidationMap);
 }
 
 // @public
@@ -2871,16 +2871,18 @@ export class SavedObjectsValidationError extends SchemaTypeError {
 }
 
 // @public
-export type SavedObjectsValidationFunction<A extends SavedObjectAttributes = SavedObjectAttributes> = (data: A) => void;
+export type SavedObjectsValidationFunction = (data: {
+    attributes: unknown;
+}) => void;
 
 // @public
-export interface SavedObjectsValidationMap<A extends SavedObjectAttributes = SavedObjectAttributes> {
+export interface SavedObjectsValidationMap {
     // (undocumented)
-    [version: string]: SavedObjectsValidationSpec<A>;
+    [version: string]: SavedObjectsValidationSpec;
 }
 
 // @public
-export type SavedObjectsValidationSpec<A extends SavedObjectAttributes> = ObjectType | SavedObjectsValidationFunction<A>;
+export type SavedObjectsValidationSpec = ObjectType | SavedObjectsValidationFunction;
 
 // Warning: (ae-extra-release-tag) The doc comment should not contain more than one release tag
 //

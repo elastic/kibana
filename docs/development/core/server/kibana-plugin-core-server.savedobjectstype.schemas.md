@@ -13,5 +13,5 @@ See [SavedObjectsValidationMap](./kibana-plugin-core-server.savedobjectsvalidati
 <b>Signature:</b>
 
 ```typescript
-schemas?: SavedObjectsValidationMap<Attributes> | (() => SavedObjectsValidationMap<Attributes>);
+schemas?: SavedObjectsValidationMap | (() => SavedObjectsValidationMap);
 ```

@@ -11,5 +11,5 @@ See [SavedObjectsValidationFunction](./kibana-plugin-core-server.savedobjectsval
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectsValidationSpec<A extends SavedObjectAttributes> = ObjectType | SavedObjectsValidationFunction<A>;
+export declare type SavedObjectsValidationSpec = ObjectType | SavedObjectsValidationFunction;
 ```
