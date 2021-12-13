@@ -88,6 +88,7 @@ const columnHeaders: ColumnHeaderOptions[] = [
 
 export const tGridIntegratedProps: TGridIntegratedProps = {
   additionalFilters: null,
+  appId: '',
   browserFields: mockBrowserFields,
   columns: columnHeaders,
   dataProviders: mockDataProviders,
@@ -131,6 +132,7 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
 
 export const eventRenderedProps: EventRenderedViewProps = {
   alertToolbar: <></>,
+  appId: '',
   browserFields: mockBrowserFields,
   events: mockTimelineData,
   leadingControlColumns: [],
