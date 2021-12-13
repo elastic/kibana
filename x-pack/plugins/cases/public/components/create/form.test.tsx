@@ -129,7 +129,7 @@ describe('CreateCaseForm', () => {
       await wrapper.find(`button[data-test-subj="create-case-submit"]`).simulate('click');
       wrapper.update();
     });
-    
+
     expect(wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()).toBeTruthy();
   });
 });
