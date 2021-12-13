@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { mapValues } from 'lodash';
 import { Request } from '@hapi/hapi';
 import pLimit from 'p-limit';
 import { Observable } from 'rxjs';
@@ -136,25 +136,55 @@ export async function registerTraceSearchTaskType({
                 fragments: nextFragments,
               } as TraceSearchState;
             });
+            let traceIds: string[] = [];
+            let errorMessage: string | undefined;
 
-            const traceIds =
-              type === TraceSearchType.eql
-                ? await getTraceIdsFromEql({
-                    start,
-                    end,
-                    environment,
-                    query,
-                    numTraceIds,
-                    apmEventClient,
-                  })
-                : await getTraceIdsFromKql({
-                    start,
-                    end,
-                    environment,
-                    query,
-                    numTraceIds,
-                    apmEventClient,
-                  });
+            try {
+              traceIds =
+                type === TraceSearchType.eql
+                  ? await getTraceIdsFromEql({
+                      start,
+                      end,
+                      environment,
+                      query,
+                      numTraceIds,
+                      apmEventClient,
+                    })
+                  : await getTraceIdsFromKql({
+                      start,
+                      end,
+                      environment,
+                      query,
+                      numTraceIds,
+                      apmEventClient,
+                    });
+            } catch (err) {
+              traceIds = [];
+              errorMessage = err.toString();
+            }
+
+            if (!traceIds.length) {
+              await updateTraceState((prev) => {
+                return {
+                  ...prev,
+                  fragments: mapValues(prev.fragments, (fragment) => ({
+                    ...fragment,
+                    isRunning: false,
+                    isPartial: false,
+                  })) as any,
+                  isError: !!errorMessage,
+                  error: errorMessage,
+                };
+              });
+              return {
+                state: {},
+              };
+            }
+
+            await updateTraceState((prev) => ({
+              ...prev,
+              foundTraceCount: traceIds.length + prev.foundTraceCount,
+            }));
 
             const fetches: Record<string, Promise<any>> = {
               samples: traceSamplesFetcher({

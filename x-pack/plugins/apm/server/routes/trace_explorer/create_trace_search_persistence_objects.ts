@@ -56,6 +56,7 @@ export async function createTraceSearchPersistenceObjects({
         ...fragmentDefaults,
       },
     },
+    foundTraceCount: 0,
     pagination: {
       after: null,
       pageIndex: 0,

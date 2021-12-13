@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { termsQuery } from '../../../../observability/server';
+import { PARENT_ID, TRACE_ID } from '../../../common/elasticsearch_fieldnames';
 import {
   getTraceSamples,
   TraceSample,
@@ -20,7 +22,20 @@ export const traceSamplesFetcher: TraceMetricFetcher<TraceSamplesResponse> =
         start,
         end,
         environment,
-        traceIds,
+        filters: [
+          {
+            bool: {
+              must_not: [
+                {
+                  exists: {
+                    field: PARENT_ID,
+                  },
+                },
+              ],
+            },
+          },
+          ...termsQuery(TRACE_ID, ...traceIds),
+        ],
         apmEventClient,
         kuery: '',
       })

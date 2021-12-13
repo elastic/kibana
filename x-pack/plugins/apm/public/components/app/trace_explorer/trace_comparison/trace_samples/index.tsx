@@ -60,7 +60,7 @@ function TraceSampleContainer({
       onTabClick={() => {}}
       traceSamples={queryState.traceSearchState?.fragments.samples.data ?? []}
       waterfall={waterfall}
-      serviceName={waterfall.rootTransaction?.service.name}
+      serviceName={waterfall.entryWaterfallTransaction?.doc.service.name}
     />
   );
 }

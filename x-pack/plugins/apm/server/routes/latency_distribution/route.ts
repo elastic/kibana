@@ -62,7 +62,7 @@ const latencyOverallDistributionRoute = createApmServerRoute({
       end,
       percentileThreshold,
       termFilters,
-      setup,
+      apmEventClient: setup.apmEventClient,
     });
   },
 });

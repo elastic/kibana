@@ -13,14 +13,49 @@ import {
   TraceSearchQuery,
   TraceSearchType,
 } from '../../../../common/trace_explorer';
-import { useTraceQuery } from '../../../hooks/use_trace_query';
+import {
+  useTraceQuery,
+  UseTraceQueryState,
+} from '../../../hooks/use_trace_query';
 import { ApmDatePicker } from '../../shared/apm_date_picker';
 import { TraceComparison } from './trace_comparison';
 import { TraceDistribution } from './trace_distribution';
 import { TraceSearchBox } from './trace_search_box';
 
-function isQueryValid(query: TraceSearchQuery) {
-  return true;
+function getTraceCountMessage(traceCount?: number) {
+  return traceCount === undefined
+    ? ''
+    : i18n.translate('xpack.apm.traceExplorer.traceCount', {
+        values: { traceCount },
+        defaultMessage: `Found {traceCount, plural,
+      =0 {no traces... yet}
+      one {# trace}
+      other {# traces}
+    }`,
+      });
+}
+
+function getComponentProps(queryState: UseTraceQueryState) {
+  return {
+    query: queryState.query,
+    error: !!queryState.traceSearchState?.isError,
+    message:
+      queryState?.traceSearchState?.error ??
+      getTraceCountMessage(queryState.traceSearchState?.foundTraceCount),
+    loading:
+      queryState.traceSearchStateLoading ||
+      !!queryState.traceSearchState?.isRunning,
+    disabled: false,
+    onQueryChange: (query: TraceSearchQuery) => {
+      queryState.setQuery(query);
+    },
+    onQueryCommit: () => {
+      queryState.commit();
+    },
+    onCancelClick: () => {
+      queryState.cancel();
+    },
+  };
 }
 
 export function TraceExplorer() {
@@ -46,12 +81,7 @@ export function TraceExplorer() {
           <EuiFlexGroup direction="row" alignItems="flexStart">
             <EuiFlexItem grow>
               <TraceSearchBox
-                query={foreground.query}
-                valid={isQueryValid(foreground.query)}
-                loading={
-                  foreground.traceSearchStateLoading ||
-                  !!foreground.traceSearchState?.isRunning
-                }
+                {...getComponentProps(foreground)}
                 title={
                   <EuiText>
                     {i18n.translate('xpack.apm.traceExplorer.searchTitle', {
@@ -59,24 +89,11 @@ export function TraceExplorer() {
                     })}
                   </EuiText>
                 }
-                disabled={false}
-                onQueryChange={(query) => {
-                  foreground.setQuery(query);
-                }}
-                onQueryCommit={() => {
-                  foreground.commit();
-                }}
               />
             </EuiFlexItem>
             <EuiFlexItem grow>
               <TraceSearchBox
-                query={background.query}
-                valid={isQueryValid(background.query)}
-                disabled={!backgroundEnabled}
-                loading={
-                  background.traceSearchStateLoading ||
-                  !!background.traceSearchState?.isRunning
-                }
+                {...getComponentProps(background)}
                 title={
                   <EuiSwitch
                     checked={backgroundEnabled}
@@ -91,12 +108,6 @@ export function TraceExplorer() {
                     )}
                   />
                 }
-                onQueryChange={(query) => {
-                  background.setQuery(query);
-                }}
-                onQueryCommit={() => {
-                  background.commit();
-                }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -105,12 +116,8 @@ export function TraceExplorer() {
       <EuiSpacer size="m" />
       <TraceDistribution
         loading={
-          (!!foreground.query.query &&
-            foreground.traceSearchState?.fragments.distribution.isRunning !==
-              false) ||
-          (!!background.query.query &&
-            background.traceSearchState?.fragments.distribution.isRunning !==
-              false)
+          !!foreground.traceSearchState?.fragments.distribution.isRunning ||
+          !!background.traceSearchState?.fragments.distribution.isRunning
         }
         foregroundDistributionResponse={
           foreground.traceSearchState?.fragments.distribution.data

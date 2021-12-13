@@ -43,6 +43,7 @@ export interface TraceSearchState {
     after: string | null;
     pageIndex: number;
   };
+  foundTraceCount: number;
   fragments: {
     distribution: TraceSearchFragmentSearch<TraceDistributionResponse>;
     samples: TraceSearchFragmentSearch<TraceSamplesResponse>;

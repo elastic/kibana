@@ -47,7 +47,7 @@ export async function getTransactionTraceSamples({
       traceId,
       sampleRangeFrom,
       sampleRangeTo,
-      setup,
+      apmEventClient: setup.apmEventClient,
       start,
       end,
     });

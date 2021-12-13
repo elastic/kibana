@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -18,8 +20,10 @@ import { LazilyLoadedEQLCodeEditor } from '../../../shared/eql_code_editor/lazil
 
 interface Props {
   query: TraceSearchQuery;
-  valid: boolean;
+  message?: string;
+  error: boolean;
   disabled: boolean;
+  onCancelClick: () => void;
   onQueryChange: (query: TraceSearchQuery) => void;
   onQueryCommit: () => void;
   title: React.ReactElement;
@@ -30,8 +34,10 @@ export function TraceSearchBox({
   query,
   onQueryChange,
   onQueryCommit,
+  onCancelClick,
   title,
-  valid,
+  message,
+  error,
   disabled,
   loading,
 }: Props) {
@@ -81,8 +87,8 @@ export function TraceSearchBox({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiFlexItem grow>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
             {query.type === TraceSearchType.eql ? (
               <LazilyLoadedEQLCodeEditor
                 value={query.query}
@@ -101,6 +107,7 @@ export function TraceSearchBox({
             ) : (
               <form>
                 <QueryStringInput
+                  disableLanguageSwitcher
                   indexPatterns={indexPatterns}
                   query={{
                     query: query.query,
@@ -120,19 +127,45 @@ export function TraceSearchBox({
               </form>
             )}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              isLoading={loading}
-              isDisabled={loading || disabled}
-              onClick={() => {
-                onQueryCommit();
-              }}
-              iconType="refresh"
+          <EuiFlexItem>
+            <EuiFlexGroup
+              direction="row"
+              gutterSize="s"
+              alignItems="center"
+              justifyContent="flexEnd"
             >
-              {i18n.translate('xpack.apm.traceSearchBox.refreshButton', {
-                defaultMessage: 'Refresh',
-              })}
-            </EuiButton>
+              <EuiFlexItem>
+                <EuiText color={error ? 'danger' : 'subdued'} size="xs">
+                  {message}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  isDisabled={!loading}
+                  onClick={() => {
+                    onCancelClick();
+                  }}
+                >
+                  {i18n.translate('xpack.apm.traceSearchBox.cancelButton', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  isLoading={loading}
+                  isDisabled={loading || disabled}
+                  onClick={() => {
+                    onQueryCommit();
+                  }}
+                  iconType="search"
+                >
+                  {i18n.translate('xpack.apm.traceSearchBox.refreshButton', {
+                    defaultMessage: 'Search',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

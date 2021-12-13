@@ -30,11 +30,11 @@ interface TraceOperation {
 
 export type TraceOperationsResponse = TraceOperation[];
 
-const MAX_PAGES = 5;
+const MAX_PAGES = 3;
 const PAGINATION_SIZE = 10000;
 
 export const traceOperationsFetcher: TraceMetricFetcher<TraceOperationsResponse> =
-  async ({ start, end, prev, traceIds, apmEventClient, environment }) => {
+  async ({ start, end, prev, traceIds, apmEventClient }) => {
     const numPages = 0;
 
     const operations: TraceOperation[] = [];

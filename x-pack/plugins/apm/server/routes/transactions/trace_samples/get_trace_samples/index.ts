@@ -18,7 +18,6 @@ import { ProcessorEvent } from '../../../../../common/processor_event';
 import {
   rangeQuery,
   kqlQuery,
-  termsQuery,
   termQuery,
 } from '../../../../../../observability/server';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
@@ -38,12 +37,13 @@ export async function getTraceSamples({
   transactionName,
   transactionType,
   transactionId,
-  traceIds,
+  traceId,
   sampleRangeFrom,
   sampleRangeTo,
   apmEventClient,
   start,
   end,
+  filters = [],
 }: {
   environment: string;
   kuery: string;
@@ -51,12 +51,13 @@ export async function getTraceSamples({
   transactionName?: string;
   transactionType?: string;
   transactionId?: string;
-  traceIds: string[];
+  traceId?: string;
   sampleRangeFrom?: number;
   sampleRangeTo?: number;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
+  filters?: QueryDslQueryContainer[];
 }) {
   return withApmSpan('get_trace_samples', async () => {
     const commonFilters = [
@@ -66,6 +67,7 @@ export async function getTraceSamples({
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
       ...kqlQuery(kuery),
+      ...filters,
     ] as QueryDslQueryContainer[];
 
     if (sampleRangeFrom !== undefined && sampleRangeTo !== undefined) {
@@ -92,7 +94,7 @@ export async function getTraceSamples({
                 { term: { [TRANSACTION_SAMPLED]: true } },
               ],
               should: [
-                ...termsQuery(TRACE_ID, ...traceIds),
+                ...termQuery(TRACE_ID, traceId),
                 ...termQuery(TRANSACTION_ID, transactionId),
               ] as QueryDslQueryContainer[],
             },
