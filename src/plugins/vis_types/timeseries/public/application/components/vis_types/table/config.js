@@ -34,20 +34,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { QueryBarWrapper } from '../../query_bar_wrapper';
-import {
-  DATA_FORMATTERS,
-  TIME_RANGE_DATA_MODES,
-  TIME_RANGE_MODE_KEY,
-} from '../../../../../common/enums';
+import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { isConfigurationFeatureEnabled } from '../../../../../common/check_ui_restrictions';
 import { filterCannotBeAppliedErrorMessage } from '../../../../../common/errors';
 import { KBN_FIELD_TYPES } from '../../../../../../../data/public';
 
-import { PanelModelContext } from '../../../contexts/panel_model_context';
-
 export class TableSeriesConfig extends Component {
-  static contextType = PanelModelContext;
-
   UNSAFE_componentWillMount() {
     const { model } = this.props;
     if (!model.color_rules || (model.color_rules && model.color_rules.length === 0)) {
@@ -65,9 +57,6 @@ export class TableSeriesConfig extends Component {
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
-
-    const isEntireTimeRangeMode =
-      this.context?.[TIME_RANGE_MODE_KEY] === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE;
 
     const functionOptions = [
       {
@@ -242,7 +231,6 @@ export class TableSeriesConfig extends Component {
                 KBN_FIELD_TYPES.STRING,
               ]}
               uiRestrictions={this.props.uiRestrictions}
-              disabled={isEntireTimeRangeMode}
               type={'terms'}
             />
           </EuiFlexItem>
@@ -255,7 +243,6 @@ export class TableSeriesConfig extends Component {
                   defaultMessage="Aggregate function"
                 />
               }
-              isDisabled={isEntireTimeRangeMode}
               fullWidth
             >
               <EuiComboBox
@@ -263,7 +250,6 @@ export class TableSeriesConfig extends Component {
                 selectedOptions={selectedAggFuncOption ? [selectedAggFuncOption] : []}
                 onChange={handleSelectChange('aggregate_function')}
                 singleSelection={{ asPlainText: true }}
-                isDisabled={isEntireTimeRangeMode}
                 fullWidth
               />
             </EuiFormRow>
