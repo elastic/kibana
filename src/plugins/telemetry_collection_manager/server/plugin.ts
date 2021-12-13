@@ -289,13 +289,13 @@ export class TelemetryCollectionManagerPlugin
     return [];
   }
 
-  private createCacheKey(strategy: CollectionStrategy, clustersDetails: ClusterDetails[]) {
+  private createCacheKey(collectionSource: string, clustersDetails: ClusterDetails[]) {
     const clusterUUids = clustersDetails
       .map(({ clusterUuid }) => clusterUuid)
       .sort()
       .join('_');
 
-    return `${strategy.title}::${clusterUUids}`;
+    return `${collectionSource}::${clusterUUids}`;
   }
 
   private async getUsageForCollection(
@@ -309,7 +309,6 @@ export class TelemetryCollectionManagerPlugin
     const clustersDetails = await collection.clusterDetailsGetter(statsCollectionConfig, context);
     const { refreshCache } = statsCollectionConfig;
     const { title: collectionSource } = collection;
-    this.cacheManager.unrefExpiredCacheObjects();
 
     // on `refreshCache: true` clear all cache to store a fresh copy
     if (refreshCache) {
@@ -320,25 +319,20 @@ export class TelemetryCollectionManagerPlugin
       return [];
     }
 
-    const cacheKey = this.createCacheKey(collection, clustersDetails);
-    if (this.cacheManager.isCacheValid(cacheKey)) {
-      const cachedData = this.cacheManager.getFromCache<BasicStatsPayload[]>(cacheKey);
-      if (cachedData) {
-        const { data, cacheTimestamp } = cachedData;
-        return data.map((stat) => ({
-          cacheDetails: {
-            isCached: true,
-            cacheTimestamp,
-          },
-          collectionSource,
-          ...stat,
-        }));
-      }
+    const cacheKey = this.createCacheKey(collectionSource, clustersDetails);
+    const cachedUsageStatsPayload = this.cacheManager.getFromCache<UsageStatsPayload[]>(cacheKey);
+    if (cachedUsageStatsPayload) {
+      return cachedUsageStatsPayload;
     }
 
     const stats = await collection.statsGetter(clustersDetails, statsCollectionConfig, context);
-    this.cacheManager.setCache(cacheKey, stats);
+    const usageStatsPayload = stats.map((stat) => ({
+      collectionSource,
+      cacheDetails: { updatedAt: new Date().toISOString() },
+      ...stat,
+    }));
+    this.cacheManager.setCache(cacheKey, usageStatsPayload);
 
-    return stats.map((stat) => ({ collectionSource, cacheDetails: { isCached: false }, ...stat }));
+    return usageStatsPayload;
   }
 }

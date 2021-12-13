@@ -7,7 +7,6 @@
  */
 
 import { CacheManager } from './cache_manager';
-import moment from 'moment';
 
 describe('CacheManager', () => {
   const mockCacheKey = 'mock_key';
@@ -23,59 +22,19 @@ describe('CacheManager', () => {
   afterEach(() => jest.clearAllMocks());
   afterAll(() => jest.useRealTimers());
 
-  test('#getFromCache returned cached object only during cache duration', () => {
+  it('caches object for the cache duration only', () => {
     const cacheManager = new CacheManager({ cacheDurationMs });
     cacheManager.setCache(mockCacheKey, mockCacheItem);
-    expect(cacheManager.getFromCache(mockCacheKey)).toEqual({
-      cacheTimestamp: moment(mockNow).format(),
-      data: mockCacheItem,
-    });
-    jest.advanceTimersByTime(cacheDurationMs);
+    expect(cacheManager.getFromCache(mockCacheKey)).toEqual(mockCacheItem);
+    jest.advanceTimersByTime(cacheDurationMs + 100);
     expect(cacheManager.getFromCache(mockCacheKey)).toEqual(undefined);
   });
 
-  test('#unrefCachedObject unrefs cached objects', () => {
-    const sndMockCacheKey = 'snd_mock_key';
+  it('#unrefAllCacheObjects unrefs cached objects', () => {
     const cacheManager = new CacheManager({ cacheDurationMs });
     cacheManager.setCache(mockCacheKey, mockCacheItem);
-    cacheManager.setCache(sndMockCacheKey, mockCacheItem);
-    expect(cacheManager.getFromCache(mockCacheKey)).toEqual({
-      cacheTimestamp: moment(mockNow).format(),
-      data: mockCacheItem,
-    });
-    cacheManager.unrefCachedObject(mockCacheKey);
+    expect(cacheManager.getFromCache(mockCacheKey)).toEqual(mockCacheItem);
+    cacheManager.unrefAllCacheObjects();
     expect(cacheManager.getFromCache(mockCacheKey)).toEqual(undefined);
-    expect(cacheManager.getFromCache(sndMockCacheKey)).toEqual({
-      cacheTimestamp: moment(mockNow).format(),
-      data: mockCacheItem,
-    });
-  });
-
-  test('#unrefExpiredCacheObjects unrefs all expired objects', () => {
-    const sndMockCacheKey = 'snd_mock_key';
-    const cacheManager = new CacheManager({ cacheDurationMs });
-    cacheManager.setCache(mockCacheKey, mockCacheItem);
-    cacheManager.setCache(sndMockCacheKey, mockCacheItem);
-    jest.advanceTimersByTime(cacheDurationMs);
-    expect(cacheManager.getFromCache(mockCacheKey)).toEqual(undefined);
-    expect(cacheManager.getFromCache(sndMockCacheKey)).toEqual(undefined);
-  });
-
-  test('#isCacheValid returns true on non-expired objects', () => {
-    const cacheManager = new CacheManager({ cacheDurationMs });
-    cacheManager.setCache(mockCacheKey, mockCacheItem);
-    expect(cacheManager.isCacheValid(mockCacheKey)).toEqual(true);
-  });
-
-  test('#isCacheValid returns false on expired objects', () => {
-    const cacheManager = new CacheManager({ cacheDurationMs });
-    cacheManager.setCache(mockCacheKey, mockCacheItem);
-    jest.advanceTimersByTime(cacheDurationMs);
-    expect(cacheManager.isCacheValid(mockCacheKey)).toEqual(false);
-  });
-
-  test('#isCacheValid returns false on non-existing objects', () => {
-    const cacheManager = new CacheManager({ cacheDurationMs });
-    expect(cacheManager.isCacheValid('non_existing_key')).toEqual(false);
   });
 });

@@ -20,10 +20,7 @@
     },
     "cacheDetails": {
       "properties": {
-        "isCached": {
-          "type": "boolean"
-        },
-        "cacheTimestamp": {
+        "updatedAt": {
           "type": "date"
         }
       }

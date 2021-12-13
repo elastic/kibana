@@ -22,6 +22,18 @@ import { assertTelemetryPayload } from '../../../../../test/api_integration/apis
 import type { UnencryptedTelemetryPayload } from '../../../../../src/plugins/telemetry/common/types';
 import type { UsageStatsPayload } from '../../../../../src/plugins/telemetry_collection_manager/server/types';
 
+function omitCacheDetails(usagePayload: Array<Record<string, unknown>>) {
+  return usagePayload.map(({ cacheDetails, ...item }) => item);
+}
+
+function updateFixtureTimestamps(fixture: Array<Record<string, unknown>>, timestamp: string) {
+  return fixture.map((item) => ({ ...item, timestamp }));
+}
+
+function getCacheLastUpdatedAt(body: UnencryptedTelemetryPayload): string[] {
+  return body.map(({ stats }) => (stats as UsageStatsPayload).cacheDetails.updatedAt);
+}
+
 /**
  * Update the .monitoring-* documents loaded via the archiver to the recent `timestamp`
  * @param esSupertest The client to send requests to ES
@@ -132,7 +144,10 @@ export default function ({ getService }: FtrProviderContext) {
       it('should load multiple trial-license clusters', async () => {
         expect(monitoring).length(3);
         expect(localXPack.collectionSource).to.eql('local_xpack');
-        expect(monitoring).to.eql(multiClusterFixture.map((item) => ({ ...item, timestamp })));
+
+        expect(omitCacheDetails(monitoring)).to.eql(
+          updateFixtureTimestamps(multiClusterFixture, timestamp)
+        );
       });
     });
 
@@ -155,9 +170,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).length(2);
         const telemetryStats = body.map(({ stats }) => stats);
 
-        const [localXPack, ...monitoring] = telemetryStats;
-        expect((localXPack as Record<string, unknown>).collectionSource).to.eql('local_xpack');
-        expect(monitoring).to.eql(basicClusterFixture.map((item) => ({ ...item, timestamp })));
+        const [localXPack, ...monitoring] = telemetryStats as Array<Record<string, unknown>>;
+        expect(localXPack.collectionSource).to.eql('local_xpack');
+        expect(omitCacheDetails(monitoring)).to.eql(
+          updateFixtureTimestamps(basicClusterFixture, timestamp)
+        );
       });
     });
 
@@ -165,15 +182,20 @@ export default function ({ getService }: FtrProviderContext) {
       const archive = 'x-pack/test/functional/es_archives/monitoring/basic_6.3.x';
       const fromTimestamp = '2018-07-23T22:54:59.087Z';
       const toTimestamp = '2018-07-23T22:55:05.933Z';
+      let cacheLastUpdated: string[] = [];
+
       before(async () => {
         await esArchiver.load(archive);
         await updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestamp);
+
         // hit the endpoint to cache results
-        await supertest
+        const { body }: { body: UnencryptedTelemetryPayload } = await supertest
           .post('/api/telemetry/v2/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
           .send({ unencrypted: true, refreshCache: true })
           .expect(200);
+
+        cacheLastUpdated = getCacheLastUpdatedAt(body);
       });
       after(() => esArchiver.unload(archive));
 
@@ -186,18 +208,12 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).length(2);
 
-        const telemetryStats = body.map(({ stats }) => stats) as UsageStatsPayload[];
-
-        const today = moment().format('DD-MM-YYYY');
-        telemetryStats.forEach(({ cacheDetails }) => {
-          expect(typeof cacheDetails.cacheTimestamp).to.eql('string');
-          expect(moment(cacheDetails.cacheTimestamp).format('DD-MM-YYYY')).to.eql(today);
-          expect(cacheDetails.isCached).to.eql(true);
-        });
+        expect(getCacheLastUpdatedAt(body)).to.eql(cacheLastUpdated);
       });
     });
 
     it('grabs a fresh copy on refresh', async () => {
+      const now = Date.now();
       const { body }: { body: UnencryptedTelemetryPayload } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
@@ -205,10 +221,8 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(body).length(1);
-      const telemetryStats = body.map(({ stats }) => stats) as UsageStatsPayload[];
-
-      telemetryStats.forEach(({ cacheDetails }) => {
-        expect(cacheDetails.isCached).to.eql(false);
+      getCacheLastUpdatedAt(body).forEach((lastUpdatedAt) => {
+        expect(new Date(lastUpdatedAt).getTime()).to.be.greaterThan(now);
       });
     });
   });

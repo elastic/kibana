@@ -65,8 +65,7 @@ export interface StatsCollectionConfig {
 }
 
 export interface CacheDetails {
-  isCached: boolean;
-  cacheTimestamp?: string;
+  updatedAt: string;
 }
 
 export interface BasicStatsPayload {

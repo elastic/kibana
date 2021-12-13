@@ -205,7 +205,7 @@ describe('Telemetry Collection Manager', () => {
                 clusterUuid: 'clusterUuid',
                 stats: {
                   ...basicStats,
-                  cacheDetails: { isCached: false },
+                  cacheDetails: { updatedAt: expect.any(String) },
                   collectionSource: 'test_collection',
                 },
               },
@@ -228,7 +228,7 @@ describe('Telemetry Collection Manager', () => {
                 clusterUuid: 'clusterUuid',
                 stats: {
                   ...basicStats,
-                  cacheDetails: { isCached: true, cacheTimestamp: expect.any(String) },
+                  cacheDetails: { updatedAt: expect.any(String) },
                   collectionSource: 'test_collection',
                 },
               },
