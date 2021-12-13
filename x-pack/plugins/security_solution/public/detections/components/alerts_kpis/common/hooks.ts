@@ -8,6 +8,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { BrowserField } from '../../../../../../timelines/common';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { getAllFieldsByName } from '../../../../common/containers/source';
@@ -54,26 +55,27 @@ export const useInspectButton = ({
   }, [setQuery, loading, response, request, refetch, uniqueQueryId, deleteQuery]);
 };
 
+function fieldsToOptions(fields: { [fieldName: string]: Partial<BrowserField> }) {
+  return Object.entries(fields).reduce<EuiComboBoxOptionOption[]>(
+    (filteredOptions: EuiComboBoxOptionOption[], [key, field]) => {
+      if (field.aggregatable === true) {
+        return [...filteredOptions, { label: key, value: key }];
+      } else {
+        return filteredOptions;
+      }
+    },
+    []
+  );
+}
+
 export const useStackByFields = () => {
-  const [stackByFieldOptions, setStackByFieldOptions] = useState<
-    undefined | EuiComboBoxOptionOption[]
-  >(undefined);
   const { pathname } = useLocation();
 
   const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
   const allFields = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
+  const [stackByFieldOptions, setStackByFieldOptions] = useState(() => fieldsToOptions(allFields));
   useEffect(() => {
-    const options = Object.entries(allFields).reduce<EuiComboBoxOptionOption[]>(
-      (filteredOptions: EuiComboBoxOptionOption[], [key, field]) => {
-        if (field.aggregatable === true) {
-          return [...filteredOptions, { label: key, value: key }];
-        } else {
-          return filteredOptions;
-        }
-      },
-      []
-    );
-    setStackByFieldOptions(options);
+    setStackByFieldOptions(fieldsToOptions(allFields));
   }, [allFields]);
   return useMemo(() => stackByFieldOptions, [stackByFieldOptions]);
 };

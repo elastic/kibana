@@ -30,7 +30,7 @@ interface StackedBySelectProps {
 }
 
 export const StackByComboBoxWrapper = styled.div`
-  min-width: 350px;
+  width: 400px;
 `;
 
 export const StackByComboBox: React.FC<StackedBySelectProps> = ({ selected, onSelect }) => {
@@ -48,16 +48,20 @@ export const StackByComboBox: React.FC<StackedBySelectProps> = ({ selected, onSe
     return [{ label: selected, value: selected }];
   }, [selected]);
   const stackOptions = useStackByFields();
+  const singleSelection = useMemo(() => {
+    return { asPlainText: true };
+  }, []);
   return (
     <StackByComboBoxWrapper>
       <EuiComboBox
         aria-label={i18n.STACK_BY_ARIA_LABEL}
         placeholder={i18n.STACK_BY_PLACEHOLDER}
         prepend={i18n.STACK_BY_LABEL}
-        singleSelection={{ asPlainText: true }}
+        singleSelection={singleSelection}
         sortMatchesBy="startsWith"
         options={stackOptions}
         selectedOptions={selectedOptions}
+        compressed
         onChange={onChange}
       />
     </StackByComboBoxWrapper>
