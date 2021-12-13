@@ -25,7 +25,7 @@ export const useAgentStatus = ({ policyId, skip }: UseAgentStatus) => {
     ['agentStatus', policyId],
     () =>
       http.get(
-        `/internal/osquery/fleet_wrapper/agent-status`,
+        `/internal/osquery/fleet_wrapper/agent_status`,
         policyId
           ? {
               query: {
