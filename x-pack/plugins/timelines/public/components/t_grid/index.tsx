@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import type { TGridProps } from '../types';
-import { TGridIntegrated, TGridIntegratedProps } from './t_grid/integrated';
-import { TGridStandalone, TGridStandaloneProps } from './t_grid/standalone';
+import type { TGridProps } from '../../types';
+import { TGridIntegrated, TGridIntegratedProps } from './integrated';
+import { TGridStandalone, TGridStandaloneProps } from './standalone';
 
 export const TGrid = (props: TGridProps) => {
   const { type, ...componentsProps } = props;
