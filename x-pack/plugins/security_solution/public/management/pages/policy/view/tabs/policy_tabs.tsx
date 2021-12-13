@@ -109,7 +109,7 @@ export const PolicyTabs = React.memo(() => {
     } else if (isInEventFilters) {
       initialTab = tabs[2];
     } else if (isInHostIsolationExceptionsTab) {
-      initialTab = tabs[2];
+      initialTab = tabs[3];
     }
 
     return initialTab;
@@ -127,8 +127,10 @@ export const PolicyTabs = React.memo(() => {
           break;
         case 'hostIsolationExceptions':
           path = getPolicyHostIsolationExceptionsPath(policyId);
+          break;
         case 'eventFilters':
           path = getPolicyEventFiltersPath(policyId);
+          break;
       }
       history.push(path);
     },
