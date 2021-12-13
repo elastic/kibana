@@ -144,7 +144,7 @@ export interface SwimlaneProps {
   swimlaneData: OverallSwimlaneData | ViewBySwimLaneData;
   swimlaneType: SwimlaneType;
   selection?: AppStateSelectedCells;
-  onCellsSelection: (payload?: AppStateSelectedCells) => void;
+  onCellsSelection?: (payload?: AppStateSelectedCells) => void;
   'data-test-subj'?: string;
   onResize: (width: number) => void;
   fromPage?: number;
@@ -281,6 +281,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     return { x: selection.times.map((v) => v * 1000), y: selection.lanes };
   }, [selection, swimlaneData, swimlaneType]);
 
+  const showBrush = !!onCellsSelection;
+
   const swimLaneConfig = useMemo<HeatmapSpec['config']>(() => {
     if (!showSwimlane) return {};
 
@@ -329,9 +331,11 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         width: X_AXIS_RIGHT_OVERFLOW * 2,
       },
       brushMask: {
+        visible: showBrush,
         fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
       },
       brushArea: {
+        visible: showBrush,
         stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
       },
       ...(showLegend ? { maxLegendHeight: LEGEND_HEIGHT } : {}),
@@ -350,6 +354,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
   const onElementClick = useCallback(
     (e: HeatmapElementEvent[]) => {
+      if (!onCellsSelection) return;
+
       const cell = e[0][0];
       const startTime = (cell.datum.x as number) / 1000;
       const payload = {
@@ -386,14 +392,16 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   );
 
   const onBrushEnd = (e: HeatmapBrushEvent) => {
-    if (!e.cells.length) return;
+    if (!e.cells.length || showBrush) return;
 
-    onCellsSelection({
-      lanes: e.y as string[],
-      times: e.x!.map((v) => (v as number) / 1000) as [number, number],
-      type: swimlaneType,
-      viewByFieldName: swimlaneData.fieldName,
-    });
+    if (onCellsSelection) {
+      onCellsSelection({
+        lanes: e.y as string[],
+        times: e.x!.map((v) => (v as number) / 1000) as [number, number],
+        type: swimlaneType,
+        viewByFieldName: swimlaneData.fieldName,
+      });
+    }
   };
 
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly

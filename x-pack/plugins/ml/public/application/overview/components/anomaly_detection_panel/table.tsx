@@ -90,7 +90,6 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
             timeBuckets={timeBuckets}
             swimlaneData={group.overallSwimLane!}
             swimlaneType={'overall'}
-            onCellsSelection={() => {}}
             onResize={() => {}}
             isLoading={false}
             id={group.id}
