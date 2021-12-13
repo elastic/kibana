@@ -20,6 +20,7 @@ import {
 import { securitySolutionFactory } from './factory';
 import { SecuritySolutionFactory } from './factory/types';
 import { EndpointAppContext } from '../../endpoint/types';
+import { KibanaRequest } from '../../../../../../src/core/server';
 
 function isObj(req: unknown): req is Record<string, unknown> {
   return typeof req === 'object' && req !== null;
@@ -34,7 +35,8 @@ function assertValidRequestType<T extends FactoryQueryTypes>(
 
 export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
-  endpointContext: EndpointAppContext
+  endpointContext: EndpointAppContext,
+  getSpaceId?: (request: KibanaRequest) => string
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
@@ -60,6 +62,7 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
             savedObjectsClient: deps.savedObjectsClient,
             endpointContext,
             request: deps.request,
+            spaceId: getSpaceId && getSpaceId(deps.request),
           })
         )
       );
