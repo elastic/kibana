@@ -37,6 +37,7 @@ import {
 } from '../shared_components';
 import { SavedObjectPaletteStore, getPalettesFromStore, savePaletteToStore } from '../persistence';
 import { computeTerms } from '../utils';
+import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 import { shouldShowValuesInLegend } from './render_helpers';
 
 const legendOptions: Array<{
@@ -68,7 +69,7 @@ const legendOptions: Array<{
 ];
 
 export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
-  const { state, setState } = props;
+  const { state, setState, frame } = props;
   const layer = state.layers[0];
 
   const onStateChange = useCallback(
@@ -139,6 +140,11 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     numberOptions,
     isDisabled: isToolbarPopoverDisabled,
   } = PartitionChartsMeta[state.shape].toolbarPopover;
+
+  const defaultTruncationValue = getDefaultVisualValuesForLayer(
+    state,
+    frame.datasourceLayers
+  ).truncateText;
 
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
@@ -215,7 +221,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         renderNestedLegendSwitch
         nestedLegend={!!layer.nestedLegend}
         onNestedLegendChange={onNestedLegendChange}
-        shouldTruncate={layer.truncateLegend ?? true}
+        shouldTruncate={layer.truncateLegend ?? defaultTruncationValue}
         onTruncateLegendChange={onTruncateLegendChange}
         maxLines={layer?.legendMaxLines}
         onMaxLinesChange={onLegendMaxLinesChange}
