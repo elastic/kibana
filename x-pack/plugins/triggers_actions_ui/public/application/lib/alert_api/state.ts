@@ -8,12 +8,12 @@ import { HttpSetup } from 'kibana/public';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { Errors, identity } from 'io-ts';
-import { AlertTaskState } from '../../../types';
+import { RuleTaskState } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { alertStateSchema } from '../../../../../alerting/common';
+import { ruleStateSchema } from '../../../../../alerting/common';
 import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
 
-const rewriteBodyRes: RewriteRequestCase<AlertTaskState> = ({
+const rewriteBodyRes: RewriteRequestCase<RuleTaskState> = ({
   rule_type_state: alertTypeState,
   alerts: alertInstances,
   previous_started_at: previousStartedAt,
@@ -32,17 +32,17 @@ export async function loadAlertState({
 }: {
   http: HttpSetup;
   alertId: string;
-}): Promise<AlertTaskState> {
+}): Promise<RuleTaskState> {
   return await http
-    .get<AsApiContract<AlertTaskState> | EmptyHttpResponse>(
+    .get<AsApiContract<RuleTaskState> | EmptyHttpResponse>(
       `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${alertId}/state`
     )
     .then((state) => (state ? rewriteBodyRes(state) : {}))
-    .then((state: AlertTaskState) => {
+    .then((state: RuleTaskState) => {
       return pipe(
-        alertStateSchema.decode(state),
+        ruleStateSchema.decode(state),
         fold((e: Errors) => {
-          throw new Error(`Alert "${alertId}" has invalid state`);
+          throw new Error(`Rule "${alertId}" has invalid state`);
         }, identity)
       );
     });
