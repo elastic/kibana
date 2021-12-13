@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { HOST_NAME, REASON, RISK_SCORE, RULE_NAME, SEVERITY } from '../screens/alerts';
-import { SERVER_SIDE_EVENT_COUNT } from '../screens/alerts_detection_rules';
+import semver from 'semver';
+import { HOST_NAME, REASON, RISK_SCORE, RULE_NAME, SEVERITY } from '../../../screens/alerts';
+import { SERVER_SIDE_EVENT_COUNT } from '../../../screens/alerts_detection_rules';
 import {
   ADDITIONAL_LOOK_BACK_DETAILS,
   ABOUT_DETAILS,
@@ -23,14 +23,17 @@ import {
   SEVERITY_DETAILS,
   THRESHOLD_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
-} from '../screens/rule_details';
+} from '../../../screens/rule_details';
 
-import { expandFirstAlert } from '../tasks/alerts';
-import { waitForPageToBeLoaded } from '../tasks/common';
-import { waitForRulesTableToBeLoaded, goToRuleDetails } from '../tasks/alerts_detection_rules';
-import { loginAndWaitForPage } from '../tasks/login';
+import { expandFirstAlert } from '../../../tasks/alerts';
+import { waitForPageToBeLoaded } from '../../../tasks/common';
+import {
+  goToTheRuleDetailsOf,
+  waitForRulesTableToBeLoaded,
+} from '../../../tasks/alerts_detection_rules';
+import { loginAndWaitForPage } from '../../../tasks/login';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
   OVERVIEW_HOST_NAME,
   OVERVIEW_RISK_SCORE,
@@ -40,7 +43,7 @@ import {
   OVERVIEW_THRESHOLD_COUNT,
   OVERVIEW_THRESHOLD_VALUE,
   SUMMARY_VIEW,
-} from '../screens/alerts_details';
+} from '../../../screens/alerts_details';
 
 const EXPECTED_NUMBER_OF_ALERTS = '1';
 
@@ -61,8 +64,8 @@ const rule = {
   severity: 'Medium',
   riskScore: '17',
   timelineTemplate: 'none',
-  runsEvery: '60s',
-  lookBack: '2999999m',
+  runsEvery: '24h',
+  lookBack: '49976h',
   timeline: 'None',
   thresholdField: 'host.name',
   threholdValue: '1',
@@ -72,7 +75,7 @@ describe('After an upgrade, the threshold rule', () => {
   before(() => {
     loginAndWaitForPage(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
-    goToRuleDetails();
+    goToTheRuleDetailsOf(rule.name);
     waitForPageToBeLoaded();
   });
 
@@ -104,10 +107,16 @@ describe('After an upgrade, the threshold rule', () => {
   });
 
   it('Displays the alert details in the TGrid', () => {
+    let expectedReason;
+    if (semver.gt(Cypress.env('ORIGINAL_VERSION'), '7.15.0')) {
+      expectedReason = alert.reason;
+    } else {
+      expectedReason = '-';
+    }
     cy.get(RULE_NAME).should('have.text', alert.rule);
     cy.get(SEVERITY).should('have.text', alert.severity);
     cy.get(RISK_SCORE).should('have.text', alert.riskScore);
-    cy.get(REASON).should('have.text', alert.reason);
+    cy.get(REASON).should('have.text', expectedReason);
     cy.get(HOST_NAME).should('have.text', alert.hostName);
   });
 
