@@ -58,6 +58,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setEuiSwitch('lnsDynamicColoringGaugeSwitch', 'check');
       await PageObjects.lens.closeDimensionEditor();
 
+      await PageObjects.lens.openVisualOptions();
+      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMajor', 'custom title');
+      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor-select', 'custom', {});
+      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
+
+      await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.openDimensionEditor(
         'lnsGauge_goalDimensionPanel > lns-empty-dimension'
       );
@@ -77,13 +83,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.retrySetValue('lns-indexPattern-static_value-input', '25000');
       await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.closeDimensionEditor();
-
-      await PageObjects.lens.openVisualOptions();
-      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMajor', 'custom title');
-      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor-select', 'custom', {});
-      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
-
-      await PageObjects.lens.waitForVisualization();
 
       const elementWithInfo = await find.byCssSelector('.echScreenReaderOnly');
       const textContent = await elementWithInfo.getAttribute('textContent');
