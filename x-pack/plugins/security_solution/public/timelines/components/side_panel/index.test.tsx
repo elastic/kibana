@@ -270,6 +270,7 @@ describe('Details Panel Component', () => {
                 "indexName": "my-index",
               }
             }
+            handleOnEventClosed={[Function]}
             hostRisk={null}
             isAlert={false}
             isDraggable={false}
@@ -449,6 +450,7 @@ describe('Details Panel Component', () => {
                       isAlert={false}
                       loading={true}
                       ruleName=""
+                      timestamp=""
                     >
                       <Styled(EuiFlexGroup)
                         gutterSize="none"
@@ -500,6 +502,7 @@ describe('Details Panel Component', () => {
                                 "indexName": "my-index",
                               }
                             }
+                            handleOnEventClosed={[Function]}
                             hostRisk={null}
                             isAlert={false}
                             isDraggable={false}
@@ -731,6 +734,7 @@ describe('Details Panel Component', () => {
                     isAlert={false}
                     loading={true}
                     ruleName=""
+                    timestamp=""
                   >
                     <Styled(EuiFlexGroup)
                       gutterSize="none"
@@ -782,6 +786,7 @@ describe('Details Panel Component', () => {
                               "indexName": "my-index",
                             }
                           }
+                          handleOnEventClosed={[Function]}
                           hostRisk={null}
                           isAlert={false}
                           isDraggable={false}
