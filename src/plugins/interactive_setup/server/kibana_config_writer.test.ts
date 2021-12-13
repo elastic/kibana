@@ -35,7 +35,8 @@ describe('KibanaConfigWriter', () => {
         throw new Error('Invalid certificate');
       }
       return {
-        fingerprint256: 'fingerprint256',
+        fingerprint256:
+          'D4:86:CE:00:AC:71:E4:1D:2B:70:D0:87:A5:55:FA:5D:D1:93:6C:DB:45:80:79:53:7B:A3:AC:13:3E:48:34:D6',
       };
     };
 
@@ -131,7 +132,7 @@ describe('KibanaConfigWriter', () => {
         elasticsearch.hosts: [some-host]
         elasticsearch.serviceAccountToken: some-value
         elasticsearch.ssl.certificateAuthorities: [/data/ca_1234.crt]
-        xpack.fleet.outputs: [{id: fleet-default-output, name: default, is_default: true, is_default_monitoring: true, type: elasticsearch, hosts: [some-host], ca_sha256: fingerprint256}]
+        xpack.fleet.outputs: [{id: fleet-default-output, name: default, is_default: true, is_default_monitoring: true, type: elasticsearch, hosts: [some-host], ca_trusted_fingerprint: d486ce00ac71e41d2b70d087a555fa5dd1936cdb458079537ba3ac133e4834d6}]
 
         ",
           ],
@@ -198,7 +199,7 @@ describe('KibanaConfigWriter', () => {
         elasticsearch.username: username
         elasticsearch.password: password
         elasticsearch.ssl.certificateAuthorities: [/data/ca_1234.crt]
-        xpack.fleet.outputs: [{id: fleet-default-output, name: default, is_default: true, is_default_monitoring: true, type: elasticsearch, hosts: [some-host], ca_sha256: fingerprint256}]
+        xpack.fleet.outputs: [{id: fleet-default-output, name: default, is_default: true, is_default_monitoring: true, type: elasticsearch, hosts: [some-host], ca_trusted_fingerprint: d486ce00ac71e41d2b70d087a555fa5dd1936cdb458079537ba3ac133e4834d6}]
 
         ",
           ],
@@ -275,7 +276,7 @@ describe('KibanaConfigWriter', () => {
         elasticsearch.hosts: [some-host]
         elasticsearch.serviceAccountToken: some-value
         elasticsearch.ssl.certificateAuthorities: [/data/ca_1234.crt]
-        xpack.fleet.outputs: [{id: fleet-default-output, name: default, is_default: true, is_default_monitoring: true, type: elasticsearch, hosts: [some-host], ca_sha256: fingerprint256}]
+        xpack.fleet.outputs: [{id: fleet-default-output, name: default, is_default: true, is_default_monitoring: true, type: elasticsearch, hosts: [some-host], ca_trusted_fingerprint: d486ce00ac71e41d2b70d087a555fa5dd1936cdb458079537ba3ac133e4834d6}]
 
         ",
           ],
@@ -329,7 +330,7 @@ describe('KibanaConfigWriter', () => {
           monitoring.ui.container.elasticsearch.enabled: true
           elasticsearch.serviceAccountToken: some-value
           elasticsearch.ssl.certificateAuthorities: [/data/ca_1234.crt]
-          xpack.fleet.outputs: [{id: fleet-default-output, name: default, is_default: true, is_default_monitoring: true, type: elasticsearch, hosts: [some-host], ca_sha256: fingerprint256}]
+          xpack.fleet.outputs: [{id: fleet-default-output, name: default, is_default: true, is_default_monitoring: true, type: elasticsearch, hosts: [some-host], ca_trusted_fingerprint: d486ce00ac71e41d2b70d087a555fa5dd1936cdb458079537ba3ac133e4834d6}]
 
           ",
             ],
