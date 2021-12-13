@@ -1065,6 +1065,68 @@ describe('PluginsService', () => {
     });
   });
 
+  test('"root" deprecations from one plugin should be applied before accessing other plugins config', async () => {
+    const pluginA = createPlugin('plugin-1-deprecations', {
+      type: PluginType.standard,
+      path: 'plugin-1-deprecations',
+      version: 'version-1',
+    });
+
+    const pluginB = createPlugin('plugin-2-deprecations', {
+      type: PluginType.standard,
+      path: 'plugin-2-deprecations',
+      version: 'version-2',
+    });
+
+    jest.doMock(
+      join(pluginA.path, 'server'),
+      () => ({
+        config: {
+          schema: schema.object({
+            enabled: schema.maybe(schema.boolean({ defaultValue: true })),
+          }),
+        },
+      }),
+      { virtual: true }
+    );
+
+    jest.doMock(
+      join(pluginB.path, 'server'),
+      () => ({
+        config: {
+          schema: schema.object({
+            enabled: schema.maybe(schema.boolean({ defaultValue: true })),
+            renamed: schema.string(), // Mandatory string to make sure that the field is actually renamed by deprecations
+          }),
+          deprecations: (toolkit: any) => [
+            toolkit.renameFromRoot(
+              'plugin-1-deprecations.toBeRenamed',
+              'plugin-2-deprecations.renamed'
+            ),
+          ],
+        },
+      }),
+      { virtual: true }
+    );
+
+    mockDiscover.mockReturnValue({
+      error$: from([]),
+      plugin$: from([pluginA, pluginB]),
+    });
+
+    config$.next({
+      'plugin-1-deprecations': {
+        toBeRenamed: 'renamed',
+      },
+    });
+
+    await expect(
+      pluginsService.discover({
+        environment: environmentPreboot,
+      })
+    ).resolves.not.toThrow(); // If the rename is not applied, it'll fail
+  });
+
   describe('plugin initialization', () => {
     beforeEach(() => {
       const prebootPlugins = [

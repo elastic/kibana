@@ -273,7 +273,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     >();
     await plugin$
       .pipe(
-        concatMap(async (plugin) => {
+        // 1. Register config descriptors and deprecations
+        map((plugin) => {
           const configDescriptor = plugin.getConfigDescriptor();
           if (configDescriptor) {
             this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
@@ -291,6 +292,12 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
             }
             this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
           }
+          return plugin;
+        }),
+        // 2. Validate config and handle enabled statuses.
+        // NOTE: We can't do both in the same previous loop because some plugins' deprecations may affect others.
+        // Hence, we need all the deprecations to be registered before accessing any config parameter.
+        concatMap(async (plugin) => {
           const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
 
           if (pluginEnableStatuses.has(plugin.name)) {
