@@ -26,17 +26,11 @@ Array [
   >
     <p>
       We checked the cluster settings and found that 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         xpack.monitoring.collection.interval
       </code>
        is set to 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         -1
       </code>
       .
@@ -103,65 +97,41 @@ Array [
   >
     <p>
       We checked the 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         node001foo
       </code>
        settings for 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         xpack.monitoring.exporters
       </code>
       , and found the reason: 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         myMonitoringClusterExporter1
       </code>
       .
     </p>
     <p>
       Using monitoring exporters to ship the monitoring data to a remote monitoring cluster is highly recommended as it keeps the integrity of the monitoring data safe no matter what the state of the production cluster. However, as this instance of Kibana could not find any monitoring data, there seems to be a problem with the 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         xpack.monitoring.exporters
       </code>
        configuration, or the 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         xpack.monitoring.elasticsearch
       </code>
        settings in 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         kibana.yml
       </code>
       .
     </p>
     <p>
       Check that the intended exporters are enabled for sending statistics to the monitoring cluster, and that the monitoring cluster host matches the 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         xpack.monitoring.elasticsearch
       </code>
        setting in 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         kibana.yml
       </code>
        to see monitoring data in this instance of Kibana.
@@ -278,24 +248,15 @@ Array [
   >
     <p>
       We checked the node001foo settings and found that 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         xpack.monitoring.enabled
       </code>
        is set to 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         false
       </code>
        set, which disables monitoring. Removing the 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         xpack.monitoring.enabled: false
       </code>
        setting from your configuration will put the default into effect and enable Monitoring.
