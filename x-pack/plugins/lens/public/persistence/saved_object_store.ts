@@ -17,7 +17,6 @@ import { LensSavedObjectAttributes } from '../async_services';
 
 export interface Document {
   savedObjectId?: string;
-  contextFromOtherViz?: { [key: string]: string };
   type?: string;
   visualizationType: string | null;
   title: string;
@@ -53,15 +52,11 @@ export class SavedObjectIndexStore implements SavedObjectStore {
   }
 
   save = async (vis: Document) => {
-    const { savedObjectId, type, contextFromOtherViz, references, ...rest } = vis;
+    const { savedObjectId, type, references, ...rest } = vis;
     // TODO: SavedObjectAttributes should support this kind of object,
     // remove this workaround when SavedObjectAttributes is updated.
     const attributes = rest as unknown as SavedObjectAttributes;
     // gets the title and description from the Viz editor saved object
-    if (savedObjectId && contextFromOtherViz) {
-      attributes.title = contextFromOtherViz.title;
-      attributes.description = contextFromOtherViz.description;
-    }
 
     const result = await this.client.create(
       DOC_TYPE,

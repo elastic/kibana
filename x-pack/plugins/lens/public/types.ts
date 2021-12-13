@@ -196,8 +196,6 @@ export interface VisualizeEditorContext {
   embeddableId?: string;
   vizEditorOriginatingAppUrl?: string;
   originatingApp?: string;
-  embeddableTitle?: string;
-  embeddableDescription?: string;
 }
 
 interface ChartSettings {

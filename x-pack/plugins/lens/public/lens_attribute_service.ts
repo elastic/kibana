@@ -37,16 +37,11 @@ export function getLensAttributeService(
     LensByReferenceInput,
     LensUnwrapMetaInfo
   >(DOC_TYPE, {
-    saveMethod: async (
-      attributes: LensSavedObjectAttributes,
-      savedObjectId?: string,
-      contextFromOtherViz?: { [key: string]: string }
-    ) => {
+    saveMethod: async (attributes: LensSavedObjectAttributes, savedObjectId?: string) => {
       const savedDoc = await savedObjectStore.save({
         ...attributes,
         savedObjectId,
         type: DOC_TYPE,
-        contextFromOtherViz,
       });
       return { id: savedDoc.savedObjectId };
     },
