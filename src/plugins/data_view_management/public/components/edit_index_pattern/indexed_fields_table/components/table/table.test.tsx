@@ -126,10 +126,19 @@ describe('Table', () => {
     const tableCell = shallow(
       renderTable()
         .prop('columns')[1]
-        .render('conflict', {
+        .render('text, long', {
           kbnType: 'conflict',
           conflictDescriptions: { keyword: ['index_a'], long: ['index_b'] },
         })
+    );
+    expect(tableCell).toMatchSnapshot();
+  });
+
+  test('should render mixed, non-conflicting type', () => {
+    const tableCell = shallow(
+      renderTable().prop('columns')[1].render('keyword, constant_keyword', {
+        kbnType: 'string',
+      })
     );
     expect(tableCell).toMatchSnapshot();
   });

@@ -349,9 +349,11 @@ export class Table extends PureComponent<IndexedFieldProps> {
   }
 
   renderFieldType(type: string, field: IndexedFieldItem) {
+    const conflictDescription =
+      field.conflictDescriptions && field.conflictDescriptions[field.name];
     return (
       <span>
-        {type !== 'conflict' ? type : ''}
+        {type === 'conflict' && conflictDescription ? '' : type}
         {field.conflictDescriptions
           ? getConflictBtn(field.name, field.conflictDescriptions, this.props.openModal)
           : ''}
