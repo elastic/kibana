@@ -25,7 +25,7 @@ import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 import { config } from './plugins_config';
 import { take } from 'rxjs/operators';
-import { DiscoveredPlugin, PluginType } from './types';
+import { DiscoveredPlugin, PluginConfigDescriptor, PluginType } from './types';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem<PluginType>> = PluginsSystem as any;
 
@@ -1092,17 +1092,14 @@ describe('PluginsService', () => {
 
     jest.doMock(
       join(pluginB.path, 'server'),
-      () => ({
+      (): { config: PluginConfigDescriptor } => ({
         config: {
           schema: schema.object({
             enabled: schema.maybe(schema.boolean({ defaultValue: true })),
             renamed: schema.string(), // Mandatory string to make sure that the field is actually renamed by deprecations
           }),
-          deprecations: (toolkit: any) => [
-            toolkit.renameFromRoot(
-              'plugin-1-deprecations.toBeRenamed',
-              'plugin-2-deprecations.renamed'
-            ),
+          deprecations: ({ renameFromRoot }) => [
+            renameFromRoot('plugin-1-deprecations.toBeRenamed', 'plugin-2-deprecations.renamed'),
           ],
         },
       }),

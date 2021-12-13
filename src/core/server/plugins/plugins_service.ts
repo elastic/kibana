@@ -271,31 +271,28 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       PluginName,
       { plugin: PluginWrapper; isEnabled: boolean }
     >();
+    const plugins = await plugin$.pipe(toArray()).toPromise();
+
     // 1. Register config descriptors and deprecations
-    const plugins = await plugin$
-      .pipe(
-        tap((plugin) => {
-          const configDescriptor = plugin.getConfigDescriptor();
-          if (configDescriptor) {
-            this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
-            if (configDescriptor.deprecations) {
-              this.coreContext.configService.addDeprecationProvider(
-                plugin.configPath,
-                configDescriptor.deprecations
-              );
-            }
-            if (configDescriptor.exposeToUsage) {
-              this.pluginConfigUsageDescriptors.set(
-                Array.isArray(plugin.configPath) ? plugin.configPath.join('.') : plugin.configPath,
-                getFlattenedObject(configDescriptor.exposeToUsage)
-              );
-            }
-            this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
-          }
-        }),
-        toArray()
-      )
-      .toPromise();
+    for (const plugin of plugins) {
+      const configDescriptor = plugin.getConfigDescriptor();
+      if (configDescriptor) {
+        this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
+        if (configDescriptor.deprecations) {
+          this.coreContext.configService.addDeprecationProvider(
+            plugin.configPath,
+            configDescriptor.deprecations
+          );
+        }
+        if (configDescriptor.exposeToUsage) {
+          this.pluginConfigUsageDescriptors.set(
+            Array.isArray(plugin.configPath) ? plugin.configPath.join('.') : plugin.configPath,
+            getFlattenedObject(configDescriptor.exposeToUsage)
+          );
+        }
+        this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
+      }
+    }
 
     // 2. Validate config and handle enabled statuses.
     // NOTE: We can't do both in the same previous loop because some plugins' deprecations may affect others.
