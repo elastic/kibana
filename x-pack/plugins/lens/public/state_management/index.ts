@@ -13,6 +13,7 @@ import { timeRangeMiddleware } from './time_range_middleware';
 import { optimizingMiddleware } from './optimizing_middleware';
 import { LensState, LensStoreDeps } from './types';
 import { initMiddleware } from './init_middleware';
+import { diffLogger } from './diff_logger';
 export * from './types';
 export * from './selectors';
 
@@ -58,6 +59,7 @@ export const makeConfigureStore = (
         predicate: () => window.ELASTIC_LENS_LOGGER,
       })
     );
+    middleware.push(diffLogger);
   }
 
   return configureStore({
