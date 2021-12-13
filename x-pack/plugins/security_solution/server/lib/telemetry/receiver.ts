@@ -12,7 +12,7 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { AgentClient, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { ExceptionListClient } from '../../../../lists/server';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
@@ -221,10 +221,16 @@ export class TelemetryReceiver {
       throw Error('exception list client is unavailable: cannot retrieve trusted applications');
     }
 
-    const results = await getTrustedAppsList(this.exceptionListClient, {
+    const results = await this.exceptionListClient.findExceptionListItem({
+      listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       page: 1,
-      per_page: 10_000,
+      perPage: 10_000,
+      filter: undefined,
+      namespaceType: 'agnostic',
+      sortField: 'name',
+      sortOrder: 'asc',
     });
+
     return {
       data: results?.data.map(trustedApplicationToTelemetryEntry),
       total: results?.total ?? 0,
@@ -331,8 +337,6 @@ export class TelemetryReceiver {
           path: '/_license',
           querystring: {
             local: true,
-            // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
-            accept_enterprise: 'true',
           },
         })
       ).body as Promise<{ license: ESLicense }>;

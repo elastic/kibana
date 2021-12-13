@@ -6,8 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { createSearchSource, SearchSource, SearchSourceDependencies } from './';
+import { mapValues } from 'lodash';
+import {
+  createSearchSource,
+  extractReferences,
+  injectReferences,
+  SearchSource,
+  SearchSourceDependencies,
+  SerializedSearchSourceFields,
+} from './';
 import { IndexPatternsContract } from '../..';
+import { mergeMigrationFunctionMaps } from '../../../../kibana_utils/common';
+import { getAllMigrations as filtersGetAllMigrations } from '../../query/persistable_state';
 
 export class SearchSourceService {
   public setup() {}
@@ -23,6 +33,28 @@ export class SearchSourceService {
        */
       createEmpty: () => {
         return new SearchSource({}, dependencies);
+      },
+      extract: (state: SerializedSearchSourceFields) => {
+        const [newState, references] = extractReferences(state);
+        return { state: newState, references };
+      },
+      inject: injectReferences,
+      getAllMigrations: () => {
+        const searchSourceMigrations = {};
+
+        // we don't know if embeddables have any migrations defined so we need to fetch them and map the received functions so we pass
+        // them the correct input and that we correctly map the response
+        const filterMigrations = mapValues(filtersGetAllMigrations(), (migrate) => {
+          return (state: SerializedSearchSourceFields) => ({
+            ...state,
+            filter: migrate(state.filter),
+          });
+        });
+
+        return mergeMigrationFunctionMaps(searchSourceMigrations, filterMigrations);
+      },
+      telemetry: () => {
+        return {};
       },
     };
   }

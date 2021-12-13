@@ -35,7 +35,7 @@ import { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { Ecs } from '../../../../../common/ecs';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
-import { useHostsRiskScore } from '../../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
+import { useHostsRiskScore } from '../../../../common/containers/hosts_risk/use_hosts_risk_score';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -133,6 +133,11 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     hostName,
   });
 
+  const timestamp = useMemo(
+    () => getFieldValue({ category: 'base', field: '@timestamp' }, detailsData),
+    [detailsData]
+  );
+
   const backToAlertDetailsLink = useMemo(() => {
     return (
       <>
@@ -173,7 +178,12 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         {isHostIsolationPanelOpen ? (
           backToAlertDetailsLink
         ) : (
-          <ExpandableEventTitle isAlert={isAlert} loading={loading} ruleName={ruleName} />
+          <ExpandableEventTitle
+            isAlert={isAlert}
+            loading={loading}
+            ruleName={ruleName}
+            timestamp={timestamp}
+          />
         )}
       </EuiFlyoutHeader>
       {isIsolateActionSuccessBannerVisible && (
@@ -203,6 +213,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             timelineId={timelineId}
             timelineTabType="flyout"
             hostRisk={hostRisk}
+            handleOnEventClosed={handleOnEventClosed}
           />
         )}
       </StyledEuiFlyoutBody>
@@ -237,6 +248,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         timelineId={timelineId}
         timelineTabType={tabType}
         hostRisk={hostRisk}
+        handleOnEventClosed={handleOnEventClosed}
       />
     </>
   );
