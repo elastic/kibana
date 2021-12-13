@@ -446,6 +446,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       (sq) => sq.id !== savedQuery.id
     );
     this.applySelectedSavedQueries(updatedSelectedSavedQueries);
+    this.setState({
+      selectedSavedQueries: [...updatedSelectedSavedQueries],
+    });
   };
 
   public onEnableAll = () => {
