@@ -7,8 +7,9 @@
 
 import React, { createContext, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
+import { Observable } from 'rxjs';
 
-import { CoreStart, ScopedHistory } from '../../../../../src/core/public';
+import { CoreStart, ScopedHistory, CoreTheme } from '../../../../../src/core/public';
 import { ClientConfigType } from '../types';
 import { HttpService, UiMetricService } from './services';
 
@@ -23,6 +24,7 @@ export interface AppDependencies {
     history: ScopedHistory;
   };
   config: ClientConfigType;
+  theme$: Observable<CoreTheme>;
 }
 
 export const AppContextProvider = ({
