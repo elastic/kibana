@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'maps']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'header', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
@@ -41,8 +41,7 @@ export default function ({ getPageObjects, getService }) {
       await security.testUser.restoreDefaults();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/117780
-    describe.skip('apply filter to current view', () => {
+    describe('apply filter to current view', () => {
       before(async () => {
         await loadDashboardAndOpenTooltip();
       });
@@ -54,6 +53,8 @@ export default function ({ getPageObjects, getService }) {
 
       it('should create filters when create filter button is clicked', async () => {
         await testSubjects.click('mapTooltipCreateFilterButton');
+        await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+        await PageObjects.maps.waitForLayersToLoadMinimizedLayerControl();
 
         const numFilters = await filterBar.getFilterCount();
         expect(numFilters).to.be(1);

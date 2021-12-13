@@ -53,6 +53,7 @@ function renderExpandButton({
         type="button"
         onClick={onClick}
         aria-label={expandLabel}
+        data-test-subj="mapExpandLayerControlButton"
       >
         <EuiLoadingSpinner size="m" />
       </button>
@@ -66,6 +67,7 @@ function renderExpandButton({
       onClick={onClick}
       iconType={hasErrors ? 'alert' : 'menuLeft'}
       aria-label={expandLabel}
+      data-test-subj="mapExpandLayerControlButton"
     />
   );
 }
