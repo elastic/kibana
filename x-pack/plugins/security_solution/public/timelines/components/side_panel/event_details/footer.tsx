@@ -24,10 +24,10 @@ import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 
 interface EventDetailsFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
+  detailsEcsData: Ecs | null;
   expandedEvent: {
     eventId: string;
     indexName: string;
-    ecsData?: Ecs;
     refetch?: () => void;
   };
   handleOnEventClosed: () => void;
@@ -47,6 +47,7 @@ interface AddExceptionModalWrapperData {
 export const EventDetailsFooterComponent = React.memo(
   ({
     detailsData,
+    detailsEcsData,
     expandedEvent,
     handleOnEventClosed,
     isHostIsolationPanelOpen,
@@ -116,7 +117,7 @@ export const EventDetailsFooterComponent = React.memo(
       skip: expandedEvent?.eventId == null,
     });
 
-    const ecsData = expandedEvent.ecsData ?? get(0, alertsEcsData);
+    const ecsData = detailsEcsData ?? get(0, alertsEcsData);
     return (
       <>
         <EuiFlyoutFooter>
