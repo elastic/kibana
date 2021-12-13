@@ -1492,29 +1492,29 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/apm-rum-core@^5.12.1":
-  version "5.12.1"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.12.1.tgz#ad78787876c68b9ce718d1c42b8e7b12b12eaa69"
-  integrity sha512-b9CyqLdu2rSdjqi5Pc2bNfQCRQT26GjQzCTpJq1WoewDaoivsPoUDrY7tCJV+j3rmRSxG7vX91pM5SygjFr7aA==
+"@elastic/apm-rum-core@^5.13.0":
+  version "5.13.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.13.0.tgz#dbada016fc73c0be4d7df1ba835a1556dc48d21e"
+  integrity sha512-5kSTbdmyLfpCdLgoy387y+WMCVl4YuYHdkFgDWAGfOBR+aaOCQAcQoLc8KK6+FZoN/vqvVSFCN+GxxyBc9Kmdw==
   dependencies:
     error-stack-parser "^1.3.5"
     opentracing "^0.14.3"
     promise-polyfill "^8.1.3"
 
-"@elastic/apm-rum-react@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.3.1.tgz#2b1a5cfe3763538d7e655816a333162696f906c9"
-  integrity sha512-nJebgxMUWsWWz93v39ok0DwFGUvv9qZkA+oElUzCKyVvWpgHsWE2pvgjthrvay64qzfEg5QeM56ywaef9V13rw==
+"@elastic/apm-rum-react@^1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.3.2.tgz#682dbf040aad4a6d7c423d0da81cc9e65a910693"
+  integrity sha512-ohSgd8wXPziJQpaixvbNAHL6/sMLBW+iOrxCFvCKF9gRllowUTqYi+etery96Hq0X8yXC+/fJg18ZXx9wlJLEQ==
   dependencies:
-    "@elastic/apm-rum" "^5.9.1"
+    "@elastic/apm-rum" "^5.10.0"
     hoist-non-react-statics "^3.3.0"
 
-"@elastic/apm-rum@^5.9.1":
-  version "5.9.1"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.9.1.tgz#23b12650d443ec0a5f7c6b7b4039334e42d2fe8a"
-  integrity sha512-NJAdzxXxf+LeCI0Dz3P+RMVY66C8sAztIg4tvnrhvBqxf8d7se+FpYw3oYjw3BZ8UDycmXEaIqEGcynUUndgqA==
+"@elastic/apm-rum@^5.10.0":
+  version "5.10.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.10.0.tgz#ffadc50e53d7b7bc9f1c7851f7d70631c3e14eba"
+  integrity sha512-Aw3UwiduxNfJ0/S3Uq0cO8O+60RmEMa9AJGq6v8fFQ8UdnTV1IgT73NpPyMLtn3qBcKyJNKpvx0jW28w5IVLcQ==
   dependencies:
-    "@elastic/apm-rum-core" "^5.12.1"
+    "@elastic/apm-rum-core" "^5.13.0"
 
 "@elastic/apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace":
   version "0.0.0"
@@ -5765,10 +5765,10 @@
   resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-3.12.1.tgz#5c6f4a1eabca84792fbd916f0cb40847f123c656"
   integrity sha512-SGGAhXLHDx+PK4YLNcNGa6goPf9XRWQNAUUbffkwVGGXIxmDKWyGGL4inzq2sPmExu431Ekb9aEMn9BkPqEYFA==
 
-"@types/jsdom@^16.2.3":
-  version "16.2.3"
-  resolved "https://registry.yarnpkg.com/@types/jsdom/-/jsdom-16.2.3.tgz#c6feadfe0836389b27f9c911cde82cd32e91c537"
-  integrity sha512-BREatezSn74rmLIDksuqGNFUTi9HNAWWQXYpFBFLK9U6wlMCO4M0QCa8CMpDsZQuqxSO9XifVLT5Q1P0vgKLqw==
+"@types/jsdom@^16.2.13":
+  version "16.2.13"
+  resolved "https://registry.yarnpkg.com/@types/jsdom/-/jsdom-16.2.13.tgz#126c8b7441b159d6234610a48de77b6066f1823f"
+  integrity sha512-8JQCjdeAidptSsOcRWk2iTm9wCcwn9l+kRG6k5bzUacrnm1ezV4forq0kWjUih/tumAeoG+OspOvQEbbRucBTw==
   dependencies:
     "@types/node" "*"
     "@types/parse5" "*"
@@ -12420,10 +12420,10 @@ elastic-apm-http-client@^10.3.0:
     readable-stream "^3.4.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.25.0:
-  version "3.25.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.25.0.tgz#3207c936429739cd07f64cbf76d7b5b4b8e0da3e"
-  integrity sha512-3K+uUQkKeaJarjPb/pDY3fldP7QeppgPPx8nJOkOrW+BvQK5YBMiWbf4S9fdx0yUUkWsVX6K+CAc401+Y1COkg==
+elastic-apm-node@^3.26.0:
+  version "3.26.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.26.0.tgz#551eb425eb85bf16c6ce9567fe92013b038018ab"
+  integrity sha512-MwYFlBTlcHI8GGQXLnnEm70JJ4RRFkHCY1D3Wt2027l8T/Ye5tgssMSiKyRbjb9bVdibbte73Xn8HF8i35UaxA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     after-all-results "^2.0.0"
@@ -27757,10 +27757,10 @@ typescript-tuple@^2.2.1:
   dependencies:
     typescript-compare "^0.0.2"
 
-typescript@4.3.5, typescript@^3.3.3333, typescript@^3.5.3, typescript@^4.3.5, typescript@~4.4.2:
-  version "4.3.5"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.3.5.tgz#4d1c37cc16e893973c45a06886b7113234f119f4"
-  integrity sha512-DqQgihaQ9cUrskJo9kIyW/+g0Vxsk8cDtZ52a3NGh0YNTfpUSArXSohyUGnvbPazEPLu398C0UxmKSOrPumUzA==
+typescript@4.5.3, typescript@^3.3.3333, typescript@^3.5.3, typescript@^4.3.5, typescript@~4.4.2:
+  version "4.5.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.5.3.tgz#afaa858e68c7103317d89eb90c5d8906268d353c"
+  integrity sha512-eVYaEHALSt+s9LbvgEv4Ef+Tdq7hBiIZgii12xXJnukryt3pMgJf6aKhoCZ3FWQsu6sydEnkg11fYXLzhLBjeQ==
 
 ua-parser-js@^0.7.18:
   version "0.7.24"
