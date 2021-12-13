@@ -193,6 +193,7 @@ export class HeadlessChromiumDriverFactory {
 
       // Ensure that the browser is closed once the observable completes.
       observer.add(() => {
+        if (page.isClosed()) return; // avoid emitting a log unnecessarily
         logger.debug(`It looks like the browser is no longer being used. Closing the browser...`);
         childProcess.kill(); // ignore async
       });
