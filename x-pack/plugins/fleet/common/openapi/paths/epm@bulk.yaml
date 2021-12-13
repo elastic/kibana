@@ -1,0 +1,16 @@
+post:
+  summary: Packages - Bulk install
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            packages:
+              type: array
+              items:
+                type: string
+  operationId: bulk-install-packages
+parameters: []

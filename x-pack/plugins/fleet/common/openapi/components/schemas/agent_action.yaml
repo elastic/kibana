@@ -1,0 +1,16 @@
+title: Agent action
+oneOf:
+  - type: object
+    properties:
+      enum:
+      - POLICY_CHANGE
+      - UNENROLL
+      - UPGRADE
+      - POLICY_REASSIGN
+  - type: object
+    properties:
+      enum:
+      - debug
+      - info
+      - warning
+      - error

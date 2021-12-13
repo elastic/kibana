@@ -59,6 +59,53 @@
         ]
       }
     },
+    "/setup/preconfiguration": {
+      "put": {
+        "summary": "Preconfiguration",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "policies": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "items": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "packages": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "nonFatalErrors": {
+                      "type": "array",
+                      "items": {
+                        "$ref": null
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-settings"
+      }
+    },
     "/settings": {
       "get": {
         "summary": "Settings",
@@ -95,6 +142,117 @@
         "operationId": "update-settings"
       }
     },
+    "/service-tokens": {
+      "deprecated": true,
+      "post": {
+        "summary": "Generate service tokens",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "operationId": "generate-service-token"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/service_tokens": {
+      "post": {
+        "summary": "Generate service tokens",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "operationId": "generate-service-token"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/epm/_bulk": {
+      "post": {
+        "summary": "Packages - Bulk install",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "packages": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "bulk-install-packages"
+      },
+      "parameters": []
+    },
     "/epm/categories": {
       "get": {
         "summary": "Package categories",
@@ -104,26 +262,31 @@
             "description": "OK",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "array",
+                "type": "object",
+                "properties": {
                   "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      },
-                      "count": {
-                        "type": "number"
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "count": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "count"
+                        ]
                       }
-                    },
-                    "required": [
-                      "id",
-                      "title",
-                      "count"
-                    ]
+                    }
                   }
                 }
               }
@@ -132,6 +295,34 @@
         },
         "operationId": "get-package-categories"
       }
+    },
+    "/epm/packages/limited": {
+      "get": {
+        "summary": "Packages - Get limited list",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "list-limited-packages"
+      },
+      "parameters": []
     },
     "/epm/packages": {
       "get": {
@@ -142,10 +333,15 @@
             "description": "OK",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "array",
+                "type": "object",
+                "properties": {
                   "items": {
-                    "$ref": "#/components/schemas/search_result"
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "../components/schemas/search_result.yaml"
+                      }
+                    }
                   }
                 }
               }
@@ -557,6 +753,102 @@
         }
       }
     },
+    "/epm/packages/{pkgName}/{pkgVersion}/{filePath*}": {
+      "get": {
+        "summary": "Packages - Get file from registry",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "body": {
+                    "type": "object"
+                  },
+                  "statusCode": {
+                    "type": "number"
+                  },
+                  "headers": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "packages-get-file"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgName",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgVersion",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "filePath",
+          "in": "path",
+          "required": true
+        }
+      ]
+    },
+    "/epm/packages/{pkgName}/stats": {
+      "get": {
+        "summary": "Get stats for a package",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "$ref": "#/components/schemas/package_usage_stats"
+                    }
+                  },
+                  "required": [
+                    "response"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-package-stats",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgName",
+          "in": "path",
+          "required": true
+        }
+      ]
+    },
     "/agents/setup": {
       "get": {
         "summary": "Agents setup - Info",
@@ -964,6 +1256,73 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
+      }
+    },
+    "/agents/{agentId}/actions": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Agent - Actions",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "operationId": "new-agent-action"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": null,
+              "title": "Agent action",
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "enum": [
+                      "POLICY_CHANGE",
+                      "UNENROLL",
+                      "UPGRADE",
+                      "POLICY_REASSIGN"
+                    ]
+                  }
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "enum": [
+                      "debug",
+                      "info",
+                      "warning",
+                      "error"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
       }
     },
     "/agents/{agentId}/reassign": {
@@ -1568,6 +1927,32 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
+      },
+      "parameters": []
+    },
+    "/data_streams": {
+      "get": {
+        "summary": "Data streams - List",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "data_streams": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/data_stream.yaml"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "data-streams-list"
       },
       "parameters": []
     },
@@ -2433,6 +2818,9 @@
                   "ca_sha256": {
                     "type": "string"
                   },
+                  "ca_trusted_fingerprint": {
+                    "type": "string"
+                  },
                   "config_yaml": {
                     "type": "string"
                   }
@@ -2471,48 +2859,6 @@
           }
         ]
       }
-    },
-    "/epm/packages/{pkgName}/stats": {
-      "get": {
-        "summary": "Get stats for a package",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "response": {
-                      "$ref": "#/components/schemas/package_usage_stats"
-                    }
-                  },
-                  "required": [
-                    "response"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "get-package-stats",
-        "security": [
-          {
-            "basicAuth": []
-          }
-        ]
-      },
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "pkgName",
-          "in": "path",
-          "required": true
-        }
-      ]
     }
   },
   "components": {
@@ -2638,53 +2984,6 @@
         },
         "required": [
           "item"
-        ]
-      },
-      "search_result": {
-        "title": "Search result",
-        "type": "object",
-        "properties": {
-          "description": {
-            "type": "string"
-          },
-          "download": {
-            "type": "string"
-          },
-          "icons": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "path": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "version": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "savedObject": {
-            "type": "object"
-          }
-        },
-        "required": [
-          "description",
-          "download",
-          "icons",
-          "name",
-          "path",
-          "title",
-          "type",
-          "version",
-          "status"
         ]
       },
       "package_info": {
@@ -2889,6 +3188,18 @@
           "ilm_policy",
           "transform",
           "data_stream_ilm_policy"
+        ]
+      },
+      "package_usage_stats": {
+        "title": "Package usage stats",
+        "type": "object",
+        "properties": {
+          "agent_policy_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "agent_policy_count"
         ]
       },
       "fleet_status_response": {
@@ -3402,6 +3713,9 @@
           "ca_sha256": {
             "type": "string"
           },
+          "ca_trusted_fingerprint": {
+            "type": "string"
+          },
           "api_key": {
             "type": "string"
           },
@@ -3417,18 +3731,6 @@
           "is_default",
           "name",
           "type"
-        ]
-      },
-      "package_usage_stats": {
-        "title": "Package usage stats",
-        "type": "object",
-        "properties": {
-          "agent_policy_count": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "agent_policy_count"
         ]
       }
     }

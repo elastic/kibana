@@ -1,0 +1,26 @@
+title: Preconfiguration Error
+type: object
+properties:
+  package:
+    type: object
+    properties:
+      name:
+        type: string
+      version:
+        type: string
+  agentPolicy:
+    type: object
+    properties:
+      name:
+        type: string
+  error:
+    type: object
+    properties:
+      name:
+        type: string
+      message:
+        type: string
+      stack:
+        type: string
+  required:
+    - error

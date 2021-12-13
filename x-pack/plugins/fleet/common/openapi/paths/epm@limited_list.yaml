@@ -1,5 +1,5 @@
 get:
-  summary: Packages - List
+  summary: Packages - Get limited list
   tags: []
   responses:
     '200':
@@ -12,6 +12,6 @@ get:
               schema:
                 type: array
                 items:
-                  $ref: ../components/schemas/search_result.yaml
-  operationId: list-all-packages
+                  type: string
+  operationId: list-limited-packages
 parameters: []

@@ -1,0 +1,30 @@
+put:
+  summary: Preconfiguration
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              policies:
+                type: array
+                items:
+                  type: object
+                  items:
+                    id:
+                      type: string
+                    updated_at:
+                      type: string
+              packages:
+                type: array
+                items:
+                  type: string
+              nonFatalErrors:
+                type: array
+                items:
+                  $ref:
+
+  operationId: get-settings
