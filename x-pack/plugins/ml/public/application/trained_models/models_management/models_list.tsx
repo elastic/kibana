@@ -82,6 +82,7 @@ export const ModelsList: FC = () => {
     services: {
       application: { navigateToUrl, capabilities },
       overlays,
+      theme,
     },
   } = useMlKibana();
   const urlLocator = useMlLocator()!;
@@ -112,7 +113,7 @@ export const ModelsList: FC = () => {
     {}
   );
 
-  const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays), []);
+  const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays, theme), []);
 
   const navigateToPath = useNavigateToPath();
 
