@@ -15,11 +15,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { INVALID_LICENSE } from '../../../../../../common/custom_link';
-import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
-import { useLicenseContext } from '../../../../../context/license/use_license_context';
-import { FETCH_STATUS, useFetcher } from '../../../../../hooks/use_fetcher';
-import { LicensePrompt } from '../../../../shared/license_prompt';
+import { INVALID_LICENSE } from '../../../../../common/custom_link';
+import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
+import { useLicenseContext } from '../../../../context/license/use_license_context';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { LicensePrompt } from '../../../shared/license_prompt';
 import { CreateCustomLinkButton } from './CreateCustomLinkButton';
 import { CreateEditCustomLinkFlyout } from './create_edit_custom_link_flyout';
 import { CustomLinkTable } from './custom_link_table';
@@ -84,7 +84,7 @@ export function CustomLinkOverview() {
       )}
 
       <EuiText color="subdued">
-        {i18n.translate('xpack.apm.settings.customizeUI.customLink.info', {
+        {i18n.translate('xpack.apm.settings.customLink.info', {
           defaultMessage:
             'These links will be shown in the Actions context menu in selected areas of the app, e.g. by the transactions detail.',
         })}
@@ -96,7 +96,7 @@ export function CustomLinkOverview() {
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
             <h2>
-              {i18n.translate('xpack.apm.settings.customizeUI.customLink', {
+              {i18n.translate('xpack.apm.settings.customLink', {
                 defaultMessage: 'Custom Links',
               })}
             </h2>

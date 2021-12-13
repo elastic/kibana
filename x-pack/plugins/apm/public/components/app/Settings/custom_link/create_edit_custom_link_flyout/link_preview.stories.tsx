@@ -7,7 +7,7 @@
 
 import React, { ComponentProps } from 'react';
 import { CoreStart } from 'kibana/public';
-import { createCallApmApi } from '../../../../../../services/rest/createCallApmApi';
+import { createCallApmApi } from '../../../../../services/rest/createCallApmApi';
 import { LinkPreview } from './link_preview';
 
 export default {

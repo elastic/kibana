@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
 import { isEmpty, get } from 'lodash';
-import { FILTER_OPTIONS } from '../../../../../../../common/custom_link/custom_link_filter_options';
+import { FILTER_OPTIONS } from '../../../../../../common/custom_link/custom_link_filter_options';
 import {
   Filter,
   FilterKey,
-} from '../../../../../../../common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
+} from '../../../../../../common/custom_link/custom_link_types';
+import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
 
 interface FilterSelectOption {
   value: 'DEFAULT' | FilterKey;
@@ -23,7 +23,7 @@ interface FilterSelectOption {
 export const DEFAULT_OPTION: FilterSelectOption = {
   value: 'DEFAULT',
   text: i18n.translate(
-    'xpack.apm.settings.customizeUI.customLink.flyOut.filters.defaultOption',
+    'xpack.apm.settings.customLink.flyOut.filters.defaultOption',
     { defaultMessage: 'Select field...' }
   ),
 };
@@ -65,7 +65,7 @@ const getInvalidTemplateVariables = (
 const validateUrl = (url: string, transaction?: Transaction) => {
   if (!transaction || isEmpty(transaction)) {
     return i18n.translate(
-      'xpack.apm.settings.customizeUI.customLink.preview.transaction.notFound',
+      'xpack.apm.settings.customLink.preview.transaction.notFound',
       {
         defaultMessage:
           "We couldn't find a matching transaction document based on the defined filters.",
@@ -76,7 +76,7 @@ const validateUrl = (url: string, transaction?: Transaction) => {
     const invalidVariables = getInvalidTemplateVariables(url, transaction);
     if (!isEmpty(invalidVariables)) {
       return i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.preview.contextVariable.noMatch',
+        'xpack.apm.settings.customLink.preview.contextVariable.noMatch',
         {
           defaultMessage:
             "We couldn't find a value match for {variables} in the example transaction document.",
@@ -90,7 +90,7 @@ const validateUrl = (url: string, transaction?: Transaction) => {
     }
   } catch (e) {
     return i18n.translate(
-      'xpack.apm.settings.customizeUI.customLink.preview.contextVariable.invalid',
+      'xpack.apm.settings.customLink.preview.contextVariable.invalid',
       {
         defaultMessage:
           "We couldn't find an example transaction document due to invalid variable(s) defined.",

@@ -16,11 +16,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
-import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
-import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
-import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
-import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
+import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
+import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 
 interface Props {
   items: CustomLink[];
@@ -35,28 +35,25 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
   const columns: Array<ITableColumn<CustomLink>> = [
     {
       field: 'label',
-      name: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.table.name',
-        { defaultMessage: 'Name' }
-      ),
+      name: i18n.translate('xpack.apm.settings.customLink.table.name', {
+        defaultMessage: 'Name',
+      }),
       truncateText: true,
     },
     {
       field: 'url',
-      name: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.table.url',
-        { defaultMessage: 'URL' }
-      ),
+      name: i18n.translate('xpack.apm.settings.customLink.table.url', {
+        defaultMessage: 'URL',
+      }),
       truncateText: true,
     },
     {
       width: '160px',
       align: RIGHT_ALIGNMENT,
       field: '@timestamp',
-      name: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.table.lastUpdated',
-        { defaultMessage: 'Last updated' }
-      ),
+      name: i18n.translate('xpack.apm.settings.customLink.table.lastUpdated', {
+        defaultMessage: 'Last updated',
+      }),
       sortable: true,
       render: (value: number) => (
         <TimestampTooltip time={value} timeUnit="minutes" />
@@ -70,11 +67,11 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
           ? [
               {
                 name: i18n.translate(
-                  'xpack.apm.settings.customizeUI.customLink.table.editButtonLabel',
+                  'xpack.apm.settings.customLink.table.editButtonLabel',
                   { defaultMessage: 'Edit' }
                 ),
                 description: i18n.translate(
-                  'xpack.apm.settings.customizeUI.customLink.table.editButtonDescription',
+                  'xpack.apm.settings.customLink.table.editButtonDescription',
                   { defaultMessage: 'Edit this custom link' }
                 ),
                 icon: 'pencil',
@@ -105,7 +102,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
         fullWidth
         onChange={(e) => setSearchTerm(e.target.value)}
         placeholder={i18n.translate(
-          'xpack.apm.settings.customizeUI.customLink.searchInput.filter',
+          'xpack.apm.settings.customLink.searchInput.filter',
           {
             defaultMessage: 'Filter links by Name and URL...',
           }
@@ -135,13 +132,10 @@ function NoResultFound({ value }: { value: string }) {
     <EuiFlexGroup justifyContent="spaceAround">
       <EuiFlexItem grow={false}>
         <EuiText size="s">
-          {i18n.translate(
-            'xpack.apm.settings.customizeUI.customLink.table.noResultFound',
-            {
-              defaultMessage: `No results for "{value}".`,
-              values: { value },
-            }
-          )}
+          {i18n.translate('xpack.apm.settings.customLink.table.noResultFound', {
+            defaultMessage: `No results for "{value}".`,
+            values: { value },
+          })}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
