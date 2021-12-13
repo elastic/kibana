@@ -15,7 +15,10 @@ import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { mlJobService } from '../../services/job_service';
 import { getDataViewIdFromName } from '../../util/index_utils';
-import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
+import {
+  formatHumanReadableDateTimeSeconds,
+  timeFormatter,
+} from '../../../../common/util/date_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { ml } from '../../services/ml_api_service';
 import { escapeForElasticsearchQuery, replaceStringTokens } from '../../util/string_utils';
@@ -36,8 +39,6 @@ import { TimeRangeBounds } from '../../util/time_buckets';
 import { MlKibanaReactContextValue } from '../../contexts/kibana';
 // @ts-ignore
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
-import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
-import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 
 interface LinksMenuProps {
   anomaly: Anomaly;
@@ -52,8 +53,6 @@ interface LinksMenuProps {
 export const LinksMenuUI = (props: LinksMenuProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [openInDiscoverUrl, setOpenInDiscoverUrl] = useState<string | undefined>();
-
-  const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
 
   useEffect(() => {
     let unmounted = false;
@@ -89,8 +88,8 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           latestMoment.add(1, 'h'); // e.g. 2016-02-08T18:59:59.999Z
         }
       }
-      const from = dateFormatter(earliestMoment.unix() * 1000); // e.g. 2016-02-08T16:00:00.000Z
-      const to = dateFormatter(latestMoment.unix() * 1000);
+      const from = timeFormatter(earliestMoment.unix() * 1000); // e.g. 2016-02-08T16:00:00.000Z
+      const to = timeFormatter(latestMoment.unix() * 1000);
 
       let kqlQuery = '';
 
