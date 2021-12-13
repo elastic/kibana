@@ -41,7 +41,10 @@ import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detec
 import { RuleParams } from '../../schemas/rule_schemas';
 import { SanitizedAlert, ResolvedSanitizedRule } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
-import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
+import {
+  getPerformBulkActionSchemaMock,
+  getPerformUpdateBulkActionSchemaMock,
+} from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { GetCurrentStatusBulkResult } from '../../rule_execution_log/types';
 // eslint-disable-next-line no-restricted-imports
@@ -130,6 +133,13 @@ export const getBulkActionRequest = () =>
     method: 'patch',
     path: DETECTION_ENGINE_RULES_BULK_ACTION,
     body: getPerformBulkActionSchemaMock(),
+  });
+
+export const getUpdateBulkActionRequest = () =>
+  requestMock.create({
+    method: 'patch',
+    path: DETECTION_ENGINE_RULES_BULK_ACTION,
+    body: getPerformUpdateBulkActionSchemaMock(),
   });
 
 export const getDeleteBulkRequest = () =>

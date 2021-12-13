@@ -11,6 +11,7 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
   getBulkActionRequest,
+  getUpdateBulkActionRequest,
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
 } from '../__mocks__/request_responses';
@@ -74,6 +75,33 @@ describe.each([
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
+
+    it('catches error if disable throws error', async () => {
+      clients.rulesClient.disable.mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      const response = await server.inject(getBulkActionRequest(), context);
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Test error',
+        status_code: 500,
+      });
+    });
+
+    it('rejects patching a rule if mlAuthz fails', async () => {
+      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
+        validateRuleType: jest
+          .fn()
+          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      });
+      const response = await server.inject(getBulkActionRequest(), context);
+
+      expect(response.status).toEqual(403);
+      expect(response.body).toEqual({
+        message: 'mocked validation message',
+        status_code: 403,
+      });
+    });
   });
 
   describe('request validation', () => {
@@ -124,40 +152,14 @@ describe.each([
     });
   });
 
-  describe('failures', () => {
-    it('catches failures if disable throws error', async () => {
-      clients.rulesClient.disable.mockImplementation(async () => {
-        throw new Error('Test error');
-      });
-      const response = await server.inject(getBulkActionRequest(), context);
-      expect(response.status).toEqual(200);
-
-      expect(response.body).toEqual({
-        errors: [
-          {
-            error: {
-              message: 'Test error',
-              statusCode: 500,
-              rule: {
-                id: mockRule.id,
-                name: mockRule.name,
-              },
-            },
-          },
-        ],
-        failed_rules_count: 1,
-        rules_count: 1,
-        success: false,
-      });
-    });
-
+  describe('update action failures', () => {
     it('catches failures when patching rule if mlAuthz fails', async () => {
       (buildMlAuthz as jest.Mock).mockReturnValueOnce({
         validateRuleType: jest
           .fn()
           .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
       });
-      const response = await server.inject(getBulkActionRequest(), context);
+      const response = await server.inject(getUpdateBulkActionRequest(), context);
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -166,10 +168,10 @@ describe.each([
             error: {
               message: 'mocked validation message',
               statusCode: 403,
-              rule: {
-                id: mockRule.id,
-                name: mockRule.name,
-              },
+            },
+            rule: {
+              id: mockRule.id,
+              name: mockRule.name,
             },
           },
         ],
@@ -195,7 +197,7 @@ describe.each([
           .mockImplementationOnce(() => ({ valid: true }))
           .mockImplementationOnce(() => ({ valid: true })),
       });
-      const response = await server.inject(getBulkActionRequest(), context);
+      const response = await server.inject(getUpdateBulkActionRequest(), context);
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -203,11 +205,11 @@ describe.each([
           {
             error: {
               message: 'mocked validation message',
-              rule: {
-                id: failedRuleId,
-                name: failedRuleName,
-              },
               statusCode: 403,
+            },
+            rule: {
+              id: failedRuleId,
+              name: failedRuleName,
             },
           },
         ],
@@ -218,7 +220,7 @@ describe.each([
     });
   });
 
-  it('should process large number of rules, larger than request chunk', async () => {
+  it('should process large number of rules, larger than request chunk for update action', async () => {
     const rulesNumber = 3_000;
     clients.rulesClient.find.mockResolvedValue(
       getFindResultWithMultiHits({
@@ -227,7 +229,7 @@ describe.each([
       })
     );
 
-    const response = await server.inject(getBulkActionRequest(), context);
+    const response = await server.inject(getUpdateBulkActionRequest(), context);
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({ success: true, rules_count: rulesNumber });

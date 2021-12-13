@@ -35,14 +35,15 @@ interface ActionPerformError {
   error: {
     message: string;
     statusCode: number;
-    rule: {
-      id: string;
-      name: string;
-    };
+  };
+  rule: {
+    id: string;
+    name: string;
   };
 }
 
 type ActionPerform = undefined | ActionPerformError;
+
 // wraps bulk action and catches errors
 const actionPerformWrapper = async (
   func: () => Promise<void>,
@@ -53,7 +54,8 @@ const actionPerformWrapper = async (
   } catch (err) {
     const { message, statusCode } = transformError(err);
     return {
-      error: { message, statusCode, rule: { id: rule.id, name: rule.name } },
+      error: { message, statusCode },
+      rule: { id: rule.id, name: rule.name },
     };
   }
 };
