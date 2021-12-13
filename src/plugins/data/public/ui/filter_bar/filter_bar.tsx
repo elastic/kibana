@@ -27,6 +27,8 @@ import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
 // import { FilterOptions } from './filter_options';
 import { useKibana } from '../../../../kibana_react/public';
 import { IDataPluginServices, IIndexPattern } from '../..';
+import type { SavedQuery } from '../../query';
+import { SavedQueriesItem } from './saved_queries_item';
 
 import { UI_SETTINGS } from '../../../common';
 
@@ -38,6 +40,8 @@ interface Props {
   intl: InjectedIntl;
   appName: string;
   timeRangeForSuggestionsOverride?: boolean;
+  selectedSavedQueries?: SavedQuery[];
+  removeSelectedSavedQuery: (savedQuery: SavedQuery) => void;
 }
 
 function FilterBarUI(props: Props) {
@@ -58,17 +62,32 @@ function FilterBarUI(props: Props) {
   const onAddFilterClick = () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
 
   function renderItems() {
-    return props.filters.map((filter, i) => (
+    return props.filters.map((filter, i) => {
+      // Do not display filters from saved queries
+      if (filter.meta.isFromSavedQuery) return null;
+      return (
+        <EuiFlexItem key={i} grow={false} className="globalFilterBar__flexItem">
+          <FilterItem
+            id={`${i}`}
+            intl={props.intl}
+            filter={filter}
+            onUpdate={(newFilter) => onUpdate(i, newFilter)}
+            onRemove={() => onRemove(i)}
+            indexPatterns={props.indexPatterns}
+            uiSettings={uiSettings!}
+            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+          />
+        </EuiFlexItem>
+      );
+    });
+  }
+
+  function renderSelectedSavedQueries() {
+    return props?.selectedSavedQueries?.map((savedQuery, i) => (
       <EuiFlexItem key={i} grow={false} className="globalFilterBar__flexItem">
-        <FilterItem
-          id={`${i}`}
-          intl={props.intl}
-          filter={filter}
-          onUpdate={(newFilter) => onUpdate(i, newFilter)}
-          onRemove={() => onRemove(i)}
-          indexPatterns={props.indexPatterns}
-          uiSettings={uiSettings!}
-          timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+        <SavedQueriesItem
+          savedQuery={savedQuery}
+          onClick={() => props.removeSelectedSavedQuery(savedQuery)}
         />
       </EuiFlexItem>
     ));
@@ -220,6 +239,7 @@ function FilterBarUI(props: Props) {
           alignItems="center"
           tabIndex={-1}
         >
+          {renderSelectedSavedQueries()}
           {renderItems()}
           {/* {renderAddFilter()} */}
         </EuiFlexGroup>

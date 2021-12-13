@@ -14,6 +14,7 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiPopover,
   useGeneratedHtmlId,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '../../../common';
@@ -38,7 +39,7 @@ interface Props {
   dateRangeTo?: string;
   toggleAddFilterModal?: (value: boolean, addFilterMode?: string) => void;
   savedQueryService: SavedQueryService;
-  applySelectedSavedQueries: (selectedSavedQuery?: SavedQuery[]) => void;
+  applySelectedQuery: (selectedSavedQuery: SavedQuery) => void;
   saveQueryFormComponent?: JSX.Element;
 }
 
@@ -56,7 +57,7 @@ export function FilterSetMenu({
   onQueryChange,
   toggleAddFilterModal,
   savedQueryService,
-  applySelectedSavedQueries,
+  applySelectedQuery,
   saveQueryFormComponent,
   openFilterSetPopover,
   toggleFilterSetPopover,
@@ -135,10 +136,10 @@ export function FilterSetMenu({
       icon: 'timefilter' in savedQuery.attributes ? 'calendar' : undefined,
       onClick: () => {
         closePopover();
-        applySelectedSavedQueries([savedQuery]);
+        applySelectedQuery(savedQuery);
       },
     };
-  });
+  }) as unknown as EuiContextMenuPanelItemDescriptor[];
 
   const panels = [
     {

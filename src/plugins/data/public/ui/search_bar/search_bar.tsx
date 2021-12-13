@@ -354,17 +354,17 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     });
   };
 
-  public applySelectedSavedQueries = (selectedSavedQueries?: SavedQuery[]) => {
-    // temporary work with only one selection
-    const savedQueries = selectedSavedQueries ?? (this.state.selectedSavedQueries as SavedQuery[]);
-    const dateRangeFrom = get(
-      savedQueries[0],
-      'attributes.timefilter.from',
-      this.state.dateRangeFrom
-    );
-    const dateRangeTo = get(savedQueries[0], 'attributes.timefilter.to', this.state.dateRangeTo);
+  public applySelectedSavedQueries = (selectedSavedQuery?: SavedQuery[]) => {
+    const savedQueries = selectedSavedQuery ?? (this.state.selectedSavedQueries as SavedQuery[]);
     const filters: Filter[] = [];
-    savedQueries.forEach((savedQuery) => {
+    const finalQueryFromSelectedSavedObjects: Query = {
+      language: 'kuery',
+      query: '',
+    };
+    let dateRangeFrom = this.state.dateRangeFrom;
+    let dateRangeTo = this.state.dateRangeTo;
+
+    savedQueries.forEach((savedQuery, idx) => {
       if (savedQuery.attributes.filters) {
         // filtersIdsFromSavedQueries
         const updatedWithIconFilters = savedQuery.attributes.filters.map((filter) => {
@@ -378,19 +378,46 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         });
         filters.push(...updatedWithIconFilters);
       }
+      if (savedQuery.attributes.query && savedQuery.attributes.query.query) {
+        const existingQuery = finalQueryFromSelectedSavedObjects.query;
+        const updatedQuery =
+          idx !== 0
+            ? existingQuery.concat(' and ', savedQuery.attributes.query.query)
+            : savedQuery.attributes.query.query;
+        finalQueryFromSelectedSavedObjects.query = updatedQuery;
+      }
+      if (savedQuery.attributes.timefilter) {
+        dateRangeFrom = savedQuery.attributes.timefilter.from || dateRangeFrom;
+        dateRangeTo = savedQuery.attributes.timefilter.to || dateRangeTo;
+      }
     });
 
-    this.setState({
-      query: savedQueries[0].attributes.query,
-      dateRangeFrom,
-      dateRangeTo,
+    this.props?.onQuerySubmit?.({
+      query: finalQueryFromSelectedSavedObjects,
+      dateRange: {
+        from: dateRangeFrom,
+        to: dateRangeTo,
+      },
     });
 
     this.props?.onFiltersUpdated?.(filters!);
+    if (selectedSavedQuery) {
+      this.setState({
+        selectedSavedQueries: [...selectedSavedQuery],
+      });
+    }
+  };
 
-    // savedQueries.forEach((savedQuery) => {
-    //   this.props?.onSavedQueryUpdated?.(savedQuery);
-    // });
+  public applySelectedQuery = (selectedSavedQuery: SavedQuery) => {
+    this.applySelectedSavedQueries([selectedSavedQuery]);
+  };
+
+  public removeSelectedSavedQuery = (savedQuery: SavedQuery) => {
+    const selectedSavedQueries: SavedQuery[] = this.state.selectedSavedQueries;
+    const updatedSelectedSavedQueries = selectedSavedQueries.filter(
+      (sq) => sq.id !== savedQuery.id
+    );
+    this.applySelectedSavedQueries(updatedSelectedSavedQueries);
   };
 
   public onEnableAll = () => {
@@ -424,6 +451,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   public onRemoveAll = () => {
+    this.setState({ selectedSavedQueries: [] });
     this.props.onFiltersUpdated?.([]);
   };
 
@@ -450,6 +478,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onLoad={this.onLoadSavedQuery}
         savedQueryService={this.savedQueryService}
         onClearSavedQuery={this.props.onClearSavedQuery}
+        selectedSavedQueries={this.state.selectedSavedQueries}
       >
         {(list) => list}
       </SavedQueryManagementComponent>
@@ -491,7 +520,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         dateRangeTo={this.state.dateRangeTo}
         toggleAddFilterModal={this.toggleAddFilterModal}
         savedQueryService={this.savedQueryService}
-        applySelectedSavedQueries={this.applySelectedSavedQueries}
+        applySelectedQuery={this.applySelectedQuery}
         saveQueryFormComponent={saveQueryFormComponent}
         toggleFilterSetPopover={this.toggleFilterSetPopover}
         openFilterSetPopover={this.state.openFilterSetPopover}
@@ -560,6 +589,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             indexPatterns={this.props.indexPatterns!}
             appName={this.services.appName}
             timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+            selectedSavedQueries={this.state.selectedSavedQueries}
+            removeSelectedSavedQuery={this.removeSelectedSavedQuery}
           />
         </div>
       );

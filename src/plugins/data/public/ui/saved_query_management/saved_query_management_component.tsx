@@ -52,6 +52,7 @@ interface Props {
   showSaveQuery?: boolean;
   loadedSavedQuery?: SavedQuery;
   savedQueryService: SavedQueryService;
+  selectedSavedQueries: SavedQuery[];
   onSave: () => void;
   onSaveAsNew: () => void;
   onLoad: (savedQueries: SavedQuery[]) => void;
@@ -74,6 +75,7 @@ export function SavedQueryManagementComponent({
   onLoad,
   onClearSavedQuery,
   savedQueryService,
+  selectedSavedQueries,
   children,
 }: Props) {
   const [isOpen, setIsOpen] = useState(true);
@@ -83,7 +85,7 @@ export function SavedQueryManagementComponent({
   const [pageSize, setPageSize] = useState(perPage);
   const [searchValue, setSearchValue] = useState('');
   const [savedQueriesBySearch, setSavedQueriesBySearch] = useState([] as SavedQuery[]);
-  const [selectedQueries, setSelectedQueries] = useState([] as SavedQuery[]);
+  const [selectedQueries, setSelectedQueries] = useState(selectedSavedQueries);
 
   const cancelPendingListingRequest = useRef<() => void>(() => {});
 
@@ -318,7 +320,7 @@ export function SavedQueryManagementComponent({
         itemId="id"
         columns={tableColumns}
         pagination={pagination}
-        selection={{ onSelectionChange }}
+        selection={{ onSelectionChange, initialSelected: selectedQueries }}
         hasActions={true}
         onChange={onTableChange}
       />
