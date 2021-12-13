@@ -87,7 +87,7 @@ export const OverviewPage: FC = () => {
           <GettingStartedCallout />
 
           <EuiPanel hasShadow={false} hasBorder>
-            <NodesList />
+            <NodesList compactView />
           </EuiPanel>
 
           <EuiSpacer size="m" />

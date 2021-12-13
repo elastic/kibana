@@ -43,7 +43,11 @@ export const getDefaultNodesListState = (): ListingPageUrlState => ({
   sortDirection: 'asc',
 });
 
-export const NodesList: FC = () => {
+export interface NodesListProps {
+  compactView?: boolean;
+}
+
+export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
   const trainedModelsApiService = useTrainedModelsApiService();
 
   const refresh = useRefresh();
@@ -162,11 +166,7 @@ export const NodesList: FC = () => {
     };
   }, [items]);
 
-  const { onTableChange, pagination, sorting } = useTableSettings<NodeItem>(
-    items,
-    pageState,
-    updatePageState
-  );
+  let tableSettings: object = useTableSettings<NodeItem>(items, pageState, updatePageState);
 
   const search: EuiSearchBarProps = {
     query: searchQueryText,
@@ -195,6 +195,10 @@ export const NodesList: FC = () => {
     [refresh]
   );
 
+  if (compactView) {
+    tableSettings = {};
+  }
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -210,20 +214,18 @@ export const NodesList: FC = () => {
         <EuiInMemoryTable<NodeItem>
           allowNeutralSort={false}
           columns={columns}
-          hasActions={true}
+          hasActions={false}
           isExpandable={true}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isSelectable={false}
           items={items}
           itemId={'id'}
           loading={isLoading}
-          search={search}
+          search={compactView ? undefined : search}
+          {...tableSettings}
           rowProps={(item) => ({
             'data-test-subj': `mlNodesTableRow row-${item.id}`,
           })}
-          pagination={pagination}
-          onTableChange={onTableChange}
-          sorting={sorting}
           data-test-subj={isLoading ? 'mlNodesTable loading' : 'mlNodesTable loaded'}
         />
       </div>
