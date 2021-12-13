@@ -202,18 +202,38 @@ export function translateToEndpointExceptions(
   }
 }
 
-function getMatcherFunction(field: string, matchAny?: boolean): TranslatedEntryMatcher {
+function getMatcherFunction({
+  field,
+  matchAny,
+  os,
+}: {
+  field: string;
+  matchAny?: boolean;
+  os: ExceptionListItemSchema['os_types'][number];
+}): TranslatedEntryMatcher {
   return matchAny
     ? field.endsWith('.caseless')
       ? 'exact_caseless_any'
       : 'exact_cased_any'
     : field.endsWith('.caseless')
-    ? 'exact_caseless'
+    ? os === 'linux'
+      ? 'exact_cased'
+      : 'exact_caseless'
     : 'exact_cased';
 }
 
-function getMatcherWildcardFunction(field: string): TranslatedEntryMatchWildcardMatcher {
-  return field.endsWith('.caseless') ? 'wildcard_caseless' : 'wildcard_cased';
+function getMatcherWildcardFunction({
+  field,
+  os,
+}: {
+  field: string;
+  os: ExceptionListItemSchema['os_types'][number];
+}): TranslatedEntryMatchWildcardMatcher {
+  return field.endsWith('.caseless')
+    ? os === 'linux'
+      ? 'wildcard_cased'
+      : 'wildcard_caseless'
+    : 'wildcard_cased';
 }
 
 function normalizeFieldName(field: string): string {
@@ -317,18 +337,18 @@ function translateEntry(
       };
     }
     case 'match': {
-      const matcher = getMatcherFunction(entry.field);
+      const matcher = getMatcherFunction({ field: entry.field, os });
       return translatedEntryMatchMatcher.is(matcher)
         ? {
             field: normalizeFieldName(entry.field),
             operator: entry.operator,
-            type: os === 'linux' ? 'exact_cased' : matcher,
+            type: matcher,
             value: entry.value,
           }
         : undefined;
     }
     case 'match_any': {
-      const matcher = getMatcherFunction(entry.field, true);
+      const matcher = getMatcherFunction({ field: entry.field, matchAny: true, os });
       return translatedEntryMatchAnyMatcher.is(matcher)
         ? {
             field: normalizeFieldName(entry.field),
@@ -339,7 +359,7 @@ function translateEntry(
         : undefined;
     }
     case 'wildcard': {
-      const wildcardMatcher = getMatcherWildcardFunction(entry.field);
+      const wildcardMatcher = getMatcherWildcardFunction({ field: entry.field, os });
       const translatedEntryWildcardMatcher =
         translatedEntryMatchWildcardMatcher.is(wildcardMatcher);
 
@@ -349,7 +369,7 @@ function translateEntry(
           const wildcardProcessEntry: TranslatedEntryMatchWildcard = {
             field: normalizeFieldName(entry.field),
             operator: entry.operator,
-            type: os === 'linux' ? 'wildcard_cased' : wildcardMatcher,
+            type: wildcardMatcher,
             value: entry.value,
           };
 
