@@ -34,7 +34,7 @@ import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects
 import { asSavedObjectExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
-import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 
