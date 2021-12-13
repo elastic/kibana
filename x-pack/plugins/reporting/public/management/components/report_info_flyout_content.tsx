@@ -110,7 +110,9 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       title: i18n.translate('xpack.reporting.listing.infoPanel.dimensionsInfoWidth', {
         defaultMessage: 'Width (in pixels)',
       }),
-      description: info.layout?.dimensions?.width || UNKNOWN,
+      description:
+        info.layout?.dimensions?.width != null ? Math.ceil(info.layout.dimensions.width) : UNKNOWN,
+
     },
 
     {
