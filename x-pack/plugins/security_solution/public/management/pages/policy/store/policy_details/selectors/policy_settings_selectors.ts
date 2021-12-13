@@ -17,7 +17,7 @@ import {
   PolicyData,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
-import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
+import { policyFactory as policyConfigFactory } from '../../../../../../../common/endpoint/models/policy_config';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,

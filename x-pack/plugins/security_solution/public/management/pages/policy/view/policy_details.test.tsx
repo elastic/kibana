@@ -127,6 +127,7 @@ describe('Policy Details', () => {
       expect(pageTitle).toHaveLength(1);
       expect(pageTitle.text()).toEqual(policyPackagePolicy.name);
     });
+
     it('should navigate to list if back to link is clicked', async () => {
       policyView.update();
 
@@ -135,6 +136,7 @@ describe('Policy Details', () => {
       backToListLink.simulate('click', { button: 0 });
       expect(history.location.pathname).toEqual(endpointListPath);
     });
+
     it('should display agent stats', async () => {
       await asyncActions;
       policyView.update();

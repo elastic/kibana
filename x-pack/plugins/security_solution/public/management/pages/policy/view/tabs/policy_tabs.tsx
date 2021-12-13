@@ -12,24 +12,23 @@ import { useHistory } from 'react-router-dom';
 import { PolicyData } from '../../../../../../common/endpoint/types';
 import {
   getPolicyDetailPath,
+  getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
   getPolicyTrustedAppsPath,
 } from '../../../../common/routing';
 import {
   isOnHostIsolationExceptionsView,
+  isOnPolicyEventFiltersView,
   isOnPolicyFormView,
   isOnPolicyTrustedAppsView,
-  isOnPolicyEventFiltersView,
-  policyIdFromParams,
   policyDetails,
+  policyIdFromParams,
 } from '../../store/policy_details/selectors';
+import { PolicyEventFiltersLayout } from '../event_filters/layout';
 import { PolicyHostIsolationExceptionsTab } from '../host_isolation_exceptions/host_isolation_exceptions_tab';
 import { PolicyFormLayout } from '../policy_forms/components';
-import {
-  getPolicyDetailPath,
-  getPolicyTrustedAppsPath,
-  getPolicyEventFiltersPath,
-} from '../../../../common/routing';
+import { usePolicyDetailsSelector } from '../policy_hooks';
+import { PolicyTrustedAppsLayout } from '../trusted_apps/layout';
 
 export const PolicyTabs = React.memo(() => {
   const history = useHistory();
@@ -89,7 +88,10 @@ export const PolicyTabs = React.memo(() => {
         content: (
           <>
             <EuiSpacer />
-            <PolicyHostIsolationExceptionsTab policyId={policyId} policy={policyItem} />
+            <PolicyHostIsolationExceptionsTab
+              policyId={policyId}
+              policy={policyItem as PolicyData}
+            />
           </>
         ),
       },
@@ -125,7 +127,7 @@ export const PolicyTabs = React.memo(() => {
           break;
         case 'hostIsolationExceptions':
           path = getPolicyHostIsolationExceptionsPath(policyId);
-	case 'eventFilters':
+        case 'eventFilters':
           path = getPolicyEventFiltersPath(policyId);
       }
       history.push(path);
