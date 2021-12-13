@@ -899,11 +899,7 @@ export class VectorStyle implements IVectorStyle {
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
     mbMap.setLayoutProperty(symbolLayerId, 'icon-allow-overlap', true);
 
-    this._iconStyleProperty.syncIconWithMb(
-      symbolLayerId,
-      mbMap,
-      this._iconSizeStyleProperty.getIconPixelSize()
-    );
+    this._iconStyleProperty.syncIconWithMb(symbolLayerId, mbMap);
     // icon-color is only supported on SDF icons.
     this._fillColorStyleProperty.syncIconColorWithMb(symbolLayerId, mbMap);
     this._lineColorStyleProperty.syncHaloBorderColorWithMb(symbolLayerId, mbMap);

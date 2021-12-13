@@ -97,6 +97,7 @@ describe('#formatTimelineData', () => {
           threat: {
             enrichments: [
               {
+                feed: { name: [] },
                 indicator: {
                   provider: ['yourself'],
                   reference: [],
@@ -108,6 +109,7 @@ describe('#formatTimelineData', () => {
                 },
               },
               {
+                feed: { name: [] },
                 indicator: {
                   provider: ['other_you'],
                   reference: [],

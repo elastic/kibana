@@ -31,19 +31,17 @@ export class Plugin implements InfraClientPluginClass {
       registerFeatures(pluginsSetup.home);
     }
 
-    const { createInventoryMetricAlertType } = await import('./alerting/inventory');
-    const { createLogThresholdAlertType } = await import('./alerting/log_threshold');
-    const { createMetricThresholdAlertType } = await import('./alerting/metric_threshold');
+    const { createInventoryMetricRuleType } = await import('./alerting/inventory');
+    const { createLogThresholdRuleType } = await import('./alerting/log_threshold');
+    const { createMetricThresholdRuleType } = await import('./alerting/metric_threshold');
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createInventoryMetricAlertType()
+      createInventoryMetricRuleType()
     );
 
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(createLogThresholdRuleType());
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createLogThresholdAlertType()
-    );
-    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createMetricThresholdAlertType()
+      createMetricThresholdRuleType()
     );
     pluginsSetup.observability.dashboard.register({
       appName: 'infra_logs',
