@@ -73,7 +73,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
   const anomalyTimelineService = useMemo(
     () =>
       new AnomalyTimelineService(timefilter, uiSettings, mlResultsServiceProvider(mlApiServices)),
-    []
+    [timefilter, uiSettings, mlApiServices]
   );
 
   const refresh = useRefresh();
@@ -167,7 +167,6 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
   };
 
   useEffect(() => {
-    if (!refresh?.timeRange) return;
     loadJobs();
   }, [refresh?.timeRange]);
 

@@ -16,7 +16,7 @@ import { useTimefilter } from '../contexts/kibana';
 
 export interface Refresh {
   lastRefresh: number;
-  timeRange: { start: string; end: string };
+  timeRange?: { start: string; end: string };
 }
 
 /**
@@ -43,5 +43,5 @@ export const useRefresh = () => {
     );
   }, []);
 
-  return useObservable<Refresh>(refresh$, { timeRange: getTimRange() });
+  return useObservable<Refresh>(refresh$);
 };
