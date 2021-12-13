@@ -73,7 +73,7 @@ export function getActions(
         defaultMessage: 'Explore in Maps',
       }),
       type: 'icon',
-      icon: 'logoMaps',
+      icon: 'gisApp',
       available: (item: FieldVisConfig) => {
         return item.type === JOB_FIELD_TYPES.GEO_POINT || item.type === JOB_FIELD_TYPES.GEO_SHAPE;
       },

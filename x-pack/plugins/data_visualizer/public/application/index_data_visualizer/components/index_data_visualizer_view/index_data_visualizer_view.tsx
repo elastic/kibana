@@ -382,7 +382,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   useEffect(
     () => {
-      // If query in the filt
+      // Update data query manager if input string is updated
       data?.query.queryString.setQuery({
         query: searchString,
         language: searchQueryLanguage,
