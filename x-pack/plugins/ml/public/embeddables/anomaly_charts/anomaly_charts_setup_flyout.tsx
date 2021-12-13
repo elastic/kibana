@@ -8,7 +8,7 @@
 import React from 'react';
 import { CoreStart } from 'kibana/public';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint, wrapWithTheme } from '../../../../../../src/plugins/kibana_react/public';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { getDefaultExplorerChartsPanelTitle } from './anomaly_charts_embeddable';
 import { HttpService } from '../../application/services/http_service';
@@ -31,24 +31,28 @@ export async function resolveEmbeddableAnomalyChartsUserInput(
       const jobs = await anomalyDetectorService.getJobs$(jobIds).toPromise();
       const influencers = anomalyDetectorService.extractInfluencers(jobs);
       influencers.push(VIEW_BY_JOB_LABEL);
+      const { theme$ } = coreStart.theme;
       const modalSession = overlays.openModal(
         toMountPoint(
-          <AnomalyChartsInitializer
-            defaultTitle={title}
-            initialInput={input}
-            onCreate={({ panelTitle, maxSeriesToPlot }) => {
-              modalSession.close();
-              resolve({
-                jobIds,
-                title: panelTitle,
-                maxSeriesToPlot,
-              });
-            }}
-            onCancel={() => {
-              modalSession.close();
-              reject();
-            }}
-          />
+          wrapWithTheme(
+            <AnomalyChartsInitializer
+              defaultTitle={title}
+              initialInput={input}
+              onCreate={({ panelTitle, maxSeriesToPlot }) => {
+                modalSession.close();
+                resolve({
+                  jobIds,
+                  title: panelTitle,
+                  maxSeriesToPlot,
+                });
+              }}
+              onCancel={() => {
+                modalSession.close();
+                reject();
+              }}
+            />,
+            theme$
+          )
         )
       );
     } catch (error) {
