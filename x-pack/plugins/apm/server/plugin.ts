@@ -28,7 +28,12 @@ import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_
 import { createApmAgentConfigurationIndex } from './routes/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './routes/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './routes/settings/custom_link/create_custom_link_index';
-import { apmIndices, apmTelemetry, apmServerSettings } from './saved_objects';
+import {
+  apmIndices,
+  apmTelemetry,
+  apmServerSettings,
+  apmTraceDataSearch,
+} from './saved_objects';
 import type {
   ApmPluginRequestHandlerContext,
   APMRouteHandlerResources,
@@ -47,6 +52,7 @@ import {
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
+import { registerTraceSearchTaskType } from './lib/trace_explorer/register_trace_search_task_type';
 
 export class APMPlugin
   implements
@@ -73,8 +79,16 @@ export class APMPlugin
     core.savedObjects.registerType(apmIndices);
     core.savedObjects.registerType(apmTelemetry);
     core.savedObjects.registerType(apmServerSettings);
+    core.savedObjects.registerType(apmTraceDataSearch);
 
     const currentConfig = this.initContext.config.get<APMConfig>();
+
+    registerTraceSearchTaskType({
+      taskManagerSetup: plugins.taskManager!,
+      coreSetup: core,
+      config: currentConfig,
+    });
+
     this.currentConfig = currentConfig;
 
     if (

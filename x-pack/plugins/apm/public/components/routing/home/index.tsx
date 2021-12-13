@@ -21,6 +21,7 @@ import { ServiceMapHome } from '../../app/service_map';
 import { TraceOverview } from '../../app/trace_overview';
 import { ApmMainTemplate } from '../templates/apm_main_template';
 import { RedirectToBackendOverviewRouteView } from './redirect_to_backend_overview_route_view';
+import { TraceExplorer } from '../../app/trace_explorer';
 
 function page<TPath extends string>({
   path,
@@ -85,6 +86,13 @@ export const home = {
       path: '/services',
       title: ServiceInventoryTitle,
       element: <ServiceInventory />,
+    }),
+    page({
+      path: '/trace-explorer',
+      title: i18n.translate('xpack.apm.views.traceExplorer.title', {
+        defaultMessage: 'Trace explorer',
+      }),
+      element: <TraceExplorer />,
     }),
     page({
       path: '/traces',

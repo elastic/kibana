@@ -15,9 +15,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import type { ApmUrlParams } from '../../../../context/url_params_context/types';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/TransactionActionMenu';
@@ -25,27 +22,32 @@ import type { TraceSample } from '../../../../hooks/use_transaction_trace_sample
 import { MaybeViewTraceLink } from './MaybeViewTraceLink';
 import { TransactionTabs } from './TransactionTabs';
 import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { Environment } from '../../../../../common/environment_rt';
 
 interface Props {
-  urlParams: ApmUrlParams;
   waterfall: IWaterfall;
   isLoading: boolean;
   traceSamples: TraceSample[];
+  environment: Environment;
+  onSampleClick: (sample: { transactionId: string; traceId: string }) => void;
+  onTabClick: (tab: string) => void;
+  serviceName?: string;
+  waterfallItemId?: string;
+  detailTab?: string;
 }
 
 export function WaterfallWithSummary({
-  urlParams,
   waterfall,
   isLoading,
   traceSamples,
+  environment,
+  onSampleClick,
+  onTabClick,
+  serviceName,
+  waterfallItemId,
+  detailTab,
 }: Props) {
-  const history = useHistory();
   const [sampleActivePage, setSampleActivePage] = useState(0);
-
-  const {
-    query: { environment },
-  } = useApmParams('/services/{serviceName}/transactions/view');
 
   useEffect(() => {
     setSampleActivePage(0);
@@ -54,14 +56,7 @@ export function WaterfallWithSummary({
   const goToSample = (index: number) => {
     setSampleActivePage(index);
     const sample = traceSamples[index];
-    history.push({
-      ...history.location,
-      search: fromQuery({
-        ...toQuery(history.location.search),
-        transactionId: sample.transactionId,
-        traceId: sample.traceId,
-      }),
-    });
+    onSampleClick(sample);
   };
 
   const { entryWaterfallTransaction } = waterfall;
@@ -131,8 +126,11 @@ export function WaterfallWithSummary({
 
       <TransactionTabs
         transaction={entryTransaction}
-        urlParams={urlParams}
         waterfall={waterfall}
+        detailTab={detailTab}
+        serviceName={serviceName}
+        waterfallItemId={waterfallItemId}
+        onTabClick={onTabClick}
       />
     </>
   );

@@ -19,3 +19,6 @@ export const APM_TELEMETRY_SAVED_OBJECT_ID = 'apm-telemetry';
 // APM Server schema
 export const APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE = 'apm-server-schema';
 export const APM_SERVER_SCHEMA_SAVED_OBJECT_ID = 'apm-server-schema';
+
+// APM Trace data search
+export const APM_TRACE_DATA_SEARCH_SAVED_OBJECT_TYPE = 'trace-data-search';

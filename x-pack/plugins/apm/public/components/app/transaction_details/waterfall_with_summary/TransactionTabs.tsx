@@ -8,26 +8,31 @@
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { LogStream } from '../../../../../../infra/public';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import type { ApmUrlParams } from '../../../../context/url_params_context/types';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { TransactionMetadata } from '../../../shared/MetadataTable/TransactionMetadata';
 import { WaterfallContainer } from './waterfall_container';
 import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
 
 interface Props {
   transaction: Transaction;
-  urlParams: ApmUrlParams;
   waterfall: IWaterfall;
+  detailTab?: string;
+  serviceName?: string;
+  waterfallItemId?: string;
+  onTabClick: (tab: string) => void;
 }
 
-export function TransactionTabs({ transaction, urlParams, waterfall }: Props) {
-  const history = useHistory();
+export function TransactionTabs({
+  transaction,
+  waterfall,
+  detailTab,
+  waterfallItemId,
+  serviceName,
+  onTabClick,
+}: Props) {
   const tabs = [timelineTab, metadataTab, logsTab];
-  const currentTab =
-    tabs.find(({ key }) => key === urlParams.detailTab) ?? timelineTab;
+  const currentTab = tabs.find(({ key }) => key === detailTab) ?? timelineTab;
   const TabContent = currentTab.component;
 
   return (
@@ -37,13 +42,7 @@ export function TransactionTabs({ transaction, urlParams, waterfall }: Props) {
           return (
             <EuiTab
               onClick={() => {
-                history.replace({
-                  ...history.location,
-                  search: fromQuery({
-                    ...toQuery(history.location.search),
-                    detailTab: key,
-                  }),
-                });
+                onTabClick(currentTab.key);
               }}
               isSelected={currentTab.key === key}
               key={key}
@@ -57,7 +56,8 @@ export function TransactionTabs({ transaction, urlParams, waterfall }: Props) {
       <EuiSpacer />
 
       <TabContent
-        urlParams={urlParams}
+        waterfallItemId={waterfallItemId}
+        serviceName={serviceName}
         waterfall={waterfall}
         transaction={transaction}
       />
@@ -90,13 +90,21 @@ const logsTab = {
 };
 
 function TimelineTabContent({
-  urlParams,
+  waterfallItemId,
+  serviceName,
   waterfall,
 }: {
-  urlParams: ApmUrlParams;
+  waterfallItemId?: string;
+  serviceName?: string;
   waterfall: IWaterfall;
 }) {
-  return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
+  return (
+    <WaterfallContainer
+      waterfallItemId={waterfallItemId}
+      serviceName={serviceName}
+      waterfall={waterfall}
+    />
+  );
 }
 
 function MetadataTabContent({ transaction }: { transaction: Transaction }) {

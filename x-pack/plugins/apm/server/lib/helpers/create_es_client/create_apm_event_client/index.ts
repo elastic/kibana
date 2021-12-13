@@ -10,6 +10,10 @@ import type {
   TermsEnumResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ValuesType } from 'utility-types';
+import {
+  EqlSearchRequest,
+  EqlSearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { Profile } from '../../../../../typings/es_schemas/ui/profile';
 import {
@@ -42,6 +46,18 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
     includeLegacyData?: boolean;
   };
 };
+
+export type APMEventEQLSearchRequest = Omit<EqlSearchRequest, 'index'> & {
+  apm: {
+    events: ProcessorEvent[];
+  };
+};
+
+export type APMEventEQLSearchResponseOf<
+  TParams extends APMEventEQLSearchRequest
+> = EqlSearchResponse<
+  TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>
+>;
 
 export type APMEventESTermsEnumRequest = Omit<TermsEnumRequest, 'index'> & {
   apm: { events: ProcessorEvent[] };
@@ -140,6 +156,50 @@ export class APMEventClient {
       requestType,
       operationName,
       requestParams: searchParams,
+    });
+  }
+
+  async eqlSearch<TParams extends APMEventEQLSearchRequest>(
+    operationName: string,
+    params: TParams
+  ): Promise<APMEventEQLSearchResponseOf<TParams>> {
+    const requestType = '_eql/_search';
+    const { index } = unpackProcessorEvents(params, this.indices);
+
+    return callAsyncWithDebug({
+      cb: () => {
+        const { apm, ...rest } = params;
+        const eqlSearchPromise = withApmSpan(operationName, () => {
+          const controller = new AbortController();
+          return cancelEsRequestOnAbort(
+            this.esClient.eql.search(
+              {
+                index: Array.isArray(index) ? index.join(',') : index,
+                ...rest,
+              },
+              { signal: controller.signal }
+            ),
+            this.request,
+            controller
+          );
+        });
+
+        return unwrapEsResponse(eqlSearchPromise);
+      },
+      getDebugMessage: () => ({
+        body: getDebugBody({
+          params,
+          requestType,
+          operationName,
+        }),
+        title: getDebugTitle(this.request),
+      }),
+      isCalledWithInternalUser: false,
+      debug: this.debug,
+      request: this.request,
+      requestType,
+      operationName,
+      requestParams: params,
     });
   }
 

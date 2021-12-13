@@ -9,14 +9,17 @@ import type {
   FieldValuePair,
   CorrelationsClientParams,
 } from '../../../common/correlations/types';
-
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export interface OverallLatencyDistributionOptions
   extends CorrelationsClientParams {
   percentileThreshold: number;
   termFilters?: FieldValuePair[];
-  setup: Setup;
+  apmEventClient: APMEventClient;
+  range?: {
+    min: number;
+    max: number;
+  };
 }
 
 export interface OverallLatencyDistributionResponse {

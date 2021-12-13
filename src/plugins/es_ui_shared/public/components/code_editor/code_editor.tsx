@@ -52,6 +52,7 @@ export interface EuiCodeEditorProps extends SupportedAriaAttributes, Omit<IAceEd
    * The matching theme file must also be imported from `brace` (e.g., `import 'brace/theme/github';`)
    */
   theme?: IAceEditorProps['theme'];
+  onAceEditorRef?: (editor: AceEditor | undefined) => void;
 
   /**
    * Use string for a built-in mode or object for a custom mode
@@ -98,6 +99,7 @@ class EuiCodeEditor extends Component<EuiCodeEditorProps, EuiCodeEditorState> {
       setOrRemoveAttribute(textbox, 'aria-labelledby', this.props['aria-labelledby']);
       setOrRemoveAttribute(textbox, 'aria-describedby', this.props['aria-describedby']);
     }
+    this.props.onAceEditorRef?.(aceEditor);
   };
 
   onEscToExit = () => {

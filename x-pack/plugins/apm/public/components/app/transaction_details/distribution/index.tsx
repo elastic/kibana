@@ -19,6 +19,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { useHistory } from 'react-router-dom';
 import { useUiTracker } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
@@ -35,6 +36,10 @@ import { WaterfallWithSummary } from '../waterfall_with_summary';
 import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
 import { HeightRetainer } from '../../../shared/HeightRetainer';
 import { ChartTitleToolTip } from '../../correlations/chart_title_tool_tip';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 // Enforce min height so it's consistent across all tabs on the same level
 // to prevent "flickering" behavior
@@ -68,7 +73,28 @@ export function TransactionDistribution({
   traceSamples,
 }: TransactionDistributionProps) {
   const { urlParams } = useLegacyUrlParams();
-  const { waterfall, status: waterfallStatus } = useWaterfallFetcher();
+  const { traceId, transactionId } = urlParams;
+
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}/transactions/view');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const history = useHistory();
+  const { waterfall, status: waterfallStatus } = useWaterfallFetcher({
+    traceId,
+    transactionId,
+    start,
+    end,
+  });
+  const { waterfallItemId, detailTab } = urlParams;
+
+  const {
+    query: { environment },
+  } = useApmParams('/services/{serviceName}/transactions/view');
+
+  const { serviceName } = useApmServiceContext();
 
   const markerCurrentTransaction =
     waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
@@ -187,10 +213,32 @@ export function TransactionDistribution({
 
         <EuiSpacer size="s" />
         <WaterfallWithSummary
-          urlParams={urlParams}
           waterfall={waterfall}
           isLoading={waterfallStatus === FETCH_STATUS.LOADING}
           traceSamples={traceSamples}
+          environment={environment}
+          onSampleClick={(sample) => {
+            history.push({
+              ...history.location,
+              search: fromQuery({
+                ...toQuery(history.location.search),
+                transactionId: sample.transactionId,
+                traceId: sample.traceId,
+              }),
+            });
+          }}
+          onTabClick={(tab) => {
+            history.replace({
+              ...history.location,
+              search: fromQuery({
+                ...toQuery(history.location.search),
+                detailTab: tab,
+              }),
+            });
+          }}
+          serviceName={serviceName}
+          waterfallItemId={waterfallItemId}
+          detailTab={detailTab}
         />
       </div>
     </HeightRetainer>

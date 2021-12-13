@@ -33,7 +33,10 @@
   ],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "apm"],
+  "configPath": [
+    "xpack",
+    "apm"
+  ],
   "requiredBundles": [
     "fleet",
     "home",
@@ -41,6 +44,7 @@
     "kibanaUtils",
     "maps",
     "ml",
-    "observability"
+    "observability",
+    "esUiShared"
   ]
 }

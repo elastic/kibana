@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isArray } from 'lodash';
 import type {
   FieldValuePair,
   CorrelationsParams,
@@ -13,7 +14,9 @@ import type {
 import { getCorrelationsFilters } from './get_filters';
 
 export const getTermsQuery = ({ fieldName, fieldValue }: FieldValuePair) => {
-  return { term: { [fieldName]: fieldValue } };
+  return isArray(fieldValue)
+    ? { terms: { [fieldName]: fieldValue } }
+    : { term: { [fieldName]: fieldValue } };
 };
 
 interface QueryParams {

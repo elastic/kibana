@@ -29,8 +29,7 @@ export async function getOverallLatencyDistribution(
   return withApmSpan('get_overall_latency_distribution', async () => {
     const overallLatencyDistribution: OverallLatencyDistributionResponse = {};
 
-    const { setup, termFilters, ...rawParams } = options;
-    const { apmEventClient } = setup;
+    const { apmEventClient, termFilters, range, ...rawParams } = options;
     const params = {
       // pass on an empty index because we're using only the body attribute
       // of the request body getters we're reusing from search strategies.
@@ -46,39 +45,47 @@ export async function getOverallLatencyDistribution(
     if (!overallLatencyDistribution.percentileThresholdValue) {
       return overallLatencyDistribution;
     }
-
     // #2: get histogram range steps
     const steps = 100;
 
-    const { body: histogramIntervalRequestBody } =
-      getHistogramIntervalRequest(params);
+    let min: number;
+    let max: number;
 
-    const histogramIntervalResponse = (await apmEventClient.search(
-      'get_histogram_interval',
-      {
-        // TODO: add support for metrics
-        apm: { events: [ProcessorEvent.transaction] },
-        body: histogramIntervalRequestBody,
-      }
-    )) as {
-      aggregations?: {
-        transaction_duration_min: estypes.AggregationsValueAggregate;
-        transaction_duration_max: estypes.AggregationsValueAggregate;
+    if (!range) {
+      const { body: histogramIntervalRequestBody } =
+        getHistogramIntervalRequest(params);
+
+      const histogramIntervalResponse = (await apmEventClient.search(
+        'get_histogram_interval',
+        {
+          // TODO: add support for metrics
+          apm: { events: [ProcessorEvent.transaction] },
+          body: histogramIntervalRequestBody,
+        }
+      )) as {
+        aggregations?: {
+          transaction_duration_min: estypes.AggregationsValueAggregate;
+          transaction_duration_max: estypes.AggregationsValueAggregate;
+        };
+        hits: { total: estypes.SearchTotalHits };
       };
-      hits: { total: estypes.SearchTotalHits };
-    };
 
-    if (
-      !histogramIntervalResponse.aggregations ||
-      histogramIntervalResponse.hits.total.value === 0
-    ) {
-      return overallLatencyDistribution;
+      if (
+        !histogramIntervalResponse.aggregations ||
+        histogramIntervalResponse.hits.total.value === 0
+      ) {
+        return overallLatencyDistribution;
+      }
+
+      min =
+        histogramIntervalResponse.aggregations.transaction_duration_min.value;
+      max =
+        histogramIntervalResponse.aggregations.transaction_duration_max.value *
+        2;
+    } else {
+      min = range.min;
+      max = range.max;
     }
-
-    const min =
-      histogramIntervalResponse.aggregations.transaction_duration_min.value;
-    const max =
-      histogramIntervalResponse.aggregations.transaction_duration_max.value * 2;
 
     const histogramRangeSteps = getHistogramRangeSteps(min, max, steps);
 

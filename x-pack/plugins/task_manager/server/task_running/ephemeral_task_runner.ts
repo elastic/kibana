@@ -237,6 +237,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
       if (apmTrans) apmTrans.end('success');
       return processedResult;
     } catch (err) {
+      console.log(err);
       this.logger.error(`Task ${this} failed: ${err}`);
       // in error scenario, we can not get the RunResult
       const processedResult = await withSpan(

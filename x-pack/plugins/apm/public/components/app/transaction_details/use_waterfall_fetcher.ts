@@ -6,10 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
 import { getWaterfall } from './waterfall_with_summary/waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
 
 const INITIAL_DATA = {
@@ -18,16 +15,17 @@ const INITIAL_DATA = {
   exceedsMax: false,
 };
 
-export function useWaterfallFetcher() {
-  const { urlParams } = useLegacyUrlParams();
-  const { traceId, transactionId } = urlParams;
-
-  const {
-    query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/transactions/view');
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
+export function useWaterfallFetcher({
+  traceId,
+  transactionId,
+  start,
+  end,
+}: {
+  traceId?: string;
+  transactionId?: string;
+  start: string;
+  end: string;
+}) {
   const {
     data = INITIAL_DATA,
     status,

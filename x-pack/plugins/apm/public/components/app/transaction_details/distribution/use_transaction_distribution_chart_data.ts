@@ -121,8 +121,20 @@ export const useTransactionDistributionChartData = () => {
 
   const transactionDistributionChartData = getTransactionDistributionChartData({
     euiTheme,
-    allTransactionsHistogram: overallLatencyHistogram,
-    failedTransactionsHistogram: errorHistogramData.overallHistogram,
+    foreground: overallLatencyHistogram && {
+      label: i18n.translate(
+        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
+        { defaultMessage: 'All transactions' }
+      ),
+      histogram: overallLatencyHistogram,
+    },
+    background: errorHistogramData.overallHistogram && {
+      label: i18n.translate(
+        'xpack.apm.transactionDistribution.chart.failedTransactionsLabel',
+        { defaultMessage: 'Failed transactions' }
+      ),
+      histogram: errorHistogramData.overallHistogram,
+    },
   });
 
   return {

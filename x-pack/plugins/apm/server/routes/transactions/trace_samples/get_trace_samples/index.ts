@@ -15,11 +15,21 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../../common/processor_event';
-import { rangeQuery, kqlQuery } from '../../../../../../observability/server';
+import {
+  rangeQuery,
+  kqlQuery,
+  termsQuery,
+  termQuery,
+} from '../../../../../../observability/server';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { Setup } from '../../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const TRACE_SAMPLES_SIZE = 500;
+
+export interface TraceSample {
+  traceId: string;
+  transactionId: string;
+}
 
 export async function getTraceSamples({
   environment,
@@ -28,33 +38,31 @@ export async function getTraceSamples({
   transactionName,
   transactionType,
   transactionId,
-  traceId,
+  traceIds,
   sampleRangeFrom,
   sampleRangeTo,
-  setup,
+  apmEventClient,
   start,
   end,
 }: {
   environment: string;
   kuery: string;
-  serviceName: string;
-  transactionName: string;
-  transactionType: string;
-  transactionId: string;
-  traceId: string;
+  serviceName?: string;
+  transactionName?: string;
+  transactionType?: string;
+  transactionId?: string;
+  traceIds: string[];
   sampleRangeFrom?: number;
   sampleRangeTo?: number;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
 }) {
   return withApmSpan('get_trace_samples', async () => {
-    const { apmEventClient } = setup;
-
     const commonFilters = [
-      { term: { [SERVICE_NAME]: serviceName } },
-      { term: { [TRANSACTION_TYPE]: transactionType } },
-      { term: { [TRANSACTION_NAME]: transactionName } },
+      ...termQuery(SERVICE_NAME, serviceName),
+      ...termQuery(TRANSACTION_TYPE, transactionType),
+      ...termQuery(TRANSACTION_NAME, transactionName),
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
       ...kqlQuery(kuery),
@@ -84,8 +92,8 @@ export async function getTraceSamples({
                 { term: { [TRANSACTION_SAMPLED]: true } },
               ],
               should: [
-                { term: { [TRACE_ID]: traceId } },
-                { term: { [TRANSACTION_ID]: transactionId } },
+                ...termsQuery(TRACE_ID, ...traceIds),
+                ...termQuery(TRANSACTION_ID, transactionId),
               ] as QueryDslQueryContainer[],
             },
           },

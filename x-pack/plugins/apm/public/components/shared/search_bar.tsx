@@ -17,6 +17,7 @@ import { useTimeRangeId } from '../../context/time_range_id/use_time_range_id';
 import { toBoolean, toNumber } from '../../context/url_params_context/helpers';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { useBreakpoints } from '../../hooks/use_breakpoints';
+import { ApmDatePicker } from './apm_date_picker';
 import { DatePicker } from './DatePicker';
 import { KueryBar } from './kuery_bar';
 import { TimeComparison } from './time_comparison';
@@ -29,39 +30,6 @@ interface Props {
   showTransactionTypeSelector?: boolean;
   kueryBarPlaceholder?: string;
   kueryBarBoolFilter?: QueryDslQueryContainer[];
-}
-
-function ApmDatePicker() {
-  const { query } = useApmParams('/*');
-
-  if (!('rangeFrom' in query)) {
-    throw new Error('range not available in route parameters');
-  }
-
-  const {
-    rangeFrom,
-    rangeTo,
-    refreshPaused: refreshPausedFromUrl = 'true',
-    refreshInterval: refreshIntervalFromUrl = '0',
-  } = query;
-
-  const refreshPaused = toBoolean(refreshPausedFromUrl);
-
-  const refreshInterval = toNumber(refreshIntervalFromUrl);
-
-  const { incrementTimeRangeId } = useTimeRangeId();
-
-  return (
-    <DatePicker
-      rangeFrom={rangeFrom}
-      rangeTo={rangeTo}
-      refreshPaused={refreshPaused}
-      refreshInterval={refreshInterval}
-      onTimeRangeRefresh={() => {
-        incrementTimeRangeId();
-      }}
-    />
-  );
 }
 
 export function SearchBar({

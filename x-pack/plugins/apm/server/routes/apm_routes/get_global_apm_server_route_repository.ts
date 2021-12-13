@@ -38,6 +38,7 @@ import { historicalDataRouteRepository } from '../historical_data';
 import { eventMetadataRouteRepository } from '../event_metadata/route';
 import { suggestionsRouteRepository } from '../suggestions/route';
 import { agentKeysRouteRepository } from '../agent_keys/route';
+import { traceExplorerRouteRepository } from '../trace_explorer/route';
 
 const getTypedGlobalApmServerRouteRepository = () => {
   const repository = createApmServerRouteRepository()
@@ -67,7 +68,8 @@ const getTypedGlobalApmServerRouteRepository = () => {
     .merge(historicalDataRouteRepository)
     .merge(eventMetadataRouteRepository)
     .merge(eventMetadataRouteRepository)
-    .merge(agentKeysRouteRepository);
+    .merge(agentKeysRouteRepository)
+    .merge(traceExplorerRouteRepository);
 
   return repository;
 };

@@ -30,6 +30,7 @@ export {
   throwUnrecoverableError,
   isEphemeralTaskRejectedDueToCapacityError,
 } from './task_running';
+export { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
 export type { RunNowResult } from './task_scheduling';
 export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
 

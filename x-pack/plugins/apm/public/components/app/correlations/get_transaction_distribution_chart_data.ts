@@ -15,36 +15,36 @@ import { TransactionDistributionChartData } from '../../shared/charts/transactio
 
 export function getTransactionDistributionChartData({
   euiTheme,
-  allTransactionsHistogram,
-  failedTransactionsHistogram,
+  foreground,
+  background,
   selectedTerm,
 }: {
   euiTheme: EuiTheme;
-  allTransactionsHistogram?: HistogramItem[];
-  failedTransactionsHistogram?: HistogramItem[];
+  foreground?: {
+    histogram: HistogramItem[];
+    label: string;
+  };
+  background?: {
+    histogram: HistogramItem[];
+    label: string;
+  };
   selectedTerm?: FieldValuePair & { histogram: HistogramItem[] };
 }) {
   const transactionDistributionChartData: TransactionDistributionChartData[] =
     [];
 
-  if (Array.isArray(allTransactionsHistogram)) {
+  if (foreground) {
     transactionDistributionChartData.push({
-      id: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
-        { defaultMessage: 'All transactions' }
-      ),
-      histogram: allTransactionsHistogram,
+      id: foreground.label,
+      histogram: foreground.histogram,
       areaSeriesColor: euiTheme.eui.euiColorVis1,
     });
   }
 
-  if (Array.isArray(failedTransactionsHistogram)) {
+  if (background) {
     transactionDistributionChartData.push({
-      id: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.failedTransactionsLabel',
-        { defaultMessage: 'Failed transactions' }
-      ),
-      histogram: failedTransactionsHistogram,
+      id: background.label,
+      histogram: background.histogram,
       areaSeriesColor: euiTheme.eui.euiColorVis7,
     });
   }

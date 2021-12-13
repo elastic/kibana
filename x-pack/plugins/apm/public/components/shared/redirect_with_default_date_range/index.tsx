@@ -35,6 +35,7 @@ export function RedirectWithDefaultDateRange({
       return (
         route.path === '/services' ||
         route.path === '/traces' ||
+        route.path === '/trace-explorer' ||
         route.path === '/service-map' ||
         route.path === '/backends' ||
         route.path === '/services/{serviceName}' ||

@@ -92,6 +92,13 @@ const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
 const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
   defaultMessage: 'Traces',
 });
+
+const traceExplorerTitle = i18n.translate(
+  'xpack.apm.navigation.traceExplorerTitle',
+  {
+    defaultMessage: 'Trace explorer',
+  }
+);
 const serviceMapTitle = i18n.translate('xpack.apm.navigation.serviceMapTitle', {
   defaultMessage: 'Service Map',
 });
@@ -131,6 +138,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                 entries: [
                   { label: servicesTitle, app: 'apm', path: '/services' },
                   { label: tracesTitle, app: 'apm', path: '/traces' },
+                  {
+                    label: traceExplorerTitle,
+                    app: 'apm',
+                    path: '/trace-explorer',
+                  },
                   {
                     label: dependenciesTitle,
                     app: 'apm',
@@ -274,6 +286,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       deepLinks: [
         { id: 'services', title: servicesTitle, path: '/services' },
         { id: 'traces', title: tracesTitle, path: '/traces' },
+        {
+          id: 'trace-explorer',
+          title: traceExplorerTitle,
+          path: '/trace-explorer',
+        },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
         { id: 'backends', title: dependenciesTitle, path: '/backends' },
       ],
