@@ -12,19 +12,14 @@ import type {
   TransportRequestOptions,
   TransportResult,
 } from '@elastic/transport';
-import { Transport } from '@elastic/transport';
-import { kHeaders } from '@elastic/transport/lib/symbols';
-import type { AuthHeaders } from '../../http';
+import type { TransportOptions } from '@elastic/transport/lib/Transport';
+import { Transport } from '@elastic/elasticsearch';
 import { isUnauthorizedError } from './errors';
 import { InternalUnauthorizedErrorHandler, isRetryResult } from './retry_unauthorized';
 
 type TransportClass = typeof Transport;
 
 const noop = () => undefined;
-
-export interface KibanaTransport {
-  updateHeaders(headers: AuthHeaders): void;
-}
 
 export const createTransport = ({
   getExecutionContext = noop,
@@ -33,7 +28,15 @@ export const createTransport = ({
   getExecutionContext?: () => string | undefined;
   unauthorizedErrorHandler?: InternalUnauthorizedErrorHandler;
 }): TransportClass => {
-  class KibanaTransportImpl extends Transport {
+  class KibanaTransport extends Transport {
+    private headers: IncomingHttpHeaders = {};
+
+    constructor(options: TransportOptions) {
+      const { headers = {}, ...otherOptions } = options;
+      super(otherOptions);
+      this.headers = headers;
+    }
+
     async request(params: TransportRequestParams, options?: TransportRequestOptions) {
       const opts: TransportRequestOptions = options || {};
       const opaqueId = getExecutionContext();
@@ -47,25 +50,33 @@ export const createTransport = ({
         opts.meta = true;
       }
 
+      // add stored headers to the options
+      opts.headers = {
+        ...this.headers,
+        ...(options?.headers ?? {}),
+      };
+
       try {
         return (await super.request(params, opts)) as TransportResult<any, any>;
       } catch (e) {
         if (isUnauthorizedError(e) && unauthorizedErrorHandler) {
           const result = await unauthorizedErrorHandler(e);
           if (isRetryResult(result)) {
-            const headers = result.authHeaders;
-            this.updateHeaders(headers);
+            this.headers = {
+              ...this.headers,
+              ...result.authHeaders,
+            };
+            opts.headers = {
+              ...this.headers,
+              ...(options?.headers ?? {}),
+            };
             return (await super.request(params, opts)) as TransportResult<any, any>;
           }
         }
         throw e;
       }
     }
-
-    updateHeaders(headers: AuthHeaders) {
-      this[kHeaders] = { ...this[kHeaders], ...(headers as IncomingHttpHeaders) };
-    }
   }
 
-  return KibanaTransportImpl;
+  return KibanaTransport;
 };

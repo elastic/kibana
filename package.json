@@ -115,7 +115,6 @@
     "@elastic/request-crypto": "1.1.4",
     "@elastic/safer-lodash-set": "link:bazel-bin/packages/elastic-safer-lodash-set",
     "@elastic/search-ui-app-search-connector": "^1.6.0",
-    "@elastic/transport": "^0.0.15",
     "@emotion/cache": "^11.4.0",
     "@emotion/css": "^11.4.0",
     "@emotion/react": "^11.4.0",
