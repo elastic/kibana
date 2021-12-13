@@ -28,9 +28,6 @@ import {
   buildQueryFilter,
   buildRangeFilter,
   disableFilter,
-  fromKueryExpression,
-  toElasticsearchQuery,
-  nodeTypes,
   buildEsQuery,
   buildQueryFromFilters,
   luceneStringToDsl,
@@ -151,16 +148,6 @@ export type {
   EsQueryConfig,
 };
 export { isFilter, isFilters };
-
-/**
- * @deprecated Import helpers from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
-export const esKuery = {
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-};
 
 /**
  * @deprecated Import helpers from the "@kbn/es-query" package directly instead.

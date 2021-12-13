@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import { RecoveredActionGroup } from '../../common';
 import {
   AlertingAuthorizationFilterType,
@@ -12,7 +13,6 @@ import {
   ensureFieldIsSafeForQuery,
   asFiltersBySpaceId,
 } from './alerting_authorization_kuery';
-import { esKuery } from '../../../../../src/plugins/data/server';
 
 describe('asKqlFiltersByRuleTypeAndConsumer', () => {
   test('constructs KQL filter for single rule type with single authorized consumer', async () => {
@@ -44,9 +44,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
         'space1'
       )
     ).toEqual(
-      esKuery.fromKueryExpression(
-        `((path.to.rule_type_id:myAppAlertType and consumer-field:(myApp)))`
-      )
+      fromKueryExpression(`((path.to.rule_type_id:myAppAlertType and consumer-field:(myApp)))`)
     );
   });
 
@@ -81,7 +79,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
         'space1'
       )
     ).toEqual(
-      esKuery.fromKueryExpression(
+      fromKueryExpression(
         `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp)))`
       )
     );
@@ -153,7 +151,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
         'space1'
       )
     ).toEqual(
-      esKuery.fromKueryExpression(
+      fromKueryExpression(
         `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
       )
     );
@@ -209,7 +207,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
         'space1'
       )
     ).toEqual(
-      esKuery.fromKueryExpression(
+      fromKueryExpression(
         `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature) and path.to.spaceIds:space1) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature) and path.to.spaceIds:space1))`
       )
     );
@@ -265,7 +263,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
         undefined
       )
     ).toEqual(
-      esKuery.fromKueryExpression(
+      fromKueryExpression(
         `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
       )
     );
@@ -638,7 +636,7 @@ describe('asFiltersBySpaceId', () => {
         },
         'space1'
       )
-    ).toEqual(esKuery.fromKueryExpression('(path.to.space.id: space1)'));
+    ).toEqual(fromKueryExpression('(path.to.space.id: space1)'));
   });
 
   test('returns undefined if no path to spaceIds is provided', () => {

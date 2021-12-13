@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiToolTip } from
 import React, { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { connect } from 'react-redux';
 import { IndexPatternSavedObject, IndexPatternProvider } from '../types';
 import { openSourceModal } from '../services/source_modal';
@@ -26,7 +27,6 @@ import {
   QueryStringInput,
   IDataPluginServices,
   Query,
-  esKuery,
 } from '../../../../../src/plugins/data/public';
 
 export interface SearchBarProps {
@@ -50,10 +50,7 @@ export interface SearchBarStateProps {
 
 function queryToString(query: Query, indexPattern: IndexPattern) {
   if (query.language === 'kuery' && typeof query.query === 'string') {
-    const dsl = esKuery.toElasticsearchQuery(
-      esKuery.fromKueryExpression(query.query as string),
-      indexPattern
-    );
+    const dsl = toElasticsearchQuery(fromKueryExpression(query.query as string), indexPattern);
     // JSON representation of query will be handled by existing logic.
     // TODO clean this up and handle it in the data fetch layer once
     // it moved to typescript.

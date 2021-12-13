@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { KqlFunctionNode, nodeBuilder } from '@kbn/es-query';
+import { KqlFunctionNode, nodeBuilder, fromKueryExpression } from '@kbn/es-query';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -20,7 +20,6 @@ import {
   SavedObjectsUtils,
   SavedObjectAttributes,
 } from '../../../../../src/core/server';
-import { esKuery } from '../../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
 import {
   Alert,
@@ -611,7 +610,7 @@ export class RulesClient {
       filter:
         (authorizationFilter && options.filter
           ? nodeBuilder.and([
-              esKuery.fromKueryExpression(options.filter),
+              fromKueryExpression(options.filter),
               authorizationFilter as KqlFunctionNode,
             ])
           : authorizationFilter) ?? options.filter,
@@ -684,10 +683,7 @@ export class RulesClient {
       ...options,
       filter:
         (authorizationFilter && filter
-          ? nodeBuilder.and([
-              esKuery.fromKueryExpression(filter),
-              authorizationFilter as KqlFunctionNode,
-            ])
+          ? nodeBuilder.and([fromKueryExpression(filter), authorizationFilter as KqlFunctionNode])
           : authorizationFilter) ?? filter,
       page: 1,
       perPage: 0,

@@ -10,11 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { DataView } from '../../../../../../../src/plugins/data/common';
-import {
-  esKuery,
-  QuerySuggestion,
-} from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '../../../../../../../src/plugins/data/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -31,8 +29,8 @@ interface State {
 }
 
 function convertKueryToEsQuery(kuery: string, dataView: DataView) {
-  const ast = esKuery.fromKueryExpression(kuery);
-  return esKuery.toElasticsearchQuery(ast, dataView);
+  const ast = fromKueryExpression(kuery);
+  return toElasticsearchQuery(ast, dataView);
 }
 
 export function KueryBar(props: {

@@ -7,10 +7,10 @@
 
 import { CoreStart } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
+import { toElasticsearchQuery } from '@kbn/es-query';
 import { ActionsConfig } from '../config';
 import { ActionsPluginsStart } from '../plugin';
 import { spacesMock } from '../../../spaces/server/mocks';
-import { esKuery } from '../../../../../src/plugins/data/server';
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
@@ -95,7 +95,7 @@ describe('findAndCleanupTasks', () => {
       sortField: 'runAt',
       sortOrder: 'asc',
     });
-    expect(esKuery.toElasticsearchQuery(savedObjectsRepository.find.mock.calls[0][0].filter))
+    expect(toElasticsearchQuery(savedObjectsRepository.find.mock.calls[0][0].filter))
       .toMatchInlineSnapshot(`
       Object {
         "bool": Object {

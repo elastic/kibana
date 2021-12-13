@@ -6,6 +6,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
+import { fromKueryExpression } from '@kbn/es-query';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { securityMock } from '../../../../plugins/security/server/mocks';
 import {
@@ -22,7 +23,6 @@ import {
 import uuid from 'uuid';
 import { RecoveredActionGroup } from '../../common';
 import { RegistryRuleType } from '../rule_type_registry';
-import { esKuery } from '../../../../../src/plugins/data/server';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
 
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -839,7 +839,7 @@ describe('AlertingAuthorization', () => {
           })
         ).filter
       ).toEqual(
-        esKuery.fromKueryExpression(
+        fromKueryExpression(
           `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
         )
       );

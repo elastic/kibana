@@ -16,9 +16,6 @@ import {
   buildPhrasesFilter,
   buildRangeFilter,
   isFilterDisabled,
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
   buildEsQuery,
   buildQueryFromFilters,
 } from '../common';
@@ -44,17 +41,6 @@ export const esFilters = {
  */
 
 import { getEsQueryConfig } from '../common';
-
-/*
- * Filter helper namespace
- * @deprecated Import helpers from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
-export const esKuery = {
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-};
 
 /*
  * Filter helper namespace

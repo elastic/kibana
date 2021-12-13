@@ -8,9 +8,10 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useEffect, useState } from 'react';
+import { fromKueryExpression } from '@kbn/es-query';
 import { WithKueryAutocompletion } from './with_kuery_autocompletion';
 import { AutocompleteField } from './autocomplete_field';
-import { esKuery, IIndexPattern, QuerySuggestion } from '../../../../../../src/plugins/data/public';
+import { IIndexPattern, QuerySuggestion } from '../../../../../../src/plugins/data/public';
 
 type LoadSuggestionsFn = (
   e: string,
@@ -31,7 +32,7 @@ interface Props {
 
 function validateQuery(query: string) {
   try {
-    esKuery.fromKueryExpression(query);
+    fromKueryExpression(query);
   } catch (err) {
     return false;
   }
