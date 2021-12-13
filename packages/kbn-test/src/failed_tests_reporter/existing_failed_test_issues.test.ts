@@ -89,11 +89,9 @@ it('captures a list of failed test issue, loads the bodies for each issue, and o
     Array [
       " debg finding 1 existing issues via ci-stats",
       " debg found 1 existing issues",
-      " debg loading issue bodies for 1 issues",
       " debg loaded 1 existing test issues",
       " debg finding 1 existing issues via ci-stats",
       " debg found 0 existing issues",
-      " debg loading issue bodies for 0 issues",
       " debg loaded 1 existing test issues",
     ]
   `);

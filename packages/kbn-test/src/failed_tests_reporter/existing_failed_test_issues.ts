@@ -63,15 +63,12 @@ export class ExistingFailedTestIssues {
     }
 
     this.log.debug('finding', unseenFailures.length, 'existing issues via ci-stats');
-    const ciStatsIssues = await this.findExistingIssues(unseenFailures);
-    this.log.debug('found', ciStatsIssues.length, 'existing issues');
-
-    const nodeIds = ciStatsIssues.map((i) => i.github.nodeId);
-    this.log.debug('loading issue bodies for', nodeIds.length, 'issues');
+    const failedTestIssues = await this.findExistingIssues(unseenFailures);
+    this.log.debug('found', failedTestIssues.length, 'existing issues');
 
     const initialResultSize = this.results.size;
     for (const failure of unseenFailures) {
-      const ciStatsIssue = ciStatsIssues.find(
+      const ciStatsIssue = failedTestIssues.find(
         (i) => i.classname === failure.classname && i.name === failure.name
       );
       if (!ciStatsIssue) {
