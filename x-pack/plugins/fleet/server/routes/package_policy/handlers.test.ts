@@ -17,18 +17,13 @@ import type {
   PostPackagePolicyCreateCallback,
   PutPackagePolicyUpdateCallback,
 } from '../..';
-<<<<<<< HEAD
-import type { CreatePackagePolicyRequestSchema } from '../../types/rest_spec';
-import type { FleetAuthzRouter } from '../security';
-import type { FleetRequestHandler, FleetRequestHandlerContext } from '../../types';
-=======
 import type {
   CreatePackagePolicyRequestSchema,
   UpdatePackagePolicyRequestSchema,
 } from '../../types/rest_spec';
-
+import type { FleetAuthzRouter } from '../security';
+import type { FleetRequestHandler, FleetRequestHandlerContext } from '../../types';
 import type { PackagePolicy } from '../../types';
->>>>>>> b0442e396b360f788524cfe38de62fa31fc1d789
 
 import { registerRoutes } from './index';
 
@@ -104,7 +99,6 @@ describe('When calling package policy', () => {
   let routeConfig: RouteConfig<any, any, any, any>;
   let context: jest.Mocked<FleetRequestHandlerContext>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
-
 
   beforeEach(() => {
     routerMock = httpServiceMock.createRouter() as unknown as jest.Mocked<FleetAuthzRouter>;

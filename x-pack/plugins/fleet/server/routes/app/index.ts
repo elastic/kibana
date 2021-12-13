@@ -99,7 +99,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED,
       validate: {},
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     generateServiceTokenHandler
   );

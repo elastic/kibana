@@ -135,7 +135,9 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     {
       path: AGENT_API_ROUTES.STATUS_PATTERN_DEPRECATED,
       validate: GetAgentStatusRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     getAgentStatusForAgentPolicyHandler
   );
