@@ -9,9 +9,11 @@ import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-l
 
 import { getExceptionListItemSchemaMock } from './exception_list_item_schema.mock';
 
-export const getFoundExceptionListItemSchemaMock = (): FoundExceptionListItemSchema => ({
-  data: [getExceptionListItemSchemaMock()],
+export const getFoundExceptionListItemSchemaMock = (
+  count: number = 1
+): FoundExceptionListItemSchema => ({
+  data: Array.from({ length: count }, getExceptionListItemSchemaMock),
   page: 1,
   per_page: 1,
-  total: 1,
+  total: count,
 });
