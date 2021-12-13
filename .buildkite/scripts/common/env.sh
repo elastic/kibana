@@ -93,6 +93,8 @@ if [[ "${BUILD_TS_REFS_CACHE_ENABLE:-}" != "true" ]]; then
   export BUILD_TS_REFS_CACHE_ENABLE=false
 fi
 
+export BAZEL_CACHE_MODE=read
+
 export BUILD_TS_REFS_DISABLE=true
 export DISABLE_BOOTSTRAP_VALIDATION=true
 

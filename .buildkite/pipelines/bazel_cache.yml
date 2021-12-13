@@ -19,7 +19,7 @@ steps:
         label: Bootstrap (MacOS x86)
         priority: $${PRIORITY}
         agents:
-          queue: macos-intel
+          queue: macos-x86
         timeout_in_minutes: 60
         concurrency_group: bazel_macos
         concurrency: 1
@@ -28,6 +28,6 @@ steps:
         label: Bootstrap (MacOS ARM)
         priority: $${PRIORITY}
         agents:
-          queue: macos-m1
+          queue: macos-arm
         timeout_in_minutes: 60
       YAML
