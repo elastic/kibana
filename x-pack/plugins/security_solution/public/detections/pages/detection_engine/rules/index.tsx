@@ -211,6 +211,7 @@ const RulesPageComponent: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="rules-import-modal-button"
                 iconType="importAction"
                 isDisabled={!userHasPermissions(canUserCRUD) || loading}
                 onClick={() => {

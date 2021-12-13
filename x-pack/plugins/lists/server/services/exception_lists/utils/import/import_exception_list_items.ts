@@ -46,8 +46,14 @@ export const importExceptionListItems = async ({
     // Gather lists referenced by items
     // Dictionary of found lists
     const foundLists = await getAllListTypes(
-      agnosticListItems,
-      nonAgnosticListItems,
+      agnosticListItems.map((list) => ({
+        listId: list.list_id,
+        namespaceType: list.namespace_type,
+      })),
+      nonAgnosticListItems.map((list) => ({
+        listId: list.list_id,
+        namespaceType: list.namespace_type,
+      })),
       savedObjectsClient
     );
 

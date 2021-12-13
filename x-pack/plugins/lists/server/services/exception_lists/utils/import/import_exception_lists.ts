@@ -43,7 +43,14 @@ export const importExceptionLists = async ({
 
     // Gather lists referenced by items
     // Dictionary of found lists
-    const foundLists = await getAllListTypes(agnosticLists, nonAgnosticLists, savedObjectsClient);
+    const foundLists = await getAllListTypes(
+      agnosticLists.map((list) => ({ listId: list.list_id, namespaceType: list.namespace_type })),
+      nonAgnosticLists.map((list) => ({
+        listId: list.list_id,
+        namespaceType: list.namespace_type,
+      })),
+      savedObjectsClient
+    );
 
     // Figure out what lists to bulk create/update
     const { errors, listItemsToDelete, listsToCreate, listsToUpdate } =

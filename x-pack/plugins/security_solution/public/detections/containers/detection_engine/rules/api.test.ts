@@ -520,6 +520,7 @@ describe('Detections Rules API', () => {
         },
         query: {
           overwrite: false,
+          overwrite_exceptions: false,
         },
       });
     });
@@ -535,6 +536,7 @@ describe('Detections Rules API', () => {
         },
         query: {
           overwrite: true,
+          overwrite_exceptions: true,
         },
       });
     });

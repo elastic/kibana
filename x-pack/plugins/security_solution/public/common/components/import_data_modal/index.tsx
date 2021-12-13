@@ -23,6 +23,9 @@ import React, { useCallback, useState } from 'react';
 import {
   ImportDataResponse,
   ImportDataProps,
+  ImportResponseError,
+  ImportRulesResponseError,
+  ExceptionsImportError,
 } from '../../../detections/containers/detection_engine/rules';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import * as i18n from './translations';
@@ -69,6 +72,22 @@ export const ImportDataModalComponent = ({
   const [overwriteExceptions, setOverwriteExceptions] = useState(false);
   const { addError, addSuccess } = useAppToasts();
 
+  const formatError = useCallback(
+    (
+      importResponse: ImportDataResponse,
+      errors: Array<ImportRulesResponseError | ImportResponseError | ExceptionsImportError>
+    ) => {
+      const formattedErrors = errors.map((e) => failedDetailed(e.error.message));
+      const error: Error & { raw_network_error?: object } = new Error(formattedErrors.join('. '));
+      error.stack = undefined;
+      error.name = 'Network errors';
+      error.raw_network_error = importResponse;
+
+      return error;
+    },
+    [failedDetailed]
+  );
+
   const cleanupAndCloseModal = useCallback(() => {
     setIsImporting(false);
     setSelectedFiles(null);
@@ -88,18 +107,42 @@ export const ImportDataModalComponent = ({
           signal: abortCtrl.signal,
         });
 
-        if (importResponse.success) {
-          addSuccess(successMessage(importResponse.success_count));
-        }
-        if (importResponse.errors.length > 0) {
-          const formattedErrors = importResponse.errors.map((e) => failedDetailed(e.error.message));
-          const error: Error & { raw_network_error?: object } = new Error(
-            formattedErrors.join('. ')
-          );
-          error.stack = undefined;
-          error.name = 'Network errors';
-          error.raw_network_error = importResponse;
-          addError(error, { title: errorMessage(importResponse.errors.length) });
+        // if import includes exceptions
+        if (showExceptionsCheckBox) {
+          // rules response actions
+          if (importResponse.success) {
+            addSuccess(successMessage(importResponse.success_count));
+          }
+          if (importResponse.errors.length > 0) {
+            const error = formatError(importResponse, importResponse.errors);
+            addError(error, { title: errorMessage(importResponse.errors.length) });
+          }
+
+          // exceptions response actions
+          if (
+            importResponse.exceptions_success &&
+            importResponse.exceptions_success_count != null
+          ) {
+            addSuccess(
+              i18n.SUCCESSFULLY_IMPORTED_EXCEPTIONS(importResponse.exceptions_success_count)
+            );
+          }
+
+          if (
+            importResponse.exceptions_errors != null &&
+            importResponse.exceptions_errors.length > 0
+          ) {
+            const error = formatError(importResponse, importResponse.exceptions_errors);
+            addError(error, { title: i18n.IMPORT_FAILED(importResponse.exceptions_errors.length) });
+          }
+        } else {
+          if (importResponse.success) {
+            addSuccess(successMessage(importResponse.success_count));
+          }
+          if (importResponse.errors.length > 0) {
+            const error = formatError(importResponse, importResponse.errors);
+            addError(error, { title: errorMessage(importResponse.errors.length) });
+          }
         }
 
         importComplete();
@@ -117,10 +160,11 @@ export const ImportDataModalComponent = ({
     addSuccess,
     cleanupAndCloseModal,
     errorMessage,
-    failedDetailed,
     importComplete,
     importData,
     successMessage,
+    showExceptionsCheckBox,
+    formatError,
   ]);
 
   const handleCloseModal = useCallback(() => {
@@ -184,6 +228,7 @@ export const ImportDataModalComponent = ({
           <EuiModalFooter>
             <EuiButtonEmpty onClick={handleCloseModal}>{i18n.CANCEL_BUTTON}</EuiButtonEmpty>
             <EuiButton
+              data-test-subj="import-data-modal-button"
               onClick={importDataCallback}
               disabled={selectedFiles == null || isImporting}
               fill
