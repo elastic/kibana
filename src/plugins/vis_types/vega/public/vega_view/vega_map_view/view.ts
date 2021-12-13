@@ -20,7 +20,7 @@ import { getUISettings } from '../../services';
 import { defaultMapConfig, defaultMabBoxStyle, vegaLayerId } from './constants';
 import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
 import './vega_map_view.scss';
-import { TMS_IN_YML_ID } from './service_settings';
+import { TMS_IN_YML_ID } from './service_settings/service_settings_types';
 
 async function updateVegaView(mapBoxInstance: Map, vegaView: View) {
   const mapCanvas = mapBoxInstance.getCanvas();

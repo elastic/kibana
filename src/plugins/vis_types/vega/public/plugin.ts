@@ -25,7 +25,7 @@ import {
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
 import type { MapsEmsPluginPublicSetup } from '../../../maps_ems/public';
-import { IServiceSettings } from './vega_view/vega_map_view/service_settings';
+import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
 
 import { ConfigSchema } from '../config';
 

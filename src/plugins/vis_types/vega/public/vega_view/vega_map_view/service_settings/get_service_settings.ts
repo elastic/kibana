@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IServiceSettings } from '../service_settings/service_settings_types';
+import type { IServiceSettings } from './service_settings_types';
 import { ServiceSettings } from './service_settings';
 import { getMapsEms } from '../../../services';
 import type { MapsEmsPluginPublicSetup, MapConfig } from '../../../../../../maps_ems/public';
