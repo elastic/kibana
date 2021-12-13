@@ -24,27 +24,21 @@ import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 // @ts-ignore
 import { escapeDoubleQuotes } from '../../explorer/explorer_utils';
-import { isRuleSupported } from '../../../../common/util/anomaly_utils';
+import {
+  Anomaly,
+  isCategorizationAnomaly,
+  isRuleSupported,
+} from '../../../../common/util/anomaly_utils';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { CustomUrlAnomalyRecordDoc, KibanaUrlConfig } from '../../../../common/types/custom_urls';
 import { TimeRangeBounds } from '../../util/time_buckets';
-import { AnomalyRecordDoc } from '../../../../common/types/anomalies';
 import { MlKibanaReactContextValue } from '../../contexts/kibana';
 // @ts-ignore
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 
-interface Anomaly {
-  jobId: string;
-  customUrls: KibanaUrlConfig[];
-  source: AnomalyRecordDoc;
-  entityValue: string;
-  entityName: string;
-  isTimeSeriesViewRecord: boolean;
-  time: number;
-}
 interface LinksMenuProps {
   anomaly: Anomaly;
   bounds: TimeRangeBounds;
@@ -102,8 +96,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
       if (record.influencers) {
         kqlQuery = record.influencers
-          // No need to add categorization detectors to query
-          .filter((influencer) => influencer.influencer_field_name !== 'mlcategory')
           .map(
             (influencer) =>
               `${escapeForElasticsearchQuery(influencer.influencer_field_name)}:"${
@@ -138,7 +130,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       }
     };
 
-    generateDiscoverUrl();
+    if (!isCategorizationAnomaly(props.anomaly)) {
+      generateDiscoverUrl();
+    }
 
     return () => {
       unmounted = true;
@@ -550,7 +544,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     );
   }
 
-  if (anomaly.entityName === 'mlcategory') {
+  if (isCategorizationAnomaly(anomaly)) {
     items.push(
       <EuiContextMenuItem
         key="view_examples"
