@@ -30,22 +30,20 @@ import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../contexts/
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { SourceSelection } from '../../../data_frame_analytics/pages/analytics_management/components/source_selection';
 import adImage from '../anomaly_detection_panel/blog-machine-learning-720x420.png';
+import { useRefresh } from '../../../routing/use_refresh';
 
 interface Props {
   jobCreationDisabled: boolean;
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
-  refreshCount: number;
 }
-export const AnalyticsPanel: FC<Props> = ({
-  jobCreationDisabled,
-  setLazyJobCount,
-  refreshCount,
-}) => {
+export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount }) => {
   const {
     services: {
       http: { basePath },
     },
   } = useMlKibana();
+
+  const refresh = useRefresh();
 
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
@@ -78,7 +76,7 @@ export const AnalyticsPanel: FC<Props> = ({
 
   useEffect(() => {
     getAnalytics(true);
-  }, [refreshCount]);
+  }, [refresh]);
 
   const errorDisplay = (
     <EuiCallOut
