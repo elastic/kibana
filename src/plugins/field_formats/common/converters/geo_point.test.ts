@@ -29,19 +29,6 @@ describe('GeoPoint Format', () => {
       );
       expect(geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] })).toBe('POINT(125.6 10.1)');
     });
-
-    test('"none" format', () => {
-      const geoPointFormat = new GeoPointFormat(
-        {
-          transform: 'none',
-        },
-        jest.fn()
-      );
-      expect(geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] })).toEqual({
-        type: 'Point', 
-        coordinates: [125.6, 10.1]
-      });
-    });
   });
 
   describe('inputs', () => {
