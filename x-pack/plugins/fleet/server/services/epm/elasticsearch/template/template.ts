@@ -147,6 +147,13 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
             fieldProps.fields = generateMultiFields(field.multi_fields);
           }
           break;
+        case 'wildcard':
+          const wildcardMapping = generateWildcardMapping(field);
+          fieldProps = { ...fieldProps, ...wildcardMapping, type: 'wildcard' };
+          if (field.multi_fields) {
+            fieldProps.fields = generateMultiFields(field.multi_fields);
+          }
+          break;
         case 'constant_keyword':
           fieldProps.type = field.type;
           if (field.value) {
@@ -267,6 +274,19 @@ function generateTextMapping(field: Field): IndexTemplateMapping {
   }
   if (field.search_analyzer) {
     mapping.search_analyzer = field.search_analyzer;
+  }
+  return mapping;
+}
+
+function generateWildcardMapping(field: Field): IndexTemplateMapping {
+  const mapping: IndexTemplateMapping = {
+    ignore_above: DEFAULT_IGNORE_ABOVE,
+  };
+  if (field.null_value) {
+    mapping.null_value = field.null_value;
+  }
+  if (field.ignore_above) {
+    mapping.ignore_above = field.ignore_above;
   }
   return mapping;
 }

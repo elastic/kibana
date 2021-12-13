@@ -383,6 +383,40 @@ describe('EPM template', () => {
     expect(mappings).toEqual(keywordWithMultiFieldsMapping);
   });
 
+  it('tests processing wildcard field with multi fields', () => {
+    const keywordWithMultiFieldsLiteralYml = `
+- name: keywordWithMultiFields
+  type: wildcard
+  multi_fields:
+    - name: raw
+      type: keyword
+    - name: indexed
+      type: text
+`;
+
+    const keywordWithMultiFieldsMapping = {
+      properties: {
+        keywordWithMultiFields: {
+          ignore_above: 1024,
+          type: 'wildcard',
+          fields: {
+            raw: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            indexed: {
+              type: 'text',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(keywordWithMultiFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(keywordWithMultiFieldsMapping);
+  });
+
   it('tests processing object field with no other attributes', () => {
     const objectFieldLiteralYml = `
 - name: objectField
