@@ -85,11 +85,15 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
                     runtimeMappings: response.runtimeMappings,
                   })
                 );
-                searchSubscription$.current[selectedDataViewId].unsubscribe();
+                if (searchSubscription$.current[selectedDataViewId]) {
+                  searchSubscription$.current[selectedDataViewId].unsubscribe();
+                }
               } else if (isErrorResponse(response)) {
                 setLoading({ id: selectedDataViewId, loading: false });
                 addWarning(i18n.ERROR_BEAT_FIELDS);
-                searchSubscription$.current[selectedDataViewId].unsubscribe();
+                if (searchSubscription$.current[selectedDataViewId]) {
+                  searchSubscription$.current[selectedDataViewId].unsubscribe();
+                }
               }
             },
             error: (msg) => {
@@ -101,7 +105,9 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
               addError(msg, {
                 title: i18n.FAIL_BEAT_FIELDS,
               });
-              searchSubscription$.current[selectedDataViewId].unsubscribe();
+              if (searchSubscription$.current[selectedDataViewId]) {
+                searchSubscription$.current[selectedDataViewId].unsubscribe();
+              }
             },
           });
         searchSubscription$.current = {
