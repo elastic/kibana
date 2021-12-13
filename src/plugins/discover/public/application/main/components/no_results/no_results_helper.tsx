@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from "react";
-import { FormattedMessage } from "@kbn/i18n-react";
+import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiLink,
   EuiDescriptionListDescription,
   EuiSpacer,
-} from "@elastic/eui";
+} from '@elastic/eui';
 
 export function getTimeFieldMessage() {
   return (
@@ -43,11 +43,7 @@ interface AdjustSearchProps {
   hasQuery?: boolean;
 }
 
-export function AdjustSearch({
-  hasFilters,
-  hasQuery,
-  onDisableFilters,
-}: AdjustSearchProps) {
+export function AdjustSearch({ hasFilters, hasQuery, onDisableFilters }: AdjustSearchProps) {
   return (
     <Fragment>
       {hasQuery && (
