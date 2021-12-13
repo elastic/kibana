@@ -14,6 +14,7 @@ import type { Filter } from '@kbn/es-query';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
+import { APP_UI_ID } from '../../../../common/constants';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import type { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -175,6 +176,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         <InspectButtonContainer>
           {timelinesUi.getTGrid<'embedded'>({
             additionalFilters,
+            appId: APP_UI_ID,
             browserFields,
             bulkActions,
             columns,
