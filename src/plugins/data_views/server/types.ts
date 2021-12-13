@@ -20,7 +20,8 @@ import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server
 type ServiceFactory = (
   savedObjectsClient: SavedObjectsClientContract,
   elasticsearchClient: ElasticsearchClient,
-  request?: KibanaRequest
+  request?: KibanaRequest,
+  byPassCapabilities?: boolean
 ) => Promise<DataViewsService>;
 export interface DataViewsServerPluginStart {
   dataViewsServiceFactory: ServiceFactory;

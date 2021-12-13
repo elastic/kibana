@@ -52,7 +52,7 @@ export const createSourcererDataViewRoute = (
             data: { indexPatterns },
           },
         ] = await getStartServices();
-        const auditLogger = security?.audit.asScoped(request);
+        const auditLogger = security?.audit.asSystem(request);
         /*
          * Note for future engineer
          * We need to have two different DataViewService because one will be to access all
@@ -61,7 +61,9 @@ export const createSourcererDataViewRoute = (
          */
         const unsecuredDataViewService = await indexPatterns.dataViewsServiceFactory(
           unsecuredSavedObjectClient,
-          context.core.elasticsearch.client.asInternalUser
+          context.core.elasticsearch.client.asInternalUser,
+          request,
+          true
         );
         const dataViewService = await indexPatterns.dataViewsServiceFactory(
           context.core.savedObjects.client,
@@ -200,7 +202,7 @@ export const getSourcererDataViewRoute = (
             data: { indexPatterns },
           },
         ] = await getStartServices();
-        const auditLogger = security?.audit.asScoped(request);
+        const auditLogger = security?.audit.asSystem(request);
         /*
          * Note for future engineer
          * We need to have two different DataViewService because one will be to access all
@@ -209,7 +211,9 @@ export const getSourcererDataViewRoute = (
          */
         const unsecuredDataViewService = await indexPatterns.dataViewsServiceFactory(
           unsecuredSavedObjectClient,
-          context.core.elasticsearch.client.asInternalUser
+          context.core.elasticsearch.client.asInternalUser,
+          request,
+          true
         );
         const dataViewService = await indexPatterns.dataViewsServiceFactory(
           context.core.savedObjects.client,
@@ -224,7 +228,6 @@ export const getSourcererDataViewRoute = (
             sourcererSavedObjectEvent({
               action: SavedObjectAction.GET,
               id: dataViewId,
-              error,
             })
           );
         } else {
