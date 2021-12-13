@@ -10,15 +10,9 @@
         "host": {
           "properties": {
             "name": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
+              "type": "keyword"
               }
             }
-          }
         },
         "ingest_timestamp": {
           "type": "date"
