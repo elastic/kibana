@@ -138,41 +138,49 @@ export const performBulkActionRoute = (
         let processed: Array<undefined | ActionPerformError> = [];
         switch (body.action) {
           case BulkAction.enable:
-            processed = await chunkifyRulesAction(rules.data, async (rule) => {
-              if (!rule.enabled) {
-                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-                await enableRule({
-                  rule,
-                  rulesClient,
-                });
-              }
-            });
+            await Promise.all(
+              rules.data.map(async (rule) => {
+                if (!rule.enabled) {
+                  throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+                  await enableRule({
+                    rule,
+                    rulesClient,
+                  });
+                }
+              })
+            );
             break;
           case BulkAction.disable:
-            processed = await chunkifyRulesAction(rules.data, async (rule) => {
-              if (rule.enabled) {
-                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-                await rulesClient.disable({ id: rule.id });
-              }
-            });
+            await Promise.all(
+              rules.data.map(async (rule) => {
+                if (rule.enabled) {
+                  throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+                  await rulesClient.disable({ id: rule.id });
+                }
+              })
+            );
             break;
           case BulkAction.delete:
-            processed = await chunkifyRulesAction(rules.data, async (rule) => {
-              await deleteRules({
-                ruleId: rule.id,
-                rulesClient,
-                ruleStatusClient,
-              });
-            });
+            await Promise.all(
+              rules.data.map(async (rule) => {
+                await deleteRules({
+                  ruleId: rule.id,
+                  rulesClient,
+                  ruleStatusClient,
+                });
+              })
+            );
             break;
           case BulkAction.duplicate:
-            processed = await chunkifyRulesAction(rules.data, async (rule) => {
-              throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+            await Promise.all(
+              rules.data.map(async (rule) => {
+                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
-              await rulesClient.create({
-                data: duplicateRule(rule, isRuleRegistryEnabled),
-              });
-            });
+                await rulesClient.create({
+                  data: duplicateRule(rule, isRuleRegistryEnabled),
+                });
+              })
+            );
             break;
           case BulkAction.export:
             const exported = await getExportByObjectIds(
