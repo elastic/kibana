@@ -17,7 +17,7 @@ export const CasesContext = React.createContext<CasesContextValue | undefined>(u
 export interface CasesContextProps
   extends Omit<CasesContextValue, 'appId' | 'appTitle' | 'basePath' | 'features'> {
   basePath?: string;
-  features?: Partial<CasesFeatures>;
+  features?: CasesFeatures;
 }
 
 export interface CasesContextStateValue extends Omit<CasesContextValue, 'appId' | 'appTitle'> {
