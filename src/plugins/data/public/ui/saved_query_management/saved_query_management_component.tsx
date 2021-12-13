@@ -304,26 +304,42 @@ export function SavedQueryManagementComponent({
 
   const component = (
     <>
-      <EuiFieldSearch
-        placeholder="Find a saved filter..."
-        value={searchValue}
-        fullWidth
-        onChange={onInputChange}
-        isClearable={true}
-        aria-label="Search..."
-        compressed
-      />
-      <EuiSpacer size="m" />
-      <EuiBasicTable
-        tableCaption="Saved filters list"
-        items={savedQueriesBySearch}
-        itemId="id"
-        columns={tableColumns}
-        pagination={pagination}
-        selection={{ onSelectionChange, initialSelected: selectedQueries }}
-        hasActions={true}
-        onChange={onTableChange}
-      />
+      {savedQueries.length && (
+        <div>
+          <EuiFieldSearch
+            placeholder="Find a saved filter..."
+            value={searchValue}
+            fullWidth
+            onChange={onInputChange}
+            isClearable={true}
+            aria-label="Search..."
+            compressed
+          />
+          <EuiSpacer size="m" />
+          <EuiBasicTable
+            tableCaption="Saved filters list"
+            items={savedQueriesBySearch}
+            itemId="id"
+            columns={tableColumns}
+            pagination={pagination}
+            selection={{ onSelectionChange, initialSelected: selectedQueries }}
+            hasActions={true}
+            onChange={onTableChange}
+          />
+        </div>
+      )}
+      {!savedQueries.length && (
+        <EuiEmptyPrompt
+          title={<h2>No saved filters</h2>}
+          body={
+            <p>
+              Saved searches allow you to reuse all or parts of your query including time filter. To
+              create a saved query, open the <EuiIcon type="filter" color="primary" /> Filter Menu
+              and select “Save current filter set”.
+            </p>
+          }
+        />
+      )}
     </>
   );
 
