@@ -28,7 +28,7 @@ import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
 import { useFetchHostIsolationExceptionsList } from '../../../host_isolation_exceptions/view/hooks';
 import { getCurrentArtifactsLocation } from '../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../policy_hooks';
-import { PolicyHostIsolationExceptionsEmptyUnexisting } from './components/empty_non_existent';
+import { PolicyHostIsolationExceptionsEmptyUnexisting } from './components/empty_unexisting';
 import { PolicyHostIsolationExceptionsEmptyUnassigned } from './components/empty_unassigned';
 import { PolicyHostIsolationExceptionsList } from './components/list';
 
