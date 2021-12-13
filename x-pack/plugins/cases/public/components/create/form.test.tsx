@@ -114,34 +114,22 @@ describe('CreateCaseForm', () => {
     expect(queryByText('Sync alert')).not.toBeInTheDocument();
   });
 
-  describe('CreateCaseFormFields', () => {
-    it('should render spinner when loading', async () => {
-      const wrapper = mount(
-        <MockHookWrapperComponent>
-          <CreateCaseFormFields
-            connectors={[]}
-            isLoadingConnectors={false}
-            hideConnectorServiceNowSir={false}
-            withSteps={true}
-          />
-        </MockHookWrapperComponent>
-      );
+  it('should render spinner when loading', async () => {
+    const wrapper = mount(
+      <MockHookWrapperComponent>
+        <CreateCaseForm {...casesFormProps} />
+      </MockHookWrapperComponent>
+    );
 
-      await act(async () => {
-        globalForm.setFieldValue('title', 'title');
-        globalForm.setFieldValue('description', 'description');
-        globalForm.submit();
-        // For some weird reason this is needed to pass the test.
-        // It does not do anything useful
-        await wrapper.find(`[data-test-subj="caseTitle"]`);
-        await wrapper.update();
-      });
+    expect(wrapper.find(`[data-test-subj="create-case-submit"]`).exists()).toBeTruthy();
 
-      await waitFor(() => {
-        expect(
-          wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()
-        ).toBeTruthy();
-      });
+    await act(async () => {
+      globalForm.setFieldValue('title', 'title');
+      globalForm.setFieldValue('description', 'description');
+      await wrapper.find(`button[data-test-subj="create-case-submit"]`).simulate('click');
+      wrapper.update();
     });
+    
+    expect(wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()).toBeTruthy();
   });
 });
