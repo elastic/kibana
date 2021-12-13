@@ -16,6 +16,15 @@ import {
 } from './use_saved_search';
 
 /**
+ * Sends COMPLETE message to the main$ observable with the information
+ * that no documents have been found, allowing Discover to show a no
+ * results message.
+ */
+export function sendNoResultsFoundMsg(main$: DataMain$) {
+  sendCompleteMsg(main$, false);
+}
+
+/**
  * Send COMPLETE message via main observable used when
  * 1.) first fetch resolved, and there are no documents
  * 2.) all fetches resolved, and there are documents
