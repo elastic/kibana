@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { TMSService } from '@elastic/ems-client';
+import type { TMSService } from '@elastic/ems-client';
 import type { MapConfig, TileMapConfig } from '../../../../../../maps_ems/public';
 
 export const ORIGIN_LEGACY = {
