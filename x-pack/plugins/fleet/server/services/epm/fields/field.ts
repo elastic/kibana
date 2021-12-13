@@ -34,6 +34,7 @@ export interface Field {
   dynamic?: 'strict' | boolean;
   include_in_parent?: boolean;
   include_in_root?: boolean;
+  null_value?: string;
 
   // Meta fields
   metric_type?: string;
