@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { CaseUserActionConnectorRt, CaseConnectorRt } from '../../connectors';
-import { Fields, Actions } from './common';
+import { ActionTypes, UserActionWithAttributes } from './common';
 
 export const ConnectorUserActionPayloadWithoutConnectorIdRt = rt.type({
   connector: CaseUserActionConnectorRt,
@@ -18,18 +18,16 @@ export const ConnectorUserActionPayloadRt = rt.type({
 });
 
 export const ConnectorUserActionWithoutConnectorIdRt = rt.type({
-  fields: rt.array(rt.literal(Fields.connector)),
-  action: rt.literal(Actions.update),
+  type: rt.literal(ActionTypes.connector),
   payload: ConnectorUserActionPayloadWithoutConnectorIdRt,
 });
 
 export const ConnectorUserActionRt = rt.type({
-  fields: rt.array(rt.literal(Fields.connector)),
-  action: rt.literal(Actions.update),
+  type: rt.literal(ActionTypes.connector),
   payload: ConnectorUserActionPayloadRt,
 });
 
-export type ConnectorUserAction = rt.TypeOf<typeof ConnectorUserActionRt>;
-export type ConnectorUserActionWithoutConnectorId = rt.TypeOf<
-  typeof ConnectorUserActionWithoutConnectorIdRt
+export type ConnectorUserAction = UserActionWithAttributes<rt.TypeOf<typeof ConnectorUserActionRt>>;
+export type ConnectorUserActionWithoutConnectorId = UserActionWithAttributes<
+  rt.TypeOf<typeof ConnectorUserActionWithoutConnectorIdRt>
 >;

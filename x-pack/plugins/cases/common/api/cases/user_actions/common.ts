@@ -6,10 +6,9 @@
  */
 
 import * as rt from 'io-ts';
-import { OWNER_FIELD } from '../constants';
 import { UserRT } from '../../user';
 
-export const Fields = {
+export const ActionTypes = {
   comment: 'comment',
   connector: 'connector',
   description: 'description',
@@ -18,7 +17,8 @@ export const Fields = {
   title: 'title',
   status: 'status',
   settings: 'settings',
-  owner: OWNER_FIELD,
+  create_case: 'create_case',
+  delete_case: 'delete_case',
 } as const;
 
 export const Actions = {
@@ -32,12 +32,24 @@ export const Actions = {
 /* To the next developer, if you add/removed fields here
  * make sure to check this file (x-pack/plugins/cases/server/services/user_actions/helpers.ts) too
  */
-export const FieldTypeRt = rt.keyof(Fields);
-export const FieldsRt = rt.array(FieldTypeRt);
+export const ActionTypesRt = rt.keyof(ActionTypes);
 export const ActionsRt = rt.keyof(Actions);
 
 export const UserActionCommonAttributesRt = rt.type({
   created_at: rt.string,
   created_by: UserRT,
   owner: rt.string,
+  action: ActionsRt,
 });
+
+export const CaseUserActionSavedObjectIdsRt = rt.intersection([
+  rt.type({
+    action_id: rt.string,
+    case_id: rt.string,
+    comment_id: rt.union([rt.string, rt.null]),
+  }),
+  rt.partial({ sub_case_id: rt.string }),
+]);
+
+export type UserActionWithAttributes<T> = T & rt.TypeOf<typeof UserActionCommonAttributesRt>;
+export type UserActionWithResponse<T> = T & rt.TypeOf<typeof CaseUserActionSavedObjectIdsRt>;

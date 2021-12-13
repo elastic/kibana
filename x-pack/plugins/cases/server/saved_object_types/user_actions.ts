@@ -16,9 +16,6 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
-      fields: {
-        type: 'keyword',
-      },
       action: {
         type: 'keyword',
       },
@@ -51,6 +48,10 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
         },
       },
       owner: {
+        type: 'keyword',
+      },
+      // The type of the action
+      type: {
         type: 'keyword',
       },
     },

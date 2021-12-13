@@ -13,16 +13,15 @@ import {
 } from '../../../common/constants';
 import {
   Actions,
+  ActionTypes,
   CaseStatuses,
-  SpecificUserActionAttributes,
   User,
-  UserActionFieldType,
+  UserActionTypes,
   UserAction,
   CaseExternalServiceBasic,
   noneConnectorId,
   CaseSettings,
   CaseConnector,
-  OWNER_FIELD,
   CasePostRequest,
 } from '../../../common/api';
 
@@ -65,75 +64,63 @@ interface BuilderReturnValue<T> {
 
 type CommonBuilderArguments = CommonArguments & {
   action: UserAction;
-  field: UserActionFieldType;
+  type: UserActionTypes;
   value: unknown;
   valueKey: string;
   extraReferences?: SavedObjectReference[];
 };
 
-type BuilderFieldTypes = UserActionFieldType | 'create_case' | 'delete_case';
+type BuilderFieldTypes = UserActionTypes;
 
 // Title
 type TitleBuilderArgs = { title: string } & CommonArguments;
-type TitleBuilderResponse = BuilderReturnValue<SpecificUserActionAttributes<TitleUserAction>>;
+type TitleBuilderResponse = BuilderReturnValue<TitleUserAction>;
 
 // Description
 type DescriptionBuilderArgs = { description: string } & CommonArguments;
-type DescriptionBuilderResponse = BuilderReturnValue<
-  SpecificUserActionAttributes<DescriptionUserAction>
->;
+type DescriptionBuilderResponse = BuilderReturnValue<DescriptionUserAction>;
 
 // Status
 type StatusBuilderArgs = { status: CaseStatuses } & CommonArguments;
-type StatusBuilderResponse = BuilderReturnValue<SpecificUserActionAttributes<StatusUserAction>>;
+type StatusBuilderResponse = BuilderReturnValue<StatusUserAction>;
 
 // Tags
-type TagsBuilderArgs = { action: TagsUserAction['action']; tags: string[] } & CommonArguments;
-type TagsBuilderResponse = BuilderReturnValue<SpecificUserActionAttributes<TagsUserAction>>;
+type TagsBuilderArgs = { action: UserAction; tags: string[] } & CommonArguments;
+type TagsBuilderResponse = BuilderReturnValue<TagsUserAction>;
 
 // Pushed
 type PushedBuilderArgs = {
   externalService: PushedUserAction['payload']['externalService'];
 } & CommonArguments;
-type PushedBuilderResponse = BuilderReturnValue<
-  SpecificUserActionAttributes<PushedUserActionWithoutConnectorId>
->;
+type PushedBuilderResponse = BuilderReturnValue<PushedUserActionWithoutConnectorId>;
 
 // Settings
 type SettingsBuilderArgs = { settings: CaseSettings } & CommonArguments;
-type SettingsBuilderResponse = BuilderReturnValue<SpecificUserActionAttributes<SettingsUserAction>>;
+type SettingsBuilderResponse = BuilderReturnValue<SettingsUserAction>;
 
 // Attachments
 type AttachmentBuilderArgs = {
-  action: CommentUserAction['action'];
+  action: UserAction;
   comment: CommentUserAction['payload']['comment'];
   attachmentId: string;
 } & CommonArguments;
-type AttachmentBuilderResponse = BuilderReturnValue<
-  SpecificUserActionAttributes<CommentUserAction>
->;
+type AttachmentBuilderResponse = BuilderReturnValue<CommentUserAction>;
 
 // Connector
 type ConnectorBuilderArgs = {
   connector: ConnectorUserAction['payload']['connector'];
 } & CommonArguments;
-type ConnectorBuilderResponse = BuilderReturnValue<
-  SpecificUserActionAttributes<ConnectorUserActionWithoutConnectorId>
->;
+type ConnectorBuilderResponse = BuilderReturnValue<ConnectorUserActionWithoutConnectorId>;
 
 // Create case
 type CreateCaseBuilderArgs = {
   payload: CasePostRequest;
 } & CommonArguments;
-type CreateCaseBuilderResponse = BuilderReturnValue<
-  SpecificUserActionAttributes<CreateCaseUserActionWithoutConnectorId>
->;
+type CreateCaseBuilderResponse = BuilderReturnValue<CreateCaseUserActionWithoutConnectorId>;
 
 // Create case
 type DeleteCaseBuilderArgs = { connectorId: string } & CommonArguments;
-type DeleteCaseBuilderResponse = BuilderReturnValue<
-  SpecificUserActionAttributes<DeleteCaseUserAction>
->;
+type DeleteCaseBuilderResponse = BuilderReturnValue<DeleteCaseUserAction>;
 
 type BuilderArgumentsType<T extends BuilderFieldTypes> = T extends 'title'
   ? TitleBuilderArgs
@@ -280,19 +267,19 @@ export class UserActionBuilder {
     action,
     user,
     owner,
-    field,
     value,
     valueKey,
     caseId,
     subCaseId,
+    type,
     extraReferences = [],
   }: CommonBuilderArguments): BuilderResponseType<T> => {
     return {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
         action,
-        fields: [field],
         payload: { [valueKey]: value },
+        type,
       },
       references: [...this.createCaseReferences(caseId, subCaseId), ...extraReferences],
     } as BuilderResponseType<T>;
@@ -302,9 +289,9 @@ export class UserActionBuilder {
     return this.buildCommonUserAction<'title'>({
       ...args,
       action: Actions.update,
-      field: 'title',
       valueKey: 'title',
       value: args.title,
+      type: ActionTypes.title,
     });
   }
 
@@ -312,9 +299,9 @@ export class UserActionBuilder {
     return this.buildCommonUserAction<'connector'>({
       ...args,
       action: Actions.update,
-      field: 'connector',
       valueKey: 'connector',
       value: this.extractConnectorId(args.connector),
+      type: ActionTypes.connector,
       extraReferences: this.createConnectorReference(args.connector.id),
     });
   }
@@ -322,9 +309,9 @@ export class UserActionBuilder {
   private buildCommentUserAction(args: AttachmentBuilderArgs): AttachmentBuilderResponse {
     return this.buildCommonUserAction<'comment'>({
       ...args,
-      field: 'comment',
       valueKey: 'comment',
       value: args.comment,
+      type: ActionTypes.comment,
       extraReferences: this.createCommentReferences(args.attachmentId),
     });
   }
@@ -333,8 +320,8 @@ export class UserActionBuilder {
     return this.buildCommonUserAction<'description'>({
       ...args,
       action: Actions.update,
-      field: 'description',
       valueKey: 'description',
+      type: ActionTypes.description,
       value: args.description,
     });
   }
@@ -343,9 +330,9 @@ export class UserActionBuilder {
     return this.buildCommonUserAction<'pushed'>({
       ...args,
       action: Actions.push_to_service,
-      field: 'pushed',
       valueKey: 'externalService',
       value: this.extractConnectorIdFromExternalService(args.externalService),
+      type: ActionTypes.pushed,
       extraReferences: this.createConnectorPushReference(args.externalService.connector_id),
     });
   }
@@ -353,9 +340,9 @@ export class UserActionBuilder {
   private buildTagsUserAction(args: TagsBuilderArgs): TagsBuilderResponse {
     return this.buildCommonUserAction<'tags'>({
       ...args,
-      field: 'tags',
       valueKey: 'tags',
       value: args.tags,
+      type: ActionTypes.tags,
     });
   }
 
@@ -363,9 +350,9 @@ export class UserActionBuilder {
     return this.buildCommonUserAction<'status'>({
       ...args,
       action: Actions.update,
-      field: 'status',
       valueKey: 'status',
       value: args.status,
+      type: ActionTypes.status,
     });
   }
 
@@ -373,9 +360,9 @@ export class UserActionBuilder {
     return this.buildCommonUserAction<'settings'>({
       ...args,
       action: Actions.update,
-      field: 'settings',
       valueKey: 'settings',
       value: args.settings,
+      type: ActionTypes.settings,
     });
   }
 
@@ -386,8 +373,8 @@ export class UserActionBuilder {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
         action: Actions.create,
-        fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', OWNER_FIELD],
         payload: { ...payload, connector: connectorWithoutId, status: CaseStatuses.open },
+        type: ActionTypes.create_case,
       },
       references: [
         ...this.createCaseReferences(caseId, subCaseId),
@@ -402,17 +389,8 @@ export class UserActionBuilder {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
         action: Actions.delete,
-        fields: [
-          'description',
-          'status',
-          'tags',
-          'title',
-          'connector',
-          'settings',
-          OWNER_FIELD,
-          'comment',
-        ],
         payload: null,
+        type: ActionTypes.delete_case,
       },
       references: [
         ...this.createCaseReferences(caseId),

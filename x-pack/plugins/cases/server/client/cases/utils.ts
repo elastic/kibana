@@ -21,6 +21,7 @@ import {
   CommentRequestUserType,
   CommentRequestAlertType,
   CommentRequestActionsType,
+  ActionTypes,
 } from '../../../common/api';
 import { ActionsClient } from '../../../../actions/server';
 import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
@@ -207,7 +208,7 @@ export const createIncident = async ({
   const commentsIdsToBeUpdated = new Set(
     userActions
       .slice(latestPushInfo?.index ?? 0)
-      .filter((action) => Array.isArray(action.fields) && action.fields[0] === 'comment')
+      .filter((action) => action.type === ActionTypes.comment)
       .map((action) => action.comment_id)
   );
 

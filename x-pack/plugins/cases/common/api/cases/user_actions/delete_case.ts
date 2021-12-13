@@ -6,23 +6,13 @@
  */
 
 import * as rt from 'io-ts';
-import { Actions, Fields } from './common';
+import { ActionTypes, UserActionWithAttributes } from './common';
 
 export const DeleteCaseUserActionRt = rt.type({
-  fields: rt.array(
-    rt.union([
-      rt.literal(Fields.description),
-      rt.literal(Fields.status),
-      rt.literal(Fields.tags),
-      rt.literal(Fields.title),
-      rt.literal(Fields.connector),
-      rt.literal(Fields.settings),
-      rt.literal(Fields.owner),
-      rt.literal(Fields.comment),
-    ])
-  ),
-  action: rt.literal(Actions.delete),
+  type: rt.literal(ActionTypes.delete_case),
   payload: rt.null,
 });
 
-export type DeleteCaseUserAction = rt.TypeOf<typeof DeleteCaseUserActionRt>;
+export type DeleteCaseUserAction = UserActionWithAttributes<
+  rt.TypeOf<typeof DeleteCaseUserActionRt>
+>;

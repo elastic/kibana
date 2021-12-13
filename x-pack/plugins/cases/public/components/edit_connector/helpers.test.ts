@@ -59,12 +59,12 @@ describe('helpers', () => {
       ).toEqual(expectedFields);
     });
 
-    // TODO: fix
-    it.skip('returns null when the action fields is not of length 1', () => {
+    it('returns null when the action is not a connector', () => {
       expect(
         getConnectorFieldsFromUserActions('id-to-find', [
           createConnectorUserAction({
-            fields: ['connector', 'connector'],
+            // @ts-expect-error
+            type: 'not-a-connector',
           }),
         ])
       ).toBeNull();
@@ -77,7 +77,7 @@ function createConnectorUserAction(attributes: Partial<ConnectorUserAction> = {}
     action: 'update',
     createdBy: { username: 'user', fullName: null, email: null },
     createdAt: '2021-12-08T11:28:32.623Z',
-    fields: ['connector'],
+    type: 'connector',
     actionId: '',
     caseId: '',
     commentId: '',

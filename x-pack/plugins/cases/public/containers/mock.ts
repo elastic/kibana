@@ -9,6 +9,7 @@ import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } 
 
 import { ResolvedCase } from '../../common/ui/types';
 import {
+  ActionTypes,
   AssociationType,
   CaseConnector,
   CaseResponse,
@@ -17,13 +18,14 @@ import {
   CasesStatusResponse,
   CaseStatuses,
   CaseType,
+  CaseUserActionResponse,
   CaseUserActionsResponse,
   CommentResponse,
   CommentType,
   ConnectorTypes,
-  SpecificUserActionResponse,
   UserAction,
-  UserActionField,
+  UserActionTypes,
+  UserActionWithResponse,
 } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
@@ -255,7 +257,7 @@ const basicAction = {
   commentId: null,
   owner: SECURITY_SOLUTION_OWNER,
   payload: { title: 'a title' },
-  fields: ['title'],
+  type: 'title',
 };
 
 export const cases: Case[] = [
@@ -393,41 +395,43 @@ const basicActionSnake = {
   owner: SECURITY_SOLUTION_OWNER,
 };
 
-export const getUserActionSnake = (fields: UserActionField, action: UserAction) => {
-  const isPushToService = action === 'push_to_service' && fields[0] === 'pushed';
+export const getUserActionSnake = (
+  type: UserActionTypes,
+  action: UserAction
+): CaseUserActionResponse => {
+  const isPushToService = type === ActionTypes.pushed;
 
   return {
     ...basicActionSnake,
-    action_id: `${fields[0]}-${action}`,
-    fields,
+    action_id: `${type}-${action}`,
+    type,
     action,
-    comment_id: fields[0] === 'comment' ? basicCommentId : null,
+    comment_id: type === 'comment' ? basicCommentId : null,
     payload: isPushToService ? { externalService: basicPushSnake } : basicAction.payload,
-  };
+  } as unknown as CaseUserActionResponse;
 };
 
 export const caseUserActionsSnake: CaseUserActionsResponse = [
-  getUserActionSnake(['description'], 'create'),
-  getUserActionSnake(['comment'], 'create'),
-  getUserActionSnake(['description'], 'update'),
+  getUserActionSnake('description', 'create'),
+  getUserActionSnake('comment', 'create'),
+  getUserActionSnake('description', 'update'),
 ];
 
 // user actions
 
 export const getUserAction = (
-  fields: UserActionField,
+  type: UserActionTypes,
   action: UserAction,
-  overrides?: Partial<CaseUserActions>
+  overrides?: Record<string, unknown>
 ): CaseUserActions => {
   return {
     ...basicAction,
-    actionId: `${fields[0]}-${action}`,
-    fields,
+    actionId: `${type}-${action}`,
+    type,
     action,
-    payload: { title: 'a title' },
-    commentId: fields[0] === 'comment' ? basicCommentId : null,
+    commentId: type === 'comment' ? basicCommentId : null,
     ...overrides,
-  };
+  } as CaseUserActions;
 };
 
 export const getJiraConnector = (overrides?: Partial<CaseConnector>): CaseConnector => {
@@ -452,11 +456,11 @@ export const getAlertUserAction = () => ({
 });
 
 export const getHostIsolationUserAction = (): SnakeToCamelCase<
-  SpecificUserActionResponse<CommentUserAction>
+  UserActionWithResponse<CommentUserAction>
 > => ({
   ...basicAction,
   actionId: 'isolate-action-id',
-  fields: ['comment'] as Array<'comment'>,
+  type: ActionTypes.comment,
   action: 'create',
   commentId: 'isolate-comment-id',
   payload: {
@@ -470,9 +474,9 @@ export const getHostIsolationUserAction = (): SnakeToCamelCase<
 });
 
 export const caseUserActions: CaseUserActions[] = [
-  getUserAction(['description'], 'create'),
-  getUserAction(['comment'], 'create'),
-  getUserAction(['description'], 'update'),
+  getUserAction('description', 'create'),
+  getUserAction('comment', 'create'),
+  getUserAction('description', 'update'),
 ];
 
 // components tests

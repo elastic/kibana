@@ -7,18 +7,13 @@
 
 import * as rt from 'io-ts';
 import { CommentRequestRt } from '../comment';
-import { Fields, Actions } from './common';
+import { ActionTypes, UserActionWithAttributes } from './common';
 
 export const CommentUserActionPayloadRt = rt.type({ comment: CommentRequestRt });
 
 export const CommentUserActionRt = rt.type({
-  fields: rt.array(rt.literal(Fields.comment)),
-  action: rt.union([
-    rt.literal(Actions.update),
-    rt.literal(Actions.create),
-    rt.literal(Actions.delete),
-  ]),
+  type: rt.literal(ActionTypes.comment),
   payload: CommentUserActionPayloadRt,
 });
 
-export type CommentUserAction = rt.TypeOf<typeof CommentUserActionRt>;
+export type CommentUserAction = UserActionWithAttributes<rt.TypeOf<typeof CommentUserActionRt>>;

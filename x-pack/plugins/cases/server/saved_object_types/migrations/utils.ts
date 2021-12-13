@@ -10,7 +10,6 @@
 import * as rt from 'io-ts';
 
 import { SavedObjectReference } from '../../../../../../src/core/server';
-import { isCreateConnector, isPush, isUpdateConnector } from '../../../common/utils/user_actions';
 import {
   CaseAttributes,
   CaseConnector,
@@ -26,6 +25,18 @@ import {
 } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
+
+export function isCreateConnector(action?: string, actionFields?: string[]): boolean {
+  return action === 'create' && actionFields != null && actionFields.includes('connector');
+}
+
+export function isUpdateConnector(action?: string, actionFields?: string[]): boolean {
+  return action === 'update' && actionFields != null && actionFields.includes('connector');
+}
+
+export function isPush(action?: string, actionFields?: string[]): boolean {
+  return action === 'push_to_service' && actionFields != null && actionFields.includes('pushed');
+}
 
 /**
  * Indicates whether which user action field is being parsed, the new_value or the old_value.

@@ -40,13 +40,11 @@ describe('UserActionBuilder', () => {
             "full_name": "Elastic User",
             "username": "elastic",
           },
-          "fields": Array [
-            "title",
-          ],
           "owner": "securitySolution",
           "payload": Object {
             "title": "test",
           },
+          "type": "title",
         },
         "references": Array [
           Object {
@@ -89,9 +87,6 @@ describe('UserActionBuilder', () => {
             "full_name": "Elastic User",
             "username": "elastic",
           },
-          "fields": Array [
-            "connector",
-          ],
           "owner": "securitySolution",
           "payload": Object {
             "connector": Object {
@@ -108,6 +103,7 @@ describe('UserActionBuilder', () => {
               "type": ".servicenow-sir",
             },
           },
+          "type": "connector",
         },
         "references": Array [
           Object {
@@ -144,9 +140,6 @@ describe('UserActionBuilder', () => {
             "full_name": "Elastic User",
             "username": "elastic",
           },
-          "fields": Array [
-            "comment",
-          ],
           "owner": "securitySolution",
           "payload": Object {
             "comment": Object {
@@ -155,6 +148,7 @@ describe('UserActionBuilder', () => {
               "type": "user",
             },
           },
+          "type": "comment",
         },
         "references": Array [
           Object {
@@ -189,13 +183,11 @@ describe('UserActionBuilder', () => {
             "full_name": "Elastic User",
             "username": "elastic",
           },
-          "fields": Array [
-            "description",
-          ],
           "owner": "securitySolution",
           "payload": Object {
             "description": "test",
           },
+          "type": "description",
         },
         "references": Array [
           Object {
@@ -225,9 +217,6 @@ describe('UserActionBuilder', () => {
             "full_name": "Elastic User",
             "username": "elastic",
           },
-          "fields": Array [
-            "pushed",
-          ],
           "owner": "securitySolution",
           "payload": Object {
             "externalService": Object {
@@ -243,6 +232,7 @@ describe('UserActionBuilder', () => {
               },
             },
           },
+          "type": "pushed",
         },
         "references": Array [
           Object {
@@ -278,9 +268,6 @@ describe('UserActionBuilder', () => {
             "full_name": "Elastic User",
             "username": "elastic",
           },
-          "fields": Array [
-            "tags",
-          ],
           "owner": "securitySolution",
           "payload": Object {
             "tags": Array [
@@ -288,6 +275,7 @@ describe('UserActionBuilder', () => {
               "two",
             ],
           },
+          "type": "tags",
         },
         "references": Array [
           Object {
@@ -317,13 +305,11 @@ describe('UserActionBuilder', () => {
             "full_name": "Elastic User",
             "username": "elastic",
           },
-          "fields": Array [
-            "status",
-          ],
           "owner": "securitySolution",
           "payload": Object {
             "status": "open",
           },
+          "type": "status",
         },
         "references": Array [
           Object {
@@ -353,15 +339,13 @@ describe('UserActionBuilder', () => {
             "full_name": "Elastic User",
             "username": "elastic",
           },
-          "fields": Array [
-            "settings",
-          ],
           "owner": "securitySolution",
           "payload": Object {
             "settings": Object {
               "syncAlerts": true,
             },
           },
+          "type": "settings",
         },
         "references": Array [
           Object {
@@ -391,15 +375,6 @@ describe('UserActionBuilder', () => {
             "full_name": "Elastic User",
             "username": "elastic",
           },
-          "fields": Array [
-            "description",
-            "status",
-            "tags",
-            "title",
-            "connector",
-            "settings",
-            "owner",
-          ],
           "owner": "securitySolution",
           "payload": Object {
             "connector": Object {
@@ -426,6 +401,7 @@ describe('UserActionBuilder', () => {
             ],
             "title": "Case SIR",
           },
+          "type": "create_case",
         },
         "references": Array [
           Object {
@@ -460,18 +436,9 @@ describe('UserActionBuilder', () => {
             "full_name": "Elastic User",
             "username": "elastic",
           },
-          "fields": Array [
-            "description",
-            "status",
-            "tags",
-            "title",
-            "connector",
-            "settings",
-            "owner",
-            "comment",
-          ],
           "owner": "securitySolution",
           "payload": null,
+          "type": "delete_case",
         },
         "references": Array [
           Object {

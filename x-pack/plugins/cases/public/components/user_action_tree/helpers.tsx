@@ -40,6 +40,8 @@ import { CasesNavigation } from '../links';
 import { HostIsolationCommentEvent } from './user_action_host_isolation_comment_event';
 import { MarkdownRenderer } from '../markdown_editor';
 import {
+  isCommentUserAction,
+  isDescriptionUserAction,
   isStatusUserAction,
   isTagsUserAction,
   isTitleUserAction,
@@ -51,7 +53,6 @@ import { SnakeToCamelCase } from '../../../common/types';
 
 interface LabelTitle {
   action: CaseUserActions;
-  field: string;
 }
 
 export type RuleDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
@@ -75,23 +76,23 @@ const getStatusTitle = (id: string, status: CaseStatuses) => (
 const isStatusValid = (status: string): status is CaseStatuses =>
   Object.prototype.hasOwnProperty.call(statuses, status);
 
-export const getLabelTitle = ({ action, field }: LabelTitle) => {
+export const getLabelTitle = ({ action }: LabelTitle) => {
   if (isTagsUserAction(action)) {
     return getTagsLabelTitle(action);
-  } else if (field === 'title' && isTitleUserAction(action)) {
+  } else if (isTitleUserAction(action)) {
     return `${i18n.CHANGED_FIELD.toLowerCase()} ${i18n.CASE_NAME.toLowerCase()}  ${i18n.TO} "${
       action.payload.title
     }"`;
-  } else if (field === 'description' && action.action === 'update') {
+  } else if (isDescriptionUserAction(action) && action.action === 'update') {
     return `${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`;
-  } else if (field === 'status' && isStatusUserAction(action)) {
+  } else if (isStatusUserAction(action)) {
     const status = action.payload.status ?? '';
     if (isStatusValid(status)) {
       return getStatusTitle(action.actionId, status);
     }
 
     return '';
-  } else if (field === 'comment' && action.action === 'update') {
+  } else if (isCommentUserAction(action) && action.action === 'update') {
     return `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
   }
 
@@ -214,9 +215,9 @@ export const getUpdateAction = ({
   ),
   type: 'update',
   event: label,
-  'data-test-subj': `${action.fields[0]}-${action.action}-action-${action.actionId}`,
+  'data-test-subj': `${action.type}-${action.action}-action-${action.actionId}`,
   timestamp: <UserActionTimestamp createdAt={action.createdAt} />,
-  timelineIcon: getUpdateActionIcon(action.fields[0]),
+  timelineIcon: getUpdateActionIcon(action.type),
   actions: (
     <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={false}>
@@ -271,7 +272,7 @@ export const getAlertAttachment = ({
       commentType={CommentType.alert}
     />
   ),
-  'data-test-subj': `${action.fields[0]}-${action.action}-action-${action.actionId}`,
+  'data-test-subj': `${action.type}-${action.action}-action-${action.actionId}`,
   timestamp: <UserActionTimestamp createdAt={action.createdAt} />,
   timelineIcon: 'bell',
   actions: (
@@ -357,7 +358,7 @@ export const getGeneratedAlertsAttachment = ({
       commentType={CommentType.generatedAlert}
     />
   ),
-  'data-test-subj': `${action.fields[0]}-${action.action}-action-${action.actionId}`,
+  'data-test-subj': `${action.type}-${action.action}-action-${action.actionId}`,
   timestamp: <UserActionTimestamp createdAt={action.createdAt} />,
   timelineIcon: 'bell',
   actions: (

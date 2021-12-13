@@ -224,8 +224,8 @@ export const mappings: ConnectorMappingsAttributes[] = [
 
 export const userActions: CaseUserActionsResponse = [
   {
-    fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', 'owner'],
     action: 'create',
+    type: 'create_case',
     created_at: '2021-02-03T17:41:03.771Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -260,7 +260,7 @@ export const userActions: CaseUserActionsResponse = [
     owner: SECURITY_SOLUTION_OWNER,
   },
   {
-    fields: ['pushed'],
+    type: 'pushed',
     action: Actions.push_to_service,
     created_at: '2021-02-03T17:41:26.108Z',
     created_by: {
@@ -286,7 +286,7 @@ export const userActions: CaseUserActionsResponse = [
     owner: SECURITY_SOLUTION_OWNER,
   },
   {
-    fields: ['comment'],
+    type: 'comment',
     action: 'create',
     created_at: '2021-02-03T17:44:21.067Z',
     created_by: {
@@ -309,7 +309,7 @@ export const userActions: CaseUserActionsResponse = [
     owner: SECURITY_SOLUTION_OWNER,
   },
   {
-    fields: ['comment'],
+    type: 'comment',
     action: 'create',
     created_at: '2021-02-03T17:44:33.078Z',
     created_by: {
@@ -332,7 +332,7 @@ export const userActions: CaseUserActionsResponse = [
     owner: SECURITY_SOLUTION_OWNER,
   },
   {
-    fields: ['pushed'],
+    type: 'pushed',
     action: Actions.push_to_service,
     created_at: '2021-02-03T17:45:29.400Z',
     created_by: {
@@ -358,7 +358,7 @@ export const userActions: CaseUserActionsResponse = [
     owner: SECURITY_SOLUTION_OWNER,
   },
   {
-    fields: ['comment'],
+    type: 'comment',
     action: 'create',
     created_at: '2021-02-03T17:48:30.616Z',
     created_by: {

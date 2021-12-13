@@ -94,8 +94,8 @@ describe(`UserActionTree`, () => {
 
   it('Renders service now update line with top and bottom when push is required', async () => {
     const ourActions = [
-      getUserAction(['pushed'], 'push_to_service'),
-      getUserAction(['comment'], 'update'),
+      getUserAction('pushed', 'push_to_service'),
+      getUserAction('comment', 'update'),
     ];
 
     const props = {
@@ -123,7 +123,7 @@ describe(`UserActionTree`, () => {
   });
 
   it('Renders service now update line with top only when push is up to date', async () => {
-    const ourActions = [getUserAction(['pushed'], 'push_to_service')];
+    const ourActions = [getUserAction('pushed', 'push_to_service')];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
@@ -149,7 +149,7 @@ describe(`UserActionTree`, () => {
     });
   });
   it('Outlines comment when update move to link is clicked', async () => {
-    const ourActions = [getUserAction(['comment'], 'create'), getUserAction(['comment'], 'update')];
+    const ourActions = [getUserAction('comment', 'create'), getUserAction('comment', 'update')];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
@@ -184,7 +184,7 @@ describe(`UserActionTree`, () => {
     });
   });
   it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
-    const ourActions = [getUserAction(['comment'], 'create')];
+    const ourActions = [getUserAction('comment', 'create')];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
@@ -228,7 +228,7 @@ describe(`UserActionTree`, () => {
   });
 
   it('calls update comment when comment markdown is saved', async () => {
-    const ourActions = [getUserAction(['comment'], 'create')];
+    const ourActions = [getUserAction('comment', 'create')];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
@@ -361,7 +361,7 @@ describe(`UserActionTree`, () => {
     const commentId = 'basic-comment-id';
     jest.spyOn(routeData, 'useParams').mockReturnValue({ commentId });
 
-    const ourActions = [getUserAction(['comment'], 'create')];
+    const ourActions = [getUserAction('comment', 'create')];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,

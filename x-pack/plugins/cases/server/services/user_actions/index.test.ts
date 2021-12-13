@@ -8,22 +8,24 @@
 import { loggerMock } from '@kbn/logging/mocks';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsFindResult } from 'kibana/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
+import { Actions, CaseStatuses, CaseUserActionAttributes, UserAction } from '../../../common/api';
 import { ConnectorUserAction } from '../../../common/api/cases/user_actions/connector';
-import { CaseUserActionService, transformFindResponseToExternalModel } from '.';
+import { PushedUserAction } from '../../../common/api/cases/user_actions/pushed';
 import {
-  Actions,
-  CaseStatuses,
-  CaseUserActionAttributes,
-  UserAction,
-  UserActionField,
-} from '../../../common/api';
-import {
+  CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
-import { CASE_REF_NAME, SUB_CASE_REF_NAME } from '../../common/constants';
+import {
+  CASE_REF_NAME,
+  COMMENT_REF_NAME,
+  CONNECTOR_ID_REFERENCE_NAME,
+  PUSH_CONNECTOR_ID_REFERENCE_NAME,
+  SUB_CASE_REF_NAME,
+} from '../../common/constants';
 
 import {
   createConnectorObject,
@@ -39,17 +41,20 @@ import {
   comment,
   attachments,
 } from './mocks';
+import { CaseUserActionService, transformFindResponseToExternalModel } from '.';
 
 const createConnectorUserAction = (
   subCaseId?: string,
   overrides?: Partial<CaseUserActionAttributes>
 ): SavedObject<CaseUserActionAttributes> => {
+  const { id, ...restConnector } = createConnectorObject().connector;
   return {
     ...createUserActionSO({
       action: 'create',
-      fields: ['connector'],
-      newValue: createConnectorObject(),
+      payload: { connector: restConnector },
+      type: 'connector',
       subCaseId,
+      connectorId: id,
     }),
     ...(overrides && { ...overrides }),
   };
@@ -58,19 +63,18 @@ const createConnectorUserAction = (
 const updateConnectorUserAction = ({
   subCaseId,
   overrides,
-  oldValue,
 }: {
   subCaseId?: string;
   overrides?: Partial<CaseUserActionAttributes>;
-  oldValue?: string | null | Record<string, unknown>;
 } = {}): SavedObject<CaseUserActionAttributes> => {
+  const { id, ...restConnector } = createJiraConnector();
   return {
     ...createUserActionSO({
       action: 'update',
-      fields: ['connector'],
-      newValue: createJiraConnector(),
-      oldValue,
+      payload: { connector: restConnector },
+      type: 'connector',
       subCaseId,
+      connectorId: id,
     }),
     ...(overrides && { ...overrides }),
   };
@@ -79,19 +83,18 @@ const updateConnectorUserAction = ({
 const pushConnectorUserAction = ({
   subCaseId,
   overrides,
-  oldValue,
 }: {
   subCaseId?: string;
   overrides?: Partial<CaseUserActionAttributes>;
-  oldValue?: string | null | Record<string, unknown>;
 } = {}): SavedObject<CaseUserActionAttributes> => {
+  const { connector_id: connectorId, ...restExternalService } = createExternalService();
   return {
     ...createUserActionSO({
       action: Actions.push_to_service,
-      fields: ['pushed'],
-      newValue: createExternalService(),
-      oldValue,
+      payload: { externalService: restExternalService },
       subCaseId,
+      pushedConnectorId: connectorId,
+      type: 'pushed',
     }),
     ...(overrides && { ...overrides }),
   };
@@ -106,20 +109,22 @@ const createUserActionFindSO = (
 
 const createUserActionSO = ({
   action,
-  fields,
   subCaseId,
-  newValue,
-  oldValue,
   attributesOverrides,
   commentId,
+  connectorId,
+  pushedConnectorId,
+  payload,
+  type,
 }: {
   action: UserAction;
-  fields: UserActionField;
   subCaseId?: string;
-  newValue?: string | null | Record<string, unknown>;
-  oldValue?: string | null | Record<string, unknown>;
+  type?: string;
+  payload?: Record<string, unknown>;
   attributesOverrides?: Partial<CaseUserActionAttributes>;
   commentId?: string;
+  connectorId?: string;
+  pushedConnectorId?: string;
 }): SavedObject<CaseUserActionAttributes> => {
   const defaultParams = {
     action,
@@ -129,12 +134,9 @@ const createUserActionSO = ({
       username: 'b',
       full_name: 'abc',
     },
-    caseId: '1',
-    subCaseId,
-    fields,
-    payload: { title: 'a new title' },
+    type: type ?? 'title',
+    payload: payload ?? { title: 'a new title' },
     owner: 'securitySolution',
-    ...(commentId ? { comment_id: commentId } : {}),
   };
 
   return {
@@ -156,6 +158,33 @@ const createUserActionSO = ({
               type: SUB_CASE_SAVED_OBJECT,
               name: SUB_CASE_REF_NAME,
               id: subCaseId,
+            },
+          ]
+        : []),
+      ...(commentId
+        ? [
+            {
+              type: CASE_COMMENT_SAVED_OBJECT,
+              name: COMMENT_REF_NAME,
+              id: commentId,
+            },
+          ]
+        : []),
+      ...(connectorId
+        ? [
+            {
+              type: ACTION_SAVED_OBJECT_TYPE,
+              name: CONNECTOR_ID_REFERENCE_NAME,
+              id: connectorId,
+            },
+          ]
+        : []),
+      ...(pushedConnectorId
+        ? [
+            {
+              type: ACTION_SAVED_OBJECT_TYPE,
+              name: PUSH_CONNECTOR_ID_REFERENCE_NAME,
+              id: pushedConnectorId,
             },
           ]
         : []),
@@ -198,24 +227,30 @@ describe('CaseUserActionService', () => {
             Object {
               "attributes": Object {
                 "action": "create",
-                "action_at": "abc",
-                "action_by": Object {
+                "action_id": "100",
+                "case_id": "1",
+                "comment_id": null,
+                "created_at": "abc",
+                "created_by": Object {
                   "email": "a",
                   "full_name": "abc",
                   "username": "b",
                 },
-                "action_field": Array [
-                  "connector",
-                ],
-                "action_id": "100",
-                "case_id": "1",
-                "comment_id": null,
-                "payload.connector.id": "1",
-                "new_value": "{\\"connector\\":{\\"name\\":\\".jira\\",\\"type\\":\\".jira\\",\\"fields\\":{\\"issueType\\":\\"bug\\",\\"priority\\":\\"high\\",\\"parent\\":\\"2\\"}}}",
-                "old_val_connector_id": null,
-                "old_value": null,
                 "owner": "securitySolution",
+                "payload": Object {
+                  "connector": Object {
+                    "fields": Object {
+                      "issueType": "bug",
+                      "parent": "2",
+                      "priority": "high",
+                    },
+                    "id": "1",
+                    "name": ".jira",
+                    "type": ".jira",
+                  },
+                },
                 "sub_case_id": "",
+                "type": "connector",
               },
               "id": "100",
               "references": Array [
@@ -266,7 +301,7 @@ describe('CaseUserActionService', () => {
 
       it('sets comment_id to null when it cannot find the reference', () => {
         const userAction = {
-          ...createUserActionSO({ action: 'create', fields: ['connector'], commentId: '5' }),
+          ...createUserActionSO({ action: 'create', commentId: '5' }),
           references: [],
         };
         const transformed = transformFindResponseToExternalModel(
@@ -278,7 +313,7 @@ describe('CaseUserActionService', () => {
 
       it('sets sub_case_id to an empty string when it cannot find the reference', () => {
         const userAction = {
-          ...createUserActionSO({ action: 'create', fields: ['connector'], subCaseId: '5' }),
+          ...createUserActionSO({ action: 'create', subCaseId: '5' }),
           references: [],
         };
         const transformed = transformFindResponseToExternalModel(
@@ -301,7 +336,6 @@ describe('CaseUserActionService', () => {
       it('sets comment_id correctly when it finds the reference', () => {
         const userAction = createUserActionSO({
           action: 'create',
-          fields: ['connector'],
           commentId: '5',
         });
 
@@ -314,7 +348,7 @@ describe('CaseUserActionService', () => {
 
       it('sets sub_case_id correctly when it finds the reference', () => {
         const userAction = {
-          ...createUserActionSO({ action: 'create', fields: ['connector'], subCaseId: '5' }),
+          ...createUserActionSO({ action: 'create', subCaseId: '5' }),
         };
 
         const transformed = transformFindResponseToExternalModel(
@@ -326,7 +360,7 @@ describe('CaseUserActionService', () => {
 
       it('sets action_id correctly to the saved object id', () => {
         const userAction = {
-          ...createUserActionSO({ action: 'create', fields: ['connector'], subCaseId: '5' }),
+          ...createUserActionSO({ action: 'create', subCaseId: '5' }),
         };
 
         const transformed = transformFindResponseToExternalModel(
@@ -338,20 +372,20 @@ describe('CaseUserActionService', () => {
     });
 
     describe('create connector', () => {
-      it('does not populate the payload.connector.id when it cannot find the reference', () => {
+      it('does set payload.connector.id to none when it cannot find the reference', () => {
         const userAction = { ...createConnectorUserAction(), references: [] };
         const transformed = transformFindResponseToExternalModel(
           createSOFindResponse([createUserActionFindSO(userAction)])
         ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeNull();
+        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBe('none');
       });
 
-      it('does not populate the payload.connector.id when the reference exists but the action and fields are invalid', () => {
+      it('does not populate the payload.connector.id when the reference exists but the action is not of type connector', () => {
         const validUserAction = createConnectorUserAction();
         const invalidUserAction = {
           ...validUserAction,
-          attributes: { ...validUserAction.attributes, action: 'invalid' },
+          attributes: { ...validUserAction.attributes, type: 'not-connector' },
         };
         const transformed = transformFindResponseToExternalModel(
           createSOFindResponse([
@@ -359,7 +393,26 @@ describe('CaseUserActionService', () => {
           ])
         ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeNull();
+        // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
+        // Do we need to put the connector.id to none?
+        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeUndefined();
+      });
+
+      it('does not populate the payload.connector.id when the reference exists but the payload does not contain a connector', () => {
+        const validUserAction = createConnectorUserAction();
+        const invalidUserAction = {
+          ...validUserAction,
+          attributes: { ...validUserAction.attributes, payload: {} },
+        };
+        const transformed = transformFindResponseToExternalModel(
+          createSOFindResponse([
+            createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
+          ])
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
+
+        // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
+        // Do we need to put the connector.id to none?
+        expect(transformed.saved_objects[0].attributes.payload.connector?.id).toBeUndefined();
       });
 
       it('populates the payload.connector.id', () => {
@@ -379,14 +432,14 @@ describe('CaseUserActionService', () => {
           createSOFindResponse([createUserActionFindSO(userAction)])
         ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeNull();
+        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBe('none');
       });
 
-      it('does not populate the payload.connector.id when the reference exists but the action and fields are invalid', () => {
+      it('does not populate the payload.connector.id when the reference exists but the action is invalid', () => {
         const validUserAction = updateConnectorUserAction();
         const invalidUserAction = {
           ...validUserAction,
-          attributes: { ...validUserAction.attributes, action: 'invalid' },
+          attributes: { ...validUserAction.attributes, type: 'not-exists' },
         };
         const transformed = transformFindResponseToExternalModel(
           createSOFindResponse([
@@ -394,7 +447,26 @@ describe('CaseUserActionService', () => {
           ])
         ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeNull();
+        // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
+        // Do we need to put the connector.id to none?
+        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeUndefined();
+      });
+
+      it('does not populate the payload.connector.id when the reference exists but the payload does not contain a connector', () => {
+        const validUserAction = updateConnectorUserAction();
+        const invalidUserAction = {
+          ...validUserAction,
+          attributes: { ...validUserAction.attributes, payload: {} },
+        };
+        const transformed = transformFindResponseToExternalModel(
+          createSOFindResponse([
+            createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
+          ])
+        ) as SavedObjectsFindResponse<ConnectorUserAction>;
+
+        // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
+        // Do we need to put the connector.id to none?
+        expect(transformed.saved_objects[0].attributes.payload.connector?.id).toBeUndefined();
       });
 
       it('populates the payload.connector.id', () => {
@@ -412,33 +484,60 @@ describe('CaseUserActionService', () => {
         const userAction = { ...pushConnectorUserAction(), references: [] };
         const transformed = transformFindResponseToExternalModel(
           createSOFindResponse([createUserActionFindSO(userAction)])
-        ) as SavedObjectsFindResponse<ConnectorUserAction>;
+        ) as SavedObjectsFindResponse<PushedUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeNull();
+        expect(transformed.saved_objects[0].attributes.payload.externalService.connector_id).toBe(
+          'none'
+        );
       });
 
       it('does not populate the payload.connector.id when the reference exists but the action and fields are invalid', () => {
         const validUserAction = pushConnectorUserAction();
         const invalidUserAction = {
           ...validUserAction,
-          attributes: { ...validUserAction.attributes, action: 'invalid' },
+          attributes: { ...validUserAction.attributes, type: 'not-exists' },
         };
         const transformed = transformFindResponseToExternalModel(
           createSOFindResponse([
             createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
           ])
-        ) as SavedObjectsFindResponse<ConnectorUserAction>;
+        ) as SavedObjectsFindResponse<PushedUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeNull();
+        // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
+        // Do we need to put the connector.id to none?
+        expect(
+          transformed.saved_objects[0].attributes.payload.externalService.connector_id
+        ).toBeUndefined();
+      });
+
+      it('does not populate the payload.connector.id when the reference exists but the payload does not contain an external service', () => {
+        const validUserAction = pushConnectorUserAction();
+        const invalidUserAction = {
+          ...validUserAction,
+          attributes: { ...validUserAction.attributes, payload: {} },
+        };
+        const transformed = transformFindResponseToExternalModel(
+          createSOFindResponse([
+            createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
+          ])
+        ) as SavedObjectsFindResponse<PushedUserAction>;
+
+        // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
+        // Do we need to put the connector.id to none?
+        expect(
+          transformed.saved_objects[0].attributes.payload.externalService?.connector_id
+        ).toBeUndefined();
       });
 
       it('populates the payload.connector.id', () => {
         const userAction = pushConnectorUserAction();
         const transformed = transformFindResponseToExternalModel(
           createSOFindResponse([createUserActionFindSO(userAction)])
-        ) as SavedObjectsFindResponse<ConnectorUserAction>;
+        ) as SavedObjectsFindResponse<PushedUserAction>;
 
-        expect(transformed.saved_objects[0].attributes.payload.connector.id).toEqual('100');
+        expect(
+          transformed.saved_objects[0].attributes.payload.externalService.connector_id
+        ).toEqual('100');
       });
     });
   });
@@ -472,7 +571,7 @@ describe('CaseUserActionService', () => {
               full_name: 'Elastic User',
               username: 'elastic',
             },
-            fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', 'owner'],
+            type: 'create_case',
             owner: 'securitySolution',
             payload: {
               connector: {
@@ -527,16 +626,7 @@ describe('CaseUserActionService', () => {
                 full_name: 'Elastic User',
                 username: 'elastic',
               },
-              fields: [
-                'description',
-                'status',
-                'tags',
-                'title',
-                'connector',
-                'settings',
-                'owner',
-                'comment',
-              ],
+              type: 'delete_case',
               owner: 'securitySolution',
               payload: null,
             },
@@ -555,16 +645,7 @@ describe('CaseUserActionService', () => {
                 full_name: 'Elastic User',
                 username: 'elastic',
               },
-              fields: [
-                'description',
-                'status',
-                'tags',
-                'title',
-                'connector',
-                'settings',
-                'owner',
-                'comment',
-              ],
+              type: 'delete_case',
               owner: 'securitySolution',
               payload: null,
             },
@@ -591,7 +672,7 @@ describe('CaseUserActionService', () => {
               full_name: 'Elastic User',
               username: 'elastic',
             },
-            fields: ['status'],
+            type: 'status',
             owner: 'securitySolution',
             payload: { status: 'closed' },
           },
@@ -613,7 +694,7 @@ describe('CaseUserActionService', () => {
               full_name: 'Elastic User',
               username: 'elastic',
             },
-            fields: ['pushed'],
+            type: 'pushed',
             owner: 'securitySolution',
             payload: {
               externalService: {
@@ -660,7 +741,7 @@ describe('CaseUserActionService', () => {
                 full_name: 'Elastic User',
                 username: 'elastic',
               },
-              fields: ['title'],
+              type: 'title',
               owner: 'securitySolution',
               payload: { title: 'updated title' },
             },
@@ -676,7 +757,7 @@ describe('CaseUserActionService', () => {
                 full_name: 'Elastic User',
                 username: 'elastic',
               },
-              fields: ['status'],
+              type: 'status',
               owner: 'securitySolution',
               payload: { status: 'closed' },
             },
@@ -692,7 +773,7 @@ describe('CaseUserActionService', () => {
                 full_name: 'Elastic User',
                 username: 'elastic',
               },
-              fields: ['connector'],
+              type: 'connector',
               owner: 'securitySolution',
               payload: {
                 connector: {
@@ -725,7 +806,7 @@ describe('CaseUserActionService', () => {
                 full_name: 'Elastic User',
                 username: 'elastic',
               },
-              fields: ['description'],
+              type: 'description',
               owner: 'securitySolution',
               payload: { description: 'updated desc' },
             },
@@ -741,7 +822,7 @@ describe('CaseUserActionService', () => {
                 full_name: 'Elastic User',
                 username: 'elastic',
               },
-              fields: ['tags'],
+              type: 'tags',
               owner: 'securitySolution',
               payload: { tags: ['one', 'two'] },
             },
@@ -757,7 +838,7 @@ describe('CaseUserActionService', () => {
                 full_name: 'Elastic User',
                 username: 'elastic',
               },
-              fields: ['tags'],
+              type: 'tags',
               owner: 'securitySolution',
               payload: { tags: ['defacement'] },
             },
@@ -773,7 +854,7 @@ describe('CaseUserActionService', () => {
                 full_name: 'Elastic User',
                 username: 'elastic',
               },
-              fields: ['settings'],
+              type: 'settings',
               owner: 'securitySolution',
               payload: { settings: { syncAlerts: false } },
             },
@@ -812,7 +893,7 @@ describe('CaseUserActionService', () => {
               full_name: 'Elastic User',
               username: 'elastic',
             },
-            fields: ['comment'],
+            type: 'comment',
             owner: 'securitySolution',
             payload: {
               comment: {
@@ -848,7 +929,7 @@ describe('CaseUserActionService', () => {
                 full_name: 'Elastic User',
                 username: 'elastic',
               },
-              fields: ['comment'],
+              type: 'comment',
               owner: 'securitySolution',
               payload: {
                 comment: { comment: 'a comment', owner: 'securitySolution', type: 'user' },
@@ -869,7 +950,7 @@ describe('CaseUserActionService', () => {
                 full_name: 'Elastic User',
                 username: 'elastic',
               },
-              fields: ['comment'],
+              type: 'comment',
               owner: 'securitySolution',
               payload: {
                 comment: {

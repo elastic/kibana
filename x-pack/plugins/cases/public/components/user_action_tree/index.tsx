@@ -501,7 +501,7 @@ export const UserActionTree = React.memo(
             }
 
             // Connectors
-            if (action.fields.length === 1 && isConnectorUserAction(action)) {
+            if (isConnectorUserAction(action)) {
               const label = getConnectorLabelTitle({ action, connectors });
               return [
                 ...comments,
@@ -514,8 +514,7 @@ export const UserActionTree = React.memo(
             }
 
             // Pushed information
-            // TODO: Use types guards
-            if (action.fields.length === 1 && isPushedUserAction<'camelCase'>(action)) {
+            if (isPushedUserAction<'camelCase'>(action)) {
               const parsedExternalService = action.payload.externalService;
 
               const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(
@@ -575,14 +574,9 @@ export const UserActionTree = React.memo(
             }
 
             // title, description, comment updates, tags
-            if (
-              action.fields.length === 1 &&
-              ['title', 'description', 'comment', 'tags', 'status'].includes(action.fields[0])
-            ) {
-              const myField = action.fields[0];
+            if (['title', 'description', 'comment', 'tags', 'status'].includes(action.type)) {
               const label: string | JSX.Element = getLabelTitle({
                 action,
-                field: myField,
               });
 
               return [

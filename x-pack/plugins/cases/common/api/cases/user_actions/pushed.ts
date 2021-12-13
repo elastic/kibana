@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { CaseUserActionExternalServiceRt, CaseExternalServiceBasicRt } from '../case';
-import { Fields, Actions } from './common';
+import { ActionTypes, UserActionWithAttributes } from './common';
 
 export const PushedUserActionPayloadWithoutConnectorIdRt = rt.type({
   externalService: CaseUserActionExternalServiceRt,
@@ -18,18 +18,16 @@ export const PushedUserActionPayloadRt = rt.type({
 });
 
 export const PushedUserActionWithoutConnectorIdRt = rt.type({
-  fields: rt.array(rt.literal(Fields.pushed)),
-  action: rt.literal(Actions.push_to_service),
+  type: rt.literal(ActionTypes.pushed),
   payload: PushedUserActionPayloadWithoutConnectorIdRt,
 });
 
 export const PushedUserActionRt = rt.type({
-  fields: rt.array(rt.literal(Fields.pushed)),
-  action: rt.literal(Actions.push_to_service),
+  type: rt.literal(ActionTypes.pushed),
   payload: PushedUserActionPayloadRt,
 });
 
-export type PushedUserAction = rt.TypeOf<typeof PushedUserActionRt>;
-export type PushedUserActionWithoutConnectorId = rt.TypeOf<
-  typeof PushedUserActionWithoutConnectorIdRt
+export type PushedUserAction = UserActionWithAttributes<rt.TypeOf<typeof PushedUserActionRt>>;
+export type PushedUserActionWithoutConnectorId = UserActionWithAttributes<
+  rt.TypeOf<typeof PushedUserActionWithoutConnectorIdRt>
 >;

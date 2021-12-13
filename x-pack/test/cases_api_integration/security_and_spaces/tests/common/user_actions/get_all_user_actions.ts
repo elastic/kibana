@@ -56,26 +56,19 @@ export default ({ getService }: FtrProviderContext): void => {
       const theCase = await createCase(supertest, postCaseReq);
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
       const createCaseUserAction = userActions[0] as CreateCaseUserAction;
+      const { id: connectorId, ...restConnector } = userActionPostResp.connector;
 
       expect(userActions.length).to.eql(1);
-      expect(createCaseUserAction.fields).to.eql([
-        'description',
-        'status',
-        'tags',
-        'title',
-        'connector',
-        'settings',
-        'owner',
-      ]);
 
       expect(createCaseUserAction.action).to.eql('create');
+      expect(createCaseUserAction.type).to.eql('create_case');
       expect(createCaseUserAction.payload.description).to.eql(userActionPostResp.description);
       expect(createCaseUserAction.payload.status).to.eql('open');
       expect(createCaseUserAction.payload.tags).to.eql(userActionPostResp.tags);
       expect(createCaseUserAction.payload.title).to.eql(userActionPostResp.title);
       expect(createCaseUserAction.payload.settings).to.eql(userActionPostResp.settings);
       expect(createCaseUserAction.payload.owner).to.eql(userActionPostResp.owner);
-      expect(createCaseUserAction.payload.connector).to.eql(userActionPostResp.connector);
+      expect(createCaseUserAction.payload.connector).to.eql(restConnector);
     });
 
     // TODO: fix
@@ -88,18 +81,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // One for creation and one for deletion
       expect(userActions.length).to.eql(2);
-      expect(userAction.fields).to.eql([
-        'description',
-        'status',
-        'tags',
-        'title',
-        'connector',
-        'settings',
-        'owner',
-        'comment',
-      ]);
 
       expect(userAction.action).to.eql('delete');
+      expect(userAction.type).to.eql('delete_case');
       expect(userAction.payload).to.eql({});
     });
 
@@ -122,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const statusUserAction = userActions[1];
 
       expect(userActions.length).to.eql(2);
-      expect(statusUserAction.fields).to.eql(['status']);
+      expect(statusUserAction.type).to.eql('status');
       expect(statusUserAction.action).to.eql('update');
       expect(statusUserAction.payload).to.eql({ status: 'closed' });
     });
@@ -153,7 +137,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const connectorUserAction = userActions[1];
 
       expect(userActions.length).to.eql(2);
-      expect(connectorUserAction.fields).to.eql(['connector']);
+      expect(connectorUserAction.type).to.eql('connector');
       expect(connectorUserAction.action).to.eql('update');
       expect(connectorUserAction.payload).to.eql({
         connector: {
@@ -185,10 +169,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const deleteTagsUserAction = userActions[2];
 
       expect(userActions.length).to.eql(3);
-      expect(addTagsUserAction.fields).to.eql(['tags']);
+      expect(addTagsUserAction.type).to.eql('tags');
       expect(addTagsUserAction.action).to.eql('add');
       expect(addTagsUserAction.payload).to.eql({ tags: ['cool', 'neat'] });
-      expect(deleteTagsUserAction.fields).to.eql(['tags']);
+      expect(deleteTagsUserAction.type).to.eql('tags');
       expect(deleteTagsUserAction.action).to.eql('delete');
       expect(deleteTagsUserAction.payload).to.eql({ tags: ['defacement'] });
     });
@@ -214,7 +198,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const titleUserAction = userActions[1];
 
       expect(userActions.length).to.eql(2);
-      expect(titleUserAction.fields).to.eql(['title']);
+      expect(titleUserAction.type).to.eql('title');
       expect(titleUserAction.action).to.eql('update');
       expect(titleUserAction.payload).to.eql({ title: newTitle });
     });
@@ -240,7 +224,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const titleUserAction = userActions[1];
 
       expect(userActions.length).to.eql(2);
-      expect(titleUserAction.fields).to.eql(['description']);
+      expect(titleUserAction.type).to.eql('description');
       expect(titleUserAction.action).to.eql('update');
       expect(titleUserAction.payload).to.eql({ description: newDesc });
     });
@@ -257,7 +241,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const commentUserAction = userActions[1];
 
       expect(userActions.length).to.eql(2);
-      expect(commentUserAction.fields).to.eql(['comment']);
+      expect(commentUserAction.type).to.eql('comment');
       expect(commentUserAction.action).to.eql('create');
       expect(commentUserAction.comment_id).to.eql(caseWithComments.comments![0].id);
       expect(commentUserAction.payload).to.eql({ comment: postCommentUserReq });
@@ -288,7 +272,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const commentUserAction = userActions[2];
 
       expect(userActions.length).to.eql(3);
-      expect(commentUserAction.fields).to.eql(['comment']);
+      expect(commentUserAction.type).to.eql('comment');
       expect(commentUserAction.action).to.eql('update');
       expect(commentUserAction.comment_id).to.eql(caseWithComments.comments![0].id);
       expect(commentUserAction.payload).to.eql({
@@ -317,7 +301,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const commentUserAction = userActions[2];
 
       expect(userActions.length).to.eql(2);
-      expect(commentUserAction.fields).to.eql(['comment']);
+      expect(commentUserAction.type).to.eql('comment');
       expect(commentUserAction.action).to.eql('delete');
       expect(commentUserAction.comment_id).to.eql(caseWithComments.comments![0].id);
       expect(commentUserAction.payload).to.eql({ comment: {} });

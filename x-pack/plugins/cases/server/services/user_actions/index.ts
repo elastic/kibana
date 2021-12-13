@@ -17,26 +17,24 @@ import {
 } from 'kibana/server';
 
 import {
-  isCreateConnector,
-  isPush,
-  isUpdateConnector,
   isConnectorUserAction,
   isPushedUserAction,
+  isUserActionType,
 } from '../../../common/utils/user_actions';
 import {
   Actions,
+  ActionTypes,
   CaseAttributes,
   CaseExternalServiceBasic,
   CasePostRequest,
   CaseStatuses,
   CaseUserActionAttributes,
+  CaseUserActionAttributesWithoutConnectorId,
   CaseUserActionResponse,
   CommentRequest,
-  Fields,
   noneConnectorId,
   SubCaseAttributes,
   User,
-  UserActionField,
 } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
@@ -67,7 +65,7 @@ interface GetCaseUserActionArgs extends ClientArgs {
 }
 
 export interface UserActionItem {
-  attributes: CaseUserActionAttributes;
+  attributes: CaseUserActionAttributesWithoutConnectorId;
   references: SavedObjectReference[];
 }
 
@@ -104,7 +102,7 @@ interface CreatePushToServiceUserAction extends CommonUserActionArgs {
 }
 
 interface GetUserActionItemByDifference extends CommonUserActionArgs {
-  field: 'connector' | 'description' | 'tags' | 'title' | 'status' | 'settings';
+  field: string;
   originalValue: unknown;
   newValue: unknown;
 }
@@ -126,9 +124,7 @@ interface BulkCreateAttachmentDeletionUserAction extends Omit<CommonUserActionAr
 }
 
 export class CaseUserActionService {
-  private static readonly userActionFieldsAllowed: Set<UserActionField[0]> = new Set(
-    Object.keys(Fields) as UserActionField
-  );
+  private static readonly userActionFieldsAllowed: Set<string> = new Set(Object.keys(ActionTypes));
 
   private readonly builder: UserActionBuilder = new UserActionBuilder();
 
@@ -183,15 +179,21 @@ export class CaseUserActionService {
       return userActions;
     }
 
-    const fieldUserAction = this.builder.buildUserAction<typeof field>(field, {
-      caseId,
-      subCaseId,
-      owner,
-      user,
-      [field]: newValue,
-    });
+    if (isUserActionType(field)) {
+      const fieldUserAction = this.builder.buildUserAction<typeof field>(field, {
+        caseId,
+        subCaseId,
+        owner,
+        user,
+        [field]: newValue,
+        // TODO: Fix
+        connectorId: '',
+      });
 
-    return fieldUserAction ? [fieldUserAction] : [];
+      return fieldUserAction ? [fieldUserAction] : [];
+    }
+
+    return [];
   }
 
   private async createAttachmentUserAction({
@@ -361,7 +363,7 @@ export class CaseUserActionService {
       const owner = originalCase.attributes.owner;
 
       const userActions: UserActionItem[] = [];
-      const updatedFields = Object.keys(updatedCase.attributes) as UserActionField;
+      const updatedFields = Object.keys(updatedCase.attributes);
 
       updatedFields
         .filter((field) => CaseUserActionService.userActionFieldsAllowed.has(field))
@@ -444,14 +446,15 @@ export class CaseUserActionService {
       const id = subCaseId ?? caseId;
       const type = subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
 
-      const userActions = await unsecuredSavedObjectsClient.find<CaseUserActionAttributes>({
-        type: CASE_USER_ACTION_SAVED_OBJECT,
-        hasReference: { type, id },
-        page: 1,
-        perPage: MAX_DOCS_PER_PAGE,
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      });
+      const userActions =
+        await unsecuredSavedObjectsClient.find<CaseUserActionAttributesWithoutConnectorId>({
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+          hasReference: { type, id },
+          page: 1,
+          perPage: MAX_DOCS_PER_PAGE,
+          sortField: 'created_at',
+          sortOrder: 'asc',
+        });
 
       return transformFindResponseToExternalModel(userActions);
     } catch (error) {
@@ -484,7 +487,7 @@ export class CaseUserActionService {
     try {
       this.log.debug(`Attempting to POST a new case user action`);
 
-      await unsecuredSavedObjectsClient.bulkCreate<CaseUserActionAttributes>(
+      await unsecuredSavedObjectsClient.bulkCreate<CaseUserActionAttributesWithoutConnectorId>(
         actions.map((action) => ({ type: CASE_USER_ACTION_SAVED_OBJECT, ...action }))
       );
     } catch (error) {
@@ -495,7 +498,7 @@ export class CaseUserActionService {
 }
 
 export function transformFindResponseToExternalModel(
-  userActions: SavedObjectsFindResponse<CaseUserActionAttributes>
+  userActions: SavedObjectsFindResponse<CaseUserActionAttributesWithoutConnectorId>
 ): SavedObjectsFindResponse<CaseUserActionResponse> {
   return {
     ...userActions,
@@ -507,7 +510,7 @@ export function transformFindResponseToExternalModel(
 }
 
 function transformToExternalModel(
-  userAction: SavedObjectsFindResult<CaseUserActionAttributes>
+  userAction: SavedObjectsFindResult<CaseUserActionAttributesWithoutConnectorId>
 ): SavedObjectsFindResult<CaseUserActionResponse> {
   const { references } = userAction;
 
@@ -560,14 +563,11 @@ const addReferenceIdToPayload = (
 function getConnectorIdFromReferences(
   userAction: SavedObjectsFindResult<CaseUserActionAttributes>
 ): string | null {
-  const {
-    attributes: { action, fields },
-    references,
-  } = userAction;
+  const { references } = userAction;
 
-  if (isCreateConnector(action, fields) || isUpdateConnector(action, fields)) {
+  if (isConnectorUserAction(userAction.attributes)) {
     return findConnectorIdReference(CONNECTOR_ID_REFERENCE_NAME, references)?.id ?? null;
-  } else if (isPush(action, fields)) {
+  } else if (isPushedUserAction(userAction.attributes)) {
     return findConnectorIdReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, references)?.id ?? null;
   }
 

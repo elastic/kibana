@@ -10,6 +10,7 @@ import { ESConnectorFields } from '.';
 import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
 import {
   CaseConnector,
+  CaseExternalServiceBasic,
   CaseFullExternalService,
   CaseStatuses,
   CaseType,
@@ -80,8 +81,8 @@ export const createJiraConnector = ({
 };
 
 export const createExternalService = (
-  overrides?: Partial<CaseFullExternalService>
-): CaseFullExternalService => ({
+  overrides?: Partial<CaseExternalServiceBasic>
+): CaseExternalServiceBasic => ({
   connector_id: '100',
   connector_name: '.jira',
   external_id: '100',

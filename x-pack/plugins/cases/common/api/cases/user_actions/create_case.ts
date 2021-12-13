@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { Actions, Fields } from './common';
+import { ActionTypes, UserActionWithAttributes } from './common';
 import {
   ConnectorUserActionPayloadRt,
   ConnectorUserActionPayloadWithoutConnectorIdRt,
@@ -17,18 +17,7 @@ import { TagsUserActionPayloadRt } from './tags';
 import { TitleUserActionPayloadRt } from './title';
 
 export const CommonFieldsRt = rt.type({
-  fields: rt.array(
-    rt.union([
-      rt.literal(Fields.description),
-      rt.literal(Fields.status),
-      rt.literal(Fields.tags),
-      rt.literal(Fields.title),
-      rt.literal(Fields.connector),
-      rt.literal(Fields.settings),
-      rt.literal(Fields.owner),
-    ])
-  ),
-  action: rt.literal(Actions.create),
+  type: rt.literal(ActionTypes.create_case),
 });
 
 const CommonPayloadAttributesRt = rt.type({
@@ -57,7 +46,9 @@ export const CreateCaseUserActionWithoutConnectorIdRt = rt.intersection([
   }),
 ]);
 
-export type CreateCaseUserAction = rt.TypeOf<typeof CreateCaseUserActionRt>;
-export type CreateCaseUserActionWithoutConnectorId = rt.TypeOf<
-  typeof CreateCaseUserActionWithoutConnectorIdRt
+export type CreateCaseUserAction = UserActionWithAttributes<
+  rt.TypeOf<typeof CreateCaseUserActionRt>
+>;
+export type CreateCaseUserActionWithoutConnectorId = UserActionWithAttributes<
+  rt.TypeOf<typeof CreateCaseUserActionWithoutConnectorIdRt>
 >;

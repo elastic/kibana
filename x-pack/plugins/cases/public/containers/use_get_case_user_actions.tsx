@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { ElasticUser, CaseUserActions, CaseExternalService } from '../../common/ui/types';
-import { Actions, CaseConnector } from '../../common/api';
+import { ActionTypes, CaseConnector } from '../../common/api';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
@@ -146,14 +146,14 @@ export const getPushedInfo = (
 
     return (
       actionsAfterPush.some(
-        (mua) => mua.fields[0] !== 'connector' && mua.action !== Actions.push_to_service
+        (mua) => mua.type !== ActionTypes.connector && mua.type !== ActionTypes.pushed
       ) || connectorHasChanged
     );
   };
 
   const commentsAndIndex = caseUserActions.reduce<CommentsAndIndex[]>(
     (bacc, mua, index) =>
-      mua.fields[0] === 'comment' && mua.commentId != null
+      mua.type === ActionTypes.comment && mua.commentId != null
         ? [
             ...bacc,
             {

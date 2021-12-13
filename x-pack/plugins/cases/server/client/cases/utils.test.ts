@@ -791,7 +791,7 @@ describe('utils', () => {
         const res = getLatestPushInfo('456', [
           ...userActions.slice(0, 3),
           {
-            fields: ['pushed'],
+            type: 'pushed',
             action: Actions.push_to_service,
             created_at: '2021-02-03T17:45:29.400Z',
             created_by: {

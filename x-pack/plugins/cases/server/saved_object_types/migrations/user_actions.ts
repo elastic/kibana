@@ -16,10 +16,17 @@ import {
   LogMeta,
   SavedObjectReference,
 } from '../../../../../../src/core/server';
-import { isPush, isUpdateConnector, isCreateConnector } from '../../../common/utils/user_actions';
+
 import { ConnectorTypes } from '../../../common/api';
 
-import { extractConnectorIdFromJson, UserActionFieldType } from './utils';
+import {
+  isPush,
+  isUpdateConnector,
+  isCreateConnector,
+  UserActionFieldType,
+  extractConnectorIdFromJson,
+} from './utils';
+
 import {
   USER_ACTION_OLD_ID_REF_NAME,
   USER_ACTION_OLD_PUSH_ID_REF_NAME,
@@ -146,6 +153,30 @@ const getSingleFieldPayload = (field: string, value: string | undefined) => {
   }
 };
 
+const fieldToActionType: Record<string, string> = {
+  title: 'title',
+  tags: 'tags',
+  description: 'description',
+  comment: 'comment',
+  connector: 'connector',
+  pushed: 'pushed',
+  settings: 'settings',
+  status: 'status',
+};
+
+const getUserActionType = (fields: string[], action: string): string => {
+  if (fields.length > 1 && action === 'create') {
+    return 'create_case';
+  }
+
+  if (fields.length > 1 && action === 'delete') {
+    return 'delete_case';
+  }
+
+  const field = fields[0];
+  return fieldToActionType[field] ?? '';
+};
+
 const getMultipleFieldsPayload = (fields: string[], value: string) => {
   if (value == null) {
     return {};
@@ -179,6 +210,7 @@ function payloadMigration(
       ? getMultipleFieldsPayload(action_field, new_value ?? old_value)
       : getSingleFieldPayload(action_field[0], new_value ?? old_value);
 
+  const type = getUserActionType(action_field, action);
   const references = removeOldReferences(doc.references);
   const newAction = action === 'push-to-service' ? 'push_to_service' : action;
 
@@ -187,10 +219,10 @@ function payloadMigration(
     attributes: {
       ...restAttributes,
       action: newAction,
-      fields: action_field,
       created_at: action_at,
       created_by: action_by,
       payload,
+      type,
     },
     references,
   };

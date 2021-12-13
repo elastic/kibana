@@ -6,14 +6,13 @@
  */
 
 import * as rt from 'io-ts';
-import { Fields, Actions } from './common';
+import { ActionTypes, UserActionWithAttributes } from './common';
 
 export const TagsUserActionPayloadRt = rt.type({ tags: rt.array(rt.string) });
 
 export const TagsUserActionRt = rt.type({
-  fields: rt.array(rt.literal(Fields.tags)),
-  action: rt.union([rt.literal(Actions.add), rt.literal(Actions.delete)]),
+  type: rt.literal(ActionTypes.tags),
   payload: TagsUserActionPayloadRt,
 });
 
-export type TagsUserAction = rt.TypeOf<typeof TagsUserActionRt>;
+export type TagsUserAction = UserActionWithAttributes<rt.TypeOf<typeof TagsUserActionRt>>;

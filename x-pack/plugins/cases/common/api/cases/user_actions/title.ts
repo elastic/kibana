@@ -6,14 +6,13 @@
  */
 
 import * as rt from 'io-ts';
-import { Fields, Actions } from './common';
+import { ActionTypes, UserActionWithAttributes } from './common';
 
 export const TitleUserActionPayloadRt = rt.type({ title: rt.string });
 
 export const TitleUserActionRt = rt.type({
-  fields: rt.array(rt.literal(Fields.title)),
-  action: rt.literal(Actions.update),
+  type: rt.literal(ActionTypes.title),
   payload: TitleUserActionPayloadRt,
 });
 
-export type TitleUserAction = rt.TypeOf<typeof TitleUserActionRt>;
+export type TitleUserAction = UserActionWithAttributes<rt.TypeOf<typeof TitleUserActionRt>>;

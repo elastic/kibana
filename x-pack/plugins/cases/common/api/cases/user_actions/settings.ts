@@ -6,15 +6,14 @@
  */
 
 import * as rt from 'io-ts';
-import { Fields, Actions } from './common';
+import { ActionTypes, UserActionWithAttributes } from './common';
 import { SettingsRt } from '../case';
 
 export const SettingsUserActionPayloadRt = rt.type({ settings: SettingsRt });
 
 export const SettingsUserActionRt = rt.type({
-  fields: rt.array(rt.literal(Fields.settings)),
-  action: rt.literal(Actions.update),
+  type: rt.literal(ActionTypes.settings),
   payload: SettingsUserActionPayloadRt,
 });
 
-export type SettingsUserAction = rt.TypeOf<typeof SettingsUserActionRt>;
+export type SettingsUserAction = UserActionWithAttributes<rt.TypeOf<typeof SettingsUserActionRt>>;

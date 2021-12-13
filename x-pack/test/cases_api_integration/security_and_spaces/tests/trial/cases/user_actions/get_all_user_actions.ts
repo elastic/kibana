@@ -24,7 +24,7 @@ import {
 
 import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
 import { PushedUserAction } from '../../../../../../../plugins/cases/common/api/cases/user_actions/pushed';
-import { SpecificUserActionResponse } from '../../../../../../../plugins/cases/common/api';
+import { UserActionWithResponse } from '../../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -68,10 +68,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
-      const pushUserAction = userActions[1] as SpecificUserActionResponse<PushedUserAction>;
+      const pushUserAction = userActions[1] as UserActionWithResponse<PushedUserAction>;
 
       expect(userActions.length).to.eql(2);
-      expect(pushUserAction.fields).to.eql(['pushed']);
+      expect(pushUserAction.type).to.eql('pushed');
       expect(pushUserAction.action).to.eql('push_to_service');
       expect(pushUserAction.created_by).to.eql(defaultUser);
       expect(pushUserAction.case_id).to.eql(postedCase.id);
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const statusUserAction = userActions[1] as PushedUserAction;
 
       expect(userActions.length).to.eql(3);
-      expect(statusUserAction.fields).to.eql(['status']);
+      expect(statusUserAction.type).to.eql('status');
       expect(statusUserAction.action).to.eql('update');
       expect(statusUserAction.payload).to.eql({ status: 'closed' });
     });

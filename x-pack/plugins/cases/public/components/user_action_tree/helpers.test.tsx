@@ -27,13 +27,12 @@ import { SnakeToCamelCase } from '../../../common/types';
 describe('User action tree helpers', () => {
   const connectors = connectorsMock;
   it('label title generated for update tags', () => {
-    const action = getUserAction(['tags'], 'update', { payload: { tags: ['test'] } });
+    const action = getUserAction('tags', 'update', { payload: { tags: ['test'] } });
     const result: string | JSX.Element = getLabelTitle({
       action,
-      field: 'tags',
     });
 
-    const tags = (action as TagsUserAction).payload.tags;
+    const tags = (action as unknown as TagsUserAction).payload.tags;
 
     const wrapper = mount(<>{result}</>);
     expect(wrapper.find(`[data-test-subj="ua-tags-label"]`).first().text()).toEqual(
@@ -44,13 +43,12 @@ describe('User action tree helpers', () => {
   });
 
   it('label title generated for update title', () => {
-    const action = getUserAction(['title'], 'update', { payload: { title: 'test' } });
+    const action = getUserAction('title', 'update', { payload: { title: 'test' } });
     const result: string | JSX.Element = getLabelTitle({
       action,
-      field: 'title',
     });
 
-    const title = (action as TitleUserAction).payload.title;
+    const title = (action as unknown as TitleUserAction).payload.title;
 
     expect(result).toEqual(
       `${i18n.CHANGED_FIELD.toLowerCase()} ${i18n.CASE_NAME.toLowerCase()}  ${i18n.TO} "${title}"`
@@ -58,10 +56,9 @@ describe('User action tree helpers', () => {
   });
 
   it('label title generated for update description', () => {
-    const action = getUserAction(['description'], 'update', { payload: { description: 'test' } });
+    const action = getUserAction('description', 'update', { payload: { description: 'test' } });
     const result: string | JSX.Element = getLabelTitle({
       action,
-      field: 'description',
     });
 
     expect(result).toEqual(`${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`);
@@ -69,11 +66,10 @@ describe('User action tree helpers', () => {
 
   it('label title generated for update status to open', () => {
     const action = {
-      ...getUserAction(['status'], 'update', { payload: { status: CaseStatuses.open } }),
+      ...getUserAction('status', 'update', { payload: { status: CaseStatuses.open } }),
     };
     const result: string | JSX.Element = getLabelTitle({
       action,
-      field: 'status',
     });
 
     const wrapper = mount(<>{result}</>);
@@ -82,11 +78,10 @@ describe('User action tree helpers', () => {
 
   it('label title generated for update status to in-progress', () => {
     const action = {
-      ...getUserAction(['status'], 'update', { payload: { status: CaseStatuses['in-progress'] } }),
+      ...getUserAction('status', 'update', { payload: { status: CaseStatuses['in-progress'] } }),
     };
     const result: string | JSX.Element = getLabelTitle({
       action,
-      field: 'status',
     });
 
     const wrapper = mount(<>{result}</>);
@@ -97,13 +92,12 @@ describe('User action tree helpers', () => {
 
   it('label title generated for update status to closed', () => {
     const action = {
-      ...getUserAction(['status'], 'update', {
+      ...getUserAction('status', 'update', {
         payload: { status: CaseStatuses.closed },
       }),
     };
     const result: string | JSX.Element = getLabelTitle({
       action,
-      field: 'status',
     });
 
     const wrapper = mount(<>{result}</>);
@@ -112,31 +106,29 @@ describe('User action tree helpers', () => {
 
   it('label title is empty when status is not valid', () => {
     const action = {
-      ...getUserAction(['status'], 'update', {
+      ...getUserAction('status', 'update', {
         payload: { status: '' },
       }),
     };
 
     const result: string | JSX.Element = getLabelTitle({
       action,
-      field: 'status',
     });
 
     expect(result).toEqual('');
   });
 
   it('label title generated for update comment', () => {
-    const action = getUserAction(['comment'], 'update');
+    const action = getUserAction('comment', 'update');
     const result: string | JSX.Element = getLabelTitle({
       action,
-      field: 'comment',
     });
 
     expect(result).toEqual(`${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`);
   });
 
   it('label title generated for pushed incident', () => {
-    const action = getUserAction(['pushed'], 'push_to_service', {
+    const action = getUserAction('pushed', 'push_to_service', {
       payload: { externalService: basicPush },
     }) as SnakeToCamelCase<PushedUserAction>;
     const result: string | JSX.Element = getPushedServiceLabelTitle(action, true);
@@ -152,10 +144,7 @@ describe('User action tree helpers', () => {
   });
 
   it('label title generated for needs update incident', () => {
-    const action = getUserAction(
-      ['pushed'],
-      'push_to_service'
-    ) as SnakeToCamelCase<PushedUserAction>;
+    const action = getUserAction('pushed', 'push_to_service') as SnakeToCamelCase<PushedUserAction>;
     const result: string | JSX.Element = getPushedServiceLabelTitle(action, false);
     const externalService = (action as SnakeToCamelCase<PushedUserAction>).payload.externalService;
 
@@ -181,11 +170,11 @@ describe('User action tree helpers', () => {
 
     it('returns the change connector label', () => {
       const result: string | JSX.Element = getConnectorLabelTitle({
-        action: getUserAction(['connector'], 'update', {
+        action: getUserAction('connector', 'update', {
           payload: {
             connector: { id: '123', type: ConnectorTypes.resilient, name: 'a', fields: null },
           },
-        }) as ConnectorUserAction,
+        }) as unknown as ConnectorUserAction,
         connectors,
       });
 
@@ -194,11 +183,11 @@ describe('User action tree helpers', () => {
 
     it('returns the removed connector label', () => {
       const result: string | JSX.Element = getConnectorLabelTitle({
-        action: getUserAction(['connector'], 'update', {
+        action: getUserAction('connector', 'update', {
           payload: {
             connector: { id: 'none', type: ConnectorTypes.none, name: 'test', fields: null },
           },
-        }) as ConnectorUserAction,
+        }) as unknown as ConnectorUserAction,
         connectors,
       });
 
