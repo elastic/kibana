@@ -12,3 +12,4 @@ export { SettingsPage } from './settings';
 export { NotFoundPage } from './not_found';
 export { AddMonitorPage } from './add_monitor';
 export { EditMonitorPage } from './edit_monitor';
+export { MonitorManagementPage } from './monitor_management';

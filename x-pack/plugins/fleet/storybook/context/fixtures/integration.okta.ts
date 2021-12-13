@@ -7,7 +7,7 @@
 import type { GetInfoResponse } from '../../../public/types';
 import { KibanaAssetType, ElasticsearchAssetType } from '../../../common/types';
 
-export const response: GetInfoResponse['response'] = {
+export const item: GetInfoResponse['item'] = {
   name: 'okta',
   title: 'Okta',
   version: '1.2.0',

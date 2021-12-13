@@ -24,14 +24,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../../../shared/doc_links';
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { LicenseBadge } from '../../../../components/shared/license_badge';
 import {
   SOURCES_PATH,
   SOURCE_DISPLAY_SETTINGS_PATH,
-  CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL,
-  ENT_SEARCH_LICENSE_MANAGEMENT,
   getContentSourcePath,
   getSourcesPath,
 } from '../../../../routes';
@@ -178,7 +177,10 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                       defaultMessage="{link} manage content access content on individual or group attributes. Allow or deny access to specific documents."
                       values={{
                         link: (
-                          <EuiLink target="_blank" href={CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL}>
+                          <EuiLink
+                            target="_blank"
+                            href={docLinks.workplaceSearchCustomSourcePermissions}
+                          >
                             {SAVE_CUSTOM_DOC_PERMISSIONS_LINK}
                           </EuiLink>
                         ),
@@ -189,7 +191,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                 <EuiSpacer size="xs" />
                 {!hasPlatinumLicense && (
                   <EuiText size="s">
-                    <EuiLink target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+                    <EuiLink target="_blank" href={docLinks.licenseManagement}>
                       {LEARN_CUSTOM_FEATURES_BUTTON}
                     </EuiLink>
                   </EuiText>

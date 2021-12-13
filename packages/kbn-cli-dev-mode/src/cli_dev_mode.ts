@@ -22,7 +22,8 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 import { CliArgs } from '@kbn/config';
-import { REPO_ROOT, CiStatsReporter } from '@kbn/dev-utils';
+import { CiStatsReporter } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { Log, CliLog } from './log';
 import { Optimizer } from './optimizer';
