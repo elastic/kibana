@@ -15,16 +15,14 @@ We follow the [GitHub forking model](https://help.github.com/articles/fork-a-rep
 
 At Elastic, all products in the stack, including Kibana, are released at the same time with the same version number. Most of these projects have the following branching strategy:
 
-- master is the next major version.
-- `<major>.x` is the next minor version.
-- `<major>.<minor>` is the next release of a minor version, including patch releases.
+- `main` points to the next minor version.
+- `<major>.<minor>` is the previously released minor version, including patch releases.
 
-As an example, let’s assume that the 7.x branch is currently a not-yet-released 7.6.0. Once 7.6.0 has reached feature freeze, it will be branched to 7.6 and 7.x will be updated to reflect 7.7.0. The release of 7.6.0 and subsequent patch releases will be cut from the 7.6 branch. At any time, you can verify the current version of a branch by inspecting the version attribute in the package.json file within the Kibana source.
+As an example, let’s assume that the main branch is currently a not-yet-released 8.1.0. Once 8.1.0 has reached feature freeze, it will be branched to 8.1 and main will be updated to reflect 8.2.0. The release of 8.1.0 and subsequent patch releases will be cut from the 8.1 branch. At any time, you can verify the current version of a branch by inspecting the version attribute in the package.json file within the Kibana source.
 
-Pull requests are made into the master branch and then backported when it is safe and appropriate.
+Pull requests are made into the main branch and only backported when it is safe and appropriate.
 
-- Breaking changes do not get backported and only go into master.
-- All non-breaking changes can be backported to the `<major>.x` branch.
+- Breaking changes can _only_ be made to `main` if there has been at least an 18 month deprecation period _and_ the breaking change has been approved. Telemetry showing current usage is crucial for gaining approval.
 - Features should not be backported to a `<major>.<minor>` branch.
 - Bug fixes can be backported to a `<major>.<minor>` branch if the changes are safe and appropriate. Safety is a judgment call you make based on factors like the bug’s severity, test coverage, confidence in the changes, etc. Your reasoning should be included in the pull request description.
 - Documentation changes can be backported to any branch at any time.
@@ -63,26 +61,26 @@ In order to assist with developer tooling we ask that all Elastic engineers use 
 
 Rebasing can be tricky, and fixing merge conflicts can be even trickier because it involves force pushing. This is all compounded by the fact that attempting to push a rebased branch remotely will be rejected by git, and you’ll be prompted to do a pull, which is not at all what you should do (this will really mess up your branch’s history).
 
-Here’s how you should rebase master onto your branch, and how to fix merge conflicts when they arise.
+Here’s how you should rebase main onto your branch, and how to fix merge conflicts when they arise.
 
-First, make sure master is up-to-date.
+First, make sure main is up-to-date.
 
 ```bash
-git checkout master
+git checkout main
 git fetch upstream
-git rebase upstream/master
+git rebase upstream/main
 ```
 
-Then, check out your branch and rebase master on top of it, which will apply all of the new commits on master to your branch, and then apply all of your branch’s new commits after that.
+Then, check out your branch and rebase main on top of it, which will apply all of the new commits on main to your branch, and then apply all of your branch’s new commits after that.
 
 ```bash
 git checkout name-of-your-branch
-git rebase master
+git rebase main
 ```
 
 You want to make sure there are no merge conflicts. If there are merge conflicts, git will pause the rebase and allow you to fix the conflicts before continuing.
 
-You can use git status to see which files contain conflicts. They’ll be the ones that aren’t staged for commit. Open those files, and look for where git has marked the conflicts. Resolve the conflicts so that the changes you want to make to the code have been incorporated in a way that doesn’t destroy work that’s been done in master. Refer to master’s commit history on GitHub if you need to gain a better understanding of how code is conflicting and how best to resolve it.
+You can use git status to see which files contain conflicts. They’ll be the ones that aren’t staged for commit. Open those files, and look for where git has marked the conflicts. Resolve the conflicts so that the changes you want to make to the code have been incorporated in a way that doesn’t destroy work that’s been done in main. Refer to main commit history on GitHub if you need to gain a better understanding of how code is conflicting and how best to resolve it.
 
 Once you’ve resolved all of the merge conflicts, use git add -A to stage them to be committed, and then use git rebase --continue to tell git to continue the rebase.
 
