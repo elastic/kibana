@@ -466,6 +466,7 @@ function getPatternFiringAlertType() {
 }
 
 function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true) {
+  let globalPatternIndex = 0;
   const paramsSchema = schema.object({
     pattern: schema.arrayOf(schema.boolean()),
   });
@@ -486,30 +487,25 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
     ruleTaskTimeout: '3s',
     cancelAlertsOnRuleTimeout,
     async executor(ruleExecutorOptions) {
-      const { services, state, params } = ruleExecutorOptions;
+      const { services, params } = ruleExecutorOptions;
       const pattern = params.pattern;
       if (!Array.isArray(pattern)) {
         throw new Error(`pattern is not an array`);
       }
 
-      // await new Promise((resolve) => setTimeout(resolve, 5000));
-
       // get the pattern index, return if past it
-      const patternIndex = state.patternIndex ?? 0;
-      if (patternIndex >= pattern.length) {
-        return { patternIndex };
-      }
-
-      // run long if pattern says to
-      if (pattern[patternIndex] === true) {
-        await new Promise((resolve) => setTimeout(resolve, 10000));
+      if (globalPatternIndex >= pattern.length) {
+        globalPatternIndex = 0;
+        return {};
       }
 
       services.alertInstanceFactory('alert').scheduleActions('default', {});
 
-      return {
-        patternIndex: patternIndex + 1,
-      };
+      // run long if pattern says to
+      if (pattern[globalPatternIndex++] === true) {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+      }
+      return {};
     },
   };
   return result;
