@@ -151,8 +151,11 @@ export class Timefilter {
   public setRefreshInterval = (refreshInterval: Partial<RefreshInterval>) => {
     const prevRefreshInterval = this.getRefreshInterval();
     const newRefreshInterval = { ...prevRefreshInterval, ...refreshInterval };
+    const isUnpausingRefreshLoop =
+      prevRefreshInterval !== undefined && !newRefreshInterval.pause && prevRefreshInterval.pause;
     // If the refresh interval is <= 0 handle that as a paused refresh
-    if (newRefreshInterval.value <= 0) {
+    // unless the user has un-paused the refresh loop
+    if (!isUnpausingRefreshLoop && newRefreshInterval.value <= 0) {
       newRefreshInterval.value = 0;
       newRefreshInterval.pause = true;
     }
