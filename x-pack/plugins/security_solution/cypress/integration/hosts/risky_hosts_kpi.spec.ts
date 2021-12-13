@@ -10,7 +10,7 @@ import { loginAndWaitForPage } from '../../tasks/login';
 import { HOSTS_URL } from '../../urls/navigation';
 
 describe('RiskyHosts KPI', () => {
-  it('it renders', () => {
+  it('renders', () => {
     loginAndWaitForPage(HOSTS_URL);
 
     cy.get('[data-test-subj="riskyHostsTotal"]').should('have.text', '0 Risky Hosts');

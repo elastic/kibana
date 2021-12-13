@@ -18,7 +18,7 @@ import {
 import { createStore, State } from '../../store';
 import { UpdateQueryParams, upsertQuery } from '../../store/inputs/helpers';
 
-import { InspectButton, InspectButtonContainer, BUTTON_CLASS } from '.';
+import { InspectButton } from '.';
 import { cloneDeep } from 'lodash/fp';
 
 describe('Inspect Button', () => {
@@ -102,36 +102,6 @@ describe('Inspect Button', () => {
         </TestProviders>
       );
       expect(wrapper.find('.euiButtonIcon').get(0).props.disabled).toBe(true);
-    });
-
-    describe('InspectButtonContainer', () => {
-      test('it renders a transparent inspect button by default', async () => {
-        const wrapper = mount(
-          <TestProviders store={store}>
-            <InspectButtonContainer>
-              <InspectButton queryId={newQuery.id} title="My title" />
-            </InspectButtonContainer>
-          </TestProviders>
-        );
-
-        expect(wrapper.find(`InspectButtonContainer`)).toHaveStyleRule('opacity', '0', {
-          modifier: `.${BUTTON_CLASS}`,
-        });
-      });
-
-      test('it renders an opaque inspect button when it has mouse focus', async () => {
-        const wrapper = mount(
-          <TestProviders store={store}>
-            <InspectButtonContainer>
-              <InspectButton queryId={newQuery.id} title="My title" />
-            </InspectButtonContainer>
-          </TestProviders>
-        );
-
-        expect(wrapper.find(`InspectButtonContainer`)).toHaveStyleRule('opacity', '1', {
-          modifier: `:hover .${BUTTON_CLASS}`,
-        });
-      });
     });
   });
 
