@@ -120,6 +120,7 @@ export class TimePickerPageObject extends FtrService {
 
     // set to time
     await this.retry.waitFor(`endDate is set to ${toTime}`, async () => {
+      await this.browser.pressKeys(this.browser.keys.ESCAPE); // close other popovers because sometimes browser can't find start input
       await this.testSubjects.click('superDatePickerendDatePopoverButton');
       panel = await this.getTimePickerPanel();
       await this.testSubjects.click('superDatePickerAbsoluteTab');
