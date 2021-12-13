@@ -13,6 +13,7 @@ node scripts/es snapshot&
 
 esPid=$!
 
+export PERFORMANCE_PHASE=WARMUP
 export TEST_ES_URL=http://elastic:changeme@localhost:9200
 export DONT_START_ES=true
 export DISABLE_APM=true
@@ -36,6 +37,7 @@ checks-reporter-with-killswitch "Run Performance Tests (warmup 2)" \
      --config test/performance/config.ftr.ts;
 
 export DISABLE_APM=false
+export PERFORMANCE_PHASE=TEST
 
 checks-reporter-with-killswitch "Run Performance Tests" \
    node scripts/functional_tests \

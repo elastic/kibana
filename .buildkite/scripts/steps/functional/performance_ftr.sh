@@ -17,7 +17,7 @@ steps:
     concurrency: 25
     concurrency_group: 'performance-test-group'
     agents:
-      queue: n2-4
+      queue: c2-16
 EOF
 
 
