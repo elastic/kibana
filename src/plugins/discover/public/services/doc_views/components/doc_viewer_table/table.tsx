@@ -137,10 +137,7 @@ export const DocViewerTable = ({
     defaultMessage: 'Search field names',
   });
 
-  const mapping = useCallback(
-    (name: string) => dataView?.fields.getByName(name),
-    [dataView?.fields]
-  );
+  const mapping = useCallback((name: string) => dataView.fields.getByName(name), [dataView.fields]);
 
   const onToggleColumn = useCallback(
     (field: string) => {

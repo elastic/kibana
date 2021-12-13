@@ -22,17 +22,14 @@ import { isNestedFieldParent } from '../../../../../application/main/utils/neste
 export const DocViewerLegacyTable = ({
   columns,
   hit,
-  indexPattern,
+  indexPattern: dataView,
   filter,
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
   const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
 
-  const mapping = useCallback(
-    (name: string) => indexPattern?.fields.getByName(name),
-    [indexPattern?.fields]
-  );
+  const mapping = useCallback((name: string) => dataView.fields.getByName(name), [dataView.fields]);
   const tableColumns = useMemo(() => {
     return filter ? [ACTIONS_COLUMN, ...MAIN_COLUMNS] : MAIN_COLUMNS;
   }, [filter]);
@@ -58,11 +55,8 @@ export const DocViewerLegacyTable = ({
     };
   }, []);
 
-  if (!indexPattern) {
-    return null;
-  }
-  const flattened = flattenHit(hit, indexPattern, { source: true, includeIgnoredValues: true });
-  const fieldsToShow = getFieldsToShow(Object.keys(flattened), indexPattern, showMultiFields);
+  const flattened = flattenHit(hit, dataView, { source: true, includeIgnoredValues: true });
+  const fieldsToShow = getFieldsToShow(Object.keys(flattened), dataView, showMultiFields);
 
   const items: FieldRecordLegacy[] = Object.keys(flattened)
     .filter((fieldName) => {
@@ -78,7 +72,7 @@ export const DocViewerLegacyTable = ({
     .map((field) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
-      const fieldType = isNestedFieldParent(field, indexPattern) ? 'nested' : fieldMapping?.type;
+      const fieldType = isNestedFieldParent(field, dataView) ? 'nested' : fieldMapping?.type;
       const ignored = getIgnoredReason(fieldMapping ?? field, hit._ignored);
       return {
         action: {
@@ -95,7 +89,7 @@ export const DocViewerLegacyTable = ({
           scripted: Boolean(fieldMapping?.scripted),
         },
         value: {
-          formattedValue: formatFieldValue(flattened[field], hit, indexPattern, fieldMapping),
+          formattedValue: formatFieldValue(flattened[field], hit, dataView, fieldMapping),
           ignored,
         },
       };

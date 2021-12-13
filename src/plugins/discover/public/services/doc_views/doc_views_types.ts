@@ -27,10 +27,10 @@ export type DocViewFilterFn = (
 ) => void;
 
 export interface DocViewRenderProps {
-  columns?: string[];
-  filter?: DocViewFilterFn;
   hit: ElasticSearchHit;
   indexPattern: IndexPattern;
+  columns?: string[];
+  filter?: DocViewFilterFn;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
 }
