@@ -1020,7 +1020,7 @@ This log message tells us that when Task Manager was running one of our rules, i
 
 For example, in this case, we’d expect to see a corresponding log line from the Alerting framework itself, saying that the rule failed. You should look in the Kibana log for a line similar to the log line below (probably shortly before the Task Manager log line):
 
-Executing Alert "27559295-44e4-4983-aa1b-94fe043ab4f9" has resulted in Error: Unable to load resource ‘/api/something’
+Executing Rule "27559295-44e4-4983-aa1b-94fe043ab4f9" has resulted in Error: Unable to load resource ‘/api/something’
 
 This would confirm that the error did in fact happen in the rule itself (rather than the Task Manager) and it would help us pin-point the specific ID of the rule which failed: 27559295-44e4-4983-aa1b-94fe043ab4f9
 
