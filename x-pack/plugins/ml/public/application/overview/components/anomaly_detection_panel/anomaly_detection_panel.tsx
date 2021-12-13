@@ -234,7 +234,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
   }
 
   return (
-    <EuiPanel className={panelClass}>
+    <EuiPanel className={panelClass} hasShadow={false} hasBorder>
       {typeof errorMessage !== 'undefined' && errorDisplay}
       {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}
 
