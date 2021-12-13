@@ -11,7 +11,7 @@ import Fs from 'fs';
 import Util from 'util';
 import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { SavedObjectsType } from '../../types';
 import { ISavedObjectsRepository } from '../../service/lib';
 import { getEnvOptions } from '../../../config/mocks';
