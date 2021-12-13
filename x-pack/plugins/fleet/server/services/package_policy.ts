@@ -521,37 +521,27 @@ class PackagePolicyService {
       );
     }
 
-    let packageInfo: PackageInfo;
+    const installedPackage = await getInstallation({
+      savedObjectsClient: soClient,
+      pkgName: packagePolicy.package.name,
+    });
 
-    if (packageVersion) {
-      packageInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: packagePolicy.package.name,
-        pkgVersion: packageVersion,
-      });
-    } else {
-      const installedPackage = await getInstallation({
-        savedObjectsClient: soClient,
-        pkgName: packagePolicy.package.name,
-      });
-
-      if (!installedPackage) {
-        throw new IngestManagerError(
-          i18n.translate('xpack.fleet.packagePolicy.packageNotInstalledError', {
-            defaultMessage: 'Package {name} is not installed',
-            values: {
-              name: packagePolicy.package.name,
-            },
-          })
-        );
-      }
-
-      packageInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: packagePolicy.package.name,
-        pkgVersion: installedPackage?.version ?? '',
-      });
+    if (!installedPackage) {
+      throw new IngestManagerError(
+        i18n.translate('xpack.fleet.packagePolicy.packageNotInstalledError', {
+          defaultMessage: 'Package {name} is not installed',
+          values: {
+            name: packagePolicy.package.name,
+          },
+        })
+      );
     }
+
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: packagePolicy.package.name,
+      pkgVersion: installedPackage?.version ?? '',
+    });
 
     const isInstalledVersionLessThanPolicyVersion = semverLt(
       packageInfo?.version ?? '',
