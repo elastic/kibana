@@ -76,8 +76,8 @@ export type ColumnHeaderOptions = Pick<
   tGridCellActions?: TGridCellAction[];
   category?: string;
   columnHeaderType: ColumnHeaderType;
-  description?: string;
-  example?: string;
+  description?: string | null;
+  example?: string | number | null;
   format?: string;
   linkField?: string;
   placeholder?: string;
