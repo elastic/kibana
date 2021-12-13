@@ -102,7 +102,7 @@ export function getNewIndexPatterns({
   type = DS_INDEX_PATTERN_METRICS,
   dataset,
   namespace = '*',
-  ccs = '*',
+  ccs,
 }: {
   config: MonitoringConfig;
   moduleType: INDEX_PATTERN_TYPES;
