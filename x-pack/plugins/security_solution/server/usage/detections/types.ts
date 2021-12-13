@@ -9,7 +9,7 @@ interface RuleSearchBody {
   query: {
     bool: {
       filter: {
-        term: { [key: string]: string };
+        terms: { [key: string]: string[] };
       };
     };
   };
