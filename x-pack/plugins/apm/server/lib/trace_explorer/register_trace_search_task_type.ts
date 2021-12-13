@@ -26,6 +26,7 @@ import { getTraceSearchState } from '../../routes/trace_explorer/get_trace_searc
 import { APMEventClient } from '../helpers/create_es_client/create_apm_event_client';
 import { APM_TRACE_SEARCH_TASK_TYPE_NAME } from './constants';
 import { traceDistributionFetcher } from './trace_distribution_fetcher';
+import { traceOperationsFetcher } from './trace_operations_fetcher';
 import { traceSamplesFetcher } from './trace_samples_fetcher';
 
 export async function registerTraceSearchTaskType({
@@ -166,6 +167,14 @@ export async function registerTraceSearchTaskType({
               }),
               distribution: traceDistributionFetcher({
                 prev: traceState.fragments.distribution.data,
+                apmEventClient,
+                start,
+                end,
+                environment,
+                traceIds,
+              }),
+              operations: traceOperationsFetcher({
+                prev: traceState.fragments.operations.data,
                 apmEventClient,
                 start,
                 end,

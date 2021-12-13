@@ -60,6 +60,7 @@ function TraceSampleContainer({
       onTabClick={() => {}}
       traceSamples={queryState.traceSearchState?.fragments.samples.data ?? []}
       waterfall={waterfall}
+      serviceName={waterfall.rootTransaction?.service.name}
     />
   );
 }
@@ -72,12 +73,12 @@ export function TraceSamples({
   background: UseTraceQueryState;
 }) {
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
+    <EuiFlexGroup direction="row" alignItems="flexStart">
+      <EuiFlexItem grow={1}>
         <TraceSampleContainer queryState={foreground} />
       </EuiFlexItem>
       {background.traceSearchState ? (
-        <EuiFlexItem>
+        <EuiFlexItem grow={1}>
           <TraceSampleContainer queryState={background} />
         </EuiFlexItem>
       ) : null}

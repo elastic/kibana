@@ -52,6 +52,9 @@ export async function createTraceSearchPersistenceObjects({
       samples: {
         ...fragmentDefaults,
       },
+      operations: {
+        ...fragmentDefaults,
+      },
     },
     pagination: {
       after: null,

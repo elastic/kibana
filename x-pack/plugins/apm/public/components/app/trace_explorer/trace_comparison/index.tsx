@@ -8,10 +8,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { UseTraceQueryState } from '../../../../hooks/use_trace_query';
+import { TraceOperations } from './trace_operations';
 import { TraceSamples } from './trace_samples';
 
 enum TraceComparisonTabType {
   traceSamples = 'traceSamples',
+  operations = 'operations',
 }
 
 export function TraceComparison({
@@ -29,6 +31,15 @@ export function TraceComparison({
       }),
       content: <TraceSamples background={background} foreground={foreground} />,
     },
+    {
+      id: TraceComparisonTabType.operations,
+      title: i18n.translate('xpack.apm.traceComparison.operationsTab', {
+        defaultMessage: 'Operations',
+      }),
+      content: (
+        <TraceOperations background={background} foreground={foreground} />
+      ),
+    },
   ];
 
   const [selectedTab, setSelectedTab] = useState(
@@ -38,7 +49,7 @@ export function TraceComparison({
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <EuiTabs>
+        <EuiTabs size="m">
           {tabs.map((tab) => (
             <EuiTab
               key={tab.id}

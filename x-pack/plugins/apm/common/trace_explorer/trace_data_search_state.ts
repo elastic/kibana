@@ -10,6 +10,8 @@ import { TraceSearchType } from '.';
 import { TraceDistributionResponse } from '../../server/lib/trace_explorer/trace_distribution_fetcher';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TraceSamplesResponse } from '../../server/lib/trace_explorer/trace_samples_fetcher';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TraceOperationsResponse } from '../../server/lib/trace_explorer/trace_operations_fetcher';
 import { Environment } from '../environment_rt';
 
 interface TraceSearchFragmentSearch<T> {
@@ -44,5 +46,6 @@ export interface TraceSearchState {
   fragments: {
     distribution: TraceSearchFragmentSearch<TraceDistributionResponse>;
     samples: TraceSearchFragmentSearch<TraceSamplesResponse>;
+    operations: TraceSearchFragmentSearch<TraceOperationsResponse>;
   };
 }
