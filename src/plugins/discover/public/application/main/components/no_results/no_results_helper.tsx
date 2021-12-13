@@ -72,7 +72,7 @@ export function AdjustSearch({ hasFilters, hasQuery, onDisableFilters }: AdjustS
             <EuiDescriptionListTitle data-test-subj="discoverNoResultsAdjustFilters">
               <FormattedMessage
                 id="discover.noResults.adjustFilters"
-                defaultMessage="Adjust your filters."
+                defaultMessage="Adjust your filters"
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
