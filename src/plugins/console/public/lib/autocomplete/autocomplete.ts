@@ -929,6 +929,9 @@ export default function ({
       return; // wait for the next typing.
     }
 
+    // if the column or the line number have not changed for the last token and
+    // user did not provided a new value, then we should not show autocomplete
+    // this guards against triggering autocomplete when clicking around the editor
     if (
       (lastEvaluatedToken.position.column !== currentToken.position.column ||
         lastEvaluatedToken.position.lineNumber !== currentToken.position.lineNumber) &&
