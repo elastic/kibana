@@ -40,7 +40,7 @@ const mockServices = {
       }
     },
   },
-  indexPatternFieldEditor: {
+  dataViewFieldEditor: {
     openEditor: jest.fn(),
     userPermissions: {
       editIndexPattern: () => {
