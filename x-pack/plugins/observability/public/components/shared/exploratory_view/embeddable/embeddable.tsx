@@ -20,38 +20,46 @@ import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export interface ExploratoryEmbeddableProps {
-  reportType: ReportViewType;
-  attributes: AllSeries;
   appendTitle?: JSX.Element;
-  title: string | JSX.Element;
+  appId?: 'security' | 'observability';
+  attributes: AllSeries;
+  axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
+  customHeight?: boolean;
+  disableBorder?: boolean;
+  disableShadow?: boolean;
+  dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
+  legendIsVisible?: boolean;
+  reportConfigMap?: ReportConfigMap;
+  reportType: ReportViewType;
   showCalculationMethod?: boolean;
   showExploreButton?: boolean;
-  axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
-  legendIsVisible?: boolean;
-  dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
-  reportConfigMap?: ReportConfigMap;
-  appId?: 'security' | 'observability';
+  title?: string | JSX.Element;
+  withActions?: boolean;
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
-  lens: LensPublicStart;
   indexPatterns: IndexPatternState;
+  lens: LensPublicStart;
 }
 
 // eslint-disable-next-line import/no-default-export
 export default function Embeddable({
-  appId,
-  reportType,
-  attributes,
-  title,
   appendTitle,
-  indexPatterns,
-  lens,
+  appId,
+  attributes,
   axisTitlesVisibility,
+  customHeight = true,
+  disableBorder = false,
+  disableShadow = false,
+  indexPatterns,
   legendIsVisible,
+  lens,
   reportConfigMap = {},
+  reportType,
   showCalculationMethod = false,
   showExploreButton = true,
+  title,
+  withActions = true,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
 
@@ -93,15 +101,16 @@ export default function Embeddable({
     http?.basePath.get(),
     appId
   );
-
   return (
-    <Wrapper>
+    <Wrapper $customHeight={customHeight}>
       <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
+        {title && (
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h3>{title}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+        )}
         {showCalculationMethod && (
           <EuiFlexItem grow={false} style={{ minWidth: 150 }}>
             <OperationTypeComponent
@@ -119,39 +128,58 @@ export default function Embeddable({
         )}
         {appendTitle}
       </EuiFlexGroup>
-      <LensWrapper>
+      <LensWrapper $disableBorder={disableBorder} $disableShadow={disableShadow}>
         <LensComponent
           id="exploratoryView"
           style={{ height: '100%' }}
           timeRange={series?.time}
           attributes={attributesJSON}
           onBrushEnd={({ range }) => {}}
-          withActions={true}
+          withActions={withActions}
         />
       </LensWrapper>
     </Wrapper>
   );
 }
 
-const LensWrapper = styled.div`
+const LensWrapper = styled.div<{
+  $disableBorder?: boolean;
+  $disableShadow?: boolean;
+}>`
   .embPanel__optionsMenuPopover {
     visibility: collapse;
   }
+  .embPanel--editing {
+    background-color: transparent;
+  }
+  ${(props) =>
+    props.$disableBorder
+      ? `.embPanel--editing {
+    border: 0;
+  }`
+      : ''}
   &&&:hover {
     .embPanel__optionsMenuPopover {
       visibility: visible;
     }
+    ${(props) =>
+      props.$disableShadow
+        ? `.embPanel--editing {
+      box-shadow: none;
+    }`
+        : ''}
   }
   .embPanel__title {
     display: none;
   }
 `;
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{
+  $customHeight?: boolean;
+}>`
   height: 100%;
   &&& {
     > :nth-child(2) {
-      height: calc(100% - 32px);
-    }
+      height: ${(props) => (props.$customHeight ? `calc(100% - 32px);` : `100%;`)}
   }
 `;

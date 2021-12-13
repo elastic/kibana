@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { euiPaletteForStatus } from '@elastic/eui';
 import {
   ConfigProps,
   SeriesConfig,
   ReportTypes,
   FILTER_RECORDS,
   REPORT_METRIC_FIELD,
-  RECORDS_FIELD,
-  UNIQUE_COUNT_COLUMN,
 } from '../../../../observability/public';
 
 export function getSecurityKPIConfig(_config: ConfigProps): SeriesConfig {
@@ -64,28 +61,6 @@ export function getSecurityKPIConfig(_config: ConfigProps): SeriesConfig {
         ],
       },
       {
-        label: 'User authentication success',
-        id: 'EVENT_SUCCESS',
-        columnType: FILTER_RECORDS,
-        columnFilters: [
-          {
-            language: 'kuery',
-            query: `event.outcome: "success" and event.category: "authentication"`,
-          },
-        ],
-      },
-      {
-        label: 'User authentication failure',
-        id: 'EVENT_FAILURE',
-        columnType: FILTER_RECORDS,
-        columnFilters: [
-          {
-            language: 'kuery',
-            query: `event.outcome: "failure" and event.category: "authentication"`,
-          },
-        ],
-      },
-      {
         label: 'source ip',
         id: 'source.ip',
         field: 'source.ip',
@@ -99,69 +74,56 @@ export function getSecurityKPIConfig(_config: ConfigProps): SeriesConfig {
     labels: { 'host.name': 'Hosts', 'url.full': 'URL', 'agent.type': 'Agent type' },
   };
 }
-export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
-const statusPallet = euiPaletteForStatus(2);
 
-export function getSecurityEventOutcomeKPIConfig(_config: ConfigProps): SeriesConfig {
+export function getSecurityAuthenticationsConfig(_config: ConfigProps): SeriesConfig {
   return {
-    defaultSeriesType: 'bar_horizontal_stacked',
     reportType: 'event_outcome',
-    seriesTypes: ['bar_horizontal_stacked'],
+    defaultSeriesType: 'bar',
+    seriesTypes: [],
     xAxisColumn: {
-      sourceField: REPORT_METRIC_FIELD,
+      sourceField: '@timestamp',
     },
     yAxisColumns: [
       {
         sourceField: REPORT_METRIC_FIELD,
+        operationType: 'unique_count',
       },
     ],
     hasOperationType: false,
     filterFields: [],
-    breakdownFields: ['event.outcome'],
+    breakdownFields: [],
     baseFilters: [],
-    labels: { 'host.name': 'Hosts', 'url.full': 'URL', 'agent.type': 'Agent type' },
-    definitionFields: ['host.name'],
+    palette: { type: 'palette', name: 'status' },
+    definitionFields: [{ field: 'host.name' }],
     metricOptions: [
       {
-        id: 'even_outcome_success',
-        label: 'authenticationsSuccess',
+        label: 'success',
+        id: 'EVENT_SUCCESS',
         columnType: FILTER_RECORDS,
-        paramFilters: [
-          { label: 'Succ', input: { query: 'event.outcome: success', language: 'kuery' } },
-        ],
         columnFilters: [
           {
             language: 'kuery',
-            query: `event.outcome: success`,
+            query: `event.outcome: "success" and event.category: "authentication"`,
           },
         ],
       },
       {
-        id: 'even_outcome_failure',
-        label: 'authenticationsFailure',
+        label: 'failure',
+        id: 'EVENT_FAILURE',
         columnType: FILTER_RECORDS,
-        paramFilters: [
-          { label: 'Fail', input: { query: 'event.outcome: failure', language: 'kuery' } },
-        ],
         columnFilters: [
           {
             language: 'kuery',
-            query: `event.outcome: failure`,
+            query: `event.outcome: "failure" and event.category: "authentication"`,
           },
         ],
       },
     ],
-    yConfig: [
-      { color: statusPallet[0], forAccessor: 'y-axis-column' },
-      { color: statusPallet[1], forAccessor: 'y-axis-column-1' },
-    ],
-    query: {
-      language: 'kuery',
-      query:
-        '(event.outcome: "success" or event.outcome : "failure") and event.category: "authentication"',
-    },
+    labels: { 'host.name': 'Hosts', 'url.full': 'URL', 'agent.type': 'Agent type' },
   };
 }
+
+export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
 
 export function getSecurityUniqueIpsKPIConfig(_config: ConfigProps): SeriesConfig {
   return {
@@ -227,6 +189,24 @@ export function getSingleMetricConfig(_config: ConfigProps): SeriesConfig {
         columnFilter: {
           language: 'kuery',
           query: `event.outcome: "failure" and event.category: "authentication"`,
+        },
+      },
+      {
+        id: 'source_ips',
+        field: 'Records_source_ips',
+        label: 'Source',
+        columnFilter: {
+          language: 'kuery',
+          query: `source.ip: *`,
+        },
+      },
+      {
+        id: 'destination_ips',
+        field: 'Records_destination_ips',
+        label: 'Destination',
+        columnFilter: {
+          language: 'kuery',
+          query: `destination.ip: *`,
         },
       },
     ],

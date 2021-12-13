@@ -19,7 +19,6 @@ import {
   StatItems,
 } from '../../../../common/components/stat_items';
 import { UpdateDateRange } from '../../../../common/components/charts/common';
-import { HostsChart } from '../../../../common/components/stat_items/hosts_chart';
 
 const kpiWidgetHeight = 247;
 

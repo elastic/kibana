@@ -7,6 +7,7 @@
 
 import { getOr } from 'lodash/fp';
 import React, { useEffect } from 'react';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { AuthenticationTable } from '../../components/authentications_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useAuthentications } from '../../containers/authentications';
@@ -16,10 +17,15 @@ import {
   MatrixHistogramMappingTypes,
   MatrixHistogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
-import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { HostsKpiChartColors } from '../../components/kpi_hosts/types';
 import * as i18n from '../translations';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { StartServices } from '../../../types';
+import {
+  indexPatternList,
+  reportConfigMap,
+} from '../../../app/exploratory_view/security_exploratory_view';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 
@@ -85,6 +91,9 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
     startDate,
     type,
   });
+  const { observability } = useKibana<StartServices>().services;
+
+  const ExploratoryViewEmbeddable = observability.ExploratoryViewEmbeddable;
 
   useEffect(() => {
     return () => {
@@ -96,15 +105,46 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
 
   return (
     <>
-      <MatrixHistogram
-        endDate={endDate}
-        filterQuery={filterQuery}
-        id={ID}
-        indexNames={indexNames}
-        setQuery={setQuery}
-        startDate={startDate}
-        {...histogramConfigs}
-      />
+      <EuiPanel color="transparent" hasBorder style={{ height: 400 }}>
+        <ExploratoryViewEmbeddable
+          appId="security"
+          title={'Authentications'}
+          reportConfigMap={reportConfigMap}
+          dataTypesIndexPatterns={indexPatternList}
+          reportType="event_outcome"
+          attributes={[
+            {
+              reportDefinitions: {
+                EVENT_SUCCESS: ['ALL_VALUES'],
+              },
+              name: 'EVENT_SUCCESS',
+              dataType: 'security',
+              selectedMetricField: 'EVENT_SUCCESS',
+              time: { from: 'now-24h', to: 'now' },
+            },
+            {
+              reportDefinitions: {
+                EVENT_FAILURE: ['ALL_VALUES'],
+              },
+              name: 'EVENT_FAILURE',
+              dataType: 'security',
+              selectedMetricField: 'EVENT_FAILURE',
+              time: { from: 'now-24h', to: 'now' },
+            },
+          ]}
+          legendIsVisible={true}
+          axisTitlesVisibility={{
+            x: false,
+            yLeft: false,
+            yRight: false,
+          }}
+          showExploreButton={false}
+          disableBorder
+          disableShadow
+          customHeight={false}
+        />
+      </EuiPanel>
+      <EuiSpacer />
 
       <AuthenticationTableManage
         data={authentications}

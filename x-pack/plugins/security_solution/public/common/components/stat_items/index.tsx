@@ -31,7 +31,6 @@ import { histogramDateTimeFormatter } from '../utils';
 import { getEmptyTagValue } from '../empty_value';
 
 import { InspectButton, InspectButtonContainer } from '../inspect';
-import { HostsChart } from './hosts_chart';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;

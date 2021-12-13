@@ -9,9 +9,10 @@ import * as React from 'react';
 import { ExploratoryViewContextProvider, ExploratoryView } from '../../../../observability/public';
 import {
   getSecurityKPIConfig,
-  getSecurityEventOutcomeKPIConfig,
+  // getSecurityEventOutcomeKPIConfig,
   getSecurityUniqueIpsKPIConfig,
   getSingleMetricConfig,
+  getSecurityAuthenticationsConfig,
 } from './kpi_over_time_config';
 import { RenderAppProps } from '../types';
 import { getSecurityAlertsKPIConfig } from './alert_kpi_over_time_config';
@@ -19,16 +20,17 @@ import { getSecurityAlertsKPIConfig } from './alert_kpi_over_time_config';
 export const reportConfigMap = {
   security: [
     getSecurityKPIConfig,
-    getSecurityEventOutcomeKPIConfig,
+    // getSecurityEventOutcomeKPIConfig,
     getSecurityUniqueIpsKPIConfig,
     getSingleMetricConfig,
+    getSecurityAuthenticationsConfig,
   ],
   securityAlerts: [getSecurityAlertsKPIConfig],
 };
 
 export const indexPatternList = {
   security:
-    'security,apm-*-transaction*,traces-apm*,remote_cluster:auditbeat-*,endgame-*,remote_cluster:filebeat-*,remote_cluster:logs-*,packetbeat-*,winlogbeat-*,.alerts-security.alerts-default',
+    'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*,.alerts-security.alerts-default',
   // 'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*,.alerts-security.alerts-default',
   securityAlerts: '.alerts-security.alerts-default-*',
 };
