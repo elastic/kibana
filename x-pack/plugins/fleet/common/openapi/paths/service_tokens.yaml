@@ -22,4 +22,5 @@ post:
               type: string
             value:
               type: string
+  deprecated: true
 

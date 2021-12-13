@@ -9,22 +9,14 @@ put:
           schema:
             type: object
             properties:
-              policies:
-                type: array
-                items:
-                  type: object
-                  items:
-                    id:
-                      type: string
-                    updated_at:
-                      type: string
+              agentPolicies:
+                type: object
+                items: {}
               packages:
-                type: array
-                items:
-                  type: string
-              nonFatalErrors:
-                type: array
-                items:
-                  $ref:
-
+                type: object
+                properties:
+                  name:
+                    type: string
+                  version:
+                    type: string
   operationId: get-settings

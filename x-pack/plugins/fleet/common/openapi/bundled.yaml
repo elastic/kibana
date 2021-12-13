@@ -48,23 +48,16 @@ paths:
               schema:
                 type: object
                 properties:
-                  policies:
-                    type: array
-                    items:
-                      type: object
-                      items:
-                        id:
-                          type: string
-                        updated_at:
-                          type: string
+                  agentPolicies:
+                    type: object
+                    items: {}
                   packages:
-                    type: array
-                    items:
-                      type: string
-                  nonFatalErrors:
-                    type: array
-                    items:
-                      $ref: null
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      version:
+                        type: string
       operationId: get-settings
   /settings:
     get:
@@ -90,7 +83,6 @@ paths:
                 $ref: '#/components/schemas/fleet_settings_response'
       operationId: update-settings
   /service-tokens:
-    deprecated: true
     post:
       summary: Generate service tokens
       tags: []
@@ -115,6 +107,7 @@ paths:
                   type: string
                 value:
                   type: string
+      deprecated: true
   /service_tokens:
     post:
       summary: Generate service tokens
@@ -140,6 +133,7 @@ paths:
                   type: string
                 value:
                   type: string
+      deprecated: true
   /epm/_bulk:
     post:
       summary: Packages - Bulk install
@@ -218,11 +212,10 @@ paths:
                   schema:
                     type: array
                     items:
-                      $ref: ../components/schemas/search_result.yaml
+                      $ref: '#/components/schemas/search_result'
       operationId: list-all-packages
     parameters: []
   /epm/packages/{pkgkey}:
-    deprecated: true
     get:
       summary: Packages - Info
       tags: []
@@ -259,6 +252,7 @@ paths:
         name: pkgkey
         in: path
         required: true
+    deprecated: true
     post:
       summary: Packages - Install
       tags: []
@@ -298,6 +292,7 @@ paths:
               properties:
                 force:
                   type: boolean
+      deprecated: true
     delete:
       summary: Packages - Delete
       tags: []
@@ -336,6 +331,7 @@ paths:
               properties:
                 force:
                   type: boolean
+      deprecated: true
   /epm/packages/{pkgName}/{pkgVersion}:
     get:
       summary: Packages - Info
@@ -554,7 +550,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
   /agent-status:
-    deprecated: true
     get:
       summary: Agents - Summary stats
       tags: []
@@ -598,6 +593,7 @@ paths:
           name: policyId
           in: query
           required: false
+      deprecated: true
   /agent_status:
     get:
       summary: Agents - Summary stats
@@ -642,6 +638,7 @@ paths:
           name: policyId
           in: query
           required: false
+      deprecated: true
   /agents:
     get:
       summary: Agents - List
@@ -1189,11 +1186,10 @@ paths:
                 data_streams:
                   type: array
                   items:
-                    $ref: '#/components/schemas/data_stream.yaml'
+                    $ref: '#/components/schemas/data_stream'
       operationId: data-streams-list
     parameters: []
   /enrollment-api-keys:
-    deprecated: true
     get:
       summary: Enrollment API Keys - List
       tags: []
@@ -1227,6 +1223,7 @@ paths:
                   - total
       operationId: get-enrollment-api-keys
       parameters: []
+      deprecated: true
     post:
       summary: Enrollment API Key - Create
       tags: []
@@ -1247,8 +1244,8 @@ paths:
       operationId: create-enrollment-api-keys
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+      deprecated: true
   /enrollment-api-keys/{keyId}:
-    deprecated: true
     parameters:
       - schema:
           type: string
@@ -1271,6 +1268,7 @@ paths:
                 required:
                   - item
       operationId: get-enrollment-api-key
+      deprecated: true
     delete:
       summary: Enrollment API Key - Delete
       tags: []
@@ -1291,6 +1289,7 @@ paths:
       operationId: delete-enrollment-api-key
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+      deprecated: true
   /enrollment_api_keys:
     get:
       summary: Enrollment API Keys - List
@@ -1325,6 +1324,7 @@ paths:
                   - total
       operationId: get-enrollment-api-keys
       parameters: []
+      deprecated: true
     post:
       summary: Enrollment API Key - Create
       tags: []
@@ -1345,6 +1345,7 @@ paths:
       operationId: create-enrollment-api-keys
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+      deprecated: true
   /enrollment_api_keys/{keyId}:
     parameters:
       - schema:
@@ -1368,6 +1369,7 @@ paths:
                 required:
                   - item
       operationId: get-enrollment-api-key
+      deprecated: true
     delete:
       summary: Enrollment API Key - Delete
       tags: []
@@ -1388,6 +1390,7 @@ paths:
       operationId: delete-enrollment-api-key
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+      deprecated: true
   /package_policies:
     get:
       summary: Package policies - List

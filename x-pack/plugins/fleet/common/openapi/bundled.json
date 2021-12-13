@@ -71,30 +71,19 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "policies": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "items": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "updated_at": {
-                            "type": "string"
-                          }
-                        }
-                      }
+                    "agentPolicies": {
+                      "type": "object",
+                      "items": {}
                     },
                     "packages": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "nonFatalErrors": {
-                      "type": "array",
-                      "items": {
-                        "$ref": null
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "string"
+                        }
                       }
                     }
                   }
@@ -143,7 +132,6 @@
       }
     },
     "/service-tokens": {
-      "deprecated": true,
       "post": {
         "summary": "Generate service tokens",
         "tags": [],
@@ -182,7 +170,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/service_tokens": {
@@ -224,7 +213,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/epm/_bulk": {
@@ -339,7 +329,7 @@
                     "schema": {
                       "type": "array",
                       "items": {
-                        "$ref": "../components/schemas/search_result.yaml"
+                        "$ref": "#/components/schemas/search_result"
                       }
                     }
                   }
@@ -353,7 +343,6 @@
       "parameters": []
     },
     "/epm/packages/{pkgkey}": {
-      "deprecated": true,
       "get": {
         "summary": "Packages - Info",
         "tags": [],
@@ -415,6 +404,7 @@
           "required": true
         }
       ],
+      "deprecated": true,
       "post": {
         "summary": "Packages - Install",
         "tags": [],
@@ -480,7 +470,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       },
       "delete": {
         "summary": "Packages - Delete",
@@ -546,7 +537,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/epm/packages/{pkgName}/{pkgVersion}": {
@@ -916,7 +908,6 @@
       }
     },
     "/agent-status": {
-      "deprecated": true,
       "get": {
         "summary": "Agents - Summary stats",
         "tags": [],
@@ -978,7 +969,8 @@
             "in": "query",
             "required": false
           }
-        ]
+        ],
+        "deprecated": true
       }
     },
     "/agent_status": {
@@ -1043,7 +1035,8 @@
             "in": "query",
             "required": false
           }
-        ]
+        ],
+        "deprecated": true
       }
     },
     "/agents": {
@@ -1944,7 +1937,7 @@
                   "data_streams": {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/schemas/data_stream.yaml"
+                      "$ref": "#/components/schemas/data_stream"
                     }
                   }
                 }
@@ -1957,7 +1950,6 @@
       "parameters": []
     },
     "/enrollment-api-keys": {
-      "deprecated": true,
       "get": {
         "summary": "Enrollment API Keys - List",
         "tags": [],
@@ -2004,7 +1996,8 @@
           }
         },
         "operationId": "get-enrollment-api-keys",
-        "parameters": []
+        "parameters": [],
+        "deprecated": true
       },
       "post": {
         "summary": "Enrollment API Key - Create",
@@ -2037,11 +2030,11 @@
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
-        ]
+        ],
+        "deprecated": true
       }
     },
     "/enrollment-api-keys/{keyId}": {
-      "deprecated": true,
       "parameters": [
         {
           "schema": {
@@ -2075,7 +2068,8 @@
             }
           }
         },
-        "operationId": "get-enrollment-api-key"
+        "operationId": "get-enrollment-api-key",
+        "deprecated": true
       },
       "delete": {
         "summary": "Enrollment API Key - Delete",
@@ -2108,7 +2102,8 @@
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
-        ]
+        ],
+        "deprecated": true
       }
     },
     "/enrollment_api_keys": {
@@ -2158,7 +2153,8 @@
           }
         },
         "operationId": "get-enrollment-api-keys",
-        "parameters": []
+        "parameters": [],
+        "deprecated": true
       },
       "post": {
         "summary": "Enrollment API Key - Create",
@@ -2191,7 +2187,8 @@
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
-        ]
+        ],
+        "deprecated": true
       }
     },
     "/enrollment_api_keys/{keyId}": {
@@ -2228,7 +2225,8 @@
             }
           }
         },
-        "operationId": "get-enrollment-api-key"
+        "operationId": "get-enrollment-api-key",
+        "deprecated": true
       },
       "delete": {
         "summary": "Enrollment API Key - Delete",
@@ -2261,7 +2259,8 @@
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
-        ]
+        ],
+        "deprecated": true
       }
     },
     "/package_policies": {

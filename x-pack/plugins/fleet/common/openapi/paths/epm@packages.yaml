@@ -12,6 +12,6 @@ get:
               schema:
                 type: array
                 items:
-                  $ref: ../components/schemas/search_result.yaml
+                  $ref: '#/components/schemas/search_result'
   operationId: list-all-packages
 parameters: []

@@ -41,3 +41,4 @@ get:
       name: policyId
       in: query
       required: false
+  deprecated: true

@@ -11,6 +11,6 @@ get:
             data_streams:
               type: array
               items:
-                $ref: '#/components/schemas/data_stream.yaml'
+                $ref: '#/components/schemas/data_stream'
   operationId: data-streams-list
 parameters: []
