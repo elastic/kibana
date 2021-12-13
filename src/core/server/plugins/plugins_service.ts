@@ -8,7 +8,7 @@
 
 import Path from 'path';
 import { Observable } from 'rxjs';
-import { concatMap, filter, first, map, tap, toArray } from 'rxjs/operators';
+import { filter, first, map, tap, toArray } from 'rxjs/operators';
 import { getFlattenedObject, pick } from '@kbn/std';
 
 import { CoreService } from '../../types';
@@ -271,10 +271,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       PluginName,
       { plugin: PluginWrapper; isEnabled: boolean }
     >();
-    await plugin$
+    // 1. Register config descriptors and deprecations
+    const plugins = await plugin$
       .pipe(
-        // 1. Register config descriptors and deprecations
-        map((plugin) => {
+        tap((plugin) => {
           const configDescriptor = plugin.getConfigDescriptor();
           if (configDescriptor) {
             this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
@@ -292,36 +292,38 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
             }
             this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
           }
-          return plugin;
         }),
-        // 2. Validate config and handle enabled statuses.
-        // NOTE: We can't do both in the same previous loop because some plugins' deprecations may affect others.
-        // Hence, we need all the deprecations to be registered before accessing any config parameter.
-        concatMap(async (plugin) => {
-          const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
-
-          if (pluginEnableStatuses.has(plugin.name)) {
-            throw new Error(`Plugin with id "${plugin.name}" is already registered!`);
-          }
-
-          if (plugin.includesUiPlugin) {
-            const uiPluginInternalInfo =
-              plugin.manifest.type === PluginType.preboot
-                ? this.prebootUiPluginInternalInfo
-                : this.standardUiPluginInternalInfo;
-            uiPluginInternalInfo.set(plugin.name, {
-              requiredBundles: plugin.requiredBundles,
-              version: plugin.manifest.version,
-              publicTargetDir: Path.resolve(plugin.path, 'target/public'),
-              publicAssetsDir: Path.resolve(plugin.path, 'public/assets'),
-            });
-          }
-
-          pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });
-        })
+        toArray()
       )
       .toPromise();
 
+    // 2. Validate config and handle enabled statuses.
+    // NOTE: We can't do both in the same previous loop because some plugins' deprecations may affect others.
+    // Hence, we need all the deprecations to be registered before accessing any config parameter.
+    for (const plugin of plugins) {
+      const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
+
+      if (pluginEnableStatuses.has(plugin.name)) {
+        throw new Error(`Plugin with id "${plugin.name}" is already registered!`);
+      }
+
+      if (plugin.includesUiPlugin) {
+        const uiPluginInternalInfo =
+          plugin.manifest.type === PluginType.preboot
+            ? this.prebootUiPluginInternalInfo
+            : this.standardUiPluginInternalInfo;
+        uiPluginInternalInfo.set(plugin.name, {
+          requiredBundles: plugin.requiredBundles,
+          version: plugin.manifest.version,
+          publicTargetDir: Path.resolve(plugin.path, 'target/public'),
+          publicAssetsDir: Path.resolve(plugin.path, 'public/assets'),
+        });
+      }
+
+      pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });
+    }
+
+    // 3. Add the plugins to the Plugin System if enabled and its dependencies are met
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
       this.validatePluginDependencies(plugin, pluginEnableStatuses);
 
