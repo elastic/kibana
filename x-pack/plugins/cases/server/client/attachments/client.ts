@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertResponse, CommentResponse } from '../../../common';
+import { AlertResponse, CommentResponse } from '../../../common/api';
 import { CasesClient } from '../client';
 
 import { CasesClientInternal } from '../client_internal';

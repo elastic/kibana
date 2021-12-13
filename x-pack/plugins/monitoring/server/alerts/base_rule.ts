@@ -8,7 +8,7 @@
 import { Logger, ElasticsearchClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import {
-  AlertType,
+  RuleType,
   AlertExecutorOptions,
   AlertInstance,
   RulesClient,
@@ -80,7 +80,7 @@ export class BaseRule {
     this.scopedLogger = Globals.app.getLogger(ruleOptions.id);
   }
 
-  public getRuleType(): AlertType<never, never, never, never, never, 'default'> {
+  public getRuleType(): RuleType<never, never, never, never, never, 'default'> {
     const { id, name, actionVariables } = this.ruleOptions;
     return {
       id,

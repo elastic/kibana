@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ScopedHistory } from 'kibana/public';
+import { Observable } from 'rxjs';
 import { ManagementSetup } from 'src/plugins/management/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { SharePluginSetup } from 'src/plugins/share/public';
-import { CoreStart } from 'src/core/public';
+import { CoreStart, ScopedHistory, CoreTheme } from 'src/core/public';
+
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { CloudSetup } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
@@ -56,4 +56,5 @@ export interface AppDependencies {
     history: ScopedHistory;
     api: ApiService;
   };
+  theme$: Observable<CoreTheme>;
 }

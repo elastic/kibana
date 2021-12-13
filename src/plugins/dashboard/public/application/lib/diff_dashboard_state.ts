@@ -41,7 +41,15 @@ export const diffDashboardState = (
   const common = commonDiffFilters<DashboardState>(
     original as unknown as DashboardDiffCommonFilters,
     newState as unknown as DashboardDiffCommonFilters,
-    ['viewMode', 'panels', 'options', 'savedQuery', 'expandedPanelId', 'controlGroupInput'],
+    [
+      'viewMode',
+      'panels',
+      'options',
+      'fullScreenMode',
+      'savedQuery',
+      'expandedPanelId',
+      'controlGroupInput',
+    ],
     true
   );
 
@@ -79,15 +87,12 @@ const panelsAreEqual = (panelsA: DashboardPanelMap, panelsB: DashboardPanelMap):
   }
   // embeddable ids are equal so let's compare individual panels.
   for (const id of embeddableIdsA) {
-    if (
-      Object.keys(
-        commonDiff<DashboardPanelState>(
-          panelsA[id] as unknown as DashboardDiffCommon,
-          panelsB[id] as unknown as DashboardDiffCommon,
-          ['panelRefName']
-        )
-      ).length > 0
-    ) {
+    const panelCommonDiff = commonDiff<DashboardPanelState>(
+      panelsA[id] as unknown as DashboardDiffCommon,
+      panelsB[id] as unknown as DashboardDiffCommon,
+      ['panelRefName']
+    );
+    if (Object.keys(panelCommonDiff).length > 0) {
       return false;
     }
   }

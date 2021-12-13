@@ -31,6 +31,7 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
   const {
     cases,
     application: { getUrlForApp },
+    theme,
   } = kServices;
 
   const getToastText = useCallback(
@@ -41,9 +42,10 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
             deepLinkId: CasesDeepLinkId.cases,
             path: generateCaseViewPath({ detailName: theCase.id }),
           })}
-        />
+        />,
+        { theme$: theme?.theme$ }
       ),
-    [getUrlForApp]
+    [getUrlForApp, theme?.theme$]
   );
 
   const absoluteFromDate = parseRelativeDate(timeRange.from);
