@@ -43,12 +43,10 @@ export interface BaseStatsGetterConfig {
 
 export interface EncryptedStatsGetterConfig extends BaseStatsGetterConfig {
   unencrypted: false;
-  refreshCache?: boolean;
 }
 
 export interface UnencryptedStatsGetterConfig extends BaseStatsGetterConfig {
   unencrypted: true;
-  refreshCache?: boolean;
   request: KibanaRequest;
 }
 

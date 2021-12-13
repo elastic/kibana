@@ -312,7 +312,7 @@ export class TelemetryCollectionManagerPlugin
 
     // on `refreshCache: true` clear all cache to store a fresh copy
     if (refreshCache) {
-      this.cacheManager.unrefAllCacheObjects();
+      this.cacheManager.resetCache();
     }
 
     if (clustersDetails.length === 0) {

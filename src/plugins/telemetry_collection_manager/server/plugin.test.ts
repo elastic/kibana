@@ -11,7 +11,6 @@ import { usageCollectionPluginMock } from '../../usage_collection/server/mocks';
 import { TelemetryCollectionManagerPlugin } from './plugin';
 import type { BasicStatsPayload, CollectionStrategyConfig, StatsGetterConfig } from './types';
 import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
-import { CacheManager } from './cache';
 
 function createCollectionStrategy(priority: number): jest.Mocked<CollectionStrategyConfig> {
   return {
@@ -50,7 +49,7 @@ describe('Telemetry Collection Manager', () => {
       // Reset cache on every request.
       // 10s cache to avoid misatekly invalidating cache during test runs
       // eslint-disable-next-line dot-notation
-      telemetryCollectionManager['cacheManager'] = new CacheManager({ cacheDurationMs: 10000 });
+      telemetryCollectionManager['cacheManager'].resetCache();
     });
 
     describe('before start', () => {

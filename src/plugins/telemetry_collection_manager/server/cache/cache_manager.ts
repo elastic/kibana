@@ -9,6 +9,7 @@
 import LRUCache from 'lru-cache';
 
 export interface CacheManagerConfig {
+  // cache duration of objects in ms
   cacheDurationMs: number;
 }
 
@@ -22,15 +23,24 @@ export class CacheManager {
     });
   }
 
+  /**
+   * Cache an object by key
+   */
   public setCache = (cacheKey: string, data: unknown): void => {
     this.cache.set(cacheKey, data);
   };
 
+  /**
+   * returns cached object. If the key is not found will return undefined.
+   */
   public getFromCache = <T = unknown>(cacheKey: string): T | undefined => {
     return this.cache.get(cacheKey) as T;
   };
 
-  public unrefAllCacheObjects(): void {
+  /**
+   * Removes all cached objects
+   */
+  public resetCache(): void {
     this.cache.reset();
   }
 }

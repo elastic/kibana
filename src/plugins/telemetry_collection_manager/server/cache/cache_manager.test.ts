@@ -30,11 +30,11 @@ describe('CacheManager', () => {
     expect(cacheManager.getFromCache(mockCacheKey)).toEqual(undefined);
   });
 
-  it('#unrefAllCacheObjects unrefs cached objects', () => {
+  it('#resetCache removes cached objects', () => {
     const cacheManager = new CacheManager({ cacheDurationMs });
     cacheManager.setCache(mockCacheKey, mockCacheItem);
     expect(cacheManager.getFromCache(mockCacheKey)).toEqual(mockCacheItem);
-    cacheManager.unrefAllCacheObjects();
+    cacheManager.resetCache();
     expect(cacheManager.getFromCache(mockCacheKey)).toEqual(undefined);
   });
 });
