@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { scaleLinear } from 'd3-scale';
-import { DatatableRow } from 'src/plugins/expressions';
-import { GaugeState } from '../../common/types/expression_functions';
+import type { DatatableRow } from 'src/plugins/expressions';
+import type { GaugeState } from '../../common/types/expression_functions';
 
 type GaugeAccessors = 'maxAccessor' | 'minAccessor' | 'goalAccessor' | 'metricAccessor';
 
@@ -33,6 +32,30 @@ export const getValueFromAccessor = (
   }
 };
 
+// returns nice rounded numbers similar to d3 nice() function
+function getNiceRange(min: number, max: number) {
+  const maxTicks = 5;
+  const offsetMax = max + 0.0000001; // added to avoid max value equal to metric value
+  const range = getNiceNumber(offsetMax - min);
+  const tickSpacing = getNiceNumber(range / (maxTicks - 1));
+  return {
+    min: Math.floor(min / tickSpacing) * tickSpacing,
+    max: Math.ceil(offsetMax / tickSpacing) * tickSpacing,
+  };
+}
+
+function getNiceNumber(localRange: number) {
+  const exponent = Math.floor(Math.log10(localRange));
+  const fraction = localRange / Math.pow(10, exponent);
+  let niceFraction = 10;
+
+  if (fraction <= 1) niceFraction = 1;
+  else if (fraction <= 2) niceFraction = 2;
+  else if (fraction <= 5) niceFraction = 5;
+
+  return niceFraction * Math.pow(10, exponent);
+}
+
 export const getMaxValue = (row?: DatatableRow, state?: GaugeAccessorsType): number => {
   const FALLBACK_VALUE = 100;
   const currentValue = getValueFromAccessor('maxAccessor', row, state);
@@ -46,13 +69,8 @@ export const getMaxValue = (row?: DatatableRow, state?: GaugeAccessorsType): num
     const minValue = getMinValue(row, state);
     if (metricValue != null) {
       const numberValues = [minValue, goalValue, metricValue].filter((v) => typeof v === 'number');
-      const biggerValue = Math.max(...numberValues);
-      const nicelyRounded = scaleLinear().domain([minValue, biggerValue]).nice().ticks(4);
-      if (nicelyRounded.length > 2) {
-        const ticksDifference = Math.abs(nicelyRounded[0] - nicelyRounded[1]);
-        return nicelyRounded[nicelyRounded.length - 1] + ticksDifference;
-      }
-      return minValue === biggerValue ? biggerValue + 1 : biggerValue;
+      const maxValue = Math.max(...numberValues);
+      return getNiceRange(minValue, maxValue).max;
     }
   }
   return FALLBACK_VALUE;
@@ -76,7 +94,7 @@ export const getMinValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
   return FALLBACK_VALUE;
 };
 
-export const getGoalValue = (row?: DatatableRow, state?: GaugeState) => {
+export const getGoalValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
   const currentValue = getValueFromAccessor('goalAccessor', row, state);
   if (currentValue != null) {
     return currentValue;

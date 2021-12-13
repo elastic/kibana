@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiIconProps } from '@elastic/eui';
 import React from 'react';
+import type { EuiIconProps } from '@elastic/eui';
 
 export const GaugeIconHorizontal = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => (
   <svg
