@@ -6,13 +6,15 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiImage,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
@@ -24,9 +26,10 @@ import { AnalyticsTable } from './table';
 import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { AnalyticStatsBarStats, StatsBar } from '../../../components/stats_bar';
-import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
+import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { SourceSelection } from '../../../data_frame_analytics/pages/analytics_management/components/source_selection';
+import adImage from '../anomaly_detection_panel/blog-machine-learning-720x420.png';
 
 interface Props {
   jobCreationDisabled: boolean;
@@ -38,6 +41,12 @@ export const AnalyticsPanel: FC<Props> = ({
   setLazyJobCount,
   refreshCount,
 }) => {
+  const {
+    services: {
+      http: { basePath },
+    },
+  } = useMlKibana();
+
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
     undefined
@@ -71,10 +80,6 @@ export const AnalyticsPanel: FC<Props> = ({
     getAnalytics(true);
   }, [refreshCount]);
 
-  const onRefresh = () => {
-    getAnalytics(true);
-  };
-
   const errorDisplay = (
     <EuiCallOut
       title={i18n.translate('xpack.ml.overview.analyticsList.errorPromptTitle', {
@@ -93,45 +98,80 @@ export const AnalyticsPanel: FC<Props> = ({
 
   const panelClass = isInitialized === false ? 'mlOverviewPanel__isLoading' : 'mlOverviewPanel';
 
+  const transformsLink = `${basePath.get()}/app/management/data/transform`;
+
+  const noDFAJobs = errorMessage === undefined && isInitialized === true && analytics.length === 0;
+
+  if (noDFAJobs) {
+    return (
+      <EuiEmptyPrompt
+        layout="horizontal"
+        hasBorder={true}
+        hasShadow={false}
+        icon={<EuiImage size="fullWidth" src={adImage} alt="anomaly_detection" />}
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.ml.overview.analyticsList.createFirstJobMessage"
+              defaultMessage="Create your first data frame analytics job"
+            />
+          </h2>
+        }
+        body={
+          <>
+            <p>
+              <FormattedMessage
+                id="xpack.ml.overview.analyticsList.emptyPromptText"
+                defaultMessage="Data frame analytics enables you to perform outlier detection, regression, or classification analysis on your data and annotates it with the results. The job puts the annotated data and a copy of the source data in a new index."
+              />
+            </p>
+            <EuiCallOut
+              size="s"
+              title={
+                <FormattedMessage
+                  id="xpack.ml.overview.analyticsList.emptyPromptText"
+                  defaultMessage="We recommend using {transforms} to create feature indices for analytics jobs."
+                  values={{
+                    transforms: (
+                      <EuiLink href={transformsLink} target="blank">
+                        <FormattedMessage
+                          id="xpack.ml.overview.gettingStartedSectionTransforms"
+                          defaultMessage="Elasticsearch's transforms"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              }
+              iconType="iInCircle"
+            />
+          </>
+        }
+        actions={
+          <EuiButton
+            onClick={() => setIsSourceIndexModalVisible(true)}
+            color="primary"
+            fill
+            isDisabled={jobCreationDisabled}
+            data-test-subj="mlOverviewCreateDFAJobButton"
+          >
+            <FormattedMessage
+              id="xpack.ml.overview.analyticsList.createJobButtonText"
+              defaultMessage="Create job"
+            />
+          </EuiButton>
+        }
+      />
+    );
+  }
+
   return (
     <EuiPanel className={panelClass}>
-      {typeof errorMessage !== 'undefined' && errorDisplay}
+      {typeof errorMessage !== 'undefined' ? errorDisplay : null}
       {isInitialized === false && (
         <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />
       )}
-      {errorMessage === undefined && isInitialized === true && analytics.length === 0 && (
-        <EuiEmptyPrompt
-          iconType="createAdvancedJob"
-          title={
-            <h2>
-              {i18n.translate('xpack.ml.overview.analyticsList.createFirstJobMessage', {
-                defaultMessage: 'Create your first data frame analytics job',
-              })}
-            </h2>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.ml.overview.analyticsList.emptyPromptText', {
-                defaultMessage: `Data frame analytics enables you to perform outlier detection, regression, or classification analysis on your data and annotates it with the results. The job puts the annotated data and a copy of the source data in a new index.`,
-              })}
-            </p>
-          }
-          actions={
-            <EuiButton
-              onClick={() => setIsSourceIndexModalVisible(true)}
-              color="primary"
-              fill
-              iconType="plusInCircle"
-              isDisabled={jobCreationDisabled}
-              data-test-subj="mlOverviewCreateDFAJobButton"
-            >
-              {i18n.translate('xpack.ml.overview.analyticsList.createJobButtonText', {
-                defaultMessage: 'Create job',
-              })}
-            </EuiButton>
-          }
-        />
-      )}
+
       {isInitialized === true && analytics.length > 0 && (
         <>
           <EuiSpacer />
@@ -155,11 +195,6 @@ export const AnalyticsPanel: FC<Props> = ({
           <AnalyticsTable items={analytics} />
           <EuiSpacer size="m" />
           <div className="mlOverviewPanel__buttons">
-            <EuiButtonEmpty size="s" onClick={onRefresh} className="mlOverviewPanel__refreshButton">
-              {i18n.translate('xpack.ml.overview.analyticsList.refreshJobsButtonText', {
-                defaultMessage: 'Refresh',
-              })}
-            </EuiButtonEmpty>
             <EuiButton size="s" fill onClick={redirectToDataFrameAnalyticsManagementPage}>
               {i18n.translate('xpack.ml.overview.analyticsList.manageJobsButtonText', {
                 defaultMessage: 'Manage jobs',

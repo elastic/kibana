@@ -197,7 +197,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
     return (
       <EuiEmptyPrompt
         layout="horizontal"
-        hasBorder={false}
+        hasBorder={true}
         hasShadow={false}
         icon={<EuiImage size="fullWidth" src={adImage} alt="anomaly_detection" />}
         color="plain"
