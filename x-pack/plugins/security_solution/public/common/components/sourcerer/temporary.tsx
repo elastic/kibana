@@ -21,14 +21,15 @@ import {
 import React, { useMemo } from 'react';
 import * as i18n from './translations';
 import { Blockquote, ResetButton } from './helpers';
+import { UpdateDefaultDataViewModal } from './update_default_data_view_modal';
 
 interface Props {
   activePatterns?: string[];
   indicesExist: boolean;
   isModified: 'deprecated' | 'missingPatterns';
   missingPatterns: string[];
-  onClick: () => void;
-  onClose: () => void;
+  onDismiss: () => void;
+  onReset: () => void;
   onUpdate: () => void;
   selectedPatterns: string[];
 }
@@ -44,13 +45,13 @@ const translations = {
   },
 };
 
-export const TemporarySourcerer = React.memo<Props>(
+export const TemporarySourcererComp = React.memo<Props>(
   ({
     activePatterns,
     indicesExist,
     isModified,
-    onClose,
-    onClick,
+    onDismiss,
+    onReset,
     onUpdate,
     selectedPatterns,
     missingPatterns,
@@ -141,7 +142,7 @@ export const TemporarySourcerer = React.memo<Props>(
                   id="xpack.securitySolution.indexPatterns.toggleToNewSourcerer"
                   defaultMessage="We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view {link}."
                   values={{
-                    link: <EuiLink onClick={onClick}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
+                    link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
                   }}
                 />
               )}
@@ -158,7 +159,7 @@ export const TemporarySourcerer = React.memo<Props>(
                     id="xpack.securitySolution.indexPatterns.missingPatterns.description"
                     defaultMessage="We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view {link}."
                     values={{
-                      link: <EuiLink onClick={onClick}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
+                      link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
                     }}
                   />
                 </>
@@ -172,7 +173,7 @@ export const TemporarySourcerer = React.memo<Props>(
               aria-label={i18n.INDEX_PATTERNS_CLOSE}
               data-test-subj="sourcerer-deprecated-close"
               flush="left"
-              onClick={onClose}
+              onClick={onDismiss}
               title={i18n.INDEX_PATTERNS_CLOSE}
             >
               {i18n.INDEX_PATTERNS_CLOSE}
@@ -183,6 +184,60 @@ export const TemporarySourcerer = React.memo<Props>(
       </>
     );
   }
+);
+
+TemporarySourcererComp.displayName = 'TemporarySourcererComp';
+
+interface TemporarySourcererProps {
+  activePatterns?: string[];
+  indicesExist: boolean;
+  isModified: 'deprecated' | 'missingPatterns';
+  isShowingUpdateModal: boolean;
+  missingPatterns: string[];
+  onContinueWithoutUpdate: () => void;
+  onDismiss: () => void;
+  onDismissModal: () => void;
+  onReset: () => void;
+  onUpdateStepOne: () => void;
+  onUpdateStepTwo: () => void;
+  selectedPatterns: string[];
+}
+
+export const TemporarySourcerer = React.memo<TemporarySourcererProps>(
+  ({
+    activePatterns,
+    indicesExist,
+    isModified,
+    missingPatterns,
+    onContinueWithoutUpdate,
+    onDismiss,
+    onReset,
+    onUpdateStepOne,
+    onUpdateStepTwo,
+    selectedPatterns,
+    isShowingUpdateModal,
+    onDismissModal,
+  }) => (
+    <>
+      <TemporarySourcererComp
+        activePatterns={activePatterns}
+        indicesExist={indicesExist}
+        isModified={isModified}
+        missingPatterns={missingPatterns}
+        onDismiss={onDismiss}
+        onReset={onReset}
+        onUpdate={onUpdateStepOne}
+        selectedPatterns={selectedPatterns}
+      />
+      <UpdateDefaultDataViewModal
+        isShowing={isShowingUpdateModal}
+        missingPatterns={missingPatterns}
+        onDismissModal={onDismissModal}
+        onContinue={onContinueWithoutUpdate}
+        onUpdate={onUpdateStepTwo}
+      />
+    </>
+  )
 );
 
 TemporarySourcerer.displayName = 'TemporarySourcerer';
