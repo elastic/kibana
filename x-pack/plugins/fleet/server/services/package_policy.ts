@@ -7,7 +7,7 @@
 
 import { omit, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import semverLte from 'semver/functions/lte';
+import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
 import type { KibanaRequest } from 'src/core/server';
 import type {
@@ -553,16 +553,16 @@ class PackagePolicyService {
       });
     }
 
-    const isInstalledVersionLessThanOrEqualToPolicyVersion = semverLte(
+    const isInstalledVersionLessThanPolicyVersion = semverLt(
       packageInfo?.version ?? '',
       packagePolicy.package.version
     );
 
-    if (isInstalledVersionLessThanOrEqualToPolicyVersion) {
+    if (isInstalledVersionLessThanPolicyVersion) {
       throw new PackagePolicyIneligibleForUpgradeError(
         i18n.translate('xpack.fleet.packagePolicy.ineligibleForUpgradeError', {
           defaultMessage:
-            "Package policy {id}'s package version {version} of package {name} is up to date with the installed package. Please install the latest version of {name}.",
+            "Package policy {id}'s package version {version} of package {name} is newer than the installed package version. Please install the latest version of {name}.",
           values: {
             id: packagePolicy.id,
             name: packagePolicy.package.name,
