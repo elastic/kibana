@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useState } from 'react';
+import React, { FC, useState } from 'react';
 import {
   Direction,
   EuiBasicTableColumn,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -29,6 +30,8 @@ import { JobSelectorBadge } from '../../../components/job_selector/job_selector_
 import { toLocaleString } from '../../../util/string_utils';
 import { SwimlaneContainer } from '../../../explorer/swimlane_container';
 import { useTimeBuckets } from '../../../components/custom_hooks/use_time_buckets';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import { useMlLink } from '../../../contexts/kibana';
 
 // Used to pass on attribute names to table columns
 export enum AnomalyDetectionListColumns {
@@ -56,6 +59,10 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
   const timeBuckets = useTimeBuckets();
+
+  const manageJobsLink = useMlLink({
+    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+  });
 
   // columns: group, max anomaly, jobs in group, latest timestamp, docs processed, action to explorer
   const columns: Array<EuiBasicTableColumn<Group>> = [
@@ -177,9 +184,8 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
   };
 
   return (
-    <Fragment>
-      <EuiSpacer />
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+    <>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize={'s'}>
         <EuiFlexItem grow={false}>
           <EuiText size="m">
             <h3>
@@ -189,8 +195,19 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
             </h3>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} className="mlOverviewPanel__statsBar">
-          <StatsBar stats={statsBarData} dataTestSub={'mlOverviewJobStatsBar'} />
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize={'s'} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <StatsBar stats={statsBarData} dataTestSub={'mlOverviewJobStatsBar'} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton size="m" fill href={manageJobsLink}>
+                {i18n.translate('xpack.ml.overview.anomalyDetection.manageJobsButtonText', {
+                  defaultMessage: 'Manage jobs',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
@@ -208,6 +225,6 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
         sorting={sorting}
         data-test-subj="mlOverviewTableAnomalyDetection"
       />
-    </Fragment>
+    </>
   );
 };

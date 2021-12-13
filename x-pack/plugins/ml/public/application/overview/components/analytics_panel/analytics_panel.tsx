@@ -26,7 +26,7 @@ import { AnalyticsTable } from './table';
 import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { AnalyticStatsBarStats, StatsBar } from '../../../components/stats_bar';
-import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
+import { useMlKibana, useMlLink } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { SourceSelection } from '../../../data_frame_analytics/pages/analytics_management/components/source_selection';
 import adImage from '../anomaly_detection_panel/blog-machine-learning-720x420.png';
@@ -53,16 +53,9 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
 
-  const mlLocator = useMlLocator();
-  const navigateToPath = useNavigateToPath();
-
-  const redirectToDataFrameAnalyticsManagementPage = async () => {
-    if (!mlLocator) return;
-    const path = await mlLocator.getUrl({
-      page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-    });
-    await navigateToPath(path, true);
-  };
+  const manageJobsLink = useMlLink({
+    page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+  });
 
   const getAnalytics = getAnalyticsFactory(
     setAnalytics,
@@ -172,7 +165,6 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
 
       {isInitialized === true && analytics.length > 0 && (
         <>
-          <EuiSpacer />
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiText size="m">
@@ -183,22 +175,25 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
                 </h3>
               </EuiText>
             </EuiFlexItem>
-            {analyticsStats !== undefined && (
-              <EuiFlexItem grow={false} className="mlOverviewPanel__statsBar">
-                <StatsBar stats={analyticsStats} dataTestSub={'mlOverviewAnalyticsStatsBar'} />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize={'s'} alignItems="center">
+                {analyticsStats !== undefined ? (
+                  <EuiFlexItem grow={false}>
+                    <StatsBar stats={analyticsStats} dataTestSub={'mlOverviewAnalyticsStatsBar'} />
+                  </EuiFlexItem>
+                ) : null}
+                <EuiFlexItem grow={false}>
+                  <EuiButton size="m" fill href={manageJobsLink}>
+                    {i18n.translate('xpack.ml.overview.analyticsList.manageJobsButtonText', {
+                      defaultMessage: 'Manage jobs',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
           <AnalyticsTable items={analytics} />
-          <EuiSpacer size="m" />
-          <div className="mlOverviewPanel__buttons">
-            <EuiButton size="s" fill onClick={redirectToDataFrameAnalyticsManagementPage}>
-              {i18n.translate('xpack.ml.overview.analyticsList.manageJobsButtonText', {
-                defaultMessage: 'Manage jobs',
-              })}
-            </EuiButton>
-          </div>
         </>
       )}
       {isSourceIndexModalVisible === true && (

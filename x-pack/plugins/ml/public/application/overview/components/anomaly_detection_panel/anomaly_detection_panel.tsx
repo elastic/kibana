@@ -13,7 +13,6 @@ import {
   EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { zipObject } from 'lodash';
@@ -77,14 +76,6 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
   );
 
   const refresh = useRefresh();
-
-  const redirectToJobsManagementPage = async () => {
-    if (!mlLocator) return;
-    const path = await mlLocator.getUrl({
-      page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-    });
-    await navigateToPath(path, true);
-  };
 
   const redirectToCreateJobSelectIndexPage = async () => {
     if (!mlLocator) return;
@@ -238,19 +229,9 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
       {typeof errorMessage !== 'undefined' && errorDisplay}
       {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}
 
-      {isLoading === false && typeof errorMessage === 'undefined' && groupsCount > 0 && (
-        <>
-          <AnomalyDetectionTable items={groups} jobsList={jobsList} statsBarData={statsBarData!} />
-          <EuiSpacer size="m" />
-          <div className="mlOverviewPanel__buttons">
-            <EuiButton size="s" fill onClick={redirectToJobsManagementPage}>
-              {i18n.translate('xpack.ml.overview.anomalyDetection.manageJobsButtonText', {
-                defaultMessage: 'Manage jobs',
-              })}
-            </EuiButton>
-          </div>
-        </>
-      )}
+      {isLoading === false && typeof errorMessage === 'undefined' && groupsCount > 0 ? (
+        <AnomalyDetectionTable items={groups} jobsList={jobsList} statsBarData={statsBarData!} />
+      ) : null}
     </EuiPanel>
   );
 };
