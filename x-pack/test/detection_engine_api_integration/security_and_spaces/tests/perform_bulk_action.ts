@@ -151,15 +151,30 @@ export default ({ getService }: FtrProviderContext): void => {
       const tags = ['tag1', 'tag2'];
       await createRule(supertest, log, getSimpleRule(ruleId));
 
-      const { body } = await postBulkAction()
+      const { body: setTagsBody } = await postBulkAction()
         .send({
           query: '',
           action: BulkAction.update,
           updates: [
             {
               type: BulkActionUpdateType.set_tags,
-              value: [],
+              value: ['reset-tag'],
             },
+          ],
+        })
+        .expect(200);
+
+      expect(setTagsBody).to.eql({ success: true, rules_count: 1 });
+
+      const { body: setTagsRule } = await fetchRule(ruleId).expect(200);
+
+      expect(setTagsRule.tags).to.eql(['reset-tag']);
+
+      const { body: addTagsBody } = await postBulkAction()
+        .send({
+          query: '',
+          action: BulkAction.update,
+          updates: [
             {
               type: BulkActionUpdateType.add_tags,
               value: tags,
@@ -168,11 +183,11 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
-      expect(body).to.eql({ success: true, rules_count: 1 });
+      expect(addTagsBody).to.eql({ success: true, rules_count: 1 });
 
       const { body: addedTagsRule } = await fetchRule(ruleId).expect(200);
 
-      expect(addedTagsRule.tags).to.eql(tags);
+      expect(addedTagsRule.tags).to.eql(['reset-tag', ...tags]);
 
       await postBulkAction()
         .send({
@@ -181,7 +196,7 @@ export default ({ getService }: FtrProviderContext): void => {
           updates: [
             {
               type: BulkActionUpdateType.delete_tags,
-              value: ['tag1'],
+              value: ['reset-tag', 'tag1'],
             },
           ],
         })
