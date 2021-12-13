@@ -112,3 +112,10 @@ export const VIEW_RULE_DETAIL_PAGE = i18n.translate(
     defaultMessage: 'View Rule detail page',
   }
 );
+
+export const VIEW_ALL_DOCUMENT_FIELDS = i18n.translate(
+  'xpack.securitySolution.eventDetails.viewAllDocumentFields',
+  {
+    defaultMessage: 'View all document fields in table',
+  }
+);
