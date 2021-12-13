@@ -64,7 +64,7 @@ export const parsePoliciesAndFilterToKql = ({
   kuery?: string;
 }): string | undefined => {
   if (!policies || !policies.length) {
-    return kuery ? kuery : '';
+    return kuery;
   }
 
   const policiesKQL = parsePoliciesToKQL(policies.join(','), '');
