@@ -54,7 +54,7 @@ export function AlertsPopover(props: AlertsPopoverProps) {
     };
   }, [searchSource, services]);
 
-  const AddAlertFlyout = useMemo(() => {
+  const SearchThresholdAlertFlyout = useMemo(() => {
     if (!alertFlyoutVisible) {
       return;
     }
@@ -77,7 +77,7 @@ export function AlertsPopover(props: AlertsPopoverProps) {
         {
           name: (
             <>
-              {AddAlertFlyout}
+              {SearchThresholdAlertFlyout}
               <EuiLink
                 onClick={() => {
                   setAlertFlyoutVisibility(true);
@@ -115,7 +115,7 @@ export function AlertsPopover(props: AlertsPopoverProps) {
 
   return (
     <>
-      {AddAlertFlyout}
+      {SearchThresholdAlertFlyout}
       <EuiWrappingPopover
         ownFocus
         button={props.anchorElement}
