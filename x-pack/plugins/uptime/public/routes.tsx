@@ -203,6 +203,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
                 />
               ),
             },
+            bottomBar: <div id="uptimeUIMonitorManagementBottomBarPortalSibling" />,
           },
           {
             title: i18n.translate('xpack.uptime.editMonitorRoute.title', {
@@ -221,6 +222,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
                 />
               ),
             },
+            bottomBar: <div id="uptimeUIMonitorManagementBottomBarPortalSibling" />,
           },
           {
             title: i18n.translate('xpack.uptime.monitorManagementRoute.title', {
@@ -267,12 +269,24 @@ export const PageRouter: FC<PageRouterProps> = ({ config = {} }) => {
   return (
     <Switch>
       {routes.map(
-        ({ title, path, component: RouteComponent, dataTestSubj, telemetryId, pageHeader }) => (
+        ({
+          title,
+          path,
+          component: RouteComponent,
+          dataTestSubj,
+          telemetryId,
+          pageHeader,
+          ...pageTemplateProps
+        }) => (
           <Route path={path} key={telemetryId} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
-              <UptimePageTemplateComponent path={path} pageHeader={pageHeader}>
+              <UptimePageTemplateComponent
+                path={path}
+                pageHeader={pageHeader}
+                {...pageTemplateProps}
+              >
                 <RouteComponent />
               </UptimePageTemplateComponent>
             </div>
