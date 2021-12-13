@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 /*
  * Contains utility functions for building and processing queries.
  */
@@ -37,23 +35,4 @@ export function buildBaseFilterCriteria(
   }
 
   return filterCriteria;
-}
-
-// Wraps the supplied aggregations in a sampler aggregation.
-// A supplied samplerShardSize (the shard_size parameter of the sampler aggregation)
-// of less than 1 indicates no sampling, and the aggs are returned as-is.
-export function buildSamplerAggregation(
-  aggs: any,
-  samplerShardSize: number
-): estypes.AggregationsAggregationContainer {
-  if (samplerShardSize < 1) {
-    return aggs;
-  }
-
-  return {
-    sampler: {
-      shard_size: samplerShardSize,
-    },
-    aggs,
-  };
 }

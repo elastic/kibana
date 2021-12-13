@@ -23,8 +23,7 @@ import { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
 import { onRaf } from '../utils';
 import { shallowEqual } from '../../utils/shallow_equal';
 
-// @internal
-export interface SuggestionsComponentProps {
+interface SuggestionsComponentProps {
   index: number | null;
   onClick: SuggestionOnClick;
   onMouseEnter: SuggestionOnMouseEnter;

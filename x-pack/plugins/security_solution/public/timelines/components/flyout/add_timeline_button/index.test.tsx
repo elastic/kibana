@@ -12,7 +12,11 @@ import { waitFor } from '@testing-library/react';
 import { AddTimelineButton } from './';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { mockOpenTimelineQueryResults, TestProviders } from '../../../../common/mock';
+import {
+  mockIndexPattern,
+  mockOpenTimelineQueryResults,
+  TestProviders,
+} from '../../../../common/mock';
 import { getAllTimeline, useGetAllTimeline } from '../../../containers/all';
 import { mockHistory, Router } from '../../../../common/mock/router';
 
@@ -60,6 +64,10 @@ jest.mock('../../timeline/properties/helpers', () => ({
 jest.mock('../../../../common/components/inspect', () => ({
   InspectButton: jest.fn().mockReturnValue(<div />),
   InspectButtonContainer: jest.fn(({ children }) => <div>{children}</div>),
+}));
+
+jest.mock('../../../../common/containers/source', () => ({
+  useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
 }));
 
 describe('AddTimelineButton', () => {
