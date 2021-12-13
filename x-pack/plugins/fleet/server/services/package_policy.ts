@@ -497,11 +497,7 @@ class PackagePolicyService {
     return result;
   }
 
-  public async getUpgradePackagePolicyInfo(
-    soClient: SavedObjectsClientContract,
-    id: string,
-    packageVersion?: string
-  ) {
+  public async getUpgradePackagePolicyInfo(soClient: SavedObjectsClientContract, id: string) {
     const packagePolicy = await this.get(soClient, id);
     if (!packagePolicy) {
       throw new IngestManagerError(
@@ -628,15 +624,10 @@ class PackagePolicyService {
 
   public async getUpgradeDryRunDiff(
     soClient: SavedObjectsClientContract,
-    id: string,
-    packageVersion?: string
+    id: string
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
     try {
-      const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(
-        soClient,
-        id,
-        packageVersion
-      );
+      const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id);
 
       const updatedPackagePolicy = updatePackageInputs(
         {
