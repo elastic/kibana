@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import semver from 'semver';
 import {
   DESTINATION_IP,
   HOST_NAME,
@@ -14,8 +15,8 @@ import {
   SEVERITY,
   SOURCE_IP,
   USER_NAME,
-} from '../screens/alerts';
-import { SERVER_SIDE_EVENT_COUNT } from '../screens/alerts_detection_rules';
+} from '../../../screens/alerts';
+import { SERVER_SIDE_EVENT_COUNT } from '../../../screens/alerts_detection_rules';
 import {
   ADDITIONAL_LOOK_BACK_DETAILS,
   ABOUT_DETAILS,
@@ -31,13 +32,16 @@ import {
   SCHEDULE_DETAILS,
   SEVERITY_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
-} from '../screens/rule_details';
+} from '../../../screens/rule_details';
 
-import { waitForPageToBeLoaded } from '../tasks/common';
-import { waitForRulesTableToBeLoaded, goToTheRuleDetailsOf } from '../tasks/alerts_detection_rules';
-import { loginAndWaitForPage } from '../tasks/login';
+import { waitForPageToBeLoaded } from '../../../tasks/common';
+import {
+  waitForRulesTableToBeLoaded,
+  goToTheRuleDetailsOf,
+} from '../../../tasks/alerts_detection_rules';
+import { loginAndWaitForPage } from '../../../tasks/login';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 
 const EXPECTED_NUMBER_OF_ALERTS = '1';
 
@@ -63,8 +67,8 @@ const rule = {
   severity: 'Low',
   riskScore: '7',
   timelineTemplate: 'none',
-  runsEvery: '10s',
-  lookBack: '179999990s',
+  runsEvery: '24h',
+  lookBack: '49976h',
   timeline: 'None',
 };
 
@@ -100,10 +104,16 @@ describe('After an upgrade, the custom query rule', () => {
   });
 
   it('Displays the alert details at the tgrid', () => {
+    let expectedReason;
+    if (semver.gt(Cypress.env('ORIGINAL_VERSION'), '7.15.0')) {
+      expectedReason = alert.reason;
+    } else {
+      expectedReason = '-';
+    }
     cy.get(RULE_NAME).should('have.text', alert.rule);
     cy.get(SEVERITY).should('have.text', alert.severity);
     cy.get(RISK_SCORE).should('have.text', alert.riskScore);
-    cy.get(REASON).should('have.text', alert.reason).type('{rightarrow}');
+    cy.get(REASON).should('have.text', expectedReason).type('{rightarrow}');
     cy.get(HOST_NAME).should('have.text', alert.hostName);
     cy.get(USER_NAME).should('have.text', alert.username);
     cy.get(PROCESS_NAME).should('have.text', alert.processName);

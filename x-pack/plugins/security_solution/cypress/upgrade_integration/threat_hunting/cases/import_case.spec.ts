@@ -15,7 +15,7 @@ import {
   ALL_CASES_OPEN_CASES_STATS,
   ALL_CASES_REPORTER,
   ALL_CASES_IN_PROGRESS_STATUS,
-} from '../screens/all_cases';
+} from '../../../screens/all_cases';
 import {
   CASES_TAGS,
   CASE_CONNECTOR,
@@ -25,16 +25,19 @@ import {
   CASE_IN_PROGRESS_STATUS,
   CASE_SWITCH,
   CASE_USER_ACTION,
-} from '../screens/case_details';
-import { CASES_PAGE } from '../screens/kibana_navigation';
+} from '../../../screens/case_details';
+import { CASES_PAGE } from '../../../screens/kibana_navigation';
 
-import { goToCaseDetails } from '../tasks/all_cases';
-import { deleteCase } from '../tasks/case_details';
-import { navigateFromKibanaCollapsibleTo, openKibanaNavigation } from '../tasks/kibana_navigation';
-import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { importCase } from '../tasks/saved_objects';
+import { goToCaseDetails } from '../../../tasks/all_cases';
+import { deleteCase } from '../../../tasks/case_details';
+import {
+  navigateFromKibanaCollapsibleTo,
+  openKibanaNavigation,
+} from '../../../tasks/kibana_navigation';
+import { loginAndWaitForPageWithoutDateRange } from '../../../tasks/login';
+import { importCase } from '../../../tasks/saved_objects';
 
-import { KIBANA_SAVED_OBJECTS } from '../urls/navigation';
+import { KIBANA_SAVED_OBJECTS } from '../../../urls/navigation';
 
 const CASE_NDJSON = '7_16_case.ndjson';
 const importedCase = {
