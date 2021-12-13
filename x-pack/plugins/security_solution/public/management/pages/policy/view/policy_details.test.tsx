@@ -127,6 +127,7 @@ describe('Policy Details', () => {
       expect(pageTitle).toHaveLength(1);
       expect(pageTitle.text()).toEqual(policyPackagePolicy.name);
     });
+
     it('should navigate to list if back to link is clicked', async () => {
       policyView.update();
 
@@ -135,6 +136,7 @@ describe('Policy Details', () => {
       backToListLink.simulate('click', { button: 0 });
       expect(history.location.pathname).toEqual(endpointListPath);
     });
+
     it('should display agent stats', async () => {
       await asyncActions;
       policyView.update();
@@ -142,6 +144,21 @@ describe('Policy Details', () => {
       const agentsSummary = policyView.find('EuiFlexGroup[data-test-subj="policyAgentsSummary"]');
       expect(agentsSummary).toHaveLength(1);
       expect(agentsSummary.text()).toBe('Total agents5Healthy3Unhealthy1Offline1');
+    });
+
+    it('should display event filters tab', async () => {
+      await asyncActions;
+      policyView.update();
+
+      const eventFiltersTab = policyView.find('button#eventFilters');
+      expect(eventFiltersTab).toHaveLength(1);
+      expect(eventFiltersTab.text()).toBe('Event filters');
+    });
+
+    it('should display the host isolation exceptions tab', async () => {
+      await asyncActions;
+      policyView.update();
+      expect(policyView.find('#hostIsolationExceptions')).toBeTruthy();
     });
   });
 });
