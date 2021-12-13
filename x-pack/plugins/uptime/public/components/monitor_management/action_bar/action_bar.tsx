@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
-import styled from 'styled-components';
-import {
-  EuiBottomBar,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiPortal,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
@@ -31,10 +23,6 @@ interface Props {
   isValid: boolean;
   onSave?: () => void;
 }
-
-const StyledPortal = styled(EuiPortal)`
-  background-color: green;
-`;
 
 export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
   const { monitorId } = useParams<{ monitorId: string }>();
