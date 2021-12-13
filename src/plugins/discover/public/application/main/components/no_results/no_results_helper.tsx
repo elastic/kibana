@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from "react";
+import { FormattedMessage } from "@kbn/i18n-react";
 import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiLink,
   EuiDescriptionListDescription,
   EuiSpacer,
-} from '@elastic/eui';
+} from "@elastic/eui";
 
 export function getTimeFieldMessage() {
   return (
@@ -43,7 +43,11 @@ interface AdjustSearchProps {
   hasQuery?: boolean;
 }
 
-export function AdjustSearch({ hasFilters, hasQuery, onDisableFilters }: AdjustSearchProps) {
+export function AdjustSearch({
+  hasFilters,
+  hasQuery,
+  onDisableFilters,
+}: AdjustSearchProps) {
   return (
     <Fragment>
       {hasQuery && (
@@ -79,20 +83,17 @@ export function AdjustSearch({ hasFilters, hasQuery, onDisableFilters }: AdjustS
               <FormattedMessage
                 id="discover.noResults.tryRemovingOrDisablingFilters"
                 defaultMessage="Try removing or <link>temporarily disabling filters</link>."
-                values={
-                  {
-                    link: (content)=> (<EuiLink data-test-subj="discoverNoResultsDisableFilters" onClick={onDisableFilters}>{content}</EuiLink>) 
-                  }
-                } 
+                values={{
+                  link: (content) => (
+                    <EuiLink
+                      data-test-subj="discoverNoResultsDisableFilters"
+                      onClick={onDisableFilters}
+                    >
+                      {content}
+                    </EuiLink>
+                  ),
+                }}
               />
-             {' '}
-              <EuiLink data-test-subj="discoverNoResultsDisableFilters" onClick={onDisableFilters}>
-                <FormattedMessage
-                  id="discover.noResults.disableFilters"
-                  defaultMessage="temporarily disabling filters"
-                />
-              </EuiLink>
-              .
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </>
