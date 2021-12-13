@@ -151,8 +151,8 @@ export function App({
     onAppLeave((actions) => {
       if (
         initialContext &&
-        'originatingAppUrl' in initialContext &&
-        initialContext.originatingAppUrl
+        'vizEditorOriginatingAppUrl' in initialContext &&
+        initialContext.vizEditorOriginatingAppUrl
       ) {
         const initialDocHasChanged = !isEqual(
           initialDoc?.state.visualization,
@@ -328,10 +328,10 @@ export function App({
   const goBackToOriginatingApp = useCallback(() => {
     if (
       initialContext &&
-      'originatingAppUrl' in initialContext &&
-      initialContext.originatingAppUrl
+      'vizEditorOriginatingAppUrl' in initialContext &&
+      initialContext.vizEditorOriginatingAppUrl
     ) {
-      application.navigateToApp('visualize', { path: initialContext.originatingAppUrl });
+      application.navigateToApp('visualize', { path: initialContext.vizEditorOriginatingAppUrl });
     }
   }, [application, initialContext]);
 

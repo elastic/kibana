@@ -152,16 +152,19 @@ export async function mountApp(
   };
 
   const redirectToOrigin = (props?: RedirectToOriginProps) => {
-    if (!embeddableEditorIncomingState?.originatingApp) {
+    const contextOriginatingApp =
+      initialContext && 'originatingApp' in initialContext ? initialContext.originatingApp : null;
+    const originatingApp = embeddableEditorIncomingState?.originatingApp ?? contextOriginatingApp;
+    if (!originatingApp) {
       throw new Error('redirectToOrigin called without an originating app');
     }
-    let embeddableId = embeddableEditorIncomingState.embeddableId;
+    let embeddableId = embeddableEditorIncomingState?.embeddableId;
     if (initialContext && 'embeddableId' in initialContext) {
       embeddableId = initialContext.embeddableId;
     }
     if (stateTransfer && props?.input) {
       const { input, isCopied } = props;
-      stateTransfer.navigateToWithEmbeddablePackage(embeddableEditorIncomingState?.originatingApp, {
+      stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
         state: {
           embeddableId: isCopied ? undefined : embeddableId,
@@ -171,7 +174,7 @@ export async function mountApp(
         },
       });
     } else {
-      coreStart.application.navigateToApp(embeddableEditorIncomingState?.originatingApp, {
+      coreStart.application.navigateToApp(originatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
       });
     }

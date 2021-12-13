@@ -13,7 +13,6 @@ export const PLUGIN_ID = 'lens';
 export const APP_ID = 'lens';
 export const LENS_EMBEDDABLE_TYPE = 'lens';
 export const DOC_TYPE = 'lens';
-export const VISUALIZE_EDITOR_DOC_TYPE = 'visualization';
 export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 export const BASE_API_URL = '/api/lens';
 export const LENS_EDIT_BY_VALUE = 'edit_by_value';

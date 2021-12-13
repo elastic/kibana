@@ -294,7 +294,10 @@ export const getTopNavConfig = (
                 ...editInLensOptions,
                 savedObjectId: visInstance.vis.id,
                 embeddableId,
-                originatingAppUrl: getVizEditorOriginatingAppUrl(history),
+                vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
+                originatingApp,
+                embeddableTitle: savedVis.title,
+                embeddableDescription: savedVis.description,
               };
               if (editInLensOptions) {
                 hideLensBadge();

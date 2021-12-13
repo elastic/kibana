@@ -12,12 +12,12 @@ import {
   ResolvedSimpleSavedObject,
 } from 'kibana/public';
 import { Query } from '../../../../../src/plugins/data/public';
-import { DOC_TYPE, PersistableFilter, VISUALIZE_EDITOR_DOC_TYPE } from '../../common';
+import { DOC_TYPE, PersistableFilter } from '../../common';
 import { LensSavedObjectAttributes } from '../async_services';
 
 export interface Document {
   savedObjectId?: string;
-  hasInitialContext?: boolean;
+  contextFromOtherViz?: { [key: string]: string };
   type?: string;
   visualizationType: string | null;
   title: string;
@@ -53,19 +53,14 @@ export class SavedObjectIndexStore implements SavedObjectStore {
   }
 
   save = async (vis: Document) => {
-    const { savedObjectId, type, hasInitialContext, references, ...rest } = vis;
+    const { savedObjectId, type, contextFromOtherViz, references, ...rest } = vis;
     // TODO: SavedObjectAttributes should support this kind of object,
     // remove this workaround when SavedObjectAttributes is updated.
     const attributes = rest as unknown as SavedObjectAttributes;
-    if (savedObjectId && hasInitialContext) {
-      // check if an existing visualization type saved object exists, if yes delete it
-      const existingVisualizationDoc = await this.loadExistingVisualizationDoc(savedObjectId);
-      if (existingVisualizationDoc) {
-        const existingVisualizationDocAttrs = existingVisualizationDoc.saved_object
-          .attributes as SavedObjectAttributes;
-        attributes.title = existingVisualizationDocAttrs.title;
-        attributes.description = existingVisualizationDocAttrs.description;
-      }
+    // gets the title and description from the Viz editor saved object
+    if (savedObjectId && contextFromOtherViz) {
+      attributes.title = contextFromOtherViz.title;
+      attributes.description = contextFromOtherViz.description;
     }
 
     const result = await this.client.create(
@@ -83,16 +78,6 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     );
 
     return { ...vis, savedObjectId: result.id };
-  };
-
-  loadExistingVisualizationDoc = async (savedObjectId: string) => {
-    const resolveResult = await this.client.resolve(VISUALIZE_EDITOR_DOC_TYPE, savedObjectId);
-
-    if (resolveResult?.saved_object?.error) {
-      return;
-    }
-
-    return resolveResult;
   };
 
   async load(savedObjectId: string): Promise<ResolvedSimpleSavedObject<LensSavedObjectAttributes>> {

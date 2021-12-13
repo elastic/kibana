@@ -246,12 +246,17 @@ export const runSaveLensVisualization = async (
 
   let initialContextInput: LensByReferenceInput | undefined;
   const docToSave = getDocToSave(lastKnownDoc, saveProps, references);
+  let contextFromVizEditor;
 
   // check that the incoming context is saved to library
   if (initialContext && 'savedObjectId' in initialContext && initialContext.savedObjectId) {
     initialContextInput = {
       savedObjectId: initialContext.savedObjectId,
     } as LensByReferenceInput;
+    contextFromVizEditor = {
+      title: initialContext.embeddableTitle ?? '',
+      description: initialContext.embeddableDescription ?? '',
+    };
     docToSave.savedObjectId = initialContext.savedObjectId;
   }
 
@@ -298,7 +303,7 @@ export const runSaveLensVisualization = async (
       docToSave,
       options.saveToLibrary || Boolean(initialContextInput),
       originalInput,
-      Boolean(initialContext && 'savedObjectId' in initialContext && initialContext.savedObjectId)
+      contextFromVizEditor
     )) as LensEmbeddableInput;
 
     if (saveProps.returnToOrigin && redirectToOrigin) {

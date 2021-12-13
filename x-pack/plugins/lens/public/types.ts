@@ -194,7 +194,10 @@ export interface VisualizeEditorContext {
   configuration: ChartSettings;
   savedObjectId?: string;
   embeddableId?: string;
-  originatingAppUrl?: string;
+  vizEditorOriginatingAppUrl?: string;
+  originatingApp?: string;
+  embeddableTitle?: string;
+  embeddableDescription?: string;
 }
 
 interface ChartSettings {

@@ -40,13 +40,13 @@ export function getLensAttributeService(
     saveMethod: async (
       attributes: LensSavedObjectAttributes,
       savedObjectId?: string,
-      hasInitialContext?: boolean
+      contextFromOtherViz?: { [key: string]: string }
     ) => {
       const savedDoc = await savedObjectStore.save({
         ...attributes,
         savedObjectId,
         type: DOC_TYPE,
-        hasInitialContext,
+        contextFromOtherViz,
       });
       return { id: savedDoc.savedObjectId };
     },

@@ -547,6 +547,7 @@ describe('Lens App', () => {
             title: 'hello there',
           }),
           true,
+          undefined,
           undefined
         );
         expect(props.redirectTo).toHaveBeenCalledWith('aaa');
@@ -580,6 +581,7 @@ describe('Lens App', () => {
             title: 'hello there',
           }),
           true,
+          undefined,
           undefined
         );
         expect(props.redirectTo).toHaveBeenCalledWith(defaultSavedObjectId);
@@ -605,7 +607,8 @@ describe('Lens App', () => {
             title: 'hello there',
           }),
           true,
-          { id: '5678', savedObjectId: defaultSavedObjectId }
+          { id: '5678', savedObjectId: defaultSavedObjectId },
+          undefined
         );
         expect(props.redirectTo).not.toHaveBeenCalled();
         await act(async () => {
@@ -654,6 +657,7 @@ describe('Lens App', () => {
             title: 'hello there',
           }),
           true,
+          undefined,
           undefined
         );
         expect(props.redirectToOrigin).toHaveBeenCalledWith({
@@ -689,7 +693,8 @@ describe('Lens App', () => {
             }),
           }),
           true,
-          { id: '5678', savedObjectId: defaultSavedObjectId }
+          { id: '5678', savedObjectId: defaultSavedObjectId },
+          undefined
         );
       });
 

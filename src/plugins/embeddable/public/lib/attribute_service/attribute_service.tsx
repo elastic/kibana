@@ -46,7 +46,7 @@ export interface AttributeServiceOptions<
   saveMethod: (
     attributes: SavedObjectAttributes,
     savedObjectId?: string,
-    hasInitialContext?: boolean
+    contextFromOtherViz?: { [key: string]: string }
   ) => Promise<{ id?: string } | { error: Error }>;
   checkForDuplicateTitle: (props: OnSaveProps) => Promise<true>;
   unwrapMethod?: (
@@ -102,7 +102,7 @@ export class AttributeService<
     newAttributes: SavedObjectAttributes,
     useRefType: boolean,
     input?: ValType | RefType,
-    hasInitialContext?: boolean
+    contextFromOtherViz?: { [key: string]: string }
   ): Promise<Omit<ValType | RefType, 'id'>> {
     const originalInput = input ? input : {};
     const savedObjectId =
@@ -116,7 +116,7 @@ export class AttributeService<
       const savedItem = await this.options.saveMethod(
         newAttributes,
         savedObjectId,
-        hasInitialContext
+        contextFromOtherViz
       );
       if ('id' in savedItem) {
         return { ...originalInput, savedObjectId: savedItem.id } as RefType;
