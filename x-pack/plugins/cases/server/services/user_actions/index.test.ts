@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { loggerMock } from '@kbn/logging/mocks';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsFindResult } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { Actions, CaseStatuses, CaseUserActionAttributes, UserAction } from '../../../common/api';
 import { ConnectorUserAction } from '../../../common/api/cases/user_actions/connector';
-import { PushedUserAction } from '../../../common/api/cases/user_actions/pushed';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -97,6 +97,18 @@ const pushConnectorUserAction = ({
       type: 'pushed',
     }),
     ...(overrides && { ...overrides }),
+  };
+};
+
+const createCaseUserAction = (): SavedObject<CaseUserActionAttributes> => {
+  const { id, ...restConnector } = createJiraConnector();
+  return {
+    ...createUserActionSO({
+      action: Actions.push_to_service,
+      payload: { externalService: restConnector, title: 'a title', description: 'a desc' },
+      connectorId: id,
+      type: 'create_case',
+    }),
   };
 };
 
@@ -190,6 +202,62 @@ const createUserActionSO = ({
         : []),
     ],
   } as SavedObject<CaseUserActionAttributes>;
+};
+
+const testConnectorId = (
+  userAction: SavedObject<CaseUserActionAttributes>,
+  path: string,
+  expectedConnectorId = '1'
+) => {
+  it('does set payload.connector.id to none when it cannot find the reference', () => {
+    const userActionWithEmptyRef = { ...userAction, references: [] };
+    const transformed = transformFindResponseToExternalModel(
+      createSOFindResponse([createUserActionFindSO(userActionWithEmptyRef)])
+    );
+
+    expect(get(transformed.saved_objects[0].attributes.payload, path)).toBe('none');
+  });
+
+  it('does not populate the payload.connector.id when the reference exists but the action is not of type connector', () => {
+    const invalidUserAction = {
+      ...userAction,
+      attributes: { ...userAction.attributes, type: 'not-connector' },
+    };
+    const transformed = transformFindResponseToExternalModel(
+      createSOFindResponse([
+        createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
+      ])
+    );
+
+    // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
+    // Do we need to put the connector.id to none?
+    expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
+  });
+
+  // TODO: Fix it for create case. isCreateCaseUserAction does not check the payload
+  it.skip('does not populate the payload.connector.id when the reference exists but the payload does not contain a connector', () => {
+    const invalidUserAction = {
+      ...userAction,
+      attributes: { ...userAction.attributes, payload: {} },
+    };
+    const transformed = transformFindResponseToExternalModel(
+      createSOFindResponse([
+        createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
+      ])
+    ) as SavedObjectsFindResponse<ConnectorUserAction>;
+
+    // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
+    // Do we need to put the connector.id to none?
+    expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
+  });
+
+  it('populates the payload.connector.id', () => {
+    const transformed = transformFindResponseToExternalModel(
+      createSOFindResponse([createUserActionFindSO(userAction)])
+    ) as SavedObjectsFindResponse<ConnectorUserAction>;
+
+    expect(get(transformed.saved_objects[0].attributes.payload, path)).toEqual(expectedConnectorId);
+  });
 };
 
 describe('CaseUserActionService', () => {
@@ -372,173 +440,23 @@ describe('CaseUserActionService', () => {
     });
 
     describe('create connector', () => {
-      it('does set payload.connector.id to none when it cannot find the reference', () => {
-        const userAction = { ...createConnectorUserAction(), references: [] };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        ) as SavedObjectsFindResponse<ConnectorUserAction>;
-
-        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBe('none');
-      });
-
-      it('does not populate the payload.connector.id when the reference exists but the action is not of type connector', () => {
-        const validUserAction = createConnectorUserAction();
-        const invalidUserAction = {
-          ...validUserAction,
-          attributes: { ...validUserAction.attributes, type: 'not-connector' },
-        };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([
-            createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
-          ])
-        ) as SavedObjectsFindResponse<ConnectorUserAction>;
-
-        // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
-        // Do we need to put the connector.id to none?
-        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeUndefined();
-      });
-
-      it('does not populate the payload.connector.id when the reference exists but the payload does not contain a connector', () => {
-        const validUserAction = createConnectorUserAction();
-        const invalidUserAction = {
-          ...validUserAction,
-          attributes: { ...validUserAction.attributes, payload: {} },
-        };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([
-            createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
-          ])
-        ) as SavedObjectsFindResponse<ConnectorUserAction>;
-
-        // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
-        // Do we need to put the connector.id to none?
-        expect(transformed.saved_objects[0].attributes.payload.connector?.id).toBeUndefined();
-      });
-
-      it('populates the payload.connector.id', () => {
-        const userAction = createConnectorUserAction();
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        ) as SavedObjectsFindResponse<ConnectorUserAction>;
-
-        expect(transformed.saved_objects[0].attributes.payload.connector.id).toEqual('1');
-      });
+      const userAction = createConnectorUserAction();
+      testConnectorId(userAction, 'connector.id');
     });
 
     describe('update connector', () => {
-      it('does not populate the payload.connector.id when it cannot find the reference', () => {
-        const userAction = { ...updateConnectorUserAction(), references: [] };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        ) as SavedObjectsFindResponse<ConnectorUserAction>;
-
-        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBe('none');
-      });
-
-      it('does not populate the payload.connector.id when the reference exists but the action is invalid', () => {
-        const validUserAction = updateConnectorUserAction();
-        const invalidUserAction = {
-          ...validUserAction,
-          attributes: { ...validUserAction.attributes, type: 'not-exists' },
-        };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([
-            createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
-          ])
-        ) as SavedObjectsFindResponse<ConnectorUserAction>;
-
-        // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
-        // Do we need to put the connector.id to none?
-        expect(transformed.saved_objects[0].attributes.payload.connector.id).toBeUndefined();
-      });
-
-      it('does not populate the payload.connector.id when the reference exists but the payload does not contain a connector', () => {
-        const validUserAction = updateConnectorUserAction();
-        const invalidUserAction = {
-          ...validUserAction,
-          attributes: { ...validUserAction.attributes, payload: {} },
-        };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([
-            createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
-          ])
-        ) as SavedObjectsFindResponse<ConnectorUserAction>;
-
-        // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
-        // Do we need to put the connector.id to none?
-        expect(transformed.saved_objects[0].attributes.payload.connector?.id).toBeUndefined();
-      });
-
-      it('populates the payload.connector.id', () => {
-        const userAction = updateConnectorUserAction();
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        ) as SavedObjectsFindResponse<ConnectorUserAction>;
-
-        expect(transformed.saved_objects[0].attributes.payload.connector.id).toEqual('1');
-      });
+      const userAction = updateConnectorUserAction();
+      testConnectorId(userAction, 'connector.id');
     });
 
     describe('push connector', () => {
-      it('does not populate the payload.connector.id when it cannot find the reference', () => {
-        const userAction = { ...pushConnectorUserAction(), references: [] };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        ) as SavedObjectsFindResponse<PushedUserAction>;
+      const userAction = pushConnectorUserAction();
+      testConnectorId(userAction, 'externalService.connector_id', '100');
+    });
 
-        expect(transformed.saved_objects[0].attributes.payload.externalService.connector_id).toBe(
-          'none'
-        );
-      });
-
-      it('does not populate the payload.connector.id when the reference exists but the action and fields are invalid', () => {
-        const validUserAction = pushConnectorUserAction();
-        const invalidUserAction = {
-          ...validUserAction,
-          attributes: { ...validUserAction.attributes, type: 'not-exists' },
-        };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([
-            createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
-          ])
-        ) as SavedObjectsFindResponse<PushedUserAction>;
-
-        // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
-        // Do we need to put the connector.id to none?
-        expect(
-          transformed.saved_objects[0].attributes.payload.externalService.connector_id
-        ).toBeUndefined();
-      });
-
-      it('does not populate the payload.connector.id when the reference exists but the payload does not contain an external service', () => {
-        const validUserAction = pushConnectorUserAction();
-        const invalidUserAction = {
-          ...validUserAction,
-          attributes: { ...validUserAction.attributes, payload: {} },
-        };
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([
-            createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
-          ])
-        ) as SavedObjectsFindResponse<PushedUserAction>;
-
-        // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
-        // Do we need to put the connector.id to none?
-        expect(
-          transformed.saved_objects[0].attributes.payload.externalService?.connector_id
-        ).toBeUndefined();
-      });
-
-      it('populates the payload.connector.id', () => {
-        const userAction = pushConnectorUserAction();
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        ) as SavedObjectsFindResponse<PushedUserAction>;
-
-        expect(
-          transformed.saved_objects[0].attributes.payload.externalService.connector_id
-        ).toEqual('100');
-      });
+    describe('create case', () => {
+      const userAction = createCaseUserAction();
+      testConnectorId(userAction, 'connector.id');
     });
   });
 

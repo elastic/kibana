@@ -14,7 +14,11 @@ import { ActionTypes, CaseConnector } from '../../common/api';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
-import { isPushedUserAction, isConnectorUserAction } from '../../common/utils/user_actions';
+import {
+  isPushedUserAction,
+  isConnectorUserAction,
+  isCreateCaseUserAction,
+} from '../../common/utils/user_actions';
 
 export interface CaseService extends CaseExternalService {
   firstPushIndex: number;
@@ -57,7 +61,7 @@ const groupConnectorFields = (
   userActions: CaseUserActions[]
 ): Record<string, Array<CaseConnector['fields']>> =>
   userActions.reduce((acc, mua) => {
-    if (isConnectorUserAction(mua)) {
+    if (isConnectorUserAction(mua) || isCreateCaseUserAction(mua)) {
       const connector = mua.payload.connector;
 
       return {

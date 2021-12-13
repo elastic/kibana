@@ -8,6 +8,7 @@
 import { ActionTypes, UserActionTypes } from '../api';
 import { CommentUserAction } from '../api/cases/user_actions/comment';
 import { ConnectorUserAction } from '../api/cases/user_actions/connector';
+import { CreateCaseUserAction } from '../api/cases/user_actions/create_case';
 import { DescriptionUserAction } from '../api/cases/user_actions/description';
 import { PushedUserAction } from '../api/cases/user_actions/pushed';
 import { StatusUserAction } from '../api/cases/user_actions/status';
@@ -57,6 +58,9 @@ export const isCommentUserAction = (userAction: unknown): userAction is CommentU
 export const isDescriptionUserAction = (userAction: unknown): userAction is DescriptionUserAction =>
   (userAction as DescriptionUserAction)?.type === ActionTypes.description &&
   (userAction as DescriptionUserAction)?.payload?.description != null;
+
+export const isCreateCaseUserAction = (userAction: unknown): userAction is CreateCaseUserAction =>
+  (userAction as CreateCaseUserAction)?.type === ActionTypes.create_case;
 
 export const isUserActionType = (field: string): field is UserActionTypes =>
   ActionTypes[field as UserActionTypes] != null;

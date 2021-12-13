@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isConnectorUserAction } from '../../../common/utils/user_actions';
+import { isConnectorUserAction, isCreateCaseUserAction } from '../../../common/utils/user_actions';
 import { ConnectorTypeFields } from '../../../common/api';
 import { CaseUserActions } from '../../containers/types';
 
@@ -14,7 +14,7 @@ export const getConnectorFieldsFromUserActions = (
   userActions: CaseUserActions[]
 ): ConnectorTypeFields['fields'] => {
   for (const action of [...userActions].reverse()) {
-    if (isConnectorUserAction(action)) {
+    if (isConnectorUserAction(action) || isCreateCaseUserAction(action)) {
       const connector = action.payload.connector;
 
       if (connector && id === connector.id) {

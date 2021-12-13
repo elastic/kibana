@@ -50,7 +50,7 @@ describe('helpers', () => {
               connector: {
                 id: 'id-to-find',
                 name: 'test',
-                fields: defaultJiraFields,
+                fields: expectedFields,
                 type: ConnectorTypes.jira,
               },
             },

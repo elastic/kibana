@@ -20,6 +20,7 @@ import {
   isConnectorUserAction,
   isPushedUserAction,
   isUserActionType,
+  isCreateCaseUserAction,
 } from '../../../common/utils/user_actions';
 import {
   Actions,
@@ -539,7 +540,7 @@ const addReferenceIdToPayload = (
   const connectorId = getConnectorIdFromReferences(userAction);
   const userActionAttributes = userAction.attributes;
 
-  if (isConnectorUserAction(userActionAttributes)) {
+  if (isConnectorUserAction(userActionAttributes) || isCreateCaseUserAction(userActionAttributes)) {
     return {
       ...userActionAttributes.payload,
       connector: {
@@ -565,7 +566,10 @@ function getConnectorIdFromReferences(
 ): string | null {
   const { references } = userAction;
 
-  if (isConnectorUserAction(userAction.attributes)) {
+  if (
+    isConnectorUserAction(userAction.attributes) ||
+    isCreateCaseUserAction(userAction.attributes)
+  ) {
     return findConnectorIdReference(CONNECTOR_ID_REFERENCE_NAME, references)?.id ?? null;
   } else if (isPushedUserAction(userAction.attributes)) {
     return findConnectorIdReference(PUSH_CONNECTOR_ID_REFERENCE_NAME, references)?.id ?? null;

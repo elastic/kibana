@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { CaseStatuses, ConnectorTypes } from '../../../common/api';
+import { CaseStatuses, CommentType, ConnectorTypes } from '../../../common/api';
 import { basicPush, getUserAction } from '../../containers/mock';
 import {
   getLabelTitle,
@@ -23,6 +23,7 @@ import { TitleUserAction } from '../../../common/api/cases/user_actions/title';
 import { PushedUserAction } from '../../../common/api/cases/user_actions/pushed';
 import { ConnectorUserAction } from '../../../common/api/cases/user_actions/connector';
 import { SnakeToCamelCase } from '../../../common/types';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
 describe('User action tree helpers', () => {
   const connectors = connectorsMock;
@@ -119,7 +120,11 @@ describe('User action tree helpers', () => {
   });
 
   it('label title generated for update comment', () => {
-    const action = getUserAction('comment', 'update');
+    const action = getUserAction('comment', 'update', {
+      payload: {
+        comment: { comment: 'a comment', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER },
+      },
+    });
     const result: string | JSX.Element = getLabelTitle({
       action,
     });
@@ -172,7 +177,12 @@ describe('User action tree helpers', () => {
       const result: string | JSX.Element = getConnectorLabelTitle({
         action: getUserAction('connector', 'update', {
           payload: {
-            connector: { id: '123', type: ConnectorTypes.resilient, name: 'a', fields: null },
+            connector: {
+              id: 'resilient-2',
+              type: ConnectorTypes.resilient,
+              name: 'a',
+              fields: null,
+            },
           },
         }) as unknown as ConnectorUserAction,
         connectors,
