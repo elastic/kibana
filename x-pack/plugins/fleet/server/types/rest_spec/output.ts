@@ -30,6 +30,7 @@ export const PostOutputRequestSchema = {
     is_default_monitoring: schema.boolean({ defaultValue: false }),
     hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
     ca_sha256: schema.maybe(schema.string()),
+    ca_trusted_fingerprint: schema.maybe(schema.string()),
     config_yaml: schema.maybe(schema.string()),
   }),
 };
@@ -45,6 +46,7 @@ export const PutOutputRequestSchema = {
     is_default_monitoring: schema.maybe(schema.boolean()),
     hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
     ca_sha256: schema.maybe(schema.string()),
+    ca_trusted_fingerprint: schema.maybe(schema.string()),
     config_yaml: schema.maybe(schema.string()),
   }),
 };
