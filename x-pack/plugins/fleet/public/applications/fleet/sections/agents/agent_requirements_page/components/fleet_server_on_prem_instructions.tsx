@@ -27,7 +27,7 @@ import {
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DownloadStep } from '../../../../components';
 import {
@@ -245,6 +245,7 @@ export const useFleetServerInstructions = (policyId?: string) => {
   const { data: settings, resendRequest: refreshSettings } = useGetSettings();
   const fleetServerHost = settings?.item.fleet_server_hosts?.[0];
   const esHost = output?.hosts?.[0];
+  const sslCATrustedFingerprint: string | undefined = output?.ca_trusted_fingerprint;
 
   const installCommand = useMemo((): string => {
     if (!serviceToken || !esHost) {
@@ -257,9 +258,18 @@ export const useFleetServerInstructions = (policyId?: string) => {
       serviceToken,
       policyId,
       fleetServerHost,
-      deploymentMode === 'production'
+      deploymentMode === 'production',
+      sslCATrustedFingerprint
     );
-  }, [serviceToken, esHost, platform, policyId, fleetServerHost, deploymentMode]);
+  }, [
+    serviceToken,
+    esHost,
+    platform,
+    policyId,
+    fleetServerHost,
+    deploymentMode,
+    sslCATrustedFingerprint,
+  ]);
 
   const getServiceToken = useCallback(async () => {
     setIsLoadingServiceToken(true);

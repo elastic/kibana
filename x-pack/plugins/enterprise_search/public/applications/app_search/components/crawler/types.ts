@@ -199,36 +199,69 @@ export interface CrawlRequest {
   completedAt: string | null;
 }
 
-export type CrawlEventStage = 'crawl' | 'process';
+export interface CrawlRequestStats {
+  status: {
+    avgResponseTimeMSec?: number;
+    crawlDurationMSec?: number;
+    pagesVisited?: number;
+    urlsAllowed?: number;
+    statusCodes?: {
+      [code: string]: number;
+    };
+  };
+}
+
+export interface CrawlRequestStatsFromServer {
+  status: {
+    avg_response_time_msec?: number;
+    crawl_duration_msec?: number;
+    pages_visited?: number;
+    urls_allowed?: number;
+    status_codes?: {
+      [code: string]: number;
+    };
+  };
+}
 
 export interface CrawlConfig {
   domainAllowlist: string[];
+  seedUrls: string[];
+  sitemapUrls: string[];
+  maxCrawlDepth: number;
 }
 
 export interface CrawlConfigFromServer {
   domain_allowlist: string[];
-}
-export interface CrawlEventFromServer {
-  id: string;
-  stage: CrawlEventStage;
-  status: CrawlerStatus;
-  created_at: string;
-  began_at: string | null;
-  completed_at: string | null;
-  type: CrawlType;
-  crawl_config: CrawlConfigFromServer;
+  seed_urls: string[];
+  sitemap_urls: string[];
+  max_crawl_depth: number;
 }
 
-export interface CrawlEvent {
-  id: string;
-  stage: CrawlEventStage;
-  status: CrawlerStatus;
-  createdAt: string;
-  beganAt: string | null;
-  completedAt: string | null;
+export type CrawlRequestWithDetailsFromServer = CrawlRequestFromServer & {
+  type: CrawlType;
+  crawl_config: CrawlConfigFromServer;
+  stats: CrawlRequestStatsFromServer;
+};
+
+export type CrawlRequestWithDetails = CrawlRequest & {
   type: CrawlType;
   crawlConfig: CrawlConfig;
-}
+  stats: CrawlRequestStats | null;
+};
+
+export type CrawlEventStage = 'crawl' | 'process';
+
+export type CrawlEventFromServer = CrawlRequestFromServer & {
+  stage: CrawlEventStage;
+  type: CrawlType;
+  crawl_config: CrawlConfigFromServer;
+};
+
+export type CrawlEvent = CrawlRequest & {
+  stage: CrawlEventStage;
+  type: CrawlType;
+  crawlConfig: CrawlConfig;
+};
 
 export const readableCrawlerStatuses: { [key in CrawlerStatus]: string } = {
   [CrawlerStatus.Pending]: i18n.translate(

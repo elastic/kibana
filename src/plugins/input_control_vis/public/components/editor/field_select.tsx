@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n-react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { IndexPattern, IndexPatternField } from '../../../../data/public';

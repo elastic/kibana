@@ -12,16 +12,22 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { useValues } from 'kea';
+
 import { getPageHeaderActions } from '../../../test_helpers';
 
 import { AddDomainFlyout } from './components/add_domain/add_domain_flyout';
 import { AddDomainForm } from './components/add_domain/add_domain_form';
+import { AddDomainFormErrors } from './components/add_domain/add_domain_form_errors';
 import { AddDomainFormSubmitButton } from './components/add_domain/add_domain_form_submit_button';
+import { AddDomainLogic } from './components/add_domain/add_domain_logic';
+import { CrawlDetailsFlyout } from './components/crawl_details_flyout';
 import { CrawlRequestsTable } from './components/crawl_requests_table';
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
 import { DomainsTable } from './components/domains_table';
 import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_crawls_popover';
+import { CrawlerLogic } from './crawler_logic';
 import { CrawlerOverview } from './crawler_overview';
 import {
   CrawlerDomainFromServer,
@@ -77,6 +83,9 @@ const events: CrawlEventFromServer[] = [
     type: CrawlType.Full,
     crawl_config: {
       domain_allowlist: ['moviedatabase.com', 'swiftype.com'],
+      seed_urls: [],
+      sitemap_urls: [],
+      max_crawl_depth: 10,
     },
   },
   {
@@ -89,6 +98,9 @@ const events: CrawlEventFromServer[] = [
     type: CrawlType.Partial,
     crawl_config: {
       domain_allowlist: ['swiftype.com'],
+      seed_urls: [],
+      sitemap_urls: [],
+      max_crawl_depth: 10,
     },
   },
 ];
@@ -175,5 +187,32 @@ describe('CrawlerOverview', () => {
     expect(wrapper.find(AddDomainFlyout)).toHaveLength(1);
     expect(wrapper.find(DomainsTable)).toHaveLength(1);
     expect(wrapper.find(CrawlRequestsTable)).toHaveLength(1);
+  });
+
+  it('contains a crawl details flyout', () => {
+    setMockValues(mockValues);
+
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(wrapper.find(CrawlDetailsFlyout)).toHaveLength(1);
+  });
+
+  it('contains a AddDomainFormErrors when there are errors', () => {
+    const errors = ['Domain name already exists'];
+
+    (useValues as jest.Mock).mockImplementation((logic) => {
+      switch (logic) {
+        case AddDomainLogic:
+          return { errors };
+        case CrawlerLogic:
+          return { ...mockValues, domains: [], events: [] };
+        default:
+          return {};
+      }
+    });
+
+    const wrapper = shallow(<CrawlerOverview />);
+
+    expect(wrapper.find(AddDomainFormErrors)).toHaveLength(1);
   });
 });

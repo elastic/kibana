@@ -8,7 +8,7 @@
 import React, { FC, useEffect, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiAccordion,
@@ -118,6 +118,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       [setIndexPatternTimeField, indexPatternAvailableTimeFields]
     );
 
+    const { overlays, theme } = useAppDependencies();
     const api = useApi();
 
     // fetch existing transform IDs and indices once for form validation
@@ -150,9 +151,11 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             }),
             text: toMountPoint(
               <ToastNotificationText
-                overlays={deps.overlays}
+                overlays={overlays}
+                theme={theme}
                 text={getErrorMessage(transformPreview)}
-              />
+              />,
+              { theme$: theme.theme$ }
             ),
           });
         }
@@ -165,7 +168,12 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               defaultMessage: 'An error occurred getting the existing transform IDs:',
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(resp)} />
+              <ToastNotificationText
+                overlays={overlays}
+                theme={theme}
+                text={getErrorMessage(resp)}
+              />,
+              { theme$: theme.theme$ }
             ),
           });
         } else {
@@ -182,7 +190,12 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               defaultMessage: 'An error occurred getting the existing index names:',
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(indices)} />
+              <ToastNotificationText
+                overlays={overlays}
+                theme={theme}
+                text={getErrorMessage(indices)}
+              />,
+              { theme$: theme.theme$ }
             ),
           });
         }
@@ -195,7 +208,8 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               defaultMessage: 'An error occurred getting the existing data view titles:',
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+              <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(e)} />,
+              { theme$: theme.theme$ }
             ),
           });
         }

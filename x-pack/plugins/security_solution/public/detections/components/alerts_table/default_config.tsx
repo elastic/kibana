@@ -6,20 +6,13 @@
  */
 
 import {
-  ALERT_DURATION,
-  ALERT_INSTANCE_ID,
-  ALERT_RULE_PRODUCER,
-  ALERT_START,
+  ALERT_BUILDING_BLOCK_TYPE,
   ALERT_WORKFLOW_STATUS,
-  ALERT_UUID,
-  ALERT_RULE_UUID,
-  ALERT_RULE_NAME,
-  ALERT_RULE_CATEGORY,
+  ALERT_RULE_RULE_ID,
 } from '@kbn/rule-data-utils/technical_field_names';
 
 import type { Filter } from '@kbn/es-query';
-import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
-import { ColumnHeaderOptions, RowRendererId } from '../../../../common/types/timeline';
+import { RowRendererId } from '../../../../common/types/timeline';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
@@ -33,12 +26,12 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
             should: [
               {
                 term: {
-                  'kibana.alert.workflow_status': status,
+                  [ALERT_WORKFLOW_STATUS]: status,
                 },
               },
               {
                 term: {
-                  'kibana.alert.workflow_status': 'in-progress',
+                  [ALERT_WORKFLOW_STATUS]: 'in-progress',
                 },
               },
             ],
@@ -46,7 +39,7 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
         }
       : {
           term: {
-            'kibana.alert.workflow_status': status,
+            [ALERT_WORKFLOW_STATUS]: status,
           },
         };
 
@@ -57,7 +50,7 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => {
         negate: false,
         disabled: false,
         type: 'phrase',
-        key: 'kibana.alert.workflow_status',
+        key: ALERT_WORKFLOW_STATUS,
         params: {
           query: status,
         },
@@ -75,7 +68,7 @@ export const buildAlertStatusesFilter = (statuses: Status[]): Filter[] => {
     bool: {
       should: statuses.map((status) => ({
         term: {
-          'kibana.alert.workflow_status': status,
+          [ALERT_WORKFLOW_STATUS]: status,
         },
       })),
     },
@@ -93,8 +86,15 @@ export const buildAlertStatusesFilter = (statuses: Status[]): Filter[] => {
   ];
 };
 
-export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
-  ruleId
+/**
+ * Builds Kuery filter for fetching alerts for a specific rule. Takes the rule's
+ * static id, i.e. `rule.ruleId` (not rule.id), so that alerts for _all
+ * historical instances_ of the rule are returned.
+ *
+ * @param ruleStaticId Rule's static id: `rule.ruleId`
+ */
+export const buildAlertsFilter = (ruleStaticId: string | null): Filter[] =>
+  ruleStaticId
     ? [
         {
           meta: {
@@ -102,14 +102,14 @@ export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
             negate: false,
             disabled: false,
             type: 'phrase',
-            key: 'kibana.alert.rule.uuid',
+            key: ALERT_RULE_RULE_ID,
             params: {
-              query: ruleId,
+              query: ruleStaticId,
             },
           },
           query: {
             match_phrase: {
-              'kibana.alert.rule.uuid': ruleId,
+              [ALERT_RULE_RULE_ID]: ruleStaticId,
             },
           },
         },
@@ -126,10 +126,10 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
             negate: true,
             disabled: false,
             type: 'exists',
-            key: 'kibana.alert.building_block_type',
+            key: ALERT_BUILDING_BLOCK_TYPE,
             value: 'exists',
           },
-          query: { exists: { field: 'kibana.alert.building_block_type' } },
+          query: { exists: { field: ALERT_BUILDING_BLOCK_TYPE } },
         },
       ];
 
@@ -182,120 +182,3 @@ export const requiredFieldsForActions = [
   'host.os.family',
   'event.code',
 ];
-
-// TODO: Once we are past experimental phase this code should be removed
-export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => {
-  const combinedQuery =
-    status === 'acknowledged'
-      ? {
-          bool: {
-            should: [
-              {
-                term: {
-                  [ALERT_WORKFLOW_STATUS]: status,
-                },
-              },
-              {
-                term: {
-                  [ALERT_WORKFLOW_STATUS]: 'in-progress',
-                },
-              },
-            ],
-          },
-        }
-      : {
-          term: {
-            [ALERT_WORKFLOW_STATUS]: status,
-          },
-        };
-
-  return [
-    {
-      meta: {
-        alias: null,
-        negate: false,
-        disabled: false,
-        type: 'phrase',
-        key: ALERT_WORKFLOW_STATUS,
-        params: {
-          query: status,
-        },
-      },
-      query: combinedQuery,
-    },
-  ];
-};
-
-// TODO: Once we are past experimental phase this code should be removed
-export const buildAlertStatusesFilterRuleRegistry = (statuses: Status[]): Filter[] => {
-  const combinedQuery = {
-    bool: {
-      should: statuses.map((status) => ({
-        term: {
-          [ALERT_WORKFLOW_STATUS]: status,
-        },
-      })),
-    },
-  };
-
-  return [
-    {
-      meta: {
-        alias: null,
-        negate: false,
-        disabled: false,
-      },
-      query: combinedQuery,
-    },
-  ];
-};
-
-export const buildShowBuildingBlockFilterRuleRegistry = (
-  showBuildingBlockAlerts: boolean
-): Filter[] =>
-  showBuildingBlockAlerts
-    ? []
-    : [
-        {
-          meta: {
-            alias: null,
-            negate: true,
-            disabled: false,
-            type: 'exists',
-            key: 'kibana.alert.building_block_type',
-            value: 'exists',
-          },
-          query: { exists: { field: 'kibana.alert.building_block_type' } },
-        },
-      ];
-
-export const requiredFieldMappingsForActionsRuleRegistry = {
-  '@timestamp': '@timestamp',
-  'alert.instance.id': ALERT_INSTANCE_ID,
-  'event.kind': 'event.kind',
-  'alert.start': ALERT_START,
-  'alert.uuid': ALERT_UUID,
-  'event.action': 'event.action',
-  'alert.workflow_status': ALERT_WORKFLOW_STATUS,
-  'alert.duration.us': ALERT_DURATION,
-  'rule.uuid': ALERT_RULE_UUID,
-  'rule.name': ALERT_RULE_NAME,
-  'rule.category': ALERT_RULE_CATEGORY,
-  producer: ALERT_RULE_PRODUCER,
-  tags: 'tags',
-};
-
-export const alertsHeadersRuleRegistry: ColumnHeaderOptions[] = Object.entries(
-  requiredFieldMappingsForActionsRuleRegistry
-).map<ColumnHeaderOptions>(([alias, field]) => ({
-  columnHeaderType: defaultColumnHeaderType,
-  displayAsText: alias,
-  id: field,
-}));
-
-export const alertsDefaultModelRuleRegistry: SubsetTimelineModel = {
-  ...timelineDefaults,
-  columns: alertsHeadersRuleRegistry,
-  showCheckboxes: true,
-  excludedRowRendererIds: Object.values(RowRendererId),
-};

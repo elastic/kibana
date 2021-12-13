@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 
 export const OptionalLabel = () => {

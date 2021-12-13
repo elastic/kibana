@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
 
 import type { AppMountParameters } from 'kibana/public';
+import type { ScreenshottingSetup } from '../../../screenshotting/public';
 import type { SharePluginSetup } from '../shared_imports';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
 
@@ -17,13 +18,25 @@ import { RedirectApp } from './redirect_app';
 
 interface MountParams extends AppMountParameters {
   apiClient: ReportingAPIClient;
+  screenshotting: ScreenshottingSetup;
   share: SharePluginSetup;
 }
 
-export const mountRedirectApp = ({ element, apiClient, history, share }: MountParams) => {
+export const mountRedirectApp = ({
+  element,
+  apiClient,
+  history,
+  screenshotting,
+  share,
+}: MountParams) => {
   render(
     <EuiErrorBoundary>
-      <RedirectApp apiClient={apiClient} history={history} share={share} />
+      <RedirectApp
+        apiClient={apiClient}
+        history={history}
+        screenshotting={screenshotting}
+        share={share}
+      />
     </EuiErrorBoundary>,
     element
   );

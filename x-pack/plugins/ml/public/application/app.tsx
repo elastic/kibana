@@ -16,6 +16,7 @@ import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import {
   KibanaContextProvider,
+  KibanaThemeProvider,
   RedirectAppLinks,
 } from '../../../../../src/plugins/kibana_react/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
@@ -28,10 +29,7 @@ import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 
-export type MlDependencies = Omit<
-  MlSetupDependencies,
-  'share' | 'indexPatternManagement' | 'fieldFormats'
-> &
+export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'fieldFormats'> &
   MlStartDependencies;
 
 interface AppProps {
@@ -102,14 +100,16 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     <RedirectAppLinks application={coreStart.application}>
       <ApplicationUsageTrackingProvider>
         <I18nContext>
-          <KibanaContextProvider
-            services={{
-              ...services,
-              mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
-            }}
-          >
-            <MlRouter pageDeps={pageDeps} />
-          </KibanaContextProvider>
+          <KibanaThemeProvider theme$={appMountParams.theme$}>
+            <KibanaContextProvider
+              services={{
+                ...services,
+                mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
+              }}
+            >
+              <MlRouter pageDeps={pageDeps} />
+            </KibanaContextProvider>
+          </KibanaThemeProvider>
         </I18nContext>
       </ApplicationUsageTrackingProvider>
     </RedirectAppLinks>
@@ -131,6 +131,7 @@ export const renderApp = (
     docLinks: coreStart.docLinks!,
     toastNotifications: coreStart.notifications.toasts,
     overlays: coreStart.overlays,
+    theme: coreStart.theme,
     recentlyAccessed: coreStart.chrome!.recentlyAccessed,
     basePath: coreStart.http.basePath,
     savedObjectsClient: coreStart.savedObjects.client,

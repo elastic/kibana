@@ -6,7 +6,6 @@
  */
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
-import 'jest-canvas-mock';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import {
@@ -1484,6 +1483,23 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       });
+    });
+
+    it('should report a generic error for invalid shift string', () => {
+      const props = getProps({
+        timeShift: '5 months',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+
+      expect(wrapper.find(TimeShift).find(EuiComboBox).prop('isInvalid')).toBeTruthy();
+
+      expect(
+        wrapper
+          .find(TimeShift)
+          .find('[data-test-subj="indexPattern-dimension-time-shift-row"]')
+          .first()
+          .prop('error')
+      ).toBe('Time shift value is not valid.');
     });
   });
 
