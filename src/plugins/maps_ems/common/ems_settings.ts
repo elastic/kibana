@@ -14,17 +14,17 @@ import {
 } from './ems_defaults';
 import { EMSConfig } from '../config';
 
-export function createEMSSettings(emsConfig: EMSConfig, getIsEnterPrisePlus: () => boolean) {
-  return new EMSSettings(emsConfig, getIsEnterPrisePlus);
+export function createEMSSettings(emsConfig: EMSConfig, getIsEnterprisePlus: () => boolean) {
+  return new EMSSettings(emsConfig, getIsEnterprisePlus);
 }
 
 export class EMSSettings {
   private readonly _config: EMSConfig;
   private readonly _getIsEnterprisePlus: () => boolean;
 
-  constructor(config: EMSConfig, getIsEnterPrisePlus: () => boolean) {
+  constructor(config: EMSConfig, getIsEnterprisePlus: () => boolean) {
     this._config = config;
-    this._getIsEnterprisePlus = getIsEnterPrisePlus;
+    this._getIsEnterprisePlus = getIsEnterprisePlus;
   }
 
   isEMSUrlSet() {
