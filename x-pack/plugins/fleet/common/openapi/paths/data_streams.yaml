@@ -7,10 +7,11 @@ get:
       content:
         application/json:
           schema:
-            type: array
-            data_streams:
-              type: array
-              items:
-                $ref: '#/components/schemas/data_stream'
+            type: object
+            properties:
+              data_streams:
+                type: array
+                items:
+                  $ref: ../components/schemas/data_stream.yaml
   operationId: data-streams-list
 parameters: []

@@ -133,7 +133,6 @@ paths:
                   type: string
                 value:
                   type: string
-      deprecated: true
   /epm/_bulk:
     post:
       summary: Packages - Bulk install
@@ -145,10 +144,16 @@ paths:
             application/json:
               schema:
                 type: object
-                packages:
-                  type: array
+                properties:
                   items:
-                    type: string
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        version:
+                          type: string
       operationId: bulk-install-packages
     parameters: []
   /epm/categories:
@@ -160,24 +165,24 @@ paths:
           description: OK
           content:
             application/json:
+              schema: null
               type: object
               properties:
                 items:
-                  schema:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                        title:
-                          type: string
-                        count:
-                          type: number
-                      required:
-                        - id
-                        - title
-                        - count
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      title:
+                        type: string
+                      count:
+                        type: number
+                    required:
+                      - id
+                      - title
+                      - count
       operationId: get-package-categories
   /epm/packages/limited:
     get:
@@ -188,10 +193,10 @@ paths:
           description: OK
           content:
             application/json:
-              type: object
-              properties:
-                items:
-                  schema:
+              schema:
+                type: object
+                properties:
+                  items:
                     type: array
                     items:
                       type: string
@@ -206,10 +211,10 @@ paths:
           description: OK
           content:
             application/json:
-              type: object
-              properties:
-                items:
-                  schema:
+              schema:
+                type: object
+                properties:
+                  items:
                     type: array
                     items:
                       $ref: '#/components/schemas/search_result'
@@ -246,13 +251,13 @@ paths:
       operationId: get-package
       security:
         - basicAuth: []
-    parameters:
-      - schema:
-          type: string
-        name: pkgkey
-        in: path
-        required: true
-    deprecated: true
+      parameters:
+        - schema:
+            type: string
+          name: pkgkey
+          in: path
+          required: true
+      deprecated: true
     post:
       summary: Packages - Install
       tags: []
@@ -462,12 +467,13 @@ paths:
             application/json:
               schema:
                 type: object
-                body:
-                  type: object
-                statusCode:
-                  type: number
-                headers:
-                  type: object
+                properties:
+                  body:
+                    type: object
+                  statusCode:
+                    type: number
+                  headers:
+                    type: object
       operationId: packages-get-file
     parameters:
       - schema:
@@ -638,7 +644,6 @@ paths:
           name: policyId
           in: query
           required: false
-      deprecated: true
   /agents:
     get:
       summary: Agents - List
@@ -787,6 +792,14 @@ paths:
             application/json:
               schema:
                 type: object
+                properties:
+                  body:
+                    type: array
+                    items: number
+                  statusCode:
+                    type: number
+                  headers:
+                    type: string
         operationId: new-agent-action
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -799,18 +812,25 @@ paths:
             oneOf:
               - type: object
                 properties:
-                  enum:
-                    - POLICY_CHANGE
-                    - UNENROLL
-                    - UPGRADE
-                    - POLICY_REASSIGN
+                  type:
+                    type: string
+                    enum:
+                      - POLICY_CHANGE
+                      - UNENROLL
+                      - UPGRADE
+                      - POLICY_REASSIGN
               - type: object
                 properties:
-                  enum:
-                    - debug
-                    - info
-                    - warning
-                    - error
+                  data:
+                    type: object
+                    properties:
+                      oneOf:
+                        type: string
+                        enum:
+                          - debug
+                          - info
+                          - warning
+                          - error
   /agents/{agentId}/reassign:
     parameters:
       - schema:
@@ -1182,11 +1202,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                data_streams:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/data_stream'
+                type: object
+                properties:
+                  data_streams:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/data_stream'
       operationId: data-streams-list
     parameters: []
   /enrollment-api-keys:
@@ -1324,7 +1345,6 @@ paths:
                   - total
       operationId: get-enrollment-api-keys
       parameters: []
-      deprecated: true
     post:
       summary: Enrollment API Key - Create
       tags: []
@@ -1345,7 +1365,6 @@ paths:
       operationId: create-enrollment-api-keys
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-      deprecated: true
   /enrollment_api_keys/{keyId}:
     parameters:
       - schema:
@@ -1369,7 +1388,6 @@ paths:
                 required:
                   - item
       operationId: get-enrollment-api-key
-      deprecated: true
     delete:
       summary: Enrollment API Key - Delete
       tags: []
@@ -1390,7 +1408,6 @@ paths:
       operationId: delete-enrollment-api-key
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-      deprecated: true
   /package_policies:
     get:
       summary: Package policies - List
@@ -1848,6 +1865,40 @@ components:
           $ref: '#/components/schemas/settings'
       required:
         - item
+    search_result:
+      title: Search result
+      type: object
+      properties:
+        description:
+          type: string
+        download:
+          type: string
+        icons:
+          type: string
+        name:
+          type: string
+        path:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+        version:
+          type: string
+        status:
+          type: string
+        savedObject:
+          type: object
+      required:
+        - description
+        - download
+        - icons
+        - name
+        - path
+        - title
+        - type
+        - version
+        - status
     package_info:
       title: Package information
       type: object
@@ -2231,6 +2282,35 @@ components:
           required:
             - id
             - status
+    data_stream:
+      title: Data stream
+      type: object
+      properties:
+        index:
+          type: string
+        dataset:
+          type: string
+        namespace:
+          type: string
+        type:
+          type: string
+        package:
+          type: string
+        package_version:
+          type: string
+        last_activity_ms:
+          type: string
+        size_in_bytes:
+          type: string
+        dashboard:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              title:
+                type: string
     enrollment_api_key:
       title: Enrollment API key
       type: object

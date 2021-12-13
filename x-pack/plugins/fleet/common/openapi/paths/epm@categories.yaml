@@ -6,22 +6,22 @@ get:
       description: OK
       content:
         application/json:
+          schema:
           type: object
           properties:
             items:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    title:
-                      type: string
-                    count:
-                      type: number
-                  required:
-                    - id
-                    - title
-                    - count
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  title:
+                    type: string
+                  count:
+                    type: number
+                required:
+                  - id
+                  - title
+                  - count
   operationId: get-package-categories

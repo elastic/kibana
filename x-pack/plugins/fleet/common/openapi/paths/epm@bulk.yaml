@@ -8,9 +8,15 @@ post:
         application/json:
           schema:
             type: object
-            packages:
-              type: array
+            properties:
               items:
-                type: string
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    version:
+                      type: string
   operationId: bulk-install-packages
 parameters: []

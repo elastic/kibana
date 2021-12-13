@@ -2,15 +2,22 @@ title: Agent action
 oneOf:
   - type: object
     properties:
-      enum:
-      - POLICY_CHANGE
-      - UNENROLL
-      - UPGRADE
-      - POLICY_REASSIGN
+      type:
+        type: string
+        enum:
+        - POLICY_CHANGE
+        - UNENROLL
+        - UPGRADE
+        - POLICY_REASSIGN
   - type: object
     properties:
-      enum:
-      - debug
-      - info
-      - warning
-      - error
+      data:
+        type: object
+        properties:
+          oneOf:
+            type: string
+            enum:
+            - debug
+            - info
+            - warning
+            - error

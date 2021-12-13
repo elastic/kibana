@@ -22,7 +22,7 @@ paths:
     $ref: paths/settings.yaml
   # App endpoints
   /service-tokens:
-    $ref: paths/service_tokens.yaml
+    $ref: paths/service_tokens_deprecated.yaml
   /service_tokens:
     $ref: paths/service_tokens.yaml
   # EPM / integrations endpoints
@@ -35,7 +35,7 @@ paths:
   /epm/packages:
     $ref: paths/epm@packages.yaml
   '/epm/packages/{pkgkey}':
-    $ref: 'paths/epm@packages@{pkgkey}.yaml'
+    $ref: 'paths/epm@packages@{pkgkey}_deprecated.yaml'
   '/epm/packages/{pkgName}/{pkgVersion}':
     $ref: 'paths/epm@packages@{pkg_name}@{pkg_version}.yaml'
   '/epm/packages/{pkgName}/{pkgVersion}/{filePath*}':
@@ -46,7 +46,7 @@ paths:
   /agents/setup:
     $ref: paths/agents@setup.yaml
   /agent-status:
-    $ref: paths/agent_status.yaml
+    $ref: paths/agent_status_deprecated.yaml
   /agent_status:
     $ref: paths/agent_status.yaml
   /agents:
@@ -81,9 +81,9 @@ paths:
     $ref: paths/data_streams.yaml
   #  Enrollment endpoints
   /enrollment-api-keys:
-    $ref: paths/enrollment_api_keys.yaml
+    $ref: paths/enrollment_api_keys_deprecated.yaml
   '/enrollment-api-keys/{keyId}':
-    $ref: 'paths/enrollment_api_keys@{key_id}.yaml'
+    $ref: 'paths/enrollment_api_keys@{key_id}_deprecated.yaml'
   /enrollment_api_keys:
     $ref: paths/enrollment_api_keys.yaml
   '/enrollment_api_keys/{keyId}':

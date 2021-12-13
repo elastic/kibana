@@ -31,6 +31,7 @@ get:
               - total
   operationId: get-enrollment-api-keys
   parameters: []
+  deprecated: true
 post:
   summary: Enrollment API Key - Create
   tags: []
@@ -51,3 +52,4 @@ post:
   operationId: create-enrollment-api-keys
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+  deprecated: true

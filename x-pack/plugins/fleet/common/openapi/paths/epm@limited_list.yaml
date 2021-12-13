@@ -6,10 +6,10 @@ get:
       description: OK
       content:
         application/json:
-          type: object
-          properties:
-            items:
-              schema:
+          schema:
+            type: object
+            properties:
+              items:
                 type: array
                 items:
                   type: string

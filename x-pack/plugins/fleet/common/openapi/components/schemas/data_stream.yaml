@@ -1,4 +1,4 @@
-title: Agent
+title: Data stream
 type: object
 properties:
   index:

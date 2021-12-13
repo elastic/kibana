@@ -6,12 +6,12 @@ get:
       description: OK
       content:
         application/json:
-          type: object
-          properties:
-            items:
-              schema:
+          schema:
+            type: object
+            properties:
+              items:
                 type: array
                 items:
-                  $ref: '#/components/schemas/search_result'
+                  $ref: ../components/schemas/search_result.yaml
   operationId: list-all-packages
 parameters: []

@@ -213,8 +213,7 @@
               }
             }
           }
-        },
-        "deprecated": true
+        }
       }
     },
     "/epm/_bulk": {
@@ -228,10 +227,20 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "packages": {
-                    "type": "array",
+                  "properties": {
                     "items": {
-                      "type": "string"
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "string"
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -252,30 +261,29 @@
             "description": "OK",
             "content": {
               "application/json": {
+                "schema": null,
                 "type": "object",
                 "properties": {
                   "items": {
-                    "schema": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          },
-                          "count": {
-                            "type": "number"
-                          }
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
                         },
-                        "required": [
-                          "id",
-                          "title",
-                          "count"
-                        ]
-                      }
+                        "title": {
+                          "type": "string"
+                        },
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "count"
+                      ]
                     }
                   }
                 }
@@ -295,10 +303,10 @@
             "description": "OK",
             "content": {
               "application/json": {
-                "type": "object",
-                "properties": {
-                  "items": {
-                    "schema": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
                       "type": "array",
                       "items": {
                         "type": "string"
@@ -323,10 +331,10 @@
             "description": "OK",
             "content": {
               "application/json": {
-                "type": "object",
-                "properties": {
-                  "items": {
-                    "schema": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/search_result"
@@ -392,19 +400,19 @@
           {
             "basicAuth": []
           }
-        ]
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "pkgkey",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "deprecated": true
       },
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "pkgkey",
-          "in": "path",
-          "required": true
-        }
-      ],
-      "deprecated": true,
       "post": {
         "summary": "Packages - Install",
         "tags": [],
@@ -756,14 +764,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "body": {
-                    "type": "object"
-                  },
-                  "statusCode": {
-                    "type": "number"
-                  },
-                  "headers": {
-                    "type": "object"
+                  "properties": {
+                    "body": {
+                      "type": "object"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "headers": {
+                      "type": "object"
+                    }
                   }
                 }
               }
@@ -1035,8 +1045,7 @@
             "in": "query",
             "required": false
           }
-        ],
-        "deprecated": true
+        ]
       }
     },
     "/agents": {
@@ -1271,7 +1280,19 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "body": {
+                      "type": "array",
+                      "items": "number"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "headers": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
@@ -1293,23 +1314,34 @@
                 {
                   "type": "object",
                   "properties": {
-                    "enum": [
-                      "POLICY_CHANGE",
-                      "UNENROLL",
-                      "UPGRADE",
-                      "POLICY_REASSIGN"
-                    ]
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "POLICY_CHANGE",
+                        "UNENROLL",
+                        "UPGRADE",
+                        "POLICY_REASSIGN"
+                      ]
+                    }
                   }
                 },
                 {
                   "type": "object",
                   "properties": {
-                    "enum": [
-                      "debug",
-                      "info",
-                      "warning",
-                      "error"
-                    ]
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "oneOf": {
+                          "type": "string",
+                          "enum": [
+                            "debug",
+                            "info",
+                            "warning",
+                            "error"
+                          ]
+                        }
+                      }
+                    }
                   }
                 }
               ]
@@ -1933,11 +1965,13 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "data_streams": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/data_stream"
+                  "type": "object",
+                  "properties": {
+                    "data_streams": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/data_stream"
+                      }
                     }
                   }
                 }
@@ -2153,8 +2187,7 @@
           }
         },
         "operationId": "get-enrollment-api-keys",
-        "parameters": [],
-        "deprecated": true
+        "parameters": []
       },
       "post": {
         "summary": "Enrollment API Key - Create",
@@ -2187,8 +2220,7 @@
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
-        ],
-        "deprecated": true
+        ]
       }
     },
     "/enrollment_api_keys/{keyId}": {
@@ -2225,8 +2257,7 @@
             }
           }
         },
-        "operationId": "get-enrollment-api-key",
-        "deprecated": true
+        "operationId": "get-enrollment-api-key"
       },
       "delete": {
         "summary": "Enrollment API Key - Delete",
@@ -2259,8 +2290,7 @@
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
-        ],
-        "deprecated": true
+        ]
       }
     },
     "/package_policies": {
@@ -2985,6 +3015,53 @@
           "item"
         ]
       },
+      "search_result": {
+        "title": "Search result",
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "download": {
+            "type": "string"
+          },
+          "icons": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "savedObject": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "description",
+          "download",
+          "icons",
+          "name",
+          "path",
+          "title",
+          "type",
+          "version",
+          "status"
+        ]
+      },
       "package_info": {
         "title": "Package information",
         "type": "object",
@@ -3558,6 +3635,50 @@
             ]
           }
         ]
+      },
+      "data_stream": {
+        "title": "Data stream",
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "string"
+          },
+          "dataset": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "package": {
+            "type": "string"
+          },
+          "package_version": {
+            "type": "string"
+          },
+          "last_activity_ms": {
+            "type": "string"
+          },
+          "size_in_bytes": {
+            "type": "string"
+          },
+          "dashboard": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       },
       "enrollment_api_key": {
         "title": "Enrollment API key",

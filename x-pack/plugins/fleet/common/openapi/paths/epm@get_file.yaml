@@ -8,12 +8,13 @@ get:
         application/json:
           schema:
             type: object
-            body:
-              type: object
-            statusCode:
-              type: number
-            headers:
-              type: object
+            properties:
+              body:
+                type: object
+              statusCode:
+                type: number
+              headers:
+                type: object
   operationId: packages-get-file
 parameters:
   - schema:

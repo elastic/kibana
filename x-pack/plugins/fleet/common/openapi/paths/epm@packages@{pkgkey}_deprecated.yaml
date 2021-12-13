@@ -28,13 +28,13 @@ get:
   operationId: get-package
   security:
     - basicAuth: []
-parameters:
-  - schema:
-      type: string
-    name: pkgkey
-    in: path
-    required: true
-deprecated: true
+  parameters:
+    - schema:
+        type: string
+      name: pkgkey
+      in: path
+      required: true
+  deprecated: true
 post:
   summary: Packages - Install
   tags: []
