@@ -100,7 +100,11 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       title: i18n.translate('xpack.reporting.listing.infoPanel.dimensionsInfoHeight', {
         defaultMessage: 'Height (in pixels)',
       }),
-      description: info.layout?.dimensions?.height || UNKNOWN,
+      description:
+        info.layout?.dimensions?.height != null
+          ? Math.ceil(info.layout.dimensions.height)
+          : UNKNOWN,
+
     },
     hasScreenshot && {
       title: i18n.translate('xpack.reporting.listing.infoPanel.dimensionsInfoWidth', {
