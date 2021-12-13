@@ -43,7 +43,6 @@ export function validateMonitor(monitorFields: MonitorFields): {
   payload: object;
 } {
   const { [ConfigKey.MONITOR_TYPE]: monitorType } = monitorFields;
-  const { [ConfigKey.NAME]: monitorName, ...monitor } = monitorFields;
 
   const decodedType = DataStreamCodec.decode(monitorType);
   if (isLeft(decodedType)) {
@@ -67,7 +66,7 @@ export function validateMonitor(monitorFields: MonitorFields): {
   }
 
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
-  const decodedMonitor = (codec as typeof ICMPSimpleFieldsCodec).decode(monitor);
+  const decodedMonitor = (codec as typeof ICMPSimpleFieldsCodec).decode(monitorFields);
 
   if (isLeft(decodedMonitor)) {
     return {
