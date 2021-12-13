@@ -5,7 +5,7 @@
  * 2.0.
  */
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import {
   getBenchmarks,
   getAllFindingsStats,
@@ -14,7 +14,7 @@ import {
   getResourcesEvaluation,
 } from './stats';
 import { mockCountResultOnce, mockSearchResultOnce } from './stats_mock_query_response';
-
+// TODO  figure out the right permissions we need to ESClient to run with
 const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
 
 afterEach(() => {
@@ -23,7 +23,7 @@ afterEach(() => {
 });
 
 describe('testing round score', () => {
-  it('take dcimel and exept the roundScore will return it with one digit after the dot ', async () => {
+  it('take dcimal and expect the roundScore will return it with one digit after the dot ', async () => {
     const score = roundScore(0.85245);
     expect(score).toEqual(85.2);
   });
