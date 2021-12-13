@@ -180,7 +180,7 @@ export function ServiceMap({
 
   return (
     <>
-      <SearchBar showKueryBar={false} />
+      <SearchBar showKueryBar={false} showTimeComparison />
       <EuiPanel hasBorder={true} paddingSize="none">
         <div
           data-test-subj="ServiceMap"
