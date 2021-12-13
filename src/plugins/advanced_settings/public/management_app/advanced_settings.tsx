@@ -33,6 +33,7 @@ import { getAriaName, toEditableConfig, fieldSorter, DEFAULT_CATEGORY } from './
 
 import { FieldSetting, SettingsChanges } from './types';
 import { parseErrorMsg } from './components/search/search';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 export const QUERY = 'query';
 
@@ -259,21 +260,23 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
 
         <AdvancedSettingsVoiceAnnouncement queryText={query.text} settings={filteredSettings} />
 
-        <Form
-          settings={this.groupedSettings}
-          visibleSettings={filteredSettings}
-          categories={this.categories}
-          categoryCounts={this.categoryCounts}
-          clearQuery={this.clearQuery}
-          save={this.saveConfig}
-          showNoResultsMessage={!footerQueryMatched}
-          enableSaving={this.props.enableSaving}
-          dockLinks={this.props.dockLinks}
-          toasts={this.props.toasts}
-          trackUiMetric={this.props.trackUiMetric}
-          queryText={query.text}
-          theme={this.props.theme}
-        />
+        <KibanaContextProvider services={{ uiSettings: this.props.uiSettings }}>
+          <Form
+            settings={this.groupedSettings}
+            visibleSettings={filteredSettings}
+            categories={this.categories}
+            categoryCounts={this.categoryCounts}
+            clearQuery={this.clearQuery}
+            save={this.saveConfig}
+            showNoResultsMessage={!footerQueryMatched}
+            enableSaving={this.props.enableSaving}
+            dockLinks={this.props.dockLinks}
+            toasts={this.props.toasts}
+            trackUiMetric={this.props.trackUiMetric}
+            queryText={query.text}
+            theme={this.props.theme}
+          />
+        </KibanaContextProvider>
         <PageFooter
           toasts={this.props.toasts}
           query={query}
