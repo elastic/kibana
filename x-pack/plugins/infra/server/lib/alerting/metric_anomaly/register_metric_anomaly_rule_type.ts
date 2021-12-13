@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { MlPluginSetup } from '../../../../../ml/server';
 import {
-  AlertType as RuleType,
+  RuleType,
   AlertInstanceState as AlertState,
   AlertInstanceContext as AlertContext,
 } from '../../../../../alerting/server';

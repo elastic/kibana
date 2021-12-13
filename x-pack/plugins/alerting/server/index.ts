@@ -14,7 +14,7 @@ import { AlertsConfigType } from './types';
 export type RulesClient = PublicMethodsOf<RulesClientClass>;
 
 export type {
-  AlertType,
+  RuleType,
   ActionGroup,
   ActionGroupIdsOf,
   AlertingPlugin,
