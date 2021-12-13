@@ -34,7 +34,7 @@ export const PolicyHostIsolationExceptionsList = ({
 }) => {
   const history = useHistory();
   // load the list of policies>
-  const policiesRequest = useGetEndpointSpecificPolicies({});
+  const policiesRequest = useGetEndpointSpecificPolicies();
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
 
   const [expandedItemsMap, setExpandedItemsMap] = useState<Map<string, boolean>>(new Map());
@@ -52,12 +52,12 @@ export const PolicyHostIsolationExceptionsList = ({
         getPolicyHostIsolationExceptionsPath(policyId, {
           ...urlParams,
           // If user changed page size, then reset page index back to the first page
-          page_index: pageSize !== pagination.pageSize ? 0 : pageIndex,
+          page_index: pageIndex,
           page_size: pageSize,
         })
       );
     },
-    [history, pagination.pageSize, policyId, urlParams]
+    [history, policyId, urlParams]
   );
 
   const handleSearchInput = useCallback(

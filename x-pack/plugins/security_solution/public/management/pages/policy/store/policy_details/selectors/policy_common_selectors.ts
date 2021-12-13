@@ -38,7 +38,7 @@ export const isOnPolicyFormView: PolicyDetailsSelector<boolean> = createSelector
   }
 );
 
-/** Returns a boolean of whether the user is on the policy details page or not */
+/** Returns a boolean of whether the user is on the policy trusted apps page or not */
 export const isOnPolicyTrustedAppsView: PolicyDetailsSelector<boolean> = createSelector(
   getUrlLocationPathname,
   (pathname) => {

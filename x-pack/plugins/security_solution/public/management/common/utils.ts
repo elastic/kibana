@@ -63,19 +63,10 @@ export const parsePoliciesAndFilterToKql = ({
   policies?: string[];
   kuery?: string;
 }): string | undefined => {
-  let kql: string | undefined;
-
-  if (policies && policies.length) {
-    const policiesKQL = parsePoliciesToKQL(policies.join(','), '');
-    kql = `(${policiesKQL})`;
+  if (!policies || !policies.length) {
+    return kuery ? kuery : '';
   }
 
-  if (kuery) {
-    if (kql) {
-      kql += ` AND (${kuery})`;
-    } else {
-      kql = `(${kuery})`;
-    }
-  }
-  return kql;
+  const policiesKQL = parsePoliciesToKQL(policies.join(','), '');
+  return `(${policiesKQL})${kuery ? ` AND (${kuery})` : ''}`;
 };

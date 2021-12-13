@@ -46,9 +46,7 @@ describe('Policy details host isolation exceptions tab', () => {
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
     render = () =>
-      (renderResult = mockedContext.render(
-        <PolicyHostIsolationExceptionsTab policyId={policyId} policy={policy} />
-      ));
+      (renderResult = mockedContext.render(<PolicyHostIsolationExceptionsTab policy={policy} />));
 
     history.push(getPolicyHostIsolationExceptionsPath(policyId));
   });

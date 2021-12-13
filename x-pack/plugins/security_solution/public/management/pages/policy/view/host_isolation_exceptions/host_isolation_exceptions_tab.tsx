@@ -32,14 +32,10 @@ import { PolicyHostIsolationExceptionsEmptyUnexisting } from './components/empty
 import { PolicyHostIsolationExceptionsEmptyUnassigned } from './components/empty_unassigned';
 import { PolicyHostIsolationExceptionsList } from './components/list';
 
-export const PolicyHostIsolationExceptionsTab = ({
-  policyId,
-  policy,
-}: {
-  policyId: string;
-  policy: PolicyData;
-}) => {
+export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyData }) => {
   const { getAppUrl } = useAppUrl();
+
+  const policyId = policy.id;
 
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const toHostIsolationList = getAppUrl({
