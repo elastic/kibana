@@ -15,6 +15,7 @@ import {
   EuiFlyoutBody,
   EuiTitle,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 import { EditorExample } from './editor_example';
 
@@ -43,8 +44,29 @@ export function HelpPanel(props: Props) {
           <p>
             <FormattedMessage
               id="console.helpPage.requestFormatDescription"
-              defaultMessage="You can type one or more requests in the white editor. Console understands requests in a compact format:"
+              defaultMessage="You can type one or more requests in the editor. Console understands requests in a compact format."
             />
+          </p>
+          <p>
+            <FormattedMessage id="console.helpPage.learnAbout" defaultMessage="Learn about" />
+            &nbsp;
+            <EuiLink
+              href="https://www.elastic.co/guide/en/kibana/current/console-kibana.html"
+              target="_blank"
+              external
+            >
+              Console
+            </EuiLink>
+            &nbsp;
+            <FormattedMessage id="console.helpPage.and" defaultMessage="and" />
+            &nbsp;
+            <EuiLink
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html"
+              target="_blank"
+              external
+            >
+              Query DSL
+            </EuiLink>
           </p>
           <EditorExample panel="help" />
           <h3>
