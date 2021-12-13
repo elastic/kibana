@@ -19,7 +19,7 @@ import { getServiceTransactionGroupDetailedStatisticsPeriods } from '../services
 import { getTransactionBreakdown } from './breakdown';
 import { getTransactionTraceSamples } from './trace_samples';
 import { getLatencyPeriods } from './get_latency_charts';
-import { getFailedTransactionRatePeriods } from '../../lib/transaction_groups/get_failed_transaction_rate';
+import { getFailedTransactionRatePeriods } from './get_failed_transaction_rate_periods';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import {

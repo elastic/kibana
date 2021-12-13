@@ -14,7 +14,7 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
 import {
-  AlertType,
+  RuleType,
   AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
@@ -28,7 +28,7 @@ import {
   validateDurationSchema,
 } from '../common';
 import { ILicenseState } from './lib/license_state';
-import { getAlertTypeFeatureUsageName } from './lib/get_alert_type_feature_usage_name';
+import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
 
 export interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
@@ -39,7 +39,7 @@ export interface ConstructorOptions {
 
 export interface RegistryRuleType
   extends Pick<
-    UntypedNormalizedAlertType,
+    UntypedNormalizedRuleType,
     | 'name'
     | 'actionGroups'
     | 'recoveryActionGroup'
@@ -58,26 +58,26 @@ export interface RegistryRuleType
 }
 
 /**
- * AlertType IDs are used as part of the authorization strings used to
+ * RuleType IDs are used as part of the authorization strings used to
  * grant users privileged operations. There is a limited range of characters
  * we can use in these auth strings, so we apply these same limitations to
- * the AlertType Ids.
+ * the RuleType Ids.
  * If you wish to change this, please confer with the Kibana security team.
  */
-const alertIdSchema = schema.string({
+const ruleTypeIdSchema = schema.string({
   validate(value: string): string | void {
     if (typeof value !== 'string') {
-      return `expected AlertType Id of type [string] but got [${typeDetect(value)}]`;
+      return `expected RuleType Id of type [string] but got [${typeDetect(value)}]`;
     } else if (!value.match(/^[a-zA-Z0-9_\-\.]*$/)) {
       const invalid = value.match(/[^a-zA-Z0-9_\-\.]+/g)!;
-      return `expected AlertType Id not to include invalid character${
+      return `expected RuleType Id not to include invalid character${
         invalid.length > 1 ? `s` : ``
       }: ${invalid?.join(`, `)}`;
     }
   },
 });
 
-export type NormalizedAlertType<
+export type NormalizedRuleType<
   Params extends AlertTypeParams,
   ExtractedParams extends AlertTypeParams,
   State extends AlertTypeState,
@@ -88,7 +88,7 @@ export type NormalizedAlertType<
 > = {
   actionGroups: Array<ActionGroup<ActionGroupIds | RecoveryActionGroupId>>;
 } & Omit<
-  AlertType<
+  RuleType<
     Params,
     ExtractedParams,
     State,
@@ -101,7 +101,7 @@ export type NormalizedAlertType<
 > &
   Pick<
     Required<
-      AlertType<
+      RuleType<
         Params,
         ExtractedParams,
         State,
@@ -114,7 +114,7 @@ export type NormalizedAlertType<
     'recoveryActionGroup'
   >;
 
-export type UntypedNormalizedAlertType = NormalizedAlertType<
+export type UntypedNormalizedRuleType = NormalizedRuleType<
   AlertTypeParams,
   AlertTypeParams,
   AlertTypeState,
@@ -126,7 +126,7 @@ export type UntypedNormalizedAlertType = NormalizedAlertType<
 
 export class RuleTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
-  private readonly ruleTypes: Map<string, UntypedNormalizedAlertType> = new Map();
+  private readonly ruleTypes: Map<string, UntypedNormalizedRuleType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly licenseState: ILicenseState;
   private readonly licensing: LicensingPluginSetup;
@@ -143,7 +143,7 @@ export class RuleTypeRegistry {
   }
 
   public ensureRuleTypeEnabled(id: string) {
-    this.licenseState.ensureLicenseForAlertType(this.get(id));
+    this.licenseState.ensureLicenseForRuleType(this.get(id));
   }
 
   public register<
@@ -155,7 +155,7 @@ export class RuleTypeRegistry {
     ActionGroupIds extends string,
     RecoveryActionGroupId extends string
   >(
-    alertType: AlertType<
+    ruleType: RuleType<
       Params,
       ExtractedParams,
       State,
@@ -165,44 +165,44 @@ export class RuleTypeRegistry {
       RecoveryActionGroupId
     >
   ) {
-    if (this.has(alertType.id)) {
+    if (this.has(ruleType.id)) {
       throw new Error(
-        i18n.translate('xpack.alerting.ruleTypeRegistry.register.duplicateAlertTypeError', {
+        i18n.translate('xpack.alerting.ruleTypeRegistry.register.duplicateRuleTypeError', {
           defaultMessage: 'Rule type "{id}" is already registered.',
           values: {
-            id: alertType.id,
+            id: ruleType.id,
           },
         })
       );
     }
     // validate ruleTypeTimeout here
-    if (alertType.ruleTaskTimeout) {
-      const invalidTimeout = validateDurationSchema(alertType.ruleTaskTimeout);
+    if (ruleType.ruleTaskTimeout) {
+      const invalidTimeout = validateDurationSchema(ruleType.ruleTaskTimeout);
       if (invalidTimeout) {
         throw new Error(
-          i18n.translate('xpack.alerting.ruleTypeRegistry.register.invalidTimeoutAlertTypeError', {
+          i18n.translate('xpack.alerting.ruleTypeRegistry.register.invalidTimeoutRuleTypeError', {
             defaultMessage: 'Rule type "{id}" has invalid timeout: {errorMessage}.',
             values: {
-              id: alertType.id,
+              id: ruleType.id,
               errorMessage: invalidTimeout,
             },
           })
         );
       }
     }
-    alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
+    ruleType.actionVariables = normalizedActionVariables(ruleType.actionVariables);
 
     // validate defaultScheduleInterval here
-    if (alertType.defaultScheduleInterval) {
-      const invalidDefaultTimeout = validateDurationSchema(alertType.defaultScheduleInterval);
+    if (ruleType.defaultScheduleInterval) {
+      const invalidDefaultTimeout = validateDurationSchema(ruleType.defaultScheduleInterval);
       if (invalidDefaultTimeout) {
         throw new Error(
           i18n.translate(
-            'xpack.alerting.ruleTypeRegistry.register.invalidDefaultTimeoutAlertTypeError',
+            'xpack.alerting.ruleTypeRegistry.register.invalidDefaultTimeoutRuleTypeError',
             {
               defaultMessage: 'Rule type "{id}" has invalid default interval: {errorMessage}.',
               values: {
-                id: alertType.id,
+                id: ruleType.id,
                 errorMessage: invalidDefaultTimeout,
               },
             }
@@ -212,16 +212,16 @@ export class RuleTypeRegistry {
     }
 
     // validate minimumScheduleInterval here
-    if (alertType.minimumScheduleInterval) {
-      const invalidMinimumTimeout = validateDurationSchema(alertType.minimumScheduleInterval);
+    if (ruleType.minimumScheduleInterval) {
+      const invalidMinimumTimeout = validateDurationSchema(ruleType.minimumScheduleInterval);
       if (invalidMinimumTimeout) {
         throw new Error(
           i18n.translate(
-            'xpack.alerting.ruleTypeRegistry.register.invalidMinimumTimeoutAlertTypeError',
+            'xpack.alerting.ruleTypeRegistry.register.invalidMinimumTimeoutRuleTypeError',
             {
               defaultMessage: 'Rule type "{id}" has invalid minimum interval: {errorMessage}.',
               values: {
-                id: alertType.id,
+                id: ruleType.id,
                 errorMessage: invalidMinimumTimeout,
               },
             }
@@ -230,7 +230,7 @@ export class RuleTypeRegistry {
       }
     }
 
-    const normalizedAlertType = augmentActionGroupsWithReserved<
+    const normalizedRuleType = augmentActionGroupsWithReserved<
       Params,
       ExtractedParams,
       State,
@@ -238,17 +238,17 @@ export class RuleTypeRegistry {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(alertType);
+    >(ruleType);
 
     this.ruleTypes.set(
-      alertIdSchema.validate(alertType.id),
-      /** stripping the typing is required in order to store the AlertTypes in a Map */
-      normalizedAlertType as unknown as UntypedNormalizedAlertType
+      ruleTypeIdSchema.validate(ruleType.id),
+      /** stripping the typing is required in order to store the RuleTypes in a Map */
+      normalizedRuleType as unknown as UntypedNormalizedRuleType
     );
     this.taskManager.registerTaskDefinitions({
-      [`alerting:${alertType.id}`]: {
-        title: alertType.name,
-        timeout: alertType.ruleTaskTimeout,
+      [`alerting:${ruleType.id}`]: {
+        title: ruleType.name,
+        timeout: ruleType.ruleTaskTimeout,
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create<
             Params,
@@ -258,14 +258,14 @@ export class RuleTypeRegistry {
             InstanceContext,
             ActionGroupIds,
             RecoveryActionGroupId | RecoveredActionGroupId
-          >(normalizedAlertType, context),
+          >(normalizedRuleType, context),
       },
     });
     // No need to notify usage on basic alert types
-    if (alertType.minimumLicenseRequired !== 'basic') {
+    if (ruleType.minimumLicenseRequired !== 'basic') {
       this.licensing.featureUsage.register(
-        getAlertTypeFeatureUsageName(alertType.name),
-        alertType.minimumLicenseRequired
+        getRuleTypeFeatureUsageName(ruleType.name),
+        ruleType.minimumLicenseRequired
       );
     }
   }
@@ -280,7 +280,7 @@ export class RuleTypeRegistry {
     RecoveryActionGroupId extends string = string
   >(
     id: string
-  ): NormalizedAlertType<
+  ): NormalizedRuleType<
     Params,
     ExtractedParams,
     State,
@@ -291,7 +291,7 @@ export class RuleTypeRegistry {
   > {
     if (!this.has(id)) {
       throw Boom.badRequest(
-        i18n.translate('xpack.alerting.ruleTypeRegistry.get.missingAlertTypeError', {
+        i18n.translate('xpack.alerting.ruleTypeRegistry.get.missingRuleTypeError', {
           defaultMessage: 'Rule type "{id}" is not registered.',
           values: {
             id,
@@ -300,11 +300,11 @@ export class RuleTypeRegistry {
       );
     }
     /**
-     * When we store the AlertTypes in the Map we strip the typing.
-     * This means that returning a typed AlertType in `get` is an inherently
+     * When we store the RuleTypes in the Map we strip the typing.
+     * This means that returning a typed RuleType in `get` is an inherently
      * unsafe operation. Down casting to `unknown` is the only way to achieve this.
      */
-    return this.ruleTypes.get(id)! as unknown as NormalizedAlertType<
+    return this.ruleTypes.get(id)! as unknown as NormalizedRuleType<
       Params,
       ExtractedParams,
       State,
@@ -334,7 +334,7 @@ export class RuleTypeRegistry {
             defaultScheduleInterval,
             doesSetRecoveryContext,
           },
-        ]: [string, UntypedNormalizedAlertType]) => ({
+        ]: [string, UntypedNormalizedRuleType]) => ({
           id,
           name,
           actionGroups,
@@ -348,7 +348,7 @@ export class RuleTypeRegistry {
           minimumScheduleInterval,
           defaultScheduleInterval,
           doesSetRecoveryContext,
-          enabledInLicense: !!this.licenseState.getLicenseCheckForAlertType(
+          enabledInLicense: !!this.licenseState.getLicenseCheckForRuleType(
             id,
             name,
             minimumLicenseRequired
@@ -359,7 +359,7 @@ export class RuleTypeRegistry {
   }
 }
 
-function normalizedActionVariables(actionVariables: AlertType['actionVariables']) {
+function normalizedActionVariables(actionVariables: RuleType['actionVariables']) {
   return {
     context: actionVariables?.context ?? [],
     state: actionVariables?.state ?? [],
@@ -376,7 +376,7 @@ function augmentActionGroupsWithReserved<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 >(
-  alertType: AlertType<
+  ruleType: RuleType<
     Params,
     ExtractedParams,
     State,
@@ -385,7 +385,7 @@ function augmentActionGroupsWithReserved<
     ActionGroupIds,
     RecoveryActionGroupId
   >
-): NormalizedAlertType<
+): NormalizedRuleType<
   Params,
   ExtractedParams,
   State,
@@ -394,8 +394,8 @@ function augmentActionGroupsWithReserved<
   ActionGroupIds,
   RecoveredActionGroupId | RecoveryActionGroupId
 > {
-  const reservedActionGroups = getBuiltinActionGroups(alertType.recoveryActionGroup);
-  const { id, actionGroups, recoveryActionGroup } = alertType;
+  const reservedActionGroups = getBuiltinActionGroups(ruleType.recoveryActionGroup);
+  const { id, actionGroups, recoveryActionGroup } = ruleType;
 
   const activeActionGroups = new Set<string>(actionGroups.map((item) => item.id));
   const intersectingReservedActionGroups = intersection<string>(
@@ -430,7 +430,7 @@ function augmentActionGroupsWithReserved<
   }
 
   return {
-    ...alertType,
+    ...ruleType,
     actionGroups: [...actionGroups, ...reservedActionGroups],
     recoveryActionGroup: recoveryActionGroup ?? RecoveredActionGroup,
   };
