@@ -6,7 +6,6 @@
  */
 
 import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
-// import { CTI_ROW_RENDERER_FIELDS } from '../../../../../../common/cti/constants';
 
 // TODO: share with security_solution/common/cti/constants.ts
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
@@ -273,3 +272,5 @@ export const TIMELINE_EVENTS_FIELDS = [
   'zeek.ssl.version',
   ...CTI_ROW_RENDERER_FIELDS,
 ];
+
+export const ECS_METADATA_FIELDS = ['_id', '_index', '_type', '_score'];
