@@ -259,8 +259,10 @@ test('task runner should implement CancellableTask cancel method with logging wa
         },
       ],
     },
-    message: 'action started: test:1: action-1',
+    message: `action: 1: 'action 1' execution cancelled due to timeout - exceeded default timeout of "5m"`,
   });
+
+  expect(mockedActionExecutor.getActionInfo.mock.calls.length).toBe(1);
 
   expect(taskRunnerFactoryInitializerParams.logger.warn).toHaveBeenCalledWith(
     `Task with Id '123' and taskType 'hjhk' was cancelled due to the timeout.`

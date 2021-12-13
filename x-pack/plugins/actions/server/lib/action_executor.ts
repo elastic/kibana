@@ -29,6 +29,7 @@ import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_l
 import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
+import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -169,26 +170,25 @@ export class ActionExecutor {
           ? {
               task: {
                 scheduled: taskInfo.scheduled.toISOString(),
-                schedule_delay: Millis2Nanos * (Date.now() - taskInfo.scheduled.getTime()),
+                scheduleDelay: Millis2Nanos * (Date.now() - taskInfo.scheduled.getTime()),
               },
             }
           : {};
 
-        const event: IEvent = {
-          event: { action: EVENT_LOG_ACTIONS.execute },
-          kibana: {
-            ...task,
-            saved_objects: [
-              {
-                rel: SAVED_OBJECT_REL_PRIMARY,
-                type: 'action',
-                id: actionId,
-                type_id: actionTypeId,
-                ...namespace,
-              },
-            ],
-          },
-        };
+        const event = createActionEventLogRecordObject({
+          actionId,
+          action: EVENT_LOG_ACTIONS.execute,
+          namespace: spaceId,
+          ...task,
+          savedObjects: [
+            {
+              type: 'action',
+              id: actionId,
+              typeId: actionTypeId,
+              relation: SAVED_OBJECT_REL_PRIMARY,
+            },
+          ],
+        });
 
         for (const relatedSavedObject of relatedSavedObjects || []) {
           event.kibana?.saved_objects?.push({
@@ -202,14 +202,22 @@ export class ActionExecutor {
 
         eventLogger.startTiming(event);
 
-        const startEvent = cloneDeep({
-          ...event,
-          event: {
-            ...event.event,
-            action: EVENT_LOG_ACTIONS.executeStart,
-          },
+        const startEvent = createActionEventLogRecordObject({
+          actionId,
+          action: EVENT_LOG_ACTIONS.executeStart,
+          namespace: spaceId,
           message: `action started: ${actionLabel}`,
+          ...task,
+          savedObjects: [
+            {
+              type: 'action',
+              id: actionId,
+              typeId: actionTypeId,
+              relation: SAVED_OBJECT_REL_PRIMARY,
+            },
+          ],
         });
+
         eventLogger.logEvent(startEvent);
 
         let rawResult: ActionTypeExecutorResult<unknown>;

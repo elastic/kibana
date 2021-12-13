@@ -12,6 +12,7 @@ export type Event = Exclude<IEvent, undefined>;
 interface CreateActionEventLogRecordParams {
   actionId: string;
   action: string;
+  name?: string;
   message?: string;
   namespace?: string;
   timestamp?: string;

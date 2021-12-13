@@ -36,6 +36,7 @@ import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_sav
 import { injectSavedObjectReferences } from './action_task_params_utils';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
+import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -183,6 +184,7 @@ export class TaskRunnerFactory {
         }
       },
       cancel: async () => {
+        // Write event log entry
         const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
         const { spaceId } = actionTaskExecutorParams;
 
@@ -204,30 +206,26 @@ export class TaskRunnerFactory {
           request,
           ...getSourceFromReferences(references),
         });
-
-        const event: IEvent = {
-          event: {
-            action: EVENT_LOG_ACTIONS.executeTimeout,
-            kind: 'action',
-          },
+        // Write event log entry
+        const event = createActionEventLogRecordObject({
+          actionId,
+          action: EVENT_LOG_ACTIONS.executeTimeout,
           message: `action: ${actionInfo.actionTypeId}:${actionId}: '${
             actionInfo.name ?? ''
           }' execution cancelled due to timeout - exceeded default timeout of "5m"`,
-          kibana: {
-            task: {
-              scheduled: taskInfo.scheduled.toISOString(),
-            },
-            saved_objects: [
-              {
-                rel: SAVED_OBJECT_REL_PRIMARY,
-                type: 'action',
-                id: actionId,
-                type_id: actionInfo.actionTypeId,
-                namespace: spaceId,
-              },
-            ],
+          namespace: spaceId,
+          task: {
+            scheduled: taskInfo.scheduled.toISOString(),
           },
-        };
+          savedObjects: [
+            {
+              type: 'action',
+              id: actionId,
+              typeId: actionInfo.actionTypeId,
+              relation: SAVED_OBJECT_REL_PRIMARY,
+            },
+          ],
+        });
 
         for (const relatedSavedObject of (relatedSavedObjects || []) as RelatedSavedObjects) {
           event.kibana?.saved_objects?.push({
@@ -240,8 +238,8 @@ export class TaskRunnerFactory {
         }
         eventLogger.logEvent(event);
 
-        logger.warn(
-          `Task with Id '${taskInstance.id}' and taskType '${taskInstance.taskType}' was cancelled due to the timeout.`
+        logger.debug(
+          `Cancelling action task for ${actionInfo.actionTypeId} action with id ${actionId} - execution error due to timeout.`
         );
         return { state: {} };
       },
