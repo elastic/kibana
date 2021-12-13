@@ -11,13 +11,20 @@ import {
   MonitorManagementListResultCodec,
   MonitorManagementListResult,
   ServiceLocations,
+  SyntheticsMonitor,
   ServiceLocationsCodec,
 } from '../../../common/runtime_types';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { apiService } from './utils';
 
-// TODO, change to monitor runtime type
-export const setMonitor = async ({ monitor, id }: { monitor: any; id?: string }): Promise<void> => {
+// TODO: Type the return type from runtime types
+export const setMonitor = async ({
+  monitor,
+  id,
+}: {
+  monitor: SyntheticsMonitor;
+  id?: string;
+}): Promise<void> => {
   if (id) {
     return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
   } else {

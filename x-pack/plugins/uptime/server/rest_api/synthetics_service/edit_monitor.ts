@@ -16,6 +16,7 @@ import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monito
 import { validateMonitor } from './monitor_validation';
 import { getMonitorNotFoundResponse } from './service_errors';
 
+// Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'PUT',
   path: API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',

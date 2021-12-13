@@ -9,19 +9,15 @@ import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 
 import {
-  BrowserFields,
   BrowserFieldsCodec,
   ConfigKey,
   DataStream,
   DataStreamCodec,
-  HTTPFields,
   HTTPFieldsCodec,
-  ICMPFields,
   ICMPSimpleFieldsCodec,
   MonitorFields,
-  TCPFields,
   TCPFieldsCodec,
-} from '../../../common/runtime_types/monitor_management';
+} from '../../../common/runtime_types';
 
 type MonitorCodecType =
   | typeof ICMPSimpleFieldsCodec
@@ -35,9 +31,6 @@ const monitorTypeToCodecMap: Record<DataStream, MonitorCodecType> = {
   [DataStream.HTTP]: HTTPFieldsCodec,
   [DataStream.BROWSER]: BrowserFieldsCodec,
 };
-
-export type SyntheticsMonitor = ICMPFields | TCPFields | HTTPFields | BrowserFields;
-export type SyntheticsMonitorWithName = SyntheticsMonitor & { [ConfigKey.NAME]: string };
 
 /**
  * Validates monitor fields with respect to the relevant Codec identified by object's 'type' property.
