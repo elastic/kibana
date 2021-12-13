@@ -274,11 +274,11 @@ describe('formatTimelineData', () => {
         'kibana.alert.rule.query': ['_id :*'],
         'kibana.alert.rule.type': ['threshold'],
         'kibana.alert.rule.uuid': ['696c24e0-526d-11eb-836c-e1620268b945'],
-        'kibana.alert.rule.risk_score': [21],
+        'kibana.alert.risk_score': [21],
         'kibana.alert.workflow_status': ['open'],
         'event.kind': ['signal'],
         'kibana.alert.original_time': ['2021-01-09T13:39:32.595Z'],
-        'kibana.alert.rule.severity': ['low'],
+        'kibana.alert.severity': ['low'],
         'kibana.alert.rule.version': ['1'],
         'kibana.alert.rule.index': [
           'apm-*-transaction*',

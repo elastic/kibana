@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { getOr } from 'lodash/fp';
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { SignalSourceHit } from './types';
 
 export interface BuildReasonMessageArgs {
-  rule: RulesSchema;
+  name: string;
+  severity: string;
   mergedDoc?: SignalSourceHit;
 }
 
@@ -56,8 +56,12 @@ const getFieldsFromDoc = (mergedDoc: SignalSourceHit) => {
  * to more easily allow for this in the future.
  * @export buildCommonReasonMessage - is only exported for testing purposes, and only used internally here.
  */
-export const buildReasonMessageUtil = ({ rule, mergedDoc }: BuildReasonMessageUtilArgs) => {
-  if (!rule || !mergedDoc) {
+export const buildReasonMessageUtil = ({
+  name,
+  severity,
+  mergedDoc,
+}: BuildReasonMessageUtilArgs) => {
+  if (!mergedDoc) {
     // This should never happen, but in case, better to not show a malformed string
     return '';
   }
@@ -98,8 +102,8 @@ export const buildReasonMessageUtil = ({ rule, mergedDoc }: BuildReasonMessageUt
 {hostName, select, null {} other {{whitespace}on {hostName}} } \
 created {alertSeverity} alert {alertName}.`,
     values: {
-      alertName: rule.name,
-      alertSeverity: rule.severity,
+      alertName: name,
+      alertSeverity: severity,
       destinationAddress: getFieldTemplateValue(destinationAddress, true),
       destinationPort: getFieldTemplateValue(destinationPort, true),
       eventCategory: getFieldTemplateValue(eventCategory),

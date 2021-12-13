@@ -141,11 +141,10 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
             alias: null,
             disabled: false,
             negate: false,
-            key: 'kibana.alert.rule.threat_mapping',
-            type: 'exists',
-            value: 'exists',
+            key: 'kibana.alert.rule.type',
+            type: 'term',
           },
-          query: { exists: { field: 'kibana.alert.rule.threat_mapping' } },
+          query: { term: { 'kibana.alert.rule.type': 'threat_match' } },
         },
       ]
     : [];

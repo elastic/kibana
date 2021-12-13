@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import {
   DragEffects,
   DraggableWrapper,
@@ -117,7 +118,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
               name: `${riskScore}`,
               kqlQuery: '',
               queryMatch: {
-                field: 'kibana.alert.rule.risk_score',
+                field: ALERT_RISK_SCORE,
                 value: riskScore,
                 operator: IS_OPERATOR,
               },
