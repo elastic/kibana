@@ -135,7 +135,7 @@ export const performBulkActionRoute = (
           });
         }
 
-        let processed: Array<undefined | ActionPerformError> = [];
+        let processed: ActionPerform[] = [];
         switch (body.action) {
           case BulkAction.enable:
             await Promise.all(
