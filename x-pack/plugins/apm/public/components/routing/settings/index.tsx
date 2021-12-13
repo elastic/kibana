@@ -16,7 +16,7 @@ import { AgentConfigurations } from '../../app/Settings/agent_configurations';
 import { CreateAgentConfigurationRouteView } from './create_agent_configuration_route_view';
 import { EditAgentConfigurationRouteView } from './edit_agent_configuration_route_view';
 import { ApmIndices } from '../../app/Settings/ApmIndices';
-import { CustomizeUI } from '../../app/Settings/customize_ui';
+import { CustomLinkOverview } from '../../app/Settings/custom_link';
 import { Schema } from '../../app/Settings/schema';
 import { AnomalyDetection } from '../../app/Settings/anomaly_detection';
 import { AgentKeys } from '../../app/Settings/agent_keys';
@@ -111,11 +111,11 @@ export const settings = {
     }),
     page({
       path: '/settings/custom-links',
-      title: i18n.translate('xpack.apm.views.settings.customizeUI.title', {
+      title: i18n.translate('xpack.apm.views.settings.customLink.title', {
         defaultMessage: 'Custom Links',
       }),
       tab: 'custom-links',
-      element: <CustomizeUI />,
+      element: <CustomLinkOverview />,
     }),
     page({
       path: '/settings/schema',
