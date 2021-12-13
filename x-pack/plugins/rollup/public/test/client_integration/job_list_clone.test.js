@@ -11,25 +11,11 @@ import { getRouter } from '../../crud_app/services/routing';
 import { setHttp } from '../../crud_app/services';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  debounce: (fn) => fn,
-}));
-
 jest.mock('../../kibana_services', () => {
   const services = jest.requireActual('../../kibana_services');
   return {
     ...services,
     getUiStatsReporter: jest.fn(() => () => {}),
-  };
-});
-
-jest.mock('../../crud_app/services/documentation_links', () => {
-  const coreMocks = jest.requireActual('../../../../../../src/core/public/mocks');
-
-  return {
-    init: jest.fn(),
-    documentationLinks: coreMocks.docLinksServiceMock.createStartContract().links,
   };
 });
 

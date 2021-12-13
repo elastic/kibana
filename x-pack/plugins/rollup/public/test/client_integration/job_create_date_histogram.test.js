@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import moment from 'moment-timezone';
-
-import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { mockHttpRequest, pageHelpers } from './helpers';
-import { docLinksServiceMock, coreMock } from '../../../../../../src/core/public/mocks';
 
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  debounce: (fn) => fn,
-}));
+import moment from 'moment-timezone';
+import { setHttp, init as initDocumentation } from '../../crud_app/services';
+import { docLinksServiceMock, coreMock } from '../../../../../../src/core/public/mocks';
 
 const { setup } = pageHelpers.jobCreate;
 

@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { indexPatterns } from '../../../../../../src/plugins/data/public';
-import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { mockHttpRequest, pageHelpers } from './helpers';
-import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
 
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  debounce: (fn) => fn,
-}));
+import { indexPatterns } from '../../../../../../src/plugins/data/public';
+import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
+import { setHttp, init as initDocumentation } from '../../crud_app/services';
 
 const { setup } = pageHelpers.jobCreate;
 

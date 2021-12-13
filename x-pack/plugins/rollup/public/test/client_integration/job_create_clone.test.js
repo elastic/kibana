@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { mockHttpRequest, pageHelpers, nextTick } from './helpers';
+import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
 import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
-
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  debounce: (fn) => fn,
-}));
 
 const { setup } = pageHelpers.jobClone;
 const {

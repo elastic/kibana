@@ -6,15 +6,12 @@
  */
 
 import { pageHelpers, mockHttpRequest } from './helpers';
+
+import { act } from 'react-dom/test-utils';
 import { first } from 'lodash';
+import { coreMock } from '../../../../../../src/core/public/mocks';
 import { setHttp } from '../../crud_app/services';
 import { JOBS } from './helpers/constants';
-import { coreMock } from '../../../../../../src/core/public/mocks';
-
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  debounce: (fn) => fn,
-}));
 
 jest.mock('../../kibana_services', () => {
   const services = jest.requireActual('../../kibana_services');
@@ -26,9 +23,7 @@ jest.mock('../../kibana_services', () => {
 
 const { setup } = pageHelpers.jobCreate;
 
-// FLAKY: https://github.com/elastic/kibana/issues/69783
-// FLAKY: https://github.com/elastic/kibana/issues/70043
-describe.skip('Create Rollup Job, step 6: Review', () => {
+describe('Create Rollup Job, step 6: Review', () => {
   let find;
   let exists;
   let actions;
@@ -37,16 +32,23 @@ describe.skip('Create Rollup Job, step 6: Review', () => {
   let table;
   let form;
   let startMock;
+  let component;
 
   beforeAll(() => {
+    jest.useFakeTimers();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments
     mockHttpRequest(startMock.http);
-    ({ find, exists, actions, getEuiStepsHorizontalActive, goToStep, table, form } = setup());
+    ({ find, exists, actions, getEuiStepsHorizontalActive, goToStep, table, form, component } =
+      setup());
   });
 
   afterEach(() => {
@@ -83,12 +85,18 @@ describe.skip('Create Rollup Job, step 6: Review', () => {
   describe('tabs', () => {
     const getTabsText = () => find('stepReviewTab').map((tab) => tab.text());
     const selectFirstField = (step) => {
-      find('rollupJobShowFieldChooserButton').simulate('click');
+      act(() => {
+        find('rollupJobShowFieldChooserButton').simulate('click');
+      });
+      component.update();
 
-      // Select the first term field
-      table
-        .getMetaData(`rollupJob${step}FieldChooser-table`)
-        .rows[0].reactWrapper.simulate('click');
+      act(() => {
+        // Select the first term field
+        table
+          .getMetaData(`rollupJob${step}FieldChooser-table`)
+          .rows[0].reactWrapper.simulate('click');
+      });
+      component.update();
     };
 
     it('should have a "Summary" & "Request" tabs to review the Job', async () => {
@@ -105,6 +113,7 @@ describe.skip('Create Rollup Job, step 6: Review', () => {
       actions.clickNextStep(); // go to step 5
       actions.clickNextStep(); // go to review
 
+      expect(exists('rollupJobCreateReviewTitle')); // Make sure we are on the review step
       expect(getTabsText()).toEqual(['Summary', 'Terms', 'Request']);
     });
 
@@ -153,9 +162,10 @@ describe.skip('Create Rollup Job, step 6: Review', () => {
         expect(startMock.http.get).not.toHaveBeenCalledWith(jobStartApiPath); // make sure it hasn't been called
 
         actions.clickSave();
-        // Given the following anti-jitter sleep x-pack/plugins/rollup/public/crud_app/store/actions/create_job.js
-        // we add a longer sleep here :(
-        await new Promise((res) => setTimeout(res, 750));
+
+        // There is a 500 timeout before receiving the response.
+        // To be investigated, this is the only app requiring a timeout to avoid a "weird flicker";
+        jest.advanceTimersByTime(500);
 
         expect(startMock.http.put).toHaveBeenCalledWith(jobCreateApiPath, expect.anything()); // It has been called!
         expect(startMock.http.get).not.toHaveBeenCalledWith(jobStartApiPath); // It has still not been called!
@@ -170,18 +180,33 @@ describe.skip('Create Rollup Job, step 6: Review', () => {
 
         await goToStep(6);
 
-        find('rollupJobToggleJobStartAfterCreation').simulate('change', {
-          target: { checked: true },
+        act(() => {
+          find('rollupJobToggleJobStartAfterCreation').simulate('change', {
+            target: { checked: true },
+          });
         });
+        component.update();
 
         expect(startMock.http.post).not.toHaveBeenCalledWith(jobStartApiPath); // make sure it hasn't been called
 
         actions.clickSave();
-        // Given the following anti-jitter sleep x-pack/plugins/rollup/public/crud_app/store/actions/create_job.js
-        // we add a longer sleep here :(
-        await new Promise((res) => setTimeout(res, 750));
 
-        expect(startMock.http.post).toHaveBeenCalledWith(jobStartApiPath, expect.anything()); // It has been called!
+        // There is a 500 timeout before receiving the response.
+        // To be investigated, this is the only app requiring a timeout to avoid a "weird flicker";
+        await act(async () => {
+          jest.advanceTimersByTime(500);
+        });
+
+        // We then have a createNoticeableDelay() that we need to account for.
+        act(() => {
+          jest.advanceTimersByTime(300);
+        });
+
+        expect(startMock.http.post).toHaveBeenCalledWith(jobStartApiPath, {
+          body: JSON.stringify({
+            jobIds: ['test-job'],
+          }),
+        });
       });
     });
   });
