@@ -18,7 +18,7 @@ import {
   AlertTypeParams,
   AlertTypeState,
 } from '../../../alerting/server';
-import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_technical_fields';
+import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
   ALERT_DURATION,
   ALERT_END,
@@ -30,7 +30,6 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
-  ALERT_RULE_PARAMETERS,
   EVENT_ACTION,
   EVENT_KIND,
   TIMESTAMP,
@@ -217,8 +216,6 @@ export const createLifecycleExecutor =
           collapse: {
             field: ALERT_UUID,
           },
-          _source: false,
-          fields: [{ field: '*', include_unmapped: true }],
           sort: {
             [TIMESTAMP]: 'desc' as const,
           },
@@ -227,24 +224,13 @@ export const createLifecycleExecutor =
       });
 
       hits.hits.forEach((hit) => {
-        const filteredFields = Object.entries(hit.fields).reduce(
-          (acc, [currFieldKey, currFieldValue]) => {
-            return {
-              ...acc,
-              ...(currFieldKey.startsWith(ALERT_RULE_PARAMETERS)
-                ? {}
-                : { [currFieldKey]: currFieldValue }),
-            };
-          },
-          {}
-        );
-        const fields = parseTechnicalFields(filteredFields);
-        const indexName = hit._index;
-        const alertId = fields[ALERT_INSTANCE_ID];
-        trackedAlertsDataMap[alertId] = {
-          indexName,
-          fields,
-        };
+        const alertId = hit._source[ALERT_INSTANCE_ID];
+        if (alertId) {
+          trackedAlertsDataMap[alertId] = {
+            indexName: hit._index,
+            fields: hit._source,
+          };
+        }
       });
     }
 
