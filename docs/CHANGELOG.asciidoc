@@ -101,8 +101,8 @@ Lens & Visualizations::
 Logs::
 Respect the Advanced Settings for queries {kibana-pull}116485[#116485]
 Machine Learning::
-* Outlier detection wizard - ensure validation call is successful {kibana-pull}120816[#120816]
-* Fixing job selector time range charts {kibana-pull}120343[#120343]
+* Ensures validation call is successful in outlier detection wizard {kibana-pull}120816[#120816]
+* Fixes time range charts in anomaly detection job selection  {kibana-pull}120343[#120343]
 Management::
 * Restore support for exclusion in index pattern {kibana-pull}120703[#120703]
 * Fixes the *Fix* button for ML snapshots in need of upgrade {kibana-pull}119745[#119745]
