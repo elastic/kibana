@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import type { PluginInitializerContext } from 'kibana/public';
 import type { EMSClient } from '@elastic/ems-client';
 import { MapsEmsPlugin } from './plugin';
 import type { MapConfig } from '../config';
-import { EMSSettings } from '../common';
+import type { EMSSettings } from '../common';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new MapsEmsPlugin(initializerContext);
 }
 
-export type { MapConfig, TileMapConfig, EMSConfig } from '../config';
+export type { MapConfig, TileMapConfig } from '../config';
+export type { EMSConfig } from '../common';
 
 export interface MapsEmsPluginPublicSetup {
   config: MapConfig;

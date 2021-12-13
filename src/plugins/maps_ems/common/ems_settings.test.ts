@@ -13,7 +13,7 @@ import {
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
 } from './ems_defaults';
-import { EMSConfig } from '../config';
+import type { EMSConfig } from './ems_settings';
 
 const IS_ENTERPRISE_PLUS = () => true;
 

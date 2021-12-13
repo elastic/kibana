@@ -12,7 +12,15 @@ import {
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
 } from './ems_defaults';
-import { EMSConfig } from '../config';
+
+export interface EMSConfig {
+  includeElasticMapsService: boolean;
+  emsUrl: string;
+  emsFileApiUrl: string;
+  emsTileApiUrl: string;
+  emsLandingPageUrl: string;
+  emsFontLibraryUrl: string;
+}
 
 export function createEMSSettings(emsConfig: EMSConfig, getIsEnterprisePlus: () => boolean) {
   return new EMSSettings(emsConfig, getIsEnterprisePlus);
