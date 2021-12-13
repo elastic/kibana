@@ -273,7 +273,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     >();
     const plugins = await plugin$.pipe(toArray()).toPromise();
 
-    // 1. Register config descriptors and deprecations
+    // Register config descriptors and deprecations
     for (const plugin of plugins) {
       const configDescriptor = plugin.getConfigDescriptor();
       if (configDescriptor) {
@@ -294,7 +294,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       }
     }
 
-    // 2. Validate config and handle enabled statuses.
+    // Validate config and handle enabled statuses.
     // NOTE: We can't do both in the same previous loop because some plugins' deprecations may affect others.
     // Hence, we need all the deprecations to be registered before accessing any config parameter.
     for (const plugin of plugins) {
@@ -320,7 +320,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });
     }
 
-    // 3. Add the plugins to the Plugin System if enabled and its dependencies are met
+    // Add the plugins to the Plugin System if enabled and its dependencies are met
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
       this.validatePluginDependencies(plugin, pluginEnableStatuses);
 
