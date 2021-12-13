@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
+import { EuiPageTemplateProps } from '@elastic/eui';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -60,7 +61,7 @@ interface PageRouterProps {
   config: UptimeConfig;
 }
 
-interface RouteProps {
+type RouteProps = {
   path: string;
   component: React.FC;
   dataTestSubj: string;
@@ -71,7 +72,7 @@ interface RouteProps {
     children?: JSX.Element;
     rightSideItems?: JSX.Element[];
   };
-}
+} & EuiPageTemplateProps;
 
 const baseTitle = i18n.translate('xpack.uptime.routes.baseTitle', {
   defaultMessage: 'Uptime - Kibana',
