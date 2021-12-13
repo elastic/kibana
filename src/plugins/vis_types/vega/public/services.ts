@@ -10,7 +10,7 @@ import { CoreStart, NotificationsStart, IUiSettingsClient, DocLinksStart } from 
 
 import { DataPublicPluginStart } from '../../../data/public';
 import { createGetterSetter } from '../../../kibana_utils/public';
-import { MapsEmsPluginPublicSetup } from '../../../maps_ems/public';
+import type { MapsEmsPluginPublicSetup } from '../../../maps_ems/public';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
 
