@@ -22,7 +22,7 @@ import {
   Criterion,
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
-} from '../../../../common/alerting/logs/log_threshold/types';
+} from '../../../../common/alerting/logs/log_threshold';
 import { alertsMock } from '../../../../../alerting/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -407,7 +407,7 @@ describe('Log threshold executor', () => {
   describe('Results processors', () => {
     describe('Can process ungrouped results', () => {
       test('It handles the ALERT state correctly', () => {
-        const alertInstanceUpdaterMock = jest.fn();
+        const alertUpdaterMock = jest.fn();
         const alertParams = {
           ...baseAlertParams,
           criteria: [positiveCriteria[0]],
@@ -423,12 +423,12 @@ describe('Log threshold executor', () => {
           results,
           alertParams,
           alertsMock.createAlertInstanceFactory,
-          alertInstanceUpdaterMock
+          alertUpdaterMock
         );
         // First call, second argument
-        expect(alertInstanceUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
+        expect(alertUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
         // First call, third argument
-        expect(alertInstanceUpdaterMock.mock.calls[0][2]).toEqual([
+        expect(alertUpdaterMock.mock.calls[0][2]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {
@@ -444,7 +444,7 @@ describe('Log threshold executor', () => {
 
     describe('Can process grouped results', () => {
       test('It handles the ALERT state correctly', () => {
-        const alertInstanceUpdaterMock = jest.fn();
+        const alertUpdaterMock = jest.fn();
         const alertParams = {
           ...baseAlertParams,
           criteria: [positiveCriteria[0]],
@@ -487,13 +487,13 @@ describe('Log threshold executor', () => {
           results,
           alertParams,
           alertsMock.createAlertInstanceFactory,
-          alertInstanceUpdaterMock
+          alertUpdaterMock
         );
-        expect(alertInstanceUpdaterMock.mock.calls.length).toBe(2);
+        expect(alertUpdaterMock.mock.calls.length).toBe(2);
         // First call, second argument
-        expect(alertInstanceUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
+        expect(alertUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
         // First call, third argument
-        expect(alertInstanceUpdaterMock.mock.calls[0][2]).toEqual([
+        expect(alertUpdaterMock.mock.calls[0][2]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {
@@ -506,9 +506,9 @@ describe('Log threshold executor', () => {
         ]);
 
         // Second call, second argument
-        expect(alertInstanceUpdaterMock.mock.calls[1][1]).toBe(AlertStates.ALERT);
+        expect(alertUpdaterMock.mock.calls[1][1]).toBe(AlertStates.ALERT);
         // Second call, third argument
-        expect(alertInstanceUpdaterMock.mock.calls[1][2]).toEqual([
+        expect(alertUpdaterMock.mock.calls[1][2]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {

@@ -8,10 +8,7 @@
 import expect from '@kbn/expect';
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 
-import {
-  DETECTION_ENGINE_RULES_URL,
-  DETECTION_ENGINE_RULES_STATUS_URL,
-} from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -33,7 +30,6 @@ import {
 } from '../../utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
-import { RuleStatusResponse } from '../../../../plugins/security_solution/server/lib/detection_engine/rules/types';
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -105,14 +101,6 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           await waitForRuleSuccessOrStatus(supertest, log, body.id);
-
-          const { body: statusBody } = await supertest
-            .post(DETECTION_ENGINE_RULES_STATUS_URL)
-            .set('kbn-xsrf', 'true')
-            .send({ ids: [body.id] })
-            .expect(200);
-
-          expect(statusBody[body.id].current_status.status).to.eql('succeeded');
         });
 
         // TODO: does the below test work?
@@ -126,14 +114,14 @@ export default ({ getService }: FtrProviderContext) => {
 
           await waitForRuleSuccessOrStatus(supertest, log, body.id, 'partial failure');
 
-          const { body: statusBody } = await supertest
-            .post(DETECTION_ENGINE_RULES_STATUS_URL)
+          const { body: rule } = await supertest
+            .get(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .send({ ids: [body.id] })
+            .query({ id: body.id })
             .expect(200);
 
-          expect(statusBody[body.id].current_status.status).to.eql('partial failure');
-          expect(statusBody[body.id].current_status.last_success_message).to.eql(
+          expect(rule.status).to.eql('partial failure');
+          expect(rule.last_success_message).to.eql(
             'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["does-not-exist-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated.'
           );
         });
@@ -147,14 +135,6 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           await waitForRuleSuccessOrStatus(supertest, log, body.id, 'succeeded');
-
-          const { body: statusBody } = await supertest
-            .post(DETECTION_ENGINE_RULES_STATUS_URL)
-            .set('kbn-xsrf', 'true')
-            .send({ ids: [body.id] })
-            .expect(200);
-
-          expect(statusBody[body.id].current_status.status).to.eql('succeeded');
         });
 
         it('should create a single rule without an input index', async () => {
@@ -321,18 +301,14 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, log, bodyId, 'partial failure');
         await sleep(5000);
 
-        const { body: statusBody } = await supertest
-          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+        const { body: rule } = await supertest
+          .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send({ ids: [bodyId] })
+          .query({ id: bodyId })
           .expect(200);
 
-        expect((statusBody as RuleStatusResponse)[bodyId].current_status?.status).to.eql(
-          'partial failure'
-        );
-        expect(
-          (statusBody as RuleStatusResponse)[bodyId].current_status?.last_success_message
-        ).to.eql(
+        expect(rule?.status).to.eql('partial failure');
+        expect(rule?.last_success_message).to.eql(
           'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1"]'
         );
       });
@@ -353,13 +329,13 @@ export default ({ getService }: FtrProviderContext) => {
         await sleep(5000);
         await waitForSignalsToBePresent(supertest, log, 2, [bodyId]);
 
-        const { body: statusBody } = await supertest
-          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+        const { body: rule } = await supertest
+          .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send({ ids: [bodyId] })
+          .query({ id: bodyId })
           .expect(200);
 
-        expect(statusBody[bodyId].current_status.status).to.eql('partial failure');
+        expect(rule.status).to.eql('partial failure');
       });
     });
   });
