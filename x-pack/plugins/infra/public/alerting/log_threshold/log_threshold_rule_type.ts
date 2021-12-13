@@ -9,15 +9,15 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import {
-  LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
-  PartialAlertParams,
+  LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
+  PartialRuleParams,
 } from '../../../common/alerting/logs/log_threshold';
 import { formatRuleData } from './rule_data_formatters';
 import { validateExpression } from './validation';
 
-export function createLogThresholdRuleType(): ObservabilityRuleTypeModel<PartialAlertParams> {
+export function createLogThresholdRuleType(): ObservabilityRuleTypeModel<PartialRuleParams> {
   return {
-    id: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
+    id: LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
     description: i18n.translate('xpack.infra.logs.alertFlyout.alertDescription', {
       defaultMessage: 'Alert when the log aggregation exceeds the threshold.',
     }),

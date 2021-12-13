@@ -23,7 +23,7 @@ import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types
 import {
   Comparator,
   ComparatorToi18nMap,
-  AlertParams,
+  RuleParams,
 } from '../../../../../common/alerting/logs/log_threshold/types';
 
 const thresholdPrefix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdPrefix', {
@@ -49,7 +49,7 @@ const getComparatorOptions = (): Array<{
 interface Props {
   comparator?: Comparator;
   value?: number;
-  updateThreshold: (params: Partial<AlertParams['count']>) => void;
+  updateThreshold: (params: Partial<RuleParams['count']>) => void;
   errors: IErrorObject;
 }
 
