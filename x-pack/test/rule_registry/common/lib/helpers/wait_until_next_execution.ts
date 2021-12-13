@@ -34,6 +34,7 @@ export async function waitUntilNextExecution(
   const { body: targetIndices, status: targetIndicesStatus } = await getAlertsTargetIndices(
     getService,
     user,
+    'observability.apm',
     spaceId
   );
   if (targetIndices.length === 0) {

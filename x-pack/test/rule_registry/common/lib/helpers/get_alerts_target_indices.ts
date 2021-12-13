@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ALERTS_TARGET_INDICES_URL } from '../../constants';
 import { GetService } from '../../types';
 import { User } from '../authentication/types';
 import { getSpaceUrlPrefix } from '../authentication/spaces';
@@ -12,12 +11,13 @@ import { getSpaceUrlPrefix } from '../authentication/spaces';
 export const getAlertsTargetIndices = async (
   getService: GetService,
   user: User,
-  spaceId: string
+  registrationContext: string,
+  spaceId: string = 'default',
+  namespace: string = 'default'
 ) => {
+  const url = `${getSpaceUrlPrefix(
+    spaceId
+  )}/api/observability/rules/alerts/dynamic_index_pattern?namespace=${namespace}&registrationContexts=${registrationContext}`;
   const supertest = getService('supertestWithoutAuth');
-  return supertest
-    .get(`${getSpaceUrlPrefix(spaceId)}${ALERTS_TARGET_INDICES_URL}`)
-    .auth(user.username, user.password)
-    .send()
-    .set('kbn-xsrf', 'foo');
+  return supertest.get(url).auth(user.username, user.password).send().set('kbn-xsrf', 'foo');
 };

@@ -41,7 +41,12 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
   describe('Rule Registry API', () => {
     describe('with write permissions', () => {
       it('does not bootstrap indices on plugin startup', async () => {
-        const { body: targetIndices } = await getAlertsTargetIndices(getService, obsOnly, SPACE_ID);
+        const { body: targetIndices } = await getAlertsTargetIndices(
+          getService,
+          obsOnly,
+          'observability.apm',
+          SPACE_ID
+        );
         try {
           const res = await es.indices.get({
             index: targetIndices[0],
@@ -81,8 +86,14 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
           createResponse = await createAlert(getService, obsOnly, SPACE_ID, alertDef);
         });
         after(async () => {
-          await deleteAlert(getService, obsOnly, SPACE_ID, createResponse.alert.id);
-          await cleanupTargetIndices(getService, obsOnly, SPACE_ID);
+          await deleteAlert(
+            getService,
+            obsOnly,
+            'observability.apm',
+            SPACE_ID,
+            createResponse.alert.id
+          );
+          await cleanupTargetIndices(getService, obsOnly, 'observability.apm', SPACE_ID);
         });
 
         it('writes alerts data to the alert indices', async () => {

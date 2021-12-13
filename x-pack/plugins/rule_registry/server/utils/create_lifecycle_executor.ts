@@ -290,14 +290,13 @@ export const createLifecycleExecutor =
     if (allEventsToIndex.length > 0 && writeAlerts) {
       logger.debug(`Preparing to index ${allEventsToIndex.length} alerts.`);
 
-      await ruleDataClient.getWriter().bulk({
-        body: allEventsToIndex.flatMap(({ event, indexName }) => [
-          indexName
-            ? { index: { _id: event[ALERT_UUID]!, _index: indexName, require_alias: false } }
-            : { index: { _id: event[ALERT_UUID]! } },
-          event,
-        ]),
-      });
+      const body = allEventsToIndex.flatMap(({ event, indexName }) => [
+        indexName
+          ? { index: { _id: event[ALERT_UUID]!, _index: indexName, require_alias: false } }
+          : { index: { _id: event[ALERT_UUID]! } },
+        event,
+      ]);
+      await ruleDataClient.getWriter().bulk({ body });
     }
 
     const nextTrackedAlerts = Object.fromEntries(

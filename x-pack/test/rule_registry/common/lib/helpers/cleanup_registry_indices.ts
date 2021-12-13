@@ -6,25 +6,13 @@
  */
 
 import expect from '@kbn/expect';
+import { IRuleDataClient } from '../../../../../plugins/rule_registry/server';
 import { GetService } from '../../types';
-import { User } from '../authentication/types';
-import { getAlertsTargetIndices } from './get_alerts_target_indices';
 
-export const cleanupTargetIndices = async (
-  getService: GetService,
-  user: User,
-  registrationContext: string,
-  spaceId: string = 'default'
-) => {
+export const cleanupRegistryIndices = async (getService: GetService, client: IRuleDataClient) => {
   const es = getService('es');
-  const { body: targetIndices } = await getAlertsTargetIndices(
-    getService,
-    user,
-    registrationContext,
-    spaceId
-  );
-  const aliasMap = await es.indices.getAlias({
-    name: targetIndices,
+  const aliasMap = await es.indices.get({
+    index: `${client.indexName}*`,
     allow_no_indices: true,
     expand_wildcards: 'open',
   });

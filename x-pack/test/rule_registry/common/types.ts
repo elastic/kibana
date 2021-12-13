@@ -5,7 +5,14 @@
  * 2.0.
  */
 import { GenericFtrProviderContext } from '@kbn/test';
-import { Alert, AlertTypeParams } from '../../../plugins/alerting/common';
+import {
+  Alert,
+  AlertTypeParams,
+  ActionGroupIdsOf,
+  AlertInstanceState as AlertState,
+  AlertInstanceContext as AlertContext,
+} from '../../../plugins/alerting/common';
+import { AlertTypeState as RuleTypeState } from '../../../plugins/alerting/server';
 import { services } from './services';
 
 export type GetService = GenericFtrProviderContext<typeof services, {}>['getService'];
@@ -20,3 +27,23 @@ export interface AlertParams extends AlertTypeParams {
 }
 
 export type AlertDef<Params extends AlertTypeParams = {}> = Partial<Alert<Params>>;
+
+export type MockRuleParams = Record<string, any>;
+export type MockRuleState = RuleTypeState & {
+  testObject?: {
+    id: string;
+    values: Array<{ name: string; value: number }>;
+    host: {
+      name: string;
+    };
+  };
+};
+
+export const FIRED_ACTIONS = {
+  id: 'observabiliy.fired',
+  name: 'Alert',
+};
+
+export type MockAlertState = AlertState;
+export type MockAlertContext = AlertContext;
+export type MockAllowedActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
