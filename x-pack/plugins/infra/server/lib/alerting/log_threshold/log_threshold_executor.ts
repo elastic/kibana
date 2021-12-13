@@ -244,13 +244,19 @@ export const processUngroupedResults = (
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
   const documentCount = results.hits.total.value;
 
   if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
     const alert = alertFactory(
       UNGROUPED_FACTORY_KEY,
-      getReasonMessageForUngroupedCountAlert(documentCount, count.value, count.comparator),
+      getReasonMessageForUngroupedCountAlert(
+        documentCount,
+        count.value,
+        count.comparator,
+        timeSize,
+        timeUnit
+      ),
       documentCount,
       count.value
     );
