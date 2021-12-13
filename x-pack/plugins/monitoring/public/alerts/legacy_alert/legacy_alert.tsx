@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import type { RuleTypeModel } from '../../../../triggers_actions_ui/public';
 import {
   LEGACY_RULES,
   LEGACY_RULE_DETAILS,
@@ -15,7 +15,7 @@ import {
 import type { MonitoringConfig } from '../../types';
 import { LazyExpression, LazyExpressionProps } from './lazy_expression';
 
-export function createLegacyAlertTypes(config: MonitoringConfig): AlertTypeModel[] {
+export function createLegacyAlertTypes(config: MonitoringConfig): RuleTypeModel[] {
   return LEGACY_RULES.map((legacyAlert) => {
     return {
       id: legacyAlert,
@@ -24,7 +24,7 @@ export function createLegacyAlertTypes(config: MonitoringConfig): AlertTypeModel
       documentationUrl(docLinks) {
         return `${docLinks.links.monitoring.alertsKibanaClusterAlerts}`;
       },
-      alertParamsExpression: (props: LazyExpressionProps) => (
+      ruleParamsExpression: (props: LazyExpressionProps) => (
         <LazyExpression {...props} config={config} />
       ),
       defaultActionMessage: '{{context.internalFullMessage}}',

@@ -11,12 +11,12 @@ import { TimeExpressionSelect } from './time_expression_select';
 
 describe('TimeExpressionSelect component', () => {
   it('should shallow renders against props', function () {
-    const component = shallowWithIntl(<TimeExpressionSelect setAlertParams={jest.fn()} />);
+    const component = shallowWithIntl(<TimeExpressionSelect setRuleParams={jest.fn()} />);
     expect(component).toMatchSnapshot();
   });
 
   it('should renders against props', function () {
-    const component = renderWithIntl(<TimeExpressionSelect setAlertParams={jest.fn()} />);
+    const component = renderWithIntl(<TimeExpressionSelect setRuleParams={jest.fn()} />);
     expect(component).toMatchSnapshot();
   });
 });

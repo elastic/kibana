@@ -18,6 +18,6 @@ export interface IService {
 }
 ```
 
-Each Stack AlertType is described in it's own README:
+Each Stack RuleType is described in it's own README:
 
 - index threshold: [`server/alert_types/index_threshold`](server/alert_types/index_threshold/README.md)

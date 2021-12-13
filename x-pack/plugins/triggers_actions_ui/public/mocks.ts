@@ -17,14 +17,14 @@ import {
   ActionTypeModel,
   AlertAddProps,
   AlertEditProps,
-  AlertTypeModel,
+  RuleTypeModel,
   ConnectorAddFlyoutProps,
   ConnectorEditFlyoutProps,
 } from './types';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  const ruleTypeRegistry = new TypeRegistry<AlertTypeModel>();
+  const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
   return {
     actionTypeRegistry,
     ruleTypeRegistry,

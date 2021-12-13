@@ -9,9 +9,9 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { TRANSFORM_RULE_TYPE } from '../../../common';
 import type { TransformHealthRuleParams } from '../../../common/types/alerting';
-import type { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import type { RuleTypeModel } from '../../../../triggers_actions_ui/public';
 
-export function getTransformHealthRuleType(): AlertTypeModel<TransformHealthRuleParams> {
+export function getTransformHealthRuleType(): RuleTypeModel<TransformHealthRuleParams> {
   return {
     id: TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH,
     description: i18n.translate('xpack.transform.alertingRuleTypes.transformHealth.description', {
@@ -21,15 +21,15 @@ export function getTransformHealthRuleType(): AlertTypeModel<TransformHealthRule
     documentationUrl(docLinks) {
       return docLinks.links.transforms.alertingRules;
     },
-    alertParamsExpression: lazy(() => import('./transform_health_rule_trigger')),
-    validate: (alertParams: TransformHealthRuleParams) => {
+    ruleParamsExpression: lazy(() => import('./transform_health_rule_trigger')),
+    validate: (ruleParams: TransformHealthRuleParams) => {
       const validationResult = {
         errors: {
           includeTransforms: new Array<string>(),
         } as Record<keyof TransformHealthRuleParams, string[]>,
       };
 
-      if (!alertParams.includeTransforms?.length) {
+      if (!ruleParams.includeTransforms?.length) {
         validationResult.errors.includeTransforms?.push(
           i18n.translate(
             'xpack.transform.alertTypes.transformHealth.includeTransforms.errorMessage',

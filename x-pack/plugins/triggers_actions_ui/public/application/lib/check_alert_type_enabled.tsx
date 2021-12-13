@@ -7,7 +7,7 @@
 
 import { upperFirst } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AlertType } from '../../types';
+import { RuleType } from '../../types';
 
 export interface IsEnabledResult {
   isEnabled: true;
@@ -17,7 +17,7 @@ export interface IsDisabledResult {
   message: string;
 }
 
-const getLicenseCheckResult = (alertType: AlertType) => {
+const getLicenseCheckResult = (alertType: RuleType) => {
   return {
     isEnabled: false,
     message: i18n.translate(
@@ -32,7 +32,7 @@ const getLicenseCheckResult = (alertType: AlertType) => {
   };
 };
 
-export function checkAlertTypeEnabled(alertType?: AlertType): IsEnabledResult | IsDisabledResult {
+export function checkAlertTypeEnabled(alertType?: RuleType): IsEnabledResult | IsDisabledResult {
   if (alertType?.enabledInLicense === false) {
     return getLicenseCheckResult(alertType);
   }

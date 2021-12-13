@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertType } from '../../types';
+import { RuleType } from '../../types';
 import { InitialAlert } from '../sections/alert_form/alert_reducer';
 
 /**
@@ -23,9 +23,9 @@ export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
 export const hasDeleteActionsCapability = (capabilities: Capabilities) =>
   capabilities?.actions?.delete;
 
-export function hasAllPrivilege(alert: InitialAlert, alertType?: AlertType): boolean {
+export function hasAllPrivilege(alert: InitialAlert, alertType?: RuleType): boolean {
   return alertType?.authorizedConsumers[alert.consumer]?.all ?? false;
 }
-export function hasReadPrivilege(alert: InitialAlert, alertType?: AlertType): boolean {
+export function hasReadPrivilege(alert: InitialAlert, alertType?: RuleType): boolean {
   return alertType?.authorizedConsumers[alert.consumer]?.read ?? false;
 }

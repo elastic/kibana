@@ -9,7 +9,7 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { Alert } from '../../../types';
+import { Rule } from '../../../types';
 import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
 import { AlertNotifyWhen } from './alert_notify_when';
 
@@ -39,7 +39,7 @@ describe('alert_notify_when', () => {
         mutedInstanceIds: [],
         notifyWhen: 'onActionGroupChange',
         ...overrides,
-      } as unknown as Alert;
+      } as unknown as Rule;
 
       wrapper = mountWithIntl(
         <AlertNotifyWhen

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeModel } from '../../types';
+import { RuleTypeModel } from '../../types';
 import { IsEnabledResult, IsDisabledResult } from './check_alert_type_enabled';
 
 export function alertTypeGroupCompare(
@@ -15,7 +15,7 @@ export function alertTypeGroupCompare(
       id: string;
       name: string;
       checkEnabledResult: IsEnabledResult | IsDisabledResult;
-      alertTypeItem: AlertTypeModel;
+      alertTypeItem: RuleTypeModel;
     }>
   ],
   right: [
@@ -24,7 +24,7 @@ export function alertTypeGroupCompare(
       id: string;
       name: string;
       checkEnabledResult: IsEnabledResult | IsDisabledResult;
-      alertTypeItem: AlertTypeModel;
+      alertTypeItem: RuleTypeModel;
     }>
   ],
   groupNames: Map<string, string> | undefined
@@ -59,13 +59,13 @@ export function alertTypeCompare(
     id: string;
     name: string;
     checkEnabledResult: IsEnabledResult | IsDisabledResult;
-    alertTypeItem: AlertTypeModel;
+    alertTypeItem: RuleTypeModel;
   },
   b: {
     id: string;
     name: string;
     checkEnabledResult: IsEnabledResult | IsDisabledResult;
-    alertTypeItem: AlertTypeModel;
+    alertTypeItem: RuleTypeModel;
   }
 ) {
   if (a.checkEnabledResult.isEnabled === true && b.checkEnabledResult.isEnabled === false) {

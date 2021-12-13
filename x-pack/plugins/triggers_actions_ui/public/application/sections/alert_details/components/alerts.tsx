@@ -28,7 +28,7 @@ import {
   AlertExecutionStatusErrorReasons,
   AlertStatusValues,
 } from '../../../../../../alerting/common';
-import { Alert, AlertSummary, AlertStatus, AlertType, Pagination } from '../../../../types';
+import { Rule, AlertSummary, AlertStatus, RuleType, Pagination } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
@@ -48,8 +48,8 @@ import {
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
 
 type AlertsProps = {
-  rule: Alert;
-  ruleType: AlertType;
+  rule: Rule;
+  ruleType: RuleType;
   readOnly: boolean;
   alertSummary: AlertSummary;
   requestRefresh: () => Promise<void>;
@@ -321,7 +321,7 @@ const INACTIVE_LABEL = i18n.translate(
   { defaultMessage: 'Recovered' }
 );
 
-function getActionGroupName(ruleType: AlertType, actionGroupId?: string): string | undefined {
+function getActionGroupName(ruleType: RuleType, actionGroupId?: string): string | undefined {
   actionGroupId = actionGroupId || ruleType.defaultActionGroupId;
   const actionGroup = ruleType?.actionGroups?.find(
     (group: ActionGroup<string>) => group.id === actionGroupId
@@ -331,7 +331,7 @@ function getActionGroupName(ruleType: AlertType, actionGroupId?: string): string
 
 export function alertToListItem(
   durationEpoch: number,
-  ruleType: AlertType,
+  ruleType: RuleType,
   alertId: string,
   alert: AlertStatus
 ): AlertListItem {

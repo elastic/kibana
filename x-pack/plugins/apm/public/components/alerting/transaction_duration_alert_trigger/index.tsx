@@ -31,7 +31,7 @@ import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 
-export interface AlertParams {
+export interface RuleParams {
   aggregationType: 'avg' | '95th' | '99th';
   environment: string;
   serviceName: string;
@@ -63,15 +63,15 @@ const TRANSACTION_ALERT_AGGREGATION_TYPES = {
 };
 
 interface Props {
-  alertParams: AlertParams;
+  ruleParams: RuleParams;
   metadata?: AlertMetadata;
-  setAlertParams: (key: string, value: any) => void;
-  setAlertProperty: (key: string, value: any) => void;
+  setRuleParams: (key: string, value: any) => void;
+  setRuleProperty: (key: string, value: any) => void;
 }
 
 export function TransactionDurationAlertTrigger(props: Props) {
   const { services } = useKibana();
-  const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
+  const { ruleParams, metadata, setRuleParams, setRuleProperty } = props;
 
   useEffect(() => {
     createCallApmApi(services as CoreStart);
@@ -80,7 +80,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
   const params = defaults(
     {
       ...omit(metadata, ['start', 'end']),
-      ...alertParams,
+      ...ruleParams,
     },
     {
       aggregationType: 'avg',
@@ -147,15 +147,15 @@ export function TransactionDurationAlertTrigger(props: Props) {
     <ServiceField
       allowAll={false}
       currentValue={params.serviceName}
-      onChange={(value) => setAlertParams('serviceName', value)}
+      onChange={(value) => setRuleParams('serviceName', value)}
     />,
     <TransactionTypeField
       currentValue={params.transactionType}
-      onChange={(value) => setAlertParams('transactionType', value)}
+      onChange={(value) => setRuleParams('transactionType', value)}
     />,
     <EnvironmentField
       currentValue={params.environment}
-      onChange={(value) => setAlertParams('environment', value)}
+      onChange={(value) => setRuleParams('environment', value)}
     />,
     <PopoverExpression
       value={params.aggregationType}
@@ -171,7 +171,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
             value: key,
           };
         })}
-        onChange={(e) => setAlertParams('aggregationType', e.target.value)}
+        onChange={(e) => setRuleParams('aggregationType', e.target.value)}
         compressed
       />
     </PopoverExpression>,
@@ -180,14 +180,14 @@ export function TransactionDurationAlertTrigger(props: Props) {
       unit={i18n.translate('xpack.apm.transactionDurationAlertTrigger.ms', {
         defaultMessage: 'ms',
       })}
-      onChange={(value) => setAlertParams('threshold', value || 0)}
+      onChange={(value) => setRuleParams('threshold', value || 0)}
     />,
     <ForLastExpression
       onChangeWindowSize={(timeWindowSize) =>
-        setAlertParams('windowSize', timeWindowSize || '')
+        setRuleParams('windowSize', timeWindowSize || '')
       }
       onChangeWindowUnit={(timeWindowUnit) =>
-        setAlertParams('windowUnit', timeWindowUnit)
+        setRuleParams('windowUnit', timeWindowUnit)
       }
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
@@ -203,8 +203,8 @@ export function TransactionDurationAlertTrigger(props: Props) {
       chartPreview={chartPreview}
       defaults={params}
       fields={fields}
-      setAlertParams={setAlertParams}
-      setAlertProperty={setAlertProperty}
+      setRuleParams={setRuleParams}
+      setRuleProperty={setRuleProperty}
     />
   );
 }

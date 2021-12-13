@@ -25,9 +25,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   documentationUrl(docLinks) {
     return `${docLinks.links.observability.tlsCertificate}`;
   },
-  alertParamsExpression: (params: any) => (
-    <TLSAlert core={core} plugins={plugins} params={params} />
-  ),
+  ruleParamsExpression: (params: any) => <TLSAlert core={core} plugins={plugins} params={params} />,
   description,
   validate: () => ({ errors: {} }),
   defaultActionMessage,
