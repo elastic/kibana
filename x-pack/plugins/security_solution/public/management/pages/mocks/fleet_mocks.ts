@@ -129,7 +129,7 @@ export const fleetGetPackageListHttpMock =
         const generator = new EndpointDocGenerator('seed');
 
         return {
-          response: [generator.generateEpmPackage()],
+          items: [generator.generateEpmPackage()],
         };
       },
     },
