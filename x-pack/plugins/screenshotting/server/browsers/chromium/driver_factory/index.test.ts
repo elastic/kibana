@@ -7,7 +7,7 @@
 
 import puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
-import { take } from 'rxjs/operators';
+import { mergeMap, take } from 'rxjs/operators';
 import type { Logger } from 'src/core/server';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import { ConfigType } from '../../../config';
@@ -27,6 +27,7 @@ describe('HeadlessChromiumDriverFactory', () => {
   let logger: jest.Mocked<Logger>;
   let screenshotMode: jest.Mocked<ScreenshotModePluginSetup>;
   let factory: HeadlessChromiumDriverFactory;
+  let mockBrowser: jest.Mocked<puppeteer.Browser>;
 
   beforeEach(async () => {
     logger = {
@@ -38,7 +39,8 @@ describe('HeadlessChromiumDriverFactory', () => {
     } as unknown as typeof logger;
     screenshotMode = {} as unknown as typeof screenshotMode;
 
-    (puppeteer as jest.Mocked<typeof puppeteer>).launch.mockResolvedValue({
+    let pageClosed = false;
+    mockBrowser = {
       newPage: jest.fn().mockResolvedValue({
         target: jest.fn(() => ({
           createCDPSession: jest.fn().mockResolvedValue({
@@ -47,10 +49,17 @@ describe('HeadlessChromiumDriverFactory', () => {
         })),
         emulateTimezone: jest.fn(),
         setDefaultTimeout: jest.fn(),
+        isClosed: jest.fn(() => {
+          return pageClosed;
+        }),
       }),
-      close: jest.fn(),
+      close: jest.fn(() => {
+        pageClosed = true;
+      }),
       process: jest.fn(),
-    } as unknown as puppeteer.Browser);
+    } as unknown as jest.Mocked<puppeteer.Browser>;
+
+    (puppeteer as jest.Mocked<typeof puppeteer>).launch.mockResolvedValue(mockBrowser);
 
     factory = new HeadlessChromiumDriverFactory(screenshotMode, config, logger, path);
     jest.spyOn(factory, 'getBrowserLogger').mockReturnValue(Rx.EMPTY);
@@ -59,13 +68,14 @@ describe('HeadlessChromiumDriverFactory', () => {
   });
 
   describe('createPage', () => {
-    it('returns browser driver and process exit observable', async () => {
+    it('returns browser driver, unexpected process exit observable, and close callback', async () => {
       await expect(
         factory.createPage({ openUrlTimeout: 0 }).pipe(take(1)).toPromise()
       ).resolves.toEqual(
         expect.objectContaining({
           driver: expect.anything(),
-          exit$: expect.anything(),
+          unexpectedExit$: expect.anything(),
+          close: expect.anything(),
         })
       );
     });
@@ -79,6 +89,25 @@ describe('HeadlessChromiumDriverFactory', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Error spawning Chromium browser! Puppeteer Launch mock fail."`
       );
+    });
+
+    describe('close behaviour', () => {
+      it('does not allow close to be called on the browse more than once', async () => {
+        await factory
+          .createPage({ openUrlTimeout: 0 })
+          .pipe(
+            take(1),
+            mergeMap(async ({ close }) => {
+              expect(mockBrowser.close).not.toHaveBeenCalled();
+              await close().toPromise();
+              await close().toPromise();
+              expect(mockBrowser.close).toHaveBeenCalledTimes(1);
+            })
+          )
+          .toPromise();
+        // Check again, after the observable completes
+        expect(mockBrowser.close).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });
