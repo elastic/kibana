@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('deletes monitor by id', async () => {
-      const { id: monitorId } = await saveMonitor(httpMonitorJson);
+      const { id: monitorId } = await saveMonitor(httpMonitorJson as MonitorFields);
 
       const deleteResponse = await supertest
         .delete(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)

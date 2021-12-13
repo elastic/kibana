@@ -6,7 +6,7 @@
  */
 
 import { SimpleSavedObject } from 'kibana/public';
-import { MonitorFields } from '../runtime_types/monitor_management';
+import { MonitorFields } from '../runtime_types';
 
 /** Represents the average monitor duration ms at a point in time. */
 export interface MonitorDurationAveragePoint {

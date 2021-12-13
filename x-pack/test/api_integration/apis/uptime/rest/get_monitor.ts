@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { SimpleSavedObject } from 'kibana/public';
 import { MonitorFields } from '../../../../../plugins/uptime/common/runtime_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
@@ -25,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send(monitor)
         .expect(200);
 
-      return res.body;
+      return res.body as SimpleSavedObject<MonitorFields>;
     };
 
     before(() => {
@@ -51,13 +52,17 @@ export default function ({ getService }: FtrProviderContext) {
           .get(API_URLS.SYNTHETICS_MONITORS + '?perPage=1000') // 1000 to sort of load all saved monitors
           .expect(200);
 
-        let found = apiResponse.body.monitors.filter(({ id }) => [id1, id2].includes(id));
+        const found: Array<SimpleSavedObject<MonitorFields>> = apiResponse.body.monitors.filter(
+          ({ id }: SimpleSavedObject<MonitorFields>) => [id1, id2].includes(id)
+        );
         found.sort(({ id: a }) => (a === id2 ? 1 : a === id1 ? -1 : 0));
-        found = found.map(({ attributes }) => attributes);
+        const foundMonitors = found.map(
+          ({ attributes }: SimpleSavedObject<MonitorFields>) => attributes
+        );
 
         const expected = [mon1, mon2];
 
-        expect(found).eql(expected);
+        expect(foundMonitors).eql(expected);
       });
 
       it('with page params', async () => {

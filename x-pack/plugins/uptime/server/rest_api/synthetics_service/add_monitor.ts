@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { MonitorFields } from '../../../common/runtime_types/monitor_management';
+import { MonitorFields } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';

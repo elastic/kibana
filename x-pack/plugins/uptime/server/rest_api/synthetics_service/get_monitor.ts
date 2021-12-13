@@ -10,7 +10,7 @@ import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
-import { getMonitorNotFoundResponse } from './service_errors.ts';
+import { getMonitorNotFoundResponse } from './service_errors';
 
 export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'GET',

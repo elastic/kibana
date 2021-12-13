@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { SimpleSavedObject } from 'kibana/public';
 import {
   ConfigKey,
   HTTPFields,
@@ -27,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send(monitor)
         .expect(200);
 
-      return res.body;
+      return res.body as SimpleSavedObject<MonitorFields>;
     };
 
     before(() => {
@@ -41,7 +42,9 @@ export default function ({ getService }: FtrProviderContext) {
     it('edits the monitor', async () => {
       const newMonitor = httpMonitorJson;
 
-      const { id: monitorId, attributes: savedMonitor } = await saveMonitor(newMonitor);
+      const { id: monitorId, attributes: savedMonitor } = await saveMonitor(
+        newMonitor as MonitorFields
+      );
 
       expect(savedMonitor).eql(newMonitor);
 
@@ -75,7 +78,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns bad request if payload is invalid for HTTP monitor', async () => {
-      const { id: monitorId, attributes: savedMonitor } = saveMonitor(httpMonitorJson);
+      const { id: monitorId, attributes: savedMonitor } = await saveMonitor(
+        httpMonitorJson as MonitorFields
+      );
 
       // Delete a required property to make payload invalid
       const toUpdate = { ...savedMonitor, 'check.request.headers': undefined };
@@ -89,7 +94,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns bad request if monitor type is invalid', async () => {
-      const { id: monitorId, attributes: savedMonitor } = saveMonitor(httpMonitorJson);
+      const { id: monitorId, attributes: savedMonitor } = await saveMonitor(
+        httpMonitorJson as MonitorFields
+      );
 
       const toUpdate = { ...savedMonitor, type: 'invalid-data-steam' };
 

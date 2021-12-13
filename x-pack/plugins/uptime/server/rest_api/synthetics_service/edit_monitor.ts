@@ -8,13 +8,13 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-import { MonitorFields } from '../../../common/runtime_types/monitor_management';
+import { MonitorFields } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
-import { getMonitorNotFoundResponse } from './service_errors.ts';
+import { getMonitorNotFoundResponse } from './service_errors';
 
 export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'PUT',
@@ -26,7 +26,7 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     body: schema.any(),
   },
   handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
-    const monitor: MonitorFields = request.body as SyntheticsMonitorSavedObject['attributes'];
+    const monitor = request.body as SyntheticsMonitorSavedObject['attributes'];
 
     const validationResult = validateMonitor(monitor);
 
