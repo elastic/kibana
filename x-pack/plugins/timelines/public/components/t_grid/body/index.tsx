@@ -300,7 +300,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
   ({
     activePage,
     additionalControls,
-    appId,
+    appId = '',
     browserFields,
     bulkActions = true,
     clearSelected,
