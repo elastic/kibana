@@ -492,12 +492,12 @@ export const useDataVisualizerGridData = (
   const extendedColumns = useMemo(() => {
     const actions = getActions(
       input.indexPattern,
-      { lens: services.lens },
+      services,
       {
         searchQueryLanguage,
         searchString,
       },
-      actionFlyoutRef
+      input.allowEditDataView ? actionFlyoutRef : undefined
     );
     if (!Array.isArray(actions) || actions.length < 1) return;
 
@@ -510,7 +510,7 @@ export const useDataVisualizerGridData = (
     };
 
     return [actionColumn];
-  }, [input.indexPattern, services, searchQueryLanguage, searchString]);
+  }, [input.indexPattern, services, searchQueryLanguage, searchString, input.allowEditDataView]);
 
   return {
     progress: combinedProgress,
