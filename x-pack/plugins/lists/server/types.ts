@@ -18,6 +18,7 @@ import type { SpacesPluginStart } from '../../spaces/server';
 
 import { ListClient } from './services/lists/list_client';
 import { ExceptionListClient } from './services/exception_lists/exception_list_client';
+import type { ListsServerExtensionRegistrar } from './services/extension_points/types';
 
 export type ContextProvider = IContextProvider<ListsRequestHandlerContext, 'lists'>;
 export type ListsPluginStart = void;
@@ -40,6 +41,7 @@ export type GetExceptionListClientType = (
 export interface ListPluginSetup {
   getExceptionListClient: GetExceptionListClientType;
   getListClient: GetListClientType;
+  registerExtension: ListsServerExtensionRegistrar;
 }
 
 /**
@@ -65,3 +67,9 @@ export type ListsPluginRouter = IRouter<ListsRequestHandlerContext>;
  * @internal
  */
 export type ContextProviderReturn = Promise<ListsApiRequestHandlerContext>;
+
+export type {
+  ExtensionPoint,
+  ExceptionListPreUpdateItemServerExtension,
+  ExceptionsListPreCreateItemServerExtension,
+} from './services/extension_points';
