@@ -199,6 +199,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
+
   const { uiSettings } = useKibana().services;
   const ACTION_BUTTON_COUNT = 5;
 

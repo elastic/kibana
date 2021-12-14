@@ -29,7 +29,7 @@ import { useUpdateDataView } from './use_update_data_view';
 import { Trigger } from './trigger';
 import { AlertsCheckbox, SaveButtons, SourcererCallout } from './sub_components';
 
-interface SourcererComponentProps {
+export interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
 }
 
