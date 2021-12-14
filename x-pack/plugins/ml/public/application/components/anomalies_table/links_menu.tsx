@@ -117,7 +117,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           language: 'kuery',
           query: kqlQuery,
         },
-        // interval,
         sort: [['timestamp, asc']],
       });
 

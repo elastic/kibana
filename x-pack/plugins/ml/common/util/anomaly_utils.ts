@@ -15,7 +15,6 @@ import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
 import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../constants/anomalies';
 import type { AnomaliesTableRecord, AnomalyRecordDoc } from '../types/anomalies';
-import { KibanaUrlConfig } from '../types/custom_urls';
 
 export interface SeverityType {
   id: ANOMALY_SEVERITY;

@@ -6,7 +6,7 @@
  */
 
 import { PARTITION_FIELDS, ANOMALY_RESULT_TYPE } from '../constants/anomalies';
-import { KibanaUrlConfig } from './custom_urls';
+import type { KibanaUrlConfig } from './custom_urls';
 
 export interface Influencer {
   influencer_field_name: string;
