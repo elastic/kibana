@@ -55,17 +55,6 @@ export const UI_SETTINGS_CSV_SEPARATOR = 'csv:separator';
 export const UI_SETTINGS_CSV_QUOTE_VALUES = 'csv:quoteValues';
 export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
 
-export const LAYOUT_TYPES = {
-  CANVAS: 'canvas',
-  PRESERVE_LAYOUT: 'preserve_layout',
-  PRINT: 'print',
-};
-
-export const DEFAULT_VIEWPORT = {
-  width: 1950,
-  height: 1200,
-};
-
 // Export Type Definitions
 export const CSV_REPORT_TYPE = 'CSV';
 export const CSV_JOB_TYPE = 'csv_searchsource';
