@@ -8315,7 +8315,6 @@
     "xpack.dataVisualizer.file.explanationFlyout.closeButton": "閉じる",
     "xpack.dataVisualizer.file.explanationFlyout.content": "分析結果を生成した論理ステップ。",
     "xpack.dataVisualizer.file.explanationFlyout.title": "分析説明",
-    "xpack.dataVisualizer.file.fileContents.fileContentsTitle": "ファイルコンテンツ",
     "xpack.dataVisualizer.file.fileErrorCallouts.applyOverridesDescription": "ファイル形式やタイムスタンプ形式などこのデータに関する何らかの情報がある場合は、初期オーバーライドを追加すると、残りの構造を推論するのに役立つことがあります。",
     "xpack.dataVisualizer.file.fileErrorCallouts.fileCouldNotBeReadTitle": "ファイル構造を決定できません",
     "xpack.dataVisualizer.file.fileErrorCallouts.fileSizeExceedsAllowedSizeByDiffFormatErrorMessage": "アップロードするよう選択されたファイルのサイズが {diffFormatted} に許可された最大サイズの {maxFileSizeFormatted} を超えています",

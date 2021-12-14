@@ -8387,7 +8387,6 @@
     "xpack.dataVisualizer.file.explanationFlyout.closeButton": "关闭",
     "xpack.dataVisualizer.file.explanationFlyout.content": "产生分析结果的逻辑步骤。",
     "xpack.dataVisualizer.file.explanationFlyout.title": "分析说明",
-    "xpack.dataVisualizer.file.fileContents.fileContentsTitle": "文件内容",
     "xpack.dataVisualizer.file.fileContents.firstLinesDescription": "前 {numberOfLines, plural, other {# 行}}",
     "xpack.dataVisualizer.file.fileErrorCallouts.applyOverridesDescription": "如果您对此数据有所了解，例如文件格式或时间戳格式，则添加初始覆盖可以帮助我们推理结构的其余部分。",
     "xpack.dataVisualizer.file.fileErrorCallouts.fileCouldNotBeReadTitle": "无法确定文件结构",
