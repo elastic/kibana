@@ -64,7 +64,8 @@ async function getIndices(dataClient: IScopedClusterClient, pattern: string, lim
   if (response.statusCode === 404 || !response.body.aggregations) {
     return [];
   }
-  const indices = response.body.aggregations.indices as estypes.AggregationsMultiBucketAggregate<{
+  const indices = response.body.aggregations
+    .indices as estypes.AggregationsMultiBucketAggregateBase<{
     key: unknown;
   }>;
 
