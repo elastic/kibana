@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { shallow, mount } from 'enzyme';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
@@ -14,10 +14,19 @@ import { createMockedIndexPattern } from '../../mocks';
 import { percentileOperation } from './index';
 import { IndexPattern, IndexPatternLayer } from '../../types';
 import { PercentileIndexPatternColumn } from './percentile';
-import { EuiFieldNumber } from '@elastic/eui';
+import { EuiRange } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { EuiFormRow } from '@elastic/eui';
 import { TermsIndexPatternColumn } from './terms';
+
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -272,8 +281,7 @@ describe('percentile', () => {
       expect(input.prop('value')).toEqual('23');
     });
 
-    it('should update state on change', async () => {
-      jest.useFakeTimers();
+    it('should update state on change', () => {
       const updateLayerSpy = jest.fn();
       const instance = mount(
         <InlineOptions
@@ -285,19 +293,18 @@ describe('percentile', () => {
         />
       );
 
-      jest.runAllTimers();
+      const input = instance
+        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
+        .find(EuiRange);
 
-      const input = instance.find(
-        '[data-test-subj="lns-indexPattern-percentile-input"] input[type="number"]'
-      );
-
-      await act(async () => {
-        input.simulate('change', { target: { value: '27' } });
+      act(() => {
+        input.prop('onChange')!(
+          { currentTarget: { value: '27' } } as ChangeEvent<HTMLInputElement>,
+          true
+        );
       });
 
       instance.update();
-
-      jest.runAllTimers();
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -314,7 +321,7 @@ describe('percentile', () => {
       });
     });
 
-    it('should not update on invalid input, but show invalid value locally', async () => {
+    it('should not update on invalid input, but show invalid value locally', () => {
       const updateLayerSpy = jest.fn();
       const instance = mount(
         <InlineOptions
@@ -326,19 +333,18 @@ describe('percentile', () => {
         />
       );
 
-      jest.runAllTimers();
+      const input = instance
+        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
+        .find(EuiRange);
 
-      const input = instance.find(
-        '[data-test-subj="lns-indexPattern-percentile-input"] input[type="number"]'
-      );
-
-      await act(async () => {
-        input.simulate('change', { target: { value: '12.12' } });
+      act(() => {
+        input.prop('onChange')!(
+          { currentTarget: { value: '12.12' } } as ChangeEvent<HTMLInputElement>,
+          true
+        );
       });
 
       instance.update();
-
-      jest.runAllTimers();
 
       expect(updateLayerSpy).not.toHaveBeenCalled();
 
@@ -351,7 +357,7 @@ describe('percentile', () => {
       expect(
         instance
           .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-          .find(EuiFieldNumber)
+          .find(EuiRange)
           .prop('value')
       ).toEqual('12.12');
     });
