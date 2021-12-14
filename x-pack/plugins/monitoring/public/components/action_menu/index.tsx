@@ -21,7 +21,7 @@ export const ActionMenu: React.FC<{}> = ({ children }) => {
       setHeaderActionMenu((element) => {
         const mount = toMountPoint(
           <KibanaContextProvider services={services}>{children}</KibanaContextProvider>,
-          services.theme
+          { theme$: services.theme?.theme$ }
         );
         return mount(element);
       });

@@ -64,7 +64,7 @@ export const useRequestErrorHandler = () => {
                 />
               </EuiButton>
             </div>,
-            services.theme
+            { theme$: services.theme?.theme$ }
           ),
         });
       } else {
@@ -72,7 +72,7 @@ export const useRequestErrorHandler = () => {
           title: i18n.translate('xpack.monitoring.ajaxErrorHandler.requestErrorNotificationTitle', {
             defaultMessage: 'Monitoring Request Error',
           }),
-          text: toMountPoint(formatMonitoringError(err), services.theme),
+          text: toMountPoint(formatMonitoringError(err), { theme$: services.theme?.theme$ }),
         });
       }
     },
