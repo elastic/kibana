@@ -7,7 +7,7 @@
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React from 'react';
 import { JOB_STATUSES } from '../../common/constants';
@@ -51,7 +51,6 @@ export class Job {
   public timeout: ReportSource['timeout'];
   public kibana_name: ReportSource['kibana_name'];
   public kibana_id: ReportSource['kibana_id'];
-  public browser_type: ReportSource['browser_type'];
 
   public size?: ReportOutput['size'];
   public content_type?: TaskRunResult['content_type'];
@@ -80,7 +79,6 @@ export class Job {
     this.timeout = report.timeout;
     this.kibana_name = report.kibana_name;
     this.kibana_id = report.kibana_id;
-    this.browser_type = report.browser_type;
     this.browserTimezone = report.payload.browserTimezone;
     this.size = report.output?.size;
     this.content_type = report.output?.content_type;

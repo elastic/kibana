@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { useStartServices } from '../../../../hooks';
@@ -31,7 +31,7 @@ export const FleetServerCloudUnhealthyCallout: React.FunctionComponent<FleetServ
       >
         <FormattedMessage
           id="xpack.fleet.fleetServerCloudRequiredCallout.calloutDescription"
-          defaultMessage="A healthy Fleet server is required to enroll agents with Fleet. Enable Fleet Server in you {cloudDeploymentLink}. For more information see the {guideLink}."
+          defaultMessage="A healthy Fleet server is required to enroll agents with Fleet. Enable Fleet Server in your {cloudDeploymentLink}. For more information see the {guideLink}."
           values={{
             cloudDeploymentLink: (
               <EuiLink href={deploymentUrl} target="_blank" external>

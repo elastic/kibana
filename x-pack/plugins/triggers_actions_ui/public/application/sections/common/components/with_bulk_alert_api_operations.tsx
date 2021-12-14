@@ -10,7 +10,7 @@ import React from 'react';
 import {
   Alert,
   AlertType,
-  AlertTaskState,
+  RuleTaskState,
   AlertSummary,
   AlertingFrameworkHealth,
   ResolvedRule,
@@ -56,7 +56,7 @@ export interface ComponentOpts {
     errors: string[];
   }>;
   loadAlert: (id: Alert['id']) => Promise<Alert>;
-  loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
+  loadAlertState: (id: Alert['id']) => Promise<RuleTaskState>;
   loadAlertSummary: (id: Alert['id']) => Promise<AlertSummary>;
   loadAlertTypes: () => Promise<AlertType[]>;
   getHealth: () => Promise<AlertingFrameworkHealth>;

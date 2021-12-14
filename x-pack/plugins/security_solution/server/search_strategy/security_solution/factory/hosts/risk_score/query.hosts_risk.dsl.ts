@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { HostsRiskScoreRequestOptions } from '../../../../../../common';
+import { HostsRiskScoreRequestOptions } from '../../../../../../common/search_strategy';
 
 export const buildHostsRiskScoreQuery = ({
   timerange,
-  hostName,
+  hostNames,
   defaultIndex,
 }: HostsRiskScoreRequestOptions) => {
   const filter = [];
@@ -26,8 +26,8 @@ export const buildHostsRiskScoreQuery = ({
     });
   }
 
-  if (hostName) {
-    filter.push({ term: { 'host.name': hostName } });
+  if (hostNames) {
+    filter.push({ terms: { 'host.name': hostNames } });
   }
 
   const dslQuery = {

@@ -7,6 +7,7 @@
 
 import type {
   IScopedClusterClient,
+  KibanaRequest,
   SavedObjectsClientContract,
 } from '../../../../../../../src/core/server';
 import type {
@@ -29,6 +30,8 @@ export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
       esClient: IScopedClusterClient;
       savedObjectsClient: SavedObjectsClientContract;
       endpointContext: EndpointAppContext;
+      request: KibanaRequest;
+      spaceId?: string;
     }
   ) => Promise<StrategyResponseType<T>>;
 }

@@ -5,45 +5,51 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component } from 'react';
-import { EuiConfirmModal, EuiSelect, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { ChangeEvent, Component, MouseEvent } from 'react';
+import { EuiConfirmModal, EuiFormRow, EuiRange } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AggDescriptor } from '../../../../common/descriptor_types';
 import { AGG_TYPE, GRID_RESOLUTION } from '../../../../common/constants';
 
-const OPTIONS = [
-  {
-    value: GRID_RESOLUTION.COARSE,
-    text: i18n.translate('xpack.maps.source.esGrid.coarseDropdownOption', {
-      defaultMessage: 'coarse',
-    }),
-  },
-  {
-    value: GRID_RESOLUTION.FINE,
-    text: i18n.translate('xpack.maps.source.esGrid.fineDropdownOption', {
-      defaultMessage: 'fine',
-    }),
-  },
-  {
-    value: GRID_RESOLUTION.MOST_FINE,
-    text: i18n.translate('xpack.maps.source.esGrid.finestDropdownOption', {
-      defaultMessage: 'finest',
-    }),
-  },
-  {
-    value: GRID_RESOLUTION.SUPER_FINE,
-    text: i18n.translate('xpack.maps.source.esGrid.superFineDropDownOption', {
-      defaultMessage: 'super fine',
-    }),
-  },
-];
+function resolutionToSliderValue(resolution: GRID_RESOLUTION) {
+  if (resolution === GRID_RESOLUTION.SUPER_FINE) {
+    return 4;
+  }
+
+  if (resolution === GRID_RESOLUTION.MOST_FINE) {
+    return 3;
+  }
+
+  if (resolution === GRID_RESOLUTION.FINE) {
+    return 2;
+  }
+
+  return 1;
+}
+
+function sliderValueToResolution(value: number) {
+  if (value === 4) {
+    return GRID_RESOLUTION.SUPER_FINE;
+  }
+
+  if (value === 3) {
+    return GRID_RESOLUTION.MOST_FINE;
+  }
+
+  if (value === 2) {
+    return GRID_RESOLUTION.FINE;
+  }
+
+  return GRID_RESOLUTION.COARSE;
+}
 
 function isUnsupportedVectorTileMetric(metric: AggDescriptor) {
   return metric.type === AGG_TYPE.TERMS;
 }
 
 interface Props {
+  isHeatmap: boolean;
   resolution: GRID_RESOLUTION;
   onChange: (resolution: GRID_RESOLUTION, metrics: AggDescriptor[]) => void;
   metrics: AggDescriptor[];
@@ -58,9 +64,9 @@ export class ResolutionEditor extends Component<Props, State> {
     showModal: false,
   };
 
-  _onResolutionChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const resolution = e.target.value as GRID_RESOLUTION;
-    if (resolution === GRID_RESOLUTION.SUPER_FINE) {
+  _onResolutionChange = (event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
+    const resolution = sliderValueToResolution(parseInt(event.currentTarget.value, 10));
+    if (!this.props.isHeatmap && resolution === GRID_RESOLUTION.SUPER_FINE) {
       const hasUnsupportedMetrics = this.props.metrics.find(isUnsupportedVectorTileMetric);
       if (hasUnsupportedMetrics) {
         this.setState({ showModal: true });
@@ -114,7 +120,7 @@ export class ResolutionEditor extends Component<Props, State> {
         <p>
           <FormattedMessage
             id="xpack.maps.source.esGrid.vectorTileModal.message"
-            defaultMessage="Super fine grid resolution uses vector tiles from the Elasticsearch vector tile API. Elasticsearch vector tile API does not support 'Top terms' metric. Switching to super fine grid resolution will remove all 'Top terms' metrics from your layer configuration."
+            defaultMessage="High resolution uses vector tiles from the Elasticsearch vector tile API. Elasticsearch vector tile API does not support 'Top terms' metric. Switching to super fine grid resolution will remove all 'Top terms' metrics from your layer configuration."
           />
         </p>
       </EuiConfirmModal>
@@ -123,9 +129,9 @@ export class ResolutionEditor extends Component<Props, State> {
 
   render() {
     const helpText =
-      this.props.resolution === GRID_RESOLUTION.SUPER_FINE
+      !this.props.isHeatmap && this.props.resolution === GRID_RESOLUTION.SUPER_FINE
         ? i18n.translate('xpack.maps.source.esGrid.superFineHelpText', {
-            defaultMessage: 'Super fine grid resolution uses vector tiles.',
+            defaultMessage: 'High resolution uses vector tiles.',
           })
         : undefined;
     return (
@@ -133,15 +139,34 @@ export class ResolutionEditor extends Component<Props, State> {
         {this._renderModal()}
         <EuiFormRow
           label={i18n.translate('xpack.maps.geoGrid.resolutionLabel', {
-            defaultMessage: 'Grid resolution',
+            defaultMessage: 'Resolution',
           })}
           helpText={helpText}
           display="columnCompressed"
         >
-          <EuiSelect
-            options={OPTIONS}
-            value={this.props.resolution}
+          <EuiRange
+            value={resolutionToSliderValue(this.props.resolution)}
             onChange={this._onResolutionChange}
+            min={1}
+            max={4}
+            showTicks
+            tickInterval={1}
+            ticks={[
+              {
+                label: i18n.translate('xpack.maps.source.esGrid.lowLabel', {
+                  defaultMessage: `low`,
+                }),
+                value: 1,
+              },
+              { label: '', value: 2 },
+              { label: '', value: 3 },
+              {
+                label: i18n.translate('xpack.maps.source.esGrid.highLabel', {
+                  defaultMessage: `high`,
+                }),
+                value: 4,
+              },
+            ]}
             compressed
           />
         </EuiFormRow>

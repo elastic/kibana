@@ -13,7 +13,7 @@
  * intl context around them.
  */
 
-import { I18nProvider, InjectedIntl, intlShape, __IntlProvider } from '@kbn/i18n/react';
+import { I18nProvider, InjectedIntl, intlShape, __IntlProvider } from '@kbn/i18n-react';
 import { mount, ReactWrapper, render, shallow } from 'enzyme';
 import React, { ReactElement, ValidationMap } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
@@ -46,7 +46,11 @@ function getOptions(context = {}, childContextTypes = {}, props = {}) {
 /**
  * When using @kbn/i18n `injectI18n` on components, props.intl is required.
  */
-function nodeWithIntlProp<T>(node: ReactElement<T>): ReactElement<T & { intl: InjectedIntl }> {
+// This function is exported solely to fix the types output in TS 4.5.2, likely a bug
+// Otherwise, InjectedIntl is missing from the output
+export function nodeWithIntlProp<T>(
+  node: ReactElement<T>
+): ReactElement<T & { intl: InjectedIntl }> {
   return React.cloneElement<any>(node, { intl });
 }
 

@@ -59,6 +59,7 @@ describe('test useSavedSearch', () => {
         services: discoverServiceMock,
         history,
         savedSearch: savedSearchMock,
+        setExpandedDoc: jest.fn(),
       });
     });
 
@@ -100,6 +101,7 @@ describe('test useSavedSearch', () => {
         services: discoverServiceMock,
         history,
         savedSearch: savedSearchMock,
+        setExpandedDoc: jest.fn(),
       });
     });
 

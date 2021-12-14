@@ -10,7 +10,7 @@ import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '../../../../../src/core/server/mocks';
 import { rulesClientMock, RulesClientMock } from '../rules_client.mock';
-import { AlertsHealth, AlertType } from '../../common';
+import { AlertsHealth, RuleType } from '../../common';
 import type { AlertingRequestHandlerContext } from '../types';
 
 export function mockHandlerArguments(
@@ -21,7 +21,7 @@ export function mockHandlerArguments(
     areApiKeysEnabled,
   }: {
     rulesClient?: RulesClientMock;
-    listTypes?: AlertType[];
+    listTypes?: RuleType[];
     getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
       (() => Promise<AlertsHealth>);
     areApiKeysEnabled?: () => Promise<boolean>;

@@ -9,7 +9,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { UiCounterMetricType } from '@kbn/analytics';
 import {
   EuiTitle,
@@ -180,17 +180,17 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     setIsFlyoutVisible(false);
   }, []);
 
-  const { indexPatternFieldEditor } = props.services;
+  const { dataViewFieldEditor } = props.services;
 
   const editField = useCallback(
     (fieldName?: string) => {
       const indexPatternFieldEditPermission =
-        indexPatternFieldEditor?.userPermissions.editIndexPattern();
+        dataViewFieldEditor?.userPermissions.editIndexPattern();
       const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
       if (!canEditIndexPatternField || !selectedIndexPattern) {
         return;
       }
-      const ref = indexPatternFieldEditor.openEditor({
+      const ref = dataViewFieldEditor.openEditor({
         ctx: {
           dataView: selectedIndexPattern,
         },
@@ -208,7 +208,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     },
     [
       closeFlyout,
-      indexPatternFieldEditor,
+      dataViewFieldEditor,
       selectedIndexPattern,
       setFieldEditorRef,
       onEditRuntimeField,

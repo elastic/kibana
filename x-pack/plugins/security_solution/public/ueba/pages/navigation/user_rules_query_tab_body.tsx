@@ -13,7 +13,7 @@ import { HostQueryProps } from './types';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { HostRulesTable } from '../../components/host_rules_table';
 import { uebaModel } from '../../store';
-import { UserRulesFields } from '../../../../common';
+import { UserRulesFields } from '../../../../common/search_strategy';
 
 const UserRulesTableManage = manageQuery(HostRulesTable);
 

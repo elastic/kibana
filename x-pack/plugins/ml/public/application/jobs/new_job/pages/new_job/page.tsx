@@ -16,7 +16,7 @@ import {
   EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { getJobCreatorTitle } from '../../common/job_creator/util/general';
