@@ -1,8 +1,10 @@
 import { filterNil } from '../../../utils/filterEmpty';
 import { getFirstCommitMessageLine } from '../commitFormatters';
 
-export const pullRequestFragmentName = 'ExistingTargetPullRequests';
-export const pullRequestFragment = /* GraphQL */ `
+const pullRequestFragmentName = 'ExistingTargetPullRequests';
+export const pullRequestFragment = {
+  name: pullRequestFragmentName,
+  source: /* GraphQL */ `
   fragment ${pullRequestFragmentName} on PullRequest {
     # Source PR
     number
@@ -13,6 +15,7 @@ export const pullRequestFragment = /* GraphQL */ `
       }
     }
     mergeCommit {
+      committedDate
       oid
       message
     }
@@ -50,13 +53,14 @@ export const pullRequestFragment = /* GraphQL */ `
         }
       }
     }
-  }
-`;
+  }`,
+};
 
 export interface PullRequestNode {
   baseRefName: string;
   number: number;
   mergeCommit: {
+    committedDate: string;
     oid: string;
     message: string;
   } | null;

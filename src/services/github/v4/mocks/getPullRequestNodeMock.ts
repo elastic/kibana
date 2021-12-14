@@ -19,6 +19,7 @@ export function getPullRequestNodeMock({
       nodes: [{ name: 'my-label-a' }],
     },
     mergeCommit: {
+      committedDate: 'zzz',
       oid: 'f3b618b9421fdecdb36862f907afbdd6344b361d',
       message: sourcePullRequest.commitMessage,
     },

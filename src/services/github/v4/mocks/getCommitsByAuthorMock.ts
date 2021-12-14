@@ -10,6 +10,7 @@ export const getCommitsByAuthorMock = (
           edges: [
             {
               node: {
+                committedDate: '2021-12-13T22:46:29Z',
                 oid: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
                 message:
                   'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
@@ -22,6 +23,7 @@ export const getCommitsByAuthorMock = (
                           nodes: [{ name: 'my-label-a' }],
                         },
                         mergeCommit: {
+                          committedDate: '2021-12-13T22:46:29Z',
                           oid: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
                           message:
                             'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',

@@ -1,5 +1,4 @@
-import intersection from 'lodash.intersection';
-import isEmpty from 'lodash.isempty';
+import { isEmpty, intersection } from 'lodash';
 import { ValidConfigOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';
 import { promptForTargetBranches } from '../services/prompts';

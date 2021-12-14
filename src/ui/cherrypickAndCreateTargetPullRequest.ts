@@ -1,6 +1,5 @@
 import chalk from 'chalk';
-import difference from 'lodash.difference';
-import isEmpty from 'lodash.isempty';
+import { isEmpty, difference } from 'lodash';
 import ora = require('ora');
 import { ValidConfigOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';

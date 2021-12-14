@@ -58,6 +58,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
 
       const commits: Commit[] = [
         {
+          committedDate: 'fff',
           sourceBranch: '7.x',
           sha: 'mySha',
           formattedMessage: 'myCommitMessage (#1000)',
@@ -67,6 +68,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
           existingTargetPullRequests: [],
         },
         {
+          committedDate: 'ggg',
           sourceBranch: '7.x',
           sha: 'mySha2',
           formattedMessage: 'myOtherCommitMessage (#2000)',
@@ -159,6 +161,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         options,
         commits: [
           {
+            committedDate: 'hhh',
             sourceBranch: '7.x',
             sha: 'mySha',
             formattedMessage: 'myCommitMessage (mySha)',
@@ -212,6 +215,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         options,
         commits: [
           {
+            committedDate: 'eee',
             sourceBranch: '7.x',
             sha: 'mySha',
             formattedMessage: 'myCommitMessage',

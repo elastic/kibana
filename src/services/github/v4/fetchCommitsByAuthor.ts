@@ -1,4 +1,4 @@
-import isEmpty from 'lodash.isempty';
+import { isEmpty, uniqBy, orderBy } from 'lodash';
 import ora from 'ora';
 import { ValidConfigOptions } from '../../../options/options';
 import { Commit } from '../../../types/Commit';
@@ -11,12 +11,35 @@ import { apiRequestV4 } from './apiRequestV4';
 import { fetchAuthorId } from './fetchAuthorId';
 import {
   pullRequestFragment,
-  pullRequestFragmentName,
   PullRequestNode,
   getExistingTargetPullRequests,
   getPullRequestLabels,
 } from './getExistingTargetPullRequests';
 import { getTargetBranchesFromLabels } from './getTargetBranchesFromLabels';
+
+function getCommitHistoryFragment(commitPath: string | null, index = 0) {
+  return /* GraphQL */ `
+  _${index}: history(
+    first: $maxNumber
+    author: { id: $authorId }
+    ${commitPath ? `path: "${commitPath}"` : ''}
+  ) {
+    edges {
+      node {
+        oid
+        message
+        committedDate
+        associatedPullRequests(first: 1) {
+          edges {
+            node {
+              ...${pullRequestFragment.name}
+            }
+          }
+        }
+      }
+    }
+  }`;
+}
 
 export async function fetchCommitsByAuthor(
   options: ValidConfigOptions
@@ -26,11 +49,16 @@ export async function fetchCommitsByAuthor(
 
     githubApiBaseUrlV4,
     maxNumber,
-    path,
+    commitPaths,
     repoName,
     repoOwner,
     sourceBranch,
   } = options;
+
+  const commitHistoryFragment =
+    commitPaths.length > 0
+      ? commitPaths.map(getCommitHistoryFragment).join('\n')
+      : getCommitHistoryFragment(null);
 
   const query = /* GraphQL */ `
     query CommitsByAuthor(
@@ -39,38 +67,19 @@ export async function fetchCommitsByAuthor(
       $maxNumber: Int!
       $sourceBranch: String!
       $authorId: ID
-      $historyPath: String
     ) {
       repository(owner: $repoOwner, name: $repoName) {
         ref(qualifiedName: $sourceBranch) {
           target {
             ... on Commit {
-              history(
-                first: $maxNumber
-                author: { id: $authorId }
-                path: $historyPath
-              ) {
-                edges {
-                  node {
-                    oid
-                    message
-                    associatedPullRequests(first: 1) {
-                      edges {
-                        node {
-                          ...${pullRequestFragmentName}
-                        }
-                      }
-                    }
-                  }
-                }
-              }
+              ${commitHistoryFragment}
             }
           }
         }
       }
     }
 
-    ${pullRequestFragment}
+    ${pullRequestFragment.source}
   `;
 
   const spinner = ora(
@@ -89,7 +98,6 @@ export async function fetchCommitsByAuthor(
         sourceBranch,
         maxNumber,
         authorId,
-        historyPath: path || null,
       },
     });
     spinner.stop();
@@ -104,68 +112,76 @@ export async function fetchCommitsByAuthor(
     );
   }
 
-  const commits = res.repository.ref.target.history.edges.map((edge) => {
-    const commitMessage = edge.node.message;
-    const sha = edge.node.oid;
+  const commits = Object.values(res.repository.ref.target).flatMap(
+    (historyResponse) => {
+      return historyResponse.edges.map((edge) => {
+        const commitMessage = edge.node.message;
+        const sha = edge.node.oid;
+        const committedDate = edge.node.committedDate;
 
-    // it is assumed that there can only be a single PR associated with a commit
-    // that assumption might not hold true forever but for now it works out
-    const pullRequestNode = edge.node.associatedPullRequests.edges[0]?.node;
+        // it is assumed that there can only be a single PR associated with a commit
+        // that assumption might not hold true forever but for now it works out
+        const pullRequestNode = edge.node.associatedPullRequests.edges[0]?.node;
 
-    // the source pull request for the commit cannot be retrieved
-    // This happens if the commits was pushed directly to a branch (not merging via a PR)
-    if (!isSourcePullRequest({ pullRequestNode, options, sha })) {
-      const pullNumber = getPullNumberFromMessage(commitMessage);
-      const formattedMessage = getFormattedCommitMessage({
-        message: commitMessage,
-        pullNumber,
-        sha,
+        // the source pull request for the commit cannot be retrieved
+        // This happens if the commits was pushed directly to a branch (not merging via a PR)
+        if (!isSourcePullRequest({ pullRequestNode, options, sha })) {
+          const pullNumber = getPullNumberFromMessage(commitMessage);
+          const formattedMessage = getFormattedCommitMessage({
+            message: commitMessage,
+            pullNumber,
+            sha,
+          });
+
+          return {
+            committedDate,
+            sourceBranch,
+            targetBranchesFromLabels: [],
+            sha,
+            formattedMessage,
+            originalMessage: commitMessage,
+            pullNumber,
+            existingTargetPullRequests: [],
+          };
+        }
+
+        const pullNumber = pullRequestNode.number;
+        const formattedMessage = getFormattedCommitMessage({
+          message: commitMessage,
+          pullNumber,
+          sha,
+        });
+
+        const existingTargetPullRequests =
+          getExistingTargetPullRequests(pullRequestNode);
+
+        const targetBranchesFromLabels = getTargetBranchesFromLabels({
+          sourceBranch: pullRequestNode.baseRefName,
+          existingTargetPullRequests,
+          branchLabelMapping: options.branchLabelMapping,
+          labels: getPullRequestLabels(pullRequestNode),
+        });
+
+        return {
+          committedDate,
+          sourceBranch,
+          targetBranchesFromLabels,
+          sha,
+          formattedMessage,
+          originalMessage: commitMessage,
+          pullNumber,
+          existingTargetPullRequests,
+        };
       });
-
-      return {
-        sourceBranch,
-        targetBranchesFromLabels: [],
-        sha,
-        formattedMessage,
-        originalMessage: commitMessage,
-        pullNumber,
-        existingTargetPullRequests: [],
-      };
     }
-
-    const pullNumber = pullRequestNode.number;
-    const formattedMessage = getFormattedCommitMessage({
-      message: commitMessage,
-      pullNumber,
-      sha,
-    });
-
-    const existingTargetPullRequests =
-      getExistingTargetPullRequests(pullRequestNode);
-
-    const targetBranchesFromLabels = getTargetBranchesFromLabels({
-      sourceBranch: pullRequestNode.baseRefName,
-      existingTargetPullRequests,
-      branchLabelMapping: options.branchLabelMapping,
-      labels: getPullRequestLabels(pullRequestNode),
-    });
-
-    return {
-      sourceBranch,
-      targetBranchesFromLabels,
-      sha,
-      formattedMessage,
-      originalMessage: commitMessage,
-      pullNumber,
-      existingTargetPullRequests,
-    };
-  });
+  );
 
   // terminate if not commits were found
   if (isEmpty(commits)) {
-    const pathText = options.path
-      ? ` touching files in path: "${options.path}"`
-      : '';
+    const pathText =
+      options.commitPaths.length > 0
+        ? ` touching files in path: "${options.commitPaths}"`
+        : '';
 
     const errorText = options.all
       ? `There are no commits in this repository${pathText}`
@@ -174,7 +190,9 @@ export async function fetchCommitsByAuthor(
     throw new HandledError(errorText);
   }
 
-  return commits;
+  const commitsUnique = uniqBy(commits, 'sha');
+  const commitsSorted = orderBy(commitsUnique, 'committedDate', 'desc');
+  return commitsSorted;
 }
 
 function isSourcePullRequest({
@@ -197,7 +215,7 @@ export interface CommitByAuthorResponse {
   repository: {
     ref: {
       target: {
-        history: {
+        [commitPath: string]: {
           edges: HistoryEdge[];
         };
       };
@@ -209,6 +227,7 @@ interface HistoryEdge {
   node: {
     oid: string;
     message: string;
+    committedDate: string;
     associatedPullRequests: {
       edges: {
         node: PullRequestNode;

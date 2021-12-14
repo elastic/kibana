@@ -110,6 +110,7 @@ Config:
 ```
 
 ## General configuration options
+
 The following options can be used in both the global config, project config, and passed in through CLI.
 
 #### `all`
@@ -126,7 +127,7 @@ CLI: `--all`, `-a`
 
 Add assignees to the target pull request
 
-CLI: `--assignees <username>`, `-assign <username>`
+CLI: `--assignee <username>`, `--assign <username>`
 
 Config:
 
@@ -276,7 +277,7 @@ Default: `false`
 
 Default: `true`
 
-#### path
+#### commitPaths
 
 Only list commits touching files under the specified path
 
@@ -286,7 +287,7 @@ Config:
 
 ```json
 {
-  "path": "my/folder"
+  "commitPaths": ["my/folder"]
 }
 ```
 
@@ -382,7 +383,7 @@ Config:
 
 Labels that will be added to the source (original) pull request. This can be useful if you, at a later time, want to find the PRs that were already backported.
 
-CLI: `--source-pr-labels <label>`
+CLI: `--source-pr-label <label>`
 
 Config:
 
@@ -396,7 +397,7 @@ Config:
 
 Overrides `targetBranchChoices` so instead of displaying a prompt with target branches to choose from, the selected commit(s) will be backported directly to the branches defined in `targetBranches`
 
-CLI: `--target-branches <branch>`, `--branch <branch>`, `-b <branch>`
+CLI: `--target-branch <branch>`, `--branch <branch>`, `-b <branch>`
 
 Config:
 
@@ -410,7 +411,7 @@ Config:
 
 Labels that will be added to the target (backport) pull request. This can be useful if you, at a later time, want to find the backport PRs.
 
-CLI: `--target-pr-labels <label>`, `-l <label>`
+CLI: `--target-pr-label <label>`, `-l <label>`
 
 Config:
 

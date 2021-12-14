@@ -35,6 +35,7 @@ describe('getTargetBranches', () => {
 
       const commits = [
         {
+          committedDate: 'bbb',
           sourceBranch: 'master',
           targetBranchesFromLabels: ['7.x'],
           sha: 'my-sha',
@@ -89,6 +90,7 @@ describe('getTargetBranches', () => {
 
       const commits = [
         {
+          committedDate: 'ddd',
           sourceBranch: 'master',
           targetBranchesFromLabels: ['8.0.0'],
           sha: 'my-sha',
@@ -125,6 +127,7 @@ describe('getTargetBranches', () => {
 
       const commits: Commit[] = [
         {
+          committedDate: 'aaa',
           formattedMessage: 'hey',
           originalMessage: 'hey',
           targetBranchesFromLabels: [],

@@ -1,6 +1,5 @@
 import { AxiosError } from 'axios';
-import difference from 'lodash.difference';
-import isEmpty from 'lodash.isempty';
+import { isEmpty, difference } from 'lodash';
 import { HandledError } from '../../HandledError';
 import { getGlobalConfigPath } from '../../env';
 import { GithubV4Response } from './apiRequestV4';

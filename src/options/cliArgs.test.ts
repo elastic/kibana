@@ -32,6 +32,8 @@ describe('getOptionsFromCliArgs', () => {
         upstream: 'elastic/kibana',
         username: 'sqren',
         mainline: 1,
+        assignees: [],
+        commitPaths: [],
       });
     });
   });
@@ -50,29 +52,16 @@ describe('getOptionsFromCliArgs', () => {
   describe('sourcePRLabels', () => {
     it('should handle all variations', () => {
       const argv = [
-        '--sourcePRLabels',
-        'label a',
-        '--sourcePrLabels',
-        'label b',
-        '--source-pr-labels',
-        'label c',
         '--sourcePRLabel',
-        'label d',
+        'label a',
         '--sourcePrLabel',
-        'label e',
+        'label b',
         '--source-pr-label',
-        'label f',
+        'label c',
       ];
 
       const res = getOptionsFromCliArgs(argv);
-      expect(res.sourcePRLabels).toEqual([
-        'label a',
-        'label b',
-        'label c',
-        'label d',
-        'label e',
-        'label f',
-      ]);
+      expect(res.sourcePRLabels).toEqual(['label a', 'label b', 'label c']);
     });
   });
 
@@ -90,8 +79,14 @@ describe('getOptionsFromCliArgs', () => {
   });
 
   describe('assignees', () => {
-    it('should set assignees', () => {
-      const argv = ['--assignees', 'john'];
+    it('--assignee', () => {
+      const argv = ['--assignee', 'john'];
+      const res = getOptionsFromCliArgs(argv);
+      expect(res.assignees).toEqual(['john']);
+    });
+
+    it('--assign', () => {
+      const argv = ['--assign', 'john'];
       const res = getOptionsFromCliArgs(argv);
       expect(res.assignees).toEqual(['john']);
     });

@@ -32,9 +32,9 @@ export function getOptionsFromCliArgs(
       type: 'string',
     })
 
-    .option('assignees', {
+    .option('assignee', {
       description: 'Add assignees to the target pull request',
-      alias: ['assignee', 'assign'],
+      alias: 'assign',
       type: 'array',
       string: true,
       conflicts: ['autoAssign'],
@@ -159,7 +159,8 @@ export function getOptionsFromCliArgs(
     .option('path', {
       description: 'Only list commits touching files under the specified path',
       alias: 'p',
-      type: 'string',
+      type: 'array',
+      string: true,
     })
 
     .option('prTitle', {
@@ -204,30 +205,29 @@ export function getOptionsFromCliArgs(
       type: 'string',
     })
 
-    .option('sourcePRLabels', {
+    .option('sourcePRLabel', {
       description: 'Add labels to the source (original) PR',
-      alias: ['sourcePRLabel', 'sourcePrLabel', 'sourcePrLabels'],
+      alias: 'sourcePrLabel',
       type: 'array',
       string: true,
     })
 
-    .option('targetBranches', {
+    .option('targetBranch', {
       description: 'Branch(es) to backport to',
-      alias: ['targetBranch', 'branch', 'b'],
+      alias: ['branch', 'b'],
       type: 'array',
       string: true, // ensure `6.0` is not coerced to `6`
     })
 
-    .option('targetBranchChoices', {
+    .option('targetBranchChoice', {
       description: 'List branches to backport to',
-      alias: 'targetBranchChoice',
       type: 'array',
       string: true,
     })
 
-    .option('targetPRLabels', {
+    .option('targetPRLabel', {
       description: 'Add labels to the target (backport) PR',
-      alias: ['labels', 'label', 'l'],
+      alias: ['label', 'l'],
       type: 'array',
       string: true,
     })
@@ -285,6 +285,15 @@ export function getOptionsFromCliArgs(
     multipleBranches,
     multipleCommits,
     noVerify,
+
+    // array types (should be renamed to plural form)
+    assignee,
+    path,
+    sourcePRLabel,
+    targetBranch,
+    targetBranchChoice,
+    targetPRLabel,
+
     ...restOptions
   } = yargsInstance.parseSync();
 
@@ -294,6 +303,14 @@ export function getOptionsFromCliArgs(
     // `multiple` is a cli-only flag to override `multipleBranches` and `multipleCommits`
     multipleBranches: multiple ?? multipleBranches,
     multipleCommits: multiple ?? multipleCommits,
+
+    // rename array types to plural
+    assignees: assignee ?? [],
+    commitPaths: path ?? [],
+    sourcePRLabels: sourcePRLabel,
+    targetBranchChoices: targetBranchChoice,
+    targetBranches: targetBranch,
+    targetPRLabels: targetPRLabel,
 
     // `verify` is a cli-only flag to flip the default of `no-verify`
     noVerify: verify ?? noVerify,

@@ -49,6 +49,7 @@ describe('fetchPullRequestBySearchQuery', () => {
     expect(res).toMatchInlineSnapshot(`
       Array [
         Object {
+          "committedDate": "2021-01-01T00:00:00",
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
@@ -66,6 +67,7 @@ describe('fetchPullRequestBySearchQuery', () => {
           "targetBranchesFromLabels": Array [],
         },
         Object {
+          "committedDate": "2021-01-01T00:00:00",
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
@@ -83,6 +85,7 @@ describe('fetchPullRequestBySearchQuery', () => {
           "targetBranchesFromLabels": Array [],
         },
         Object {
+          "committedDate": "2021-01-01T00:00:00",
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
@@ -105,6 +108,7 @@ describe('fetchPullRequestBySearchQuery', () => {
           "targetBranchesFromLabels": Array [],
         },
         Object {
+          "committedDate": "2021-01-01T00:00:00",
           "existingTargetPullRequests": Array [],
           "formattedMessage": "[APM] Update script with new roles/users (#72599)",
           "originalMessage": "[APM] Update script with new roles/users (#72599)
@@ -120,6 +124,7 @@ describe('fetchPullRequestBySearchQuery', () => {
           "targetBranchesFromLabels": Array [],
         },
         Object {
+          "committedDate": "2021-01-01T00:00:00",
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
@@ -140,6 +145,7 @@ describe('fetchPullRequestBySearchQuery', () => {
           "targetBranchesFromLabels": Array [],
         },
         Object {
+          "committedDate": "2021-01-01T00:00:00",
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
@@ -155,6 +161,7 @@ describe('fetchPullRequestBySearchQuery', () => {
           "targetBranchesFromLabels": Array [],
         },
         Object {
+          "committedDate": "2021-01-01T00:00:00",
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
@@ -170,6 +177,7 @@ describe('fetchPullRequestBySearchQuery', () => {
           "targetBranchesFromLabels": Array [],
         },
         Object {
+          "committedDate": "2021-01-01T00:00:00",
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
@@ -190,6 +198,7 @@ describe('fetchPullRequestBySearchQuery', () => {
           "targetBranchesFromLabels": Array [],
         },
         Object {
+          "committedDate": "2021-01-01T00:00:00",
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.x",
@@ -210,6 +219,7 @@ describe('fetchPullRequestBySearchQuery', () => {
           "targetBranchesFromLabels": Array [],
         },
         Object {
+          "committedDate": "2021-01-01T00:00:00",
           "existingTargetPullRequests": Array [
             Object {
               "branch": "7.9",

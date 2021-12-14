@@ -56,39 +56,39 @@ See [configuration.md](https://github.com/sqren/backport/blob/master/docs/config
 
 Please note that dashes between the words are optional, for instance you can type `--targetBranch` or `--target-branch` both are valid options.
 
-| Option              | Shorthand notation   | Description                                            | Default        | Type            |
-| ------------------- | -------------------- | ------------------------------------------------------ | -------------- | --------------- |
-| --access-token      | --accesstoken        | Github access token                                    |                | `string`        |
-| --all               | -a                   | Show commits from other than me                        | false          | `boolean`       |
-| --author            |                      | Filter commits by author                               | _Current user_ | `string`        |
-| --assignees         | --assignee, --assign | Assign users to target pull request                    |                | `Array<string>` |
-| --auto-assign       |                      | Assign current user to target pull request             | false          | `boolean`       |
-| --branch            | --b                  | Target branch to backport to                           |                | `string`        |
-| --ci                |                      | Disable interactive prompts                            | false          | `boolean`       |
-| --dry-run           |                      | Perform backport without pushing to Github             | false          | `string`        |
-| --editor            |                      | Editor (eg. `code`) to open and solve conflicts        | nano           | `string`        |
-| --fork              |                      | Create backports in fork (true) or origin repo (false) | true           | `boolean`       |
-| --git-hostname      |                      | Hostname for Git                                       | github.com     | `string`        |
-| --mainline          |                      | Parent id of merge commit                              | 1              | `number`        |
-| --max-number        | --number, --n        | Number of commits to choose from                       | 10             | `number`        |
-| --multiple          |                      | Select multiple commits/branches                       | false          | `boolean`       |
-| --multiple-branches |                      | Backport to multiple branches                          | true           | `boolean`       |
-| --multiple-commits  |                      | Backport multiple commits                              | false          | `boolean`       |
-| --path              | -p                   | Only list commits touching files under a specific path |                | `string`        |
-| --pull-number       | --pr                 | Pull request to backport                               |                | `number`        |
-| --pr-description    | --description        | Pull request description suffix                        |                | `string`        |
-| --pr-filter         |                      | List commits from PRs filtered by a given query        |                | `string`        |
-| --pr-title          | --title              | Title of pull request                                  |                | `string`        |
-| --reset-author      |                      | Set yourself as commit author                          |                | `boolean`       |
-| --sha               |                      | Sha of commit to backport                              |                | `string`        |
-| --source-branch     |                      | Specify a non-default branch to backport from          |                | `string`        |
-| --source-pr-labels  | --sourcePRLabel      | Labels added to the source PR                          |                | `array<string>` |
-| --target-pr-Labels  | --labels, --label    | Labels added to the target PR                          |                | `array<string>` |
-| --target-branches   | --b, --targetBranch  | Target branch(es) to backport to                       |                | `array<string>` |
-| --upstream          | --up                 | Name of organization and repository                    |                | `string`        |
-| --username          |                      | Github username                                        |                | `string`        |
-| --help              |                      | Show help                                              |                |                 |
-| -v, --version       |                      | Show version number                                    |                |                 |
+| Option              | Shorthand notation | Description                                            | Default        | Type            |
+| ------------------- | ------------------ | ------------------------------------------------------ | -------------- | --------------- |
+| --access-token      |                    | Github access token                                    |                | `string`        |
+| --all               | -a                 | Show commits from other than me                        | false          | `boolean`       |
+| --author            |                    | Filter commits by author                               | _Current user_ | `string`        |
+| --assignee          | --assign           | Assign users to target pull request                    |                | `Array<string>` |
+| --auto-assign       |                    | Assign current user to target pull request             | false          | `boolean`       |
+| --branch            | -b                 | Target branch to backport to                           |                | `string`        |
+| --ci                |                    | Disable interactive prompts                            | false          | `boolean`       |
+| --dry-run           |                    | Perform backport without pushing to Github             | false          | `string`        |
+| --editor            |                    | Editor (eg. `code`) to open and solve conflicts        | nano           | `string`        |
+| --fork              |                    | Create backports in fork (true) or origin repo (false) | true           | `boolean`       |
+| --git-hostname      |                    | Hostname for Git                                       | github.com     | `string`        |
+| --mainline          |                    | Parent id of merge commit                              | 1              | `number`        |
+| --max-number        | --number, -n       | Number of commits to choose from                       | 10             | `number`        |
+| --multiple          |                    | Select multiple commits/branches                       | false          | `boolean`       |
+| --multiple-branches |                    | Backport to multiple branches                          | true           | `boolean`       |
+| --multiple-commits  |                    | Backport multiple commits                              | false          | `boolean`       |
+| --path              | -p                 | Only list commits touching files under a specific path |                | `string`        |
+| --pull-number       | --pr               | Pull request to backport                               |                | `number`        |
+| --pr-description    | --description      | Pull request description suffix                        |                | `string`        |
+| --pr-filter         |                    | List commits from PRs filtered by a given query        |                | `string`        |
+| --pr-title          | --title            | Title of pull request                                  |                | `string`        |
+| --reset-author      |                    | Set yourself as commit author                          |                | `boolean`       |
+| --sha               |                    | Sha of commit to backport                              |                | `string`        |
+| --source-branch     |                    | Specify a non-default branch to backport from          |                | `string`        |
+| --source-pr-label   |                    | Labels added to the source PR                          |                | `array<string>` |
+| --target-pr-label   | --label, -l        | Labels added to the target PR                          |                | `array<string>` |
+| --target-branch     | -b                 | Target branch(es) to backport to                       |                | `array<string>` |
+| --upstream          | --up               | Name of organization and repository                    |                | `string`        |
+| --username          |                    | Github username                                        |                | `string`        |
+| --help              |                    | Show help                                              |                |                 |
+| -v, --version       |                    | Show version number                                    |                |                 |
 
 The CLI options will override the [configuration options](https://github.com/sqren/backport/blob/master/docs/configuration.md).
 

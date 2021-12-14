@@ -6,7 +6,7 @@ import { getProjectConfig } from './projectConfig';
 
 export const defaultConfigOptions = {
   all: false,
-  assignees: [],
+  assignees: [] as Array<string>,
   autoAssign: false,
   autoMerge: false,
   autoMergeMethod: 'merge',

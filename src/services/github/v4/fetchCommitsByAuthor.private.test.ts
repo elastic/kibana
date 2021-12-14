@@ -1,5 +1,6 @@
 import { ValidConfigOptions } from '../../../options/options';
 import { getDevAccessToken } from '../../../test/private/getDevAccessToken';
+import { Commit } from '../../../types/Commit';
 import { PromiseReturnType } from '../../../types/PromiseReturnType';
 import { fetchCommitsByAuthor } from './fetchCommitsByAuthor';
 
@@ -8,6 +9,91 @@ describe('fetchCommitsByAuthor', () => {
 
   beforeAll(async () => {
     devAccessToken = await getDevAccessToken();
+  });
+
+  describe('commitPaths', () => {
+    const getOptions = () =>
+      ({
+        repoOwner: 'backport-org',
+        repoName: 'repo-with-different-commit-paths',
+        sourceBranch: 'main',
+        accessToken: devAccessToken,
+        username: 'sqren',
+        author: 'sqren',
+        maxNumber: 10,
+        githubApiBaseUrlV4: 'https://api.github.com/graphql',
+      } as ValidConfigOptions);
+
+    const getCommitMessages = (commits: Commit[]) => {
+      return commits.map((c) =>
+        c.originalMessage.replace(/(\r\n|\n|\r)/gm, '')
+      );
+    };
+
+    it('returns all commits', async () => {
+      const commits = await fetchCommitsByAuthor({
+        ...getOptions(),
+        commitPaths: [] as Array<string>,
+      });
+
+      const commitMessages = getCommitMessages(commits);
+      expect(commitMessages).toEqual([
+        'Edit all lyrics',
+        'Update .backportrc.json',
+        'Edit "Take on me"',
+        'Add backportrc.json',
+        'Add "Bohemian Rhapsody""',
+        'Add "99 Luftballons"',
+        'Add "Take on me"',
+      ]);
+    });
+
+    it('only returns commits related to "99-luftballons.txt"', async () => {
+      const commits = await fetchCommitsByAuthor({
+        ...getOptions(),
+        commitPaths: ['lyrics/99-luftballons.txt'],
+      });
+
+      const commitMessages = getCommitMessages(commits);
+      expect(commitMessages).toEqual([
+        'Edit all lyrics',
+        'Add "99 Luftballons"',
+      ]);
+    });
+
+    it('only returns commits related to "take-on-me.txt"', async () => {
+      const commits = await fetchCommitsByAuthor({
+        ...getOptions(),
+        commitPaths: ['lyrics/take-on-me.txt'],
+      });
+
+      const commitMessages = getCommitMessages(commits);
+      expect(commitMessages).toEqual([
+        'Edit all lyrics',
+        'Edit "Take on me"',
+        'Add "Take on me"',
+      ]);
+    });
+
+    it('removes duplicates and order by `committedDate`', async () => {
+      const commits = await fetchCommitsByAuthor({
+        ...getOptions(),
+        commitPaths: [
+          'lyrics/99-luftballons.txt',
+          'lyrics/take-on-me.txt',
+          'lyrics/bohemian-rhapsody.txt',
+        ],
+      });
+
+      const commitMessages = getCommitMessages(commits);
+      expect(commitMessages).toEqual([
+        'Edit all lyrics',
+        'Edit "Take on me"',
+        'Add "Bohemian Rhapsody""',
+        'Add "99 Luftballons"',
+        'Add "Take on me"',
+      ]);
+    });
   });
 
   describe('existingTargetPullRequests', () => {
@@ -22,6 +108,7 @@ describe('fetchCommitsByAuthor', () => {
         author: 'sqren',
         maxNumber: 10,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
+        commitPaths: [] as Array<string>,
       } as ValidConfigOptions);
     });
 

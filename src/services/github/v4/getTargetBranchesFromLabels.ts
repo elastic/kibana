@@ -1,4 +1,4 @@
-import uniq from 'lodash.uniq';
+import { uniq } from 'lodash';
 import { ValidConfigOptions } from '../../../options/options';
 import { filterNil } from '../../../utils/filterEmpty';
 import { logger } from '../../logger';

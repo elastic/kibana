@@ -1,7 +1,6 @@
 import { resolve as pathResolve } from 'path';
 import del from 'del';
-import isEmpty from 'lodash.isempty';
-import uniq from 'lodash.uniq';
+import { uniq, isEmpty } from 'lodash';
 import ora from 'ora';
 import { ValidConfigOptions } from '../options/options';
 import { Commit } from '../types/Commit';

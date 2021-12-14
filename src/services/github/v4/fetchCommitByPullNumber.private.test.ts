@@ -20,6 +20,7 @@ describe('fetchCommitByPullNumber', () => {
       } as ValidConfigOptions & { pullNumber: number };
 
       expect(await fetchCommitByPullNumber(options)).toEqual({
+        committedDate: '2020-08-15T12:40:19Z',
         formattedMessage: 'Add 🍏 emoji (#5)',
         originalMessage: 'Add 🍏 emoji (#5)',
         pullNumber: 5,

@@ -49,7 +49,7 @@ describe('runWithOptions', () => {
       multipleBranches: false,
       multipleCommits: false,
       noVerify: true,
-      path: undefined,
+      commitPaths: [],
       prDescription: 'myPrDescription',
       prTitle: 'myPrTitle {targetBranch} {commitMessages}',
       pullNumber: undefined,
@@ -155,7 +155,6 @@ describe('runWithOptions', () => {
     expect(commitsByAuthorCalls.map((body) => body.variables)).toEqual([
       {
         authorId: 'sqren_author_id',
-        historyPath: null,
         maxNumber: 10,
         repoName: 'kibana',
         repoOwner: 'elastic',

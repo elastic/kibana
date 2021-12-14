@@ -45,6 +45,7 @@ describe('fetchPullRequestBySearchQuery', () => {
 
       expect(await fetchPullRequestBySearchQuery(options)).toEqual([
         {
+          committedDate: '2020-08-16T21:44:28Z',
           existingTargetPullRequests: [
             { branch: '7.8', state: 'OPEN', number: 10 },
           ],
@@ -56,6 +57,7 @@ describe('fetchPullRequestBySearchQuery', () => {
           targetBranchesFromLabels: [],
         },
         {
+          committedDate: '2020-08-15T12:40:19Z',
           existingTargetPullRequests: [
             { branch: '7.x', state: 'MERGED', number: 6 },
             { branch: '7.8', state: 'MERGED', number: 7 },

@@ -22,6 +22,7 @@ describe('fetchCommitBySha', () => {
         sourceBranch: 'master',
       } as BackportOptionsWithSha)
     ).toEqual({
+      committedDate: '2020-07-07T20:40:28Z',
       formattedMessage: '[APM] Add API tests (#70740)',
       originalMessage: '[APM] Add API tests (#70740)',
       pullNumber: 70740,

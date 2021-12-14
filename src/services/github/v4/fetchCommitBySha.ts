@@ -12,7 +12,6 @@ import { apiRequestV4 } from './apiRequestV4';
 import {
   PullRequestNode,
   pullRequestFragment,
-  pullRequestFragmentName,
   getExistingTargetPullRequests,
   getPullRequestLabels,
 } from './getExistingTargetPullRequests';
@@ -28,12 +27,13 @@ export async function fetchCommitBySha(
     repository(owner: $repoOwner, name: $repoName) {
       object(expression: $oid) {
         ... on Commit {
+          committedDate
           message
           oid
           associatedPullRequests(first: 1) {
             edges {
               node {
-                ...${pullRequestFragmentName}
+                ...${pullRequestFragment.name}
               }
             }
           }
@@ -42,7 +42,7 @@ export async function fetchCommitBySha(
     }
   }
 
-    ${pullRequestFragment}
+    ${pullRequestFragment.source}
   `;
 
   const spinner = ora(`Loading commit "${getShortSha(options.sha)}"`).start();
@@ -71,6 +71,7 @@ export async function fetchCommitBySha(
     );
   }
 
+  const committedDate = res.repository.object.committedDate;
   const sha = res.repository.object.oid;
   const commitMessage = res.repository.object.message;
   const pullRequestNode =
@@ -105,6 +106,7 @@ export async function fetchCommitBySha(
     : [];
 
   return {
+    committedDate,
     sourceBranch,
     targetBranchesFromLabels,
     sha,
@@ -118,6 +120,7 @@ export async function fetchCommitBySha(
 interface CommitsByShaResponse {
   repository: {
     object: {
+      committedDate: string;
       message: string;
       oid: string;
       associatedPullRequests: {

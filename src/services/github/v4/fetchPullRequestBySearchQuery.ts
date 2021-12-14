@@ -1,4 +1,4 @@
-import isEmpty from 'lodash.isempty';
+import { isEmpty } from 'lodash';
 import ora from 'ora';
 import { ValidConfigOptions } from '../../../options/options';
 import { Commit } from '../../../types/Commit';
@@ -7,7 +7,6 @@ import { getFormattedCommitMessage } from '../commitFormatters';
 import { apiRequestV4 } from './apiRequestV4';
 import {
   pullRequestFragment,
-  pullRequestFragmentName,
   PullRequestNode,
   getExistingTargetPullRequests,
   getPullRequestLabels,
@@ -33,13 +32,13 @@ export async function fetchPullRequestBySearchQuery(
       search(query: $query, type: ISSUE, first: $maxNumber) {
         nodes {
           ... on PullRequest {
-            ...${pullRequestFragmentName}
+            ...${pullRequestFragment.name}
           }
         }
       }
     }
 
-    ${pullRequestFragment}
+    ${pullRequestFragment.source}
   `;
 
   const authorFilter = all ? '' : `author:${author}`;
@@ -70,6 +69,7 @@ export async function fetchPullRequestBySearchQuery(
       throw new Error('Pull Request is not merged');
     }
 
+    const committedDate = pullRequestNode.mergeCommit.committedDate;
     const sha = pullRequestNode.mergeCommit.oid;
     const pullNumber = pullRequestNode.number;
     const commitMessage = pullRequestNode.mergeCommit.message;
@@ -90,6 +90,7 @@ export async function fetchPullRequestBySearchQuery(
     });
 
     const choice: Commit = {
+      committedDate,
       sourceBranch,
       targetBranchesFromLabels,
       sha,

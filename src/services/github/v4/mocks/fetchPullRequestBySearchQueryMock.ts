@@ -13,6 +13,7 @@ export const fetchPullRequestBySearchQueryMock: PullRequestBySearchQueryResponse
             },
           },
           mergeCommit: {
+            committedDate: '2021-01-01T00:00:00',
             oid: 'e0f4775b780aada005bdd1774edcceac0ffee006',
             message:
               '[APM] @ts-error -> @ts-expect-error (#76492)\n\nCo-authored-by: Elastic Machine <elasticmachine@users.noreply.github.com>',
@@ -68,6 +69,7 @@ export const fetchPullRequestBySearchQueryMock: PullRequestBySearchQueryResponse
             },
           },
           mergeCommit: {
+            committedDate: '2021-01-01T00:00:00',
             oid: 'fae1e02e0f7a475bf92da05be52a817aa2a84959',
             message:
               '[APM] Avoid negative offset for error marker on timeline (#76638)\n\nCo-authored-by: Elastic Machine <elasticmachine@users.noreply.github.com>',
@@ -124,6 +126,7 @@ export const fetchPullRequestBySearchQueryMock: PullRequestBySearchQueryResponse
             },
           },
           mergeCommit: {
+            committedDate: '2021-01-01T00:00:00',
             oid: 'aa68e3b63a4b513294dc58eaf4422e66a0beffb1',
             message:
               '[APM] Add anomaly detection API tests + fixes (#73120)\n\nCo-authored-by: Nathan L Smith <nathan.smith@elastic.co>',
@@ -221,6 +224,7 @@ export const fetchPullRequestBySearchQueryMock: PullRequestBySearchQueryResponse
             },
           },
           mergeCommit: {
+            committedDate: '2021-01-01T00:00:00',
             oid: '2fc7112ec27a9f8ded0e2f9e097613721f1179dd',
             message:
               '[APM] Update script with new roles/users (#72599)\n\n* [APM] Update script with new roles/users\r\n\r\n* add log\r\n\r\n* Add validation for http prefix',
@@ -255,6 +259,7 @@ export const fetchPullRequestBySearchQueryMock: PullRequestBySearchQueryResponse
             },
           },
           mergeCommit: {
+            committedDate: '2021-01-01T00:00:00',
             oid: '7e126bfab6a3bfc44f9fa50feecfe22b4634e1a0',
             message: 'Update jobs_list.tsx (#72797)',
           },
@@ -333,6 +338,7 @@ export const fetchPullRequestBySearchQueryMock: PullRequestBySearchQueryResponse
             },
           },
           mergeCommit: {
+            committedDate: '2021-01-01T00:00:00',
             oid: 'd12208c7ea9513529ea1aff42d154db89e3573ff',
             message: '[APM] Fix confusing request/minute viz (#69143)',
           },
@@ -394,6 +400,7 @@ export const fetchPullRequestBySearchQueryMock: PullRequestBySearchQueryResponse
             },
           },
           mergeCommit: {
+            committedDate: '2021-01-01T00:00:00',
             oid: 'f760d8513b0216a73e9a476661f0fb8fb0887a61',
             message: '[APM] Remove watcher integration (#71655)',
           },
@@ -454,6 +461,7 @@ export const fetchPullRequestBySearchQueryMock: PullRequestBySearchQueryResponse
             },
           },
           mergeCommit: {
+            committedDate: '2021-01-01T00:00:00',
             oid: '05ee3da80db34ccf93e7424aa2704c098a1b49fa',
             message: '[APM] Disable flaky rum e2e’s (#72614)',
           },
@@ -539,6 +547,7 @@ export const fetchPullRequestBySearchQueryMock: PullRequestBySearchQueryResponse
             },
           },
           mergeCommit: {
+            committedDate: '2021-01-01T00:00:00',
             oid: '51a862988c344b34bd9da57dd57008df12e1b5e5',
             message:
               '[APM] Increase `xpack.apm.ui.transactionGroupBucketSize` (#71661)',
@@ -688,6 +697,7 @@ export const fetchPullRequestBySearchQueryMock: PullRequestBySearchQueryResponse
             },
           },
           mergeCommit: {
+            committedDate: '2021-01-01T00:00:00',
             oid: '511e4543a7828cf0cdb157b88b01352947e0384f',
             message:
               '[APM] Handle ML errors (#72316)\n\n* [APM] Handle ML errors\r\n\r\n* Add capability check\r\n\r\n* Improve test\r\n\r\n* Address Caue’s feedback\r\n\r\n* Move getSeverity\r\n\r\n* Fix tsc\r\n\r\n* Fix copy',

@@ -40,7 +40,7 @@ export type ConfigOptions = Partial<{
   multipleBranches: boolean;
   multipleCommits: boolean;
   noVerify: boolean;
-  path: string;
+  commitPaths: string[];
   prDescription: string;
   prFilter: string;
   prTitle: string;

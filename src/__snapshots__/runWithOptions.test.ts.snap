@@ -88,6 +88,7 @@ Array [
             "name": "1. Add 👻 (2e63475c) ",
             "short": "2e63475c",
             "value": Object {
+              "committedDate": "2021-12-24T00:00:00Z",
               "existingTargetPullRequests": Array [],
               "formattedMessage": "Add 👻 (2e63475c)",
               "originalMessage": "Add 👻",
@@ -101,6 +102,7 @@ Array [
             "name": "2. Add witch (#85) ",
             "short": "#85 (f3b618b9)",
             "value": Object {
+              "committedDate": "2021-12-23T00:00:00Z",
               "existingTargetPullRequests": Array [],
               "formattedMessage": "Add witch (#85)",
               "originalMessage": "Add witch (#85)",
@@ -114,6 +116,7 @@ Array [
             "name": "3. Add SF mention (#80) 6.3",
             "short": "#80 (79cf1845)",
             "value": Object {
+              "committedDate": "2021-12-22T00:00:00Z",
               "existingTargetPullRequests": Array [
                 Object {
                   "branch": "6.3",
@@ -137,6 +140,7 @@ Array [
             "name": "4. Add backport config (3827bbba) ",
             "short": "3827bbba",
             "value": Object {
+              "committedDate": "2021-12-21T00:00:00Z",
               "existingTargetPullRequests": Array [],
               "formattedMessage": "Add backport config (3827bbba)",
               "originalMessage": "Add backport config",
@@ -150,6 +154,7 @@ Array [
             "name": "5. Initial commit (5ea0da55) ",
             "short": "5ea0da55",
             "value": Object {
+              "committedDate": "2021-12-20T00:00:00Z",
               "existingTargetPullRequests": Array [],
               "formattedMessage": "Initial commit (5ea0da55)",
               "originalMessage": "Initial commit",

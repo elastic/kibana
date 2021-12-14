@@ -81,31 +81,32 @@ Array [
       $maxNumber: Int!
       $sourceBranch: String!
       $authorId: ID
-      $historyPath: String
     ) {
       repository(owner: $repoOwner, name: $repoName) {
         ref(qualifiedName: $sourceBranch) {
           target {
             ... on Commit {
-              history(
-                first: $maxNumber
-                author: { id: $authorId }
-                path: $historyPath
-              ) {
-                edges {
-                  node {
-                    oid
-                    message
-                    associatedPullRequests(first: 1) {
-                      edges {
-                        node {
-                          ...ExistingTargetPullRequests
-                        }
-                      }
-                    }
-                  }
-                }
-              }
+              
+  _0: history(
+    first: $maxNumber
+    author: { id: $authorId }
+    
+  ) {
+    edges {
+      node {
+        oid
+        message
+        committedDate
+        associatedPullRequests(first: 1) {
+          edges {
+            node {
+              ...ExistingTargetPullRequests
+            }
+          }
+        }
+      }
+    }
+  }
             }
           }
         }
@@ -123,6 +124,7 @@ Array [
       }
     }
     mergeCommit {
+      committedDate
       oid
       message
     }
@@ -161,11 +163,9 @@ Array [
       }
     }
   }
-
   ",
     "variables": Object {
       "authorId": "sqren_author_id",
-      "historyPath": null,
       "maxNumber": 10,
       "repoName": "backport-demo",
       "repoOwner": "backport-org",
@@ -256,31 +256,32 @@ Array [
       $maxNumber: Int!
       $sourceBranch: String!
       $authorId: ID
-      $historyPath: String
     ) {
       repository(owner: $repoOwner, name: $repoName) {
         ref(qualifiedName: $sourceBranch) {
           target {
             ... on Commit {
-              history(
-                first: $maxNumber
-                author: { id: $authorId }
-                path: $historyPath
-              ) {
-                edges {
-                  node {
-                    oid
-                    message
-                    associatedPullRequests(first: 1) {
-                      edges {
-                        node {
-                          ...ExistingTargetPullRequests
-                        }
-                      }
-                    }
-                  }
-                }
-              }
+              
+  _0: history(
+    first: $maxNumber
+    author: { id: $authorId }
+    
+  ) {
+    edges {
+      node {
+        oid
+        message
+        committedDate
+        associatedPullRequests(first: 1) {
+          edges {
+            node {
+              ...ExistingTargetPullRequests
+            }
+          }
+        }
+      }
+    }
+  }
             }
           }
         }
@@ -298,6 +299,7 @@ Array [
       }
     }
     mergeCommit {
+      committedDate
       oid
       message
     }
@@ -336,11 +338,9 @@ Array [
       }
     }
   }
-
   ",
     "variables": Object {
       "authorId": "sqren_author_id",
-      "historyPath": null,
       "maxNumber": 10,
       "repoName": "backport-demo",
       "repoOwner": "backport-org",

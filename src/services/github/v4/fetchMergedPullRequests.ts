@@ -1,10 +1,9 @@
-import difference from 'lodash.difference';
+import { difference } from 'lodash';
 import { ValidConfigOptions } from '../../../options/options';
 import { apiRequestV4 } from './apiRequestV4';
 import { fetchDefaultBranch } from './fetchDefaultBranch';
 import {
   pullRequestFragment,
-  pullRequestFragmentName,
   PullRequestNode,
   getExistingTargetPullRequests,
   getPullRequestLabels,
@@ -32,7 +31,7 @@ export async function fetchMergedPullRequests(
                   associatedPullRequests(first: 1) {
                     edges {
                       node {
-                        ...${pullRequestFragmentName}
+                        ...${pullRequestFragment.name}
                       }
                     }
                   }
@@ -45,7 +44,7 @@ export async function fetchMergedPullRequests(
     }
   }
 
-    ${pullRequestFragment}
+    ${pullRequestFragment.source}
   `;
 
   // TODO: It should be possible to delete this since defaultBranch is already fetched during startup

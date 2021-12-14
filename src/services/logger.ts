@@ -1,5 +1,5 @@
 import dedent from 'dedent';
-import isString from 'lodash.isstring';
+import { isString } from 'lodash';
 import safeJsonStringify from 'safe-json-stringify';
 import winston, { format } from 'winston';
 import { ConfigOptions } from '../options/ConfigOptions';

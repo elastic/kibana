@@ -301,6 +301,7 @@ describe('cherrypick', () => {
   } as ValidConfigOptions;
 
   const commit: Commit = {
+    committedDate: '2021-01-25T00:00:00',
     sourceBranch: '7.x',
     formattedMessage: '',
     originalMessage: '',
