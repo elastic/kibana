@@ -10,19 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { isCompleteResponse, ISearchSource } from '../../../../../data/public';
 import { DataViewType } from '../../../../../data_views/common';
-import { Adapters } from '../../../../../inspector/common';
+import { FetchDeps } from './fetch_all';
 
 export function fetchTotalHits(
   searchSource: ISearchSource,
-  {
-    abortController,
-    inspectorAdapters,
-    searchSessionId,
-  }: {
-    abortController: AbortController;
-    inspectorAdapters: Adapters;
-    searchSessionId: string;
-  }
+  { abortController, inspectorAdapters, searchSessionId }: FetchDeps
 ) {
   searchSource.setField('trackTotalHits', true);
   searchSource.setField('size', 0);

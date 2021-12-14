@@ -12,14 +12,17 @@ import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { IKibanaSearchResponse } from 'src/plugins/data/common';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { FetchDeps } from './fetch_all';
 
-const getDeps = () => ({
-  abortController: new AbortController(),
-  inspectorAdapters: { requests: new RequestAdapter() },
-  onResults: jest.fn(),
-  searchSessionId: '123',
-  services: discoverServiceMock,
-});
+const getDeps = () =>
+  ({
+    abortController: new AbortController(),
+    inspectorAdapters: { requests: new RequestAdapter() },
+    onResults: jest.fn(),
+    searchSessionId: '123',
+    services: discoverServiceMock,
+    savedSearch: savedSearchMock,
+  } as unknown as FetchDeps);
 
 describe('test fetchDocuments', () => {
   test('resolves with returned documents', async () => {

@@ -14,6 +14,7 @@ import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { calculateBounds, IKibanaSearchResponse } from '../../../../../data/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FetchDeps } from './fetch_all';
 
 describe('test fetchCharts', () => {
   test('updateSearchSource helper function', () => {
@@ -62,6 +63,7 @@ describe('test fetchCharts', () => {
       data: discoverServiceMock.data,
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
+      savedSearch: savedSearchMockWithTimeField,
       searchSessionId: '123',
     };
     deps.data.query.timefilter.timefilter.getTime = () => {
@@ -115,8 +117,9 @@ describe('test fetchCharts', () => {
       data: discoverServiceMock.data,
       inspectorAdapters: { requests: new RequestAdapter() },
       onResults: jest.fn(),
+      savedSearch: savedSearchMockWithTimeField,
       searchSessionId: '123',
-    };
+    } as unknown as FetchDeps;
 
     savedSearchMockWithTimeField.searchSource.fetch$ = () => throwErrorRx({ msg: 'Oh noes!' });
 
