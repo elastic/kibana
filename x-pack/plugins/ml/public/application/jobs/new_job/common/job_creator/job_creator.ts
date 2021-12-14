@@ -370,7 +370,7 @@ export class JobCreator {
   }
 
   public get timeFieldName(): string {
-    return this._job_config.data_description.time_field;
+    return this._job_config.data_description.time_field!;
   }
 
   public set timeFieldName(fieldName: string) {
