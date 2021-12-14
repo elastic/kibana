@@ -316,6 +316,11 @@ async function attemptToCreateCommand(
     );
 
     // @ts-expect-error
+    await session.sendDevToolsCommand('Network.setCacheDisabled', {
+      cacheDisabled: true,
+    });
+
+    // @ts-expect-error
     session.setNetworkConditions({
       offline: false,
       latency,
