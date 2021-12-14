@@ -411,6 +411,8 @@ export const dispatchUpdateTimeline =
     ruleNote,
   }: UpdateTimeline): (() => void) =>
   () => {
+    console.log('timeline index names');
+    console.log(timeline.indexNames);
     if (!isEmpty(timeline.indexNames)) {
       dispatch(
         sourcererActions.setSelectedDataView({
@@ -424,6 +426,7 @@ export const dispatchUpdateTimeline =
       timeline.status === TimelineStatus.immutable &&
       timeline.timelineType === TimelineType.template
     ) {
+      console.log('timeline status');
       dispatch(
         dispatchSetRelativeRangeDatePicker({
           id: 'timeline',
@@ -434,6 +437,7 @@ export const dispatchUpdateTimeline =
         })
       );
     } else {
+      console.log('timeline NOT status');
       dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
     }
     dispatch(

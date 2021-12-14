@@ -57,6 +57,7 @@ export const useInvestigateInTimeline = ({
 
   const createTimeline = useCallback(
     ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
+      console.log('CREATING TIMELINE');
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       dispatchUpdateTimeline(dispatch)({
         duplicate: true,
@@ -103,9 +104,7 @@ export const useInvestigateInTimeline = ({
         searchStrategyClient,
         updateTimelineIsLoading,
       });
-    }
-
-    if (ecsRowData != null) {
+    } else if (ecsRowData != null) {
       console.log('ecsRowData');
       await sendAlertToTimelineAction({
         createTimeline,
