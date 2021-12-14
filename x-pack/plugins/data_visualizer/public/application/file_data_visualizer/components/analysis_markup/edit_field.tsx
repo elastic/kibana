@@ -20,7 +20,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FindFileStructureResponse, InputOverrides } from '../../../../../../file_upload/common';
 import { createUrlOverrides } from '../../../common/components/utils/utils';
 
