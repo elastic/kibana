@@ -48,11 +48,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
+  // FLAKY: https://github.com/elastic/kibana/issues/120056
+  registry.when.skip(
     'Instance details when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
-      describe('fetch instance details', () => {
+      describe.skip('fetch instance details', () => {
         let response: {
           status: number;
           body: ServiceOverviewInstanceDetails;
