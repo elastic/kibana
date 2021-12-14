@@ -158,24 +158,16 @@ describe('handleClusterStats', () => {
       },
     };
 
-    const req = {
-      server: {
-        config: () => ({
-          get: () => 'abc',
-        }),
-      },
-    };
-
-    const clusters = handleClusterStats(response, req);
+    const clusters = handleClusterStats(response);
 
     expect(clusters.length).toEqual(3);
-    expect(clusters[0].ccs).toBe('abc');
+    expect(clusters[0].ccs).toBe(undefined);
     expect(clusters[0].cluster_uuid).toBe(validLicenseClusterUuid);
     expect(clusters[0].license).toBe(validLicense);
     expect(clusters[1].ccs).toEqual('abc');
     expect(clusters[1].cluster_uuid).toEqual('xyz');
     expect(clusters[1].license).toBe(validLicense);
-    expect(clusters[2].ccs).toEqual('abc');
+    expect(clusters[2].ccs).toEqual('local_cluster');
     expect(clusters[2].cluster_uuid).toBe(validLicenseClusterUuid);
     expect(clusters[2].license).toBe(validLicense);
   });
