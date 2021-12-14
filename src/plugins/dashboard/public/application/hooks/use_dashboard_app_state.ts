@@ -265,7 +265,7 @@ export const useDashboardAppState = ({
         .subscribe(async (states) => {
           const [lastSaved, current] = states;
           const unsavedChanges = await diffDashboardState({
-            getEmbeddable: dashboardContainer.untilEmbeddableLoaded,
+            getEmbeddable: (id: string) => dashboardContainer.untilEmbeddableLoaded(id),
             originalState: lastSaved,
             newState: current,
           });

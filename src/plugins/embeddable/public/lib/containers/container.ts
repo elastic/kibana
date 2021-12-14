@@ -197,7 +197,7 @@ export abstract class Container<
     });
   }
 
-  public async isInputEqual(lastInput: TContainerInput) {
+  public async getExplicitInputIsEqual(lastInput: TContainerInput) {
     const { panels: lastPanels, ...restOfLastInput } = lastInput;
     const { panels: currentPanels, ...restOfCurrentInput } = this.getInput();
     const otherInputIsEqual = isEqual(restOfLastInput, restOfCurrentInput);
@@ -216,7 +216,7 @@ export abstract class Container<
       const currentEmbeddable = await this.untilEmbeddableLoaded(id);
       const lastPanelInput = lastPanels[id].explicitInput;
       if (isErrorEmbeddable(currentEmbeddable)) continue;
-      if (currentEmbeddable.isInputEqual(lastPanelInput)) {
+      if (currentEmbeddable.getExplicitInputIsEqual(lastPanelInput)) {
         return false;
       }
     }

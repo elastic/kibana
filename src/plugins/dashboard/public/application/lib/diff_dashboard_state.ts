@@ -113,18 +113,15 @@ const getFiltersAreEqual = (
   );
 };
 
-const getOptionsAreEqual = (
-  optionsA: DashboardOptions,
-  optionsB: DashboardOptions
-): { hasChanged: boolean; changeString?: string } => {
+const getOptionsAreEqual = (optionsA: DashboardOptions, optionsB: DashboardOptions): boolean => {
   const optionKeys = [
     ...(Object.keys(optionsA) as Array<keyof DashboardOptions>),
     ...(Object.keys(optionsB) as Array<keyof DashboardOptions>),
   ];
   for (const key of optionKeys) {
-    if (Boolean(optionsA[key]) !== Boolean(optionsB[key])) return { hasChanged: false };
+    if (Boolean(optionsA[key]) !== Boolean(optionsB[key])) return false;
   }
-  return { hasChanged: true };
+  return true;
 };
 
 const getPanelsAreEqual = async (
@@ -157,7 +154,7 @@ const getPanelsAreEqual = async (
 
     // the position and type of this embeddable is equal. Now we compare the embeddable input
     const embeddable = await getEmbeddable(embeddableId);
-    if (!embeddable.getExplicitInputIsEqual(originalExplicitInput)) return false;
+    if (!(await embeddable.getExplicitInputIsEqual(originalExplicitInput))) return false;
   }
   return true;
 };

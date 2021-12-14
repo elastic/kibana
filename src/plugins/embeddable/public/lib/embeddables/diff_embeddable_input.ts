@@ -7,8 +7,23 @@
  */
 
 import fastIsEqual from 'fast-deep-equal';
-import { pick } from 'lodash';
+import { pick, omit } from 'lodash';
 import { EmbeddableInput } from '.';
+
+// list out the keys from the EmbeddableInput type to allow lodash to pick them later
+const allGenericInputKeys: Readonly<Array<keyof EmbeddableInput>> = [
+  'lastReloadRequestTime',
+  'executionContext',
+  'searchSessionId',
+  'hidePanelTitles',
+  'disabledActions',
+  'disableTriggers',
+  'enhancements',
+  'syncColors',
+  'viewMode',
+  'title',
+  'id',
+] as const;
 
 const genericInputKeysToCompare = [
   'hidePanelTitles',
@@ -25,6 +40,12 @@ type GenericEmbedableInputToCompare = Pick<
   EmbeddableInput,
   typeof genericInputKeysToCompare[number]
 >;
+
+export const omitGenericEmbeddableInput = <
+  I extends Partial<EmbeddableInput> = Partial<EmbeddableInput>
+>(
+  input: I
+): Omit<I, keyof EmbeddableInput> => omit(input, allGenericInputKeys);
 
 export const genericEmbeddableInputIsEqual = (
   currentInput: Partial<EmbeddableInput>,

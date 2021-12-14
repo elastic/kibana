@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
+import fastIsEqual from 'fast-deep-equal';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
@@ -17,7 +18,9 @@ import {
   Embeddable,
   IContainer,
   ReferenceOrValueEmbeddable,
+  genericEmbeddableInputIsEqual,
   VALUE_CLICK_TRIGGER,
+  omitGenericEmbeddableInput,
 } from '../../../../../src/plugins/embeddable/public';
 import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
 import {
@@ -214,6 +217,18 @@ export class MapEmbeddable
       showSaveModal: true,
       saveModalTitle: this.getTitle(),
     });
+  }
+
+  public async getExplicitInputIsEqual(
+    lastInput: Partial<MapByValueInput | MapByReferenceInput>
+  ): Promise<boolean> {
+    const currentInput = this.getExplicitInput();
+    if (!genericEmbeddableInputIsEqual(lastInput, currentInput)) return false;
+
+    // generic embeddable input is equal, now we compare map specific input elements, ignoring 'mapBuffer'.
+    const lastMapInput = omitGenericEmbeddableInput(_.omit(lastInput, 'mapBuffer'));
+    const currentMapInput = omitGenericEmbeddableInput(_.omit(lastInput, 'mapBuffer'));
+    return fastIsEqual(lastMapInput, currentMapInput);
   }
 
   public async getInputAsValueType(): Promise<MapByValueInput> {

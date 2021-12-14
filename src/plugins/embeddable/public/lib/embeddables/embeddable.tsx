@@ -16,7 +16,7 @@ import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
-import { genericEmbeddableInputIsEqual } from './diff_embeddable_input';
+import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
@@ -133,9 +133,10 @@ export abstract class Embeddable<
   }
 
   public async getExplicitInputIsEqual(lastInput: Partial<TEmbeddableInput>): Promise<boolean> {
+    const currentInput = this.getExplicitInput();
     return (
-      genericEmbeddableInputIsEqual(lastInput, this.getExplicitInput()) &&
-      fastIsEqual(lastInput, this.getExplicitInput())
+      genericEmbeddableInputIsEqual(lastInput, currentInput) &&
+      fastIsEqual(omitGenericEmbeddableInput(lastInput), omitGenericEmbeddableInput(currentInput))
     );
   }
 
