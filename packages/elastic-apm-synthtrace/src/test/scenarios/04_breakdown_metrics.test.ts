@@ -10,6 +10,7 @@ import { apm } from '../../lib/apm';
 import { timerange } from '../../lib/timerange';
 import { getBreakdownMetrics } from '../../lib/apm/utils/get_breakdown_metrics';
 import { ApmFields } from '../../lib/apm/apm_fields';
+import { streamProcess } from '../../lib/interval';
 
 describe('breakdown metrics', () => {
   let events: ApmFields[];
@@ -24,12 +25,12 @@ describe('breakdown metrics', () => {
     const javaService = apm.service('opbeans-java', 'production', 'java');
     const javaInstance = javaService.instance('instance-1');
 
-    const start = new Date('2021-01-01T00:00:00.000Z').getTime();
+    const start = new Date('2021-01-01T00:00:00.000Z');
 
-    const range = timerange(start, start + INTERVALS * 30 * 1000);
+    const range = timerange(start, new Date(start.getTime() + INTERVALS * 30 * 1000));
 
-    events = getBreakdownMetrics([
-      ...range
+    events = Array.from(streamProcess([getBreakdownMetrics],
+      range
         .interval('30s')
         .rate(LIST_RATE)
         .flatMap((timestamp) =>
@@ -46,7 +47,7 @@ describe('breakdown metrics', () => {
             )
             .serialize()
         ),
-      ...range
+      range
         .interval('30s')
         .rate(ID_RATE)
         .flatMap((timestamp) =>
@@ -67,8 +68,8 @@ describe('breakdown metrics', () => {
                 )
             )
             .serialize()
-        ),
-    ]).filter((event) => event['processor.event'] === 'metric');
+        )
+    )).filter((event) => event['processor.event'] === 'metric');
   });
 
   it('generates the right amount of breakdown metrics', () => {
