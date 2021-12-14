@@ -97,7 +97,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
 
     hasScreenshot && {
       title: i18n.translate('xpack.reporting.listing.infoPanel.dimensionsInfoHeight', {
-        defaultMessage: 'Height (in pixels)',
+        defaultMessage: 'Height in pixels',
       }),
       description:
         info.layout?.dimensions?.height != null
@@ -106,7 +106,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
     },
     hasScreenshot && {
       title: i18n.translate('xpack.reporting.listing.infoPanel.dimensionsInfoWidth', {
-        defaultMessage: 'Width (in pixels)',
+        defaultMessage: 'Width in pixels',
       }),
       description:
         info.layout?.dimensions?.width != null ? Math.ceil(info.layout.dimensions.width) : UNKNOWN,
@@ -182,15 +182,23 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
           </EuiCallOut>
         </>
       )}
-      <EuiTitle size="xs">
-        <h3>Output</h3>
+      <EuiTitle size="s">
+        <h3>
+          {i18n.translate('xpack.reporting.listing.infoPanel.outputSectionTitle', {
+            defaultMessage: 'Output',
+          })}
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiDescriptionList listItems={outputInfo} type="column" align="center" compressed />
 
       <EuiSpacer />
-      <EuiTitle size="xs">
-        <h3>Timestamps</h3>
+      <EuiTitle size="s">
+        <h3>
+          {i18n.translate('xpack.reporting.listing.infoPanel.timestampSectionTitle', {
+            defaultMessage: 'Timestamps',
+          })}
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiDescriptionList listItems={timestampsInfo} type="column" align="center" compressed />

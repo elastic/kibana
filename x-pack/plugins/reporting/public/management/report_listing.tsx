@@ -420,13 +420,13 @@ class ReportListingUi extends Component<Props, State> {
           },
           {
             name: i18n.translate('xpack.reporting.listing.table.openInKibanaAppLabel', {
-              defaultMessage: 'Open in Kibana App',
+              defaultMessage: 'Open in Kibana',
             }),
             'data-test-subj': 'reportOpenInKibanaApp',
             description: i18n.translate(
               'xpack.reporting.listing.table.openInKibanaAppDescription',
               {
-                defaultMessage: 'Open the Kibana App where this report was generated.',
+                defaultMessage: 'Open the Kibana app where this report was generated.',
               }
             ),
             available: (job) => job.canLinkToKibanaApp,

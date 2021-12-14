@@ -97,7 +97,7 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ onClose, job }) => 
       }}
     >
       {i18n.translate('xpack.reporting.reportInfoFlyout.openInKibanaAppButtonLabel', {
-        defaultMessage: 'Open in Kibana App',
+        defaultMessage: 'Open in Kibana',
       })}
     </EuiContextMenuItem>,
   ];
