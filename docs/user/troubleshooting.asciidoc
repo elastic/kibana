@@ -76,7 +76,10 @@ To simplify the investigation of such cases, the search slow log file includes t
 WARNING: At the moment, {kib} can only highlight cases where a slow query originated from a {kib} visualization, *Lens*, *Discover*, or *Alerting*.
 
 For example, if a request to {es} was initiated by a Vega visualization on a dashboard, you will see the following in the slow logs:
-`"source": { "id": "c89d1ab3-b4a7-4920-a64a-22a910a413b0;kibana:application:dashboard:edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b;visualization:Vega:cb099a20-ea66-11eb-9425-113343a037e3" }`
+[source,json]
+----
+"source": { "id": "c89d1ab3-b4a7-4920-a64a-22a910a413b0;kibana:application:dashboard:edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b;visualization:Vega:cb099a20-ea66-11eb-9425-113343a037e3" }
+----
 
 Take a closer look at the format of the string.
 The id value starts with  `c89d1ab3-b4a7-4920-a64a-22a910a413b0`, which is a unique identifier of a request set by the {kib} server.
@@ -95,5 +98,17 @@ Now, you can see the request to {es} has been initiated by the `[Logs] Unique Vi
 
 [source,text]
 ----
-[DEBUG][execution_context] stored the execution context: {"parent":{"type":"application","name":"dashboard","id":"edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b","description":"[Logs] Web Traffic","url":"/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b"},"type":"visualization","name":"Vega","id":"cb099a20-ea66-11eb-9425-113343a037e3","description":"[Logs] Unique Visitor Heatmap","url":"/app/visualize#/edit/cb099a20-ea66-11eb-9425-113343a037e3"}
+[DEBUG][execution_context] stored the execution context: {
+  "parent": {
+    "type": "application",
+    "name": "dashboard",
+    "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+    "description": "[Logs] Web Traffic","url":"/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b"
+  },
+  "type": "visualization",
+  "name": "Vega",
+  "id": "cb099a20-ea66-11eb-9425-113343a037e3",
+  "description": "[Logs] Unique Visitor Heatmap",
+  "url": "/app/visualize#/edit/cb099a20-ea66-11eb-9425-113343a037e3"
+}
 ----
