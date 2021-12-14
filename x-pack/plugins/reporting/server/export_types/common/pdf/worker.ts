@@ -6,7 +6,22 @@
  */
 
 import { Ensure, SerializableRecord } from '@kbn/utility-types';
-import type { TemplateLayout } from './get_template_copy';
+
+export type TemplateLayout = Ensure<
+  {
+    orientation: 'landscape' | 'portrait' | undefined;
+    useReportingBranding: boolean;
+    hasHeader: boolean;
+    hasFooter: boolean;
+    pageSize:
+      | string
+      | {
+          width: number;
+          height: number | 'auto';
+        };
+  },
+  SerializableRecord
+>;
 
 export type PdfWorkerData = Ensure<
   {
