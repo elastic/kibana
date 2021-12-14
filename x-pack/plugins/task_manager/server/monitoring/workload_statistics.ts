@@ -452,15 +452,12 @@ function hasAggregations(
   );
 }
 export interface WorkloadAggregationResponse {
-  // @ts-expect-error is not compatible with AggregationsAggregate
   taskType: TaskTypeAggregation;
-  // @ts-expect-error is not compatible with AggregationsAggregate
   schedule: ScheduleAggregation;
   idleTasks: IdleTasksAggregation;
   nonRecurringTasks: {
     doc_count: number;
   };
-  // @ts-expect-error is not compatible with AggregationsAggregate
   ownerIds: {
     ownerIds: {
       value: number;
