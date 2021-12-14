@@ -10,39 +10,45 @@ import { GeoPointFormat } from './geo_point';
 
 describe('GeoPoint Format', () => {
   describe('output format', () => {
-    test('"string" format', () => {
+    test('"string"', () => {
       const geoPointFormat = new GeoPointFormat(
         {
           transform: 'string',
         },
         jest.fn()
       );
-      expect(geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] })).toBe('10.1,125.6');
+      expect(geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] })).toBe(
+        '10.1,125.6'
+      );
     });
 
-    test('"WKT" format', () => {
+    test('"WKT"', () => {
       const geoPointFormat = new GeoPointFormat(
         {
           transform: 'wkt',
         },
         jest.fn()
       );
-      expect(geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] })).toBe('POINT(125.6 10.1)');
+      expect(geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] })).toBe(
+        'POINT(125.6 10.1)'
+      );
     });
   });
 
   describe('inputs', () => {
-    test('convert Geopoint expressed as an GeoJson geometry', () => {
+    test('Geopoint expressed as an GeoJson geometry', () => {
       const geoPointFormat = new GeoPointFormat(
         {
           transform: 'string',
         },
         jest.fn()
       );
-      expect(geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] })).toBe('10.1,125.6');
+      expect(geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] })).toBe(
+        '10.1,125.6'
+      );
     });
 
-    test('convert Geopoint expressed as an object, with lat and lon keys', () => {
+    test('Geopoint expressed as an object, with lat and lon keys', () => {
       const geoPointFormat = new GeoPointFormat(
         {
           transform: 'string',
@@ -52,7 +58,7 @@ describe('GeoPoint Format', () => {
       expect(geoPointFormat.convert({ lat: 10.1, lon: 125.6 })).toBe('10.1,125.6');
     });
 
-    test('convert Geopoint expressed as a string with the format: "lat,lon"', () => {
+    test('Geopoint expressed as a string with the format: "lat,lon"', () => {
       const geoPointFormat = new GeoPointFormat(
         {
           transform: 'string',
@@ -62,7 +68,7 @@ describe('GeoPoint Format', () => {
       expect(geoPointFormat.convert('10.1,125.6')).toBe('10.1,125.6');
     });
 
-    test('convert Geopoint expressed as a Well-Known Text POINT with the format: "POINT(lon lat)"', () => {
+    test('Geopoint expressed as a Well-Known Text POINT with the format: "POINT(lon lat)"', () => {
       const geoPointFormat = new GeoPointFormat(
         {
           transform: 'string',
@@ -72,7 +78,7 @@ describe('GeoPoint Format', () => {
       expect(geoPointFormat.convert('POINT(125.6 10.1)')).toBe('10.1,125.6');
     });
 
-    test('convert bad input', () => {
+    test('non-geopoint', () => {
       const geoPointFormat = new GeoPointFormat(
         {
           transform: 'string',

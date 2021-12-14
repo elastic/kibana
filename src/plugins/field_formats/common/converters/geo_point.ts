@@ -10,7 +10,7 @@ import { Point } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import { FIELD_FORMAT_IDS } from '../types';
+import { FIELD_FORMAT_IDS, TextContextTypeConvert } from '../types';
 import { asPrettyString } from '../utils';
 
 const TRANSFORM_OPTIONS = [
@@ -40,7 +40,7 @@ const TRANSFORM_OPTIONS = [
  * When value is read from fields API, its a GeoJSON Point geometry
  * When value is ready from source, its as provided during ingest which supports multiple formats
  */
-function toPoint(val: Point | { lat: number, lon: number } | string): Point | null {
+function toPoint(val: Point | { lat: number; lon: number } | string): Point | null {
   let lat: number = NaN;
   let lon: number = NaN;
 
@@ -65,13 +65,19 @@ function toPoint(val: Point | { lat: number, lon: number } | string): Point | nu
   return Number.isNaN(lat) || Number.isNaN(lon)
     ? null
     : {
-      type: 'Point',
-      coordinates: [lon, lat]
-    };
+        type: 'Point',
+        coordinates: [lon, lat],
+      };
 }
 
-function isPoint(val: Point | { lat: number, lon: number } | string): boolean {
-  return typeof val === 'object' && 'type' in val && val.type === 'Point' && 'coordinates' in val && val.coordinates.length === 2;
+function isPoint(val: Point | { lat: number; lon: number } | string): boolean {
+  return (
+    typeof val === 'object' &&
+    'type' in val &&
+    val.type === 'Point' &&
+    'coordinates' in val &&
+    val.coordinates.length === 2
+  );
 }
 
 /** @public */
@@ -89,12 +95,12 @@ export class GeoPointFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = (val: Point | { lat: number, lon: number } | string) => {
+  textConvert: TextContextTypeConvert = (val: Point | { lat: number; lon: number } | string) => {
     if (!val) {
       return '';
     }
 
-    const point = isPoint(val) ? val : toPoint(val);
+    const point: Point | null = isPoint(val) ? (val as Point) : toPoint(val);
     if (!point) {
       return asPrettyString(val);
     }
