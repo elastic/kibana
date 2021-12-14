@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { Filter } from '../../../../../../../common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
-import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
+import { Filter } from '../../../../../../common/custom_link/custom_link_types';
+import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
+import { callApmApi } from '../../../../../services/rest/createCallApmApi';
 import { replaceTemplateVariables, convertFiltersToQuery } from './helper';
 
 export interface LinkPreviewProps {
@@ -70,12 +70,9 @@ export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
     <>
       <EuiTitle size="xs">
         <h3>
-          {i18n.translate(
-            'xpack.apm.settings.customizeUI.customLink.previewSectionTitle',
-            {
-              defaultMessage: 'Preview',
-            }
-          )}
+          {i18n.translate('xpack.apm.settings.customLink.previewSectionTitle', {
+            defaultMessage: 'Preview',
+          })}
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
@@ -88,10 +85,9 @@ export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
         >
           {label
             ? label
-            : i18n.translate(
-                'xpack.apm.settings.customizeUI.customLink.default.label',
-                { defaultMessage: 'Elastic.co' }
-              )}
+            : i18n.translate('xpack.apm.settings.customLink.default.label', {
+                defaultMessage: 'Elastic.co',
+              })}
         </EuiText>
 
         <EuiText
@@ -109,10 +105,9 @@ export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
               {formattedUrl}
             </EuiLink>
           ) : (
-            i18n.translate(
-              'xpack.apm.settings.customizeUI.customLink.default.url',
-              { defaultMessage: 'https://www.elastic.co' }
-            )
+            i18n.translate('xpack.apm.settings.customLink.default.url', {
+              defaultMessage: 'https://www.elastic.co',
+            })
           )}
         </EuiText>
         <EuiSpacer />
@@ -120,7 +115,7 @@ export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
               {i18n.translate(
-                'xpack.apm.settings.customizeUI.customLink.linkPreview.descrition',
+                'xpack.apm.settings.customLink.linkPreview.descrition',
                 {
                   defaultMessage:
                     'Test your link with values from an example transaction document based on the filters above.',

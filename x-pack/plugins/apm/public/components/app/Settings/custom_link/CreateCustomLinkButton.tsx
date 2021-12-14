@@ -8,8 +8,8 @@
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { NO_PERMISSION_LABEL } from '../../../../../../common/custom_link';
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 export function CreateCustomLinkButton({ onClick }: { onClick: () => void }) {
   const { core } = useApmPluginContext();
@@ -24,10 +24,9 @@ export function CreateCustomLinkButton({ onClick }: { onClick: () => void }) {
         isDisabled={!canSave}
         data-test-subj="createButton"
       >
-        {i18n.translate(
-          'xpack.apm.settings.customizeUI.customLink.createCustomLink',
-          { defaultMessage: 'Create custom link' }
-        )}
+        {i18n.translate('xpack.apm.settings.customLink.createCustomLink', {
+          defaultMessage: 'Create custom link',
+        })}
       </EuiButton>
     </EuiToolTip>
   );

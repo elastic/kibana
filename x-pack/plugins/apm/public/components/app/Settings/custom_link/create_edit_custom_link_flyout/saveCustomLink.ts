@@ -10,8 +10,8 @@ import { NotificationsStart } from 'kibana/public';
 import {
   Filter,
   CustomLink,
-} from '../../../../../../../common/custom_link/custom_link_types';
-import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
+} from '../../../../../../common/custom_link/custom_link_types';
+import { callApmApi } from '../../../../../services/rest/createCallApmApi';
 
 export async function saveCustomLink({
   id,
@@ -53,19 +53,17 @@ export async function saveCustomLink({
     }
     toasts.addSuccess({
       iconType: 'check',
-      title: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.create.successed',
-        { defaultMessage: 'Link saved!' }
-      ),
+      title: i18n.translate('xpack.apm.settings.customLink.create.successed', {
+        defaultMessage: 'Link saved!',
+      }),
     });
   } catch (error) {
     toasts.addDanger({
-      title: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.create.failed',
-        { defaultMessage: 'Link could not be saved!' }
-      ),
+      title: i18n.translate('xpack.apm.settings.customLink.create.failed', {
+        defaultMessage: 'Link could not be saved!',
+      }),
       text: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.create.failed.message',
+        'xpack.apm.settings.customLink.create.failed.message',
         {
           defaultMessage:
             'Something went wrong when saving the link. Error: "{errorMessage}"',
