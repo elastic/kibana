@@ -7,10 +7,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiLink } from '@elastic/eui';
 import { Legacy } from '../../legacy_shims';
-import { mountReactNode } from '../../../../../../src/core/public/utils';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
 export interface EnableAlertResponse {
   isSufficientlySecure?: boolean;
@@ -22,13 +21,10 @@ const showApiKeyAndEncryptionError = () => {
   const settingsUrl = Legacy.shims.docLinks.links.alerting.generalSettings;
 
   Legacy.shims.toastNotifications.addWarning({
-    title: mountReactNode(
-      <FormattedMessage
-        id="xpack.monitoring.healthCheck.tlsAndEncryptionErrorTitle"
-        defaultMessage="Additional setup required"
-      />
-    ),
-    text: mountReactNode(
+    title: i18n.translate('xpack.monitoring.healthCheck.tlsAndEncryptionErrorTitle', {
+      defaultMessage: 'Additional setup required',
+    }),
+    text: toMountPoint(
       <div>
         <p>
           {i18n.translate('xpack.monitoring.healthCheck.tlsAndEncryptionError', {
@@ -41,7 +37,8 @@ const showApiKeyAndEncryptionError = () => {
             defaultMessage: 'Learn how.',
           })}
         </EuiLink>
-      </div>
+      </div>,
+      Legacy.shims.kibanaServices.theme
     ),
   });
 };
@@ -50,13 +47,10 @@ const showUnableToDisableWatcherClusterAlertsError = () => {
   const settingsUrl = Legacy.shims.docLinks.links.alerting.generalSettings;
 
   Legacy.shims.toastNotifications.addWarning({
-    title: mountReactNode(
-      <FormattedMessage
-        id="xpack.monitoring.healthCheck.unableToDisableWatches.title"
-        defaultMessage="Legacy cluster alerts still active"
-      />
-    ),
-    text: mountReactNode(
+    title: i18n.translate('xpack.monitoring.healthCheck.unableToDisableWatches.title', {
+      defaultMessage: 'Legacy cluster alerts still active',
+    }),
+    text: toMountPoint(
       <div>
         <p>
           {i18n.translate('xpack.monitoring.healthCheck.unableToDisableWatches.text', {
@@ -69,25 +63,24 @@ const showUnableToDisableWatcherClusterAlertsError = () => {
             defaultMessage: 'Learn more.',
           })}
         </EuiLink>
-      </div>
+      </div>,
+      Legacy.shims.kibanaServices.theme
     ),
   });
 };
 
 const showDisabledWatcherClusterAlertsError = () => {
   Legacy.shims.toastNotifications.addWarning({
-    title: mountReactNode(
-      <FormattedMessage
-        id="xpack.monitoring.healthCheck.disabledWatches.title"
-        defaultMessage="New alerts created"
-      />
-    ),
-    text: mountReactNode(
+    title: i18n.translate('xpack.monitoring.healthCheck.disabledWatches.title', {
+      defaultMessage: 'New alerts created',
+    }),
+    text: toMountPoint(
       <p>
         {i18n.translate('xpack.monitoring.healthCheck.disabledWatches.text', {
           defaultMessage: `Review the alert definition using Setup mode and configure additional action connectors to get notified via your favorite method.`,
         })}
-      </p>
+      </p>,
+      Legacy.shims.kibanaServices.theme
     ),
     'data-test-subj': 'alertsCreatedToast',
   });
