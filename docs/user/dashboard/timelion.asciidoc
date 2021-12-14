@@ -34,7 +34,7 @@ The fist parameter of the .es function is the parameter q (for query), which is 
 .es(*)
 .es(q=*)
 
-Multiple parameters are separated by comma. The .es function has another parameter called index, that can be used to specify an index pattern for this series, so the query won't be executed again all indexes (or whatever you changed the above mentioned setting to).
+Multiple parameters are separated by a comma. The .es function has another parameter called index, that can be used to specify {a-data-source} for this series, so the query won't be executed against all indexes (or whatever you changed the setting to).
 
 .es(q=*, index=logstash-*)
 

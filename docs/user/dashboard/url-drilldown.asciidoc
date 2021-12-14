@@ -202,7 +202,7 @@ Tip: Use in combination with <<helpers, date>> helper to format date.
 |
 | context.panel.indexPatternId +
 context.panel.indexPatternIds
-|Index pattern ids used by a panel.
+|The {data-source} IDs used by a panel.
 
 |
 | context.panel.savedObjectId

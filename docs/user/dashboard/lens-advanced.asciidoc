@@ -34,7 +34,7 @@ Open the visualization editor, then make sure the correct fields appear.
 
 . On the dashboard, click *Create visualization*.
 
-. Make sure the *kibana_sample_data_ecommerce* index appears, then set the <<set-time-filter,time filter>> to *Last 30 days*.
+. Make sure the *kibana_sample_data_ecommerce* {data-source} appears, then set the <<set-time-filter,time filter>> to *Last 30 days*.
 
 [discrete]
 [[custom-time-interval]]
