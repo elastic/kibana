@@ -23,10 +23,16 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
   let startMock;
 
   beforeAll(() => {
+    jest.useFakeTimers();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
     initDocumentation(docLinksServiceMock.createStartContract());
   });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments
     mockHttpRequest(startMock.http);

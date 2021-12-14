@@ -23,9 +23,14 @@ describe('Create Rollup Job, step 5: Metrics', () => {
   let startMock;
 
   beforeAll(() => {
+    jest.useFakeTimers();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
     initDocumentation(docLinksServiceMock.createStartContract());
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   beforeEach(() => {
