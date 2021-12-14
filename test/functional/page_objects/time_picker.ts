@@ -118,6 +118,7 @@ export class TimePickerPageObject extends FtrService {
   public async setAbsoluteRange(fromTime: string, toTime: string) {
     this.log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
     await this.showStartEndTimes();
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
     let panel!: WebElementWrapper;
 
     // set to time
@@ -174,9 +175,7 @@ export class TimePickerPageObject extends FtrService {
   }
 
   public async isOff() {
-    return await this.find.existsByCssSelector(
-      '.euiSuperDatePicker.euiFormControlLayout-isDisabled'
-    );
+    return await this.find.existsByCssSelector('.euiAutoRefresh input[disabled]');
   }
 
   public async getRefreshConfig(keepQuickSelectOpen = false) {
