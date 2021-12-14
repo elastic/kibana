@@ -88,33 +88,18 @@ exports.EcsCustomPropertyMappings = {
       // reporting specific fields
       reporting: {
         properties: {
-          appName: {
+          jobType: {
             type: 'keyword',
           },
           contentType: {
             type: 'keyword',
           },
-          jobType: {
-            type: 'keyword',
-          },
-          attempt: {
-            type: 'long',
-          },
-          status: {
-            type: 'keyword',
-          },
           csv: {
             properties: {
-              numColumns: {
-                type: 'long',
-              },
               byteLength: {
                 type: 'long',
               },
               numRows: {
-                type: 'long',
-              },
-              scrollTime: {
                 type: 'long',
               },
             },

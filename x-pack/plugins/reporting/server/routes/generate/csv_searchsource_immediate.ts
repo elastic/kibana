@@ -77,11 +77,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           },
           kibana: {
             reporting: {
-              appName: 'dashboard',
               jobType: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
-              status: 'processing',
               contentType: 'text/csv',
-              attempt: 1,
             },
           },
         });

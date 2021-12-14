@@ -140,15 +140,11 @@ export const EventSchema = schema.maybe(
         ),
         reporting: schema.maybe(
           schema.object({
-            appName: ecsString(),
             contentType: ecsString(),
             jobType: ecsString(),
-            attempt: ecsNumber(),
-            status: ecsString(),
             csv: schema.maybe(
               schema.object({
                 byteLength: ecsNumber(),
-                numColumns: ecsNumber(),
                 scrollTime: ecsNumber(),
               })
             ),

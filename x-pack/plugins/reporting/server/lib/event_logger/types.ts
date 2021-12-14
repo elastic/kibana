@@ -22,11 +22,8 @@ interface ActionBase<A extends string, K extends ActionKind, EventProvider> {
     provider: 'reporting';
     id: string;
     timezone: string;
-    created?: string;
-    end?: string;
-    duration?: number;
   };
-  kibana: { uuid?: string } & EventProvider;
+  kibana: EventProvider;
   user?: { name: string };
   log: {
     logger: 'reporting';
@@ -48,15 +45,17 @@ type ReportingAction<A extends string, K extends ActionKind> = ActionBase<
   {
     reporting: K extends 'event'
       ? {
-          appName: string;
           jobType: string;
           contentType: string;
-          attempt: number;
-          status: 'pending' | 'processing' | 'completed' | 'failed';
           csv?: K extends 'event' ? { numColumns?: number } : {};
         }
       : K extends 'metrics'
-      ? { csv?: { byteLength?: number; numRows?: number; scrollTime?: number } }
+      ? {
+          csv?: {
+            byteLength: number;
+            numRows: number;
+          };
+        }
       : {};
   }
 >;

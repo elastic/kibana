@@ -305,19 +305,10 @@
                 },
                 "reporting": {
                     "properties": {
-                        "appName": {
-                            "type": "keyword"
-                        },
-                        "contentType": {
-                            "type": "keyword"
-                        },
                         "jobType": {
                             "type": "keyword"
                         },
-                        "attempt": {
-                            "type": "long"
-                        },
-                        "status": {
+                        "contentType": {
                             "type": "keyword"
                         },
                         "csv": {
@@ -325,13 +316,7 @@
                                 "numRows": {
                                     "type": "long"
                                 },
-                                "numColumns": {
-                                    "type": "long"
-                                },
                                 "byteLength": {
-                                    "type": "long"
-                                },
-                                "scrollTime": {
                                     "type": "long"
                                 }
                             }
