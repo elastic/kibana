@@ -15,6 +15,8 @@ import {
   EuiSpacer,
   EuiAccordion,
   EuiIconTip,
+  htmlIdGenerator,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
@@ -60,6 +62,7 @@ function ofName(name?: string, count: number = 0) {
   });
 }
 
+const idPrefix = htmlIdGenerator()();
 const DEFAULT_SIZE = 3;
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
 
@@ -383,7 +386,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               />
             </>
           }
-          display="columnCompressed"
+          display="rowCompressed"
           fullWidth
         >
           <EuiSelect
@@ -417,10 +420,55 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
             defaultMessage: 'Rank direction',
           })}
-          display="columnCompressed"
+          display="rowCompressed"
           fullWidth
         >
-          <EuiSelect
+          <EuiButtonGroup
+            isFullWidth
+            legend={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
+              defaultMessage: 'Rank direction',
+            })}
+            data-test-subj="indexPattern-terms-orderDirection-groups"
+            name="orderDirection"
+            buttonSize="compressed"
+            aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
+              defaultMessage: 'Rank direction',
+            })}
+            options={[
+              {
+                id: `${idPrefix}asc`,
+                'data-test-subj': 'indexPattern-terms-orderDirection-groups-asc',
+                value: 'asc',
+                label: i18n.translate('xpack.lens.indexPattern.terms.orderAscending', {
+                  defaultMessage: 'Ascending',
+                }),
+              },
+              {
+                id: `${idPrefix}desc`,
+                'data-test-subj': 'indexPattern-terms-orderDirection-groups-desc',
+                value: 'desc',
+                label: i18n.translate('xpack.lens.indexPattern.terms.orderDescending', {
+                  defaultMessage: 'Descending',
+                }),
+              },
+            ]}
+            idSelected={`${idPrefix}${currentColumn.params.orderDirection}`}
+            onChange={(id) => {
+              const value = id.replace(
+                idPrefix,
+                ''
+              ) as TermsIndexPatternColumn['params']['orderDirection'];
+              updateLayer(
+                updateColumnParam({
+                  layer,
+                  columnId,
+                  paramName: 'orderDirection',
+                  value,
+                })
+              );
+            }}
+          />
+          {/* <EuiSelect
             compressed
             data-test-subj="indexPattern-terms-orderDirection"
             options={[
@@ -451,7 +499,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
               defaultMessage: 'Rank by',
             })}
-          />
+          /> */}
         </EuiFormRow>
         {!hasRestrictions && (
           <>
