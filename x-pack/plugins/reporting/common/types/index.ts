@@ -32,6 +32,7 @@ export interface ReportOutput extends TaskRunResult {
 
 export interface TaskRunResult {
   content_type: string | null;
+  num_rows: number;
   csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
   warnings?: string[];

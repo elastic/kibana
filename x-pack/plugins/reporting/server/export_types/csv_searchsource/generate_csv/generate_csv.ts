@@ -434,7 +434,7 @@ export class CsvGenerator {
       }
     }
 
-    this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
+    this.logger.debug(`Finished generating.`);
 
     // FIXME: https://github.com/elastic/kibana/issues/112186 -- find root cause
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
@@ -445,6 +445,7 @@ export class CsvGenerator {
     }
 
     return {
+      num_rows: this.csvRowCount,
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
       max_size_reached: this.maxSizeReached,

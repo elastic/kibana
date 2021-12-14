@@ -98,18 +98,13 @@ export function registerGenerateCsvFromSavedObjectImmediate(
             },
           });
 
-          const { content_type: jobOutputContentType }: TaskRunResult = await runTaskFn(
-            null,
-            req.body,
-            context,
-            stream,
-            req
-          );
+          const { content_type: jobOutputContentType, num_rows: numRows }: TaskRunResult =
+            await runTaskFn(null, req.body, context, stream, req);
           stream.end();
           const jobOutputContent = buffer.toString();
           const jobOutputSize = buffer.byteLength;
 
-          logger.info(`Job output size: ${jobOutputSize} bytes.`);
+          logger.info(`Job output size: ${jobOutputSize} bytes / ${numRows} rows.`);
 
           // convert null to undefined so the value can be sent to h.response()
           if (jobOutputContent === null) {
@@ -117,7 +112,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           }
 
           eventLog.logComplete('csv generation is complete', {
-            csv: { byteLength: jobOutputSize },
+            csv: { byteLength: jobOutputSize, numRows },
           });
 
           return res.ok({
