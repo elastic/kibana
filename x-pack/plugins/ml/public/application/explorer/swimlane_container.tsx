@@ -69,10 +69,6 @@ function getFormattedSeverityScore(score: number): string {
 const RESIZE_THROTTLE_TIME_MS = 500;
 const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
-/**
- * Minimum container height to make sure "No data" message is displayed without overflow.
- */
-const MIN_CONTAINER_HEIGHT = 40;
 
 const Y_AXIS_HEIGHT = 24;
 
@@ -251,12 +247,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     return isLoading
       ? containerHeightRef.current
       : // TODO update when elastic charts X label will be fixed
-        Math.max(
-          rowsCount * CELL_HEIGHT +
-            (showLegend ? LEGEND_HEIGHT : 0) +
-            (showYAxis ? Y_AXIS_HEIGHT : 0),
-          noDataWarning ? MIN_CONTAINER_HEIGHT : 0
-        );
+        rowsCount * CELL_HEIGHT +
+          (showLegend ? LEGEND_HEIGHT : 0) +
+          (showYAxis ? Y_AXIS_HEIGHT : 0);
   }, [isLoading, rowsCount]);
 
   useEffect(() => {
@@ -392,9 +385,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   );
 
   const onBrushEnd = (e: HeatmapBrushEvent) => {
-    if (!e.cells.length || showBrush) return;
+    if (!e.cells.length || !showBrush) return;
 
-    if (onCellsSelection) {
+    if (typeof onCellsSelection === 'function') {
       onCellsSelection({
         lanes: e.y as string[],
         times: e.x!.map((v) => (v as number) / 1000) as [number, number],
@@ -403,6 +396,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       });
     }
   };
+
+  if (!isLoading && !showSwimlane && noDataWarning) {
+    return <>{noDataWarning}</>;
+  }
 
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
@@ -509,7 +506,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                       />
                     </EuiText>
                   )}
-                  {!isLoading && !showSwimlane && noDataWarning ? noDataWarning : null}
                 </div>
               </div>
             </>
