@@ -15,7 +15,6 @@ import { stringify } from 'query-string';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
-  console.log(fields, '!!fields');
   const reason = fields[ALERT_REASON] ?? '-';
   const nodeTypeField = `${ALERT_RULE_PARAMETERS}.nodeType`;
   const nodeType = fields[nodeTypeField];
