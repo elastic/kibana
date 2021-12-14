@@ -124,6 +124,7 @@ describe('Event filter flyout', () => {
 
   it('should confirm form when button is enabled', async () => {
     component = render();
+
     mockedContext.store.dispatch({
       type: 'eventFiltersChangeForm',
       payload: {
@@ -135,6 +136,9 @@ describe('Event filter flyout', () => {
         hasNameError: false,
         hasOSError: false,
       },
+    });
+    await reactTestingLibrary.waitFor(() => {
+      expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
     });
     const confirmButton = component.getByTestId('add-exception-confirm-button');
 

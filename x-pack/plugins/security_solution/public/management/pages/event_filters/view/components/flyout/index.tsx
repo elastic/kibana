@@ -151,7 +151,13 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
         <EuiButton
           data-test-subj="add-exception-confirm-button"
           fill
-          disabled={formHasError || creationInProgress || (!!data && !enrichedData)}
+          disabled={
+            formHasError ||
+            creationInProgress ||
+            (!!data && !enrichedData) ||
+            policiesRequest.isLoading ||
+            policiesRequest.isRefetching
+          }
           onClick={() =>
             id
               ? dispatch({ type: 'eventFiltersUpdateStart' })
@@ -177,7 +183,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           )}
         </EuiButton>
       ),
-      [formHasError, creationInProgress, data, enrichedData, id, dispatch]
+      [formHasError, creationInProgress, data, enrichedData, id, dispatch, policiesRequest]
     );
 
     return (
@@ -214,7 +220,11 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          <EventFiltersForm allowSelectOs={!data} policies={policiesRequest?.data?.items ?? []} />
+          <EventFiltersForm
+            allowSelectOs={!data}
+            policies={policiesRequest?.data?.items ?? []}
+            arePoliciesLoading={policiesRequest.isLoading || policiesRequest.isRefetching}
+          />
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
