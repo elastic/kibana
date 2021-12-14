@@ -73,7 +73,7 @@ export class EMSSettings {
     if (this._config.emsLandingPageUrl !== DEFAULT_EMS_LANDING_PAGE_URL || !this.isEMSUrlSet()) {
       return this._config.emsLandingPageUrl!;
     } else {
-      return `${this.getEMSRoot()}/maps`;
+      return `${this.getEMSRoot()}/maps/`;
     }
   }
 

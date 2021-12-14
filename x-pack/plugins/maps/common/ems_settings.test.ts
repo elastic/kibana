@@ -138,7 +138,7 @@ describe('EMSSettings', () => {
         expect(emsSettings.getEMSFontLibraryUrl()).toBe(
           'https://localhost:8080/tile/fonts/{fontstack}/{range}.pbf'
         );
-        expect(emsSettings.getEMSLandingPageUrl()).toBe('https://localhost:8080/maps');
+        expect(emsSettings.getEMSLandingPageUrl()).toBe('https://localhost:8080/maps/');
       });
 
       describe('internal settings overrides (the below behavior is not publically supported, but aids internal debugging use-cases)', () => {
@@ -158,7 +158,7 @@ describe('EMSSettings', () => {
           expect(emsSettings.getEMSFontLibraryUrl()).toBe(
             'https://localhost:8080/tile/fonts/{fontstack}/{range}.pbf'
           );
-          expect(emsSettings.getEMSLandingPageUrl()).toBe('https://localhost:8080/maps');
+          expect(emsSettings.getEMSLandingPageUrl()).toBe('https://localhost:8080/maps/');
         });
 
         test(`should override internal emsTileApiUrl`, () => {
@@ -177,7 +177,7 @@ describe('EMSSettings', () => {
           expect(emsSettings.getEMSFontLibraryUrl()).toBe(
             'https://localhost:8080/tile/fonts/{fontstack}/{range}.pbf'
           );
-          expect(emsSettings.getEMSLandingPageUrl()).toBe('https://localhost:8080/maps');
+          expect(emsSettings.getEMSLandingPageUrl()).toBe('https://localhost:8080/maps/');
         });
 
         test('should override internal emsFontLibraryUrl', () => {
@@ -194,7 +194,7 @@ describe('EMSSettings', () => {
           expect(emsSettings.getEMSFileApiUrl()).toBe('https://localhost:8080/file');
           expect(emsSettings.getEMSTileApiUrl()).toBe('https://localhost:8080/tile');
           expect(emsSettings.getEMSFontLibraryUrl()).toBe('https://maps.foobar/fonts');
-          expect(emsSettings.getEMSLandingPageUrl()).toBe('https://localhost:8080/maps');
+          expect(emsSettings.getEMSLandingPageUrl()).toBe('https://localhost:8080/maps/');
         });
 
         test('should override internal emsLandingPageUrl', () => {
