@@ -281,8 +281,7 @@ export class CaseUserActionService {
         ...acc,
         {
           ...(deleteCaseUserAction ? deleteCaseUserAction : {}),
-          // TODO: Fix type
-        } as unknown as UserActionItem,
+        },
       ];
     }, [] as UserActionItem[]);
 

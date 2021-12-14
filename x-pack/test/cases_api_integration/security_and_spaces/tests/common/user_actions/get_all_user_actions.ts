@@ -56,10 +56,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const theCase = await createCase(supertest, postCaseReq);
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
       const createCaseUserAction = userActions[0] as CreateCaseUserAction;
-      const { id: connectorId, ...restConnector } = userActionPostResp.connector;
 
       expect(userActions.length).to.eql(1);
-
       expect(createCaseUserAction.action).to.eql('create');
       expect(createCaseUserAction.type).to.eql('create_case');
       expect(createCaseUserAction.payload.description).to.eql(userActionPostResp.description);
@@ -68,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(createCaseUserAction.payload.title).to.eql(userActionPostResp.title);
       expect(createCaseUserAction.payload.settings).to.eql(userActionPostResp.settings);
       expect(createCaseUserAction.payload.owner).to.eql(userActionPostResp.owner);
-      expect(createCaseUserAction.payload.connector).to.eql(restConnector);
+      expect(createCaseUserAction.payload.connector).to.eql(userActionPostResp.connector);
     });
 
     // TODO: fix

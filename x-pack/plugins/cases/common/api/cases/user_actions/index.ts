@@ -25,6 +25,16 @@ import { StatusUserActionRt } from './status';
 import { DeleteCaseUserActionRt } from './delete_case';
 
 export * from './common';
+export * from './comment';
+export * from './connector';
+export * from './create_case';
+export * from './delete_case';
+export * from './description';
+export * from './pushed';
+export * from './settings';
+export * from './status';
+export * from './tags';
+export * from './title';
 
 const CommonUserActionsRt = rt.union([
   DescriptionUserActionRt,

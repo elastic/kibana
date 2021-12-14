@@ -13,7 +13,6 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationContext,
-  LogMeta,
   SavedObjectReference,
 } from '../../../../../../src/core/server';
 
