@@ -111,6 +111,8 @@ function createRule(shouldWriteAlerts: boolean = true) {
           savedObjectsClient: {} as any,
           scopedClusterClient: {} as any,
           shouldWriteAlerts: () => shouldWriteAlerts,
+          shouldStopExecution: () => false,
+          search: {} as any,
         },
         spaceId: 'spaceId',
         state,

@@ -45,7 +45,12 @@ import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, SERVER_APP_ID, LEGACY_NOTIFICATIONS_ID } from '../common/constants';
+import {
+  APP_ID,
+  SERVER_APP_ID,
+  LEGACY_NOTIFICATIONS_ID,
+  DEFAULT_ALERTS_INDEX,
+} from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
@@ -161,7 +166,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     initUsageCollectors({
       core,
       kibanaIndex: core.savedObjects.getKibanaIndex(),
-      signalsIndex: config.signalsIndex,
+      signalsIndex: DEFAULT_ALERTS_INDEX,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
     });
@@ -319,8 +324,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
-        endpointContext
+        endpointContext,
+        depsStart.spaces?.spacesService?.getSpaceId
       );
+
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
