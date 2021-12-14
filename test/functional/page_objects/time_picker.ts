@@ -107,6 +107,8 @@ export class TimePickerPageObject extends FtrService {
       await this.testSubjects.click('superDatePickerShowDatesButton');
     }
     await this.testSubjects.exists('superDatePickerstartDatePopoverButton');
+    // Close the start date popover which opens automatically when the button is shown
+    await this.testSubjects.click('superDatePickerstartDatePopoverButton');
   }
 
   /**
@@ -120,7 +122,6 @@ export class TimePickerPageObject extends FtrService {
 
     // set to time
     await this.retry.waitFor(`endDate is set to ${toTime}`, async () => {
-      await this.browser.pressKeys(this.browser.keys.ESCAPE); // close other popovers because sometimes browser can't find start input
       await this.testSubjects.click('superDatePickerendDatePopoverButton');
       panel = await this.getTimePickerPanel();
       await this.testSubjects.click('superDatePickerAbsoluteTab');
@@ -173,7 +174,9 @@ export class TimePickerPageObject extends FtrService {
   }
 
   public async isOff() {
-    return await this.find.existsByCssSelector('.euiDatePickerRange--readOnly');
+    return await this.find.existsByCssSelector(
+      '.euiSuperDatePicker.euiFormControlLayout-isDisabled'
+    );
   }
 
   public async getRefreshConfig(keepQuickSelectOpen = false) {
