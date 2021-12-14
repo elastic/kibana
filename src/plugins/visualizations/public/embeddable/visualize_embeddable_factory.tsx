@@ -231,6 +231,7 @@ export class VisualizeEmbeddableFactory
       savedVis.title = title;
       savedVis.description = '';
       savedVis.searchSourceFields = visObj?.data.searchSource?.getSerializedFields();
+      savedVis.savedSearchId = visObj?.data.savedSearchId;
       const serializedVis = (visObj as unknown as Vis).serialize();
       const { params, data } = serializedVis;
       savedVis.visState = {

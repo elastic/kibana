@@ -182,7 +182,7 @@ describe('Config Deprecations', () => {
       },
     };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.security.showInsecureClusterWarning).not.toBeDefined();
+    expect(migrated.security?.showInsecureClusterWarning).not.toBeDefined();
     expect(migrated.xpack.security.showInsecureClusterWarning).toEqual(false);
     expect(messages).toMatchInlineSnapshot(`
       Array [
