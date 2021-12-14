@@ -9,12 +9,10 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 
+import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { CaseOwnerSelection } from './case_owner_selection';
 import { schema, FormProps } from './schema';
-
-const OBSERVABILITY = 'observability';
-const SECURITY_SOLUTION = 'securitySolution';
 
 describe('Case Owner Selection', () => {
   let globalForm: FormHook;
@@ -39,7 +37,7 @@ describe('Case Owner Selection', () => {
   it('renders', () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CaseOwnerSelection availableOwners={[SECURITY_SOLUTION]} isLoading={false} />
+        <CaseOwnerSelection availableOwners={[SECURITY_SOLUTION_OWNER]} isLoading={false} />
       </MockHookWrapperComponent>
     );
 
@@ -47,8 +45,8 @@ describe('Case Owner Selection', () => {
   });
 
   it.each([
-    [OBSERVABILITY, SECURITY_SOLUTION],
-    [SECURITY_SOLUTION, OBSERVABILITY],
+    [OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER],
+    [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER],
   ])('disables %s button if user only has %j', (disabledButton, permission) => {
     const wrapper = mount(
       <MockHookWrapperComponent>
@@ -62,13 +60,34 @@ describe('Case Owner Selection', () => {
     expect(
       wrapper.find(`[data-test-subj="${permission}RadioButton"] input`).first().props().disabled
     ).toBeFalsy();
+    expect(
+      wrapper.find(`[data-test-subj="${permission}RadioButton"] input`).first().props().checked
+    ).toBeTruthy();
+  });
+
+  it('defaults to first available Solution', async () => {
+    const wrapper = mount(
+      <MockHookWrapperComponent>
+        <CaseOwnerSelection
+          availableOwners={[OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER]}
+          isLoading={false}
+        />
+      </MockHookWrapperComponent>
+    );
+
+    expect(
+      wrapper.find(`[data-test-subj="observabilityRadioButton"] input`).first().props().checked
+    ).toBeTruthy();
+    expect(
+      wrapper.find(`[data-test-subj="securitySolutionRadioButton"] input`).first().props().checked
+    ).toBeFalsy();
   });
 
   it('it changes the selection', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
         <CaseOwnerSelection
-          availableOwners={[OBSERVABILITY, SECURITY_SOLUTION]}
+          availableOwners={[OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER]}
           isLoading={false}
         />
       </MockHookWrapperComponent>
@@ -78,7 +97,7 @@ describe('Case Owner Selection', () => {
       wrapper
         .find(`[data-test-subj="observabilityRadioButton"] input`)
         .first()
-        .simulate('change', 'observability');
+        .simulate('change', OBSERVABILITY_OWNER);
     });
 
     await waitFor(() => {
@@ -91,13 +110,13 @@ describe('Case Owner Selection', () => {
       ).toBeFalsy();
     });
 
-    expect(globalForm.getFormData()).toEqual({ selectedOwner: 'observability' });
+    expect(globalForm.getFormData()).toEqual({ selectedOwner: OBSERVABILITY_OWNER });
 
     await act(async () => {
       wrapper
         .find(`[data-test-subj="securitySolutionRadioButton"] input`)
         .first()
-        .simulate('change', 'securitySolution');
+        .simulate('change', SECURITY_SOLUTION_OWNER);
     });
 
     await waitFor(() => {
@@ -110,6 +129,6 @@ describe('Case Owner Selection', () => {
       ).toBeFalsy();
     });
 
-    expect(globalForm.getFormData()).toEqual({ selectedOwner: 'securitySolution' });
+    expect(globalForm.getFormData()).toEqual({ selectedOwner: SECURITY_SOLUTION_OWNER });
   });
 });

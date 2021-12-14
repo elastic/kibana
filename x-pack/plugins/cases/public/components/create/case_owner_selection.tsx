@@ -18,7 +18,11 @@ import {
 } from '@elastic/eui';
 
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { OWNER_INFO } from '../../../common/constants';
+
 import { FieldHook, getFieldValidityAndErrorMessage, UseField } from '../../common/shared_imports';
+import * as i18n from './translations';
 
 interface MenuSelectionProps {
   field: FieldHook<string>;
@@ -31,8 +35,8 @@ interface Props {
   isLoading: boolean;
 }
 
-const SECURITY_SOLUTION = 'securitySolution';
-const OBSERVABILITY = 'observability';
+const DEFAULT_SELECTABLE_OWNERS = [SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER] as const;
+
 const FIELD_NAME = 'selectedOwner';
 
 const FullWidthKeyPadMenu = euiStyled(EuiKeyPadMenu)`
@@ -54,21 +58,21 @@ const CaseOwnerSelectionComponent: React.FC<Props> = ({ availableOwners, isLoadi
   );
 };
 
-function MenuSelection({
+const MenuSelection = ({
   availableOwners,
   field,
   isLoading = false,
-}: MenuSelectionProps): JSX.Element {
+}: MenuSelectionProps): JSX.Element => {
   const { errorMessage, isInvalid } = getFieldValidityAndErrorMessage(field);
   const radioGroupName = useGeneratedHtmlId({ prefix: 'caseOwnerRadioGroup' });
 
   const onChange = useCallback((val: string) => field.setValue(val), [field]);
 
   useEffect(() => {
-    if (availableOwners.length === 1) {
+    if (!field.value) {
       onChange(availableOwners[0]);
     }
-  }, [availableOwners, onChange]);
+  }, [availableOwners, field.value, onChange]);
 
   return (
     <EuiFormRow
@@ -80,41 +84,29 @@ function MenuSelection({
       label={field.label}
       labelAppend={field.labelAppend}
     >
-      <FullWidthKeyPadMenu checkable={{ ariaLegend: 'Single case type select' }}>
+      <FullWidthKeyPadMenu checkable={{ ariaLegend: i18n.ARIA_KEYPAD_LEGEND }}>
         <EuiFlexGroup>
-          <EuiFlexItem>
-            <FullWidthKeyPadItem
-              data-test-subj="securitySolutionRadioButton"
-              onChange={onChange}
-              checkable="single"
-              name={radioGroupName}
-              id={SECURITY_SOLUTION}
-              label="Security"
-              isSelected={field.value === SECURITY_SOLUTION}
-              isDisabled={isLoading || !availableOwners.includes(SECURITY_SOLUTION)}
-            >
-              <EuiIcon type="logoSecurity" size="xl" />
-            </FullWidthKeyPadItem>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <FullWidthKeyPadItem
-              data-test-subj="observabilityRadioButton"
-              onChange={onChange}
-              checkable="single"
-              name={radioGroupName}
-              id={OBSERVABILITY}
-              label="Observability"
-              isSelected={field.value === OBSERVABILITY}
-              isDisabled={isLoading || !availableOwners.includes(OBSERVABILITY)}
-            >
-              <EuiIcon type="logoObservability" size="xl" />
-            </FullWidthKeyPadItem>
-          </EuiFlexItem>
+          {DEFAULT_SELECTABLE_OWNERS.map((owner) => (
+            <EuiFlexItem>
+              <FullWidthKeyPadItem
+                data-test-subj={`${owner}RadioButton`}
+                onChange={onChange}
+                checkable="single"
+                name={radioGroupName}
+                id={owner}
+                label={OWNER_INFO[owner].label}
+                isSelected={field.value === owner}
+                isDisabled={isLoading || !availableOwners.includes(owner)}
+              >
+                <EuiIcon type={OWNER_INFO[owner].iconType} size="xl" />
+              </FullWidthKeyPadItem>
+            </EuiFlexItem>
+          ))}
         </EuiFlexGroup>
       </FullWidthKeyPadMenu>
     </EuiFormRow>
   );
-}
+};
 
 CaseOwnerSelectionComponent.displayName = 'CaseOwnerSelectionComponent';
 

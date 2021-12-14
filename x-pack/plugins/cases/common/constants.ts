@@ -89,6 +89,25 @@ export const MAX_GENERATED_ALERTS_PER_SUB_CASE = 50;
 export const SECURITY_SOLUTION_OWNER = 'securitySolution';
 
 /**
+ * This must be the same value that the observability plugin uses to define the case kind when it registers the
+ * feature for the 7.13 migration only.
+ *
+ * This variable is being also used by test files and mocks.
+ */
+export const OBSERVABILITY_OWNER = 'observability';
+
+export const OWNER_INFO = {
+  [SECURITY_SOLUTION_OWNER]: {
+    label: 'Security',
+    iconType: 'logoSecurity',
+  },
+  [OBSERVABILITY_OWNER]: {
+    label: 'Observability',
+    iconType: 'logoObservability',
+  },
+};
+
+/**
  * This flag governs enabling the case as a connector feature. It is disabled by default as the feature is not complete.
  */
 export const ENABLE_CASE_CONNECTOR = false;

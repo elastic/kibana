@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common';
 
 import { useKibana } from '../../common/lib/kibana';
 import { useAvailableCasesOwners } from './use_available_owners';
@@ -25,7 +26,7 @@ const hasAll = {
   },
 };
 
-const hasSecurityAsCrud = {
+const hasSecurityAsCrudAndObservabilityAsRead = {
   securitySolutionCases: {
     crud_cases: true,
   },
@@ -34,12 +35,10 @@ const hasSecurityAsCrud = {
   },
 };
 
-const hasObservabilityAsRead = {
-  observabilityCases: {
-    read_cases: true,
-  },
-  securitySolutionCases: {
+const unrelatedFeatures = {
+  bogusCapability: {
     crud_cases: true,
+    read_cases: true,
   },
 };
 
@@ -53,12 +52,12 @@ const mockKibana = (permissionType: unknown = hasAll) => {
   } as unknown as ReturnType<typeof useKibana>);
 };
 
-describe('useKibanaMock', () => {
+describe('useAvailableCasesOwners correctly grabs user case permissions', () => {
   it('returns all available owner types if user has access to all', () => {
     mockKibana();
     const { result } = renderHook(useAvailableCasesOwners);
 
-    expect(result.current).toEqual(['securitySolution', 'observability']);
+    expect(result.current).toEqual([SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]);
   });
 
   it('returns no owner types if user has access to none', () => {
@@ -69,16 +68,23 @@ describe('useKibanaMock', () => {
   });
 
   it('returns only the permission it should have with CRUD as default', () => {
-    mockKibana(hasSecurityAsCrud);
+    mockKibana(hasSecurityAsCrudAndObservabilityAsRead);
     const { result } = renderHook(useAvailableCasesOwners);
 
-    expect(result.current).toEqual(['securitySolution']);
+    expect(result.current).toEqual([SECURITY_SOLUTION_OWNER]);
   });
 
   it('returns only the permission it should have with READ as default', () => {
-    mockKibana(hasObservabilityAsRead);
+    mockKibana(hasSecurityAsCrudAndObservabilityAsRead);
     const { result } = renderHook(() => useAvailableCasesOwners('read'));
 
-    expect(result.current).toEqual(['observability']);
+    expect(result.current).toEqual([OBSERVABILITY_OWNER]);
+  });
+
+  it('returns no owners when the capabilities does not contain valid entries', () => {
+    mockKibana(unrelatedFeatures);
+    const { result } = renderHook(useAvailableCasesOwners);
+
+    expect(result.current).toEqual([]);
   });
 });

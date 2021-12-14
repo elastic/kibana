@@ -34,7 +34,6 @@ interface Props {
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
   caseType?: CaseType;
   children?: JSX.Element | JSX.Element[];
-  hideConnectorServiceNowSir?: boolean;
   onSuccess?: (theCase: Case) => Promise<void>;
 }
 
@@ -42,7 +41,6 @@ export const FormContext: React.FC<Props> = ({
   afterCaseCreated,
   caseType = CaseType.individual,
   children,
-  hideConnectorServiceNowSir,
   onSuccess,
 }) => {
   const { connectors, loading: isLoadingConnectors } = useConnectors();

@@ -168,12 +168,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     timelineIntegration,
   }) => (
     <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-      <FormContext
-        afterCaseCreated={afterCaseCreated}
-        caseType={caseType}
-        hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-        onSuccess={onSuccess}
-      >
+      <FormContext afterCaseCreated={afterCaseCreated} caseType={caseType} onSuccess={onSuccess}>
         <CreateCaseFormFields
           connectors={empty}
           isLoadingConnectors={false}
