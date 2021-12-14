@@ -10,7 +10,8 @@ import React, { ReactElement } from 'react';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
-import type { Filter, IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { AbstractESSource } from '../es_source';
 import {
