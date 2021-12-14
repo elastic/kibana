@@ -177,7 +177,7 @@ export class PdfMaker {
         logo: this._logo,
         content: this._content as unknown as SerializableRecord[],
       };
-      this.worker = new Worker(path.resolve(__dirname, './worker'), { workerData });
+      this.worker = new Worker(path.resolve(__dirname, './worker.js'), { workerData });
       this.worker.on('error', reject);
       this.worker.on('message', (buffer: Buffer) => resolve(buffer));
       this.worker.on('exit', () => {
