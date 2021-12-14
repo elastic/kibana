@@ -70,6 +70,7 @@ export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>
 
 export interface LensUnwrapMetaInfo {
   sharingSavedObjectProps?: SharingSavedObjectProps;
+  title?: string;
 }
 
 export interface LensUnwrapResult {
@@ -610,16 +611,14 @@ export class Embeddable
   };
 
   public getInputAsRefType = async (): Promise<LensByReferenceInput> => {
-    const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.deps.attributeService.getInputAsRefType(input, {
+    return this.deps.attributeService.getInputAsRefType(this.getExplicitInput(), {
       showSaveModal: true,
       saveModalTitle: this.getTitle(),
     });
   };
 
   public getInputAsValueType = async (): Promise<LensByValueInput> => {
-    const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.deps.attributeService.getInputAsValueType(input);
+    return this.deps.attributeService.getInputAsValueType(this.getExplicitInput());
   };
 
   // same API as Visualize

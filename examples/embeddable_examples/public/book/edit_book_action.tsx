@@ -71,7 +71,7 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
         const newInput = await attributeService.wrapAttributes(
           attributes,
           useRefType,
-          attributeService.getExplicitInputFromEmbeddable(embeddable)
+          embeddable.getExplicitInput()
         );
         if (!useRefType && (embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId) {
           // Set the saved object ID to null so that update input will remove the existing savedObjectId...

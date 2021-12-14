@@ -210,16 +210,14 @@ export class MapEmbeddable
   }
 
   public async getInputAsRefType(): Promise<MapByReferenceInput> {
-    const input = getMapAttributeService().getExplicitInputFromEmbeddable(this);
-    return getMapAttributeService().getInputAsRefType(input, {
+    return getMapAttributeService().getInputAsRefType(this.getExplicitInput(), {
       showSaveModal: true,
       saveModalTitle: this.getTitle(),
     });
   }
 
   public async getInputAsValueType(): Promise<MapByValueInput> {
-    const input = getMapAttributeService().getExplicitInputFromEmbeddable(this);
-    return getMapAttributeService().getInputAsValueType(input);
+    return getMapAttributeService().getInputAsValueType(this.getExplicitInput());
   }
 
   public getDescription() {

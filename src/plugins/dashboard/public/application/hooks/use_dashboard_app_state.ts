@@ -262,9 +262,13 @@ export const useDashboardAppState = ({
         dashboardBuildContext.$checkForUnsavedChanges,
       ])
         .pipe(debounceTime(DashboardConstants.CHANGE_CHECK_DEBOUNCE))
-        .subscribe((states) => {
+        .subscribe(async (states) => {
           const [lastSaved, current] = states;
-          const unsavedChanges = diffDashboardState(lastSaved, current);
+          const unsavedChanges = await diffDashboardState({
+            getEmbeddable: dashboardContainer.untilEmbeddableLoaded,
+            originalState: lastSaved,
+            newState: current,
+          });
 
           const savedTimeChanged =
             lastSaved.timeRestore &&
