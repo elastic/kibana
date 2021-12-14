@@ -5,35 +5,24 @@
  * 2.0.
  */
 
-import { IEvent } from '../../../../event_log/server';
+import { IEventLogService } from '../../../../event_log/server';
+import {
+  EVENT_ACTION_EXECUTE_COMPLETE,
+  EVENT_ACTION_EXECUTE_ERROR,
+  EVENT_ACTION_EXECUTE_SAVE,
+  EVENT_ACTION_EXECUTE_SCHEDULE,
+  EVENT_ACTION_EXECUTE_START,
+  PLUGIN_ID,
+} from '../../../common/constants';
 
-export function logCreatorFactory(base: IEvent) {
-  return (mergeIn: IEvent) => ({
-    ...base,
-    kibana: {
-      reporting: {
-        ...base?.kibana?.reporting,
-        ...mergeIn?.kibana?.reporting,
-        csv: {
-          ...base?.kibana?.reporting?.csv,
-          ...mergeIn?.kibana?.reporting?.csv,
-        },
-      },
-    },
-    log: {
-      ...base?.log,
-      ...mergeIn?.log,
-    },
-    event: {
-      ...base?.event,
-      ...mergeIn?.event,
-    },
-    error: {
-      ...base?.error,
-      ...mergeIn?.error,
-    },
-    message: mergeIn?.message,
-  });
+export { ReportingEventLogger } from './logger';
+
+export function registerEventLogProviderActions(eventLog: IEventLogService) {
+  eventLog.registerProviderActions(PLUGIN_ID, [
+    EVENT_ACTION_EXECUTE_SCHEDULE,
+    EVENT_ACTION_EXECUTE_START,
+    EVENT_ACTION_EXECUTE_COMPLETE,
+    EVENT_ACTION_EXECUTE_ERROR,
+    EVENT_ACTION_EXECUTE_SAVE,
+  ]);
 }
-
-export function registerEventLogProviderActions() {}

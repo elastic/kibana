@@ -65,7 +65,7 @@ export class ReportingPlugin
       router,
     });
 
-    registerEventLogProviderActions();
+    registerEventLogProviderActions(eventLog);
     registerUiSettings(core);
     registerDeprecations({
       core,

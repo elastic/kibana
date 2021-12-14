@@ -10,11 +10,11 @@ import { KibanaRequest } from 'src/core/server';
 import { Writable } from 'stream';
 import uuid from 'uuid';
 import { ReportingCore } from '../../';
-import { IEvent } from '../../../../event_log/server';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
 import { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
 import { LevelLogger as Logger } from '../../lib';
+import { ReportingEventLogger } from '../../lib/event_logger';
 import { TaskRunResult } from '../../lib/tasks';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { RequestHandler } from '../lib/request_handler';
@@ -71,18 +71,23 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         const runTaskFn = runTaskFnFactory(reporting, logger);
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
 
-        const downloadEvent: IEvent = {
-          user: { name: user ? user.username : undefined },
-          event: { id: uuid.v1(), timezone: req.body.browserTimezone, kind: 'event' },
-          log: { level: 'info' },
-          kibana: {
-            reporting: { jobtype: CSV_SEARCHSOURCE_IMMEDIATE_TYPE, status: 'processing' },
+        const barnacle = new ReportingEventLogger({
+          event: {
+            id: uuid.v1(),
+            timezone: req.body.browserTimezone,
           },
-        };
-        const [{ startLogger, completeLogger, errorLogger }, createEventLog] =
-          reporting.getEventLoggers(downloadEvent);
-        startLogger.logEvent(createEventLog({ message: 'Started generating CSV output' }));
-        completeLogger.startTiming(downloadEvent);
+          kibana: {
+            reporting: {
+              appName: 'dashboard',
+              jobType: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
+              status: 'processing',
+              contentType: 'text/csv',
+              attempt: 1,
+            },
+          },
+        });
+
+        barnacle.logStart('starting execution', { csv: { numColumns: req.body.columns?.length } });
 
         try {
           let buffer = Buffer.from('');
@@ -114,20 +119,6 @@ export function registerGenerateCsvFromSavedObjectImmediate(
             logger.warn('CSV Job Execution created empty content result');
           }
 
-          completeLogger.stopTiming(downloadEvent);
-          completeLogger.logEvent(
-            createEventLog({
-              message: 'Finished generating CSV output',
-              event: { kind: 'metric' },
-              kibana: {
-                reporting: {
-                  status: 'completed',
-                  csv: { byteLength: jobOutputSize },
-                },
-              },
-            })
-          );
-
           return res.ok({
             body: jobOutputContent || '',
             headers: {
@@ -137,20 +128,6 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           });
         } catch (err) {
           logger.error(err);
-          errorLogger.logEvent(
-            createEventLog({
-              message: `${err}`,
-              log: { level: 'error' },
-              kibana: { reporting: { status: 'error' } },
-              event: { kind: 'error' },
-              error: {
-                message: err.message,
-                code: err.code,
-                stack_trace: err.stack_trace,
-                type: err.type,
-              },
-            })
-          );
           return requestHandler.handleError(err);
         }
       }

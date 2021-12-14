@@ -13,86 +13,62 @@ import {
   EVENT_ACTION_EXECUTE_SAVE,
 } from '../../../common/constants';
 
-interface EventedBase<P, EventProvider> {
+type ActionKind = 'event' | 'metrics' | 'error';
+
+interface ActionBase<A extends string, K extends ActionKind, EventProvider> {
   event: {
-    provider: P;
-    kind: 'event' | 'metrics' | 'error';
+    action: A;
+    kind: K;
+    provider: 'reporting';
     id: string;
     timezone: string;
     created?: string;
     end?: string;
     duration?: number;
   };
-  kibana: { uuid: string } & EventProvider;
+  kibana: { uuid?: string } & EventProvider;
   user?: { name: string };
   log: {
-    logger: P;
-    level: 'info' | 'error';
+    logger: 'reporting';
+    level: K extends 'error' ? 'error' : 'info';
   };
+  message: string;
 }
 
-interface EventedError {
+interface ErrorAction {
   message: string;
   code?: number;
   stack_trace?: string;
   type?: string;
 }
 
-type ReportingEventedBase = EventedBase<
-  'reporting',
+type ReportingAction<A extends string, K extends ActionKind> = ActionBase<
+  A,
+  K,
   {
-    reporting: {
-      appName: string;
-      jobType: string;
-      contentType: string;
-      attempt: number;
-      status: 'pending' | 'processing' | 'completed' | 'failed';
-      csv?: {
-        numColumns: number;
-        byteLength: number;
-        numRows: number;
-        scrollTime: number;
-      };
-    };
+    reporting: K extends 'event'
+      ? {
+          appName: string;
+          jobType: string;
+          contentType: string;
+          attempt: number;
+          status: 'pending' | 'processing' | 'completed' | 'failed';
+        }
+      :
+          | {}
+          | {
+              csv?: K extends 'event'
+                ? { numColumns: number }
+                : K extends 'metrics'
+                ? { byteLength?: number; numRows?: number; scrollTime?: number }
+                : undefined;
+            };
   }
 >;
 
-interface EventedSettings {
-  settings: {
-    reporting: {
-      queueTimeout: number;
-      csv: {
-        maxSizeBytes: number;
-        scrollSize: number;
-        contentStream: {
-          chunkSize: number;
-        };
-      };
-    };
-  };
-}
-
-type EventedReportingAction = EventedBase<'reporting', ReportingEventedBase>;
-type EventedReportingActionEvent = EventedReportingAction['event'];
-
-/*
- * Interfaces for Event Log payloads from Reporting
- */
-export interface EventedReportingActionScheduleTask
-  extends EventedBase<'reporting', ReportingEventedBase & EventedSettings> {
-  event: EventedReportingActionEvent & { action: typeof EVENT_ACTION_EXECUTE_SCHEDULE };
-}
-export interface EventedReportingActionExecuteStart
-  extends EventedBase<'reporting', ReportingEventedBase & EventedSettings> {
-  event: EventedReportingActionEvent & { action: typeof EVENT_ACTION_EXECUTE_START };
-}
-export interface EventedReportingActionExecuteComplete extends EventedReportingAction {
-  event: EventedReportingActionEvent & { action: typeof EVENT_ACTION_EXECUTE_COMPLETE };
-}
-export interface EventedReportingActionExecuteError extends EventedReportingAction {
-  event: EventedReportingActionEvent & { action: typeof EVENT_ACTION_EXECUTE_ERROR };
-  error: EventedError;
-}
-export interface EventedReportingActionSaveReport extends EventedReportingAction {
-  event: EventedReportingActionEvent & { action: typeof EVENT_ACTION_EXECUTE_SAVE };
-}
+export type ScheduleTask = ReportingAction<typeof EVENT_ACTION_EXECUTE_SCHEDULE, 'event'>;
+export type ExecuteStart = ReportingAction<typeof EVENT_ACTION_EXECUTE_START, 'event'>;
+export type ExecuteComplete = ReportingAction<typeof EVENT_ACTION_EXECUTE_COMPLETE, 'metrics'>;
+export type SaveReport = ReportingAction<typeof EVENT_ACTION_EXECUTE_SAVE, 'event'>;
+export type ExecuteError = ReportingAction<typeof EVENT_ACTION_EXECUTE_ERROR, 'error'> &
+  ErrorAction;
