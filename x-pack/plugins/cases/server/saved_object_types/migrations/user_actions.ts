@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { isString } from 'lodash';
+import { isPlainObject, isString } from 'lodash';
 import { addOwnerToSO, SanitizedCaseOwner } from '.';
 import {
   SavedObjectUnsanitizedDoc,
@@ -16,7 +16,7 @@ import {
   SavedObjectReference,
 } from '../../../../../../src/core/server';
 
-import { ConnectorTypes } from '../../../common/api';
+import { CommentType, ConnectorTypes } from '../../../common/api';
 
 import {
   isPush,
@@ -32,13 +32,14 @@ import {
   USER_ACTION_OLD_PUSH_ID_REF_NAME,
 } from '../../common/constants';
 
-interface UserActions {
+export interface UserActions {
   action: string;
   action_field: string[];
   action_at: string;
   action_by: { email: string; username: string; full_name: string };
-  new_value: string;
-  old_value: string;
+  new_value: string | null;
+  old_value: string | null;
+  owner: string;
 }
 
 interface UserActionUnmigratedConnectorDocument {
@@ -116,8 +117,18 @@ function formatDocumentWithConnectorReferences(
   };
 }
 
-const getSingleFieldPayload = (field: string, value: string | undefined) => {
-  const decodeValue = (v: string | undefined) => (isString(v) ? JSON.parse(v) : value ?? {});
+const getSingleFieldPayload = (
+  field: string,
+  value: string | null,
+  owner: string
+): Record<string, unknown> => {
+  const decodeValue = (v: string | null) => {
+    try {
+      return isString(v) ? JSON.parse(v) : value ?? {};
+    } catch {
+      return value;
+    }
+  };
 
   switch (field) {
     case 'title':
@@ -129,7 +140,24 @@ const getSingleFieldPayload = (field: string, value: string | undefined) => {
     case 'description':
       return { description: value ?? '' };
     case 'comment':
-      return { comment: decodeValue(value) };
+      /**
+       * Until 7.10 the new_value of the comment user action
+       * was a string. In 7.11+ more fields were introduced to the comment's
+       * saved object and the new_value of the user actions changes to an
+       * stringify object. At that point of time no migrations were made to
+       * the user actions to accommodate the new formatting.
+       *
+       * We are taking care of it in this migration.
+       * If there response of the decodeValue function is not an object
+       * then we assume that the value is a string coming for a 7.10
+       * user action saved object.
+       */
+      const decodedValue = decodeValue(value);
+      return {
+        comment: isPlainObject(decodedValue)
+          ? decodedValue
+          : { comment: isString(decodedValue) ? decodedValue : '', type: CommentType.user, owner },
+      };
     case 'connector':
       return { connector: decodeValue(value) };
     case 'pushed':
@@ -166,7 +194,11 @@ const getUserActionType = (fields: string[], action: string): string => {
   return fieldToActionType[field] ?? '';
 };
 
-const getMultipleFieldsPayload = (fields: string[], value: string) => {
+const getMultipleFieldsPayload = (
+  fields: string[],
+  value: string | null,
+  owner: string
+): Record<string, unknown> => {
   if (value == null) {
     return {};
   }
@@ -174,9 +206,40 @@ const getMultipleFieldsPayload = (fields: string[], value: string) => {
   const decodedValue = JSON.parse(value);
 
   return fields.reduce(
-    (payload, field) => ({ ...payload, ...getSingleFieldPayload(field, decodedValue[field]) }),
+    (payload, field) => ({
+      ...payload,
+      ...getSingleFieldPayload(field, decodedValue[field], owner),
+    }),
     {}
   );
+};
+
+const getPayload = (
+  type: string,
+  action_field: string[],
+  new_value: string | null,
+  old_value: string | null,
+  owner: string
+): Record<string, unknown> => {
+  const payload =
+    action_field.length > 1
+      ? getMultipleFieldsPayload(action_field, new_value ?? old_value ?? null, owner)
+      : getSingleFieldPayload(action_field[0], new_value ?? old_value ?? null, owner);
+
+  /**
+   * From 7.10+ the cases saved object has the connector attribute
+   * Create case user actions did not get migrated to have the
+   * connector attribute included.
+   *
+   * We are taking care of it in this migration by adding the none
+   * connector as a default
+   */
+  return {
+    ...payload,
+    ...(payload.connector == null && (type === 'create_case' || type === 'connector')
+      ? { connector: { name: 'none', type: '.none', fields: null } }
+      : {}),
+  };
 };
 
 const removeOldReferences = (
@@ -187,34 +250,45 @@ const removeOldReferences = (
       ref.name !== USER_ACTION_OLD_ID_REF_NAME && ref.name !== USER_ACTION_OLD_PUSH_ID_REF_NAME
   );
 
-function payloadMigration(
+export function payloadMigration(
   doc: SavedObjectUnsanitizedDoc<UserActions>,
   context: SavedObjectMigrationContext
 ): SavedObjectSanitizedDoc<unknown> {
-  const { new_value, old_value, action_field, action_at, action_by, action, ...restAttributes } =
-    doc.attributes;
+  const originalDocWithReferences = { ...doc, references: doc.references ?? [] };
+  const owner = originalDocWithReferences.attributes.owner;
 
-  const payload =
-    action_field.length > 1
-      ? getMultipleFieldsPayload(action_field, new_value ?? old_value)
-      : getSingleFieldPayload(action_field[0], new_value ?? old_value);
+  try {
+    const { new_value, old_value, action_field, action_at, action_by, action, ...restAttributes } =
+      originalDocWithReferences.attributes;
 
-  const type = getUserActionType(action_field, action);
-  const references = removeOldReferences(doc.references);
-  const newAction = action === 'push-to-service' ? 'push_to_service' : action;
+    const type = getUserActionType(action_field, action);
+    const payload = getPayload(type, action_field, new_value, old_value, owner);
+    const references = removeOldReferences(doc.references);
+    const newAction = action === 'push-to-service' ? 'push_to_service' : action;
 
-  return {
-    ...doc,
-    attributes: {
-      ...restAttributes,
-      action: newAction,
-      created_at: action_at,
-      created_by: action_by,
-      payload,
-      type,
-    },
-    references,
-  };
+    return {
+      ...originalDocWithReferences,
+      attributes: {
+        ...restAttributes,
+        action: newAction,
+        created_at: action_at,
+        created_by: action_by,
+        payload,
+        type,
+      },
+      references,
+    };
+  } catch (error) {
+    logError({
+      id: doc.id,
+      context,
+      error,
+      docType: 'user action connector',
+      docKey: 'userAction',
+    });
+
+    return originalDocWithReferences;
+  }
 }
 
 export const userActionsMigrations = {

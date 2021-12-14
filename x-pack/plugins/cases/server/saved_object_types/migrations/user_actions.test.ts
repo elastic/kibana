@@ -11,29 +11,28 @@ import {
   SavedObjectMigrationContext,
   SavedObjectSanitizedDoc,
   SavedObjectsMigrationLogger,
+  SavedObjectUnsanitizedDoc,
 } from 'kibana/server';
 import { migrationMocks } from 'src/core/server/mocks';
-import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_USER_ACTION_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import {
   createConnectorObject,
   createExternalService,
   createJiraConnector,
 } from '../../services/test_utils';
-import { userActionsConnectorIdMigration } from './user_actions';
+import { payloadMigration, UserActions, userActionsConnectorIdMigration } from './user_actions';
 
 interface OldCaseUserActionAttributes {
   new_value?: string;
   old_value?: string;
 }
 
-const create_7_14_0_userAction = (
-  params: {
-    action?: string;
-    action_field?: string[];
-    new_value?: string | null | object;
-    old_value?: string | null | object;
-  } = {}
-) => {
+const create_7_14_0_userAction = (params: {
+  action: string;
+  action_field: string[];
+  new_value: string | null | object;
+  old_value: string | null | object;
+}): SavedObjectUnsanitizedDoc<UserActions> => {
   const { new_value, old_value, ...restParams } = params;
 
   return {
@@ -41,8 +40,17 @@ const create_7_14_0_userAction = (
     id: '1',
     attributes: {
       ...restParams,
-      new_value: new_value && typeof new_value === 'object' ? JSON.stringify(new_value) : new_value,
-      old_value: old_value && typeof old_value === 'object' ? JSON.stringify(old_value) : old_value,
+      action_at: '2022-01-09T22:00:00.000Z',
+      action_by: {
+        email: 'elastic@elastic.co',
+        full_name: 'Elastic User',
+        username: 'elastic',
+      },
+      new_value:
+        new_value && typeof new_value === 'object' ? JSON.stringify(new_value) : new_value ?? null,
+      old_value:
+        old_value && typeof old_value === 'object' ? JSON.stringify(old_value) : old_value ?? null,
+      owner: SECURITY_SOLUTION_OWNER,
     },
   };
 };
@@ -170,11 +178,18 @@ describe('user action migrations', () => {
             Object {
               "attributes": Object {
                 "action": "push-to-service",
+                "action_at": "2022-01-09T22:00:00.000Z",
+                "action_by": Object {
+                  "email": "elastic@elastic.co",
+                  "full_name": "Elastic User",
+                  "username": "elastic",
+                },
                 "action_field": Array [
                   "invalid field",
                 ],
                 "new_value": "hello",
                 "old_value": null,
+                "owner": "securitySolution",
               },
               "id": "1",
               "references": Array [],
@@ -202,11 +217,18 @@ describe('user action migrations', () => {
             Object {
               "attributes": Object {
                 "action": "push-to-service",
+                "action_at": "2022-01-09T22:00:00.000Z",
+                "action_by": Object {
+                  "email": "elastic@elastic.co",
+                  "full_name": "Elastic User",
+                  "username": "elastic",
+                },
                 "action_field": Array [
                   "pushed",
                 ],
                 "new_value": "{a",
                 "old_value": null,
+                "owner": "securitySolution",
               },
               "id": "1",
               "references": Array [],
@@ -352,11 +374,18 @@ describe('user action migrations', () => {
             Object {
               "attributes": Object {
                 "action": "update",
+                "action_at": "2022-01-09T22:00:00.000Z",
+                "action_by": Object {
+                  "email": "elastic@elastic.co",
+                  "full_name": "Elastic User",
+                  "username": "elastic",
+                },
                 "action_field": Array [
                   "invalid action",
                 ],
                 "new_value": "new json value",
                 "old_value": "old value",
+                "owner": "securitySolution",
               },
               "id": "1",
               "references": Array [],
@@ -382,11 +411,18 @@ describe('user action migrations', () => {
             Object {
               "attributes": Object {
                 "action": "update",
+                "action_at": "2022-01-09T22:00:00.000Z",
+                "action_by": Object {
+                  "email": "elastic@elastic.co",
+                  "full_name": "Elastic User",
+                  "username": "elastic",
+                },
                 "action_field": Array [
                   "connector",
                 ],
                 "new_value": "{}",
                 "old_value": "{b",
+                "owner": "securitySolution",
               },
               "id": "1",
               "references": Array [],
@@ -534,11 +570,18 @@ describe('user action migrations', () => {
             Object {
               "attributes": Object {
                 "action": "create",
+                "action_at": "2022-01-09T22:00:00.000Z",
+                "action_by": Object {
+                  "email": "elastic@elastic.co",
+                  "full_name": "Elastic User",
+                  "username": "elastic",
+                },
                 "action_field": Array [
                   "invalid action",
                 ],
                 "new_value": "new json value",
                 "old_value": "old value",
+                "owner": "securitySolution",
               },
               "id": "1",
               "references": Array [],
@@ -564,11 +607,18 @@ describe('user action migrations', () => {
             Object {
               "attributes": Object {
                 "action": "create",
+                "action_at": "2022-01-09T22:00:00.000Z",
+                "action_by": Object {
+                  "email": "elastic@elastic.co",
+                  "full_name": "Elastic User",
+                  "username": "elastic",
+                },
                 "action_field": Array [
                   "connector",
                 ],
                 "new_value": "new json value",
                 "old_value": "old value",
+                "owner": "securitySolution",
               },
               "id": "1",
               "references": Array [],
@@ -600,6 +650,45 @@ describe('user action migrations', () => {
               },
             ]
           `);
+        });
+      });
+    });
+  });
+
+  describe('8.1.0', () => {
+    describe('payloadMigration', () => {
+      let context: jest.Mocked<SavedObjectMigrationContext>;
+
+      beforeEach(() => {
+        context = migrationMocks.createContext();
+      });
+
+      it('it transforms a comment user action where the new_value is a string', () => {
+        const userAction = create_7_14_0_userAction({
+          action: 'create',
+          action_field: ['comment'],
+          new_value: 'A comment',
+          old_value: null,
+        });
+
+        const migratedUserAction = payloadMigration(userAction, context);
+        expect(migratedUserAction.attributes).toEqual({
+          action: 'create',
+          created_at: '2022-01-09T22:00:00.000Z',
+          created_by: {
+            email: 'elastic@elastic.co',
+            full_name: 'Elastic User',
+            username: 'elastic',
+          },
+          owner: 'securitySolution',
+          payload: {
+            comment: {
+              comment: 'A comment',
+              owner: 'securitySolution',
+              type: 'user',
+            },
+          },
+          type: 'comment',
         });
       });
     });

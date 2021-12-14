@@ -12,10 +12,7 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../../../../../plugins/cases/common/constants';
 import { getCaseUserActions } from '../../../../common/lib/utils';
-import {
-  CaseUserActionResponse,
-  CaseUserActionsResponse,
-} from '../../../../../../plugins/cases/common/api';
+import { CaseUserActionsResponse } from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -40,26 +37,15 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           .expect(200);
 
         const connectorUserAction = body[1];
-        const oldValue = JSON.parse(connectorUserAction.old_value);
-        const newValue = JSON.parse(connectorUserAction.new_value);
 
-        expect(connectorUserAction.action_field.length).eql(1);
-        expect(connectorUserAction.action_field[0]).eql('connector');
-        expect(connectorUserAction.old_val_connector_id).to.eql(
-          'c1900ac0-017f-11eb-93f8-d161651bf509'
-        );
-        expect(oldValue).to.eql({
-          name: 'none',
-          type: '.none',
-          fields: null,
-        });
-        expect(connectorUserAction.new_val_connector_id).to.eql(
-          'b1900ac0-017f-11eb-93f8-d161651bf509'
-        );
-        expect(newValue).to.eql({
-          name: 'none',
-          type: '.none',
-          fields: null,
+        expect(connectorUserAction.type).to.be('connector');
+        expect(connectorUserAction.payload).to.eql({
+          connector: {
+            id: 'b1900ac0-017f-11eb-93f8-d161651bf509',
+            fields: null,
+            name: 'none',
+            type: '.none',
+          },
         });
       });
     });
@@ -113,13 +99,10 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             'ab43b5f0-005e-11ec-91f1-6daf2ab59fb5'
           )!;
 
-          const newValDecoded = JSON.parse(userAction.new_value!);
-          expect(newValDecoded.description).to.be('a description');
-          expect(newValDecoded.title).to.be('a case');
-          expect(newValDecoded.connector).not.have.property('id');
-          // the connector id should be none so it should be removed
-          expect(userAction.new_val_connector_id).to.be(null);
-          expect(userAction.old_val_connector_id).to.be(null);
+          const payload = userAction.payload;
+          expect(payload.description).to.be('a description');
+          expect(payload.title).to.be('a case');
+          expect(payload.connector.id).to.be('none');
         });
 
         it('sets the connector ids to null for a create user action with null new and old values', async () => {
@@ -128,8 +111,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             'b3094de0-005e-11ec-91f1-6daf2ab59fb5'
           )!;
 
-          expect(userAction.new_val_connector_id).to.be(null);
-          expect(userAction.old_val_connector_id).to.be(null);
+          const payload = userAction.payload;
+          expect(payload.connector.id).to.be('none');
         });
       });
 
@@ -141,86 +124,55 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           });
         });
 
-        it('removes the connector id field for a created case user action', async () => {
+        it('adds the connector id field for a created case user action', async () => {
           const userAction = getUserActionById(
             userActions,
             'e7882d70-005e-11ec-91f1-6daf2ab59fb5'
           )!;
 
-          const newValDecoded = JSON.parse(userAction.new_value!);
-          expect(newValDecoded.description).to.be('a description');
-          expect(newValDecoded.title).to.be('a case');
-
-          expect(newValDecoded.connector).to.not.have.property('id');
-          expect(userAction.new_val_connector_id).to.be('d92243b0-005e-11ec-91f1-6daf2ab59fb5');
-          expect(userAction.old_val_connector_id).to.be(null);
+          const payload = userAction.payload;
+          expect(payload.description).to.be('a description');
+          expect(payload.title).to.be('a case');
+          expect(payload.connector.id).to.be('d92243b0-005e-11ec-91f1-6daf2ab59fb5');
         });
 
-        it('removes the connector id from the external service new value', async () => {
+        it('adds the connector id from the external service new value', async () => {
           const userAction = getUserActionById(
             userActions,
             'e9471b80-005e-11ec-91f1-6daf2ab59fb5'
           )!;
 
-          const newValDecoded = JSON.parse(userAction.new_value!);
-          expect(newValDecoded.connector_name).to.be('a jira connector');
-          expect(newValDecoded).to.not.have.property('connector_id');
-          expect(userAction.new_val_connector_id).to.be('d92243b0-005e-11ec-91f1-6daf2ab59fb5');
-          expect(userAction.old_val_connector_id).to.be(null);
+          const externalService = userAction.payload.externalService;
+          expect(externalService.connector_name).to.be('a jira connector');
+          expect(externalService.connector_id).to.be('d92243b0-005e-11ec-91f1-6daf2ab59fb5');
         });
 
-        it('sets the connector ids to null for a comment user action', async () => {
-          const userAction = getUserActionById(
-            userActions,
-            'efe9de50-005e-11ec-91f1-6daf2ab59fb5'
-          )!;
-
-          const newValDecoded = JSON.parse(userAction.new_value!);
-          expect(newValDecoded.comment).to.be('a comment');
-          expect(userAction.new_val_connector_id).to.be(null);
-          expect(userAction.old_val_connector_id).to.be(null);
-        });
-
-        it('removes the connector id for an update connector action', async () => {
+        it('adds the connector id for an update connector action', async () => {
           const userAction = getUserActionById(
             userActions,
             '16cd9e30-005f-11ec-91f1-6daf2ab59fb5'
           )!;
 
-          const newValDecoded = JSON.parse(userAction.new_value!);
-          const oldValDecoded = JSON.parse(userAction.old_value!);
-
-          expect(newValDecoded.name).to.be('a different jira connector');
-          expect(oldValDecoded.name).to.be('a jira connector');
-
-          expect(newValDecoded).to.not.have.property('id');
-          expect(oldValDecoded).to.not.have.property('id');
-          expect(userAction.new_val_connector_id).to.be('0a572860-005f-11ec-91f1-6daf2ab59fb5');
-          expect(userAction.old_val_connector_id).to.be('d92243b0-005e-11ec-91f1-6daf2ab59fb5');
+          const payload = userAction.payload;
+          expect(payload.connector.name).to.be('a different jira connector');
+          expect(payload.connector.id).to.be('0a572860-005f-11ec-91f1-6daf2ab59fb5');
         });
 
-        it('removes the connector id from the external service new value for second push', async () => {
+        it('adds the connector id from the external service new value for second push', async () => {
           const userAction = getUserActionById(
             userActions,
             '1ea33bb0-005f-11ec-91f1-6daf2ab59fb5'
           )!;
 
-          const newValDecoded = JSON.parse(userAction.new_value!);
-
-          expect(newValDecoded.connector_name).to.be('a different jira connector');
-
-          expect(newValDecoded).to.not.have.property('connector_id');
-          expect(userAction.new_val_connector_id).to.be('0a572860-005f-11ec-91f1-6daf2ab59fb5');
-          expect(userAction.old_val_connector_id).to.be(null);
+          const externalService = userAction.payload.externalService;
+          expect(externalService.connector_name).to.be('a different jira connector');
+          expect(externalService.connector_id).to.be('0a572860-005f-11ec-91f1-6daf2ab59fb5');
         });
       });
     });
   });
 }
 
-function getUserActionById(
-  userActions: CaseUserActionsResponse,
-  id: string
-): CaseUserActionResponse | undefined {
+function getUserActionById(userActions: CaseUserActionsResponse, id: string): any {
   return userActions.find((userAction) => userAction.action_id === id);
 }
