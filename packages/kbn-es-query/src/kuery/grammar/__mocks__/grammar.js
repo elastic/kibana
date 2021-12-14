@@ -300,8 +300,7 @@ function peg$parse(input, options) {
           suggestionTypes: ['conjunction']
         };
       }
-      const range = buildNamedArgNode(operator, value);
-      return buildFunctionNode('range', [field, range]);
+      return buildFunctionNode('range', [field, operator, value]);
     };
   var peg$f8 = function(field, partial) {
       if (partial.type === 'cursor') {
@@ -2190,7 +2189,6 @@ function peg$parse(input, options) {
     const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
     const buildLiteralNode = nodeTypes.literal.buildNode;
     const buildWildcardNode = nodeTypes.wildcard.buildNode;
-    const buildNamedArgNode = nodeTypes.namedArg.buildNode;
     const { wildcardSymbol } = nodeTypes.wildcard;
 
 

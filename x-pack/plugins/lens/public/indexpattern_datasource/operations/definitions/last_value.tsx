@@ -223,7 +223,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
           label={i18n.translate('xpack.lens.indexPattern.lastValue.sortField', {
             defaultMessage: 'Sort by date field',
           })}
-          display="columnCompressed"
+          display="rowCompressed"
           fullWidth
           error={i18n.translate('xpack.lens.indexPattern.sortField.invalid', {
             defaultMessage: 'Invalid field. Check your data view or pick another field.',
