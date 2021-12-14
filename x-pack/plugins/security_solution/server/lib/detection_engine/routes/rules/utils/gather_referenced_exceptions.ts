@@ -6,14 +6,13 @@
  */
 import { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { SavedObjectsClientContract } from 'kibana/server';
+import { ImportRulesSchemaDecoded } from '../../../../../../common/detection_engine/schemas/request';
 
 import {
   ExceptionListQueryInfo,
   getAllListTypes,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../lists/server/services/exception_lists/utils/import/find_all_exception_list_types';
-
-import { PromiseFromStreams } from './import_rules_utils';
 
 /**
  * Helper that takes rules, goes through their referenced exception lists and
@@ -26,12 +25,16 @@ export const getReferencedExceptionLists = async ({
   rules,
   savedObjectsClient,
 }: {
-  rules: PromiseFromStreams[];
+  rules: Array<ImportRulesSchemaDecoded | Error>;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<Record<string, ExceptionListSchema>> => {
-  const [lists]: ListArray[] = rules
-    .filter((rule) => !(rule instanceof Error))
-    .map((rule) => rule.exceptions_list);
+  const [lists] = rules.reduce<ListArray[]>((acc, rule) => {
+    if (!(rule instanceof Error) && rule.exceptions_list != null) {
+      return [...acc, rule.exceptions_list];
+    } else {
+      return acc;
+    }
+  }, []);
 
   if (lists == null) {
     return {};

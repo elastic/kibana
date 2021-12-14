@@ -51,7 +51,7 @@ describe('importQuerySchema', () => {
     const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "wrong" supplied to "overwrite"',
+      'Invalid value "wrong" supplied to "overwrite_exceptions"',
     ]);
     expect(message.schema).toEqual({});
   });
