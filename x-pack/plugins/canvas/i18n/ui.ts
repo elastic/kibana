@@ -604,6 +604,46 @@ export const ModelStrings = {
       i18n.translate('xpack.canvas.uis.models.heatmap.args.isVisibleLabel', {
         defaultMessage: 'Specifies whether or not the legend is visible',
       }),
+    getPositionDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap.args.positionTitle', {
+        defaultMessage: 'Legend Position',
+      }),
+    getPositionHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap.args.positionLabel', {
+        defaultMessage: 'Specifies the legend position.',
+      }),
+    getPositionTopOption: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap.args.positionTopLabel', {
+        defaultMessage: 'Top',
+      }),
+    getPositionBottomOption: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap.args.positionBottomLabel', {
+        defaultMessage: 'Bottom',
+      }),
+    getPositionLeftOption: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap.args.positionLeftLabel', {
+        defaultMessage: 'Left',
+      }),
+    getPositionRightOption: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap.args.positionRightLabel', {
+        defaultMessage: 'Right',
+      }),
+    getMaxLinesDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap.args.maxLinesTitle', {
+        defaultMessage: 'Legend maximum lines',
+      }),
+    getMaxLinesHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap.args.maxLinesLabel', {
+        defaultMessage: 'Specifies the number of lines per legend item.',
+      }),
+    getShouldTruncateDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap.args.shouldTruncateTitle', {
+        defaultMessage: 'Truncate label',
+      }),
+    getShouldTruncateHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap.args.shouldTruncateLabel', {
+        defaultMessage: 'Specifies whether or not the legend items should be truncated',
+      }),
   },
 };
 
@@ -1391,6 +1431,14 @@ export const ViewStrings = {
     getValueAccessorHelp: () =>
       i18n.translate('xpack.canvas.uis.views.heatmap.args.valueAccessorHelp', {
         defaultMessage: 'The name of the value column or the corresponding dimension',
+      }),
+    getLegendHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.legendHelp', {
+        defaultMessage: 'Heatmap legend',
+      }),
+    getLegendDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.legendDisplayName', {
+        defaultMessage: "Configure the heatmap chart's legend",
       }),
   },
 };

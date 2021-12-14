@@ -20,8 +20,40 @@ export const heatmapLegend = () => ({
       displayName: strings.getIsVisibleDisplayName(),
       help: strings.getIsVisibleHelp(),
       argType: 'toggle',
+      default: true,
       options: {
-        onlyMath: false,
+        onlyMath: true,
+      },
+    },
+    {
+      name: 'position',
+      displayName: strings.getPositionDisplayName(),
+      help: strings.getPositionHelp(),
+      argType: 'select',
+      default: 'right',
+      options: {
+        choices: [
+          { value: 'top', name: strings.getPositionTopOption() },
+          { value: 'right', name: strings.getPositionRightOption() },
+          { value: 'bottom', name: strings.getPositionBottomOption() },
+          { value: 'left', name: strings.getPositionLeftOption() },
+        ],
+      },
+    },
+    {
+      name: 'maxLines',
+      displayName: strings.getMaxLinesDisplayName(),
+      help: strings.getMaxLinesHelp(),
+      argType: 'number',
+      default: 10,
+    },
+    {
+      name: 'shouldTruncate',
+      displayName: strings.getShouldTruncateDisplayName(),
+      help: strings.getShouldTruncateHelp(),
+      argType: 'toggle',
+      options: {
+        onlyMath: true,
       },
     },
   ],

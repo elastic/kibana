@@ -43,8 +43,8 @@ export const heatmap = () => ({
     },
     {
       name: 'legend',
-      displayName: 'Legend',
-      help: 'legend',
+      displayName: strings.getLegendDisplayName(),
+      help: strings.getLegendHelp(),
       type: 'model',
       argType: 'heatmap_legend',
     },
