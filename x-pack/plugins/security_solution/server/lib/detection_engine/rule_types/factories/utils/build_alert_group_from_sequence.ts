@@ -102,7 +102,7 @@ export const buildAlertRoot = (
   const rule = buildRuleWithoutOverrides(completeRule);
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
   const reason = buildReasonMessage({ rule, mergedDoc: mergedAlerts as SignalSourceHit });
-  const doc = buildAlert(wrappedBuildingBlocks, rule, spaceId, reason);
+  const doc = buildAlert(wrappedBuildingBlocks, completeRule, spaceId, reason);
   return {
     ...mergedAlerts,
     event: {
@@ -110,7 +110,6 @@ export const buildAlertRoot = (
     },
     ...doc,
     [ALERT_ORIGINAL_TIME]: timestamps[0],
-    [ALERT_BUILDING_BLOCK_TYPE]: undefined,
     [ALERT_GROUP_ID]: generateAlertId(doc),
   };
 };

@@ -18,6 +18,9 @@ import { RACAlert } from '../../types';
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';
 import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import { buildRuleNameFromMapping } from '../../../signals/mappings/build_rule_name_from_mapping';
+import { buildSeverityFromMapping } from '../../../signals/mappings/build_severity_from_mapping';
+import { buildRiskScoreFromMapping } from '../../../signals/mappings/build_risk_score_from_mapping';
 
 const isSourceDoc = (
   hit: SignalSourceHit
@@ -58,11 +61,31 @@ export const buildBulkBody = (
   const filteredSource = filterSource(mergedDoc);
   const reason = buildReasonMessage({ mergedDoc, rule });
 
+  const overrides = applyOverrides
+    ? {
+        nameOverride: buildRuleNameFromMapping({
+          eventSource: mergedDoc._source ?? {},
+          ruleName: completeRule.ruleConfig.name,
+          ruleNameMapping: completeRule.ruleParams.ruleNameOverride,
+        }).ruleName,
+        severityOverride: buildSeverityFromMapping({
+          eventSource: mergedDoc._source ?? {},
+          severity: completeRule.ruleParams.severity,
+          severityMapping: completeRule.ruleParams.severityMapping,
+        }).severity,
+        riskScoreOverride: buildRiskScoreFromMapping({
+          eventSource: mergedDoc._source ?? {},
+          riskScore: completeRule.ruleParams.riskScore,
+          riskScoreMapping: completeRule.ruleParams.riskScoreMapping,
+        }).riskScore,
+      }
+    : undefined;
+
   if (isSourceDoc(mergedDoc)) {
     return {
       ...filteredSource,
       ...eventFields,
-      ...buildAlert([mergedDoc], rule, spaceId, reason),
+      ...buildAlert([mergedDoc], completeRule, spaceId, reason, overrides),
       ...additionalAlertFields({ ...mergedDoc, _source: { ...mergedDoc._source, ...eventFields } }),
       [EVENT_KIND]: 'signal',
       [TIMESTAMP]: new Date().toISOString(),

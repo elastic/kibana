@@ -6,10 +6,8 @@
  */
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  ALERT_RULE_THRESHOLD_FIELD,
-  ALERT_ORIGINAL_TIME,
-} from '../../../../../common/field_maps/field_names';
+import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { ALERT_ORIGINAL_TIME } from '../../../../../common/field_maps/field_names';
 
 import { SimpleHit, ThresholdSignalHistory } from '../types';
 import { getThresholdTermsHash, isWrappedRACAlert, isWrappedSignalHit } from '../utils';
@@ -20,7 +18,11 @@ interface GetThresholdSignalHistoryParams {
 
 const getTerms = (alert: SimpleHit) => {
   if (isWrappedRACAlert(alert)) {
-    return (alert._source[ALERT_RULE_THRESHOLD_FIELD] as string[]).map((field) => ({
+    const parameters = alert._source[ALERT_RULE_PARAMETERS] as unknown as Record<
+      string,
+      Record<string, string[]>
+    >;
+    return parameters.threshold.field.map((field) => ({
       field,
       value: alert._source[field] as string,
     }));
