@@ -1122,7 +1122,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('dry run', function () {
-        it('should respond with a bad request', async function () {
+        it('should respond with a 200 ok', async function () {
           await supertest
             .post(`/api/fleet/package_policies/upgrade/dryrun`)
             .set('kbn-xsrf', 'xxxx')
@@ -1130,19 +1130,19 @@ export default function (providerContext: FtrProviderContext) {
               packagePolicyIds: [packagePolicyId],
               packageVersion: '0.1.0',
             })
-            .expect(400);
+            .expect(200);
         });
       });
 
       describe('upgrade', function () {
-        it('should respond with a bad request', async function () {
+        it('should respond with a 200 ok', async function () {
           await supertest
             .post(`/api/fleet/package_policies/upgrade`)
             .set('kbn-xsrf', 'xxxx')
             .send({
               packagePolicyIds: [packagePolicyId],
             })
-            .expect(400);
+            .expect(200);
         });
       });
     });
