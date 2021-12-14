@@ -11,7 +11,7 @@ import {
   catchError,
   concatMap,
   first,
-  map,
+  mapTo,
   mergeMap,
   take,
   takeUntil,
@@ -69,13 +69,13 @@ export function getScreenshots(
   } = options;
 
   return browserDriverFactory.createPage({ browserTimezone, openUrlTimeout }, logger).pipe(
-    mergeMap(({ driver, exit$, metrics$ }) => {
+    mergeMap(({ driver, unexpectedExit$, metrics$, close }) => {
       apmCreatePage?.end();
       metrics$.subscribe(({ cpu, memory }) => {
         apmTrans?.setLabel('cpu', cpu, false);
         apmTrans?.setLabel('memory', memory, false);
       });
-      exit$.subscribe({ error: () => apmTrans?.end() });
+      unexpectedExit$.subscribe({ error: () => apmTrans?.end() });
 
       const screen = new ScreenshotObservableHandler(driver, logger, layout, options);
 
@@ -88,13 +88,16 @@ export function getScreenshots(
               logger.error(error);
               return of({ ...DEFAULT_SETUP_RESULT, error }); // allow failover screenshot capture
             }),
-            takeUntil(exit$),
+            takeUntil(unexpectedExit$),
             screen.getScreenshots()
           )
         ),
         take(options.urls.length),
         toArray(),
-        map((results) => ({ layout, metrics$, results }))
+        mergeMap((results) => {
+          // At this point we no longer need the page, close it.
+          return close().pipe(mapTo({ layout, metrics$, results }));
+        })
       );
     }),
     first()

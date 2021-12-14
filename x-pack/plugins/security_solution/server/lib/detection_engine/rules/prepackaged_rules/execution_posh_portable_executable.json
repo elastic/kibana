@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "This rule detects the presence of Portable Executables in a PowerShell Script by Looking for its encoded header. Attackers embed PEs into PowerShell Scripts for Injecting them into the memory, avoiding defenses by not writing to disk.,",
+  "description": "Detects the presence of portable executables (PE) in a PowerShell script by looking for its encoded header. Attackers embed PEs into PowerShell scripts for injecting them into the memory, avoiding defenses by not writing to disk.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Suspicious Portable Executable Encoded in Powershell Script",
-  "query": "event.code:\"4104\" and \n  powershell.file.script_block_text : (\n    TVqQAAMAAAAEAAAA\n  )\n",
+  "query": "event.category:process and \n  powershell.file.script_block_text : (\n    TVqQAAMAAAAEAAAA\n  )\n",
   "risk_score": 47,
   "rule_id": "ad84d445-b1ce-4377-82d9-7c633f28bf9a",
   "severity": "medium",
@@ -48,5 +48,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }
