@@ -230,10 +230,6 @@ const alertFieldMappings: Record<string, string> = {
  */
 export const getField = (ecsData: Ecs, field: string) => {
   const aadField = (alertFieldMappings[field] ?? field).replace('signal', 'kibana.alert');
-  console.log('aad field');
-  console.log(ecsData);
-  console.log(field);
-  console.log(aadField);
   const siemSignalsField = (siemSignalsFieldMappings[field] ?? field).replace(
     'kibana.alert',
     'signal'
@@ -241,25 +237,16 @@ export const getField = (ecsData: Ecs, field: string) => {
   const parts = aadField.split('.');
   if (parts.includes('parameters') && parts[parts.length - 1] !== 'parameters') {
     const paramsField = parts.slice(0, parts.length - 1).join('.');
-    console.log(paramsField);
-    const params = ecsData[paramsField];
-    console.log(params);
-    const field = parts[parts.length - 1];
-    console.log(field);
-    const value = get(field, params);
-    console.log(value);
+    const params = get(paramsField, ecsData);
+    const value = get(parts[parts.length - 1], params);
     if (isEmpty(value)) {
-      console.log('is empty');
       return [];
     }
     return value;
   }
-  console.log('no parts');
   const value = get(aadField, ecsData) ?? get(siemSignalsField, ecsData);
   if (isEmpty(value)) {
-    console.log('is empty');
     return [];
   }
-  console.log(value);
   return value;
 };

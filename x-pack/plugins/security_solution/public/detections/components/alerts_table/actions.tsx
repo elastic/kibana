@@ -159,6 +159,7 @@ const getFiltersFromRule = (filters: string[]): Filter[] =>
   }, [] as Filter[]);
 
 export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggregationData => {
+  console.log('getting threshold agg data');
   const thresholdEcsData: Ecs[] = Array.isArray(ecsData) ? ecsData : [ecsData];
   console.log(thresholdEcsData);
   return thresholdEcsData.reduce<ThresholdAggregationData>(
@@ -166,55 +167,33 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
       const threshold =
         getField(thresholdData, ALERT_RULE_PARAMETERS).threshold ??
         thresholdData.signal?.rule?.threshold;
-      console.log('here is the threshold');
-      console.log(threshold);
 
-      let aggField: string[] = [];
-      let thresholdResult: {
-        terms?: Array<{
-          field?: string;
-          value: string;
+      const thresholdResult: {
+        terms: Array<{
+          field: string[];
+          value: string[];
         }>;
-        count: number;
-        from: string;
-      };
-
-      console.log(threshold);
-      thresholdResult = getField(thresholdData, ALERT_THRESHOLD_RESULT) as string;
-      aggField = threshold.field;
+        count: number[];
+        from: string[];
+      } = getField(thresholdData, ALERT_THRESHOLD_RESULT);
 
       console.log('threshold result');
       console.log(thresholdResult);
 
-      // Legacy support
-      const ruleFromStr = getField(thresholdData, ALERT_RULE_FROM)[0];
-      const ruleFrom = dateMath.parse(ruleFromStr) ?? moment(); // The fallback here will essentially ensure 0 results
       const originalTimeStr = getField(thresholdData, ALERT_ORIGINAL_TIME)[0];
-      const originalTime = originalTimeStr != null ? moment(originalTimeStr) : ruleFrom;
-      const ruleInterval = moment.duration(moment().diff(ruleFrom));
-      const fromOriginalTime = originalTime.clone().subtract(ruleInterval); // This is the default... can overshoot
-      // End legacy support
-
-      const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
+      const originalTime = moment(originalTimeStr);
+      const aggregationFields: string[] = Array.isArray(threshold.field)
+        ? threshold.field
+        : [threshold.field];
 
       return {
-        // Use `threshold_result.from` if available (it will always be available for new signals). Otherwise, use a calculated
-        // lower bound, which could result in the timeline showing a superset of the events that made up the threshold set.
-        thresholdFrom: thresholdResult.from ?? fromOriginalTime.toISOString(),
+        thresholdFrom: thresholdResult.from[0],
         thresholdTo: originalTime.toISOString(),
         dataProviders: [
           ...outerAcc.dataProviders,
           ...aggregationFields.reduce<DataProvider[]>((acc, aggregationField, i) => {
-            /*
-            const aggregationValue = ([thresholdResult.terms['0']] ?? []).filter( // FIXME
-              (term: { field?: string | undefined; value: string }) =>
-                term.field === aggregationField
-            )[0].value;
-            */
-            const aggField = Object.values(aggregationField)[0][0];
-            console.log(aggField);
-            const aggregationValue = Object.values(thresholdResult.terms).filter(
-              (term) => term.field[0] === aggField
+            const aggregationValue = thresholdResult.terms.filter(
+              (term) => term.field.length > 0 && term.field[0] === aggregationField
             )[0].value[0];
             const dataProviderValue = Array.isArray(aggregationValue)
               ? aggregationValue[0]
@@ -224,15 +203,15 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
               return acc;
             }
 
-            const aggregationFieldId = aggField.replace('.', '-');
+            const aggregationFieldId = aggregationField.replace('.', '-');
             const dataProviderPartial = {
               id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
-              name: aggField,
+              name: aggregationField,
               enabled: true,
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                field: aggField,
+                field: aggregationField,
                 value: dataProviderValue,
                 operator: ':' as QueryOperator,
               },
@@ -266,7 +245,10 @@ export const isEqlRuleWithGroupId = (ecsData: Ecs) => {
 
 export const isThresholdRule = (ecsData: Ecs) => {
   const ruleType = getField(ecsData, ALERT_RULE_TYPE);
-  return Array.isArray(ruleType) && ruleType.length && ruleType[0] === 'threshold';
+  return (
+    ruleType === 'threshold' ||
+    (Array.isArray(ruleType) && ruleType.length && ruleType[0] === 'threshold')
+  );
 };
 
 export const buildAlertsKqlFilter = (
@@ -386,12 +368,8 @@ export const sendAlertToTimelineAction = async ({
    * We are making an assumption here that if you have an array of ecs data they are all coming from the same rule
    * but we still want to determine the filter for each alerts
    */
-  console.log('sending alert to timeline');
   const ecsData: Ecs = Array.isArray(ecs) && ecs.length > 0 ? ecs[0] : (ecs as Ecs);
-  console.log(ecsData);
   const alertIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [ecs._id];
-  console.log('alert ids');
-  console.log(alertIds);
   const ruleNote = getField(ecsData, ALERT_RULE_NOTE);
   const noteContent = Array.isArray(ruleNote) && ruleNote.length > 0 ? ruleNote[0] : '';
   const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);
@@ -481,13 +459,9 @@ export const sendAlertToTimelineAction = async ({
   if (isThresholdRule(ecsData)) {
     const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(ecsData);
 
-    console.log('printing rule params');
     const filters = getField(ecsData, 'signal.rule.filters');
-    console.log(filters);
     const language = getField(ecsData, 'signal.rule.language');
-    console.log(language);
     const query = getField(ecsData, 'signal.rule.query');
-    console.log(query);
 
     return createTimeline({
       from: thresholdFrom,

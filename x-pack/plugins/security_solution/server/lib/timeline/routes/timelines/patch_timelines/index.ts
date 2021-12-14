@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
@@ -31,26 +30,18 @@ export const patchTimelinesRoute = (
     {
       path: TIMELINE_URL,
       validate: {
-        body: schema.object({}, { unknowns: 'allow' }),
-      },
-      /*
-      validate: {
         body: buildRouteValidationWithExcess(patchTimelineSchema),
       },
-      */
       options: {
         tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
-      console.log('HERE IS THE ROUTE');
       const siemResponse = buildSiemResponse(response);
 
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        console.log(request.body);
         const { timelineId, timeline, version } = request.body;
-        console.log(JSON.stringify(timeline));
         const { templateTimelineId, templateTimelineVersion, timelineType, title, status } =
           timeline;
 
@@ -95,9 +86,7 @@ export const patchTimelinesRoute = (
           );
         }
       } catch (err) {
-        console.log('TIMELINE ERROR');
         const error = transformError(err);
-        console.log(error);
         return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,

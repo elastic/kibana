@@ -39,7 +39,6 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
   const createTimeline = useCallback(
     ({ id, show }) => {
-      console.log('CALLED CREATE TIMELINE');
       if (id === TimelineId.active && timelineFullScreen) {
         setTimelineFullScreen(false);
       }

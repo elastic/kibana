@@ -23,8 +23,6 @@ export const useFetchEcsAlertsData = ({
   skip?: boolean;
   onError?: (e: Error) => void;
 }): { isLoading: boolean | null; alertsEcsData: Ecs[] | null } => {
-  console.log('use fetch');
-  console.log(alertIds);
   const [isLoading, setIsLoading] = useState<boolean | null>(null);
   const [alertsEcsData, setAlertEcsData] = useState<Ecs[] | null>(null);
 
@@ -33,7 +31,6 @@ export const useFetchEcsAlertsData = ({
     const abortCtrl = new AbortController();
 
     const fetchAlert = async () => {
-      console.log('fetching');
       try {
         setIsLoading(true);
         const alertResponse = await KibanaServices.get().http.fetch<
@@ -42,9 +39,6 @@ export const useFetchEcsAlertsData = ({
           method: 'POST',
           body: JSON.stringify(buildAlertsQuery(alertIds ?? [])),
         });
-
-        console.log('fetched');
-        console.log(alertResponse.hits.hits);
 
         setAlertEcsData(
           alertResponse?.hits.hits.reduce<Ecs[]>(

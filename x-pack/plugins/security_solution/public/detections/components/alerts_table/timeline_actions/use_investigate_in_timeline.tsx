@@ -37,8 +37,6 @@ export const useInvestigateInTimeline = ({
     data: { search: searchStrategyClient, query },
   } = useKibana().services;
   const dispatch = useDispatch();
-  console.log('use investigate');
-  console.log(alertIds);
 
   const filterManagerBackup = useMemo(() => query.filterManager, [query.filterManager]);
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
@@ -57,7 +55,6 @@ export const useInvestigateInTimeline = ({
 
   const createTimeline = useCallback(
     ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
-      console.log('CREATING TIMELINE');
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       dispatchUpdateTimeline(dispatch)({
         duplicate: true,
@@ -78,26 +75,17 @@ export const useInvestigateInTimeline = ({
     [dispatch, filterManager, updateTimelineIsLoading]
   );
 
-  console.log('use investigate 2');
-  console.log(alertIds);
   const showInvestigateInTimelineAction = alertIds != null;
   const { isLoading: isFetchingAlertEcs, alertsEcsData } = useFetchEcsAlertsData({
     alertIds,
     skip: ecsRowData != null || alertIds == null,
   });
-  console.log('use investigate 3');
-  console.log('row data');
-  console.log(ecsRowData);
-  console.log('alert data');
-  console.log(alertsEcsData);
 
   const investigateInTimelineAlertClick = useCallback(async () => {
     if (onInvestigateInTimelineAlertClick) {
       onInvestigateInTimelineAlertClick();
     }
     if (alertsEcsData != null) {
-      console.log('alertsEcsData');
-
       await sendAlertToTimelineAction({
         createTimeline,
         ecsData: alertsEcsData,
@@ -105,7 +93,6 @@ export const useInvestigateInTimeline = ({
         updateTimelineIsLoading,
       });
     } else if (ecsRowData != null) {
-      console.log('ecsRowData');
       await sendAlertToTimelineAction({
         createTimeline,
         ecsData: ecsRowData,
@@ -122,9 +109,6 @@ export const useInvestigateInTimeline = ({
     updateTimelineIsLoading,
   ]);
 
-  console.log('investigate');
-  console.log(showInvestigateInTimelineAction);
-  console.log(ecsRowData);
   const investigateInTimelineActionItems = showInvestigateInTimelineAction
     ? [
         <EuiContextMenuItem

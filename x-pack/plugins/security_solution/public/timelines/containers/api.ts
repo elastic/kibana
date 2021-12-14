@@ -129,7 +129,6 @@ const patchTimeline = async ({
 }: RequestPatchTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
   let response = null;
   let requestBody = null;
-  console.log('PATCHING TIMELINE');
   try {
     requestBody = JSON.stringify({
       timeline: {
@@ -147,7 +146,6 @@ const patchTimeline = async ({
   } catch (err) {
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
-  console.log(requestBody);
   try {
     response = await KibanaServices.get().http.patch<TimelineResponse>(TIMELINE_URL, {
       method: 'PATCH',
@@ -157,7 +155,6 @@ const patchTimeline = async ({
     // For Future developer
     // We are not rejecting our promise here because we had issue with our RXJS epic
     // the issue we were not able to pass the right object to it so we did manage the error in the success
-    console.log(err);
     return Promise.resolve(decodeTimelineErrorResponse(err.body));
   }
   return decodeTimelineResponse(response);
