@@ -380,23 +380,13 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     };
   }, []);
 
-  useEffect(
-    () => {
-      // Update data query manager if input string is updated
-      data?.query.queryString.setQuery({
-        query: searchString,
-        language: searchQueryLanguage,
-      });
-    }, // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      data,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify({
-        searchQueryLanguage,
-        searchString,
-      }),
-    ]
-  );
+  useEffect(() => {
+    // Update data query manager if input string is updated
+    data?.query.queryString.setQuery({
+      query: searchString,
+      language: searchQueryLanguage,
+    });
+  }, [data, searchQueryLanguage, searchString]);
   const helpLink = docLinks.links.ml.guide;
 
   return (
