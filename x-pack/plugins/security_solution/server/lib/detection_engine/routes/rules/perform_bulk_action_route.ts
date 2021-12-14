@@ -7,7 +7,6 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { Logger } from 'src/core/server';
-import { chunk } from 'lodash';
 
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -15,6 +14,7 @@ import { performBulkActionSchema } from '../../../../../common/detection_engine/
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { initPromisePool } from '../../../../utils/promises_pool';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { deleteRules } from '../../rules/delete_rules';
@@ -30,7 +30,7 @@ import { RuleParams } from '../../schemas/rule_schemas';
 import { FindResult } from '../../../../../../alerting/server';
 
 const BULK_ACTION_RULES_LIMIT = 10000;
-const BULK_ACTION_RULES_CHUNK = 1024;
+const BULK_ACTION_CONCURRENCY = 500;
 interface ActionPerformError {
   error: {
     message: string;
@@ -44,7 +44,7 @@ interface ActionPerformError {
 
 type ActionPerform = undefined | ActionPerformError;
 
-// wraps bulk action and catches errors
+// wraps bulk action and catches errors, matched with rule details
 const actionPerformWrapper = async (
   func: () => Promise<void>,
   rule: FindResult<RuleParams>['data'][number]
@@ -60,27 +60,15 @@ const actionPerformWrapper = async (
   }
 };
 
-// to avoid large number of concurrent requests, we split request in chunks and run them sequentially
-const chunkifyRulesAction = async <T extends FindResult<RuleParams>['data'][number]>(
-  rules: T[],
-  action: (rule: T) => Promise<void>
-): Promise<ActionPerform[]> => {
-  const processChunks = async (
-    rulesChunks: T[][],
-    acc: ActionPerform[]
-  ): Promise<ActionPerform[]> => {
-    if (rulesChunks.length === 0) {
-      return acc;
-    }
-    const processed = await Promise.all(
-      rulesChunks[0].map(async (rule) => actionPerformWrapper(async () => action(rule), rule))
-    );
-
-    return processChunks(rulesChunks.slice(1), [...acc, ...processed]);
-  };
-
-  return processChunks(chunk(rules, BULK_ACTION_RULES_CHUNK), []);
-};
+const chunkifyRulesAction = async <Rule extends FindResult<RuleParams>['data'][number]>(
+  rules: Rule[],
+  action: (rule: Rule) => Promise<void>
+) =>
+  initPromisePool({
+    concurrency: BULK_ACTION_CONCURRENCY,
+    items: rules,
+    executor: async (rule) => actionPerformWrapper(async () => action(rule), rule),
+  });
 
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
@@ -137,52 +125,48 @@ export const performBulkActionRoute = (
           });
         }
 
-        let processed: ActionPerform[] = [];
+        let processingResponse: {
+          results: ActionPerform[];
+        } = {
+          results: [],
+        };
         switch (body.action) {
           case BulkAction.enable:
-            await Promise.all(
-              rules.data.map(async (rule) => {
-                if (!rule.enabled) {
-                  throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-                  await enableRule({
-                    rule,
-                    rulesClient,
-                  });
-                }
-              })
-            );
+            processingResponse = await chunkifyRulesAction(rules.data, async (rule) => {
+              if (!rule.enabled) {
+                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+                await enableRule({
+                  rule,
+                  rulesClient,
+                });
+              }
+            });
             break;
           case BulkAction.disable:
-            await Promise.all(
-              rules.data.map(async (rule) => {
-                if (rule.enabled) {
-                  throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-                  await rulesClient.disable({ id: rule.id });
-                }
-              })
-            );
+            processingResponse = await chunkifyRulesAction(rules.data, async (rule) => {
+              if (rule.enabled) {
+                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+                await rulesClient.disable({ id: rule.id });
+              }
+            });
             break;
           case BulkAction.delete:
-            await Promise.all(
-              rules.data.map(async (rule) => {
-                await deleteRules({
-                  ruleId: rule.id,
-                  rulesClient,
-                  ruleStatusClient,
-                });
-              })
-            );
+            processingResponse = await chunkifyRulesAction(rules.data, async (rule) => {
+              await deleteRules({
+                ruleId: rule.id,
+                rulesClient,
+                ruleStatusClient,
+              });
+            });
             break;
           case BulkAction.duplicate:
-            await Promise.all(
-              rules.data.map(async (rule) => {
-                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+            processingResponse = await chunkifyRulesAction(rules.data, async (rule) => {
+              throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
-                await rulesClient.create({
-                  data: duplicateRule(rule, isRuleRegistryEnabled),
-                });
-              })
-            );
+              await rulesClient.create({
+                data: duplicateRule(rule, isRuleRegistryEnabled),
+              });
+            });
             break;
           case BulkAction.export:
             const exported = await getExportByObjectIds(
@@ -204,7 +188,7 @@ export const performBulkActionRoute = (
               body: responseBody,
             });
           case BulkAction.update:
-            processed = await chunkifyRulesAction(rules.data, async (rule) => {
+            processingResponse = await chunkifyRulesAction(rules.data, async (rule) => {
               throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
               const updatedRule = body.updates.reduce(
@@ -230,14 +214,22 @@ export const performBulkActionRoute = (
             });
         }
 
-        const errors = processed.filter((res) => res?.error);
-        const failedRulesCount = errors.length;
+        const errors = processingResponse.results.filter(
+          (resp): resp is ActionPerformError => resp?.error !== undefined
+        );
+        if (errors.length) {
+          return siemResponse.error({
+            body: `Failed actions: ${errors.length}. Rules processed: ${rules.data.length}. ${errors
+              .map((r) => `'${r.rule.name}': '${r.error.message}'`)
+              .join(', ')}`,
+            statusCode: 500,
+          });
+        }
 
         return response.ok({
           body: {
-            success: failedRulesCount === 0,
+            success: true,
             rules_count: rules.data.length,
-            ...(failedRulesCount > 0 ? { errors, failed_rules_count: failedRulesCount } : {}),
           },
         });
       } catch (err) {
