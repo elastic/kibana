@@ -229,7 +229,7 @@ describe('LoginPage', () => {
       expect(wrapper.find(EuiEmptyPrompt)).toMatchSnapshot();
     });
 
-    it('renders open in new window button when cookies are disabled and document is not embedded inside iframe', async () => {
+    it('renders warning when cookies are disabled and document is not embedded inside iframe', async () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState());
 

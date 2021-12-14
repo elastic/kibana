@@ -129,7 +129,7 @@ exports[`LoginPage disabled form states renders open in new window button when c
 />
 `;
 
-exports[`LoginPage disabled form states renders open in new window button when cookies are disabled and document is not embedded inside iframe 1`] = `
+exports[`LoginPage disabled form states renders warning when cookies are disabled and document is not embedded inside iframe 1`] = `
 <DisabledLoginForm
   message={
     <FormattedMessage
