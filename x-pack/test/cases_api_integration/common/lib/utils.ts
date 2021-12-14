@@ -49,7 +49,6 @@ import {
   CasesConfigurationsResponse,
   CaseUserActionsResponse,
   AlertResponse,
-  ConnectorMappings,
   CasesByAlertId,
   CaseResolveResponse,
   CaseMetricsResponse,
@@ -61,8 +60,6 @@ import { SignalHit } from '../../../../plugins/security_solution/server/lib/dete
 import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
-import { ESCasesConfigureAttributes } from '../../../../plugins/cases/server/services/configure/types';
-import { ESCaseAttributes } from '../../../../plugins/cases/server/services/cases/types';
 import { getServiceNowServer } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 function toArray<T>(input: T | T[]): T[] {
@@ -592,89 +589,6 @@ export const ensureSavedObjectIsAuthorized = (
 ) => {
   expect(entities.length).to.eql(numberOfExpectedCases);
   entities.forEach((entity) => expect(owners.includes(entity.owner)).to.be(true));
-};
-
-interface ConnectorMappingsSavedObject {
-  'cases-connector-mappings': ConnectorMappings;
-}
-
-/**
- * Returns connector mappings saved objects from Elasticsearch directly.
- */
-export const getConnectorMappingsFromES = async ({ es }: { es: Client }) => {
-  const mappings: TransportResult<
-    estypes.SearchResponse<ConnectorMappingsSavedObject>,
-    unknown
-  > = await es.search(
-    {
-      index: '.kibana',
-      body: {
-        query: {
-          term: {
-            type: {
-              value: 'cases-connector-mappings',
-            },
-          },
-        },
-      },
-    },
-    { meta: true }
-  );
-
-  return mappings;
-};
-
-interface ConfigureSavedObject {
-  'cases-configure': ESCasesConfigureAttributes;
-}
-
-/**
- * Returns configure saved objects from Elasticsearch directly.
- */
-export const getConfigureSavedObjectsFromES = async ({ es }: { es: Client }) => {
-  const configure: TransportResult<
-    estypes.SearchResponse<ConfigureSavedObject>,
-    unknown
-  > = await es.search(
-    {
-      index: '.kibana',
-      body: {
-        query: {
-          term: {
-            type: {
-              value: 'cases-configure',
-            },
-          },
-        },
-      },
-    },
-    { meta: true }
-  );
-
-  return configure;
-};
-
-export const getCaseSavedObjectsFromES = async ({ es }: { es: Client }) => {
-  const configure: TransportResult<
-    estypes.SearchResponse<{ cases: ESCaseAttributes }>,
-    unknown
-  > = await es.search(
-    {
-      index: '.kibana',
-      body: {
-        query: {
-          term: {
-            type: {
-              value: 'cases',
-            },
-          },
-        },
-      },
-    },
-    { meta: true }
-  );
-
-  return configure;
 };
 
 export const createCaseWithConnector = async ({

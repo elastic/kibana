@@ -11,11 +11,11 @@ import {
   CASE_CONFIGURE_URL,
   SECURITY_SOLUTION_OWNER,
 } from '../../../../../../plugins/cases/common/constants';
+import { getConfiguration } from '../../../../common/lib/utils';
 import {
-  getConfiguration,
   getConfigureSavedObjectsFromES,
   getConnectorMappingsFromES,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/elasticsearch';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {

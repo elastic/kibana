@@ -32,10 +32,10 @@ import {
   createCaseWithConnector,
   createConnector,
   getServiceNowConnector,
-  getConnectorMappingsFromES,
   getCase,
   getServiceNowSimulationServer,
 } from '../../../../common/lib/utils';
+import { getConnectorMappingsFromES } from '../../../../common/lib/elasticsearch';
 import {
   CaseConnector,
   CaseStatuses,

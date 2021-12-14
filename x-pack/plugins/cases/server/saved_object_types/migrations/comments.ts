@@ -124,39 +124,26 @@ const migrateAlertsToObjects810 = (
 }> => {
   const docWithReferences = { ...doc, references: doc.references ?? [] };
 
-  try {
-    const { attributes } = doc;
+  const { attributes } = doc;
 
-    if (!isAlertAttachment(attributes)) {
-      return docWithReferences;
-    }
-
-    const { ids, indices } = getIDsAndIndicesAsArrays(attributes);
-    validateIdsAndIndices(ids, indices);
-
-    // intentionally removing alertId, index, and rule, so we can create a new document with those fields
-    // in a different place
-    const { alertId, index, rule, ...restAttributes } = attributes;
-
-    const alerts = ids.map((id, iterIndex) => ({
-      id,
-      index: indices[iterIndex],
-      rule,
-    }));
-
-    return {
-      ...doc,
-      attributes: {
-        ...restAttributes,
-        alerts,
-      },
-      references: doc.references ?? [],
-    };
-  } catch (error) {
-    logError({ id: doc.id, context, error, docType: 'comment alert', docKey: 'comment' });
-
+  if (!isAlertAttachment(attributes)) {
     return docWithReferences;
   }
+
+  const alerts = buildAlertsObject({ docId: doc.id, attributes, context });
+
+  // intentionally removing alertId, index, and rule, so we can create a new document with those fields
+  // in a different place
+  const { alertId, index, rule, ...restAttributes } = attributes;
+
+  return {
+    ...doc,
+    attributes: {
+      ...restAttributes,
+      alerts,
+    },
+    references: doc.references ?? [],
+  };
 };
 
 const isAlertAttachment = (
@@ -165,12 +152,50 @@ const isAlertAttachment = (
   return AttributesTypeAlertsRt.is(attributes);
 };
 
-const validateIdsAndIndices = (ids: string[], indices: string[]) => {
-  if (ids.length !== indices.length) {
-    throw new Error(
-      `alertIds array size [${ids.length}] does not equal index array size [${indices.length}]`
-    );
+const buildAlertsObject = ({
+  docId,
+  attributes,
+  context,
+}: {
+  docId: string;
+  attributes: AttributesTypeAlerts;
+  context: SavedObjectMigrationContext;
+}) => {
+  const { ids, indices } = getIDsAndIndicesAsArrays(attributes);
+
+  const alertsWithIdsAsPrimaryArray = ids.map((id, iterIndex) => ({
+    id,
+    index: indices[iterIndex],
+    rule: attributes.rule,
+  }));
+
+  if (ids.length === indices.length) {
+    return alertsWithIdsAsPrimaryArray;
   }
+
+  const errorMessage = `alertIds array size [${ids.length}] does not equal index array size [${
+    indices.length
+  }], alertIds: [${ids.join(',')}] indices: [${indices.join(',')}]`;
+
+  logError({
+    id: docId,
+    context,
+    error: errorMessage,
+    docType: 'comment alert',
+    docKey: 'comment',
+  });
+
+  // These should never really happen because we enforce the array lengths in the attach alert api call
+  if (ids.length > indices.length) {
+    // only return the alerts that we have indices for
+    return indices.map((index, iterIndex) => ({
+      id: ids[iterIndex],
+      index,
+      rule: attributes.rule,
+    }));
+  }
+
+  return alertsWithIdsAsPrimaryArray;
 };
 
 export const migrateByValueLensVisualizations =

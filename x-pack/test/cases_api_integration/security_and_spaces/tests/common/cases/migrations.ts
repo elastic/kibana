@@ -11,7 +11,8 @@ import {
   CASES_URL,
   SECURITY_SOLUTION_OWNER,
 } from '../../../../../../plugins/cases/common/constants';
-import { getCase, getCaseSavedObjectsFromES, resolveCase } from '../../../../common/lib/utils';
+import { getCase, resolveCase } from '../../../../common/lib/utils';
+import { getCaseSavedObjectsFromES } from '../../../../common/lib/elasticsearch';
 import { superUser } from '../../../../common/lib/authentication/users';
 import { AttributesTypeUser } from '../../../../../../plugins/cases/common/api';
 

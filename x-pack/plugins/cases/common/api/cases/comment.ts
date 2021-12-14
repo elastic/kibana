@@ -64,6 +64,24 @@ export const AlertCommentRequestRt = rt.type({
   owner: rt.string,
 });
 
+// TODO: rename
+export const AlertCommentRequestRt810 = rt.type({
+  type: rt.union([rt.literal(CommentType.generatedAlert), rt.literal(CommentType.alert)]),
+  alerts: rt.array(
+    rt.type({
+      id: rt.string,
+      index: rt.string,
+      rule: rt.type({
+        // TODO: it'd be great if we could enforce not allowing the user to pass in null for the rule information
+        // but allow it to be null in the backend because of previous alerts that did not have the rule info
+        id: rt.union([rt.string, rt.null]),
+        name: rt.union([rt.string, rt.null]),
+      }),
+    })
+  ),
+  owner: rt.string,
+});
+
 export const ActionsCommentRequestRt = rt.type({
   type: rt.literal(CommentType.actions),
   comment: rt.string,
@@ -84,6 +102,12 @@ export const AttributesTypeAlertsRt = rt.intersection([
   AlertCommentRequestRt,
   CommentAttributesBasicRt,
 ]);
+
+export const AttributesTypeAlertsRt810 = rt.intersection([
+  AlertCommentRequestRt810,
+  CommentAttributesBasicRt,
+]);
+
 const AttributesTypeActionsRt = rt.intersection([
   ActionsCommentRequestRt,
   CommentAttributesBasicRt,
@@ -91,6 +115,7 @@ const AttributesTypeActionsRt = rt.intersection([
 const CommentAttributesRt = rt.union([
   AttributesTypeUserRt,
   AttributesTypeAlertsRt,
+  AttributesTypeAlertsRt810,
   AttributesTypeActionsRt,
 ]);
 
@@ -166,6 +191,8 @@ export const FindQueryParamsRt = rt.partial({
 export type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
 export type AttributesTypeActions = rt.TypeOf<typeof AttributesTypeActionsRt>;
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
+// TODO: rename
+export type AttributesTypeAlerts810 = rt.TypeOf<typeof AttributesTypeAlertsRt810>;
 export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
