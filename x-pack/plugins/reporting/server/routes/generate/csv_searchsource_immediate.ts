@@ -14,7 +14,6 @@ import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
 import { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
 import { LevelLogger as Logger } from '../../lib';
-import { ReportingEventLogger } from '../../lib/event_logger';
 import { TaskRunResult } from '../../lib/tasks';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { RequestHandler } from '../lib/request_handler';
@@ -71,7 +70,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         const runTaskFn = runTaskFnFactory(reporting, logger);
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
 
-        const barnacle = new ReportingEventLogger({
+        const eventLog = reporting.getEventLogger({
           event: {
             id: uuid.v1(),
             timezone: req.body.browserTimezone,
@@ -87,7 +86,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           },
         });
 
-        barnacle.logStart('starting execution', { csv: { numColumns: req.body.columns?.length } });
+        eventLog.logStart('starting execution', { csv: { numColumns: req.body.columns?.length } });
+        eventLog.startTiming();
 
         try {
           let buffer = Buffer.from('');
@@ -119,6 +119,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
             logger.warn('CSV Job Execution created empty content result');
           }
 
+          eventLog.stopTiming();
+
           return res.ok({
             body: jobOutputContent || '',
             headers: {
@@ -128,6 +130,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           });
         } catch (err) {
           logger.error(err);
+          eventLog.logError();
           return requestHandler.handleError(err);
         }
       }

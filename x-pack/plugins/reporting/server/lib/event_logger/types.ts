@@ -53,16 +53,11 @@ type ReportingAction<A extends string, K extends ActionKind> = ActionBase<
           contentType: string;
           attempt: number;
           status: 'pending' | 'processing' | 'completed' | 'failed';
+          csv?: K extends 'event' ? { numColumns?: number } : {};
         }
-      :
-          | {}
-          | {
-              csv?: K extends 'event'
-                ? { numColumns: number }
-                : K extends 'metrics'
-                ? { byteLength?: number; numRows?: number; scrollTime?: number }
-                : undefined;
-            };
+      : K extends 'metrics'
+      ? { csv?: { byteLength?: number; numRows?: number; scrollTime?: number } }
+      : {};
   }
 >;
 

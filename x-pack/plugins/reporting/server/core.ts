@@ -29,11 +29,12 @@ import { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
+import { PLUGIN_ID, REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { durationToNumber } from '../common/schema_utils';
 import { ReportingConfig, ReportingSetup } from './';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
+import { reportingEventLoggerFactory, ReportingEventLoggerOpts } from './lib/event_logger/logger';
 import { ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import { ReportingPluginRouter, ScreenshotOptions } from './types';
@@ -379,5 +380,11 @@ export class ReportingCore {
 
   public countConcurrentReports(): number {
     return this.executing.size;
+  }
+
+  public getEventLogger(opts: ReportingEventLoggerOpts) {
+    const logger = this.pluginSetupDeps!.eventLog.getLogger({ event: { provider: PLUGIN_ID } });
+    const ReportingEventLogger = reportingEventLoggerFactory(logger);
+    return new ReportingEventLogger(opts);
   }
 }
