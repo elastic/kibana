@@ -55,7 +55,15 @@ export function getIndexPatterns(
   return indexPatterns;
 }
 
-export function getLegacyIndexPattern({ moduleType }: { moduleType: INDEX_PATTERN_TYPES }) {
+export function getLegacyIndexPattern({
+  moduleType,
+  config,
+  ccs,
+}: {
+  moduleType: INDEX_PATTERN_TYPES;
+  config: MonitoringConfig;
+  ccs?: string;
+}) {
   let indexPattern = '';
   switch (moduleType) {
     case 'elasticsearch':
@@ -70,10 +78,13 @@ export function getLegacyIndexPattern({ moduleType }: { moduleType: INDEX_PATTER
     case 'beats':
       indexPattern = INDEX_PATTERN_BEATS;
       break;
+    case 'entsearch':
+      indexPattern = INDEX_PATTERN_ENTERPRISE_SEARCH;
+      break;
     default:
       throw new Error(`invalid module type to create index pattern: ${moduleType}`);
   }
-  return indexPattern;
+  return prefixIndexPattern(config, indexPattern, ccs);
 }
 
 export function getDsIndexPattern({
@@ -81,11 +92,15 @@ export function getDsIndexPattern({
   moduleType,
   dataset,
   namespace = '*',
+  config,
+  ccs,
 }: {
   type?: string;
   dataset?: string;
   moduleType: INDEX_PATTERN_TYPES;
   namespace?: string;
+  config: MonitoringConfig;
+  ccs?: string;
 }): string {
   let datasetsPattern = '';
   if (dataset) {
@@ -93,7 +108,7 @@ export function getDsIndexPattern({
   } else {
     datasetsPattern = `${moduleType}.*`;
   }
-  return `${type}-${datasetsPattern}-${namespace}`;
+  return prefixIndexPattern(config, `${type}-${datasetsPattern}-${namespace}`, ccs);
 }
 
 export function getNewIndexPatterns({
@@ -111,7 +126,7 @@ export function getNewIndexPatterns({
   namespace?: string;
   ccs?: string;
 }): string {
-  const dsIndexPattern = getDsIndexPattern({ type, moduleType, dataset, namespace });
-  const legacyIndexPattern = getLegacyIndexPattern({ moduleType });
-  return prefixIndexPattern(config, `${legacyIndexPattern},${dsIndexPattern}`, ccs);
+  const legacyIndexPattern = getLegacyIndexPattern({ moduleType, config, ccs });
+  const dsIndexPattern = getDsIndexPattern({ type, moduleType, dataset, namespace, config, ccs });
+  return `${legacyIndexPattern},${dsIndexPattern}`;
 }

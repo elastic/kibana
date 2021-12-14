@@ -588,6 +588,6 @@ export const SAVED_OBJECT_TELEMETRY = 'monitoring-telemetry';
 
 export const TELEMETRY_METRIC_BUTTON_CLICK = 'btnclick__';
 
-export type INDEX_PATTERN_TYPES = 'elasticsearch' | 'kibana' | 'logstash' | 'beats';
+export type INDEX_PATTERN_TYPES = 'elasticsearch' | 'kibana' | 'logstash' | 'beats' | 'entsearch';
 
 export type DS_INDEX_PATTERN_TYPES = typeof DS_INDEX_PATTERN_METRICS | typeof DS_INDEX_PATTERN_LOGS;
