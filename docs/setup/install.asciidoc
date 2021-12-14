@@ -33,7 +33,7 @@ our Debian repository.
 
 `rpm`::
 
-The `rpm` package is suitable for installation on Red Hat, Centos, SLES,
+The `rpm` package is suitable for installation on Red Hat, SLES,
 OpenSuSE and other RPM-based systems.  RPMs may be downloaded from the
 Elastic website or from our RPM repository.
 +
