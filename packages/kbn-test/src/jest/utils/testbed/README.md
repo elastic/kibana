@@ -274,13 +274,10 @@ expect(tableCellsValues).toEqual([
 
 An object with the following methods:
 
-##### `setInputValue(input, value, isAsync)`
+##### `setInputValue(input, value)`
 
 Set the value of a form input. The input can either be a test subject (a string) or an Enzyme react wrapper. If you specify a test subject, 
 you can provide a nested path to access it by separating the parent and child with a dot (e.g. `myForm.followerIndexName`).
-
-`isAsync`: flag that will return a Promise that resolves on the next "tick". This is useful if updating the input triggers 
-an async operation (like a HTTP request) and we need it to resolve so the DOM gets updated (default: `false`).
 
 ```js
 await form.setInputValue('myInput', 'some value', true);
