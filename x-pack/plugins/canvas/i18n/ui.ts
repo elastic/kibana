@@ -1434,11 +1434,11 @@ export const ViewStrings = {
       }),
     getLegendHelp: () =>
       i18n.translate('xpack.canvas.uis.views.heatmap.args.legendHelp', {
-        defaultMessage: 'Heatmap legend',
+        defaultMessage: "Configure the heatmap chart's legend",
       }),
     getLegendDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.heatmap.args.legendDisplayName', {
-        defaultMessage: "Configure the heatmap chart's legend",
+        defaultMessage: 'Heatmap legend',
       }),
   },
 };

@@ -48,33 +48,6 @@ export const heatmap = () => ({
       type: 'model',
       argType: 'heatmap_legend',
     },
-    // // {
-    //   name: 'colorMode',
-    //   displayName: strings.getColorModeColumnDisplayName(),
-    //   help: strings.getColorModeColumnHelp(),
-    //   argType: 'select',
-    //   default: 'Labels',
-    //   options: {
-    //     choices: [
-    //       { value: 'None', name: strings.getColorModeNoneOption() },
-    //       { value: 'Labels', name: strings.getColorModeLabelOption() },
-    //       { value: 'Background', name: strings.getColorModeBackgroundOption() },
-    //     ],
-    //   },
-    // },
-    // {
-    //   name: 'showLabels',
-    //   displayName: strings.getShowLabelsColumnDisplayName(),
-    //   help: strings.getShowLabelsColumnHelp(),
-    //   argType: 'toggle',
-    //   default: true,
-    // },
-    // {
-    //   name: 'percentageMode',
-    //   displayName: strings.getPercentageModeColumnDisplayName(),
-    //   help: strings.getPercentageModeColumnHelp(),
-    //   argType: 'toggle',
-    // },
   ],
   resolve({ context }: any) {
     if (getState(context) !== 'ready') {
