@@ -11,7 +11,7 @@ import { Ast } from '@kbn/interpreter/common';
 // @ts-expect-error unconverted components
 import { ArgForm } from '../components/arg_form';
 import { argTypeRegistry } from './arg_type_registry';
-import type { ArgType, ArgTypeDef, ExpressionType } from './types';
+import type { Args, ArgType, ArgTypeDef, ArgValue, ExpressionType } from './types';
 import {
   AssetType,
   CanvasElement,
@@ -39,10 +39,10 @@ interface ArtOwnProps {
     shapes?: string[];
   };
 }
-export type ArgProps = ArtOwnProps & BaseFormProps;
+export type ArgUiConfig = ArtOwnProps & BaseFormProps;
 
 export interface DataArg {
-  argValue?: string | Ast | null;
+  argValue?: ArgValue | null;
   skipRender?: boolean;
   label?: string;
   valueIndex: number;
@@ -51,7 +51,7 @@ export interface DataArg {
   contextExpression?: string;
   name: string;
   argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
-  args: Record<string, Array<string | Ast>> | null;
+  args: Args;
   argType: ArgType;
   argTypeDef?: ArgTypeDef;
   filterGroups: string[];
@@ -60,7 +60,7 @@ export interface DataArg {
   expressionType: ExpressionType;
   nextArgType?: ArgType;
   nextExpressionType?: ExpressionType;
-  onValueAdd: (argName: string, argValue: string | Ast | null) => () => void;
+  onValueAdd: (argName: string, argValue: ArgValue | null) => () => void;
   onAssetAdd: (type: AssetType['type'], content: AssetType['value']) => string;
   onValueChange: (value: Ast | string) => void;
   onValueRemove: () => void;
@@ -82,7 +82,7 @@ export class Arg {
   displayName?: string;
   help?: string;
 
-  constructor(props: ArgProps) {
+  constructor(props: ArgUiConfig) {
     const argType = argTypeRegistry.get(props.argType);
     if (!argType) {
       throw new Error(`Invalid arg type: ${props.argType}`);

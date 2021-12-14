@@ -9,7 +9,7 @@ import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
 import { toExpression } from '@kbn/interpreter/common';
 import { interpretAst } from '../../lib/run_interpreter';
-import { modelRegistry, viewRegistry, transformRegistry } from '../../expression_types';
+import { getArgTypeDef } from '../../lib/args';
 import { FunctionFormList as Component } from './function_form_list';
 
 function normalizeContext(chain) {
@@ -24,10 +24,6 @@ function normalizeContext(chain) {
 
 function getExpression(ast) {
   return ast != null && ast.type === 'expression' ? toExpression(ast) : ast;
-}
-
-function getArgTypeDef(fn) {
-  return modelRegistry.get(fn) || viewRegistry.get(fn) || transformRegistry.get(fn);
 }
 
 const isPureArgumentType = (arg) => !arg.type || arg.type === 'argument';
@@ -91,6 +87,7 @@ const transformFunctionsToComponents = (functionsChain, path) => {
     // wrap each part of the chain in ArgType, passing in the previous context
     const component = {
       args,
+      nestedFunctionsArgs: complexArgs,
       argType: argType.function,
       argTypeDef: Object.assign(argTypeDef, { args: argumentsView }),
       argResolver: (argAst) => interpretAst(argAst, prevContext),

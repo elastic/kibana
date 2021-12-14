@@ -34,13 +34,14 @@ import { getAssets } from '../../state/selectors/assets';
 // @ts-expect-error unconverted lib
 import { findExistingAsset } from '../../lib/find_existing_asset';
 import { FunctionForm as Component } from './function_form';
-import { ArgType, ArgTypeDef } from '../../expression_types/types';
+import { Args, ArgType, ArgTypeDef } from '../../expression_types/types';
 import { State, ExpressionContext, CanvasElement, AssetType } from '../../../types';
 
 interface FunctionFormProps {
   name: string;
   argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
-  args: Record<string, Array<string | Ast>> | null;
+  args: Args;
+  nestedFunctionsArgs: Args;
   argType: ArgType;
   argTypeDef: ArgTypeDef;
   expressionIndex: number;

@@ -1,0 +1,73 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { fromExpression, toExpression } from '@kbn/interpreter/common';
+import {
+  modelRegistry,
+  viewRegistry,
+  transformRegistry,
+  Model,
+  View,
+  Transform,
+  argTypeRegistry,
+} from '../expression_types';
+import { ArgUiConfig } from '../expression_types/arg';
+
+type ArgType = Model | View | Transform;
+
+export function getArgTypeDef(fn: string): ArgType {
+  return modelRegistry.get(fn) || viewRegistry.get(fn) || transformRegistry.get(fn);
+}
+
+const buildArg = (arg: ArgUiConfig, expr: string) => `${arg.name}=${formatExpr(expr)}`;
+
+const filterValidArguments = (args: Array<string | undefined>) =>
+  args.filter((arg) => arg !== undefined);
+
+const formatExpr = (expr: string) => {
+  const exprWithoutBrackets = removeFigureBrackets(expr);
+  return toExpression(fromExpression(exprWithoutBrackets));
+};
+
+const removeFigureBrackets = (expr: string) => {
+  if (expr[0] === '{' && expr[expr.length - 1] === '}') {
+    return expr.substring(1, expr.length - 1);
+  }
+  return expr;
+};
+
+export function buildDefaultArgExpr(argUiConfig: ArgUiConfig): string | undefined {
+  const argConfig = getArgTypeDef(argUiConfig.argType);
+  if (argUiConfig.default) {
+    return buildArg(argUiConfig, argUiConfig.default);
+  }
+
+  if (!argConfig) {
+    const arg = argTypeRegistry.get(argUiConfig.argType);
+    if (!arg) {
+      return undefined;
+    }
+
+    const defExpr = arg.default;
+    if (defExpr) {
+      return buildArg(argUiConfig, defExpr);
+    }
+    return undefined;
+  }
+
+  const defaultArgs = argConfig.args.map((arg) => {
+    const defExpr = arg.default;
+    if (defExpr) {
+      return buildArg(arg, defExpr);
+    }
+    return buildDefaultArgExpr(arg);
+  });
+
+  const validArgs = filterValidArguments(defaultArgs);
+  const defExpr = validArgs.length ? `{${argUiConfig.argType} ${validArgs.join(' ')}}` : undefined;
+  return defExpr;
+}

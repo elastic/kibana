@@ -13,8 +13,10 @@ type FunctionFormComponentProps = RenderArgData;
 export const FunctionFormComponent: FunctionComponent<FunctionFormComponentProps> = (props) => {
   const passedProps = {
     name: props.name,
+    path: props.path,
     argResolver: props.argResolver,
     args: props.args,
+    nestedFunctionsArgs: props.nestedFunctionsArgs,
     argType: props.argType,
     argTypeDef: props.argTypeDef,
     filterGroups: props.filterGroups,

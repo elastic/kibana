@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Ast } from '@kbn/interpreter/common';
 import type { Transform } from './transform';
 import type { View } from './view';
 import type { Datasource } from './datasource';
@@ -21,3 +22,6 @@ export type { Arg } from './arg';
 export type ExpressionType = View | Model | Transform;
 
 export type { RenderArgData } from './function_form';
+
+export type ArgValue = string | Ast;
+export type Args = Record<string, Array<ArgValue | null>> | null;
