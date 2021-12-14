@@ -26,9 +26,6 @@ export interface LensMultitermsUsage {
   saved_multiterms_overall: Record<string, number>;
   saved_multiterms_30_days: Record<string, number>;
   saved_multiterms_90_days: Record<string, number>;
-  saved_multiterms_overall_total: number;
-  saved_multiterms_30_days_total: number;
-  saved_multiterms_90_days_total: number;
 }
 
 export interface LensClickUsage {

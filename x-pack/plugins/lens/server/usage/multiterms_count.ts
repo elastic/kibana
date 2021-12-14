@@ -103,8 +103,5 @@ export async function getMultitermsCounts(
     saved_multiterms_overall: result.saved_overall,
     saved_multiterms_30_days: result.saved_30_days,
     saved_multiterms_90_days: result.saved_90_days,
-    saved_multiterms_overall_total: result.saved_overall_total,
-    saved_multiterms_30_days_total: result.saved_30_days_total,
-    saved_multiterms_90_days_total: result.saved_90_days_total,
   };
 }
