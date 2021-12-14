@@ -29,7 +29,7 @@ import { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { PLUGIN_ID, REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
+import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { durationToNumber } from '../common/schema_utils';
 import { ReportingConfig, ReportingSetup } from './';
 import { ReportingConfigType } from './config';
@@ -383,8 +383,7 @@ export class ReportingCore {
   }
 
   public getEventLogger(opts: ReportingEventLoggerOpts) {
-    const logger = this.pluginSetupDeps!.eventLog.getLogger({ event: { provider: PLUGIN_ID } });
-    const ReportingEventLogger = reportingEventLoggerFactory(logger);
+    const ReportingEventLogger = reportingEventLoggerFactory(this.pluginSetupDeps!.eventLog);
     return new ReportingEventLogger(opts);
   }
 }

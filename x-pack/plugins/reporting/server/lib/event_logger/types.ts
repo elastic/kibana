@@ -6,11 +6,11 @@
  */
 
 import {
-  EVENT_ACTION_EXECUTE_SCHEDULE,
-  EVENT_ACTION_EXECUTE_START,
   EVENT_ACTION_EXECUTE_COMPLETE,
   EVENT_ACTION_EXECUTE_ERROR,
   EVENT_ACTION_EXECUTE_SAVE,
+  EVENT_ACTION_EXECUTE_SCHEDULE,
+  EVENT_ACTION_EXECUTE_START,
 } from '../../../common/constants';
 
 type ActionKind = 'event' | 'metrics' | 'error';
@@ -35,9 +35,9 @@ interface ActionBase<A extends string, K extends ActionKind, EventProvider> {
   message: string;
 }
 
-interface ErrorAction {
+export interface ErrorAction {
   message: string;
-  code?: number;
+  code?: string;
   stack_trace?: string;
   type?: string;
 }

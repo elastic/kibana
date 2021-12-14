@@ -119,7 +119,9 @@ export function registerGenerateCsvFromSavedObjectImmediate(
             logger.warn('CSV Job Execution created empty content result');
           }
 
-          eventLog.stopTiming();
+          eventLog.logComplete('csv generation is complete', {
+            csv: { byteLength: jobOutputSize },
+          });
 
           return res.ok({
             body: jobOutputContent || '',
@@ -130,7 +132,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           });
         } catch (err) {
           logger.error(err);
-          eventLog.logError();
+          eventLog.logError(err);
           return requestHandler.handleError(err);
         }
       }
