@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, Component } from 'react';
+import React, { Fragment } from 'react';
 import { Legacy } from '../../../legacy_shims';
 import moment from 'moment';
 import numeral from '@elastic/numeral';
@@ -28,7 +28,7 @@ import { AlertsStatus } from '../../../alerts/status';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import './listing.scss';
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint, useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 const IsClusterSupported = ({ isSupported, children }) => {
   return isSupported ? children : '-';
@@ -252,7 +252,7 @@ const licenseWarning = (scope, { title, text }) => {
   });
 };
 
-const handleClickIncompatibleLicense = (scope, clusterName) => {
+const handleClickIncompatibleLicense = (scope, theme$, clusterName) => {
   licenseWarning(scope, {
     title: i18n.translate(
       'xpack.monitoring.cluster.listing.incompatibleLicense.warningMessageTitle',
@@ -286,12 +286,12 @@ const handleClickIncompatibleLicense = (scope, clusterName) => {
           />
         </p>
       </Fragment>,
-      Legacy.shims.kibanaServices.theme
+      { theme$ }
     ),
   });
 };
 
-const handleClickInvalidLicense = (scope, clusterName) => {
+const handleClickInvalidLicense = (scope, theme$, clusterName) => {
   const licensingPath = `${Legacy.shims.getBasePath()}/app/management/stack/license_management/home`;
 
   licenseWarning(scope, {
@@ -332,124 +332,122 @@ const handleClickInvalidLicense = (scope, clusterName) => {
           />
         </p>
       </Fragment>,
-      Legacy.shims.kibanaServices.theme
+      { theme$ }
     ),
   });
 };
 
-export class Listing extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      [STANDALONE_CLUSTER_STORAGE_KEY]: false,
-    };
+const StandaloneClusterCallout = ({ changeCluster, storage }) => {
+  if (storage.get(STANDALONE_CLUSTER_STORAGE_KEY)) {
+    return null;
   }
 
-  renderStandaloneClusterCallout(changeCluster, storage) {
-    if (storage.get(STANDALONE_CLUSTER_STORAGE_KEY)) {
-      return null;
-    }
-
-    return (
-      <div>
-        <EuiCallOut
-          color="warning"
-          title={i18n.translate('xpack.monitoring.cluster.listing.standaloneClusterCallOutTitle', {
-            defaultMessage:
-              "It looks like you have instances that aren't connected to an Elasticsearch cluster.",
-          })}
-          iconType="link"
-        >
-          <p>
-            <EuiLink
-              onClick={() => changeCluster(STANDALONE_CLUSTER_CLUSTER_UUID)}
-              data-test-subj="standaloneClusterLink"
-            >
-              <FormattedMessage
-                id="xpack.monitoring.cluster.listing.standaloneClusterCallOutLink"
-                defaultMessage="View these instances."
-              />
-            </EuiLink>
+  return (
+    <div>
+      <EuiCallOut
+        color="warning"
+        title={i18n.translate('xpack.monitoring.cluster.listing.standaloneClusterCallOutTitle', {
+          defaultMessage:
+            "It looks like you have instances that aren't connected to an Elasticsearch cluster.",
+        })}
+        iconType="link"
+      >
+        <p>
+          <EuiLink
+            onClick={() => changeCluster(STANDALONE_CLUSTER_CLUSTER_UUID)}
+            data-test-subj="standaloneClusterLink"
+          >
+            <FormattedMessage
+              id="xpack.monitoring.cluster.listing.standaloneClusterCallOutLink"
+              defaultMessage="View these instances."
+            />
+          </EuiLink>
+          &nbsp;
+          <FormattedMessage
+            id="xpack.monitoring.cluster.listing.standaloneClusterCallOutText"
+            defaultMessage="Or, click Standalone Cluster in the table below"
+          />
+        </p>
+        <p>
+          <EuiLink
+            onClick={() => {
+              storage.set(STANDALONE_CLUSTER_STORAGE_KEY, true);
+            }}
+          >
+            <EuiIcon type="cross" />
             &nbsp;
             <FormattedMessage
-              id="xpack.monitoring.cluster.listing.standaloneClusterCallOutText"
-              defaultMessage="Or, click Standalone Cluster in the table below"
+              id="xpack.monitoring.cluster.listing.standaloneClusterCallOutDismiss"
+              defaultMessage="Dismiss"
             />
-          </p>
-          <p>
-            <EuiLink
-              onClick={() => {
-                storage.set(STANDALONE_CLUSTER_STORAGE_KEY, true);
-                this.setState({ [STANDALONE_CLUSTER_STORAGE_KEY]: true });
-              }}
-            >
-              <EuiIcon type="cross" />
-              &nbsp;
-              <FormattedMessage
-                id="xpack.monitoring.cluster.listing.standaloneClusterCallOutDismiss"
-                defaultMessage="Dismiss"
-              />
-            </EuiLink>
-          </p>
-        </EuiCallOut>
-        <EuiSpacer />
-      </div>
-    );
-  }
+          </EuiLink>
+        </p>
+      </EuiCallOut>
+      <EuiSpacer />
+    </div>
+  );
+};
 
-  render() {
-    const { angular, clusters, sorting, pagination, onTableChange } = this.props;
+export const Listing = ({ angular, clusters, sorting, pagination, onTableChange }) => {
+  const { services } = useKibana();
 
-    const _changeCluster = partial(changeCluster, angular.scope, angular.globalState);
-    const _handleClickIncompatibleLicense = partial(handleClickIncompatibleLicense, angular.scope);
-    const _handleClickInvalidLicense = partial(handleClickInvalidLicense, angular.scope);
-    const hasStandaloneCluster = !!clusters.find(
-      (cluster) => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID
-    );
+  const _changeCluster = partial(changeCluster, angular.scope, angular.globalState);
+  const _handleClickIncompatibleLicense = partial(
+    handleClickIncompatibleLicense,
+    angular.scope,
+    services.theme.theme$
+  );
+  const _handleClickInvalidLicense = partial(
+    handleClickInvalidLicense,
+    angular.scope,
+    services.theme.theme$
+  );
+  const hasStandaloneCluster = !!clusters.find(
+    (cluster) => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID
+  );
 
-    return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent>
-            {hasStandaloneCluster
-              ? this.renderStandaloneClusterCallout(_changeCluster, angular.storage)
-              : null}
-            <EuiMonitoringTable
-              className="clusterTable"
-              rows={clusters}
-              columns={getColumns(
-                angular.showLicenseExpiration,
-                _changeCluster,
-                _handleClickIncompatibleLicense,
-                _handleClickInvalidLicense
-              )}
-              rowProps={(item) => {
-                return {
-                  'data-test-subj': `clusterRow_${item.cluster_uuid}`,
-                };
-              }}
-              sorting={{
-                ...sorting,
-                sort: {
-                  ...sorting.sort,
-                  field: 'cluster_name',
-                },
-              }}
-              pagination={pagination}
-              search={{
-                box: {
-                  incremental: true,
-                  placeholder: angular.scope.filterText,
-                },
-              }}
-              onTableChange={onTableChange}
-              executeQueryOptions={{
-                defaultFields: ['cluster_name'],
-              }}
-            />
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-    );
-  }
-}
+  return (
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPageContent>
+          {hasStandaloneCluster ? (
+            <StandaloneClusterCallout changeCluster={_changeCluster} storage={angular.storage} />
+          ) : null}
+          <EuiMonitoringTable
+            className="clusterTable"
+            rows={clusters}
+            columns={getColumns(
+              angular.showLicenseExpiration,
+              _changeCluster,
+              _handleClickIncompatibleLicense,
+              _handleClickInvalidLicense
+            )}
+            rowProps={(item) => {
+              return {
+                'data-test-subj': `clusterRow_${item.cluster_uuid}`,
+              };
+            }}
+            sorting={{
+              ...sorting,
+              sort: {
+                ...sorting.sort,
+                field: 'cluster_name',
+              },
+            }}
+            pagination={pagination}
+            search={{
+              box: {
+                incremental: true,
+                placeholder: angular.scope.filterText,
+              },
+            }}
+            onTableChange={onTableChange}
+            executeQueryOptions={{
+              defaultFields: ['cluster_name'],
+            }}
+          />
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
+  );
+};
