@@ -27,3 +27,9 @@ export class EndpointLicenseError extends EndpointError {
     super('Your license level does not allow for this action.');
   }
 }
+
+export class EndpointAuthorizationError extends EndpointError {
+  constructor(meta?: unknown) {
+    super('Endpoint authorization failure', meta);
+  }
+}
