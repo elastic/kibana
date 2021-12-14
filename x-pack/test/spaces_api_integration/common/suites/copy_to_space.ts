@@ -89,7 +89,7 @@ export function copyToSpaceTestSuiteFactory(
 
     const aggs = response.aggregations as Record<
       string,
-      estypes.AggregationsMultiBucketAggregate<SpaceBucket>
+      estypes.AggregationsMultiBucketAggregateBase<SpaceBucket>
     >;
     return {
       buckets: aggs.count.buckets,
