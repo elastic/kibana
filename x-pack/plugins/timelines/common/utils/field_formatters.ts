@@ -7,9 +7,9 @@
 
 import { get, isEmpty, isNumber, isObject, isString } from 'lodash/fp';
 
+import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils/technical_field_names';
 import { EventHit, EventSource, TimelineEventsDetailsItem } from '../search_strategy';
 import { toObjectArrayOfStrings, toStringArray } from './to_array';
-
 export const baseCategoryFields = ['@timestamp', 'labels', 'message', 'tags'];
 
 export const getFieldCategory = (field: string): string => {
@@ -117,7 +117,7 @@ export const getDataFromFieldsHits = (
       ? item
           .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
           .flat()
-      : field === 'kibana.alert.rule.parameters'
+      : field === ALERT_RULE_PARAMETERS
       ? getDataFromFieldsHits(item, dotField, fieldCategory) // as part of https://github.com/elastic/kibana/issues/120749 kibana.alert.rule.parameters flattened type is added. This line prepends kibana.alert.rule.parameters to each field of the nested object. Without this fix, kibana.alert.rule.parameters does not get returned in the edges response of TimelinesAllEventsStrategy at all
       : getDataFromFieldsHits(item, prependField, fieldCategory);
     // combine duplicate fields
