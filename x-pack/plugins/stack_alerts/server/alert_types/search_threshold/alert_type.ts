@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
-import { AlertType, AlertExecutorOptions } from '../../types';
+import { RuleType, AlertExecutorOptions } from '../../types';
 import { ParamsSchema } from './alert_type_params';
 import { ActionContext } from './action_context';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
@@ -38,7 +38,7 @@ export type SearchThresholdExtractedParams = Omit<SearchThresholdParams, 'search
   searchSource: SearchSourceFields & { indexRefName: string };
 };
 
-export type SearchThresholdAlertType = AlertType<
+export type SearchThresholdAlertType = RuleType<
   SearchThresholdParams,
   SearchThresholdExtractedParams,
   {},
