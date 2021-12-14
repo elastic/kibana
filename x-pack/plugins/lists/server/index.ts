@@ -17,7 +17,14 @@ export type {
   UpdateExceptionListItemOptions,
 } from './services/exception_lists/exception_list_client_types';
 export { ExceptionListClient } from './services/exception_lists/exception_list_client';
-export type { ListPluginSetup, ListsApiRequestHandlerContext } from './types';
+export type {
+  ListPluginSetup,
+  ListsApiRequestHandlerContext,
+  ListsServerExtensionRegistrar,
+  ExtensionPoint,
+  ExceptionsListPreCreateItemServerExtension,
+  ExceptionListPreUpdateItemServerExtension,
+} from './types';
 export type { ExportExceptionListAndItemsReturn } from './services/exception_lists/export_exception_list_and_items';
 
 export const config: PluginConfigDescriptor = {

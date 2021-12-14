@@ -38,6 +38,7 @@ import {
   EndpointFleetServicesFactory,
   EndpointScopedFleetServicesInterface,
 } from './services/endpoint_fleet_services';
+import type { ListsServerExtensionRegistrar } from '../../../lists/server';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -56,6 +57,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   alerting: AlertsPluginStartContract;
   config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
+  registerListsServerExtension?: ListsServerExtensionRegistrar;
   licenseService: LicenseService;
   exceptionListsClient: ExceptionListClient | undefined;
   cases: CasesPluginStartContract | undefined;
