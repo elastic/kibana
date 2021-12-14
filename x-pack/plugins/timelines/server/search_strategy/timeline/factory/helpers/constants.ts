@@ -6,7 +6,6 @@
  */
 
 import { ALERT_RULE_CONSUMER, ALERT_RISK_SCORE, ALERT_SEVERITY } from '@kbn/rule-data-utils';
-// import { CTI_ROW_RENDERER_FIELDS } from '../../../../../../common/cti/constants';
 
 // TODO: share with security_solution/common/cti/constants.ts
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
