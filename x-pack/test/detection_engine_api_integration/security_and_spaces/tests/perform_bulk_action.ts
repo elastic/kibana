@@ -206,5 +206,96 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(deletedTagsRule.tags).to.eql(['tag2']);
     });
+
+    it('should set, add and delete indices in rules', async () => {
+      const ruleId = 'ruleId';
+      const indices = ['index1-*', 'index2-*'];
+      await createRule(supertest, log, getSimpleRule(ruleId));
+
+      const { body: setIndexBody } = await postBulkAction()
+        .send({
+          query: '',
+          action: BulkAction.update,
+          updates: [
+            {
+              type: BulkActionUpdateType.set_index,
+              value: ['initial-index-*'],
+            },
+          ],
+        })
+        .expect(200);
+
+      expect(setIndexBody).to.eql({ success: true, rules_count: 1 });
+
+      const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
+
+      expect(setIndexRule.index).to.eql(['initial-index-*']);
+
+      const { body: addIndexBody } = await postBulkAction()
+        .send({
+          query: '',
+          action: BulkAction.update,
+          updates: [
+            {
+              type: BulkActionUpdateType.add_index,
+              value: indices,
+            },
+          ],
+        })
+        .expect(200);
+
+      expect(addIndexBody).to.eql({ success: true, rules_count: 1 });
+
+      const { body: addIndexRule } = await fetchRule(ruleId).expect(200);
+
+      expect(addIndexRule.index).to.eql(['initial-index-*', ...indices]);
+
+      await postBulkAction()
+        .send({
+          query: '',
+          action: BulkAction.update,
+          updates: [
+            {
+              type: BulkActionUpdateType.delete_index,
+              value: ['index1-*'],
+            },
+          ],
+        })
+        .expect(200);
+
+      const { body: deleteIndexRule } = await fetchRule(ruleId).expect(200);
+
+      expect(deleteIndexRule.index).to.eql(['initial-index-*', 'index2-*']);
+    });
+
+    it('should set timeline values in rule', async () => {
+      const ruleId = 'ruleId';
+      const timelineId = '91832785-286d-4ebe-b884-1a208d111a70';
+      const timelineTitle = 'Test timeline';
+      await createRule(supertest, log, getSimpleRule(ruleId));
+
+      const { body } = await postBulkAction()
+        .send({
+          query: '',
+          action: BulkAction.update,
+          updates: [
+            {
+              type: BulkActionUpdateType.set_timeline,
+              value: {
+                timelineId,
+                timelineTitle,
+              },
+            },
+          ],
+        })
+        .expect(200);
+
+      expect(body).to.eql({ success: true, rules_count: 1 });
+
+      const { body: rule } = await fetchRule(ruleId).expect(200);
+
+      expect(rule.timeline_id).to.eql(timelineId);
+      expect(rule.timeline_title).to.eql(timelineTitle);
+    });
   });
 };
