@@ -206,10 +206,7 @@ export const upgradePackagePolicyHandler: RequestHandler<
       const body: UpgradePackagePolicyDryRunResponse = [];
 
       for (const id of request.body.packagePolicyIds) {
-        const result = await packagePolicyService.getUpgradeDryRunDiff(
-          soClient,
-          id,
-        );
+        const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
         body.push(result);
       }
 
@@ -225,7 +222,6 @@ export const upgradePackagePolicyHandler: RequestHandler<
       return response.ok({
         body,
       });
-
     } else {
       const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
         soClient,

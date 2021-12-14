@@ -165,7 +165,7 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200);
 
           // try upgrade policy to 0.1.0: error
-         await supertest
+          await supertest
             .post(`/api/fleet/package_policies/upgrade`)
             .set('kbn-xsrf', 'xxxx')
             .send({
