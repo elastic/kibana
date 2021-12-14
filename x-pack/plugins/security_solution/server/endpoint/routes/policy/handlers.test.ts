@@ -314,7 +314,7 @@ describe('test policy response handler', () => {
         mockResponse
       );
       expect(mockPackagePolicyService.list.mock.calls[0][1]).toEqual({
-        kuery: `some query and ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+        kuery: `(some query) and ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
         perPage: undefined,
         sortField: undefined,
       });
