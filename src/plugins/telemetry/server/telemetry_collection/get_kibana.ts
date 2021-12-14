@@ -41,8 +41,6 @@ export function handleKibanaStats(
   const { kibana, kibana_stats: kibanaStats, ...plugins } = response;
 
   const os = {
-    platform: 'unknown',
-    platformRelease: 'unknown',
     ...kibanaStats.os,
   };
   const formattedOsStats = Object.entries(os).reduce((acc, [key, value]) => {

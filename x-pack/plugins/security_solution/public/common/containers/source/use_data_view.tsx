@@ -54,7 +54,6 @@ export const useDataView = (): {
     },
     [dispatch]
   );
-
   const indexFieldsSearch = useCallback(
     (selectedDataViewId: string, needToBeInit: boolean = false) => {
       const asyncSearch = async () => {
@@ -110,7 +109,6 @@ export const useDataView = (): {
                     runtimeMappings: response.runtimeMappings,
                   })
                 );
-
                 searchSubscription$.current[selectedDataViewId].unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading({ id: selectedDataViewId, loading: false });

@@ -195,28 +195,33 @@ export const useInitSourcerer = (
     },
     [defaultDataView.title, dispatch, indexFieldsSearch, addError]
   );
-  useEffect(() => {
+
+  const onSignalIndexUpdated = useCallback(() => {
     if (
       !loadingSignalIndex &&
       signalIndexName != null &&
       signalIndexNameSourcerer == null &&
       defaultDataView.id.length > 0
     ) {
-      // update signal name also updates sourcerer
-      // we hit this the first time signal index is created
       updateSourcererDataView(signalIndexName);
       dispatch(sourcererActions.setSignalIndexName({ signalIndexName }));
     }
   }, [
-    defaultDataView.id,
+    defaultDataView.id.length,
     dispatch,
-    indexFieldsSearch,
-    isSignalIndexExists,
     loadingSignalIndex,
     signalIndexName,
     signalIndexNameSourcerer,
     updateSourcererDataView,
   ]);
+
+  useEffect(() => {
+    onSignalIndexUpdated();
+    // because we only want onSignalIndexUpdated to run when signalIndexName updates,
+    // but we want to know about the updates from the dependencies of onSignalIndexUpdated
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signalIndexName]);
+
   // Related to the detection page
   useEffect(() => {
     if (
