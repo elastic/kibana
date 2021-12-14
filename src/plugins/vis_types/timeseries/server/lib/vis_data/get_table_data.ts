@@ -118,9 +118,7 @@ export async function getTableData(
       []
     );
 
-    const series = await Promise.all(
-      buckets.map(processBucket({ panel, extractFields, capabilities }))
-    );
+    const series = await Promise.all(buckets.map(processBucket({ panel, extractFields })));
 
     return {
       ...meta,

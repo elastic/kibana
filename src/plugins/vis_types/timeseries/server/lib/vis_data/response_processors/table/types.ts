@@ -10,14 +10,14 @@ import { createFieldsFetcher } from '../../../search_strategies/lib/fields_fetch
 import type { ProcessorFunction } from '../../build_processor_function';
 import type { TableSearchRequestMeta } from '../../request_processors/table/types';
 import type { Panel, Series, PanelData } from '../../../../../common/types';
-import type { SearchCapabilities } from '../../../search_strategies';
 
 export interface TableResponseProcessorsParams {
-  response: Record<string, unknown>;
+  response: {
+    aggregations: Record<string, any>;
+  };
   panel: Panel;
   series: Series;
   meta: TableSearchRequestMeta;
-  capabilities: SearchCapabilities;
   extractFields: ReturnType<typeof createFieldsFetcher>;
 }
 

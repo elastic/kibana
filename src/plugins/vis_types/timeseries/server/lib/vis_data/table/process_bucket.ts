@@ -15,7 +15,7 @@ import { createFieldsFetcher } from '../../search_strategies/lib/fields_fetcher'
 import type { Panel } from '../../../../common/types';
 import type { PanelDataArray } from '../../../../common/types/vis_data';
 import type { TableSearchRequestMeta } from '../request_processors/table/types';
-import type { SearchCapabilities } from '../../search_strategies';
+import type { TableResponseProcessorsParams } from '../response_processors/table/types';
 
 function trendSinceLastBucket(data: PanelDataArray[]) {
   if (data.length < 2) {
@@ -30,15 +30,14 @@ function trendSinceLastBucket(data: PanelDataArray[]) {
 
 interface ProcessTableBucketParams {
   panel: Panel;
-  capabilities: SearchCapabilities;
   extractFields: ReturnType<typeof createFieldsFetcher>;
 }
 
-export function processBucket({ panel, capabilities, extractFields }: ProcessTableBucketParams) {
+export function processBucket({ panel, extractFields }: ProcessTableBucketParams) {
   return async (bucket: Record<string, unknown>) => {
     const resultSeries = await Promise.all(
       getActiveSeries(panel).map(async (series) => {
-        const response: any = {
+        const response: TableResponseProcessorsParams['response'] = {
           aggregations: {
             [series.id]: get(bucket, `${series.id}`),
           },
@@ -58,7 +57,6 @@ export function processBucket({ panel, capabilities, extractFields }: ProcessTab
           series,
           meta,
           extractFields,
-          capabilities,
         });
 
         if (!result) return null;
