@@ -28,7 +28,8 @@ const showApiKeyAndEncryptionError = () => {
       <div>
         <p>
           {i18n.translate('xpack.monitoring.healthCheck.tlsAndEncryptionError', {
-            defaultMessage: `Stack Monitoring rules require API keys to be enabled and an encryption key to be configured.`,
+            defaultMessage:
+              'Stack Monitoring rules require API keys to be enabled and an encryption key to be configured.',
           })}
         </p>
         <EuiSpacer size="xs" />
@@ -54,7 +55,8 @@ const showUnableToDisableWatcherClusterAlertsError = () => {
       <div>
         <p>
           {i18n.translate('xpack.monitoring.healthCheck.unableToDisableWatches.text', {
-            defaultMessage: `We failed to remove legacy cluster alerts. Please check the Kibana server log for more details, or try again later.`,
+            defaultMessage:
+              'We failed to remove legacy cluster alerts. Please check the Kibana server log for more details, or try again later.',
           })}
         </p>
         <EuiSpacer size="xs" />
@@ -75,7 +77,8 @@ const showDisabledWatcherClusterAlertsError = () => {
       defaultMessage: 'New alerts created',
     }),
     text: i18n.translate('xpack.monitoring.healthCheck.disabledWatches.text', {
-      defaultMessage: `Review the alert definition using Setup mode and configure additional action connectors to get notified via your favorite method.`,
+      defaultMessage:
+        'Review the alert definition using Setup mode and configure additional action connectors to get notified via your favorite method.',
     }),
     'data-test-subj': 'alertsCreatedToast',
   });
