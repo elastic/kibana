@@ -263,10 +263,10 @@ export const dryRunUpgradePackagePolicyHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   try {
     const body: UpgradePackagePolicyDryRunResponse = [];
-    const { packagePolicyIds, packageVersion } = request.body;
+    const { packagePolicyIds } = request.body;
 
     for (const id of packagePolicyIds) {
-      const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id, packageVersion);
+      const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
       body.push(result);
     }
 
