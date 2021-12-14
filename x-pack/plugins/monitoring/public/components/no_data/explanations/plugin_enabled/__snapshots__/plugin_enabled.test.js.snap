@@ -26,24 +26,15 @@ Array [
   >
     <p>
       We checked the cluster settings and found that 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         xpack.monitoring.enabled
       </code>
        is set to 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         false
       </code>
        set, which disables monitoring. Removing the 
-      <code
-        class="euiCode"
-        data-code-language="text"
-      >
+      <code>
         xpack.monitoring.enabled: false
       </code>
        setting from your configuration will put the default into effect and enable Monitoring.

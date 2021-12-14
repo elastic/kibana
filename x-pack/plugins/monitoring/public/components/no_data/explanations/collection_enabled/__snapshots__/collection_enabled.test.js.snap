@@ -187,19 +187,13 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
         >
           We checked the cluster settings and found that 
           <EuiCode>
-            <code
-              className="euiCode"
-              data-code-language="text"
-            >
+            <code>
               xpack.monitoring.collection.enabled
             </code>
           </EuiCode>
            is set to 
           <EuiCode>
-            <code
-              className="euiCode"
-              data-code-language="text"
-            >
+            <code>
               -1
             </code>
           </EuiCode>
