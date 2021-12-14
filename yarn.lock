@@ -5765,10 +5765,10 @@
   resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-3.12.1.tgz#5c6f4a1eabca84792fbd916f0cb40847f123c656"
   integrity sha512-SGGAhXLHDx+PK4YLNcNGa6goPf9XRWQNAUUbffkwVGGXIxmDKWyGGL4inzq2sPmExu431Ekb9aEMn9BkPqEYFA==
 
-"@types/jsdom@^16.2.3":
-  version "16.2.3"
-  resolved "https://registry.yarnpkg.com/@types/jsdom/-/jsdom-16.2.3.tgz#c6feadfe0836389b27f9c911cde82cd32e91c537"
-  integrity sha512-BREatezSn74rmLIDksuqGNFUTi9HNAWWQXYpFBFLK9U6wlMCO4M0QCa8CMpDsZQuqxSO9XifVLT5Q1P0vgKLqw==
+"@types/jsdom@^16.2.13":
+  version "16.2.13"
+  resolved "https://registry.yarnpkg.com/@types/jsdom/-/jsdom-16.2.13.tgz#126c8b7441b159d6234610a48de77b6066f1823f"
+  integrity sha512-8JQCjdeAidptSsOcRWk2iTm9wCcwn9l+kRG6k5bzUacrnm1ezV4forq0kWjUih/tumAeoG+OspOvQEbbRucBTw==
   dependencies:
     "@types/node" "*"
     "@types/parse5" "*"
@@ -5853,11 +5853,19 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__field-types@link:bazel-bin/packages/kbn-field-types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__i18n-react@link:bazel-bin/packages/kbn-i18n-react/npm_module_types":
   version "0.0.0"
   uid ""
 
 "@types/kbn__i18n@link:bazel-bin/packages/kbn-i18n/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__mapbox-gl@link:bazel-bin/packages/kbn-mapbox-gl/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -8738,10 +8746,10 @@ broadcast-channel@^3.4.1:
     rimraf "3.0.2"
     unload "2.2.0"
 
-broadcast-channel@^4.7.0:
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/broadcast-channel/-/broadcast-channel-4.7.0.tgz#4f5c31982f627eae4ffe463623ba36a9e7da1992"
-  integrity sha512-1C7wDPqeiKkwpScqFP044MsPAtxxDNKZzOnJmkHaTuOlUdaMLo11op56NrCOMiRh8dzktstcNsiHELGeTMKnNQ==
+broadcast-channel@^4.7.1:
+  version "4.7.1"
+  resolved "https://registry.yarnpkg.com/broadcast-channel/-/broadcast-channel-4.7.1.tgz#f2a5129cf4bf69c9f944b34e777a4fc907be407e"
+  integrity sha512-liKNu7gwUtBVyTzqx3Thg//7ZooKXfnXxFm/pjLPaxG3t8CquwqnobH8jtFe2FQenFduC2dUzkL1bIrld7auqg==
   dependencies:
     "@babel/runtime" "^7.16.0"
     detect-node "^2.1.0"
@@ -27757,10 +27765,10 @@ typescript-tuple@^2.2.1:
   dependencies:
     typescript-compare "^0.0.2"
 
-typescript@4.3.5, typescript@^3.3.3333, typescript@^3.5.3, typescript@^4.3.5, typescript@~4.4.2:
-  version "4.3.5"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.3.5.tgz#4d1c37cc16e893973c45a06886b7113234f119f4"
-  integrity sha512-DqQgihaQ9cUrskJo9kIyW/+g0Vxsk8cDtZ52a3NGh0YNTfpUSArXSohyUGnvbPazEPLu398C0UxmKSOrPumUzA==
+typescript@4.5.3, typescript@^3.3.3333, typescript@^3.5.3, typescript@^4.3.5, typescript@~4.4.2:
+  version "4.5.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.5.3.tgz#afaa858e68c7103317d89eb90c5d8906268d353c"
+  integrity sha512-eVYaEHALSt+s9LbvgEv4Ef+Tdq7hBiIZgii12xXJnukryt3pMgJf6aKhoCZ3FWQsu6sydEnkg11fYXLzhLBjeQ==
 
 ua-parser-js@^0.7.18:
   version "0.7.24"
