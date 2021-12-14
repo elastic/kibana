@@ -23,7 +23,7 @@ const TRANSFORM_OPTIONS = [
   {
     kind: 'string',
     text: i18n.translate('fieldFormats.geoPoint.transformOptions.string', {
-      defaultMessage: 'lat,lon',
+      defaultMessage: 'string with the format: "lat,lon"',
     }),
   },
   {
