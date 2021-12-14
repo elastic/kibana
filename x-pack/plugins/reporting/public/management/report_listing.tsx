@@ -321,7 +321,10 @@ class ReportListingUi extends Component<Props, State> {
         render: (objectTitle: string, job) => {
           return (
             <div data-test-subj="reportingListItemObjectTitle">
-              <EuiLink onClick={() => this.setState({ selectedJob: job })}>
+              <EuiLink
+                data-test-subj={`viewReportingLink${job.id}`}
+                onClick={() => this.setState({ selectedJob: job })}
+              >
                 {objectTitle ||
                   i18n.translate('xpack.reporting.listing.table.noTitleLabel', {
                     defaultMessage: 'Untitled',

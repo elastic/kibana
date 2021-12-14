@@ -67,7 +67,11 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ onClose, job }) => 
   }, [isLoading, apiClient, job.id, isMounted]);
 
   const actionsButton = (
-    <EuiButton iconType="arrowUp" onClick={() => setIsActionsPopoverOpen((isOpen) => !isOpen)}>
+    <EuiButton
+      data-test-subj="reportInfoFlyoutActionsButton"
+      iconType="arrowUp"
+      onClick={() => setIsActionsPopoverOpen((isOpen) => !isOpen)}
+    >
       {i18n.translate('xpack.reporting.reportInfoFlyout.actionsButtonLabel', {
         defaultMessage: 'Actions',
       })}
@@ -76,6 +80,7 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ onClose, job }) => 
 
   const actionItems = [
     <EuiContextMenuItem
+      data-test-subj="reportInfoFlyoutDownloadButton"
       key="download"
       icon="download"
       disabled={!job.isDownloadReady}
@@ -88,6 +93,7 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ onClose, job }) => 
       })}
     </EuiContextMenuItem>,
     <EuiContextMenuItem
+      data-test-subj="reportInfoFlyoutOpenInKibanaButton"
       disabled={!job.canLinkToKibanaApp}
       key="openInKibanaApp"
       icon="popout"
