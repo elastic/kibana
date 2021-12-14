@@ -141,7 +141,7 @@ describe.each([
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "action",Invalid value "undefined" supplied to "updates"'
+        'Invalid value "undefined" supplied to "action",Invalid value "undefined" supplied to "update"'
       );
     });
 
@@ -153,7 +153,7 @@ describe.each([
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown" supplied to "action",Invalid value "undefined" supplied to "updates"'
+        'Invalid value "unknown" supplied to "action",Invalid value "undefined" supplied to "update"'
       );
     });
 

@@ -191,7 +191,7 @@ export const performBulkActionRoute = (
             processingResponse = await chunkifyRulesAction(rules.data, async (rule) => {
               throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
-              const updatedRule = body.updates.reduce(
+              const updatedRule = body.update.reduce(
                 (acc, action) => appplyBulkActionUpdateToRule(acc, action),
                 transformAlertToRule(rule)
               );

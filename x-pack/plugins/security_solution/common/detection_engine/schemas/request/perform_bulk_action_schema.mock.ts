@@ -16,5 +16,5 @@ export const getPerformBulkActionSchemaMock = (): PerformBulkActionSchema => ({
 export const getPerformUpdateBulkActionSchemaMock = (): PerformBulkActionSchema => ({
   query: '',
   action: BulkAction.update,
-  updates: [{ type: BulkActionUpdateType.add_tags, value: ['tag1'] }],
+  [BulkAction.update]: [{ type: BulkActionUpdateType.add_tags, value: ['tag1'] }],
 });

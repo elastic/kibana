@@ -155,7 +155,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           query: '',
           action: BulkAction.update,
-          updates: [
+          [BulkAction.update]: [
             {
               type: BulkActionUpdateType.set_tags,
               value: ['reset-tag'],
@@ -174,7 +174,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           query: '',
           action: BulkAction.update,
-          updates: [
+          [BulkAction.update]: [
             {
               type: BulkActionUpdateType.add_tags,
               value: tags,
@@ -193,7 +193,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           query: '',
           action: BulkAction.update,
-          updates: [
+          [BulkAction.update]: [
             {
               type: BulkActionUpdateType.delete_tags,
               value: ['reset-tag', 'tag1'],
@@ -216,9 +216,9 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           query: '',
           action: BulkAction.update,
-          updates: [
+          [BulkAction.update]: [
             {
-              type: BulkActionUpdateType.set_index,
+              type: BulkActionUpdateType.set_index_patterns,
               value: ['initial-index-*'],
             },
           ],
@@ -235,9 +235,9 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           query: '',
           action: BulkAction.update,
-          updates: [
+          [BulkAction.update]: [
             {
-              type: BulkActionUpdateType.add_index,
+              type: BulkActionUpdateType.add_index_patterns,
               value: indices,
             },
           ],
@@ -254,9 +254,9 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           query: '',
           action: BulkAction.update,
-          updates: [
+          [BulkAction.update]: [
             {
-              type: BulkActionUpdateType.delete_index,
+              type: BulkActionUpdateType.delete_index_patterns,
               value: ['index1-*'],
             },
           ],
@@ -278,12 +278,12 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           query: '',
           action: BulkAction.update,
-          updates: [
+          [BulkAction.update]: [
             {
               type: BulkActionUpdateType.set_timeline,
               value: {
-                timelineId,
-                timelineTitle,
+                timeline_id: timelineId,
+                timeline_title: timelineTitle,
               },
             },
           ],

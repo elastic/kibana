@@ -74,14 +74,14 @@ describe('bulk_action_update', () => {
     describe('index', () => {
       test('should add new index to rule', () => {
         const updatedRule = appplyBulkActionUpdateToRule(ruleMock, {
-          type: BulkActionUpdateType.add_index,
+          type: BulkActionUpdateType.add_index_patterns,
           value: ['my-index-*'],
         });
         expect(updatedRule.index).toEqual(['initial-index-*', 'my-index-*']);
       });
       test('should remove index from rule', () => {
         const updatedRule = appplyBulkActionUpdateToRule(ruleMock, {
-          type: BulkActionUpdateType.delete_index,
+          type: BulkActionUpdateType.delete_index_patterns,
           value: ['initial-index-*'],
         });
         expect(updatedRule.index).toEqual([]);
@@ -89,7 +89,7 @@ describe('bulk_action_update', () => {
 
       test('should rewrite index in rule', () => {
         const updatedRule = appplyBulkActionUpdateToRule(ruleMock, {
-          type: BulkActionUpdateType.set_index,
+          type: BulkActionUpdateType.set_index_patterns,
           value: ['index'],
         });
         expect(updatedRule.index).toEqual(['index']);
@@ -101,8 +101,8 @@ describe('bulk_action_update', () => {
         const updatedRule = appplyBulkActionUpdateToRule(ruleMock, {
           type: BulkActionUpdateType.set_timeline,
           value: {
-            timelineId: '91832785-286d-4ebe-b884-1a208d111a70',
-            timelineTitle: 'Test timeline',
+            timeline_id: '91832785-286d-4ebe-b884-1a208d111a70',
+            timeline_title: 'Test timeline',
           },
         });
 

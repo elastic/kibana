@@ -462,9 +462,9 @@ export enum BulkActionUpdateType {
   'add_tags' = 'add_tags',
   'delete_tags' = 'delete_tags',
   'set_tags' = 'set_tags',
-  'add_index' = 'add_index',
-  'delete_index' = 'delete_index',
-  'set_index' = 'set_index',
+  'add_index_patterns' = 'add_index_patterns',
+  'delete_index_patterns' = 'delete_index_patterns',
+  'set_index_patterns' = 'set_index_patterns',
   'set_timeline' = 'set_timeline',
 }
 
@@ -481,9 +481,9 @@ const actionUpdateTags = t.type({
 
 const actionUpdateIndex = t.type({
   type: t.union([
-    t.literal(BulkActionUpdateType.add_index),
-    t.literal(BulkActionUpdateType.delete_index),
-    t.literal(BulkActionUpdateType.set_index),
+    t.literal(BulkActionUpdateType.add_index_patterns),
+    t.literal(BulkActionUpdateType.delete_index_patterns),
+    t.literal(BulkActionUpdateType.set_index_patterns),
   ]),
   value: index,
 });
@@ -491,15 +491,15 @@ const actionUpdateIndex = t.type({
 const actionUpdateTimeline = t.type({
   type: t.literal(BulkActionUpdateType.set_timeline),
   value: t.type({
-    timelineId: timeline_id,
-    timelineTitle: timeline_title,
+    timeline_id,
+    timeline_title,
   }),
 });
 
-export const bulkActionUpdate = t.union([
+export const bulkActionUpdatePayload = t.union([
   actionUpdateTags,
   actionUpdateIndex,
   actionUpdateTimeline,
 ]);
 
-export type BulkActionUpdate = t.TypeOf<typeof bulkActionUpdate>;
+export type BulkActionUpdatePayload = t.TypeOf<typeof bulkActionUpdatePayload>;

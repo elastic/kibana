@@ -47,7 +47,7 @@ describe('perform_bulk_action_schema', () => {
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "action"',
-      'Invalid value "undefined" supplied to "updates"',
+      'Invalid value "undefined" supplied to "update"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -61,7 +61,7 @@ describe('perform_bulk_action_schema', () => {
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "unknown" supplied to "action"',
-      'Invalid value "undefined" supplied to "updates"',
+      'Invalid value "undefined" supplied to "update"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -76,7 +76,7 @@ describe('perform_bulk_action_schema', () => {
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "update" supplied to "action"',
-      'Invalid value "undefined" supplied to "updates"',
+      'Invalid value "undefined" supplied to "update"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -100,7 +100,7 @@ describe('perform_bulk_action_schema', () => {
     const payload: PerformBulkActionSchema = {
       query: 'name: test',
       action: BulkAction.update,
-      updates: [{ type: BulkActionUpdateType.set_tags, value: ['test-tag'] }],
+      [BulkAction.update]: [{ type: BulkActionUpdateType.set_tags, value: ['test-tag'] }],
     };
 
     const message = retrieveValidationMessage(payload);

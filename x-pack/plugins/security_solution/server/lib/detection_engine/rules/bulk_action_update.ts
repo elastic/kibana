@@ -7,7 +7,7 @@
 
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
-  BulkActionUpdate,
+  BulkActionUpdatePayload,
   BulkActionUpdateType,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
@@ -21,7 +21,7 @@ export const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
 
 export const appplyBulkActionUpdateToRule = (
   existingRule: Partial<RulesSchema>,
-  action: BulkActionUpdate
+  action: BulkActionUpdatePayload
 ): Partial<RulesSchema> => {
   const rule = { ...existingRule };
   switch (action.type) {
@@ -39,22 +39,22 @@ export const appplyBulkActionUpdateToRule = (
       break;
 
     // index actions
-    case BulkActionUpdateType.add_index:
+    case BulkActionUpdateType.add_index_patterns:
       rule.index = addItemsToArray(rule.index ?? [], action.value);
       break;
 
-    case BulkActionUpdateType.delete_index:
+    case BulkActionUpdateType.delete_index_patterns:
       rule.index = deleteItemsFromArray(rule.index ?? [], action.value);
       break;
 
-    case BulkActionUpdateType.set_index:
+    case BulkActionUpdateType.set_index_patterns:
       rule.index = action.value;
       break;
 
     // timeline actions
     case BulkActionUpdateType.set_timeline:
-      rule.timeline_id = action.value.timelineId;
-      rule.timeline_title = action.value.timelineTitle;
+      rule.timeline_id = action.value.timeline_id;
+      rule.timeline_title = action.value.timeline_title;
   }
 
   return rule;

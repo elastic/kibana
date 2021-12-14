@@ -6,28 +6,33 @@
  */
 
 import * as t from 'io-ts';
-import { BulkAction, queryOrUndefined, bulkActionUpdate } from '../common/schemas';
+import { BulkAction, queryOrUndefined, bulkActionUpdatePayload } from '../common/schemas';
 
-export const performBulkActionSchema = t.union([
+export const performBulkActionSchema = t.intersection([
   t.exact(
     t.type({
       query: queryOrUndefined,
-      action: t.union([
-        t.literal(BulkAction.delete),
-        t.literal(BulkAction.disable),
-        t.literal(BulkAction.duplicate),
-        t.literal(BulkAction.enable),
-        t.literal(BulkAction.export),
-      ]),
     })
   ),
-  t.exact(
-    t.type({
-      query: queryOrUndefined,
-      action: t.literal(BulkAction.update),
-      updates: t.array(bulkActionUpdate),
-    })
-  ),
+  t.union([
+    t.exact(
+      t.type({
+        action: t.union([
+          t.literal(BulkAction.delete),
+          t.literal(BulkAction.disable),
+          t.literal(BulkAction.duplicate),
+          t.literal(BulkAction.enable),
+          t.literal(BulkAction.export),
+        ]),
+      })
+    ),
+    t.exact(
+      t.type({
+        action: t.literal(BulkAction.update),
+        [BulkAction.update]: t.array(bulkActionUpdatePayload),
+      })
+    ),
+  ]),
 ]);
 
 export type PerformBulkActionSchema = t.TypeOf<typeof performBulkActionSchema>;
