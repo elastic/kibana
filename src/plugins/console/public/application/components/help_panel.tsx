@@ -18,12 +18,15 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { EditorExample } from './editor_example';
+import { useServicesContext } from '../contexts';
 
 interface Props {
   onClose: () => void;
 }
 
 export function HelpPanel(props: Props) {
+  const { docLinks } = useServicesContext();
+
   return (
     <EuiFlyout onClose={props.onClose} data-test-subj="helpFlyout" size="s">
       <EuiFlyoutHeader hasBorder>
@@ -48,25 +51,22 @@ export function HelpPanel(props: Props) {
             />
           </p>
           <p>
-            <FormattedMessage id="console.helpPage.learnAbout" defaultMessage="Learn about" />
-            &nbsp;
-            <EuiLink
-              href="https://www.elastic.co/guide/en/kibana/current/console-kibana.html"
-              target="_blank"
-              external
-            >
-              Console
-            </EuiLink>
-            &nbsp;
-            <FormattedMessage id="console.helpPage.and" defaultMessage="and" />
-            &nbsp;
-            <EuiLink
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html"
-              target="_blank"
-              external
-            >
-              Query DSL
-            </EuiLink>
+            <FormattedMessage
+              id="console.helpPage.learnAboutConsoleAndQueryDslText"
+              defaultMessage="Learn about {console} and {queryDsl}"
+              values={{
+                console: (
+                  <EuiLink href={docLinks.console.guide} target="_blank" external>
+                    Console
+                  </EuiLink>
+                ),
+                queryDsl: (
+                  <EuiLink href={docLinks.query.queryDsl} target="_blank" external>
+                    Query DSL
+                  </EuiLink>
+                ),
+              }}
+            />
           </p>
           <EditorExample panel="help" />
           <h3>
