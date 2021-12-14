@@ -14,6 +14,12 @@ import { LensUsage, LensTelemetryState } from './types';
 import { lensUsageSchema } from './schema';
 
 const emptyUsageCollection = {
+  saved_multiterms_overall: {},
+  saved_multiterms_30_days: {},
+  saved_multiterms_90_days: {},
+  saved_multiterms_overall_total: 0,
+  saved_multiterms_30_days_total: 0,
+  saved_multiterms_90_days_total: 0,
   saved_overall: {},
   saved_30_days: {},
   saved_90_days: {},
@@ -44,6 +50,7 @@ export function registerLensUsageCollector(
         return {
           ...emptyUsageCollection,
           ...state.saved,
+          ...state.multiterms,
           events_30_days: events.last30,
           events_90_days: events.last90,
           suggestion_events_30_days: suggestions.last30,
