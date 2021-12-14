@@ -43,7 +43,7 @@ export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
 };
 
 export const getLoadPoliciesError = (error: ServerApiError) => {
-  return i18n.translate('xpack.securitySolution.hostIsolationExceptions.failedLoadPolicies', {
+  return i18n.translate('xpack.securitySolution.exceptions.failedLoadPolicies', {
     defaultMessage: 'There was an error loading policies: "{error}"',
     values: { error: error.message },
   });
