@@ -10,10 +10,10 @@ import { GeoPointFormat } from './geo_point';
 
 describe('GeoPoint Format', () => {
   describe('output format', () => {
-    test('"string"', () => {
+    test('"lat_lon_string"', () => {
       const geoPointFormat = new GeoPointFormat(
         {
-          transform: 'string',
+          transform: 'lat_lon_string',
         },
         jest.fn()
       );
@@ -39,7 +39,7 @@ describe('GeoPoint Format', () => {
     test('Geopoint expressed as an GeoJson geometry', () => {
       const geoPointFormat = new GeoPointFormat(
         {
-          transform: 'string',
+          transform: 'lat_lon_string',
         },
         jest.fn()
       );
@@ -51,7 +51,7 @@ describe('GeoPoint Format', () => {
     test('Geopoint expressed as an object, with lat and lon keys', () => {
       const geoPointFormat = new GeoPointFormat(
         {
-          transform: 'string',
+          transform: 'lat_lon_string',
         },
         jest.fn()
       );
@@ -61,7 +61,7 @@ describe('GeoPoint Format', () => {
     test('Geopoint expressed as a string with the format: "lat,lon"', () => {
       const geoPointFormat = new GeoPointFormat(
         {
-          transform: 'string',
+          transform: 'lat_lon_string',
         },
         jest.fn()
       );
@@ -71,7 +71,7 @@ describe('GeoPoint Format', () => {
     test('Geopoint expressed as a Well-Known Text POINT with the format: "POINT(lon lat)"', () => {
       const geoPointFormat = new GeoPointFormat(
         {
-          transform: 'string',
+          transform: 'lat_lon_string',
         },
         jest.fn()
       );
@@ -81,7 +81,7 @@ describe('GeoPoint Format', () => {
     test('non-geopoint', () => {
       const geoPointFormat = new GeoPointFormat(
         {
-          transform: 'string',
+          transform: 'lat_lon_string',
         },
         jest.fn()
       );
