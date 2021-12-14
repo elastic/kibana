@@ -20,7 +20,7 @@ export const heatmapGridConfig: ExpressionFunctionDefinition<
   name: EXPRESSION_HEATMAP_GRID_NAME,
   aliases: [],
   type: EXPRESSION_HEATMAP_GRID_NAME,
-  help: `Configure the heatmap layout `,
+  help: `Configure the heatmap layout`,
   inputTypes: ['null'],
   args: {
     // grid

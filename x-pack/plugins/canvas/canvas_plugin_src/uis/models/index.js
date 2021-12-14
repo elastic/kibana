@@ -10,5 +10,6 @@ import { math } from './math';
 import { tagcloud } from './tagcloud';
 import { metricVis } from './metric_vis';
 import { heatmapLegend } from './heatmap_legend';
+import { heatmapGrid } from './heatmap_grid';
 
-export const modelSpecs = [pointseries, math, tagcloud, metricVis, heatmapLegend];
+export const modelSpecs = [pointseries, math, tagcloud, metricVis, heatmapLegend, heatmapGrid];

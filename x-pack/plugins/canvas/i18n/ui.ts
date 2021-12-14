@@ -593,56 +593,134 @@ export const ModelStrings = {
   },
   HeatmapLegend: {
     getDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap.title', {
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.title', {
         defaultMessage: "Configure the heatmap chart's legend",
       }),
     getIsVisibleDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap.args.isVisibleTitle', {
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.isVisibleTitle', {
         defaultMessage: 'Show legend',
       }),
     getIsVisibleHelp: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap.args.isVisibleLabel', {
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.isVisibleLabel', {
         defaultMessage: 'Specifies whether or not the legend is visible',
       }),
     getPositionDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap.args.positionTitle', {
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.positionTitle', {
         defaultMessage: 'Legend Position',
       }),
     getPositionHelp: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap.args.positionLabel', {
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.positionLabel', {
         defaultMessage: 'Specifies the legend position.',
       }),
     getPositionTopOption: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap.args.positionTopLabel', {
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.positionTopLabel', {
         defaultMessage: 'Top',
       }),
     getPositionBottomOption: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap.args.positionBottomLabel', {
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.positionBottomLabel', {
         defaultMessage: 'Bottom',
       }),
     getPositionLeftOption: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap.args.positionLeftLabel', {
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.positionLeftLabel', {
         defaultMessage: 'Left',
       }),
     getPositionRightOption: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap.args.positionRightLabel', {
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.positionRightLabel', {
         defaultMessage: 'Right',
       }),
     getMaxLinesDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap.args.maxLinesTitle', {
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.maxLinesTitle', {
         defaultMessage: 'Legend maximum lines',
       }),
     getMaxLinesHelp: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap.args.maxLinesLabel', {
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.maxLinesLabel', {
         defaultMessage: 'Specifies the number of lines per legend item.',
       }),
     getShouldTruncateDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap.args.shouldTruncateTitle', {
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.shouldTruncateTitle', {
         defaultMessage: 'Truncate label',
       }),
     getShouldTruncateHelp: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap.args.shouldTruncateLabel', {
+      i18n.translate('xpack.canvas.uis.models.heatmap_legend.args.shouldTruncateLabel', {
         defaultMessage: 'Specifies whether or not the legend items should be truncated',
+      }),
+  },
+  HeatmapGrid: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.title', {
+        defaultMessage: 'Configure the heatmap layout',
+      }),
+    getStrokeWidthDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.strokeWidthTitle', {
+        defaultMessage: 'Stroke width',
+      }),
+    getStrokeWidthHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.strokeWidthLabel', {
+        defaultMessage: 'Specifies the grid stroke width',
+      }),
+    getStrokeColorDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.strokeColorTitle', {
+        defaultMessage: 'Stroke color',
+      }),
+    getStrokeColorHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.strokeColorLabel', {
+        defaultMessage: 'Specifies the grid stroke color',
+      }),
+    getCellHeightDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.cellHeightTitle', {
+        defaultMessage: 'Cell height',
+      }),
+    getCellHeightHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.cellHeightLabel', {
+        defaultMessage: 'Specifies the grid cell height',
+      }),
+    getCellWidthDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.cellWidthTitle', {
+        defaultMessage: 'Cell width',
+      }),
+    getCellWidthHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.cellWidthLabel', {
+        defaultMessage: 'Specifies the grid cell width',
+      }),
+    getIsCellLabelVisibleDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isCellLabelVisibleTitle', {
+        defaultMessage: 'Show cell label',
+      }),
+    getIsCellLabelVisibleHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isCellLabelVisibleLabel', {
+        defaultMessage: 'Specifies whether or not the cell label is visible',
+      }),
+    getIsYAxisLabelVisibleDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isYAxisLabelVisibleTile', {
+        defaultMessage: 'Show Y-axis labels',
+      }),
+    getIsYAxisLabelVisibleHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isYAxisLabelVisibleLabel', {
+        defaultMessage: 'Specifies whether or not the Y-axis labels are visible',
+      }),
+    getIsXAxisLabelVisibleDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isXAxisLabelVisibleTile', {
+        defaultMessage: 'Show X-axis labels',
+      }),
+    getIsXAxisLabelVisibleHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isYAxisLabelVisibleLabel', {
+        defaultMessage: 'Specifies whether or not the X-axis labels are visible',
+      }),
+    getYAxisLabelWidthDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.yAxisLabelWidthTitle', {
+        defaultMessage: 'Y-axis labels width',
+      }),
+    getYAxisLabelWidthHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.yAxisLabelWidthLabel', {
+        defaultMessage: 'Specifies the width of the Y-axis labels',
+      }),
+    getYAxisLabelColorDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.yAxisLabelColorTitle', {
+        defaultMessage: 'Y-axis labels color',
+      }),
+    getYAxisLabelColorHelp: () =>
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.yAxisLabelColorLabel', {
+        defaultMessage: 'Specifies the color of the Y-axis labels',
       }),
   },
 };
@@ -1439,6 +1517,14 @@ export const ViewStrings = {
     getLegendDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.heatmap.args.legendDisplayName', {
         defaultMessage: 'Heatmap legend',
+      }),
+    getGridConfigHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.gridConfigHelp', {
+        defaultMessage: 'Configure the heatmap layout',
+      }),
+    getGridConfigDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.gridConfigDisplayName', {
+        defaultMessage: 'Heatmap layout configuration',
       }),
   },
 };

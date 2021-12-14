@@ -21,9 +21,6 @@ export const heatmapLegend = () => ({
       help: strings.getIsVisibleHelp(),
       argType: 'toggle',
       default: true,
-      options: {
-        onlyMath: true,
-      },
     },
     {
       name: 'position',
@@ -52,9 +49,6 @@ export const heatmapLegend = () => ({
       displayName: strings.getShouldTruncateDisplayName(),
       help: strings.getShouldTruncateHelp(),
       argType: 'toggle',
-      options: {
-        onlyMath: true,
-      },
     },
   ],
   resolve({ context }: any) {

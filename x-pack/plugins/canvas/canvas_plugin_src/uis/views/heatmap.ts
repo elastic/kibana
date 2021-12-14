@@ -48,6 +48,13 @@ export const heatmap = () => ({
       type: 'model',
       argType: 'heatmap_legend',
     },
+    {
+      name: 'gridConfig',
+      displayName: strings.getGridConfigDisplayName(),
+      help: strings.getGridConfigHelp(),
+      type: 'model',
+      argType: 'heatmap_grid',
+    },
   ],
   resolve({ context }: any) {
     if (getState(context) !== 'ready') {
