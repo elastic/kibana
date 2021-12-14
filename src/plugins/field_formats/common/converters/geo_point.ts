@@ -21,8 +21,8 @@ const TRANSFORM_OPTIONS = [
     }),
   },
   {
-    kind: 'string',
-    text: i18n.translate('fieldFormats.geoPoint.transformOptions.string', {
+    kind: 'lat_lon_string',
+    text: i18n.translate('fieldFormats.geoPoint.transformOptions.latLonString', {
       defaultMessage: 'string with the format: "lat,lon"',
     }),
   },
@@ -106,7 +106,7 @@ export class GeoPointFormat extends FieldFormat {
     }
 
     switch (this.param('transform')) {
-      case 'string':
+      case 'lat_lon_string':
         return `${point.coordinates[1]},${point.coordinates[0]}`;
       case 'wkt':
         return `POINT(${point.coordinates[0]} ${point.coordinates[1]})`;
