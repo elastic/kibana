@@ -120,7 +120,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
               size="s"
               title={
                 <FormattedMessage
-                  id="xpack.ml.overview.analyticsList.emptyPromptText"
+                  id="xpack.ml.overview.analyticsList.emptyPromptHelperText"
                   defaultMessage="We recommend using {transforms} to create feature indices for analytics jobs."
                   values={{
                     transforms: (

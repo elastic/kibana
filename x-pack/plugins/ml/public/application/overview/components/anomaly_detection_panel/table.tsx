@@ -31,7 +31,7 @@ import { toLocaleString } from '../../../util/string_utils';
 import { SwimlaneContainer } from '../../../explorer/swimlane_container';
 import { useTimeBuckets } from '../../../components/custom_hooks/use_time_buckets';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { useMlLink } from '../../../contexts/kibana';
+import { useMlLink, useTimefilter } from '../../../contexts/kibana';
 
 // Used to pass on attribute names to table columns
 export enum AnomalyDetectionListColumns {
@@ -59,6 +59,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
   const timeBuckets = useTimeBuckets();
+  const timeFilter = useTimefilter();
 
   const manageJobsLink = useMlLink({
     page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
@@ -105,7 +106,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
           />
         ) : (
           <FormattedMessage
-            id="xpack.ml.overview.anomalyDetection.noAnomaliesFoundMessage"
+            id="xpack.ml.overview.anomalyDetection.noResultsFoundMessage"
             defaultMessage="No results found"
           />
         );
@@ -162,7 +163,12 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       name: i18n.translate('xpack.ml.overview.anomalyDetection.tableActionLabel', {
         defaultMessage: 'Actions',
       }),
-      render: (group: Group) => <ExplorerLink jobsList={getJobsFromGroup(group, jobsList)} />,
+      render: (group: Group) => (
+        <ExplorerLink
+          jobsList={getJobsFromGroup(group, jobsList)}
+          timeRange={timeFilter.getTime()}
+        />
+      ),
       width: '100px',
       align: 'right',
     },
