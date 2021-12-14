@@ -19,6 +19,7 @@ import {
   getGoalValue,
   getMaxValue,
   getMinValue,
+  getValueFromAccessor,
   GaugeIconVertical,
   GaugeIconHorizontal,
 } from '../../../../../../src/plugins/chart_expressions/expression_gauge/public';
@@ -195,6 +196,31 @@ export const getGaugeVisualization = ({
       palette = getStopsForFixedMode(displayStops, state?.palette?.params?.colorStops);
     }
 
+    let invalidProps: { invalid?: boolean; invalidMessage?: string } = {};
+    const minValue = getValueFromAccessor('minAccessor', row, state);
+    const maxValue = getValueFromAccessor('maxAccessor', row, state);
+    if (maxValue != null && minValue != null) {
+      if (maxValue < minValue) {
+        invalidProps = {
+          invalid: true,
+          invalidMessage: i18n.translate(
+            'xpack.lens.guageVisualization.chartCannotRenderMinGreaterMax',
+            {
+              defaultMessage: 'Minimum value may not be greater than maximum value',
+            }
+          ),
+        };
+      }
+      if (maxValue === minValue) {
+        invalidProps = {
+          invalid: true,
+          invalidMessage: i18n.translate('xpack.lens.guageVisualization.chartCannotRenderEqual', {
+            defaultMessage: 'Minimum and maximum values may not be equal',
+          }),
+        };
+      }
+    }
+
     return {
       groups: [
         {
@@ -238,6 +264,7 @@ export const getGaugeVisualization = ({
           dataTestSubj: 'lnsGauge_minDimensionPanel',
           prioritizedOperation: 'min',
           suggestedValue: () => (state.metricAccessor ? getMinValue(row, state) : undefined),
+          ...invalidProps,
         },
         {
           supportStaticValue: true,
@@ -253,6 +280,7 @@ export const getGaugeVisualization = ({
           dataTestSubj: 'lnsGauge_maxDimensionPanel',
           prioritizedOperation: 'max',
           suggestedValue: () => (state.metricAccessor ? getMaxValue(row, state) : undefined),
+          ...invalidProps,
         },
         {
           supportStaticValue: true,
