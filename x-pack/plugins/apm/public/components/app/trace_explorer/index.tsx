@@ -57,7 +57,7 @@ function getComponentProps(queryState: UseTraceQueryState) {
     },
     hasNext:
       queryState.traceSearchState?.isPartial === false &&
-      queryState.traceSearchState?.pagination.after,
+      !!queryState.traceSearchState?.pagination.after,
     onNextClick: () => {
       queryState.next();
     },
