@@ -15,6 +15,7 @@ import { stringify } from 'query-string';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
+  console.log(fields, '!!fields');
   const reason = fields[ALERT_REASON] ?? '-';
   const nodeTypeField = `${ALERT_RULE_PARAMETERS}.nodeType`;
   const nodeType = fields[nodeTypeField];
@@ -30,7 +31,7 @@ export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
     // We always pick the first criteria metric for the URL
     const criteriaMetricField = `${ALERT_RULE_PARAMETERS}.criteria.metric`;
     const criteriaMetric = fields[criteriaMetricField][0];
-    const criteriaCustomMetricIdField = `${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`;
+    const criteriaCustomMetricIdField = `${ALERT_RULE_PARAMETERS}.criteria.id`;
     const criteriaCustomMetricId = fields[criteriaCustomMetricIdField][0];
     if (criteriaCustomMetricId === 'alert-custom-metric') {
       const customMetric = encode({ id: criteriaCustomMetricId });
