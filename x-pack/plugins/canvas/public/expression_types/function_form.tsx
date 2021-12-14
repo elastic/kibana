@@ -6,7 +6,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiButtonIcon, EuiCallOut, EuiFlexGroup, EuiFormRow, EuiToolTip } from '@elastic/eui';
 import { isPlainObject, uniq, last, compact } from 'lodash';
 import { Ast, fromExpression } from '@kbn/interpreter/common';
 import { ArgAddPopover, ArgOptions } from '../components/arg_add_popover';
@@ -35,6 +35,7 @@ export interface ArgWithValues {
 
 export type RenderArgData = BaseFormProps & {
   argType: ArgType;
+  removable?: boolean;
   type?: ArgDisplayType;
   argTypeDef?: ArgTypeDef;
   args: Args;
@@ -50,6 +51,7 @@ export type RenderArgData = BaseFormProps & {
   onValueAdd: (argName: string, argValue: ArgValue | null) => () => void;
   onValueChange: (argName: string, argIndex: number) => (value: string | Ast) => void;
   onValueRemove: (argName: string, argIndex: number) => () => void;
+  onContainerRemove: () => void;
   onAssetAdd: (type: AssetType['type'], content: AssetType['value']) => string;
   updateContext: (element?: CanvasElement) => void;
   typeInstance?: ExpressionType;
@@ -80,7 +82,7 @@ export class FunctionForm extends BaseForm {
   }
 
   renderArg(argWithValues: ArgWithValues, props: RenderArgProps) {
-    const { onValueRemove, onValueChange, ...passedProps } = props;
+    const { onValueRemove, onValueChange, onContainerRemove, ...passedProps } = props;
     const { arg, argValues } = argWithValues;
     const { argType, expressionIndex } = passedProps;
     // TODO: show some information to the user than an argument was skipped
@@ -228,7 +230,7 @@ export class FunctionForm extends BaseForm {
   }
 
   render(data: RenderArgData = { args: null, argTypeDef: undefined } as RenderArgData) {
-    const { args, argTypeDef, nestedFunctionsArgs = {} } = data;
+    const { args, argTypeDef, nestedFunctionsArgs = {}, removable } = data;
     const argsWithValues = this.getArgsWithValues(args, argTypeDef);
     try {
       // props are passed to resolve and the returned object is mixed into the template props
@@ -247,11 +249,28 @@ export class FunctionForm extends BaseForm {
       if (!addableArgs.length && !argumentForms.length) {
         return null;
       }
-
       return (
         <SidebarSection>
           <SidebarSectionTitle title={argTypeDef?.displayName} tip={argTypeDef?.help}>
-            {addableArgs.length === 0 ? null : <ArgAddPopover options={addableArgs} />}
+            <EuiFormRow>
+              <EuiFlexGroup direction="row" gutterSize="s">
+                {removable && (
+                  <EuiToolTip position="top" content={'Remove'}>
+                    <EuiButtonIcon
+                      color="text"
+                      onClick={() => {
+                        props.onContainerRemove();
+                      }}
+                      iconType="cross"
+                      iconSize="s"
+                      aria-label={'Remove'}
+                      className="canvasArg__remove"
+                    />
+                  </EuiToolTip>
+                )}
+                {addableArgs.length === 0 ? null : <ArgAddPopover options={addableArgs} />}
+              </EuiFlexGroup>
+            </EuiFormRow>
           </SidebarSectionTitle>
           {argumentForms}
         </SidebarSection>

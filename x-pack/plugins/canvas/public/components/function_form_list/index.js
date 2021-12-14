@@ -62,13 +62,19 @@ const mergeComponentsAndContexts = (
   context: [...context, ...nextContext],
 });
 
-const buildPathName = (prevPath = '', argName, index) => {
-  const newPath = `${argName}.${index}`;
-  return prevPath.length ? `${prevPath}.${newPath}` : newPath;
+const buildPath = (prevPath = '', argName, index, removable = true) => {
+  const newPath = `${argName}`;
+  return { path: prevPath.length ? `${prevPath}.${newPath}` : newPath, index, removable };
 };
 
-const transformFunctionsToComponents = (functionsChain, path, argUiConfig) => {
-  const argumentsPath = path ? `${path}.chain` : `chain`;
+const transformFunctionsToComponents = (
+  functionsChain,
+  { path, index, removable },
+  argUiConfig
+) => {
+  const parentPath = path;
+  const indexPath = index !== undefined ? `.${index}` : '';
+  const argumentsPath = path ? `${path}${indexPath}.chain` : `chain`;
   return functionsChain.reduce((current, argType, i) => {
     const argumentPath = `${argumentsPath}.${i}.arguments`;
     const argTypeDef = getArgTypeDef(argType.function);
@@ -103,6 +109,8 @@ const transformFunctionsToComponents = (functionsChain, path, argUiConfig) => {
       expressionIndex: i, // preserve the index in the AST
       nextArgType: nextArg && nextArg.function,
       path: `${argumentPath}`,
+      parentPath,
+      removable,
     };
 
     const next = Object.keys(complexArgs).reduce((current, argName) => {
@@ -110,7 +118,7 @@ const transformFunctionsToComponents = (functionsChain, path, argUiConfig) => {
         .map(({ chain }, index) =>
           transformFunctionsToComponents(
             chain,
-            buildPathName(argumentPath, argName, index),
+            buildPath(argumentPath, argName, index),
             complexArgumentsViews?.find((argView) => argView.name === argName)
           )
         )
@@ -129,7 +137,7 @@ const functionFormItems = withProps((props) => {
   const selectedElement = props.element;
   const functionsChain = get(selectedElement, 'ast.chain', []);
   // map argTypes from AST, attaching nextArgType if one exists
-  const functionsListItems = transformFunctionsToComponents(functionsChain, 'ast');
+  const functionsListItems = transformFunctionsToComponents(functionsChain, { path: 'ast' });
   return {
     functionFormItems: functionsListItems.mapped,
   };

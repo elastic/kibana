@@ -47,10 +47,12 @@ interface FunctionFormProps {
   expressionIndex: number;
   nextArgType?: ArgType;
   path: string;
+  parentPath: string;
+  removable?: boolean;
 }
 
 export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) => {
-  const { expressionIndex, argType, nextArgType, path } = props;
+  const { expressionIndex, argType, nextArgType, path, parentPath } = props;
 
   const dispatch = useDispatch();
   const context = useSelector<State, ExpressionContext>(
@@ -122,6 +124,17 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
     [dispatch, element, expressionIndex, pageId, path]
   );
 
+  const deleteParentArgument = useCallback(() => {
+    dispatch(
+      deleteArgumentAtIndex({
+        index: expressionIndex,
+        element,
+        pageId,
+        path: parentPath,
+      })
+    );
+  }, [dispatch, element, expressionIndex, pageId, parentPath]);
+
   const onAssetAddDispatch = useCallback(
     (type: AssetType['type'], content: AssetType['value']) => {
       // make the ID here and pass it into the action
@@ -156,6 +169,7 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
       updateContext={updateContext}
       onValueChange={setArgument}
       onValueRemove={deleteArgument}
+      onContainerRemove={deleteParentArgument}
       onAssetAdd={onAssetAdd}
     />
   );

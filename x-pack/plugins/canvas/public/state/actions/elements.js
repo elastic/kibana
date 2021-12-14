@@ -407,7 +407,7 @@ export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dis
       ? // if more than one val, remove the specified val
         del(element, `${path}.${argName}.${argIndex}`)
       : // otherwise, remove the entire key
-        del(element, `${path}.${argName}`);
+        del(element, argName ? `${path}.${argName}` : path);
 
   dispatch(setAstAtIndex(argumnentChainIndex, get(newElement, argumentChainPath), element, pageId));
 });
