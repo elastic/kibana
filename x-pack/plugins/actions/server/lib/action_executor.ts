@@ -69,6 +69,7 @@ export class ActionExecutor {
   private isInitialized = false;
   private actionExecutorContext?: ActionExecutorContext;
   private readonly isESOCanEncrypt: boolean;
+  private actionInfo: ActionInfo | undefined;
 
   constructor({ isESOCanEncrypt }: { isESOCanEncrypt: boolean }) {
     this.isESOCanEncrypt = isESOCanEncrypt;
@@ -125,13 +126,17 @@ export class ActionExecutor {
         const spaceId = spaces && spaces.getSpaceId(request);
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
-        const { actionTypeId, name, config, secrets } = await getActionInfoInern(
-          await getActionsClientWithRequest(request, source),
-          encryptedSavedObjectsClient,
-          preconfiguredActions,
-          actionId,
-          namespace.namespace
-        );
+        if (!this.actionInfo) {
+          this.actionInfo = await getActionInfoInternal(
+            await getActionsClientWithRequest(request, source),
+            encryptedSavedObjectsClient,
+            preconfiguredActions,
+            actionId,
+            namespace.namespace
+          );
+        }
+
+        const { actionTypeId, name, config, secrets } = this.actionInfo;
 
         if (span) {
           span.name = `execute_action ${actionTypeId}`;
@@ -271,32 +276,75 @@ export class ActionExecutor {
     );
   }
 
-  public async getActionInfo<Source = unknown>({
+  public async logCancellation<Source = unknown>({
     actionId,
     request,
+    relatedSavedObjects,
     source,
+    taskInfo,
   }: {
     actionId: string;
     request: KibanaRequest;
+    taskInfo?: TaskInfo;
+    relatedSavedObjects: RelatedSavedObjects;
     source?: ActionExecutionSource<Source>;
-  }): Promise<ActionInfo> {
+  }) {
     const {
       spaces,
       encryptedSavedObjectsClient,
       preconfiguredActions,
+      eventLogger,
       getActionsClientWithRequest,
     } = this.actionExecutorContext!;
 
     const spaceId = spaces && spaces.getSpaceId(request);
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
-
-    return await getActionInfoInern(
-      await getActionsClientWithRequest(request, source),
-      encryptedSavedObjectsClient,
-      preconfiguredActions,
+    if (!this.actionInfo) {
+      this.actionInfo = await getActionInfoInternal(
+        await getActionsClientWithRequest(request, source),
+        encryptedSavedObjectsClient,
+        preconfiguredActions,
+        actionId,
+        namespace.namespace
+      );
+    }
+    const task = taskInfo
+      ? {
+          task: {
+            scheduled: taskInfo.scheduled.toISOString(),
+            scheduleDelay: Millis2Nanos * (Date.now() - taskInfo.scheduled.getTime()),
+          },
+        }
+      : {};
+    // Write event log entry
+    const event = createActionEventLogRecordObject({
       actionId,
-      namespace.namespace
-    );
+      action: EVENT_LOG_ACTIONS.executeTimeout,
+      message: `action: ${this.actionInfo.actionTypeId}:${actionId}: '${
+        this.actionInfo.name ?? ''
+      }' execution cancelled due to timeout - exceeded default timeout of "5m"`,
+      namespace: spaceId,
+      ...task,
+      savedObjects: [
+        {
+          type: 'action',
+          id: actionId,
+          typeId: this.actionInfo.actionTypeId,
+          relation: SAVED_OBJECT_REL_PRIMARY,
+        },
+      ],
+    });
+
+    for (const relatedSavedObject of (relatedSavedObjects || []) as RelatedSavedObjects) {
+      event.kibana?.saved_objects?.push({
+        rel: SAVED_OBJECT_REL_PRIMARY,
+        type: relatedSavedObject.type,
+        id: relatedSavedObject.id,
+        type_id: relatedSavedObject.typeId,
+        namespace: relatedSavedObject.namespace,
+      });
+    }
+    eventLogger.logEvent(event);
   }
 }
 
@@ -307,7 +355,7 @@ interface ActionInfo {
   secrets: unknown;
 }
 
-async function getActionInfoInern(
+async function getActionInfoInternal(
   actionsClient: PublicMethodsOf<ActionsClient>,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],

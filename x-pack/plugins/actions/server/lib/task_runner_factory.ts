@@ -34,9 +34,6 @@ import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects
 import { asSavedObjectExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
-import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
-import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -45,7 +42,6 @@ export interface TaskRunnerContext {
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   basePathService: IBasePath;
   getUnsecuredSavedObjectsClient: (request: KibanaRequest) => SavedObjectsClientContract;
-  eventLogger: IEventLogger;
 }
 
 export class TaskRunnerFactory {
@@ -77,7 +73,6 @@ export class TaskRunnerFactory {
       spaceIdToNamespace,
       basePathService,
       getUnsecuredSavedObjectsClient,
-      eventLogger,
     } = this.taskRunnerContext!;
 
     const taskInfo = {
@@ -98,15 +93,9 @@ export class TaskRunnerFactory {
           encryptedSavedObjectsClient,
           spaceIdToNamespace
         );
-
-        const requestHeaders: Record<string, string> = {};
-        if (apiKey) {
-          requestHeaders.authorization = `ApiKey ${apiKey}`;
-        }
-
         const path = addSpaceIdToPath('/', spaceId);
 
-        const request = getRequest(apiKey);
+        const request = getFakeRequest(apiKey);
         basePathService.set(request, path);
 
         // Throwing an executor error means we will attempt to retry the task
@@ -197,49 +186,19 @@ export class TaskRunnerFactory {
           spaceIdToNamespace
         );
 
-        const request = getRequest(apiKey);
+        const request = getFakeRequest(apiKey);
         const path = addSpaceIdToPath('/', spaceId);
         basePathService.set(request, path);
 
-        const actionInfo = await actionExecutor.getActionInfo({
+        await actionExecutor.logCancellation({
           actionId,
           request,
+          relatedSavedObjects: (relatedSavedObjects || []) as RelatedSavedObjects,
           ...getSourceFromReferences(references),
         });
-        // Write event log entry
-        const event = createActionEventLogRecordObject({
-          actionId,
-          action: EVENT_LOG_ACTIONS.executeTimeout,
-          message: `action: ${actionInfo.actionTypeId}:${actionId}: '${
-            actionInfo.name ?? ''
-          }' execution cancelled due to timeout - exceeded default timeout of "5m"`,
-          namespace: spaceId,
-          task: {
-            scheduled: taskInfo.scheduled.toISOString(),
-          },
-          savedObjects: [
-            {
-              type: 'action',
-              id: actionId,
-              typeId: actionInfo.actionTypeId,
-              relation: SAVED_OBJECT_REL_PRIMARY,
-            },
-          ],
-        });
-
-        for (const relatedSavedObject of (relatedSavedObjects || []) as RelatedSavedObjects) {
-          event.kibana?.saved_objects?.push({
-            rel: SAVED_OBJECT_REL_PRIMARY,
-            type: relatedSavedObject.type,
-            id: relatedSavedObject.id,
-            type_id: relatedSavedObject.typeId,
-            namespace: relatedSavedObject.namespace,
-          });
-        }
-        eventLogger.logEvent(event);
 
         logger.debug(
-          `Cancelling action task for ${actionInfo.actionTypeId} action with id ${actionId} - execution error due to timeout.`
+          `Cancelling action task for action with id ${actionId} - execution error due to timeout.`
         );
         return { state: {} };
       },
@@ -247,7 +206,7 @@ export class TaskRunnerFactory {
   }
 }
 
-function getRequest(apiKey?: string) {
+function getFakeRequest(apiKey?: string) {
   const requestHeaders: Record<string, string> = {};
   if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;

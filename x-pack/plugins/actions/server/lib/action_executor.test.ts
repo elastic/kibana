@@ -516,19 +516,28 @@ test('logs a warning when alert executor returns invalid status', async () => {
 test('return executed action info', async () => {
   setupActionExecutorMock();
 
-  const actionInfo = await actionExecutor.getActionInfo({
+  await actionExecutor.logCancellation({
     actionId: 'action1',
+    relatedSavedObjects: [],
     request: {} as KibanaRequest,
   });
-  expect(actionInfo).toEqual({
-    actionTypeId: 'test',
-    config: {
-      bar: true,
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+  expect(eventLogger.logEvent.mock.calls[0][0]).toMatchObject({
+    event: {
+      action: 'execute-timeout',
     },
-    name: 'action-1',
-    secrets: {
-      baz: true,
+    kibana: {
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: '1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+      ],
     },
+    message: 'action started: test:1: action-1',
   });
 });
 
