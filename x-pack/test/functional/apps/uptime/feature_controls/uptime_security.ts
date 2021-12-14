@@ -136,7 +136,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no uptime privileges', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/104249
+    describe.skip('no uptime privileges', () => {
       before(async () => {
         await security.role.create('no_uptime_privileges_role', {
           elasticsearch: {

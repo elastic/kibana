@@ -86,6 +86,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   const factories = embeddable
     ? Array.from(embeddable.getEmbeddableFactories()).filter(
         ({ type, isEditable, canCreateNew, isContainerType }) =>
+          // @ts-expect-error ts 4.5 upgrade
           isEditable() && !isContainerType && canCreateNew() && type !== 'visualization'
       )
     : [];
