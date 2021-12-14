@@ -117,7 +117,7 @@ export const EditFieldModal: FC<DeleteModelsModalProps> = ({
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose.bind(null, null)}>
           <FormattedMessage
-            id="xpack.ml.dataVisualizer.modelsList.deleteModal.cancelButtonLabel"
+            id="xpack.dataVisualizer.modelsList.deleteModal.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
@@ -130,7 +130,7 @@ export const EditFieldModal: FC<DeleteModelsModalProps> = ({
           data-test-subj="mlModelsDeleteModalConfirmButton"
         >
           <FormattedMessage
-            id="xpack.ml.dataVisualizer.modelsList.deleteModal.deleteButtonLabel"
+            id="xpack.dataVisualizer.modelsList.deleteModal.deleteButtonLabel"
             defaultMessage="Save"
           />
         </EuiButton>
