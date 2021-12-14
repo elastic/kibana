@@ -57,7 +57,7 @@ export function generatePdfObservable(
       tracker.endScreenshots();
       tracker.startSetup();
 
-      const pdfOutput = new PdfMaker(layout, logo);
+      const pdfOutput = new PdfMaker(layout, options.layout, logo);
       if (title) {
         const timeRange = getTimeRange(results);
         title += timeRange ? ` - ${timeRange}` : '';
@@ -81,12 +81,12 @@ export function generatePdfObservable(
       try {
         tracker.startCompile();
         logger.debug(`Compiling PDF using "${layout.id}" layout...`);
-        pdfOutput.generate();
+        buffer = await pdfOutput.generate();
         tracker.endCompile();
 
         tracker.startGetBuffer();
         logger.debug(`Generating PDF Buffer...`);
-        buffer = await pdfOutput.getBuffer();
+        // buffer = await pdfOutput.getBuffer();
 
         const byteLength = buffer?.byteLength ?? 0;
         logger.debug(`PDF buffer byte length: ${byteLength}`);
