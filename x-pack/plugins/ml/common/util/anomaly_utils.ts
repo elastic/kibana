@@ -43,16 +43,6 @@ export interface EntityField {
   operation?: EntityFieldOperation;
 }
 
-export interface Anomaly {
-  jobId: string;
-  customUrls: KibanaUrlConfig[];
-  source: AnomalyRecordDoc;
-  entityValue: string;
-  entityName: string;
-  isTimeSeriesViewRecord: boolean;
-  time: number;
-}
-
 // List of function descriptions for which actual values from record level results should be displayed.
 const DISPLAY_ACTUAL_FUNCTIONS = [
   'count',
