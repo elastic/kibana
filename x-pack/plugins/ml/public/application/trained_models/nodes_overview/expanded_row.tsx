@@ -35,10 +35,11 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     ...details
   } = item;
 
+  delete details.id;
+
   // Process node attributes
   attributes['ml.machine_memory'] = bytesFormatter(attributes['ml.machine_memory']);
   attributes['ml.max_jvm_size'] = bytesFormatter(attributes['ml.max_jvm_size']);
-  delete attributes['xpack.installed'];
 
   return (
     <>

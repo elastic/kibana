@@ -188,7 +188,7 @@ export interface AllocatedModel {
 }
 
 export interface NodeDeploymentStatsResponse {
-  id: string;
+  id?: string;
   name: string;
   attributes: Record<string, string>;
   roles: string[];
