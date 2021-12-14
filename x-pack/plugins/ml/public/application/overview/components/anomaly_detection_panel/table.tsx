@@ -92,6 +92,24 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
         </EuiToolTip>
       ),
       render: (group: Group) => {
+        const swimLaneData = group.overallSwimLane;
+
+        if (!swimLaneData) return null;
+
+        const hasResults = swimLaneData.points.length > 0;
+
+        const noDatWarning = hasResults ? (
+          <FormattedMessage
+            id="xpack.ml.overview.anomalyDetection.noAnomaliesFoundMessage"
+            defaultMessage="No anomalies found"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.ml.overview.anomalyDetection.noAnomaliesFoundMessage"
+            defaultMessage="No results found"
+          />
+        );
+
         return (
           <SwimlaneContainer
             timeBuckets={timeBuckets}
@@ -103,12 +121,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
             showTimeline={false}
             showYAxis={false}
             showLegend={false}
-            noDataWarning={
-              <FormattedMessage
-                id="xpack.ml.overview.anomalyDetection.noAnomaliesFoundMessage"
-                defaultMessage="No anomalies found"
-              />
-            }
+            noDataWarning={noDatWarning}
           />
         );
       },
