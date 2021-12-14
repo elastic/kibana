@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { getReferencesFilterMock } from './query_params.tests.mocks';
+
 import * as esKuery from '@kbn/es-query';
+
 type KueryNode = any;
 
 import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
 import { SavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
-import { getQueryParams, getClauseForReference } from './query_params';
+import { getQueryParams } from './query_params';
 
 const registerTypes = (registry: SavedObjectTypeRegistry) => {
   registry.registerType({
@@ -85,6 +88,12 @@ describe('#getQueryParams', () => {
   beforeEach(() => {
     registry = new SavedObjectTypeRegistry();
     registerTypes(registry);
+
+    getReferencesFilterMock.mockReturnValue({ references_filter: true });
+  });
+
+  afterEach(() => {
+    getReferencesFilterMock.mockClear();
   });
 
   const createTypeClause = (type: string, namespaces?: string[]) => {
@@ -185,102 +194,42 @@ describe('#getQueryParams', () => {
 
   describe('reference filter clause', () => {
     describe('`hasReference` parameter', () => {
-      const getReferencesFilter = (result: any) => {
-        const filters = result.query.bool.filter;
-        return filters.find((filter: any) => {
-          const clauses = filter.bool?.must ?? filter.bool?.should;
-          if (!clauses) {
-            return false;
-          }
-          return clauses[0].nested?.path === 'references' ?? false;
-        });
-      };
-
-      it('does not include the clause when `hasReference` is not specified', () => {
-        const result = getQueryParams({
+      it('does not call `getReferencesFilter` when `hasReference` is not specified', () => {
+        getQueryParams({
           registry,
           hasReference: undefined,
         });
 
-        expect(getReferencesFilter(result)).toBeUndefined();
+        expect(getReferencesFilterMock).not.toHaveBeenCalled();
       });
 
-      it('creates a should clause for specified reference when operator is `OR`', () => {
+      it('calls `getReferencesFilter` with the correct parameters', () => {
         const hasReference = { id: 'foo', type: 'bar' };
-        const result = getQueryParams({
+        getQueryParams({
           registry,
           hasReference,
-          hasReferenceOperator: 'OR',
+          hasReferenceOperator: 'AND',
         });
-        expect(getReferencesFilter(result)).toEqual({
-          bool: {
-            should: [getClauseForReference(hasReference)],
-            minimum_should_match: 1,
-          },
+
+        expect(getReferencesFilterMock).toHaveBeenCalledTimes(1);
+        expect(getReferencesFilterMock).toHaveBeenCalledWith({
+          references: [hasReference],
+          operator: 'AND',
         });
       });
 
-      it('creates a must clause for specified reference when operator is `AND`', () => {
+      it('includes the return of `getReferencesFilter` in the `filter` clause', () => {
+        getReferencesFilterMock.mockReturnValue({ references_filter: true });
+
         const hasReference = { id: 'foo', type: 'bar' };
         const result = getQueryParams({
           registry,
           hasReference,
           hasReferenceOperator: 'AND',
         });
-        expect(getReferencesFilter(result)).toEqual({
-          bool: {
-            must: [getClauseForReference(hasReference)],
-          },
-        });
-      });
 
-      it('handles multiple references when operator is `OR`', () => {
-        const hasReference = [
-          { id: 'foo', type: 'bar' },
-          { id: 'hello', type: 'dolly' },
-        ];
-        const result = getQueryParams({
-          registry,
-          hasReference,
-          hasReferenceOperator: 'OR',
-        });
-        expect(getReferencesFilter(result)).toEqual({
-          bool: {
-            should: hasReference.map(getClauseForReference),
-            minimum_should_match: 1,
-          },
-        });
-      });
-
-      it('handles multiple references when operator is `AND`', () => {
-        const hasReference = [
-          { id: 'foo', type: 'bar' },
-          { id: 'hello', type: 'dolly' },
-        ];
-        const result = getQueryParams({
-          registry,
-          hasReference,
-          hasReferenceOperator: 'AND',
-        });
-        expect(getReferencesFilter(result)).toEqual({
-          bool: {
-            must: hasReference.map(getClauseForReference),
-          },
-        });
-      });
-
-      it('defaults to `OR` when operator is not specified', () => {
-        const hasReference = { id: 'foo', type: 'bar' };
-        const result = getQueryParams({
-          registry,
-          hasReference,
-        });
-        expect(getReferencesFilter(result)).toEqual({
-          bool: {
-            should: [getClauseForReference(hasReference)],
-            minimum_should_match: 1,
-          },
-        });
+        const filters: any[] = result.query.bool.filter;
+        expect(filters.some((filter) => filter.references_filter === true)).toBeDefined();
       });
     });
   });
