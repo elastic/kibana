@@ -7,7 +7,6 @@
 
 import { Logger, CoreSetup } from 'kibana/server';
 import moment from 'moment';
-import { IEventLogService } from '../../../event_log/server';
 import {
   RunContext,
   TaskManagerSetupContract,
@@ -29,9 +28,9 @@ export function initializeAlertingTelemetry(
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
   kibanaIndex: string,
-  eventLog: IEventLogService
+  eventLogIndex: string
 ) {
-  registerAlertingTelemetryTask(logger, core, taskManager, kibanaIndex, eventLog);
+  registerAlertingTelemetryTask(logger, core, taskManager, kibanaIndex, eventLogIndex);
 }
 
 export function scheduleAlertingTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
@@ -45,13 +44,13 @@ function registerAlertingTelemetryTask(
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
   kibanaIndex: string,
-  eventLog: IEventLogService
+  eventLogIndex: string
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Alerting usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex, eventLog),
+      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex, eventLogIndex),
     },
   });
 }
@@ -73,11 +72,10 @@ export function telemetryTaskRunner(
   logger: Logger,
   core: CoreSetup,
   kibanaIndex: string,
-  eventLog: IEventLogService
+  eventLogIndex: string
 ) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
-    const eventLogIndex = eventLog.getIndexPattern();
     const getEsClient = () =>
       core.getStartServices().then(
         ([
