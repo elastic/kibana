@@ -55,7 +55,12 @@ export const HostIsolationExceptionsList = () => {
 
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
-  const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList();
+  const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList({
+    filter: location.filter,
+    page: location.page_index,
+    perPage: location.page_size,
+  });
+
   const toasts = useToasts();
 
   // load the list of policies>
