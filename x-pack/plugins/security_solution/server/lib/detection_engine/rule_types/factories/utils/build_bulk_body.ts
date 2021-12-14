@@ -55,11 +55,6 @@ export const buildBulkBody = (
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
   const eventFields = buildEventTypeAlert(mergedDoc);
   const filteredSource = filterSource(mergedDoc);
-  const reason = buildReasonMessage({
-    name: completeRule.ruleConfig.name,
-    severity: completeRule.ruleParams.severity,
-    mergedDoc,
-  });
 
   const overrides = applyOverrides
     ? {
@@ -80,6 +75,12 @@ export const buildBulkBody = (
         }).riskScore,
       }
     : undefined;
+
+  const reason = buildReasonMessage({
+    name: overrides?.nameOverride ?? completeRule.ruleConfig.name,
+    severity: overrides?.severityOverride ?? completeRule.ruleParams.severity,
+    mergedDoc,
+  });
 
   if (isSourceDoc(mergedDoc)) {
     return {
