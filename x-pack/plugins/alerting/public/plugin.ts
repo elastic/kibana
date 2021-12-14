@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { CoreSetup, Plugin, CoreStart } from 'src/core/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
 import { loadAlert, loadAlertType } from './alert_api';
 import { Alert, AlertNavigation } from '../common';
+import { KibanaMonitoringSection } from '../../monitoring/public';
+import { getKibanaMonitoringSectionApp } from './kibana_monitoring_section';
 
 export interface PluginSetupContract {
   /**
@@ -44,6 +45,8 @@ export interface PluginSetupContract {
    * in conjunction with the consumer id, to navigate the user to a custom URL to view a rule's details.
    */
   registerDefaultNavigation: (applicationId: string, handler: AlertNavigationHandler) => void;
+
+  getKibanaMonitoringSection: () => KibanaMonitoringSection;
 }
 export interface PluginStartContract {
   getNavigation: (alertId: Alert['id']) => Promise<AlertNavigation | undefined>;
@@ -51,6 +54,7 @@ export interface PluginStartContract {
 
 export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginStartContract> {
   private alertNavigationRegistry?: AlertNavigationRegistry;
+
   public setup(core: CoreSetup) {
     this.alertNavigationRegistry = new AlertNavigationRegistry();
 
@@ -67,9 +71,17 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
       handler: AlertNavigationHandler
     ) => this.alertNavigationRegistry!.registerDefault(applicationId, handler);
 
+    const getKibanaMonitoringSection = () => {
+      return {
+        title: 'Alerting',
+        renderApp: (metrics: unknown) => getKibanaMonitoringSectionApp({ metrics }),
+      };
+    };
+
     return {
       registerNavigation,
       registerDefaultNavigation,
+      getKibanaMonitoringSection,
     };
   }
 

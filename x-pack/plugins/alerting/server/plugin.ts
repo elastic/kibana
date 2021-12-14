@@ -6,7 +6,6 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { flatten } from 'lodash';
 import type { Request } from '@hapi/hapi';
 import { first } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
@@ -37,7 +36,7 @@ import {
   SavedObjectsBulkGetObject,
   ServiceStatusLevels,
 } from '../../../../src/core/server';
-import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID, RawAlert } from './types';
+import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID, RawRule } from './types';
 import { defineRoutes } from './routes';
 import { LICENSE_TYPE, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import {
@@ -55,12 +54,7 @@ import {
 } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
-import {
-  IEventLogger,
-  IEventLogService,
-  IEventLogClientService,
-  IValidatedEvent,
-} from '../../event_log/server';
+import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
 import {
@@ -73,7 +67,6 @@ import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
-import { EventSchema } from '../../event_log/generated/schemas';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -110,6 +103,7 @@ export interface PluginSetupContract {
     >
   ): void;
   getSecurityHealth: () => Promise<SecurityHealth>;
+  getKibanaMonitoringSectionQuery: () => object;
 }
 
 export interface PluginStartContract {
@@ -260,12 +254,32 @@ export class AlertingPlugin {
       this.createRouteHandlerContext(core)
     );
 
+    interface RuleMetric {
+      name: string;
+      id: string;
+      lastExecutionDuration: number;
+      lastExecutionTimeout?: string;
+    }
+
     if (plugins.usageCollection) {
       plugins.usageCollection.registerCollector(
-        plugins.usageCollection.makeKibanaMetricsCollector<IValidatedEvent[], false>({
-          type: 'event_log',
+        plugins.usageCollection.makeKibanaMetricsCollector<RuleMetric, false>({
+          type: 'rule',
           isReady: () => true,
-          schema: EventSchema,
+          schema: {
+            name: {
+              type: 'keyword',
+            },
+            id: {
+              type: 'keyword',
+            },
+            lastExecutionDuration: {
+              type: 'long',
+            },
+            lastExecutionTimeout: {
+              type: 'keyword',
+            },
+          },
           fetch: async () => {
             const services = await core.getStartServices();
             const savedObjectClient = await services[0].savedObjects.createInternalRepository([
@@ -276,54 +290,64 @@ export class AlertingPlugin {
             });
 
             // Find all rules
-            const response = await savedObjectClient.find<RawAlert>({ type: 'alert' });
+            const response = await savedObjectClient.find<RawRule>({ type: 'alert' });
             const rules = response.saved_objects;
 
-            // Get event log entries
-            const eventLogEntries = flatten(
-              await Promise.all(
-                rules.map(async ({ attributes: rule, id, namespaces }) => {
-                  // Get the actual API key for each rule
-                  const {
-                    attributes: { apiKey },
-                  } = await esoClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
-                    namespace: namespaces ? namespaces[0] : undefined,
-                  });
+            const ruleMetrics: RuleMetric[] = await Promise.all(
+              rules.map(async ({ attributes: rule, id, namespaces }) => {
+                // Get the last execute event log
+                const {
+                  attributes: { apiKey },
+                } = await esoClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
+                  namespace: namespaces ? namespaces[0] : undefined,
+                });
 
-                  // rule.
-                  const requestHeaders: Record<string, string> = {};
-                  if (apiKey) {
-                    requestHeaders.authorization = `ApiKey ${apiKey}`;
-                  }
-                  const fakeRequest = KibanaRequest.from({
-                    headers: requestHeaders,
-                    path: '/',
-                    route: { settings: {} },
-                    url: {
-                      href: '/',
+                // rule.
+                const requestHeaders: Record<string, string> = {};
+                if (apiKey) {
+                  requestHeaders.authorization = `ApiKey ${apiKey}`;
+                }
+                const fakeRequest = KibanaRequest.from({
+                  headers: requestHeaders,
+                  path: '/',
+                  route: { settings: {} },
+                  url: {
+                    href: '/',
+                  },
+                  raw: {
+                    req: {
+                      url: '/',
                     },
-                    raw: {
-                      req: {
-                        url: '/',
-                      },
-                    },
-                  } as unknown as Request);
+                  },
+                } as unknown as Request);
 
-                  const eventLogClient = services[1].eventLog.getClient(fakeRequest);
+                const eventLogClient = services[1].eventLog.getClient(fakeRequest);
 
-                  const events = await eventLogClient.findEventsBySavedObjectIds('alert', [id], {
-                    page: 1,
-                    per_page: 1,
-                    sort_order: 'desc',
-                    filter: '(event.action: "execute")',
-                  });
+                const events = await eventLogClient.findEventsBySavedObjectIds('alert', [id], {
+                  page: 1,
+                  per_page: 1000,
+                  sort_order: 'desc',
+                  // filter: '(event.action: "execute")',
+                });
 
-                  return events.data;
-                })
-              )
+                const lastExecute = events.data.find(
+                  (event) =>
+                    event?.event?.action === EVENT_LOG_ACTIONS.execute && event?.event?.duration
+                );
+                const lastTimeout = events.data.find(
+                  (event) => event?.event?.action === EVENT_LOG_ACTIONS.executeTimeout
+                );
+
+                return {
+                  name: rule.name,
+                  id,
+                  lastExecutionDuration: lastExecute?.event?.duration ?? 0,
+                  lastExecutionTimeout: lastTimeout?.['@timestamp'],
+                };
+              })
             );
 
-            return eventLogEntries;
+            return ruleMetrics;
           },
         })
       );
@@ -380,6 +404,11 @@ export class AlertingPlugin {
             return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;
           }
         );
+      },
+      getKibanaMonitoringSectionQuery: () => {
+        return {
+          collapse: { field: 'kibana_metrics.rule.id' },
+        };
       },
     };
   }

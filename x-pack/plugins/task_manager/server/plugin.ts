@@ -215,7 +215,9 @@ export class TaskManagerPlugin
       this.config!,
       managedConfiguration,
       this.logger
-    ).subscribe((stat) => this.monitoringStats$.next(stat));
+    ).subscribe((stat) => {
+      this.monitoringStats$.next(stat);
+    });
 
     const taskScheduling = new TaskScheduling({
       logger: this.logger,

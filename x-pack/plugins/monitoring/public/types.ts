@@ -10,6 +10,7 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import { KibanaMonitoringRegistry } from './kibana_monitoring_registry';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export type { MonitoringConfig } from '../server';
@@ -27,4 +28,5 @@ export interface MonitoringStartPluginDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   appMountParameters: AppMountParameters;
+  kibanaMonitoringRegistry: KibanaMonitoringRegistry;
 }

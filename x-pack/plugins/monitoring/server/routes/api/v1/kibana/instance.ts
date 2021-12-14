@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { getKibanaInfo } from '../../../../lib/kibana/get_kibana_info';
+import { getKibanaMetrics } from '../../../../lib/kibana/get_kibana_metrics';
 // @ts-ignore
 import { handleError } from '../../../../lib/errors';
 // @ts-ignore
@@ -16,7 +17,7 @@ import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 // @ts-ignore
 import { metricSet } from './metric_set_instance';
 import { INDEX_PATTERN_KIBANA } from '../../../../../common/constants';
-import { LegacyRequest, LegacyServer } from '../../../../types';
+import { LegacyRequest, LegacyServer, RouteDependencies } from '../../../../types';
 
 /**
  * Kibana instance: This will fetch all data required to display a Kibana
@@ -24,7 +25,7 @@ import { LegacyRequest, LegacyServer } from '../../../../types';
  * - Kibana Instance Summary (Status)
  * - Metrics
  */
-export function kibanaInstanceRoute(server: LegacyServer) {
+export function kibanaInstanceRoute(server: LegacyServer, npRoute: RouteDependencies) {
   server.route({
     method: 'POST',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/kibana/{kibanaUuid}',
@@ -51,14 +52,19 @@ export function kibanaInstanceRoute(server: LegacyServer) {
       const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
 
       try {
-        const [metrics, kibanaSummary] = await Promise.all([
+        const [metrics, kibanaSummary, kibanaMetrics] = await Promise.all([
           getMetrics(req, kbnIndexPattern, metricSet),
           getKibanaInfo(req, kbnIndexPattern, { clusterUuid, kibanaUuid }),
+          getKibanaMetrics(req, kbnIndexPattern, npRoute.sections.kibana.instance.metrics.query, {
+            clusterUuid,
+            kibanaUuid,
+          }),
         ]);
 
         return {
           metrics,
           kibanaSummary,
+          kibanaMetrics,
         };
       } catch (err) {
         throw handleError(err, req);

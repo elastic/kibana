@@ -205,6 +205,15 @@ export class MonitoringPlugin
         encryptedSavedObjects: plugins.encryptedSavedObjects,
         alerting: plugins.alerting,
         logger: this.log,
+        sections: {
+          kibana: {
+            instance: {
+              metrics: {
+                query: this.setupPlugins?.alerting?.getKibanaMonitoringSectionQuery(),
+              },
+            },
+          },
+        },
       });
       initInfraSource(config, plugins.infra);
     }

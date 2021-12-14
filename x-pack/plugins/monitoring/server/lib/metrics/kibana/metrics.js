@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaEventLogMetric, KibanaEventsRateClusterMetric, KibanaMetric } from './classes';
+import { KibanaEventsRateClusterMetric, KibanaMetric } from './classes';
 import { LARGE_FLOAT, SMALL_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
 import { i18n } from '@kbn/i18n';
 
@@ -252,26 +252,5 @@ export const metrics = {
     format: SMALL_FLOAT,
     metricAgg: 'max',
     units: '',
-  }),
-
-  // Alerting
-  kibana_alerting_event_log_average_duration: new KibanaEventLogMetric({
-    field: 'kibana_metrics.event_log.event.duration',
-    label: i18n.translate(
-      'xpack.monitoring.metrics.kibanaInstance.alertingEventLogAverageDuration.label',
-      {
-        defaultMessage: 'Average of event.duration',
-      }
-    ),
-    description: i18n.translate(
-      'xpack.monitoring.metrics.kibanaInstance.alertingEventLogAverageDuration.description',
-      {
-        defaultMessage: 'TODO: fill out',
-      }
-    ),
-    format: SMALL_FLOAT,
-    metricAgg: 'avg',
-    units: '',
-    debug: true,
   }),
 };

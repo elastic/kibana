@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useState, useCallback, useEffect } from 'react';
+import React, { Fragment, useContext, useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
@@ -35,9 +35,37 @@ import { AlertsCallout } from '../../../alerts/callout';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
+import { Legacy } from '../../../legacy_shims';
+import { KibanaMonitoringSection } from '../../../kibana_monitoring_registry';
 
-const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
+const KibanaInstance = ({
+  data,
+  alerts,
+  sections,
+}: {
+  data: any;
+  alerts: any;
+  sections: KibanaMonitoringSection[];
+}) => {
   const { zoomInfo, onBrush } = useCharts();
+
+  function renderSections(metrics: unknown) {
+    if (!sections || sections.length === 0) {
+      return null;
+    }
+
+    return sections.map((section) => {
+      return (
+        <Fragment>
+          <EuiTitle>
+            <h2>{section.title}</h2>
+          </EuiTitle>
+          <EuiHorizontalRule />
+          {section.renderApp(metrics)}
+        </Fragment>
+      );
+    });
+  }
 
   return (
     <EuiPage>
@@ -99,20 +127,7 @@ const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
             </EuiFlexItem>
           </EuiFlexGrid>
           <EuiHorizontalRule />
-          <EuiTitle>
-            <h2>Alerting</h2>
-          </EuiTitle>
-          <EuiHorizontalRule />
-          <EuiFlexGrid columns={2} gutterSize="s">
-            <EuiFlexItem grow={true}>
-              <MonitoringTimeseriesContainer
-                series={data.metrics.kibana_alerting_event_log_average_duration}
-                onBrush={onBrush}
-                zoomInfo={zoomInfo}
-              />
-              <EuiSpacer />
-            </EuiFlexItem>
-          </EuiFlexGrid>
+          {renderSections(data.kibanaMetrics)}
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
@@ -180,10 +195,12 @@ export const KibanaInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
     }
   }, [ccs, clusterUuid, instance, services.data?.query.timefilter.timefilter, services.http]);
 
+  const sections = Legacy.shims.kibanaMonitoringRegistry.sections;
+
   return (
     <PageTemplate title={title} pageTitle={pageTitle} getPageData={getPageData}>
       <div data-test-subj="kibanaInstancePage">
-        <KibanaInstance data={data} alerts={alerts} />
+        <KibanaInstance data={data} alerts={alerts} sections={sections} />
       </div>
     </PageTemplate>
   );

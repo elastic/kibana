@@ -216,6 +216,8 @@ export class BulkUploader implements IBulkUploader {
       },
       []
     );
+    // console.log(JSON.stringify(metrics))
+    // console.log('************')
     return metrics;
   }
 

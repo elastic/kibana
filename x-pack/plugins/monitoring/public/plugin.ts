@@ -21,6 +21,7 @@ import {
 } from '../../../../src/plugins/home/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
+import { PluginSetupContract as AlertingSetupContract } from '../../alerting/public';
 import {
   RULE_DETAILS,
   RULE_THREAD_POOL_SEARCH_REJECTIONS,
@@ -35,6 +36,7 @@ import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
 import { createMissingMonitoringDataAlertType } from './alerts/missing_monitoring_data_alert';
 import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
 import { setConfig } from './external_config';
+import { KibanaMonitoringRegistry } from './kibana_monitoring_registry';
 import { Legacy } from './legacy_shims';
 import { MonitoringConfig, MonitoringStartPluginDependencies } from './types';
 
@@ -43,24 +45,31 @@ interface MonitoringSetupPluginDependencies {
   cloud?: { isCloudEnabled: boolean };
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  alerting: AlertingSetupContract;
 }
 export class MonitoringPlugin
   implements
     Plugin<void, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies>
 {
-  constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
+  private kibanaMonitoringRegistry: KibanaMonitoringRegistry;
+
+  constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {
+    this.kibanaMonitoringRegistry = new KibanaMonitoringRegistry();
+  }
 
   public setup(
     core: CoreSetup<MonitoringStartPluginDependencies>,
     plugins: MonitoringSetupPluginDependencies
   ) {
-    const { home } = plugins;
+    const { home, alerting } = plugins;
     const id = 'monitoring';
     const icon = 'monitoringApp';
     const title = i18n.translate('xpack.monitoring.stackMonitoringTitle', {
       defaultMessage: 'Stack Monitoring',
     });
     const monitoring = this.initializerContext.config.get();
+
+    this.kibanaMonitoringRegistry.add(alerting.getKibanaMonitoringSection());
 
     if (!monitoring.ui.enabled) {
       return false;
@@ -105,6 +114,7 @@ export class MonitoringPlugin
           triggersActionsUi: pluginsStart.triggersActionsUi,
           usageCollection: plugins.usageCollection,
           appMountParameters: params,
+          kibanaMonitoringRegistry: this.kibanaMonitoringRegistry,
         };
 
         Legacy.init({
@@ -118,6 +128,7 @@ export class MonitoringPlugin
           triggersActionsUi: deps.triggersActionsUi,
           usageCollection: deps.usageCollection,
           appMountParameters: deps.appMountParameters,
+          kibanaMonitoringRegistry: deps.kibanaMonitoringRegistry,
         });
 
         const config = Object.fromEntries(externalConfig);

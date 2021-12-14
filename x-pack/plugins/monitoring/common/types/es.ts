@@ -66,6 +66,18 @@ export interface ElasticsearchSourceKibanaStats {
   concurrent_connections?: number;
 }
 
+export interface ElasticsearchSourceKibanaMetrics {
+  type: string;
+  timestamp: Date;
+  kibana?: ElasticsearchSourceKibanaStats['kibana'];
+  rule?: {
+    name?: string;
+    id?: string;
+    lastExecutionDuration?: number;
+    lastExecutionTimeout?: Date;
+  };
+}
+
 export interface ElasticsearchSourceLogstashPipelineVertex {
   id: string;
   plugin_type: string;
@@ -197,6 +209,7 @@ export interface ElasticsearchLegacySource {
     type?: string;
   };
   kibana_stats?: ElasticsearchSourceKibanaStats;
+  kibana_metrics?: ElasticsearchSourceKibanaMetrics;
   license?: {
     status?: string;
     type?: string;
@@ -541,6 +554,7 @@ export interface ElasticsearchMetricbeatSource {
       uuid?: string;
       status?: string;
     };
+    metrics?: ElasticsearchSourceKibanaMetrics;
     stats?: {
       concurrent_connections?: number;
       process?: {
