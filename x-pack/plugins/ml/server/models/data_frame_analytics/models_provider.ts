@@ -89,7 +89,7 @@ export function modelsProvider(
 
       const {
         body: { nodes: clusterNodes },
-      } = await client.asCurrentUser.nodes.stats();
+      } = await client.asInternalUser.nodes.stats();
 
       const mlNodes = Object.entries(clusterNodes).filter(([, node]) => node.roles.includes('ml'));
 
