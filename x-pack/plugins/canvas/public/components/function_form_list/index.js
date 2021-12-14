@@ -63,18 +63,13 @@ const mergeComponentsAndContexts = (
 });
 
 const buildPath = (prevPath = '', argName, index, removable = true) => {
-  const newPath = `${argName}`;
-  return { path: prevPath.length ? `${prevPath}.${newPath}` : newPath, index, removable };
+  const newPath = `${argName}.${index}`;
+  return { path: prevPath.length ? `${prevPath}.${newPath}` : newPath, removable };
 };
 
-const transformFunctionsToComponents = (
-  functionsChain,
-  { path, index, removable },
-  argUiConfig
-) => {
+const transformFunctionsToComponents = (functionsChain, { path, removable }, argUiConfig) => {
   const parentPath = path;
-  const indexPath = index !== undefined ? `.${index}` : '';
-  const argumentsPath = path ? `${path}${indexPath}.chain` : `chain`;
+  const argumentsPath = path ? `${path}.chain` : `chain`;
   return functionsChain.reduce((current, argType, i) => {
     const argumentPath = `${argumentsPath}.${i}.arguments`;
     const argTypeDef = getArgTypeDef(argType.function);

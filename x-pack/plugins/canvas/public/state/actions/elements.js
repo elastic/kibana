@@ -401,13 +401,19 @@ export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dis
   const argumentChainPath = pathTerms.slice(0, 3);
   const argumnentChainIndex = last(argumentChainPath);
   const curVal = get(element, [...pathTerms, argName]);
-
-  const newElement =
+  let newElement =
     argIndex != null && curVal.length > 1
       ? // if more than one val, remove the specified val
         del(element, `${path}.${argName}.${argIndex}`)
       : // otherwise, remove the entire key
         del(element, argName ? `${path}.${argName}` : path);
+
+  const parentPath = pathTerms.slice(0, pathTerms.length - 1);
+  const updatedArgument = get(newElement, parentPath);
+
+  if (Array.isArray(updatedArgument) && !updatedArgument.length) {
+    newElement = del(element, parentPath);
+  }
 
   dispatch(setAstAtIndex(argumnentChainIndex, get(newElement, argumentChainPath), element, pageId));
 });
