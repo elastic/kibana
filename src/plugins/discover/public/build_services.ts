@@ -66,7 +66,7 @@ export interface DiscoverServices {
   toastNotifications: ToastsStart;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   http: HttpStart;
   storage: Storage;
   spaces?: SpacesApi;
@@ -105,7 +105,7 @@ export function buildServices(
     uiSettings: core.uiSettings,
     storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
-    indexPatternFieldEditor: plugins.dataViewFieldEditor,
+    dataViewFieldEditor: plugins.dataViewFieldEditor,
     http: core.http,
     spaces: plugins.spaces,
   };
