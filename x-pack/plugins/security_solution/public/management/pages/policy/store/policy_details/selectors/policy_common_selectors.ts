@@ -7,12 +7,13 @@
 
 import { matchPath } from 'react-router-dom';
 import { createSelector } from 'reselect';
-import { PolicyDetailsSelector, PolicyDetailsState } from '../../../types';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
 } from '../../../../../common/constants';
+import { PolicyDetailsSelector, PolicyDetailsState } from '../../../types';
 
 /**
  * Returns current artifacts location
@@ -37,7 +38,7 @@ export const isOnPolicyFormView: PolicyDetailsSelector<boolean> = createSelector
   }
 );
 
-/** Returns a boolean of whether the user is on the policy trusted app page or not */
+/** Returns a boolean of whether the user is on the policy trusted apps page or not */
 export const isOnPolicyTrustedAppsView: PolicyDetailsSelector<boolean> = createSelector(
   getUrlLocationPathname,
   (pathname) => {
@@ -57,6 +58,19 @@ export const isOnPolicyEventFiltersView: PolicyDetailsSelector<boolean> = create
     return (
       matchPath(pathname ?? '', {
         path: MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
+        exact: true,
+      }) !== null
+    );
+  }
+);
+
+/** Returns a boolean of whether the user is on the host isolation exceptions page or not */
+export const isOnHostIsolationExceptionsView: PolicyDetailsSelector<boolean> = createSelector(
+  getUrlLocationPathname,
+  (pathname) => {
+    return (
+      matchPath(pathname ?? '', {
+        path: MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
         exact: true,
       }) !== null
     );
