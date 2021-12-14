@@ -10,7 +10,7 @@ import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts
 import { left } from 'fp-ts/lib/Either';
 import { BulkAction, BulkActionUpdateType } from '../common/schemas';
 
-const retrieveValidationMessage = (payload: PerformBulkActionSchema) => {
+const retrieveValidationMessage = (payload: unknown) => {
   const decoded = performBulkActionSchema.decode(payload);
   const checked = exactCheck(payload, decoded);
   return foldLeftRight(checked);
@@ -43,7 +43,7 @@ describe('perform_bulk_action_schema', () => {
     const payload: Omit<PerformBulkActionSchema, 'action'> = {
       query: 'name: test',
     };
-    const message = retrieveValidationMessage(payload as PerformBulkActionSchema);
+    const message = retrieveValidationMessage(payload);
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "action"',
@@ -57,7 +57,7 @@ describe('perform_bulk_action_schema', () => {
       query: 'name: test',
       action: 'unknown',
     };
-    const message = retrieveValidationMessage(payload as unknown as PerformBulkActionSchema);
+    const message = retrieveValidationMessage(payload);
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "unknown" supplied to "action"',
@@ -72,7 +72,7 @@ describe('perform_bulk_action_schema', () => {
       action: BulkAction.update,
     };
 
-    const message = retrieveValidationMessage(payload as PerformBulkActionSchema);
+    const message = retrieveValidationMessage(payload);
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "update" supplied to "action"',
