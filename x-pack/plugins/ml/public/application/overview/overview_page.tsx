@@ -25,6 +25,8 @@ import { useUrlState } from '../util/url_state';
 import { useRefresh } from '../routing/use_refresh';
 
 export const OverviewPage: FC = () => {
+  const canViewMlNodes = checkPermission('canViewMlNodes');
+
   const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
   const disableCreateAnalyticsButton =
     !mlNodesAvailable() ||
@@ -86,11 +88,14 @@ export const OverviewPage: FC = () => {
 
           <GettingStartedCallout />
 
-          <EuiPanel hasShadow={false} hasBorder>
-            <NodesList compactView />
-          </EuiPanel>
-
-          <EuiSpacer size="m" />
+          {canViewMlNodes ? (
+            <>
+              <EuiPanel hasShadow={false} hasBorder>
+                <NodesList compactView />
+              </EuiPanel>
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
 
           <OverviewContent
             createAnomalyDetectionJobDisabled={disableCreateAnomalyDetectionJob}
