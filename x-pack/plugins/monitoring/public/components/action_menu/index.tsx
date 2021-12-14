@@ -8,9 +8,9 @@
 import React, { useContext, useEffect } from 'react';
 import {
   KibanaContextProvider,
+  toMountPoint,
   useKibana,
 } from '../../../../../../src/plugins/kibana_react/public';
-import { mountReactNode } from '../../../../../../src/core/public/utils';
 import { HeaderActionMenuContext } from '../../application/contexts/header_action_menu_context';
 
 export const ActionMenu: React.FC<{}> = ({ children }) => {
@@ -19,8 +19,9 @@ export const ActionMenu: React.FC<{}> = ({ children }) => {
   useEffect(() => {
     if (setHeaderActionMenu) {
       setHeaderActionMenu((element) => {
-        const mount = mountReactNode(
-          <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+        const mount = toMountPoint(
+          <KibanaContextProvider services={services}>{children}</KibanaContextProvider>,
+          services.theme
         );
         return mount(element);
       });
