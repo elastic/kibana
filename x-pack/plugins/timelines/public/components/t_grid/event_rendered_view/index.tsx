@@ -27,7 +27,8 @@ import styled from 'styled-components';
 
 import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 
-import type { BrowserFields, RowRenderer, TimelineItem } from '../../../../common';
+import type { BrowserFields, TimelineItem } from '../../../../common/search_strategy';
+import type { RowRenderer } from '../../../../common/types';
 import { RuleName } from '../../rule_name';
 import { isEventBuildingBlockType } from '../body/helpers';
 
@@ -64,6 +65,7 @@ const StyledEuiBasicTable = styled(EuiBasicTable as BasicTableType)`
 
 export interface EventRenderedViewProps {
   alertToolbar: React.ReactNode;
+  appId: string;
   browserFields: BrowserFields;
   events: TimelineItem[];
   leadingControlColumns: EuiDataGridControlColumn[];
@@ -86,6 +88,7 @@ export const PreferenceFormattedDate = React.memo(PreferenceFormattedDateCompone
 
 const EventRenderedViewComponent = ({
   alertToolbar,
+  appId,
   browserFields,
   events,
   leadingControlColumns,
@@ -167,7 +170,7 @@ const EventRenderedViewComponent = ({
         render: (name: unknown, item: TimelineItem) => {
           const ruleName = get(item, `ecs.signal.rule.name`) ?? get(item, `ecs.${ALERT_RULE_NAME}`);
           const ruleId = get(item, `ecs.signal.rule.id`) ?? get(item, `ecs.${ALERT_RULE_UUID}`);
-          return <RuleName name={ruleName} id={ruleId} />;
+          return <RuleName name={ruleName} id={ruleId} appId={appId} />;
         },
       },
       {
@@ -208,7 +211,7 @@ const EventRenderedViewComponent = ({
         width: '60%',
       },
     ],
-    [ActionTitle, browserFields, events, leadingControlColumns, rowRenderers]
+    [ActionTitle, browserFields, events, leadingControlColumns, rowRenderers, appId]
   );
 
   const handleTableChange = useCallback(

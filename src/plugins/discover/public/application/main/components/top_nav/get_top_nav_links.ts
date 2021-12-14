@@ -53,6 +53,7 @@ export const getTopNavLinks = ({
       openOptionsPopover({
         I18nContext: services.core.i18n.Context,
         anchorElement,
+        theme$: services.core.theme.theme$,
       }),
     testId: 'discoverOptionsButton',
   };
@@ -114,6 +115,7 @@ export const getTopNavLinks = ({
       showOpenSearchPanel({
         onOpenSavedSearch,
         I18nContext: services.core.i18n.Context,
+        theme$: services.core.theme.theme$,
       }),
   };
 

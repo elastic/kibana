@@ -1,11 +1,18 @@
 .mlDataGrid {
+
   .euiDataGridRowCell--boolean {
     text-transform: none;
   }
 
-  // Override to align the sorting arrow at the bottom when histogram charts are enabled
-  .euiDataGridHeaderCell .euiDataGridHeaderCell__sortingArrow {
-    margin-top: auto;
-    margin-bottom: 0;
+  // Overrides to align the sorting arrow, actions icon and the column header when no chart is available,
+  // to the bottom of the cell when histogram charts are enabled.
+  // Note that overrides have to be used as currently it is not possible to add a custom class name
+  // for the EuiDataGridHeaderCell - see https://github.com/elastic/eui/issues/5106
+  .euiDataGridHeaderCell {
+    .euiDataGridHeaderCell__sortingArrow,
+    .euiDataGridHeaderCell__icon,
+    .euiPopover {
+      margin-top: auto;
+    }
   }
 }

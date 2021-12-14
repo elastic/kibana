@@ -38,6 +38,8 @@ import {
   MonitoringKibanaSummaryStatusProvider,
   MonitoringSetupModeProvider,
   MonitoringAlertsProvider,
+  MonitoringEnterpriseSearchOverviewProvider,
+  MonitoringEnterpriseSearchSummaryStatusProvider,
   // @ts-ignore not ts yet
 } from './monitoring';
 // @ts-ignore not ts yet
@@ -101,6 +103,8 @@ export const services = {
   monitoringKibanaInstances: MonitoringKibanaInstancesProvider,
   monitoringKibanaInstance: MonitoringKibanaInstanceProvider,
   monitoringKibanaSummaryStatus: MonitoringKibanaSummaryStatusProvider,
+  monitoringEnterpriseSearchOverview: MonitoringEnterpriseSearchOverviewProvider,
+  monitoringEnterpriseSearchSummaryStatus: MonitoringEnterpriseSearchSummaryStatusProvider,
   monitoringSetupMode: MonitoringSetupModeProvider,
   monitoringAlerts: MonitoringAlertsProvider,
   pipelineList: PipelineListProvider,

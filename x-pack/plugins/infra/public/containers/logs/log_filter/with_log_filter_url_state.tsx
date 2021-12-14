@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import React, { useContext } from 'react';
-import { Query } from '../../../../../../../src/plugins/data/public';
+import { Query } from '@kbn/es-query';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../../utils/url_state';
 import { LogFilterState } from './log_filter_state';
 

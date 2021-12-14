@@ -43,6 +43,10 @@ import { EmbeddableStart } from '../../embeddable/public';
 import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '../../../../x-pack/plugins/triggers_actions_ui/public';
 
+export interface HistoryLocationState {
+  referrer: string;
+}
+
 export interface DiscoverServices {
   application: ApplicationStart;
   addBasePath: (path: string) => string;
@@ -52,7 +56,7 @@ export interface DiscoverServices {
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
-  history: () => History;
+  history: () => History<HistoryLocationState>;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
@@ -68,7 +72,7 @@ export interface DiscoverServices {
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   http: HttpStart;
   storage: Storage;
   spaces?: SpacesApi;
@@ -110,7 +114,7 @@ export function buildServices(
     storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
     triggersActionsUi: plugins.triggersActionsUi,
-    indexPatternFieldEditor: plugins.dataViewFieldEditor,
+    dataViewFieldEditor: plugins.dataViewFieldEditor,
     http: core.http,
     spaces: plugins.spaces,
   };
