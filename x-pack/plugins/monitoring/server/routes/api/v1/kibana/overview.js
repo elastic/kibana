@@ -44,7 +44,6 @@ export function kibanaOverviewRoute(server) {
             {
               bool: {
                 should: [
-                  { term: { 'data_stream.type': 'metrics' } },
                   { term: { 'data_stream.dataset': `${moduleType}.${dsDataset}` } },
                   { term: { type: 'kibana_stats' } },
                 ],

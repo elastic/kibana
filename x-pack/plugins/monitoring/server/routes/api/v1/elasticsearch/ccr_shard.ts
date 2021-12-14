@@ -114,7 +114,6 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
         {
           bool: {
             should: [
-              { term: { 'data_stream.type': 'metrics' } },
               { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
               {
                 term: {
