@@ -61,6 +61,7 @@ export function shiftPalette(stops: ColorStop[], max: number) {
     ...entry,
     stop: i + 1 < array.length ? array[i + 1].stop : max,
   }));
+
   if (stops[stops.length - 1].stop === max) {
     // extends the range by a fair amount to make it work the extra case for the last stop === max
     const computedStep = getStepValue(stops, result, max) || 1;
@@ -69,6 +70,17 @@ export function shiftPalette(stops: ColorStop[], max: number) {
     result[stops.length - 1].stop = max + step;
   }
   return result;
+}
+
+/** @internal **/
+function calculateStop(
+  stopValue: number,
+  newMin: number,
+  oldMin: number,
+  oldInterval: number,
+  newInterval: number
+) {
+  return newMin + ((stopValue - oldMin) * 100 * newInterval) / 100 / oldInterval;
 }
 
 // Utility to remap color stops within new domain
@@ -84,7 +96,7 @@ export function remapStopsByNewInterval(
   return (controlStops || []).map(({ color, stop }) => {
     return {
       color,
-      stop: newMin + ((stop - oldMin) * 100 * newInterval) / 100 / oldInterval,
+      stop: calculateStop(stop, newMin, oldMin, oldInterval, newInterval),
     };
   });
 }
@@ -100,10 +112,12 @@ export function getStopsFromColorRangesByNewInterval(
   }: { newInterval: number; oldInterval: number; newMin: number; oldMin: number }
 ) {
   return (colorRanges || []).map(({ color, start }) => {
-    let stop = newMin + ((start - oldMin) * 100 * newInterval) / 100 / oldInterval;
+    let stop = calculateStop(start, newMin, oldMin, oldInterval, newInterval);
+
     if (oldInterval === 0) {
       stop = newInterval + newMin;
     }
+
     return {
       color,
       stop,

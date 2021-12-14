@@ -195,7 +195,15 @@ export function ColorRanges(props: ColorRangesProps) {
                   setColorRanges([...localColorRanges]);
                 }}
                 button={
-                  <EuiColorPickerSwatch color={colorRange.color} aria-label="Select a new color" />
+                  <EuiColorPickerSwatch
+                    color={colorRange.color}
+                    aria-label={i18n.translate(
+                      'xpack.lens.dynamicColoring.customPalette.selectNewColor',
+                      {
+                        defaultMessage: 'Select a new color',
+                      }
+                    )}
+                  />
                 }
                 secondaryInputDisplay="top"
                 color={colorRange.color}
