@@ -7,26 +7,33 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { basicCaseMetrics } from '../../containers/mock';
+import { basicCaseMetrics, basicCaseMetricsFeatures } from '../../containers/mock';
 import { CaseViewMetrics } from './case_view_metrics';
-import { CaseMetrics } from '../../../common/ui';
+import { CaseMetrics, CaseMetricsFeature } from '../../../common/ui';
 import { TestProviders } from '../../common/mock';
 
 const renderCaseMetrics = ({
   metrics = basicCaseMetrics,
+  features = basicCaseMetricsFeatures,
   isLoading = false,
 }: {
   metrics?: CaseMetrics;
+  features?: CaseMetricsFeature[];
   isLoading?: boolean;
 } = {}) => {
   return render(
     <TestProviders>
-      <CaseViewMetrics metrics={metrics} isLoading={isLoading} />
+      <CaseViewMetrics metrics={metrics} isLoading={isLoading} features={features} />
     </TestProviders>
   );
 };
 
-const alertsMetrics = basicCaseMetrics.alerts!;
+const metricsFeaturesTests: Array<[CaseMetricsFeature, string, number]> = [
+  ['alerts.count', 'Total Alerts', basicCaseMetrics.alerts!.count!],
+  ['alerts.users', 'Associated Users', basicCaseMetrics.alerts!.users!.total!],
+  ['alerts.hosts', 'Associated Hosts', basicCaseMetrics.alerts!.hosts!.total!],
+  ['connectors', 'Total Connectors', basicCaseMetrics.connectors!.length!],
+];
 
 describe('CaseViewMetrics', () => {
   it('should render', () => {
@@ -47,47 +54,29 @@ describe('CaseViewMetrics', () => {
     expect(getByText('Total Connectors')).toBeInTheDocument();
   });
 
-  it('should render total alerts metrics only', () => {
-    const alertsCount = alertsMetrics.count! + 4321;
-    const metrics = { alerts: { ...alertsMetrics, count: alertsCount } };
-    const { getByText } = renderCaseMetrics({ metrics });
+  it('should render metrics with default value 0', () => {
+    const { getByText, getAllByText } = renderCaseMetrics({ metrics: {} });
     expect(getByText('Total Alerts')).toBeInTheDocument();
-    expect(getByText(alertsCount)).toBeInTheDocument();
-  });
-
-  it('should render associated users metrics only', () => {
-    const totalAlertUsers = alertsMetrics.users!.total + 4321;
-    const metrics = {
-      alerts: {
-        ...alertsMetrics,
-        users: { ...alertsMetrics.users!, total: totalAlertUsers },
-      },
-    };
-    const { getByText } = renderCaseMetrics({ metrics });
     expect(getByText('Associated Users')).toBeInTheDocument();
-    expect(getByText(totalAlertUsers)).toBeInTheDocument();
-  });
-
-  it('should render associated hosts metrics only', () => {
-    const totalAlertHosts = alertsMetrics.hosts!.total + 4321;
-    const metrics = {
-      alerts: {
-        ...alertsMetrics,
-        hosts: { ...alertsMetrics.hosts!, total: totalAlertHosts },
-      },
-    };
-    const { getByText } = renderCaseMetrics({ metrics });
     expect(getByText('Associated Hosts')).toBeInTheDocument();
-    expect(getByText(totalAlertHosts)).toBeInTheDocument();
+    expect(getByText('Total Connectors')).toBeInTheDocument();
+    expect(getAllByText('0')).toHaveLength(basicCaseMetricsFeatures.length);
   });
 
-  it('should render total Connectors metrics only', () => {
-    const connectors = [...basicCaseMetrics.connectors!, { id: 'foo', name: 'bar', pushCount: 0 }];
-    const metrics = {
-      connectors,
-    };
-    const { getByText } = renderCaseMetrics({ metrics });
-    expect(getByText('Total Connectors')).toBeInTheDocument();
-    expect(getByText(connectors.length)).toBeInTheDocument();
+  describe.each(metricsFeaturesTests)('Metrics feature: %s ', (feature, text, total) => {
+    it('should render metric', () => {
+      const { getByText } = renderCaseMetrics({ features: [feature] });
+      expect(getByText(text)).toBeInTheDocument();
+      expect(getByText(total)).toBeInTheDocument();
+    });
+
+    it('should not render other metrics', () => {
+      const { queryByText } = renderCaseMetrics({ features: [feature] });
+      metricsFeaturesTests.forEach(([_, otherMetricText]) => {
+        if (otherMetricText !== text) {
+          expect(queryByText(otherMetricText)).toBeNull();
+        }
+      });
+    });
   });
 });

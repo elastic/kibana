@@ -116,7 +116,7 @@ describe('useGetCaseMetrics', () => {
     });
   });
 
-  it('unhappy path', async () => {
+  it('returns an error when getCaseMetrics throws', async () => {
     const spyOnGetCaseMetrics = jest.spyOn(api, 'getCaseMetrics');
     spyOnGetCaseMetrics.mockImplementation(() => {
       throw new Error('Something went wrong');

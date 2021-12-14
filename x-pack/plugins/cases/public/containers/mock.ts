@@ -8,7 +8,7 @@
 import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
 import { isCreateConnector, isPush, isUpdateConnector } from '../../common/utils/user_actions';
-import { ResolvedCase } from '../../common/ui/types';
+import { CaseMetrics, CaseMetricsFeature, ResolvedCase } from '../../common/ui/types';
 import {
   AssociationType,
   CaseUserActionConnector,
@@ -24,7 +24,6 @@ import {
   ConnectorTypes,
   UserAction,
   UserActionField,
-  CaseMetricsResponse,
 } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
@@ -170,7 +169,14 @@ export const basicResolvedCase: ResolvedCase = {
   aliasTargetId: `${basicCase.id}_2`,
 };
 
-export const basicCaseMetrics: CaseMetricsResponse = {
+export const basicCaseMetricsFeatures: CaseMetricsFeature[] = [
+  'alerts.count',
+  'alerts.users',
+  'alerts.hosts',
+  'connectors',
+];
+
+export const basicCaseMetrics: CaseMetrics = {
   alerts: {
     count: 12,
     hosts: {

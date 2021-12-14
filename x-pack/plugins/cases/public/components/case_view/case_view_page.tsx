@@ -175,9 +175,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       (newCase: Case, updateKey: UpdateKey) => {
         updateCase({ ...newCase, comments: caseData.comments });
         fetchCaseUserActions(caseId, newCase.connector.id, subCaseId);
-        if (updateKey === 'connector' || updateKey === 'status') {
-          fetchCaseMetrics();
-        }
+        fetchCaseMetrics();
       },
       [updateCase, caseData, fetchCaseUserActions, caseId, subCaseId, fetchCaseMetrics]
     );
@@ -353,6 +351,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                             data-test-subj="case-view-metrics"
                             isLoading={isLoadingMetrics}
                             metrics={metrics}
+                            features={metricsFeatures}
                           />
                         </EuiFlexItem>
                         <EuiFlexItem>

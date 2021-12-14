@@ -175,7 +175,7 @@ export const getCaseMetrics = async (
       query: { features: JSON.stringify(features) },
     }
   );
-  return decodeCaseMetricsResponse(response) as CaseMetrics;
+  return convertToCamelCase<CaseMetricsResponse, CaseMetrics>(decodeCaseMetricsResponse(response));
 };
 
 export const getCaseUserActions = async (

@@ -112,8 +112,7 @@ export const useGetCaseMetrics = (
       isCancelledRef.current = true;
       abortCtrlRef.current.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId, features]);
+  }, [callFetch]);
 
   return { ...state, fetchCaseMetrics: callFetch };
 };

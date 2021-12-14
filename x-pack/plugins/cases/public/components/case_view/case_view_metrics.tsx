@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
-import { CaseMetrics } from '../../../common/ui';
+import { CaseMetrics, CaseMetricsFeature } from '../../../common/ui';
 import {
   ASSOCIATED_HOSTS_METRIC,
   ASSOCIATED_USERS_METRIC,
@@ -23,34 +23,38 @@ const MetricValue = styled(EuiFlexItem)`
 
 export interface CaseViewMetricsProps {
   metrics: CaseMetrics | null;
+  features: CaseMetricsFeature[];
   isLoading: boolean;
 }
 
 type MetricItems = Array<{ title: string; value: number }>;
 
-const useMetricItems = (metrics: CaseMetrics | null): MetricItems => {
+const useMetricItems = (
+  metrics: CaseMetrics | null,
+  features: CaseMetricsFeature[]
+): MetricItems => {
   const { alerts, connectors } = metrics ?? {};
-  const totalConnectors = connectors?.length;
-  const alertsCount = alerts?.count;
-  const totalAlertUsers = alerts?.users?.total;
-  const totalAlertHosts = alerts?.hosts?.total;
+  const totalConnectors = connectors?.length ?? 0;
+  const alertsCount = alerts?.count ?? 0;
+  const totalAlertUsers = alerts?.users?.total ?? 0;
+  const totalAlertHosts = alerts?.hosts?.total ?? 0;
 
   const metricItems = useMemo<MetricItems>(() => {
     const items = [];
-    if (alertsCount != null) {
+    if (features.includes('alerts.count')) {
       items.push({ title: TOTAL_ALERTS_METRIC, value: alertsCount });
     }
-    if (totalAlertUsers != null) {
+    if (features.includes('alerts.users')) {
       items.push({ title: ASSOCIATED_USERS_METRIC, value: totalAlertUsers });
     }
-    if (totalAlertHosts != null) {
+    if (features.includes('alerts.hosts')) {
       items.push({ title: ASSOCIATED_HOSTS_METRIC, value: totalAlertHosts });
     }
-    if (totalConnectors != null) {
+    if (features.includes('connectors')) {
       items.push({ title: TOTAL_CONNECTORS_METRIC, value: totalConnectors });
     }
     return items;
-  }, [alertsCount, totalAlertUsers, totalAlertHosts, totalConnectors]);
+  }, [features, alertsCount, totalAlertUsers, totalAlertHosts, totalConnectors]);
 
   return metricItems;
 };
@@ -72,8 +76,8 @@ const CaseViewMetricItems: React.FC<{ metricItems: MetricItems }> = React.memo(
 CaseViewMetricItems.displayName = 'CaseViewMetricItems';
 
 export const CaseViewMetrics: React.FC<CaseViewMetricsProps> = React.memo(
-  ({ metrics, isLoading }) => {
-    const metricItems = useMetricItems(metrics);
+  ({ metrics, features, isLoading }) => {
+    const metricItems = useMetricItems(metrics, features);
     return (
       <EuiPanel data-test-subj="case-view-metrics-panel" hasShadow={false} hasBorder={true}>
         <EuiFlexGroup gutterSize="xl" wrap={true} responsive={false}>

@@ -154,11 +154,6 @@ export const ASSOCIATED_HOSTS_METRIC = i18n.translate(
   }
 );
 
-// TODO: api metrics not implemented yet
-// export const ISOLATED_HOSTS_METRIC = i18n.translate('xpack.cases.caseView.metrics.isolatedHosts', {
-//   defaultMessage: 'Isolated Hosts',
-// });
-
 export const TOTAL_CONNECTORS_METRIC = i18n.translate(
   'xpack.cases.caseView.metrics.totalConnectors',
   {
