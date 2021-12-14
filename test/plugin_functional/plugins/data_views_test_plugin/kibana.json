@@ -1,8 +1,8 @@
 {
-  "id": "indexPatternsTestPlugin",
+  "id": "dataViewsTestPlugin",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
-  "configPath": ["index_patterns_test_plugin"],
+  "configPath": ["data_views_test_plugin"],
   "server": true,
   "ui": false,
   "requiredPlugins": ["data"],
@@ -10,5 +10,5 @@
     "name": "App Services",
     "githubTeam": "kibana-app-services"
   },
-  "description": "Index pattern test plugin"
+  "description": "Data views test plugin"
 }
