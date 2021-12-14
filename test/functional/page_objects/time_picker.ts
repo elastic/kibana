@@ -7,6 +7,7 @@
  */
 
 import moment from 'moment';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
@@ -108,6 +109,7 @@ export class TimePickerPageObject extends FtrService {
     }
     await this.testSubjects.exists('superDatePickerstartDatePopoverButton');
     // Close the start date popover which opens automatically when the button is shown
+    await setTimeoutAsync(100);
     await this.testSubjects.click('superDatePickerstartDatePopoverButton');
   }
 
@@ -118,7 +120,6 @@ export class TimePickerPageObject extends FtrService {
   public async setAbsoluteRange(fromTime: string, toTime: string) {
     this.log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
     await this.showStartEndTimes();
-    await this.browser.pressKeys(this.browser.keys.ESCAPE);
     let panel!: WebElementWrapper;
 
     // set to time
@@ -175,7 +176,7 @@ export class TimePickerPageObject extends FtrService {
   }
 
   public async isOff() {
-    return await this.find.existsByCssSelector('.euiAutoRefresh input[disabled]');
+    return await this.find.existsByCssSelector('.euiAutoRefresh .euiFormControlLayout--readOnly');
   }
 
   public async getRefreshConfig(keepQuickSelectOpen = false) {
