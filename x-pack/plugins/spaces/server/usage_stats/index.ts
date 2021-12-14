@@ -6,5 +6,6 @@
  */
 
 export { SPACES_USAGE_STATS_TYPE } from './constants';
-export { UsageStatsService, UsageStatsServiceSetup } from './usage_stats_service';
-export { UsageStats } from './types';
+export type { UsageStatsServiceSetup } from './usage_stats_service';
+export { UsageStatsService } from './usage_stats_service';
+export type { UsageStats } from './types';

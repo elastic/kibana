@@ -28,6 +28,7 @@ interface SuggestionsCalloutProps {
   description: string;
   buttonTo: string;
   lastUpdatedTimestamp: string; // ISO string like '2021-10-04T18:53:02.784Z'
+  style?: React.CSSProperties;
 }
 
 export const SuggestionsCallout: React.FC<SuggestionsCalloutProps> = ({
@@ -35,6 +36,7 @@ export const SuggestionsCallout: React.FC<SuggestionsCalloutProps> = ({
   description,
   buttonTo,
   lastUpdatedTimestamp,
+  style,
 }) => {
   const { pathname } = useLocation();
 
@@ -49,7 +51,7 @@ export const SuggestionsCallout: React.FC<SuggestionsCalloutProps> = ({
 
   return (
     <>
-      <EuiCallOut color="success" iconType={LightbulbIcon} title={title}>
+      <EuiCallOut style={style} color="success" iconType={LightbulbIcon} title={title}>
         <EuiText size="s">
           <p>{description}</p>
         </EuiText>
@@ -80,7 +82,6 @@ export const SuggestionsCallout: React.FC<SuggestionsCalloutProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiCallOut>
-      <EuiSpacer />
     </>
   );
 };

@@ -17,7 +17,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new CustomIntegrationsPlugin(initializerContext);
 }
 
-export { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './types';
+export type { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './types';
 
 export type { IntegrationCategory, CustomIntegration } from '../common';
 

@@ -15,7 +15,7 @@ import {
 } from '../../../common';
 import { CaseActionConnector } from '../types';
 
-export { ThirdPartyField as AllThirdPartyFields } from '../../../common';
+export type { ThirdPartyField as AllThirdPartyFields } from '../../../common';
 
 export interface ThirdPartyField {
   label: string;

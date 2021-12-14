@@ -53,7 +53,7 @@ export function isColumnInvalid(
   indexPattern: IndexPattern
 ) {
   const column: IndexPatternColumn | undefined = layer.columns[columnId];
-  if (!column) return;
+  if (!column || !indexPattern) return;
 
   const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
   // check also references for errors

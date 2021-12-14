@@ -222,6 +222,7 @@ export function TransactionsTable({
     transactionGroupDetailedStatistics,
     comparisonEnabled,
     shouldShowSparkPlots,
+    comparisonType,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING;

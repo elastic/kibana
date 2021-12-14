@@ -45,11 +45,5 @@ export type ObservabilityConfig = TypeOf<typeof config.schema>;
 export const plugin = (initContext: PluginInitializerContext) =>
   new ObservabilityPlugin(initContext);
 
-export {
-  createOrUpdateIndex,
-  Mappings,
-  ObservabilityPluginSetup,
-  ScopedAnnotationsClient,
-  unwrapEsResponse,
-  WrappedElasticsearchClientError,
-};
+export type { Mappings, ObservabilityPluginSetup, ScopedAnnotationsClient };
+export { createOrUpdateIndex, unwrapEsResponse, WrappedElasticsearchClientError };

@@ -25,7 +25,7 @@ apm = ElasticAPM(app)
   }
 )}
 from elasticapm.contrib.flask import ElasticAPM
-app.config['ELASTIC_APM'] = {curlyOpen}
+app.config['ELASTIC_APM'] = {
 # ${i18n.translate(
   'xpack.apm.tutorial.flaskClient.configure.commands.setRequiredServiceNameComment',
   {
@@ -65,6 +65,6 @@ app.config['ELASTIC_APM'] = {curlyOpen}
   }
 )}
 'ENVIRONMENT': 'production',
-{curlyClose}
+}
 
 apm = ElasticAPM(app)`;

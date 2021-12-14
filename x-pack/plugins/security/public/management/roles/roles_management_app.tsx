@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Route, Router, Switch, useParams } from 'react-router-dom';
+import { Route, Router, useParams } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import type { FatalErrorsSetup, StartServicesAccessor } from 'src/core/public';
@@ -15,6 +15,11 @@ import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import type { SecurityLicense } from '../../../common/licensing';
+import {
+  Breadcrumb,
+  BreadcrumbsProvider,
+  createBreadcrumbsChangeHandler,
+} from '../../components/breadcrumb';
 import type { PluginStartDependencies } from '../../plugin';
 import { tryDecodeURIComponent } from '../url_utils';
 
@@ -27,18 +32,14 @@ interface CreateParams {
 export const rolesManagementApp = Object.freeze({
   id: 'roles',
   create({ license, fatalErrors, getStartServices }: CreateParams) {
+    const title = i18n.translate('xpack.security.management.rolesTitle', {
+      defaultMessage: 'Roles',
+    });
     return {
       id: this.id,
       order: 20,
-      title: i18n.translate('xpack.security.management.rolesTitle', { defaultMessage: 'Roles' }),
+      title,
       async mount({ element, setBreadcrumbs, history }) {
-        const rolesBreadcrumbs = [
-          {
-            text: i18n.translate('xpack.security.roles.breadcrumb', { defaultMessage: 'Roles' }),
-            href: `/`,
-          },
-        ];
-
         const [
           [startServices, { data, features, spaces }],
           { RolesGridPage },
@@ -57,19 +58,18 @@ export const rolesManagementApp = Object.freeze({
           import('../users'),
         ]);
 
-        const { application, docLinks, http, i18n: i18nStart, notifications } = startServices;
+        const {
+          application,
+          docLinks,
+          http,
+          i18n: i18nStart,
+          notifications,
+          chrome,
+        } = startServices;
+
+        chrome.docTitle.change(title);
 
         const rolesAPIClient = new RolesAPIClient(http);
-        const RolesGridPageWithBreadcrumbs = () => {
-          setBreadcrumbs(rolesBreadcrumbs);
-          return (
-            <RolesGridPage
-              notifications={notifications}
-              rolesAPIClient={rolesAPIClient}
-              history={history}
-            />
-          );
-        };
 
         const EditRolePageWithBreadcrumbs = ({ action }: { action: 'edit' | 'clone' }) => {
           const { roleName } = useParams<{ roleName?: string }>();
@@ -78,38 +78,38 @@ export const rolesManagementApp = Object.freeze({
           // See https://github.com/elastic/kibana/issues/82440
           const decodedRoleName = roleName ? tryDecodeURIComponent(roleName) : undefined;
 
-          setBreadcrumbs([
-            ...rolesBreadcrumbs,
-            action === 'edit' && roleName
+          const breadcrumbObj =
+            action === 'edit' && roleName && decodedRoleName
               ? { text: decodedRoleName, href: `/edit/${encodeURIComponent(roleName)}` }
               : {
                   text: i18n.translate('xpack.security.roles.createBreadcrumb', {
                     defaultMessage: 'Create',
                   }),
-                },
-          ]);
+                };
 
           const spacesApiUi = spaces?.ui;
 
           return (
-            <EditRolePage
-              action={action}
-              roleName={decodedRoleName}
-              rolesAPIClient={rolesAPIClient}
-              userAPIClient={new UserAPIClient(http)}
-              indicesAPIClient={new IndicesAPIClient(http)}
-              privilegesAPIClient={new PrivilegesAPIClient(http)}
-              getFeatures={features.getFeatures}
-              http={http}
-              notifications={notifications}
-              fatalErrors={fatalErrors}
-              license={license}
-              docLinks={docLinks}
-              uiCapabilities={application.capabilities}
-              indexPatterns={data.indexPatterns}
-              history={history}
-              spacesApiUi={spacesApiUi}
-            />
+            <Breadcrumb text={breadcrumbObj.text} href={breadcrumbObj.href}>
+              <EditRolePage
+                action={action}
+                roleName={decodedRoleName}
+                rolesAPIClient={rolesAPIClient}
+                userAPIClient={new UserAPIClient(http)}
+                indicesAPIClient={new IndicesAPIClient(http)}
+                privilegesAPIClient={new PrivilegesAPIClient(http)}
+                getFeatures={features.getFeatures}
+                http={http}
+                notifications={notifications}
+                fatalErrors={fatalErrors}
+                license={license}
+                docLinks={docLinks}
+                uiCapabilities={application.capabilities}
+                indexPatterns={data.indexPatterns}
+                history={history}
+                spacesApiUi={spacesApiUi}
+              />
+            </Breadcrumb>
           );
         };
 
@@ -117,21 +117,28 @@ export const rolesManagementApp = Object.freeze({
           <KibanaContextProvider services={startServices}>
             <i18nStart.Context>
               <Router history={history}>
-                <Switch>
-                  <Route path={['/', '']} exact={true}>
-                    <RolesGridPageWithBreadcrumbs />
-                  </Route>
-                  <Route path="/edit/:roleName?">
-                    <EditRolePageWithBreadcrumbs action="edit" />
-                  </Route>
-                  <Route path="/clone/:roleName">
-                    <EditRolePageWithBreadcrumbs action="clone" />
-                  </Route>
-                </Switch>
+                <BreadcrumbsProvider
+                  onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}
+                >
+                  <Breadcrumb text={title} href="/">
+                    <Route path={['/', '']} exact={true}>
+                      <RolesGridPage
+                        notifications={notifications}
+                        rolesAPIClient={rolesAPIClient}
+                        history={history}
+                      />
+                    </Route>
+                    <Route path="/edit/:roleName?">
+                      <EditRolePageWithBreadcrumbs action="edit" />
+                    </Route>
+                    <Route path="/clone/:roleName">
+                      <EditRolePageWithBreadcrumbs action="clone" />
+                    </Route>
+                  </Breadcrumb>
+                </BreadcrumbsProvider>
               </Router>
             </i18nStart.Context>
           </KibanaContextProvider>,
-
           element
         );
 

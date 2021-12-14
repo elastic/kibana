@@ -30,3 +30,8 @@ export const registerRoutesMock = jest.fn();
 jest.doMock('./routes', () => ({
   registerRoutes: registerRoutesMock,
 }));
+
+export const deleteIndexTemplatesMock = jest.fn();
+jest.doMock('./service/lib/delete_index_templates', () => ({
+  deleteIndexTemplates: deleteIndexTemplatesMock,
+}));

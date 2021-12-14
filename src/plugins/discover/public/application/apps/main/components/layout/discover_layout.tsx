@@ -35,7 +35,7 @@ import { getResultState } from '../../utils/get_result_state';
 import { InspectorSession } from '../../../../../../../inspector/public';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { DataMainMsg } from '../../services/use_saved_search';
-import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
+import { useColumns } from '../../../../helpers/use_data_grid_columns';
 import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../../types';
 import { useDataState } from '../../utils/use_data_state';
@@ -43,6 +43,7 @@ import {
   SavedSearchURLConflictCallout,
   useSavedSearchAliasMatchRedirect,
 } from '../../../../../saved_searches';
+import { DataViewType } from '../../../../../../../data_views/common';
 
 /**
  * Local storage key for sidebar persistence state
@@ -94,8 +95,12 @@ export function DiscoverLayout({
 
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
-  const timeField = useMemo(() => {
-    return indexPattern.type !== 'rollup' ? indexPattern.timeFieldName : undefined;
+  // We treat rollup v1 data views as non time based in Discover, since we query them
+  // in a non time based way using the regular _search API, since the internal
+  // representation of those documents does not have the time field that _field_caps
+  // reports us.
+  const isTimeBased = useMemo(() => {
+    return indexPattern.type !== DataViewType.ROLLUP && indexPattern.isTimeBased();
   }, [indexPattern]);
 
   const initialSidebarClosed = Boolean(storage.get(SIDEBAR_CLOSED_KEY));
@@ -125,7 +130,7 @@ export function DiscoverLayout({
     };
   }, [inspectorSession]);
 
-  const { columns, onAddColumn, onRemoveColumn } = useDataGridColumns({
+  const { columns, onAddColumn, onRemoveColumn } = useColumns({
     capabilities,
     config: uiSettings,
     indexPattern,
@@ -247,7 +252,7 @@ export function DiscoverLayout({
             >
               {resultState === 'none' && (
                 <DiscoverNoResults
-                  timeFieldName={timeField}
+                  isTimeBased={isTimeBased}
                   data={data}
                   error={dataState.error}
                   hasQuery={!!state.query?.query}
@@ -278,7 +283,7 @@ export function DiscoverLayout({
                       savedSearchDataTotalHits$={totalHits$}
                       services={services}
                       stateContainer={stateContainer}
-                      timefield={timeField}
+                      isTimeBased={isTimeBased}
                     />
                   </EuiFlexItem>
                   <EuiHorizontalRule margin="none" />

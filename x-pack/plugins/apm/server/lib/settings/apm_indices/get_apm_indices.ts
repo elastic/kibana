@@ -16,7 +16,7 @@ import { APMRouteHandlerResources } from '../../../routes/typings';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { ApmIndicesConfig } from '../../../../../observability/common/typings';
 
-export { ApmIndicesConfig };
+export type { ApmIndicesConfig };
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
 

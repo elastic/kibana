@@ -34,6 +34,8 @@ export TEST_BROWSER_HEADLESS=1
 
 export ELASTIC_APM_ENVIRONMENT=ci
 export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
+export ELASTIC_APM_SERVER_URL=https://kibana-ci-apm.apm.us-central1.gcp.cloud.es.io
+export ELASTIC_APM_SECRET_TOKEN=7YKhoXsO4MzjhXjx2c
 
 if is_pr; then
   if [[ "${GITHUB_PR_LABELS:-}" == *"ci:collect-apm"* ]]; then
@@ -42,7 +44,11 @@ if is_pr; then
     export ELASTIC_APM_ACTIVE=false
   fi
 
-  export CHECKS_REPORTER_ACTIVE=true
+  if [[ "${GITHUB_STEP_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
+    export CHECKS_REPORTER_ACTIVE=true
+  else
+    export CHECKS_REPORTER_ACTIVE=false
+  fi
 
   # These can be removed once we're not supporting Jenkins and Buildkite at the same time
   # These are primarily used by github checks reporter and can be configured via /github_checks_api.json

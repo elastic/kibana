@@ -123,16 +123,33 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
         );
       }
 
-      return isEdit ? (
-        <EuiText>
-          <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
-            <FormattedMessage
-              id="xpack.fleet.editPackagePolicy.pageTitle"
-              defaultMessage="Edit integration"
-            />
-          </h1>
-        </EuiText>
-      ) : (
+      if (isEdit) {
+        return (
+          <EuiText>
+            <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
+              <FormattedMessage
+                id="xpack.fleet.editPackagePolicy.pageTitle"
+                defaultMessage="Edit integration"
+              />
+            </h1>
+          </EuiText>
+        );
+      }
+
+      if (isUpgrade) {
+        return (
+          <EuiText>
+            <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
+              <FormattedMessage
+                id="xpack.fleet.upgradePackagePolicy.pageTitle"
+                defaultMessage="Upgrade integration"
+              />
+            </h1>
+          </EuiText>
+        );
+      }
+
+      return (
         <EuiText>
           <h1>
             <FormattedMessage

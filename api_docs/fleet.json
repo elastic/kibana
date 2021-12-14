@@ -19591,16 +19591,6 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-common.AGENT_API_ROUTES.ENROLL_PATTERN",
-            "type": "string",
-            "tags": [],
-            "label": "ENROLL_PATTERN",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "fleet",
             "id": "def-common.AGENT_API_ROUTES.UNENROLL_PATTERN",
             "type": "string",
             "tags": [],

@@ -157,7 +157,6 @@ export function registerSnapshotsRoutes({
             repositories,
             // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/845
             errors: fetchedSnapshots?.failures,
-            // @ts-expect-error @elastic/elasticsearch "total" is a new field in the response
             total: fetchedSnapshots?.total,
           },
         });

@@ -43,7 +43,7 @@ import { Storage } from '../../kibana_utils/public';
 import { migrateToLatest, PersistableStateService } from '../../kibana_utils/common';
 import { ATTRIBUTE_SERVICE_KEY, AttributeService } from './lib/attribute_service';
 import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
-import { EmbeddableStateWithType } from '../common/types';
+import { EmbeddableStateWithType, CommonEmbeddableStartContract } from '../common/types';
 import {
   getExtractFunction,
   getInjectFunction,
@@ -90,11 +90,12 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
     V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
       [ATTRIBUTE_SERVICE_KEY]: A;
     },
-    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
+    M extends unknown = unknown
   >(
     type: string,
-    options: AttributeServiceOptions<A>
-  ) => AttributeService<A, V, R>;
+    options: AttributeServiceOptions<A, M>
+  ) => AttributeService<A, V, R, M>;
 }
 
 export type EmbeddablePanelHOC = React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
@@ -172,8 +173,9 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           />
         );
 
-    const commonContract = {
-      getEmbeddableFactory: this.getEmbeddableFactory,
+    const commonContract: CommonEmbeddableStartContract = {
+      getEmbeddableFactory: this
+        .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
       getEnhancement: this.getEnhancement,
     };
 

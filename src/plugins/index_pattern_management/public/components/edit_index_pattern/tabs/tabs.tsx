@@ -80,7 +80,7 @@ export function Tabs({
   location,
   refreshFields,
 }: TabsProps) {
-  const { application, uiSettings, docLinks, indexPatternFieldEditor } =
+  const { application, uiSettings, docLinks, indexPatternFieldEditor, overlays } =
     useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
@@ -102,8 +102,13 @@ export function Tabs({
           tempScriptedFieldLanguages.push(field.lang);
         }
       } else {
+        // for conflicted fields, add conflict as a type
+        if (field.type === 'conflict') {
+          tempIndexedFieldTypes.push('conflict');
+        }
         if (field.esTypes) {
-          tempIndexedFieldTypes.push(field.esTypes?.join(', '));
+          // add all types, may be multiple
+          field.esTypes.forEach((item) => tempIndexedFieldTypes.push(item));
         }
       }
     });
@@ -230,6 +235,7 @@ export function Tabs({
                       deleteField,
                       getFieldInfo,
                     }}
+                    openModal={overlays.openModal}
                   />
                 )}
               </DeleteRuntimeFieldProvider>
@@ -288,6 +294,7 @@ export function Tabs({
       openFieldEditor,
       DeleteRuntimeFieldProvider,
       refreshFields,
+      overlays,
     ]
   );
 

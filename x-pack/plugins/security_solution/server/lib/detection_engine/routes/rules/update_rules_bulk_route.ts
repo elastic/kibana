@@ -89,8 +89,7 @@ export const updateRulesBulkRoute = (
               rulesClient,
               ruleStatusClient,
               defaultOutputIndex: siemClient.getSignalsIndex(),
-              existingRule,
-              migratedRule,
+              existingRule: migratedRule,
               ruleUpdate: payloadRule,
               isRuleRegistryEnabled,
             });

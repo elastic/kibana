@@ -56,12 +56,14 @@ export const CardCompressedHeader = memo<CardCompressedHeaderProps>(
           />
         }
         name={
-          <TextValueDisplay bold truncate={!expanded}>
+          <TextValueDisplay bold truncate={!expanded} withTooltip={!expanded}>
             {artifact.name}
           </TextValueDisplay>
         }
         description={
-          <DescriptionField truncate={!expanded}>{artifact.description}</DescriptionField>
+          <DescriptionField truncate={!expanded} withTooltip={!expanded}>
+            {artifact.description}
+          </DescriptionField>
         }
         effectScope={
           <EffectScope policies={policyNavLinks} data-test-subj={getTestId('effectScope')} />

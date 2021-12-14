@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { TimeRangeComparisonType } from '../../../../common/runtime_types/comparison_type_rt';
 import {
   asMillisecondDuration,
   asPercent,
@@ -42,12 +43,14 @@ export function getColumns({
   transactionGroupDetailedStatistics,
   comparisonEnabled,
   shouldShowSparkPlots = true,
+  comparisonType,
 }: {
   serviceName: string;
   latencyAggregationType?: LatencyAggregationType;
   transactionGroupDetailedStatistics?: TransactionGroupDetailedStatistics;
   comparisonEnabled?: boolean;
   shouldShowSparkPlots?: boolean;
+  comparisonType?: TimeRangeComparisonType;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
     {
@@ -67,6 +70,8 @@ export function getColumns({
                 transactionName={name}
                 transactionType={type}
                 latencyAggregationType={latencyAggregationType}
+                comparisonEnabled={comparisonEnabled}
+                comparisonType={comparisonType}
               >
                 {name}
               </TransactionDetailLink>

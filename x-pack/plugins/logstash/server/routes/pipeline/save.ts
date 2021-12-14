@@ -47,6 +47,7 @@ export function registerPipelineSaveRoute(
 
           await client.asCurrentUser.logstash.putPipeline({
             id: pipeline.id,
+            // @ts-expect-error description is required
             body: pipeline.upstreamJSON,
           });
 

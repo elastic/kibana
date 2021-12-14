@@ -14,6 +14,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { HeaderActions } from '../body/actions/header_actions';
 import { CellValueElementProps } from '../cell_rendering';
 import { Direction } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers/index';
@@ -39,7 +40,7 @@ import {
 import { DetailsPanel } from '../../side_panel';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
-import { defaultControlColumn } from '../body/control_columns';
+import { getDefaultControlColumn } from '../body/control_columns';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -103,6 +104,8 @@ interface PinnedFilter {
 
 export type Props = OwnProps & PropsFromRedux;
 
+const trailingControlColumns: ControlColumnProps[] = []; // stable reference
+
 export const PinnedTabContentComponent: React.FC<Props> = ({
   columns,
   timelineId,
@@ -121,6 +124,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     loading: loadingSourcerer,
   } = useSourcererScope(SourcererScopeName.timeline);
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
+  const ACTION_BUTTON_COUNT = 5;
 
   const existingIndexNamesSelector = useMemo(
     () => sourcererSelectors.getAllExistingIndexNamesSelector(),
@@ -202,8 +206,14 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     onEventClosed({ tabType: TimelineTabs.pinned, timelineId });
   }, [timelineId, onEventClosed]);
 
-  const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
-  const trailingControlColumns: ControlColumnProps[] = [];
+  const leadingControlColumns = useMemo(
+    () =>
+      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
+        ...x,
+        headerCellRender: HeaderActions,
+      })),
+    []
+  );
 
   return (
     <>

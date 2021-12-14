@@ -30,29 +30,29 @@ interface CreateParams {
 export const spacesManagementApp = Object.freeze({
   id: 'spaces',
   create({ getStartServices, spacesManager }: CreateParams) {
+    const title = i18n.translate('xpack.spaces.displayName', {
+      defaultMessage: 'Spaces',
+    });
+
     return {
       id: this.id,
       order: 2,
-      title: i18n.translate('xpack.spaces.displayName', {
-        defaultMessage: 'Spaces',
-      }),
+      title,
 
       async mount({ element, setBreadcrumbs, history }) {
         const [[coreStart, { features }], { SpacesGridPage }, { ManageSpacePage }] =
           await Promise.all([getStartServices(), import('./spaces_grid'), import('./edit_space')]);
 
-        const spacesBreadcrumbs = [
-          {
-            text: i18n.translate('xpack.spaces.management.breadcrumb', {
-              defaultMessage: 'Spaces',
-            }),
-            href: `/`,
-          },
-        ];
-        const { notifications, i18n: i18nStart, application } = coreStart;
+        const spacesFirstBreadcrumb = {
+          text: title,
+          href: `/`,
+        };
+        const { notifications, i18n: i18nStart, application, chrome } = coreStart;
+
+        chrome.docTitle.change(title);
 
         const SpacesGridPageWithBreadcrumbs = () => {
-          setBreadcrumbs(spacesBreadcrumbs);
+          setBreadcrumbs([{ ...spacesFirstBreadcrumb, href: undefined }]);
           return (
             <SpacesGridPage
               capabilities={application.capabilities}
@@ -67,12 +67,11 @@ export const spacesManagementApp = Object.freeze({
 
         const CreateSpacePageWithBreadcrumbs = () => {
           setBreadcrumbs([
-            ...spacesBreadcrumbs,
+            spacesFirstBreadcrumb,
             {
               text: i18n.translate('xpack.spaces.management.createSpaceBreadcrumb', {
                 defaultMessage: 'Create',
               }),
-              href: '/create',
             },
           ]);
 
@@ -92,10 +91,9 @@ export const spacesManagementApp = Object.freeze({
 
           const onLoadSpace = (space: Space) => {
             setBreadcrumbs([
-              ...spacesBreadcrumbs,
+              spacesFirstBreadcrumb,
               {
                 text: space.name,
-                href: `/edit/${encodeURIComponent(space.id)}`,
               },
             ]);
           };
@@ -137,6 +135,7 @@ export const spacesManagementApp = Object.freeze({
         );
 
         return () => {
+          chrome.docTitle.reset();
           unmountComponentAtNode(element);
         };
       },

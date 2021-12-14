@@ -111,7 +111,7 @@ export abstract class Embeddable<
    * Merges input$ and output$ streams and debounces emit till next macro-task.
    * Could be useful to batch reactions to input$ and output$ updates that happen separately but synchronously.
    * In case corresponding state change triggered `reload` this stream is guarantied to emit later,
-   * which allows to skip any state handling in case `reload` already handled it.
+   * which allows to skip state handling in case `reload` already handled it.
    */
   public getUpdated$(): Readonly<Rx.Observable<TEmbeddableInput | TEmbeddableOutput>> {
     return merge(this.getInput$().pipe(skip(1)), this.getOutput$().pipe(skip(1))).pipe(
@@ -184,7 +184,7 @@ export abstract class Embeddable<
 
   /**
    * Called when this embeddable is no longer used, this should be the place for
-   * implementors to add any additional clean up tasks, like unmounting and unsubscribing.
+   * implementors to add additional clean up tasks, like un-mounting and unsubscribing.
    */
   public destroy(): void {
     this.destroyed = true;

@@ -7,7 +7,6 @@
 import expect from '@kbn/expect';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 import { dataConfig, generateData } from './generate_data';
 import { NodeType, BackendNode } from '../../../../plugins/apm/common/connections';
 import { roundNumber } from '../../utils';
@@ -15,6 +14,7 @@ import { roundNumber } from '../../utils';
 type TopDependencies = APIReturnType<'GET /internal/apm/backends/top_backends'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 

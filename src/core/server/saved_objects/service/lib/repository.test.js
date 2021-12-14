@@ -2112,7 +2112,16 @@ describe('SavedObjectsRepository', () => {
 
       it(`self-generates an id if none is provided`, async () => {
         await createSuccess(type, attributes);
-        expect(client.create).toHaveBeenCalledWith(
+        expect(client.create).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          }),
+          expect.anything()
+        );
+        await createSuccess(type, attributes, { id: '' });
+        expect(client.create).toHaveBeenNthCalledWith(
+          2,
           expect.objectContaining({
             id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           }),
@@ -3294,6 +3303,20 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
+      it('search for the right fields when typeToNamespacesMap is set', async () => {
+        const relevantOpts = {
+          ...commonOptions,
+          fields: ['title'],
+          type: '',
+          namespaces: [],
+          typeToNamespacesMap: new Map([[type, [namespace]]]),
+        };
+
+        await findSuccess(relevantOpts, namespace);
+        const esOptions = client.search.mock.calls[0][0];
+        expect(esOptions?._source ?? []).toContain('index-pattern.title');
+      });
+
       it(`accepts hasReferenceOperator`, async () => {
         const relevantOpts = {
           ...commonOptions,
@@ -3851,6 +3874,13 @@ describe('SavedObjectsRepository', () => {
         await test({});
       });
 
+      it(`throws when id is empty`, async () => {
+        await expect(
+          savedObjectsRepository.incrementCounter(type, '', counterFields)
+        ).rejects.toThrowError(createBadRequestError('id cannot be empty'));
+        expect(client.update).not.toHaveBeenCalled();
+      });
+
       it(`throws when counterField is not CounterField type`, async () => {
         const test = async (field) => {
           await expect(
@@ -4293,6 +4323,13 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when type is hidden`, async () => {
         await expectNotFoundError(HIDDEN_TYPE, id);
+        expect(client.update).not.toHaveBeenCalled();
+      });
+
+      it(`throws when id is empty`, async () => {
+        await expect(savedObjectsRepository.update(type, '', attributes)).rejects.toThrowError(
+          createBadRequestError('id cannot be empty')
+        );
         expect(client.update).not.toHaveBeenCalled();
       });
 

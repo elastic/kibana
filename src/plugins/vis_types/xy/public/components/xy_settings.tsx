@@ -113,9 +113,6 @@ export const XYSettings: FC<XYSettingsProps> = ({
     barSeriesStyle: {
       ...valueLabelsStyling,
     },
-    crosshair: {
-      ...theme.crosshair,
-    },
     legend: {
       labelOptions: { maxLines: truncateLegend ? maxLegendLines ?? 1 : 0 },
     },

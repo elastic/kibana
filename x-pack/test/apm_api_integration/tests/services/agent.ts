@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
-import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const supertest = getService('legacySupertestAsApmReadUser');
 
   const archiveName = 'apm_8.0.0';

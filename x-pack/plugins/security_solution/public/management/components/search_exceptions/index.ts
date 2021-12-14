@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { SearchExceptions, SearchExceptionsProps } from './search_exceptions';
+export type { SearchExceptionsProps } from './search_exceptions';
+export { SearchExceptions } from './search_exceptions';

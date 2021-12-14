@@ -113,7 +113,7 @@ class FieldsService {
         this._mlClusterClient,
         this._dataViewsService
       );
-      const rollupConfigs: estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[] | null =
+      const rollupConfigs: estypes.RollupGetRollupCapsRollupCapabilitySummary[] | null =
         await rollupService.getRollupJobs();
 
       // if a rollup index has been specified, yet there are no
@@ -137,7 +137,7 @@ class FieldsService {
 }
 
 function combineAllRollupFields(
-  rollupConfigs: estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[]
+  rollupConfigs: estypes.RollupGetRollupCapsRollupCapabilitySummary[]
 ): RollupFields {
   const rollupFields: RollupFields = {};
   rollupConfigs.forEach((conf) => {

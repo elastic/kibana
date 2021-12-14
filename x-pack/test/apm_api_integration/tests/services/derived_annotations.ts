@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { registry } from '../../common/registry';
 
 export default function annotationApiTests({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const es = getService('es');
 

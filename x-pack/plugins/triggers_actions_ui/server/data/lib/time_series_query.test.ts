@@ -59,6 +59,7 @@ describe('timeSeriesQuery', () => {
 describe('getResultFromEs', () => {
   it('correctly parses time series results for count aggregation', () => {
     expect(
+      // @ts-expect-error not full interface
       getResultFromEs(true, false, {
         took: 0,
         timed_out: false,

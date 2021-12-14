@@ -6,4 +6,4 @@
  */
 
 export { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
-export { Privileges } from '../../../../src/plugins/es_ui_shared/common';
+export type { Privileges } from '../../../../src/plugins/es_ui_shared/common';

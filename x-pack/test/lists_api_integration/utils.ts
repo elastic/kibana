@@ -116,20 +116,25 @@ export const removeExceptionListServerGeneratedProperties = (
 export const waitFor = async (
   functionToTest: () => Promise<boolean>,
   functionName: string,
-  maxTimeout: number = 5000,
-  timeoutWait: number = 10
+  maxTimeout: number = 800000,
+  timeoutWait: number = 250
 ) => {
   await new Promise<void>(async (resolve, reject) => {
     try {
       let found = false;
       let numberOfTries = 0;
+      const maxTries = Math.floor(maxTimeout / timeoutWait);
 
-      while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
+      while (!found && numberOfTries < maxTries) {
         const itPasses = await functionToTest();
 
         if (itPasses) {
           found = true;
         } else {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Try number ${numberOfTries} out of ${maxTries} for function ${functionName}`
+          );
           numberOfTries++;
         }
 
@@ -219,7 +224,7 @@ export const importFile = async (
   if (response.status !== 200) {
     // eslint-disable-next-line no-console
     console.log(
-      `Did not get an expected 200 "ok" When importing a file. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+      `Did not get an expected 200 "ok" When importing a file (importFile). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
         response.body
       )}, status: ${JSON.stringify(response.status)}`
     );
@@ -246,12 +251,20 @@ export const importTextFile = async (
   contents: string[],
   fileName: string
 ): Promise<void> => {
-  await supertest
+  const response = await supertest
     .post(`${LIST_ITEM_URL}/_import?type=${type}`)
     .set('kbn-xsrf', 'true')
     .attach('file', getImportListItemAsBuffer(contents), fileName)
-    .expect('Content-Type', 'application/json; charset=utf-8')
-    .expect(200);
+    .expect('Content-Type', 'application/json; charset=utf-8');
+
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log(
+      `Did not get an expected 200 "ok" when importing a text file (importTextFile). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
 
   // although we have pushed the list and its items, it is async so we
   // have to wait for the contents before continuing
@@ -271,10 +284,17 @@ export const waitForListItem = async (
   fileName: string
 ): Promise<void> => {
   await waitFor(async () => {
-    const { status } = await supertest
+    const { status, body } = await supertest
       .get(`${LIST_ITEM_URL}?list_id=${fileName}&value=${itemValue}`)
       .send();
-
+    if (status !== 200) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `Did not get an expected 200 "ok" when waiting for a list item (waitForListItem) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
+          body
+        )}, status: ${JSON.stringify(status)}`
+      );
+    }
     return status === 200;
   }, `waitForListItem fileName: "${fileName}" itemValue: "${itemValue}"`);
 };
@@ -310,9 +330,17 @@ export const waitForTextListItem = async (
   await waitFor(async () => {
     const promises = await Promise.all(
       tokens.map(async (token) => {
-        const { status } = await supertest
+        const { status, body } = await supertest
           .get(`${LIST_ITEM_URL}?list_id=${fileName}&value=${token}`)
           .send();
+        if (status !== 200) {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Did not get an expected 200 "ok" when waiting for a text list item (waitForTextListItem) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
+              body
+            )}, status: ${JSON.stringify(status)}`
+          );
+        }
         return status === 200;
       })
     );

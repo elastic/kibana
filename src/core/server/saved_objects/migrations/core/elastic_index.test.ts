@@ -164,7 +164,7 @@ describe('ElasticIndex', () => {
       client.tasks.get.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           completed: true,
-        } as estypes.TaskGetResponse)
+        } as estypes.TasksGetResponse)
       );
 
       const info = {
@@ -248,7 +248,7 @@ describe('ElasticIndex', () => {
             reason: 'all shards failed',
             failed_shards: [],
           },
-        } as estypes.TaskGetResponse)
+        } as estypes.TasksGetResponse)
       );
 
       const info = {

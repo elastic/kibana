@@ -27,6 +27,16 @@ const PacksPageComponent = () => {
             </h1>
           </EuiText>
         </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.osquery.packList.pageSubtitle"
+                defaultMessage="Create packs to organize sets of queries and to schedule queries for agent policies."
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
       </EuiFlexGroup>
     ),
     []

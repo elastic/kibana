@@ -34,7 +34,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
     after(async () => {
       await esClient.snapshot.deleteRepository({ repository: repoName });
-      // @ts-expect-error @elastic/elasticsearch DeleteSnapshotLifecycleRequest.policy_id is required
       await esClient.ilm.deleteLifecycle({ policy: policyName });
     });
 

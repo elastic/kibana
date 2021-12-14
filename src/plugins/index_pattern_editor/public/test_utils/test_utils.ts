@@ -8,4 +8,5 @@
 
 export { getRandomString } from '@kbn/test/jest';
 
-export { registerTestBed, TestBed } from '@kbn/test/jest';
+export type { TestBed } from '@kbn/test/jest';
+export { registerTestBed } from '@kbn/test/jest';

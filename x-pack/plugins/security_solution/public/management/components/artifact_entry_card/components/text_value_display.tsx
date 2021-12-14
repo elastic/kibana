@@ -6,14 +6,16 @@
  */
 
 import React, { memo, PropsWithChildren, useMemo } from 'react';
-import { CommonProps, EuiText } from '@elastic/eui';
+import { CommonProps, EuiText, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
+import { getEmptyValue } from '../../../../common/components/empty_value';
 
 export type TextValueDisplayProps = Pick<CommonProps, 'data-test-subj'> &
   PropsWithChildren<{
     bold?: boolean;
     truncate?: boolean;
     size?: 'xs' | 's' | 'm' | 'relative';
+    withTooltip?: boolean;
   }>;
 
 /**
@@ -21,7 +23,14 @@ export type TextValueDisplayProps = Pick<CommonProps, 'data-test-subj'> &
  * display of values on the card
  */
 export const TextValueDisplay = memo<TextValueDisplayProps>(
-  ({ bold, truncate, size = 's', 'data-test-subj': dataTestSubj, children }) => {
+  ({
+    bold,
+    truncate,
+    size = 's',
+    withTooltip = false,
+    'data-test-subj': dataTestSubj,
+    children,
+  }) => {
     const cssClassNames = useMemo(() => {
       return classNames({
         'eui-textTruncate': truncate,
@@ -29,9 +38,22 @@ export const TextValueDisplay = memo<TextValueDisplayProps>(
       });
     }, [truncate]);
 
+    const textContent = useMemo(() => {
+      return bold ? <strong>{children}</strong> : children;
+    }, [bold, children]);
+
     return (
       <EuiText size={size} className={cssClassNames} data-test-subj={dataTestSubj}>
-        {bold ? <strong>{children}</strong> : children}
+        {withTooltip &&
+        'string' === typeof children &&
+        children.length > 0 &&
+        children !== getEmptyValue() ? (
+          <EuiToolTip content={children} position="top">
+            <>{textContent}</>
+          </EuiToolTip>
+        ) : (
+          textContent
+        )}
       </EuiText>
     );
   }

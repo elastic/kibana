@@ -242,7 +242,7 @@ const mockV2MigrationOptions = () => {
       error: undefined,
       failures: [],
       task: { description: 'task description' } as any,
-    } as estypes.TaskGetResponse)
+    } as estypes.TasksGetResponse)
   );
 
   options.client.search = jest
