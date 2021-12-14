@@ -118,7 +118,7 @@ export const getDataFromFieldsHits = (
       ? item
           .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
           .flat()
-      : getDataFromFieldsHits(item, prependField, fieldCategory);
+      : getDataFromFieldsHits(item, dotField, fieldCategory);
 
     // combine duplicate fields
     const flat: Record<string, TimelineEventsDetailsItem> = [
