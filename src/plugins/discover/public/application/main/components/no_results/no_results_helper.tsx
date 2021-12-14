@@ -78,14 +78,17 @@ export function AdjustSearch({ hasFilters, hasQuery, onDisableFilters }: AdjustS
             <EuiDescriptionListDescription>
               <FormattedMessage
                 id="discover.noResults.tryRemovingOrDisablingFilters"
-                defaultMessage="Try removing or <link>temporarily disabling filters</link>."
+                defaultMessage="Try removing or {disablingFiltersLink}."
                 values={{
-                  link: (content) => (
+                  disablingFiltersLink: (
                     <EuiLink
                       data-test-subj="discoverNoResultsDisableFilters"
                       onClick={onDisableFilters}
                     >
-                      {content}
+                      <FormattedMessage
+                        id="discover.noResults.temporaryDisablingFiltersLinkText"
+                        defaultMessage="temporarily disabling filters"
+                      />
                     </EuiLink>
                   ),
                 }}
