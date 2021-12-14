@@ -33,7 +33,7 @@ export function registerNavigation(alerting: AlertingSetup) {
 }
 
 interface PeopleinSpaceParamsProps {
-  alertParams: { outerSpaceCapacity?: number; craft?: string; op?: string };
+  ruleParams: { outerSpaceCapacity?: number; craft?: string; op?: string };
   setRuleParams: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
 }
@@ -49,7 +49,7 @@ export function getAlertType(): RuleTypeModel {
     iconClass: 'globe',
     documentationUrl: null,
     ruleParamsExpression: PeopleinSpaceExpression,
-    validate: (alertParams: PeopleinSpaceParamsProps['alertParams']) => {
+    validate: (alertParams: PeopleinSpaceParamsProps['ruleParams']) => {
       const { outerSpaceCapacity, craft, op } = alertParams;
 
       const validationResult = {
@@ -93,24 +93,24 @@ export function getAlertType(): RuleTypeModel {
 }
 
 export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParamsProps> = ({
-  alertParams,
+  ruleParams,
   setRuleParams,
   errors,
 }) => {
-  const { outerSpaceCapacity = 0, craft = Craft.OuterSpace, op = Operator.AreAbove } = alertParams;
+  const { outerSpaceCapacity = 0, craft = Craft.OuterSpace, op = Operator.AreAbove } = ruleParams;
 
   // store defaults
   useEffect(() => {
-    if (outerSpaceCapacity !== alertParams.outerSpaceCapacity) {
+    if (outerSpaceCapacity !== ruleParams.outerSpaceCapacity) {
       setRuleParams('outerSpaceCapacity', outerSpaceCapacity);
     }
-    if (craft !== alertParams.craft) {
+    if (craft !== ruleParams.craft) {
       setRuleParams('craft', craft);
     }
-    if (op !== alertParams.op) {
+    if (op !== ruleParams.op) {
       setRuleParams('op', op);
     }
-  }, [alertParams, craft, op, outerSpaceCapacity, setRuleParams]);
+  }, [ruleParams, craft, op, outerSpaceCapacity, setRuleParams]);
 
   const [craftTrigger, setCraftTrigger] = useState<{ craft: string; isOpen: boolean }>({
     craft,
