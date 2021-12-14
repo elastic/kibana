@@ -18,8 +18,7 @@ export default function ({ getPageObjects, getService }) {
   const retry = getService('retry');
   const security = getService('security');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/113993
-  describe.skip('embed in dashboard', () => {
+  describe('embed in dashboard', () => {
     before(async () => {
       await security.testUser.setRoles(
         [
@@ -96,8 +95,15 @@ export default function ({ getPageObjects, getService }) {
     it('should apply new container state (time, query, filters) to embeddable', async () => {
       await filterBar.selectIndexPattern('logstash-*');
       await filterBar.addFilter('machine.os', 'is', 'win 8');
-      await filterBar.selectIndexPattern('meta_for_geo_shapes*');
-      await filterBar.addFilter('shape_name', 'is', 'alpha'); // runtime fields do not have autocomplete
+      await PageObjects.maps.waitForLayersToLoad();
+
+      // retry is fix for flaky test https://github.com/elastic/kibana/issues/113993
+      // timing issue where click for addFilter opens filter pill created above instead of clicking addFilter
+      await retry.try(async () => {
+        await filterBar.selectIndexPattern('meta_for_geo_shapes*');
+        await filterBar.addFilter('shape_name', 'is', 'alpha'); // runtime fields do not have autocomplete
+      });
+      await PageObjects.maps.waitForLayersToLoad();
 
       const { rawResponse: gridResponse } = await PageObjects.maps.getResponseFromDashboardPanel(
         'geo grid vector grid example'
