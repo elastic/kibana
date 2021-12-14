@@ -27,11 +27,7 @@ import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 // @ts-ignore
 import { escapeDoubleQuotes } from '../../explorer/explorer_utils';
-import {
-  Anomaly,
-  isCategorizationAnomaly,
-  isRuleSupported,
-} from '../../../../common/util/anomaly_utils';
+import { isCategorizationAnomaly, isRuleSupported } from '../../../../common/util/anomaly_utils';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { CustomUrlAnomalyRecordDoc, KibanaUrlConfig } from '../../../../common/types/custom_urls';
@@ -39,14 +35,15 @@ import { TimeRangeBounds } from '../../util/time_buckets';
 import { MlKibanaReactContextValue } from '../../contexts/kibana';
 // @ts-ignore
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
+import { AnomaliesTableRecord } from '../../../../common/types/anomalies';
 
 interface LinksMenuProps {
-  anomaly: Anomaly;
+  anomaly: AnomaliesTableRecord;
   bounds: TimeRangeBounds;
   showViewSeriesLink: boolean;
   isAggregatedData: boolean;
   interval: 'day' | 'hour' | 'second';
-  showRuleEditorFlyout: (anomaly: Anomaly) => void;
+  showRuleEditorFlyout: (anomaly: AnomaliesTableRecord) => void;
   kibana: MlKibanaReactContextValue;
 }
 
