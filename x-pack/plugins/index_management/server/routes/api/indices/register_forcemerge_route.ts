@@ -27,7 +27,7 @@ export function registerForcemergeRoute({ router, lib: { handleEsError } }: Rout
       const { client } = context.core.elasticsearch;
       const { maxNumSegments, indices = [] } = request.body as typeof bodySchema.type;
       const params = {
-        expand_wildcards: 'none',
+        expand_wildcards: 'none' as const,
         index: indices,
       };
 
