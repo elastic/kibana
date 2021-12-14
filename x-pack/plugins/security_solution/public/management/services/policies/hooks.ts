@@ -14,7 +14,7 @@ export function useGetEndpointSpecificPolicies({
   onError,
 }: {
   onError?: (error: ServerApiError) => void;
-}): QueryObserverResult<GetPolicyListResponse> {
+} = {}): QueryObserverResult<GetPolicyListResponse> {
   const http = useHttp();
   return useQuery<GetPolicyListResponse, ServerApiError>(
     ['endpointSpecificPolicies'],

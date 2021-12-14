@@ -18,7 +18,6 @@ import { getHostIsolationExceptionItems } from '../../../host_isolation_exceptio
 import { PolicyHostIsolationExceptionsTab } from './host_isolation_exceptions_tab';
 
 jest.mock('../../../host_isolation_exceptions/service');
-jest.mock('../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
 
@@ -46,9 +45,7 @@ describe('Policy details host isolation exceptions tab', () => {
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
     render = () =>
-      (renderResult = mockedContext.render(
-        <PolicyHostIsolationExceptionsTab policyId={policyId} policy={policy} />
-      ));
+      (renderResult = mockedContext.render(<PolicyHostIsolationExceptionsTab policy={policy} />));
 
     history.push(getPolicyHostIsolationExceptionsPath(policyId));
   });

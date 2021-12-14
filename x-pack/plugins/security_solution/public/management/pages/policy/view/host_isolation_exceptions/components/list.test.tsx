@@ -18,8 +18,6 @@ import {
 import { PolicyHostIsolationExceptionsList } from './list';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
-
 const emptyList = {
   data: [],
   page: 1,

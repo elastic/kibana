@@ -88,15 +88,12 @@ export const PolicyTabs = React.memo(() => {
         content: (
           <>
             <EuiSpacer />
-            <PolicyHostIsolationExceptionsTab
-              policyId={policyId}
-              policy={policyItem as PolicyData}
-            />
+            <PolicyHostIsolationExceptionsTab policy={policyItem as PolicyData} />
           </>
         ),
       },
     ],
-    [policyId, policyItem]
+    [policyItem]
   );
 
   const currentSelectedTab = useMemo(() => {
