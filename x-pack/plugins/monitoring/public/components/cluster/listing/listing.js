@@ -24,11 +24,11 @@ import {
 import { EuiMonitoringTable } from '../../table';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { mountReactNode } from '../../../../../../../src/core/public/utils';
 import { AlertsStatus } from '../../../alerts/status';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import './listing.scss';
+import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 
 const IsClusterSupported = ({ isSupported, children }) => {
   return isSupported ? children : '-';
@@ -254,14 +254,14 @@ const licenseWarning = (scope, { title, text }) => {
 
 const handleClickIncompatibleLicense = (scope, clusterName) => {
   licenseWarning(scope, {
-    title: mountReactNode(
-      <FormattedMessage
-        id="xpack.monitoring.cluster.listing.incompatibleLicense.warningMessageTitle"
-        defaultMessage="You can't view the {clusterName} cluster"
-        values={{ clusterName: '"' + clusterName + '"' }}
-      />
+    title: i18n.translate(
+      'xpack.monitoring.cluster.listing.incompatibleLicense.warningMessageTitle',
+      {
+        defaultMessage: "You can't view the {clusterName} cluster",
+        values: { clusterName: '"' + clusterName + '"' },
+      }
     ),
-    text: mountReactNode(
+    text: toMountPoint(
       <Fragment>
         <p>
           <FormattedMessage
@@ -285,7 +285,8 @@ const handleClickIncompatibleLicense = (scope, clusterName) => {
             }}
           />
         </p>
-      </Fragment>
+      </Fragment>,
+      Legacy.shims.kibanaServices.theme
     ),
   });
 };
@@ -294,14 +295,11 @@ const handleClickInvalidLicense = (scope, clusterName) => {
   const licensingPath = `${Legacy.shims.getBasePath()}/app/management/stack/license_management/home`;
 
   licenseWarning(scope, {
-    title: mountReactNode(
-      <FormattedMessage
-        id="xpack.monitoring.cluster.listing.invalidLicense.warningMessageTitle"
-        defaultMessage="You can't view the {clusterName} cluster"
-        values={{ clusterName: '"' + clusterName + '"' }}
-      />
-    ),
-    text: mountReactNode(
+    title: i18n.translate('xpack.monitoring.cluster.listing.invalidLicense.warningMessageTitle', {
+      defaultMessage: "You can't view the {clusterName} cluster",
+      values: { clusterName: '"' + clusterName + '"' },
+    }),
+    text: toMountPoint(
       <Fragment>
         <p>
           <FormattedMessage
@@ -333,7 +331,8 @@ const handleClickInvalidLicense = (scope, clusterName) => {
             }}
           />
         </p>
-      </Fragment>
+      </Fragment>,
+      Legacy.shims.kibanaServices.theme
     ),
   });
 };
