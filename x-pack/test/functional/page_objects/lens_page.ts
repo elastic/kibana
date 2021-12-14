@@ -596,6 +596,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.exists('lnsVisualOptionsButton');
       });
     },
+    async retrySetValue(
+      input: string,
+      value: string,
+      options = {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      } as Record<string, boolean>
+    ) {
+      await retry.try(async () => {
+        await testSubjects.setValue(input, value, options);
+        expect(await (await testSubjects.find(input)).getAttribute('value')).to.eql(value);
+      });
+    },
     async useCurvedLines() {
       await testSubjects.click('lnsCurveStyleToggle');
     },
@@ -855,11 +868,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDatatableCell(rowIndex = 0, colIndex = 0) {
-      const columnNumber = await this.getCountOfDatatableColumns();
       return await find.byCssSelector(
-        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"]:nth-child(${
-          rowIndex * columnNumber + colIndex + 2
-        })`
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-id="${rowIndex},${colIndex}"]`
       );
     },
 
