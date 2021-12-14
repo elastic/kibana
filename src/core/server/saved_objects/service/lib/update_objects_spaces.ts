@@ -120,6 +120,9 @@ type ObjectToDeleteAliasesFor = Pick<
 
 const MAX_CONCURRENT_ALIAS_DELETIONS = 10;
 
+function isMgetError(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.MgetMultiGetError {
+  return Boolean(doc && 'error' in doc);
+}
 /**
  * Gets all references and transitive references of the given objects. Ignores any object and/or reference that is not a multi-namespace
  * type.
@@ -224,15 +227,20 @@ export async function updateObjectsSpaces({
     let versionProperties;
     if (esRequestIndex !== undefined) {
       const doc = bulkGetResponse?.body.docs[esRequestIndex];
-      // @ts-expect-error MultiGetHit._source is optional
-      if (!doc?.found || !rawDocExistsInNamespace(registry, doc, namespace)) {
+      const isErrorDoc = isMgetError(doc);
+
+      if (
+        isErrorDoc ||
+        // @ts-expect-error MultiGetHit._source is optional
+        !rawDocExistsInNamespace(registry, doc, namespace)
+      ) {
         const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
         return {
           tag: 'Left',
           value: { id, type, spaces: [], error },
         };
       }
-      currentSpaces = doc._source?.namespaces ?? [];
+      currentSpaces = doc?._source?.namespaces ?? [];
       // @ts-expect-error MultiGetHit._source is optional
       versionProperties = getExpectedVersionProperties(version, doc);
     } else if (spaces?.length === 0) {

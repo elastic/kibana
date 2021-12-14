@@ -196,6 +196,10 @@ interface PreflightCheckNamespacesResult {
   rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
 }
 
+function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
+  return Boolean(doc && 'found' in doc);
+}
+
 /**
  * @public
  */
@@ -647,7 +651,7 @@ export class SavedObjectsRepository {
 
       const { type, id, esRequestIndex } = expectedResult.value;
       const doc = bulkGetResponse?.body.docs[esRequestIndex];
-      if (doc?.found) {
+      if (isMgetDoc(doc)) {
         errors.push({
           id,
           type,
@@ -1497,7 +1501,7 @@ export class SavedObjectsRepository {
         if (esRequestIndex !== undefined) {
           const indexFound = bulkGetResponse?.statusCode !== 404;
           const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
-          const docFound = indexFound && actualResult?.found === true;
+          const docFound = indexFound && isMgetDoc(actualResult);
           if (
             !docFound ||
             // @ts-expect-error MultiGetHit is incorrectly missing _id, _source

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { MgetHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   CORE_USAGE_STATS_ID,
@@ -150,7 +150,7 @@ export async function internalBulkResolve<T>(
         return either.value;
       }
       const exactMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
-      let aliasMatchDoc: MgetHit<SavedObjectsRawDocSource> | undefined;
+      let aliasMatchDoc: MgetResponseItem<SavedObjectsRawDocSource> | undefined;
       const aliasTargetId = aliasTargetIds[aliasTargetIndex++];
       if (aliasTargetId !== undefined) {
         aliasMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];

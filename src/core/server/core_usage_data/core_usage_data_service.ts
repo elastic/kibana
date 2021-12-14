@@ -13,9 +13,8 @@ import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
 import { CoreService } from 'src/core/types';
 import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
-import {
+import type {
   AggregationsFiltersAggregate,
-  AggregationsFiltersBucketItem,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CoreContext } from '../core_context';
@@ -180,7 +179,7 @@ export class CoreUsageDataService
     const { hits, aggregations } = resp;
     const totalCount = (hits.total as SearchTotalHits).value;
     const aggregate = aggregations!.aliases as AggregationsFiltersAggregate;
-    const buckets = aggregate.buckets as Record<string, AggregationsFiltersBucketItem>;
+    const buckets = aggregate.buckets as Record<string, { doc_count: number }>;
     const disabledCount = buckets.disabled.doc_count as number;
     const activeCount = buckets.active.doc_count as number;
     const inactiveCount = totalCount - disabledCount - activeCount;

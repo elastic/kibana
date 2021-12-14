@@ -17,7 +17,7 @@ export function getSortingParams(
   type: string | string[],
   sortField?: string,
   sortOrder?: estypes.SearchSortOrder
-): { sort?: estypes.SearchSortContainer[] } {
+): { sort?: estypes.SearchSortCombinations[] } {
   if (!sortField) {
     return {};
   }
