@@ -13,14 +13,7 @@ import { SingleFieldSelect } from '../../../components/single_field_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { i18n } from '@kbn/i18n';
 import { SCALING_TYPES } from '../../../../common/constants';
-import {
-  getGeoFields,
-  supportsGeoTileAgg,
-} from '../../../index_pattern_util';
-
-function doesGeoFieldSupportGeoTileAgg(indexPattern, geoFieldName) {
-  return indexPattern ? supportsGeoTileAgg(indexPattern.fields.getByName(geoFieldName)) : false;
-}
+import { getGeoFields } from '../../../index_pattern_util';
 
 const RESET_INDEX_PATTERN_STATE = {
   indexPattern: undefined,
@@ -62,16 +55,9 @@ export class CreateSourceEditor extends Component {
   };
 
   _onGeoFieldSelect = (geoFieldName) => {
-    // Respect previous scaling type selection unless newly selected geo field does not support clustering.
-    const scalingType =
-      this.state.scalingType === SCALING_TYPES.CLUSTERS &&
-      !doesGeoFieldSupportGeoTileAgg(this.state.indexPattern, geoFieldName)
-        ? SCALING_TYPES.MVT
-        : this.state.scalingType;
     this.setState(
       {
         geoFieldName,
-        scalingType,
       },
       this._previewLayer
     );
