@@ -67,7 +67,24 @@ const buildPath = (prevPath = '', argName, index, removable = true) => {
   return { path: prevPath.length ? `${prevPath}.${newPath}` : newPath, removable };
 };
 
-const transformFunctionsToComponents = (functionsChain, { path, removable }, argUiConfig) => {
+const flattenNestedFunctionsToComponents = (complexArgs, complexArgumentsViews, argumentPath) =>
+  Object.keys(complexArgs).reduce((current, argName) => {
+    const next = complexArgs[argName]
+      .map(({ chain }, index) =>
+        transformFunctionsToComponents(
+          chain,
+          buildPath(argumentPath, argName, index),
+          complexArgumentsViews?.find((argView) => argView.name === argName)
+        )
+      )
+      .reduce(
+        (current, next) => mergeComponentsAndContexts(current, next),
+        createComponentsWithContext()
+      );
+    return mergeComponentsAndContexts(current, next);
+  }, createComponentsWithContext());
+
+function transformFunctionsToComponents(functionsChain, { path, removable }, argUiConfig) {
   const parentPath = path;
   const argumentsPath = path ? `${path}.chain` : `chain`;
   return functionsChain.reduce((current, argType, i) => {
@@ -108,25 +125,18 @@ const transformFunctionsToComponents = (functionsChain, { path, removable }, arg
       removable,
     };
 
-    const next = Object.keys(complexArgs).reduce((current, argName) => {
-      const next = complexArgs[argName]
-        .map(({ chain }, index) =>
-          transformFunctionsToComponents(
-            chain,
-            buildPath(argumentPath, argName, index),
-            complexArgumentsViews?.find((argView) => argView.name === argName)
-          )
-        )
-        .reduce(
-          (current, next) => mergeComponentsAndContexts(current, next),
-          createComponentsWithContext()
-        );
-      return mergeComponentsAndContexts(current, next);
-    }, createComponentsWithContext());
+    const components = flattenNestedFunctionsToComponents(
+      complexArgs,
+      complexArgumentsViews,
+      argumentPath
+    );
 
-    return mergeComponentsAndContexts(current, { ...next, mapped: [component, ...next.mapped] });
+    return mergeComponentsAndContexts(current, {
+      ...components,
+      mapped: [component, ...components.mapped],
+    });
   }, createComponentsWithContext());
-};
+}
 
 const functionFormItems = withProps((props) => {
   const selectedElement = props.element;
