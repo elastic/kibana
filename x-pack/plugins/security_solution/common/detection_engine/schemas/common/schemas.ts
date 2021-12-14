@@ -447,84 +447,49 @@ export const privilege = t.type({
 
 export type Privilege = t.TypeOf<typeof privilege>;
 
-export enum BulkActionSimple {
+export enum BulkAction {
   'enable' = 'enable',
   'disable' = 'disable',
   'export' = 'export',
   'delete' = 'delete',
   'duplicate' = 'duplicate',
-}
-
-export const bulkActionSimple = enumeration('BulkActionSimple', BulkActionSimple);
-
-export enum BulkActionEnhanced {
   'update' = 'update',
 }
-export const bulkActionEnhanced = enumeration('BulkActionEnhanced', BulkActionEnhanced);
-
-export const BulkAction = {
-  ...BulkActionSimple,
-  ...BulkActionEnhanced,
-};
-
-export type BulkAction = BulkActionSimple | BulkActionEnhanced;
 
 export const bulkAction = enumeration('BulkAction', BulkAction);
 
-export enum BulkActionUpdateTagsType {
+export enum BulkActionUpdateType {
   'add_tags' = 'add_tags',
   'delete_tags' = 'delete_tags',
   'set_tags' = 'set_tags',
-}
-
-export const bulkActionUpdateTagsType = enumeration(
-  'BulkActionUpdateTagsType',
-  BulkActionUpdateTagsType
-);
-
-export enum BulkActionUpdateIndexType {
   'add_index' = 'add_index',
   'delete_index' = 'delete_index',
   'set_index' = 'set_index',
-}
-
-export const bulkActionUpdateIndexType = enumeration(
-  'BulkActionUpdateIndexType',
-  BulkActionUpdateIndexType
-);
-
-export enum BulkActionUpdateTimelineType {
   'set_timeline' = 'set_timeline',
 }
 
-export const bulkActionUpdateTimelineType = enumeration(
-  'BulkActionUpdateTimelineType',
-  BulkActionUpdateTimelineType
-);
-
-export const BulkActionUpdateType = {
-  ...BulkActionUpdateTagsType,
-  ...BulkActionUpdateIndexType,
-  ...BulkActionUpdateTimelineType,
-};
-
-export type BulkActionUpdateType =
-  | BulkActionUpdateTagsType
-  | BulkActionUpdateIndexType
-  | BulkActionUpdateTimelineType;
+export const bulkActionUpdateType = enumeration('BulkActionUpdateType', BulkActionUpdateType);
 
 const actionUpdateTags = t.type({
-  type: bulkActionUpdateTagsType,
+  type: t.union([
+    t.literal(BulkActionUpdateType.add_tags),
+    t.literal(BulkActionUpdateType.delete_tags),
+    t.literal(BulkActionUpdateType.set_tags),
+  ]),
   value: tags,
 });
 
 const actionUpdateIndex = t.type({
-  type: bulkActionUpdateIndexType,
+  type: t.union([
+    t.literal(BulkActionUpdateType.add_index),
+    t.literal(BulkActionUpdateType.delete_index),
+    t.literal(BulkActionUpdateType.set_index),
+  ]),
   value: index,
 });
 
 const actionUpdateTimeline = t.type({
-  type: bulkActionUpdateTimelineType,
+  type: t.literal(BulkActionUpdateType.set_timeline),
   value: t.type({
     timelineId: timeline_id,
     timelineTitle: timeline_title,

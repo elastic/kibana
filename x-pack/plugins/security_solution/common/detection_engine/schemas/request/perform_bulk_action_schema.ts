@@ -6,24 +6,25 @@
  */
 
 import * as t from 'io-ts';
-import {
-  bulkActionEnhanced,
-  bulkActionSimple,
-  queryOrUndefined,
-  bulkActionUpdate,
-} from '../common/schemas';
+import { BulkAction, queryOrUndefined, bulkActionUpdate } from '../common/schemas';
 
 export const performBulkActionSchema = t.union([
   t.exact(
     t.type({
       query: queryOrUndefined,
-      action: bulkActionSimple,
+      action: t.union([
+        t.literal(BulkAction.delete),
+        t.literal(BulkAction.disable),
+        t.literal(BulkAction.duplicate),
+        t.literal(BulkAction.enable),
+        t.literal(BulkAction.export),
+      ]),
     })
   ),
   t.exact(
     t.type({
       query: queryOrUndefined,
-      action: bulkActionEnhanced,
+      action: t.literal(BulkAction.update),
       updates: t.array(bulkActionUpdate),
     })
   ),
