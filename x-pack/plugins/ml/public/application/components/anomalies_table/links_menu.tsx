@@ -7,64 +7,151 @@
 
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import rison from 'rison-node';
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-
-import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import rison, { RisonValue } from 'rison-node';
+import React, { useEffect, useState } from 'react';
+import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
-
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
-import { checkPermission } from '../../capabilities/check_capabilities';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
-import { isRuleSupported } from '../../../../common/util/anomaly_utils';
-import { parseInterval } from '../../../../common/util/parse_interval';
-import { escapeDoubleQuotes } from '../../explorer/explorer_utils';
-import { getFieldTypeFromMapping } from '../../services/mapping_service';
-import { ml } from '../../services/ml_api_service';
+import { i18n } from '@kbn/i18n';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { mlJobService } from '../../services/job_service';
-import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
-import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import { getDataViewIdFromName } from '../../util/index_utils';
-import { replaceStringTokens } from '../../util/string_utils';
+import {
+  formatHumanReadableDateTimeSeconds,
+  timeFormatter,
+} from '../../../../common/util/date_utils';
+import { parseInterval } from '../../../../common/util/parse_interval';
+import { ml } from '../../services/ml_api_service';
+import { escapeForElasticsearchQuery, replaceStringTokens } from '../../util/string_utils';
+import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
-/*
- * Component for rendering the links menu inside a cell in the anomalies table.
- */
-class LinksMenuUI extends Component {
-  static propTypes = {
-    anomaly: PropTypes.object.isRequired,
-    bounds: PropTypes.object.isRequired,
-    showViewSeriesLink: PropTypes.bool,
-    isAggregatedData: PropTypes.bool,
-    interval: PropTypes.string,
-    showRuleEditorFlyout: PropTypes.func,
-  };
+import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
+// @ts-ignore
+import { escapeDoubleQuotes } from '../../explorer/explorer_utils';
+import { isCategorizationAnomaly, isRuleSupported } from '../../../../common/util/anomaly_utils';
+import { checkPermission } from '../../capabilities/check_capabilities';
+import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { CustomUrlAnomalyRecordDoc, KibanaUrlConfig } from '../../../../common/types/custom_urls';
+import { TimeRangeBounds } from '../../util/time_buckets';
+import { MlKibanaReactContextValue } from '../../contexts/kibana';
+// @ts-ignore
+import { getFieldTypeFromMapping } from '../../services/mapping_service';
+import { AnomaliesTableRecord } from '../../../../common/types/anomalies';
 
-  constructor(props) {
-    super(props);
+interface LinksMenuProps {
+  anomaly: AnomaliesTableRecord;
+  bounds: TimeRangeBounds;
+  showViewSeriesLink: boolean;
+  isAggregatedData: boolean;
+  interval: 'day' | 'hour' | 'second';
+  showRuleEditorFlyout: (anomaly: AnomaliesTableRecord) => void;
+  kibana: MlKibanaReactContextValue;
+}
 
-    this.state = {
-      isPopoverOpen: false,
-      toasts: [],
+export const LinksMenuUI = (props: LinksMenuProps) => {
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+  const [openInDiscoverUrl, setOpenInDiscoverUrl] = useState<string | undefined>();
+
+  useEffect(() => {
+    let unmounted = false;
+    const generateDiscoverUrl = async () => {
+      const {
+        services: { share },
+      } = props.kibana;
+      const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+
+      if (!discoverLocator) {
+        // eslint-disable-next-line no-console
+        console.error('No locator for Discover detected');
+        return;
+      }
+
+      const job = mlJobService.getJob(props.anomaly.jobId);
+
+      const index = job.datafeed_config.indices[0];
+      const interval = props.interval;
+      const dataViewId = (await getDataViewIdFromName(index)) || index;
+      const record = props.anomaly.source;
+
+      const earliestMoment = moment(record.timestamp).startOf(interval);
+      if (interval === 'hour') {
+        // Start from the previous hour.
+        earliestMoment.subtract(1, 'h');
+      }
+      let latestMoment = moment(record.timestamp).add(record.bucket_span, 's');
+      if (props.isAggregatedData === true) {
+        latestMoment = moment(record.timestamp).endOf(interval);
+        if (interval === 'hour') {
+          // Show to the end of the next hour.
+          latestMoment.add(1, 'h'); // e.g. 2016-02-08T18:59:59.999Z
+        }
+      }
+      const from = timeFormatter(earliestMoment.unix() * 1000); // e.g. 2016-02-08T16:00:00.000Z
+      const to = timeFormatter(latestMoment.unix() * 1000);
+
+      let kqlQuery = '';
+
+      if (record.influencers) {
+        kqlQuery = record.influencers
+          .map(
+            (influencer) =>
+              `${escapeForElasticsearchQuery(influencer.influencer_field_name)}:"${
+                influencer.influencer_field_values[0] ?? ''
+              }"`
+          )
+          .join(' AND ');
+      }
+
+      const url = await discoverLocator.getRedirectUrl({
+        indexPatternId: dataViewId,
+        refreshInterval: {
+          display: 'Off',
+          pause: true,
+          value: 0,
+        },
+        timeRange: {
+          from,
+          to,
+          mode: 'absolute',
+        },
+        query: {
+          language: 'kuery',
+          query: kqlQuery,
+        },
+        sort: [['timestamp, asc']],
+      });
+
+      if (!unmounted) {
+        setOpenInDiscoverUrl(url);
+      }
     };
-  }
 
-  openCustomUrl = (customUrl) => {
-    const { anomaly, interval, isAggregatedData } = this.props;
+    if (!isCategorizationAnomaly(props.anomaly)) {
+      generateDiscoverUrl();
+    }
 
+    return () => {
+      unmounted = true;
+    };
+  }, [JSON.stringify(props.anomaly)]);
+
+  const onButtonClick = () => setPopoverOpen(!isPopoverOpen);
+
+  const closePopover = () => setPopoverOpen(false);
+
+  const openCustomUrl = (customUrl: KibanaUrlConfig) => {
+    const { anomaly, interval, isAggregatedData } = props;
+
+    // eslint-disable-next-line no-console
     console.log('Anomalies Table - open customUrl for record:', anomaly);
 
     // If url_value contains $earliest$ and $latest$ tokens, add in times to the source record.
     // Create a copy of the record as we are adding properties into it.
-    const record = cloneDeep(anomaly.source);
+    const record = cloneDeep(anomaly.source) as CustomUrlAnomalyRecordDoc;
     const timestamp = record.timestamp;
     const configuredUrlValue = customUrl.url_value;
-    const timeRangeInterval = parseInterval(customUrl.time_range);
-    const basePath = this.props.kibana.services.http.basePath.get();
+    const timeRangeInterval =
+      customUrl.time_range !== undefined ? parseInterval(customUrl.time_range) : null;
+    const basePath = props.kibana.services.http.basePath.get();
 
     if (configuredUrlValue.includes('$earliest$')) {
       let earliestMoment = moment(timestamp);
@@ -114,7 +201,7 @@ class LinksMenuUI extends Component {
         .then((resp) => {
           // Prefix each of the terms with '+' so that the Elasticsearch Query String query
           // run in a drilldown Kibana dashboard has to match on all terms.
-          const termsArray = resp.terms.split(' ').map((term) => `+${term}`);
+          const termsArray = resp.terms.split(' ').map((term: string) => `+${term}`);
           record.mlcategoryterms = termsArray.join(' ');
           record.mlcategoryregex = resp.regex;
 
@@ -124,8 +211,9 @@ class LinksMenuUI extends Component {
           openCustomUrlWindow(urlPath, customUrl, basePath);
         })
         .catch((resp) => {
+          // eslint-disable-next-line no-console
           console.log('openCustomUrl(): error loading categoryDefinition:', resp);
-          const { toasts } = this.props.kibana.services.notifications;
+          const { toasts } = props.kibana.services.notifications;
           toasts.addDanger(
             i18n.translate('xpack.ml.anomaliesTable.linksMenu.unableToOpenLinkErrorMessage', {
               defaultMessage:
@@ -139,19 +227,32 @@ class LinksMenuUI extends Component {
     } else {
       // Replace any tokens in the configured url_value with values from the source record,
       // and then open link in a new tab/window.
-      const urlPath = getUrlForRecord(customUrl, record);
+      const urlPath = getUrlForRecord(customUrl, record as CustomUrlAnomalyRecordDoc);
       openCustomUrlWindow(urlPath, customUrl, basePath);
     }
   };
 
-  viewSeries = async () => {
+  const viewSeries = async () => {
     const {
       services: { share },
-    } = this.props.kibana;
+    } = props.kibana;
     const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
 
-    const record = this.props.anomaly.source;
-    const bounds = this.props.bounds;
+    const record = props.anomaly.source;
+    const bounds = props.bounds;
+
+    if (!mlLocator) {
+      // eslint-disable-next-line no-console
+      console.error('Unable to detect locator for ML or bounds');
+      return;
+    }
+
+    if (!bounds || !bounds.min || !bounds.max) {
+      // eslint-disable-next-line no-console
+      console.error('Invalid bounds');
+      return;
+    }
+
     const from = bounds.min.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
     const to = bounds.max.toISOString();
 
@@ -161,17 +262,17 @@ class LinksMenuUI extends Component {
     const zoomTo = recordTime.add(100 * record.bucket_span, 's').toISOString();
 
     // Extract the by, over and partition fields for the record.
-    const entityCondition = {};
+    const entityCondition: Record<string, string | number> = {};
 
-    if (record.partition_field_value !== undefined) {
+    if (record.partition_field_name !== undefined && record.partition_field_value !== undefined) {
       entityCondition[record.partition_field_name] = record.partition_field_value;
     }
 
-    if (record.over_field_value !== undefined) {
+    if (record.over_field_name !== undefined && record.over_field_value !== undefined) {
       entityCondition[record.over_field_name] = record.over_field_value;
     }
 
-    if (record.by_field_value !== undefined) {
+    if (record.by_field_name !== undefined && record.by_field_value !== undefined) {
       // Note that analyses with by and over fields, will have a top-level by_field_name,
       // but the by_field_value(s) will be in the nested causes array.
       // TODO - drilldown from cause in expanded row only?
@@ -189,8 +290,8 @@ class LinksMenuUI extends Component {
             value: 0,
           },
           timeRange: {
-            from: from,
-            to: to,
+            from,
+            to,
             mode: 'absolute',
           },
           zoom: {
@@ -210,19 +311,20 @@ class LinksMenuUI extends Component {
     window.open(singleMetricViewerLink, '_blank');
   };
 
-  viewExamples = () => {
-    const categoryId = this.props.anomaly.entityValue;
-    const record = this.props.anomaly.source;
+  const viewExamples = () => {
+    const categoryId = props.anomaly.entityValue;
+    const record = props.anomaly.source;
 
-    const job = mlJobService.getJob(this.props.anomaly.jobId);
+    const job = mlJobService.getJob(props.anomaly.jobId);
     if (job === undefined) {
-      console.log(`viewExamples(): no job found with ID: ${this.props.anomaly.jobId}`);
-      const { toasts } = this.props.kibana.services.notifications;
+      // eslint-disable-next-line no-console
+      console.log(`viewExamples(): no job found with ID: ${props.anomaly.jobId}`);
+      const { toasts } = props.kibana.services.notifications;
       toasts.addDanger(
         i18n.translate('xpack.ml.anomaliesTable.linksMenu.unableToViewExamplesErrorMessage', {
           defaultMessage: 'Unable to view examples as no details could be found for job ID {jobId}',
           values: {
-            jobId: this.props.anomaly.jobId,
+            jobId: props.anomaly.jobId,
           },
         })
       );
@@ -239,11 +341,12 @@ class LinksMenuUI extends Component {
     findFieldType(datafeedIndices[i]);
 
     const error = () => {
+      // eslint-disable-next-line no-console
       console.log(
         `viewExamples(): error finding type of field ${categorizationFieldName} in indices:`,
         datafeedIndices
       );
-      const { toasts } = this.props.kibana.services.notifications;
+      const { toasts } = props.kibana.services.notifications;
       toasts.addDanger(
         i18n.translate('xpack.ml.anomaliesTable.linksMenu.noMappingCouldBeFoundErrorMessage', {
           defaultMessage:
@@ -257,7 +360,7 @@ class LinksMenuUI extends Component {
       );
     };
 
-    const createAndOpenUrl = (index, categorizationFieldType) => {
+    const createAndOpenUrl = (index: string, categorizationFieldType: string) => {
       // Get the definition of the category and use the terms or regex to view the
       // matching events in the Kibana Discover tab depending on whether the
       // categorization field is of mapping type text (preferred) or keyword.
@@ -306,13 +409,13 @@ class LinksMenuUI extends Component {
               value: 0,
             },
             time: {
-              from: from,
-              to: to,
+              from,
+              to,
               mode: 'absolute',
             },
           });
 
-          const appStateProps = {
+          const appStateProps: RisonValue = {
             index: dataViewId,
             filters: [],
           };
@@ -322,7 +425,7 @@ class LinksMenuUI extends Component {
           const _a = rison.encode(appStateProps);
 
           // Need to encode the _a parameter as it will contain characters such as '+' if using the regex.
-          const { basePath } = this.props.kibana.services.http;
+          const { basePath } = props.kibana.services.http;
           let path = basePath.get();
           path += '/app/discover#/';
           path += '?_g=' + _g;
@@ -330,8 +433,9 @@ class LinksMenuUI extends Component {
           window.open(path, '_blank');
         })
         .catch((resp) => {
+          // eslint-disable-next-line no-console
           console.log('viewExamples(): error loading categoryDefinition:', resp);
-          const { toasts } = this.props.kibana.services.notifications;
+          const { toasts } = props.kibana.services.notifications;
           toasts.addDanger(
             i18n.translate('xpack.ml.anomaliesTable.linksMenu.loadingDetailsErrorMessage', {
               defaultMessage:
@@ -344,9 +448,9 @@ class LinksMenuUI extends Component {
         });
     };
 
-    function findFieldType(index) {
+    function findFieldType(index: string) {
       getFieldTypeFromMapping(index, categorizationFieldName)
-        .then((resp) => {
+        .then((resp: string) => {
           if (resp !== '') {
             createAndOpenUrl(datafeedIndices.join(), resp);
           } else {
@@ -364,124 +468,126 @@ class LinksMenuUI extends Component {
     }
   };
 
-  onButtonClick = () => {
-    this.setState((prevState) => ({
-      isPopoverOpen: !prevState.isPopoverOpen,
-    }));
-  };
+  const { anomaly, showViewSeriesLink } = props;
+  const canConfigureRules = isRuleSupported(anomaly.source) && checkPermission('canUpdateJob');
 
-  closePopover = () => {
-    this.setState({
-      isPopoverOpen: false,
-    });
-  };
+  const button = (
+    <EuiButtonIcon
+      size="s"
+      color="text"
+      onClick={onButtonClick}
+      iconType="gear"
+      aria-label={i18n.translate('xpack.ml.anomaliesTable.linksMenu.selectActionAriaLabel', {
+        defaultMessage: 'Select action for anomaly at {time}',
+        values: { time: formatHumanReadableDateTimeSeconds(anomaly.time) },
+      })}
+      data-test-subj="mlAnomaliesListRowActionsButton"
+    />
+  );
 
-  render() {
-    const { anomaly, showViewSeriesLink } = this.props;
-    const canConfigureRules = isRuleSupported(anomaly.source) && checkPermission('canUpdateJob');
-
-    const button = (
-      <EuiButtonIcon
-        size="s"
-        color="text"
-        onClick={this.onButtonClick}
-        iconType="gear"
-        aria-label={i18n.translate('xpack.ml.anomaliesTable.linksMenu.selectActionAriaLabel', {
-          defaultMessage: 'Select action for anomaly at {time}',
-          values: { time: formatHumanReadableDateTimeSeconds(anomaly.time) },
-        })}
-        data-test-subj="mlAnomaliesListRowActionsButton"
-      />
-    );
-
-    const items = [];
-    if (anomaly.customUrls !== undefined) {
-      anomaly.customUrls.forEach((customUrl, index) => {
-        items.push(
-          <EuiContextMenuItem
-            key={`custom_url_${index}`}
-            icon="popout"
-            onClick={() => {
-              this.closePopover();
-              this.openCustomUrl(customUrl);
-            }}
-            data-test-subj={`mlAnomaliesListRowActionCustomUrlButton_${index}`}
-          >
-            {customUrl.url_name}
-          </EuiContextMenuItem>
-        );
-      });
-    }
-
-    if (showViewSeriesLink === true && anomaly.isTimeSeriesViewRecord === true) {
+  const items = [];
+  if (anomaly.customUrls !== undefined) {
+    anomaly.customUrls.forEach((customUrl, index) => {
       items.push(
         <EuiContextMenuItem
-          key="view_series"
-          icon="visLine"
-          onClick={() => {
-            this.closePopover();
-            this.viewSeries();
-          }}
-          data-test-subj="mlAnomaliesListRowActionViewSeriesButton"
-        >
-          <FormattedMessage
-            id="xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel"
-            defaultMessage="View series"
-          />
-        </EuiContextMenuItem>
-      );
-    }
-
-    if (anomaly.entityName === 'mlcategory') {
-      items.push(
-        <EuiContextMenuItem
-          key="view_examples"
+          key={`custom_url_${index}`}
           icon="popout"
           onClick={() => {
-            this.closePopover();
-            this.viewExamples();
+            closePopover();
+            openCustomUrl(customUrl);
           }}
-          data-test-subj="mlAnomaliesListRowActionViewExamplesButton"
+          data-test-subj={`mlAnomaliesListRowActionCustomUrlButton_${index}`}
         >
-          <FormattedMessage
-            id="xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel"
-            defaultMessage="View examples"
-          />
+          {customUrl.url_name}
         </EuiContextMenuItem>
       );
-    }
+    });
+  }
 
-    if (canConfigureRules) {
-      items.push(
-        <EuiContextMenuItem
-          key="create_rule"
-          icon="controlsHorizontal"
-          onClick={() => {
-            this.closePopover();
-            this.props.showRuleEditorFlyout(anomaly);
-          }}
-          data-test-subj="mlAnomaliesListRowActionConfigureRulesButton"
-        >
-          <FormattedMessage
-            id="xpack.ml.anomaliesTable.linksMenu.configureRulesLabel"
-            defaultMessage="Configure job rules"
-          />
-        </EuiContextMenuItem>
-      );
-    }
-
-    return (
-      <EuiPopover
-        button={button}
-        isOpen={this.state.isPopoverOpen}
-        closePopover={this.closePopover}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
+  if (openInDiscoverUrl) {
+    items.push(
+      <EuiContextMenuItem
+        key={`auto_raw_data_url`}
+        icon="discoverApp"
+        href={openInDiscoverUrl}
+        data-test-subj={`mlAnomaliesListRowAction_viewInDiscoverButton`}
       >
-        <EuiContextMenuPanel items={items} data-test-subj="mlAnomaliesListRowActionsMenu" />
-      </EuiPopover>
+        <FormattedMessage
+          id="xpack.ml.anomaliesTable.linksMenu.viewInDiscover"
+          defaultMessage="View in Discover"
+        />
+      </EuiContextMenuItem>
     );
   }
-}
+
+  if (showViewSeriesLink === true && anomaly.isTimeSeriesViewRecord === true) {
+    items.push(
+      <EuiContextMenuItem
+        key="view_series"
+        icon="visLine"
+        onClick={() => {
+          closePopover();
+          viewSeries();
+        }}
+        data-test-subj="mlAnomaliesListRowActionViewSeriesButton"
+      >
+        <FormattedMessage
+          id="xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel"
+          defaultMessage="View series"
+        />
+      </EuiContextMenuItem>
+    );
+  }
+
+  if (isCategorizationAnomaly(anomaly)) {
+    items.push(
+      <EuiContextMenuItem
+        key="view_examples"
+        icon="popout"
+        onClick={() => {
+          closePopover();
+          viewExamples();
+        }}
+        data-test-subj="mlAnomaliesListRowActionViewExamplesButton"
+      >
+        <FormattedMessage
+          id="xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel"
+          defaultMessage="View examples"
+        />
+      </EuiContextMenuItem>
+    );
+  }
+
+  if (canConfigureRules) {
+    items.push(
+      <EuiContextMenuItem
+        key="create_rule"
+        icon="controlsHorizontal"
+        onClick={() => {
+          closePopover();
+          props.showRuleEditorFlyout(anomaly);
+        }}
+        data-test-subj="mlAnomaliesListRowActionConfigureRulesButton"
+      >
+        <FormattedMessage
+          id="xpack.ml.anomaliesTable.linksMenu.configureRulesLabel"
+          defaultMessage="Configure job rules"
+        />
+      </EuiContextMenuItem>
+    );
+  }
+
+  return (
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenuPanel items={items} data-test-subj="mlAnomaliesListRowActionsMenu" />
+    </EuiPopover>
+  );
+};
 
 export const LinksMenu = withKibana(LinksMenuUI);
