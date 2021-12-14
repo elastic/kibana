@@ -590,22 +590,22 @@ const previewTransformHandler: RequestHandler<
   }
 };
 
-const startTransformsHandler: RequestHandler<undefined, undefined, StartTransformsRequestSchema> =
-  async (ctx, req, res) => {
-    const transformsInfo = req.body;
+const startTransformsHandler: RequestHandler<
+  undefined,
+  undefined,
+  StartTransformsRequestSchema
+> = async (ctx, req, res) => {
+  const transformsInfo = req.body;
 
-    try {
-      const body = await startTransforms(
-        transformsInfo,
-        ctx.core.elasticsearch.client.asCurrentUser
-      );
-      return res.ok({
-        body,
-      });
-    } catch (e) {
-      return res.customError(wrapError(wrapEsError(e)));
-    }
-  };
+  try {
+    const body = await startTransforms(transformsInfo, ctx.core.elasticsearch.client.asCurrentUser);
+    return res.ok({
+      body,
+    });
+  } catch (e) {
+    return res.customError(wrapError(wrapEsError(e)));
+  }
+};
 
 async function startTransforms(
   transformsInfo: StartTransformsRequestSchema,
@@ -635,18 +635,21 @@ async function startTransforms(
   return results;
 }
 
-const stopTransformsHandler: RequestHandler<undefined, undefined, StopTransformsRequestSchema> =
-  async (ctx, req, res) => {
-    const transformsInfo = req.body;
+const stopTransformsHandler: RequestHandler<
+  undefined,
+  undefined,
+  StopTransformsRequestSchema
+> = async (ctx, req, res) => {
+  const transformsInfo = req.body;
 
-    try {
-      return res.ok({
-        body: await stopTransforms(transformsInfo, ctx.core.elasticsearch.client.asCurrentUser),
-      });
-    } catch (e) {
-      return res.customError(wrapError(wrapEsError(e)));
-    }
-  };
+  try {
+    return res.ok({
+      body: await stopTransforms(transformsInfo, ctx.core.elasticsearch.client.asCurrentUser),
+    });
+  } catch (e) {
+    return res.customError(wrapError(wrapEsError(e)));
+  }
+};
 
 async function stopTransforms(
   transformsInfo: StopTransformsRequestSchema,

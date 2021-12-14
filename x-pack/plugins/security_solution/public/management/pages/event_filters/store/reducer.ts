@@ -66,16 +66,17 @@ const handleEventFiltersListPageDataChanges: CaseReducer<EventFiltersListPageDat
   };
 };
 
-const handleEventFiltersListPageDataExistChanges: CaseReducer<EventFiltersListPageDataExistsChanged> =
-  (state, action) => {
-    return {
-      ...state,
-      listPage: {
-        ...state.listPage,
-        dataExist: action.payload,
-      },
-    };
+const handleEventFiltersListPageDataExistChanges: CaseReducer<
+  EventFiltersListPageDataExistsChanged
+> = (state, action) => {
+  return {
+    ...state,
+    listPage: {
+      ...state.listPage,
+      dataExist: action.payload,
+    },
   };
+};
 
 const eventFiltersInitForm: CaseReducer<EventFiltersInitForm> = (state, action) => {
   return {
