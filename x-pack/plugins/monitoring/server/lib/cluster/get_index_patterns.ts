@@ -78,7 +78,7 @@ export function getLegacyIndexPattern({
     case 'beats':
       indexPattern = INDEX_PATTERN_BEATS;
       break;
-    case 'entsearch':
+    case 'enterprisesearch':
       indexPattern = INDEX_PATTERN_ENTERPRISE_SEARCH;
       break;
     default:

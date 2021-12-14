@@ -25,7 +25,7 @@ export async function getStats(req: LegacyRequest, clusterUuid: string) {
 
   // just get the legacy pattern since no integration exists yet
   const indexPattern = getLegacyIndexPattern({
-    moduleType: 'entsearch',
+    moduleType: 'enterprisesearch',
     config: Globals.app.config,
     ccs: req.payload.ccs,
   });
