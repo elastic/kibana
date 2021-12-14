@@ -29,7 +29,7 @@ import { Globals } from '../../static_globals';
 export function getClustersStats(req: LegacyRequest, clusterUuid: string, ccs?: string) {
   return (
     fetchClusterStats(req, clusterUuid, ccs)
-      .then((response) => handleClusterStats(response, req))
+      .then((response) => handleClusterStats(response))
       // augment older documents (e.g., from 2.x - 5.4) with their cluster_state
       .then((clusters) => getClustersState(req, clusters))
   );
@@ -113,7 +113,7 @@ function fetchClusterStats(req: LegacyRequest, clusterUuid: string, ccs?: string
  * @param {Object} response The response from Elasticsearch.
  * @return {Array} Objects representing each cluster.
  */
-export function handleClusterStats(response: ElasticsearchResponse, req: LegacyRequest) {
+export function handleClusterStats(response: ElasticsearchResponse) {
   const hits = response?.hits?.hits ?? [];
 
   return hits
@@ -121,9 +121,11 @@ export function handleClusterStats(response: ElasticsearchResponse, req: LegacyR
       const cluster = hit._source as ElasticsearchModifiedSource;
 
       if (cluster) {
+        const indexName = hit._index;
+        const ccs = parseCrossClusterPrefix(indexName);
+
         // use CCS whenever we come across it so that we can avoid talking to other monitoring clusters whenever possible
-        const ccs = getConfigCcs(req.server.config());
-        if (typeof ccs === 'string') {
+        if (ccs) {
           cluster.ccs = ccs;
         }
       }
