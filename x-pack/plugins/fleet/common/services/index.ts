@@ -34,3 +34,4 @@ export {
 } from './validate_package_policy';
 
 export { normalizeHostsForAgents } from './hosts_utils';
+export { splitPkgKey } from './split_pkg_key';
