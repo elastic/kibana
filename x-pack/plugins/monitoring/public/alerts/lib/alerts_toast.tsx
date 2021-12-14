@@ -74,14 +74,9 @@ const showDisabledWatcherClusterAlertsError = () => {
     title: i18n.translate('xpack.monitoring.healthCheck.disabledWatches.title', {
       defaultMessage: 'New alerts created',
     }),
-    text: toMountPoint(
-      <p>
-        {i18n.translate('xpack.monitoring.healthCheck.disabledWatches.text', {
-          defaultMessage: `Review the alert definition using Setup mode and configure additional action connectors to get notified via your favorite method.`,
-        })}
-      </p>,
-      Legacy.shims.kibanaServices.theme
-    ),
+    text: i18n.translate('xpack.monitoring.healthCheck.disabledWatches.text', {
+      defaultMessage: `Review the alert definition using Setup mode and configure additional action connectors to get notified via your favorite method.`,
+    }),
     'data-test-subj': 'alertsCreatedToast',
   });
 };
