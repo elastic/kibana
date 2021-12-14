@@ -128,7 +128,7 @@ function isKibanaUrl(urlConfig: UrlConfig) {
 /**
  * Escape any double quotes in the value for correct use in KQL.
  */
-function escapeForKQL(value: string | number): string {
+export function escapeForKQL(value: string | number): string {
   return String(value).replace(/\"/g, '\\"');
 }
 
