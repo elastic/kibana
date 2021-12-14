@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiIcon, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { AllSeries, createExploratoryViewUrl, useTheme } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
@@ -20,11 +20,13 @@ import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export interface ExploratoryEmbeddableProps {
+  alignLnsMetric?: string;
   appendTitle?: JSX.Element;
   appId?: 'security' | 'observability';
   attributes: AllSeries;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
-  customHeight?: boolean;
+  compressed?: boolean;
+  customHeight?: string | number;
   disableBorder?: boolean;
   disableShadow?: boolean;
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
@@ -33,6 +35,9 @@ export interface ExploratoryEmbeddableProps {
   reportType: ReportViewType;
   showCalculationMethod?: boolean;
   showExploreButton?: boolean;
+  metricIcon?: string;
+  metricIconColor?: string;
+  metricPostfix?: string;
   title?: string | JSX.Element;
   withActions?: boolean;
 }
@@ -44,16 +49,21 @@ export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddab
 
 // eslint-disable-next-line import/no-default-export
 export default function Embeddable({
+  alignLnsMetric,
   appendTitle,
   appId,
   attributes,
   axisTitlesVisibility,
-  customHeight = true,
+  compressed = false,
+  customHeight,
   disableBorder = false,
   disableShadow = false,
   indexPatterns,
   legendIsVisible,
   lens,
+  metricIcon,
+  metricIconColor,
+  metricPostfix,
   reportConfigMap = {},
   reportType,
   showCalculationMethod = false,
@@ -101,9 +111,10 @@ export default function Embeddable({
     http?.basePath.get(),
     appId
   );
+
   return (
-    <Wrapper $customHeight={customHeight}>
-      <EuiFlexGroup alignItems="center">
+    <Wrapper $customHeight={customHeight} $compressed={compressed}>
+      <StyledFlexGroup alignItems="center" gutterSize="none" $compressed={compressed}>
         {title && (
           <EuiFlexItem>
             <EuiTitle size="xs">
@@ -127,22 +138,41 @@ export default function Embeddable({
           </EuiFlexItem>
         )}
         {appendTitle}
-      </EuiFlexGroup>
-      <LensWrapper $disableBorder={disableBorder} $disableShadow={disableShadow}>
-        <LensComponent
-          id="exploratoryView"
-          style={{ height: '100%' }}
-          timeRange={series?.time}
-          attributes={attributesJSON}
-          onBrushEnd={({ range }) => {}}
-          withActions={withActions}
-        />
+      </StyledFlexGroup>
+      <LensWrapper
+        $alignLnsMetric={alignLnsMetric}
+        $disableBorder={disableBorder}
+        $disableShadow={disableShadow}
+      >
+        {metricIcon && (
+          <EuiFlexItem style={{ justifyContent: 'space-evenly', paddingTop: '24px' }} grow={false}>
+            <EuiIcon type={metricIcon} size="l" color={metricIconColor} />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={metricIcon && metricPostfix ? false : 1}>
+          <LensComponent
+            id="exploratoryView"
+            style={{ height: '100%' }}
+            timeRange={series?.time}
+            attributes={attributesJSON}
+            onBrushEnd={({ range }) => {}}
+            withActions={withActions}
+          />
+        </EuiFlexItem>
+        {metricPostfix && (
+          <EuiFlexItem style={{ justifyContent: 'space-evenly', paddingTop: '24px' }} grow={false}>
+            <EuiTitle size="s">
+              <h3> {metricPostfix}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+        )}
       </LensWrapper>
     </Wrapper>
   );
 }
 
-const LensWrapper = styled.div<{
+const LensWrapper = styled(EuiFlexGroup)<{
+  $alignLnsMetric?: string;
   $disableBorder?: boolean;
   $disableShadow?: boolean;
 }>`
@@ -172,14 +202,35 @@ const LensWrapper = styled.div<{
   .embPanel__title {
     display: none;
   }
+
+  ${(props) =>
+    props.$alignLnsMetric
+      ? `.lnsMetricExpression__container {
+    align-items: ${props.$alignLnsMetric};
+  }`
+      : ''}
 `;
 
 const Wrapper = styled.div<{
-  $customHeight?: boolean;
+  $customHeight?: string | number;
+  $compressed?: boolean;
 }>`
   height: 100%;
+  ${(props) => (props.$compressed ? 'position: relative;' : '')}
+
   &&& {
     > :nth-child(2) {
-      height: ${(props) => (props.$customHeight ? `calc(100% - 32px);` : `100%;`)}
+      height: ${(props) => (props.$customHeight ? `${props.$customHeight};` : `calc(100% - 32px);`)}
   }
+`;
+
+const StyledFlexGroup = styled(EuiFlexGroup)<{
+  $compressed?: boolean;
+}>`
+  ${(props) =>
+    props.$compressed
+      ? `position: absolute;
+         top: 0;
+         z-index: 1;`
+      : ''}
 `;

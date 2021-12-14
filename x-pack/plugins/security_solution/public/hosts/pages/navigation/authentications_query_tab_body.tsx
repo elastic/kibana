@@ -138,10 +138,11 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
             yLeft: false,
             yRight: false,
           }}
-          showExploreButton={false}
+          showExploreButton={true}
           disableBorder
           disableShadow
-          customHeight={false}
+          compressed
+          customHeight="100%"
         />
       </EuiPanel>
       <EuiSpacer />

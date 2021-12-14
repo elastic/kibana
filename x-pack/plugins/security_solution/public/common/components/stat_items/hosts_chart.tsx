@@ -23,36 +23,29 @@ import {
   reportConfigMap,
 } from '../../../app/exploratory_view/security_exploratory_view';
 
-interface Props {
-  title?: string;
-}
-
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
 
-export const HostsChart = ({ title }: Props) => {
-  const { observability, http } = useKibana<StartServices>().services;
+const panelHeight = '400px';
+
+export const HostsChart = () => {
+  const { observability } = useKibana<StartServices>().services;
 
   const ExploratoryViewEmbeddable = observability.ExploratoryViewEmbeddable;
 
-  // const createExploratoryViewUrl = observability.createExploratoryViewUrl;
-  // const href = createExploratoryViewUrl(
-  //   { reportType, allSeries: attributes },
-  //   http?.basePath.get(),
-  //   appId
-  // );
   <EuiFlexItem grow={false}>
     <EuiButtonIcon href="" size="s" iconType="visBarVerticalStacked" />
   </EuiFlexItem>;
   return (
     <>
       <EuiFlexGroup>
-        <EuiFlexItem style={{ height: 400 }}>
+        <EuiFlexItem style={{ height: panelHeight }}>
           <EuiPanel color="transparent" hasBorder>
             <StyledEuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem style={{ height: 100 }} grow={false}>
+              <EuiFlexItem style={{ height: '100px' }} grow={false}>
                 <ExploratoryViewEmbeddable
+                  alignLnsMetric="flex-start"
                   appId="security"
                   title={'Hosts'}
                   reportConfigMap={reportConfigMap}
@@ -71,13 +64,16 @@ export const HostsChart = ({ title }: Props) => {
                     },
                   ]}
                   showExploreButton={false}
+                  compressed
                   disableBorder
                   disableShadow
-                  customHeight={false}
+                  customHeight="100%"
+                  metricIcon="storage"
+                  metricIconColor="#6092c0"
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiHorizontalRule />
+                <EuiHorizontalRule margin="s" />
               </EuiFlexItem>
               <EuiFlexItem grow={1}>
                 <ExploratoryViewEmbeddable
@@ -85,7 +81,6 @@ export const HostsChart = ({ title }: Props) => {
                   reportConfigMap={reportConfigMap}
                   dataTypesIndexPatterns={indexPatternList}
                   reportType="kpi-over-time"
-                  showExploreButton={false}
                   attributes={[
                     {
                       reportDefinitions: {
@@ -103,15 +98,17 @@ export const HostsChart = ({ title }: Props) => {
                     yLeft: false,
                     yRight: false,
                   }}
-                  showExploreButton={false}
+                  showExploreButton={true}
+                  compressed
                   disableBorder
                   disableShadow
+                  customHeight="100%"
                 />
               </EuiFlexItem>
             </StyledEuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem style={{ height: 400 }}>
+        <EuiFlexItem style={{ height: panelHeight }}>
           <EuiSplitPanel.Outer
             direction="row"
             grow={true}
@@ -123,6 +120,7 @@ export const HostsChart = ({ title }: Props) => {
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: 100 }} grow={false}>
                   <ExploratoryViewEmbeddable
+                    alignLnsMetric="flex-start"
                     appId="security"
                     title={'Source IPs'}
                     reportConfigMap={reportConfigMap}
@@ -141,13 +139,17 @@ export const HostsChart = ({ title }: Props) => {
                       },
                     ]}
                     showExploreButton={false}
+                    compressed
                     disableBorder
                     disableShadow
-                    customHeight={false}
+                    customHeight="100%"
+                    metricIcon="visMapCoordinate"
+                    metricPostfix="source"
+                    metricIconColor="#d36086"
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiHorizontalRule />
+                  <EuiHorizontalRule margin="s" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <ExploratoryViewEmbeddable
@@ -183,10 +185,11 @@ export const HostsChart = ({ title }: Props) => {
                       yLeft: false,
                       yRight: false,
                     }}
-                    showExploreButton={false}
+                    showExploreButton={true}
+                    compressed
                     disableBorder
                     disableShadow
-                    customHeight={false}
+                    customHeight="100%"
                   />
                 </EuiFlexItem>
               </StyledEuiFlexGroup>
@@ -195,6 +198,7 @@ export const HostsChart = ({ title }: Props) => {
               <StyledEuiFlexGroup direction="column" gutterSize="none">
                 <EuiFlexItem style={{ height: 100 }} grow={false}>
                   <ExploratoryViewEmbeddable
+                    alignLnsMetric="flex-start"
                     appId="security"
                     title={'Destination IPs'}
                     reportConfigMap={reportConfigMap}
@@ -213,13 +217,17 @@ export const HostsChart = ({ title }: Props) => {
                       },
                     ]}
                     showExploreButton={false}
+                    compressed
                     disableBorder
                     disableShadow
-                    customHeight={false}
+                    customHeight="100%"
+                    metricIcon="visMapCoordinate"
+                    metricIconColor="#9170b8"
+                    metricPostfix="destination"
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiHorizontalRule />
+                  <EuiHorizontalRule margin="s" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <ExploratoryViewEmbeddable
@@ -253,10 +261,11 @@ export const HostsChart = ({ title }: Props) => {
                       yLeft: false,
                       yRight: false,
                     }}
-                    showExploreButton={false}
+                    showExploreButton={true}
+                    compressed
                     disableBorder
                     disableShadow
-                    customHeight={false}
+                    customHeight="100%"
                   />
                 </EuiFlexItem>
               </StyledEuiFlexGroup>
