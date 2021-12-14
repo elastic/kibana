@@ -67,7 +67,7 @@ const buildPathName = (prevPath = '', argName, index) => {
   return prevPath.length ? `${prevPath}.${newPath}` : newPath;
 };
 
-const transformFunctionsToComponents = (functionsChain, path) => {
+const transformFunctionsToComponents = (functionsChain, path, argUiConfig) => {
   const argumentsPath = path ? `${path}.chain` : `chain`;
   return functionsChain.reduce((current, argType, i) => {
     const argumentPath = `${argumentsPath}.${i}.arguments`;
@@ -82,14 +82,22 @@ const transformFunctionsToComponents = (functionsChain, path) => {
     }
 
     const { argumentsView, args } = getPureArgs(argTypeDef, argType.arguments);
-    const { args: complexArgs } = getComplexArgs(argTypeDef, argType.arguments);
+    const { argumentsView: complexArgumentsViews, args: complexArgs } = getComplexArgs(
+      argTypeDef,
+      argType.arguments
+    );
 
     // wrap each part of the chain in ArgType, passing in the previous context
     const component = {
       args,
       nestedFunctionsArgs: complexArgs,
       argType: argType.function,
-      argTypeDef: Object.assign(argTypeDef, { args: argumentsView }),
+      argTypeDef: Object.assign(argTypeDef, {
+        args: argumentsView,
+        name: argUiConfig?.name ?? argTypeDef.name,
+        displayName: argUiConfig?.displayName ?? argTypeDef.displayName,
+        help: argUiConfig?.help ?? argTypeDef.name,
+      }),
       argResolver: (argAst) => interpretAst(argAst, prevContext),
       contextExpression: getExpression(prevContext),
       expressionIndex: i, // preserve the index in the AST
@@ -100,7 +108,11 @@ const transformFunctionsToComponents = (functionsChain, path) => {
     const next = Object.keys(complexArgs).reduce((current, argName) => {
       const next = complexArgs[argName]
         .map(({ chain }, index) =>
-          transformFunctionsToComponents(chain, buildPathName(argumentPath, argName, index))
+          transformFunctionsToComponents(
+            chain,
+            buildPathName(argumentPath, argName, index),
+            complexArgumentsViews?.find((argView) => argView.name === argName)
+          )
         )
         .reduce(
           (current, next) => mergeComponentsAndContexts(current, next),
