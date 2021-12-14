@@ -15,7 +15,7 @@ import { DefaultFormatEditor, defaultState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
 import { formatId } from './constants';
-import { StringFormat } from '../../../../../../field_formats/common';
+import { GeoPointFormat } from '../../../../../../field_formats/common';
 
 interface GeoPointFormatEditorFormatParams {
   transform: string;
@@ -27,11 +27,8 @@ export class GeoPointFormatEditor extends DefaultFormatEditor<GeoPointFormatEdit
     ...defaultState,
     sampleInputs: [
       {
-        'coordinates': [
-          125.6,
-          10.1
-        ],
-        'type': 'Point'
+        coordinates: [125.6, 10.1],
+        type: 'Point',
       },
     ],
   };
@@ -55,12 +52,14 @@ export class GeoPointFormatEditor extends DefaultFormatEditor<GeoPointFormatEdit
           <EuiSelect
             data-test-subj="geoPointEditorTransform"
             defaultValue={formatParams.transform}
-            options={((format.type as typeof GeoPointFormat).transformOptions || []).map((option) => {
-              return {
-                value: option.kind as string,
-                text: option.text,
-              };
-            })}
+            options={((format.type as typeof GeoPointFormat).transformOptions || []).map(
+              (option) => {
+                return {
+                  value: option.kind as string,
+                  text: option.text,
+                };
+              }
+            )}
             onChange={(e) => {
               this.onChange({ transform: e.target.value });
             }}
