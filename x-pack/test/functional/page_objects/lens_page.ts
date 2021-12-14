@@ -680,7 +680,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const queryTerm = searchTerm ?? subVisualizationId.substring(subVisualizationId.length - 3);
       return await testSubjects.setValue('lnsChartSwitchSearch', queryTerm, {
         clearWithKeyboard: true,
-        typeCharByChar: true,
       });
     },
 
