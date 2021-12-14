@@ -43,7 +43,6 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   const cellSize = 15;
-  const overallSwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneOverall';
   const viewBySwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneViewBy';
 
   describe('population analysis', function () {
@@ -95,23 +94,25 @@ export default function ({ getService }: FtrProviderContext) {
       const viewBySwimLanes = await testSubjects.find(viewBySwimLaneTestSubj);
       const cells = await ml.swimLane.getCells(viewBySwimLaneTestSubj);
       const sampleCell = cells[0];
-      // TODO: fix tooltip opening
-      // await viewBySwimLanes.moveMouseTo({
-      //   xOffset: Math.floor(sampleCell.x) + cellSize,
-      //   yOffset: Math.floor(sampleCell.y) + cellSize,
-      // });
 
-      // TODO: scroll into view
+      await viewBySwimLanes.moveMouseTo({
+        xOffset: Math.floor(cellSize / 2.0),
+        yOffset: Math.floor(cellSize / 2.0),
+      });
+
       await mlScreenshots.takeScreenshot('ml-population-results', screenshotDirectories);
 
-      await ml.testExecution.logTestStep('select swim lane tile');
+      await ml.testExecution.logTestStep(
+        'select swim lane tile, expand anomaly row and take screenshot'
+      );
       await ml.swimLane.selectSingleCell(viewBySwimLaneTestSubj, {
         x: sampleCell.x + cellSize,
         y: sampleCell.y + cellSize,
       });
       await ml.swimLane.waitForSwimLanesToLoad();
 
-      // TODO: scroll into view / open row details
+      await ml.anomalyExplorer.scrollChartsContainerIntoView();
+      await ml.anomaliesTable.ensureDetailsOpen(0);
       await ml.testExecution.logTestStep('take screenshot');
       await mlScreenshots.takeScreenshot('ml-population-anomaly', screenshotDirectories);
     });
