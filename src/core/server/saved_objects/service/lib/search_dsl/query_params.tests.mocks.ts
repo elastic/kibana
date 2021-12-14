@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-// Mapbox-gl doesn't declare this type.
-declare module 'maplibre-gl/dist/maplibre-gl-csp';
+export const getReferencesFilterMock = jest.fn();
+
+jest.doMock('./references_filter', () => ({
+  getReferencesFilter: getReferencesFilterMock,
+}));
