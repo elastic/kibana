@@ -26,14 +26,15 @@ export const CommonInfraProviders: React.FC<{
   storage: Storage;
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-}> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage }) => {
+  theme$: AppMountParameters['theme$'];
+}> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
     <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
       <EuiThemeProvider darkMode={darkMode}>
         <DataUIProviders appName={appName} storage={storage}>
-          <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu}>
+          <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
             <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
           </HeaderActionMenuProvider>
         </DataUIProviders>

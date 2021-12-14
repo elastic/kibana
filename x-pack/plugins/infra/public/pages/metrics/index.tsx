@@ -48,7 +48,7 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
 
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
-  const { setHeaderActionMenu } = useContext(HeaderActionMenuContext);
+  const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
   const settingsTabTitle = i18n.translate('xpack.infra.metrics.settingsTabTitle', {
     defaultMessage: 'Settings',
@@ -84,8 +84,8 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                     })}
                   />
 
-                  {setHeaderActionMenu && (
-                    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+                  {setHeaderActionMenu && theme$ && (
+                    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
                       <EuiHeaderLinks gutterSize="xs">
                         <EuiHeaderLink color={'text'} {...settingsLinkProps}>
                           {settingsTabTitle}

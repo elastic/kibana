@@ -90,10 +90,11 @@ export function ApmAppRoot({
 }
 
 function MountApmHeaderActionMenu() {
-  const { setHeaderActionMenu } = useApmPluginContext().appMountParameters;
+  const { setHeaderActionMenu, theme$ } =
+    useApmPluginContext().appMountParameters;
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
       <ApmHeaderActionMenu />
     </HeaderMenuPortal>
   );
