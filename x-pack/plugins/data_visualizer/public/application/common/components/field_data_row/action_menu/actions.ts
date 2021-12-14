@@ -38,7 +38,7 @@ export function getActions(
     dataVisualizerRefresh$.next(refresh);
   };
   // Navigate to Lens with prefilled chart for data field
-  if (lensPlugin !== undefined) {
+  if (services.application?.capabilities?.visualize?.show === true && lensPlugin !== undefined) {
     const canUseLensEditor = lensPlugin?.canUseEditor();
     actions.push({
       name: i18n.translate('xpack.dataVisualizer.index.dataGrid.exploreInLensTitle', {
@@ -64,7 +64,11 @@ export function getActions(
     });
   }
 
-  if (services?.uiActions && mapsPlugin) {
+  if (
+    services?.uiActions &&
+    mapsPlugin &&
+    services.application?.capabilities?.maps?.show === true
+  ) {
     actions.push({
       name: i18n.translate('xpack.dataVisualizer.index.dataGrid.exploreInMapsTitle', {
         defaultMessage: 'Explore in Maps',
@@ -73,7 +77,7 @@ export function getActions(
         defaultMessage: 'Explore in Maps',
       }),
       type: 'icon',
-      icon: 'logoMaps',
+      icon: 'gisApp',
       available: (item: FieldVisConfig) => {
         return item.type === JOB_FIELD_TYPES.GEO_POINT || item.type === JOB_FIELD_TYPES.GEO_SHAPE;
       },

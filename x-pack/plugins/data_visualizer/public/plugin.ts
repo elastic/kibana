@@ -23,7 +23,7 @@ import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables';
 import { FieldFormatsStart } from '../../../../src/plugins/field_formats/public';
-import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import type { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { IndexDataVisualizerLocatorDefinition } from './application/index_data_visualizer/locator';
 
 export interface DataVisualizerSetupDependencies {
@@ -75,7 +75,6 @@ export class DataVisualizerPlugin
 
   public start(core: CoreStart, plugins: DataVisualizerStartDependencies) {
     setStartServices(core, plugins);
-
     return {
       getFileDataVisualizerComponent,
       getIndexDataVisualizerComponent,

@@ -38,7 +38,11 @@ export const TriggerComponent: FC<Props> = ({
   const badge = useMemo(() => {
     switch (isModified) {
       case 'modified':
-        return <StyledBadge>{i18n.MODIFIED_BADGE_TITLE}</StyledBadge>;
+        return (
+          <StyledBadge data-test-subj="sourcerer-modified-badge">
+            {i18n.MODIFIED_BADGE_TITLE}
+          </StyledBadge>
+        );
       case 'alerts':
         return (
           <StyledBadge data-test-subj="sourcerer-alerts-badge">
