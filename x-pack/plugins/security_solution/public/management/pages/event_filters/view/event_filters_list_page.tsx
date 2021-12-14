@@ -102,7 +102,7 @@ export const EventFiltersListPage = memo(() => {
   const navigateCallback = useEventFiltersNavigateCallback();
   const showFlyout = !!location.show;
 
-  // load the list of policies>
+  // load the list of policies
   const policiesRequest = useGetEndpointSpecificPolicies({
     onError: (err) => {
       toasts.addDanger(getLoadPoliciesError(err));
