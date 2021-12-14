@@ -12,6 +12,7 @@ import { HostsTabsProps } from './types';
 import { scoreIntervalToDateTime } from '../../common/components/ml/score/score_interval_to_datetime';
 import { Anomaly } from '../../common/components/ml/types';
 import { HostsTableType } from '../store/model';
+import { useKibana } from '../../common/lib/kibana';
 import { AnomaliesQueryTabBody } from '../../common/containers/anomalies/anomalies_query_tab_body';
 import { AnomaliesHostTable } from '../../common/components/ml/tables/anomalies_host_table';
 import { UpdateDateRange } from '../../common/components/charts/common';
@@ -37,6 +38,7 @@ export const HostsTabs = memo<HostsTabsProps>(
     to,
     type,
   }) => {
+    const { sessionView } = useKibana().services;
     const narrowDateRange = useCallback(
       (score: Anomaly, interval: string) => {
         const fromTo = scoreIntervalToDateTime(score, interval);
@@ -96,6 +98,9 @@ export const HostsTabs = memo<HostsTabsProps>(
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.alerts})`}>
           <HostAlertsQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.sessions})`}>
+          {sessionView.getSessionViewTableProcessTree()}
         </Route>
       </Switch>
     );

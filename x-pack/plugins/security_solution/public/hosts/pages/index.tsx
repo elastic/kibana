@@ -22,7 +22,8 @@ const getHostsTabPath = () =>
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +
-  `${HostsTableType.alerts})`;
+  `${HostsTableType.alerts}|` +
+  `${HostsTableType.sessions})`;
 
 const getHostDetailsTabPath = () =>
   `${hostDetailsPagePath}/:tabName(` +

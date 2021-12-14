@@ -20,6 +20,7 @@ export enum HostsTableType {
   uncommonProcesses = 'uncommonProcesses',
   anomalies = 'anomalies',
   alerts = 'externalAlerts',
+  sessions = 'sessions',
 }
 
 export interface BasicQueryPaginated {
@@ -39,6 +40,7 @@ export interface Queries {
   [HostsTableType.uncommonProcesses]: BasicQueryPaginated;
   [HostsTableType.anomalies]: null | undefined;
   [HostsTableType.alerts]: BasicQueryPaginated;
+  [HostsTableType.sessions]: null | undefined;
 }
 
 export interface GenericHostsModel {

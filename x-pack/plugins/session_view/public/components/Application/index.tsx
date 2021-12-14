@@ -56,4 +56,4 @@ export const Application = () => {
   );
 };
 
-Application.displayName = 'application';
+Application.displayName = 'Application';

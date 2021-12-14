@@ -12,6 +12,9 @@ import {
   EuiCheckbox,
   EuiButtonIcon,
   EuiToolTip,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import { SessionViewServices } from '../../types';
@@ -32,9 +35,10 @@ export interface SessionLeaderTableProps {
   onStateChange?: (state: TGridState) => void;
   setRefetch?: (ref: () => void) => void;
   itemsPerPage?: number[];
-  onExpand?: (props: ActionProps) => {};
-  onInspect?: (props: ActionProps) => {};
-  onOpenSessionViewer?: (props: ActionProps) => {};
+  onExpand?: (props: ActionProps) => void;
+  onInspect?: (props: ActionProps) => void;
+  onAnalyzeSession?: (props: ActionProps) => void;
+  onOpenSessionViewer?: (props: ActionProps) => void;
 };
 
 // Not sure why the timelines plugins doesn't have a type for the
@@ -102,11 +106,14 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
     itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
     onExpand = () => {},
     onInspect = () => {},
+    onAnalyzeSession = () => {},
     onOpenSessionViewer = () => {},
   } = props;
 
   const { timelines } = useKibana<SessionViewServices>().services;
   const [columns, setColumns] = useState<ColumnHeaderOptions[]>(defaultColumns);
+  const [openPopoverId, setOpenPopoverId] = useState<string>('');
+
   const { 
     rowButtonContainer,
     rowCheckbox,
@@ -123,6 +130,18 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
   const handleSetRefetch = (ref: () => void) => {
     setRefetch(ref);
   };
+
+  const handleMoreActionsClick = (eventId: string = '') => () => {
+    if (openPopoverId === eventId) {
+      setOpenPopoverId('');
+    } else {
+      setOpenPopoverId(eventId);
+    }
+  }
+
+  const handleClosePopover = () => {
+    setOpenPopoverId('');
+  }
 
   // Must cast to any since the timelines plugin expects 
   // a React component. 
@@ -197,19 +216,46 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
     );
   };
 
-  const renderOpenSessionViewerButton = (props: ActionProps) => {
+  const renderOpenMoreActionsButton = (props: ActionProps) => {
+    const { eventId } = props;
     return (
-      <EuiToolTip
-        position="top"
-        content="Open in session viewer"
+      <EuiPopover
+        anchorPosition="upCenter"
+        isOpen={openPopoverId === eventId}
+        closePopover={handleClosePopover}
+        button={
+          <EuiButtonIcon
+            aria-label="row open in session viewer icon button"
+            color="primary"
+            iconType="boxesHorizontal"
+            onClick={handleMoreActionsClick(eventId)}
+          />
+        }
       >
-        <EuiButtonIcon
-          aria-label="row open in session viewer icon button"
-          color="primary"
-          iconType="boxesHorizontal"
-          onClick={() => onOpenSessionViewer(props)}
+        <EuiContextMenuPanel 
+          size="s"
+          items={[
+            <EuiContextMenuItem
+              key="analyzeSession"
+              onClick={() => {
+                onAnalyzeSession(props);
+                handleClosePopover();
+              }}
+            >
+              Analyze Session
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              key="openSessionViewer"
+              onClick={() => {
+                onOpenSessionViewer(props);
+                handleClosePopover();
+              }}
+            >
+              Open in session viewer
+            </EuiContextMenuItem>,
+          ]}
         />
-      </EuiToolTip>
+      </EuiPopover>
     );
   };
 
@@ -219,7 +265,7 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
         {renderRowCheckbox(props)}
         {renderExpandButton(props)}
         {renderInspectButton(props)}
-        {renderOpenSessionViewerButton(props)}
+        {renderOpenMoreActionsButton(props)}
       </div>
     );
   };
@@ -276,3 +322,5 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
     </div>
   );
 };
+
+SessionLeaderTable.displayName = 'SessionLeaderTable';
