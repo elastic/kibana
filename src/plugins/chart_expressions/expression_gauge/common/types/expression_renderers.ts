@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ChartsPluginSetup, PaletteRegistry } from '../../../../charts/public';
+import type { ChartsPluginSetup } from '../../../../charts/public';
 import type { IFieldFormat, SerializedFieldFormat } from '../../../../field_formats/common';
 import type { GaugeExpressionProps } from './expression_functions';
 

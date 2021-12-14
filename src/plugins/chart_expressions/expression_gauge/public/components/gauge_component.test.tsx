@@ -47,7 +47,6 @@ jest.mock('@elastic/charts', () => {
 });
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
-const palettesRegistry = chartPluginMock.createPaletteRegistry();
 const formatService = fieldFormatsServiceMock.createStartContract();
 const args: GaugeArguments = {
   labelMajor: 'Gauge',
@@ -79,7 +78,6 @@ describe('GaugeComponent', function () {
       data: createData(),
       chartsThemeService,
       args,
-      paletteService: palettesRegistry,
       formatFactory: formatService.deserialize,
     };
   });
