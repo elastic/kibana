@@ -20,7 +20,10 @@ import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
-import { previewRulesSchema } from '../../../../../common/detection_engine/schemas/request';
+import {
+  previewRulesSchema,
+  RulePreviewLogs,
+} from '../../../../../common/detection_engine/schemas/request';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 import {
@@ -110,6 +113,8 @@ export const previewRulesRoute = async (
         const username = security?.authc.getCurrentUser(request)?.username;
         const { previewRuleExecutionLogClient, warningsAndErrorsStore } = createWarningsAndErrors();
         const runState: Record<string, unknown> = {};
+        const errors: RulePreviewLogs[] = [];
+        const warnings: RulePreviewLogs[] = [];
 
         const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
           ...securityRuleTypeOptions,
@@ -184,6 +189,28 @@ export const previewRulesRoute = async (
               tags: [],
               updatedBy: rule.updatedBy,
             })) as TState;
+
+            // Save and reset error and warning logs
+            const currentErrors = {
+              logs: warningsAndErrorsStore
+                .filter((item) => item.newStatus === RuleExecutionStatus.failed)
+                .map((item) => item.message),
+              startedAt: startedAt.toDate().toISOString(),
+            };
+            const currentWarnings = {
+              logs: warningsAndErrorsStore
+                .filter(
+                  (item) =>
+                    item.newStatus === RuleExecutionStatus['partial failure'] ||
+                    item.newStatus === RuleExecutionStatus.warning
+                )
+                .map((item) => item.message),
+              startedAt: startedAt.toDate().toISOString(),
+            };
+            errors.push(currentErrors);
+            warnings.push(currentWarnings);
+            previewRuleExecutionLogClient.clearWarningsAndErrorsStore();
+
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(internalRule.schedule.interval));
             invocationCount--;
@@ -251,18 +278,6 @@ export const previewRulesRoute = async (
             );
             break;
         }
-
-        const errors = warningsAndErrorsStore
-          .filter((item) => item.newStatus === RuleExecutionStatus.failed)
-          .map((item) => item.message);
-
-        const warnings = warningsAndErrorsStore
-          .filter(
-            (item) =>
-              item.newStatus === RuleExecutionStatus['partial failure'] ||
-              item.newStatus === RuleExecutionStatus.warning
-          )
-          .map((item) => item.message);
 
         // Refreshes alias to ensure index is able to be read before returning
         await context.core.elasticsearch.client.asInternalUser.indices.refresh(

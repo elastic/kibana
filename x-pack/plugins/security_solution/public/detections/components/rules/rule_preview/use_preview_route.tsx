@@ -13,6 +13,7 @@ import { QUERY_PREVIEW_NOISE_WARNING } from './translations';
 import { usePreviewRule } from '../../../containers/detection_engine/rules/use_preview_rule';
 import { formatPreviewRule } from '../../../pages/detection_engine/rules/create/helpers';
 import { FieldValueThreshold } from '../threshold_input';
+import { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
 
 interface PreviewRouteParams {
   isDisabled: boolean;
@@ -44,16 +45,16 @@ export const usePreviewRoute = ({
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
   const { isLoading, response, rule, setRule } = usePreviewRule(timeFrame);
-  const [warnings, setWarnings] = useState<string[]>(response.warnings ?? []);
+  const [warnings, setWarnings] = useState<RulePreviewLogs[]>(response.warnings ?? []);
 
   useEffect(() => {
     setWarnings(response.warnings ?? []);
   }, [response]);
 
-  const addNoiseWarning = useCallback(
-    () => setWarnings([QUERY_PREVIEW_NOISE_WARNING, ...warnings]),
-    [warnings]
-  );
+  const addNoiseWarning = useCallback(() => {
+    const noiseWarning = { logs: [QUERY_PREVIEW_NOISE_WARNING] };
+    setWarnings([noiseWarning, ...warnings]);
+  }, [warnings]);
 
   const clearPreview = useCallback(() => {
     setRule(null);
