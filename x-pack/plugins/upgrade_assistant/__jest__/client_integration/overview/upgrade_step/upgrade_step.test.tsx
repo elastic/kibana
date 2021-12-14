@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
-describe.skip('Overview - Upgrade Step', () => {
+describe('Overview - Upgrade Step', () => {
   let testBed: OverviewTestBed;
   const { server } = setupEnvironment();
 
