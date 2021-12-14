@@ -62,6 +62,7 @@ export const getThreatList = async ({
         },
       ],
       search_after: searchAfter,
+      // @ts-expect-error is not compatible with SearchSortCombinations
       sort: getSortWithTieBreaker({
         sortField,
         sortOrder,
