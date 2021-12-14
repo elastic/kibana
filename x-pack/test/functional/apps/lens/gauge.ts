@@ -13,10 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/120670
-  describe.skip('lens gauge', () => {
+  describe('lens gauge', () => {
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -34,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'average',
         field: 'bytes',
       });
-
       await PageObjects.lens.waitForVisualization();
     });
 
@@ -51,18 +48,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reflect edits for gauge', async () => {
-      await PageObjects.lens.openVisualOptions();
-      await retry.try(async () => {
-        await testSubjects.setValue('lnsToolbarGaugeLabelMajor', 'custom title');
-      });
-      await retry.try(async () => {
-        await testSubjects.setValue('lnsToolbarGaugeLabelMinor-select', 'custom');
-      });
-      await retry.try(async () => {
-        await testSubjects.setValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
-      });
-
-      await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.configureDimension({
         dimension: 'lnsGauge_metricDimensionPanel > lns-dimensionTrigger',
         operation: 'count',
@@ -73,6 +58,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setEuiSwitch('lnsDynamicColoringGaugeSwitch', 'check');
       await PageObjects.lens.closeDimensionEditor();
 
+      await PageObjects.lens.openVisualOptions();
+      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMajor', 'custom title');
+      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor-select', 'custom', {});
+      await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
+
+      await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.openDimensionEditor(
         'lnsGauge_goalDimensionPanel > lns-empty-dimension'
       );
@@ -82,20 +73,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openDimensionEditor(
         'lnsGauge_minDimensionPanel > lns-empty-dimension-suggested-value'
       );
-
-      await testSubjects.setValue('lns-indexPattern-static_value-input', '1000', {
-        clearWithKeyboard: true,
-      });
+      await PageObjects.lens.retrySetValue('lns-indexPattern-static_value-input', '1000');
       await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.openDimensionEditor(
         'lnsGauge_maxDimensionPanel > lns-empty-dimension-suggested-value'
       );
-
-      await testSubjects.setValue('lns-indexPattern-static_value-input', '25000', {
-        clearWithKeyboard: true,
-      });
+      await PageObjects.lens.retrySetValue('lns-indexPattern-static_value-input', '25000');
       await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.closeDimensionEditor();
 
