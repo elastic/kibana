@@ -63,6 +63,6 @@ describe('fetchLicenses', () => {
     const index = '.monitoring-es-*';
     await fetchLicenses(esClient, clusters, index);
     const params = esClient.search.mock.calls[0][0] as any;
-    expect(params?.body?.query.bool.filter[3].range.timestamp.gte).toBe('now-2m');
+    expect(params?.body?.query.bool.filter[2].range.timestamp.gte).toBe('now-2m');
   });
 });

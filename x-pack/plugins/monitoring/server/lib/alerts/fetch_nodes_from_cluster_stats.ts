@@ -7,6 +7,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, AlertClusterStatsNodes } from '../../../common/types/alerts';
 import { ElasticsearchSource } from '../../../common/types/es';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 function formatNode(
   nodes: NonNullable<NonNullable<ElasticsearchSource['cluster_state']>['nodes']> | undefined
@@ -45,16 +46,7 @@ export async function fetchNodesFromClusterStats(
       query: {
         bool: {
           filter: [
-            {
-              term: {
-                type: 'cluster_stats',
-              },
-            },
-            {
-              term: {
-                'data_stream.dataset': 'elasticsearch.cluster_stats',
-              },
-            },
+            createDatasetFilter('cluster_stats', 'elasticsearch.cluster_stats'),
             {
               range: {
                 timestamp: {

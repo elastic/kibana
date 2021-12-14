@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 interface RangeFilter {
   [field: string]: {
@@ -33,11 +34,7 @@ export async function fetchClusters(
       query: {
         bool: {
           filter: [
-            {
-              term: {
-                type: 'cluster_stats',
-              },
-            },
+            createDatasetFilter('cluster_stats', 'elasticsearch.cluster_stats'),
             {
               range: rangeFilter,
             },

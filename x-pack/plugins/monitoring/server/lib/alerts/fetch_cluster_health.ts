@@ -7,6 +7,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, AlertClusterHealth } from '../../../common/types/alerts';
 import { ElasticsearchSource, ElasticsearchResponse } from '../../../common/types/es';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 export async function fetchClusterHealth(
   esClient: ElasticsearchClient,
@@ -39,16 +40,7 @@ export async function fetchClusterHealth(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            {
-              term: {
-                'data_stream.dataset': 'elasticsearch.cluster_stats',
-              },
-            },
-            {
-              term: {
-                type: 'cluster_stats',
-              },
-            },
+            createDatasetFilter('cluster_stats', 'elasticsearch.cluster_stats'),
             {
               range: {
                 timestamp: {

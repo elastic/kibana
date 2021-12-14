@@ -7,6 +7,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 interface ESAggResponse {
   key: string;
@@ -32,16 +33,7 @@ export async function fetchKibanaVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            {
-              term: {
-                'data_stream.dataset': 'kibana.stats',
-              },
-            },
-            {
-              term: {
-                type: 'kibana_stats',
-              },
-            },
+            createDatasetFilter('kibana_stats', 'kibana.stats'),
             {
               range: {
                 timestamp: {

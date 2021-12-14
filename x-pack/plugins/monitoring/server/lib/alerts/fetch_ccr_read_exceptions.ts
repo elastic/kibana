@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { CCRReadExceptionsStats } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 export async function fetchCCRReadExceptions(
   esClient: ElasticsearchClient,
@@ -35,16 +36,7 @@ export async function fetchCCRReadExceptions(
                 },
               },
             },
-            {
-              term: {
-                'data_stream.dataset': 'elasticsearch.ccr',
-              },
-            },
-            {
-              term: {
-                type: 'ccr_stats',
-              },
-            },
+            createDatasetFilter('ccr_stats', 'elasticsearch.ccr'),
             {
               range: {
                 timestamp: {

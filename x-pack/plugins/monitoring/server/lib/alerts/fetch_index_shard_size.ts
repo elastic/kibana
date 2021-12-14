@@ -10,6 +10,7 @@ import { AlertCluster, IndexShardSizeStats } from '../../../common/types/alerts'
 import { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../common/types/es';
 import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
 import { Globals } from '../../static_globals';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 type TopHitType = ElasticsearchResponseHit & {
   _source: { index_stats?: Partial<ElasticsearchIndexStats> };
@@ -42,11 +43,7 @@ export async function fetchIndexShardSize(
       query: {
         bool: {
           must: [
-            {
-              match: {
-                type: 'index_stats',
-              },
-            },
+            createDatasetFilter('index_stats', 'elasticsearch.index'),
             {
               range: {
                 timestamp: {

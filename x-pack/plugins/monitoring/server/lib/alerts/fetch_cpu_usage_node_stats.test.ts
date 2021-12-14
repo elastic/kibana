@@ -213,8 +213,15 @@ describe('fetchCpuUsageNodeStats', () => {
           bool: {
             filter: [
               { terms: { cluster_uuid: ['abc123'] } },
-              { term: { 'data_stream.dataset': 'elasticsearch.node_stats' } },
-              { term: { type: 'node_stats' } },
+              {
+                bool: {
+                  should: [
+                    { term: { type: 'node_stats' } },
+                    { term: { 'data_stream.dataset': 'elasticsearch.node_stats' } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
               { range: { timestamp: { format: 'epoch_millis', gte: 0, lte: 0 } } },
               {
                 bool: { should: [{ exists: { field: 'cluster_uuid' } }], minimum_should_match: 1 },

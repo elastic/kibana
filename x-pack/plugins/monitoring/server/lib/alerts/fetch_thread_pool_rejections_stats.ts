@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertThreadPoolRejectionsStats } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 const invalidNumberValue = (value: number) => {
   return isNaN(value) || value === undefined || value === null;
@@ -53,16 +54,7 @@ export async function fetchThreadPoolRejectionStats(
                 cluster_uuid: clustersIds,
               },
             },
-            {
-              term: {
-                'data_stream.dataset': 'elasticsearch.node_stats',
-              },
-            },
-            {
-              term: {
-                type: 'node_stats',
-              },
-            },
+            createDatasetFilter('node_stats', 'elasticsearch.node_stats'),
             {
               range: {
                 timestamp: {

@@ -10,6 +10,7 @@ import { get } from 'lodash';
 import moment from 'moment';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../common/constants';
 import { AlertCluster, AlertCpuUsageNodeStats } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 interface NodeBucketESResponse {
   key: string;
@@ -48,16 +49,7 @@ export async function fetchCpuUsageNodeStats(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            {
-              term: {
-                'data_stream.dataset': 'elasticsearch.node_stats',
-              },
-            },
-            {
-              term: {
-                type: 'node_stats',
-              },
-            },
+            createDatasetFilter('node_stats', 'elasticsearch.node_stats'),
             {
               range: {
                 timestamp: {
