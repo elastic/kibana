@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
+import {
+  DEFAULT_REPOSITORY_TYPES,
+  REPOSITORY_PLUGINS_MAP,
+  REPOSITORY_TYPES,
+} from '../../../common';
 import { addBasePath } from '../helpers';
 import { registerRepositoriesRoutes } from './repositories';
 import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
@@ -32,7 +36,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
   const getClusterSettingsFn = router.getMockApiFn('cluster.getSettings');
   const getSnapshotFn = router.getMockApiFn('snapshot.get');
   const verifyRepoFn = router.getMockApiFn('snapshot.verifyRepository');
-  const catPluginsFn = router.getMockApiFn('cat.plugins');
+  const nodesInfoFn = router.getMockApiFn('nodes.info');
 
   beforeAll(() => {
     registerRepositoriesRoutes({
@@ -253,38 +257,60 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       path: addBasePath('repository_types'),
     };
 
-    it('should return default types if no repository plugins returned from ES', async () => {
-      catPluginsFn.mockResolvedValue({ body: {} });
+    it('returns default types if no repository plugins returned from ES', async () => {
+      nodesInfoFn.mockResolvedValue({ body: { nodes: { testNodeId: { plugins: [] } } } });
 
       const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
 
-    it('should return default types with any repository plugins returned from ES', async () => {
+    it('returns default types with any repository plugins returned from ES', async () => {
       const pluginNames = Object.keys(REPOSITORY_PLUGINS_MAP);
       const pluginTypes = Object.entries(REPOSITORY_PLUGINS_MAP).map(([key, value]) => value);
 
-      const mockEsResponse = [...pluginNames.map((key) => ({ component: key }))];
-      catPluginsFn.mockResolvedValue({ body: mockEsResponse });
+      const mockEsResponse = {
+        nodes: { testNodeId: { plugins: [...pluginNames.map((key) => ({ name: key }))] } },
+      };
+      nodesInfoFn.mockResolvedValue({ body: mockEsResponse });
 
       const expectedResponse = [...DEFAULT_REPOSITORY_TYPES, ...pluginTypes];
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
 
-    it('should not return non-repository plugins returned from ES', async () => {
+    it(`doesn't return non-repository plugins returned from ES`, async () => {
       const pluginNames = ['foo-plugin', 'bar-plugin'];
-      const mockEsResponse = [...pluginNames.map((key) => ({ component: key }))];
-      catPluginsFn.mockResolvedValue({ body: mockEsResponse });
+      const mockEsResponse = {
+        nodes: { testNodeId: { plugins: [...pluginNames.map((key) => ({ name: key }))] } },
+      };
+      nodesInfoFn.mockResolvedValue({ body: mockEsResponse });
 
       const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
 
-    it('should throw if ES error', async () => {
-      catPluginsFn.mockRejectedValueOnce(new Error('Error getting plugins'));
+    it(`doesn't return repository plugins that are not installed on all nodes`, async () => {
+      const dataNodePlugins = ['repository-s3', 'repository-azure'];
+      const masterNodePlugins = ['repository-azure'];
+      const mockEsResponse = {
+        nodes: {
+          dataNode: { plugins: [...dataNodePlugins.map((key) => ({ name: key }))] },
+          masterNode: { plugins: [...masterNodePlugins.map((key) => ({ name: key }))] },
+        },
+      };
+      nodesInfoFn.mockResolvedValue({ body: mockEsResponse });
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError('Error getting plugins');
+      const expectedResponse = [...DEFAULT_REPOSITORY_TYPES, REPOSITORY_TYPES.azure];
+
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+    });
+
+    it('should throw if ES error', async () => {
+      nodesInfoFn.mockRejectedValueOnce(new Error('Error getting cluster stats'));
+
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError(
+        'Error getting cluster stats'
+      );
     });
   });
 
