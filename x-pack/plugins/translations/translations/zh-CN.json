@@ -1806,7 +1806,6 @@
     "discover.noMatchRoute.bannerTitleText": "未找到页面",
     "discover.noResults.adjustFilters": "调整您的筛选",
     "discover.noResults.adjustSearch": "调整您的查询",
-    "discover.noResults.disableFilters": "正临时禁用筛选",
     "discover.noResults.expandYourTimeRangeTitle": "展开时间范围",
     "discover.noResults.queryMayNotMatchTitle": "尝试搜索更长的时间段。",
     "discover.noResults.searchExamples.noResultsBecauseOfError": "检索搜索结果时遇到问题",
