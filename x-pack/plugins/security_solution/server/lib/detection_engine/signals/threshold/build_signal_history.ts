@@ -22,8 +22,6 @@ const getTerms = (alert: SimpleHit) => {
       string,
       Record<string, string[]>
     >;
-    console.log('threshold params');
-    console.log(JSON.stringify(parameters));
     return parameters.threshold.field.map((field) => ({
       field,
       value: alert._source[field] as string,
