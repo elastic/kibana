@@ -18,6 +18,7 @@ export interface UseTraceQueryState {
   setQuery: (query: TraceSearchQuery) => void;
   commit: () => void;
   cancel: () => void;
+  next: () => void;
   traceSearchState?: TraceSearchState;
   traceSearchStateLoading?: boolean;
 }
@@ -27,7 +28,10 @@ export function useTraceQuery(defaults: TraceSearchQuery): UseTraceQueryState {
 
   const { core } = useApmPluginContext();
 
-  const [committedQuery, setCommittedQuery] = useState(query);
+  const [committedQuery, setCommittedQuery] = useState({
+    ...query,
+    pageIndex: 0,
+  });
 
   const [traceSearchState, setTraceSearchState] = useState<
     TraceSearchState | undefined
@@ -73,6 +77,7 @@ export function useTraceQuery(defaults: TraceSearchQuery): UseTraceQueryState {
             environment,
             type: committedQuery.type,
             query: committedQuery.query,
+            pageIndex: committedQuery.pageIndex,
           },
         },
         signal: controller.signal,
@@ -107,7 +112,20 @@ export function useTraceQuery(defaults: TraceSearchQuery): UseTraceQueryState {
     query,
     setQuery,
     commit: () => {
-      setCommittedQuery({ ...query });
+      setCommittedQuery({
+        ...query,
+        pageIndex:
+          query.type === committedQuery.type &&
+          query.query === committedQuery.query
+            ? committedQuery.pageIndex
+            : 0,
+      });
+    },
+    next: () => {
+      setCommittedQuery({
+        ...committedQuery,
+        pageIndex: committedQuery.pageIndex + 1,
+      });
     },
     cancel: () => {
       if (abortControllerRef.current) {

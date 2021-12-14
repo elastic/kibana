@@ -55,6 +55,12 @@ function getComponentProps(queryState: UseTraceQueryState) {
     onCancelClick: () => {
       queryState.cancel();
     },
+    hasNext:
+      queryState.traceSearchState?.isPartial === false &&
+      queryState.traceSearchState?.pagination.after,
+    onNextClick: () => {
+      queryState.next();
+    },
   };
 }
 

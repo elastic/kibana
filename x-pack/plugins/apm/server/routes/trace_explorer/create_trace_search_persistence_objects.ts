@@ -15,6 +15,8 @@ import {
 import { APM_TRACE_SEARCH_TASK_TYPE_NAME } from '../../lib/trace_explorer/constants';
 import { TraceDataSearchSavedObjectType } from '../../saved_objects/apm_trace_data_search';
 import { formatTraceDataForSavedObject } from './format_trace_data_for_saved_object';
+import { getTraceSearchTaskId } from './get_task_id';
+import { getTraceSearchResult } from './get_trace_search_result';
 
 export async function createTraceSearchPersistenceObjects({
   id,
@@ -35,10 +37,10 @@ export async function createTraceSearchPersistenceObjects({
     isError: false,
     error: undefined,
     data: undefined,
-    pageIndex: 0,
+    pageIndex: params.pageIndex,
   };
 
-  const traceSearchState: TraceSearchState = {
+  let traceSearchState: TraceSearchState = {
     params,
     apiKey,
     isRunning: true,
@@ -58,28 +60,61 @@ export async function createTraceSearchPersistenceObjects({
     },
     foundTraceCount: 0,
     pagination: {
-      after: null,
+      after: undefined,
       pageIndex: 0,
     },
   };
 
-  await savedObjectsClient.create<TraceDataSearchSavedObjectType>(
-    APM_TRACE_DATA_SEARCH_SAVED_OBJECT_TYPE,
-    formatTraceDataForSavedObject(traceSearchState),
-    {
-      id,
-    }
-  );
+  if (params.pageIndex > 0) {
+    const prevResult = await getTraceSearchResult({
+      id: getTraceSearchTaskId({
+        ...params,
+        pageIndex: params.pageIndex - 1,
+      }),
+      savedObjectsClient,
+    });
 
-  const task = await taskManagerStart.schedule({
-    id,
-    params: {
-      ...params,
-      apiKey,
-    },
-    state: {},
-    taskType: APM_TRACE_SEARCH_TASK_TYPE_NAME,
-  });
+    if (!prevResult) {
+      throw new Error('Could not retrieve previous page of traces');
+    }
+
+    if (prevResult.isRunning) {
+      throw new Error('Previous page is still being fetched');
+    }
+
+    if (prevResult.isError) {
+      throw new Error('Previous page is incomplete or failed partially');
+    }
+
+    traceSearchState = {
+      ...traceSearchState,
+      foundTraceCount: prevResult.foundTraceCount,
+      fragments: prevResult.fragments,
+      pagination: {
+        ...prevResult.pagination,
+        after: prevResult.pagination.after,
+      },
+    };
+  }
+
+  const [, task] = await Promise.all([
+    savedObjectsClient.create<TraceDataSearchSavedObjectType>(
+      APM_TRACE_DATA_SEARCH_SAVED_OBJECT_TYPE,
+      formatTraceDataForSavedObject(traceSearchState),
+      {
+        id,
+      }
+    ),
+    taskManagerStart.schedule({
+      id,
+      params: {
+        ...params,
+        apiKey,
+      },
+      state: {},
+      taskType: APM_TRACE_SEARCH_TASK_TYPE_NAME,
+    }),
+  ]);
 
   return {
     task,

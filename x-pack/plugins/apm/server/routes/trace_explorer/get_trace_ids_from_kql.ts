@@ -9,6 +9,7 @@ import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
 import { Environment } from '../../../common/environment_rt';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -19,6 +20,7 @@ export async function getTraceIdsFromKql({
   environment,
   start,
   end,
+  after,
 }: {
   apmEventClient: APMEventClient;
   query: string;
@@ -26,7 +28,8 @@ export async function getTraceIdsFromKql({
   environment: Environment;
   start: number;
   end: number;
-}): Promise<string[]> {
+  after: Record<string, any> | undefined;
+}) {
   const response = await apmEventClient.search('get_trace_ids_from_kql', {
     apm: {
       events: [
@@ -53,22 +56,27 @@ export async function getTraceIdsFromKql({
       size: 0,
       aggs: {
         trace_id: {
-          terms: {
-            field: TRACE_ID,
+          composite: {
+            sources: asMutableArray([
+              { traceId: { terms: { field: TRACE_ID } } },
+            ] as const),
             size: numTraceIds,
-            order: {
-              _key: 'asc' as const,
-            },
-            execution_hint: 'map',
+            ...(after ? { after } : {}),
           },
         },
       },
     },
   });
 
-  return (
+  const traceIds =
     response.aggregations?.trace_id.buckets.map(
-      (bucket) => bucket.key as string
-    ) ?? []
-  );
+      (bucket) => bucket.key.traceId as string
+    ) ?? [];
+
+  return {
+    traceIds,
+    after: traceIds.length
+      ? response.aggregations!.trace_id.after_key
+      : undefined,
+  };
 }

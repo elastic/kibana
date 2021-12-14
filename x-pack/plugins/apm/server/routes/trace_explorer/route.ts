@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { toNumberRt } from '@kbn/io-ts-utils/to_number_rt';
 import * as t from 'io-ts';
 import { environmentRt } from '../../../common/environment_rt';
 import { TraceSearchType } from '../../../common/trace_explorer';
@@ -24,6 +25,7 @@ const traceExplorerDataRoute = createApmServerRoute({
           t.literal(TraceSearchType.eql),
         ]),
         query: t.string,
+        pageIndex: toNumberRt,
       }),
     ]),
   }),
@@ -41,7 +43,7 @@ const traceExplorerDataRoute = createApmServerRoute({
 
     const {
       params: {
-        query: { start, end, environment, type, query },
+        query: { start, end, environment, type, query, pageIndex },
       },
     } = resources;
 
@@ -54,6 +56,7 @@ const traceExplorerDataRoute = createApmServerRoute({
           start,
           end,
           pageSize: 1000,
+          pageIndex,
         },
         request,
         savedObjectsClient: coreStart.savedObjects.getScopedClient(request),

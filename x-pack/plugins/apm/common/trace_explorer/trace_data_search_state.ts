@@ -30,6 +30,7 @@ export interface TraceSearchParams {
   start: number;
   end: number;
   pageSize: number;
+  pageIndex: number;
 }
 
 export interface TraceSearchState {
@@ -40,7 +41,7 @@ export interface TraceSearchState {
   isError: boolean;
   error: string | undefined;
   pagination: {
-    after: string | null;
+    after: Record<string, any> | undefined;
     pageIndex: number;
   };
   foundTraceCount: number;

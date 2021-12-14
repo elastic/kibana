@@ -136,11 +136,16 @@ export async function registerTraceSearchTaskType({
                 fragments: nextFragments,
               } as TraceSearchState;
             });
-            let traceIds: string[] = [];
+
+            let traceIdsResponse: {
+              after: Record<string, any> | undefined;
+              traceIds: string[];
+            };
+
             let errorMessage: string | undefined;
 
             try {
-              traceIds =
+              traceIdsResponse =
                 type === TraceSearchType.eql
                   ? await getTraceIdsFromEql({
                       start,
@@ -149,6 +154,7 @@ export async function registerTraceSearchTaskType({
                       query,
                       numTraceIds,
                       apmEventClient,
+                      after: traceState.pagination.after,
                     })
                   : await getTraceIdsFromKql({
                       start,
@@ -157,11 +163,17 @@ export async function registerTraceSearchTaskType({
                       query,
                       numTraceIds,
                       apmEventClient,
+                      after: traceState.pagination.after,
                     });
             } catch (err) {
-              traceIds = [];
+              traceIdsResponse = {
+                after: undefined,
+                traceIds: [],
+              };
               errorMessage = err.toString();
             }
+
+            const traceIds = traceIdsResponse.traceIds;
 
             if (!traceIds.length) {
               await updateTraceState((prev) => {
@@ -174,6 +186,10 @@ export async function registerTraceSearchTaskType({
                   })) as any,
                   isError: !!errorMessage,
                   error: errorMessage,
+                  pagination: {
+                    ...prev.pagination,
+                    after: traceIdsResponse.after,
+                  },
                 };
               });
               return {
@@ -181,9 +197,13 @@ export async function registerTraceSearchTaskType({
               };
             }
 
-            await updateTraceState((prev) => ({
+            updateTraceState((prev) => ({
               ...prev,
               foundTraceCount: traceIds.length + prev.foundTraceCount,
+              pagination: {
+                ...prev.pagination,
+                after: traceIdsResponse.after,
+              },
             }));
 
             const fetches: Record<string, Promise<any>> = {
@@ -261,21 +281,23 @@ export async function registerTraceSearchTaskType({
               );
             }
 
-            await Promise.all(promises);
-
-            await updateTraceState((prev) => {
-              return {
-                ...prev,
-                isRunning: false,
-                isPartial: false,
-                isError: Object.values(prev.fragments).some(
-                  (fragment) => fragment.isError
-                ),
-                error: Object.values(prev.fragments).find(
-                  (fragment) => fragment.isError
-                )?.error,
-              };
-            });
+            await Promise.all(
+              promises.concat(
+                updateTraceState((prev) => {
+                  return {
+                    ...prev,
+                    isRunning: false,
+                    isPartial: false,
+                    isError: Object.values(prev.fragments).some(
+                      (fragment) => fragment.isError
+                    ),
+                    error: Object.values(prev.fragments).find(
+                      (fragment) => fragment.isError
+                    )?.error,
+                  };
+                })
+              )
+            );
 
             return {
               state: {},

@@ -26,8 +26,10 @@ interface Props {
   onCancelClick: () => void;
   onQueryChange: (query: TraceSearchQuery) => void;
   onQueryCommit: () => void;
+  onNextClick: () => void;
   title: React.ReactElement;
   loading: boolean;
+  hasNext: boolean;
 }
 
 export function TraceSearchBox({
@@ -35,11 +37,13 @@ export function TraceSearchBox({
   onQueryChange,
   onQueryCommit,
   onCancelClick,
+  onNextClick,
   title,
   message,
   error,
   disabled,
   loading,
+  hasNext,
 }: Props) {
   const { dataView } = useDynamicDataViewFetcher();
 
@@ -156,13 +160,21 @@ export function TraceSearchBox({
                   isLoading={loading}
                   isDisabled={loading || disabled}
                   onClick={() => {
-                    onQueryCommit();
+                    if (hasNext) {
+                      onNextClick();
+                    } else {
+                      onQueryCommit();
+                    }
                   }}
                   iconType="search"
                 >
-                  {i18n.translate('xpack.apm.traceSearchBox.refreshButton', {
-                    defaultMessage: 'Search',
-                  })}
+                  {hasNext
+                    ? i18n.translate('xpack.apm.traceSearchBox.moreButton', {
+                        defaultMessage: 'Load more',
+                      })
+                    : i18n.translate('xpack.apm.traceSearchBox.refreshButton', {
+                        defaultMessage: 'Search',
+                      })}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
