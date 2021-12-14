@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, Component } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiPanel } from '@elastic/eui';
 
