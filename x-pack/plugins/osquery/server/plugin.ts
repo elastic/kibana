@@ -30,6 +30,7 @@ import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_c
 import { ConfigType } from './config';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../common/types';
 import { PLUGIN_ID } from '../common';
+import { TelemetryEventsSender } from './telemetry/sender';
 
 const registerFeatures = (features: SetupPlugins['features']) => {
   features.registerKibanaFeature({
@@ -205,10 +206,12 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   private readonly logger: Logger;
   private context: PluginInitializerContext;
   private readonly osqueryAppContextService = new OsqueryAppContextService();
+  private readonly telemetryEventsSender: TelemetryEventsSender;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.context = initializerContext;
     this.logger = initializerContext.logger.get();
+    this.telemetryEventsSender = new TelemetryEventsSender(this.logger.get('telemetry_events'));
   }
 
   public setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
@@ -225,6 +228,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       service: this.osqueryAppContextService,
       config: (): ConfigType => config,
       security: plugins.security,
+      telemetryEventsSender: new TelemetryEventsSender(this.logger.get('telemetry_events')),
     };
 
     initSavedObjects(core.savedObjects);
@@ -240,6 +244,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
       plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
     });
+
+    osqueryContext.telemetryEventsSender.setup(plugins.telemetry);
 
     return {};
   }
@@ -257,11 +263,14 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       registerIngestCallback,
     });
 
+    this.telemetryEventsSender.start(plugins.telemetry, core);
+
     return {};
   }
 
   public stop() {
     this.logger.debug('osquery: Stopped');
     this.osqueryAppContextService.stop();
+    this.telemetryEventsSender.stop();
   }
 }
