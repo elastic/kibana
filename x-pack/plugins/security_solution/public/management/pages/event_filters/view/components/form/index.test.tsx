@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EventFiltersForm, EventFiltersFormProps } from '.';
+import { EventFiltersForm } from '.';
 import { RenderResult, act } from '@testing-library/react';
 import { fireEvent, waitFor } from '@testing-library/dom';
 import { stubIndexPattern } from 'src/plugins/data/common/stubs';
@@ -30,7 +30,7 @@ describe('Event filter form', () => {
   let component: RenderResult;
   let mockedContext: AppContextTestRender;
   let render: (
-    props?: Partial<EventFiltersFormProps>
+    props?: Partial<React.ComponentProps<typeof EventFiltersForm>>
   ) => ReturnType<AppContextTestRender['render']>;
   let renderWithData: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let getState: () => EventFiltersListPageState;
@@ -41,7 +41,9 @@ describe('Event filter form', () => {
     policiesRequest = await sendGetEndpointSpecificPackagePoliciesMock();
     getState = () => mockedContext.store.getState().management.eventFilters;
     render = (props) =>
-      mockedContext.render(<EventFiltersForm policies={policiesRequest.items} {...props} />);
+      mockedContext.render(
+        <EventFiltersForm policies={policiesRequest.items} arePoliciesLoading={false} {...props} />
+      );
     renderWithData = async () => {
       const renderResult = render();
       const entry = getInitialExceptionFromEvent(ecsEventMock());
@@ -82,6 +84,13 @@ describe('Event filter form', () => {
     component = await renderWithData();
 
     expect(component.getByTestId('exceptionsBuilderWrapper')).not.toBeNull();
+  });
+
+  it('should displays loader when policies are still loading', () => {
+    component = render({ arePoliciesLoading: true });
+
+    expect(component.queryByTestId('exceptionsBuilderWrapper')).toBeNull();
+    expect(component.getByTestId('loading-spinner')).not.toBeNull();
   });
 
   it('should display sections', async () => {
@@ -167,6 +176,13 @@ describe('Event filter form', () => {
     userEvent.click(component.getByTestId('perPolicy'));
     userEvent.click(component.getByTestId(`policy-${policyId}`));
     expect(getState().form.entry?.tags).toEqual([`policy:${policyId}`]);
+  });
+
+  it('should have global policy by default', async () => {
+    component = await renderWithData();
+
+    expect(component.getByTestId('globalPolicy')).toBeChecked();
+    expect(component.getByTestId('perPolicy')).not.toBeChecked();
   });
 
   it('should retain the previous policy selection when switching from per-policy to global', async () => {

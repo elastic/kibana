@@ -56,12 +56,13 @@ const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.LINUX,
 ];
 
-export interface EventFiltersFormProps {
+interface EventFiltersFormProps {
   allowSelectOs?: boolean;
   policies: PolicyData[];
+  arePoliciesLoading: boolean;
 }
 export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
-  ({ allowSelectOs = false, policies }) => {
+  ({ allowSelectOs = false, policies, arePoliciesLoading }) => {
     const { http, data } = useKibana().services;
 
     const dispatch = useDispatch<Dispatch<AppAction>>();
@@ -103,6 +104,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
                     name: exception?.name ?? '',
                     comments: exception?.comments ?? [],
                     os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
+                    tags: exception?.tags ?? [],
                   },
                   hasItemsError: arg.errorExists || !arg.exceptionItems[0]?.entries?.length,
                 }
@@ -112,7 +114,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           },
         });
       },
-      [dispatch, exception?.name, exception?.comments, exception?.os_types]
+      [dispatch, exception?.name, exception?.comments, exception?.os_types, exception?.tags]
     );
 
     const handleOnChangeName = useCallback(
@@ -354,7 +356,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
       [commentsInputMemo]
     );
 
-    return !isIndexPatternLoading && exception ? (
+    return !isIndexPatternLoading && exception && !arePoliciesLoading ? (
       <EuiForm component="div">
         {detailsSection}
         <EuiHorizontalRule />
