@@ -186,11 +186,11 @@ export const getListHandler: RequestHandler = async (context, request, response)
 
       const { maxIngestedTimestamp } = dataStreamAggs as Record<
         string,
-        estypes.AggregationsValueAggregate
+        estypes.AggregationsRateAggregate
       >;
       const { dataset, namespace, type } = dataStreamAggs as Record<
         string,
-        estypes.AggregationsMultiBucketAggregate<{ key?: string; value?: number }>
+        estypes.AggregationsMultiBucketAggregateBase<{ key?: string; value?: number }>
       >;
 
       // some integrations e.g custom logs don't have event.ingested
@@ -198,9 +198,12 @@ export const getListHandler: RequestHandler = async (context, request, response)
         dataStreamResponse.last_activity_ms = maxIngestedTimestamp?.value;
       }
 
-      dataStreamResponse.dataset = dataset.buckets[0]?.key || '';
-      dataStreamResponse.namespace = namespace.buckets[0]?.key || '';
-      dataStreamResponse.type = type.buckets[0]?.key || '';
+      dataStreamResponse.dataset =
+        (dataset.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
+      dataStreamResponse.namespace =
+        (namespace.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
+      dataStreamResponse.type =
+        (type.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
 
       // Find package saved object
       const pkgName = dataStreamResponse.package;
