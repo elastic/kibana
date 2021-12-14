@@ -9,7 +9,7 @@ import { ChartsPluginSetup } from '../../../charts/public';
 import { CoreSetup, CoreStart } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
 import { gaugeFunction } from '../common';
-import { setFormatService, setPaletteService, setThemeService } from './services';
+import { setFormatService, setThemeService } from './services';
 import { gaugeRenderer } from './expression_renderers';
 import type { FieldFormatsStart } from '../../../field_formats/public';
 
@@ -27,9 +27,6 @@ export interface ExpressionGaugePluginStart {
 /** @internal */
 export class ExpressionGaugePlugin {
   public setup(core: CoreSetup, { expressions, charts }: ExpressionGaugePluginSetup) {
-    charts.palettes.getPalettes().then((palettes) => {
-      setPaletteService(palettes);
-    });
     setThemeService(charts.theme);
     expressions.registerFunction(gaugeFunction);
     expressions.registerRenderer(gaugeRenderer({ theme: core.theme }));

@@ -7,10 +7,7 @@
  */
 
 import { createGetterSetter } from '../../../../kibana_utils/public';
-import { PaletteRegistry, ChartsPluginSetup } from '../../../../charts/public';
-
-export const [getPaletteService, setPaletteService] =
-  createGetterSetter<PaletteRegistry>('palette');
+import { ChartsPluginSetup } from '../../../../charts/public';
 
 export const [getThemeService, setThemeService] =
   createGetterSetter<ChartsPluginSetup['theme']>('charts.theme');

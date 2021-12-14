@@ -54,7 +54,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       default: 'none',
       options: ['none', 'palette'],
       help: i18n.translate('expressionGauge.functions.colorMode.help', {
-        defaultMessage: 'Which part of gauge to color',
+        defaultMessage: 'If set to palette, the palette colors will be applied to the bands',
       }),
     },
     palette: {

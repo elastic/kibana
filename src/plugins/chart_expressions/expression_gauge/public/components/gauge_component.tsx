@@ -10,7 +10,12 @@ import { Chart, Goal, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CustomPaletteState } from '../../../../charts/public';
 import { EmptyPlaceholder } from '../../../../charts/public';
-import type { GaugeRenderProps, GaugeLabelMajorMode, GaugeTicksPosition } from '../../common';
+import {
+  GaugeRenderProps,
+  GaugeLabelMajorMode,
+  GaugeTicksPosition,
+  GaugeLabelMajorModes,
+} from '../../common';
 import { GaugeShapes, GaugeTicksPositions } from '../../common';
 import { GaugeIconVertical, GaugeIconHorizontal } from './gauge_icon';
 import { getMaxValue, getMinValue, getValueFromAccessor } from './utils';
@@ -56,12 +61,12 @@ function getTitle(
   labelMajor?: string,
   fallbackTitle?: string
 ) {
-  if (labelMajorMode === 'none') {
+  if (labelMajorMode === GaugeLabelMajorModes.none) {
     return '';
-  } else if (labelMajorMode === 'auto') {
-    return `${fallbackTitle || ''}   `;
+  } else if (labelMajorMode === GaugeLabelMajorModes.auto) {
+    return `${fallbackTitle || ''}   `; // added extra space for nice rendering
   }
-  return `${labelMajor || fallbackTitle || ''}   `;
+  return `${labelMajor || fallbackTitle || ''}   `; // added extra space for nice rendering
 }
 
 // TODO: once charts handle not displaying labels when there's no space for them, it's safe to remove this
@@ -119,7 +124,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     const chartTheme = chartsThemeService.useChartsTheme();
 
     const table = data;
-    // const table = Object.values(data.tables)[0];
     const metricColumn = table.columns.find((col) => col.id === metricAccessor);
 
     const chartData = table.rows.filter(
@@ -206,7 +210,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
               : () => `rgba(255,255,255,0)`
           }
           labelMajor={getTitle(labelMajorMode, labelMajor, metricColumn?.name)}
-          labelMinor={labelMinor ? labelMinor + '  ' : ''}
+          labelMinor={labelMinor ? labelMinor + '  ' : ''} // added extra space for nice rendering
         />
       </Chart>
     );

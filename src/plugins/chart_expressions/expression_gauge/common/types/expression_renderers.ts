@@ -15,7 +15,6 @@ export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 export type GaugeRenderProps = GaugeExpressionProps & {
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginSetup['theme'];
-  paletteService: PaletteRegistry;
 };
 
 export interface ColorStop {
