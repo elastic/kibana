@@ -37,18 +37,6 @@ export const getDuplicateFields = (entries: ConditionEntry[]) => {
 const WIN_EXEC_PATH = /\\(\w+\.\w+)$/i;
 const UNIX_EXEC_PATH = /\/\w+\.*\w*$/i;
 
-export const getExecutableName = ({
-  os,
-  value,
-}: {
-  os: OperatingSystem;
-  value: string;
-}): string => {
-  const execName =
-    os === OperatingSystem.WINDOWS ? value.match(WIN_EXEC_PATH) : value.match(UNIX_EXEC_PATH);
-  return execName ? execName[0].replaceAll(/\/|\\/gi, '') : '';
-};
-
 export const hasSimpleExecutableName = ({
   os,
   type,

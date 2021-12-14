@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import { createHash } from 'crypto';
 import type {
   Entry,
@@ -39,10 +40,7 @@ import {
   WrappedTranslatedExceptionList,
   wrappedTranslatedExceptionList,
 } from '../../schemas';
-import {
-  hasSimpleExecutableName,
-  getExecutableName,
-} from '../../../../common/endpoint/service/trusted_apps/validations';
+import { hasSimpleExecutableName } from '../../../../common/endpoint/service/trusted_apps/validations';
 
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
@@ -303,7 +301,7 @@ function appendProcessNameEntry({
         TranslatedEntryMatcher,
         'exact_caseless' | 'exact_cased'
       >,
-      value: getExecutableName({ os: os as OperatingSystem, value: entry.value }),
+      value: os === 'windows' ? path.win32.basename(entry.value) : path.posix.basename(entry.value),
     },
   ].reduce<TranslatedPerformantEntries>((p, c) => {
     p.push(c);
