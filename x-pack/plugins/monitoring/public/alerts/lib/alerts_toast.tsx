@@ -8,6 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiLink } from '@elastic/eui';
+import type { Observable } from 'rxjs';
+import type { CoreTheme } from 'kibana/public';
 import { Legacy } from '../../legacy_shims';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -17,7 +19,7 @@ export interface EnableAlertResponse {
   disabledWatcherClusterAlerts?: boolean;
 }
 
-const showApiKeyAndEncryptionError = () => {
+const showApiKeyAndEncryptionError = (theme$?: Observable<CoreTheme>) => {
   const settingsUrl = Legacy.shims.docLinks.links.alerting.generalSettings;
 
   Legacy.shims.toastNotifications.addWarning({
@@ -39,12 +41,12 @@ const showApiKeyAndEncryptionError = () => {
           })}
         </EuiLink>
       </div>,
-      Legacy.shims.kibanaServices.theme
+      { theme$ }
     ),
   });
 };
 
-const showUnableToDisableWatcherClusterAlertsError = () => {
+const showUnableToDisableWatcherClusterAlertsError = (theme$?: Observable<CoreTheme>) => {
   const settingsUrl = Legacy.shims.docLinks.links.alerting.generalSettings;
 
   Legacy.shims.toastNotifications.addWarning({
@@ -66,7 +68,7 @@ const showUnableToDisableWatcherClusterAlertsError = () => {
           })}
         </EuiLink>
       </div>,
-      Legacy.shims.kibanaServices.theme
+      { theme$ }
     ),
   });
 };
@@ -84,14 +86,14 @@ const showDisabledWatcherClusterAlertsError = () => {
   });
 };
 
-export const showAlertsToast = (response: EnableAlertResponse) => {
+export const showAlertsToast = (response: EnableAlertResponse, theme$?: Observable<CoreTheme>) => {
   const { isSufficientlySecure, hasPermanentEncryptionKey, disabledWatcherClusterAlerts } =
     response;
 
   if (isSufficientlySecure === false || hasPermanentEncryptionKey === false) {
-    showApiKeyAndEncryptionError();
+    showApiKeyAndEncryptionError(theme$);
   } else if (disabledWatcherClusterAlerts === false) {
-    showUnableToDisableWatcherClusterAlertsError();
+    showUnableToDisableWatcherClusterAlertsError(theme$);
   } else if (disabledWatcherClusterAlerts === true) {
     showDisabledWatcherClusterAlertsError();
   }
