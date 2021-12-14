@@ -9,9 +9,9 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import React, { useState } from 'react';
-import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
-import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
-import { useTheme } from '../../../../../../hooks/use_theme';
+import { callApmApi } from '../../../../../services/rest/createCallApmApi';
+import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import { useTheme } from '../../../../../hooks/use_theme';
 
 interface Props {
   onDelete: () => void;
@@ -36,7 +36,7 @@ export function DeleteButton({ onDelete, customLinkId }: Props) {
       }}
       style={{ marginRight: theme.eui.euiSize }}
     >
-      {i18n.translate('xpack.apm.settings.customizeUI.customLink.delete', {
+      {i18n.translate('xpack.apm.settings.customLink.delete', {
         defaultMessage: 'Delete',
       })}
     </EuiButtonEmpty>
@@ -57,18 +57,16 @@ async function deleteConfig(
     });
     toasts.addSuccess({
       iconType: 'trash',
-      title: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.delete.successed',
-        { defaultMessage: 'Deleted custom link.' }
-      ),
+      title: i18n.translate('xpack.apm.settings.customLink.delete.successed', {
+        defaultMessage: 'Deleted custom link.',
+      }),
     });
   } catch (error) {
     toasts.addDanger({
       iconType: 'cross',
-      title: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.delete.failed',
-        { defaultMessage: 'Custom link could not be deleted' }
-      ),
+      title: i18n.translate('xpack.apm.settings.customLink.delete.failed', {
+        defaultMessage: 'Custom link could not be deleted',
+      }),
     });
   }
 }

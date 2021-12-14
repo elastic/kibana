@@ -21,7 +21,7 @@ import React from 'react';
 import {
   Filter,
   FilterKey,
-} from '../../../../../../../common/custom_link/custom_link_types';
+} from '../../../../../../common/custom_link/custom_link_types';
 import {
   DEFAULT_OPTION,
   FILTER_SELECT_OPTIONS,
@@ -68,7 +68,7 @@ export function FiltersSection({
       <EuiTitle size="xs">
         <h3>
           {i18n.translate(
-            'xpack.apm.settings.customizeUI.customLink.flyout.filters.title',
+            'xpack.apm.settings.customLink.flyout.filters.title',
             {
               defaultMessage: 'Filters',
             }
@@ -78,7 +78,7 @@ export function FiltersSection({
       <EuiSpacer size="s" />
       <EuiText size="s">
         {i18n.translate(
-          'xpack.apm.settings.customizeUI.customLink.flyout.filters.subtitle',
+          'xpack.apm.settings.customLink.flyout.filters.subtitle',
           {
             defaultMessage:
               'Use the filter options to scope them to only appear for specific services.',
@@ -102,7 +102,7 @@ export function FiltersSection({
                 options={selectOptions}
                 value={key}
                 prepend={i18n.translate(
-                  'xpack.apm.settings.customizeUI.customLink.flyout.filters.prepend',
+                  'xpack.apm.settings.customLink.flyout.filters.prepend',
                   {
                     defaultMessage: 'Field',
                   }
@@ -121,7 +121,7 @@ export function FiltersSection({
                 data-test-subj={`${key}.value`}
                 fullWidth
                 placeholder={i18n.translate(
-                  'xpack.apm.settings.customizeUI.customLink.flyOut.filters.defaultOption.value',
+                  'xpack.apm.settings.customLink.flyOut.filters.defaultOption.value',
                   { defaultMessage: 'Value' }
                 )}
                 onChange={(e) => onChangeFilter(key, e.target.value, idx)}
@@ -165,7 +165,7 @@ function AddFilterButton({
       disabled={isDisabled}
     >
       {i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.flyout.filters.addAnotherFilter',
+        'xpack.apm.settings.customLink.flyout.filters.addAnotherFilter',
         {
           defaultMessage: 'Add another filter',
         }

@@ -15,8 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { Filter } from '../../../../../../../common/custom_link/custom_link_types';
-import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
+import { Filter } from '../../../../../../common/custom_link/custom_link_types';
+import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { FiltersSection } from './FiltersSection';
 import { FlyoutFooter } from './FlyoutFooter';
 import { LinkSection } from './LinkSection';
@@ -80,28 +80,22 @@ export function CreateEditCustomLinkFlyout({
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2>
-              {i18n.translate(
-                'xpack.apm.settings.customizeUI.customLink.flyout.title',
-                {
-                  defaultMessage: 'Create link',
-                }
-              )}
+              {i18n.translate('xpack.apm.settings.customLink.flyout.title', {
+                defaultMessage: 'Create link',
+              })}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiText>
             <p>
-              {i18n.translate(
-                'xpack.apm.settings.customizeUI.customLink.flyout.label',
-                {
-                  defaultMessage:
-                    'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. More information, including examples, are available in the',
-                }
-              )}{' '}
+              {i18n.translate('xpack.apm.settings.customLink.flyout.label', {
+                defaultMessage:
+                  'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. More information, including examples, are available in the',
+              })}{' '}
               <Documentation
                 label={i18n.translate(
-                  'xpack.apm.settings.customizeUI.customLink.flyout.label.doc',
+                  'xpack.apm.settings.customLink.flyout.label.doc',
                   {
                     defaultMessage: 'documentation.',
                   }
