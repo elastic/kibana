@@ -119,7 +119,7 @@ const getColumns = (
       render: (_status, cluster) => (
         <IsClusterSupported {...cluster}>
           <IsAlertsSupported cluster={cluster}>
-            <AlertsStatus alerts={cluster.alerts.list} />
+            <AlertsStatus alerts={cluster.alerts.list} showBadge={false} />
           </IsAlertsSupported>
         </IsClusterSupported>
       ),
