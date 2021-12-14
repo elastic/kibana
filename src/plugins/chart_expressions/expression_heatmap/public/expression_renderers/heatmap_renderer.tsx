@@ -21,8 +21,6 @@ import {
 import { getFormatService, getPaletteService, getUISettings, getThemeService } from '../services';
 import { getTimeZone } from '../utils/get_timezone';
 
-import './index.scss';
-
 interface ExpressioHeatmapRendererDependencies {
   theme: ThemeServiceStart;
 }

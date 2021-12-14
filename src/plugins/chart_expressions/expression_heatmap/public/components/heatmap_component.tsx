@@ -31,6 +31,7 @@ import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './he
 import { getColorPicker } from '../utils/get_color_picker';
 import { DEFAULT_PALETTE_NAME, defaultPaletteParams } from '../constants';
 import { HeatmapIcon } from './heatmap_icon';
+import './index.scss';
 
 declare global {
   interface Window {

@@ -21,11 +21,11 @@ export const GaugeIconHorizontal = ({ title, titleId, ...props }: Omit<EuiIconPr
   >
     {title ? <title id={titleId}>{title}</title> : null}
     <path
-      className="gauge-chart-icon__subdued"
+      className="chart-icon__subdued"
       d="M1 13a1 1 0 00-1 1v2a1 1 0 102 0v-1h5v1a1 1 0 102 0v-1h5v1a1 1 0 102 0v-1h5v1a1 1 0 102 0v-1h5v1a1 1 0 102 0v-2a1 1 0 00-1-1H1z"
     />
     <path
-      className="gauge-chart-icon__accent"
+      className="chart-icon__accent"
       d="M0 6a1 1 0 011-1h24a1 1 0 011 1v4a1 1 0 01-1 1H1a1 1 0 01-1-1V6z"
     />
   </svg>
@@ -43,11 +43,11 @@ export const GaugeIconVertical = ({ title, titleId, ...props }: Omit<EuiIconProp
   >
     {title ? <title id={titleId}>{title}</title> : null}
     <path
-      className="gauge-chart-icon__subdued"
+      className="chart-icon__subdued"
       d="M16 22a1 1 0 01-1-1V4a1 1 0 011-1h4a1 1 0 011 1v17a1 1 0 01-1 1h-4z"
     />
     <path
-      className="gauge-chart-icon__accent"
+      className="chart-icon__accent"
       d="M10 0h2a1 1 0 011 1v20a1 1 0 01-1 1h-2a1 1 0 110-2h1v-3h-1a1 1 0 110-2h1v-3h-1a1 1 0 110-2h1V7h-1a1 1 0 010-2h1V2h-1a1 1 0 010-2z"
     />
   </svg>

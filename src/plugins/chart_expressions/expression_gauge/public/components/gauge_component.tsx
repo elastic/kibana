@@ -14,7 +14,7 @@ import type { GaugeRenderProps, GaugeLabelMajorMode, GaugeTicksPosition } from '
 import { GaugeShapes, GaugeTicksPositions } from '../../common';
 import { GaugeIconVertical, GaugeIconHorizontal } from './gauge_icon';
 import { getMaxValue, getMinValue, getValueFromAccessor } from './utils';
-
+import './index.scss';
 declare global {
   interface Window {
     /**

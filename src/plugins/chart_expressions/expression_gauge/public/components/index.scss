@@ -1,4 +1,4 @@
-.heatmap-container {
+.gauge-container {
   @include euiScrollBar;
   height: 100%;
   width: 100%;
@@ -7,12 +7,4 @@
   overflow: auto hidden;
   user-select: text;
   padding: $euiSizeS;
-}
-
-.heatmap-chart-icon__subdued {
-  fill: $euiTextSubduedColor;
-}
-
-.heatmap-chart-icon__accent {
-  fill: $euiColorVis0;
 }

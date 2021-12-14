@@ -13,7 +13,6 @@ import { KibanaThemeProvider } from '../../../../kibana_react/public';
 import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
 import { EXPRESSION_GAUGE_NAME, GaugeExpressionProps } from '../../common';
 import { getFormatService, getPaletteService, getThemeService } from '../services';
-import './index.scss';
 
 interface ExpressionGaugeRendererDependencies {
   theme: ThemeServiceStart;

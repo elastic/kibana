@@ -19,7 +19,8 @@
     "share",
     "presentationUtil",
     "dataViewFieldEditor",
-    "expressionGauge"
+    "expressionGauge",
+    "expressionHeatmap"
   ],
   "optionalPlugins": [
     "usageCollection",
