@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configureStore, getDefaultMiddleware, PreloadedState } from '@reduxjs/toolkit';
+import { configureStore, getDefaultMiddleware, Middleware, PreloadedState } from '@reduxjs/toolkit';
 import { createLogger } from 'redux-logger';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import { makeLensReducer, lensActions } from './lens_slice';
@@ -13,7 +13,7 @@ import { timeRangeMiddleware } from './time_range_middleware';
 import { optimizingMiddleware } from './optimizing_middleware';
 import { LensState, LensStoreDeps } from './types';
 import { initMiddleware } from './init_middleware';
-import { diffLogger } from './diff_logger';
+import { DiffLoggerWindow } from './diff_logger';
 export * from './types';
 export * from './selectors';
 
@@ -39,6 +39,27 @@ export const {
   addLayer,
   setLayerDefaultDimension,
 } = lensActions;
+
+let loggerWindow: DiffLoggerWindow;
+
+const diffLogger: Middleware = (store) => (next) => (action) => {
+  const prevState = store.getState();
+  const result = next(action);
+  if (
+    (window as unknown as Window & { ELASTIC_LENS_DIFF_LOGGER: boolean }).ELASTIC_LENS_DIFF_LOGGER
+  ) {
+    if (!loggerWindow) {
+      loggerWindow = new DiffLoggerWindow();
+    }
+
+    loggerWindow.printDiff({
+      actionType: action.type,
+      prev: prevState,
+      next: store.getState(),
+    });
+  }
+  return result;
+};
 
 export const makeConfigureStore = (
   storeDeps: LensStoreDeps,
@@ -71,7 +92,8 @@ export const makeConfigureStore = (
   });
 };
 
-export type LensRootStore = ReturnType<typeof makeConfigureStore>;
+type Awaited<T> = T extends PromiseLike<infer U> ? U : T; // TODO - use built-in when we get to TS 4.5
+export type LensRootStore = Awaited<ReturnType<typeof makeConfigureStore>>;
 
 export type LensDispatch = LensRootStore['dispatch'];
 export type LensGetState = LensRootStore['getState'];

@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { Middleware } from 'redux';
-// TODO - load this async
-import { diff, formatters } from 'jsondiffpatch';
-
 // copied from https://unpkg.com/browse/jsondiffpatch@0.4.1/dist/formatters-styles/html.css
 // have to do inline style block because of content security policy
 const htmlStyles = `.jsondiffpatch-delta {
@@ -164,7 +160,7 @@ const htmlStyles = `.jsondiffpatch-delta {
 const actionContainerId = 'action-header';
 const diffContainerId = 'diff-container';
 
-class LoggerWindow {
+export class DiffLoggerWindow {
   private _window?: Window | null;
 
   private initializeWindow() {
@@ -185,34 +181,26 @@ class LoggerWindow {
     return ret;
   }
 
-  printDiff({ actionType, diffHtml }: { actionType: string; diffHtml: string }) {
+  async printDiff({ actionType, prev, next }: { actionType: string; prev: object; next: object }) {
     if (!this._window || this._window.closed) {
       this._window = this.initializeWindow();
     }
-    this._window!.document.getElementById(actionContainerId)!.innerText = `Action: "${actionType}"`;
-    // eslint-disable-next-line no-unsanitized/property
-    this._window!.document.getElementById(diffContainerId)!.innerHTML = diffHtml;
+
+    const {
+      diff,
+      formatters: {
+        html: { format: formatDelta },
+      },
+    } = await import('jsondiffpatch');
+
+    const delta = diff(prev, next);
+
+    if (delta) {
+      this._window!.document.getElementById(
+        actionContainerId
+      )!.innerText = `Action: "${actionType}"`;
+      // eslint-disable-next-line no-unsanitized/property
+      this._window!.document.getElementById(diffContainerId)!.innerHTML = formatDelta(delta, null);
+    }
   }
 }
-
-let loggerWindow: LoggerWindow;
-
-export const diffLogger: Middleware = (store) => (next) => (action) => {
-  const prevState = store.getState();
-  const result = next(action);
-  if (
-    (window as unknown as Window & { ELASTIC_LENS_DIFF_LOGGER: boolean }).ELASTIC_LENS_DIFF_LOGGER
-  ) {
-    if (!loggerWindow) {
-      loggerWindow = new LoggerWindow();
-    }
-    const delta = diff(prevState, store.getState());
-    if (delta) {
-      loggerWindow.printDiff({
-        actionType: action.type,
-        diffHtml: formatters.html.format(delta, null),
-      });
-    }
-  }
-  return result;
-};
