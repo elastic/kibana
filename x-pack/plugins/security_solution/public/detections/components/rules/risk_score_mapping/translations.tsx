@@ -25,7 +25,7 @@ export const DEFAULT_RISK_SCORE = i18n.translate(
 export const RISK_SCORE_FIELD = i18n.translate(
   'xpack.securitySolution.alerts.riskScoreMapping.riskScoreFieldTitle',
   {
-    defaultMessage: ALERT_RISK_SCORE,
+    defaultMessage: `${ALERT_RISK_SCORE}`,
   }
 );
 
