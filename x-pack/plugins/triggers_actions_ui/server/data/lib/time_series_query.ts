@@ -152,7 +152,6 @@ export function getResultFromEs(
     const dateAgg = aggregations.dateAgg;
 
     aggregations.groupAgg = {
-      // @ts-expect-error doesn't contain required doc_count, key_as_string
       buckets: [{ key: 'all documents', dateAgg }],
     };
 
