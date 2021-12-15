@@ -26,7 +26,7 @@ import {
 } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_columns';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 
-import { ViewLink } from './actions';
+import { useTableActions } from './actions';
 
 type DataFrameAnalyticsTableColumns = [
   EuiTableFieldDataColumnType<DataFrameAnalyticsListRow>,
@@ -85,18 +85,14 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       textOnly: true,
       truncateText: true,
       sortable: true,
-      width: '20%',
+      width: '25%',
     },
     {
       name: i18n.translate('xpack.ml.overview.analyticsList.tableActionLabel', {
         defaultMessage: 'Actions',
       }),
-      actions: [
-        {
-          render: (item: DataFrameAnalyticsListRow) => <ViewLink item={item} />,
-        },
-      ],
-      width: '100px',
+      actions: useTableActions(),
+      width: '80px',
     },
   ];
 
@@ -133,7 +129,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       allowNeutralSort={false}
       className="mlAnalyticsTable"
       columns={columns}
-      hasActions={false}
+      hasActions={true}
       isExpandable={false}
       isSelectable={false}
       items={items}

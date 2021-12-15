@@ -18,6 +18,29 @@ export function useGroupActions(): Array<Action<Group>> {
 
   return [
     {
+      isPrimary: true,
+      name: i18n.translate('xpack.ml.overview.anomalyDetection.viewJobsActionName', {
+        defaultMessage: 'View jobs',
+      }),
+      description: i18n.translate(
+        'xpack.ml.overview.anomalyDetection.resultActions.openInJobManagementText',
+        {
+          defaultMessage: 'View jobs',
+        }
+      ),
+      icon: 'list',
+      type: 'icon',
+      onClick: async (item) => {
+        const path = await locator?.getUrl({
+          page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+          pageState: {
+            groupIds: [item.id],
+          },
+        });
+        await navigateToPath(path);
+      },
+    },
+    {
       isPrimary: false,
       name: i18n.translate('xpack.ml.overview.anomalyDetection.viewResultsActionName', {
         defaultMessage: 'View in Anomaly Explorer',
@@ -36,29 +59,6 @@ export function useGroupActions(): Array<Action<Group>> {
           pageState: {
             jobIds: item.jobIds,
             timeRange: timefilter.getTime(),
-          },
-        });
-        await navigateToPath(path);
-      },
-    },
-    {
-      isPrimary: true,
-      name: i18n.translate('xpack.ml.overview.anomalyDetection.viewJobsActionName', {
-        defaultMessage: 'View jobs',
-      }),
-      description: i18n.translate(
-        'xpack.ml.overview.anomalyDetection.resultActions.openInJobManagementText',
-        {
-          defaultMessage: 'View jobs',
-        }
-      ),
-      icon: 'list',
-      type: 'icon',
-      onClick: async (item) => {
-        const path = await locator?.getUrl({
-          page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-          pageState: {
-            groupIds: [item.id],
           },
         });
         await navigateToPath(path);
