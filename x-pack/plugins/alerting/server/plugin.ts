@@ -258,6 +258,8 @@ export class AlertingPlugin {
       name: string;
       id: string;
       lastExecutionDuration: number;
+      averageDrift: number;
+      averageDuration: number;
       lastExecutionTimeout?: string;
     }
 
@@ -274,6 +276,12 @@ export class AlertingPlugin {
               type: 'keyword',
             },
             lastExecutionDuration: {
+              type: 'long',
+            },
+            averageDrift: {
+              type: 'long',
+            },
+            averageDuration: {
               type: 'long',
             },
             lastExecutionTimeout: {
@@ -338,11 +346,15 @@ export class AlertingPlugin {
                   (event) => event?.event?.action === EVENT_LOG_ACTIONS.executeTimeout
                 );
 
+                const metrics = await services[1].taskManager.getHealthMetrics(id);
+
                 return {
                   name: rule.name,
                   id,
                   lastExecutionDuration: lastExecute?.event?.duration ?? 0,
                   lastExecutionTimeout: lastTimeout?.['@timestamp'],
+                  averageDrift: metrics.drift,
+                  averageDuration: metrics.duration,
                 };
               })
             );

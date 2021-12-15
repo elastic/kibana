@@ -7,6 +7,7 @@
 
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
+import stats from 'stats-lite';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   PluginInitializerContext,
@@ -17,7 +18,7 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '../../../../src/core/server';
-import { TaskPollingLifecycle } from './polling_lifecycle';
+import { TaskLifecycleEvent, TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
@@ -32,6 +33,9 @@ import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
+import { ErroredTask, isTaskRunEvent, TaskRun } from './task_events';
+import { RanTask } from './task_running';
+import { unwrap } from './lib/result_type';
 
 export interface TaskManagerSetupContract {
   /**
@@ -52,7 +56,10 @@ export type TaskManagerStartContract = Pick<
 > &
   Pick<TaskStore, 'fetch' | 'get' | 'remove'> & {
     removeIfExists: TaskStore['remove'];
-  } & { supportsEphemeralTasks: () => boolean };
+  } & {
+    supportsEphemeralTasks: () => boolean;
+    getHealthMetrics: (id: string) => { drift: number; duration: number };
+  };
 
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract>
@@ -229,6 +236,9 @@ export class TaskManagerPlugin
       taskManagerId: taskStore.taskManagerId,
     });
 
+    function hasTiming(taskEvent: TaskLifecycleEvent) {
+      return !!taskEvent?.timing;
+    }
     return {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
       get: (id: string) => taskStore.get(id),
@@ -239,6 +249,27 @@ export class TaskManagerPlugin
       runNow: (...args) => taskScheduling.runNow(...args),
       ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
       supportsEphemeralTasks: () => this.config.ephemeral_tasks.enabled,
+      getHealthMetrics: (id: string) => {
+        const drifts: number[] = [];
+        const durations: number[] = [];
+        this.taskPollingLifecycle?.events2
+          .filter(
+            (taskEvent) => isTaskRunEvent(taskEvent) && hasTiming(taskEvent) && taskEvent.id === id
+          )
+          .forEach((taskEvent: TaskLifecycleEvent) => {
+            const { task }: RanTask | ErroredTask = unwrap((taskEvent as TaskRun).event);
+            const drift = taskEvent.timing!.start - task.runAt.getTime();
+            const duration = taskEvent.timing!.stop - taskEvent.timing!.start;
+            drifts.push(drift);
+            durations.push(duration);
+          });
+        const last5Drifts = drifts.slice(-5);
+        const last5Durations = durations.slice(-5);
+        return {
+          drift: stats.mean(last5Drifts),
+          duration: stats.mean(last5Durations),
+        };
+      },
     };
   }
 

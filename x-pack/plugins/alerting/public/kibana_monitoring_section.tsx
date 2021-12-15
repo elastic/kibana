@@ -22,8 +22,26 @@ export const getKibanaMonitoringSectionApp: React.FC<Props> = ({ metrics }: Prop
     },
     {
       field: 'rule.lastExecutionDuration',
-      name: 'Duration',
-      render: (lastExecutionDuration: number) => moment.duration(lastExecutionDuration).humanize(),
+      name: 'Last duration',
+      // This is in nanoseconds
+      render: (lastExecutionDuration: number) => `${lastExecutionDuration / (1000 * 1000)}ms`,
+      sortable: true,
+    },
+    {
+      field: 'rule.averageDrift',
+      name: 'Average drift',
+      render: (averageDrift: number) => `${averageDrift}ms`,
+      // render: (averageDrift: number) => moment.duration(averageDrift, 'ms').humanize(),
+      sortable: true,
+    },
+    {
+      field: 'rule.averageDuration',
+      name: 'Average duration',
+      render: (averageDuration: number) => `${averageDuration}ms`,
+      // render: (averageDuration: number) => {
+      //   console.log({ averageDuration }, moment.duration(averageDuration, 'ms').humanize('seconds'))
+      //   return moment.duration(averageDuration, 's').humanize();
+      // },
       sortable: true,
     },
   ];

@@ -80,6 +80,7 @@ export class TaskPollingLifecycle {
   public pool: TaskPool;
   // all task related events (task claimed, task marked as running, etc.) are emitted through events$
   private events$ = new Subject<TaskLifecycleEvent>();
+  private events2$: TaskLifecycleEvent[] = [];
   // all on-demand requests we wish to pipe into the poller
   private claimRequests$ = new Subject<Option<string>>();
   // our subscription to the poller
@@ -110,7 +111,10 @@ export class TaskPollingLifecycle {
     this.store = taskStore;
     this.executionContext = executionContext;
 
-    const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
+    const emitEvent = (event: TaskLifecycleEvent) => {
+      this.events$.next(event);
+      this.events2$.push(event);
+    };
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: config.max_workers,
@@ -211,8 +215,13 @@ export class TaskPollingLifecycle {
     return this.events$;
   }
 
+  public get events2(): TaskLifecycleEvent[] {
+    return this.events2$;
+  }
+
   private emitEvent = (event: TaskLifecycleEvent) => {
     this.events$.next(event);
+    this.events2$.push(event);
   };
 
   public attemptToRun(task: string) {
