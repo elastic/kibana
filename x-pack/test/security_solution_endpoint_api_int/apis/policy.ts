@@ -45,5 +45,24 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.message).to.contain('Policy Response Not Found');
       });
     });
+    describe('get policy list', async () => {
+      before(
+        async () =>
+          await esArchiver.load('x-pack/test/functional/es_archives/endpoint/policy', {
+            useCreate: true,
+          })
+      );
+      it('should return a list of policies', async () => {
+        const { body } = await supertest.get(`/api/endpoint/policy`).send().expect(200);
+        expect(body.items).to.eql([
+          {
+            items: [],
+            total: 0,
+            page: 1,
+            perPage: 10,
+          },
+        ]);
+      });
+    });
   });
 }

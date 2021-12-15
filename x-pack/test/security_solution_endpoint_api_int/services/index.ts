@@ -13,4 +13,5 @@ export const services = {
   ...xPackAPIServices,
   resolverGenerator: ResolverGeneratorProvider,
   endpointTestResources: EndpointTestResources,
+  // policyService: EndpointPolicyTestResourcesProvider,
 };
