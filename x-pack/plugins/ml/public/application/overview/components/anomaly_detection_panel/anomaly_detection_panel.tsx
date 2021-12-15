@@ -28,7 +28,7 @@ import { getGroupsFromJobs, getJobsWithTimerange, getStatsBarData } from './util
 import { Dictionary } from '../../../../../common/types/common';
 import { MlSummaryJob, MlSummaryJobs } from '../../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import adImage from './blog-machine-learning-720x420.png';
+import adImage from './ml_anomaly_detection.png';
 import { useRefresh } from '../../../routing/use_refresh';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { AnomalyTimelineService } from '../../../services/anomaly_timeline_service';

@@ -29,7 +29,7 @@ import { AnalyticStatsBarStats, StatsBar } from '../../../components/stats_bar';
 import { useMlKibana, useMlLink } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { SourceSelection } from '../../../data_frame_analytics/pages/analytics_management/components/source_selection';
-import adImage from '../anomaly_detection_panel/blog-machine-learning-720x420.png';
+import adImage from '../anomaly_detection_panel/ml_anomaly_detection.png';
 import { useRefresh } from '../../../routing/use_refresh';
 
 interface Props {
