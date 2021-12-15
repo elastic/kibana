@@ -18,11 +18,14 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import {
-  isNumericFieldForDatatable,
-  GaugeVisualizationState,
   GaugeTicksPositions,
   GaugeColorModes,
-} from '../../../common/expressions';
+} from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import {
+  getMaxValue,
+  getMinValue,
+} from '../../../../../../src/plugins/chart_expressions/expression_gauge/public';
+import { isNumericFieldForDatatable } from '../../../common/expressions';
 import {
   applyPaletteParams,
   CustomizablePalette,
@@ -32,10 +35,9 @@ import {
   PalettePanelContainer,
 } from '../../shared_components/';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { defaultPaletteParams } from './palette_config';
-
 import './dimension_editor.scss';
-import { getMaxValue, getMinValue } from './utils';
+import { GaugeVisualizationState } from './constants';
+import { defaultPaletteParams } from './palette_config';
 
 export function GaugeDimensionEditor(
   props: VisualizationDimensionEditorProps<GaugeVisualizationState> & {
