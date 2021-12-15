@@ -1792,7 +1792,6 @@
     "discover.noMatchRoute.bannerTitleText": "ページが見つかりません",
     "discover.noResults.adjustFilters": "フィルターを調整",
     "discover.noResults.adjustSearch": "クエリを調整",
-    "discover.noResults.disableFilters": "フィルターを一時的に無効にしています",
     "discover.noResults.expandYourTimeRangeTitle": "時間範囲を拡大",
     "discover.noResults.queryMayNotMatchTitle": "期間を長くして検索を試してください。",
     "discover.noResults.searchExamples.noResultsBecauseOfError": "検索結果の取得中にエラーが発生しました",
