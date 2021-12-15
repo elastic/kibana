@@ -99,7 +99,7 @@ export async function fetchIndexShardSize(
   try {
     if (filterQuery) {
       const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.must.push(filterQueryObject);
+      params.body.query.bool.filter.push(filterQueryObject);
     }
   } catch (e) {
     // meh
