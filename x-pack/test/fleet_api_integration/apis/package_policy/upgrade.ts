@@ -42,17 +42,17 @@ export default function (providerContext: FtrProviderContext) {
     let agentPolicyId: string;
     let packagePolicyId: string;
 
-    before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-    });
+    // before(async () => {
+    //   await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+    //   await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+    // });
 
-    after(async () => {
-      await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
-      await getService('esArchiver').unload(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
-      );
-    });
+    // after(async () => {
+    //   await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
+    //   await getService('esArchiver').unload(
+    //     'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+    //   );
+    // });
 
     setupFleetAndAgents(providerContext);
 
@@ -159,7 +159,7 @@ export default function (providerContext: FtrProviderContext) {
 
           // downgrade package
           await supertest
-            .post(`/api/fleet/epm/packages/package_policy_upgrade/0.1.0`)
+            .post(`/api/fleet/epm/packages/package_policy_upgrade-0.1.0`)
             .set('kbn-xsrf', 'xxxx')
             .send({ force: true })
             .expect(200);
