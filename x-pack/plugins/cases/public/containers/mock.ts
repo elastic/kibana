@@ -191,7 +191,7 @@ export const basicCaseMetrics: CaseMetrics = {
       values: [{ name: 'Jon', count: 12 }],
     },
   },
-  connectors: [{ id: 'none', name: 'My Connector', pushCount: 3 }],
+  connectors: { total: 1 },
   lifespan: { creationDate: basicCreatedAt, closeDate: basicClosedAt },
 };
 

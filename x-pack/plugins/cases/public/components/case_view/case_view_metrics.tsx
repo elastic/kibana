@@ -27,33 +27,37 @@ export interface CaseViewMetricsProps {
   isLoading: boolean;
 }
 
-type MetricItems = Array<{ title: string; value: number }>;
+interface MetricItem {
+  title: string;
+  value: number;
+}
+type MetricItems = MetricItem[];
 
 const useMetricItems = (
   metrics: CaseMetrics | null,
   features: CaseMetricsFeature[]
 ): MetricItems => {
   const { alerts, connectors } = metrics ?? {};
-  const totalConnectors = connectors?.length ?? 0;
+  const totalConnectors = connectors?.total ?? 0;
   const alertsCount = alerts?.count ?? 0;
   const totalAlertUsers = alerts?.users?.total ?? 0;
   const totalAlertHosts = alerts?.hosts?.total ?? 0;
 
   const metricItems = useMemo<MetricItems>(() => {
-    const items = [];
-    if (features.includes('alerts.count')) {
-      items.push({ title: TOTAL_ALERTS_METRIC, value: alertsCount });
-    }
-    if (features.includes('alerts.users')) {
-      items.push({ title: ASSOCIATED_USERS_METRIC, value: totalAlertUsers });
-    }
-    if (features.includes('alerts.hosts')) {
-      items.push({ title: ASSOCIATED_HOSTS_METRIC, value: totalAlertHosts });
-    }
-    if (features.includes('connectors')) {
-      items.push({ title: TOTAL_CONNECTORS_METRIC, value: totalConnectors });
-    }
-    return items;
+    const items: Array<[CaseMetricsFeature, MetricItem]> = [
+      ['alerts.count', { title: TOTAL_ALERTS_METRIC, value: alertsCount }],
+      ['alerts.users', { title: ASSOCIATED_USERS_METRIC, value: totalAlertUsers }],
+      ['alerts.hosts', { title: ASSOCIATED_HOSTS_METRIC, value: totalAlertHosts }],
+      ['connectors', { title: TOTAL_CONNECTORS_METRIC, value: totalConnectors }],
+    ];
+
+    return items.reduce(
+      (result: MetricItems, [feature, item]) => [
+        ...result,
+        ...(features.includes(feature) ? [item] : []),
+      ],
+      []
+    );
   }, [features, alertsCount, totalAlertUsers, totalAlertHosts, totalConnectors]);
 
   return metricItems;

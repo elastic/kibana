@@ -32,7 +32,7 @@ const metricsFeaturesTests: Array<[CaseMetricsFeature, string, number]> = [
   ['alerts.count', 'Total Alerts', basicCaseMetrics.alerts!.count!],
   ['alerts.users', 'Associated Users', basicCaseMetrics.alerts!.users!.total!],
   ['alerts.hosts', 'Associated Hosts', basicCaseMetrics.alerts!.hosts!.total!],
-  ['connectors', 'Total Connectors', basicCaseMetrics.connectors!.length!],
+  ['connectors', 'Total Connectors', basicCaseMetrics.connectors!.total!],
 ];
 
 describe('CaseViewMetrics', () => {
