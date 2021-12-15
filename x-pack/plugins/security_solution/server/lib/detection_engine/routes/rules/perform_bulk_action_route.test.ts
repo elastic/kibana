@@ -75,20 +75,35 @@ describe.each([
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
+  });
 
-    it('catches error if disable throws error', async () => {
+  describe('partial failures', () => {
+    it('returns error if disable rule throws error', async () => {
       clients.rulesClient.disable.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(getBulkActionRequest(), context);
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        message: "Failed actions: 1. Rules processed: 1. 'Detect Root/Admin Users': 'Test error'",
+        message: 'Bulk edit partially failed',
         status_code: 500,
+        errors: [
+          {
+            error_message: 'Test error',
+            error_status_code: 500,
+            rule_id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            rule_name: 'Detect Root/Admin Users',
+          },
+        ],
+        rules: {
+          failed: 1,
+          succeeded: 0,
+          total: 1,
+        },
       });
     });
 
-    it('rejects patching a rule if mlAuthz fails', async () => {
+    it('returns error if machine learning rule validation fails', async () => {
       (buildMlAuthz as jest.Mock).mockReturnValueOnce({
         validateRuleType: jest
           .fn()
@@ -98,13 +113,25 @@ describe.each([
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        message:
-          "Failed actions: 1. Rules processed: 1. 'Detect Root/Admin Users': 'mocked validation message'",
+        errors: [
+          {
+            error_message: 'mocked validation message',
+            error_status_code: 403,
+            rule_id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            rule_name: 'Detect Root/Admin Users',
+          },
+        ],
+        message: 'Bulk edit partially failed',
+        rules: {
+          failed: 1,
+          succeeded: 0,
+          total: 1,
+        },
         status_code: 500,
       });
     });
 
-    it('process the rest of rules actions if one of action fails', async () => {
+    it('returns error if one of rule validations fails and the rest are successfull', async () => {
       const failedRuleId = 'fail-rule-id';
       const failedRuleName = 'Rule that fails';
       clients.rulesClient.find.mockResolvedValue(
@@ -125,8 +152,20 @@ describe.each([
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        message:
-          "Failed actions: 1. Rules processed: 3. 'Rule that fails': 'mocked validation message'",
+        errors: [
+          {
+            error_message: 'mocked validation message',
+            error_status_code: 403,
+            rule_id: 'fail-rule-id',
+            rule_name: 'Rule that fails',
+          },
+        ],
+        message: 'Bulk edit partially failed',
+        rules: {
+          failed: 1,
+          succeeded: 2,
+          total: 3,
+        },
         status_code: 500,
       });
     });

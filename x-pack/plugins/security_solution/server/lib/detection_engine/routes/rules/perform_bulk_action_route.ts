@@ -215,11 +215,31 @@ export const performBulkActionRoute = (
         const errors = processingResponse.results.filter(
           (resp): resp is RuleActionError => resp?.error !== undefined
         );
-        if (errors.length) {
-          return siemResponse.error({
-            body: `Failed actions: ${errors.length}. Rules processed: ${rules.data.length}. ${errors
-              .map((r) => `'${r.rule.name}': '${r.error.message}'`)
-              .join(', ')}`,
+        const rulesCount = rules.data.length;
+        const errorsCount = errors.length;
+
+        if (errorsCount > 0) {
+          const responseBody = {
+            message: 'Bulk edit partially failed',
+            status_code: 500,
+            errors: errors.map(({ error, rule }) => ({
+              rule_id: rule.id,
+              rule_name: rule.name,
+              error_message: error.message,
+              error_status_code: error.statusCode,
+            })),
+            rules: {
+              total: rulesCount,
+              failed: errorsCount,
+              succeeded: rulesCount - errorsCount,
+            },
+          };
+
+          return response.custom({
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: Buffer.from(JSON.stringify(responseBody)),
             statusCode: 500,
           });
         }
@@ -227,7 +247,7 @@ export const performBulkActionRoute = (
         return response.ok({
           body: {
             success: true,
-            rules_count: rules.data.length,
+            rules_count: rulesCount,
           },
         });
       } catch (err) {
