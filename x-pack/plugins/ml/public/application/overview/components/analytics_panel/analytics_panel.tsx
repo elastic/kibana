@@ -121,10 +121,10 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
               title={
                 <FormattedMessage
                   id="xpack.ml.overview.analyticsList.emptyPromptHelperText"
-                  defaultMessage="We recommend using {transforms} to create feature indices for analytics jobs."
+                  defaultMessage="Data frame analytics requires specifically structured source data. Use {transforms} to create data frames before you create the jobs."
                   values={{
                     transforms: (
-                      <EuiLink href={transformsLink} target="blank">
+                      <EuiLink href={transformsLink} target="blank" color={'accent'}>
                         <FormattedMessage
                           id="xpack.ml.overview.gettingStartedSectionTransforms"
                           defaultMessage="Elasticsearch's transforms"

@@ -16,14 +16,10 @@ const feedbackLink = 'https://www.elastic.co/community/';
 
 export const GettingStartedCallout: FC = () => {
   const {
-    services: {
-      docLinks,
-      http: { basePath },
-    },
+    services: { docLinks },
   } = useMlKibana();
 
   const docsLink = docLinks.links.ml.guide;
-  const transformsLink = `${basePath.get()}/app/management/data/transform`;
 
   const [isCalloutDismissed, setIsCalloutDismissed] = useStorage(
     ML_GETTING_STARTED_CALLOUT_DISMISSED,
@@ -46,21 +42,13 @@ export const GettingStartedCallout: FC = () => {
         <p>
           <FormattedMessage
             id="xpack.ml.overview.gettingStartedSectionText"
-            defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or creating a new job. We recommend using {transforms} to create feature indices for analytics jobs."
+            defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or creating a new job."
             values={{
               docs: (
                 <EuiLink href={docsLink} target="blank">
                   <FormattedMessage
                     id="xpack.ml.overview.gettingStartedSectionDocs"
                     defaultMessage="documentation"
-                  />
-                </EuiLink>
-              ),
-              transforms: (
-                <EuiLink href={transformsLink} target="blank">
-                  <FormattedMessage
-                    id="xpack.ml.overview.gettingStartedSectionTransforms"
-                    defaultMessage="Elasticsearch's transforms"
                   />
                 </EuiLink>
               ),
