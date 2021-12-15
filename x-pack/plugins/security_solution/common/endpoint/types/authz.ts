@@ -22,6 +22,8 @@ export interface EndpointAuthz {
   canUnIsolateHost: boolean;
 }
 
+export type EndpointAuthzKeyList = Array<keyof EndpointAuthz>;
+
 export interface EndpointPrivileges extends EndpointAuthz {
   loading: boolean;
 }

@@ -205,8 +205,10 @@ async function executeRatioAlert(
   }
 
   if (hasGroupBy(alertParams)) {
-    const numeratorGroupedResults = await getGroupedResults(numeratorQuery, esClient);
-    const denominatorGroupedResults = await getGroupedResults(denominatorQuery, esClient);
+    const [numeratorGroupedResults, denominatorGroupedResults] = await Promise.all([
+      getGroupedResults(numeratorQuery, esClient),
+      getGroupedResults(denominatorQuery, esClient),
+    ]);
     processGroupByRatioResults(
       numeratorGroupedResults,
       denominatorGroupedResults,
@@ -215,8 +217,10 @@ async function executeRatioAlert(
       updateAlert
     );
   } else {
-    const numeratorUngroupedResults = await getUngroupedResults(numeratorQuery, esClient);
-    const denominatorUngroupedResults = await getUngroupedResults(denominatorQuery, esClient);
+    const [numeratorUngroupedResults, denominatorUngroupedResults] = await Promise.all([
+      getUngroupedResults(numeratorQuery, esClient),
+      getUngroupedResults(denominatorQuery, esClient),
+    ]);
     processUngroupedRatioResults(
       numeratorUngroupedResults,
       denominatorUngroupedResults,
