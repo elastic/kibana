@@ -6,7 +6,7 @@
  */
 import { Logger } from 'src/core/server';
 import { AlertingSetup } from '../../types';
-import { getAlertType } from './alert_type';
+import { getRuleType } from './rule_type';
 
 interface RegisterParams {
   logger: Logger;
@@ -15,5 +15,5 @@ interface RegisterParams {
 
 export function register(params: RegisterParams) {
   const { logger, alerting } = params;
-  alerting.registerType(getAlertType(logger));
+  alerting.registerType(getRuleType(logger));
 }

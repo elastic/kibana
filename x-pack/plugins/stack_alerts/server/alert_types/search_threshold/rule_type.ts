@@ -8,13 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
 import { RuleType, AlertExecutorOptions } from '../../types';
-import { ParamsSchema } from './alert_type_params';
+import { ParamsSchema } from './rule_type_params';
 import { ActionContext } from './action_context';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 import {
-  SearchSourceFields,
   extractReferences,
   injectReferences,
+  SerializedSearchSourceFields,
 } from '../../../../../../src/plugins/data/common';
 import { AlertTypeParams } from '../../../../alerting/common';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
@@ -27,18 +27,22 @@ export const ConditionMetAlertInstanceId = 'Search matched threshold';
  * These are the params the user can configure, except searchSourceFields
  * they are matching the index-threshold rule
  */
+export type ExtractedSerializedSearchSourceFields = SerializedSearchSourceFields & {
+  indexRefName: string;
+};
+
 export interface SearchThresholdParams extends AlertTypeParams {
   thresholdComparator: string;
   threshold: number[];
   timeWindowSize: number;
   timeWindowUnit: string;
-  searchSource: SearchSourceFields;
+  searchSource: SerializedSearchSourceFields;
 }
 export type SearchThresholdExtractedParams = Omit<SearchThresholdParams, 'searchSource'> & {
-  searchSource: SearchSourceFields & { indexRefName: string };
+  searchSource: ExtractedSerializedSearchSourceFields;
 };
 
-export type SearchThresholdAlertType = RuleType<
+export type SearchThresholdRuleType = RuleType<
   SearchThresholdParams,
   SearchThresholdExtractedParams,
   {},
@@ -47,7 +51,7 @@ export type SearchThresholdAlertType = RuleType<
   typeof ActionGroupId
 >;
 
-export function getAlertType(logger: Logger): SearchThresholdAlertType {
+export function getRuleType(logger: Logger): SearchThresholdRuleType {
   const alertTypeName = i18n.translate('xpack.stackAlerts.searchThreshold.alertTypeTitle', {
     defaultMessage: 'Search threshold',
   });
@@ -176,7 +180,7 @@ export function getAlertType(logger: Logger): SearchThresholdAlertType {
         const [searchSourceFields, references] = extractReferences(params.searchSource);
         const newParams = {
           ...params,
-          searchSource: searchSourceFields,
+          searchSource: searchSourceFields as ExtractedSerializedSearchSourceFields,
         } as SearchThresholdExtractedParams;
         return { params: newParams, references };
       },
