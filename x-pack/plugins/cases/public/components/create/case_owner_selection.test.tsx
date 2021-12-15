@@ -65,7 +65,7 @@ describe('Case Owner Selection', () => {
     ).toBeTruthy();
   });
 
-  it('defaults to first available Solution', async () => {
+  it('defaults to security Solution', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
         <CaseOwnerSelection
@@ -77,10 +77,10 @@ describe('Case Owner Selection', () => {
 
     expect(
       wrapper.find(`[data-test-subj="observabilityRadioButton"] input`).first().props().checked
-    ).toBeTruthy();
+    ).toBeFalsy();
     expect(
       wrapper.find(`[data-test-subj="securitySolutionRadioButton"] input`).first().props().checked
-    ).toBeFalsy();
+    ).toBeTruthy();
   });
 
   it('it changes the selection', async () => {

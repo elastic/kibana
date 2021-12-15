@@ -80,20 +80,7 @@ export const SUPPORTED_CONNECTORS = [
 export const MAX_ALERTS_PER_SUB_CASE = 5000;
 export const MAX_GENERATED_ALERTS_PER_SUB_CASE = 50;
 
-/**
- * This must be the same value that the security solution plugin uses to define the case kind when it registers the
- * feature for the 7.13 migration only.
- *
- * This variable is being also used by test files and mocks.
- */
 export const SECURITY_SOLUTION_OWNER = 'securitySolution';
-
-/**
- * This must be the same value that the observability plugin uses to define the case kind when it registers the
- * feature for the 7.13 migration only.
- *
- * This variable is being also used by test files and mocks.
- */
 export const OBSERVABILITY_OWNER = 'observability';
 
 export const OWNER_INFO = {

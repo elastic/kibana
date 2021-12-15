@@ -70,7 +70,11 @@ const MenuSelection = ({
 
   useEffect(() => {
     if (!field.value) {
-      onChange(availableOwners[0]);
+      const securitySolutionIndex = availableOwners.findIndex(
+        (value) => value === SECURITY_SOLUTION_OWNER
+      );
+      const defaultSelectedSolution = securitySolutionIndex === -1 ? 0 : securitySolutionIndex;
+      onChange(availableOwners[defaultSelectedSolution]);
     }
   }, [availableOwners, field.value, onChange]);
 
@@ -87,7 +91,7 @@ const MenuSelection = ({
       <FullWidthKeyPadMenu checkable={{ ariaLegend: i18n.ARIA_KEYPAD_LEGEND }}>
         <EuiFlexGroup>
           {DEFAULT_SELECTABLE_OWNERS.map((owner) => (
-            <EuiFlexItem>
+            <EuiFlexItem key={owner}>
               <FullWidthKeyPadItem
                 data-test-subj={`${owner}RadioButton`}
                 onChange={onChange}
