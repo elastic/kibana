@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import type { HttpSetup, ApplicationStart, CoreSetup } from 'src/core/public';
-
-export interface KibanaContext {
-  http: HttpSetup;
-  application: ApplicationStart;
-  uiSettings: CoreSetup['uiSettings'];
-}
+export { PolicyEventFiltersEmptyUnassigned } from './policy_event_filters_empty_unassigned';
+export { PolicyEventFiltersEmptyUnexisting } from './policy_event_filters_empty_unexisting';
