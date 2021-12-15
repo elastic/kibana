@@ -22,6 +22,7 @@ import {
   CommentType,
   getCaseCommentsUrl,
   getCaseDetailsUrl,
+  getCaseDetailsMetricsUrl,
   getCasePushUrl,
   getCaseUserActionUrl,
   getSubCaseDetailsUrl,
@@ -30,6 +31,7 @@ import {
   SubCaseResponse,
   SubCasesResponse,
   User,
+  CaseMetricsResponse,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -48,6 +50,8 @@ import {
   AllCases,
   BulkUpdateStatus,
   Case,
+  CaseMetrics,
+  CaseMetricsFeature,
   CasesStatus,
   FetchCasesProps,
   SortFieldCase,
@@ -64,6 +68,7 @@ import {
   decodeCasesStatusResponse,
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
+  decodeCaseMetricsResponse,
 } from './utils';
 
 export const getCase = async (
@@ -155,6 +160,22 @@ export const getReporters = async (signal: AbortSignal, owner: string[]): Promis
     query: { ...(owner.length > 0 ? { owner } : {}) },
   });
   return response ?? [];
+};
+
+export const getCaseMetrics = async (
+  caseId: string,
+  features: CaseMetricsFeature[],
+  signal: AbortSignal
+): Promise<CaseMetrics> => {
+  const response = await KibanaServices.get().http.fetch<CaseMetricsResponse>(
+    getCaseDetailsMetricsUrl(caseId),
+    {
+      method: 'GET',
+      signal,
+      query: { features: JSON.stringify(features) },
+    }
+  );
+  return convertToCamelCase<CaseMetricsResponse, CaseMetrics>(decodeCaseMetricsResponse(response));
 };
 
 export const getCaseUserActions = async (
