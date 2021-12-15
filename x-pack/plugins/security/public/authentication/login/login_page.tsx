@@ -38,6 +38,7 @@ import {
 } from '../../../common/constants';
 import type { LoginState } from '../../../common/login_state';
 import type { LogoutReason } from '../../../common/types';
+import type { ConfigType } from '../../config';
 import type { LoginFormProps } from './components';
 import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
 
@@ -46,6 +47,7 @@ interface Props {
   notifications: NotificationsStart;
   fatalErrors: FatalErrorsStart;
   loginAssistanceMessage: string;
+  sameSiteCookies?: ConfigType['sameSiteCookies'];
 }
 
 interface State {
@@ -119,6 +121,7 @@ export class LoginPage extends Component<Props, State> {
     const contentBodyClasses = classNames('loginWelcome__content', 'loginWelcome-body', {
       ['loginWelcome__contentDisabledForm']: !loginIsSupported,
     });
+    console.log(this.props);
 
     return (
       <div className="loginWelcome login-form">
@@ -210,10 +213,17 @@ export class LoginPage extends Component<Props, State> {
           <div style={{ maxWidth: '36em', margin: 'auto', textAlign: 'center' }}>
             <EuiText color="subdued">
               <p>
-                <FormattedMessage
-                  id="xpack.security.loginPage.requiresNewWindowTitle"
-                  defaultMessage="To view this content, open it in a new window or adjust your browser settings to allow third-party cookies."
-                />
+                {this.props.sameSiteCookies !== 'None' ? (
+                  <FormattedMessage
+                    id="xpack.security.loginPage.openInNewWindowOrChangeKibanaConfigTitle"
+                    defaultMessage="To view this content, open it in a new window or ask your administrator to allow cross-origin cookies."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.security.loginPage.openInNewWindowOrChangeBrowserSettingsTitle"
+                    defaultMessage="To view this content, open it in a new window or adjust your browser settings to allow third-party cookies."
+                  />
+                )}
               </p>
             </EuiText>
             <EuiSpacer />
@@ -225,7 +235,7 @@ export class LoginPage extends Component<Props, State> {
               fill
             >
               <FormattedMessage
-                id="xpack.security.loginPage.requiresNewWindowMessage"
+                id="xpack.security.loginPage.openInNewWindowButton"
                 defaultMessage="Open in new window"
               />
             </EuiButton>

@@ -199,7 +199,7 @@ describe('LoginPage', () => {
       expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
     });
 
-    it('renders open in new window button when cookies are disabled and document is embedded inside iframe', async () => {
+    it('renders CTA and cross-origin cookie warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are blocked', async () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState());
 
@@ -218,6 +218,38 @@ describe('LoginPage', () => {
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
+          sameSiteCookies="Lax"
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(EuiFlexItem).children()).toMatchSnapshot();
+    });
+
+    it('renders CTA and browser settings warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are allowed', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      Object.defineProperty(window, 'navigator', {
+        value: { cookieEnabled: false },
+        writable: true,
+      });
+      Object.defineProperty(window, 'top', {
+        value: {},
+        writable: true,
+      });
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+          sameSiteCookies="None"
         />
       );
 
