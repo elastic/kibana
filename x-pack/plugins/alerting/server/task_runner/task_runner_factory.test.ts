@@ -17,13 +17,13 @@ import {
 import { actionsMock } from '../../../actions/server/mocks';
 import { alertsMock, rulesClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
-import { UntypedNormalizedAlertType } from '../rule_type_registry';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
 
 const executionContext = executionContextServiceMock.createSetupContract();
 
-const alertType: UntypedNormalizedAlertType = {
+const ruleType: UntypedNormalizedRuleType = {
   id: 'test',
   name: 'My test alert',
   actionGroups: [{ id: 'default', name: 'Default' }],
@@ -83,7 +83,7 @@ describe('Task Runner Factory', () => {
     ruleTypeRegistry: ruleTypeRegistryMock.create(),
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: true,
-    maxEphemeralActionsPerAlert: 10,
+    maxEphemeralActionsPerRule: 10,
     cancelAlertsOnRuleTimeout: true,
     executionContext,
   };
@@ -96,7 +96,7 @@ describe('Task Runner Factory', () => {
   test(`throws an error if factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory();
     expect(() =>
-      factory.create(alertType, { taskInstance: mockedTaskInstance })
+      factory.create(ruleType, { taskInstance: mockedTaskInstance })
     ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 
