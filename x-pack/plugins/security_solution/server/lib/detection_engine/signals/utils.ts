@@ -22,12 +22,15 @@ import {
   Privilege,
   RuleExecutionStatus,
 } from '../../../../common/detection_engine/schemas/common/schemas';
-import { Logger, SavedObjectsClientContract } from '../../../../../../../src/core/server';
+import {
+  ElasticsearchClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-  IAbortableEsClient,
   parseDuration,
 } from '../../../../../alerting/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
