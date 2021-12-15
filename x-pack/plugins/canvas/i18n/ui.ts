@@ -703,7 +703,7 @@ export const ModelStrings = {
         defaultMessage: 'Show X-axis labels',
       }),
     getIsXAxisLabelVisibleHelp: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isYAxisLabelVisibleLabel', {
+      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isXAxisLabelVisibleLabel', {
         defaultMessage: 'Specifies whether or not the X-axis labels are visible',
       }),
     getYAxisLabelWidthDisplayName: () =>
