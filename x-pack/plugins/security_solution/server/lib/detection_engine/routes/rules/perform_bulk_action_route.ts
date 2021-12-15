@@ -10,7 +10,10 @@ import { Logger } from 'src/core/server';
 
 import { RuleAlertType as Rule } from '../../rules/types';
 
-import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_BULK_ACTION,
+  MAX_RULES_TO_UPDATE_IN_PARALLEL,
+} from '../../../../../common/constants';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { performBulkActionSchema } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { SetupPlugins } from '../../../../plugin';
@@ -29,7 +32,6 @@ import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
-const MAX_RULES_TO_PROCESS_IN_PARALLEL = 50;
 
 type RuleActionFn = (rule: Rule) => Promise<void>;
 
@@ -65,7 +67,7 @@ const executeActionAndHandleErrors = async (
 
 const executeBulkAction = async (rules: Rule[], action: RuleActionFn) =>
   initPromisePool({
-    concurrency: MAX_RULES_TO_PROCESS_IN_PARALLEL,
+    concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
     items: rules,
     executor: async (rule) => executeActionAndHandleErrors(rule, action),
   });
