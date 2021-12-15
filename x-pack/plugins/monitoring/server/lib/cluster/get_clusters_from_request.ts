@@ -105,7 +105,7 @@ export async function getClustersFromRequest(
 
     // add ml jobs and alerts data
     const mlJobs = isInCodePath(codePaths, [CODE_PATH_ML])
-      ? await getMlJobsForCluster(req, cluster)
+      ? await getMlJobsForCluster(req, cluster, '*')
       : null;
     if (mlJobs !== null) {
       cluster.ml = { jobs: mlJobs };
@@ -189,7 +189,7 @@ export async function getClustersFromRequest(
   });
   const kibanas =
     isInCodePath(codePaths, [CODE_PATH_KIBANA]) && !isStandaloneCluster
-      ? await getKibanasForClusters(req, clusters)
+      ? await getKibanasForClusters(req, clusters, '*')
       : [];
   // add the kibana data to each cluster
   kibanas.forEach((kibana) => {
@@ -264,7 +264,7 @@ export async function getClustersFromRequest(
   });
 
   // check ccr configuration
-  const isCcrEnabled = await checkCcrEnabled(req);
+  const isCcrEnabled = await checkCcrEnabled(req, '*');
 
   const kibanaUuid = config.get('server.uuid')!;
 

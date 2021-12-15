@@ -99,7 +99,7 @@ export function getMlJobs(req: LegacyRequest) {
  * cardinality isn't guaranteed to be accurate is the issue
  * but it will be as long as the precision threshold is >= the actual value
  */
-export function getMlJobsForCluster(req: LegacyRequest, cluster: ElasticsearchSource) {
+export function getMlJobsForCluster(req: LegacyRequest, cluster: ElasticsearchSource, ccs: string) {
   const license = cluster.license ?? cluster.elasticsearch?.cluster?.stats?.license ?? {};
 
   if (license.status === 'active' && includes(ML_SUPPORTED_LICENSES, license.type)) {
@@ -113,10 +113,10 @@ export function getMlJobsForCluster(req: LegacyRequest, cluster: ElasticsearchSo
     const dataset = 'ml_job';
     const moduleType = 'elasticsearch';
     const indexPatterns = getNewIndexPatterns({
-      ccs: req.payload.ccs,
       config: Globals.app.config,
       moduleType,
       dataset,
+      ccs,
     });
 
     const params = {

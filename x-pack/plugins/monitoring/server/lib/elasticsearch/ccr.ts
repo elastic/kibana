@@ -17,14 +17,14 @@ import { LegacyRequest } from '../../types';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 
-export async function checkCcrEnabled(req: LegacyRequest) {
+export async function checkCcrEnabled(req: LegacyRequest, ccs: string) {
   const dataset = 'cluster_stats';
   const moduleType = 'elasticsearch';
   const indexPatterns = getNewIndexPatterns({
     config: Globals.app.config,
     moduleType,
     dataset,
-    ccs: req.payload.ccs,
+    ccs,
   });
 
   const start = moment.utc(req.payload.timeRange.min).valueOf();

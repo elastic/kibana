@@ -25,7 +25,7 @@ import { Globals } from '../../static_globals';
  *  - number of instances
  *  - combined health
  */
-export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[]) {
+export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], ccs: string) {
   const config = req.server.config();
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
@@ -35,9 +35,9 @@ export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[]) {
   const dataset = 'stats';
   const indexPatterns = getNewIndexPatterns({
     config: Globals.app.config,
-    ccs: req.payload.ccs,
     moduleType,
     dataset,
+    ccs,
   });
 
   return Promise.all(
