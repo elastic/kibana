@@ -9,13 +9,13 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import React, { useCallback } from 'react';
-import { IFieldType } from 'src/plugins/data/public';
 import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
+import { DerivedIndexPattern } from '../../../../containers/metrics_source';
 
 interface Props {
   options: MetricsExplorerOptions;
   onChange: (groupBy: string | null | string[]) => void;
-  fields: IFieldType[];
+  fields: DerivedIndexPattern['fields'];
   errorOptions?: string[];
 }
 

@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { IFieldType } from 'src/plugins/data/public';
+import { DataViewField } from 'src/plugins/data_views/common';
 import { Criterion } from './criterion';
 import {
   PartialRuleParams,
@@ -34,7 +34,7 @@ const QueryBText = i18n.translate('xpack.infra.logs.alerting.threshold.ratioCrit
 });
 
 interface SharedProps {
-  fields: IFieldType[];
+  fields: DataViewField[];
   criteria?: PartialCriteriaType;
   defaultCriterion: PartialCriterionType;
   errors: Errors['criteria'];

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { debounce } from 'lodash';
 import { Unit } from '@elastic/datemath';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
@@ -23,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
 import { Comparator, Aggregators } from '../../../../common/alerting/metrics';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import {

@@ -21,7 +21,7 @@ export const SearchBar = () => {
     setFilterQueryDraftFromKueryExpression,
   } = useWaffleFiltersContext();
   return (
-    <WithKueryAutocompletion indexPattern={createDerivedIndexPattern('metrics')}>
+    <WithKueryAutocompletion indexPattern={createDerivedIndexPattern()}>
       {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
         <AutocompleteField
           isLoadingSuggestions={isLoadingSuggestions}
