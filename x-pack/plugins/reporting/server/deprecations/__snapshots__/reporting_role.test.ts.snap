@@ -15,7 +15,7 @@ Array [
     "deprecationType": "feature",
     "documentationUrl": "https://www.elastic.co/guide/en/kibana/branch/kibana-privileges.html",
     "level": "warning",
-    "message": "The default mechanism for Reporting privilege will work differently in future versions, and this cluster has users who have a deprecated role for this privilege. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
+    "message": "The default mechanism for Reporting privileges will work differently in future versions, and this cluster has users who have a deprecated role for this privilege. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
     "title": "The \\"reporting_user\\" role is deprecated: check user roles",
   },
 ]
@@ -74,7 +74,7 @@ Array [
     "deprecationType": "feature",
     "documentationUrl": "https://www.elastic.co/guide/en/kibana/branch/kibana-privileges.html",
     "level": "warning",
-    "message": "The default mechanism for Reporting privilege will work differently in future versions, and this cluster has users who have a deprecated role for this privilege. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
+    "message": "The default mechanism for Reporting privileges will work differently in future versions, and this cluster has users who have a deprecated role for this privilege. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
     "title": "The \\"reporting_user\\" role is deprecated: check user roles",
   },
 ]
@@ -93,7 +93,7 @@ Array [
     "deprecationType": "feature",
     "documentationUrl": "https://www.elastic.co/guide/en/kibana/branch/kibana-privileges.html",
     "level": "warning",
-    "message": "The default mechanism for Reporting privilege will work differently in future versions, and this cluster has users who have a deprecated role for this privilege. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
+    "message": "The default mechanism for Reporting privileges will work differently in future versions, and this cluster has users who have a deprecated role for this privilege. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
     "title": "The \\"reporting_user\\" role is deprecated: check user roles",
   },
 ]
@@ -112,7 +112,7 @@ Array [
     "deprecationType": "feature",
     "documentationUrl": "https://www.elastic.co/guide/en/kibana/branch/kibana-privileges.html",
     "level": "warning",
-    "message": "The default mechanism for Reporting privilege will work differently in future versions, and this cluster has users who have a deprecated role for this privilege. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
+    "message": "The default mechanism for Reporting privileges will work differently in future versions, and this cluster has users who have a deprecated role for this privilege. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
     "title": "The \\"reporting_user\\" role is deprecated: check user roles",
   },
 ]

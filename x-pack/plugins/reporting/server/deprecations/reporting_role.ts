@@ -63,7 +63,7 @@ async function getUsersDeprecations(
     }),
     message: i18n.translate('xpack.reporting.deprecations.reportingRoleUsers.description', {
       defaultMessage:
-        `The default mechanism for Reporting privilege will work differently in future versions, and` +
+        `The default mechanism for Reporting privileges will work differently in future versions, and` +
         ` this cluster has users who have a deprecated role for this privilege.` +
         ` Set "xpack.reporting.roles.enabled" to "false" to adopt the future behavior before upgrading.`,
     }),
