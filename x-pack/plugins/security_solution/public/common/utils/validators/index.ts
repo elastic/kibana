@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty, isNumber } from 'lodash/fp';
 export * from './is_endpoint_host_isolated';
 
 const allowedSchemes = ['http:', 'https:'];
@@ -29,3 +30,7 @@ export const isUrlInvalid = (url: string | null | undefined) => {
   }
   return true;
 };
+
+export function hasValueToDisplay(value: string | number | null | undefined) {
+  return isNumber(value) || !isEmpty(value);
+}

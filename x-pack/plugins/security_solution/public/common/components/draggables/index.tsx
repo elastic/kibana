@@ -24,7 +24,7 @@ export interface DefaultDraggableType {
   id: string;
   isDraggable?: boolean;
   field: string;
-  value?: string | null;
+  value?: string | number | null;
   name?: string | null;
   queryValue?: string | null;
   children?: React.ReactNode;
@@ -63,7 +63,7 @@ export const Content = React.memo<{
   field: string;
   tooltipContent?: React.ReactNode;
   tooltipPosition?: ToolTipPositions;
-  value?: string | null;
+  value?: string | number | null;
 }>(({ children, field, tooltipContent, tooltipPosition, value }) =>
   !tooltipContentIsExplicitlyNull(tooltipContent) ? (
     <EuiToolTip
@@ -115,7 +115,7 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
         and: [],
         enabled: true,
         id: escapeDataProviderId(id),
-        name: name ? name : value ?? '',
+        name: name ? name : value?.toString() ?? '',
         excluded: false,
         kqlQuery: '',
         queryMatch: {
