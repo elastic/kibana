@@ -13,6 +13,7 @@ import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
 import type { Layout } from '../../../../../screenshotting/server';
 import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
+import { PdfWorkerOutOfMemoryError } from './pdf_generate_errors';
 
 import { PdfWorkerData } from './worker';
 
@@ -144,9 +145,18 @@ export class PdfMaker {
     return new Promise<Buffer>((resolve, reject) => {
       let buffer: undefined | Buffer;
       this.worker = new Worker(path.resolve(__dirname, './worker.js'), {
+        resourceLimits: {
+          maxOldGenerationSizeMb: 128, // We should consider making this number more dynamic.
+        },
         workerData: this.getWorkerData(),
       });
-      this.worker.on('error', reject);
+      this.worker.on('error', (workerError: NodeJS.ErrnoException) => {
+        if (workerError.code === 'ERR_WORKER_OUT_OF_MEMORY') {
+          reject(new PdfWorkerOutOfMemoryError(workerError.message));
+        } else {
+          reject(workerError);
+        }
+      });
 
       // We expect one message from the work container the PDF buffer.
       this.worker.on('message', (pdfBuffer: Buffer) => (buffer = pdfBuffer));
