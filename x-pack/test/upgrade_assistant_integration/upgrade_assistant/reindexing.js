@@ -6,12 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import { systemIndicesSuperuser } from '@kbn/test';
 
 import { ReindexStatus, REINDEX_OP_TYPE } from '../../../plugins/upgrade_assistant/common/types';
 import { generateNewIndexName } from '../../../plugins/upgrade_assistant/server/lib/reindexing/index_settings';
 import { getIndexState } from '../../../plugins/upgrade_assistant/common/get_index_state';
 
 export default function ({ getService }) {
+  const security = getService('security');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
@@ -35,6 +37,14 @@ export default function ({ getService }) {
   };
 
   describe('reindexing', () => {
+    before(async () => {
+      await security.testUser.setRoles(['test_reindexing']);
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
+
     afterEach(() => {
       // Cleanup saved objects
       return es.deleteByQuery({
@@ -55,8 +65,11 @@ export default function ({ getService }) {
       await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
       const { body } = await supertest
         .post(`/api/upgrade_assistant/reindex/dummydata`)
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+        .auth(systemIndicesSuperuser.username, systemIndicesSuperuser.password)
+        .set('kbn-xsrf', 'xxx');
+      // .expect(200);
+
+      console.log(body);
 
       expect(body.indexName).to.equal('dummydata');
       expect(body.status).to.equal(ReindexStatus.inProgress);
@@ -83,7 +96,7 @@ export default function ({ getService }) {
       });
     });
 
-    it('should update any aliases', async () => {
+    it.only('should update any aliases', async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
 
       // Add aliases and ensure each returns the right number of docs
@@ -121,12 +134,12 @@ export default function ({ getService }) {
       });
     });
 
-    it('shows no warnings', async () => {
+    it.only('shows no warnings', async () => {
       const resp = await supertest.get(`/api/upgrade_assistant/reindex/7.0-data`);
       expect(resp.body.warnings.length).to.be(0);
     });
 
-    it('reindexes old 7.0 index', async () => {
+    it.only('reindexes old 7.0 index', async () => {
       const { body } = await supertest
         .post(`/api/upgrade_assistant/reindex/7.0-data`)
         .set('kbn-xsrf', 'xxx')
@@ -140,7 +153,7 @@ export default function ({ getService }) {
       expect(lastState.status).to.equal(ReindexStatus.completed);
     });
 
-    it('should reindex a batch in order and report queue state', async () => {
+    it.only('should reindex a batch in order and report queue state', async () => {
       const assertQueueState = async (firstInQueueIndexName, queueLength) => {
         const response = await supertest
           .get(`/api/upgrade_assistant/reindex/batch/queue`)

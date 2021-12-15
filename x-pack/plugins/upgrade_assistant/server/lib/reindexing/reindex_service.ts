@@ -399,6 +399,8 @@ export const reindexServiceFactory = (
         body,
       });
 
+      console.log(resp);
+
       return resp.has_all_requested;
     },
 

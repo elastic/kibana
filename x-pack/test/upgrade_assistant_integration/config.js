@@ -34,5 +34,21 @@ export default async function ({ readConfigFile }) {
       ...xPackFunctionalTestsConfig.get('esTestCluster'),
       dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
     },
+    security: {
+      roles: {
+        test_reindexing: {
+          elasticsearch: {
+            cluster: ['manage'],
+            indices: [
+              {
+                names: ['.tasks'],
+                privileges: ['read', 'delete'],
+                allow_restricted_indices: true,
+              },
+            ],
+          },
+        },
+      },
+    },
   };
 }
