@@ -24,7 +24,7 @@ describe('TelemetryService', () => {
   });
 
   describe('fetchExample', () => {
-    it('calls fetchTelemetry with unencrupted: true, refreshCache: true', async () => {
+    it('calls fetchTelemetry with unencrypted: true, refreshCache: true', async () => {
       const telemetryService = mockTelemetryService();
       telemetryService.fetchTelemetry = jest.fn();
       await telemetryService.fetchExample();
