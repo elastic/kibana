@@ -119,6 +119,17 @@ export class EndpointAppContextService {
         getPackagePolicyDeleteCallback(dependencies.exceptionListsClient)
       );
     }
+
+    if (this.startDependencies.registerListsServerExtension) {
+      const { registerListsServerExtension } = this.startDependencies;
+
+      registerListsServerExtension({
+        type: 'exceptionsListPreCreateItem',
+        callback: async () => {
+          this.startDependencies?.logger.info('exceptionsListPreCreateItem called!');
+        },
+      });
+    }
   }
 
   public stop() {}

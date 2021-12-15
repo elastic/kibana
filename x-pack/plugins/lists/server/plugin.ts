@@ -26,7 +26,11 @@ import { getSpaceId } from './get_space_id';
 import { getUser } from './get_user';
 import { initSavedObjects } from './saved_objects';
 import { ExceptionListClient } from './services/exception_lists/exception_list_client';
-import { ExtensionPointStorage, ExtensionPointStorageInterface } from './services/extension_points';
+import {
+  ExtensionPointStorage,
+  ExtensionPointStorageClientInterface,
+  ExtensionPointStorageInterface,
+} from './services/extension_points';
 
 export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {}, PluginsStart> {
   private readonly logger: Logger;
@@ -86,7 +90,7 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
 
   private createRouteHandlerContext = (): ContextProvider => {
     return async (context, request): ContextProviderReturn => {
-      const { spaces, config, security } = this;
+      const { spaces, config, security, extensionPoints } = this;
       const {
         core: {
           savedObjects: { client: savedObjectsClient },
@@ -106,6 +110,8 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
               savedObjectsClient,
               user,
             }),
+          getExtensionPointClient: (): ExtensionPointStorageClientInterface =>
+            extensionPoints.getClient(),
           getListClient: (): ListClient =>
             new ListClient({
               config,

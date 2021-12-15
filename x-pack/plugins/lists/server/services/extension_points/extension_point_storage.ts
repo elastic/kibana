@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { ExtensionPoint, ServerExtensionCallback } from './types';
 
 export class ExtensionPointStorage {
@@ -26,9 +27,27 @@ export class ExtensionPointStorage {
     this.store.clear();
   }
 
-  get(extensionType: ExtensionPoint['type']): Set<ServerExtensionCallback> | undefined {
-    return this.store.get(extensionType);
+  /**
+   * returns a client interface that does not expose the full set of methods available in the storage
+   */
+  getClient(): ExtensionPointStorageClientInterface {
+    return new ExtensionPointStorageClient(this);
+  }
+}
+
+class ExtensionPointStorageClient {
+  constructor(private readonly storage: ExtensionPointStorageInterface) {}
+
+  /**
+   * Retrieve a list (`Set`) of extension points that are registered for a given type
+   * @param extensionType
+   */
+  get(
+    extensionType: ExtensionPoint['type']
+  ): ReadonlySet<Readonly<ServerExtensionCallback>> | undefined {
+    return this.storage.get(extensionType);
   }
 }
 
 export type ExtensionPointStorageInterface = ExtensionPointStorage;
+export type ExtensionPointStorageClientInterface = ExtensionPointStorageClient;

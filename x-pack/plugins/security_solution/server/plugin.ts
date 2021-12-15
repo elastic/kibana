@@ -432,6 +432,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerIngestCallback,
       licenseService,
       exceptionListsClient: exceptionListClient,
+      registerListsServerExtension: this.lists?.registerExtension,
     });
 
     this.telemetryReceiver.start(
