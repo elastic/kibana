@@ -58,7 +58,7 @@ export class DocLinksService {
           indexManagement: `${ELASTIC_WEBSITE_URL}/guide/en/cloud/current/ec-configure-index-management.html`,
         },
         console: {
-          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/current/console-kibana.html`,
+          guide: `${KIBANA_DOCS}console-kibana.html`,
         },
         dashboard: {
           guide: `${KIBANA_DOCS}dashboard.html`,
