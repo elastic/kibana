@@ -39,7 +39,8 @@ const getQueueTypes = (queueBuckets: Array<Bucket & { num_pipelines: { value: nu
  */
 export function getLogstashForClusters(
   req: LegacyRequest,
-  clusters: Array<{ cluster_uuid: string } | Cluster>
+  clusters: Array<{ cluster_uuid: string } | Cluster>,
+  ccs?: string
 ) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
@@ -50,7 +51,7 @@ export function getLogstashForClusters(
   const moduleType = 'logstash';
   const indexPatterns = getNewIndexPatterns({
     config: Globals.app.config,
-    ccs: req.payload.ccs,
+    ccs: ccs || req.payload.ccs,
     moduleType,
     dataset,
   });

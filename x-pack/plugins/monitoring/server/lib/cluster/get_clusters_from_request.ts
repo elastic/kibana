@@ -53,13 +53,8 @@ export async function getClustersFromRequest(
     codePaths,
   }: { clusterUuid: string; start: number; end: number; codePaths: string[] }
 ) {
-  const {
-    lsIndexPattern,
-    beatsIndexPattern,
-    apmIndexPattern,
-    enterpriseSearchIndexPattern,
-    filebeatIndexPattern,
-  } = indexPatterns;
+  const { beatsIndexPattern, apmIndexPattern, enterpriseSearchIndexPattern, filebeatIndexPattern } =
+    indexPatterns;
 
   const config = req.server.config();
   const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
@@ -74,14 +69,7 @@ export async function getClustersFromRequest(
   }
 
   if (!clusterUuid && !isStandaloneCluster) {
-    const indexPatternsToCheckForNonClusters = [
-      lsIndexPattern,
-      beatsIndexPattern,
-      apmIndexPattern,
-      enterpriseSearchIndexPattern,
-    ];
-
-    if (await hasStandaloneClusters(req, indexPatternsToCheckForNonClusters)) {
+    if (await hasStandaloneClusters(req, '*')) {
       clusters.push(getStandaloneClusterDefinition());
     }
   }
@@ -202,8 +190,8 @@ export async function getClustersFromRequest(
 
   // add logstash data
   if (isInCodePath(codePaths, [CODE_PATH_LOGSTASH])) {
-    const logstashes = await getLogstashForClusters(req, clusters);
-    const pipelines = await getLogstashPipelineIds({ req, clusterUuid, size: 1 });
+    const logstashes = await getLogstashForClusters(req, clusters, '*');
+    const pipelines = await getLogstashPipelineIds({ req, clusterUuid, size: 1, ccs: '*' });
     logstashes.forEach((logstash) => {
       const clusterIndex = clusters.findIndex(
         (cluster) =>

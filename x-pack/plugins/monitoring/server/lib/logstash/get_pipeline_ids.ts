@@ -18,12 +18,14 @@ interface GetLogstashPipelineIdsParams {
   clusterUuid: string;
   size: number;
   logstashUuid?: string;
+  ccs?: string;
 }
 export async function getLogstashPipelineIds({
   req,
   clusterUuid,
   logstashUuid,
   size,
+  ccs,
 }: GetLogstashPipelineIdsParams): Promise<Pipeline[]> {
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
@@ -37,7 +39,7 @@ export async function getLogstashPipelineIds({
   const moduleType = 'logstash';
   const indexPatterns = getNewIndexPatterns({
     config: Globals.app.config,
-    ccs: req.payload.ccs,
+    ccs: ccs || req.payload.ccs,
     moduleType,
     dataset,
   });
