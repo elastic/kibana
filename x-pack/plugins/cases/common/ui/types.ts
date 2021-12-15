@@ -73,13 +73,7 @@ export type Comment = CommentRequest & {
   version: string;
 };
 
-/**
- * TODO: Ensure the type is correct
- * or find a better way
- * Payload nested objects are in snakeCase in this type
- */
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
-
 export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 
 interface BasicCase {

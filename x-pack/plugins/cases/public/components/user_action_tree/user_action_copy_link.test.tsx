@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// TODO: removed dependencies on UrlGetSearch
-
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import copy from 'copy-to-clipboard';

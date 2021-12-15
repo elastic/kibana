@@ -28,6 +28,7 @@ import { AddComment, AddCommentRefObject } from '../add_comment';
 import { Case, CaseUserActions, Ecs } from '../../../common/ui/types';
 import {
   ActionConnector,
+  Actions,
   ActionsCommentRequestRt,
   AlertCommentRequestRt,
   CommentType,
@@ -341,7 +342,7 @@ export const UserActionTree = React.memo(
           // eslint-disable-next-line complexity
           (comments, action, index) => {
             // Comment creation
-            if (action.commentId != null && action.action === 'create') {
+            if (action.commentId != null && action.action === Actions.create) {
               const comment = caseData.comments.find((c) => c.id === action.commentId);
               if (
                 comment != null &&
@@ -526,11 +527,11 @@ export const UserActionTree = React.memo(
               const label = getPushedServiceLabelTitle(action, firstPush);
 
               const showTopFooter =
-                action.action === 'push_to_service' &&
+                action.action === Actions.push_to_service &&
                 index === caseServices[parsedConnectorId]?.lastPushIndex;
 
               const showBottomFooter =
-                action.action === 'push_to_service' &&
+                action.action === Actions.push_to_service &&
                 index === caseServices[parsedConnectorId]?.lastPushIndex &&
                 caseServices[parsedConnectorId].hasDataToPush;
 

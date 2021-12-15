@@ -10,8 +10,13 @@ import { loggerMock } from '@kbn/logging/mocks';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsFindResult } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { Actions, CaseStatuses, CaseUserActionAttributes, UserAction } from '../../../common/api';
-import { ConnectorUserAction } from '../../../common/api/cases/user_actions/connector';
+import {
+  Actions,
+  CaseStatuses,
+  CaseUserActionAttributes,
+  ConnectorUserAction,
+  UserAction,
+} from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -50,7 +55,7 @@ const createConnectorUserAction = (
   const { id, ...restConnector } = createConnectorObject().connector;
   return {
     ...createUserActionSO({
-      action: 'create',
+      action: Actions.create,
       payload: { connector: restConnector },
       type: 'connector',
       subCaseId,
@@ -70,7 +75,7 @@ const updateConnectorUserAction = ({
   const { id, ...restConnector } = createJiraConnector();
   return {
     ...createUserActionSO({
-      action: 'update',
+      action: Actions.update,
       payload: { connector: restConnector },
       type: 'connector',
       subCaseId,
@@ -369,7 +374,7 @@ describe('CaseUserActionService', () => {
 
       it('sets comment_id to null when it cannot find the reference', () => {
         const userAction = {
-          ...createUserActionSO({ action: 'create', commentId: '5' }),
+          ...createUserActionSO({ action: Actions.create, commentId: '5' }),
           references: [],
         };
         const transformed = transformFindResponseToExternalModel(
@@ -381,7 +386,7 @@ describe('CaseUserActionService', () => {
 
       it('sets sub_case_id to an empty string when it cannot find the reference', () => {
         const userAction = {
-          ...createUserActionSO({ action: 'create', subCaseId: '5' }),
+          ...createUserActionSO({ action: Actions.create, subCaseId: '5' }),
           references: [],
         };
         const transformed = transformFindResponseToExternalModel(
@@ -403,7 +408,7 @@ describe('CaseUserActionService', () => {
 
       it('sets comment_id correctly when it finds the reference', () => {
         const userAction = createUserActionSO({
-          action: 'create',
+          action: Actions.create,
           commentId: '5',
         });
 
@@ -416,7 +421,7 @@ describe('CaseUserActionService', () => {
 
       it('sets sub_case_id correctly when it finds the reference', () => {
         const userAction = {
-          ...createUserActionSO({ action: 'create', subCaseId: '5' }),
+          ...createUserActionSO({ action: Actions.create, subCaseId: '5' }),
         };
 
         const transformed = transformFindResponseToExternalModel(
@@ -428,7 +433,7 @@ describe('CaseUserActionService', () => {
 
       it('sets action_id correctly to the saved object id', () => {
         const userAction = {
-          ...createUserActionSO({ action: 'create', subCaseId: '5' }),
+          ...createUserActionSO({ action: Actions.create, subCaseId: '5' }),
         };
 
         const transformed = transformFindResponseToExternalModel(
@@ -482,7 +487,7 @@ describe('CaseUserActionService', () => {
         expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
           'cases-user-actions',
           {
-            action: 'create',
+            action: Actions.create,
             created_at: '2022-01-09T22:00:00.000Z',
             created_by: {
               email: 'elastic@elastic.co',
@@ -583,7 +588,7 @@ describe('CaseUserActionService', () => {
         expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
           'cases-user-actions',
           {
-            action: 'update',
+            action: Actions.update,
             created_at: '2022-01-09T22:00:00.000Z',
             created_by: {
               email: 'elastic@elastic.co',
@@ -605,7 +610,7 @@ describe('CaseUserActionService', () => {
         expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
           'cases-user-actions',
           {
-            action: 'push_to_service',
+            action: Actions.push_to_service,
             created_at: '2022-01-09T22:00:00.000Z',
             created_by: {
               email: 'elastic@elastic.co',
@@ -652,7 +657,7 @@ describe('CaseUserActionService', () => {
         expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
           {
             attributes: {
-              action: 'update',
+              action: Actions.update,
               created_at: '2022-01-09T22:00:00.000Z',
               created_by: {
                 email: 'elastic@elastic.co',
@@ -668,7 +673,7 @@ describe('CaseUserActionService', () => {
           },
           {
             attributes: {
-              action: 'update',
+              action: Actions.update,
               created_at: '2022-01-09T22:00:00.000Z',
               created_by: {
                 email: 'elastic@elastic.co',
@@ -684,7 +689,7 @@ describe('CaseUserActionService', () => {
           },
           {
             attributes: {
-              action: 'update',
+              action: Actions.update,
               created_at: '2022-01-09T22:00:00.000Z',
               created_by: {
                 email: 'elastic@elastic.co',
@@ -717,7 +722,7 @@ describe('CaseUserActionService', () => {
           },
           {
             attributes: {
-              action: 'update',
+              action: Actions.update,
               created_at: '2022-01-09T22:00:00.000Z',
               created_by: {
                 email: 'elastic@elastic.co',
@@ -765,7 +770,7 @@ describe('CaseUserActionService', () => {
           },
           {
             attributes: {
-              action: 'update',
+              action: Actions.update,
               created_at: '2022-01-09T22:00:00.000Z',
               created_by: {
                 email: 'elastic@elastic.co',
@@ -791,9 +796,9 @@ describe('CaseUserActionService', () => {
       type TestParameters = [MethodsOfService, string];
 
       it.each<TestParameters>([
-        ['createAttachmentCreationUserAction', 'create'],
+        ['createAttachmentCreationUserAction', Actions.create],
         ['createAttachmentDeletionUserAction', 'delete'],
-        ['createAttachmentUpdateUserAction', 'update'],
+        ['createAttachmentUpdateUserAction', Actions.update],
       ])('creates a create case user action', async (func, action) => {
         await service[func]({
           ...commonArgs,

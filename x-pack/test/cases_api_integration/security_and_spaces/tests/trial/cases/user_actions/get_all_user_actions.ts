@@ -23,8 +23,10 @@ import {
 } from '../../../../../common/lib/utils';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
-import { PushedUserAction } from '../../../../../../../plugins/cases/common/api/cases/user_actions/pushed';
-import { UserActionWithResponse } from '../../../../../../../plugins/cases/common/api';
+import {
+  UserActionWithResponse,
+  PushedUserAction,
+} from '../../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

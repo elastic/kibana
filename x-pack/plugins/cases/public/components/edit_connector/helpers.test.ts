@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorUserAction } from '../../../common/api/cases/user_actions/connector';
-import { ConnectorTypes } from '../../../common/api';
+import { Actions, ConnectorTypes, ConnectorUserAction } from '../../../common/api';
 import { CaseUserActions } from '../../containers/types';
 import { getConnectorFieldsFromUserActions } from './helpers';
 
@@ -74,7 +73,7 @@ describe('helpers', () => {
 
 function createConnectorUserAction(attributes: Partial<ConnectorUserAction> = {}): CaseUserActions {
   return {
-    action: 'update',
+    action: Actions.update,
     createdBy: { username: 'user', fullName: null, email: null },
     createdAt: '2021-12-08T11:28:32.623Z',
     type: 'connector',

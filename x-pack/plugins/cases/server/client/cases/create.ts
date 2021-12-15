@@ -78,19 +78,11 @@ export const create = async (
       entities: [{ owner: query.owner, id: savedObjectID }],
     });
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { username, full_name, email } = user;
-    const createdDate = new Date().toISOString();
-
     const newCase = await caseService.postNewCase({
       unsecuredSavedObjectsClient,
       attributes: transformNewCase({
-        createdDate,
+        user,
         newCase: query,
-        username,
-        full_name,
-        email,
-        connector: query.connector,
       }),
       id: savedObjectID,
     });

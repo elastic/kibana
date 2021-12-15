@@ -23,6 +23,18 @@ import {
   CaseSettings,
   CaseConnector,
   CasePostRequest,
+  CommentUserAction,
+  ConnectorUserAction,
+  ConnectorUserActionWithoutConnectorId,
+  CreateCaseUserActionWithoutConnectorId,
+  DeleteCaseUserAction,
+  DescriptionUserAction,
+  PushedUserAction,
+  PushedUserActionWithoutConnectorId,
+  SettingsUserAction,
+  StatusUserAction,
+  TagsUserAction,
+  TitleUserAction,
 } from '../../../common/api';
 
 import {
@@ -33,29 +45,7 @@ import {
   SUB_CASE_REF_NAME,
 } from '../../common/constants';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { TitleUserAction } from '../../../common/api/cases/user_actions/title';
-import { DescriptionUserAction } from '../../../common/api/cases/user_actions/description';
-import { StatusUserAction } from '../../../common/api/cases/user_actions/status';
-import { TagsUserAction } from '../../../common/api/cases/user_actions/tags';
-import {
-  PushedUserAction,
-  PushedUserActionWithoutConnectorId,
-} from '../../../common/api/cases/user_actions/pushed';
-import { SettingsUserAction } from '../../../common/api/cases/user_actions/settings';
-import { CommentUserAction } from '../../../common/api/cases/user_actions/comment';
-import {
-  ConnectorUserAction,
-  ConnectorUserActionWithoutConnectorId,
-} from '../../../common/api/cases/user_actions/connector';
-import { CreateCaseUserActionWithoutConnectorId } from '../../../common/api/cases/user_actions/create_case';
-import { DeleteCaseUserAction } from '../../../common/api/cases/user_actions/delete_case';
-
-interface CommonArguments {
-  user: User;
-  caseId: string;
-  owner: string;
-  subCaseId?: string;
-}
+import { CommonArguments } from './types';
 
 interface BuilderReturnValue<T> {
   attributes: T;
@@ -403,6 +393,6 @@ export class UserActionBuilder {
     field: BuilderFieldTypes,
     args: BuilderArgumentsType<T>
   ): BuilderResponseType<T> | null {
-    return (this.builderMap.get(field)?.call(this, args) as BuilderResponseType<T>) ?? null;
+    return this.builderMap.get(field)?.call(this, args) ?? null;
   }
 }

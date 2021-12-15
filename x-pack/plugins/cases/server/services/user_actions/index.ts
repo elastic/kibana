@@ -33,7 +33,11 @@ import {
   CaseUserActionAttributesWithoutConnectorId,
   CaseUserActionResponse,
   CommentRequest,
+  CommentUserAction,
+  CreateCaseUserActionWithoutConnectorId,
   noneConnectorId,
+  PushedUserActionWithoutConnectorId,
+  StatusUserAction,
   SubCaseAttributes,
   User,
 } from '../../../common/api';
@@ -54,11 +58,8 @@ import {
 } from '../../common/constants';
 import { findConnectorIdReference } from '../transform';
 import { isTwoArraysDifference } from '../../client/utils';
-import { CommentUserAction } from '../../../common/api/cases/user_actions/comment';
-import { StatusUserAction } from '../../../common/api/cases/user_actions/status';
-import { PushedUserActionWithoutConnectorId } from '../../../common/api/cases/user_actions/pushed';
 import { UserActionBuilder } from './builder';
-import { CreateCaseUserActionWithoutConnectorId } from '../../../common/api/cases/user_actions/create_case';
+import { CommonArguments } from './types';
 
 interface GetCaseUserActionArgs extends ClientArgs {
   caseId: string;
@@ -79,12 +80,7 @@ interface CreateUserActionES<T> extends ClientArgs {
   references: SavedObjectReference[];
 }
 
-interface CommonUserActionArgs extends ClientArgs {
-  caseId: string;
-  subCaseId?: string;
-  user: User;
-  owner: string;
-}
+type CommonUserActionArgs = ClientArgs & CommonArguments;
 interface CreateCaseCreationUserActionArgs extends CommonUserActionArgs {
   payload: CasePostRequest;
 }
@@ -144,18 +140,21 @@ export class CaseUserActionService {
       return [];
     }
 
-    if (field === 'tags') {
+    if (field === ActionTypes.tags) {
       const compareValues = isTwoArraysDifference(originalValue, newValue);
       const userActions: UserActionItem[] = [];
       if (compareValues && compareValues.addedItems.length > 0) {
-        const tagAddUserAction = this.builder.buildUserAction<'tags'>('tags', {
-          caseId,
-          subCaseId,
-          owner,
-          user,
-          action: 'add',
-          tags: compareValues.addedItems,
-        });
+        const tagAddUserAction = this.builder.buildUserAction<typeof ActionTypes.tags>(
+          ActionTypes.tags,
+          {
+            caseId,
+            subCaseId,
+            owner,
+            user,
+            action: Actions.add,
+            tags: compareValues.addedItems,
+          }
+        );
 
         if (tagAddUserAction) {
           userActions.push(tagAddUserAction);
@@ -163,14 +162,17 @@ export class CaseUserActionService {
       }
 
       if (compareValues && compareValues.deletedItems.length > 0) {
-        const tagsDeleteUserAction = this.builder.buildUserAction<'tags'>('tags', {
-          caseId,
-          subCaseId,
-          owner,
-          user,
-          action: 'delete',
-          tags: compareValues.deletedItems,
-        });
+        const tagsDeleteUserAction = this.builder.buildUserAction<typeof ActionTypes.tags>(
+          ActionTypes.tags,
+          {
+            caseId,
+            subCaseId,
+            owner,
+            user,
+            action: Actions.delete,
+            tags: compareValues.deletedItems,
+          }
+        );
 
         if (tagsDeleteUserAction) {
           userActions.push(tagsDeleteUserAction);
@@ -209,15 +211,18 @@ export class CaseUserActionService {
   }: CreateAttachmentUserAction): Promise<void> {
     try {
       this.log.debug(`Attempting to create a create case user action`);
-      const userAction = this.builder.buildUserAction<'comment'>('comment', {
-        action,
-        caseId,
-        user,
-        owner,
-        comment: attachment,
-        attachmentId,
-        subCaseId,
-      });
+      const userAction = this.builder.buildUserAction<typeof ActionTypes.comment>(
+        ActionTypes.comment,
+        {
+          action,
+          caseId,
+          user,
+          owner,
+          comment: attachment,
+          attachmentId,
+          subCaseId,
+        }
+      );
 
       if (userAction) {
         await this.create<CommentUserAction>({
@@ -242,13 +247,16 @@ export class CaseUserActionService {
   }: CreateCaseCreationUserActionArgs): Promise<void> {
     try {
       this.log.debug(`Attempting to create a create case user action`);
-      const userAction = this.builder.buildUserAction<'create_case'>('create_case', {
-        caseId,
-        subCaseId,
-        user,
-        owner,
-        payload,
-      });
+      const userAction = this.builder.buildUserAction<typeof ActionTypes.create_case>(
+        ActionTypes.create_case,
+        {
+          caseId,
+          subCaseId,
+          user,
+          owner,
+          payload,
+        }
+      );
 
       if (userAction) {
         await this.create<CreateCaseUserActionWithoutConnectorId>({
@@ -270,12 +278,15 @@ export class CaseUserActionService {
   }: BulkCreateCaseDeletionUserAction): Promise<void> {
     this.log.debug(`Attempting to create a create case user action`);
     const userActionsWithReferences = cases.reduce((acc, caseInfo) => {
-      const deleteCaseUserAction = this.builder.buildUserAction<'delete_case'>('delete_case', {
-        user,
-        owner: caseInfo.owner,
-        caseId: caseInfo.id,
-        connectorId: caseInfo.connectorId,
-      });
+      const deleteCaseUserAction = this.builder.buildUserAction<typeof ActionTypes.delete_case>(
+        ActionTypes.delete_case,
+        {
+          user,
+          owner: caseInfo.owner,
+          caseId: caseInfo.id,
+          connectorId: caseInfo.connectorId,
+        }
+      );
 
       return [
         ...acc,
@@ -297,12 +308,15 @@ export class CaseUserActionService {
   }: CreateStatusUpdateUserAction): Promise<void> {
     try {
       this.log.debug(`Attempting to create a create case user action`);
-      const userAction = this.builder.buildUserAction<'status'>('status', {
-        caseId,
-        user,
-        status,
-        owner,
-      });
+      const userAction = this.builder.buildUserAction<typeof ActionTypes.status>(
+        ActionTypes.status,
+        {
+          caseId,
+          user,
+          status,
+          owner,
+        }
+      );
 
       if (userAction) {
         await this.create<StatusUserAction>({
@@ -326,12 +340,15 @@ export class CaseUserActionService {
   }: CreatePushToServiceUserAction): Promise<void> {
     try {
       this.log.debug(`Attempting to create a create case user action`);
-      const userAction = this.builder.buildUserAction<'pushed'>('pushed', {
-        caseId,
-        user,
-        externalService,
-        owner,
-      });
+      const userAction = this.builder.buildUserAction<typeof ActionTypes.pushed>(
+        ActionTypes.pushed,
+        {
+          caseId,
+          user,
+          externalService,
+          owner,
+        }
+      );
 
       if (userAction) {
         await this.create<PushedUserActionWithoutConnectorId>({
@@ -416,15 +433,18 @@ export class CaseUserActionService {
   }: BulkCreateAttachmentDeletionUserAction): Promise<void> {
     this.log.debug(`Attempting to create a create case user action`);
     const userActionsWithReferences = attachments.reduce((acc, attachment) => {
-      const deleteCommentUserAction = this.builder.buildUserAction<'comment'>('comment', {
-        action: Actions.delete,
-        caseId,
-        user,
-        owner: attachment.owner,
-        comment: attachment.attachment,
-        attachmentId: attachment.id,
-        subCaseId,
-      });
+      const deleteCommentUserAction = this.builder.buildUserAction<typeof ActionTypes.comment>(
+        ActionTypes.comment,
+        {
+          action: Actions.delete,
+          caseId,
+          user,
+          owner: attachment.owner,
+          comment: attachment.attachment,
+          attachmentId: attachment.id,
+          subCaseId,
+        }
+      );
       return [
         ...acc,
         {

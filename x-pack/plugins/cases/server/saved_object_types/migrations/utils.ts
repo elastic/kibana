@@ -7,19 +7,26 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import { isPlainObject, isString } from 'lodash';
 import * as rt from 'io-ts';
 
 import {
   LogMeta,
   SavedObjectMigrationContext,
   SavedObjectReference,
+  SavedObjectSanitizedDoc,
+  SavedObjectUnsanitizedDoc,
 } from '../../../../../../src/core/server';
 import {
+  Actions,
+  ActionTypes,
   CaseAttributes,
   CaseConnector,
   CaseConnectorRt,
   CaseExternalServiceBasicRt,
+  CommentType,
   noneConnectorId,
+  UserActionTypes,
 } from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
@@ -29,6 +36,35 @@ import {
 } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
+import { UserActions, UserActionUnmigratedConnectorDocument } from './types';
+
+// Generic util functions
+export function logError({
+  id,
+  context,
+  error,
+  docType,
+  docKey,
+}: {
+  id: string;
+  context: SavedObjectMigrationContext;
+  error: Error;
+  docType: string;
+  docKey: string;
+}) {
+  context.log.error<MigrationLogMeta>(
+    `Failed to migrate ${docType} with doc id: ${id} version: ${context.migrationVersion} error: ${error.message}`,
+    {
+      migrations: {
+        [docKey]: {
+          id,
+        },
+      },
+    }
+  );
+}
+
+// 7.16 util functions
 
 export function isCreateConnector(action?: string, actionFields?: string[]): boolean {
   return action === 'create' && actionFields != null && actionFields.includes('connector');
@@ -131,7 +167,7 @@ export function extractConnectorIdHelper({
   };
 }
 
-function isCreateCaseConnector(
+export function isCreateCaseConnector(
   action: string,
   actionFields: string[],
   actionDetails: unknown
@@ -154,7 +190,7 @@ export const ConnectorIdReferenceName: Record<UserActionFieldType, ConnectorIdRe
   [UserActionFieldType.Old]: USER_ACTION_OLD_ID_REF_NAME,
 };
 
-function transformConnectorFromCreateAndUpdateAction(
+export function transformConnectorFromCreateAndUpdateAction(
   connector: CaseConnector,
   fieldType: UserActionFieldType
 ): {
@@ -303,27 +339,170 @@ interface MigrationLogMeta extends LogMeta {
   };
 }
 
-export function logError({
-  id,
-  context,
-  error,
-  docType,
-  docKey,
-}: {
-  id: string;
-  context: SavedObjectMigrationContext;
-  error: Error;
-  docType: string;
-  docKey: string;
-}) {
-  context.log.error<MigrationLogMeta>(
-    `Failed to migrate ${docType} with doc id: ${id} version: ${context.migrationVersion} error: ${error.message}`,
-    {
-      migrations: {
-        [docKey]: {
-          id,
-        },
-      },
-    }
+export function isConnectorUserAction(action?: string, actionFields?: string[]): boolean {
+  return (
+    isCreateConnector(action, actionFields) ||
+    isUpdateConnector(action, actionFields) ||
+    isPush(action, actionFields)
   );
 }
+
+export function formatDocumentWithConnectorReferences(
+  doc: SavedObjectUnsanitizedDoc<UserActionUnmigratedConnectorDocument>
+): SavedObjectSanitizedDoc<unknown> {
+  const { new_value, old_value, action, action_field, ...restAttributes } = doc.attributes;
+  const { references = [] } = doc;
+
+  const { transformedActionDetails: transformedNewValue, references: newValueConnectorRefs } =
+    extractConnectorIdFromJson({
+      action,
+      actionFields: action_field,
+      actionDetails: new_value,
+      fieldType: UserActionFieldType.New,
+    });
+
+  const { transformedActionDetails: transformedOldValue, references: oldValueConnectorRefs } =
+    extractConnectorIdFromJson({
+      action,
+      actionFields: action_field,
+      actionDetails: old_value,
+      fieldType: UserActionFieldType.Old,
+    });
+
+  return {
+    ...doc,
+    attributes: {
+      ...restAttributes,
+      action,
+      action_field,
+      new_value: transformedNewValue,
+      old_value: transformedOldValue,
+    },
+    references: [...references, ...newValueConnectorRefs, ...oldValueConnectorRefs],
+  };
+}
+
+// 8.1.0 migration util functions
+
+const getSingleFieldPayload = (
+  field: string,
+  value: string | null,
+  owner: string
+): Record<string, unknown> => {
+  const decodeValue = (v: string | null) => {
+    try {
+      return isString(v) ? JSON.parse(v) : value ?? {};
+    } catch {
+      return value;
+    }
+  };
+
+  switch (field) {
+    case 'title':
+      return { title: value ?? '' };
+    case 'tags':
+      return { tags: isString(value) ? value.split(',') : value ?? [] };
+    case 'status':
+      return { status: value ?? '' };
+    case 'description':
+      return { description: value ?? '' };
+    case 'comment':
+      /**
+       * Until 7.10 the new_value of the comment user action
+       * was a string. In 7.11+ more fields were introduced to the comment's
+       * saved object and the new_value of the user actions changes to an
+       * stringify object. At that point of time no migrations were made to
+       * the user actions to accommodate the new formatting.
+       *
+       * We are taking care of it in this migration.
+       * If there response of the decodeValue function is not an object
+       * then we assume that the value is a string coming for a 7.10
+       * user action saved object.
+       */
+      const decodedValue = decodeValue(value);
+      return {
+        comment: isPlainObject(decodedValue)
+          ? decodedValue
+          : { comment: isString(decodedValue) ? decodedValue : '', type: CommentType.user, owner },
+      };
+    case 'connector':
+      return { connector: decodeValue(value) };
+    case 'pushed':
+      return { externalService: decodeValue(value) };
+    case 'settings':
+      return { settings: decodeValue(value) };
+
+    default:
+      return {};
+  }
+};
+
+export const getUserActionType = (fields: string[], action: string): string => {
+  if (fields.length > 1 && action === Actions.create) {
+    return ActionTypes.create_case;
+  }
+
+  if (fields.length > 1 && action === Actions.delete) {
+    return ActionTypes.delete_case;
+  }
+
+  const field = fields[0] as UserActionTypes;
+  return ActionTypes[field] ?? '';
+};
+
+const getMultipleFieldsPayload = (
+  fields: string[],
+  value: string | null,
+  owner: string
+): Record<string, unknown> => {
+  if (value == null) {
+    return {};
+  }
+
+  const decodedValue = JSON.parse(value);
+
+  return fields.reduce(
+    (payload, field) => ({
+      ...payload,
+      ...getSingleFieldPayload(field, decodedValue[field], owner),
+    }),
+    {}
+  );
+};
+
+export const getPayload = (
+  type: string,
+  action_field: string[],
+  new_value: string | null,
+  old_value: string | null,
+  owner: string
+): Record<string, unknown> => {
+  const payload =
+    action_field.length > 1
+      ? getMultipleFieldsPayload(action_field, new_value ?? old_value ?? null, owner)
+      : getSingleFieldPayload(action_field[0], new_value ?? old_value ?? null, owner);
+
+  /**
+   * From 7.10+ the cases saved object has the connector attribute
+   * Create case user actions did not get migrated to have the
+   * connector attribute included.
+   *
+   * We are taking care of it in this migration by adding the none
+   * connector as a default
+   */
+  return {
+    ...payload,
+    ...(payload.connector == null &&
+    (type === ActionTypes.create_case || type === ActionTypes.connector)
+      ? { connector: { name: 'none', type: '.none', fields: null } }
+      : {}),
+  };
+};
+
+export const removeOldReferences = (
+  references: SavedObjectUnsanitizedDoc<UserActions>['references']
+): SavedObjectReference[] =>
+  (references ?? []).filter(
+    (ref) =>
+      ref.name !== USER_ACTION_OLD_ID_REF_NAME && ref.name !== USER_ACTION_OLD_PUSH_ID_REF_NAME
+  );

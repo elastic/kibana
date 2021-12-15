@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { ActionTypes, UserActionTypes } from '../api';
-import { CommentUserAction } from '../api/cases/user_actions/comment';
-import { ConnectorUserAction } from '../api/cases/user_actions/connector';
-import { CreateCaseUserAction } from '../api/cases/user_actions/create_case';
-import { DescriptionUserAction } from '../api/cases/user_actions/description';
-import { PushedUserAction } from '../api/cases/user_actions/pushed';
-import { StatusUserAction } from '../api/cases/user_actions/status';
-import { TagsUserAction } from '../api/cases/user_actions/tags';
-import { TitleUserAction } from '../api/cases/user_actions/title';
+import {
+  ActionTypes,
+  CommentUserAction,
+  ConnectorUserAction,
+  CreateCaseUserAction,
+  DescriptionUserAction,
+  PushedUserAction,
+  StatusUserAction,
+  TagsUserAction,
+  TitleUserAction,
+  UserActionTypes,
+} from '../api';
 import { SnakeToCamelCase } from '../types';
 
 type SnakeCaseOrCamelCaseUserAction<
@@ -22,9 +25,6 @@ type SnakeCaseOrCamelCaseUserAction<
   C
 > = T extends 'snakeCase' ? S : C;
 
-/**
- * TODO: Ternary operation for camelCase/snakeCase
- * */
 export const isConnectorUserAction = (userAction: unknown): userAction is ConnectorUserAction =>
   (userAction as ConnectorUserAction)?.type === ActionTypes.connector &&
   (userAction as ConnectorUserAction)?.payload?.connector != null;

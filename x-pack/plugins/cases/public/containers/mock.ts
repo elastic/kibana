@@ -9,6 +9,7 @@ import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } 
 
 import { ResolvedCase } from '../../common/ui/types';
 import {
+  Actions,
   ActionTypes,
   AssociationType,
   CaseConnector,
@@ -26,10 +27,10 @@ import {
   UserAction,
   UserActionTypes,
   UserActionWithResponse,
+  CommentUserAction,
 } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
-import { CommentUserAction } from '../../common/api/cases/user_actions/comment';
 import { SnakeToCamelCase } from '../../common/types';
 export { connectorsMock } from './configure/mock';
 
@@ -411,11 +412,11 @@ export const getUserActionSnake = (
 };
 
 export const caseUserActionsSnake: CaseUserActionsResponse = [
-  getUserActionSnake('description', 'create', { description: 'a desc' }),
-  getUserActionSnake('comment', 'create', {
+  getUserActionSnake('description', Actions.create, { description: 'a desc' }),
+  getUserActionSnake('comment', Actions.create, {
     comment: { comment: 'a comment', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER },
   }),
-  getUserActionSnake('description', 'update', { description: 'a desc updated' }),
+  getUserActionSnake('description', Actions.update, { description: 'a desc updated' }),
 ];
 
 export const getUserAction = (
@@ -451,7 +452,7 @@ export const getAlertUserAction = (): SnakeToCamelCase<
 > => ({
   ...basicAction,
   actionId: 'alert-action-id',
-  action: 'create',
+  action: Actions.create,
   commentId: 'alert-comment-id',
   type: ActionTypes.comment,
   payload: {
@@ -474,7 +475,7 @@ export const getHostIsolationUserAction = (): SnakeToCamelCase<
   ...basicAction,
   actionId: 'isolate-action-id',
   type: ActionTypes.comment,
-  action: 'create',
+  action: Actions.create,
   commentId: 'isolate-comment-id',
   payload: {
     comment: {
@@ -487,13 +488,13 @@ export const getHostIsolationUserAction = (): SnakeToCamelCase<
 });
 
 export const caseUserActions: CaseUserActions[] = [
-  getUserAction('description', 'create', { payload: { description: 'a desc' } }),
-  getUserAction('comment', 'create', {
+  getUserAction('description', Actions.create, { payload: { description: 'a desc' } }),
+  getUserAction('comment', Actions.create, {
     payload: {
       comment: { comment: 'a comment', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER },
     },
   }),
-  getUserAction('description', 'update', { payload: { description: 'a desc updated' } }),
+  getUserAction('description', Actions.update, { payload: { description: 'a desc updated' } }),
 ];
 
 // components tests

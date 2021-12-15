@@ -224,7 +224,7 @@ export const mappings: ConnectorMappingsAttributes[] = [
 
 export const userActions: CaseUserActionsResponse = [
   {
-    action: 'create',
+    action: Actions.create,
     type: 'create_case',
     created_at: '2021-02-03T17:41:03.771Z',
     created_by: {
@@ -287,7 +287,7 @@ export const userActions: CaseUserActionsResponse = [
   },
   {
     type: 'comment',
-    action: 'create',
+    action: Actions.create,
     created_at: '2021-02-03T17:44:21.067Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -310,7 +310,7 @@ export const userActions: CaseUserActionsResponse = [
   },
   {
     type: 'comment',
-    action: 'create',
+    action: Actions.create,
     created_at: '2021-02-03T17:44:33.078Z',
     created_by: {
       email: 'elastic@elastic.co',
@@ -359,7 +359,7 @@ export const userActions: CaseUserActionsResponse = [
   },
   {
     type: 'comment',
-    action: 'create',
+    action: Actions.create,
     created_at: '2021-02-03T17:48:30.616Z',
     created_by: {
       email: 'elastic@elastic.co',

@@ -69,8 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(createCaseUserAction.payload.connector).to.eql(userActionPostResp.connector);
     });
 
-    // TODO: fix
-    it.skip('creates a delete case user action when a case is deleted', async () => {
+    it('creates a delete case user action when a case is deleted', async () => {
       const theCase = await createCase(supertest, postCaseReq);
       await deleteCases({ supertest, caseIDs: [theCase.id] });
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
@@ -82,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(userAction.action).to.eql('delete');
       expect(userAction.type).to.eql('delete_case');
-      expect(userAction.payload).to.eql({});
+      expect(userAction.payload).to.eql(null);
     });
 
     it('creates a status update user action when changing the status', async () => {

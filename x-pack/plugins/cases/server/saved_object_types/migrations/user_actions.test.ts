@@ -20,7 +20,8 @@ import {
   createExternalService,
   createJiraConnector,
 } from '../../services/test_utils';
-import { payloadMigration, UserActions, userActionsConnectorIdMigration } from './user_actions';
+import { UserActions } from './types';
+import { payloadMigration, userActionsConnectorIdMigration } from './user_actions';
 
 interface OldCaseUserActionAttributes {
   new_value?: string;

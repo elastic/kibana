@@ -23,6 +23,10 @@ import {
   CommentType,
   CommentRequestActionsType,
   noneConnectorId,
+  Actions,
+  ConnectorUserAction,
+  PushedUserAction,
+  TagsUserAction,
 } from '../../../common/api';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
@@ -46,9 +50,6 @@ import {
   isTagsUserAction,
   isTitleUserAction,
 } from '../../../common/utils/user_actions';
-import { ConnectorUserAction } from '../../../common/api/cases/user_actions/connector';
-import { TagsUserAction } from '../../../common/api/cases/user_actions/tags';
-import { PushedUserAction } from '../../../common/api/cases/user_actions/pushed';
 import { SnakeToCamelCase } from '../../../common/types';
 
 interface LabelTitle {
@@ -83,7 +84,7 @@ export const getLabelTitle = ({ action }: LabelTitle) => {
     return `${i18n.CHANGED_FIELD.toLowerCase()} ${i18n.CASE_NAME.toLowerCase()}  ${i18n.TO} "${
       action.payload.title
     }"`;
-  } else if (isDescriptionUserAction(action) && action.action === 'update') {
+  } else if (isDescriptionUserAction(action) && action.action === Actions.update) {
     return `${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`;
   } else if (isStatusUserAction(action)) {
     const status = action.payload.status ?? '';
@@ -92,7 +93,7 @@ export const getLabelTitle = ({ action }: LabelTitle) => {
     }
 
     return '';
-  } else if (isCommentUserAction(action) && action.action === 'update') {
+  } else if (isCommentUserAction(action) && action.action === Actions.update) {
     return `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
   }
 
@@ -134,8 +135,8 @@ const getTagsLabelTitle = (action: TagsUserAction) => {
   return (
     <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span" responsive={false}>
       <EuiFlexItem data-test-subj="ua-tags-label" grow={false}>
-        {action.action === 'add' && i18n.ADDED_FIELD}
-        {action.action === 'delete' && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
+        {action.action === Actions.add && i18n.ADDED_FIELD}
+        {action.action === Actions.delete && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <Tags tags={tags} gutterSize="xs" />
@@ -223,7 +224,7 @@ export const getUpdateAction = ({
       <EuiFlexItem grow={false}>
         <UserActionCopyLink id={action.actionId} />
       </EuiFlexItem>
-      {action.action === 'update' && action.commentId != null && (
+      {action.action === Actions.update && action.commentId != null && (
         <EuiFlexItem grow={false}>
           <UserActionMoveToReference id={action.commentId} outlineComment={handleOutlineComment} />
         </EuiFlexItem>
