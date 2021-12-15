@@ -9,7 +9,6 @@ import deepMerge from 'deepmerge';
 import { IEventLogger, IEventLogService } from '../../../../event_log/server';
 import {
   EVENT_ACTION_EXECUTE_COMPLETE,
-  EVENT_ACTION_EXECUTE_ERROR,
   EVENT_ACTION_EXECUTE_START,
   PLUGIN_ID,
 } from '../../../common/constants';
@@ -25,7 +24,11 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
 
   return class ReportingEventLogger {
     readonly eventObj: {
-      event: { id: string; timezone: string; provider: 'reporting' };
+      event: {
+        id: string;
+        timezone: string;
+        provider: 'reporting';
+      };
       kibana: { reporting: ExecuteStart['kibana']['reporting'] };
       log: { logger: 'reporting' };
     };
@@ -39,18 +42,17 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
         log: { logger: 'reporting' },
       };
 
-      // create a "complete" logger that will use helper functions and calculate timings
+      // create a "complete" logger that will use EventLog helpers to calculate timings
       this.completionLogger = eventLog.getLogger({ event: { provider: PLUGIN_ID } });
     }
 
     logStart(message: string): ExecuteStart {
-      const action = EVENT_ACTION_EXECUTE_START as typeof EVENT_ACTION_EXECUTE_START;
       const event = deepMerge(
         {
           message,
-          event: { kind: 'event' as const, action },
-          log: { level: 'info' as const },
-        },
+          event: { kind: 'event', action: EVENT_ACTION_EXECUTE_START },
+          log: { level: 'info' },
+        } as Partial<ExecuteStart>,
         this.eventObj
       );
 
@@ -67,14 +69,13 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
       reportingObj: Partial<ExecuteComplete['kibana']['reporting']>
     ): ExecuteComplete {
       this.completionLogger.stopTiming(this.eventObj);
-      const action = EVENT_ACTION_EXECUTE_COMPLETE as typeof EVENT_ACTION_EXECUTE_COMPLETE;
       const event = deepMerge(
         {
           message,
-          event: { kind: 'metrics' as const, action },
-          kibana: { reporting: { ...reportingObj } },
-          log: { level: 'info' as const },
-        },
+          event: { kind: 'metrics', outcome: 'success', action: EVENT_ACTION_EXECUTE_COMPLETE },
+          kibana: { reporting: reportingObj },
+          log: { level: 'info' },
+        } as Partial<ExecuteComplete>,
         this.eventObj
       );
       this.completionLogger.logEvent(event);
@@ -82,22 +83,24 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
     }
 
     logError(error: ErrorAction): ExecuteError {
-      const action = EVENT_ACTION_EXECUTE_ERROR as typeof EVENT_ACTION_EXECUTE_ERROR;
-      const event = deepMerge(
-        {
+      interface CoolErrorMessage {
+        message: string;
+        error: ExecuteError['error'];
+        event: Omit<ExecuteError['event'], 'provider' | 'id' | 'timezone'>;
+        log: Omit<ExecuteError['log'], 'logger'>;
+      }
+      const coolErrorMessage: CoolErrorMessage = {
+        message: error.message,
+        error: {
           message: error.message,
-          error: {
-            message: error.message,
-            code: error.code,
-            stack_trace: error.stack_trace,
-            type: error.type,
-          },
-          event: { kind: 'error' as const, action },
-          kibana: { reporting: {} },
-          log: { level: 'error' as const },
+          code: error.code,
+          stack_trace: error.stack_trace,
+          type: error.type,
         },
-        this.eventObj
-      );
+        event: { kind: 'error', outcome: 'failure', action: EVENT_ACTION_EXECUTE_COMPLETE },
+        log: { level: 'error' },
+      };
+      const event = deepMerge(coolErrorMessage, this.eventObj);
       genericLogger.logEvent(event);
       return event;
     }

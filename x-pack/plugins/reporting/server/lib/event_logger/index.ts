@@ -8,19 +8,13 @@
 import { IEventLogService } from '../../../../event_log/server';
 import {
   EVENT_ACTION_EXECUTE_COMPLETE,
-  EVENT_ACTION_EXECUTE_ERROR,
-  EVENT_ACTION_EXECUTE_SAVE,
-  EVENT_ACTION_EXECUTE_SCHEDULE,
   EVENT_ACTION_EXECUTE_START,
   PLUGIN_ID,
 } from '../../../common/constants';
 
 export function registerEventLogProviderActions(eventLog: IEventLogService) {
   eventLog.registerProviderActions(PLUGIN_ID, [
-    EVENT_ACTION_EXECUTE_SCHEDULE,
     EVENT_ACTION_EXECUTE_START,
     EVENT_ACTION_EXECUTE_COMPLETE,
-    EVENT_ACTION_EXECUTE_ERROR,
-    EVENT_ACTION_EXECUTE_SAVE,
   ]);
 }

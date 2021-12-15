@@ -7,18 +7,23 @@
 
 import {
   EVENT_ACTION_EXECUTE_COMPLETE,
-  EVENT_ACTION_EXECUTE_ERROR,
-  EVENT_ACTION_EXECUTE_SAVE,
-  EVENT_ACTION_EXECUTE_SCHEDULE,
   EVENT_ACTION_EXECUTE_START,
 } from '../../../common/constants';
 
+type ActionType = typeof EVENT_ACTION_EXECUTE_START | typeof EVENT_ACTION_EXECUTE_COMPLETE;
 type ActionKind = 'event' | 'metrics' | 'error';
+type ActionOutcome = 'success' | 'failure';
 
-interface ActionBase<A extends string, K extends ActionKind, EventProvider> {
+interface ActionBase<
+  A extends ActionType,
+  K extends ActionKind,
+  O extends ActionOutcome,
+  EventProvider
+> {
   event: {
     action: A;
     kind: K;
+    outcome?: O;
     provider: 'reporting';
     id: string;
     timezone: string;
@@ -39,9 +44,14 @@ export interface ErrorAction {
   type?: string;
 }
 
-type ReportingAction<A extends string, K extends ActionKind> = ActionBase<
+type ReportingAction<
+  A extends ActionType,
+  K extends ActionKind,
+  O extends ActionOutcome = 'success'
+> = ActionBase<
   A,
   K,
+  O,
   {
     reporting: K extends 'event'
       ? {
@@ -59,9 +69,11 @@ type ReportingAction<A extends string, K extends ActionKind> = ActionBase<
   }
 >;
 
-export type ScheduleTask = ReportingAction<typeof EVENT_ACTION_EXECUTE_SCHEDULE, 'event'>;
 export type ExecuteStart = ReportingAction<typeof EVENT_ACTION_EXECUTE_START, 'event'>;
 export type ExecuteComplete = ReportingAction<typeof EVENT_ACTION_EXECUTE_COMPLETE, 'metrics'>;
-export type SaveReport = ReportingAction<typeof EVENT_ACTION_EXECUTE_SAVE, 'event'>;
-export type ExecuteError = ReportingAction<typeof EVENT_ACTION_EXECUTE_ERROR, 'error'> &
-  ErrorAction;
+
+export type ExecuteError = ReportingAction<
+  typeof EVENT_ACTION_EXECUTE_COMPLETE,
+  'error',
+  'failure'
+> & { error: ErrorAction };
