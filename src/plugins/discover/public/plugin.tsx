@@ -406,7 +406,7 @@ export class DiscoverPlugin
     uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
     setUiActions(plugins.uiActions);
 
-    const services = buildServices(core, plugins, this.initializerContext);
+    const services = buildServices(core, plugins, this.initializerContext, this.locator!);
     setServices(services);
 
     injectTruncateStyles(services.uiSettings.get(TRUNCATE_MAX_HEIGHT));

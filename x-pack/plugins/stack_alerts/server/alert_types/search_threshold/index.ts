@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { CoreSetup } from 'kibana/server';
 import { Logger } from 'src/core/server';
 import { AlertingSetup } from '../../types';
 import { getRuleType } from './rule_type';
@@ -11,9 +12,10 @@ import { getRuleType } from './rule_type';
 interface RegisterParams {
   logger: Logger;
   alerting: AlertingSetup;
+  core: CoreSetup;
 }
 
 export function register(params: RegisterParams) {
-  const { logger, alerting } = params;
-  alerting.registerType(getRuleType(logger));
+  const { logger, alerting, core } = params;
+  alerting.registerType(getRuleType(logger, core));
 }

@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Logger } from 'src/core/server';
+import { sha256 } from 'js-sha256';
+import { CoreSetup, Logger } from 'kibana/server';
 import { RuleType, AlertExecutorOptions } from '../../types';
 import { ParamsSchema } from './rule_type_params';
 import { ActionContext } from './action_context';
@@ -15,6 +16,7 @@ import {
   extractReferences,
   injectReferences,
   SerializedSearchSourceFields,
+  getTime,
 } from '../../../../../../src/plugins/data/common';
 import { AlertTypeParams } from '../../../../alerting/common';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
@@ -51,7 +53,7 @@ export type SearchThresholdRuleType = RuleType<
   typeof ActionGroupId
 >;
 
-export function getRuleType(logger: Logger): SearchThresholdRuleType {
+export function getRuleType(logger: Logger, core: CoreSetup): SearchThresholdRuleType {
   const alertTypeName = i18n.translate('xpack.stackAlerts.searchThreshold.alertTypeTitle', {
     defaultMessage: 'Search threshold',
   });
@@ -202,11 +204,12 @@ export function getRuleType(logger: Logger): SearchThresholdRuleType {
       typeof ActionGroupId
     >
   ) {
-    const { name, params, alertId, state } = options;
+    const { name, params, alertId, state, request, services } = options;
+    const { data } = services;
     const timestamp = new Date().toISOString();
-    logger.debug(`searchThreshold (${alertId}) previousTimestamp: ${state.previousTimestamp}`);
+    const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
     logger.debug(
-      `searchThreshold (${alertId}) searchSource: ${JSON.stringify(params.searchSourceFields)}`
+      `searchThreshold (${alertId}) previousTimestamp: ${state.previousTimestamp}, previousTimeRange ${state.previousTimeRange}`
     );
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
@@ -221,32 +224,61 @@ export function getRuleType(logger: Logger): SearchThresholdRuleType {
       );
     }
 
-    const nrOfDocs = 10;
-    /**
-     * Currently this is just triggering a notification if the configured threshold is lower then 10
-     * What should be implemented:
-     * - Create a scoped search source client using KibanaRequest
-     * - Create a searchSource object
-     * - Use it to request data from Elasticsearch
-     * - Compare number of documents with the configured threshold
-     */
+    const searchSourceClient = await data.search.searchSource.asScoped(request);
+    const loadedSearchSource = await searchSourceClient.create(params.searchSource);
+    const index = loadedSearchSource.getField('index');
+    const timeFieldName = index?.timeFieldName;
+    if (!timeFieldName) {
+      throw new Error(
+        i18n.translate('xpack.stackAlerts.indexThreshold.invalidDataViewErrorMessage', {
+          defaultMessage: 'Invalid data view without timeFieldName',
+        })
+      );
+    }
+
+    loadedSearchSource.setField('size', 0);
+
+    const filter = getTime(index, {
+      from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
+      to: 'now',
+    });
+    const from = filter?.query.range[timeFieldName].gte;
+    const to = filter?.query.range[timeFieldName].lte;
+    const searchSourceChild = loadedSearchSource.createChild();
+    searchSourceChild.setField('filter', filter);
+
+    let nrOfDocs = 0;
+    try {
+      logger.info(
+        `searchThreshold (${alertId}) query: ${JSON.stringify(
+          searchSourceChild.getSearchRequestBody()
+        )}`
+      );
+      const docs = await searchSourceChild.fetch();
+      nrOfDocs = Number(docs.hits.total);
+      logger.info(`searchThreshold (${alertId}) nrOfDocs: ${nrOfDocs}`);
+    } catch (error) {
+      logger.error('Error fetching documents: ' + error.message);
+      throw error;
+    }
 
     const met = compareFn(nrOfDocs, params.threshold);
-
     if (met) {
       const conditions = `${nrOfDocs} is ${getHumanReadableComparator(
         params.thresholdComparator
       )} ${params.threshold}`;
+      const checksum = sha256.create().update(JSON.stringify(params));
+      const link = `${publicBaseUrl}/app/discover#/viewAlert/${alertId}?from=${from}&to=${to}&checksum=${checksum}`;
 
       const baseContext: ActionContext = {
         title: name,
-        message: `${nrOfDocs} documents found`,
+        message: `${nrOfDocs} documents found between ${from} and ${to}`,
         date: timestamp,
         value: Number(nrOfDocs),
         conditions,
+        link,
       };
 
-      // this is where the notification is scheduled
       const alertInstance = options.services.alertInstanceFactory(ConditionMetAlertInstanceId);
       alertInstance.scheduleActions(ActionGroupId, baseContext);
     }

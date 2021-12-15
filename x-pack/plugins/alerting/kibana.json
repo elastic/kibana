@@ -10,6 +10,7 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "alerting"],
   "requiredPlugins": [
+    "data",
     "actions",
     "encryptedSavedObjects",
     "eventLog",

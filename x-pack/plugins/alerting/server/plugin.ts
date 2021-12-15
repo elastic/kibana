@@ -35,6 +35,7 @@ import {
   SavedObjectsBulkGetObject,
   ServiceStatusLevels,
 } from '../../../../src/core/server';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID } from './types';
 import { defineRoutes } from './routes';
 import { LICENSE_TYPE, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
@@ -136,6 +137,7 @@ export interface AlertingPluginsStart {
   licensing: LicensingPluginStart;
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
+  data: DataPluginStart;
 }
 
 export class AlertingPlugin {
@@ -378,7 +380,7 @@ export class AlertingPlugin {
     this.config.then((config) => {
       taskRunnerFactory.initialize({
         logger,
-        getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
+        getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch, plugins.data),
         getRulesClientWithRequest,
         spaceIdToNamespace,
         actionsPlugin: plugins.actions,
@@ -440,9 +442,11 @@ export class AlertingPlugin {
 
   private getServicesFactory(
     savedObjects: SavedObjectsServiceStart,
-    elasticsearch: ElasticsearchServiceStart
+    elasticsearch: ElasticsearchServiceStart,
+    data: DataPluginStart
   ): (request: KibanaRequest) => Services {
     return (request) => ({
+      data,
       savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
       scopedClusterClient: elasticsearch.client.asScoped(request),
     });

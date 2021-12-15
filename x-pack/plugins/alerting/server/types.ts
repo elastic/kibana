@@ -7,6 +7,7 @@
 
 import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { PublicAlertInstance } from './alert_instance';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -66,6 +67,7 @@ export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: IScopedClusterClient;
+  data: DataPluginStart;
 }
 
 export interface AlertServices<
@@ -92,6 +94,7 @@ export interface AlertExecutorOptions<
   startedAt: Date;
   previousStartedAt: Date | null;
   services: AlertServices<InstanceState, InstanceContext, ActionGroupIds>;
+  request: KibanaRequest;
   params: Params;
   state: State;
   rule: SanitizedRuleConfig;
