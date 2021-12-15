@@ -41,6 +41,7 @@ export interface ElasticsearchSourceKibanaStats {
     };
     transport_address?: string;
     host?: string;
+    version?: string;
   };
   os?: {
     memory?: {
@@ -417,6 +418,7 @@ export interface ElasticsearchMetricbeatSource {
   '@timestamp'?: string;
   service?: {
     address?: string;
+    version?: string;
   };
   elasticsearch?: {
     node?: ElasticsearchLegacySource['source_node'] & ElasticsearchMetricbeatNode;
