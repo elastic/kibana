@@ -23,6 +23,10 @@ const LENS_METRIC_TYPES: { [key: string]: AggOptions } = {
     name: 'average',
     isFullReference: false,
   },
+  cardinality: {
+    name: 'unique_count',
+    isFullReference: false,
+  },
   count: {
     name: 'count',
     isFullReference: false,
