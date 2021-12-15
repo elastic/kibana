@@ -35,6 +35,16 @@ const defaultOption = {
   }),
 };
 
+const singleSelectionOption = { asPlainText: true };
+
+const label = i18n.translate('xpack.lens.indexPattern.columnFormatLabel', {
+  defaultMessage: 'Value format',
+});
+
+const decimalsLabel = i18n.translate('xpack.lens.indexPattern.decimalPlacesLabel', {
+  defaultMessage: 'Decimals',
+});
+
 interface FormatSelectorProps {
   selectedColumn: GenericIndexPatternColumn;
   onChange: (newFormat?: { id: string; params?: Record<string, unknown> }) => void;
@@ -44,7 +54,8 @@ interface State {
   decimalPlaces: number;
 }
 
-const singleSelectionOption = { asPlainText: true };
+const RANGE_MIN = 0;
+const RANGE_MAX = 15;
 
 export function FormatSelector(props: FormatSelectorProps) {
   const { selectedColumn, onChange } = props;
@@ -60,13 +71,7 @@ export function FormatSelector(props: FormatSelectorProps) {
 
   const selectedFormat = currentFormat?.id ? supportedFormats[currentFormat.id] : undefined;
 
-  const label = i18n.translate('xpack.lens.indexPattern.columnFormatLabel', {
-    defaultMessage: 'Value format',
-  });
 
-  const decimalsLabel = i18n.translate('xpack.lens.indexPattern.decimalPlacesLabel', {
-    defaultMessage: 'Decimals',
-  });
 
   const stableOptions = useMemo(
     () => [
@@ -130,9 +135,9 @@ export function FormatSelector(props: FormatSelectorProps) {
               <EuiSpacer size="xs" />
               <EuiRange
                 showInput="inputWithPopover"
-                min={0}
-                max={20}
                 value={state.decimalPlaces}
+                min={RANGE_MIN}
+                max={RANGE_MAX}
                 onChange={(e) => {
                   setState({ decimalPlaces: Number(e.currentTarget.value) });
                   onChange({
