@@ -66,7 +66,7 @@ export const aggAvg = (): FunctionDefinition => ({
       types: ['string'],
       help: i18n.translate('data.search.aggs.metrics.timeShift.help', {
         defaultMessage:
-          'Shift the time range for the metric by a set time, for example 1h or 7d. "previous" will shift by the length of the currently picked time range.',
+          'Shift the time range for the metric by a set time, for example 1h or 7d. "previous" will use the closest time range from the date histogram or time range filter.',
       }),
     },
   },

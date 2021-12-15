@@ -177,7 +177,10 @@ export class AggConfig {
       throw new Error(`could not parse time shift ${rawTimeShift}`);
     }
     if (parsedTimeShift === 'previous') {
-      if (!this.aggConfigs.timeRange) {
+      const timeShiftInterval = this.aggConfigs.getTimeShiftInterval();
+      if (timeShiftInterval) {
+        return timeShiftInterval;
+      } else if (!this.aggConfigs.timeRange) {
         return;
       }
       const resolvedBounds = this.aggConfigs.getResolvedTimeRange()!;
