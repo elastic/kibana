@@ -23,6 +23,8 @@ import {
 } from '@elastic/eui';
 import {
   ALERT_DURATION,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
   ALERT_UUID,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_NAME,
@@ -33,10 +35,6 @@ import {
 } from '@kbn/rule-data-utils/alerts_as_data_status';
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
-import {
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-} from '../../../../../common/technical_field_names';
 import type { TopAlert } from '../../containers';
 import { useKibana, useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../../common/utils/formatters';

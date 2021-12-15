@@ -6,18 +6,12 @@
  */
 
 import { CoreSetup, Logger } from 'src/core/server';
-// import {
-//   ALERT_EVALUATION_THRESHOLD,
-//   ALERT_EVALUATION_VALUE,
-// } from '../../../../observability/common/technical_field_names';
+
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
-} from '../../lib/alerting/common/technical_rule_data_field_names';
-// import { ALERT_NAMESPACE } from '@kbn/rule-data-utils/technical_field_names';
+} from '@kbn/rule-data-utils/technical_field_names';
 import { mappingFromFieldMap } from '../../../../rule_registry/common/mapping_from_field_map';
-// const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as const;
-// const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
 
 import { Dataset, RuleRegistryPluginSetupContract } from '../../../../rule_registry/server';
 import type { InfraFeatureId } from '../../../common/constants';
