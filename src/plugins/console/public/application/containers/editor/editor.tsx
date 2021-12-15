@@ -11,7 +11,8 @@ import { debounce } from 'lodash';
 import { EuiProgress } from '@elastic/eui';
 
 import { EditorContentSpinner } from '../../components';
-import { Panel, PanelsContainer } from '../../../../../kibana_react/public';
+import { Panel } from '../../containers/split_panel/panel';
+import { PanelsContainer } from '../../containers/split_panel/panel_container';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { StorageKeys } from '../../../services';
 import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
