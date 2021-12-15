@@ -94,7 +94,7 @@ export class FunctionForm extends BaseForm {
       valueIndex: number
     ): ReactElement<any, any> | null =>
       arg.render({
-        key: `${id}`,
+        key: `${id}.${arg.name}.${valueIndex}`,
         ...passedProps,
         valueIndex,
         onValueChange: onValueChange(arg.name, valueIndex),
