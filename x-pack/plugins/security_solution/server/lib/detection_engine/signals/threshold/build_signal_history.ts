@@ -55,8 +55,6 @@ export const buildThresholdSignalHistory = ({
       return acc;
     }
 
-    console.log('building signal history');
-    console.log(JSON.stringify(alert));
     const terms = getTerms(alert as SimpleHit);
     const hash = getThresholdTermsHash(terms);
     const existing = acc[hash];

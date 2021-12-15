@@ -28,7 +28,6 @@ import {
   ALERT_THRESHOLD_RESULT,
 } from '../../../../common/field_maps/field_names';
 import {
-  KueryFilterQueryKind,
   TimelineId,
   TimelineResult,
   TimelineStatus,
@@ -159,9 +158,7 @@ const getFiltersFromRule = (filters: string[]): Filter[] =>
   }, [] as Filter[]);
 
 export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggregationData => {
-  console.log('getting threshold agg data');
   const thresholdEcsData: Ecs[] = Array.isArray(ecsData) ? ecsData : [ecsData];
-  console.log(thresholdEcsData);
   return thresholdEcsData.reduce<ThresholdAggregationData>(
     (outerAcc, thresholdData) => {
       const threshold =
@@ -170,31 +167,28 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
 
       const thresholdResult: {
         terms: Array<{
-          field: string[];
-          value: string[];
+          field: string;
+          value: string;
         }>;
-        count: number[];
-        from: string[];
+        count: number;
+        from: string;
       } = getField(thresholdData, ALERT_THRESHOLD_RESULT);
 
-      console.log('threshold result');
-      console.log(thresholdResult);
-
-      const originalTimeStr = getField(thresholdData, ALERT_ORIGINAL_TIME)[0];
+      const originalTimeStr = getField(thresholdData, ALERT_ORIGINAL_TIME);
       const originalTime = moment(originalTimeStr);
       const aggregationFields: string[] = Array.isArray(threshold.field)
         ? threshold.field
         : [threshold.field];
 
       return {
-        thresholdFrom: thresholdResult.from[0],
+        thresholdFrom: thresholdResult.from,
         thresholdTo: originalTime.toISOString(),
         dataProviders: [
           ...outerAcc.dataProviders,
           ...aggregationFields.reduce<DataProvider[]>((acc, aggregationField, i) => {
             const aggregationValue = thresholdResult.terms.filter(
-              (term) => term.field.length > 0 && term.field[0] === aggregationField
-            )[0].value[0];
+              (term) => term.field === aggregationField
+            )[0].value;
             const dataProviderValue = Array.isArray(aggregationValue)
               ? aggregationValue[0]
               : aggregationValue;
@@ -459,9 +453,10 @@ export const sendAlertToTimelineAction = async ({
   if (isThresholdRule(ecsData)) {
     const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(ecsData);
 
-    const filters = getField(ecsData, 'signal.rule.filters');
-    const language = getField(ecsData, 'signal.rule.language');
-    const query = getField(ecsData, 'signal.rule.query');
+    const params = getField(ecsData, ALERT_RULE_PARAMETERS);
+    const filters = getFiltersFromRule(params.filters) ?? [];
+    const language = params.language ?? 'kuery';
+    const query = params.query ?? '';
 
     return createTimeline({
       from: thresholdFrom,
@@ -469,7 +464,7 @@ export const sendAlertToTimelineAction = async ({
       timeline: {
         ...timelineDefaults,
         description: `_id: ${ecsData._id}`,
-        filters: getFiltersFromRule(getField(ecsData, 'signal.rule.filters') as string[]),
+        filters,
         dataProviders,
         id: TimelineId.active,
         indexNames: [],
@@ -481,16 +476,10 @@ export const sendAlertToTimelineAction = async ({
         kqlQuery: {
           filterQuery: {
             kuery: {
-              kind: ecsData.signal?.rule?.language?.length
-                ? (ecsData.signal?.rule?.language[0] as KueryFilterQueryKind)
-                : 'kuery',
-              expression: getField(ecsData, 'signal.rule.query').length
-                ? getField(ecsData, 'signal.rule.query')[0]
-                : '',
+              kind: language,
+              expression: query,
             },
-            serializedQuery: getField(ecsData, 'signal.rule.query').length
-              ? getField(ecsData, 'signal.rule.query')[0]
-              : '',
+            serializedQuery: query,
           },
         },
       },

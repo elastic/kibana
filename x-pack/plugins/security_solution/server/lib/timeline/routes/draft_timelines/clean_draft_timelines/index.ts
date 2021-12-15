@@ -27,7 +27,7 @@ import { TimelineType } from '../../../../../../common/types/timeline';
 
 export const cleanDraftTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.post(
