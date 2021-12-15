@@ -17,7 +17,6 @@ export async function getMultitermsCounts(
   function bucketsToObject(arg: any) {
     const obj: Record<string, number> = {};
     if (arg.multitermsDocs.doc_count > 0) {
-      //   console.log();
       obj.multiterms_docs = arg.multitermsDocs.doc_count;
       obj.multiterms_terms_count = arg.multitermsTermsCount.value;
       obj.multiterms_operations_count = arg.multitermsOperationsCount.value;
