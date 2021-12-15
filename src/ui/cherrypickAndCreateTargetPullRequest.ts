@@ -29,7 +29,7 @@ import { enablePullRequestAutoMerge } from '../services/github/v4/enablePullRequ
 import { consoleLog, logger } from '../services/logger';
 import { confirmPrompt } from '../services/prompts';
 import { sequentially } from '../services/sequentially';
-import { Commit } from '../types/Commit';
+import { Commit } from '../services/sourceCommit';
 
 export async function cherrypickAndCreateTargetPullRequest({
   options,
@@ -176,12 +176,9 @@ async function waitForCherrypick(
       cherrypickSpinner.succeed();
       return;
     }
-
-    // cherrypick failed due to conflicts
+  } finally {
+    // stop spinner
     cherrypickSpinner.fail();
-  } catch (e) {
-    cherrypickSpinner.fail();
-    throw e;
   }
 
   // resolve conflicts automatically

@@ -2,9 +2,9 @@ import { Octokit } from '@octokit/rest';
 import chalk from 'chalk';
 import ora from 'ora';
 import { ValidConfigOptions } from '../../../options/options';
-import { Commit } from '../../../types/Commit';
 import { HandledError } from '../../HandledError';
 import { logger, consoleLog } from '../../logger';
+import { Commit } from '../../sourceCommit';
 import { fetchExistingPullRequest } from '../v4/fetchExistingPullRequest';
 import { getGithubV3ErrorMessage } from './getGithubV3ErrorMessage';
 

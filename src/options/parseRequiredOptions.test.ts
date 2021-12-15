@@ -13,7 +13,9 @@ describe('parseRequiredOptions', () => {
   } as OptionsFromConfigFiles;
 
   const optionsFromCliArgs = {} as OptionsFromCliArgs;
-  const optionsFromGithub = { sourceBranch: 'main' } as OptionsFromGithub;
+  const optionsFromGithub = {
+    sourceBranch: 'source-branch-from-github',
+  } as OptionsFromGithub;
 
   describe('should not throw', () => {
     it('when all options are valid and `branches` is given', () => {

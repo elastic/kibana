@@ -1,8 +1,7 @@
 import { uniq } from 'lodash';
 import { ValidConfigOptions } from '../../../options/options';
 import { filterNil } from '../../../utils/filterEmpty';
-import { logger } from '../../logger';
-import { ExistingTargetPullRequests } from './getExistingTargetPullRequests';
+import { ExistingTargetPullRequests } from '../../sourceCommit';
 
 export function getTargetBranchForLabel({
   branchLabelMapping,
@@ -34,30 +33,36 @@ export function getTargetBranchesFromLabels({
   branchLabelMapping,
   labels,
 }: {
-  sourceBranch: string;
+  sourceBranch?: string;
   existingTargetPullRequests: ExistingTargetPullRequests;
   branchLabelMapping: ValidConfigOptions['branchLabelMapping'];
   labels?: string[];
 }) {
-  if (!branchLabelMapping || !labels) {
-    return [];
+  if (!sourceBranch || !branchLabelMapping || !labels) {
+    return { expected: [], missing: [], unmerged: [], merged: [] };
   }
 
-  const existingBranches = existingTargetPullRequests.map((pr) => pr.branch);
+  const existingTargetBranches = existingTargetPullRequests.map(
+    (pr) => pr.branch
+  );
 
-  const targetBranches = labels
+  const unmerged = existingTargetPullRequests
+    .filter((pr) => pr.state !== 'MERGED')
+    .map((pr) => pr.branch);
+
+  const merged = existingTargetPullRequests
+    .filter((pr) => pr.state === 'MERGED')
+    .map((pr) => pr.branch);
+
+  const expectedTargetBranches = labels
     .map((label) => getTargetBranchForLabel({ branchLabelMapping, label }))
     .filter(filterNil)
-    .filter((targetBranch) => !existingBranches.includes(targetBranch))
     .filter((targetBranch) => targetBranch !== sourceBranch);
 
-  logger.verbose('Inputs when calculating target branches:', {
-    labels,
-    branchLabelMapping,
-    existingTargetPullRequests,
-  });
+  const expected = uniq(expectedTargetBranches);
+  const missing = expected.filter(
+    (targetBranch) => !existingTargetBranches.includes(targetBranch)
+  );
 
-  logger.verbose('Target branches inferred from labels:', targetBranches);
-
-  return uniq(targetBranches);
+  return { expected, missing, unmerged, merged };
 }

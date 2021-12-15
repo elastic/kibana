@@ -2,7 +2,7 @@ import { isEmpty, intersection } from 'lodash';
 import { ValidConfigOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';
 import { promptForTargetBranches } from '../services/prompts';
-import { Commit } from '../types/Commit';
+import { Commit } from '../services/sourceCommit';
 import { filterNil } from '../utils/filterEmpty';
 
 export function getTargetBranches(
@@ -15,17 +15,17 @@ export function getTargetBranches(
   }
 
   // intersection of target branches from the selected commits
-  const targetBranchesFromLabels = intersection(
-    ...commits.map((commit) => commit.targetBranchesFromLabels)
+  const expectedTargetBranchesFromLabels = intersection(
+    ...commits.map((commit) => commit.targetBranchesFromLabels.expected)
   ).filter(filterNil);
 
   // automatically backport to specified target branches
   if (options.ci) {
-    if (isEmpty(targetBranchesFromLabels)) {
+    if (isEmpty(expectedTargetBranchesFromLabels)) {
       throw new HandledError(`There are no branches to backport to. Aborting.`);
     }
 
-    return targetBranchesFromLabels;
+    return expectedTargetBranchesFromLabels;
   }
 
   // sourceBranch should be the same for all commits, so picking `sourceBranch` from the first commit should be fine 🤞
@@ -34,7 +34,7 @@ export function getTargetBranches(
 
   const targetBranchChoices = getTargetBranchChoices(
     options,
-    targetBranchesFromLabels,
+    expectedTargetBranchesFromLabels,
     sourceBranch
   );
 
@@ -47,7 +47,7 @@ export function getTargetBranches(
 
 export function getTargetBranchChoices(
   options: ValidConfigOptions,
-  targetBranchesFromLabels: string[],
+  expectedTargetBranchesFromLabels: string[],
   sourceBranch: string
 ) {
   // exclude sourceBranch from targetBranchChoices
@@ -65,7 +65,7 @@ export function getTargetBranchChoices(
 
   // select target branches based on pull request labels
   return targetBranchesChoices.map((choice) => {
-    const isChecked = targetBranchesFromLabels.includes(choice.name);
+    const isChecked = expectedTargetBranchesFromLabels.includes(choice.name);
     return { ...choice, checked: isChecked };
   });
 }

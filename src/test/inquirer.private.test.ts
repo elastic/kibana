@@ -116,8 +116,8 @@ describe('inquirer cli', () => {
     expect(output).toMatchInlineSnapshot(`
       "? Select commit (Use arrow keys)
       ❯ 1. Add sheep emoji (#9) 7.8
-        2. Change Ulysses to Gretha (conflict) (#8)
-        3. Add 🍏 emoji (#5) 7.x, 7.8
+        2. Change Ulysses to Gretha (conflict) (#8) 7.x
+        3. Add 🍏 emoji (#5) 7.8, 7.x
         4. Add family emoji (#2) 7.x
         5. Add \`backport\` dep (823178be)
         6. Merge pull request #1 from backport-org/add-heart-emoji (#1)"

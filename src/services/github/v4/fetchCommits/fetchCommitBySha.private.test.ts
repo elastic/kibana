@@ -1,5 +1,5 @@
-import { ValidConfigOptions } from '../../../options/options';
-import { getDevAccessToken } from '../../../test/private/getDevAccessToken';
+import { ValidConfigOptions } from '../../../../options/options';
+import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
 import { fetchCommitBySha } from './fetchCommitBySha';
 
 type BackportOptionsWithSha = ValidConfigOptions & { sha: string };
@@ -28,7 +28,12 @@ describe('fetchCommitBySha', () => {
       pullNumber: 70740,
       sha: 'cb6fbc0e1b406675724181a3e9f59459b5f8f892',
       sourceBranch: 'master',
-      targetBranchesFromLabels: [],
+      targetBranchesFromLabels: {
+        expected: [],
+        missing: [],
+        unmerged: [],
+        merged: [],
+      },
       existingTargetPullRequests: [
         { branch: '7.x', state: 'MERGED', number: 71014 },
       ],

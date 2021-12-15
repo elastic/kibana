@@ -5,8 +5,8 @@ import { runWithOptions } from './runWithOptions';
 import * as childProcess from './services/child-process-promisified';
 import * as fs from './services/fs-promisified';
 import { AuthorIdResponse } from './services/github/v4/fetchAuthorId';
-import { CommitByAuthorResponse } from './services/github/v4/fetchCommitsByAuthor';
-import { commitsWithPullRequestsMock } from './services/github/v4/mocks/commitsByAuthorMock';
+import { CommitByAuthorResponse } from './services/github/v4/fetchCommits/fetchCommitsByAuthor';
+import { commitsByAuthorMock } from './services/github/v4/mocks/commitsByAuthorMock';
 import { mockGqlRequest, getNockCallsForScope } from './test/nockHelpers';
 import { PromiseReturnType } from './types/PromiseReturnType';
 import { SpyHelper } from './types/SpyHelper';
@@ -58,7 +58,7 @@ describe('runWithOptions', () => {
       repoOwner: 'elastic',
       resetAuthor: false,
       sha: undefined,
-      sourceBranch: 'mySourceBranch',
+      sourceBranch: 'my-source-branch-from-options',
       sourcePRLabels: [],
       prFilter: undefined,
       targetBranches: [],
@@ -99,7 +99,7 @@ describe('runWithOptions', () => {
     commitsByAuthorCalls = mockGqlRequest<CommitByAuthorResponse>({
       name: 'CommitsByAuthor',
       statusCode: 200,
-      body: { data: commitsWithPullRequestsMock },
+      body: { data: commitsByAuthorMock },
     });
 
     const scope = nock('https://api.github.com')
@@ -158,7 +158,7 @@ describe('runWithOptions', () => {
         maxNumber: 10,
         repoName: 'kibana',
         repoOwner: 'elastic',
-        sourceBranch: 'mySourceBranch',
+        sourceBranch: 'my-source-branch-from-options',
       },
     ]);
   });

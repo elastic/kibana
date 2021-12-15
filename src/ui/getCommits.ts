@@ -1,9 +1,9 @@
 import { ValidConfigOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';
-import { fetchCommitByPullNumber } from '../services/github/v4/fetchCommitByPullNumber';
-import { fetchCommitBySha } from '../services/github/v4/fetchCommitBySha';
-import { fetchCommitsByAuthor } from '../services/github/v4/fetchCommitsByAuthor';
-import { fetchPullRequestBySearchQuery } from '../services/github/v4/fetchPullRequestBySearchQuery';
+import { fetchCommitByPullNumber } from '../services/github/v4/fetchCommits/fetchCommitByPullNumber';
+import { fetchCommitBySha } from '../services/github/v4/fetchCommits/fetchCommitBySha';
+import { fetchCommitsByAuthor } from '../services/github/v4/fetchCommits/fetchCommitsByAuthor';
+import { fetchPullRequestBySearchQuery } from '../services/github/v4/fetchCommits/fetchPullRequestBySearchQuery';
 import { promptForCommits } from '../services/prompts';
 
 export async function getCommits(options: ValidConfigOptions) {

@@ -3,9 +3,9 @@ import os from 'os';
 import inquirer from 'inquirer';
 import nock from 'nock';
 import { AuthorIdResponse } from '../../services/github/v4/fetchAuthorId';
-import { CommitByAuthorResponse } from '../../services/github/v4/fetchCommitsByAuthor';
+import { CommitByAuthorResponse } from '../../services/github/v4/fetchCommits/fetchCommitsByAuthor';
 import { GithubConfigOptionsResponse } from '../../services/github/v4/getOptionsFromGithub/query';
-import { commitsWithPullRequestsMock } from '../../services/github/v4/mocks/commitsByAuthorMock';
+import { commitsByAuthorMock } from '../../services/github/v4/mocks/commitsByAuthorMock';
 import { mockGqlRequest, getNockCallsForScope } from '../nockHelpers';
 import {
   HOMEDIR_PATH,
@@ -53,7 +53,7 @@ export function createSpies({ commitCount }: { commitCount: number }) {
   const commitsByAuthorCalls = mockGqlRequest<CommitByAuthorResponse>({
     name: 'CommitsByAuthor',
     statusCode: 200,
-    body: { data: commitsWithPullRequestsMock },
+    body: { data: commitsByAuthorMock },
   });
 
   const createPullRequestCalls = mockCreatePullRequest();

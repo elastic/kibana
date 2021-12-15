@@ -15,8 +15,8 @@ import {
   getUpstreamFromGitRemote,
 } from '../services/git';
 import { ExecError } from '../test/ExecError';
-import { Commit } from '../types/Commit';
 import { SpyHelper } from '../types/SpyHelper';
+import { Commit } from './sourceCommit';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -306,7 +306,12 @@ describe('cherrypick', () => {
     formattedMessage: '',
     originalMessage: '',
     sha: 'abcd',
-    targetBranchesFromLabels: [],
+    targetBranchesFromLabels: {
+      expected: [],
+      missing: [],
+      unmerged: [],
+      merged: [],
+    },
     existingTargetPullRequests: [],
   };
 

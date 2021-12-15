@@ -39,7 +39,7 @@ Array [
     },
   ],
   Array [
-    "git fetch elastic mySourceBranch:mySourceBranch --force",
+    "git fetch elastic my-source-branch-from-options:my-source-branch-from-options --force",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -57,7 +57,7 @@ Array [
     },
   ],
   Array [
-    "git reset --hard && git checkout mySourceBranch && git branch -D backport/6.x/commit-2e63475c",
+    "git reset --hard && git checkout my-source-branch-from-options && git branch -D backport/6.x/commit-2e63475c",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -94,8 +94,13 @@ Array [
               "originalMessage": "Add 👻",
               "pullNumber": undefined,
               "sha": "2e63475c483f7844b0f2833bc57fdee32095bacb",
-              "sourceBranch": "mySourceBranch",
-              "targetBranchesFromLabels": Array [],
+              "sourceBranch": "my-source-branch-from-options",
+              "targetBranchesFromLabels": Object {
+                "expected": Array [],
+                "merged": Array [],
+                "missing": Array [],
+                "unmerged": Array [],
+              },
             },
           },
           Object {
@@ -108,12 +113,17 @@ Array [
               "originalMessage": "Add witch (#85)",
               "pullNumber": 85,
               "sha": "f3b618b9421fdecdb36862f907afbdd6344b361d",
-              "sourceBranch": "mySourceBranch",
-              "targetBranchesFromLabels": Array [],
+              "sourceBranch": "master",
+              "targetBranchesFromLabels": Object {
+                "expected": Array [],
+                "merged": Array [],
+                "missing": Array [],
+                "unmerged": Array [],
+              },
             },
           },
           Object {
-            "name": "3. Add SF mention (#80) 6.3",
+            "name": "3. Add SF mention (#80) ",
             "short": "#80 (79cf1845)",
             "value": Object {
               "committedDate": "2021-12-22T00:00:00Z",
@@ -132,8 +142,13 @@ Array [
 * Add several emojis!",
               "pullNumber": 80,
               "sha": "79cf18453ec32a4677009dcbab1c9c8c73fc14fe",
-              "sourceBranch": "mySourceBranch",
-              "targetBranchesFromLabels": Array [],
+              "sourceBranch": "master",
+              "targetBranchesFromLabels": Object {
+                "expected": Array [],
+                "merged": Array [],
+                "missing": Array [],
+                "unmerged": Array [],
+              },
             },
           },
           Object {
@@ -146,8 +161,13 @@ Array [
               "originalMessage": "Add backport config",
               "pullNumber": undefined,
               "sha": "3827bbbaf39914eda4f02f6940189844375fd097",
-              "sourceBranch": "mySourceBranch",
-              "targetBranchesFromLabels": Array [],
+              "sourceBranch": "my-source-branch-from-options",
+              "targetBranchesFromLabels": Object {
+                "expected": Array [],
+                "merged": Array [],
+                "missing": Array [],
+                "unmerged": Array [],
+              },
             },
           },
           Object {
@@ -160,8 +180,13 @@ Array [
               "originalMessage": "Initial commit",
               "pullNumber": undefined,
               "sha": "5ea0da550ac191029459289d67f99ad7d310812b",
-              "sourceBranch": "mySourceBranch",
-              "targetBranchesFromLabels": Array [],
+              "sourceBranch": "my-source-branch-from-options",
+              "targetBranchesFromLabels": Object {
+                "expected": Array [],
+                "merged": Array [],
+                "missing": Array [],
+                "unmerged": Array [],
+              },
             },
           },
         ],

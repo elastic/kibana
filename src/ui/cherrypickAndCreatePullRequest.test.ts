@@ -4,8 +4,8 @@ import { ValidConfigOptions } from '../options/options';
 import * as childProcess from '../services/child-process-promisified';
 import * as logger from '../services/logger';
 import * as prompts from '../services/prompts';
+import { Commit } from '../services/sourceCommit';
 import { ExecError } from '../test/ExecError';
-import { Commit } from '../types/Commit';
 import { PromiseReturnType } from '../types/PromiseReturnType';
 import { SpyHelper } from '../types/SpyHelper';
 import { cherrypickAndCreateTargetPullRequest } from './cherrypickAndCreateTargetPullRequest';
@@ -64,7 +64,12 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
           formattedMessage: 'myCommitMessage (#1000)',
           originalMessage: 'My original commit message',
           pullNumber: 1000,
-          targetBranchesFromLabels: [],
+          targetBranchesFromLabels: {
+            expected: [],
+            missing: [],
+            unmerged: [],
+            merged: [],
+          },
           existingTargetPullRequests: [],
         },
         {
@@ -74,7 +79,12 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
           formattedMessage: 'myOtherCommitMessage (#2000)',
           originalMessage: 'My original commit message',
           pullNumber: 2000,
-          targetBranchesFromLabels: [],
+          targetBranchesFromLabels: {
+            expected: [],
+            missing: [],
+            unmerged: [],
+            merged: [],
+          },
           existingTargetPullRequests: [],
         },
       ];
@@ -166,7 +176,12 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
             sha: 'mySha',
             formattedMessage: 'myCommitMessage (mySha)',
             originalMessage: 'My original commit message',
-            targetBranchesFromLabels: [],
+            targetBranchesFromLabels: {
+              expected: [],
+              missing: [],
+              unmerged: [],
+              merged: [],
+            },
             existingTargetPullRequests: [],
           },
         ],
@@ -220,7 +235,12 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
             sha: 'mySha',
             formattedMessage: 'myCommitMessage',
             originalMessage: 'My original commit message',
-            targetBranchesFromLabels: [],
+            targetBranchesFromLabels: {
+              expected: [],
+              missing: [],
+              unmerged: [],
+              merged: [],
+            },
             existingTargetPullRequests: [],
           },
         ],

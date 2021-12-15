@@ -102,7 +102,7 @@ describe('getOptions', () => {
   });
 
   it('should return options', async () => {
-    mockGetGithubConfigOptions({ defaultBranch: 'some-branch-name' });
+    mockGetGithubConfigOptions({ defaultBranch: 'default-branch-from-github' });
     const options = await getOptions(defaultArgs);
 
     expect(options).toEqual({
@@ -129,7 +129,7 @@ describe('getOptions', () => {
       repoName: 'kibana',
       repoOwner: 'elastic',
       resetAuthor: false,
-      sourceBranch: 'some-branch-name',
+      sourceBranch: 'default-branch-from-github',
       sourcePRLabels: [],
       targetBranchChoices: [
         { checked: false, name: '6.0' },
