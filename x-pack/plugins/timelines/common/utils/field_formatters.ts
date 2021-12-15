@@ -7,7 +7,6 @@
 
 import { get, isEmpty, isNumber, isObject, isString } from 'lodash/fp';
 
-import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils/technical_field_names';
 import { EventHit, EventSource, TimelineEventsDetailsItem } from '../search_strategy';
 import { toObjectArrayOfStrings, toStringArray } from './to_array';
 export const baseCategoryFields = ['@timestamp', 'labels', 'message', 'tags'];
@@ -147,7 +146,5 @@ export const getDataFromFieldsHits = (
     return Object.values(flat);
   }, []);
 
-export const getDataSafety = <A, T>(fn: (args: A) => T, args: A): Promise<T> => {
-  console.log(args, '!!args');
-  return new Promise((resolve) => setTimeout(() => resolve(fn(args))));
-};
+export const getDataSafety = <A, T>(fn: (args: A) => T, args: A): Promise<T> =>
+  new Promise((resolve) => setTimeout(() => resolve(fn(args))));
