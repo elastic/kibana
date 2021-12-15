@@ -7,21 +7,21 @@ get:
       content:
         application/json:
           schema:
-          type: object
-          properties:
-            items:
-              type: array
+            type: object
+            properties:
               items:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  title:
-                    type: string
-                  count:
-                    type: number
-                required:
-                  - id
-                  - title
-                  - count
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    count:
+                      type: number
+                  required:
+                    - id
+                    - title
+                    - count
   operationId: get-package-categories

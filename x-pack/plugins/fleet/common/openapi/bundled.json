@@ -145,9 +145,9 @@
                 }
               }
             }
-          },
-          "operationId": "generate-service-token"
+          }
         },
+        "operationId": "generate-service-token",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -188,9 +188,9 @@
                 }
               }
             }
-          },
-          "operationId": "generate-service-token"
+          }
         },
+        "operationId": "generate-service-token",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -216,9 +216,9 @@
         }
       }
     },
-    "/epm/_bulk": {
-      "post": {
-        "summary": "Packages - Bulk install",
+    "/epm/categories": {
+      "get": {
+        "summary": "Package categories",
         "tags": [],
         "responses": {
           "200": {
@@ -233,57 +233,22 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "name": {
+                          "id": {
                             "type": "string"
                           },
-                          "version": {
+                          "title": {
                             "type": "string"
+                          },
+                          "count": {
+                            "type": "number"
                           }
-                        }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "count"
+                        ]
                       }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "operationId": "bulk-install-packages"
-      },
-      "parameters": []
-    },
-    "/epm/categories": {
-      "get": {
-        "summary": "Package categories",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": null,
-                "type": "object",
-                "properties": {
-                  "items": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        },
-                        "count": {
-                          "type": "number"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "title",
-                        "count"
-                      ]
                     }
                   }
                 }
@@ -347,6 +312,42 @@
           }
         },
         "operationId": "list-all-packages"
+      },
+      "parameters": []
+    },
+    "/epm/packages/_bulk": {
+      "post": {
+        "summary": "Packages - Bulk install",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "bulk-install-packages"
       },
       "parameters": []
     },
@@ -753,7 +754,7 @@
         }
       }
     },
-    "/epm/packages/{pkgName}/{pkgVersion}/{filePath*}": {
+    "/epm/packages/{pkgName}/{pkgVersion}/{filePath}": {
       "get": {
         "summary": "Packages - Get file from registry",
         "tags": [],
@@ -1284,7 +1285,9 @@
                   "properties": {
                     "body": {
                       "type": "array",
-                      "items": "number"
+                      "items": {
+                        "type": "number"
+                      }
                     },
                     "statusCode": {
                       "type": "number"
@@ -1296,9 +1299,9 @@
                 }
               }
             }
-          },
-          "operationId": "new-agent-action"
+          }
         },
+        "operationId": "new-agent-action",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1308,43 +1311,14 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": null,
-              "title": "Agent action",
-              "oneOf": [
-                {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "POLICY_CHANGE",
-                        "UNENROLL",
-                        "UPGRADE",
-                        "POLICY_REASSIGN"
-                      ]
-                    }
-                  }
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "oneOf": {
-                          "type": "string",
-                          "enum": [
-                            "debug",
-                            "info",
-                            "warning",
-                            "error"
-                          ]
-                        }
-                      }
-                    }
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "$ref": "#/components/schemas/agent_action"
                   }
                 }
-              ]
+              }
             }
           }
         }
@@ -2546,14 +2520,16 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "hasErrors": {
-                      "type": "boolean"
-                    },
-                    "diff": {
-                      "schema": null,
-                      "$ref": "#/components/schemas/upgrade_diff"
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "hasErrors": {
+                        "type": "boolean"
+                      },
+                      "diff": {
+                        "$ref": "#/components/schemas/upgrade_diff"
+                      }
                     },
                     "required": [
                       "hasErrors"
@@ -3448,6 +3424,51 @@
           }
         ]
       },
+      "agent_action": {
+        "title": "Agent action",
+        "oneOf": [
+          {
+            "properties": {
+              "data": {
+                "type": "string"
+              },
+              "ack_data": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "POLICY_CHANGE",
+                  "UNENROLL",
+                  "UPGRADE",
+                  "POLICY_REASSIGN"
+                ]
+              }
+            }
+          },
+          {
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "log_level": {
+                    "type": "string",
+                    "enum": [
+                      "debug",
+                      "info",
+                      "warning",
+                      "error"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
       "new_agent_policy": {
         "title": "New agent policy",
         "type": "object",
@@ -3717,7 +3738,46 @@
       "upgrade_diff": {
         "title": "Package policy Upgrade dryrun",
         "type": "array",
-        "items": {}
+        "items": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/package_policy"
+            },
+            {
+              "type": "object",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/new_package_policy"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "missingVars": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
       },
       "update_package_policy": {
         "title": "Update package policy",
@@ -3800,7 +3860,12 @@
             "type": "string"
           }
         },
-        "required": null
+        "required": [
+          "name",
+          "namespace",
+          "policy_id",
+          "enabled"
+        ]
       },
       "output": {
         "title": "Output",
