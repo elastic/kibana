@@ -42,7 +42,7 @@ export async function fetchIndexShardSize(
       size: 0,
       query: {
         bool: {
-          must: [
+          filter: [
             createDatasetFilter('index_stats', 'elasticsearch.index'),
             {
               range: {
