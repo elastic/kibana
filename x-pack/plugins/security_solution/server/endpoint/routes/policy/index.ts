@@ -61,6 +61,10 @@ export function registerPolicyRoutes(router: IRouter, endpointAppContext: Endpoi
       validate: GetEndpointPackagePolicyRequestSchema,
       options: { authRequired: true },
     },
-    getPolicyListHandler(endpointAppContext)
+    withEndpointAuthz(
+      { all: ['canAccessEndpointManagement'] },
+      logger,
+      getPolicyListHandler(endpointAppContext)
+    )
   );
 }
