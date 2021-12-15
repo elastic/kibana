@@ -43,7 +43,7 @@ import { SanitizedAlert, ResolvedSanitizedRule } from '../../../../../../alertin
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import {
   getPerformBulkActionSchemaMock,
-  getPerformUpdateBulkActionSchemaMock,
+  getPerformBulkActionEditSchemaMock,
 } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { GetCurrentStatusBulkResult } from '../../rule_execution_log/types';
@@ -135,11 +135,11 @@ export const getBulkActionRequest = () =>
     body: getPerformBulkActionSchemaMock(),
   });
 
-export const getUpdateBulkActionRequest = () =>
+export const getBulkActionEditRequest = () =>
   requestMock.create({
     method: 'patch',
     path: DETECTION_ENGINE_RULES_BULK_ACTION,
-    body: getPerformUpdateBulkActionSchemaMock(),
+    body: getPerformBulkActionEditSchemaMock(),
   });
 
 export const getDeleteBulkRequest = () =>

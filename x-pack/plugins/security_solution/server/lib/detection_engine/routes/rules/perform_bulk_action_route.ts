@@ -191,13 +191,13 @@ export const performBulkActionRoute = (
             processingResponse = await executeBulkAction(rules.data, async (rule) => {
               throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
-              const updatedRule = body[BulkAction.edit].reduce(
+              const editedRule = body[BulkAction.edit].reduce(
                 (acc, action) => appplyBulkActionEditToRule(acc, action),
                 rule
               );
 
-              const { tags, params: { timelineTitle, timelineId } = {} } = updatedRule;
-              const index = 'index' in updatedRule.params ? updatedRule.params.index : undefined;
+              const { tags, params: { timelineTitle, timelineId } = {} } = editedRule;
+              const index = 'index' in editedRule.params ? editedRule.params.index : undefined;
 
               await patchRules({
                 rulesClient,

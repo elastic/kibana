@@ -48,57 +48,57 @@ describe('bulk_action_edit', () => {
     };
     describe('tags', () => {
       test('should add new tags to rule', () => {
-        const updatedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
+        const editedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
           type: BulkActionEditType.add_tags,
           value: ['new_tag'],
         });
-        expect(updatedRule.tags).toEqual(['tag1', 'tag2', 'new_tag']);
+        expect(editedRule.tags).toEqual(['tag1', 'tag2', 'new_tag']);
       });
       test('should remove tag from rule', () => {
-        const updatedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
+        const editedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
           type: BulkActionEditType.delete_tags,
           value: ['tag1'],
         });
-        expect(updatedRule.tags).toEqual(['tag2']);
+        expect(editedRule.tags).toEqual(['tag2']);
       });
 
       test('should rewrite tags in rule', () => {
-        const updatedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
+        const editedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
           type: BulkActionEditType.set_tags,
           value: ['tag_r_1', 'tag_r_2'],
         });
-        expect(updatedRule.tags).toEqual(['tag_r_1', 'tag_r_2']);
+        expect(editedRule.tags).toEqual(['tag_r_1', 'tag_r_2']);
       });
     });
 
     describe('index_patterns', () => {
       test('should add new index to rule', () => {
-        const updatedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
+        const editedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
           type: BulkActionEditType.add_index_patterns,
           value: ['my-index-*'],
         });
-        expect(updatedRule.params).toHaveProperty('index', ['initial-index-*', 'my-index-*']);
+        expect(editedRule.params).toHaveProperty('index', ['initial-index-*', 'my-index-*']);
       });
       test('should remove index from rule', () => {
-        const updatedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
+        const editedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
           type: BulkActionEditType.delete_index_patterns,
           value: ['initial-index-*'],
         });
-        expect(updatedRule.params).toHaveProperty('index', []);
+        expect(editedRule.params).toHaveProperty('index', []);
       });
 
       test('should rewrite index in rule', () => {
-        const updatedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
+        const editedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
           type: BulkActionEditType.set_index_patterns,
           value: ['index'],
         });
-        expect(updatedRule.params).toHaveProperty('index', ['index']);
+        expect(editedRule.params).toHaveProperty('index', ['index']);
       });
     });
 
     describe('timeline', () => {
       test('should set timeline', () => {
-        const updatedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
+        const editedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
           type: BulkActionEditType.set_timeline,
           value: {
             timeline_id: '91832785-286d-4ebe-b884-1a208d111a70',
@@ -106,8 +106,8 @@ describe('bulk_action_edit', () => {
           },
         });
 
-        expect(updatedRule.params.timelineId).toBe('91832785-286d-4ebe-b884-1a208d111a70');
-        expect(updatedRule.params.timelineTitle).toBe('Test timeline');
+        expect(editedRule.params.timelineId).toBe('91832785-286d-4ebe-b884-1a208d111a70');
+        expect(editedRule.params.timelineTitle).toBe('Test timeline');
       });
     });
   });

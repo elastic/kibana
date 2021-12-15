@@ -11,7 +11,7 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
   getBulkActionRequest,
-  getUpdateBulkActionRequest,
+  getBulkActionEditRequest,
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
 } from '../__mocks__/request_responses';
@@ -121,7 +121,7 @@ describe.each([
           .mockImplementationOnce(() => ({ valid: true }))
           .mockImplementationOnce(() => ({ valid: true })),
       });
-      const response = await server.inject(getUpdateBulkActionRequest(), context);
+      const response = await server.inject(getBulkActionEditRequest(), context);
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
@@ -189,7 +189,7 @@ describe.each([
       })
     );
 
-    const response = await server.inject(getUpdateBulkActionRequest(), context);
+    const response = await server.inject(getBulkActionEditRequest(), context);
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({ success: true, rules_count: rulesNumber });

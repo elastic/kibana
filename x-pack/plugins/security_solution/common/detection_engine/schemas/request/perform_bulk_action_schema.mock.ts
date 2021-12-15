@@ -13,7 +13,7 @@ export const getPerformBulkActionSchemaMock = (): PerformBulkActionSchema => ({
   action: BulkAction.disable,
 });
 
-export const getPerformUpdateBulkActionSchemaMock = (): PerformBulkActionSchema => ({
+export const getPerformBulkActionEditSchemaMock = (): PerformBulkActionSchema => ({
   query: '',
   action: BulkAction.edit,
   [BulkAction.edit]: [{ type: BulkActionEditType.add_tags, value: ['tag1'] }],
