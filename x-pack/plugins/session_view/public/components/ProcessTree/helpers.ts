@@ -64,7 +64,7 @@ export const searchProcessTree = (processMap: ProcessMap, searchQuery: string | 
 
       // TODO: the text we search is the same as what we render.
       // should this be customizable??
-      const text = `${workingDirectory} ${args.join(' ')}`;
+      const text = `${workingDirectory} ${args?.join(' ')}`;
 
       process.searchMatched = text.includes(searchQuery) ? searchQuery : null;
 

@@ -33,11 +33,11 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       color: colors.text,
     };
 
-    const searchHighlight: CSSObject = {
-      backgroundColor: colors.highlight,
-      color: colors.text,
-      borderRadius: border.radius.medium,
-    };
+    const searchHighlight = `
+      background-color: ${colors.highlight};
+      color: ${colors.text};
+      border-radius: ${border.radius.medium};
+    `;
 
     const children: CSSObject = {
       position: 'relative',
