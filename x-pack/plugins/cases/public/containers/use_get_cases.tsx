@@ -106,6 +106,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   status: StatusAll,
   tags: [],
   onlyCollectionType: false,
+  owner: [],
 };
 
 export const DEFAULT_QUERY_PARAMS: QueryParams = {
@@ -145,7 +146,6 @@ export const useGetCases = (
     initialFilterOptions?: Partial<FilterOptions>;
   } = {}
 ): UseGetCases => {
-  const { owner } = useCasesContext();
   const { initialQueryParams = empty, initialFilterOptions = empty } = params;
   const [state, dispatch] = useReducer(dataFetchReducer, {
     data: initialData,
@@ -185,7 +185,7 @@ export const useGetCases = (
         dispatch({ type: 'FETCH_INIT', payload: 'cases' });
 
         const response = await getCases({
-          filterOptions: { ...filterOptions, owner },
+          filterOptions,
           queryParams,
           signal: abortCtrlFetchCases.current.signal,
         });
@@ -208,7 +208,7 @@ export const useGetCases = (
         }
       }
     },
-    [owner, toasts]
+    [toasts]
   );
 
   const dispatchUpdateCaseProperty = useCallback(

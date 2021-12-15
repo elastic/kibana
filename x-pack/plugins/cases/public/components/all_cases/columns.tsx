@@ -30,6 +30,8 @@ import {
   CommentRequestAlertType,
   ActionConnector,
 } from '../../../common/api';
+import { OWNER_INFO } from '../../../common/constants';
+import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsLink } from '../links';
@@ -45,6 +47,8 @@ import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import { PostComment } from '../../containers/use_post_comment';
+
+type SolutionType = typeof SECURITY_SOLUTION_OWNER | typeof OBSERVABILITY_OWNER;
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -79,6 +83,7 @@ export interface GetCasesColumn {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
   postComment?: (args: PostComment) => Promise<void>;
   updateCase?: (newCase: Case) => void;
+  showSolutionColumn?: boolean;
 }
 export const useCasesColumns = ({
   dispatchUpdateCaseProperty,
@@ -93,6 +98,7 @@ export const useCasesColumns = ({
   alertData,
   postComment,
   updateCase,
+  showSolutionColumn,
 }: GetCasesColumn): CasesColumns[] => {
   // Delete case
   const {
@@ -251,6 +257,23 @@ export const useCasesColumns = ({
           ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
           : getEmptyTagValue(),
     },
+    ...(showSolutionColumn
+      ? [
+          {
+            align: RIGHT_ALIGNMENT,
+            field: 'owner',
+            name: i18n.SOLUTION,
+            render: (solutionName: SolutionType) => {
+              const caseOwner = OWNER_INFO[solutionName];
+              return caseOwner ? (
+                <EuiIcon size="s" type={caseOwner.iconType} title={caseOwner.label} />
+              ) : (
+                getEmptyTagValue()
+              );
+            },
+          },
+        ]
+      : []),
     {
       align: RIGHT_ALIGNMENT,
       field: 'totalComment',
