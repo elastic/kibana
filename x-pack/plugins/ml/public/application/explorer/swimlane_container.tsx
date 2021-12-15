@@ -397,9 +397,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     }
   };
 
-  if (!isLoading && !showSwimlane && noDataWarning) {
-    return <>{noDataWarning}</>;
-  }
+  const noSwimLaneData = !isLoading && !showSwimlane && !!noDataWarning;
 
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
@@ -422,7 +420,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
           >
             <>
               <div>
-                <div style={{ height: `${containerHeight}px`, position: 'relative' }}>
+                <div
+                  style={{ height: `${containerHeight}px`, position: 'relative' }}
+                  hidden={noSwimLaneData}
+                >
                   {showSwimlane && !isLoading && (
                     <Chart className={'mlSwimLaneContainer'}>
                       <Settings
@@ -507,6 +508,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                     </EuiText>
                   )}
                 </div>
+                {noSwimLaneData ? <>{noDataWarning}</> : null}
               </div>
             </>
           </EuiFlexItem>
