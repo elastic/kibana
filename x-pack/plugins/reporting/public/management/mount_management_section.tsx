@@ -30,7 +30,11 @@ export async function mountManagementSection(
   render(
     <I18nProvider>
       <KibanaContextProvider
-        services={{ http: coreSetup.http, application: coreStart.application }}
+        services={{
+          http: coreSetup.http,
+          application: coreStart.application,
+          uiSettings: coreStart.uiSettings,
+        }}
       >
         <InternalApiClientProvider apiClient={apiClient}>
           <IlmPolicyStatusContextProvider>

@@ -7,12 +7,12 @@
 
 import React, { FormEvent } from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { GaugeToolbar } from '.';
-import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
 import { ToolbarButton } from 'src/plugins/kibana_react/public';
 import { ReactWrapper } from 'enzyme';
-import { GaugeVisualizationState } from '../../../../common/expressions';
 import { act } from 'react-dom/test-utils';
+import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
+import { GaugeToolbar } from '.';
+import type { GaugeVisualizationState } from '../constants';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
