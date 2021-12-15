@@ -20,6 +20,7 @@ import {
   MANAGEMENT_PAGE_SIZE_OPTIONS,
 } from '../../../common/constants';
 import { getEndpointListPath } from '../../../common/routing';
+import { getLoadPoliciesError } from '../../../common/translations';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
@@ -33,7 +34,6 @@ import { HostIsolationExceptionsFormFlyout } from './components/form_flyout';
 import {
   DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
   EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
-  getLoadPoliciesError,
 } from './components/translations';
 import {
   useFetchHostIsolationExceptionsList,
@@ -55,7 +55,12 @@ export const HostIsolationExceptionsList = () => {
 
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
-  const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList();
+  const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList({
+    filter: location.filter,
+    page: location.page_index,
+    perPage: location.page_size,
+  });
+
   const toasts = useToasts();
 
   // load the list of policies>
