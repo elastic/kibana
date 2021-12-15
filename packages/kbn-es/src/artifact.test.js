@@ -69,6 +69,18 @@ beforeEach(() => {
     valid: {
       archives: [createArchive({ license: 'oss' }), createArchive({ license: 'default' })],
     },
+    invalidArch: {
+      archives: [
+        createArchive({ license: 'oss', architecture: 'invalid_arch' }),
+        createArchive({ license: 'default', architecture: 'invalid_arch' }),
+      ],
+    },
+    differentVersion: {
+      archives: [
+        createArchive({ license: 'oss', version: 'another-version' }),
+        createArchive({ license: 'default', version: 'another-version' }),
+      ],
+    },
     multipleArch: {
       archives: [
         createArchive({ architecture: 'fake_arch', license: 'oss' }),
@@ -116,8 +128,14 @@ describe('Artifact', () => {
         artifactTest('INVALID_LICENSE', 'default')
       );
 
+      it('should return an artifact even if the version does not match', async () => {
+        mockFetch(MOCKS.differentVersion);
+        artifactTest('default', 'default');
+      });
+
       it('should throw when an artifact cannot be found in the manifest for the specified parameters', async () => {
-        await expect(Artifact.getSnapshot('default', 'INVALID_VERSION', log)).rejects.toThrow(
+        mockFetch(MOCKS.invalidArch);
+        await expect(Artifact.getSnapshot('default', MOCK_VERSION, log)).rejects.toThrow(
           "couldn't find an artifact"
         );
       });
@@ -144,8 +162,14 @@ describe('Artifact', () => {
         artifactTest('INVALID_LICENSE', 'default', 2)
       );
 
+      it('should return an artifact even if the version does not match', async () => {
+        mockFetch(MOCKS.differentVersion);
+        artifactTest('default', 'default', 2);
+      });
+
       it('should throw when an artifact cannot be found in the manifest for the specified parameters', async () => {
-        await expect(Artifact.getSnapshot('default', 'INVALID_VERSION', log)).rejects.toThrow(
+        mockFetch(MOCKS.invalidArch);
+        await expect(Artifact.getSnapshot('default', MOCK_VERSION, log)).rejects.toThrow(
           "couldn't find an artifact"
         );
       });
