@@ -8,6 +8,8 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { Logger } from 'src/core/server';
 
+import { RuleAlertType as Rule } from '../../rules/types';
+
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { performBulkActionSchema } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
@@ -26,12 +28,17 @@ import { appplyBulkActionUpdateToRule } from '../../rules/bulk_action_update';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 import { transformAlertToRule } from './utils';
-import { RuleParams } from '../../schemas/rule_schemas';
-import { FindResult } from '../../../../../../alerting/server';
 
-const BULK_ACTION_RULES_LIMIT = 10000;
-const BULK_ACTION_CONCURRENCY = 500;
-interface ActionPerformError {
+const MAX_RULES_TO_PROCESS_TOTAL = 10000;
+const MAX_RULES_TO_PROCESS_IN_PARALLEL = 50;
+
+type RuleActionFn = (rule: Rule) => Promise<void>;
+
+type RuleActionSuccess = undefined;
+
+type RuleActionResult = RuleActionSuccess | RuleActionError;
+
+interface RuleActionError {
   error: {
     message: string;
     statusCode: number;
@@ -42,15 +49,12 @@ interface ActionPerformError {
   };
 }
 
-type ActionPerform = undefined | ActionPerformError;
-
-// wraps bulk action and catches errors, matched with rule details
-const actionPerformWrapper = async (
-  func: () => Promise<void>,
-  rule: FindResult<RuleParams>['data'][number]
-): Promise<ActionPerform> => {
+const executeActionAndHandleErrors = async (
+  rule: Rule,
+  action: RuleActionFn
+): Promise<RuleActionResult> => {
   try {
-    await func();
+    await action(rule);
   } catch (err) {
     const { message, statusCode } = transformError(err);
     return {
@@ -60,14 +64,11 @@ const actionPerformWrapper = async (
   }
 };
 
-const chunkifyRulesAction = async <Rule extends FindResult<RuleParams>['data'][number]>(
-  rules: Rule[],
-  action: (rule: Rule) => Promise<void>
-) =>
+const executeBulkAction = async (rules: Rule[], action: RuleActionFn) =>
   initPromisePool({
-    concurrency: BULK_ACTION_CONCURRENCY,
+    concurrency: MAX_RULES_TO_PROCESS_IN_PARALLEL,
     items: rules,
-    executor: async (rule) => actionPerformWrapper(async () => action(rule), rule),
+    executor: async (rule) => executeActionAndHandleErrors(rule, action),
   });
 
 export const performBulkActionRoute = (
@@ -110,7 +111,7 @@ export const performBulkActionRoute = (
         const rules = await findRules({
           isRuleRegistryEnabled,
           rulesClient,
-          perPage: BULK_ACTION_RULES_LIMIT,
+          perPage: MAX_RULES_TO_PROCESS_TOTAL,
           filter: body.query !== '' ? body.query : undefined,
           page: undefined,
           sortField: undefined,
@@ -118,21 +119,21 @@ export const performBulkActionRoute = (
           fields: undefined,
         });
 
-        if (rules.total > BULK_ACTION_RULES_LIMIT) {
+        if (rules.total > MAX_RULES_TO_PROCESS_TOTAL) {
           return siemResponse.error({
-            body: `More than ${BULK_ACTION_RULES_LIMIT} rules matched the filter query. Try to narrow it down.`,
+            body: `More than ${MAX_RULES_TO_PROCESS_TOTAL} rules matched the filter query. Try to narrow it down.`,
             statusCode: 400,
           });
         }
 
         let processingResponse: {
-          results: ActionPerform[];
+          results: RuleActionResult[];
         } = {
           results: [],
         };
         switch (body.action) {
           case BulkAction.enable:
-            processingResponse = await chunkifyRulesAction(rules.data, async (rule) => {
+            processingResponse = await executeBulkAction(rules.data, async (rule) => {
               if (!rule.enabled) {
                 throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
                 await enableRule({
@@ -143,7 +144,7 @@ export const performBulkActionRoute = (
             });
             break;
           case BulkAction.disable:
-            processingResponse = await chunkifyRulesAction(rules.data, async (rule) => {
+            processingResponse = await executeBulkAction(rules.data, async (rule) => {
               if (rule.enabled) {
                 throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
                 await rulesClient.disable({ id: rule.id });
@@ -151,7 +152,7 @@ export const performBulkActionRoute = (
             });
             break;
           case BulkAction.delete:
-            processingResponse = await chunkifyRulesAction(rules.data, async (rule) => {
+            processingResponse = await executeBulkAction(rules.data, async (rule) => {
               await deleteRules({
                 ruleId: rule.id,
                 rulesClient,
@@ -160,7 +161,7 @@ export const performBulkActionRoute = (
             });
             break;
           case BulkAction.duplicate:
-            processingResponse = await chunkifyRulesAction(rules.data, async (rule) => {
+            processingResponse = await executeBulkAction(rules.data, async (rule) => {
               throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
               await rulesClient.create({
@@ -188,7 +189,7 @@ export const performBulkActionRoute = (
               body: responseBody,
             });
           case BulkAction.update:
-            processingResponse = await chunkifyRulesAction(rules.data, async (rule) => {
+            processingResponse = await executeBulkAction(rules.data, async (rule) => {
               throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
               const updatedRule = body.update.reduce(
@@ -215,7 +216,7 @@ export const performBulkActionRoute = (
         }
 
         const errors = processingResponse.results.filter(
-          (resp): resp is ActionPerformError => resp?.error !== undefined
+          (resp): resp is RuleActionError => resp?.error !== undefined
         );
         if (errors.length) {
           return siemResponse.error({
