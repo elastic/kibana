@@ -13,5 +13,6 @@ export const initialHostIsolationExceptionsPageState = (): HostIsolationExceptio
     page_index: MANAGEMENT_DEFAULT_PAGE,
     page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
     filter: '',
+    included_policies: '',
   },
 });
