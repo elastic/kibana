@@ -11,10 +11,10 @@ import { StackMonitoringFields } from './stack_monitoring_fields';
 
 export class KibanaStats extends Serializable<StackMonitoringFields> {
   timestamp(timestamp: number) : this {
-    super.timestamp(timestamp);
     this.fields['kibana_stats.timestamp'] = new Date(timestamp).toISOString();
     this.fields['kibana_stats.response_times.max'] = 250;
     this.fields['kibana_stats.kibana.status'] = 'green';
+    this.fields['timestamp'] = timestamp;
     return this;
   }
 
@@ -23,4 +23,5 @@ export class KibanaStats extends Serializable<StackMonitoringFields> {
     this.fields['kibana_stats.requests.total'] = total;
     return this;
   }
+
 }

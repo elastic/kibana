@@ -7,7 +7,6 @@
  */
 
 import { stackMonitoring, timerange } from '../../index';
-import { eventsToElasticsearchOutput } from '../../lib/utils/to_elasticsearch_output';
 import { Scenario } from '../scenario';
 import { getCommonServices } from '../utils/get_common_services';
 
@@ -30,16 +29,17 @@ const scenario: Scenario = async ({ target, writeTarget, logLevel }) => {
           const events = logger.perf('generating_sm_events', () => {
             return kibanaStats.timestamp(timestamp).requests(10, 20).serialize();
           });
+          return events;
 
-          return logger.perf('sm_events_to_es_output', () => {
-            const smEvents = eventsToElasticsearchOutput({ events, writeTarget });
-            smEvents.forEach((event: any) => {
-              const ts = event._source['@timestamp'];
-              delete event._source['@timestamp'];
-              event._source.timestamp = ts;
-            });
-            return smEvents;
-          });
+          // return logger.perf('sm_events_to_es_output', () => {
+          //   const smEvents = eventsToElasticsearchOutput({ events, writeTarget });
+          //   smEvents.forEach((event: any) => {
+          //     const ts = event._source['@timestamp'];
+          //     delete event._source['@timestamp'];
+          //     event._source.timestamp = ts;
+          //   });
+          //   return smEvents;
+          // });
         });
     },
   };

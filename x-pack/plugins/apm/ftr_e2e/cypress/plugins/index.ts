@@ -6,7 +6,7 @@
  */
 import Fs from 'fs';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-import { apm, createLogger, LogLevel } from '@elastic/apm-synthtrace';
+import { apm, createLogger, LogLevel, SpanIterable } from '@elastic/apm-synthtrace';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 // ***********************************************************
@@ -46,7 +46,7 @@ const plugin: Cypress.PluginConfig = (on, config) => {
   );
 
   on('task', {
-    'synthtrace:index': async (events) => {
+    'synthtrace:index': async (events: SpanIterable) => {
       await synthtraceEsClient.index(events);
       return null;
     },

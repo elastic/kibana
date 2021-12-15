@@ -16,6 +16,9 @@ export class Timerange {
   }
 }
 
-export function timerange(from: Date, to: Date) {
-  return new Timerange(from, to);
+export function timerange(from: Date | number, to: Date | number) {
+  return new Timerange(
+    from instanceof Date ? from : new Date(from),
+    to instanceof Date ? to : new Date(to)
+  );
 }

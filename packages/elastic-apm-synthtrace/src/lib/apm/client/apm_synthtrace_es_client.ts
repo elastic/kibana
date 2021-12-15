@@ -7,15 +7,12 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { uploadEvents } from '../../../scripts/utils/upload_events';
-import { Fields } from '../../entity';
 import { cleanWriteTargets } from '../../utils/clean_write_targets';
-import { getBreakdownMetrics } from '../utils/get_breakdown_metrics';
-import { getSpanDestinationMetrics } from '../utils/get_span_destination_metrics';
-import { getTransactionMetrics } from '../utils/get_transaction_metrics';
 import { getApmWriteTargets } from '../utils/get_apm_write_targets';
 import { Logger } from '../../utils/create_logger';
-import { apmEventsToElasticsearchOutput } from '../utils/apm_events_to_elasticsearch_output';
+import { ApmElasticsearchOutputWriteTargets } from '../utils/apm_events_to_elasticsearch_output';
+import { ApmFields } from '../apm_fields';
+import { defaultProcessors, SpanIterable, streamProcess } from '../../interval';
 
 export class ApmSynthtraceEsClient {
   constructor(private readonly client: Client, private readonly logger: Logger) {}
@@ -34,25 +31,17 @@ export class ApmSynthtraceEsClient {
     );
   }
 
-  async index(events: Fields[]) {
+  async index(events: SpanIterable) {
     const writeTargets = await this.getWriteTargets();
 
-    const eventsToIndex = apmEventsToElasticsearchOutput({
-      events: [
-        ...events,
-        ...getTransactionMetrics(events),
-        ...getSpanDestinationMetrics(events),
-        ...getBreakdownMetrics(events),
-      ],
-      writeTargets,
-    });
-
-    await uploadEvents({
-      batchSize: 1000,
-      client: this.client,
-      clientWorkers: 5,
-      events: eventsToIndex,
-      logger: this.logger,
+    await this.client.helpers.bulk<ApmFields>({
+      datasource: streamProcess(defaultProcessors, events),
+      onDocument: (doc: unknown) => {
+        const d = doc as ApmFields;
+        const index =
+          writeTargets[d['processor.event'] as keyof ApmElasticsearchOutputWriteTargets];
+        return { index: { _index: index } };
+      },
     });
 
     return this.client.indices.refresh({

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchOutput } from '../lib/utils/to_elasticsearch_output';
 import { RunOptions } from './utils/parse_run_cli_flags';
+import { SpanIterable } from '../lib/interval';
 
-type Generate = (range: { from: number; to: number }) => ElasticsearchOutput[];
+type Generate = (range: { from: Date; to: Date }) => SpanIterable;
 export type Scenario = (options: RunOptions) => Promise<{ generate: Generate }>;

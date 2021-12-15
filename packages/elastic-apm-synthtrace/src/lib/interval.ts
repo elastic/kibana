@@ -11,45 +11,96 @@ import { getTransactionMetrics } from './apm/utils/get_transaction_metrics';
 import { getSpanDestinationMetrics } from './apm/utils/get_span_destination_metrics';
 import { getBreakdownMetrics } from './apm/utils/get_breakdown_metrics';
 
-export const defaultProcessors = [getTransactionMetrics, getSpanDestinationMetrics, getBreakdownMetrics]
-export function* streamProcess(processors: ((events: ApmFields[]) => ApmFields[])[], ...eventSources: SpanIterable[]) {
-  let localBuffer = []
-  let flushAfter : number | null = null;
+export const defaultProcessors = [
+  getTransactionMetrics,
+  getSpanDestinationMetrics,
+  getBreakdownMetrics,
+];
+export async function* streamProcess(
+  processors: Array<(events: ApmFields[]) => ApmFields[]>,
+  ...eventSources: SpanIterable[]
+) {
+  let localBuffer = [];
+  let flushAfter: number | null = null;
   for (const eventSource of eventSources) {
     for (const event of eventSource) {
       localBuffer.push(event);
       if (flushAfter === undefined)
         flushAfter = moment(new Date(event['@timestamp'] as number)).add(1, 'm').valueOf()
 
-      yield event
-      //TODO move away from chunking and feed these data one by one
-      if ((flushAfter !== null && Date.now().valueOf() >= flushAfter) || localBuffer.length === 10000) {
-        for (const processor of processors)
-          yield* processor(localBuffer)
-        localBuffer = []
+      yield event;
+      // TODO move away from chunking and feed this data one by one to processors
+      if (
+        (flushAfter !== null && Date.now().valueOf() >= flushAfter) ||
+        localBuffer.length === 10000
+      ) {
+        for (const processor of processors) {
+          yield* processor(localBuffer);
+        }
+        localBuffer = [];
         flushAfter = null;
       }
     }
   }
   if (localBuffer.length > 0) {
-    for (const processor of processors)
-      yield* processor(localBuffer)
-    localBuffer = []
+    for (const processor of processors) {
+      yield* processor(localBuffer);
+    }
   }
 }
-
-
-export class SpanIterable implements Iterable<ApmFields> {
+export interface SpanIterable extends Iterable<ApmFields>, AsyncIterable<ApmFields> {
+  toArray(): ApmFields[];
+  concat(...iterables: SpanIterable[]): ConcatenatedSpanGenerators;
+}
+export class SpanGenerator implements SpanIterable {
   constructor(
     private readonly interval: Interval,
-    private readonly dataGenerator: (interval: Interval) => Generator<ApmFields>) { }
+    private readonly dataGenerator: Array<(interval: Interval) => Generator<ApmFields>>
+  ) {}
 
-  toArray() : ApmFields[] {
-    return Array.from(this)
+  toArray(): ApmFields[] {
+    return Array.from(this);
   }
+  concat(...iterables: SpanGenerator[]) {
+    return new ConcatenatedSpanGenerators([this, ...iterables]);
+  }
+  *[Symbol.iterator]() {
+    for (const iterator of this.dataGenerator) {
+      for (const fields of iterator(this.interval)) {
+        yield fields;
+      }
+    }
+  }
+  async *[Symbol.asyncIterator]() {
+    for (const iterator of this.dataGenerator) {
+      for (const fields of iterator(this.interval)) {
+        yield fields;
+      }
+    }
+  }
+}
+export class ConcatenatedSpanGenerators implements SpanIterable {
+  constructor(private readonly dataGenerators: SpanIterable[]) {}
 
-  [Symbol.iterator](): Iterator<ApmFields> {
-    return this.dataGenerator(this.interval)[Symbol.iterator]();
+  toArray(): ApmFields[] {
+    return Array.from(this);
+  }
+  concat(...iterables: SpanIterable[]) {
+    return new ConcatenatedSpanGenerators([...this.dataGenerators, ...iterables]);
+  }
+  *[Symbol.iterator]() {
+    for (const iterator of this.dataGenerators) {
+      for (const fields of iterator) {
+        yield fields;
+      }
+    }
+  }
+  async *[Symbol.asyncIterator]() {
+    for (const iterator of this.dataGenerators) {
+      for (const fields of iterator) {
+        yield fields;
+      }
+    }
   }
 }
 
@@ -64,15 +115,18 @@ export class Interval implements Iterable<number> {
   transactions(map: (timestamp: number) => ApmFields[]) {
     return this.flatMap(map);
   }
-  flatMap(map: (timestamp: number) => ApmFields[]) : SpanIterable {
-    return new SpanIterable(this, function *(i) {
-      for (const x of i) {
-        for (const a of map(x)) {
-          yield a;
+  flatMap(map: (timestamp: number, index?: number) => ApmFields[]): SpanIterable {
+    return new SpanGenerator(this, [
+      function* (i) {
+        let index = 0;
+        for (const x of i) {
+          for (const a of map(x, index)) {
+            yield a;
+            index++;
+          }
         }
-      }
-    });
-
+      },
+    ]);
   }
 
   rate(rate: number): Interval {
@@ -86,20 +140,20 @@ export class Interval implements Iterable<number> {
       throw new Error('Failed to parse interval');
     }
     const yieldRate = () => {
-      const timestamp = now.getTime()
-      return new Array<number>(this.yieldRate).fill(timestamp)
-    }
+      const timestamp = now.getTime();
+      return new Array<number>(this.yieldRate).fill(timestamp);
+    };
     do {
-      yield* yieldRate()
-      now = new Date(moment(now)
-        .add(Number(args[1]), args[2] as any)
-        .valueOf());
-
-    } while(now < this.to)
-
+      yield* yieldRate();
+      now = new Date(
+        moment(now)
+          .add(Number(args[1]), args[2] as any)
+          .valueOf()
+      );
+    } while (now < this.to);
   }
 
   [Symbol.iterator]() {
-    return this._generate()[Symbol.iterator]()
+    return this._generate()[Symbol.iterator]();
   }
 }

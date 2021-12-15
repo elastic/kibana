@@ -86,10 +86,12 @@ yargs(process.argv.slice(2))
 
     const { logger } = getCommonServices(runOptions);
 
-    const to = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
-    const from = argv.from
+    const toMs = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
+    const to = new Date(toMs);
+    const fromMs = argv.from
       ? datemath.parse(String(argv.from))!.valueOf()
-      : to - intervalToMs('15m');
+      : toMs - intervalToMs('15m');
+    const from = new Date(fromMs);
 
     const live = argv.live;
 
@@ -97,22 +99,22 @@ yargs(process.argv.slice(2))
       `Starting data generation\n: ${JSON.stringify(
         {
           ...runOptions,
-          from: new Date(from).toISOString(),
-          to: new Date(to).toISOString(),
+          from: from.toISOString(),
+          to: to.toISOString(),
         },
         null,
         2
       )}`
     );
 
-    startHistoricalDataUpload({
+    await startHistoricalDataUpload({
       ...runOptions,
       from,
       to,
     });
 
     if (live) {
-      startLiveDataUpload({
+      await startLiveDataUpload({
         ...runOptions,
         start: to,
       });

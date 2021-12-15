@@ -8,10 +8,9 @@
 
 import { partition } from 'lodash';
 import { getScenario } from './get_scenario';
-import { uploadEvents } from './upload_events';
 import { RunOptions } from './parse_run_cli_flags';
 import { getCommonServices } from './get_common_services';
-import { ElasticsearchOutput } from '../../lib/utils/to_elasticsearch_output';
+import { ApmFields } from '../../lib/apm/apm_fields';
 
 export async function startLiveDataUpload({
   file,
@@ -25,10 +24,7 @@ export async function startLiveDataUpload({
   workers,
   writeTarget,
   scenarioOpts,
-}: RunOptions & { start: number }) {
-  let queuedEvents: ElasticsearchOutput[] = [];
-  let requestedUntil: number = start;
-
+}: RunOptions & { start: Date }) {
   const { logger, client } = getCommonServices({ target, logLevel });
 
   const scenario = await getScenario({ file, logger });
@@ -45,12 +41,19 @@ export async function startLiveDataUpload({
     scenarioOpts,
   });
 
-  function uploadNextBatch() {
-    const end = new Date().getTime();
+  let queuedEvents: ApmFields[] = [];
+  let requestedUntil: Date = start;
+
+  async function uploadNextBatch() {
+    const end = new Date();
     if (end > requestedUntil) {
       const bucketFrom = requestedUntil;
-      const bucketTo = requestedUntil + bucketSizeInMs;
-      const nextEvents = generate({ from: bucketFrom, to: bucketTo });
+      const bucketTo = new Date(requestedUntil.getTime() + bucketSizeInMs);
+      // TODO this materializes into an array, assumption is that the live buffer will fit in memory
+      const nextEvents = logger.perf('execute_scenario', () =>
+        generate({ from: bucketFrom, to: bucketTo }).toArray()
+      );
+
       logger.debug(
         `Requesting ${new Date(bucketFrom).toISOString()} to ${new Date(
           bucketTo
@@ -62,23 +65,27 @@ export async function startLiveDataUpload({
 
     const [eventsToUpload, eventsToRemainInQueue] = partition(
       queuedEvents,
-      (event) => event.timestamp <= end
+      (event) => event['@timestamp'] !== undefined && event['@timestamp'] <= end.getTime()
     );
 
     logger.info(`Uploading until ${new Date(end).toISOString()}, events: ${eventsToUpload.length}`);
 
     queuedEvents = eventsToRemainInQueue;
 
-    uploadEvents({
-      events: eventsToUpload,
-      clientWorkers,
-      batchSize,
-      logger,
-      client,
+    await client.helpers.bulk<ApmFields>({
+      datasource: eventsToUpload,
+      onDocument: (doc) => {
+        return { index: { _index: '' } };
+      },
+      concurrency: clientWorkers,
     });
   }
 
-  setInterval(uploadNextBatch, intervalInMs);
-
-  uploadNextBatch();
+  do {
+    await uploadNextBatch();
+    await delay(intervalInMs);
+  } while (true);
+}
+async function delay(ms: number) {
+  return await new Promise((resolve) => setTimeout(resolve, ms));
 }
