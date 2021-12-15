@@ -253,7 +253,9 @@ export class SecurityPageObject extends FtrService {
     );
 
     const endTime = performance.now();
-    this.log.info(`Home page transaction took ${endTime - startTime} milliseconds`);
+    // eslint-disable-next-line no-console
+    console.log(`Home page transaction took ${endTime - startTime} milliseconds`);
+    this.log.debug(`Home page transaction took ${endTime - startTime} milliseconds`);
   }
 
   async logout() {
