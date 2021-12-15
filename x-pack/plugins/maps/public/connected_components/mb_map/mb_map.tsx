@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { Adapters } from 'src/plugins/inspector/public';
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
 
 import { mapboxgl } from '@kbn/mapbox-gl';

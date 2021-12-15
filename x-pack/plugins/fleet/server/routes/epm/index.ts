@@ -14,7 +14,7 @@ import type {
   UpdatePackageResponse,
 } from '../../../common';
 
-import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
+import { EPM_API_ROUTES } from '../../constants';
 import { splitPkgKey } from '../../services/epm/registry';
 import {
   GetCategoriesRequestSchema,
@@ -32,7 +32,7 @@ import {
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
 } from '../../types';
-import type { FleetRouter } from '../../types/request_context';
+import type { FleetAuthzRouter } from '../security';
 
 import {
   getCategoriesHandler,
@@ -50,119 +50,144 @@ import {
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
-export const registerRoutes = (routers: { rbac: FleetRouter; superuser: FleetRouter }) => {
-  routers.rbac.get(
+export const registerRoutes = (router: FleetAuthzRouter) => {
+  router.get(
     {
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
       validate: GetCategoriesRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
     },
     getCategoriesHandler
   );
 
-  routers.rbac.get(
+  router.get(
     {
       path: EPM_API_ROUTES.LIST_PATTERN,
       validate: GetPackagesRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
     },
     getListHandler
   );
 
-  routers.rbac.get(
+  router.get(
     {
       path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
       validate: false,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
     },
     getLimitedListHandler
   );
 
-  routers.rbac.get(
+  router.get(
     {
       path: EPM_API_ROUTES.STATS_PATTERN,
       validate: GetStatsRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
     },
     getStatsHandler
   );
 
-  routers.rbac.get(
+  router.get(
     {
       path: EPM_API_ROUTES.FILEPATH_PATTERN,
       validate: GetFileRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
     },
     getFileHandler
   );
 
-  routers.rbac.get(
+  router.get(
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: GetInfoRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
     },
     getInfoHandler
   );
 
-  routers.superuser.put(
+  router.put(
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: UpdatePackageRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        integrations: { upgradePackages: true, writePackageSettings: true },
+      },
     },
     updatePackageHandler
   );
 
-  routers.superuser.post(
+  router.post(
     {
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN,
       validate: InstallPackageFromRegistryRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        integrations: { installPackages: true },
+      },
     },
     installPackageFromRegistryHandler
   );
 
-  routers.superuser.post(
+  router.post(
     {
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
       validate: BulkUpgradePackagesFromRegistryRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        integrations: { installPackages: true, upgradePackages: true },
+      },
     },
     bulkInstallPackagesFromRegistryHandler
   );
 
-  routers.superuser.post(
+  // Only allow upload for superuser
+  router.post(
     {
       path: EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
       validate: InstallPackageByUploadRequestSchema,
       options: {
-        tags: [`access:${PLUGIN_ID}-all`],
         body: {
           accepts: ['application/gzip', 'application/zip'],
           parse: false,
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
       },
+      fleetAuthz: {
+        integrations: { uploadPackages: true },
+      },
     },
     installPackageByUploadHandler
   );
 
-  routers.superuser.delete(
+  router.delete(
     {
       path: EPM_API_ROUTES.DELETE_PATTERN,
       validate: DeletePackageRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        integrations: { removePackages: true },
+      },
     },
     deletePackageHandler
   );
 
   // deprecated since 8.0
-  routers.rbac.get(
+  router.get(
     {
       path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
       validate: GetInfoRequestSchemaDeprecated,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
     },
     async (context, request, response) => {
       const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
@@ -179,11 +204,13 @@ export const registerRoutes = (routers: { rbac: FleetRouter; superuser: FleetRou
     }
   );
 
-  routers.superuser.put(
+  router.put(
     {
       path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
       validate: UpdatePackageRequestSchemaDeprecated,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        integrations: { upgradePackages: true, writePackageSettings: true },
+      },
     },
     async (context, request, response) => {
       const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
@@ -199,11 +226,13 @@ export const registerRoutes = (routers: { rbac: FleetRouter; superuser: FleetRou
     }
   );
 
-  routers.superuser.post(
+  router.post(
     {
       path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED,
       validate: InstallPackageFromRegistryRequestSchemaDeprecated,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        integrations: { installPackages: true },
+      },
     },
     async (context, request, response) => {
       const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
@@ -219,11 +248,13 @@ export const registerRoutes = (routers: { rbac: FleetRouter; superuser: FleetRou
     }
   );
 
-  routers.superuser.delete(
+  router.delete(
     {
       path: EPM_API_ROUTES.DELETE_PATTERN_DEPRECATED,
       validate: DeletePackageRequestSchemaDeprecated,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        integrations: { removePackages: true },
+      },
     },
     async (context, request, response) => {
       const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
