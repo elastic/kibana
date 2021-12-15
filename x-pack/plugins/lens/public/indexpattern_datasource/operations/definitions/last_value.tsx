@@ -22,6 +22,7 @@ import {
   getFilter,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
+import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 
 function ofName(name: string, timeShift: string | undefined) {
   return adjustTimeScaleLabelSuffix(
@@ -152,6 +153,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     if (invalidSortFieldMessage) {
       errorMessages = [invalidSortFieldMessage];
     }
+    errorMessages.push(...(getDisallowedPreviousShiftMessage(layer, columnId) || []));
     return errorMessages.length ? errorMessages : undefined;
   },
   buildColumn({ field, previousColumn, indexPattern }, columnParams) {

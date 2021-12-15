@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GenericIndexPatternColumn, operationDefinitionMap } from '.';
+import { GenericIndexPatternColumn, operationDefinitionMap, GenericOperationDefinition } from '.';
 import {
   FieldBasedIndexPatternColumn,
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import { IndexPattern } from '../../types';
+import { IndexPattern, IndexPatternLayer } from '../../types';
 
 export function getInvalidFieldMessage(
   column: FieldBasedIndexPatternColumn,
@@ -65,6 +65,13 @@ export function getInvalidFieldMessage(
   }
 
   return undefined;
+}
+
+export function combineErrorMessages(
+  errorMessages: Array<string[] | undefined>
+): string[] | undefined {
+  const messages = (errorMessages.filter(Boolean) as string[][]).flat();
+  return messages.length ? messages : undefined;
 }
 
 export function getSafeName(name: string, indexPattern: IndexPattern): string {

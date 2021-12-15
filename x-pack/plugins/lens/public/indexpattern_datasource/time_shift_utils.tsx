@@ -149,6 +149,33 @@ export function getLayerTimeShiftChecks({
   };
 }
 
+export function getDisallowedPreviousShiftMessage(
+  layer: IndexPatternLayer,
+  columnId: string
+): string[] | undefined {
+  const currentColumn = layer.columns[columnId];
+  const hasPreviousShift =
+    currentColumn.timeShift && parseTimeShift(currentColumn.timeShift) === 'previous';
+  if (!hasPreviousShift) {
+    return;
+  }
+  const hasDateHistogram = Object.values(layer.columns).some(
+    (column) => column.operationType === 'date_histogram'
+  );
+  if (!hasDateHistogram) {
+    return;
+  }
+  return [
+    i18n.translate('xpack.lens.indexPattern.dateHistogramTimeShift', {
+      defaultMessage:
+        'In a single layer, you are unable to combine previous time range shift with date histograms. Either use an explicit time shift duration in "{column}" or replace the date histogram.',
+      values: {
+        column: currentColumn.label,
+      },
+    }),
+  ];
+}
+
 export function getStateTimeShiftWarningMessages(
   state: IndexPatternPrivateState,
   { activeData }: FramePublicAPI

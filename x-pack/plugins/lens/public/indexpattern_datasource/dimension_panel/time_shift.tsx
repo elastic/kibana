@@ -89,9 +89,9 @@ export function TimeShift({
     return null;
   }
 
-  const { isValueTooSmall, isValueNotMultiple, canShift } = getLayerTimeShiftChecks(
-    getDateHistogramInterval(layer, indexPattern, activeData, layerId)
-  );
+  const dateHistogramInterval = getDateHistogramInterval(layer, indexPattern, activeData, layerId);
+  const { isValueTooSmall, isValueNotMultiple, canShift } =
+    getLayerTimeShiftChecks(dateHistogramInterval);
 
   if (!canShift) {
     return null;
@@ -167,7 +167,10 @@ export function TimeShift({
               options={timeShiftOptions.filter(({ value }) => {
                 const parsedValue = parseTimeShift(value);
                 return (
-                  parsedValue && !isValueTooSmall(parsedValue) && !isValueNotMultiple(parsedValue)
+                  parsedValue &&
+                  !isValueTooSmall(parsedValue) &&
+                  !isValueNotMultiple(parsedValue) &&
+                  !(parsedValue === 'previous' && dateHistogramInterval.interval)
                 );
               })}
               selectedOptions={getSelectedOption()}

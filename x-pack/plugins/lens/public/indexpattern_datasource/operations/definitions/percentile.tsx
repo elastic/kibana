@@ -18,10 +18,12 @@ import {
   isValidNumber,
   getFilter,
   isColumnOfType,
+  combineErrorMessages,
 } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { useDebouncedValue } from '../../../shared_components';
+import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
@@ -142,7 +144,10 @@ export const percentileOperation: OperationDefinition<
     ).toAst();
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+    combineErrorMessages([
+      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+      getDisallowedPreviousShiftMessage(layer, columnId),
+    ]),
   paramEditor: function PercentileParamEditor({
     layer,
     updateLayer,

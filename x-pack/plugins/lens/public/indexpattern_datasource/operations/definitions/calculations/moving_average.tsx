@@ -21,10 +21,16 @@ import {
   checkForDataLayerType,
 } from './utils';
 import { updateColumnParam } from '../../layer_helpers';
-import { getFormatFromPreviousColumn, isValidNumber, getFilter } from '../helpers';
+import {
+  getFormatFromPreviousColumn,
+  isValidNumber,
+  getFilter,
+  combineErrorMessages,
+} from '../helpers';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 import type { OperationDefinition, ParamEditorProps } from '..';
+import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.movingAverageOf', {
@@ -114,13 +120,16 @@ export const movingAverageOperation: OperationDefinition<
   },
   onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
   getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
-    return getErrorsForDateReference(
-      layer,
-      columnId,
-      i18n.translate('xpack.lens.indexPattern.movingAverage', {
-        defaultMessage: 'Moving average',
-      })
-    );
+    return combineErrorMessages([
+      getErrorsForDateReference(
+        layer,
+        columnId,
+        i18n.translate('xpack.lens.indexPattern.movingAverage', {
+          defaultMessage: 'Moving average',
+        })
+      ),
+      getDisallowedPreviousShiftMessage(layer, columnId),
+    ]);
   },
   getHelpMessage: () => <MovingAveragePopup />,
   getDisabledStatus(indexPattern, layer, layerType) {
