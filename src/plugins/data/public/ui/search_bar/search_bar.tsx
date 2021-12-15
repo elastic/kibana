@@ -372,7 +372,14 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         selectedSavedQueries: [...selectedQueries],
       });
     }
-    if (!Boolean(this.services.storage.get(LOCAL_STORAGE_TIMEFILTER_OVERRIDE_MODAL_HIDDEN))) {
+    const queries = selectedQueries ?? this.state.selectedSavedQueries;
+    const selectedQueriesHaveTimeFilter = queries.some(
+      (query: SavedQuery) => query.attributes.timefilter
+    );
+    if (
+      !Boolean(this.services.storage.get(LOCAL_STORAGE_TIMEFILTER_OVERRIDE_MODAL_HIDDEN)) &&
+      selectedQueriesHaveTimeFilter
+    ) {
       this.setState({ overrideTimeFilterModalShow: true });
     } else {
       this.applySelectedSavedQueries(selectedQueries);
