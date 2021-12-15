@@ -14,10 +14,16 @@ import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../types';
-import { SPECIFIC_RUNTIME_FIELD_PATH, SPECIFIC_RUNTIME_FIELD_PATH_LEGACY } from '../../constants';
+import {
+  SPECIFIC_RUNTIME_FIELD_PATH,
+  SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
+  SERVICE_KEY,
+  SERVICE_KEY_LEGACY,
+  SERVICE_KEY_TYPE,
+} from '../../constants';
 
 const getRuntimeFieldRouteFactory =
-  (path: string) =>
+  (path: string, serviceKey: SERVICE_KEY_TYPE) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -66,20 +72,31 @@ const getRuntimeFieldRouteFactory =
           throw new Error('Only runtime fields can be retrieved.');
         }
 
-        return res.ok({
+        const legacyResponse = {
           body: {
             field: field.toSpec(),
             runtimeField: indexPattern.getRuntimeField(name),
           },
-        });
+        };
+
+        const response = {
+          body: {
+            fields: [field.toSpec()],
+            runtimeField: indexPattern.getRuntimeField(name),
+          },
+        };
+
+        return res.ok(serviceKey === SERVICE_KEY_LEGACY ? legacyResponse : response);
       })
     );
   };
 
 export const registerGetRuntimeFieldRoute = getRuntimeFieldRouteFactory(
-  SPECIFIC_RUNTIME_FIELD_PATH
+  SPECIFIC_RUNTIME_FIELD_PATH,
+  SERVICE_KEY
 );
 
 export const registerGetRuntimeFieldRouteLegacy = getRuntimeFieldRouteFactory(
-  SPECIFIC_RUNTIME_FIELD_PATH_LEGACY
+  SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
+  SERVICE_KEY_LEGACY
 );

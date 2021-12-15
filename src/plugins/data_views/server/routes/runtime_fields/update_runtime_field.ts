@@ -21,10 +21,11 @@ import {
   SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
+  SERVICE_KEY_TYPE,
 } from '../../constants';
 
 const updateRuntimeFieldRouteFactory =
-  (path: string, serviceKey: string) =>
+  (path: string, serviceKey: SERVICE_KEY_TYPE) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -88,12 +89,21 @@ const updateRuntimeFieldRouteFactory =
         const fieldObject = indexPattern.fields.getByName(name);
         if (!fieldObject) throw new Error(`Could not create a field [name = ${name}].`);
 
-        return res.ok({
+        const legacyResponse = {
           body: {
             field: fieldObject.toSpec(),
             [serviceKey]: indexPattern.toSpec(),
           },
-        });
+        };
+
+        const response = {
+          body: {
+            fields: [fieldObject.toSpec()],
+            [serviceKey]: indexPattern.toSpec(),
+          },
+        };
+
+        return res.ok(serviceKey === SERVICE_KEY_LEGACY ? legacyResponse : response);
       })
     );
   };

@@ -80,12 +80,21 @@ const putRuntimeFieldRouteFactory =
         const fieldObject = indexPattern.fields.getByName(name);
         if (!fieldObject) throw new Error(`Could not create a field [name = ${name}].`);
 
-        return res.ok({
+        const legacyResponse = {
           body: {
             field: fieldObject.toSpec(),
             [serviceKey]: indexPattern.toSpec(),
           },
-        });
+        };
+
+        const response = {
+          body: {
+            fields: [fieldObject.toSpec()],
+            [serviceKey]: indexPattern.toSpec(),
+          },
+        };
+
+        return res.ok(serviceKey === SERVICE_KEY_LEGACY ? legacyResponse : response);
       })
     );
   };
