@@ -193,7 +193,7 @@ export class DynamicStyleProperty<T>
     }
 
     const categoricalFieldMetaFromServer = this._getCategoryFieldMetaFromStyleMetaRequest();
-    return categoricalFieldMetaFromServer
+    return categoricalFieldMetaFromServer.length
       ? categoricalFieldMetaFromServer
       : categoryFieldMetaFromLocalFeatures;
   }
