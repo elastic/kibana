@@ -369,6 +369,10 @@ const changePointPValuesRoute = createApmServerRoute({
       rangeRt,
       t.type({
         fieldCandidates: t.array(t.string),
+        baselineMin: toNumberRt,
+        baselineMax: toNumberRt,
+        deviationMin: toNumberRt,
+        deviationMax: toNumberRt,
       }),
     ]),
   }),
@@ -382,7 +386,14 @@ const changePointPValuesRoute = createApmServerRoute({
     const { indices } = await setupRequest(resources);
     const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
 
-    const { fieldCandidates, ...params } = resources.params.body;
+    const {
+      fieldCandidates,
+      baselineMin,
+      baselineMax,
+      deviationMin,
+      deviationMax,
+      ...params
+    } = resources.params.body;
 
     const paramsWithIndex = {
       ...params,
@@ -395,7 +406,8 @@ const changePointPValuesRoute = createApmServerRoute({
         await fetchChangePointPValues(
           esClient,
           paramsWithIndex,
-          fieldCandidates
+          fieldCandidates,
+          { baselineMin, baselineMax, deviationMin, deviationMax }
         )
     );
   },

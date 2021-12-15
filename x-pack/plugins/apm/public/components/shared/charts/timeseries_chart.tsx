@@ -127,6 +127,9 @@ export function TimeseriesChart({
   ];
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
+  const [originalWindowParameters, setOriginalWindowParameters] = useState<
+    WindowParameters | undefined
+  >();
   const [windowParameters, setWindowParameters] = useState<
     WindowParameters | undefined
   >();
@@ -182,6 +185,7 @@ export function TimeseriesChart({
   const changePoint: ProjectionClickListener = ({ x }) => {
     if (typeof x === 'number') {
       const wp = getWindowParameters(x, min, max);
+      setOriginalWindowParameters(wp);
       setWindowParameters(wp);
     }
   };
@@ -362,10 +366,19 @@ export function TimeseriesChart({
     ] as Array<EuiBasicTableColumn<ChangePoint>>;
   }, [history]);
 
+  function onWindowParametersChange(wp: WindowParameters) {
+    setWindowParameters(wp);
+  }
+
   const chart = (
     <>
-      {windowParameters && (
-        <MlBrush windowParameters={windowParameters} min={min} max={max} />
+      {originalWindowParameters && (
+        <MlBrush
+          windowParameters={originalWindowParameters}
+          min={min}
+          max={max}
+          onChange={onWindowParametersChange}
+        />
       )}
       <ChartContainer
         hasData={!isEmpty}
@@ -458,9 +471,9 @@ export function TimeseriesChart({
                 id="rect_annotation_1"
                 style={{
                   strokeWidth: 1,
-                  stroke: theme.eui.euiColorLightShade,
-                  fill: theme.eui.euiColorLightShade,
-                  opacity: 0.9,
+                  stroke: '#e8eaeb',
+                  fill: '#e8eaeb',
+                  opacity: 1,
                 }}
                 hideTooltips={true}
               />
@@ -479,9 +492,9 @@ export function TimeseriesChart({
                 id="rect_annotation_w"
                 style={{
                   strokeWidth: 1,
-                  stroke: theme.eui.euiColorVis4,
-                  fill: theme.eui.euiColorLightShade,
-                  opacity: 0.9,
+                  stroke: '#e8eaeb',
+                  fill: '#e8eaeb',
+                  opacity: 1,
                 }}
                 hideTooltips={true}
               />

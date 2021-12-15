@@ -15,7 +15,13 @@ import { getRequestBase } from './get_request_base';
 
 export const getChangePointRequest = (
   params: ChangePointParams & CorrelationsParams,
-  fieldName: string
+  fieldName: string,
+  windowParameters: {
+    baselineMin: number;
+    baselineMax: number;
+    deviationMin: number;
+    deviationMax: number;
+  }
 ): estypes.SearchRequest => {
   const {
     environment,
@@ -43,15 +49,16 @@ export const getChangePointRequest = (
     },
   };
 
-  const { filter } = query.bool;
+  const filter = query.bool.filter.filter((d) => Object.keys(d)[0] !== 'range');
 
   query.bool.filter = [
     ...filter,
     {
       range: {
         '@timestamp': {
-          gte: params?.deviationMin,
-          lt: params?.deviationMax,
+          gte: windowParameters.deviationMin,
+          lt: windowParameters.deviationMax,
+          format: 'epoch_millis',
         },
       },
     },
@@ -71,8 +78,9 @@ export const getChangePointRequest = (
                 {
                   range: {
                     '@timestamp': {
-                      gte: params?.baselineMin,
-                      lt: params?.baselineMax,
+                      gte: windowParameters.baselineMin,
+                      lt: windowParameters.baselineMax,
+                      format: 'epoch_millis',
                     },
                   },
                 },
@@ -80,6 +88,7 @@ export const getChangePointRequest = (
             },
           },
           p_value: { background_is_superset: false },
+          size: 1000,
         },
       },
     },
@@ -94,16 +103,20 @@ export const getChangePointRequest = (
 export const fetchChangePointPValues = async (
   esClient: ElasticsearchClient,
   params: ChangePointParams & CorrelationsParams,
-  fieldNames: string[]
+  fieldNames: string[],
+  windowParameters: {
+    baselineMin: number;
+    baselineMax: number;
+    deviationMin: number;
+    deviationMax: number;
+  }
 ) => {
   const result = [];
 
   for (const fieldName of fieldNames) {
-    const request = getChangePointRequest(params, fieldName);
-    console.log('request.body.query', JSON.stringify(request.body));
+    const request = getChangePointRequest(params, fieldName, windowParameters);
     const resp = await esClient.search(request);
 
-    console.log('resp.body.aggregations', resp.body.aggregations);
     if (resp.body.aggregations === undefined) {
       throw new Error('fetchChangePoint failed, did not return aggregations.');
     }

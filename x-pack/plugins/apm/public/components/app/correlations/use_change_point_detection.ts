@@ -107,12 +107,15 @@ export function useChangePointDetection(
       // console.log('fieldCandidatesChunks', fieldCandidatesChunks);
 
       for (const fieldCandidatesChunk of fieldCandidatesChunks) {
-        // console.log('RUN CHUNK');
         const { changePoints: pValues } = await callApmApi({
           endpoint: 'POST /internal/apm/correlations/change_point_p_values',
           signal: abortCtrl.current.signal,
           params: {
-            body: { ...fetchParams, fieldCandidates: fieldCandidatesChunk },
+            body: {
+              ...fetchParams,
+              fieldCandidates: fieldCandidatesChunk,
+              ...searchStrategyParams,
+            },
           },
         });
         // console.log('pValues', pValues);
@@ -174,7 +177,7 @@ export function useChangePointDetection(
         setResponse.flush();
       }
     }
-  }, [fetchParams, setResponse]);
+  }, [fetchParams, setResponse, searchStrategyParams]);
 
   const cancelFetch = useCallback(() => {
     abortCtrl.current.abort();

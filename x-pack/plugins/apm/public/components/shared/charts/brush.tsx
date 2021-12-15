@@ -38,29 +38,31 @@ interface Dimensions {
 
 const margin = {
   top: 10,
-  right: 10,
+  right: 30,
   bottom: 10,
-  left: 10,
+  left: 60,
 };
 
 // const width = 400 - margin.left - margin.right;
-const height = 200 - margin.top - margin.bottom;
+const height = 40 - margin.top - margin.bottom;
 
 export function MlBrush({
   windowParameters,
   min,
   max,
+  onChange,
 }: {
   windowParameters: WindowParameters;
   min: number;
   max: number;
+  onChange?: (windowParameters: WindowParameters) => {};
 }) {
   const stageSvgRef = useRef(null);
   const d3Container = useRef(null);
 
   const width =
     stageSvgRef.current !== null
-      ? stageSvgRef.current.offsetWidth - margin.left - margin.right
+      ? stageSvgRef.current.clientWidth - margin.left - margin.right
       : null;
 
   const { baselineMin, baselineMax, deviationMin, deviationMax } =
@@ -69,14 +71,14 @@ export function MlBrush({
   useEffect(() => {
     if (d3Container.current && stageSvgRef.current && width) {
       const x = d3.scaleLinear().domain([min, max]).rangeRound([0, width]);
+      const px2ts = (px: number) => Math.round(x.invert(px));
       const minExtentPx = Math.round((x(max) - x(min)) / 100);
       const brushes: MlBrush[] = [];
 
       const svg = d3.select(d3Container.current);
 
-      const gElement = svg
-        .append('g')
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+      const gElement = svg.append('g');
+      // .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
       gElement
         .append('rect')
@@ -113,6 +115,17 @@ export function MlBrush({
           const deviationBrush = document.getElementById('brush-deviation');
           const deviationSelection = d3.brushSelection(deviationBrush);
 
+          if (!deviationSelection || !baselineSelection) {
+            return;
+          }
+
+          const newWindowParameters = {
+            baselineMin: px2ts(baselineSelection[0]),
+            baselineMax: px2ts(baselineSelection[1]),
+            deviationMin: px2ts(deviationSelection[0]),
+            deviationMax: px2ts(deviationSelection[1]),
+          };
+
           if (
             id === 'deviation' &&
             deviationSelection &&
@@ -124,6 +137,10 @@ export function MlBrush({
               deviationSelection[1],
               newDeviationMin + minExtentPx
             );
+
+            newWindowParameters.deviationMin = px2ts(newDeviationMin);
+            newWindowParameters.deviationMax = px2ts(newDeviationMax);
+
             d3.select(this)
               .transition()
               .duration(200)
@@ -139,12 +156,19 @@ export function MlBrush({
               baselineSelection[0],
               newBaselineMax - minExtentPx
             );
+
+            newWindowParameters.baselineMin = px2ts(newBaselineMin);
+            newWindowParameters.baselineMax = px2ts(newBaselineMax);
+
             d3.select(this)
               .transition()
               .duration(200)
               .call(brushes[0].brush.move, [newBaselineMin, newBaselineMax]);
           }
 
+          if (onChange) {
+            onChange(newWindowParameters);
+          }
           drawBrushes();
         }
       }
@@ -185,7 +209,16 @@ export function MlBrush({
       newBrush('deviation', deviationMin, deviationMax);
       drawBrushes();
     }
-  }, [min, max, width, baselineMin, baselineMax, deviationMin, deviationMax]);
+  }, [
+    min,
+    max,
+    width,
+    baselineMin,
+    baselineMax,
+    deviationMin,
+    deviationMax,
+    // onChange,
+  ]);
 
   return (
     <div className="ml-state-svg" ref={stageSvgRef}>
@@ -193,7 +226,7 @@ export function MlBrush({
         <svg
           className="ml-d3-component"
           width={width}
-          height={height}
+          height={height + 5}
           ref={d3Container}
         />
       )}

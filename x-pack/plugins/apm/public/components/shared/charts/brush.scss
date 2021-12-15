@@ -1,6 +1,15 @@
-.ml-brush {
+.ml-state-svg {
+  width: 100%;
+  margin-bottom: -18px;
+  // border: 1px solid red;
+  margin-left: 60px;
+  margin-right: 30px;
+}
+
+.ml-d3-component {
+
   .grid-background {
-    fill: #eee;
+    fill: none;
   }
 
   .grid line,
@@ -10,9 +19,15 @@
     shape-rendering: crispEdges;
   }
 
+  .handle {
+    fill: #666;
+  }
 
   .brush .selection {
-    stroke: #000;
-    fill: red;
+    stroke: none;
+    fill: #69707d !important;
+    opacity: 0.5 !important;
   }
 }
+
+
