@@ -15259,7 +15259,6 @@
     "xpack.maps.layers.newVectorLayerWizard.indexPrivsErrorTitle": "缺少索引权限",
     "xpack.maps.layerSettings.attributionLegend": "归因",
     "xpack.maps.layerTocActions.cloneLayerTitle": "克隆图层",
-    "xpack.maps.layerTocActions.editLayerTooltip": "编辑在没有集群、联接或时间筛选的情况下文档图层仅支持的特征",
     "xpack.maps.layerTocActions.fitToDataTitle": "适应数据",
     "xpack.maps.layerTocActions.hideLayerTitle": "隐藏图层",
     "xpack.maps.layerTocActions.layerActionsTitle": "图层操作",
