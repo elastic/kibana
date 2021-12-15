@@ -52,11 +52,11 @@ interface FunctionFormProps {
 }
 
 export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) => {
-  const { expressionIndex, argType, nextArgType, path, parentPath } = props;
-
+  const { expressionIndex, ...restProps } = props;
+  const { nextArgType, path, parentPath, argType } = restProps;
   const dispatch = useDispatch();
   const context = useSelector<State, ExpressionContext>(
-    (state) => getContextForIndex(state, expressionIndex),
+    (state) => getContextForIndex(state, parentPath, expressionIndex),
     deepEqual
   );
   const element = useSelector<State, CanvasElement | undefined>(
@@ -72,68 +72,32 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
 
   const addArgument = useCallback(
     (argName: string, argValue: string | Ast | null) => () => {
-      dispatch(
-        addArgumentValueAtIndex({
-          index: expressionIndex,
-          element,
-          pageId,
-          argName,
-          value: argValue,
-          path,
-        })
-      );
+      dispatch(addArgumentValueAtIndex({ element, pageId, argName, value: argValue, path }));
     },
-    [dispatch, element, expressionIndex, pageId, path]
+    [dispatch, element, pageId, path]
   );
 
-  const updateContext = useCallback(
-    () => dispatch(fetchContext(expressionIndex, element)),
-    [dispatch, element, expressionIndex]
-  );
+  const updateContext = useCallback(() => {
+    return dispatch(fetchContext(expressionIndex, element, false, parentPath));
+  }, [dispatch, element, expressionIndex, parentPath]);
 
   const setArgument = useCallback(
     (argName: string, valueIndex: number) => (value: string | Ast | null) => {
-      dispatch(
-        setArgumentAtIndex({
-          index: expressionIndex,
-          element,
-          pageId,
-          argName,
-          value,
-          valueIndex,
-          path,
-        })
-      );
+      dispatch(setArgumentAtIndex({ element, pageId, argName, value, valueIndex, path }));
     },
-    [dispatch, element, expressionIndex, pageId, path]
+    [dispatch, element, pageId, path]
   );
 
   const deleteArgument = useCallback(
     (argName: string, argIndex: number) => () => {
-      dispatch(
-        deleteArgumentAtIndex({
-          index: expressionIndex,
-          element,
-          pageId,
-          argName,
-          argIndex,
-          path,
-        })
-      );
+      dispatch(deleteArgumentAtIndex({ element, pageId, argName, argIndex, path }));
     },
-    [dispatch, element, expressionIndex, pageId, path]
+    [dispatch, element, pageId, path]
   );
 
   const deleteParentArgument = useCallback(() => {
-    dispatch(
-      deleteArgumentAtIndex({
-        index: expressionIndex,
-        element,
-        pageId,
-        path: parentPath,
-      })
-    );
-  }, [dispatch, element, expressionIndex, pageId, parentPath]);
+    dispatch(deleteArgumentAtIndex({ element, pageId, path: parentPath }));
+  }, [dispatch, element, pageId, parentPath]);
 
   const onAssetAddDispatch = useCallback(
     (type: AssetType['type'], content: AssetType['value']) => {
@@ -160,7 +124,8 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
 
   return (
     <Component
-      {...props}
+      {...restProps}
+      id={path}
       context={context}
       filterGroups={filterGroups}
       expressionType={findExpressionType(argType)}

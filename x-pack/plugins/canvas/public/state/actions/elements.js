@@ -30,8 +30,8 @@ const { actionsElements: strings } = ErrorStrings;
 
 const { set, del } = immutable;
 
-export function getSiblingContext(state, elementId, checkIndex) {
-  const prevContextPath = [elementId, 'expressionContext', checkIndex];
+export function getSiblingContext(state, elementId, checkIndex, path = ['ast']) {
+  const prevContextPath = [elementId, 'expressionContext', ...path, checkIndex];
   const prevContextValue = getResolvedArgsValue(state, prevContextPath);
 
   // if a value is found, return it, along with the index it was found at
@@ -49,7 +49,7 @@ export function getSiblingContext(state, elementId, checkIndex) {
   }
 
   // walk back up to find the closest cached context available
-  return getSiblingContext(state, elementId, prevContextIndex);
+  return getSiblingContext(state, elementId, prevContextIndex, path);
 }
 
 function getBareElement(el, includeId = false) {
@@ -71,8 +71,9 @@ export const flushContextAfterIndex = createAction('flushContextAfterIndex');
 
 export const fetchContext = createThunk(
   'fetchContext',
-  ({ dispatch, getState }, index, element, fullRefresh = false) => {
-    const chain = get(element, 'ast.chain');
+  ({ dispatch, getState }, index, element, fullRefresh = false, path) => {
+    const pathToTarget = [...path.split('.'), 'chain'];
+    const chain = get(element, pathToTarget);
     const invalidIndex = chain ? index >= chain.length : true;
 
     if (!element || !chain || invalidIndex) {
@@ -81,7 +82,7 @@ export const fetchContext = createThunk(
 
     // cache context as the previous index
     const contextIndex = index - 1;
-    const contextPath = [element.id, 'expressionContext', contextIndex];
+    const contextPath = [element.id, 'expressionContext', path, contextIndex];
 
     // set context state to loading
     dispatch(
@@ -91,12 +92,12 @@ export const fetchContext = createThunk(
     );
 
     // function to walk back up to find the closest context available
-    const getContext = () => getSiblingContext(getState(), element.id, contextIndex - 1);
+    const getContext = () => getSiblingContext(getState(), element.id, contextIndex - 1, [path]);
     const { index: prevContextIndex, context: prevContextValue } =
       fullRefresh !== true ? getContext() : {};
 
     // modify the ast chain passed to the interpreter
-    const astChain = element.ast.chain.filter((exp, i) => {
+    const astChain = chain.filter((exp, i) => {
       if (prevContextValue != null) {
         return i > prevContextIndex && i < index;
       }
@@ -104,16 +105,9 @@ export const fetchContext = createThunk(
     });
 
     const variables = getWorkpadVariablesAsObject(getState());
-
+    const elementWithNewAst = set(element, pathToTarget, astChain);
     // get context data from a partial AST
-    return interpretAst(
-      {
-        ...element.ast,
-        chain: astChain,
-      },
-      variables,
-      prevContextValue
-    ).then((value) => {
+    return interpretAst(elementWithNewAst.ast, variables, prevContextValue).then((value) => {
       dispatch(
         args.setValue({
           path: contextPath,

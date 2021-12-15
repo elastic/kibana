@@ -39,6 +39,7 @@ const strings = {
       defaultMessage: 'Save',
     }),
 };
+
 export class DatasourceComponent extends PureComponent {
   static propTypes = {
     args: PropTypes.object.isRequired,

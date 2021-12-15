@@ -16,10 +16,7 @@ function normalizeContext(chain) {
   if (!Array.isArray(chain) || !chain.length) {
     return null;
   }
-  return {
-    type: 'expression',
-    chain,
-  };
+  return { type: 'expression', chain };
 }
 
 function getExpression(ast) {
@@ -62,10 +59,42 @@ const mergeComponentsAndContexts = (
   context: [...context, ...nextContext],
 });
 
-const buildPath = (prevPath = '', argName, index, removable = true) => {
-  const newPath = `${argName}.${index}`;
+const buildPath = (prevPath = '', argName, index, removable = false) => {
+  const newPath = index === undefined ? argName : `${argName}.${index}`;
   return { path: prevPath.length ? `${prevPath}.${newPath}` : newPath, removable };
 };
+
+const componentFactory = ({
+  args,
+  argsWithExprFunctions,
+  argType,
+  argTypeDef,
+  argumentsView,
+  argUiConfig,
+  prevContext,
+  expressionIndex,
+  nextArg,
+  path,
+  parentPath,
+  removable,
+}) => ({
+  args,
+  nestedFunctionsArgs: argsWithExprFunctions,
+  argType: argType.function,
+  argTypeDef: Object.assign(argTypeDef, {
+    args: argumentsView,
+    name: argUiConfig?.name ?? argTypeDef.name,
+    displayName: argUiConfig?.displayName ?? argTypeDef.displayName,
+    help: argUiConfig?.help ?? argTypeDef.name,
+  }),
+  argResolver: (argAst) => interpretAst(argAst, prevContext),
+  contextExpression: getExpression(prevContext),
+  expressionIndex, // preserve the index in the AST
+  nextArgType: nextArg && nextArg.function,
+  path,
+  parentPath,
+  removable,
+});
 
 const flattenNestedFunctionsToComponents = (complexArgs, complexArgumentsViews, argumentPath) =>
   Object.keys(complexArgs).reduce((current, argName) => {
@@ -73,7 +102,7 @@ const flattenNestedFunctionsToComponents = (complexArgs, complexArgumentsViews, 
       .map(({ chain }, index) =>
         transformFunctionsToComponents(
           chain,
-          buildPath(argumentPath, argName, index),
+          buildPath(argumentPath, argName, index, true),
           complexArgumentsViews?.find((argView) => argView.name === argName)
         )
       )
@@ -90,8 +119,6 @@ function transformFunctionsToComponents(functionsChain, { path, removable }, arg
   return functionsChain.reduce((current, argType, i) => {
     const argumentPath = `${argumentsPath}.${i}.arguments`;
     const argTypeDef = getArgTypeDef(argType.function);
-    const prevContext = normalizeContext(current.context);
-    const nextArg = functionsChain[i + 1] || null;
     current.context = current.context.concat(argType);
 
     // filter out argTypes that shouldn't be in the sidebar
@@ -100,34 +127,30 @@ function transformFunctionsToComponents(functionsChain, { path, removable }, arg
     }
 
     const { argumentsView, args } = getPureArgs(argTypeDef, argType.arguments);
-    const { argumentsView: complexArgumentsViews, args: complexArgs } = getComplexArgs(
+    const { argumentsView: exprFunctionsViews, args: argsWithExprFunctions } = getComplexArgs(
       argTypeDef,
       argType.arguments
     );
 
     // wrap each part of the chain in ArgType, passing in the previous context
-    const component = {
+    const component = componentFactory({
       args,
-      nestedFunctionsArgs: complexArgs,
-      argType: argType.function,
-      argTypeDef: Object.assign(argTypeDef, {
-        args: argumentsView,
-        name: argUiConfig?.name ?? argTypeDef.name,
-        displayName: argUiConfig?.displayName ?? argTypeDef.displayName,
-        help: argUiConfig?.help ?? argTypeDef.name,
-      }),
-      argResolver: (argAst) => interpretAst(argAst, prevContext),
-      contextExpression: getExpression(prevContext),
+      argsWithExprFunctions,
+      argType,
+      argTypeDef,
+      argumentsView,
+      argUiConfig,
+      prevContext: normalizeContext(current.context),
       expressionIndex: i, // preserve the index in the AST
-      nextArgType: nextArg && nextArg.function,
-      path: `${argumentPath}`,
+      nextArg: functionsChain[i + 1] || null,
+      path: argumentPath,
       parentPath,
       removable,
-    };
+    });
 
     const components = flattenNestedFunctionsToComponents(
-      complexArgs,
-      complexArgumentsViews,
+      argsWithExprFunctions,
+      exprFunctionsViews,
       argumentPath
     );
 
@@ -142,7 +165,7 @@ const functionFormItems = withProps((props) => {
   const selectedElement = props.element;
   const functionsChain = get(selectedElement, 'ast.chain', []);
   // map argTypes from AST, attaching nextArgType if one exists
-  const functionsListItems = transformFunctionsToComponents(functionsChain, { path: 'ast' });
+  const functionsListItems = transformFunctionsToComponents(functionsChain, buildPath('', 'ast'));
   return {
     functionFormItems: functionsListItems.mapped,
   };

@@ -56,7 +56,6 @@ export interface DataArg {
   argTypeDef?: ArgTypeDef;
   filterGroups: string[];
   context?: ExpressionContext;
-  expressionIndex: number;
   expressionType: ExpressionType;
   nextArgType?: ArgType;
   nextExpressionType?: ExpressionType;
@@ -119,20 +118,15 @@ export class Arg {
 
   // TODO: Document what these otherProps are. Maybe make them named arguments?
   render(data: DataArg) {
-    const { onValueChange, onValueRemove, argValue, key, label, ...otherProps } = data;
+    const { onValueChange, onValueRemove, key, label, ...otherProps } = data;
+    const resolved = this.resolve?.(otherProps);
     // This is everything the arg_type template needs to render
-    const templateProps = {
-      ...otherProps,
-      ...this.resolve?.(otherProps),
-      onValueChange,
-      argValue,
-      typeInstance: this,
-    };
+    const templateProps = { ...otherProps, ...resolved, onValueChange, typeInstance: this };
 
     const formProps = {
       key,
       argTypeInstance: this,
-      valueMissing: this.required && argValue == null,
+      valueMissing: this.required && data.argValue == null,
       label,
       onValueChange,
       onValueRemove,

@@ -39,11 +39,11 @@ export type RenderArgData = BaseFormProps & {
   type?: ArgDisplayType;
   argTypeDef?: ArgTypeDef;
   args: Args;
+  id: string;
   nestedFunctionsArgs: Args;
   argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
   context?: ExpressionContext;
   contextExpression?: string;
-  expressionIndex: number;
   expressionType: ExpressionType;
   filterGroups: string[];
   nextArgType?: ArgType;
@@ -82,19 +82,19 @@ export class FunctionForm extends BaseForm {
   }
 
   renderArg(argWithValues: ArgWithValues, props: RenderArgProps) {
-    const { onValueRemove, onValueChange, onContainerRemove, ...passedProps } = props;
+    const { onValueRemove, onValueChange, onContainerRemove, id, ...passedProps } = props;
     const { arg, argValues } = argWithValues;
-    const { argType, expressionIndex } = passedProps;
     // TODO: show some information to the user than an argument was skipped
     if (!arg) {
       return null;
     }
+
     const renderArgWithProps = (
       argValue: string | Ast | null,
       valueIndex: number
     ): ReactElement<any, any> | null =>
       arg.render({
-        key: `${argType}-${expressionIndex}-${arg.name}-${valueIndex}`,
+        key: `${id}`,
         ...passedProps,
         valueIndex,
         onValueChange: onValueChange(arg.name, valueIndex),
@@ -236,9 +236,9 @@ export class FunctionForm extends BaseForm {
       // props are passed to resolve and the returned object is mixed into the template props
       const props = { ...data, ...this.resolve(data), typeInstance: this };
       // allow a hook to override the data args
-      const resolvedArgsWithValues = argsWithValues.map((argWithValue) => ({
-        ...argWithValue,
-        ...this.resolveArg(argWithValue, props),
+      const resolvedArgsWithValues = argsWithValues.map((argWithValues) => ({
+        ...argWithValues,
+        ...this.resolveArg(argWithValues, props),
       }));
 
       const argumentForms = compact(
