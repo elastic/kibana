@@ -17,7 +17,7 @@ import {
 } from '@kbn/mapbox-gl';
 import uuid from 'uuid/v4';
 import { Geometry } from 'geojson';
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { GEO_JSON_TYPE, LON_INDEX, RawValue } from '../../../../common/constants';
 import {
