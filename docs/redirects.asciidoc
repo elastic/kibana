@@ -440,3 +440,8 @@ This content has moved. Refer to <<data-views-runtime-field-api-upsert>>.
 == Index patterns has been renamed to data views.
 
 This content has moved. Refer to <<data-views-api-update>>.
+
+[role="exclude",id="xpack-kibana-role-management"]
+== Kibana role management.
+
+This content has moved. Refer to <<kibana-role-management>>.
