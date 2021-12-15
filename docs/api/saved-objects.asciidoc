@@ -6,7 +6,7 @@ Manage {kib} saved objects, including dashboards, visualizations, and more.
 WARNING: Do not write documents directly to the `.kibana` index. When you write directly
 to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
 
-NOTE: For managing {kib} index patterns, use the <<data-views-api, index patterns API>>.
+NOTE: For managing {data-sources}, use the <<data-views-api, {data-sources} API>>.
 
 The following saved objects APIs are available: 
 
