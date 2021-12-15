@@ -14,6 +14,5 @@ import type { CoreTheme } from '../../../../core/public';
 // That copy and this comment can be removed once https://github.com/elastic/kibana/issues/119204 is implemented.
 
 export const getColorMode = (theme: CoreTheme): EuiThemeColorModeStandard => {
-  // COLOR_MODES_STANDARD is not exported from eui
   return theme.darkMode ? COLOR_MODES_STANDARD.dark : COLOR_MODES_STANDARD.light;
 };
