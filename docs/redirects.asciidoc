@@ -440,8 +440,3 @@ This content has moved. Refer to <<data-views-runtime-field-api-upsert>>.
 == Index patterns has been renamed to data views.
 
 This content has moved. Refer to <<data-views-api-update>>.
-
-[role="exclude",id="tsvb-index-pattern-mode"]
-== Index patterns has been renamed to data views.
-
-This content has moved. Refer to <<tsvb-data-view-mode>>.
