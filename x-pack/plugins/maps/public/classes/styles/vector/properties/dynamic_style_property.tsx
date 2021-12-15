@@ -415,14 +415,14 @@ export class DynamicStyleProperty<T>
     };
   }
 
-  _pluckCategoricalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData): Category[] | null {
+  _pluckCategoricalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData): Category[] {
     if (!this.isCategorical() || !this._field) {
-      return null;
+      return [];
     }
 
     const fieldMeta = styleMetaData[`${this._field.getRootName()}_terms`];
     if (!fieldMeta || !('buckets' in fieldMeta)) {
-      return null;
+      return [];
     }
 
     return fieldMeta.buckets.map((bucket) => {
