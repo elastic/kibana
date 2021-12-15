@@ -88,7 +88,7 @@ function isSystemError(error: FailedAttemptErrors): boolean {
 }
 
 export function getFetchOptions(targetUrl: string): RequestInit | undefined {
-  const options: { [key: string]: any } = {
+  const options: RequestInit = {
     headers: {
       'User-Agent': `Kibana/${appContextService.getKibanaVersion()} node-fetch`,
     },
