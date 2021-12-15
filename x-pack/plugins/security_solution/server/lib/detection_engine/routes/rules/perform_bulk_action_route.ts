@@ -19,7 +19,7 @@ import { performBulkActionSchema } from '../../../../../common/detection_engine/
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { initPromisePool } from '../../../../utils/promises_pool';
+import { initPromisePool } from '../../../../utils/promise_pool';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { deleteRules } from '../../rules/delete_rules';
