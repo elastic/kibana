@@ -297,12 +297,12 @@ async function attemptToCreateCommand(
   const { session, consoleLog$ } = await buildDriverInstance();
 
   if (throttleOption === '1' && browserType === 'chrome') {
-    const { KBN_NETWORK_TEST_PROFILE = 'DEFAULT' } = process.env;
+    const { KBN_NETWORK_TEST_PROFILE = 'CLOUD_USER' } = process.env;
 
     const profile =
       KBN_NETWORK_TEST_PROFILE in Object.keys(NETWORK_PROFILES)
         ? KBN_NETWORK_TEST_PROFILE
-        : 'DEFAULT';
+        : 'CLOUD_USER';
 
     const {
       DOWNLOAD: downloadThroughput,
