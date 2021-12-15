@@ -30,32 +30,32 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
           configPath: `${fromPath}.roles.enabled`,
           level: 'warning',
           title: i18n.translate('xpack.reporting.deprecations.reportingRoles.title', {
-            defaultMessage: 'The [{fromPath}.roles] setting is deprecated',
+            defaultMessage: `The "{fromPath}.roles" setting is deprecated`,
             values: { fromPath },
           }),
           // TODO: once scheduled reports is released, restate this to say that we have no access to scheduled reporting.
           // https://github.com/elastic/kibana/issues/79905
           message: i18n.translate('xpack.reporting.deprecations.reportingRoles.description', {
             defaultMessage:
-              `The default mechanism for Reporting privilege will work differently in future versions,` +
-              ` which will affect the behavior of this cluster. Set [xpack.reporting.roles.enabled] to` +
-              ` [false] to adopt the future behavior before upgrading.`,
+              `The default mechanism for Reporting privileges will work differently in future versions,` +
+              ` which will affect the behavior of this cluster. Set "xpack.reporting.roles.enabled" to` +
+              ` "false" to adopt the future behavior before upgrading.`,
           }),
           correctiveActions: {
             manualSteps: [
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepOne', {
-                defaultMessage: `Set [xpack.reporting.roles.enabled] to [false] in kibana.yml.`,
+                defaultMessage: `Set "xpack.reporting.roles.enabled" to "false" in kibana.yml.`,
               }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepTwo', {
-                defaultMessage: `Remove [xpack.reporting.roles.allow] in kibana.yml, if present.`,
+                defaultMessage: `Remove "xpack.reporting.roles.allow" in kibana.yml, if present.`,
               }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepThree', {
                 defaultMessage:
-                  `Create one or more roles that grant the Kibana application` +
-                  ` privilege for reporting from **Management > Security > Roles**.`,
+                  `Go to **Management > Security > Roles** to create one or more roles that grant` +
+                  ` the Kibana application privilege for Reporting.`,
               }),
               i18n.translate('xpack.reporting.deprecations.reportingRoles.manualStepFour', {
-                defaultMessage: `Grant reporting privileges to users by assigning one of the new roles.`,
+                defaultMessage: `Grant Reporting privileges to users by assigning one of the new roles.`,
               }),
             ],
           },
