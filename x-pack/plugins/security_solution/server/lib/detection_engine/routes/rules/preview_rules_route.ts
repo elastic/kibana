@@ -207,8 +207,12 @@ export const previewRulesRoute = async (
                 .map((item) => item.message),
               startedAt: startedAt.toDate().toISOString(),
             };
-            errors.push(currentErrors);
-            warnings.push(currentWarnings);
+            if (currentErrors.logs.length > 0) {
+              errors.push(currentErrors);
+            }
+            if (currentWarnings.logs.length > 0) {
+              warnings.push(currentWarnings);
+            }
             previewRuleExecutionLogClient.clearWarningsAndErrorsStore();
 
             previousStartedAt = startedAt.toDate();

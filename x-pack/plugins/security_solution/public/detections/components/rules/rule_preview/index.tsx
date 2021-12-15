@@ -137,7 +137,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
             <PreviewButton
               fill
               isLoading={isPreviewRequestInProgress}
-              isDisabled={isDisabled && !areAllMlJobsRunning}
+              isDisabled={isDisabled || !areAllMlJobsRunning}
               onClick={createPreview}
               data-test-subj="queryPreviewButton"
             >
