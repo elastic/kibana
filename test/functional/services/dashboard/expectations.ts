@@ -236,6 +236,12 @@ export class DashboardExpectService extends FtrService {
     });
   }
 
+  async savedSearchNoResult() {
+    const savedSearchTable = await this.testSubjects.find('embeddedSavedSearchDocTable');
+    const resultStr = await savedSearchTable.getVisibleText();
+    expect(resultStr).to.be('No results found');
+  }
+
   async savedSearchRowsExist() {
     this.testSubjects.existOrFail('docTableExpandToggleColumn');
   }

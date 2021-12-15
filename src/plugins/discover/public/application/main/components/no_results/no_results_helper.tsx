@@ -57,7 +57,10 @@ export function AdjustSearch({ hasFilters, hasQuery, onDisableFilters }: AdjustS
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              Try searching for a different combination of terms.
+              <FormattedMessage
+                id="discover.noResults.trySearchingForDifferentCombination"
+                defaultMessage="Try searching for a different combination of terms."
+              />
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </>
@@ -73,14 +76,23 @@ export function AdjustSearch({ hasFilters, hasQuery, onDisableFilters }: AdjustS
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              Try removing or{' '}
-              <EuiLink data-test-subj="discoverNoResultsDisableFilters" onClick={onDisableFilters}>
-                <FormattedMessage
-                  id="discover.noResults.disableFilters"
-                  defaultMessage="temporarily disabling filters"
-                />
-              </EuiLink>
-              .
+              <FormattedMessage
+                id="discover.noResults.tryRemovingOrDisablingFilters"
+                defaultMessage="Try removing or {disablingFiltersLink}."
+                values={{
+                  disablingFiltersLink: (
+                    <EuiLink
+                      data-test-subj="discoverNoResultsDisableFilters"
+                      onClick={onDisableFilters}
+                    >
+                      <FormattedMessage
+                        id="discover.noResults.temporaryDisablingFiltersLinkText"
+                        defaultMessage="temporarily disabling filters"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </>

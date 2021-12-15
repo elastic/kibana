@@ -34,6 +34,7 @@ describe('Host isolation exceptions Reducer', () => {
         expect(getCurrentLocation(result)).toEqual({
           filter: '',
           id: undefined,
+          included_policies: '',
           page_index: 0,
           page_size: 10,
           show: undefined,

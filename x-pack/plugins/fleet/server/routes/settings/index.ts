@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandler } from 'src/core/server';
+import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import { PLUGIN_ID, SETTINGS_API_ROUTES } from '../../constants';
+import { SETTINGS_API_ROUTES } from '../../constants';
 import { PutSettingsRequestSchema, GetSettingsRequestSchema } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { settingsService, agentPolicyService, appContextService } from '../../services';
+import type { FleetAuthzRouter } from '../security';
 
 export const getSettingsHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
@@ -62,12 +63,14 @@ export const putSettingsHandler: RequestHandler<
   }
 };
 
-export const registerRoutes = (router: IRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter) => {
   router.get(
     {
       path: SETTINGS_API_ROUTES.INFO_PATTERN,
       validate: GetSettingsRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     getSettingsHandler
   );
@@ -75,7 +78,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: SETTINGS_API_ROUTES.UPDATE_PATTERN,
       validate: PutSettingsRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     putSettingsHandler
   );

@@ -78,9 +78,9 @@ describe('getMetrics', () => {
     });
   });
 
-  it('populates the alertHosts and alertUsers sections', async () => {
+  it('populates the alerts.hosts and alerts.users sections', async () => {
     const metrics = await getCaseMetrics(
-      { caseId: '', features: ['alertHosts'] },
+      { caseId: '', features: ['alerts.hosts', 'alerts.users'] },
       client,
       clientArgs
     );
@@ -91,7 +91,7 @@ describe('getMetrics', () => {
 
   it('populates multiple sections at a time', async () => {
     const metrics = await getCaseMetrics(
-      { caseId: '', features: ['alertsCount', 'lifespan'] },
+      { caseId: '', features: ['alerts.count', 'lifespan'] },
       client,
       clientArgs
     );
@@ -105,7 +105,7 @@ describe('getMetrics', () => {
 
   it('populates multiple alerts sections at a time', async () => {
     const metrics = await getCaseMetrics(
-      { caseId: '', features: ['alertsCount', 'alertHosts'] },
+      { caseId: '', features: ['alerts.count', 'alerts.hosts'] },
       client,
       clientArgs
     );
@@ -127,7 +127,7 @@ describe('getMetrics', () => {
 
     try {
       await getCaseMetrics(
-        { caseId: '', features: ['bananas', 'lifespan', 'alertsCount'] },
+        { caseId: '', features: ['bananas', 'lifespan', 'alerts.count'] },
         client,
         clientArgs
       );
