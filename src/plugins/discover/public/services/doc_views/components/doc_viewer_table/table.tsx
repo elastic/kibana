@@ -7,7 +7,7 @@
  */
 
 import './table.scss';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -55,50 +55,35 @@ interface ItemsEntry {
   restItems: FieldRecord[];
 }
 
-interface BrowseFieldsState {
-  searchField?: string;
-  pinnedFields?: string[];
-  pageSize?: number;
-}
-
 const MOBILE_OPTIONS = { header: false };
 const PAGE_SIZE_OPTIONS = [25, 50, 100];
 const DEFAULT_PAGE_SIZE = 25;
-const BROWSE_FIELDS_STATE_KEY = 'discover:browseFieldsState';
+const PINNED_FIELDS_KEY = 'discover:pinnedFields';
+const EXPANDED_DOC_PAGE_SIZE = 'discover:expandedDocPageSize';
+const EXPANDED_DOC_SEARCH_FIELD = 'discover:expandedDocSearchField';
 
-const validatePageSize = (pageSize?: number) => {
-  return pageSize && PAGE_SIZE_OPTIONS.includes(pageSize);
+const getPinnedFields = (dataViewId: string, storage: Storage): string[] => {
+  return (storage.get(PINNED_FIELDS_KEY) || {})[dataViewId] || [];
+};
+const updatePinnedFieldsState = (newFields: string[], dataViewId: string, storage: Storage) => {
+  const pinnedFieldsState = storage.get(PINNED_FIELDS_KEY) || {};
+  storage.set(PINNED_FIELDS_KEY, Object.assign(pinnedFieldsState, { [dataViewId]: newFields }));
 };
 
-const getAllBrowseFieldsStates = (
-  storage: Storage
-): Record<string, BrowseFieldsState | undefined> => {
-  try {
-    const browseFieldsState = storage.get(BROWSE_FIELDS_STATE_KEY);
-    return (browseFieldsState && JSON.parse(browseFieldsState)) || {};
-  } catch {
-    return {};
-  }
+const getPageSize = (storage: Storage): number => {
+  const pageSize = Number(storage.get(EXPANDED_DOC_PAGE_SIZE));
+  return pageSize && PAGE_SIZE_OPTIONS.includes(pageSize) ? pageSize : DEFAULT_PAGE_SIZE;
+};
+const updatePageSize = (newPageSize: number, storage: Storage) => {
+  storage.set(EXPANDED_DOC_PAGE_SIZE, newPageSize);
 };
 
-const setBrowseFieldsState = (
-  newState: BrowseFieldsState,
-  dataViewId: string,
-  storage: Storage
-) => {
-  const entry = getAllBrowseFieldsStates(storage);
-  const prev = entry[dataViewId] || {};
-
-  const newBrowseFieldsState = Object.assign(prev, newState);
-  const newBrowseFieldsStateEntry = Object.assign(entry, {
-    [dataViewId]: newBrowseFieldsState,
-  });
-  storage.set(BROWSE_FIELDS_STATE_KEY, JSON.stringify(newBrowseFieldsStateEntry));
+const getSearchText = (storage: Storage) => {
+  return String(storage.get(EXPANDED_DOC_SEARCH_FIELD)) || '';
 };
-
-const saveFieldSearchOptimized = debounce(
-  (searchField: string, dataView: string, storage: Storage) =>
-    setBrowseFieldsState({ searchField }, dataView, storage),
+const updateSearchText = debounce(
+  (newSearchText: string, storage: Storage) =>
+    storage.set(EXPANDED_DOC_SEARCH_FIELD, newSearchText),
   500
 );
 
@@ -115,20 +100,10 @@ export const DocViewerTable = ({
   const currentDataViewId = dataView.id!;
   const isSingleDocView = !filter;
 
-  const {
-    searchField: initialSearchField,
-    pinnedFields: initialPinnedFields,
-    pageSize: initialPageSize,
-  }: Required<BrowseFieldsState> = useMemo(() => {
-    const state = getAllBrowseFieldsStates(storage)[currentDataViewId] || {};
-    return {
-      pinnedFields: isSingleDocView ? [] : state.pinnedFields || [],
-      searchField: state.searchField || '',
-      pageSize: (validatePageSize(state.pageSize) && state.pageSize) || DEFAULT_PAGE_SIZE,
-    };
-  }, [storage, currentDataViewId, isSingleDocView]);
-  const [searchField, setSearchField] = useState(initialSearchField);
-  const [pinnedFields, setPinnedFields] = useState<string[]>(initialPinnedFields);
+  const [searchText, setSearchText] = useState(getSearchText(storage));
+  const [pinnedFields, setPinnedFields] = useState<string[]>(
+    getPinnedFields(currentDataViewId, storage)
+  );
 
   const flattened = flattenHit(hit, dataView, { source: true, includeIgnoredValues: true });
   const fieldsToShow = getFieldsToShow(Object.keys(flattened), dataView, showMultiFields);
@@ -159,7 +134,7 @@ export const DocViewerTable = ({
         ? pinnedFields.filter((curField) => curField !== field)
         : [...pinnedFields, field];
 
-      setBrowseFieldsState({ pinnedFields: newPinned }, currentDataViewId, storage);
+      updatePinnedFieldsState(newPinned, currentDataViewId, storage);
       setPinnedFields(newPinned);
     },
     [currentDataViewId, pinnedFields, storage]
@@ -210,11 +185,11 @@ export const DocViewerTable = ({
 
   const handleOnChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newSearchField = event.currentTarget.value;
-      saveFieldSearchOptimized(newSearchField, currentDataViewId, storage);
-      setSearchField(newSearchField);
+      const newSearchText = event.currentTarget.value;
+      updateSearchText(newSearchText, storage);
+      setSearchText(newSearchText);
     },
-    [currentDataViewId, storage]
+    [storage]
   );
 
   const { pinnedItems, restItems } = Object.keys(flattened)
@@ -236,7 +211,8 @@ export const DocViewerTable = ({
         } else {
           const fieldMapping = mapping(curFieldName);
           const displayName = fieldMapping?.displayName ?? curFieldName;
-          if (displayName.includes(searchField)) {
+          if (displayName.includes(searchText)) {
+            // filter only unpinned fields
             acc.restItems.push(fieldToItem(curFieldName));
           }
         }
@@ -251,17 +227,17 @@ export const DocViewerTable = ({
 
   const { curPageIndex, pageSize, totalPages, startIndex, changePageIndex, changePageSize } =
     usePager({
-      initialPageSize,
+      initialPageSize: getPageSize(storage),
       totalItems: restItems.length,
     });
   const showPagination = totalPages !== 0;
 
   const onChangePageSize = useCallback(
     (newPageSize: number) => {
-      setBrowseFieldsState({ pageSize: newPageSize }, currentDataViewId, storage);
+      updatePageSize(newPageSize, storage);
       changePageSize(newPageSize);
     },
-    [changePageSize, currentDataViewId, storage]
+    [changePageSize, storage]
   );
 
   const headers = [
@@ -378,7 +354,7 @@ export const DocViewerTable = ({
           fullWidth
           onChange={handleOnChange}
           placeholder={searchPlaceholder}
-          value={searchField}
+          value={searchText}
         />
       </EuiFlexItem>
 
