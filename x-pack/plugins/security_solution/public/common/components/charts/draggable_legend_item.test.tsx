@@ -69,7 +69,7 @@ describe('DraggableLegendItem', () => {
     expect(wrapper.find('[data-test-subj="value-wrapper-empty"]').first().exists()).toBeTruthy();
   });
 
-  it('does not render the value label when the value is a number', () => {
+  it('does not render the empty value label when the value is a number', () => {
     wrapper = mount(
       <TestProviders>
         <DraggableLegendItem legendItem={{ ...legendItem, value: 0 }} />
