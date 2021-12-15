@@ -54,6 +54,8 @@ export class DefaultSearchCapabilities {
         ...aggs[AGG_TYPE.METRIC],
         ...aggs[AGG_TYPE.SIBLING_PIPELINE],
         TSVB_METRIC_TYPES.MATH,
+        TSVB_METRIC_TYPES.CALCULATION,
+        TSVB_METRIC_TYPES.SERIES_AGG,
         BUCKET_TYPES.TERMS,
       ].reduce(
         (availableAggs, aggType) => ({
