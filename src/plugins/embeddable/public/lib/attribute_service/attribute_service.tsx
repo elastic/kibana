@@ -164,12 +164,15 @@ export class AttributeService<
         try {
           const newAttributes = { ...(input as ValType)[ATTRIBUTE_SERVICE_KEY] };
           newAttributes.title = props.newTitle;
-          const wrappedInput = (await this.wrapAttributes(newAttributes, true)) as RefType;
+          const wrappedInput = (await this.wrapAttributes(
+            newAttributes,
+            true
+          )) as unknown as RefType;
+          // Remove unneeded attributes from the original input. Note that the original panel title
+          // is removed in favour of the new attributes title
+          const newInput = omit(input, [ATTRIBUTE_SERVICE_KEY, 'title']);
 
-          // Remove unneeded attributes from the original input.
-          const newInput = omit(input, ATTRIBUTE_SERVICE_KEY);
-
-          // Combine input and wrapped input to preserve any passed in explicit Input.
+          // Combine input and wrapped input to preserve any passed in explicit Input
           resolve({ ...newInput, ...wrappedInput });
           return { id: wrappedInput.savedObjectId };
         } catch (error) {
