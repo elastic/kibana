@@ -49,6 +49,7 @@ export interface DataVisualizerGridInput {
   visibleFieldNames?: string[];
   filters?: Filter[];
   showPreviewByDefault?: boolean;
+  allowEditDataView?: boolean;
   /**
    * Callback to add a filter to filter bar
    */
