@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
+import { RuleAlertType } from './types';
+
 import {
   BulkActionUpdatePayload,
   BulkActionUpdateType,
@@ -20,10 +21,10 @@ export const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
 };
 
 export const appplyBulkActionUpdateToRule = (
-  existingRule: Partial<RulesSchema>,
+  existingRule: RuleAlertType,
   action: BulkActionUpdatePayload
-): Partial<RulesSchema> => {
-  const rule = { ...existingRule };
+): RuleAlertType => {
+  const rule = { ...existingRule, params: { ...existingRule.params } };
   switch (action.type) {
     // tags actions
     case BulkActionUpdateType.add_tags:
@@ -40,21 +41,29 @@ export const appplyBulkActionUpdateToRule = (
 
     // index actions
     case BulkActionUpdateType.add_index_patterns:
-      rule.index = addItemsToArray(rule.index ?? [], action.value);
+      if (rule.params && 'index' in rule.params) {
+        rule.params.index = addItemsToArray(rule.params.index ?? [], action.value);
+      }
       break;
 
     case BulkActionUpdateType.delete_index_patterns:
-      rule.index = deleteItemsFromArray(rule.index ?? [], action.value);
+      if (rule.params && 'index' in rule.params) {
+        rule.params.index = deleteItemsFromArray(rule.params.index ?? [], action.value);
+      }
       break;
 
     case BulkActionUpdateType.set_index_patterns:
-      rule.index = action.value;
+      if (rule.params && 'index' in rule.params) {
+        rule.params.index = action.value;
+      }
       break;
 
     // timeline actions
     case BulkActionUpdateType.set_timeline:
-      rule.timeline_id = action.value.timeline_id;
-      rule.timeline_title = action.value.timeline_title;
+      if (rule.params) {
+        rule.params.timelineId = action.value.timeline_id;
+        rule.params.timelineTitle = action.value.timeline_title;
+      }
   }
 
   return rule;

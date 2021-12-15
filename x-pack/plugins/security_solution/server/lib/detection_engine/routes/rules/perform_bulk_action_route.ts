@@ -194,15 +194,11 @@ export const performBulkActionRoute = (
 
               const updatedRule = body.update.reduce(
                 (acc, action) => appplyBulkActionUpdateToRule(acc, action),
-                transformAlertToRule(rule)
+                rule
               );
 
-              const {
-                tags,
-                index,
-                timeline_title: timelineTitle,
-                timeline_id: timelineId,
-              } = updatedRule;
+              const { tags, params: { timelineTitle, timelineId } = {} } = updatedRule;
+              const index = 'index' in updatedRule.params ? updatedRule.params.index : undefined;
 
               await patchRules({
                 rulesClient,
