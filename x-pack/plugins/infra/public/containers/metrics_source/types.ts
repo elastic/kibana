@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { HttpSetup, ApplicationStart, CoreSetup } from 'src/core/public';
+import { MetricsSourceStatus } from '../../../common/metrics_sources';
 
-export interface KibanaContext {
-  http: HttpSetup;
-  application: ApplicationStart;
-  uiSettings: CoreSetup['uiSettings'];
+export interface DerivedIndexPattern {
+  fields: MetricsSourceStatus['indexFields'];
+  title: string;
 }
+
+export type CreateDerivedIndexPattern = () => DerivedIndexPattern;
