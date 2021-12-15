@@ -837,13 +837,26 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 &token=${refreshToken}`;
   }
 
+  // async getTimesliceMaskFieldName(): Promise<string | null> {
+  //   if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
+  //     return null;
+  //   }
+
+  //   const indexPattern = await this.getIndexPattern();
+  //   return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
+  // }
+
   async getTimesliceMaskFieldName(): Promise<string | null> {
     if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
       return null;
     }
-
-    const indexPattern = await this.getIndexPattern();
-    return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
+    try {
+      const indexPattern = await this.getIndexPattern();
+      return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
+    } catch (e) {
+      // do not throw when index pattern does not exist, error will be surfaced by getGeoJsonWithMeta
+      return null;
+    }
   }
 
   getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean {
