@@ -83,7 +83,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           },
         });
 
-        eventLog.logStart('starting execution', { csv: { numColumns: req.body.columns?.length } });
+        eventLog.logStart('starting execution', {});
         eventLog.startTiming();
 
         try {
@@ -98,7 +98,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
             },
           });
 
-          const { content_type: jobOutputContentType, num_rows: numRows }: TaskRunResult =
+          const { content_type: jobOutputContentType, csv_num_rows: numRows }: TaskRunResult =
             await runTaskFn(null, req.body, context, stream, req);
           stream.end();
           const jobOutputContent = buffer.toString();
@@ -112,7 +112,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           }
 
           eventLog.logComplete('csv generation is complete', {
-            csv: { byteLength: jobOutputSize, numRows },
+            csv: { byteLength: jobOutputSize, numRows: numRows! },
           });
 
           return res.ok({

@@ -47,7 +47,6 @@ type ReportingAction<A extends string, K extends ActionKind> = ActionBase<
       ? {
           jobType: string;
           contentType: string;
-          csv?: K extends 'event' ? { numColumns?: number } : {};
         }
       : K extends 'metrics'
       ? {

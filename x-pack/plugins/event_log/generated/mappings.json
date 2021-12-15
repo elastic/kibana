@@ -313,10 +313,10 @@
                         },
                         "csv": {
                             "properties": {
-                                "numRows": {
+                                "byteLength": {
                                     "type": "long"
                                 },
-                                "byteLength": {
+                                "numRows": {
                                     "type": "long"
                                 }
                             }
