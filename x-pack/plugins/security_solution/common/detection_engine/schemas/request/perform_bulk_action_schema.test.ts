@@ -8,7 +8,7 @@
 import { performBulkActionSchema, PerformBulkActionSchema } from './perform_bulk_action_schema';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { left } from 'fp-ts/lib/Either';
-import { BulkAction, BulkActionUpdateType } from '../common/schemas';
+import { BulkAction, BulkActionEditType } from '../common/schemas';
 
 const retrieveValidationMessage = (payload: unknown) => {
   const decoded = performBulkActionSchema.decode(payload);
@@ -38,7 +38,7 @@ describe('perform_bulk_action_schema', () => {
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "undefined" supplied to "action"',
-        'Invalid value "undefined" supplied to "update"',
+        'Invalid value "undefined" supplied to "edit"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -52,7 +52,7 @@ describe('perform_bulk_action_schema', () => {
 
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "unknown" supplied to "action"',
-        'Invalid value "undefined" supplied to "update"',
+        'Invalid value "undefined" supplied to "edit"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -135,14 +135,14 @@ describe('perform_bulk_action_schema', () => {
       test('invalid request: missing edit payload', () => {
         const payload = {
           query: 'name: test',
-          action: BulkAction.update,
+          action: BulkAction.edit,
         };
 
         const message = retrieveValidationMessage(payload);
 
         expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "update" supplied to "action"',
-          'Invalid value "undefined" supplied to "update"',
+          'Invalid value "edit" supplied to "action"',
+          'Invalid value "undefined" supplied to "edit"',
         ]);
         expect(message.schema).toEqual({});
       });
@@ -151,13 +151,13 @@ describe('perform_bulk_action_schema', () => {
         const payload = {
           query: 'name: test',
           action: BulkAction.enable,
-          [BulkAction.update]: [{ type: BulkActionUpdateType.set_tags, value: ['test-tag'] }],
+          [BulkAction.edit]: [{ type: BulkActionEditType.set_tags, value: ['test-tag'] }],
         };
 
         const message = retrieveValidationMessage(payload);
 
         expect(getPaths(left(message.errors))).toEqual([
-          'invalid keys "update,[{"type":"set_tags","value":["test-tag"]}]"',
+          'invalid keys "edit,[{"type":"set_tags","value":["test-tag"]}]"',
         ]);
         expect(message.schema).toEqual({});
       });
@@ -165,15 +165,15 @@ describe('perform_bulk_action_schema', () => {
       test('invalid request: wrong type for edit payload', () => {
         const payload = {
           query: 'name: test',
-          action: BulkAction.update,
-          [BulkAction.update]: { type: BulkActionUpdateType.set_tags, value: ['test-tag'] },
+          action: BulkAction.edit,
+          [BulkAction.edit]: { type: BulkActionEditType.set_tags, value: ['test-tag'] },
         };
 
         const message = retrieveValidationMessage(payload);
 
         expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "update" supplied to "action"',
-          'Invalid value "{"type":"set_tags","value":["test-tag"]}" supplied to "update"',
+          'Invalid value "edit" supplied to "action"',
+          'Invalid value "{"type":"set_tags","value":["test-tag"]}" supplied to "edit"',
         ]);
         expect(message.schema).toEqual({});
       });
@@ -183,16 +183,16 @@ describe('perform_bulk_action_schema', () => {
       test('invalid request: wrong tags type', () => {
         const payload = {
           query: 'name: test',
-          action: BulkAction.update,
-          [BulkAction.update]: [{ type: BulkActionUpdateType.set_tags, value: 'test-tag' }],
+          action: BulkAction.edit,
+          [BulkAction.edit]: [{ type: BulkActionEditType.set_tags, value: 'test-tag' }],
         };
 
         const message = retrieveValidationMessage(payload);
 
         expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "update" supplied to "action"',
-          'Invalid value "test-tag" supplied to "update,value"',
-          'Invalid value "set_tags" supplied to "update,type"',
+          'Invalid value "edit" supplied to "action"',
+          'Invalid value "test-tag" supplied to "edit,value"',
+          'Invalid value "set_tags" supplied to "edit,type"',
         ]);
         expect(message.schema).toEqual({});
       });
@@ -200,8 +200,8 @@ describe('perform_bulk_action_schema', () => {
       test('valid request: add_tags edit action', () => {
         const payload = {
           query: 'name: test',
-          action: BulkAction.update,
-          [BulkAction.update]: [{ type: BulkActionUpdateType.add_tags, value: ['test-tag'] }],
+          action: BulkAction.edit,
+          [BulkAction.edit]: [{ type: BulkActionEditType.add_tags, value: ['test-tag'] }],
         };
 
         const message = retrieveValidationMessage(payload);
@@ -213,8 +213,8 @@ describe('perform_bulk_action_schema', () => {
       test('valid request: set_tags edit action', () => {
         const payload = {
           query: 'name: test',
-          action: BulkAction.update,
-          [BulkAction.update]: [{ type: BulkActionUpdateType.set_tags, value: ['test-tag'] }],
+          action: BulkAction.edit,
+          [BulkAction.edit]: [{ type: BulkActionEditType.set_tags, value: ['test-tag'] }],
         };
 
         const message = retrieveValidationMessage(payload);
@@ -226,8 +226,8 @@ describe('perform_bulk_action_schema', () => {
       test('valid request: delete_tags edit action', () => {
         const payload = {
           query: 'name: test',
-          action: BulkAction.update,
-          [BulkAction.update]: [{ type: BulkActionUpdateType.delete_tags, value: ['test-tag'] }],
+          action: BulkAction.edit,
+          [BulkAction.edit]: [{ type: BulkActionEditType.delete_tags, value: ['test-tag'] }],
         };
 
         const message = retrieveValidationMessage(payload);
@@ -241,16 +241,16 @@ describe('perform_bulk_action_schema', () => {
       test('invalid request: wrong index_patterns type', () => {
         const payload = {
           query: 'name: test',
-          action: BulkAction.update,
-          [BulkAction.update]: [{ type: BulkActionUpdateType.set_tags, value: 'logs-*' }],
+          action: BulkAction.edit,
+          [BulkAction.edit]: [{ type: BulkActionEditType.set_tags, value: 'logs-*' }],
         };
 
         const message = retrieveValidationMessage(payload);
 
         expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "update" supplied to "action"',
-          'Invalid value "logs-*" supplied to "update,value"',
-          'Invalid value "set_tags" supplied to "update,type"',
+          'Invalid value "edit" supplied to "action"',
+          'Invalid value "logs-*" supplied to "edit,value"',
+          'Invalid value "set_tags" supplied to "edit,type"',
         ]);
         expect(message.schema).toEqual({});
       });
@@ -258,10 +258,8 @@ describe('perform_bulk_action_schema', () => {
       test('valid request: set_index_patterns edit action', () => {
         const payload: PerformBulkActionSchema = {
           query: 'name: test',
-          action: BulkAction.update,
-          [BulkAction.update]: [
-            { type: BulkActionUpdateType.set_index_patterns, value: ['logs-*'] },
-          ],
+          action: BulkAction.edit,
+          [BulkAction.edit]: [{ type: BulkActionEditType.set_index_patterns, value: ['logs-*'] }],
         };
 
         const message = retrieveValidationMessage(payload);
@@ -273,10 +271,8 @@ describe('perform_bulk_action_schema', () => {
       test('valid request: add_index_patterns edit action', () => {
         const payload: PerformBulkActionSchema = {
           query: 'name: test',
-          action: BulkAction.update,
-          [BulkAction.update]: [
-            { type: BulkActionUpdateType.add_index_patterns, value: ['logs-*'] },
-          ],
+          action: BulkAction.edit,
+          [BulkAction.edit]: [{ type: BulkActionEditType.add_index_patterns, value: ['logs-*'] }],
         };
 
         const message = retrieveValidationMessage(payload);
@@ -288,9 +284,9 @@ describe('perform_bulk_action_schema', () => {
       test('valid request: delete_index_patterns edit action', () => {
         const payload: PerformBulkActionSchema = {
           query: 'name: test',
-          action: BulkAction.update,
-          [BulkAction.update]: [
-            { type: BulkActionUpdateType.delete_index_patterns, value: ['logs-*'] },
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            { type: BulkActionEditType.delete_index_patterns, value: ['logs-*'] },
           ],
         };
 
@@ -305,16 +301,16 @@ describe('perform_bulk_action_schema', () => {
       test('invalid request: wrong timeline payload type', () => {
         const payload = {
           query: 'name: test',
-          action: BulkAction.update,
-          [BulkAction.update]: [{ type: BulkActionUpdateType.set_timeline, value: [] }],
+          action: BulkAction.edit,
+          [BulkAction.edit]: [{ type: BulkActionEditType.set_timeline, value: [] }],
         };
 
         const message = retrieveValidationMessage(payload);
 
         expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "update" supplied to "action"',
-          'Invalid value "set_timeline" supplied to "update,type"',
-          'Invalid value "[]" supplied to "update,value"',
+          'Invalid value "edit" supplied to "action"',
+          'Invalid value "set_timeline" supplied to "edit,type"',
+          'Invalid value "[]" supplied to "edit,value"',
         ]);
         expect(message.schema).toEqual({});
       });
@@ -322,10 +318,10 @@ describe('perform_bulk_action_schema', () => {
       test('invalid request: missing timeline_id', () => {
         const payload = {
           query: 'name: test',
-          action: BulkAction.update,
-          [BulkAction.update]: [
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
             {
-              type: BulkActionUpdateType.set_timeline,
+              type: BulkActionEditType.set_timeline,
               value: {
                 timeline_title: 'Test timeline title',
               },
@@ -336,10 +332,10 @@ describe('perform_bulk_action_schema', () => {
         const message = retrieveValidationMessage(payload);
 
         expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "update" supplied to "action"',
-          'Invalid value "set_timeline" supplied to "update,type"',
-          'Invalid value "{"timeline_title":"Test timeline title"}" supplied to "update,value"',
-          'Invalid value "undefined" supplied to "update,value,timeline_id"',
+          'Invalid value "edit" supplied to "action"',
+          'Invalid value "set_timeline" supplied to "edit,type"',
+          'Invalid value "{"timeline_title":"Test timeline title"}" supplied to "edit,value"',
+          'Invalid value "undefined" supplied to "edit,value,timeline_id"',
         ]);
         expect(message.schema).toEqual({});
       });
@@ -347,10 +343,10 @@ describe('perform_bulk_action_schema', () => {
       test('valid request: set_timeline edit action', () => {
         const payload: PerformBulkActionSchema = {
           query: 'name: test',
-          action: BulkAction.update,
-          [BulkAction.update]: [
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
             {
-              type: BulkActionUpdateType.set_timeline,
+              type: BulkActionEditType.set_timeline,
               value: {
                 timeline_id: 'timelineid',
                 timeline_title: 'Test timeline title',

@@ -13,7 +13,7 @@ import {
 } from '../../../../plugins/security_solution/common/constants';
 import {
   BulkAction,
-  BulkActionUpdateType,
+  BulkActionEditType,
 } from '../../../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -154,10 +154,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: setTagsBody } = await postBulkAction()
         .send({
           query: '',
-          action: BulkAction.update,
-          [BulkAction.update]: [
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
             {
-              type: BulkActionUpdateType.set_tags,
+              type: BulkActionEditType.set_tags,
               value: ['reset-tag'],
             },
           ],
@@ -173,10 +173,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: addTagsBody } = await postBulkAction()
         .send({
           query: '',
-          action: BulkAction.update,
-          [BulkAction.update]: [
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
             {
-              type: BulkActionUpdateType.add_tags,
+              type: BulkActionEditType.add_tags,
               value: tags,
             },
           ],
@@ -192,10 +192,10 @@ export default ({ getService }: FtrProviderContext): void => {
       await postBulkAction()
         .send({
           query: '',
-          action: BulkAction.update,
-          [BulkAction.update]: [
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
             {
-              type: BulkActionUpdateType.delete_tags,
+              type: BulkActionEditType.delete_tags,
               value: ['reset-tag', 'tag1'],
             },
           ],
@@ -207,7 +207,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(deletedTagsRule.tags).to.eql(['tag2']);
     });
 
-    it('should set, add and delete indices in rules', async () => {
+    it('should set, add and delete index patterns in rules', async () => {
       const ruleId = 'ruleId';
       const indices = ['index1-*', 'index2-*'];
       await createRule(supertest, log, getSimpleRule(ruleId));
@@ -215,10 +215,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: setIndexBody } = await postBulkAction()
         .send({
           query: '',
-          action: BulkAction.update,
-          [BulkAction.update]: [
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
             {
-              type: BulkActionUpdateType.set_index_patterns,
+              type: BulkActionEditType.set_index_patterns,
               value: ['initial-index-*'],
             },
           ],
@@ -234,10 +234,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: addIndexBody } = await postBulkAction()
         .send({
           query: '',
-          action: BulkAction.update,
-          [BulkAction.update]: [
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
             {
-              type: BulkActionUpdateType.add_index_patterns,
+              type: BulkActionEditType.add_index_patterns,
               value: indices,
             },
           ],
@@ -253,10 +253,10 @@ export default ({ getService }: FtrProviderContext): void => {
       await postBulkAction()
         .send({
           query: '',
-          action: BulkAction.update,
-          [BulkAction.update]: [
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
             {
-              type: BulkActionUpdateType.delete_index_patterns,
+              type: BulkActionEditType.delete_index_patterns,
               value: ['index1-*'],
             },
           ],
@@ -277,10 +277,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await postBulkAction()
         .send({
           query: '',
-          action: BulkAction.update,
-          [BulkAction.update]: [
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
             {
-              type: BulkActionUpdateType.set_timeline,
+              type: BulkActionEditType.set_timeline,
               value: {
                 timeline_id: timelineId,
                 timeline_title: timelineTitle,

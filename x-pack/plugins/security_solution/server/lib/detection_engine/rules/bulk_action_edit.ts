@@ -8,8 +8,8 @@
 import { RuleAlertType } from './types';
 
 import {
-  BulkActionUpdatePayload,
-  BulkActionUpdateType,
+  BulkActionEditPayload,
+  BulkActionEditType,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
@@ -20,46 +20,46 @@ export const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
   return arr.filter((item) => !itemsSet.has(item));
 };
 
-export const appplyBulkActionUpdateToRule = (
+export const appplyBulkActionEditToRule = (
   existingRule: RuleAlertType,
-  action: BulkActionUpdatePayload
+  action: BulkActionEditPayload
 ): RuleAlertType => {
   const rule = { ...existingRule, params: { ...existingRule.params } };
   switch (action.type) {
     // tags actions
-    case BulkActionUpdateType.add_tags:
+    case BulkActionEditType.add_tags:
       rule.tags = addItemsToArray(rule.tags ?? [], action.value);
       break;
 
-    case BulkActionUpdateType.delete_tags:
+    case BulkActionEditType.delete_tags:
       rule.tags = deleteItemsFromArray(rule.tags ?? [], action.value);
       break;
 
-    case BulkActionUpdateType.set_tags:
+    case BulkActionEditType.set_tags:
       rule.tags = action.value;
       break;
 
     // index actions
-    case BulkActionUpdateType.add_index_patterns:
+    case BulkActionEditType.add_index_patterns:
       if (rule.params && 'index' in rule.params) {
         rule.params.index = addItemsToArray(rule.params.index ?? [], action.value);
       }
       break;
 
-    case BulkActionUpdateType.delete_index_patterns:
+    case BulkActionEditType.delete_index_patterns:
       if (rule.params && 'index' in rule.params) {
         rule.params.index = deleteItemsFromArray(rule.params.index ?? [], action.value);
       }
       break;
 
-    case BulkActionUpdateType.set_index_patterns:
+    case BulkActionEditType.set_index_patterns:
       if (rule.params && 'index' in rule.params) {
         rule.params.index = action.value;
       }
       break;
 
     // timeline actions
-    case BulkActionUpdateType.set_timeline:
+    case BulkActionEditType.set_timeline:
       if (rule.params) {
         rule.params.timelineId = action.value.timeline_id;
         rule.params.timelineTitle = action.value.timeline_title;

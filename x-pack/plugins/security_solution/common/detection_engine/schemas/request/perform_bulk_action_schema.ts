@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { BulkAction, queryOrUndefined, bulkActionUpdatePayload } from '../common/schemas';
+import { BulkAction, queryOrUndefined, bulkActionEditPayload } from '../common/schemas';
 
 export const performBulkActionSchema = t.intersection([
   t.exact(
@@ -28,8 +28,8 @@ export const performBulkActionSchema = t.intersection([
     ),
     t.exact(
       t.type({
-        action: t.literal(BulkAction.update),
-        [BulkAction.update]: t.array(bulkActionUpdatePayload),
+        action: t.literal(BulkAction.edit),
+        [BulkAction.edit]: t.array(bulkActionEditPayload),
       })
     ),
   ]),

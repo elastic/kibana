@@ -453,12 +453,12 @@ export enum BulkAction {
   'export' = 'export',
   'delete' = 'delete',
   'duplicate' = 'duplicate',
-  'update' = 'update',
+  'edit' = 'edit',
 }
 
 export const bulkAction = enumeration('BulkAction', BulkAction);
 
-export enum BulkActionUpdateType {
+export enum BulkActionEditType {
   'add_tags' = 'add_tags',
   'delete_tags' = 'delete_tags',
   'set_tags' = 'set_tags',
@@ -468,38 +468,38 @@ export enum BulkActionUpdateType {
   'set_timeline' = 'set_timeline',
 }
 
-export const bulkActionUpdateType = enumeration('BulkActionUpdateType', BulkActionUpdateType);
+export const bulkActionEditType = enumeration('BulkActionEditType', BulkActionEditType);
 
-const actionUpdateTags = t.type({
+const bulkActionEditPayloadTags = t.type({
   type: t.union([
-    t.literal(BulkActionUpdateType.add_tags),
-    t.literal(BulkActionUpdateType.delete_tags),
-    t.literal(BulkActionUpdateType.set_tags),
+    t.literal(BulkActionEditType.add_tags),
+    t.literal(BulkActionEditType.delete_tags),
+    t.literal(BulkActionEditType.set_tags),
   ]),
   value: tags,
 });
 
-const actionUpdateIndex = t.type({
+const bulkActionEditPayloadIndexPatterns = t.type({
   type: t.union([
-    t.literal(BulkActionUpdateType.add_index_patterns),
-    t.literal(BulkActionUpdateType.delete_index_patterns),
-    t.literal(BulkActionUpdateType.set_index_patterns),
+    t.literal(BulkActionEditType.add_index_patterns),
+    t.literal(BulkActionEditType.delete_index_patterns),
+    t.literal(BulkActionEditType.set_index_patterns),
   ]),
   value: index,
 });
 
-const actionUpdateTimeline = t.type({
-  type: t.literal(BulkActionUpdateType.set_timeline),
+const bulkActionEditPayloadTimeline = t.type({
+  type: t.literal(BulkActionEditType.set_timeline),
   value: t.type({
     timeline_id,
     timeline_title,
   }),
 });
 
-export const bulkActionUpdatePayload = t.union([
-  actionUpdateTags,
-  actionUpdateIndex,
-  actionUpdateTimeline,
+export const bulkActionEditPayload = t.union([
+  bulkActionEditPayloadTags,
+  bulkActionEditPayloadIndexPatterns,
+  bulkActionEditPayloadTimeline,
 ]);
 
-export type BulkActionUpdatePayload = t.TypeOf<typeof bulkActionUpdatePayload>;
+export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;

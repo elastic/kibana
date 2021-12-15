@@ -24,10 +24,9 @@ import { duplicateRule } from '../../rules/duplicate_rule';
 import { enableRule } from '../../rules/enable_rule';
 import { findRules } from '../../rules/find_rules';
 import { patchRules } from '../../rules/patch_rules';
-import { appplyBulkActionUpdateToRule } from '../../rules/bulk_action_update';
+import { appplyBulkActionEditToRule } from '../../rules/bulk_action_edit';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
-import { transformAlertToRule } from './utils';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_RULES_TO_PROCESS_IN_PARALLEL = 50;
@@ -188,12 +187,12 @@ export const performBulkActionRoute = (
               },
               body: responseBody,
             });
-          case BulkAction.update:
+          case BulkAction.edit:
             processingResponse = await executeBulkAction(rules.data, async (rule) => {
               throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
-              const updatedRule = body.update.reduce(
-                (acc, action) => appplyBulkActionUpdateToRule(acc, action),
+              const updatedRule = body[BulkAction.edit].reduce(
+                (acc, action) => appplyBulkActionEditToRule(acc, action),
                 rule
               );
 
