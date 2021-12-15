@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export * from './source';
-export * from './types';
+import { MetricsSourceStatus } from '../../../common/metrics_sources';
+
+export interface DerivedIndexPattern {
+  fields: MetricsSourceStatus['indexFields'];
+  title: string;
+}
+
+export type CreateDerivedIndexPattern = () => DerivedIndexPattern;
