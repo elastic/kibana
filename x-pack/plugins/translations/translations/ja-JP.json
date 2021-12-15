@@ -15122,7 +15122,6 @@
     "xpack.maps.layers.newVectorLayerWizard.indexPrivsErrorTitle": "インデックス権限がありません",
     "xpack.maps.layerSettings.attributionLegend": "属性",
     "xpack.maps.layerTocActions.cloneLayerTitle": "レイヤーおクローンを作成",
-    "xpack.maps.layerTocActions.editLayerTooltip": "クラスタリング、結合、または時間フィルタリングなしで、ドキュメントレイヤーでのサポートされている機能を編集",
     "xpack.maps.layerTocActions.fitToDataTitle": "データに合わせる",
     "xpack.maps.layerTocActions.hideLayerTitle": "レイヤーの非表示",
     "xpack.maps.layerTocActions.layerActionsTitle": "レイヤー操作",
