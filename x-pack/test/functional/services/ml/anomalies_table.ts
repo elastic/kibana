@@ -169,5 +169,9 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
         }
       });
     },
+
+    async scrollTableIntoView() {
+      await testSubjects.scrollIntoView('mlAnomaliesTable');
+    },
   };
 }

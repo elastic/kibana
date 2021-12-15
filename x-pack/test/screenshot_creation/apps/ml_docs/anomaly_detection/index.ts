@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('anomaly detection', function () {
     loadTestFile(require.resolve('./geographic_data'));
     loadTestFile(require.resolve('./population_analysis'));
+    loadTestFile(require.resolve('./custom_urls'));
   });
 }
