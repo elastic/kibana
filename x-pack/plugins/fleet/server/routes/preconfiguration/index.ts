@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandler } from 'src/core/server';
+import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { PreconfiguredAgentPolicy } from '../../../common';
 
-import { PLUGIN_ID, PRECONFIGURATION_API_ROUTES } from '../../constants';
+import { PRECONFIGURATION_API_ROUTES } from '../../constants';
 import { PutPreconfigurationSchema } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { ensurePreconfiguredPackagesAndPolicies, outputService } from '../../services';
+import type { FleetAuthzRouter } from '../security';
 
 export const updatePreconfigurationHandler: RequestHandler<
   undefined,
@@ -40,12 +41,14 @@ export const updatePreconfigurationHandler: RequestHandler<
   }
 };
 
-export const registerRoutes = (router: IRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter) => {
   router.put(
     {
       path: PRECONFIGURATION_API_ROUTES.UPDATE_PATTERN,
       validate: PutPreconfigurationSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     updatePreconfigurationHandler
   );
