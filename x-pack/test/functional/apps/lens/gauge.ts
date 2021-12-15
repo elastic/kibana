@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(textContent).to.contain('Average of bytes'); // it gets default title
       expect(textContent).to.contain('horizontalBullet chart');
       expect(textContent).to.contain('Minimum:0'); // it gets default minimum static value
-      expect(textContent).to.contain('Maximum:8000'); // it gets default maximum static value
+      expect(textContent).to.contain('Maximum:10000'); // it gets default maximum static value
       expect(textContent).to.contain('Value:5727.32');
     });
 
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(textContent).to.contain('horizontalBullet chart');
       expect(textContent).to.contain('Minimum:1000');
       expect(textContent).to.contain('Maximum:25000');
-      expect(textContent).to.contain('Target:15000');
+      expect(textContent).to.contain('Target:11250');
       expect(textContent).to.contain('Value:14005');
     });
     it('should seamlessly switch to vertical chart without losing configuration', async () => {
@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(textContent).to.contain('verticalBullet chart');
       expect(textContent).to.contain('Minimum:1000');
       expect(textContent).to.contain('Maximum:25000');
-      expect(textContent).to.contain('Target:15000');
+      expect(textContent).to.contain('Target:11250');
       expect(textContent).to.contain('Value:14005');
     });
     it('should switch to table chart and filter not supported static values', async () => {
