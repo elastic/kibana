@@ -319,6 +319,25 @@ describe('test policy response handler', () => {
         sortField: undefined,
       });
     });
+
+    it('should pass other query params as expected', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest({
+        query: { page: 1, pageSize: 11 },
+      });
+
+      await policyHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        mockRequest,
+        mockResponse
+      );
+      expect(mockPackagePolicyService.list.mock.calls[0][1]).toEqual({
+        page: 1,
+        perPage: 11,
+        sortField: undefined,
+        sortOrder: undefined,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+      });
+    });
   });
 });
 

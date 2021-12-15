@@ -83,9 +83,10 @@ export const getPolicyListHandler = function (
     }${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`;
     try {
       const listResponse = await fleetServices.packagePolicy.list(soClient, {
-        ...request.query,
+        page: request.query.page,
         perPage: request.query.pageSize,
         sortField: request.query.sort,
+        sortOrder: request.query.sortOrder,
         kuery: endpointFilteredKuery,
       });
 
