@@ -117,9 +117,7 @@ export const getDataFromFieldsHits = (
       ? item
           .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
           .flat()
-      : field === ALERT_RULE_PARAMETERS
-      ? getDataFromFieldsHits(item, dotField, fieldCategory) // as part of https://github.com/elastic/kibana/issues/120749 kibana.alert.rule.parameters flattened type is added. This line prepends kibana.alert.rule.parameters to each field of the nested object. Without this fix, kibana.alert.rule.parameters does not get returned in the edges response of TimelinesAllEventsStrategy at all
-      : getDataFromFieldsHits(item, prependField, fieldCategory);
+      : getDataFromFieldsHits(item, dotField, fieldCategory);
     // combine duplicate fields
     const flat: Record<string, TimelineEventsDetailsItem> = [
       ...accumulator,
@@ -149,5 +147,7 @@ export const getDataFromFieldsHits = (
     return Object.values(flat);
   }, []);
 
-export const getDataSafety = <A, T>(fn: (args: A) => T, args: A): Promise<T> =>
-  new Promise((resolve) => setTimeout(() => resolve(fn(args))));
+export const getDataSafety = <A, T>(fn: (args: A) => T, args: A): Promise<T> => {
+  console.log(args, '!!args');
+  return new Promise((resolve) => setTimeout(() => resolve(fn(args))));
+};
