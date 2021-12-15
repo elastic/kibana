@@ -21,9 +21,9 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { CLOUD_SNAPSHOT_REPOSITORY } from '../../../../../common/constants';
 import { useAppContext } from '../../../app_context';
 import { ResponseError } from '../../../../../common/types';
-import { CLOUD_SNAPSHOT_REPOSITORY } from '../../../../../common/constants';
 import { uiMetricService, UIM_BACKUP_DATA_CLOUD_CLICK } from '../../../lib/ui_metric';
 
 interface Props {
@@ -33,7 +33,7 @@ interface Props {
 }
 
 const isMissingFoundSnapshotsRepo = (error: ResponseError) => {
-  return error.statusCode === 404 && error.message === `[${CLOUD_SNAPSHOT_REPOSITORY}] missing`;
+  return error.statusCode === 404 && error.message.toString().includes(CLOUD_SNAPSHOT_REPOSITORY);
 };
 
 export const CloudBackup: React.FunctionComponent<Props> = ({
