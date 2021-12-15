@@ -6,8 +6,8 @@
  */
 
 import { TransportRequestOptions, TransportResult } from '@elastic/elasticsearch';
-import { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SearchRequest as SearchRequestWithBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest as SearchRequestWithBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from 'src/core/server';
 
 export interface IAbortableEsClient {
