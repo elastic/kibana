@@ -11,15 +11,6 @@ import { FormatSelector } from './format_selector';
 import { act } from 'react-dom/test-utils';
 import { GenericIndexPatternColumn } from '../..';
 
-jest.mock('lodash', () => {
-  const original = jest.requireActual('lodash');
-
-  return {
-    ...original,
-    debounce: (fn: unknown) => fn,
-  };
-});
-
 const bytesColumn: GenericIndexPatternColumn = {
   label: 'Max of bytes',
   dataType: 'number',

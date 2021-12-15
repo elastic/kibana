@@ -50,10 +50,6 @@ interface FormatSelectorProps {
   onChange: (newFormat?: { id: string; params?: Record<string, unknown> }) => void;
 }
 
-interface State {
-  decimalPlaces: number;
-}
-
 const RANGE_MIN = 0;
 const RANGE_MAX = 15;
 
@@ -64,15 +60,10 @@ export function FormatSelector(props: FormatSelectorProps) {
     'params' in selectedColumn && selectedColumn.params && 'format' in selectedColumn.params
       ? selectedColumn.params.format
       : undefined;
-  const [state, setState] = useState<State>({
-    decimalPlaces:
-      typeof currentFormat?.params?.decimals === 'number' ? currentFormat.params.decimals : 2,
-  });
+
+  const [decimals, setDecimals] = useState(currentFormat?.params?.decimals ?? 2);
 
   const selectedFormat = currentFormat?.id ? supportedFormats[currentFormat.id] : undefined;
-
-
-
   const stableOptions = useMemo(
     () => [
       defaultOption,
@@ -96,10 +87,10 @@ export function FormatSelector(props: FormatSelectorProps) {
       }
       onChange({
         id: choices[0].value,
-        params: { decimals: state.decimalPlaces },
+        params: { decimals },
       });
     },
-    [onChange, state.decimalPlaces]
+    [onChange, decimals]
   );
 
   const currentOption = useMemo(
@@ -135,15 +126,17 @@ export function FormatSelector(props: FormatSelectorProps) {
               <EuiSpacer size="xs" />
               <EuiRange
                 showInput="inputWithPopover"
-                value={state.decimalPlaces}
+                value={decimals}
                 min={RANGE_MIN}
                 max={RANGE_MAX}
                 onChange={(e) => {
-                  setState({ decimalPlaces: Number(e.currentTarget.value) });
+                  const value = Number(e.currentTarget.value);
+                  setDecimals(value);
+                  const validatedValue = Math.min(RANGE_MAX, Math.max(RANGE_MIN, value));
                   onChange({
                     id: currentFormat.id,
                     params: {
-                      decimals: Number(e.currentTarget.value),
+                      decimals: validatedValue,
                     },
                   });
                 }}
