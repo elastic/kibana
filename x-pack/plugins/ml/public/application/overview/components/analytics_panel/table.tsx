@@ -6,14 +6,7 @@
  */
 
 import React, { FC, useState } from 'react';
-import {
-  Direction,
-  EuiBadge,
-  EuiInMemoryTable,
-  EuiTableActionsColumnType,
-  EuiTableComputedColumnType,
-  EuiTableFieldDataColumnType,
-} from '@elastic/eui';
+import { Direction, EuiBadge, EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getAnalysisType } from '../../../data_frame_analytics/common/analytics';
 import {
@@ -28,15 +21,6 @@ import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/d
 
 import { useTableActions } from './actions';
 
-type DataFrameAnalyticsTableColumns = [
-  EuiTableFieldDataColumnType<DataFrameAnalyticsListRow>,
-  EuiTableComputedColumnType<DataFrameAnalyticsListRow>,
-  EuiTableComputedColumnType<DataFrameAnalyticsListRow>,
-  EuiTableComputedColumnType<DataFrameAnalyticsListRow>,
-  EuiTableFieldDataColumnType<DataFrameAnalyticsListRow>,
-  EuiTableActionsColumnType<DataFrameAnalyticsListRow>
-];
-
 interface Props {
   items: DataFrameAnalyticsListRow[];
 }
@@ -47,13 +31,12 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
   const [sortField, setSortField] = useState<string>(DataFrameAnalyticsListColumn.id);
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
-  // id, type, status, progress, created time, view icon
-  const columns: DataFrameAnalyticsTableColumns = [
+  const columns: Array<EuiBasicTableColumn<DataFrameAnalyticsListRow>> = [
     {
       field: DataFrameAnalyticsListColumn.id,
       name: i18n.translate('xpack.ml.overview.analyticsList.id', { defaultMessage: 'ID' }),
       sortable: true,
-      truncateText: true,
+      truncateText: false,
       width: '20%',
     },
     {
@@ -125,7 +108,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
   };
 
   return (
-    <EuiInMemoryTable
+    <EuiInMemoryTable<DataFrameAnalyticsListRow>
       allowNeutralSort={false}
       className="mlAnalyticsTable"
       columns={columns}
