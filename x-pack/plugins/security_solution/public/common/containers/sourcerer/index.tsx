@@ -77,32 +77,39 @@ export const useInitSourcerer = (
     selectedPatterns,
     missingPatterns,
   } = useDeepEqualSelector((state) => scopeIdSelector(state, scopeId));
-  const { selectedDataViewId: timelineDataViewId } = useDeepEqualSelector((state) =>
-    scopeIdSelector(state, SourcererScopeName.timeline)
-  );
-  const activeDataViewIds = useMemo(
-    () => [...new Set([scopeDataViewId, timelineDataViewId])],
-    [scopeDataViewId, timelineDataViewId]
-  );
+  const {
+    selectedDataViewId: timelineDataViewId,
+    selectedPatterns: timelineSelectedPatterns,
+    missingPatterns: timelineMissingPatterns,
+  } = useDeepEqualSelector((state) => scopeIdSelector(state, SourcererScopeName.timeline));
   const { indexFieldsSearch } = useDataView();
 
   const searchedIds = useRef<string[]>([]);
-  useEffect(
-    () =>
-      activeDataViewIds.forEach((id) => {
-        if (id != null && id.length > 0 && !searchedIds.current.includes(id)) {
-          searchedIds.current = [...searchedIds.current, id];
-          indexFieldsSearch(
-            id,
-            id === scopeDataViewId
-              ? selectedPatterns.length === 0 && missingPatterns.length === 0
-              : false
-          );
-        }
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeDataViewIds, indexFieldsSearch]
-  );
+  useEffect(() => {
+    const activeDataViewIds = [...new Set([scopeDataViewId, timelineDataViewId])];
+    activeDataViewIds.forEach((id) => {
+      if (id != null && id.length > 0 && !searchedIds.current.includes(id)) {
+        searchedIds.current = [...searchedIds.current, id];
+        indexFieldsSearch(
+          id,
+          id === scopeDataViewId ? SourcererScopeName.default : SourcererScopeName.timeline,
+          id === scopeDataViewId
+            ? selectedPatterns.length === 0 && missingPatterns.length === 0
+            : timelineDataViewId === id
+            ? timelineMissingPatterns.length === 0 && timelineSelectedPatterns.length === 0
+            : false
+        );
+      }
+    });
+  }, [
+    indexFieldsSearch,
+    missingPatterns.length,
+    scopeDataViewId,
+    selectedPatterns.length,
+    timelineDataViewId,
+    timelineMissingPatterns.length,
+    timelineSelectedPatterns.length,
+  ]);
 
   // Related to timeline
   useEffect(() => {

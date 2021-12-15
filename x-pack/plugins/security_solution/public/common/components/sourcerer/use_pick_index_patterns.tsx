@@ -60,7 +60,6 @@ export const usePickIndexPatterns = ({
   selectedPatterns,
   signalIndexName,
 }: UsePickIndexPatternsProps): UsePickIndexPatterns => {
-  const abortCtrl = useRef<AbortController>(new AbortController());
   const dispatch = useDispatch();
   const [loadingIndexPatterns, setLoadingIndexPatterns] = useState(false);
   const alertsOptions = useMemo(
@@ -191,11 +190,7 @@ export const usePickIndexPatterns = ({
         try {
           setLoadingIndexPatterns(true);
           setSelectedOptions([]);
-          abortCtrl.current = new AbortController();
-          const pickedDataViewData = await getSourcererDataview(
-            newSelectedDataViewId,
-            abortCtrl.current.signal
-          );
+          const pickedDataViewData = await getSourcererDataview(newSelectedDataViewId);
           dispatch(
             sourcererActions.updateSourcererDataViews({
               dataView: pickedDataViewData,
@@ -236,12 +231,6 @@ export const usePickIndexPatterns = ({
         : [],
     [dataViewId, defaultDataViewId, isModified, isOnlyDetectionAlerts, kibanaDataViews]
   );
-
-  useEffect(() => {
-    return () => {
-      abortCtrl.current.abort();
-    };
-  });
 
   return {
     allOptions,

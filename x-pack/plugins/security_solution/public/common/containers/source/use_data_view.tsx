@@ -40,7 +40,11 @@ const getEsFields = memoizeOne(
 );
 
 export const useDataView = (): {
-  indexFieldsSearch: (selectedDataViewId: string, needToBeInit?: boolean) => void;
+  indexFieldsSearch: (
+    selectedDataViewId: string,
+    scopeId: SourcererScopeName,
+    needToBeInit?: boolean
+  ) => void;
 } => {
   const { data } = useKibana().services;
   const abortCtrl = useRef<Record<string, AbortController>>({});
@@ -55,7 +59,11 @@ export const useDataView = (): {
     [dispatch]
   );
   const indexFieldsSearch = useCallback(
-    (selectedDataViewId: string, needToBeInit: boolean = false) => {
+    (
+      selectedDataViewId: string,
+      scopeId: SourcererScopeName = SourcererScopeName.default,
+      needToBeInit: boolean = false
+    ) => {
       const asyncSearch = async () => {
         abortCtrl.current = {
           ...abortCtrl.current,
@@ -63,16 +71,15 @@ export const useDataView = (): {
         };
         setLoading({ id: selectedDataViewId, loading: true });
         if (needToBeInit) {
-          getSourcererDataview(
+          const dataViewToUpdate = await getSourcererDataview(
             selectedDataViewId,
             abortCtrl.current[selectedDataViewId].signal
-          ).then((dataView) => {
-            dispatch(
-              sourcererActions.updateSourcererDataViews({
-                dataView,
-              })
-            );
-          });
+          );
+          dispatch(
+            sourcererActions.updateSourcererDataViews({
+              dataView: dataViewToUpdate,
+            })
+          );
         }
 
         const subscription = data.search
@@ -93,7 +100,7 @@ export const useDataView = (): {
                 if (needToBeInit) {
                   dispatch(
                     sourcererActions.setSelectedDataView({
-                      id: SourcererScopeName.default,
+                      id: scopeId,
                       selectedDataViewId,
                       selectedPatterns: response.indicesExist,
                     })
