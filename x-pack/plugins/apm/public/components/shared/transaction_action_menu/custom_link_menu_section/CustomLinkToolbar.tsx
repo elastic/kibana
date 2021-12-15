@@ -39,7 +39,7 @@ export function CustomLinkToolbar({
                 defaultMessage: 'Manage custom links',
               })}
             >
-              <APMLink path={`/settings/customize-ui`}>
+              <APMLink path={`/settings/custom-links`}>
                 <EuiIcon
                   type="gear"
                   color="text"
