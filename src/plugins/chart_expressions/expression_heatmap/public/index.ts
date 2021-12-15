@@ -11,3 +11,5 @@ import { ExpressionHeatmapPlugin } from './plugin';
 export function plugin() {
   return new ExpressionHeatmapPlugin();
 }
+
+export { HeatmapIcon } from './components/heatmap_icon';

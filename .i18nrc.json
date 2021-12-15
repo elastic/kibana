@@ -29,6 +29,7 @@
     "expressionRevealImage": "src/plugins/expression_reveal_image",
     "expressionShape": "src/plugins/expression_shape",
     "expressionHeatmap": "src/plugins/chart_expressions/expression_heatmap",
+    "expressionGauge": "src/plugins/chart_expressions/expression_gauge",
     "expressionTagcloud": "src/plugins/chart_expressions/expression_tagcloud",
     "expressionMetricVis": "src/plugins/chart_expressions/expression_metric",
     "inputControl": "src/plugins/input_control_vis",
