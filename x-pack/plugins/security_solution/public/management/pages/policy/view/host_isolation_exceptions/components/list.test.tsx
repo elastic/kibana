@@ -108,7 +108,7 @@ describe('Policy details host isolation exceptions tab', () => {
     expect(renderResult.getByTestId('remove-from-policy-action')).toBeDisabled();
   });
 
-  it('should display enable the "remove from policy" option to policy-specific exceptions ', () => {
+  it('should enable the "remove from policy" option to policy-specific exceptions ', () => {
     const testException = getExceptionListItemSchemaMock({ tags: [`policy:${policyId}`] });
     const exceptions = {
       ...emptyList,
