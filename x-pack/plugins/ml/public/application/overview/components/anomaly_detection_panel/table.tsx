@@ -21,8 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
-import { ExplorerLink } from './actions';
-import { getJobsFromGroup } from './utils';
+import { useGroupActions } from './actions';
 import { Group, GroupsDictionary } from './anomaly_detection_panel';
 import { MlSummaryJobs } from '../../../../../common/types/anomaly_detection_jobs';
 import { JobStatsBarStats, StatsBar } from '../../../components/stats_bar';
@@ -31,7 +30,7 @@ import { toLocaleString } from '../../../util/string_utils';
 import { SwimlaneContainer } from '../../../explorer/swimlane_container';
 import { useTimeBuckets } from '../../../components/custom_hooks/use_time_buckets';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { useMlLink, useTimefilter } from '../../../contexts/kibana';
+import { useMlLink } from '../../../contexts/kibana';
 
 // Used to pass on attribute names to table columns
 export enum AnomalyDetectionListColumns {
@@ -59,7 +58,6 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
   const timeBuckets = useTimeBuckets();
-  const timeFilter = useTimefilter();
 
   const manageJobsLink = useMlLink({
     page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
@@ -75,7 +73,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       render: (id: Group['id']) => <JobSelectorBadge id={id} isGroup={id !== 'ungrouped'} />,
       sortable: true,
       truncateText: true,
-      width: '20%',
+      width: '15%',
     },
     {
       name: (
@@ -135,7 +133,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       }),
       sortable: true,
       truncateText: true,
-      width: '100px',
+      width: '10%',
     },
     {
       field: AnomalyDetectionListColumns.latestTimestamp,
@@ -147,7 +145,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       textOnly: true,
       truncateText: true,
       sortable: true,
-      width: '20%',
+      width: '25%',
     },
     {
       field: AnomalyDetectionListColumns.docsProcessed,
@@ -157,19 +155,14 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       render: (docs: number) => toLocaleString(docs),
       textOnly: true,
       sortable: true,
-      width: '20%',
+      width: '15%',
     },
     {
       name: i18n.translate('xpack.ml.overview.anomalyDetection.tableActionLabel', {
         defaultMessage: 'Actions',
       }),
-      render: (group: Group) => (
-        <ExplorerLink
-          jobsList={getJobsFromGroup(group, jobsList)}
-          timeRange={timeFilter.getTime()}
-        />
-      ),
-      width: '100px',
+      actions: useGroupActions(),
+      width: '80px',
       align: 'right',
     },
   ];
@@ -234,7 +227,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
         allowNeutralSort={false}
         className="mlAnomalyDetectionTable"
         columns={columns}
-        hasActions={false}
+        hasActions={true}
         isExpandable={false}
         isSelectable={false}
         items={groupsList}

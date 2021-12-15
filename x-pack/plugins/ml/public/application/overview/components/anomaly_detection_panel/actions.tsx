@@ -5,51 +5,64 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MlSummaryJobs } from '../../../../../common/types/anomaly_detection_jobs';
-import { useMlLink } from '../../../contexts/kibana';
+import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import { useMlLocator, useNavigateToPath, useTimefilter } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { TimeRange } from '../../../../../../../../src/plugins/data/common';
+import { Group } from './anomaly_detection_panel';
 
-interface Props {
-  jobsList: MlSummaryJobs;
-  timeRange?: TimeRange;
-}
+export function useGroupActions(): Array<Action<Group>> {
+  const locator = useMlLocator();
+  const timefilter = useTimefilter();
+  const navigateToPath = useNavigateToPath();
 
-export const ExplorerLink: FC<Props> = ({ jobsList, timeRange }) => {
-  const openJobsInAnomalyExplorerText = i18n.translate(
-    'xpack.ml.overview.anomalyDetection.resultActions.openJobsInAnomalyExplorerText',
+  return [
     {
-      defaultMessage: 'Open {jobsCount, plural, one {{jobId}} other {# jobs}} in Anomaly Explorer',
-      values: { jobsCount: jobsList.length, jobId: jobsList[0] && jobsList[0].id },
-    }
-  );
-
-  const explorerPath = useMlLink({
-    page: ML_PAGES.ANOMALY_EXPLORER,
-    pageState: {
-      jobIds: jobsList.map((job) => job.id),
-      timeRange,
+      isPrimary: false,
+      name: i18n.translate('xpack.ml.overview.anomalyDetection.viewResultsActionName', {
+        defaultMessage: 'View in Anomaly Explorer',
+      }),
+      description: i18n.translate(
+        'xpack.ml.overview.anomalyDetection.resultActions.openJobsInAnomalyExplorerText',
+        {
+          defaultMessage: 'View in Anomaly Explorer',
+        }
+      ),
+      icon: 'visTable',
+      type: 'icon',
+      onClick: async (item) => {
+        const path = await locator?.getUrl({
+          page: ML_PAGES.ANOMALY_EXPLORER,
+          pageState: {
+            jobIds: item.jobIds,
+            timeRange: timefilter.getTime(),
+          },
+        });
+        await navigateToPath(path);
+      },
     },
-  });
-
-  return explorerPath ? (
-    <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
-      <EuiButtonEmpty
-        href={explorerPath}
-        color="text"
-        size="xs"
-        iconType="visTable"
-        aria-label={openJobsInAnomalyExplorerText}
-        className="results-button"
-        data-test-subj={`openOverviewJobsInAnomalyExplorer`}
-      >
-        {i18n.translate('xpack.ml.overview.anomalyDetection.viewResultsActionName', {
-          defaultMessage: 'View results',
-        })}
-      </EuiButtonEmpty>
-    </EuiToolTip>
-  ) : null;
-};
+    {
+      isPrimary: true,
+      name: i18n.translate('xpack.ml.overview.anomalyDetection.viewJobsActionName', {
+        defaultMessage: 'View jobs',
+      }),
+      description: i18n.translate(
+        'xpack.ml.overview.anomalyDetection.resultActions.openInJobManagementText',
+        {
+          defaultMessage: 'View jobs',
+        }
+      ),
+      icon: 'list',
+      type: 'icon',
+      onClick: async (item) => {
+        const path = await locator?.getUrl({
+          page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+          pageState: {
+            groupIds: [item.id],
+          },
+        });
+        await navigateToPath(path);
+      },
+    },
+  ];
+}
