@@ -19,7 +19,7 @@ describe('UserActionBuilder', () => {
 
   beforeAll(() => {
     jest.useFakeTimers('modern');
-    jest.setSystemTime(new Date(2021, 12, 10).getTime());
+    jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
   });
 
   afterAll(() => {
