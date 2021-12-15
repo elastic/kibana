@@ -10,11 +10,18 @@ exports[`MetricTile correct displays a byte metric 1`] = `
 `;
 
 exports[`MetricTile correct displays a float metric 1`] = `
-<EuiCard
-  data-test-subj="serverMetric-load"
-  description="Load"
-  textAlign="left"
-  title="4.05, 3.37, 3.12"
+<LoadMetricTile
+  metric={
+    Object {
+      "name": "Load",
+      "type": "float",
+      "value": Array [
+        4.0537109375,
+        3.36669921875,
+        3.1220703125,
+      ],
+    }
+  }
 />
 `;
 
@@ -37,19 +44,23 @@ exports[`MetricTile correct displays an untyped metric 1`] = `
 `;
 
 exports[`MetricTile correctly displays a metric with metadata 1`] = `
-<EuiCard
-  data-test-subj="serverMetric-delay"
-  description="Delay avg"
-  footer={
-    <MetricCardFooter
-      description="Percentiles"
-      title="
-  50: 1.00 ms;
-  95: 5.00 ms;
-  99: 10.00 ms"
-    />
+<DelayMetricTile
+  metric={
+    Object {
+      "meta": Object {
+        "description": "Percentiles",
+        "title": "",
+        "type": "time",
+        "value": Array [
+          1,
+          5,
+          10,
+        ],
+      },
+      "name": "Delay",
+      "type": "time",
+      "value": 1,
+    }
   }
-  textAlign="left"
-  title="1.00 ms"
 />
 `;
