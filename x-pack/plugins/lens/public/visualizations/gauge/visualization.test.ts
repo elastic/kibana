@@ -11,10 +11,7 @@ import { GROUP_ID } from './constants';
 import type { DatasourcePublicAPI, Operation } from '../../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { CustomPaletteParams, layerTypes } from '../../../common';
-import {
-  EXPRESSION_GAUGE_NAME,
-  GaugeVisualizationState,
-} from '../../../common/expressions/gauge_chart';
+import type { GaugeVisualizationState } from './constants';
 import { PaletteOutput } from 'src/plugins/charts/common';
 
 function exampleState(): GaugeVisualizationState {
@@ -41,7 +38,6 @@ describe('gauge', () => {
       expect(getGaugeVisualization({ paletteService }).initialize(() => 'l1')).toEqual({
         layerId: 'l1',
         layerType: layerTypes.DATA,
-        title: 'Empty Gauge chart',
         shape: 'horizontalBullet',
         labelMajorMode: 'auto',
         ticksPosition: 'auto',
@@ -399,22 +395,17 @@ describe('gauge', () => {
         maxAccessor: 'max-accessor',
         labelMinor: 'Subtitle',
       };
-      const attributes = {
-        title: 'Test',
-      };
       expect(
         getGaugeVisualization({
           paletteService,
-        }).toExpression(state, datasourceLayers, attributes)
+        }).toExpression(state, datasourceLayers)
       ).toEqual({
         type: 'expression',
         chain: [
           {
             type: 'function',
-            function: EXPRESSION_GAUGE_NAME,
+            function: 'gauge',
             arguments: {
-              title: ['Test'],
-              description: [''],
               metricAccessor: ['metric-accessor'],
               minAccessor: ['min-accessor'],
               maxAccessor: ['max-accessor'],
@@ -437,13 +428,10 @@ describe('gauge', () => {
         layerId: 'first',
         minAccessor: 'minAccessor',
       };
-      const attributes = {
-        title: 'Test',
-      };
       expect(
         getGaugeVisualization({
           paletteService,
-        }).toExpression(state, datasourceLayers, attributes)
+        }).toExpression(state, datasourceLayers)
       ).toEqual(null);
     });
   });
