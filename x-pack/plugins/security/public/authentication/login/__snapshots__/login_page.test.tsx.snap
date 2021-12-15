@@ -140,7 +140,7 @@ exports[`LoginPage disabled form states renders warning when cookies are disable
   }
   title={
     <FormattedMessage
-      defaultMessage="Cookies are required to log into Elastic"
+      defaultMessage="Cookies are required to log in to Elastic"
       id="xpack.security.loginPage.requiresCookiesTitle"
       values={Object {}}
     />
