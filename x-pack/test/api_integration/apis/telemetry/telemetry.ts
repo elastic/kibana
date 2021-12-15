@@ -20,7 +20,10 @@ import ossPluginsTelemetrySchema from '../../../../../src/plugins/telemetry/sche
 import xpackPluginsTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_plugins.json';
 import { assertTelemetryPayload } from '../../../../../test/api_integration/apis/telemetry/utils';
 import type { UnencryptedTelemetryPayload } from '../../../../../src/plugins/telemetry/common/types';
-import type { UsageStatsPayload } from '../../../../../src/plugins/telemetry_collection_manager/server/types';
+import type {
+  UsageStatsPayload,
+  CacheDetails,
+} from '../../../../../src/plugins/telemetry_collection_manager/server/types';
 
 function omitCacheDetails(usagePayload: Array<Record<string, unknown>>) {
   return usagePayload.map(({ cacheDetails, ...item }) => item);
@@ -30,8 +33,8 @@ function updateFixtureTimestamps(fixture: Array<Record<string, unknown>>, timest
   return fixture.map((item) => ({ ...item, timestamp }));
 }
 
-function getCacheLastUpdatedAt(body: UnencryptedTelemetryPayload): string[] {
-  return body.map(({ stats }) => (stats as UsageStatsPayload).cacheDetails.updatedAt);
+function getCacheDetails(body: UnencryptedTelemetryPayload): CacheDetails[] {
+  return body.map(({ stats }) => (stats as UsageStatsPayload).cacheDetails);
 }
 
 /**
@@ -195,11 +198,12 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ unencrypted: true, refreshCache: true })
           .expect(200);
 
-        cacheLastUpdated = getCacheLastUpdatedAt(body);
+        cacheLastUpdated = getCacheDetails(body).map(({ updatedAt }) => updatedAt);
       });
       after(() => esArchiver.unload(archive));
 
       it('returns cached results by default', async () => {
+        const now = Date.now();
         const { body }: { body: UnencryptedTelemetryPayload } = await supertest
           .post('/api/telemetry/v2/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
@@ -208,7 +212,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).length(2);
 
-        expect(getCacheLastUpdatedAt(body)).to.eql(cacheLastUpdated);
+        const cacheDetails = getCacheDetails(body);
+        // Check that the fetched payload is actually cached by comparing cache and updatedAt timestamps
+        expect(cacheDetails.map(({ updatedAt }) => updatedAt)).to.eql(cacheLastUpdated);
+        // Check that the fetchedAt timestamp is updated when the data is fethed
+        cacheDetails.forEach(({ fetchedAt }) => {
+          expect(new Date(fetchedAt).getTime()).to.be.greaterThan(now);
+        });
       });
     });
 
@@ -221,8 +231,12 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(body).length(1);
-      getCacheLastUpdatedAt(body).forEach((lastUpdatedAt) => {
-        expect(new Date(lastUpdatedAt).getTime()).to.be.greaterThan(now);
+      getCacheDetails(body).forEach(({ updatedAt, fetchedAt }) => {
+        // Check that the cache is fresh by comparing updatedAt timestamp with
+        // the timestamp the data was fetched.
+        expect(new Date(updatedAt).getTime()).to.be.greaterThan(now);
+        // Check that the fetchedAt timestamp is updated when the data is fethed
+        expect(new Date(fetchedAt).getTime()).to.be.greaterThan(now);
       });
     });
   });

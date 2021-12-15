@@ -21,7 +21,16 @@
     "cacheDetails": {
       "properties": {
         "updatedAt": {
-          "type": "date"
+          "type": "date",
+          "_meta": {
+            "description": "The timestamp the payload was last cached."
+          }
+        },
+        "fetchedAt": {
+          "type": "date",
+          "_meta": {
+            "description": "The timestamp the payload was grabbed from cache."
+          }
         }
       }
     },

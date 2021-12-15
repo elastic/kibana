@@ -298,6 +298,16 @@ export class TelemetryCollectionManagerPlugin
     return `${collectionSource}::${clusterUUids}`;
   }
 
+  private updateFetchedAt(statsPayload: UsageStatsPayload[]): UsageStatsPayload[] {
+    return statsPayload.map((stat) => ({
+      ...stat,
+      cacheDetails: {
+        ...stat.cacheDetails,
+        fetchedAt: new Date().toISOString(),
+      },
+    }));
+  }
+
   private async getUsageForCollection(
     collection: CollectionStrategy,
     statsCollectionConfig: StatsCollectionConfig
@@ -322,17 +332,18 @@ export class TelemetryCollectionManagerPlugin
     const cacheKey = this.createCacheKey(collectionSource, clustersDetails);
     const cachedUsageStatsPayload = this.cacheManager.getFromCache<UsageStatsPayload[]>(cacheKey);
     if (cachedUsageStatsPayload) {
-      return cachedUsageStatsPayload;
+      return this.updateFetchedAt(cachedUsageStatsPayload);
     }
 
+    const now = new Date().toISOString();
     const stats = await collection.statsGetter(clustersDetails, statsCollectionConfig, context);
     const usageStatsPayload = stats.map((stat) => ({
       collectionSource,
-      cacheDetails: { updatedAt: new Date().toISOString() },
+      cacheDetails: { updatedAt: now, fetchedAt: now },
       ...stat,
     }));
     this.cacheManager.setCache(cacheKey, usageStatsPayload);
 
-    return usageStatsPayload;
+    return this.updateFetchedAt(usageStatsPayload);
   }
 }

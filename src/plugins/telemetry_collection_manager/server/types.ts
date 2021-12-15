@@ -64,6 +64,7 @@ export interface StatsCollectionConfig {
 
 export interface CacheDetails {
   updatedAt: string;
+  fetchedAt: string;
 }
 
 export interface BasicStatsPayload {
