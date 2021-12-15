@@ -496,6 +496,7 @@ describe('Detections Rules API', () => {
       name: 'fileToImport',
       size: 89,
       type: 'json',
+      webkitRelativePath: '/webkitRelativePath',
       arrayBuffer: jest.fn(),
       slice: jest.fn(),
       stream: jest.fn(),

@@ -63,6 +63,7 @@ const MetricsApp: React.FC<{
         appName="Metrics UI"
         setHeaderActionMenu={setHeaderActionMenu}
         storage={storage}
+        theme$={theme$}
         triggersActionsUI={plugins.triggersActionsUi}
       >
         <Router history={history}>
