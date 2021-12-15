@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useContext, useState, useEffect } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
 import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -14,9 +14,10 @@ import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 import { MONITOR_MANAGEMENT } from '../../../../common/constants';
+import { UptimeSettingsContext } from '../../../contexts';
 import { setMonitor } from '../../../state/api';
 
-import { SyntheticsMonitor } from '../../fleet_package/types';
+import { SyntheticsMonitor } from '../../../../common/runtime_types';
 
 interface Props {
   monitor: SyntheticsMonitor;
@@ -26,6 +27,7 @@ interface Props {
 
 export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
   const { monitorId } = useParams<{ monitorId: string }>();
+  const { basePath } = useContext(UptimeSettingsContext);
 
   const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -87,7 +89,12 @@ export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty color="ghost" size="s" iconType="cross">
+              <EuiButtonEmpty
+                color="ghost"
+                size="s"
+                iconType="cross"
+                href={`${basePath}/app/uptime/manage-monitors`}
+              >
                 {DISCARD_LABEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -120,7 +127,7 @@ const SAVE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.saveMo
 });
 
 const EDIT_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorLabel', {
-  defaultMessage: 'Edit monitor',
+  defaultMessage: 'Update monitor',
 });
 
 const VALIDATION_ERROR_LABEL = i18n.translate('xpack.uptime.monitorManagement.validationError', {
