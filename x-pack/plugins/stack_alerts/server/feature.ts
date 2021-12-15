@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureConfig } from '../../../plugins/features/common';
 import { ID as IndexThreshold } from './alert_types/index_threshold/alert_type';
-import { ID as SearchThreshold } from './alert_types/search_threshold/alert_type';
+import { ID as SearchThreshold } from './alert_types/search_threshold/rule_type';
 import { GEO_CONTAINMENT_ID as GeoContainment } from './alert_types/geo_containment/alert_type';
 import { ES_QUERY_ID as ElasticsearchQuery } from './alert_types/es_query/alert_type';
 import { STACK_ALERTS_FEATURE_ID } from '../common';
