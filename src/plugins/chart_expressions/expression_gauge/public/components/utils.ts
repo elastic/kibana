@@ -1,24 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { scaleLinear } from 'd3-scale';
-import {
-  ChartColorConfiguration,
-  PaletteDefinition,
-  PaletteRegistry,
-  SeriesLayer,
-} from 'src/plugins/charts/public';
-import { DatatableRow } from 'src/plugins/expressions';
-import Color from 'color';
-import type { GaugeVisualizationState } from '../../../common/expressions/gauge_chart';
+import type { DatatableRow } from 'src/plugins/expressions';
+import type { GaugeState } from '../../common/types/expression_functions';
 
 type GaugeAccessors = 'maxAccessor' | 'minAccessor' | 'goalAccessor' | 'metricAccessor';
 
-type GaugeAccessorsType = Pick<GaugeVisualizationState, GaugeAccessors>;
+type GaugeAccessorsType = Pick<GaugeState, GaugeAccessors>;
 
 export const getValueFromAccessor = (
   accessorName: GaugeAccessors,
@@ -39,6 +32,30 @@ export const getValueFromAccessor = (
   }
 };
 
+// returns nice rounded numbers similar to d3 nice() function
+function getNiceRange(min: number, max: number) {
+  const maxTicks = 5;
+  const offsetMax = max + 0.0000001; // added to avoid max value equal to metric value
+  const range = getNiceNumber(offsetMax - min);
+  const tickSpacing = getNiceNumber(range / (maxTicks - 1));
+  return {
+    min: Math.floor(min / tickSpacing) * tickSpacing,
+    max: Math.ceil(offsetMax / tickSpacing) * tickSpacing,
+  };
+}
+
+function getNiceNumber(localRange: number) {
+  const exponent = Math.floor(Math.log10(localRange));
+  const fraction = localRange / Math.pow(10, exponent);
+  let niceFraction = 10;
+
+  if (fraction <= 1) niceFraction = 1;
+  else if (fraction <= 2) niceFraction = 2;
+  else if (fraction <= 5) niceFraction = 5;
+
+  return niceFraction * Math.pow(10, exponent);
+}
+
 export const getMaxValue = (row?: DatatableRow, state?: GaugeAccessorsType): number => {
   const FALLBACK_VALUE = 100;
   const currentValue = getValueFromAccessor('maxAccessor', row, state);
@@ -52,13 +69,8 @@ export const getMaxValue = (row?: DatatableRow, state?: GaugeAccessorsType): num
     const minValue = getMinValue(row, state);
     if (metricValue != null) {
       const numberValues = [minValue, goalValue, metricValue].filter((v) => typeof v === 'number');
-      const biggerValue = Math.max(...numberValues);
-      const nicelyRounded = scaleLinear().domain([minValue, biggerValue]).nice().ticks(4);
-      if (nicelyRounded.length > 2) {
-        const ticksDifference = Math.abs(nicelyRounded[0] - nicelyRounded[1]);
-        return nicelyRounded[nicelyRounded.length - 1] + ticksDifference;
-      }
-      return minValue === biggerValue ? biggerValue + 1 : biggerValue;
+      const maxValue = Math.max(...numberValues);
+      return getNiceRange(minValue, maxValue).max;
     }
   }
   return FALLBACK_VALUE;
@@ -82,7 +94,7 @@ export const getMinValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
   return FALLBACK_VALUE;
 };
 
-export const getGoalValue = (row?: DatatableRow, state?: GaugeVisualizationState) => {
+export const getGoalValue = (row?: DatatableRow, state?: GaugeAccessorsType) => {
   const currentValue = getValueFromAccessor('goalAccessor', row, state);
   if (currentValue != null) {
     return currentValue;
@@ -90,24 +102,4 @@ export const getGoalValue = (row?: DatatableRow, state?: GaugeVisualizationState
   const minValue = getMinValue(row, state);
   const maxValue = getMaxValue(row, state);
   return Math.round((maxValue - minValue) * 0.75 + minValue);
-};
-
-export const transparentizePalettes = (palettes: PaletteRegistry) => {
-  const addAlpha = (c: string | null) => (c ? new Color(c).hex() + `80` : `000000`);
-  const transparentizePalette = (palette: PaletteDefinition<unknown>) => ({
-    ...palette,
-    getCategoricalColor: (
-      series: SeriesLayer[],
-      chartConfiguration?: ChartColorConfiguration,
-      state?: unknown
-    ) => addAlpha(palette.getCategoricalColor(series, chartConfiguration, state)),
-    getCategoricalColors: (size: number, state?: unknown): string[] =>
-      palette.getCategoricalColors(size, state).map(addAlpha),
-  });
-
-  return {
-    ...palettes,
-    get: (name: string) => transparentizePalette(palettes.get(name)),
-    getAll: () => palettes.getAll().map((singlePalette) => transparentizePalette(singlePalette)),
-  };
 };

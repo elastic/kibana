@@ -1,20 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
-import { Chart, Goal } from '@elastic/charts';
-import { shallowWithIntl } from '@kbn/test/jest';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
-import type { ColorStop, LensMultiTable } from '../../../common';
-import { fieldFormatsServiceMock } from '../../../../../../src/plugins/field_formats/public/mocks';
-import { GaugeArguments, GaugeLabelMajorMode } from '../../../common/expressions/gauge_chart';
-import { GaugeComponent, GaugeRenderProps } from './chart_component';
+import { chartPluginMock } from '../../../../charts/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
+import type { Datatable } from '../../../../expressions/public';
 import { DatatableColumn, DatatableRow } from 'src/plugins/expressions/common';
-import { VisualizationContainer } from '../../visualization_container';
+import { shallowWithIntl } from '@kbn/test/jest';
+import { GaugeRenderProps, GaugeArguments, GaugeLabelMajorMode, ColorStop } from '../../common';
+import GaugeComponent from './gauge_component';
+import { Chart, Goal } from '@elastic/charts';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -37,27 +37,19 @@ const numberColumn = (id = 'metric-accessor'): DatatableColumn => ({
   },
 });
 
-const createData = (
-  row: DatatableRow = { 'metric-accessor': 3, 'min-accessor': 0, 'max-accessor': 10 }
-): LensMultiTable => {
+jest.mock('@elastic/charts', () => {
+  const original = jest.requireActual('@elastic/charts');
+
   return {
-    type: 'lens_multitable',
-    tables: {
-      layerId: {
-        type: 'datatable',
-        rows: [row],
-        columns: Object.keys(row).map((key) => numberColumn(key)),
-      },
-    },
+    ...original,
+    getSpecId: jest.fn(() => {}),
   };
-};
+});
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
-const palettesRegistry = chartPluginMock.createPaletteRegistry();
 const formatService = fieldFormatsServiceMock.createStartContract();
 const args: GaugeArguments = {
   labelMajor: 'Gauge',
-  description: 'vis description',
   metricAccessor: 'metric-accessor',
   minAccessor: '',
   maxAccessor: '',
@@ -68,6 +60,16 @@ const args: GaugeArguments = {
   labelMajorMode: 'auto',
 };
 
+const createData = (
+  row: DatatableRow = { 'metric-accessor': 3, 'min-accessor': 0, 'max-accessor': 10 }
+): Datatable => {
+  return {
+    type: 'datatable',
+    rows: [row],
+    columns: Object.keys(row).map((key) => numberColumn(key)),
+  };
+};
+
 describe('GaugeComponent', function () {
   let wrapperProps: GaugeRenderProps;
 
@@ -76,7 +78,6 @@ describe('GaugeComponent', function () {
       data: createData(),
       chartsThemeService,
       args,
-      paletteService: palettesRegistry,
       formatFactory: formatService.deserialize,
     };
   });
@@ -86,7 +87,7 @@ describe('GaugeComponent', function () {
     expect(component.find(Chart)).toMatchSnapshot();
   });
 
-  it('shows empty placeholder when metricAccessor is not provided', async () => {
+  it('returns null when metricAccessor is not provided', async () => {
     const customProps = {
       ...wrapperProps,
       args: {
@@ -98,7 +99,7 @@ describe('GaugeComponent', function () {
       data: createData({ 'min-accessor': 0, 'max-accessor': 10 }),
     };
     const component = shallowWithIntl(<GaugeComponent {...customProps} />);
-    expect(component.find(VisualizationContainer)).toHaveLength(1);
+    expect(component.isEmptyRender()).toBe(true);
   });
 
   it('shows empty placeholder when minimum accessor equals maximum accessor', async () => {
