@@ -8,9 +8,9 @@
 import React, { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import { ITooltipProperty } from './tooltip_property';
 import { InnerJoin } from '../joins/inner_join';
-import { Filter } from '../../../../../../src/plugins/data/public';
 
 export class JoinTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;
