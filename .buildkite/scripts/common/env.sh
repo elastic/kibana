@@ -76,8 +76,14 @@ export GIT_BRANCH="${BUILDKITE_BRANCH:-}"
 export FLEET_PACKAGE_REGISTRY_PORT=6104
 export TEST_CORS_SERVER_PORT=6105
 
-export DETECT_CHROMEDRIVER_VERSION=true
-export CHROMEDRIVER_FORCE_DOWNLOAD=true
+# Mac agents currently don't have Chrome
+if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
+  echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
+  export DETECT_CHROMEDRIVER_VERSION=true
+  export CHROMEDRIVER_FORCE_DOWNLOAD=true
+else
+  echo "Chrome not detected, installing default chromedriver binary for the package version"
+fi
 
 export GCS_UPLOAD_PREFIX=FAKE_UPLOAD_PREFIX # TODO remove the need for this
 
