@@ -9,11 +9,11 @@ import './login_page.scss';
 
 import {
   EuiButton,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import classNames from 'classnames';
@@ -207,31 +207,29 @@ export class LoginPage extends Component<Props, State> {
     if (!isCookiesEnabled) {
       if (isWindowEmbedded()) {
         return (
-          <EuiEmptyPrompt
-            body={
+          <div style={{ maxWidth: '36em', margin: 'auto', textAlign: 'center' }}>
+            <EuiText color="subdued">
               <p>
                 <FormattedMessage
                   id="xpack.security.loginPage.requiresNewWindowTitle"
-                  defaultMessage="This content can't be viewed embedded in another website."
+                  defaultMessage="To view this content, open in new window or adjust your browser settings to allow 3rd-party cookies."
                 />
               </p>
-            }
-            actions={
-              <EuiButton
-                href={window.location.href}
-                target="_blank"
-                iconType="popout"
-                iconSide="right"
-                fill
-              >
-                <FormattedMessage
-                  id="xpack.security.loginPage.requiresNewWindowMessage"
-                  defaultMessage="Open in Elastic"
-                />
-              </EuiButton>
-            }
-            style={{ paddingTop: 0 }}
-          />
+            </EuiText>
+            <EuiSpacer />
+            <EuiButton
+              href={window.location.href}
+              target="_blank"
+              iconType="popout"
+              iconSide="right"
+              fill
+            >
+              <FormattedMessage
+                id="xpack.security.loginPage.requiresNewWindowMessage"
+                defaultMessage="Open in new window"
+              />
+            </EuiButton>
+          </div>
         );
       }
 
