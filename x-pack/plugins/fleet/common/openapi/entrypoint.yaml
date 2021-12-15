@@ -26,7 +26,6 @@ paths:
   /service_tokens:
     $ref: paths/service_tokens.yaml
   # EPM / integrations endpoints
-
   /epm/categories:
     $ref: paths/epm@categories.yaml
   /epm/packages/limited:
