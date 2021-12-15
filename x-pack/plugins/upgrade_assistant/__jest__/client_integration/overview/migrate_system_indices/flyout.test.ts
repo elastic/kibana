@@ -8,39 +8,35 @@
 import { act } from 'react-dom/test-utils';
 
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
-import { setupEnvironment, kibanaVersion } from '../../helpers';
+import { setupEnvironment } from '../../helpers';
 import { systemIndicesMigrationStatus } from './mocks';
 
-if (kibanaVersion.major >= 8 || kibanaVersion.minor > 16) {
-  describe('Overview - Migrate system indices - Flyout', () => {
-    let testBed: OverviewTestBed;
-    const { server, httpRequestsMockHelpers } = setupEnvironment();
+describe('Overview - Migrate system indices - Flyout', () => {
+  let testBed: OverviewTestBed;
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
 
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(systemIndicesMigrationStatus);
+  beforeEach(async () => {
+    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(systemIndicesMigrationStatus);
 
-      await act(async () => {
-        testBed = await setupOverviewPage();
-      });
-
-      testBed.component.update();
+    await act(async () => {
+      testBed = await setupOverviewPage();
     });
 
-    afterAll(() => {
-      server.restore();
-    });
-
-    test('shows correct features in flyout table', async () => {
-      const { actions, table } = testBed;
-
-      await actions.clickViewSystemIndicesState();
-
-      const { tableCellsValues } = table.getMetaData('flyoutDetails');
-
-      expect(tableCellsValues.length).toBe(systemIndicesMigrationStatus.features.length);
-      expect(tableCellsValues).toMatchSnapshot();
-    });
+    testBed.component.update();
   });
-} else {
-  test(`System indices migration is disabled for ${kibanaVersion.version}`, () => undefined);
-}
+
+  afterAll(() => {
+    server.restore();
+  });
+
+  test('shows correct features in flyout table', async () => {
+    const { actions, table } = testBed;
+
+    await actions.clickViewSystemIndicesState();
+
+    const { tableCellsValues } = table.getMetaData('flyoutDetails');
+
+    expect(tableCellsValues.length).toBe(systemIndicesMigrationStatus.features.length);
+    expect(tableCellsValues).toMatchSnapshot();
+  });
+});
