@@ -53,8 +53,7 @@ export async function getClustersFromRequest(
     codePaths,
   }: { clusterUuid: string; start: number; end: number; codePaths: string[] }
 ) {
-  const { beatsIndexPattern, apmIndexPattern, enterpriseSearchIndexPattern, filebeatIndexPattern } =
-    indexPatterns;
+  const { apmIndexPattern, enterpriseSearchIndexPattern, filebeatIndexPattern } = indexPatterns;
 
   const config = req.server.config();
   const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
@@ -207,7 +206,7 @@ export async function getClustersFromRequest(
 
   // add beats data
   const beatsByCluster = isInCodePath(codePaths, [CODE_PATH_BEATS])
-    ? await getBeatsForClusters(req, beatsIndexPattern, clusters)
+    ? await getBeatsForClusters(req, clusters, '*')
     : [];
   beatsByCluster.forEach((beats) => {
     const clusterIndex = clusters.findIndex(
