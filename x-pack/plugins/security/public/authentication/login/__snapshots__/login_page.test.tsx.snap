@@ -96,37 +96,41 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
 `;
 
 exports[`LoginPage disabled form states renders open in new window button when cookies are disabled and document is embedded inside iframe 1`] = `
-<EuiEmptyPrompt
-  actions={
-    <EuiButton
-      fill={true}
-      href="http://some-host/bar"
-      iconSide="right"
-      iconType="popout"
-      target="_blank"
-    >
-      <FormattedMessage
-        defaultMessage="Open in Elastic"
-        id="xpack.security.loginPage.requiresNewWindowMessage"
-        values={Object {}}
-      />
-    </EuiButton>
+<div
+  style={
+    Object {
+      "margin": "auto",
+      "maxWidth": "36em",
+      "textAlign": "center",
+    }
   }
-  body={
+>
+  <EuiText
+    color="subdued"
+  >
     <p>
       <FormattedMessage
-        defaultMessage="This content can't be viewed embedded in another website."
+        defaultMessage="To view this content, open it in a new window or adjust your browser settings to allow third-party cookies."
         id="xpack.security.loginPage.requiresNewWindowTitle"
         values={Object {}}
       />
     </p>
-  }
-  style={
-    Object {
-      "paddingTop": 0,
-    }
-  }
-/>
+  </EuiText>
+  <EuiSpacer />
+  <EuiButton
+    fill={true}
+    href="http://some-host/bar"
+    iconSide="right"
+    iconType="popout"
+    target="_blank"
+  >
+    <FormattedMessage
+      defaultMessage="Open in new window"
+      id="xpack.security.loginPage.requiresNewWindowMessage"
+      values={Object {}}
+    />
+  </EuiButton>
+</div>
 `;
 
 exports[`LoginPage disabled form states renders warning when cookies are disabled and document is not embedded inside iframe 1`] = `
@@ -140,7 +144,7 @@ exports[`LoginPage disabled form states renders warning when cookies are disable
   }
   title={
     <FormattedMessage
-      defaultMessage="Cookies are required to log in to Elastic"
+      defaultMessage="Cookies are required to log into Elastic"
       id="xpack.security.loginPage.requiresCookiesTitle"
       values={Object {}}
     />

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
@@ -226,7 +226,7 @@ describe('LoginPage', () => {
         wrapper.update();
       });
 
-      expect(wrapper.find(EuiEmptyPrompt)).toMatchSnapshot();
+      expect(wrapper.find(EuiFlexItem).children()).toMatchSnapshot();
     });
 
     it('renders warning when cookies are disabled and document is not embedded inside iframe', async () => {
