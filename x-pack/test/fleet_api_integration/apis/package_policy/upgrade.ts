@@ -122,6 +122,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('dry run', function () {
+        withTestPackageVersion('0.2.0-add-non-required-test-var');
         it('returns a valid diff', async function () {
           const { body }: { body: UpgradePackagePolicyDryRunResponse } = await supertest
             .post(`/api/fleet/package_policies/upgrade`)
@@ -145,7 +146,25 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('upgrade', function () {
-        it('should respond with an error when "dryRun: false" is provided', async function () {
+        withTestPackageVersion('0.2.0-add-non-required-test-var');
+        it('should respond with an error', async function () {
+          // upgrade policy to 0.2.0
+          await supertest
+            .post(`/api/fleet/package_policies/upgrade`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              packagePolicyIds: [packagePolicyId],
+            })
+            .expect(200);
+
+          // downgrade package
+          await supertest
+            .post(`/api/fleet/epm/packages/package_policy_upgrade-0.1.0`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ force: true })
+            .expect(200);
+
+          // try upgrade policy to 0.1.0: error
           await supertest
             .post(`/api/fleet/package_policies/upgrade`)
             .set('kbn-xsrf', 'xxxx')
@@ -1124,7 +1143,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('dry run', function () {
-        it('should respond with a bad request', async function () {
+        it('should respond with a 200 ok', async function () {
           await supertest
             .post(`/api/fleet/package_policies/upgrade`)
             .set('kbn-xsrf', 'xxxx')
@@ -1133,12 +1152,12 @@ export default function (providerContext: FtrProviderContext) {
               dryRun: true,
               packageVersion: '0.1.0',
             })
-            .expect(400);
+            .expect(200);
         });
       });
 
       describe('upgrade', function () {
-        it('should respond with a bad request', async function () {
+        it('should respond with a 200 ok', async function () {
           await supertest
             .post(`/api/fleet/package_policies/upgrade`)
             .set('kbn-xsrf', 'xxxx')
@@ -1147,7 +1166,7 @@ export default function (providerContext: FtrProviderContext) {
               dryRun: false,
               packageVersion: '0.1.0',
             })
-            .expect(400);
+            .expect(200);
         });
       });
     });
