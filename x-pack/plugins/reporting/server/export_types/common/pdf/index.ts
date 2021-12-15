@@ -144,7 +144,6 @@ export class PdfMaker {
     return new Promise<Buffer>((resolve, reject) => {
       let buffer: undefined | Buffer;
       this.worker = new Worker(path.resolve(__dirname, './worker.js'), {
-        resourceLimits: { maxOldGenerationSizeMb: 150 },
         workerData: this.getWorkerData(),
       });
       this.worker.on('error', reject);
