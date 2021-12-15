@@ -214,14 +214,27 @@ export const swapActionIds = async (
       index: '.kibana',
       body: {
         query: {
-          term: {
-            originId: {
-              // we are attempting to import a rule that contains an action.
-              // That action (connector) has the old, pre-8.0 _id.
-              // We need to swap the old, pre-8.0 _id for the new id (alias_target_id)
-              // and replace the id of the action in the rule with the new _id
-              value: action.id,
-            },
+          bool: {
+            filter: [
+              {
+                term: {
+                  originId: {
+                    // we are attempting to import a rule that contains an action.
+                    // That action (connector) has the old, pre-8.0 _id.
+                    // We need to swap the old, pre-8.0 _id for the new id (alias_target_id)
+                    // and replace the id of the action in the rule with the new _id
+                    value: action.id,
+                  },
+                },
+              },
+              {
+                term: {
+                  type: {
+                    value: 'action',
+                  },
+                },
+              },
+            ],
           },
         },
       },
