@@ -22,11 +22,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         shouldLoginIfPrompted: false,
       });
 
-      await testSubjects.existOrFail('loginSubmit', { timeout: 5000 });
+      await testSubjects.existOrFail('loginSubmit', { timeout: 60000 });
 
       await PageObjects.security.login();
 
-      await testSubjects.existOrFail('homeApp', { timeout: 5000 });
+      await testSubjects.existOrFail('homeApp', { timeout: 60000 });
     });
   });
 }
