@@ -41,7 +41,6 @@ import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
-  FORBIDDEN_MESSAGE,
   METADATA_TRANSFORMS_PATTERN,
 } from '../../../../common/endpoint/constants';
 import { EndpointFleetServicesInterface } from '../../services/endpoint_fleet_services';
@@ -191,15 +190,6 @@ export function getMetadataTransformStatsHandler(
   logger: Logger
 ): RequestHandler<unknown, unknown, unknown, SecuritySolutionRequestHandlerContext> {
   return async (context, _, response) => {
-    const { canAccessEndpointManagement } = context.securitySolution.endpointAuthz;
-    if (!canAccessEndpointManagement) {
-      return response.forbidden({
-        body: {
-          message: FORBIDDEN_MESSAGE,
-        },
-      });
-    }
-
     const esClient = context.core.elasticsearch.client.asInternalUser;
     try {
       const transformStats = await esClient.transform.getTransformStats({
