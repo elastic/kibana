@@ -19,6 +19,7 @@ import React, {
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 
 import { parseEsError } from '../../lib/runtime_field_validation';
 import { useFieldEditorContext } from '../field_editor_context';
@@ -165,13 +166,21 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       if (format?.id) {
         const formatter = fieldFormats.getInstance(format.id, format.params);
         if (formatter) {
-          return formatter.convertObject?.html(value) ?? JSON.stringify(value);
+          return formatter.getConverterFor('html')(value) ?? JSON.stringify(value);
+        }
+      }
+
+      if (type) {
+        const fieldType = castEsToKbnFieldTypeName(type);
+        const defaultFormatterForType = fieldFormats.getDefaultInstance(fieldType);
+        if (defaultFormatterForType) {
+          return defaultFormatterForType.getConverterFor('html')(value) ?? JSON.stringify(value);
         }
       }
 
       return defaultValueFormatter(value);
     },
-    [format, fieldFormats]
+    [format, type, fieldFormats]
   );
 
   const fetchSampleDocuments = useCallback(
