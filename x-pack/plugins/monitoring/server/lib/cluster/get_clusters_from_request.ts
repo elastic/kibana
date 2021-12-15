@@ -54,7 +54,6 @@ export async function getClustersFromRequest(
   }: { clusterUuid: string; start: number; end: number; codePaths: string[] }
 ) {
   const {
-    kbnIndexPattern,
     lsIndexPattern,
     beatsIndexPattern,
     apmIndexPattern,
@@ -128,7 +127,7 @@ export async function getClustersFromRequest(
     }
 
     // update clusters with license check results
-    const getSupportedClusters = flagSupportedClusters(req, kbnIndexPattern);
+    const getSupportedClusters = flagSupportedClusters(req, '*');
     clusters = await getSupportedClusters(clusters);
 
     // add alerts data
