@@ -7,10 +7,12 @@
  */
 
 import * as esKuery from '@kbn/es-query';
+
 type KueryNode = any;
 
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
+import { getReferencesFilter } from './references_filter';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -139,50 +141,6 @@ interface QueryParams {
   kueryNode?: KueryNode;
 }
 
-function getReferencesFilter(
-  references: HasReferenceQueryParams[],
-  operator: SearchOperator = 'OR'
-) {
-  if (operator === 'AND') {
-    return {
-      bool: {
-        must: references.map(getClauseForReference),
-      },
-    };
-  } else {
-    return {
-      bool: {
-        should: references.map(getClauseForReference),
-        minimum_should_match: 1,
-      },
-    };
-  }
-}
-
-export function getClauseForReference(reference: HasReferenceQueryParams) {
-  return {
-    nested: {
-      path: 'references',
-      query: {
-        bool: {
-          must: [
-            {
-              term: {
-                'references.id': reference.id,
-              },
-            },
-            {
-              term: {
-                'references.type': reference.type,
-              },
-            },
-          ],
-        },
-      },
-    },
-  };
-}
-
 // A de-duplicated set of namespaces makes for a more efficient query.
 const uniqNamespaces = (namespacesToNormalize?: string[]) =>
   namespacesToNormalize ? Array.from(new Set(namespacesToNormalize)) : undefined;
@@ -215,7 +173,14 @@ export function getQueryParams({
   const bool: any = {
     filter: [
       ...(kueryNode != null ? [esKuery.toElasticsearchQuery(kueryNode)] : []),
-      ...(hasReference?.length ? [getReferencesFilter(hasReference, hasReferenceOperator)] : []),
+      ...(hasReference?.length
+        ? [
+            getReferencesFilter({
+              references: hasReference,
+              operator: hasReferenceOperator,
+            }),
+          ]
+        : []),
       {
         bool: {
           should: types.map((shouldType) => {
