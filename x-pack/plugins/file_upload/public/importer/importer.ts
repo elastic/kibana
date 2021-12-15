@@ -22,6 +22,7 @@ import { CreateDocsResponse, IImporter, ImportResults } from './types';
 import { isPopulatedObject } from '../../common/utils';
 
 const CHUNK_SIZE = 5000;
+const REDUCED_CHUNK_SIZE = 100;
 export const MAX_CHUNK_CHAR_COUNT = 1000000;
 export const IMPORT_RETRIES = 5;
 const STRING_CHUNKS_MB = 100;
@@ -71,7 +72,7 @@ export abstract class Importer implements IImporter {
     if (pipelineContainsSpecialProcessors(pipeline)) {
       // pipeline contains processors which we know are slow
       // so reduce the chunk size significantly to avoid timeouts
-      this._chunkSize = 100;
+      this._chunkSize = REDUCED_CHUNK_SIZE;
     }
 
     // if no pipeline has been supplied,
