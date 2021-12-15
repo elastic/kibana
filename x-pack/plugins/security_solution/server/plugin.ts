@@ -43,7 +43,12 @@ import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, SERVER_APP_ID, LEGACY_NOTIFICATIONS_ID } from '../common/constants';
+import {
+  APP_ID,
+  SERVER_APP_ID,
+  LEGACY_NOTIFICATIONS_ID,
+  DEFAULT_ALERTS_INDEX,
+} from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
@@ -61,6 +66,7 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
+import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
 import { registerEventLogProvider } from './lib/detection_engine/rule_execution_log/event_log_adapter/register_event_log_provider';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
@@ -158,7 +164,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     initUsageCollectors({
       core,
       kibanaIndex: core.savedObjects.getKibanaIndex(),
-      signalsIndex: config.signalsIndex,
+      signalsIndex: DEFAULT_ALERTS_INDEX,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
     });
@@ -167,6 +173,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
+    let previewRuleDataClient: IRuleDataClient | null = null;
 
     // rule options are used both to create and preview rules.
     const ruleOptions: CreateRuleOptions = {
@@ -184,7 +191,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       };
     });
 
-    ruleDataClient = ruleDataService.initializeIndex({
+    const ruleDataServiceOptions = {
       feature: SERVER_APP_ID,
       registrationContext: 'security',
       dataset: Dataset.alerts,
@@ -199,17 +206,28 @@ export class Plugin implements ISecuritySolutionPlugin {
         },
       ],
       secondaryAlias: config.signalsIndex,
+    };
+
+    ruleDataClient = ruleDataService.initializeIndex(ruleDataServiceOptions);
+    const previewIlmPolicy = previewPolicy.policy;
+
+    previewRuleDataClient = ruleDataService.initializeIndex({
+      ...ruleDataServiceOptions,
+      additionalPrefix: '.preview',
+      ilmPolicy: previewIlmPolicy,
     });
 
-    const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
+    const securityRuleTypeOptions = {
       lists: plugins.lists,
       logger: this.logger,
       config: this.config,
       ruleDataClient,
       eventLogService,
-    });
+    };
 
     if (plugins.alerting) {
+      const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
+
       plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
       plugins.alerting.registerType(
         securityRuleTypeWrapper(createSavedQueryAlertType(ruleOptions))
@@ -234,7 +252,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger,
       ruleDataClient,
       ruleOptions,
-      core.getStartServices
+      core.getStartServices,
+      securityRuleTypeOptions,
+      previewRuleDataClient
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
@@ -285,8 +305,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
-        endpointContext
+        endpointContext,
+        depsStart.spaces?.spacesService?.getSpaceId
       );
+
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
