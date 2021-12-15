@@ -113,7 +113,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
             <p>
               <FormattedMessage
                 id="xpack.ml.overview.analyticsList.emptyPromptText"
-                defaultMessage="Data frame analytics enables you to perform outlier detection, regression, or classification analysis on your data and annotates it with the results. The job puts the annotated data and a copy of the source data in a new index."
+                defaultMessage="Data frame analytics enables you to perform outlier detection, regression, or classification analysis and put the annotated data in a new index. The classification and regression trained models can also be used for inference in pipelines and aggregations."
               />
             </p>
             <EuiCallOut
