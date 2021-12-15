@@ -9,6 +9,7 @@
 import _ from 'lodash';
 import { DashboardPanelState } from '..';
 import { esFilters, Filter } from '../../services/data';
+import { EmbeddableInput } from '../../services/embeddable';
 import {
   DashboardContainerInput,
   DashboardOptions,
@@ -52,12 +53,12 @@ export const diffDashboardState = (
 };
 
 const optionsAreEqual = (optionsA: DashboardOptions, optionsB: DashboardOptions): boolean => {
-  const optionKeys = [...Object.keys(optionsA), ...Object.keys(optionsB)];
+  const optionKeys = [
+    ...(Object.keys(optionsA) as Array<keyof DashboardOptions>),
+    ...(Object.keys(optionsB) as Array<keyof DashboardOptions>),
+  ];
   for (const key of optionKeys) {
-    if (
-      Boolean((optionsA as unknown as { [key: string]: boolean })[key]) !==
-      Boolean((optionsB as unknown as { [key: string]: boolean })[key])
-    ) {
+    if (Boolean(optionsA[key]) !== Boolean(optionsB[key])) {
       return false;
     }
   }
@@ -78,14 +79,38 @@ const panelsAreEqual = (panelsA: DashboardPanelMap, panelsB: DashboardPanelMap):
     const panelCommonDiff = commonDiff<DashboardPanelState>(
       panelsA[id] as unknown as DashboardDiffCommon,
       panelsB[id] as unknown as DashboardDiffCommon,
-      ['panelRefName']
+      ['panelRefName', 'explicitInput']
     );
-    if (Object.keys(panelCommonDiff).length > 0) {
+    if (
+      Object.keys(panelCommonDiff).length > 0 ||
+      !explicitInputIsEqual(panelsA[id].explicitInput, panelsB[id].explicitInput)
+    ) {
       return false;
     }
   }
-
   return true;
+};
+
+/**
+ * Need to compare properties of explicitInput *directly* in order to handle special comparisons for 'title'
+ * and 'hidePanelTitles.' For example, if some object 'obj1' has 'obj1[title] = undefined' and some other
+ * object `obj2' simply does not have the key `title,' we want obj1 to still equal obj2 - in normal comparisons
+ * without this special case, `obj1 != obj2.'
+ * @param originalInput
+ * @param newInput
+ */
+const explicitInputIsEqual = (
+  originalInput: EmbeddableInput,
+  newInput: EmbeddableInput
+): boolean => {
+  const diffs = commonDiff<DashboardPanelState>(originalInput, newInput, [
+    'hidePanelTitles',
+    'title',
+  ]);
+  const hidePanelsAreEqual =
+    Boolean(originalInput.hidePanelTitles) === Boolean(newInput.hidePanelTitles);
+  const titlesAreEqual = originalInput.title === newInput.title;
+  return Object.keys(diffs).length === 0 && hidePanelsAreEqual && titlesAreEqual;
 };
 
 const commonDiffFilters = <T extends { filters: Filter[] }>(
