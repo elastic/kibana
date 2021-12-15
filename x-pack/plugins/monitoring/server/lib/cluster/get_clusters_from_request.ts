@@ -52,7 +52,7 @@ export async function getClustersFromRequest(
     codePaths,
   }: { clusterUuid: string; start: number; end: number; codePaths: string[] }
 ) {
-  const { enterpriseSearchIndexPattern, filebeatIndexPattern } = indexPatterns;
+  const { filebeatIndexPattern } = indexPatterns;
 
   const config = req.server.config();
   const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
@@ -229,7 +229,7 @@ export async function getClustersFromRequest(
 
   // add Enterprise Search data
   const enterpriseSearchByCluster = isInCodePath(codePaths, [CODE_PATH_ENTERPRISE_SEARCH])
-    ? await getEnterpriseSearchForClusters(req, enterpriseSearchIndexPattern, clusters)
+    ? await getEnterpriseSearchForClusters(req, clusters, '*')
     : [];
   enterpriseSearchByCluster.forEach((entSearch) => {
     const clusterIndex = clusters.findIndex(
