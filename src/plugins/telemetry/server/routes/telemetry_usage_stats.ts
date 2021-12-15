@@ -24,16 +24,18 @@ export function registerTelemetryUsageStatsRoutes(
       validate: {
         body: schema.object({
           unencrypted: schema.boolean({ defaultValue: false }),
+          refreshCache: schema.boolean({ defaultValue: false }),
         }),
       },
     },
     async (context, req, res) => {
-      const { unencrypted } = req.body;
+      const { unencrypted, refreshCache } = req.body;
 
       try {
         const statsConfig: StatsGetterConfig = {
           request: req,
           unencrypted,
+          refreshCache,
         };
 
         const stats = await telemetryCollectionManager.getStats(statsConfig);

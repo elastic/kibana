@@ -140,7 +140,7 @@ export class TelemetryService {
 
   /** Fetches an unencrypted telemetry payload so we can show it to the user **/
   public fetchExample = async (): Promise<UnencryptedTelemetryPayload> => {
-    return await this.fetchTelemetry({ unencrypted: true });
+    return await this.fetchTelemetry({ unencrypted: true, refreshCache: true });
   };
 
   /**
@@ -149,9 +149,10 @@ export class TelemetryService {
    */
   public fetchTelemetry = async <T = EncryptedTelemetryPayload | UnencryptedTelemetryPayload>({
     unencrypted = false,
+    refreshCache = false,
   } = {}): Promise<T> => {
     return this.http.post('/api/telemetry/v2/clusters/_stats', {
-      body: JSON.stringify({ unencrypted }),
+      body: JSON.stringify({ unencrypted, refreshCache }),
     });
   };
 

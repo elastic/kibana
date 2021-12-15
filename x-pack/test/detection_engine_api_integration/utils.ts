@@ -1930,7 +1930,7 @@ export const getStats = async (
   const response = await supertest
     .post(getStatsUrl())
     .set('kbn-xsrf', 'true')
-    .send({ unencrypted: true });
+    .send({ unencrypted: true, refreshCache: true });
   if (response.status !== 200) {
     log.error(
       `Did not get an expected 200 "ok" when getting the stats for detections. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(

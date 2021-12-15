@@ -45,6 +45,12 @@ describe('Telemetry Collection Manager', () => {
     const telemetryCollectionManager = new TelemetryCollectionManagerPlugin(initializerContext);
     const setupApi = telemetryCollectionManager.setup(coreMock.createSetup(), { usageCollection });
     const collectionStrategy = createCollectionStrategy(1);
+    beforeEach(() => {
+      // Reset cache on every request.
+      // 10s cache to avoid misatekly invalidating cache during test runs
+      // eslint-disable-next-line dot-notation
+      telemetryCollectionManager['cacheManager'].resetCache();
+    });
 
     describe('before start', () => {
       test('registers a collection strategy', () => {
@@ -196,12 +202,36 @@ describe('Telemetry Collection Manager', () => {
             await expect(setupApi.getStats(config)).resolves.toStrictEqual([
               {
                 clusterUuid: 'clusterUuid',
-                stats: { ...basicStats, collectionSource: 'test_collection' },
+                stats: {
+                  ...basicStats,
+                  cacheDetails: { updatedAt: expect.any(String), fetchedAt: expect.any(String) },
+                  collectionSource: 'test_collection',
+                },
               },
             ]);
+
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
             ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+          });
+
+          test('returns cached object on multiple calls', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
+              { clusterUuid: 'clusterUuid' },
+            ]);
+            collectionStrategy.statsGetter.mockResolvedValue([basicStats]);
+            await setupApi.getStats(config);
+
+            await expect(setupApi.getStats(config)).resolves.toStrictEqual([
+              {
+                clusterUuid: 'clusterUuid',
+                stats: {
+                  ...basicStats,
+                  cacheDetails: { updatedAt: expect.any(String), fetchedAt: expect.any(String) },
+                  collectionSource: 'test_collection',
+                },
+              },
+            ]);
           });
         });
 
