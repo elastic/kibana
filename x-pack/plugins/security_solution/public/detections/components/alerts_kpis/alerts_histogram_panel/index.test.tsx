@@ -22,6 +22,7 @@ jest.mock('react-router-dom', () => {
     ...originalModule,
     createHref: jest.fn(),
     useHistory: jest.fn(),
+    useLocation: jest.fn().mockReturnValue({ pathname: '' }),
   };
 });
 
@@ -37,8 +38,20 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => {
           navigateToApp: mockNavigateToApp,
           getUrlForApp: jest.fn(),
         },
+        data: {
+          search: {
+            search: jest.fn(),
+          },
+        },
         uiSettings: {
           get: jest.fn(),
+        },
+        notifications: {
+          toasts: {
+            addWarning: jest.fn(),
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+          },
         },
       },
     }),

@@ -21,8 +21,7 @@ import * as i18n from './translations';
 import { AlertsCount } from './alerts_count';
 import type { AlertsCountAggregation } from './types';
 import { DEFAULT_STACK_BY_FIELD } from '../common/config';
-import type { AlertsStackByField } from '../common/types';
-import { KpiPanel, StackBySelect } from '../common/components';
+import { KpiPanel, StackByComboBox } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
@@ -39,8 +38,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
 
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COUNT_ID}-${uuid.v4()}`, []);
-    const [selectedStackByOption, setSelectedStackByOption] =
-      useState<AlertsStackByField>(DEFAULT_STACK_BY_FIELD);
+    const [selectedStackByOption, setSelectedStackByOption] = useState(DEFAULT_STACK_BY_FIELD);
 
     // TODO: Once we are past experimental phase this code should be removed
     // const fetchMethod = useIsExperimentalFeatureEnabled('ruleRegistryEnabled')
@@ -99,7 +97,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
             titleSize="s"
             hideSubtitle
           >
-            <StackBySelect selected={selectedStackByOption} onSelect={setSelectedStackByOption} />
+            <StackByComboBox selected={selectedStackByOption} onSelect={setSelectedStackByOption} />
           </HeaderSection>
           <AlertsCount
             data={alertsData}

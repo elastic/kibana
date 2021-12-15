@@ -6,10 +6,9 @@
  */
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
-import type { AlertsStackByField } from '../common/types';
 
 export const getAlertsCountQuery = (
-  stackByField: AlertsStackByField,
+  stackByField: string,
   from: string,
   to: string,
   additionalFilters: Array<{
