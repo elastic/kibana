@@ -38,7 +38,6 @@ import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
 import { LegacyRequest, Cluster } from '../../types';
 import { RulesByType } from '../../../common/types/alerts';
-import { getApmInfo } from '../apm/get_apm_info';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -53,7 +52,7 @@ export async function getClustersFromRequest(
     codePaths,
   }: { clusterUuid: string; start: number; end: number; codePaths: string[] }
 ) {
-  const { apmIndexPattern, enterpriseSearchIndexPattern, filebeatIndexPattern } = indexPatterns;
+  const { enterpriseSearchIndexPattern, filebeatIndexPattern } = indexPatterns;
 
   const config = req.server.config();
   const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
@@ -168,12 +167,6 @@ export async function getClustersFromRequest(
     }
   }
   // add kibana data
-  await getApmInfo(req, apmIndexPattern, {
-    clusterUuid: clusters[0].cluster_uuid,
-    apmUuid: 'asf',
-    start: 10,
-    end: 1,
-  });
   const kibanas =
     isInCodePath(codePaths, [CODE_PATH_KIBANA]) && !isStandaloneCluster
       ? await getKibanasForClusters(req, clusters, '*')
@@ -218,7 +211,7 @@ export async function getClustersFromRequest(
 
   // add apm data
   const apmsByCluster = isInCodePath(codePaths, [CODE_PATH_APM])
-    ? await getApmsForClusters(req, apmIndexPattern, clusters)
+    ? await getApmsForClusters(req, clusters, '*')
     : [];
   apmsByCluster.forEach((apm) => {
     const clusterIndex = clusters.findIndex(
