@@ -212,7 +212,7 @@ export class LoginPage extends Component<Props, State> {
               <p>
                 <FormattedMessage
                   id="xpack.security.loginPage.requiresNewWindowTitle"
-                  defaultMessage="To view this content, open in new window or adjust your browser settings to allow 3rd-party cookies."
+                  defaultMessage="To view this content, open it in a new window or adjust your browser settings to allow third-party cookies."
                 />
               </p>
             </EuiText>
