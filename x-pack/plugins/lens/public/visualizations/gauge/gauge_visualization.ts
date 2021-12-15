@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './expression';
 export * from './visualization';

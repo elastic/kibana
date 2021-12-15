@@ -17,7 +17,7 @@ import { getServiceMapBackendNodeInfo } from './get_service_map_backend_node_inf
 import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
-import { environmentRt, rangeRt } from '../default_api_types';
+import { environmentRt, offsetRt, rangeRt } from '../default_api_types';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -75,7 +75,7 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([environmentRt, rangeRt]),
+    query: t.intersection([environmentRt, rangeRt, offsetRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
@@ -91,7 +91,7 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
 
     const {
       path: { serviceName },
-      query: { environment, start, end },
+      query: { environment, start, end, offset },
     } = params;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
@@ -102,14 +102,23 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
       kuery: '',
     });
 
-    return getServiceMapServiceNodeInfo({
+    const commonProps = {
       environment,
       setup,
       serviceName,
       searchAggregatedTransactions,
       start,
       end,
-    });
+    };
+
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      getServiceMapServiceNodeInfo(commonProps),
+      offset
+        ? getServiceMapServiceNodeInfo({ ...commonProps, offset })
+        : undefined,
+    ]);
+
+    return { currentPeriod, previousPeriod };
   },
 });
 
@@ -120,6 +129,7 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
       t.type({ backendName: t.string }),
       environmentRt,
       rangeRt,
+      offsetRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -135,16 +145,19 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
 
     const {
-      query: { backendName, environment, start, end },
+      query: { backendName, environment, start, end, offset },
     } = params;
 
-    return getServiceMapBackendNodeInfo({
-      environment,
-      setup,
-      backendName,
-      start,
-      end,
-    });
+    const commonProps = { environment, setup, backendName, start, end };
+
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      getServiceMapBackendNodeInfo(commonProps),
+      offset
+        ? getServiceMapBackendNodeInfo({ ...commonProps, offset })
+        : undefined,
+    ]);
+
+    return { currentPeriod, previousPeriod };
   },
 });
 
