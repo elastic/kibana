@@ -92,3 +92,5 @@ export const journeySelector = ({ journeys }: AppState) => journeys;
 export const networkEventsSelector = ({ networkEvents }: AppState) => networkEvents;
 
 export const syntheticsSelector = ({ synthetics }: AppState) => synthetics;
+
+export const uptimeWriteSelector = (state: AppState) => state;

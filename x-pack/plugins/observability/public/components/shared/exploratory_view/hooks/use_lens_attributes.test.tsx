@@ -19,6 +19,7 @@ import * as indexPattern from './use_app_index_pattern';
 import * as theme from '../../../../hooks/use_theme';
 import { dataTypes, obsvReportConfigMap, reportTypesList } from '../obsv_exploratory_view';
 import { ExploratoryViewContextProvider } from '../contexts/exploatory_view_config';
+import { themeServiceMock } from 'src/core/public/mocks';
 
 const mockSingleSeries = [
   {
@@ -60,6 +61,7 @@ describe('useExpViewTimeRange', function () {
         indexPatterns={{}}
         reportConfigMap={obsvReportConfigMap}
         setHeaderActionMenu={jest.fn()}
+        theme$={themeServiceMock.createTheme$()}
       >
         <UrlStorageContextProvider storage={storage}>{children}</UrlStorageContextProvider>
       </ExploratoryViewContextProvider>

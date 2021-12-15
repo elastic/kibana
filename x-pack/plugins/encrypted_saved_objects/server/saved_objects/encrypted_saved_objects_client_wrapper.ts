@@ -230,7 +230,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     type: string,
     id: string,
     attributes: Partial<T>,
-    options?: SavedObjectsUpdateOptions
+    options?: SavedObjectsUpdateOptions<T>
   ) {
     if (!this.options.service.isRegistered(type)) {
       return await this.options.baseClient.update(type, id, attributes, options);

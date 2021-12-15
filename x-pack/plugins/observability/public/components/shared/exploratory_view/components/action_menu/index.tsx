@@ -16,10 +16,10 @@ interface Props {
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }
 export function ExpViewActionMenu(props: Props) {
-  const { setHeaderActionMenu } = useExploratoryView();
+  const { setHeaderActionMenu, theme$ } = useExploratoryView();
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
       <ExpViewActionMenuContent {...props} />
     </HeaderMenuPortal>
   );
