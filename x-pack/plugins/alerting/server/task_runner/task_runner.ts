@@ -56,6 +56,7 @@ import {
   createAlertEventLogRecordObject,
   Event,
 } from '../lib/create_alert_event_log_record_object';
+import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -94,6 +95,7 @@ export class TaskRunner<
     RecoveryActionGroupId
   >;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
+  private searchAbortController: AbortController;
   private cancelled: boolean;
 
   constructor(
@@ -115,6 +117,7 @@ export class TaskRunner<
     this.ruleName = null;
     this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
+    this.searchAbortController = new AbortController();
     this.cancelled = false;
   }
 
@@ -324,6 +327,11 @@ export class TaskRunner<
               WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
             >(alerts),
             shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
+            shouldStopExecution: () => this.cancelled,
+            search: createAbortableEsClientFactory({
+              scopedClusterClient: services.scopedClusterClient,
+              abortController: this.searchAbortController,
+            }),
           },
           params,
           state: alertTypeState as State,
@@ -729,6 +737,11 @@ export class TaskRunner<
     this.logger.debug(
       `Cancelling rule type ${this.ruleType.id} with id ${ruleId} - execution exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`
     );
+
+    this.logger.debug(
+      `Aborting any in-progress ES searches for rule type ${this.ruleType.id} with id ${ruleId}`
+    );
+    this.searchAbortController.abort();
 
     const eventLogger = this.context.eventLogger;
     const event: IEvent = {
