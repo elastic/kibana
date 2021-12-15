@@ -180,9 +180,11 @@ export const WorkpadHeader: FC<Props> = ({
             <EuiFlexItem grow={false}>
               <ViewMenu />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EditMenu commit={commit} />
-            </EuiFlexItem>
+            {isWriteable && (
+              <EuiFlexItem grow={false}>
+                <EditMenu commit={commit} />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <ShareMenu />
             </EuiFlexItem>
