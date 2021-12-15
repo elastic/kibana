@@ -102,6 +102,7 @@ export const PolicyHostIsolationExceptionsDeleteModal = ({
         }
       )}
       isLoading={mutation.isLoading}
+      data-test-subj={'remove-from-policy-dialog'}
     >
       <EuiCallOut color="warning" iconType="help">
         <p>
