@@ -441,7 +441,7 @@ This content has moved. Refer to <<data-views-runtime-field-api-upsert>>.
 
 This content has moved. Refer to <<data-views-api-update>>.
 
-[role="exclude",id="xpack-kibana-role-management]
+[role="exclude",id="xpack-kibana-role-management"]
 == Kibana role management.
 
 This content has moved. Refer to <<kibana-role-management>>.
