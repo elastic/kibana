@@ -33,6 +33,7 @@ export interface IndexTemplateMapping {
 }
 export interface CurrentDataStream {
   dataStreamName: string;
+  replicated: boolean;
   indexTemplate: IndexTemplate;
 }
 const DEFAULT_SCALING_FACTOR = 1000;
@@ -415,8 +416,17 @@ export const updateCurrentWriteIndices = async (
   if (!templates.length) return;
 
   const allIndices = await queryDataStreamsFromTemplates(esClient, templates);
-  if (!allIndices.length) return;
-  return updateAllDataStreams(allIndices, esClient, logger);
+  const allUpdatablesIndices = allIndices.filter((indice) => {
+    if (indice.replicated) {
+      logger.warn(
+        `Datastream ${indice.dataStreamName} cannot be updated because this is a replicated datastream.`
+      );
+      return false;
+    }
+    return true;
+  });
+  if (!allUpdatablesIndices.length) return;
+  return updateAllDataStreams(allUpdatablesIndices, esClient, logger);
 };
 
 function isCurrentDataStream(item: CurrentDataStream[] | undefined): item is CurrentDataStream[] {
@@ -440,10 +450,12 @@ const getDataStreams = async (
 ): Promise<CurrentDataStream[] | undefined> => {
   const { templateName, indexTemplate } = template;
   const { body } = await esClient.indices.getDataStream({ name: `${templateName}-*` });
+
   const dataStreams = body.data_streams;
   if (!dataStreams.length) return;
   return dataStreams.map((dataStream: any) => ({
     dataStreamName: dataStream.name,
+    replicated: dataStream.replicated,
     indexTemplate,
   }));
 };
@@ -478,7 +490,6 @@ const updateExistingDataStream = async ({
   // to skip updating and assume the value in the index mapping is correct
   delete mappings.properties.stream;
   delete mappings.properties.data_stream;
-
   // try to update the mappings first
   try {
     await retryTransientEsErrors(
