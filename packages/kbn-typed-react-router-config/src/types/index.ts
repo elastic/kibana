@@ -305,7 +305,7 @@ type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
 //             element,
 //           },
 //           {
-//             path: '/settings/customize-ui',
+//             path: '/settings/custom-links',
 //             element,
 //           },
 //           {
