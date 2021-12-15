@@ -10,7 +10,6 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export type { MonitoringConfig } from '../server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -28,3 +27,5 @@ export interface MonitoringStartPluginDependencies {
   usageCollection: UsageCollectionSetup;
   appMountParameters: AppMountParameters;
 }
+
+export type MonitoringStartServices = CoreStart & MonitoringStartPluginDependencies;
