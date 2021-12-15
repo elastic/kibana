@@ -193,7 +193,9 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
                   value={query}
                 />
               </EuiPopoverTitle>
-              <div className="euiFilterSelect__items">{dropdownItems}</div>
+              <div data-test-subj="policiesSelector-popover" className="euiFilterSelect__items">
+                {dropdownItems}
+              </div>
             </EuiPopover>
           </EuiFilterGroup>
         </EuiFlexItem>
