@@ -28,12 +28,19 @@ export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
     };
 
     // We always pick the first criteria metric for the URL
-    const criteriaMetricField = `${ALERT_RULE_PARAMETERS}.criteria.metric`;
-    const criteriaMetric = fields[criteriaMetricField][0];
-    const criteriaCustomMetricIdField = `${ALERT_RULE_PARAMETERS}.criteria.id`;
-    const criteriaCustomMetricId = fields[criteriaCustomMetricIdField][0];
-    if (criteriaCustomMetricId === 'alert-custom-metric') {
-      const customMetric = encode({ id: criteriaCustomMetricId });
+    const criteriaMetric = fields[`${ALERT_RULE_PARAMETERS}.criteria.metric`][0];
+    const criteriaCustomMetricId = fields[`${ALERT_RULE_PARAMETERS}.criteria.id`][0];
+    if (criteriaCustomMetricId !== 'alert-custom-metric') {
+      const criteriaCustomMetricAggregation =
+        fields[`${ALERT_RULE_PARAMETERS}.criteria.aggregation`][0];
+      const criteriaCustomMetricField = fields[`${ALERT_RULE_PARAMETERS}.criteria.field`][0];
+
+      const customMetric = encode({
+        id: criteriaCustomMetricId,
+        type: 'custom',
+        field: criteriaCustomMetricField,
+        aggregation: criteriaCustomMetricAggregation,
+      });
       linkToParams.customMetric = customMetric;
       linkToParams.metric = customMetric;
     } else {
