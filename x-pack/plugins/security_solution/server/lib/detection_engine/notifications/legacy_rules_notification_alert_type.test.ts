@@ -100,7 +100,7 @@ describe('legacyRules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+      alertServices.search.asCurrentUser.search.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           sampleDocSearchResultsWithSortId()
         )
@@ -128,7 +128,7 @@ describe('legacyRules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+      alertServices.search.asCurrentUser.search.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           sampleDocSearchResultsWithSortId()
         )
@@ -156,7 +156,7 @@ describe('legacyRules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+      alertServices.search.asCurrentUser.search.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           sampleDocSearchResultsWithSortId()
         )
@@ -185,7 +185,7 @@ describe('legacyRules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+      alertServices.search.asCurrentUser.search.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           sampleDocSearchResultsWithSortId()
         )
@@ -211,7 +211,7 @@ describe('legacyRules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+      alertServices.search.asCurrentUser.search.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise(sampleEmptyDocSearchResults())
       );
 
@@ -228,7 +228,7 @@ describe('legacyRules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+      alertServices.search.asCurrentUser.search.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           sampleDocSearchResultsNoSortIdNoVersion()
         )
