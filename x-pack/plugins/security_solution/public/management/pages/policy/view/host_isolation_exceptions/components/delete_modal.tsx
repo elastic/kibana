@@ -77,9 +77,15 @@ export const PolicyHostIsolationExceptionsDeleteModal = ({
     mutation.mutate();
   };
 
+  const handleCancel = () => {
+    if (!mutation.isLoading) {
+      onCancel();
+    }
+  };
+
   return (
     <EuiConfirmModal
-      onCancel={onCancel}
+      onCancel={handleCancel}
       onConfirm={handleModalConfirm}
       title={i18n.translate(
         'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.removeDialog.title',
