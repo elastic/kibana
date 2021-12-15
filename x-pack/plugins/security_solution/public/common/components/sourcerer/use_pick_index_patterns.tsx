@@ -61,6 +61,7 @@ export const usePickIndexPatterns = ({
   signalIndexName,
 }: UsePickIndexPatternsProps): UsePickIndexPatterns => {
   const dispatch = useDispatch();
+  const isHooklAlive = useRef(true);
   const [loadingIndexPatterns, setLoadingIndexPatterns] = useState(false);
   const alertsOptions = useMemo(
     () => (signalIndexName ? patternListToOptions([signalIndexName]) : []),
@@ -190,19 +191,23 @@ export const usePickIndexPatterns = ({
         try {
           setLoadingIndexPatterns(true);
           setSelectedOptions([]);
+          // TODO We will need to figure out how to pass an abortController, but as right now this hook is
+          // constantly getting destroy and re-init
           const pickedDataViewData = await getSourcererDataview(newSelectedDataViewId);
-          dispatch(
-            sourcererActions.updateSourcererDataViews({
-              dataView: pickedDataViewData,
-            })
-          );
-          setSelectedOptions(
-            isOnlyDetectionAlerts
-              ? alertsOptions
-              : patternListToOptions(pickedDataViewData.patternList)
-          );
+          if (isHooklAlive.current) {
+            dispatch(
+              sourcererActions.updateSourcererDataViews({
+                dataView: pickedDataViewData,
+              })
+            );
+            setSelectedOptions(
+              isOnlyDetectionAlerts
+                ? alertsOptions
+                : patternListToOptions(pickedDataViewData.patternList)
+            );
+          }
         } catch (err) {
-          abortCtrl.current.abort();
+          // Nothing to do
         }
         setLoadingIndexPatterns(false);
       } else {
@@ -231,6 +236,13 @@ export const usePickIndexPatterns = ({
         : [],
     [dataViewId, defaultDataViewId, isModified, isOnlyDetectionAlerts, kibanaDataViews]
   );
+
+  useEffect(() => {
+    isHooklAlive.current = true;
+    return () => {
+      isHooklAlive.current = false;
+    };
+  }, []);
 
   return {
     allOptions,

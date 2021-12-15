@@ -42,7 +42,7 @@ const getEsFields = memoizeOne(
 export const useDataView = (): {
   indexFieldsSearch: (
     selectedDataViewId: string,
-    scopeId: SourcererScopeName,
+    scopeId?: SourcererScopeName,
     needToBeInit?: boolean
   ) => void;
 } => {
@@ -97,7 +97,7 @@ export const useDataView = (): {
             next: (response) => {
               if (isCompleteResponse(response)) {
                 const patternString = response.indicesExist.sort().join();
-                if (needToBeInit) {
+                if (needToBeInit && scopeId) {
                   dispatch(
                     sourcererActions.setSelectedDataView({
                       id: scopeId,
