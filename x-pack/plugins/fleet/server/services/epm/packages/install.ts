@@ -644,7 +644,7 @@ export async function ensurePackagesCompletedInstall(
             savedObjectsClient,
             pkgkey,
             esClient,
-            spaceId: (pkg.attributes.installed_kibana_space_id as string) || DEFAULT_SPACE_ID,
+            spaceId: pkg.attributes.installed_kibana_space_id || DEFAULT_SPACE_ID,
           })
         );
       }
