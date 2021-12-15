@@ -7,7 +7,6 @@
 
 import './app.scss';
 
-import { isEqual } from 'lodash';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -40,6 +39,7 @@ import {
 } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
+import { isLensEqual } from './lens_document_equality';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -156,15 +156,9 @@ export function App({
 
   useEffect(() => {
     onAppLeave((actions) => {
-      // Confirm when the user has made any changes to an existing doc
-      // or when the user has configured something without saving
-      const persistedState = persistedDoc?.state;
-      const lastKnownDocState = removePinnedFilters(
-        injectDocFilterReferences(data.query.filterManager.inject, lastKnownDoc)
-      )?.state;
       if (
         application.capabilities.visualize.save &&
-        !isEqual(persistedState, lastKnownDocState) &&
+        !isLensEqual(persistedDoc, lastKnownDoc, data.query.filterManager.inject, datasourceMap) &&
         (isSaveable || persistedDoc)
       ) {
         return actions.confirm(
@@ -186,6 +180,7 @@ export function App({
     persistedDoc,
     application.capabilities.visualize.save,
     data.query.filterManager.inject,
+    datasourceMap,
   ]);
 
   const getLegacyUrlConflictCallout = useCallback(() => {
