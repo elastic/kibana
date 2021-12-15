@@ -14,13 +14,12 @@ import { DataType, formatNumber, Metric } from '../lib';
  * Displays metadata for a metric.
  */
 export const MetricCardFooter: FunctionComponent<{
-  testSubjectName: string;
   title: string;
   description: string;
-}> = ({ testSubjectName, title, description }) => {
+}> = ({ title, description }) => {
   return (
     <EuiStat
-      data-test-subj={testSubjectName}
+      data-test-subj="serverMetricMeta"
       title={title}
       titleSize="xxs"
       description={description}
@@ -34,69 +33,65 @@ export const MetricCardFooter: FunctionComponent<{
  */
 export const MetricTile: FunctionComponent<{ metric: Metric }> = ({ metric }) => {
   const { name } = metric;
-  if (name === 'Delay') {
-    return (
-      <EuiCard
-        data-test-subj={`serverMetric-${formatMetricId(metric)}`}
-        title={formatMetric(metric)}
-        textAlign="left"
-        description={`${name} avg`}
-        footer={
-          metric.meta && (
-            <MetricCardFooter
-              testSubjectName="serverMetricMeta"
-              title={formatDelayFooterTitle(metric.meta.value as number[], metric.meta.type)}
-              description={metric.meta.description}
-            />
-          )
-        }
-      />
-    );
-  } else if (name === 'Load') {
-    return (
-      <EuiCard
-        data-test-subj={`serverMetric-${formatMetricId(metric)}`}
-        title={formatMetric(metric)}
-        textAlign="left"
-        description={name}
-        footer={
-          metric.meta && (
-            <MetricCardFooter
-              testSubjectName="serverMetricMeta"
-              title={metric.meta.title}
-              description={metric.meta.description}
-            />
-          )
-        }
-      />
-    );
-  } else if (name === 'Response time avg') {
-    return (
-      <EuiCard
-        data-test-subj={`serverMetric-${formatMetricId(metric)}`}
-        title={formatMetric(metric)}
-        textAlign="left"
-        description={name}
-        footer={
-          metric.meta && (
-            <MetricCardFooter
-              testSubjectName="serverMetricMeta"
-              title={formatNumber(metric.meta.value![0], metric.meta.type)}
-              description={metric.meta.description}
-            />
-          )
-        }
-      />
-    );
-  } else {
-    return (
-      <EuiCard
-        data-test-subj={`serverMetric-${formatMetricId(metric)}`}
-        textAlign="left"
-        title={formatMetric(metric)}
-        description={name}
-      />
-    );
+  switch (name) {
+    case 'Delay':
+      return (
+        <EuiCard
+          data-test-subj={`serverMetric-${formatMetricId(metric)}`}
+          title={formatMetric(metric)}
+          textAlign="left"
+          description={`${name} avg`}
+          footer={
+            metric.meta?.value && (
+              <MetricCardFooter
+                title={formatDelayFooterTitle(metric.meta.value, metric.meta.type)}
+                description={metric.meta.description}
+              />
+            )
+          }
+        />
+      );
+    case 'Load':
+      return (
+        <EuiCard
+          data-test-subj={`serverMetric-${formatMetricId(metric)}`}
+          title={formatMetric(metric)}
+          textAlign="left"
+          description={name}
+          footer={
+            metric.meta && (
+              <MetricCardFooter title={metric.meta.title} description={metric.meta.description} />
+            )
+          }
+        />
+      );
+    case 'Response time avg':
+      return (
+        <EuiCard
+          data-test-subj={`serverMetric-${formatMetricId(metric)}`}
+          title={formatMetric(metric)}
+          textAlign="left"
+          description={name}
+          footer={
+            metric.meta?.value &&
+            Array.isArray(metric.meta.value) && (
+              <MetricCardFooter
+                title={formatNumber(metric.meta.value[0], metric.meta.type)}
+                description={metric.meta.description}
+              />
+            )
+          }
+        />
+      );
+    default:
+      return (
+        <EuiCard
+          data-test-subj={`serverMetric-${formatMetricId(metric)}`}
+          textAlign="left"
+          title={formatMetric(metric)}
+          description={name}
+        />
+      );
   }
 };
 

@@ -43,7 +43,6 @@ exports[`MetricTile correctly displays a metric with metadata 1`] = `
   footer={
     <MetricCardFooter
       description="Percentiles"
-      testSubjectName="serverMetricMeta"
       title="
   50: 1.00 ms;
   95: 5.00 ms;
