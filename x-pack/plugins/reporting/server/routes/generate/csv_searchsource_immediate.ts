@@ -83,7 +83,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           },
         });
 
-        eventLog.logStart('starting execution', {});
+        eventLog.logStart('starting csv generation');
         eventLog.startTiming();
 
         try {

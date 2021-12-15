@@ -43,16 +43,12 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
       this.completionLogger = eventLog.getLogger({ event: { provider: PLUGIN_ID } });
     }
 
-    logStart(
-      message: string,
-      reportingObj: Partial<ExecuteStart['kibana']['reporting']>
-    ): ExecuteStart {
+    logStart(message: string): ExecuteStart {
       const action = EVENT_ACTION_EXECUTE_START as typeof EVENT_ACTION_EXECUTE_START;
       const event = deepMerge(
         {
           message,
           event: { kind: 'event' as const, action },
-          kibana: { reporting: { ...reportingObj } },
           log: { level: 'info' as const },
         },
         this.eventObj
