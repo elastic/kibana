@@ -12,7 +12,10 @@ import { isEqual } from 'lodash';
 import { encode } from 'rison-node';
 import { SimpleSavedObject } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   IndexDataVisualizerViewProps,
@@ -189,6 +192,7 @@ export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ add
     lens,
     dataViewFieldEditor,
     uiActions,
+    charts,
   } = getPluginsStart();
   const services = {
     data,
@@ -200,15 +204,18 @@ export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ add
     lens,
     dataViewFieldEditor,
     uiActions,
+    charts,
     ...coreStart,
   };
 
   return (
-    <KibanaContextProvider services={{ ...services }}>
-      <DataVisualizerUrlStateContextProvider
-        IndexDataVisualizerComponent={IndexDataVisualizerView}
-        additionalLinks={additionalLinks}
-      />
-    </KibanaContextProvider>
+    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+      <KibanaContextProvider services={{ ...services }}>
+        <DataVisualizerUrlStateContextProvider
+          IndexDataVisualizerComponent={IndexDataVisualizerView}
+          additionalLinks={additionalLinks}
+        />
+      </KibanaContextProvider>
+    </KibanaThemeProvider>
   );
 };

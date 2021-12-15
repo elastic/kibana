@@ -11,7 +11,8 @@
     "share",
     "discover",
     "fileUpload",
-    "uiActions"
+    "uiActions",
+    "charts"
   ],
   "optionalPlugins": [
     "security",
@@ -27,7 +28,6 @@
     "maps",
     "esUiShared",
     "fieldFormats",
-    "charts",
     "uiActions"
   ],
   "extraPublicDirs": [
