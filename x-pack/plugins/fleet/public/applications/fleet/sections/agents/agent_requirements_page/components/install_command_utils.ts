@@ -35,6 +35,8 @@ export function getInstallCommandForPlatform(
     commandArguments += ` ${newLineSeparator}\n  --fleet-server-es-ca=<PATH_TO_ES_CERT>`;
     commandArguments += ` ${newLineSeparator}\n  --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT>`;
     commandArguments += ` ${newLineSeparator}\n  --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY>`;
+  } else {
+    commandArguments += ` ${newLineSeparator}\n  --fleet-server-insecure-http`;
   }
 
   switch (platform) {
