@@ -18,14 +18,20 @@ export type { MLJobs } from '../server/lib/elasticsearch/get_ml_jobs';
 export interface MonitoringStartPluginDependencies {
   navigation: NavigationStart;
   data: DataPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  usageCollection: UsageCollectionSetup;
+}
+
+interface LegacyStartDependencies {
   element: HTMLElement;
   core: CoreStart;
   isCloud: boolean;
   pluginInitializerContext: PluginInitializerContext;
   externalConfig: Array<Array<string | number> | Array<string | boolean>>;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  usageCollection: UsageCollectionSetup;
   appMountParameters: AppMountParameters;
 }
+
+export type LegacyMonitoringStartPluginDependencies = MonitoringStartPluginDependencies &
+  LegacyStartDependencies;
 
 export type MonitoringStartServices = CoreStart & MonitoringStartPluginDependencies;
