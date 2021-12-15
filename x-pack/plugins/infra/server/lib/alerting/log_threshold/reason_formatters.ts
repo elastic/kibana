@@ -6,23 +6,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import 'moment-duration-format';
+
 import {
   Comparator,
   ComparatorToi18nMap,
   TimeUnit,
 } from '../../../../common/alerting/logs/log_threshold/types';
 
-// TODO: Do we need to i18n the returned value?
-const getTimeUnitFromOneChart = (shortcut: TimeUnit): string => {
-  switch (shortcut) {
+const getDuration = (timeSize: number, timeUnit: TimeUnit): string => {
+  switch (timeUnit) {
     case 's':
-      return 'sec';
+      return moment.duration(timeSize, 'seconds').format('s [sec]');
     case 'm':
-      return 'min';
+      return moment.duration(timeSize, 'minutes').format('m [min]');
     case 'h':
-      return 'hr';
+      return moment.duration(timeSize, 'hours').format('h [hr]');
     case 'd':
-      return 'day';
+      return moment.duration(timeSize, 'days').format('d [day]');
   }
 };
 
@@ -35,13 +37,12 @@ export const getReasonMessageForUngroupedCountAlert = (
 ) =>
   i18n.translate('xpack.infra.logs.alerting.threshold.ungroupedCountAlertReasonDescription', {
     defaultMessage:
-      '{actualCount, plural, one {{actualCount} log entry} other {{actualCount} log entries}} in the last ({timeSize} {timeUnit}). Alert when ({translatedComparator} {expectedCount}).',
+      '{actualCount, plural, one {{actualCount} log entry} other {{actualCount} log entries}} in the last {duration}. Alert when ({translatedComparator} {expectedCount}).',
     values: {
       actualCount,
       expectedCount,
       translatedComparator: ComparatorToi18nMap[comparator],
-      timeSize,
-      timeUnit: getTimeUnitFromOneChart(timeUnit),
+      duration: getDuration(timeSize, timeUnit),
     },
   });
 
@@ -55,14 +56,13 @@ export const getReasonMessageForGroupedCountAlert = (
 ) =>
   i18n.translate('xpack.infra.logs.alerting.threshold.groupedCountAlertReasonDescription', {
     defaultMessage:
-      '{actualCount, plural, one {{actualCount} log entry} other {{actualCount} log entries}} in the last ({timeSize} {timeUnit}) for {groupName}. Alert when ({translatedComparator} {expectedCount}).',
+      '{actualCount, plural, one {{actualCount} log entry} other {{actualCount} log entries}} in the last {duration} for {groupName}. Alert when ({translatedComparator} {expectedCount}).',
     values: {
       actualCount,
       expectedCount,
       groupName,
       translatedComparator: ComparatorToi18nMap[comparator],
-      timeSize,
-      timeUnit: getTimeUnitFromOneChart(timeUnit),
+      duration: getDuration(timeSize, timeUnit),
     },
   });
 
@@ -75,13 +75,12 @@ export const getReasonMessageForUngroupedRatioAlert = (
 ) =>
   i18n.translate('xpack.infra.logs.alerting.threshold.ungroupedRatioAlertReasonDescription', {
     defaultMessage:
-      'The ratio of selected logs is {actualRatio} in the last ({timeSize} {timeUnit}). Alert when ({translatedComparator} {expectedRatio}).',
+      'The ratio of selected logs is {actualRatio} in the last {duration}. Alert when ({translatedComparator} {expectedRatio}).',
     values: {
       actualRatio,
       expectedRatio,
       translatedComparator: ComparatorToi18nMap[comparator],
-      timeSize,
-      timeUnit: getTimeUnitFromOneChart(timeUnit),
+      duration: getDuration(timeSize, timeUnit),
     },
   });
 
@@ -95,13 +94,13 @@ export const getReasonMessageForGroupedRatioAlert = (
 ) =>
   i18n.translate('xpack.infra.logs.alerting.threshold.groupedRatioAlertReasonDescription', {
     defaultMessage:
-      'The ratio of selected logs is {actualRatio} in the last ({timeSize} {timeUnit}) for {groupName}. Alert when ({translatedComparator} {expectedRatio}).',
+      'The ratio of selected logs is {actualRatio} in the last {duration} for {groupName}. Alert when ({translatedComparator} {expectedRatio}).',
     values: {
       actualRatio,
       expectedRatio,
       groupName,
       translatedComparator: ComparatorToi18nMap[comparator],
       timeSize,
-      timeUnit: getTimeUnitFromOneChart(timeUnit),
+      duration: getDuration(timeSize, timeUnit),
     },
   });
