@@ -7,6 +7,7 @@
 
 import { get, isEmpty, isNumber, isObject, isString } from 'lodash/fp';
 
+import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils/technical_field_names';
 import { EventHit, EventSource, TimelineEventsDetailsItem } from '../search_strategy';
 import { toObjectArrayOfStrings, toStringArray } from './to_array';
 export const baseCategoryFields = ['@timestamp', 'labels', 'message', 'tags'];
@@ -36,6 +37,9 @@ export const formatGeoLocation = (item: unknown[]) => {
 
 export const isGeoField = (field: string) =>
   field.includes('geo.location') || field.includes('geoip.location');
+
+export const isRuleParametersFieldOrSubfield = (field: string, prependField?: string) =>
+  prependField?.includes(ALERT_RULE_PARAMETERS) || field === ALERT_RULE_PARAMETERS;
 
 export const getDataFromSourceHits = (
   sources: EventSource,
@@ -111,12 +115,22 @@ export const getDataFromFieldsHits = (
       ];
     }
 
+    if (isRuleParametersFieldOrSubfield(field, prependField)) {
+      const parameterFields = Array.isArray(item)
+        ? item
+            .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
+            .flat()
+        : getDataFromFieldsHits(item, dotField, fieldCategory);
+      return [...accumulator, ...parameterFields];
+    }
+
     // format nested fields
     const nestedFields = Array.isArray(item)
       ? item
           .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
           .flat()
-      : getDataFromFieldsHits(item, dotField, fieldCategory);
+      : getDataFromFieldsHits(item, prependField, fieldCategory);
+
     // combine duplicate fields
     const flat: Record<string, TimelineEventsDetailsItem> = [
       ...accumulator,
