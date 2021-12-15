@@ -59,7 +59,7 @@ Saved objects that are unable to persist are replaced with an error object.
 [[saved-objects-api-bulk-get-body-example]]
 ==== Example
 
-Retrieve an {data-source} with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID:
+Retrieve a {data-source} with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID:
 
 [source,sh]
 --------------------------------------------------
