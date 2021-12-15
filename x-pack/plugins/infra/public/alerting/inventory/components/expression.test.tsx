@@ -171,7 +171,15 @@ describe('ExpressionRow', () => {
           metric: [],
         }}
         expression={expression}
-        fields={[{ name: 'some.system.field', type: 'bzzz' }]}
+        fields={[
+          {
+            name: 'some.system.field',
+            type: 'bzzz',
+            searchable: true,
+            aggregatable: true,
+            displayable: true,
+          },
+        ]}
       />
     );
 

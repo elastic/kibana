@@ -48,7 +48,7 @@ function isValidMetaFieldName(field: string): field is ValidMetaFieldNames {
   return (VALID_META_FIELD_NAMES as string[]).includes(field);
 }
 
-export interface TabifyDocsOptions {
+interface TabifyDocsOptions {
   shallow?: boolean;
   /**
    * If set to `false` the _source of the document, if requested, won't be

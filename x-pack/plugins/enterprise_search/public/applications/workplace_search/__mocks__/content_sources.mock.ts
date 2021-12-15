@@ -123,6 +123,11 @@ export const fullContentSources = [
     urlFieldIsLinkable: true,
     createdAt: '2021-01-20',
     serviceName: 'myService',
+    secret: {
+      app_id: '99999',
+      fingerprint: '65xM7s0RE6tEWNhnuXpK5EvZ5OAMIcbDHIISm/0T23Y=',
+      base_url: 'http://github.com',
+    },
   },
   {
     ...contentSources[1],

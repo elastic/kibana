@@ -79,7 +79,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
   });
 
-  const alertStatus = get(0, ecsRowData?.['kibana.alert.workflow_status']) as Status;
+  const alertStatus = get(0, ecsRowData?.kibana?.alert?.workflow_status) as Status | undefined;
 
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
 
@@ -164,6 +164,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   });
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
+    disabled: !isEvent,
   });
   const items: React.ReactElement[] = useMemo(
     () =>

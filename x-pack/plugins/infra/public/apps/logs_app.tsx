@@ -23,7 +23,7 @@ import { prepareMountElement } from './common_styles';
 export const renderApp = (
   core: CoreStart,
   plugins: InfraClientStartDeps,
-  { element, history, setHeaderActionMenu }: AppMountParameters
+  { element, history, setHeaderActionMenu, theme$ }: AppMountParameters
 ) => {
   const storage = new Storage(window.localStorage);
 
@@ -36,6 +36,7 @@ export const renderApp = (
       history={history}
       plugins={plugins}
       setHeaderActionMenu={setHeaderActionMenu}
+      theme$={theme$}
     />,
     element
   );
@@ -51,15 +52,17 @@ const LogsApp: React.FC<{
   plugins: InfraClientStartDeps;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   storage: Storage;
-}> = ({ core, history, plugins, setHeaderActionMenu, storage }) => {
+  theme$: AppMountParameters['theme$'];
+}> = ({ core, history, plugins, setHeaderActionMenu, storage, theme$ }) => {
   const uiCapabilities = core.application.capabilities;
 
   return (
-    <CoreProviders core={core} plugins={plugins}>
+    <CoreProviders core={core} plugins={plugins} theme$={theme$}>
       <CommonInfraProviders
         appName="Logs UI"
         setHeaderActionMenu={setHeaderActionMenu}
         storage={storage}
+        theme$={theme$}
         triggersActionsUI={plugins.triggersActionsUi}
       >
         <Router history={history}>

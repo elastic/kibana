@@ -39,6 +39,7 @@ export interface ClientConfigType {
 export interface ClientData extends InitialAppData {
   publicUrl?: string;
   errorConnecting?: boolean;
+  errorConnectingMessage?: string;
 }
 
 interface PluginsSetup {
@@ -193,8 +194,9 @@ export class EnterpriseSearchPlugin implements Plugin {
     try {
       this.data = await http.get('/internal/enterprise_search/config_data');
       this.hasInitialized = true;
-    } catch {
+    } catch (e) {
       this.data.errorConnecting = true;
+      this.data.errorConnectingMessage = `${e.res.status} ${e.message}`;
     }
   }
 }

@@ -77,6 +77,7 @@ export class UpgradeAssistantUIPlugin
               api: apiService,
               breadcrumbs: breadcrumbService,
             },
+            theme$: params.theme$,
           };
 
           const { mountManagementSection } = await import('./application/mount_management_section');

@@ -35,6 +35,7 @@ export interface IEventLogService {
   registerSavedObjectProvider(type: string, provider: SavedObjectProvider): void;
   getLogger(properties: IEvent): IEventLogger;
   getIndexPattern(): string;
+  isEsContextReady(): Promise<boolean>;
 }
 
 export interface IEventLogClientService {
