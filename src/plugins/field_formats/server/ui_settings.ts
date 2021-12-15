@@ -42,7 +42,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   "ip": { "id": "ip", "params": {} },
   "date": { "id": "date", "params": {} },
   "date_nanos": { "id": "date_nanos", "params": {}, "es": true },
-  "geo_point": { "id": "geo_point", "params": { "transform": "lat_lon_string" } },
+  "geo_point": { "id": "geo_point", "params": { "transform": "wkt" } },
   "number": { "id": "number", "params": {} },
   "boolean": { "id": "boolean", "params": {} },
   "histogram": { "id": "histogram", "params": {} },

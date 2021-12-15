@@ -48,7 +48,7 @@ function toPoint(val: Point | { lat: number; lon: number } | string): Point | nu
     lat = val.lat;
     lon = val.lon;
   } else if (typeof val === 'string') {
-    if (val.startsWith('POINT(')) {
+    if (val.startsWith('POINT (')) {
       const pointArg = val.slice('POINT('.length, val.length);
       const split = pointArg.split(' ');
       if (split.length === 2) {
@@ -109,7 +109,7 @@ export class GeoPointFormat extends FieldFormat {
       case 'lat_lon_string':
         return `${point.coordinates[1]},${point.coordinates[0]}`;
       case 'wkt':
-        return `POINT(${point.coordinates[0]} ${point.coordinates[1]})`;
+        return `POINT (${point.coordinates[0]} ${point.coordinates[1]})`;
       default:
         return asPrettyString(val);
     }

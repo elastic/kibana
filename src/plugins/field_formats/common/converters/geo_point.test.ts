@@ -30,7 +30,7 @@ describe('GeoPoint Format', () => {
         jest.fn()
       );
       expect(geoPointFormat.convert({ type: 'Point', coordinates: [125.6, 10.1] })).toBe(
-        'POINT(125.6 10.1)'
+        'POINT (125.6 10.1)'
       );
     });
   });
@@ -68,14 +68,14 @@ describe('GeoPoint Format', () => {
       expect(geoPointFormat.convert('10.1,125.6')).toBe('10.1,125.6');
     });
 
-    test('Geopoint expressed as a Well-Known Text POINT with the format: "POINT(lon lat)"', () => {
+    test('Geopoint expressed as a Well-Known Text POINT with the format: "POINT (lon lat)"', () => {
       const geoPointFormat = new GeoPointFormat(
         {
           transform: 'lat_lon_string',
         },
         jest.fn()
       );
-      expect(geoPointFormat.convert('POINT(125.6 10.1)')).toBe('10.1,125.6');
+      expect(geoPointFormat.convert('POINT (125.6 10.1)')).toBe('10.1,125.6');
     });
 
     test('non-geopoint', () => {
