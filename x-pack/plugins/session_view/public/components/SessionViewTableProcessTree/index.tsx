@@ -66,6 +66,7 @@ export const SessionViewTableProcessTree = (props: SessionViewTableProcessTreePr
           iconSide="left"
           iconType="cross"
           onClick={handleCloseProcessTree}
+          data-test-subj="session-view-close-button"
         >
           Closs session viewer
         </EuiButtonEmpty>

@@ -229,6 +229,7 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
             color="primary"
             iconType="boxesHorizontal"
             onClick={handleMoreActionsClick(eventId)}
+            data-test-subj={`session-leader-table-more-actions-${eventId}`}
           />
         }
       >
@@ -317,7 +318,7 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
   }
 
   return (
-    <div>
+    <div data-test-subj="session-leader-table">
       {renderTimelinesTable()}
     </div>
   );
