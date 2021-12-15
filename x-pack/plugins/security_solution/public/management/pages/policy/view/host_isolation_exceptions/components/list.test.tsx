@@ -109,7 +109,9 @@ describe('Policy details host isolation exceptions tab', () => {
   });
 
   it('should enable the "remove from policy" option to policy-specific exceptions ', () => {
-    const testException = getExceptionListItemSchemaMock({ tags: [`policy:${policyId}`] });
+    const testException = getExceptionListItemSchemaMock({
+      tags: [`policy:${policyId}`, 'policy:1234', 'not-a-policy-tag'],
+    });
     const exceptions = {
       ...emptyList,
       data: [testException],
@@ -124,7 +126,9 @@ describe('Policy details host isolation exceptions tab', () => {
   });
 
   it('should render the delete dialog when the "remove from policy" button is clicked', () => {
-    const testException = getExceptionListItemSchemaMock({ tags: [`policy:${policyId}`] });
+    const testException = getExceptionListItemSchemaMock({
+      tags: [`policy:${policyId}`, 'policy:1234', 'not-a-policy-tag'],
+    });
     const exceptions = {
       ...emptyList,
       data: [testException],
