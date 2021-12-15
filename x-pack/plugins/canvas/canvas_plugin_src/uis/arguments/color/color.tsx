@@ -35,7 +35,7 @@ const ColorPicker: FC<Props> = ({ onValueChange, argValue }) => {
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiColorPicker onChange={pickColor} color={color} isInvalid={!!errors} />
+        <EuiColorPicker compressed onChange={pickColor} color={color} isInvalid={!!errors} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
