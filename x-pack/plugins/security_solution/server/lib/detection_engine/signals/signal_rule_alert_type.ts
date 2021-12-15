@@ -443,7 +443,7 @@ export const signalRulesAlertType = ({
                 outputIndex: indexNameOverride ?? outputIndex,
                 ruleId,
                 signals: result.createdSignals,
-                esClient: services.scopedClusterClient.asCurrentUser,
+                abortableEsClient: services.search.asCurrentUser,
                 notificationRuleParams,
                 logger,
               });
@@ -502,7 +502,7 @@ export const signalRulesAlertType = ({
               outputIndex,
               ruleId,
               signals: result.createdSignals,
-              esClient: services.scopedClusterClient.asCurrentUser,
+              abortableEsClient: services.search.asCurrentUser,
               notificationRuleParams,
               logger,
             });
@@ -536,7 +536,7 @@ export const signalRulesAlertType = ({
             outputIndex,
             ruleId,
             signals: result.createdSignals,
-            esClient: services.scopedClusterClient.asCurrentUser,
+            abortableEsClient: services.search.asCurrentUser,
             notificationRuleParams,
             logger,
           });
