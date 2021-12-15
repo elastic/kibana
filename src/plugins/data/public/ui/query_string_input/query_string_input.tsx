@@ -150,7 +150,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
   private isFocusWithin = false;
 
   private getQueryString = () => {
-    return toUser(this.props.query.query);
+    return toUser(!this.props.query.isFromSavedQuery ? this.props.query.query : '');
   };
 
   private fetchIndexPatterns = debounce(async () => {

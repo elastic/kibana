@@ -81,6 +81,7 @@ export type Filter = {
 export type Query = {
   query: string | { [key: string]: any };
   language: string;
+  isFromSavedQuery?: boolean;
 };
 
 /**

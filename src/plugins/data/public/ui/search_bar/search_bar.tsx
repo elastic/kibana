@@ -141,6 +141,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       nextQuery = {
         query: nextProps.query.query,
         language: nextProps.query.language,
+        isFromSavedQuery: nextProps.query.isFromSavedQuery ?? false,
       };
     } else if (
       nextProps.query &&
@@ -369,11 +370,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   public applyTimeFilterOverrideModal = (selectedQueries?: SavedQuery[]) => {
-    // if (selectedQueries) {
-    //   this.setState({
-    //     selectedSavedQueries: [...selectedQueries],
-    //   });
-    // }
     const queries = [...(selectedQueries || []), ...this.state.selectedSavedQueries];
     this.setState({ finalSelectedSavedQueries: queries });
     const selectedQueriesHaveTimeFilter = queries.some(
@@ -398,18 +394,18 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   public applySelectedSavedQueries = (selectedSavedQueries: SavedQuery[]) => {
-    // const savedQueries = selectedSavedQuery ?? (this.state.selectedSavedQueries as SavedQuery[]);
     const filters: Filter[] = [];
     const finalQueryFromSelectedSavedObjects: Query = {
       language: 'kuery',
       query: '',
+      isFromSavedQuery: true,
     };
     let dateRangeFrom = this.state.dateRangeFrom;
     let dateRangeTo = this.state.dateRangeTo;
 
     selectedSavedQueries.forEach((savedQuery, idx) => {
+      let savedQueryHasQueryIdx = 0;
       if (savedQuery.attributes.filters) {
-        // filtersIdsFromSavedQueries
         const updatedWithIconFilters = savedQuery.attributes.filters.map((filter) => {
           return {
             ...filter,
@@ -424,16 +420,22 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       if (savedQuery.attributes.query && savedQuery.attributes.query.query) {
         const existingQuery = finalQueryFromSelectedSavedObjects.query;
         const updatedQuery =
-          idx !== 0
+          savedQueryHasQueryIdx !== 0
             ? existingQuery.concat(' and ', savedQuery.attributes.query.query)
             : savedQuery.attributes.query.query;
         finalQueryFromSelectedSavedObjects.query = updatedQuery;
+        savedQueryHasQueryIdx++;
       }
       if (savedQuery.attributes.timefilter) {
         dateRangeFrom = savedQuery.attributes.timefilter.from || dateRangeFrom;
         dateRangeTo = savedQuery.attributes.timefilter.to || dateRangeTo;
       }
     });
+    // this.setState({
+    //   query: finalQueryFromSelectedSavedObjects,
+    //   dateRangeFrom,
+    //   dateRangeTo,
+    // });
 
     this.props?.onQuerySubmit?.({
       query: finalQueryFromSelectedSavedObjects,
@@ -526,17 +528,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       </SavedQueryManagementComponent>
     );
 
-    // const filterOptions = this.shouldRenderFilterBar() ? (
-    //   <FilterOptions
-    //     onEnableAll={this.onEnableAll}
-    //     onDisableAll={this.onDisableAll}
-    //     onPinAll={this.onPinAll}
-    //     onUnpinAll={this.onUnpinAll}
-    //     onToggleAllNegated={this.onToggleAllNegated}
-    //     onToggleAllDisabled={this.onToggleAllDisabled}
-    //     onRemoveAll={this.onRemoveAll}
-    //   />
-    // ) : undefined;
     const saveQueryFormComponent = (
       <SaveQueryForm
         savedQueryService={this.savedQueryService}
