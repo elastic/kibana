@@ -55,7 +55,7 @@ export const useInspectButton = ({
   }, [setQuery, loading, response, request, refetch, uniqueQueryId, deleteQuery]);
 };
 
-function fieldsToOptions(fields: { [fieldName: string]: Partial<BrowserField> }) {
+function getAggregatableFields(fields: { [fieldName: string]: Partial<BrowserField> }) {
   return Object.entries(fields).reduce<EuiComboBoxOptionOption[]>(
     (filteredOptions: EuiComboBoxOptionOption[], [key, field]) => {
       if (field.aggregatable === true) {
@@ -73,9 +73,11 @@ export const useStackByFields = () => {
 
   const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
   const allFields = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
-  const [stackByFieldOptions, setStackByFieldOptions] = useState(() => fieldsToOptions(allFields));
+  const [stackByFieldOptions, setStackByFieldOptions] = useState(() =>
+    getAggregatableFields(allFields)
+  );
   useEffect(() => {
-    setStackByFieldOptions(fieldsToOptions(allFields));
+    setStackByFieldOptions(getAggregatableFields(allFields));
   }, [allFields]);
   return useMemo(() => stackByFieldOptions, [stackByFieldOptions]);
 };
