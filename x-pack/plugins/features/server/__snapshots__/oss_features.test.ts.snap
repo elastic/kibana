@@ -660,11 +660,15 @@ Array [
     "privilege": Object {
       "alerting": Object {
         "alert": Object {
-          "all": Array [],
+          "all": Array [
+            ".search-threshold",
+          ],
           "read": Array [],
         },
         "rule": Object {
-          "all": Array [],
+          "all": Array [
+            ".search-threshold",
+          ],
           "read": Array [],
         },
       },
@@ -711,6 +715,18 @@ Array [
   },
   Object {
     "privilege": Object {
+      "alerting": Object {
+        "alert": Object {
+          "read": Array [
+            ".search-threshold",
+          ],
+        },
+        "rule": Object {
+          "read": Array [
+            ".search-threshold",
+          ],
+        },
+      },
       "app": Array [
         "discover",
         "kibana",
@@ -1140,11 +1156,15 @@ Array [
     "privilege": Object {
       "alerting": Object {
         "alert": Object {
-          "all": Array [],
+          "all": Array [
+            ".search-threshold",
+          ],
           "read": Array [],
         },
         "rule": Object {
-          "all": Array [],
+          "all": Array [
+            ".search-threshold",
+          ],
           "read": Array [],
         },
       },
@@ -1191,6 +1211,18 @@ Array [
   },
   Object {
     "privilege": Object {
+      "alerting": Object {
+        "alert": Object {
+          "read": Array [
+            ".search-threshold",
+          ],
+        },
+        "rule": Object {
+          "read": Array [
+            ".search-threshold",
+          ],
+        },
+      },
       "app": Array [
         "discover",
         "kibana",
