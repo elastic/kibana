@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignalSearchResponse } from '../signals/types';
+import type { SignalSearchResponse, SignalSource } from '../signals/types';
 import { buildSignalsSearchQuery } from './build_signals_query';
 import { IAbortableEsClient } from '../../../../../alerting/server';
 
@@ -38,7 +38,7 @@ export const getSignals = async ({
     size,
   });
 
-  const { body: result } = await abortableEsClient.search(query);
+  const { body: result } = await abortableEsClient.search<SignalSource>(query);
 
-  return result as SignalSearchResponse;
+  return result;
 };
