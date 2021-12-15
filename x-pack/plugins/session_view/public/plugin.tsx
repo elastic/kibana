@@ -66,7 +66,6 @@ export class SessionViewPlugin implements Plugin {
 
   public start(core: CoreStart) {
     // NO-OP
-    console.log('start', core);
     return {
       getSessionViewTableProcessTree: () => {
         return (
