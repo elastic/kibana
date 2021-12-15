@@ -7,14 +7,21 @@
 
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import React from 'react';
-import { fireEvent, act } from '@testing-library/react';
+import { fireEvent, act, waitFor } from '@testing-library/react';
 import { EventFiltersListPage } from './event_filters_list_page';
 import { eventFiltersListQueryHttpMock } from '../test_utils';
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utilts';
 
 // Needed to mock the data services used by the ExceptionItem component
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
+jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../services/policies/policies');
+
+(sendGetEndpointSpecificPackagePolicies as jest.Mock).mockImplementation(
+  sendGetEndpointSpecificPackagePoliciesMock
+);
 
 describe('When on the Event Filters List Page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -172,6 +179,28 @@ describe('When on the Event Filters List Page', () => {
     it('search action is dispatched', async () => {
       await act(async () => {
         fireEvent.click(renderResult.getByTestId('searchButton'));
+        expect(await waitForAction('userChangedUrl')).not.toBeNull();
+      });
+    });
+  });
+
+  describe('And policies select is dispatched', () => {
+    it('should apply policy filter', async () => {
+      const policies = await sendGetEndpointSpecificPackagePoliciesMock();
+      (sendGetEndpointSpecificPackagePolicies as jest.Mock).mockResolvedValue(policies);
+
+      renderResult = render();
+      await waitFor(() => {
+        expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
+      });
+
+      const firstPolicy = policies.items[0];
+
+      fireEvent.click(renderResult.getByTestId('policiesSelectorButton'));
+      await act(async () => {
+        fireEvent.click(
+          renderResult.getByTestId(`policiesSelector-popover-items-${firstPolicy.id}`)
+        );
         expect(await waitForAction('userChangedUrl')).not.toBeNull();
       });
     });

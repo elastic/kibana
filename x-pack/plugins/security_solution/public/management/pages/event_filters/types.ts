@@ -22,6 +22,7 @@ export interface EventFiltersPageLocation {
   /** Used for editing. The ID of the selected event filter */
   id?: string;
   filter: string;
+  included_policies: string;
 }
 
 export interface EventFiltersForm {
