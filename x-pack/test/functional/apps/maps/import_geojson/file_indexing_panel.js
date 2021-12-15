@@ -13,7 +13,6 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
   const log = getService('log');
   const security = getService('security');
-  const browser = getService('browser');
   const retry = getService('retry');
 
   async function loadFileAndIndex(loadFileName) {
