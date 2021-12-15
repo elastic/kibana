@@ -178,5 +178,9 @@ export function MachineLearningAnomalyExplorerProvider({
     async scrollChartsContainerIntoView() {
       await testSubjects.scrollIntoView('mlExplorerChartsContainer');
     },
+
+    async scrollMapContainerIntoView() {
+      await testSubjects.scrollIntoView('mlAnomaliesMapContainer');
+    },
   };
 }
