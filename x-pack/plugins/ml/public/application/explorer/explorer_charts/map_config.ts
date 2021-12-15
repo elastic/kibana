@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../../maps/common';
+import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '../../../../../maps/common';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../../common';
 import { AnomaliesTableData } from '../explorer_utils';
 
@@ -104,7 +104,7 @@ export const getMLAnomaliesTypicalLayer = (anomalies: AnomaliesTableData['anomal
         },
       },
     },
-    type: 'VECTOR',
+    type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 };
 
@@ -161,6 +161,6 @@ export const getMLAnomaliesActualLayer = (anomalies: any) => {
         },
       },
     },
-    type: 'VECTOR',
+    type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 };
