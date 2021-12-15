@@ -244,6 +244,16 @@ export const ArgumentStrings = {
         defaultMessage: 'Custom',
       }),
   },
+  Color: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.colorTitle', {
+        defaultMessage: 'Color',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.colorLabel', {
+        defaultMessage: 'Color picker',
+      }),
+  },
   Percentage: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.arguments.percentageTitle', {

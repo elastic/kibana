@@ -31,7 +31,7 @@ export const heatmapGrid = () => ({
       name: 'strokeColor',
       displayName: strings.getStrokeColorDisplayName(),
       help: strings.getStrokeColorDisplayName(),
-      argType: 'string', // TODO: change to a single color picker.
+      argType: 'color', // TODO: change to a single color picker.
     },
     {
       name: 'yAxisLabelColor',
