@@ -7,7 +7,6 @@
  */
 
 import moment from 'moment';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
@@ -108,9 +107,10 @@ export class TimePickerPageObject extends FtrService {
       await this.testSubjects.click('superDatePickerShowDatesButton');
     }
     await this.testSubjects.exists('superDatePickerstartDatePopoverButton');
-    // Close the start date popover which opens automatically when the button is shown
-    await setTimeoutAsync(250);
-    await this.testSubjects.click('superDatePickerstartDatePopoverButton');
+    // Close the start date popover which opens automatically if `superDatePickerShowDatesButton` is clicked
+    if (isShowDatesButton) {
+      await this.testSubjects.click('superDatePickerstartDatePopoverButton');
+    }
   }
 
   /**
@@ -129,7 +129,7 @@ export class TimePickerPageObject extends FtrService {
       await this.testSubjects.click('superDatePickerAbsoluteTab');
       await this.testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
-      await this.browser.pressKeys(this.browser.keys.ESCAPE); // close popover because sometimes browser can't find start input
+      await this.testSubjects.click('superDatePickerendDatePopoverButton'); // close popover because sometimes browser can't find start input
       const actualToTime = await this.testSubjects.getVisibleText(
         'superDatePickerendDatePopoverButton'
       );
