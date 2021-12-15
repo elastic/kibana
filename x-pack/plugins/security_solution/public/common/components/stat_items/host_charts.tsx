@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
   EuiHorizontalRule,
   EuiPanel,
   EuiSplitPanel,
 } from '@elastic/eui';
 import styled from 'styled-components';
-
+import { useDispatch } from 'react-redux';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { StartServices } from '../../../types';
 import {
   indexPatternList,
   reportConfigMap,
 } from '../../../app/exploratory_view/security_exploratory_view';
+import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+import { InputsModelId } from '../../store/inputs/constants';
+import { TimeRange } from '../../../../../../../src/plugins/data/public';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -29,14 +31,47 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 
 const panelHeight = '400px';
 
-export const HostsChart = () => {
+interface Props {
+  from: string;
+  to: string;
+  inputsModelId?: InputsModelId;
+}
+
+export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
+  const timerange = useMemo<TimeRange>(
+    () => ({
+      from: new Date(from).toISOString(),
+      to: new Date(to).toISOString(),
+      mode: 'absolute',
+    }),
+    [from, to]
+  );
+
+  console.log('from----', from, new Date(from).toISOString());
+  const dispatch = useDispatch();
   const { observability } = useKibana<StartServices>().services;
 
   const ExploratoryViewEmbeddable = observability.ExploratoryViewEmbeddable;
 
-  <EuiFlexItem grow={false}>
-    <EuiButtonIcon href="" size="s" iconType="visBarVerticalStacked" />
-  </EuiFlexItem>;
+  const onBrushEnd = useCallback(
+    ({
+      range,
+    }: {
+      table: Datatable;
+      column: number;
+      range: number[];
+      timeFieldName?: string | undefined;
+    }) => {
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: inputsModelId,
+          from: new Date(range[0]).toISOString(),
+          to: new Date(range[1]).toISOString(),
+        })
+      );
+    },
+    [dispatch, inputsModelId]
+  );
   return (
     <>
       <EuiFlexGroup>
@@ -60,7 +95,7 @@ export const HostsChart = () => {
                       dataType: 'security',
                       selectedMetricField: 'host.name',
                       operationType: 'unique_count',
-                      time: { from: 'now-24h', to: 'now' },
+                      time: timerange,
                     },
                   ]}
                   showExploreButton={false}
@@ -89,7 +124,7 @@ export const HostsChart = () => {
                       name: 'hosts',
                       dataType: 'security',
                       selectedMetricField: 'host.name',
-                      time: { from: 'now-24h', to: 'now' },
+                      time: timerange,
                     },
                   ]}
                   legendIsVisible={false}
@@ -103,6 +138,7 @@ export const HostsChart = () => {
                   disableBorder
                   disableShadow
                   customHeight="100%"
+                  onBrushEnd={onBrushEnd}
                 />
               </EuiFlexItem>
             </StyledEuiFlexGroup>
@@ -122,7 +158,7 @@ export const HostsChart = () => {
                   <ExploratoryViewEmbeddable
                     alignLnsMetric="flex-start"
                     appId="security"
-                    title={'Source IPs'}
+                    title={'Unique IPs'}
                     reportConfigMap={reportConfigMap}
                     dataTypesIndexPatterns={indexPatternList}
                     reportType="singleMetric"
@@ -134,7 +170,7 @@ export const HostsChart = () => {
                         name: 'Source IPs',
                         dataType: 'security', // number (?)
                         selectedMetricField: 'Records_source_ips',
-                        time: { from: 'now-24h', to: 'now' },
+                        time: timerange,
                         operationType: 'count', // unique_count(?)
                       },
                     ]}
@@ -165,7 +201,7 @@ export const HostsChart = () => {
                         name: 'Unique source',
                         dataType: 'security',
                         selectedMetricField: 'source.ip',
-                        time: { from: 'now-24h', to: 'now' },
+                        time: { from: 'now-24h', to: 'now' }, // unable to read iso string
                         color: '#D36086',
                       },
                       {
@@ -175,7 +211,7 @@ export const HostsChart = () => {
                         name: 'Unique Destination',
                         dataType: 'security',
                         selectedMetricField: 'destination.ip',
-                        time: { from: 'now-24h', to: 'now' },
+                        time: { from: 'now-24h', to: 'now' }, // unable to read iso string
                         color: '#9170B8',
                       },
                     ]}
@@ -200,7 +236,6 @@ export const HostsChart = () => {
                   <ExploratoryViewEmbeddable
                     alignLnsMetric="flex-start"
                     appId="security"
-                    title={'Destination IPs'}
                     reportConfigMap={reportConfigMap}
                     dataTypesIndexPatterns={indexPatternList}
                     reportType="singleMetric"
@@ -212,7 +247,7 @@ export const HostsChart = () => {
                         name: 'Destination IPs',
                         dataType: 'security',
                         selectedMetricField: 'Records_destination_ips',
-                        time: { from: 'now-24h', to: 'now' },
+                        time: timerange,
                         operationType: 'count',
                       },
                     ]}
@@ -243,7 +278,7 @@ export const HostsChart = () => {
                         name: 'source.ip',
                         dataType: 'security',
                         selectedMetricField: 'source.ip',
-                        time: { from: 'now-24h', to: 'now' },
+                        time: timerange,
                       },
                       {
                         reportDefinitions: {
@@ -252,7 +287,7 @@ export const HostsChart = () => {
                         name: 'destination.ip',
                         dataType: 'security',
                         selectedMetricField: 'destination.ip',
-                        time: { from: 'now-24h', to: 'now' },
+                        time: timerange,
                       },
                     ]}
                     legendIsVisible={false}
@@ -266,6 +301,7 @@ export const HostsChart = () => {
                     disableBorder
                     disableShadow
                     customHeight="100%"
+                    onBrushEnd={onBrushEnd}
                   />
                 </EuiFlexItem>
               </StyledEuiFlexGroup>

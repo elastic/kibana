@@ -31,6 +31,13 @@ export interface ExploratoryEmbeddableProps {
   disableShadow?: boolean;
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
   legendIsVisible?: boolean;
+
+  onBrushEnd?: (params: {
+    table: Datatable;
+    column: number;
+    range: number[];
+    timeFieldName?: string | undefined;
+  }) => null;
   reportConfigMap?: ReportConfigMap;
   reportType: ReportViewType;
   showCalculationMethod?: boolean;
@@ -64,6 +71,7 @@ export default function Embeddable({
   metricIcon,
   metricIconColor,
   metricPostfix,
+  onBrushEnd,
   reportConfigMap = {},
   reportType,
   showCalculationMethod = false,
@@ -155,7 +163,7 @@ export default function Embeddable({
             style={{ height: '100%' }}
             timeRange={series?.time}
             attributes={attributesJSON}
-            onBrushEnd={({ range }) => {}}
+            onBrushEnd={onBrushEnd}
             withActions={withActions}
           />
         </EuiFlexItem>

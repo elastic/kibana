@@ -97,7 +97,7 @@ export function ExploratoryView({
   };
 
   const WrapperC = asPanel ? PanelWrapper : Wrapper;
-
+  console.log('lensAttributes', lensAttributes);
   return (
     <WrapperC>
       {lens ? (

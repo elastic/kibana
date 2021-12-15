@@ -9,7 +9,6 @@ import * as React from 'react';
 import { ExploratoryViewContextProvider, ExploratoryView } from '../../../../observability/public';
 import {
   getSecurityKPIConfig,
-  // getSecurityEventOutcomeKPIConfig,
   getSecurityUniqueIpsKPIConfig,
   getSingleMetricConfig,
   getSecurityAuthenticationsConfig,
@@ -20,7 +19,6 @@ import { getSecurityAlertsKPIConfig } from './alert_kpi_over_time_config';
 export const reportConfigMap = {
   security: [
     getSecurityKPIConfig,
-    // getSecurityEventOutcomeKPIConfig,
     getSecurityUniqueIpsKPIConfig,
     getSingleMetricConfig,
     getSecurityAuthenticationsConfig,
