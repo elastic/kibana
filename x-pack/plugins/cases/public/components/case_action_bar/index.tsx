@@ -25,7 +25,7 @@ import { CaseService } from '../../containers/use_get_case_user_actions';
 import { StatusContextMenu } from './status_context_menu';
 import { getStatusDate, getStatusTitle } from './helpers';
 import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
-import { OnUpdateFields } from '../case_view';
+import type { OnUpdateFields } from '../case_view/types';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 
 const MyDescriptionList = styled(EuiDescriptionList)`

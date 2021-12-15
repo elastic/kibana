@@ -30,7 +30,7 @@ export const DEFAULT_WAFFLE_FILTERS_STATE: WaffleFiltersState = { kind: 'kuery',
 
 export const useWaffleFilters = () => {
   const { createDerivedIndexPattern } = useSourceContext();
-  const indexPattern = createDerivedIndexPattern('metrics');
+  const indexPattern = createDerivedIndexPattern();
 
   const [urlState, setUrlState] = useUrlState<WaffleFiltersState>({
     defaultState: DEFAULT_WAFFLE_FILTERS_STATE,
