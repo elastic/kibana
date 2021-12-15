@@ -625,7 +625,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButton onClick={() => this.setState({ overrideTimeFilterModalShow: false })}>
+            <EuiButton
+              onClick={() =>
+                this.setState({ overrideTimeFilterModalShow: false, finalSelectedSavedQueries: [] })
+              }
+            >
               Cancel
             </EuiButton>
             <EuiButton
