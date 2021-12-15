@@ -85,11 +85,7 @@ export const fetchContext = createThunk(
     const contextPath = [element.id, 'expressionContext', path, contextIndex];
 
     // set context state to loading
-    dispatch(
-      args.setLoading({
-        path: contextPath,
-      })
-    );
+    dispatch(args.setLoading({ path: contextPath }));
 
     // function to walk back up to find the closest context available
     const getContext = () => getSiblingContext(getState(), element.id, contextIndex - 1, [path]);
@@ -108,12 +104,7 @@ export const fetchContext = createThunk(
     const elementWithNewAst = set(element, pathToTarget, astChain);
     // get context data from a partial AST
     return interpretAst(elementWithNewAst.ast, variables, prevContextValue).then((value) => {
-      dispatch(
-        args.setValue({
-          path: contextPath,
-          value,
-        })
-      );
+      dispatch(args.setValue({ path: contextPath, value }));
     });
   }
 );
