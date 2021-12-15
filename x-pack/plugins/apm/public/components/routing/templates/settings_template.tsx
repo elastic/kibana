@@ -21,7 +21,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'agent-keys'
     | 'anomaly-detection'
     | 'apm-indices'
-    | 'customize-ui'
+    | 'custom-links'
     | 'schema';
   hidden?: boolean;
 };
@@ -100,13 +100,13 @@ function getTabs({
       hidden: !canAccessML,
     },
     {
-      key: 'customize-ui',
+      key: 'custom-links',
       label: i18n.translate('xpack.apm.settings.customizeApp', {
-        defaultMessage: 'Customize app',
+        defaultMessage: 'Custom Links',
       }),
       href: getLegacyApmHref({
         basePath,
-        path: `/settings/customize-ui`,
+        path: `/settings/custom-links`,
         search,
       }),
     },

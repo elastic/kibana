@@ -14,6 +14,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import {
   Embeddable,
   IContainer,
@@ -28,7 +29,6 @@ import {
   APPLY_FILTER_TRIGGER,
   esFilters,
   TimeRange,
-  Filter,
   Query,
 } from '../../../../../src/plugins/data/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
