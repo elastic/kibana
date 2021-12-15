@@ -202,7 +202,7 @@ export function GaugeDimensionEditor(
                 position="top"
                 tooltipContent={i18n.translate('xpack.lens.shared.ticksPositionOptionsTooltip', {
                   defaultMessage:
-                    'Places ticks on color borders instead of distributing them evenly',
+                    'Places ticks on each band border instead of distributing them evenly',
                 })}
                 condition={true}
                 delay="regular"
