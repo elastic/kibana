@@ -19,13 +19,7 @@ export { CASES_URL, SECURITY_SOLUTION_OWNER, ENABLE_CASE_CONNECTOR } from './con
 
 export { CommentType, CaseStatuses, getCasesFromAlertsUrl, throwErrors } from './api';
 
-export type {
-  SubCase,
-  Case,
-  Ecs,
-  CasesContextValue,
-  CaseViewRefreshPropInterface,
-} from './ui/types';
+export type { SubCase, Case, Ecs, CasesFeatures, CaseViewRefreshPropInterface } from './ui/types';
 
 export { StatusAll } from './ui/types';
 

@@ -16,7 +16,7 @@ export class AlertDetails implements MetricsHandler {
   private retrievedMetrics: boolean = false;
 
   public getFeatures(): Set<string> {
-    return new Set(['alertHosts', 'alertUsers']);
+    return new Set(['alerts.hosts', 'alerts.users']);
   }
 
   public async compute(): Promise<CaseMetricsResponse> {

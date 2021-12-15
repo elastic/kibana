@@ -20,7 +20,7 @@ export class AlertsCount implements MetricsHandler {
   ) {}
 
   public getFeatures(): Set<string> {
-    return new Set(['alertsCount']);
+    return new Set(['alerts.count']);
   }
 
   public async compute(): Promise<CaseMetricsResponse> {

@@ -15,7 +15,7 @@ export class Connectors implements MetricsHandler {
 
   public async compute(): Promise<CaseMetricsResponse> {
     return {
-      connectors: [],
+      connectors: { total: 0 },
     };
   }
 }
