@@ -108,7 +108,7 @@ export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
                 isLoading={isSaving}
                 disabled={hasBeenSubmitted && !isValid}
               >
-                {monitorId ? EDIT_MONITOR_LABEL : SAVE_MONITOR_LABEL}
+                {monitorId ? UPDATE_MONITOR_LABEL : SAVE_MONITOR_LABEL}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -126,7 +126,7 @@ const SAVE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.saveMo
   defaultMessage: 'Save monitor',
 });
 
-const EDIT_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorLabel', {
+const UPDATE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.updateMonitorLabel', {
   defaultMessage: 'Update monitor',
 });
 
