@@ -202,7 +202,10 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
  * @param esClient
  * @returns
  */
-const swapActionIds = async (action: Action, esClient: ElasticsearchClient): Promise<Action> => {
+export const swapActionIds = async (
+  action: Action,
+  esClient: ElasticsearchClient
+): Promise<Action | Error> => {
   try {
     // actions are hidden SO types so we need to query
     // with the elasticsearch client.. unless there
@@ -226,6 +229,10 @@ const swapActionIds = async (action: Action, esClient: ElasticsearchClient): Pro
     if (actionWithRequestedOriginId.body.hits.hits.length === 1) {
       // id is of the form 'action:1234-5678...' so I need to split off the 'action' prefix
       return { ...action, id: actionWithRequestedOriginId.body.hits.hits[0]._id.split(':')[1] };
+    } else if (actionWithRequestedOriginId.body.hits.hits.length > 1) {
+      return new Error(
+        `action connector with originId: ${action.id} had conflicts. Please resolve these conflicts either in the file you are attempting to upload or resolve the conflicting action connector in Kibana.`
+      );
     }
   } catch (exc) {
     return action;
@@ -268,16 +275,39 @@ export const migrateLegacyActionsIds = async (
   esClient: ElasticsearchClient
 ): Promise<PromiseFromStreams[]> => {
   const isImportRule = (r: unknown): r is ImportRulesSchemaDecoded => !(r instanceof Error);
-  const rulesToReturn = rules.map(async (rule) => {
-    if (isImportRule(rule)) {
-      const actionsMap = rule.actions.map((action: Action) => swapActionIds(action, esClient));
-      const newActions = await Promise.all(actionsMap);
-      return { ...rule, actions: newActions } as ImportRulesSchemaDecoded;
-    }
-    return rule;
-  });
-  const resolvedRulesToReturn = await Promise.all(rulesToReturn);
-  return resolvedRulesToReturn;
+  return Promise.all(
+    rules.map(async (rule) => {
+      if (isImportRule(rule)) {
+        // can we swap the pre 8.0 action connector(s) id with the new,
+        // post-8.0 action id (swap the originId for the new _id?)
+        const newActions: Array<Action | Error> = await Promise.all(
+          rule.actions.map((action: Action) => swapActionIds(action, esClient))
+        );
+
+        // any errors discovered while trying to migrate
+        // and swap the action connector ids?
+        const actionMigrationErrors = newActions.filter(
+          (action): action is Error => action instanceof Error
+        );
+
+        if (actionMigrationErrors == null || actionMigrationErrors.length === 0) {
+          return { ...rule, actions: newActions } as ImportRulesSchemaDecoded;
+        }
+        // return an Error object with the rule_id and the error messages
+        // for the actions associated with that rule.
+        return new Error(
+          JSON.stringify(
+            createBulkErrorObject({
+              ruleId: rule.rule_id,
+              statusCode: 409,
+              message: `${actionMigrationErrors.map((error: Error) => error.message).join(',')}`,
+            })
+          )
+        );
+      }
+      return rule;
+    })
+  );
 };
 
 /**

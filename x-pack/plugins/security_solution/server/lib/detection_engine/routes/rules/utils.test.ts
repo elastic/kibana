@@ -7,6 +7,7 @@
 
 import { Readable } from 'stream';
 import { createPromiseFromStreams } from '@kbn/utils';
+import { Action, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import {
   transformAlertToRule,
@@ -19,6 +20,8 @@ import {
   getDuplicates,
   getTupleDuplicateErrorsAndUniqueRules,
   getInvalidConnectors,
+  swapActionIds,
+  migrateLegacyActionsIds,
 } from './utils';
 import { getAlertMock } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
@@ -30,7 +33,6 @@ import { createRulesAndExceptionsStreamFromNdJson } from '../../rules/create_rul
 import { RuleAlertType } from '../../rules/types';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
 import {
   getMlRuleParams,
@@ -652,6 +654,218 @@ describe.each([
     });
   });
 
+  describe('swapActionIds', () => {
+    const mockAction: Action = {
+      group: 'group string',
+      id: 'some-7.x-id',
+      action_type_id: '.slack',
+      params: {},
+    };
+    beforeEach(() => {
+      clients.core.elasticsearch.client.asInternalUser.search.mockReset();
+      clients.core.elasticsearch.client.asInternalUser.search.mockClear();
+    });
+
+    test('returns original action if Elasticsearch query fails', async () => {
+      clients.core.elasticsearch.client.asInternalUser.search.mockRejectedValueOnce(
+        new Error('failed to query')
+      );
+      const result = await swapActionIds(
+        mockAction,
+        clients.core.elasticsearch.client.asInternalUser
+      );
+      expect(result).toEqual(mockAction);
+    });
+
+    test('returns original action if Elasticsearch query returns no hits', async () => {
+      // @ts-expect-error
+      clients.core.elasticsearch.client.asInternalUser.search.mockImplementationOnce(async () => ({
+        body: {
+          hits: { total: 0, hits: [] },
+        },
+      }));
+      const result = await swapActionIds(
+        mockAction,
+        clients.core.elasticsearch.client.asInternalUser
+      );
+      expect(result).toEqual(mockAction);
+    });
+
+    test('returns error if conflicting action connectors are found -> two hits found with same originId', async () => {
+      // @ts-expect-error
+      clients.core.elasticsearch.client.asInternalUser.search.mockImplementationOnce(async () => ({
+        body: {
+          hits: {
+            total: 2,
+            hits: [{ fakeActionKey: 'fakeActionValue' }, { fakeActionKey: 'fakeActionValue2' }],
+          },
+        },
+      }));
+      const result = await swapActionIds(
+        mockAction,
+        clients.core.elasticsearch.client.asInternalUser
+      );
+      expect(result instanceof Error).toBeTruthy();
+      expect((result as unknown as Error).message).toEqual(
+        'action connector with originId: some-7.x-id had conflicts. Please resolve these conflicts either in the file you are attempting to upload or resolve the conflicting action connector in Kibana.'
+      );
+    });
+
+    test('returns action with new migrated _id if a single hit is found when querying by action connector originId', async () => {
+      // @ts-expect-error
+      clients.core.elasticsearch.client.asInternalUser.search.mockImplementationOnce(async () => ({
+        body: {
+          hits: {
+            total: 1,
+            hits: [{ _id: 'action:new-post-8.0-id' }],
+          },
+        },
+      }));
+      const result = await swapActionIds(
+        mockAction,
+        clients.core.elasticsearch.client.asInternalUser
+      );
+      expect(result).toEqual({ ...mockAction, id: 'new-post-8.0-id' });
+    });
+  });
+
+  describe('migrateLegacyActionsIds', () => {
+    const mockAction: Action = {
+      group: 'group string',
+      id: 'some-7.x-id',
+      action_type_id: '.slack',
+      params: {},
+    };
+    test('returns import rules schemas + migrated action', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [mockAction],
+      };
+      // @ts-expect-error
+      clients.core.elasticsearch.client.asInternalUser.search.mockImplementationOnce(async () => ({
+        body: {
+          hits: {
+            total: 1,
+            hits: [{ _id: 'action:new-post-8.0-id' }],
+          },
+        },
+      }));
+
+      const res = await migrateLegacyActionsIds(
+        // @ts-expect-error
+        [rule],
+        clients.core.elasticsearch.client.asInternalUser
+      );
+      expect(res).toEqual([{ ...rule, actions: [{ ...mockAction, id: 'new-post-8.0-id' }] }]);
+    });
+
+    test('returns import rules schemas + multiple migrated action', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [mockAction, { ...mockAction, id: 'different-id' }],
+      };
+      // @ts-expect-error
+      clients.core.elasticsearch.client.asInternalUser.search.mockImplementation(async () => ({
+        body: {
+          hits: {
+            total: 1,
+            hits: [{ _id: 'action:new-post-8.0-id' }],
+          },
+        },
+      }));
+
+      const res = await migrateLegacyActionsIds(
+        // @ts-expect-error
+        [rule],
+        clients.core.elasticsearch.client.asInternalUser
+      );
+      expect(res).toEqual([
+        {
+          ...rule,
+          actions: [
+            { ...mockAction, id: 'new-post-8.0-id' },
+            { ...mockAction, id: 'new-post-8.0-id' },
+          ],
+        },
+      ]);
+    });
+
+    test('returns import rules schemas + migrated action resulting in error', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [mockAction],
+      };
+      // @ts-expect-error
+      clients.core.elasticsearch.client.asInternalUser.search.mockImplementationOnce(async () => ({
+        body: {
+          hits: {
+            total: 2,
+            hits: [{ fakeActionKey: 'fakeActionValue' }, { fakeActionKey: 'fakeActionValue2' }],
+          },
+        },
+      }));
+
+      const res = await migrateLegacyActionsIds(
+        // @ts-expect-error
+        [rule],
+        clients.core.elasticsearch.client.asInternalUser
+      );
+      expect(res[0] instanceof Error).toBeTruthy();
+      expect((res[0] as unknown as Error).message).toEqual(
+        JSON.stringify({
+          rule_id: 'rule-1',
+          error: {
+            status_code: 409,
+            message:
+              'action connector with originId: some-7.x-id had conflicts. Please resolve these conflicts either in the file you are attempting to upload or resolve the conflicting action connector in Kibana.',
+          },
+        })
+      );
+    });
+    test('returns import multiple rules schemas + migrated action, one success and one error', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [mockAction],
+      };
+
+      // @ts-expect-error
+      clients.core.elasticsearch.client.asInternalUser.search.mockImplementationOnce(async () => ({
+        body: {
+          hits: {
+            total: 1,
+            hits: [{ _id: 'action:new-post-8.0-id' }],
+          },
+        },
+      }));
+      // @ts-expect-error
+      clients.core.elasticsearch.client.asInternalUser.search.mockImplementationOnce(async () => ({
+        body: {
+          hits: {
+            total: 2,
+            hits: [{ fakeActionKey: 'fakeActionValue' }, { fakeActionKey: 'fakeActionValue2' }],
+          },
+        },
+      }));
+
+      const res = await migrateLegacyActionsIds(
+        // @ts-expect-error
+        [rule, rule],
+        clients.core.elasticsearch.client.asInternalUser
+      );
+      expect(res[0]).toEqual({ ...rule, actions: [{ ...mockAction, id: 'new-post-8.0-id' }] });
+      expect(res[1] instanceof Error).toBeTruthy();
+      expect((res[1] as unknown as Error).message).toEqual(
+        JSON.stringify({
+          rule_id: 'rule-1',
+          error: {
+            status_code: 409,
+            message:
+              'action connector with originId: some-7.x-id had conflicts. Please resolve these conflicts either in the file you are attempting to upload or resolve the conflicting action connector in Kibana.',
+          },
+        })
+      );
+    });
+  });
   describe('getInvalidConnectors', () => {
     beforeEach(() => {
       clients.actionsClient.getAll.mockReset();
