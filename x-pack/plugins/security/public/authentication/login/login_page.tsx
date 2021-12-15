@@ -121,7 +121,6 @@ export class LoginPage extends Component<Props, State> {
     const contentBodyClasses = classNames('loginWelcome__content', 'loginWelcome-body', {
       ['loginWelcome__contentDisabledForm']: !loginIsSupported,
     });
-    console.log(this.props);
 
     return (
       <div className="loginWelcome login-form">
