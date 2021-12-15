@@ -38,7 +38,7 @@ export interface DataVisualizerStartDependencies {
   security?: SecurityPluginSetup;
   share: SharePluginStart;
   lens?: LensPublicStart;
-  charts?: ChartsPluginStart;
+  charts: ChartsPluginStart;
   dataViewFieldEditor?: IndexPatternFieldEditorStart;
   fieldFormats: FieldFormatsStart;
   uiActions?: UiActionsStart;

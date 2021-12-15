@@ -60,8 +60,8 @@ export const DocumentCountChart: FC<Props> = ({
     services: { data, uiSettings, fieldFormats, charts },
   } = useDataVisualizerKibana();
 
-  const chartTheme = charts?.theme.useChartsTheme();
-  const chartBaseTheme = charts?.theme.useChartsBaseTheme();
+  const chartTheme = charts.theme.useChartsTheme();
+  const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
   const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
