@@ -39,7 +39,9 @@ export const appplyBulkActionEditToRule = (
       rule.tags = action.value;
       break;
 
-    // index actions
+    // index_patterns actions
+    // index is not present in all rule types(machine learning). But it's mandatory for the rest.
+    // So we check if index is present and only in that case apply action
     case BulkActionEditType.add_index_patterns:
       if (rule.params && 'index' in rule.params) {
         rule.params.index = addItemsToArray(rule.params.index ?? [], action.value);
@@ -60,10 +62,11 @@ export const appplyBulkActionEditToRule = (
 
     // timeline actions
     case BulkActionEditType.set_timeline:
-      if (rule.params) {
-        rule.params.timelineId = action.value.timeline_id;
-        rule.params.timelineTitle = action.value.timeline_title;
-      }
+      rule.params = {
+        ...rule.params,
+        timelineId: action.value.timeline_id,
+        timelineTitle: action.value.timeline_title,
+      };
   }
 
   return rule;

@@ -72,14 +72,14 @@ describe('bulk_action_edit', () => {
     });
 
     describe('index_patterns', () => {
-      test('should add new index to rule', () => {
+      test('should add new index pattern to rule', () => {
         const editedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
           type: BulkActionEditType.add_index_patterns,
           value: ['my-index-*'],
         });
         expect(editedRule.params).toHaveProperty('index', ['initial-index-*', 'my-index-*']);
       });
-      test('should remove index from rule', () => {
+      test('should remove index pattern from rule', () => {
         const editedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
           type: BulkActionEditType.delete_index_patterns,
           value: ['initial-index-*'],
@@ -87,12 +87,36 @@ describe('bulk_action_edit', () => {
         expect(editedRule.params).toHaveProperty('index', []);
       });
 
-      test('should rewrite index in rule', () => {
+      test('should rewrite index  pattern in rule', () => {
         const editedRule = appplyBulkActionEditToRule(ruleMock as RuleAlertType, {
           type: BulkActionEditType.set_index_patterns,
           value: ['index'],
         });
         expect(editedRule.params).toHaveProperty('index', ['index']);
+      });
+
+      test('should not add new index pattern to rule if index pattern is absent', () => {
+        const editedRule = appplyBulkActionEditToRule({ params: {} } as RuleAlertType, {
+          type: BulkActionEditType.add_index_patterns,
+          value: ['my-index-*'],
+        });
+        expect(editedRule.params).not.toHaveProperty('index');
+      });
+
+      test('should not remove index pattern to rule if index pattern is absent', () => {
+        const editedRule = appplyBulkActionEditToRule({ params: {} } as RuleAlertType, {
+          type: BulkActionEditType.delete_index_patterns,
+          value: ['initial-index-*'],
+        });
+        expect(editedRule.params).not.toHaveProperty('index');
+      });
+
+      test('should not set index pattern to rule if index pattern is absent', () => {
+        const editedRule = appplyBulkActionEditToRule({ params: {} } as RuleAlertType, {
+          type: BulkActionEditType.set_index_patterns,
+          value: ['index-*'],
+        });
+        expect(editedRule.params).not.toHaveProperty('index');
       });
     });
 
