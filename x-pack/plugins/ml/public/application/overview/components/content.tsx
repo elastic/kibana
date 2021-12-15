@@ -15,7 +15,6 @@ interface Props {
   createAnalyticsJobDisabled: boolean;
   setAdLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
   setDfaLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
-  refreshCount: number;
 }
 
 export const OverviewContent: FC<Props> = ({
@@ -23,7 +22,6 @@ export const OverviewContent: FC<Props> = ({
   createAnalyticsJobDisabled,
   setAdLazyJobCount,
   setDfaLazyJobCount,
-  refreshCount,
 }) => (
   <>
     <AnomalyDetectionPanel
@@ -34,7 +32,6 @@ export const OverviewContent: FC<Props> = ({
     <AnalyticsPanel
       jobCreationDisabled={createAnalyticsJobDisabled}
       setLazyJobCount={setDfaLazyJobCount}
-      refreshCount={refreshCount}
     />
   </>
 );

@@ -32,10 +32,9 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     allocated_models: allocatedModels,
     attributes,
     memory_overview: memoryOverview,
+    id,
     ...details
   } = item;
-
-  delete details.id;
 
   // Process node attributes
   attributes['ml.machine_memory'] = bytesFormatter(attributes['ml.machine_memory']);

@@ -23,6 +23,7 @@ import { NodesList } from '../trained_models/nodes_overview';
 import { DatePickerWrapper } from '../components/navigation_menu/date_picker_wrapper';
 import { useUrlState } from '../util/url_state';
 import { useRefresh } from '../routing/use_refresh';
+import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 export const OverviewPage: FC = () => {
   const canViewMlNodes = checkPermission('canViewMlNodes');
@@ -69,7 +70,6 @@ export const OverviewPage: FC = () => {
 
   const [adLazyJobCount, setAdLazyJobCount] = useState(0);
   const [dfaLazyJobCount, setDfaLazyJobCount] = useState(0);
-  const [refreshCount, setRefreshCount] = useState(0);
 
   return (
     <>
@@ -83,7 +83,16 @@ export const OverviewPage: FC = () => {
 
           <NodeAvailableWarning />
           <JobsAwaitingNodeWarning jobCount={adLazyJobCount + dfaLazyJobCount} />
-          <SavedObjectsWarning onCloseFlyout={() => setRefreshCount(refreshCount + 1)} />
+          <SavedObjectsWarning
+            onCloseFlyout={() => {
+              const { from, to } = timefilter.getTime();
+              const timeRange = { start: from, end: to };
+              mlTimefilterRefresh$.next({
+                lastRefresh: Date.now(),
+                timeRange,
+              });
+            }}
+          />
           <UpgradeWarning />
 
           <GettingStartedCallout />
@@ -102,7 +111,6 @@ export const OverviewPage: FC = () => {
             createAnalyticsJobDisabled={disableCreateAnalyticsButton}
             setAdLazyJobCount={setAdLazyJobCount}
             setDfaLazyJobCount={setDfaLazyJobCount}
-            refreshCount={refreshCount}
           />
         </EuiPageBody>
       </EuiPage>
