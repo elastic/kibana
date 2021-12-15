@@ -59,6 +59,7 @@ interface ColumnChange {
   shouldResetLabel?: boolean;
   incompleteParams?: ColumnAdvancedParams;
   incompleteFieldName?: string;
+  incompleteFieldOperation?: OperationType;
   columnParams?: Record<string, unknown>;
   initialParams?: { params: Record<string, unknown> }; // TODO: bind this to the op parameter
 }
@@ -194,6 +195,7 @@ export function insertNewColumn({
   shouldResetLabel,
   incompleteParams,
   incompleteFieldName,
+  incompleteFieldOperation,
   columnParams,
   initialParams,
 }: ColumnChange): IndexPatternLayer {
@@ -253,6 +255,20 @@ export function insertNewColumn({
       }
 
       const newId = generateId();
+      if (incompleteFieldOperation && incompleteFieldName) {
+        const validFields = indexPattern.fields.filter(
+          (validField) => validField.name === incompleteFieldName
+        );
+        tempLayer = insertNewColumn({
+          layer: tempLayer,
+          columnId: newId,
+          op: incompleteFieldOperation,
+          indexPattern,
+          field: validFields[0],
+          visualizationGroups,
+          targetGroup,
+        });
+      }
       if (validOperations.length === 1) {
         const def = validOperations[0];
 
@@ -305,7 +321,10 @@ export function insertNewColumn({
     return updateDefaultLabels(
       addOperationFn(
         tempLayer,
-        operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, referenceIds }),
+        operationDefinition.buildColumn(
+          { ...baseOptions, layer: tempLayer, referenceIds },
+          columnParams
+        ),
         columnId,
         visualizationGroups,
         targetGroup
@@ -1561,6 +1580,9 @@ export function computeLayerFromContext(
       field: !firstElement?.isFullReference ? field ?? documentField : undefined,
       columnParams: firstElement?.params ?? undefined,
       incompleteFieldName: firstElement?.isFullReference ? field?.name : undefined,
+      incompleteFieldOperation: firstElement?.isFullReference
+        ? firstElement?.pipelineAggType
+        : undefined,
       indexPattern,
       visualizationGroups: [],
     });

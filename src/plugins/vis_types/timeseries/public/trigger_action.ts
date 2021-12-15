@@ -35,6 +35,10 @@ const LENS_METRIC_TYPES: { [key: string]: AggOptions } = {
     name: 'counter_rate',
     isFullReference: true,
   },
+  moving_average: {
+    name: 'moving_average',
+    isFullReference: true,
+  },
   max: {
     name: 'max',
     isFullReference: false,
@@ -149,6 +153,28 @@ export const triggerVisualizeToLensActions = async (
           color: layer.color,
           fieldName: 'document',
           params: { formula: finalScript, shift: timeShift },
+        },
+      ];
+    } else if (aggregation === 'moving_average') {
+      // console.dir(layer.metrics);
+      const movingAverageMetric = layer.metrics.find(
+        (metric) => metric.id === layer.metrics[metricIdx].field
+      );
+      if (!movingAverageMetric) {
+        return null;
+      }
+      const pipelineAggMap = LENS_METRIC_TYPES[movingAverageMetric.type];
+      if (!pipelineAggMap) {
+        return null;
+      }
+      metricsArray = [
+        {
+          agg: aggregationMap.name,
+          isFullReference: aggregationMap.isFullReference,
+          pipelineAggType: pipelineAggMap.name,
+          color: layer.color,
+          fieldName: movingAverageMetric?.field ?? 'document',
+          params: { shift: timeShift, window: layer.metrics[metricIdx].window },
         },
       ];
     } else {

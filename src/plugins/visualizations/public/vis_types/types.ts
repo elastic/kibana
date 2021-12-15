@@ -84,6 +84,7 @@ interface SplitFilters {
 interface Metric {
   agg: string;
   fieldName: string;
+  pipelineAggType?: string;
   params?: Record<string, unknown>;
   isFullReference: boolean;
   color?: string;

@@ -174,6 +174,7 @@ interface Metric {
   params?: Record<string, unknown>;
   isFullReference: boolean;
   color?: string;
+  pipelineAggType?: string;
 }
 
 export interface VisualizeEditorLayersContext {
