@@ -109,6 +109,7 @@ interface State {
   openFilterSetPopover: boolean;
   showSavedQueryPopover: boolean;
   selectedSavedQueries: SavedQuery[];
+  finalSelectedSavedQueries: SavedQuery[];
   currentProps?: SearchBarProps;
   query?: Query;
   dateRangeFrom: string;
@@ -196,6 +197,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showSavedQueryPopover: false,
     currentProps: this.props,
     selectedSavedQueries: [],
+    finalSelectedSavedQueries: [],
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
@@ -367,12 +369,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   public applyTimeFilterOverrideModal = (selectedQueries?: SavedQuery[]) => {
-    if (selectedQueries) {
-      this.setState({
-        selectedSavedQueries: [...selectedQueries],
-      });
-    }
-    const queries = selectedQueries ?? this.state.selectedSavedQueries;
+    // if (selectedQueries) {
+    //   this.setState({
+    //     selectedSavedQueries: [...selectedQueries],
+    //   });
+    // }
+    const queries = [...(selectedQueries || []), ...this.state.selectedSavedQueries];
+    this.setState({ finalSelectedSavedQueries: queries });
     const selectedQueriesHaveTimeFilter = queries.some(
       (query: SavedQuery) => query.attributes.timefilter
     );
@@ -382,7 +385,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     ) {
       this.setState({ overrideTimeFilterModalShow: true });
     } else {
-      this.applySelectedSavedQueries(selectedQueries);
+      this.applySelectedSavedQueries(queries);
     }
   };
 
@@ -391,11 +394,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       this.services.storage.set(LOCAL_STORAGE_TIMEFILTER_OVERRIDE_MODAL_HIDDEN, true);
     }
     this.setState({ overrideTimeFilterModalShow: false });
-    this.applySelectedSavedQueries();
+    this.applySelectedSavedQueries(this.state.selectedSavedQueries);
   };
 
-  public applySelectedSavedQueries = (selectedSavedQuery?: SavedQuery[]) => {
-    const savedQueries = selectedSavedQuery ?? (this.state.selectedSavedQueries as SavedQuery[]);
+  public applySelectedSavedQueries = (selectedSavedQueries: SavedQuery[]) => {
+    // const savedQueries = selectedSavedQuery ?? (this.state.selectedSavedQueries as SavedQuery[]);
     const filters: Filter[] = [];
     const finalQueryFromSelectedSavedObjects: Query = {
       language: 'kuery',
@@ -404,7 +407,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     let dateRangeFrom = this.state.dateRangeFrom;
     let dateRangeTo = this.state.dateRangeTo;
 
-    savedQueries.forEach((savedQuery, idx) => {
+    selectedSavedQueries.forEach((savedQuery, idx) => {
       if (savedQuery.attributes.filters) {
         // filtersIdsFromSavedQueries
         const updatedWithIconFilters = savedQuery.attributes.filters.map((filter) => {
@@ -448,13 +451,14 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   public removeSelectedSavedQuery = (savedQuery: SavedQuery) => {
-    const selectedSavedQueries: SavedQuery[] = this.state.selectedSavedQueries;
+    const selectedSavedQueries: SavedQuery[] = this.state.finalSelectedSavedQueries;
     const updatedSelectedSavedQueries = selectedSavedQueries.filter(
       (sq) => sq.id !== savedQuery.id
     );
     this.applySelectedSavedQueries(updatedSelectedSavedQueries);
     this.setState({
       selectedSavedQueries: [...updatedSelectedSavedQueries],
+      finalSelectedSavedQueries: [...updatedSelectedSavedQueries],
     });
   };
 
@@ -489,7 +493,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   public onRemoveAll = () => {
-    this.setState({ selectedSavedQueries: [] });
+    this.setState({ selectedSavedQueries: [], finalSelectedSavedQueries: [] });
     this.props.onFiltersUpdated?.([]);
   };
 
@@ -516,7 +520,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onLoad={this.onLoadSavedQuery}
         savedQueryService={this.savedQueryService}
         onClearSavedQuery={this.props.onClearSavedQuery}
-        selectedSavedQueries={this.state.selectedSavedQueries}
+        selectedSavedQueries={this.state.finalSelectedSavedQueries}
       >
         {(list) => list}
       </SavedQueryManagementComponent>
@@ -663,7 +667,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             indexPatterns={this.props.indexPatterns!}
             appName={this.services.appName}
             timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-            selectedSavedQueries={this.state.selectedSavedQueries}
+            selectedSavedQueries={this.state.finalSelectedSavedQueries}
             removeSelectedSavedQuery={this.removeSelectedSavedQuery}
           />
         </div>
