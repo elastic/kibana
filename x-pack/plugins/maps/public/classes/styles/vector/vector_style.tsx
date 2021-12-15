@@ -511,19 +511,15 @@ export class VectorStyle implements IVectorStyle {
     }
 
     dynamicProperties.forEach((dynamicProperty) => {
-      const ordinalStyleMeta =
-        dynamicProperty.pluckOrdinalStyleMetaFromTileMetaFeatures(metaFeatures);
-      const categoricalStyleMeta =
-        dynamicProperty.pluckCategoricalStyleMetaFromTileMetaFeatures(metaFeatures);
-
       const name = dynamicProperty.getFieldName();
       if (!styleMeta.fieldMeta[name]) {
-        styleMeta.fieldMeta[name] = {};
+        styleMeta.fieldMeta[name] = { categories: [] };
       }
-      if (categoricalStyleMeta) {
-        styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
-      }
+      styleMeta.fieldMeta[name].categories =
+        dynamicProperty.pluckCategoricalStyleMetaFromTileMetaFeatures(metaFeatures);
 
+      const ordinalStyleMeta =
+        dynamicProperty.pluckOrdinalStyleMetaFromTileMetaFeatures(metaFeatures);
       if (ordinalStyleMeta) {
         styleMeta.fieldMeta[name].range = ordinalStyleMeta;
       }
@@ -595,17 +591,13 @@ export class VectorStyle implements IVectorStyle {
 
     dynamicProperties.forEach(
       (dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>) => {
-        const categoricalStyleMeta =
-          dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
-        const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
         const name = dynamicProperty.getFieldName();
         if (!styleMeta.fieldMeta[name]) {
-          styleMeta.fieldMeta[name] = {};
+          styleMeta.fieldMeta[name] = { categories: [] };
         }
-        if (categoricalStyleMeta) {
-          styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
-        }
-
+        styleMeta.fieldMeta[name].categories =
+          dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
+        const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
         if (ordinalStyleMeta) {
           styleMeta.fieldMeta[name].range = ordinalStyleMeta;
         }
