@@ -76,7 +76,12 @@ export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
 export const CSV_JOB_TYPE_DEPRECATED = 'csv';
 
-export const USES_HEADLESS_JOB_TYPES = [PDF_JOB_TYPE, PNG_JOB_TYPE];
+export const USES_HEADLESS_JOB_TYPES = [
+  PDF_JOB_TYPE,
+  PNG_JOB_TYPE,
+  PDF_JOB_TYPE_V2,
+  PNG_JOB_TYPE_V2,
+];
 
 export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
 

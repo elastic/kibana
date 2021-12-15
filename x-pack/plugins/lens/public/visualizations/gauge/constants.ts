@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const LENS_GAUGE_RENDERER = 'lens_gauge_renderer';
+import { GaugeState } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import { LayerType } from '../../../common/';
+
 export const LENS_GAUGE_ID = 'lnsGauge';
 
 export const GROUP_ID = {
@@ -14,3 +16,8 @@ export const GROUP_ID = {
   MAX: 'max',
   GOAL: 'goal',
 } as const;
+
+export type GaugeVisualizationState = GaugeState & {
+  layerId: string;
+  layerType: LayerType;
+};

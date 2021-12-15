@@ -40,13 +40,16 @@ export function getInstallCommandForPlatform(
     }
     commandArguments.push(['fleet-server-cert', '<PATH_TO_FLEET_SERVER_CERT>']);
     commandArguments.push(['fleet-server-cert-key', '<PATH_TO_FLEET_SERVER_CERT_KEY>']);
+  } else {
+    commandArguments.push(['fleet-server-insecure-http']);
   }
 
   const commandArgumentsStr = commandArguments.reduce((acc, [key, val]) => {
     if (acc === '' && key === 'url') {
       return `--${key}=${val}`;
     }
-    return (acc += ` ${newLineSeparator}  --${key}=${val}`);
+    const valOrEmpty = val ? `=${val}` : '';
+    return (acc += ` ${newLineSeparator}  --${key}${valOrEmpty}`);
   }, '');
 
   switch (platform) {
