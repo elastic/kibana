@@ -100,7 +100,7 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
   const emptyState = (
     <>
       <EuiSpacer />
-      <EuiPanel hasShadow={false} color="subdued">
+      <EuiPanel hasShadow={false}>
         <EuiText textAlign="center" color="subdued" size="s">
           <strong>
             {isRemote ? REMOTE_SOURCES_EMPTY_TABLE_TITLE : STANDARD_SOURCES_EMPTY_TABLE_TITLE}
@@ -111,6 +111,38 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
             ? REMOTE_SOURCES_EMPTY_TABLE_DESCRIPTION
             : STANDARD_SOURCES_EMPTY_TABLE_DESCRIPTION}
         </EuiText>
+      </EuiPanel>
+    </>
+  );
+
+  const sourcesTable = (
+    <>
+      <EuiSpacer />
+      <EuiPanel hasShadow={false}>
+        <EuiTable className={tableClass}>
+          <EuiTableHeader>
+            <EuiTableHeaderCell>{SOURCE}</EuiTableHeaderCell>
+            <EuiTableHeaderCell />
+          </EuiTableHeader>
+          <EuiTableBody>
+            {contentSources.map((source, i) => (
+              <EuiTableRow key={i}>
+                <EuiTableRowCell>{source.name}</EuiTableRowCell>
+                <EuiTableRowCell align="right">
+                  <EuiSwitch
+                    checked={!!source.isEnabled}
+                    disabled={sectionDisabled}
+                    onChange={(e) => updateSource(source.id, e.target.checked)}
+                    showLabel={false}
+                    label={`${source.name} Toggle`}
+                    data-test-subj={`${sourceType}SourceToggle`}
+                    compressed
+                  />
+                </EuiTableRowCell>
+              </EuiTableRow>
+            ))}
+          </EuiTableBody>
+        </EuiTable>
       </EuiPanel>
     </>
   );
@@ -137,49 +169,19 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
           {isRemote ? REMOTE_SOURCES_TABLE_DESCRIPTION : STANDARD_SOURCES_TABLE_DESCRIPTION}
         </EuiText>
         {!hasSources && emptyState}
+        {hasSources && sourcesTable}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 
-  const sourcesTable = (
-    <>
-      <EuiSpacer />
-      <EuiTable className={tableClass}>
-        <EuiTableHeader>
-          <EuiTableHeaderCell>{SOURCE}</EuiTableHeaderCell>
-          <EuiTableHeaderCell />
-        </EuiTableHeader>
-        <EuiTableBody>
-          {contentSources.map((source, i) => (
-            <EuiTableRow key={i}>
-              <EuiTableRowCell>{source.name}</EuiTableRowCell>
-              <EuiTableRowCell align="right">
-                <EuiSwitch
-                  checked={!!source.isEnabled}
-                  disabled={sectionDisabled}
-                  onChange={(e) => updateSource(source.id, e.target.checked)}
-                  showLabel={false}
-                  label={`${source.name} Toggle`}
-                  data-test-subj={`${sourceType}SourceToggle`}
-                  compressed
-                />
-              </EuiTableRowCell>
-            </EuiTableRow>
-          ))}
-        </EuiTableBody>
-      </EuiTable>
-    </>
-  );
-
   return (
     <EuiPanel
-      hasShadow={false}
+      color="subdued"
       className={classNames({
         'euiPanel--disabled': panelDisabled,
       })}
     >
       {sectionHeading}
-      {hasSources && sourcesTable}
     </EuiPanel>
   );
 };
