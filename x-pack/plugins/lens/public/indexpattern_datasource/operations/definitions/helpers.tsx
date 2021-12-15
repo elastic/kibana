@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GenericIndexPatternColumn, operationDefinitionMap, GenericOperationDefinition } from '.';
+import { GenericIndexPatternColumn, operationDefinitionMap } from '.';
 import {
   FieldBasedIndexPatternColumn,
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import { IndexPattern, IndexPatternLayer } from '../../types';
+import { IndexPattern } from '../../types';
 
 export function getInvalidFieldMessage(
   column: FieldBasedIndexPatternColumn,

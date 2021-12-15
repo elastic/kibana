@@ -13,8 +13,6 @@ import type {
 import { optionallHistogramBasedOperationToExpression } from './utils';
 import type { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
-import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
-import { IndexPatternLayer } from '../../../types';
 
 type OverallMetricIndexPatternColumn<T extends string> = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
