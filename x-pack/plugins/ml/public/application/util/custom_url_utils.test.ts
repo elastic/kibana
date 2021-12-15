@@ -11,6 +11,7 @@ import {
   isValidLabel,
   isValidTimeRange,
   openCustomUrlWindow,
+  getQueryField,
 } from './custom_url_utils';
 import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 import {
@@ -269,9 +270,9 @@ describe('ML - custom URL utils', () => {
       );
     });
 
-    test.skip('returns expected URL for a Kibana Discover type URL when record field contains special characters', () => {
+    test('returns expected URL for a Kibana Discover type URL when record field contains special characters', () => {
       expect(getUrlForRecord(TEST_DISCOVER_URL, TEST_RECORD_SPECIAL_CHARS)).toBe(
-        "discover#/?_g=(time:(from:'2017-02-09T15:10:00.000Z',mode:absolute,to:'2017-02-09T17:15:00.000Z'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:'airline:\"%3C%3E%3A%3B%5B%7D%5C%22)\" and odd:field,name:>:&12<''))"
+        "discover#/?_g=(time:(from:'2017-02-09T15:10:00.000Z',mode:absolute,to:'2017-02-09T17:15:00.000Z'))&_a=(index:bf6e5860-9404-11e8-8d4c-593f69c47267,query:(language:kuery,query:'airline:\"%3C%3E%3A%3B%5B%7D%5C%22)\" AND odd\\:field,name:\"%3E%3A%2612%3C!'\"'))"
       );
     });
 
@@ -623,6 +624,24 @@ describe('ML - custom URL utils', () => {
       expect(getUrlForRecord(urlWithCustomFilter, testRecords)).toBe(
         `discover#/?_g=(time:(from:'2019-02-01T16:00:00.000Z',mode:absolute,to:'2019-02-01T18:59:59.999Z'))&_a=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:subSystem.keyword,negate:!f,params:(query:JDBC),type:phrase),query:(match_phrase:(subSystem.keyword:JDBC)))),index:'eap_wls_server_12c*,*:eap_wls_server_12c*',query:(language:kuery,query:'wlscluster.keyword:\"AAL\"'))`
       );
+    });
+  });
+
+  describe('getQueryField', () => {
+    test('accounts for colon : in field name', () => {
+      expect(getQueryField(`odd:field,name : " $odd:field,name$"`)).toBe('odd:field,name');
+      expect(getQueryField(`odd:field,name: $odd:field,name$ "`)).toBe('odd:field,name');
+      expect(getQueryField(`odd:field,name:$odd:field,name$"`)).toBe('odd:field,name');
+      expect(getQueryField(`odd:field,name: " $odd:field,name$"`)).toBe('odd:field,name');
+      expect(getQueryField(`odd:field,name&:$odd:field,name&$"`)).toBe('odd:field,name&');
+      expect(getQueryField('{air}line:${air}line$')).toBe('{air}line');
+      expect(getQueryField(`odd:field$name&:$odd:field$name&$`)).toBe('odd:field$name&');
+    });
+
+    test('accounts for spaces in query string', () => {
+      expect(getQueryField(`airline : $airline$"`)).toBe('airline');
+      expect(getQueryField(`airline:" $airline$""`)).toBe('airline');
+      expect(getQueryField(`airline:$airline$"`)).toBe('airline');
     });
   });
 

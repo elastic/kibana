@@ -10,7 +10,6 @@
 import { get, flow } from 'lodash';
 import moment from 'moment';
 import rison, { RisonObject, RisonValue } from 'rison-node';
-
 import { parseInterval } from '../../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
 import {
@@ -138,6 +137,41 @@ export const isRisonObject = (value: RisonValue): value is RisonObject => {
   return value !== null && typeof value === 'object';
 };
 
+/**
+ * Helper to grab field value from the string containing field value & name
+ * which also handle special characters like colons and spaces
+ * `odd:field$name&:"$odd:field$name&$"` => 'odd:field$name&'
+ */
+export const getQueryField = (str: string): string => {
+  let fieldName = '';
+  // Find the first valid '$' anchor which is the start of the field value
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === '$') {
+      let foundIdxToSplit = i;
+      // Then back track to find the nearest colon on the left
+      // the rest of string to the left of found colon
+      // would be the field name
+      for (let idx = foundIdxToSplit; idx > -1; idx--) {
+        if (str[idx] === ':') {
+          foundIdxToSplit = idx;
+          break;
+        }
+      }
+
+      // As the field name may contain both : and $,
+      // we need to keep searching until the two sides match
+      fieldName = str.slice(0, foundIdxToSplit).trim();
+      let fieldValue = str.slice(foundIdxToSplit, str.length);
+      const fieldValueStart = fieldValue.indexOf('$');
+      const fieldValueEnd = fieldValue.lastIndexOf('$');
+      fieldValue = fieldValue.slice(fieldValueStart, fieldValueEnd + 1);
+      if (fieldValue === `$${fieldName}$`) {
+        break;
+      }
+    }
+  }
+  return fieldName;
+};
 const getQueryStringResultProvider =
   (record: CustomUrlAnomalyRecordDoc, getResultTokenValue: GetResultTokenValue) =>
   (resultPrefix: string, queryString: string, resultPostfix: string): string => {
@@ -145,12 +179,13 @@ const getQueryStringResultProvider =
 
     let availableCharactersLeft = URL_LENGTH_LIMIT - resultPrefix.length - resultPostfix.length;
 
+    const testStr = queryString;
     // URL template might contain encoded characters
-    const queryFields = queryString
+    const queryFields = testStr
       // Split query string by AND operator.
       .split(/\sand\s/i)
       // Get property name from `influencerField:$influencerField$` string.
-      .map((v) => String(v.split(/:(.+)?\$/)[0]).trim());
+      .map((v) => getQueryField(String(v).replace(/\\/g, '')));
 
     const queryParts: string[] = [];
     const joinOperator = ' AND ';
@@ -169,7 +204,9 @@ const getQueryStringResultProvider =
       // combine values with OR operator e.g. `(influencerField:value or influencerField:another_value)`.
       let result = '';
       for (let j = 0; j < tokenValues.length; j++) {
-        const part = `${j > 0 ? ' OR ' : ''}${field}:"${getResultTokenValue(tokenValues[j])}"`;
+        const part = `${j > 0 ? ' OR ' : ''}${escapeForElasticsearchQuery(
+          field
+        )}:"${getResultTokenValue(tokenValues[j])}"`;
 
         // Build up a URL string which is not longer than the allowed length and isn't corrupted by invalid query.
         if (availableCharactersLeft < part.length) {
@@ -225,9 +262,9 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
   };
 
   return flow(
+    decodeURIComponent,
     (str: string) => str.replace('$earliest$', record.earliest).replace('$latest$', record.latest),
     // Process query string content of the URL
-    decodeURIComponent,
     (str: string) => {
       const getResultTokenValue: GetResultTokenValue = flow(
         queryLanguageEscapeCallback,
