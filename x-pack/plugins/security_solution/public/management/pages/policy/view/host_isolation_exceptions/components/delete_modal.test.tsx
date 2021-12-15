@@ -68,7 +68,7 @@ describe('Policy details host isolation exceptions delete modal', () => {
     userEvent.click(confirmButton);
 
     await waitFor(() => {
-      expect(confirmButton).not.toBeEnabled();
+      expect(confirmButton).toBeDisabled();
     });
   });
 
