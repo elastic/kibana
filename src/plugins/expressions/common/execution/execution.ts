@@ -559,10 +559,10 @@ export class Execution<
   interpret<T>(ast: ExpressionAstNode, input: T): Observable<ExecutionResult<unknown>> {
     switch (getType(ast)) {
       case 'expression':
-        const execution = this.execution.executor.createExecution(
-          ast as ExpressionAstExpression,
-          this.execution.params
-        );
+        const execution = this.execution.executor.createExecution(ast as ExpressionAstExpression, {
+          ...this.execution.params,
+          variables: this.context.variables,
+        });
         this.childExecutions.push(execution);
 
         return execution.start(input, true);

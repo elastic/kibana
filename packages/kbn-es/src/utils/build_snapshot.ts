@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-const execa = require('execa');
-const path = require('path');
-const os = require('os');
-const readline = require('readline');
-const { createCliError } = require('../errors');
-const { findMostRecentlyChanged } = require('../utils');
-const { GRADLE_BIN } = require('../paths');
+import path from 'path';
+import os from 'os';
 
-const onceEvent = (emitter, event) => new Promise((resolve) => emitter.once(event, resolve));
+import { ToolingLog, withProcRunner } from '@kbn/dev-utils';
+
+import { createCliError } from '../errors';
+import { findMostRecentlyChanged } from './find_most_recently_changed';
+import { GRADLE_BIN } from '../paths';
+
+interface BuildSnapshotOptions {
+  license: string;
+  sourcePath: string;
+  log: ToolingLog;
+  platform?: string;
+}
 
 /**
  * Creates archive from source
- *
- * @param {Object} options
- * @property {('oss'|'basic'|'trial')} options.license
- * @property {String} options.sourcePath
- * @property {ToolingLog} options.log
- * @returns {Object} containing archive and optional plugins
  *
  * Gradle tasks:
  *   $ ./gradlew tasks --all | grep 'distribution.*assemble\s'
@@ -34,38 +34,26 @@ const onceEvent = (emitter, event) => new Promise((resolve) => emitter.once(even
  *   :distribution:archives:oss-linux-tar:assemble
  *   :distribution:archives:oss-windows-zip:assemble
  */
-exports.buildSnapshot = async ({ license, sourcePath, log, platform = os.platform() }) => {
+export async function buildSnapshot({
+  license,
+  sourcePath,
+  log,
+  platform = os.platform(),
+}: BuildSnapshotOptions) {
   const { task, ext } = exports.archiveForPlatform(platform, license);
   const buildArgs = [`:distribution:archives:${task}:assemble`];
 
   log.info('%s %s', GRADLE_BIN, buildArgs.join(' '));
   log.debug('cwd:', sourcePath);
 
-  const build = execa(GRADLE_BIN, buildArgs, {
-    cwd: sourcePath,
-    stdio: ['ignore', 'pipe', 'pipe'],
+  await withProcRunner(log, async (procs) => {
+    await procs.run('gradle', {
+      cmd: GRADLE_BIN,
+      args: buildArgs,
+      cwd: sourcePath,
+      wait: true,
+    });
   });
-
-  const stdout = readline.createInterface({ input: build.stdout });
-  const stderr = readline.createInterface({ input: build.stderr });
-
-  stdout.on('line', (line) => log.debug(line));
-  stderr.on('line', (line) => log.error(line));
-
-  const [exitCode] = await Promise.all([
-    Promise.race([
-      onceEvent(build, 'exit'),
-      onceEvent(build, 'error').then((error) => {
-        throw createCliError(`Error spawning gradle: ${error.message}`);
-      }),
-    ]),
-    onceEvent(stdout, 'close'),
-    onceEvent(stderr, 'close'),
-  ]);
-
-  if (exitCode > 0) {
-    throw createCliError('unable to build ES');
-  }
 
   const archivePattern = `distribution/archives/${task}/build/distributions/elasticsearch-*.${ext}`;
   const esArchivePath = findMostRecentlyChanged(path.resolve(sourcePath, archivePattern));
@@ -75,9 +63,9 @@ exports.buildSnapshot = async ({ license, sourcePath, log, platform = os.platfor
   }
 
   return esArchivePath;
-};
+}
 
-exports.archiveForPlatform = (platform, license) => {
+export function archiveForPlatform(platform: NodeJS.Platform, license: string) {
   const taskPrefix = license === 'oss' ? 'oss-' : '';
 
   switch (platform) {
@@ -88,6 +76,6 @@ exports.archiveForPlatform = (platform, license) => {
     case 'linux':
       return { format: 'tar', ext: 'tar.gz', task: `${taskPrefix}linux-tar`, platform: 'linux' };
     default:
-      throw new Error(`unknown platform: ${platform}`);
+      throw new Error(`unsupported platform: ${platform}`);
   }
-};
+}

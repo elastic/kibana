@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ConfigDeprecation, ConfigDeprecationFactory } from 'kibana/server';
 
 /**
@@ -22,6 +23,14 @@ export const deprecations = ({
 }: ConfigDeprecationFactory): ConfigDeprecation[] => {
   return [
     deprecate('enabled', '8.0.0', { level: 'critical' }),
+    deprecate('cluster_alerts.allowedSpaces', '8.0.0', {
+      level: 'warning',
+      message: i18n.translate('xpack.monitoring.deprecations.allowedSpaces', {
+        defaultMessage:
+          'Starting in 7.15, the Stack Monitoring application will prompt you to create cluster alerts rather than creating them automatically in allowed spaces.' +
+          ' This configuration is no longer used and will be removed in a future version. ',
+      }),
+    }),
     // This order matters. The "blanket rename" needs to happen at the end
     renameFromRoot('xpack.monitoring.max_bucket_size', 'monitoring.ui.max_bucket_size', {
       level: 'warning',

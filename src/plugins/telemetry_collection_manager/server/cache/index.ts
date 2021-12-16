@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-exports.run = require('./cli').run;
-exports.Cluster = require('./cluster').Cluster;
+export { CacheManager } from './cache_manager';
+export type { CacheManagerConfig } from './cache_manager';

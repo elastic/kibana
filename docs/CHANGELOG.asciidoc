@@ -13,6 +13,7 @@ Review important information about the {kib} 7.16.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.16.1>>
 * <<release-notes-7.16.0>>
 //* <<release-notes-7.15.2>>
 //* <<release-notes-7.15.1>>
@@ -67,10 +68,62 @@ Review important information about the {kib} 7.16.x releases.
 
 --
 
+[[release-notes-7.16.1]]
+== {kib} 7.16.1
+
+Review the following information about the 7.16.1 release.
+
+[float]
+[[breaking-changes-v7.16.1]]
+=== Breaking changes
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.16.1, review the <<breaking-changes-7.16.0,7.16.0 breaking changes>>.
+
+[float]
+[[fixes-v7.16.1]]
+=== Bug Fixes
+
+The 7.16.1 release includes the following bug fixes.
+
+Dashboard::
+Fixes invalid filter blank screen {kibana-pull}120530[#120530]
+Discover::
+* Fixes CSV report for filtered *Discover* results on dashboards {kibana-pull}119583[#119583]
+* Fixes timefield sorting when switching similar index patterns {kibana-pull}116145[#116145]
+Elastic Security::
+For the Elastic Security 7.16.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+Fixes bug with duplicate Fleet Server inputs in Cloud deployments {kibana-pull}119925[#119925]
+Lens & Visualizations::
+* Fixes time shift metric lookup {kibana-pull}119774[#119774]
+* Enables normal mode for percentage charts {kibana-pull}119582[#119582]
+* Defaults the point size to 1 and corrects the vislib migrations {kibana-pull}118994[#118994]
+* Adds `rtl` label support to Elastic Charts {kibana-pull}118606[#118606]
+Logs::
+Respect the Advanced Settings for queries {kibana-pull}116485[#116485]
+Machine Learning::
+* Ensures validation call is successful in outlier detection wizard {kibana-pull}120816[#120816]
+* Fixes time range charts in anomaly detection job selection  {kibana-pull}120343[#120343]
+Management::
+* Restore support for exclusion in index pattern {kibana-pull}120703[#120703]
+* Fixes the *Fix* button for ML snapshots in need of upgrade {kibana-pull}119745[#119745]
+* Fixes the Painless script editor scrolling experience {kibana-pull}119577[#119577]
+* Adds support for the Mapper Size Plugin `_size` parameter in the index template mappings {kibana-pull}119365[#119365]
+Metrics::
+Handle invalid KQL in filterQuery {kibana-pull}119557[#119557]
+Monitoring::
+Separate out mb and legacy index patterns from requests {kibana-pull}120841[#120841]
+Osquery::
+Fixes Pack uploader and *View in Lens* link {kibana-pull}120845[#120845]
+Platform::
+* Fixes expressions performance regression {kibana-pull}117714[#117714]
+* Fixes an issue where banners were unintentionally appearing in reports {kibana-pull}116147[#116147]
+Reporting::
+Improves the performance when generating a large CSV export {kibana-pull}120365[#120365] and {kibana-pull}120309[#120309]
+Security::
+Fixes an issue where {kib} crashed when no authentication providers were enabled {kibana-pull}118784[#118784]
+
 [[release-notes-7.16.0]]
 == {kib} 7.16.0
-
-coming::[7.16.0]
 
 For information about the {kib} 7.16.0 release, review the following information.
 

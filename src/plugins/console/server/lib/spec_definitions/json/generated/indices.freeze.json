@@ -14,12 +14,8 @@
       ],
       "wait_for_active_shards": ""
     },
-    "methods": [
-      "POST"
-    ],
-    "patterns": [
-      "{indices}/_freeze"
-    ],
+    "methods": [],
+    "patterns": [],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/freeze-index-api.html"
   }
 }

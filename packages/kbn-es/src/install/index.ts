@@ -6,11 +6,6 @@
  * Side Public License, v 1.
  */
 
-const { ToolingLog } = require('@kbn/dev-utils');
-
-const log = new ToolingLog({
-  level: 'verbose',
-  writeTo: process.stdout,
-});
-
-exports.log = log;
+export { installArchive } from './install_archive';
+export { installSnapshot, downloadSnapshot } from './install_snapshot';
+export { installSource } from './install_source';

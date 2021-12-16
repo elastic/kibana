@@ -7,7 +7,11 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { SavedObjectMigrationContext, SavedObjectSanitizedDoc } from 'kibana/server';
+import {
+  SavedObjectMigrationContext,
+  SavedObjectSanitizedDoc,
+  SavedObjectsMigrationLogger,
+} from 'kibana/server';
 import { migrationMocks } from 'src/core/server/mocks';
 import { CaseUserActionAttributes, CASE_USER_ACTION_SAVED_OBJECT } from '../../../common';
 import {
@@ -216,7 +220,19 @@ describe('user action migrations', () => {
 
           userActionsConnectorIdMigration(userAction, context);
 
-          expect(context.log.error).toHaveBeenCalled();
+          const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
+          expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
+            Array [
+              "Failed to migrate user action connector with doc id: 1 version: 8.0.0 error: Unexpected token a in JSON at position 1",
+              Object {
+                "migrations": Object {
+                  "userAction": Object {
+                    "id": "1",
+                  },
+                },
+              },
+            ]
+          `);
         });
       });
 
@@ -384,7 +400,19 @@ describe('user action migrations', () => {
 
           userActionsConnectorIdMigration(userAction, context);
 
-          expect(context.log.error).toHaveBeenCalled();
+          const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
+          expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
+            Array [
+              "Failed to migrate user action connector with doc id: 1 version: 8.0.0 error: Unexpected token b in JSON at position 1",
+              Object {
+                "migrations": Object {
+                  "userAction": Object {
+                    "id": "1",
+                  },
+                },
+              },
+            ]
+          `);
         });
       });
 
@@ -554,7 +582,19 @@ describe('user action migrations', () => {
 
           userActionsConnectorIdMigration(userAction, context);
 
-          expect(context.log.error).toHaveBeenCalled();
+          const log = context.log as jest.Mocked<SavedObjectsMigrationLogger>;
+          expect(log.error.mock.calls[0]).toMatchInlineSnapshot(`
+            Array [
+              "Failed to migrate user action connector with doc id: 1 version: 8.0.0 error: Unexpected token e in JSON at position 1",
+              Object {
+                "migrations": Object {
+                  "userAction": Object {
+                    "id": "1",
+                  },
+                },
+              },
+            ]
+          `);
         });
       });
     });

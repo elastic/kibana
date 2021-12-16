@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-exports.createCliError = function (message) {
-  const error = new Error(message);
-  error.isCliError = true;
-  return error;
-};
+import { ToolingLog } from '@kbn/dev-utils';
 
-exports.isCliError = function (error) {
-  return error && error.isCliError;
-};
+export const log = new ToolingLog({
+  level: 'verbose',
+  writeTo: process.stdout,
+});

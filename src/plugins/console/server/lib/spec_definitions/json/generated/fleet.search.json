@@ -1,0 +1,16 @@
+{
+  "fleet.search": {
+    "url_params": {
+      "wait_for_checkpoints": [],
+      "wait_for_checkpoints_timeout": "",
+      "allow_partial_search_results": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/_fleet/_search"
+    ]
+  }
+}

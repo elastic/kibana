@@ -6,25 +6,69 @@
  * Side Public License, v 1.
  */
 
-const fetch = require('node-fetch');
-const AbortController = require('abort-controller');
-const fs = require('fs');
-const { promisify } = require('util');
-const { pipeline, Transform } = require('stream');
-const chalk = require('chalk');
-const { createHash } = require('crypto');
-const path = require('path');
+import fs from 'fs';
+import { promisify } from 'util';
+import path from 'path';
+import { createHash } from 'crypto';
+import { pipeline, Transform } from 'stream';
+import { setTimeout } from 'timers/promises';
+
+import fetch, { Headers } from 'node-fetch';
+import AbortController from 'abort-controller';
+import chalk from 'chalk';
+import { ToolingLog } from '@kbn/dev-utils';
+
+import { cache } from './utils/cache';
+import { resolveCustomSnapshotUrl } from './custom_snapshots';
+import { createCliError, isCliError } from './errors';
 
 const asyncPipeline = promisify(pipeline);
 const DAILY_SNAPSHOTS_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily';
 const PERMANENT_SNAPSHOTS_BASE_URL =
   'https://storage.googleapis.com/kibana-ci-es-snapshots-permanent';
 
-const { cache } = require('./utils');
-const { resolveCustomSnapshotUrl } = require('./custom_snapshots');
-const { createCliError, isCliError } = require('./errors');
+type ChecksumType = 'sha512';
+export type ArtifactLicense = 'oss' | 'basic' | 'trial';
 
-function getChecksumType(checksumUrl) {
+interface ArtifactManifest {
+  id: string;
+  bucket: string;
+  branch: string;
+  sha: string;
+  sha_short: string;
+  version: string;
+  generated: string;
+  archives: Array<{
+    filename: string;
+    checksum: string;
+    url: string;
+    version: string;
+    platform: string;
+    architecture: string;
+    license: string;
+  }>;
+}
+
+export interface ArtifactSpec {
+  url: string;
+  checksumUrl: string;
+  checksumType: ChecksumType;
+  filename: string;
+}
+
+interface ArtifactDownloaded {
+  cached: false;
+  checksum: string;
+  etag?: string;
+  contentLength: number;
+  first500Bytes: Buffer;
+  headers: Headers;
+}
+interface ArtifactCached {
+  cached: true;
+}
+
+function getChecksumType(checksumUrl: string): ChecksumType {
   if (checksumUrl.endsWith('.sha512')) {
     return 'sha512';
   }
@@ -32,15 +76,18 @@ function getChecksumType(checksumUrl) {
   throw new Error(`unable to determine checksum type: ${checksumUrl}`);
 }
 
-function headersToString(headers, indent = '') {
+function headersToString(headers: Headers, indent = '') {
   return [...headers.entries()].reduce(
     (acc, [key, value]) => `${acc}\n${indent}${key}: ${value}`,
     ''
   );
 }
 
-async function retry(log, fn) {
-  async function doAttempt(attempt) {
+async function retry<T>(log: ToolingLog, fn: () => Promise<T>): Promise<T> {
+  let attempt = 0;
+  while (true) {
+    attempt += 1;
+
     try {
       return await fn();
     } catch (error) {
@@ -49,13 +96,10 @@ async function retry(log, fn) {
       }
 
       log.warning('...failure, retrying in 5 seconds:', error.message);
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await setTimeout(5000);
       log.info('...retrying');
-      return await doAttempt(attempt + 1);
     }
   }
-
-  return await doAttempt(1);
 }
 
 // Setting this flag provides an easy way to run the latest un-promoted snapshot without having to look it up
@@ -63,7 +107,7 @@ function shouldUseUnverifiedSnapshot() {
   return !!process.env.KBN_ES_SNAPSHOT_USE_UNVERIFIED;
 }
 
-async function fetchSnapshotManifest(url, log) {
+async function fetchSnapshotManifest(url: string, log: ToolingLog) {
   log.info('Downloading snapshot manifest from %s', chalk.bold(url));
 
   const abc = new AbortController();
@@ -73,7 +117,11 @@ async function fetchSnapshotManifest(url, log) {
   return { abc, resp, json };
 }
 
-async function getArtifactSpecForSnapshot(urlVersion, license, log) {
+async function getArtifactSpecForSnapshot(
+  urlVersion: string,
+  license: string,
+  log: ToolingLog
+): Promise<ArtifactSpec> {
   const desiredVersion = urlVersion.replace('-SNAPSHOT', '');
   const desiredLicense = license === 'oss' ? 'oss' : 'default';
 
@@ -103,22 +151,23 @@ async function getArtifactSpecForSnapshot(urlVersion, license, log) {
     throw new Error(`Unable to read snapshot manifest: ${resp.statusText}\n  ${json}`);
   }
 
-  const manifest = JSON.parse(json);
-
+  const manifest: ArtifactManifest = JSON.parse(json);
   const platform = process.platform === 'win32' ? 'windows' : process.platform;
   const arch = process.arch === 'arm64' ? 'aarch64' : 'x86_64';
 
   const archive = manifest.archives.find(
-    (archive) =>
-      archive.version === desiredVersion &&
-      archive.platform === platform &&
-      archive.license === desiredLicense &&
-      archive.architecture === arch
+    (a) => a.platform === platform && a.license === desiredLicense && a.architecture === arch
   );
 
   if (!archive) {
     throw createCliError(
-      `Snapshots for ${desiredVersion} are available, but couldn't find an artifact in the manifest for [${desiredVersion}, ${desiredLicense}, ${platform}]`
+      `Snapshots are available, but couldn't find an artifact in the manifest for [${desiredLicense}, ${platform}, ${arch}]`
+    );
+  }
+
+  if (archive.version !== desiredVersion) {
+    log.warning(
+      `Snapshot found, but version does not match Kibana. Kibana: ${desiredVersion}, Snapshot: ${archive.version}`
     );
   }
 
@@ -130,93 +179,65 @@ async function getArtifactSpecForSnapshot(urlVersion, license, log) {
   };
 }
 
-exports.Artifact = class Artifact {
+export class Artifact {
   /**
    * Fetch an Artifact from the Artifact API for a license level and version
-   * @param {('oss'|'basic'|'trial')} license
-   * @param {string} version
-   * @param {ToolingLog} log
    */
-  static async getSnapshot(license, version, log) {
+  static async getSnapshot(license: ArtifactLicense, version: string, log: ToolingLog) {
     const urlVersion = `${encodeURIComponent(version)}-SNAPSHOT`;
 
     const customSnapshotArtifactSpec = resolveCustomSnapshotUrl(urlVersion, license);
     if (customSnapshotArtifactSpec) {
-      return new Artifact(customSnapshotArtifactSpec, log);
+      return new Artifact(log, customSnapshotArtifactSpec);
     }
 
     const artifactSpec = await getArtifactSpecForSnapshot(urlVersion, license, log);
-    return new Artifact(artifactSpec, log);
+    return new Artifact(log, artifactSpec);
   }
 
   /**
    * Fetch an Artifact from the Elasticsearch past releases url
-   * @param {string} url
-   * @param {ToolingLog} log
    */
-  static async getArchive(url, log) {
+  static async getArchive(url: string, log: ToolingLog) {
     const shaUrl = `${url}.sha512`;
 
-    const artifactSpec = {
-      url: url,
+    return new Artifact(log, {
+      url,
       filename: path.basename(url),
       checksumUrl: shaUrl,
       checksumType: getChecksumType(shaUrl),
-    };
-
-    return new Artifact(artifactSpec, log);
+    });
   }
 
-  constructor(spec, log) {
-    this._spec = spec;
-    this._log = log;
-  }
-
-  getUrl() {
-    return this._spec.url;
-  }
-
-  getChecksumUrl() {
-    return this._spec.checksumUrl;
-  }
-
-  getChecksumType() {
-    return this._spec.checksumType;
-  }
-
-  getFilename() {
-    return this._spec.filename;
-  }
+  constructor(private readonly log: ToolingLog, public readonly spec: ArtifactSpec) {}
 
   /**
    * Download the artifact to disk, skips the download if the cache is
    * up-to-date, verifies checksum when downloaded
-   * @param {string} dest
-   * @return {Promise<void>}
    */
-  async download(dest, { useCached = false }) {
-    await retry(this._log, async () => {
+  async download(dest: string, { useCached = false }: { useCached?: boolean } = {}) {
+    await retry(this.log, async () => {
       const cacheMeta = cache.readMeta(dest);
       const tmpPath = `${dest}.tmp`;
 
       if (useCached) {
         if (cacheMeta.exists) {
-          this._log.info(
+          this.log.info(
             'use-cached passed, forcing to use existing snapshot',
             chalk.bold(cacheMeta.ts)
           );
           return;
         } else {
-          this._log.info('use-cached passed but no cached snapshot found. Continuing to download');
+          this.log.info('use-cached passed but no cached snapshot found. Continuing to download');
         }
       }
 
-      const artifactResp = await this._download(tmpPath, cacheMeta.etag, cacheMeta.ts);
+      const artifactResp = await this.fetchArtifact(tmpPath, cacheMeta.etag, cacheMeta.ts);
       if (artifactResp.cached) {
         return;
       }
 
-      await this._verifyChecksum(artifactResp);
+      await this.verifyChecksum(artifactResp);
 
       // cache the etag for future downloads
       cache.writeMeta(dest, { etag: artifactResp.etag });
@@ -228,18 +249,18 @@ exports.Artifact = class Artifact {
 
   /**
    * Fetch the artifact with an etag
-   * @param {string} tmpPath
-   * @param {string} etag
-   * @param {string} ts
-   * @return {{ cached: true }|{ checksum: string, etag: string, first500Bytes: Buffer }}
    */
-  async _download(tmpPath, etag, ts) {
-    const url = this.getUrl();
+  private async fetchArtifact(
+    tmpPath: string,
+    etag: string,
+    ts: string
+  ): Promise<ArtifactDownloaded | ArtifactCached> {
+    const url = this.spec.url;
 
     if (etag) {
-      this._log.info('verifying cache of %s', chalk.bold(url));
+      this.log.info('verifying cache of %s', chalk.bold(url));
     } else {
-      this._log.info('downloading artifact from %s', chalk.bold(url));
+      this.log.info('downloading artifact from %s', chalk.bold(url));
     }
 
     const abc = new AbortController();
@@ -251,7 +272,7 @@ exports.Artifact = class Artifact {
     });
 
     if (resp.status === 304) {
-      this._log.info('etags match, reusing cache from %s', chalk.bold(ts));
+      this.log.info('etags match, reusing cache from %s', chalk.bold(ts));
 
       abc.abort();
       return {
@@ -270,10 +291,10 @@ exports.Artifact = class Artifact {
     }
 
     if (etag) {
-      this._log.info('cache invalid, redownloading');
+      this.log.info('cache invalid, redownloading');
     }
 
-    const hash = createHash(this.getChecksumType());
+    const hash = createHash(this.spec.checksumType);
     let first500Bytes = Buffer.alloc(0);
     let contentLength = 0;
 
@@ -300,8 +321,9 @@ exports.Artifact = class Artifact {
     );
 
     return {
+      cached: false,
       checksum: hash.digest('hex'),
-      etag: resp.headers.get('etag'),
+      etag: resp.headers.get('etag') ?? undefined,
       contentLength,
       first500Bytes,
       headers: resp.headers,
@@ -310,14 +332,12 @@ exports.Artifact = class Artifact {
 
   /**
    * Verify the checksum of the downloaded artifact with the checksum at checksumUrl
-   * @param {{ checksum: string, contentLength: number, first500Bytes: Buffer }} artifactResp
-   * @return {Promise<void>}
    */
-  async _verifyChecksum(artifactResp) {
-    this._log.info('downloading artifact checksum from %s', chalk.bold(this.getChecksumUrl()));
+  private async verifyChecksum(artifactResp: ArtifactDownloaded) {
+    this.log.info('downloading artifact checksum from %s', chalk.bold(this.spec.checksumUrl));
 
     const abc = new AbortController();
-    const resp = await fetch(this.getChecksumUrl(), {
+    const resp = await fetch(this.spec.checksumUrl, {
       signal: abc.signal,
     });
 
@@ -338,7 +358,7 @@ exports.Artifact = class Artifact {
       const lenString = `${len} / ${artifactResp.contentLength}`;
 
       throw createCliError(
-        `artifact downloaded from ${this.getUrl()} does not match expected checksum\n` +
+        `artifact downloaded from ${this.spec.url} does not match expected checksum\n` +
           `  expected: ${expectedChecksum}\n` +
           `  received: ${artifactResp.checksum}\n` +
           `  headers: ${headersToString(artifactResp.headers, '    ')}\n` +
@@ -346,6 +366,6 @@ exports.Artifact = class Artifact {
       );
     }
 
-    this._log.info('checksum verified');
+    this.log.info('checksum verified');
   }
-};
+}
