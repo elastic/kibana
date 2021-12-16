@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ConnectorTypes } from './api';
-import { CasesContextValue } from './ui/types';
+import { CasesContextFeatures } from './ui/types';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
@@ -110,6 +110,7 @@ export const MAX_TITLE_LENGTH = 64;
  * Cases features
  */
 
-export const DEFAULT_FEATURES: CasesContextValue['features'] = Object.freeze({
+export const DEFAULT_FEATURES: CasesContextFeatures = Object.freeze({
   alerts: { sync: true },
+  metrics: [],
 });
