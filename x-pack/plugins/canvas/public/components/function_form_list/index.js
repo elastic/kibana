@@ -100,7 +100,7 @@ const flattenNestedFunctionsToComponents = (complexArgs, complexArgumentsViews, 
   Object.keys(complexArgs).reduce((current, argName) => {
     const next = complexArgs[argName]
       .map(({ chain }, index) =>
-        transformFunctionsToComponents(
+        transformFunctionsToUIConfig(
           chain,
           buildPath(argumentPath, argName, index, true),
           complexArgumentsViews?.find((argView) => argView.name === argName)
@@ -113,7 +113,20 @@ const flattenNestedFunctionsToComponents = (complexArgs, complexArgumentsViews, 
     return mergeComponentsAndContexts(current, next);
   }, createComponentsWithContext());
 
-function transformFunctionsToComponents(functionsChain, { path, removable }, argUiConfig) {
+/**
+ * Converts chain of expressions to the array of UI component configurations.
+ * Recursively loops through the AST, detects expression functions inside
+ * the expression chain of the top and nested levels, finds view/model/transform definition
+ * for the found expression functions, splits arguments of the expression for two categories: simple and expression functions.
+ * After, recursively loops through the nested expression functions, creates UI component configurations and flatten them to the array.
+ *
+ * @param {Ast['chain']} functionsChain - chain of expression functions.
+ * @param {{ path: string, removable: boolean }} functionMeta - saves the path to the current expressions chain at the original AST
+ * and saves the information about that it can be removed (is an argument of the other expression).
+ * @param {*} argUiConfig - Argument UI configuration of the element, which contains current expressions chain. It can be view, model, transform or argument.
+ * @returns UI component configurations of expressions, found at AST.
+ */
+function transformFunctionsToUIConfig(functionsChain, { path, removable }, argUiConfig) {
   const parentPath = path;
   const argumentsPath = path ? `${path}.chain` : `chain`;
   return functionsChain.reduce((current, argType, i) => {
@@ -165,7 +178,7 @@ const functionFormItems = withProps((props) => {
   const selectedElement = props.element;
   const functionsChain = get(selectedElement, 'ast.chain', []);
   // map argTypes from AST, attaching nextArgType if one exists
-  const functionsListItems = transformFunctionsToComponents(functionsChain, buildPath('', 'ast'));
+  const functionsListItems = transformFunctionsToUIConfig(functionsChain, buildPath('', 'ast'));
   return {
     functionFormItems: functionsListItems.mapped,
   };
