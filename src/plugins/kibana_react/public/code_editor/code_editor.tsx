@@ -23,6 +23,8 @@ import {
   LIGHT_THEME_TRANSPARENT,
 } from './editor_theme';
 
+import { PlaceHolderWidget } from './placeholder_widget';
+
 import './editor.scss';
 
 export interface Props {
@@ -105,6 +107,8 @@ export interface Props {
    * Should the editor be rendered using the fullWidth EUI attribute
    */
   fullWidth?: boolean;
+
+  placeholder?: string;
   /**
    * Accessible name for the editor. (Defaults to "Code editor")
    */
@@ -126,6 +130,7 @@ export const CodeEditor: React.FC<Props> = ({
   suggestionProvider,
   signatureProvider,
   hoverProvider,
+  placeholder,
   languageConfiguration,
   'aria-label': ariaLabel = i18n.translate('kibana-react.kibanaCodeEditor.ariaLabel', {
     defaultMessage: 'Code Editor',
@@ -144,6 +149,7 @@ export const CodeEditor: React.FC<Props> = ({
   const isReadOnly = options?.readOnly ?? false;
 
   const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const _placeholderWidget = useRef<monaco.editor.IContentWidget | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
@@ -375,6 +381,19 @@ export const CodeEditor: React.FC<Props> = ({
       textboxMutationObserver.current?.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    if (placeholder && !value && _editor.current) {
+      _placeholderWidget.current = new PlaceHolderWidget(placeholder, _editor.current);
+      _editor.current.addContentWidget(_placeholderWidget.current);
+    }
+    return () => {
+      if (_placeholderWidget.current) {
+        _editor.current?.removeContentWidget(_placeholderWidget.current);
+        _placeholderWidget.current = null;
+      }
+    };
+  }, [placeholder, value]);
 
   return (
     <div className="kibanaCodeEditor">
