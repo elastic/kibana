@@ -264,7 +264,7 @@ export function insertNewColumn({
           columnId: newId,
           op: incompleteFieldOperation,
           indexPattern,
-          field: validFields[0],
+          field: validFields[0] ?? documentField,
           visualizationGroups,
           targetGroup,
         });
@@ -1539,7 +1539,7 @@ export function computeLayerFromContext(
   if (isArray(metricsArray)) {
     const firstElement = metricsArray.shift();
     const field = firstElement
-      ? indexPattern.getFieldByName(firstElement.fieldName)
+      ? indexPattern.getFieldByName(firstElement.fieldName) ?? documentField
       : documentField;
 
     const operation = firstElement?.agg;

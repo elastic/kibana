@@ -90,7 +90,6 @@ export const movingAverageOperation: OperationDefinition<
     const metric = layer.columns[referenceIds[0]];
     const window = columnParams?.window ?? WINDOW_DEFAULT_VALUE;
 
-    // const { window = WINDOW_DEFAULT_VALUE } = columnParams;
     return {
       label: ofName(metric?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',

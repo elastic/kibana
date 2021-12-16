@@ -39,6 +39,10 @@ const LENS_METRIC_TYPES: { [key: string]: AggOptions } = {
     name: 'moving_average',
     isFullReference: true,
   },
+  derivative: {
+    name: 'differences',
+    isFullReference: true,
+  },
   max: {
     name: 'max',
     isFullReference: false,
@@ -155,15 +159,14 @@ export const triggerVisualizeToLensActions = async (
           params: { formula: finalScript, shift: timeShift },
         },
       ];
-    } else if (aggregation === 'moving_average') {
-      // console.dir(layer.metrics);
-      const movingAverageMetric = layer.metrics.find(
+    } else if (aggregation === 'moving_average' || aggregation === 'derivative') {
+      const subFunctionMetric = layer.metrics.find(
         (metric) => metric.id === layer.metrics[metricIdx].field
       );
-      if (!movingAverageMetric) {
+      if (!subFunctionMetric) {
         return null;
       }
-      const pipelineAggMap = LENS_METRIC_TYPES[movingAverageMetric.type];
+      const pipelineAggMap = LENS_METRIC_TYPES[subFunctionMetric.type];
       if (!pipelineAggMap) {
         return null;
       }
@@ -173,7 +176,7 @@ export const triggerVisualizeToLensActions = async (
           isFullReference: aggregationMap.isFullReference,
           pipelineAggType: pipelineAggMap.name,
           color: layer.color,
-          fieldName: movingAverageMetric?.field ?? 'document',
+          fieldName: subFunctionMetric?.field ?? 'document',
           params: { shift: timeShift, window: layer.metrics[metricIdx].window },
         },
       ];
