@@ -11,7 +11,9 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
   const PageObjects = getPageObjects(['canvas', 'common', 'header', 'lens']);
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
   const archives = {
     es: 'x-pack/test/functional/es_archives/canvas/logstash_lens',
     kbn: 'x-pack/test/functional/fixtures/kbn_archiver/canvas/lens',
@@ -21,6 +23,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
     before(async () => {
       await esArchiver.load(archives.es);
       await kibanaServer.importExport.load(archives.kbn);
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-lens' });
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
       // load test workpad
@@ -30,29 +33,54 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
     });
 
     after(async () => {
+      await PageObjects.common.navigateToApp('canvas');
+      await PageObjects.canvas.deleteAllWorkpadsByName('lens tests');
       await esArchiver.unload(archives.es);
       await kibanaServer.importExport.unload(archives.kbn);
     });
 
-    describe('by-reference', () => {
+    describe.skip('by-reference', () => {
       it('renders lens visualization using savedLens expression', async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.lens.assertMetric('Maximum of bytes', '16,788');
       });
 
-      it('adds existing visualize embeddable from the visualize library', async () => {
+      it('adds existing saved search embeddable from the visualize library', async () => {
+        await PageObjects.canvas.goToListingPageViaBreadcrumbs();
+        await PageObjects.canvas.createNewWorkpad();
+        await PageObjects.canvas.setWorkpadName('lens tests');
         await PageObjects.canvas.clickAddFromLibrary();
-        await dashboardAddPanel.toggleFilter('lens');
+        await dashboardAddPanel.addEmbeddable('Artistpreviouslyknownaslens', 'lens');
+        await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslens');
       });
 
-      it('edits visualize by-reference embeddable', async () => {});
+      it('edits saved search by-reference embeddable', async () => {
+        await dashboardPanelActions.editPanelByTitle('Artistpreviouslyknownaslens');
+        await PageObjects.lens.save('Artistpreviouslyknownaslens v2', false, true);
+        await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslensv2');
+      });
     });
 
     describe('by-value', () => {
-      it('creates new lens embeddable', () => {});
+      it('creates new lens embeddable', async () => {
+        await PageObjects.canvas.createNewVis('lens');
+        await PageObjects.lens.goToTimeRange();
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'date_histogram',
+          field: '@timestamp',
+        });
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'average',
+          field: 'bytes',
+        });
+        await PageObjects.lens.saveAndReturn();
+        await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslensv2');
+      });
 
-      it('edits lens by-value embeddable', () => {});
+      it('edits lens by-value embeddable', async () => {});
     });
   });
 }

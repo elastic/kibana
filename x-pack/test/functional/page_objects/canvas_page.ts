@@ -52,6 +52,16 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.click('create-workpad-button');
     },
 
+    async deleteAllWorkpadsByName(name: string) {
+      log.debug('CanvasPage.deleteWorkpadByName', name);
+
+      // filters workpad list for provided name
+      await testSubjects.setValue('tableListSearchBox', name);
+      await testSubjects.click('checkboxSelectAll');
+      await testSubjects.click('deleteWorkpadButton');
+      await testSubjects.click('confirmModalConfirmButton');
+    },
+
     async fillOutCustomElementForm(name: string, description: string) {
       // Fill out the custom element form and submit it
       await testSubjects.setValue('canvasCustomElementForm-name', name, {
@@ -133,6 +143,17 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.setValue('canvas-workpad-name-text-field', name);
       const lastBreadcrumb = await testSubjects.getVisibleText('breadcrumb last');
       expect(lastBreadcrumb).to.eql(name);
+    },
+
+    async goToListingPageViaBreadcrumbs() {
+      log.debug('CanvasPage.goToListingPageViaBreadcrumbs');
+      await testSubjects.click('breadcrumb first');
+    },
+
+    async createNewVis(visType: string) {
+      log.debug('CanvasPage.createNewVisType', visType);
+      await testSubjects.click('canvasEditorMenuButton');
+      await testSubjects.click(`visType-${visType}`);
     },
   };
 }

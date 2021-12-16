@@ -15,7 +15,6 @@ export default function canvasApp({ loadTestFile, getService }) {
       await security.testUser.setRoles([
         'test_logstash_reader',
         'global_discover_all',
-        'global_visualize_all',
         'global_dashboard_read',
         'global_canvas_all',
       ]);

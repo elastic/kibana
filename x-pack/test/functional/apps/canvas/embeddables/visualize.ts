@@ -34,8 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('by-reference', () => {
-      it('renders embeddable with using savedVisualization expression', () => {});
-
       it('adds existing visualize embeddable from the visualize library', async () => {});
 
       it('edits visualize by-reference embeddable', async () => {});

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['canvas', 'common', 'header', 'discover']);
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const archives = {
@@ -29,7 +28,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      // await esArchiver.unload(archives.es);
+      await PageObjects.common.navigateToApp('canvas');
+      await PageObjects.canvas.deleteAllWorkpadsByName('saved search tests');
+      await esArchiver.unload(archives.es);
     });
 
     describe('by-reference', () => {
