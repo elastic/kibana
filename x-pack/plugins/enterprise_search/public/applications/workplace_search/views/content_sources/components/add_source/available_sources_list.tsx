@@ -11,8 +11,11 @@ import { useValues } from 'kea';
 
 import {
   EuiCard,
-  EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiListGroup,
+  EuiListGroupItem,
   EuiSpacer,
   EuiTitle,
   EuiText,
@@ -41,15 +44,23 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const getSourceCard = ({ name, serviceType, addPath, accountContextOnly }: SourceDataItem) => {
+
     const disabled = !hasPlatinumLicense && accountContextOnly;
+
+    // TODO
+    // does this card need a disabled state?
     const card = (
-      <EuiCard
-        titleSize="xs"
-        title={name}
-        description={<></>}
-        isDisabled={disabled}
-        icon={<SourceIcon serviceType={serviceType} name={name} size="xxl" />}
-      />
+      <>
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem>
+            <SourceIcon serviceType={serviceType} name={name} size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiLinkTo to={getSourcesPath(addPath, true)}>{name}</EuiLinkTo>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule size="full" margin="s" />
+      </>
     );
 
     if (disabled) {
@@ -69,17 +80,30 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
         </EuiToolTip>
       );
     }
-    return <EuiLinkTo to={getSourcesPath(addPath, true)}>{card}</EuiLinkTo>;
+
+    // return <EuiLinkTo to={getSourcesPath(addPath, true)}>{card}</EuiLinkTo>;
+    return card;
   };
 
   const visibleSources = (
-    <EuiFlexGrid columns={3} gutterSize="m" responsive={false}>
+    <EuiListGroup
+      gutterSize="none"
+      flush={true}
+      maxWidth={false}
+    >
+
       {sources.map((source, i) => (
-        <EuiFlexItem key={i} data-test-subj="AvailableSourceCard">
-          {getSourceCard(source)}
-        </EuiFlexItem>
+        <EuiListGroupItem
+          key={i}
+          data-test-subj="AvailableSourceCard"
+          label={getSourceCard(source)}
+        >
+
+          {console.log(getSourceCard(source))}
+        </EuiListGroupItem>
       ))}
-    </EuiFlexGrid>
+
+    </EuiListGroup>
   );
 
   const emptyState = (

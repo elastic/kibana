@@ -66,7 +66,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
   );
 
   const visibleSources = (
-    <EuiFlexGrid columns={3} gutterSize="xl" className="source-grid-configured">
+    <EuiFlexGrid columns={3} gutterSize="m" className="source-grid-configured">
       {sources.map(({ name, serviceType, addPath, connected, accountContextOnly }, i) => (
         <React.Fragment key={i}>
           <EuiFlexItem grow>
