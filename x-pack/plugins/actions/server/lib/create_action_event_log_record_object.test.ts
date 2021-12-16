@@ -37,7 +37,6 @@ describe('createActionEventLogRecordObject', () => {
         saved_objects: [
           {
             id: '1',
-            namespace: undefined,
             rel: 'primary',
             type: 'action',
             type_id: 'test',
@@ -58,7 +57,7 @@ describe('createActionEventLogRecordObject', () => {
         name: 'test name',
         action: 'execute',
         message: 'action execution start',
-        namespace: { namespace: 'default' },
+        namespace: 'default',
         savedObjects: [
           {
             id: '2',
@@ -114,7 +113,6 @@ describe('createActionEventLogRecordObject', () => {
         saved_objects: [
           {
             id: '1',
-            namespace: undefined,
             rel: 'primary',
             type: 'action',
             type_id: 'test',
