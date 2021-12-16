@@ -202,20 +202,16 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
   };
 
   public readonly getExampleUrl = (context: ActionFactoryContext): string => {
-    const defaultExample = 'https://www.example.com/?{{event.key}}={{event.value}}';
-    const [trigger] = context.triggers;
-
-    switch (trigger) {
-      case VALUE_CLICK_TRIGGER:
-        return defaultExample;
+    switch (context.triggers[0]) {
       case SELECT_RANGE_TRIGGER:
         return 'https://www.example.com/?from={{event.from}}&to={{event.to}}';
       case CONTEXT_MENU_TRIGGER:
         return 'https://www.example.com/?panel={{context.panel.title}}';
       case ROW_CLICK_TRIGGER:
         return 'https://www.example.com/keys={{event.keys}}&values={{event.values}}';
+      case VALUE_CLICK_TRIGGER:
       default:
-        return defaultExample;
+        return 'https://www.example.com/?{{event.key}}={{event.value}}';
     }
   };
 }
