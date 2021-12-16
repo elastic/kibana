@@ -30,17 +30,15 @@ const getPolicyQuery = (policyId: string): string => {
 
 export const parsePoliciesToKQL = (
   includedPolicies: string[],
-  excludedPolicies: string[]
+  excludedPolicies: string[] = []
 ): string => {
   if (isEmpty(includedPolicies) && isEmpty(excludedPolicies)) return '';
 
-  const includedPoliciesKuery = includedPolicies
-    ? includedPolicies.map(getPolicyQuery).join(' OR ')
-    : '';
+  const includedPoliciesKuery = includedPolicies.map(getPolicyQuery).join(' OR ');
 
   const excludedPoliciesKuery = excludedPolicies
-    ? excludedPolicies.map((policyId) => `not ${getPolicyQuery(policyId)}`).join(' AND ')
-    : '';
+    .map((policyId) => `not ${getPolicyQuery(policyId)}`)
+    .join(' AND ');
 
   const kuery = [];
 

@@ -8,6 +8,7 @@
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EventFiltersListPage } from './event_filters_list_page';
 import { eventFiltersListQueryHttpMock } from '../test_utils';
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
@@ -196,13 +197,9 @@ describe('When on the Event Filters List Page', () => {
 
       const firstPolicy = policies.items[0];
 
-      fireEvent.click(renderResult.getByTestId('policiesSelectorButton'));
-      await act(async () => {
-        fireEvent.click(
-          renderResult.getByTestId(`policiesSelector-popover-items-${firstPolicy.id}`)
-        );
-        expect(await waitForAction('userChangedUrl')).not.toBeNull();
-      });
+      userEvent.click(renderResult.getByTestId('policiesSelectorButton'));
+      userEvent.click(renderResult.getByTestId(`policiesSelector-popover-items-${firstPolicy.id}`));
+      await waitFor(() => expect(waitForAction('userChangedUrl')).not.toBeNull());
     });
   });
 
