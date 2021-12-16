@@ -33,7 +33,7 @@ describe('breakdown metrics', () => {
         range
           .interval('30s')
           .rate(LIST_RATE)
-          .flatMap((timestamp) =>
+          .spans((timestamp) =>
             javaInstance
               .transaction('GET /api/product/list')
               .timestamp(timestamp)
@@ -52,7 +52,7 @@ describe('breakdown metrics', () => {
       range
       .interval('30s')
       .rate(ID_RATE)
-      .flatMap((timestamp) =>
+      .spans((timestamp) =>
         javaInstance
           .transaction('GET /api/product/:id')
           .timestamp(timestamp)

@@ -25,7 +25,7 @@ const scenario: Scenario = async ({ target, logLevel }) => {
       return range
         .interval('10s')
         .rate(1)
-        .flatMap((timestamp) => {
+        .spans((timestamp) => {
           const clusterEvents = logger.perf('generating_es_events', () => {
             return clusterStats.timestamp(timestamp).indices(115).serialize();
           });

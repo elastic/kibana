@@ -30,7 +30,7 @@ const scenario: Scenario = async ({ target, logLevel, scenarioOpts }) => {
       const instances = [...Array(numServices).keys()]
           .map(index => apm.service(`opbeans-go-${index}`, 'production', 'go').instance('instance'));
       const instanceSpans = (instance: Instance) => {
-        const successfulTraceEvents = successfulTimestamps.flatMap((timestamp) =>
+        const successfulTraceEvents = successfulTimestamps.spans((timestamp) =>
           instance
             .transaction(transactionName)
             .timestamp(timestamp)
@@ -52,7 +52,7 @@ const scenario: Scenario = async ({ target, logLevel, scenarioOpts }) => {
             .serialize()
         );
 
-        const failedTraceEvents = failedTimestamps.flatMap((timestamp) =>
+        const failedTraceEvents = failedTimestamps.spans((timestamp) =>
           instance
             .transaction(transactionName)
             .timestamp(timestamp)
@@ -69,7 +69,7 @@ const scenario: Scenario = async ({ target, logLevel, scenarioOpts }) => {
         const metricsets = range
           .interval('30s')
           .rate(1)
-          .flatMap((timestamp) =>
+          .spans((timestamp) =>
             instance
               .appMetrics({
                 'system.memory.actual.free': 800,

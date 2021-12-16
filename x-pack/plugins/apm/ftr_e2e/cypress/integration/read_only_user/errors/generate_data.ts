@@ -21,7 +21,7 @@ export function generateData({ from, to }: { from: number; to: number }) {
   return range
     .interval('2m')
     .rate(1)
-    .flatMap((timestamp, index) => [
+    .spans((timestamp, index) => [
       ...opbeansJava
         .transaction('GET /apple 🍎 ')
         .timestamp(timestamp)

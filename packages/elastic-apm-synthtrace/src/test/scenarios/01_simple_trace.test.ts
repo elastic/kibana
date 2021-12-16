@@ -24,7 +24,7 @@ describe('simple trace', () => {
     events = range
       .interval('1m')
       .rate(1)
-      .transactions((timestamp) =>
+      .spans((timestamp) =>
         javaInstance
           .transaction('GET /api/product/list')
           .duration(1000)

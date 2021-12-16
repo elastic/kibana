@@ -34,7 +34,7 @@ describe('transaction metrics', () => {
       range
         .interval('1m')
         .rate(25)
-        .flatMap((timestamp) =>
+        .spans((timestamp) =>
           span(timestamp)
             .success()
             .serialize()
@@ -42,7 +42,7 @@ describe('transaction metrics', () => {
       range
         .interval('1m')
         .rate(50)
-        .flatMap((timestamp) =>
+        .spans((timestamp) =>
           span(timestamp)
             .failure()
             .serialize()

@@ -25,7 +25,7 @@ const scenario: Scenario = async ({ target, writeTarget, logLevel }) => {
       return range
         .interval('30s')
         .rate(1)
-        .flatMap((timestamp) => {
+        .spans((timestamp) => {
           const events = logger.perf('generating_sm_events', () => {
             return kibanaStats.timestamp(timestamp).requests(10, 20).serialize();
           });

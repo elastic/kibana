@@ -30,11 +30,7 @@ export class Interval implements Iterable<number> {
   private readonly intervalAmount: number;
   private readonly intervalUnit: any;
 
-  transactions(map: (timestamp: number) => ApmFields[]) {
-    return this.flatMap(map);
-  }
-
-  flatMap(map: (timestamp: number, index?: number) => ApmFields[]): SpanIterable {
+  spans(map: (timestamp: number, index?: number) => ApmFields[]): SpanIterable {
     return new SpanGenerator(this, [
       function* (i) {
         let index = 0;
