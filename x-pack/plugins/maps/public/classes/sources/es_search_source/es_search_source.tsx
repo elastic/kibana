@@ -837,15 +837,6 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 &token=${refreshToken}`;
   }
 
-  // async getTimesliceMaskFieldName(): Promise<string | null> {
-  //   if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
-  //     return null;
-  //   }
-
-  //   const indexPattern = await this.getIndexPattern();
-  //   return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
-  // }
-
   async getTimesliceMaskFieldName(): Promise<string | null> {
     if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
       return null;
