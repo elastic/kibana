@@ -114,6 +114,7 @@ export enum SecurityPageName {
   trustedApps = 'trusted_apps',
   ueba = 'ueba',
   uncommonProcesses = 'uncommon_processes',
+  sessions = 'sessions',
 }
 
 export const TIMELINES_PATH = '/timelines' as const;

@@ -88,8 +88,10 @@ export const autoExpandProcessTree = (processMap: ProcessMap) => {
 
     if (process.searchMatched || process.isUserEntered()) {
       let { parent } = process;
+      const parentIdSet = new Set<string>();
 
-      while (parent && parent.id !== parent.parent?.id) {
+      while (parent && !parentIdSet.has(parent.id)) {
+        parentIdSet.add(parent.id);
         parent.autoExpand = true;
         parent = parent.parent;
       }

@@ -9,6 +9,7 @@ import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { TestPage } from '../components/TestPage';
 import { SessionViewPage } from '../components/SessionViewPage';
+import { SessionLeaderTablePage } from '../components/SessionLeaderTablePage';
 
 export const Routes = () => {
   /**
@@ -19,6 +20,7 @@ export const Routes = () => {
     <Switch>
       <Route exact path={'/'} component={TestPage} />
       <Route path={'/process_tree'} component={SessionViewPage} />
+      <Route path={'/session_leader_table'} component={SessionLeaderTablePage} />
     </Switch>
   );
 };

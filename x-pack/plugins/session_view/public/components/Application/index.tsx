@@ -32,9 +32,14 @@ const Links = () => {
       <li css={listItemCss}>
         <Link to="/process_tree">Process Tree</Link>
       </li>
+      <li css={listItemCss}>
+        <Link to="/session_leader_table">Session Leader Table</Link>
+      </li>
     </ul>
   );
 };
+
+Links.displayName = 'Links';
 
 export const Application = () => {
   const { euiTheme } = useEuiTheme();
@@ -50,3 +55,5 @@ export const Application = () => {
     </div>
   );
 };
+
+Application.displayName = 'Application';
