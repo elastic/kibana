@@ -127,16 +127,3 @@ const ensureCreateEndpointHostIsolationExceptionList = async (kbn: KbnClient) =>
       }
     });
 };
-
-const fetchEndpointPolicies = (
-  kbnClient: KbnClient
-): Promise<AxiosResponse<GetPolicyListResponse>> => {
-  return kbnClient.request<GetPolicyListResponse>({
-    method: 'GET',
-    path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
-    query: {
-      perPage: 100,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
-    },
-  });
-};
