@@ -247,7 +247,7 @@ export class LoginPage extends Component<Props, State> {
           title={
             <FormattedMessage
               id="xpack.security.loginPage.requiresCookiesTitle"
-              defaultMessage="Cookies are required to log into Elastic"
+              defaultMessage="Cookies are required to log in to Elastic"
             />
           }
           message={
