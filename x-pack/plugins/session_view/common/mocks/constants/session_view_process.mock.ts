@@ -232,7 +232,7 @@ export const mockEvents = [
       kind: EventKind.event,
     },
   },
-];
+] as ProcessEvent[];
 
 export const mockAlerts = [
   {
