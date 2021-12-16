@@ -24,7 +24,7 @@ import {
 } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
-import { getGroupsFromJobs, getJobsWithTimerange, getStatsBarData } from './utils';
+import { getGroupsFromJobs, getStatsBarData } from './utils';
 import { Dictionary } from '../../../../../common/types/common';
 import { MlSummaryJob, MlSummaryJobs } from '../../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
@@ -88,7 +88,6 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
   const [isLoading, setIsLoading] = useState(false);
   const [groups, setGroups] = useState<GroupsDictionary>({});
   const [groupsCount, setGroupsCount] = useState<number>(0);
-  const [jobsList, setJobsList] = useState<Record<string, MlSummaryJobs>>({});
   const [statsBarData, setStatsBarData] = useState<JobStatsBarStats>();
   const [errorMessage, setErrorMessage] = useState<string>();
 
@@ -106,14 +105,12 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
         return job;
       });
       const { groups: jobsGroups, count } = getGroupsFromJobs(jobsSummaryList);
-      const jobsWithTimerange = getJobsWithTimerange(jobsSummaryList);
       const stats = getStatsBarData(jobsSummaryList);
       setIsLoading(false);
       setErrorMessage(undefined);
       setStatsBarData(stats);
       setGroupsCount(count);
       setGroups(jobsGroups);
-      setJobsList(jobsWithTimerange);
       loadOverallSwimLanes(jobsGroups);
       setLazyJobCount(lazyJobCount);
     } catch (e) {
@@ -230,7 +227,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
       {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}
 
       {isLoading === false && typeof errorMessage === 'undefined' && groupsCount > 0 ? (
-        <AnomalyDetectionTable items={groups} jobsList={jobsList} statsBarData={statsBarData!} />
+        <AnomalyDetectionTable items={groups} statsBarData={statsBarData!} />
       ) : null}
     </EuiPanel>
   );

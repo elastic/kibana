@@ -7,9 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
-import { Group, GroupsDictionary } from './anomaly_detection_panel';
+import { GroupsDictionary } from './anomaly_detection_panel';
 import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
-import { isDefined } from '../../../../../common/types/guards';
 
 export function getGroupsFromJobs(jobs: MlSummaryJobs): {
   groups: GroupsDictionary;
@@ -160,27 +159,4 @@ export function getStatsBarData(jobsList: any) {
   jobStats.activeNodes.value = Object.keys(mlNodes).length;
 
   return jobStats;
-}
-
-export function getJobsFromGroup(group: Group, jobs: Record<string, any>) {
-  return group.jobIds.map((jobId) => jobs[jobId]).filter(isDefined);
-}
-
-export function getJobsWithTimerange(jobsList: any): Record<string, any> {
-  const jobs: any = {};
-  jobsList.forEach((job: any) => {
-    if (jobs[job.id] === undefined) {
-      // create the job in the object with the times you need
-      if (job.earliestTimestampMs !== undefined) {
-        const { earliestTimestampMs, latestResultsTimestampMs } = job;
-        jobs[job.id] = {
-          id: job.id,
-          earliestTimestampMs,
-          latestResultsTimestampMs,
-        };
-      }
-    }
-  });
-
-  return jobs;
 }

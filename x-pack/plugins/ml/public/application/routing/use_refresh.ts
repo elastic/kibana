@@ -26,7 +26,7 @@ export interface Refresh {
 export const useRefresh = () => {
   const timefilter = useTimefilter();
 
-  const getTimRange = () => {
+  const getTimeRange = () => {
     const { from, to } = timefilter.getTime();
     return { start: from, end: to };
   };
@@ -36,7 +36,7 @@ export const useRefresh = () => {
       mlTimefilterRefresh$,
       timefilter.getTimeUpdate$().pipe(
         map(() => {
-          return { lastRefresh: Date.now(), timeRange: getTimRange() };
+          return { lastRefresh: Date.now(), timeRange: getTimeRange() };
         })
       ),
       annotationsRefresh$.pipe(map((d) => ({ lastRefresh: d })))

@@ -23,7 +23,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 import { useGroupActions } from './actions';
 import { Group, GroupsDictionary } from './anomaly_detection_panel';
-import { MlSummaryJobs } from '../../../../../common/types/anomaly_detection_jobs';
 import { JobStatsBarStats, StatsBar } from '../../../components/stats_bar';
 import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge';
 import { toLocaleString } from '../../../util/string_utils';
@@ -32,7 +31,6 @@ import { useTimeBuckets } from '../../../components/custom_hooks/use_time_bucket
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useMlLink } from '../../../contexts/kibana';
 
-// Used to pass on attribute names to table columns
 export enum AnomalyDetectionListColumns {
   id = 'id',
   maxAnomalyScore = 'max_anomaly_score',
@@ -46,10 +44,9 @@ export enum AnomalyDetectionListColumns {
 interface Props {
   items: GroupsDictionary;
   statsBarData: JobStatsBarStats;
-  jobsList: Record<string, MlSummaryJobs>;
 }
 
-export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData }) => {
+export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData }) => {
   const groupsList = Object.values(items);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -63,7 +60,6 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
     page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
   });
 
-  // columns: group, max anomaly, jobs in group, latest timestamp, docs processed, action to explorer
   const columns: Array<EuiBasicTableColumn<Group>> = [
     {
       field: AnomalyDetectionListColumns.id,
