@@ -58,7 +58,7 @@ describe('createActionEventLogRecordObject', () => {
         name: 'test name',
         action: 'execute',
         message: 'action execution start',
-        namespace: 'default',
+        namespace: { namespace: 'default' },
         savedObjects: [
           {
             id: '2',
