@@ -10,6 +10,7 @@ import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import { Adapters } from 'src/plugins/inspector/public';
 import type { Query } from 'src/plugins/data/common';
+import { Filter } from '@kbn/es-query';
 import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
 import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import {
@@ -53,7 +54,7 @@ import {
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 import { MapSettings } from '../reducers/map';
-import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
+import { TimeRange } from '../../../../../src/plugins/data/public';
 import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
