@@ -25,7 +25,6 @@ export class PlaceHolderWidget implements monaco.editor.IContentWidget {
       const domNode = document.createElement('div');
       domNode.innerText = this.placeholderText;
       domNode.className = 'kibanaCodeEditor__placeholderContainer';
-      domNode.setAttribute('data-test-subj', 'codeEditorPlaceholderWidget');
       this.editor.applyFontInfo(domNode);
       this.domNode = domNode;
     }
