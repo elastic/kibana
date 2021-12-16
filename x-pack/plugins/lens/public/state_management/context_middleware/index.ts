@@ -8,10 +8,9 @@
 import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { setState, LensDispatch } from '..';
+import { setState, LensDispatch, LensStoreDeps, navigateAway } from '..';
 import { LensAppState } from '../types';
 import { getResolvedDateRange, containsDynamicMath } from '../../utils';
-import { LensStoreDeps, navigateAway } from '..';
 import { subscribeToExternalContext } from './subscribe_to_external_context';
 
 export const contextMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {
