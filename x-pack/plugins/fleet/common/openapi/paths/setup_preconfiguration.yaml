@@ -1,5 +1,6 @@
 put:
   summary: Preconfiguration
+  operationId: get-settings
   tags: []
   responses:
     '200':
@@ -19,4 +20,24 @@ put:
                     type: string
                   version:
                     type: string
-  operationId: get-settings
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            body:
+              type: object
+              properties:
+                agentPolicies:
+                  $ref: ../components/schemas/preconfigured_agent_policies.yaml
+                packages:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    version:
+                      type: string
+                  required:
+                    - name
+                    - version

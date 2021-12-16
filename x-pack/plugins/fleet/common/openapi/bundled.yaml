@@ -39,6 +39,7 @@ paths:
   /setup/preconfiguration:
     put:
       summary: Preconfiguration
+      operationId: get-settings
       tags: []
       responses:
         '200':
@@ -58,7 +59,27 @@ paths:
                         type: string
                       version:
                         type: string
-      operationId: get-settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body:
+                  type: object
+                  properties:
+                    agentPolicies:
+                      $ref: '#/components/schemas/preconfigured_agent_policies'
+                    packages:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        version:
+                          type: string
+                      required:
+                        - name
+                        - version
   /settings:
     get:
       summary: Settings
@@ -1802,6 +1823,87 @@ components:
       required:
         - isInitialized
         - nonFatalErrors
+    preconfigured_agent_policies:
+      title: Preconfigured agent policies
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        is_managed:
+          type: string
+        unenroll_timeout:
+          type: number
+        monitoring_enabled:
+          type: array
+          items:
+            type: string
+            enum:
+              - logs
+              - metrics
+        namespace:
+          type: string
+        id:
+          oneOf:
+            - type: string
+            - type: number
+        is_default:
+          type: boolean
+        is_default_fleet_server:
+          type: boolean
+        data_output_id:
+          type: string
+        monitoring_output_id:
+          type: string
+        package_policies:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                oneOf:
+                  - type: string
+                  - type: number
+              name:
+                type: string
+              package:
+                type: object
+                properties:
+                  name:
+                    type: string
+              description:
+                type: string
+              namespace:
+                type: string
+              inputs:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    enabled:
+                      type: boolean
+                    keep_enabled:
+                      type: boolean
+                    vars:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        type:
+                          type: string
+                        value:
+                          type: string
+                        frozen:
+                          type: boolean
+                  required:
+                    - type
+      required:
+        - name
+        - namespace
+        - package_policies
     settings:
       title: Settings
       type: object
@@ -2436,12 +2538,12 @@ components:
           properties:
             items:
               $ref: '#/components/schemas/enrollment_api_key'
-        items:
+        item:
           type: array
           items:
             $ref: '#/components/schemas/enrollment_api_key'
       required:
-        - items
+        - item
     upgrade_diff:
       title: Package policy Upgrade dryrun
       type: array

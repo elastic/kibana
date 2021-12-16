@@ -7,9 +7,9 @@ properties:
     properties:
       items:
         $ref: ./enrollment_api_key.yaml
-  items:
+  item:
     type: array
     items:
       $ref: ./enrollment_api_key.yaml
 required:
-  - items
+  - item
