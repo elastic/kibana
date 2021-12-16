@@ -30,7 +30,7 @@ import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/publi
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { TinymathAST } from 'packages/kbn-tinymath';
 import { SavedObjectReference } from 'kibana/server';
-import { clone } from 'lodash';
+import { cloneDeep } from 'lodash';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -1762,7 +1762,14 @@ describe('IndexPattern Data Source', () => {
       },
     };
 
+    const currentIndexPatternReference = {
+      id: 'some-id',
+      name: 'indexpattern-datasource-current-indexpattern',
+      type: 'index-pattern',
+    };
+
     const references1: SavedObjectReference[] = [
+      currentIndexPatternReference,
       {
         id: 'some-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',
@@ -1771,6 +1778,7 @@ describe('IndexPattern Data Source', () => {
     ];
 
     const references2: SavedObjectReference[] = [
+      currentIndexPatternReference,
       {
         id: 'some-DIFFERENT-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',
@@ -1785,7 +1793,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should be false if datasource states differ', () => {
-      const differentPersistableState = clone(persistableState);
+      const differentPersistableState = cloneDeep(persistableState);
       differentPersistableState.layers[layerId].columnOrder = ['something else'];
 
       expect(
@@ -1801,7 +1809,7 @@ describe('IndexPattern Data Source', () => {
     it('should be true if datasource states are identical and they refer to the same data view', () => {
       expect(
         indexPatternDatasource.isEqual(persistableState, references1, persistableState, references1)
-      ).toBe(false);
+      ).toBe(true);
     });
   });
 });
