@@ -11,8 +11,7 @@ import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public
 import { setState, LensDispatch } from '..';
 import { LensAppState } from '../types';
 import { getResolvedDateRange, containsDynamicMath } from '../../utils';
-import { LensStoreDeps } from '..';
-import { navigateAway } from '..';
+import { LensStoreDeps, navigateAway } from '..';
 import { subscribeToExternalContext } from './subscribe_to_external_context';
 
 export const contextMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {
