@@ -12,12 +12,14 @@ import { monaco } from '@kbn/monaco';
  * When using custom fonts with monaco need to call `monaco.editor.remeasureFonts()` when custom fonts finished loading
  * Otherwise initial measurements on fallback font are used which causes visual glitches in the editor
  */
+// @ts-ignore
 if ('fonts' in window.document && 'ready' in window.document.fonts) {
+  // @ts-ignore
   window.document.fonts.ready
     .then(() => {
       monaco.editor.remeasureFonts();
     })
-    .catch((e) => {
+    .catch((e: unknown) => {
       // eslint-disable-next-line no-console
       console.warn('Failed to remeasureFonts in <CodeEditor/>');
       // eslint-disable-next-line no-console
