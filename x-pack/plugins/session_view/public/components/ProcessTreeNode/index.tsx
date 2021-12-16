@@ -227,7 +227,7 @@ export function ProcessTreeNode({
   };
 
   const id = process.id;
-
+debugger
   return (
     <>
       <div
