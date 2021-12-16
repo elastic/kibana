@@ -57,7 +57,7 @@ const result = await executionContract.getData();
 ```
 
 <DocCallOut>
-  Check the full spec of execute function [here](https://github.com/elastic/kibana/blob/main/docs/development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.execution.md)
+  Check the full spec of execute function <DocLink id="kibExpressionsPluginApi" section="def-common.ExpressionsService.execute" text="here" />
 </DocCallOut>
 
 In addition, on the browser side, there are two additional ways to run expressions and render the results.
@@ -71,7 +71,7 @@ This is the easiest way to get expressions rendered inside your application.
 ```
 
 <DocCallOut>
-  Check the full spec of ReactExpressionRenderer component props [here](https://github.com/elastic/kibana/blob/main/docs/development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.reactexpressionrendererprops.md)
+  Check the full spec of ReactExpressionRenderer component props <DocLink id="kibExpressionsPluginApi" section="def-public.ReactExpressionRendererProps" text="here" />
 </DocCallOut>
 
 #### Expression loader
@@ -83,7 +83,7 @@ const handler = loader(domElement, expression, params);
 ```
 
 <DocCallOut>
-  Check the full spec of expression loader params [here](https://github.com/elastic/kibana/blob/main/docs/development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.iexpressionloaderparams.md)
+  Check the full spec of expression loader params <DocLink id="kibExpressionsPluginApi" section="def-public.IExpressionLoaderParams" text="here" />
 </DocCallOut>
 
 ### Creating new expression functions
@@ -106,7 +106,7 @@ expressions.registerFunction(functionDefinition);
 ```
 
 <DocCallOut>
-  Check the full interface of ExpressionFuntionDefinition [here](https://github.com/elastic/kibana/blob/main/docs/development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.expressionfunctiondefinition.md)
+  Check the full interface of ExpressionFuntionDefinition <DocLink id="kibExpressionsPluginApi" section="def-common.ExpressionFunctionDefinition" text="here" />
 </DocCallOut>
 
 ### Creating new expression renderers
@@ -128,5 +128,5 @@ expressions.registerRenderer(rendererDefinition);
 ```
 
 <DocCallOut>
-  Check the full interface of ExpressionRendererDefinition [here](https://github.com/elastic/kibana/blob/main/docs/development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.expressionrenderdefinition.md)
+  Check the full interface of ExpressionRendererDefinition <DocLink id="kibExpressionsPluginApi" section="def-common.ExpressionRenderDefinition" text="here" />
 </DocCallOut>

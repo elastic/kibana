@@ -95,7 +95,8 @@ import type {
   SearchSourceFields,
   SearchSourceOptions,
 } from './types';
-import { FetchHandlers, getSearchParamsFromRequest, RequestFailure, SearchRequest } from './fetch';
+import { getSearchParamsFromRequest, RequestFailure } from './fetch';
+import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import {

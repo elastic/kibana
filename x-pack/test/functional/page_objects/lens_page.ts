@@ -599,6 +599,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.exists('lnsVisualOptionsButton');
       });
     },
+    async retrySetValue(
+      input: string,
+      value: string,
+      options = {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      } as Record<string, boolean>
+    ) {
+      await retry.try(async () => {
+        await testSubjects.setValue(input, value, options);
+        expect(await (await testSubjects.find(input)).getAttribute('value')).to.eql(value);
+      });
+    },
     async useCurvedLines() {
       await testSubjects.click('lnsCurveStyleToggle');
     },

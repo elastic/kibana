@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies the deletion of backup files, saved using third-party software, by a process outside of the backup suite. Adversaries may delete Backup files to ensure that recovery from a Ransomware attack is less likely.",
+  "description": "Identifies the deletion of backup files, saved using third-party software, by a process outside of the backup suite. Adversaries may delete Backup files to ensure that recovery from a ransomware attack is less likely.",
   "false_positives": [
     "Certain utilities that delete files for disk cleanup or Administrators manually removing backup files."
   ],
@@ -48,5 +48,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }
