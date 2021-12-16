@@ -23,13 +23,12 @@ import {
 import { MLJobLink } from './ml_job_link';
 import * as labels from './translations';
 import { MLFlyoutView } from './ml_flyout';
-import { ML_JOB_ID } from '../../../../common/constants';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
 import { useMonitorId } from '../../../hooks';
 import { kibanaService } from '../../../state/kibana_service';
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint, useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
 
 interface Props {
@@ -73,6 +72,7 @@ const showMLJobNotification = (
 };
 
 export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
+  const core = useKibana();
   const dispatch = useDispatch();
   const { data: hasMLJob, error } = useSelector(hasNewMLJobSelector);
   const isMLJobCreating = useSelector(isMLJobCreatingSelector);
@@ -113,14 +113,14 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
           true,
           hasMLJob.awaitingNodeAssignment
         );
-        const loadMLJob = (jobId: string) =>
-          dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
-
-        loadMLJob(ML_JOB_ID);
-
+        dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
         refreshApp();
-        dispatch(setAlertFlyoutType(CLIENT_ALERT_TYPES.DURATION_ANOMALY));
-        dispatch(setAlertFlyoutVisible(true));
+
+        const hasUptimeWrite = core.services.application?.capabilities.uptime?.save ?? false;
+        if (hasUptimeWrite) {
+          dispatch(setAlertFlyoutType(CLIENT_ALERT_TYPES.DURATION_ANOMALY));
+          dispatch(setAlertFlyoutVisible(true));
+        }
       } else {
         showMLJobNotification(
           monitorId as string,
