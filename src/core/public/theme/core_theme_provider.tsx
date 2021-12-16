@@ -37,7 +37,6 @@ export const CoreThemeProvider: FC<CoreThemeProviderProps> = ({ theme$, children
   const euiTheme = useMemo(() => convertCoreTheme(coreTheme), [coreTheme]);
   return (
     <EuiProvider
-      modify={{ LIGHT: { colors: { primary: '#FF0000' } } }}
       colorMode={euiTheme.colorMode}
       theme={euiTheme.euiThemeSystem}
       cache={emotionCache}
