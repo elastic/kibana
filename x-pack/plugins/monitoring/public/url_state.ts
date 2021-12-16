@@ -6,7 +6,7 @@
  */
 import { Subscription } from 'rxjs';
 import { History, createHashHistory } from 'history';
-import { MonitoringStartPluginDependencies } from './types';
+import { MonitoringStartPluginDependencies, MonitoringStartServices } from './types';
 import { Legacy } from './legacy_shims';
 
 import {
@@ -67,7 +67,7 @@ export class GlobalState {
 
   constructor(
     queryService: MonitoringStartPluginDependencies['data']['query'],
-    toasts: MonitoringStartPluginDependencies['core']['notifications']['toasts'],
+    toasts: MonitoringStartServices['notifications']['toasts'],
     externalState: RawObject
   ) {
     this.timefilterRef = queryService.timefilter.timefilter;
