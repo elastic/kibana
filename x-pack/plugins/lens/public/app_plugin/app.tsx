@@ -31,12 +31,7 @@ import {
   DispatchSetState,
   selectSavedObjectFormat,
 } from '../state_management';
-import {
-  SaveModalContainer,
-  runSaveLensVisualization,
-  injectDocFilterReferences,
-  removePinnedFilters,
-} from './save_modal_container';
+import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
 import { isLensEqual } from './lens_document_equality';

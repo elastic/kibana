@@ -51,6 +51,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     checkIntegrity: jest.fn((_state) => []),
     isTimeBased: jest.fn(),
     isValidColumn: jest.fn(),
+    isEqual: jest.fn(),
   };
 }
 
