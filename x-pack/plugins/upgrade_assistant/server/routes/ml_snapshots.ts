@@ -135,6 +135,8 @@ export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: Rou
             jobId,
           };
 
+          // console.log(body);
+
           // Store snapshot in saved object if upgrade not complete
           if (body.completed !== true) {
             await createMlOperation(savedObjectsClient, snapshotInfo);
@@ -199,40 +201,37 @@ export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: Rou
           }
 
           const snapshotOp = foundSnapshots.saved_objects[0];
-          const { nodeId } = snapshotOp.attributes;
 
-          // Now that we have the node ID, check the upgrade snapshot task progress
-          const { body: taskResponse } = await esClient.asCurrentUser.tasks.list({
-            nodes: [nodeId],
-            actions: 'xpack/ml/job/snapshot/upgrade',
-            detailed: true, // necessary in order to filter if there are more than 1 snapshot upgrades in progress
+          const { body } = await esClient.asCurrentUser.transport.request({
+            method: 'GET',
+            path: `/_ml/anomaly_detectors/${jobId}/model_snapshots/${snapshotId}/_upgrade/_stats`,
           });
 
-          const nodeTaskInfo = taskResponse?.nodes && taskResponse!.nodes[nodeId];
+          // console.log('WOW');
+          // console.log(body);
+
+          const upgradeStatus = body.model_snapshot_upgrades[0];
           const snapshotInfo: MlOperation = {
             ...snapshotOp.attributes,
           };
 
-          if (nodeTaskInfo) {
-            // Find the correct snapshot task ID based on the task description
-            const snapshotTaskId = Object.keys(nodeTaskInfo.tasks).find((task) => {
-              // The description is in the format of "job-snapshot-upgrade-<job_id>-<snapshot_id>"
-              const taskDescription = nodeTaskInfo.tasks[task].description;
-              const taskSnapshotAndJobIds = taskDescription!.replace('job-snapshot-upgrade-', '');
-              const taskSnapshotAndJobIdParts = taskSnapshotAndJobIds.split('-');
-              const taskSnapshotId =
-                taskSnapshotAndJobIdParts[taskSnapshotAndJobIdParts.length - 1];
-              const taskJobId = taskSnapshotAndJobIdParts.slice(0, 1).join('-');
-
-              return taskSnapshotId === snapshotId && taskJobId === jobId;
-            });
-
-            // If the snapshot task exists, assume the upgrade is in progress
-            if (snapshotTaskId && nodeTaskInfo.tasks[snapshotTaskId]) {
+          if (upgradeStatus) {
+            if (
+              upgradeStatus.state === 'loading_old_state' ||
+              upgradeStatus.state === 'saving_new_state'
+            ) {
               return response.ok({
                 body: {
                   ...snapshotInfo,
                   status: 'in_progress',
+                },
+              });
+            } else if (upgradeStatus.state === 'failed') {
+              return response.customError({
+                statusCode: 404,
+                body: {
+                  message:
+                    "The upgrade that was started for this model snapshot doesn't exist anymore.",
                 },
               });
             } else {
