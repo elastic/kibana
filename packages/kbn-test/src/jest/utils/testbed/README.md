@@ -116,7 +116,7 @@ In order to prevent flakiness in component integration tests, please consider th
   });
   ```
 
-- **Do not use** using `nextTick()`, `waitFor`, or `waitForFunc` helpers in tests. These helpers use `setTimeout` underneath and add latency in the tests, especially on CI where a timeout (even of a few ms) can trigger a timeout error. These helpers will eventually be deprecated once existing tests has been updated.
+- **Do not use** using `nextTick()` helper in tests. This helper use `setTimeout` underneath and add latency in the tests, especially on CI where a timeout (even of a few ms) can trigger a timeout error.
 
 - **Do not declare** `component.update()` inside `act()`. Each `act()` call should contain a chunk of actions that updates the internal state(s). The `component.update()` that re-renders the internal DOM needs to be called outside, before asserting against the updated DOM.
 
@@ -274,13 +274,10 @@ expect(tableCellsValues).toEqual([
 
 An object with the following methods:
 
-##### `setInputValue(input, value, isAsync)`
+##### `setInputValue(input, value)`
 
 Set the value of a form input. The input can either be a test subject (a string) or an Enzyme react wrapper. If you specify a test subject, 
 you can provide a nested path to access it by separating the parent and child with a dot (e.g. `myForm.followerIndexName`).
-
-`isAsync`: flag that will return a Promise that resolves on the next "tick". This is useful if updating the input triggers 
-an async operation (like a HTTP request) and we need it to resolve so the DOM gets updated (default: `false`).
 
 ```js
 await form.setInputValue('myInput', 'some value', true);

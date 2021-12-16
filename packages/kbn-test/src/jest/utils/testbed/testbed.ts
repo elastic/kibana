@@ -157,52 +157,17 @@ export function registerTestBed<T extends string = string>(
         });
       };
 
-      const waitForFn: TestBed<T>['waitForFn'] = async (predicate, errMessage) => {
-        const triggeredAt = Date.now();
-
-        const MAX_WAIT_TIME = 30000;
-        const WAIT_INTERVAL = 50;
-
-        const process = async (): Promise<void> => {
-          const isOK = await predicate();
-
-          if (isOK) {
-            // Great! nothing else to do here.
-            return;
-          }
-
-          const timeElapsed = Date.now() - triggeredAt;
-          if (timeElapsed > MAX_WAIT_TIME) {
-            throw new Error(errMessage);
-          }
-
-          return new Promise((resolve) => setTimeout(resolve, WAIT_INTERVAL)).then(() => {
-            component.update();
-            return process();
-          });
-        };
-
-        return process();
-      };
-
-      const waitFor: TestBed<T>['waitFor'] = (testSubject: T, count = 1) => {
-        return waitForFn(
-          () => Promise.resolve(exists(testSubject, count)),
-          `I waited patiently for the "${testSubject}" test subject to appear with no luck. It is nowhere to be found!`
-        );
-      };
-
       /**
        * ----------------------------------------------------------------
        * Forms
        * ----------------------------------------------------------------
        */
 
-      const setInputValue: TestBed<T>['form']['setInputValue'] = (
-        input,
-        value,
-        isAsync = false
-      ) => {
+      const setInputValue: TestBed<T>['form']['setInputValue'] = function (input, value) {
+        if (arguments.length === 3) {
+          throw new Error(`Passing the "isAsync" arg is not supported anymore.`);
+        }
+
         const formInput = typeof input === 'string' ? find(input) : input;
 
         if (!formInput.length) {
@@ -210,11 +175,6 @@ export function registerTestBed<T extends string = string>(
         }
         formInput.simulate('change', { target: { value } });
         component.update();
-
-        if (!isAsync) {
-          return;
-        }
-        return new Promise((resolve) => setTimeout(resolve));
       };
 
       const setSelectValue: TestBed<T>['form']['setSelectValue'] = (
@@ -334,8 +294,6 @@ export function registerTestBed<T extends string = string>(
         exists,
         find,
         setProps,
-        waitFor,
-        waitForFn,
         table: {
           getMetaData,
         },
