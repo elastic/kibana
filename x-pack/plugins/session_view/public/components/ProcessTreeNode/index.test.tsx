@@ -29,6 +29,10 @@ describe('ProcessTreeNode component', () => {
 
       expect(renderResult.queryByTestId('processTreeNode')).toBeTruthy();
     });
+    it('renders orphaned node', async () => {
+      renderResult = mockedContext.render(<ProcessTreeNode process={processMock} isOrphan />);
+      expect(renderResult.queryByText(/orphaned/i)).toBeTruthy();
+    });
 
     it('renders user icon for user entered process', async () => {
       const userEnteredProcessMock: typeof processMock = {
