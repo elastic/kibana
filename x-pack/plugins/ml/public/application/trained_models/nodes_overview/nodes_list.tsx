@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
+import { cloneDeep } from 'lodash';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { usePageUrlState } from '../../util/url_state';
@@ -91,7 +92,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
   }, [itemIdToExpandedRowMap]);
 
   const toggleDetails = (item: NodeItem) => {
-    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    const itemIdToExpandedRowMapValues = cloneDeep(itemIdToExpandedRowMap);
     if (itemIdToExpandedRowMapValues[item.id]) {
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
