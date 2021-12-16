@@ -10,12 +10,13 @@ import type {
   IEsSearchRequest,
   IEsSearchResponse,
 } from '../../../../../../../../src/plugins/data/common';
+import { RISKY_HOSTS_INDEX_PREFIX } from '../../../../constants';
 import { Inspect, Maybe, TimerangeInput } from '../../../common';
 
 export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
   defaultIndex: string[];
   factoryQueryType?: FactoryQueryTypes;
-  hostName?: string;
+  hostNames?: string[];
   timerange?: TimerangeInput;
 }
 
@@ -38,3 +39,7 @@ export interface RuleRisk {
   rule_name: string;
   rule_risk: string;
 }
+
+export const getHostRiskIndex = (spaceId: string): string => {
+  return `${RISKY_HOSTS_INDEX_PREFIX}${spaceId}`;
+};

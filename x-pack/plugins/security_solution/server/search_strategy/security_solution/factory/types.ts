@@ -31,6 +31,7 @@ export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
       savedObjectsClient: SavedObjectsClientContract;
       endpointContext: EndpointAppContext;
       request: KibanaRequest;
+      spaceId?: string;
     }
   ) => Promise<StrategyResponseType<T>>;
 }

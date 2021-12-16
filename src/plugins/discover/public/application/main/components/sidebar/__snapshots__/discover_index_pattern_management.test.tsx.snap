@@ -653,13 +653,13 @@ exports[`Discover IndexPattern Management renders correctly 1`] = `
           "navigateToApp": [MockFunction],
         },
       },
-      "history": [Function],
-      "indexPatternFieldEditor": Object {
+      "dataViewFieldEditor": Object {
         "openEditor": [MockFunction],
         "userPermissions": Object {
           "editIndexPattern": [Function],
         },
       },
+      "history": [Function],
       "uiSettings": Object {
         "get": [Function],
       },
