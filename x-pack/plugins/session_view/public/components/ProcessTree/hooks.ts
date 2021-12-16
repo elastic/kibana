@@ -154,7 +154,7 @@ export const useProcessTree = ({
       sessionEntityId
     );
     setForwardIndex(forward.length);
-
+debugger
     setProcessMap({ ...eventsProcessMap });
     setOrphans([...orphans]);
     // eslint-disable-next-line react-hooks/exhaustive-deps

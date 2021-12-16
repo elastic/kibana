@@ -9,6 +9,9 @@ import { ProcessImpl } from './hooks';
 
 export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[]) => {
   events.forEach((event) => {
+    if (event.process.entity_id === '3d07f844-ad71-5fd0-969d-40c58c751fd3') {
+      debugger
+    }
     const { entity_id: id } = event.process;
     let process = processMap[id];
 
@@ -30,7 +33,9 @@ export const buildProcessTree = (
   sessionEntityId: string,
   backwardDirection: boolean = false
 ) => {
+  debugger
   events.forEach((event) => {
+    debugger
     const process = processMap[event.process.entity_id];
     const parentProcess = processMap[event.process.parent?.entity_id];
 
@@ -88,8 +93,10 @@ export const autoExpandProcessTree = (processMap: ProcessMap) => {
 
     if (process.searchMatched || process.isUserEntered()) {
       let { parent } = process;
+      const parentIdSet = new Set();
 
-      while (parent && parent.id !== parent.parent?.id) {
+      while (parent && !parentIdSet.has(parent.id)) {
+        parentIdSet.add(parent.id);
         parent.autoExpand = true;
         parent = parent.parent;
       }
@@ -111,6 +118,7 @@ export const processNewEvents = (
   }
 
   const updatedProcessMap = updateProcessMap(eventsProcessMap, events);
+  debugger
   const builtProcessMap = buildProcessTree(
     updatedProcessMap,
     events,
