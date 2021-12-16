@@ -105,6 +105,13 @@ export const ENABLE_ANOMALY_ALERT = i18n.translate(
   }
 );
 
+export const ENABLE_ANOMALY_NO_PERMISSIONS_TOOLTIP = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.noPermissionsTooltip',
+  {
+    defaultMessage: 'You need read-write access to Uptime to create anomaly alerts.',
+  }
+);
+
 export const DISABLE_ANOMALY_ALERT = i18n.translate(
   'xpack.uptime.ml.enableAnomalyDetectionPanel.disableAnomalyAlert',
   {
