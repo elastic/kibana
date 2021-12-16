@@ -9,7 +9,7 @@ import { mappingFromFieldMap } from '../../mapping_from_field_map';
 import { ClusterPutComponentTemplateBody } from '../../types';
 import { experimentalRuleFieldMap } from '../field_maps/experimental_rule_field_map';
 
-export const technicalComponentTemplate: ClusterPutComponentTemplateBody = {
+export const experimentalComponentTemplate: ClusterPutComponentTemplateBody = {
   template: {
     settings: {
       number_of_shards: 1,
