@@ -19,12 +19,18 @@ export class ExtensionPointStorage {
     const extensionPointCallbacks = this.store.get(extension.type);
 
     if (extensionPointCallbacks) {
+      // FIXME:PT store the entire definition? ALso, capture (via Error#stack) where the extension was added from (debug purposes)
+
       extensionPointCallbacks.add(extension.callback);
     }
   }
 
   clear(): void {
     this.store.clear();
+  }
+
+  get(extensionType: ExtensionPoint['type']): Set<ServerExtensionCallback> | undefined {
+    return this.store.get(extensionType);
   }
 
   /**

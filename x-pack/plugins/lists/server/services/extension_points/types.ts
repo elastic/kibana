@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { CreateExceptionListItemOptions } from '../exception_lists/exception_list_client_types';
+
 export type ServerExtensionCallback<A extends object | void = void, R = unknown> = (
   args: A
 ) => Promise<R>;
@@ -22,8 +24,11 @@ interface ServerExtensionPointDefinition<
  * Extension point is triggered prior to creating a new Exception List Item. Throw'ing will cause
  * the create operation to fail
  */
-export type ExceptionsListPreCreateItemServerExtension =
-  ServerExtensionPointDefinition<'exceptionsListPreCreateItem'>;
+export type ExceptionsListPreCreateItemServerExtension = ServerExtensionPointDefinition<
+  'exceptionsListPreCreateItem',
+  CreateExceptionListItemOptions,
+  CreateExceptionListItemOptions
+>;
 
 /**
  * Extension point is triggered prior to updating the Exception List Item. Throw'ing will cause the

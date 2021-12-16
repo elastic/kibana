@@ -60,6 +60,7 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
       getExceptionListClient: (savedObjectsClient, user): ExceptionListClient => {
         return new ExceptionListClient({
           savedObjectsClient,
+          serverExtensionsClient: this.extensionPoints.getClient(),
           user,
         });
       },
@@ -108,6 +109,7 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
           getExceptionListClient: (): ExceptionListClient =>
             new ExceptionListClient({
               savedObjectsClient,
+              serverExtensionsClient: this.extensionPoints.getClient(),
               user,
             }),
           getExtensionPointClient: (): ExtensionPointStorageClientInterface =>

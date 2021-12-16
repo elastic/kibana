@@ -50,9 +50,12 @@ import {
   VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-types';
 
+import { ExtensionPointStorageClientInterface } from '../extension_points';
+
 export interface ConstructorOptions {
   user: string;
   savedObjectsClient: SavedObjectsClientContract;
+  serverExtensionsClient: ExtensionPointStorageClientInterface;
 }
 
 export interface GetExceptionListOptions {

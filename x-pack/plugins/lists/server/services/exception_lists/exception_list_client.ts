@@ -6,15 +6,26 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import type {
+import {
   ExceptionListItemSchema,
   ExceptionListSchema,
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
   ImportExceptionsResponseSchema,
+  createExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { Type } from 'io-ts';
+import { pipe } from 'fp-ts/pipeable';
+import { fold } from 'fp-ts/Either';
+import * as t from 'io-ts';
+
+import type { ExtensionPointStorageClientInterface } from '../extension_points';
+import {
+  exactCheck,
+  formatErrors,
+} from '../../../../../../../../../../private/var/tmp/_bazel_ptavares/a4a237a05d507fc23e0818d3647eedfe/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-securitysolution-io-ts-utils';
 
 import {
   ConstructorOptions,
@@ -66,15 +77,47 @@ import {
   importExceptionsAsArray,
   importExceptionsAsStream,
 } from './import_exception_list_and_items';
+import { DataValidationError } from './utils/errors';
 
 export class ExceptionListClient {
   private readonly user: string;
-
   private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly serverExtensionsClient: ExtensionPointStorageClientInterface;
 
-  constructor({ user, savedObjectsClient }: ConstructorOptions) {
+  constructor({ user, savedObjectsClient, serverExtensionsClient }: ConstructorOptions) {
+    // FIXME:PT add option to "turn off running external extension points
+
     this.user = user;
     this.savedObjectsClient = savedObjectsClient;
+    this.serverExtensionsClient = serverExtensionsClient;
+  }
+
+  /**
+   * Validates some data with a given validator (`io-ts` schema) and if validation errors exist, then an
+   * Error instance will be returned.
+   *
+   * @param data
+   * @param validator
+   * @private
+   */
+  private validateData(
+    data: unknown,
+    validator: Type<unknown, unknown>
+  ): undefined | DataValidationError {
+    // FIXME:PT fix `validator` type so that it does not show error when used
+
+    return pipe(
+      validator.decode(data),
+      (decoded) => exactCheck(data, decoded),
+      fold(
+        (errors: t.Errors) => {
+          const errorStrings = formatErrors(errors);
+
+          return new DataValidationError(errorStrings, 400);
+        },
+        () => undefined
+      )
+    );
   }
 
   /**
@@ -368,8 +411,9 @@ export class ExceptionListClient {
     tags,
     type,
   }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
-    const { savedObjectsClient, user } = this;
-    return createExceptionListItem({
+    const { savedObjectsClient, user, serverExtensionsClient } = this;
+    const externalExtensions = serverExtensionsClient.get('exceptionsListPreCreateItem');
+    let itemData: CreateExceptionListItemOptions = {
       comments,
       description,
       entries,
@@ -379,9 +423,27 @@ export class ExceptionListClient {
       name,
       namespaceType,
       osTypes,
-      savedObjectsClient,
       tags,
       type,
+    };
+
+    if (externalExtensions) {
+      // Call each extension callback
+      for (const externalExtensionCallback of externalExtensions) {
+        itemData = await externalExtensionCallback(itemData);
+
+        // Before calling the next one, make sure the returned payload is valid
+        const validationError = this.validateData(itemData, createExceptionListItemSchema);
+
+        if (validationError) {
+          throw validationError;
+        }
+      }
+    }
+
+    return createExceptionListItem({
+      ...itemData,
+      savedObjectsClient,
       user,
     });
   };
