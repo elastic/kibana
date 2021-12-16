@@ -6,12 +6,8 @@
  */
 
 import { CoreSetup, Logger } from 'src/core/server';
-
-import {
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-} from '@kbn/rule-data-utils/technical_field_names';
 import { mappingFromFieldMap } from '../../../../rule_registry/common/mapping_from_field_map';
+import { experimentalRuleFieldMap } from '../../../../rule_registry/common/assets/field_maps/experimental_rule_field_map';
 
 import { Dataset, RuleRegistryPluginSetupContract } from '../../../../rule_registry/server';
 import type { InfraFeatureId } from '../../../common/constants';
@@ -38,13 +34,7 @@ export const createRuleDataClient = ({
     componentTemplates: [
       {
         name: 'mappings',
-        mappings: mappingFromFieldMap(
-          {
-            [ALERT_EVALUATION_THRESHOLD]: { type: 'scaled_float', scaling_factor: 100 },
-            [ALERT_EVALUATION_VALUE]: { type: 'scaled_float', scaling_factor: 100 },
-          },
-          'strict'
-        ),
+        mappings: mappingFromFieldMap({ ...experimentalRuleFieldMap }, 'strict'),
       },
     ],
   });

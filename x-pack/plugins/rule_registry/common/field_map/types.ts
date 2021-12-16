@@ -11,6 +11,5 @@ export interface FieldMap {
     required?: boolean;
     array?: boolean;
     path?: string;
-    scaling_factor?: number;
   };
 }
