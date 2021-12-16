@@ -176,9 +176,9 @@ export const EventFiltersListPage = memo(() => {
   );
 
   const handleOnSearch = useCallback(
-    (query: string) => {
+    (query: string, includedPolicies?: string) => {
       dispatch({ type: 'eventFiltersForceRefresh', payload: { forceRefresh: true } });
-      navigateCallback({ filter: query });
+      navigateCallback({ filter: query, included_policies: includedPolicies });
     },
     [navigateCallback, dispatch]
   );
@@ -280,6 +280,9 @@ export const EventFiltersListPage = memo(() => {
             placeholder={i18n.translate('xpack.securitySolution.eventFilter.search.placeholder', {
               defaultMessage: 'Search on the fields below: name, comments, value',
             })}
+            hasPolicyFilter
+            policyList={policiesRequest.data?.items}
+            defaultIncludedPolicies={location.included_policies}
           />
           <EuiSpacer size="m" />
           <EuiText color="subdued" size="xs" data-test-subj="eventFiltersCountLabel">
