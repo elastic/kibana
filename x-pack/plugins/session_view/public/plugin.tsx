@@ -14,7 +14,6 @@ import {
   PluginInitializerContext,
 } from '../../../../src/core/public';
 import { SessionViewTableProcessTree } from './components/SessionViewTableProcessTree';
-import { QueryClient, QueryClientProvider } from 'react-query';
 import { createStore, Reducer } from 'redux';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { SessionViewConfigType, SessionViewServices } from './types';
@@ -25,9 +24,6 @@ const createTimelineStore = (reducer: Reducer) => {
     reducer
   )
 };
-
-// Initializing react-query
-const queryClient = new QueryClient();
 
 export class SessionViewPlugin implements Plugin {
   private kibanaVersion: string;
@@ -69,9 +65,7 @@ export class SessionViewPlugin implements Plugin {
     return {
       getSessionViewTableProcessTree: () => {
         return (
-          <QueryClientProvider client={queryClient}>
-            <SessionViewTableProcessTree />
-          </QueryClientProvider>
+          <SessionViewTableProcessTree />
         )
       }
     };

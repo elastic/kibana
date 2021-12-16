@@ -9,6 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useQuery } from 'react-query';
 import { CoreStart } from 'kibana/public';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { SessionLeaderTable } from '../SessionLeaderTable';
@@ -20,7 +21,10 @@ export interface SessionViewTableProcessTreeProps {
  // TODO: Not sure how we want to allow other plugins to modifiy this 
 }
 
-export const SessionViewTableProcessTree = (props: SessionViewTableProcessTreeProps) => {
+// Initializing react-query
+const queryClient = new QueryClient();
+
+export const SessionViewTableProcessTreeContent = (props: SessionViewTableProcessTreeProps) => {
   const [eventId, setEventId] = useState<string>('');
   const [selectedSessionEntityId, setSelectedSessionEntityId] = useState<string>('');
 
@@ -80,4 +84,13 @@ export const SessionViewTableProcessTree = (props: SessionViewTableProcessTreePr
   );
 };
 
+export const SessionViewTableProcessTree = (props: SessionViewTableProcessTreeProps) => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SessionViewTableProcessTreeContent {...props} />
+    </QueryClientProvider>
+  );
+};
+
+SessionViewTableProcessTreeContent.displayName = 'SessionViewTableProcessTreeContent';
 SessionViewTableProcessTree.displayName = 'SessionViewTableProcessTree';
