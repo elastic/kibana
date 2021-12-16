@@ -53,14 +53,17 @@ export function InstallButton(props: InstallationButtonProps) {
   const handleClickInstall = useCallback(async () => {
     setFleetSetupInProgress(true);
     toggleInstallModal();
-    const res = await sendPostFleetSetup({ forceRecreate: false });
-    if (res.error) {
+    try {
+      const res = await sendPostFleetSetup({ forceRecreate: false });
+      if (res.error) {
+        throw res.error;
+      }
+    } catch (e) {
       notifications.toasts.addWarning({
         title: toMountPoint(
           <FormattedMessage
             id="xpack.fleet.integrations.fleetSetupErrorTitle"
             defaultMessage="Failed to setup Fleet"
-            values={{ title }}
           />
         ),
         text: toMountPoint(
