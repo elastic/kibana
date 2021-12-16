@@ -15,7 +15,7 @@ import {
   CaseStatuses,
   CaseType,
   ConnectorTypes,
-  noneConnectorId,
+  NONE_CONNECTOR_ID,
 } from '../../common/api';
 import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './cases/types';
@@ -179,7 +179,7 @@ export const createSavedObjectReferences = ({
   connector?: ESCaseConnectorWithId;
   externalService?: CaseFullExternalService;
 } = {}): SavedObjectReference[] => [
-  ...(connector && connector.id !== noneConnectorId
+  ...(connector && connector.id !== NONE_CONNECTOR_ID
     ? [
         {
           id: connector.id,

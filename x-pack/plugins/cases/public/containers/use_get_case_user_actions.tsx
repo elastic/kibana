@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { ElasticUser, CaseUserActions, CaseExternalService } from '../../common/ui/types';
-import { ActionTypes, CaseConnector } from '../../common/api';
+import { ActionTypes, CaseConnector, NONE_CONNECTOR_ID } from '../../common/api';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
@@ -63,6 +63,10 @@ const groupConnectorFields = (
   userActions.reduce((acc, mua) => {
     if (isConnectorUserAction(mua) || isCreateCaseUserAction(mua)) {
       const connector = mua.payload.connector;
+
+      if (connector.id === NONE_CONNECTOR_ID) {
+        return acc;
+      }
 
       return {
         ...acc,

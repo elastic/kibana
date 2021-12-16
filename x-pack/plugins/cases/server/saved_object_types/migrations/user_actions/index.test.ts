@@ -14,16 +14,20 @@ import {
   SavedObjectUnsanitizedDoc,
 } from 'kibana/server';
 import { migrationMocks } from 'src/core/server/mocks';
-import { CASE_USER_ACTION_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import {
+  CASE_USER_ACTION_SAVED_OBJECT,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../../common/constants';
 import {
   createConnectorObject,
   createExternalService,
   createJiraConnector,
-} from '../../services/test_utils';
+} from '../../../services/test_utils';
+import { userActionsConnectorIdMigration } from './connector_id';
+import { payloadMigration } from './payload';
 import { UserActions } from './types';
-import { payloadMigration, userActionsConnectorIdMigration } from './user_actions';
 
-interface OldCaseUserActionAttributes {
+interface Pre810UserActionAttributes {
   new_value?: string;
   old_value?: string;
 }
@@ -77,7 +81,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedExternalService = JSON.parse(migratedUserAction.attributes.new_value!);
           expect(parsedExternalService).not.toHaveProperty('connector_id');
@@ -120,7 +124,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedNewExternalService = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldExternalService = JSON.parse(migratedUserAction.attributes.old_value!);
@@ -147,7 +151,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedNewExternalService = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldExternalService = JSON.parse(migratedUserAction.attributes.old_value!);
@@ -172,7 +176,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           expect(migratedUserAction.attributes.old_value).toBeNull();
           expect(migratedUserAction).toMatchInlineSnapshot(`
@@ -210,7 +214,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           expect(migratedUserAction.attributes.old_value).toBeNull();
           expect(migratedUserAction.attributes.new_value).toEqual('{a');
@@ -276,7 +280,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedConnector = JSON.parse(migratedUserAction.attributes.new_value!);
           expect(parsedConnector).not.toHaveProperty('id');
@@ -316,7 +320,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedNewConnector = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldConnector = JSON.parse(migratedUserAction.attributes.new_value!);
@@ -344,7 +348,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedNewConnectorId = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldConnectorId = JSON.parse(migratedUserAction.attributes.old_value!);
@@ -369,7 +373,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           expect(migratedUserAction).toMatchInlineSnapshot(`
             Object {
@@ -406,7 +410,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           expect(migratedUserAction).toMatchInlineSnapshot(`
             Object {
@@ -470,7 +474,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedConnector = JSON.parse(migratedUserAction.attributes.new_value!);
           expect(parsedConnector.connector).not.toHaveProperty('id');
@@ -512,7 +516,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedNewConnector = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldConnector = JSON.parse(migratedUserAction.attributes.new_value!);
@@ -540,7 +544,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedNewConnectorId = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldConnectorId = JSON.parse(migratedUserAction.attributes.old_value!);
@@ -565,7 +569,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           expect(migratedUserAction).toMatchInlineSnapshot(`
             Object {
@@ -602,7 +606,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<OldCaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           expect(migratedUserAction).toMatchInlineSnapshot(`
             Object {
@@ -657,13 +661,41 @@ describe('user action migrations', () => {
   });
 
   describe('8.1.0', () => {
-    describe('payloadMigration', () => {
-      let context: jest.Mocked<SavedObjectMigrationContext>;
+    let context: jest.Mocked<SavedObjectMigrationContext>;
 
-      beforeEach(() => {
-        context = migrationMocks.createContext();
+    beforeEach(() => {
+      context = migrationMocks.createContext();
+    });
+
+    describe('references', () => {
+      it('removes the old references', () => {
+        const userAction = create_7_14_0_userAction({
+          action: 'update',
+          action_field: ['connector'],
+          new_value: createJiraConnector(),
+          old_value: { ...createJiraConnector(), id: '5' },
+        });
+
+        const migratedUserAction = payloadMigration(
+          {
+            ...userAction,
+            references: [
+              { id: '1', name: 'connectorId', type: 'action' },
+              { id: '5', name: 'oldConnectorId', type: 'action' },
+              { id: '100', name: 'pushConnectorId', type: 'action' },
+              { id: '5', name: 'oldPushConnectorId', type: 'action' },
+            ],
+          },
+          context
+        );
+        expect(migratedUserAction.references).toEqual([
+          { id: '1', name: 'connectorId', type: 'action' },
+          { id: '100', name: 'pushConnectorId', type: 'action' },
+        ]);
       });
+    });
 
+    describe('payloadMigration', () => {
       it('it transforms a comment user action where the new_value is a string', () => {
         const userAction = create_7_14_0_userAction({
           action: 'create',
@@ -690,6 +722,223 @@ describe('user action migrations', () => {
             },
           },
           type: 'comment',
+        });
+      });
+
+      it('it transforms a create case user action without a connector', () => {
+        const userAction = create_7_14_0_userAction({
+          action: 'create',
+          action_field: ['description', 'title', 'tags'],
+          new_value: {
+            title: 'old case',
+            description: 'a desc',
+            tags: ['some tags'],
+          },
+          old_value: null,
+        });
+
+        const migratedUserAction = payloadMigration(userAction, context);
+        expect(migratedUserAction.attributes).toEqual({
+          action: 'create',
+          created_at: '2022-01-09T22:00:00.000Z',
+          created_by: {
+            email: 'elastic@elastic.co',
+            full_name: 'Elastic User',
+            username: 'elastic',
+          },
+          owner: 'securitySolution',
+          payload: {
+            connector: {
+              fields: null,
+              name: 'none',
+              type: '.none',
+            },
+            description: 'a desc',
+            tags: ['some tags'],
+            title: 'old case',
+          },
+          type: 'create_case',
+        });
+      });
+
+      describe('user actions', () => {
+        const fieldsTests: Array<[string, string | object]> = [
+          ['description', 'a desc'],
+          ['title', 'a title'],
+          ['status', 'open'],
+          ['comment', { comment: 'a comment', type: 'user' }],
+          [
+            'connector',
+            {
+              fields: {
+                issueType: 'bug',
+                parent: '2',
+                priority: 'high',
+              },
+              name: '.jira',
+              type: '.jira',
+            },
+          ],
+          ['settings', { syncAlerts: false }],
+        ];
+
+        it('migrates a create case user action correctly', () => {
+          const userAction = create_7_14_0_userAction({
+            action: 'create',
+            action_field: [
+              'description',
+              'title',
+              'tags',
+              'status',
+              'settings',
+              'owner',
+              'connector',
+            ],
+            new_value: {
+              title: 'old case',
+              description: 'a desc',
+              tags: ['some tags'],
+              status: 'open',
+              settings: { syncAlerts: false },
+              connector: {
+                fields: {
+                  issueType: 'bug',
+                  parent: '2',
+                  priority: 'high',
+                },
+                name: '.jira',
+                type: '.jira',
+              },
+              owner: SECURITY_SOLUTION_OWNER,
+            },
+            old_value: null,
+          });
+
+          const migratedUserAction = payloadMigration(userAction, context);
+          expect(migratedUserAction.attributes).toEqual({
+            action: 'create',
+            created_at: '2022-01-09T22:00:00.000Z',
+            created_by: {
+              email: 'elastic@elastic.co',
+              full_name: 'Elastic User',
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              connector: {
+                fields: {
+                  issueType: 'bug',
+                  parent: '2',
+                  priority: 'high',
+                },
+                name: '.jira',
+                type: '.jira',
+              },
+              description: 'a desc',
+              tags: ['some tags'],
+              title: 'old case',
+              settings: {
+                syncAlerts: false,
+              },
+              status: 'open',
+            },
+            type: 'create_case',
+          });
+        });
+
+        it.each(fieldsTests)('migrates a user action for %s correctly', (field, value) => {
+          const userAction = create_7_14_0_userAction({
+            action: 'update',
+            action_field: [field],
+            new_value: value,
+            old_value: null,
+          });
+
+          const migratedUserAction = payloadMigration(userAction, context);
+          expect(migratedUserAction.attributes).toEqual({
+            action: 'update',
+            created_at: '2022-01-09T22:00:00.000Z',
+            created_by: {
+              email: 'elastic@elastic.co',
+              full_name: 'Elastic User',
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              [field]: value,
+            },
+            type: field,
+          });
+        });
+
+        it('migrates a user action for tags correctly', () => {
+          const userAction = create_7_14_0_userAction({
+            action: 'update',
+            action_field: ['tags'],
+            new_value: 'one, two',
+            old_value: null,
+          });
+
+          const migratedUserAction = payloadMigration(userAction, context);
+          expect(migratedUserAction.attributes).toEqual({
+            action: 'update',
+            created_at: '2022-01-09T22:00:00.000Z',
+            created_by: {
+              email: 'elastic@elastic.co',
+              full_name: 'Elastic User',
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              tags: ['one', 'two'],
+            },
+            type: 'tags',
+          });
+        });
+
+        it('migrates a user action for external services correctly', () => {
+          const userAction = create_7_14_0_userAction({
+            action: 'update',
+            action_field: ['pushed'],
+            new_value: {
+              connector_name: 'jira',
+              external_title: 'awesome',
+              external_url: 'http://www.google.com',
+              pushed_at: '2019-11-25T21:54:48.952Z',
+              pushed_by: {
+                full_name: 'elastic',
+                email: 'testemail@elastic.co',
+                username: 'elastic',
+              },
+            },
+            old_value: null,
+          });
+
+          const migratedUserAction = payloadMigration(userAction, context);
+          expect(migratedUserAction.attributes).toEqual({
+            action: 'update',
+            created_at: '2022-01-09T22:00:00.000Z',
+            created_by: {
+              email: 'elastic@elastic.co',
+              full_name: 'Elastic User',
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              externalService: {
+                connector_name: 'jira',
+                external_title: 'awesome',
+                external_url: 'http://www.google.com',
+                pushed_at: '2019-11-25T21:54:48.952Z',
+                pushed_by: {
+                  full_name: 'elastic',
+                  email: 'testemail@elastic.co',
+                  username: 'elastic',
+                },
+              },
+            },
+            type: 'pushed',
+          });
         });
       });
     });

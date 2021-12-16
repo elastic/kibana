@@ -25,7 +25,7 @@ describe('helpers', () => {
       expect(
         getConnectorFieldsFromUserActions('a', [
           createConnectorUserAction({
-            // @ts-expect-error
+            // @ts-expect-error payload missing fields
             payload: { a: '1' },
           }),
         ])

@@ -10,7 +10,7 @@ import {
   CaseAttributes,
   CaseFullExternalService,
   ConnectorTypes,
-  noneConnectorId,
+  NONE_CONNECTOR_ID,
 } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
@@ -116,7 +116,7 @@ describe('case migrations', () => {
 
     it('does not create a reference when the external_service.connector_id is none', () => {
       const caseSavedObject = create_7_14_0_case({
-        externalService: createExternalService({ connector_id: noneConnectorId }),
+        externalService: createExternalService({ connector_id: NONE_CONNECTOR_ID }),
       });
 
       const migratedConnector = caseConnectorIdMigration(

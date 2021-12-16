@@ -22,7 +22,7 @@ import {
   CaseStatuses,
   CommentType,
   CommentRequestActionsType,
-  noneConnectorId,
+  NONE_CONNECTOR_ID,
   Actions,
   ConnectorUserAction,
   PushedUserAction,
@@ -113,15 +113,10 @@ export const getConnectorLabelTitle = ({
     return '';
   }
 
-  // // if the ids are the same, assume we just changed the fields
-  // if (oldConnector.id === newConnector.id) {
-  //   return i18n.CHANGED_CONNECTOR_FIELD;
-  // }
-
   // ids are not the same so check and see if the id is a valid connector and then return its name
   // if the connector id is the none connector value then it must have been removed
   const newConnectorActionInfo = connectors.find((c) => c.id === connector.id);
-  if (connector.id !== noneConnectorId && newConnectorActionInfo != null) {
+  if (connector.id !== NONE_CONNECTOR_ID && newConnectorActionInfo != null) {
     return i18n.SELECTED_THIRD_PARTY(newConnectorActionInfo.name);
   }
 
@@ -177,7 +172,7 @@ export const getPushInfo = (
   externalService: CaseExternalService | undefined,
   index: number
 ) =>
-  externalService != null && externalService.connectorId != null
+  externalService != null && externalService.connectorId !== NONE_CONNECTOR_ID
     ? {
         firstPush: caseServices[externalService.connectorId]?.firstPushIndex === index,
         parsedConnectorId: externalService.connectorId,
@@ -185,8 +180,8 @@ export const getPushInfo = (
       }
     : {
         firstPush: false,
-        parsedConnectorId: noneConnectorId,
-        parsedConnectorName: noneConnectorId,
+        parsedConnectorId: NONE_CONNECTOR_ID,
+        parsedConnectorName: NONE_CONNECTOR_ID,
       };
 
 const getUpdateActionIcon = (fields: string): string => {

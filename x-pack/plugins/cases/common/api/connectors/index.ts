@@ -73,7 +73,7 @@ const ConnectorNoneTypeFieldsRt = rt.type({
   fields: rt.null,
 });
 
-export const noneConnectorId: string = 'none';
+export const NONE_CONNECTOR_ID: string = 'none';
 
 export const ConnectorTypeFieldsRt = rt.union([
   ConnectorJiraTypeFieldsRt,
@@ -95,11 +95,6 @@ export const CaseUserActionConnectorRt = rt.union([
   rt.intersection([ConnectorServiceNowSIRTypeFieldsRt, rt.type({ name: rt.string })]),
   rt.intersection([ConnectorSwimlaneTypeFieldsRt, rt.type({ name: rt.string })]),
 ]);
-
-// export const CaseUserActionConnectorRt = rt.intersection([
-//   rt.type({ name: rt.string }),
-//   ConnectorTypeFieldsRt,
-// ]);
 
 export const CaseConnectorRt = rt.intersection([
   rt.type({

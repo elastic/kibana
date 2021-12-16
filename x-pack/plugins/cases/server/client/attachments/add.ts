@@ -92,8 +92,6 @@ async function getSubCase({
     createdBy: user,
   });
 
-  // Code for creating a sub case user action has been removed
-
   return newSubCase;
 }
 

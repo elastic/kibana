@@ -121,8 +121,6 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
     await pMap(ids, deleteSubCasesMapper, {
       concurrency: MAX_CONCURRENT_SEARCHES,
     });
-
-    // Code for creating a sub case user action has been removed
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete sub cases ids: ${JSON.stringify(ids)}: ${error}`,
