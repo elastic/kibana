@@ -8,8 +8,8 @@
 import React from 'react';
 import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 import { euiPaletteForStatus } from '@elastic/eui';
-import { useCloudPostureStatsApi } from '../../../common/api/use_cloud_posture_stats_api';
 import { useNavigateToCSPFindings } from '../../../common/hooks/use_navigate_to_csp_findings';
+import { CloudPostureStats } from '../../../../common/types';
 
 export function sortAscending<T>(getter: (x: T) => number | string) {
   return (a: T, b: T) => {
@@ -22,10 +22,12 @@ export function sortAscending<T>(getter: (x: T) => number | string) {
   };
 }
 
-export const ResourcesAtRiskChart = () => {
+interface ResourcesAtRiskChartProps {
+  data: CloudPostureStats['resourcesEvaluations'];
+}
+
+export const ResourcesAtRiskChart = ({ data: resources }: ResourcesAtRiskChartProps) => {
   const { navigate } = useNavigateToCSPFindings();
-  const getStats = useCloudPostureStatsApi();
-  const resources = getStats.isSuccess && getStats.data.resourcesEvaluations;
   if (!resources) return null;
 
   // TODO: add type

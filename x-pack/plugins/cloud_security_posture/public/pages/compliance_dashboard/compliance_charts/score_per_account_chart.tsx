@@ -22,9 +22,7 @@ const mockData = [
   { id: '10', name: 'f04f0fa90', value: 130, evaluation: 'fail' },
 ];
 
-export const ScorePerAccountChart = () => {
-  const accountEvaluations = mockData;
-
+export const ScorePerAccountChart = ({ data: accountEvaluations = mockData }) => {
   return (
     <Chart size={{ height: 200 }}>
       <Settings theme={theme} rotation={90} showLegend={false} />

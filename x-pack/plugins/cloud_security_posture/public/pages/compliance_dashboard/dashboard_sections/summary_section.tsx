@@ -11,25 +11,37 @@ import { ResourcesAtRiskChart } from '../compliance_charts/resources_at_risk_cha
 import { ScorePerAccountChart } from '../compliance_charts/score_per_account_chart';
 import { ChartPanel } from '../../../components/chart_panel';
 import { ComplianceStats } from '../compliance_charts/compliance_stats';
+import { useCloudPostureStatsApi } from '../../../common/api';
 
-export const SummarySection = () => (
-  <EuiFlexGrid columns={3}>
-    <EuiFlexItem>
-      <ComplianceStats />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ChartPanel
-        title="Top 5 Resources Types At Risk"
-        description="Non compliant first"
-        chart={ResourcesAtRiskChart}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <ChartPanel
-        title="Score Per Account / Cluster"
-        description="Non compliant first"
-        chart={ScorePerAccountChart}
-      />
-    </EuiFlexItem>
-  </EuiFlexGrid>
-);
+export const SummarySection = () => {
+  const getStats = useCloudPostureStatsApi();
+
+  return (
+    <EuiFlexGrid columns={3}>
+      <EuiFlexItem>
+        <ComplianceStats />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <ChartPanel
+          chart={ResourcesAtRiskChart}
+          title="Top 5 Resources Types At Risk"
+          description="Non compliant first"
+          data={getStats.data?.resourcesEvaluations}
+          isLoading={getStats.isLoading}
+          isError={getStats.isError}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <ChartPanel
+          chart={ScorePerAccountChart}
+          title="Score Per Account / Cluster"
+          description="Non compliant first"
+          // TODO: no api for this chart yet, using empty state for now
+          data={[]}
+          isLoading={getStats.isLoading}
+          isError={getStats.isError}
+        />
+      </EuiFlexItem>
+    </EuiFlexGrid>
+  );
+};

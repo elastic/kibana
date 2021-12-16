@@ -19,7 +19,11 @@ import { dateValueToTuple } from '../index';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { BenchmarkStats } from '../../../../../server/cloud_posture/types';
 
-export const ComplianceTrendChart = ({ postureScore }: BenchmarkStats) => {
+interface ComplianceTrendChartProps {
+  data: BenchmarkStats;
+}
+
+export const ComplianceTrendChart = ({ data: { postureScore } }: ComplianceTrendChartProps) => {
   if (postureScore === undefined) return null;
 
   const complianceScoreTrend = [
