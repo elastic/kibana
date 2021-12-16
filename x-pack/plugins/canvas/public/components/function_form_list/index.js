@@ -96,7 +96,14 @@ const componentFactory = ({
   removable,
 });
 
-const flattenNestedFunctionsToComponents = (complexArgs, complexArgumentsViews, argumentPath) =>
+/**
+ * Converts expression functions at the arguments for the expression, to the array of UI component configurations.
+ * @param {Ast['chain'][number]['arguments']} complexArgs - expression's arguments, which are expression functions.
+ * @param {object[]} complexArgumentsViews - argument UI views/models/tranforms.
+ * @param {string} argumentPath - path at the AST to the current expression.
+ * @returns flatten array of the arguments UI configurations.
+ */
+const transformNestedFunctionsToUIConfig = (complexArgs, complexArgumentsViews, argumentPath) =>
   Object.keys(complexArgs).reduce((current, argName) => {
     const next = complexArgs[argName]
       .map(({ chain }, index) =>
@@ -123,7 +130,7 @@ const flattenNestedFunctionsToComponents = (complexArgs, complexArgumentsViews, 
  * @param {Ast['chain']} functionsChain - chain of expression functions.
  * @param {{ path: string, removable: boolean }} functionMeta - saves the path to the current expressions chain at the original AST
  * and saves the information about that it can be removed (is an argument of the other expression).
- * @param {*} argUiConfig - Argument UI configuration of the element, which contains current expressions chain. It can be view, model, transform or argument.
+ * @param {object} argUiConfig - Argument UI configuration of the element, which contains current expressions chain. It can be view, model, transform or argument.
  * @returns UI component configurations of expressions, found at AST.
  */
 function transformFunctionsToUIConfig(functionsChain, { path, removable }, argUiConfig) {
@@ -161,7 +168,7 @@ function transformFunctionsToUIConfig(functionsChain, { path, removable }, argUi
       removable,
     });
 
-    const components = flattenNestedFunctionsToComponents(
+    const components = transformNestedFunctionsToUIConfig(
       argsWithExprFunctions,
       exprFunctionsViews,
       argumentPath
