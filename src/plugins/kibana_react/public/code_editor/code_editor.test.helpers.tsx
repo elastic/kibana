@@ -13,7 +13,6 @@ function createEditorInstance() {
   const didShowListeners: Array<(e?: unknown) => void> = [];
   const didHideListeners: Array<(e?: unknown) => void> = [];
   let placeholderDiv: undefined | HTMLDivElement;
-  let placeholderWidget: undefined | monaco.editor.IContentWidget;
   let areSuggestionsVisible = false;
 
   const editorInstance = {
