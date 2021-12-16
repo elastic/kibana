@@ -17,7 +17,7 @@ export class PlaceHolderWidget implements monaco.editor.IContentWidget {
   private domNode: undefined | HTMLElement;
 
   getId(): string {
-    return 'MONACO_PLACEHOLDER_WIDGET_ID';
+    return 'KBN_CODE_EDITOR_PLACEHOLDER_WIDGET_ID';
   }
 
   getDomNode(): HTMLElement {
