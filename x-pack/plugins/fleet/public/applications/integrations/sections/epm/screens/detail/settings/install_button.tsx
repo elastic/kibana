@@ -17,6 +17,8 @@ import {
   useInstallPackage,
 } from '../../../../../hooks';
 
+import { sendPostFleetSetup } from '../../../../../../../hooks/use_request/setup';
+
 import { ConfirmPackageInstall } from './confirm_package_install';
 
 type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version'> & {
@@ -35,16 +37,21 @@ export function InstallButton(props: InstallationButtonProps) {
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
 
-  const isInstalling = installationStatus === InstallStatus.installing;
+  const [isFleetSetupInProgress, setFleetSetupInProgress] = useState<boolean>(false);
+
+  const isInstalling = installationStatus === InstallStatus.installing || isFleetSetupInProgress;
   const [isInstallModalVisible, setIsInstallModalVisible] = useState<boolean>(false);
 
   const toggleInstallModal = useCallback(() => {
     setIsInstallModalVisible(!isInstallModalVisible);
   }, [isInstallModalVisible]);
 
-  const handleClickInstall = useCallback(() => {
-    installPackage({ name, version, title });
+  const handleClickInstall = useCallback(async () => {
+    setFleetSetupInProgress(true);
     toggleInstallModal();
+    await sendPostFleetSetup({ forceRecreate: false });
+    setFleetSetupInProgress(false);
+    installPackage({ name, version, title });
   }, [installPackage, name, title, toggleInstallModal, version]);
 
   const installModal = (
