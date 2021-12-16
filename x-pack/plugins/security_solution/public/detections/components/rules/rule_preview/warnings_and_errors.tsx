@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useMemo } from 'react';
+import React, { useMemo, Fragment } from 'react';
 import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import { partition } from 'lodash';
 import { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
@@ -31,6 +31,7 @@ export const PreviewWarningsAndErrorsComponent: React.FC<PreviewWarningsAndError
 
   return (
     <>
+      <EuiSpacer size="s" />
       {noiseWarnings.map((warning, key) => (
         <CalloutGroup key={key} item={warning} />
       ))}
@@ -41,22 +42,24 @@ export const PreviewWarningsAndErrorsComponent: React.FC<PreviewWarningsAndError
 };
 
 const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError }) => {
-  const firstLog = logs.pop();
+  const firstLog = logs[0];
+  const restOfLogs = logs.slice(1);
   return firstLog != null ? (
     <>
       <CalloutGroup item={firstLog} isError={isError} />
-      {logs.length > 0 ? (
+      {restOfLogs.length > 0 ? (
         <EuiAccordion
           id={isError ? 'previewErrorAccordion' : 'previewWarningAccordion'}
           buttonContent={
             isError ? i18n.QUERY_PREVIEW_SEE_ALL_ERRORS : i18n.QUERY_PREVIEW_SEE_ALL_WARNINGS
           }
         >
-          {logs.map((log, key) => (
-            <CalloutGroup key={key} item={log} isError={isError} />
+          {restOfLogs.map((log, key) => (
+            <CalloutGroup key={`accordion-log-${key}`} item={log} isError={isError} />
           ))}
         </EuiAccordion>
       ) : null}
+      <EuiSpacer size="m" />
     </>
   ) : null;
 };
@@ -68,17 +71,18 @@ export const CalloutGroup: React.FC<{
   return item.logs.length > 0 ? (
     <>
       {item.logs.map((log, i) => (
-        <Fragment key={`${item}-${i}`}>
-          <EuiSpacer size="s" />
+        <Fragment key={`${item.startedAt}-${i}`}>
           <EuiCallOut
             color={isError ? 'danger' : 'warning'}
-            iconType="help"
+            iconType="alert"
             data-test-subj={isError ? 'preview-error' : 'preview-warning'}
+            title={item.startedAt != null ? `[${item.startedAt}]` : null}
           >
             <EuiText>
-              <p>{`${item.startedAt != null ?? `[${item.startedAt}] `}${log}`}</p>
+              <p>{log}</p>
             </EuiText>
           </EuiCallOut>
+          <EuiSpacer size="s" />
         </Fragment>
       ))}
     </>

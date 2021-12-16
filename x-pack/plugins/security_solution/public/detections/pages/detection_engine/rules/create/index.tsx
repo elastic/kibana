@@ -79,11 +79,7 @@ const StepDefineRuleAccordion: StyledComponent<
   any, // eslint-disable-line
   { ref: React.MutableRefObject<EuiAccordion | null> },
   never
-> = styled(EuiAccordion)`
-  .euiAccordion__childWrapper {
-    overflow: visible;
-  }
-`;
+> = styled(EuiAccordion)``;
 
 StepDefineRuleAccordion.displayName = 'StepDefineRuleAccordion';
 
