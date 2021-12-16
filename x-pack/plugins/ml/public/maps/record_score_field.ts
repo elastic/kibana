@@ -9,6 +9,7 @@
 import _ from 'lodash';
 import { IField, IVectorSource } from '../../../maps/public';
 import { FIELD_ORIGIN } from '../../../maps/common';
+import { TileMetaFeature } from '../../../maps/common/descriptor_types';
 import { AnomalySource } from './anomaly_source';
 import { ITooltipProperty } from '../../../maps/public';
 import { Filter } from '../../../../../src/plugins/data/public';
@@ -73,6 +74,10 @@ export class RecordScoreField implements IField {
     return 'record_score';
   }
 
+  getMbFieldName(): string {
+    return this.getName();
+  }
+
   getOrigin(): FIELD_ORIGIN {
     return FIELD_ORIGIN.SOURCE;
   }
@@ -85,12 +90,20 @@ export class RecordScoreField implements IField {
     return this._source;
   }
 
+  isCount() {
+    return false;
+  }
+
   isEqual(field: IField): boolean {
     return this.getName() === field.getName();
   }
 
   isValid(): boolean {
     return true;
+  }
+
+  pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature) {
+    return null;
   }
 
   // NA
@@ -110,6 +123,14 @@ export class RecordScoreField implements IField {
 
   // NA
   supportsFieldMeta(): boolean {
+    return false;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    return false;
+  }
+
+  supportsFieldMetaFromEs(): boolean {
     return false;
   }
 
