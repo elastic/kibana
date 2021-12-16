@@ -17,8 +17,7 @@ import type { IField } from '../../../maps/public';
 import type { Attribution, ImmutableSourceProperty, PreIndexedShape } from '../../../maps/public';
 import type { SourceEditorArgs } from '../../../maps/public';
 import type { DataRequest } from '../../../maps/public';
-import type { SourceTooltipConfig } from '../../../maps/public';
-import type { IVectorSource } from '../../../maps/public';
+import type { IVectorSource, SourceStatus } from '../../../maps/public';
 import { ML_ANOMALY } from './register_with_maps';
 import { getResultsForJobId } from './util';
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
@@ -135,6 +134,18 @@ export class AnomalySource implements IVectorSource {
     return null;
   }
 
+  getSourceStatus() {
+    return { tooltipContent: null, areResultsTrimmed: false };
+  }
+
+  getType(): string {
+    return this._descriptor.type;
+  }
+
+  isMvt() {
+    return true;
+  }
+
   showJoinEditor(): boolean {
     // Ignore, only show if joins are enabled for current configuration
     return false;
@@ -197,7 +208,7 @@ export class AnomalySource implements IVectorSource {
     return MIN_ZOOM;
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceStatus {
     return {
       tooltipContent: i18n.translate('xpack.ml.maps.sourceTooltip', {
         defaultMessage: `Shows anomalies`,

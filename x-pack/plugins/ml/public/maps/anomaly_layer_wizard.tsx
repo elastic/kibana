@@ -48,7 +48,7 @@ export const anomalyLayerWizard: LayerWizard = {
       // remove usage of VectorLayer.createDescriptor. should be hardcoded to actual descriptor
       const anomalyLayerDescriptor: VectorLayerDescriptor = {
         id: uuid(),
-        type: LAYER_TYPE.VECTOR,
+        type: LAYER_TYPE.GEOJSON_VECTOR,
         sourceDescriptor: AnomalySource.createDescriptor({
           jobId: sourceConfig.jobId,
           typicalActual: sourceConfig.typicalActual,
