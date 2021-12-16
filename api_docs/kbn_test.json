@@ -178,12 +178,19 @@
                   {
                     "parentPluginId": "@kbn/test",
                     "id": "def-server.DockerServersService.Unnamed.$1.Unnamed",
-                    "type": "Any",
+                    "type": "IndexSignature",
                     "tags": [],
-                    "label": "Unnamed",
+                    "label": "[name: string]: DockerServerSpec",
                     "description": [],
                     "signature": [
-                      "any"
+                      "[name: string]:  ",
+                      {
+                        "pluginId": "@kbn/test",
+                        "scope": "server",
+                        "docId": "kibKbnTestPluginApi",
+                        "section": "def-server.DockerServerSpec",
+                        "text": "DockerServerSpec"
+                      }
                     ],
                     "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
                     "deprecated": false

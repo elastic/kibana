@@ -7,9 +7,9 @@
 
 import { head } from 'lodash/fp';
 import React from 'react';
-import { Filter } from '../../../../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
 
-import { ColumnHeaderOptions } from '../../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../../common/types';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { ColumnRenderer } from './column_renderer';

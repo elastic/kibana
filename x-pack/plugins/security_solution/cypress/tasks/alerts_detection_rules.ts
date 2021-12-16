@@ -149,6 +149,10 @@ export const goToRuleDetails = () => {
   cy.get(RULE_NAME).first().click({ force: true });
 };
 
+export const goToTheRuleDetailsOf = (ruleName: string) => {
+  cy.get(RULE_NAME).contains(ruleName).click();
+};
+
 export const loadPrebuiltDetectionRules = () => {
   cy.get(LOAD_PREBUILT_RULES_BTN).should('exist').click({ force: true });
 };

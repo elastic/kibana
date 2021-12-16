@@ -16,8 +16,8 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';
 import { DiscoverServices } from '../../build_services';
-import { ElasticSearchHit } from '../../services/doc_views/doc_views_types';
 import { getDocId } from './discover_grid_document_selection';
+import { ElasticSearchHit } from '../../types';
 
 jest.mock('../../kibana_services', () => ({
   ...jest.requireActual('../../kibana_services'),

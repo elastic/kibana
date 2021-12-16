@@ -8,7 +8,7 @@
 import React, { memo, useMemo, useState, useEffect, useRef } from 'react';
 import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
 
 import { useKibana, useToasts } from '../../../../../../../common/lib/kibana';
@@ -72,7 +72,7 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
     const getTitleMessage = () => (
       <FormattedMessage
         id="xpack.securitySolution.endpoint.fleetCustomExtension.trustedAppsLabel"
-        defaultMessage="Trusted Applications"
+        defaultMessage="Trusted applications"
       />
     );
 

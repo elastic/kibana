@@ -9,7 +9,9 @@ import type { FactoryQueryTypes } from '../../../../../common/search_strategy/se
 import { CtiQueries } from '../../../../../common/search_strategy/security_solution/cti';
 import type { SecuritySolutionFactory } from '../types';
 import { eventEnrichment } from './event_enrichment';
+import { dataSource } from './threat_intel_source';
 
 export const ctiFactoryTypes: Record<CtiQueries, SecuritySolutionFactory<FactoryQueryTypes>> = {
   [CtiQueries.eventEnrichment]: eventEnrichment,
+  [CtiQueries.dataSource]: dataSource,
 };

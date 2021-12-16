@@ -12,6 +12,7 @@ import { SecurityPageName } from '../../../../common/constants';
 import {
   createSecuritySolutionStorageMock,
   mockGlobalState,
+  mockIndexPattern,
   SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../common/mock';
@@ -35,6 +36,10 @@ jest.mock('../../../common/lib/kibana', () => {
     useUiSetting$: jest.fn().mockReturnValue([]),
   };
 });
+
+jest.mock('../../../common/containers/source', () => ({
+  useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
+}));
 
 jest.mock('react-reverse-portal', () => ({
   InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,

@@ -8,12 +8,13 @@
 import React, { useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DiscoverServices } from '../../build_services';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { Doc } from './components/doc';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../utils/use_index_pattern';
+import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
 
 export interface SingleDocRouteProps {
   /**
@@ -36,18 +37,19 @@ export function SingleDocRoute(props: SingleDocRouteProps) {
   const { chrome, timefilter } = services;
 
   const { indexPatternId, index } = useParams<DocUrlParams>();
+  const breadcrumb = useMainRouteBreadcrumb();
 
   const query = useQuery();
   const docId = query.get('id') || '';
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(),
+      ...getRootBreadcrumbs(breadcrumb),
       {
         text: `${index}#${docId}`,
       },
     ]);
-  }, [chrome, index, docId]);
+  }, [chrome, index, docId, breadcrumb]);
 
   useEffect(() => {
     timefilter.disableAutoRefreshSelector();

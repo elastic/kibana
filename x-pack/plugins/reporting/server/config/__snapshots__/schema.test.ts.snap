@@ -3,52 +3,8 @@
 exports[`Reporting Config Schema context {"dev":false,"dist":false} produces correct config 1`] = `
 Object {
   "capture": Object {
-    "browser": Object {
-      "autoDownload": true,
-      "chromium": Object {
-        "proxy": Object {
-          "enabled": false,
-        },
-      },
-      "type": "chromium",
-    },
     "loadDelay": "PT3S",
     "maxAttempts": 1,
-    "networkPolicy": Object {
-      "enabled": true,
-      "rules": Array [
-        Object {
-          "allow": true,
-          "host": undefined,
-          "protocol": "http:",
-        },
-        Object {
-          "allow": true,
-          "host": undefined,
-          "protocol": "https:",
-        },
-        Object {
-          "allow": true,
-          "host": undefined,
-          "protocol": "ws:",
-        },
-        Object {
-          "allow": true,
-          "host": undefined,
-          "protocol": "wss:",
-        },
-        Object {
-          "allow": true,
-          "host": undefined,
-          "protocol": "data:",
-        },
-        Object {
-          "allow": false,
-          "host": undefined,
-          "protocol": undefined,
-        },
-      ],
-    },
     "timeouts": Object {
       "openUrl": "PT1M",
       "renderComplete": "PT30S",
@@ -101,53 +57,8 @@ Object {
 exports[`Reporting Config Schema context {"dev":false,"dist":true} produces correct config 1`] = `
 Object {
   "capture": Object {
-    "browser": Object {
-      "autoDownload": false,
-      "chromium": Object {
-        "inspect": false,
-        "proxy": Object {
-          "enabled": false,
-        },
-      },
-      "type": "chromium",
-    },
     "loadDelay": "PT3S",
     "maxAttempts": 3,
-    "networkPolicy": Object {
-      "enabled": true,
-      "rules": Array [
-        Object {
-          "allow": true,
-          "host": undefined,
-          "protocol": "http:",
-        },
-        Object {
-          "allow": true,
-          "host": undefined,
-          "protocol": "https:",
-        },
-        Object {
-          "allow": true,
-          "host": undefined,
-          "protocol": "ws:",
-        },
-        Object {
-          "allow": true,
-          "host": undefined,
-          "protocol": "wss:",
-        },
-        Object {
-          "allow": true,
-          "host": undefined,
-          "protocol": "data:",
-        },
-        Object {
-          "allow": false,
-          "host": undefined,
-          "protocol": undefined,
-        },
-      ],
-    },
     "timeouts": Object {
       "openUrl": "PT1M",
       "renderComplete": "PT30S",

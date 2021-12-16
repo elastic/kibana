@@ -55,12 +55,19 @@
           {
             "parentPluginId": "@kbn/utility-types",
             "id": "def-server.JsonObject.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: JsonValue",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.JsonValue",
+                "text": "JsonValue"
+              }
             ],
             "path": "packages/kbn-utility-types/src/serializable/index.ts",
             "deprecated": false

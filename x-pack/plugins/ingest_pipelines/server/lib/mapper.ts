@@ -79,8 +79,12 @@ function parseAndValidate(file: string) {
   if (missingHeaders.length > 0) {
     throw new Error(
       i18n.translate('xpack.ingestPipelines.mapToIngestPipeline.error.missingHeaders', {
-        defaultMessage: 'Missing required headers: Include [{missing}] header(s) in the CSV file.',
-        values: { missing: missingHeaders.join(', ') },
+        defaultMessage:
+          'Missing required headers: Include {missingHeaders} {missingHeadersCount, plural, one {header} other {headers}} in the CSV file.',
+        values: {
+          missingHeaders: missingHeaders.join(', '),
+          missingHeadersCount: missingHeaders.length,
+        },
       })
     );
   }

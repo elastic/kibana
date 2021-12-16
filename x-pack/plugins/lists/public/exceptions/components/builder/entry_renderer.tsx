@@ -37,7 +37,7 @@ import {
 } from '@kbn/securitysolution-autocomplete';
 import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
 
-import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { HttpStart } from '../../../../../../../src/core/public';
 import { getEmptyValue } from '../../../common/empty_value';
 

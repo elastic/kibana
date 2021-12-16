@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import styled from 'styled-components';
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartCreationInfo } from './chart_creation_info';
 
 export interface ChartTimeRange {

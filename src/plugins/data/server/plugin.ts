@@ -11,7 +11,7 @@ import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
 import { ConfigSchema } from '../config';
-import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
+import type { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
@@ -21,7 +21,7 @@ import { AutocompleteService } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server';
 import { getUiSettings } from './ui_settings';
 
-export interface DataEnhancements {
+interface DataEnhancements {
   search: SearchEnhancements;
 }
 

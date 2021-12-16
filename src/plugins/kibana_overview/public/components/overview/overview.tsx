@@ -16,8 +16,9 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiTitle,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -53,6 +54,7 @@ interface Props {
 
 export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) => {
   const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const {
     services: { http, docLinks, data, share, uiSettings, application },
   } = useKibana<CoreStart & AppPluginStartDependencies>();
@@ -112,6 +114,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
       const hasUserIndexPattern = await indexPatternService.hasUserDataView().catch(() => true);
 
       setNewKibanaInstance(!hasUserIndexPattern);
+      setIsLoading(false);
     };
 
     fetchIsNewKibanaInstance();
@@ -144,6 +147,16 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   // Dashboard and discover are displayed in larger cards
   const mainApps = ['dashboard', 'discover'];
   const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
+
+  if (isLoading) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <KibanaPageTemplate

@@ -11,7 +11,6 @@ import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 import { ISearchSource } from '../../../../../data/common';
 import { GetStateReturn } from '../services/discover_state';
-import { ElasticSearchHit } from '../../../services/doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../../inspector/public';
 import type { AutoRefreshDoneFn } from '../../../../../data/public';
 import { validateTimeRange } from './validate_time_range';
@@ -23,6 +22,7 @@ import { fetchAll } from './fetch_all';
 import { useBehaviorSubject } from './use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 import { getFetch$ } from './get_fetch_observable';
+import { ElasticSearchHit } from '../../../types';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -159,7 +159,7 @@ export const useSavedSearch = ({
       initialFetchStatus,
     });
 
-    const subscription = fetch$.subscribe((val) => {
+    const subscription = fetch$.subscribe(async (val) => {
       if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
         return;
       }
@@ -167,28 +167,26 @@ export const useSavedSearch = ({
 
       refs.current.abortController?.abort();
       refs.current.abortController = new AbortController();
-      try {
-        fetchAll(dataSubjects, searchSource, val === 'reset', {
-          abortController: refs.current.abortController,
-          appStateContainer: stateContainer.appStateContainer,
-          inspectorAdapters,
-          data,
-          initialFetchStatus,
-          searchSessionId: searchSessionManager.getNextSearchSessionId(),
-          services,
-          useNewFieldsApi,
-        }).subscribe({
-          complete: () => {
-            // if this function was set and is executed, another refresh fetch can be triggered
-            refs.current.autoRefreshDone?.();
-            refs.current.autoRefreshDone = undefined;
-          },
-        });
-      } catch (error) {
-        main$.next({
-          fetchStatus: FetchStatus.ERROR,
-          error,
-        });
+      const autoRefreshDone = refs.current.autoRefreshDone;
+
+      await fetchAll(dataSubjects, searchSource, val === 'reset', {
+        abortController: refs.current.abortController,
+        appStateContainer: stateContainer.appStateContainer,
+        inspectorAdapters,
+        data,
+        initialFetchStatus,
+        searchSessionId: searchSessionManager.getNextSearchSessionId(),
+        services,
+        useNewFieldsApi,
+      });
+
+      // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
+      // replacing this current one, call it to make sure we tell that the auto refresh is done
+      // and a new one can be scheduled.
+      if (autoRefreshDone === refs.current.autoRefreshDone) {
+        // if this function was set and is executed, another refresh fetch can be triggered
+        refs.current.autoRefreshDone?.();
+        refs.current.autoRefreshDone = undefined;
       }
     });
 

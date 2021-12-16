@@ -98,12 +98,10 @@ describe('checkForUnknownDocs', () => {
     const result = await task();
 
     expect(Either.isRight(result)).toBe(true);
-    expect((result as Either.Right<any>).right).toEqual({
-      unknownDocs: [],
-    });
+    expect((result as Either.Right<any>).right).toEqual({});
   });
 
-  it('resolves with `Either.right` when unknown docs are found', async () => {
+  it('resolves with `Either.left` when unknown docs are found', async () => {
     const client = elasticsearchClientMock.createInternalClient(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
@@ -124,8 +122,9 @@ describe('checkForUnknownDocs', () => {
 
     const result = await task();
 
-    expect(Either.isRight(result)).toBe(true);
-    expect((result as Either.Right<any>).right).toEqual({
+    expect(Either.isLeft(result)).toBe(true);
+    expect((result as Either.Left<any>).left).toEqual({
+      type: 'unknown_docs_found',
       unknownDocs: [
         { id: '12', type: 'foo' },
         { id: '14', type: 'bar' },
@@ -151,8 +150,9 @@ describe('checkForUnknownDocs', () => {
 
     const result = await task();
 
-    expect(Either.isRight(result)).toBe(true);
-    expect((result as Either.Right<any>).right).toEqual({
+    expect(Either.isLeft(result)).toBe(true);
+    expect((result as Either.Left<any>).left).toEqual({
+      type: 'unknown_docs_found',
       unknownDocs: [{ id: '12', type: 'unknown' }],
     });
   });

@@ -22,19 +22,17 @@ import {
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
+import { Case, DeleteCase, SubCase } from '../../../common/ui/types';
 import {
   CaseStatuses,
   CaseType,
   CommentType,
   CommentRequestAlertType,
-  DeleteCase,
-  Case,
-  SubCase,
   ActionConnector,
-} from '../../../common';
+} from '../../../common/api';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
-import { CaseDetailsHrefSchema, CaseDetailsLink, CasesNavigation } from '../links';
+import { CaseDetailsLink } from '../links';
 import * as i18n from './translations';
 import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
 import { ALERTS } from '../../common/translations';
@@ -69,8 +67,6 @@ const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
 export interface GetCasesColumn {
-  caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
-  disableAlerts?: boolean;
   dispatchUpdateCaseProperty: (u: UpdateCase) => void;
   filterStatus: string;
   handleIsLoading: (a: boolean) => void;
@@ -85,8 +81,6 @@ export interface GetCasesColumn {
   updateCase?: (newCase: Case) => void;
 }
 export const useCasesColumns = ({
-  caseDetailsNavigation,
-  disableAlerts = false,
   dispatchUpdateCaseProperty,
   filterStatus,
   handleIsLoading,
@@ -179,19 +173,17 @@ export const useCasesColumns = ({
       name: i18n.NAME,
       render: (theCase: Case | SubCase) => {
         if (theCase.id != null && theCase.title != null) {
-          const caseDetailsLinkComponent =
-            caseDetailsNavigation != null ? (
-              <CaseDetailsLink
-                caseDetailsNavigation={caseDetailsNavigation}
-                detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
-                subCaseId={isSubCase(theCase) ? theCase.id : undefined}
-                title={theCase.title}
-              >
-                <TruncatedText text={theCase.title} />
-              </CaseDetailsLink>
-            ) : (
+          const caseDetailsLinkComponent = isSelectorView ? (
+            <TruncatedText text={theCase.title} />
+          ) : (
+            <CaseDetailsLink
+              detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
+              subCaseId={isSubCase(theCase) ? theCase.id : undefined}
+              title={theCase.title}
+            >
               <TruncatedText text={theCase.title} />
-            );
+            </CaseDetailsLink>
+          );
           return theCase.status !== CaseStatuses.closed ? (
             caseDetailsLinkComponent
           ) : (
@@ -250,19 +242,15 @@ export const useCasesColumns = ({
       },
       truncateText: true,
     },
-    ...(!disableAlerts
-      ? [
-          {
-            align: RIGHT_ALIGNMENT,
-            field: 'totalAlerts',
-            name: ALERTS,
-            render: (totalAlerts: Case['totalAlerts']) =>
-              totalAlerts != null
-                ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
-                : getEmptyTagValue(),
-          },
-        ]
-      : []),
+    {
+      align: RIGHT_ALIGNMENT,
+      field: 'totalAlerts',
+      name: ALERTS,
+      render: (totalAlerts: Case['totalAlerts']) =>
+        totalAlerts != null
+          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+          : getEmptyTagValue(),
+    },
     {
       align: RIGHT_ALIGNMENT,
       field: 'totalComment',

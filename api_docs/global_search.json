@@ -455,7 +455,7 @@
         "signature": [
           "Pick<",
           "GlobalSearchProviderResult",
-          ", \"type\" | \"id\" | \"title\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
+          ", \"title\" | \"type\" | \"id\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
@@ -1108,7 +1108,7 @@
         "signature": [
           "Pick<",
           "GlobalSearchProviderResult",
-          ", \"type\" | \"id\" | \"title\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
+          ", \"title\" | \"type\" | \"id\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,

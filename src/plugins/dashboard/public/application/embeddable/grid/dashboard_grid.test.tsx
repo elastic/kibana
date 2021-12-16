@@ -23,6 +23,7 @@ import {
 } from '../../../services/embeddable_test_samples';
 import { coreMock, uiSettingsServiceMock } from '../../../../../../core/public/mocks';
 import { getStubPluginServices } from '../../../../../presentation_util/public';
+import { screenshotModePluginMock } from '../../../../../screenshot_mode/public/mocks';
 
 let dashboardContainer: DashboardContainer | undefined;
 const presentationUtil = getStubPluginServices();
@@ -70,7 +71,9 @@ function prepare(props?: Partial<DashboardGridProps>) {
     } as any,
     uiSettings: uiSettingsServiceMock.createStartContract(),
     http: coreMock.createStart().http,
+    theme: coreMock.createStart().theme,
     presentationUtil,
+    screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
   dashboardContainer = new DashboardContainer(initialInput, options);
   const defaultTestProps: DashboardGridProps = {

@@ -11,7 +11,7 @@ jest.mock('./api_keys_grid', () => ({
 
 import { act } from '@testing-library/react';
 
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
 import type { Unmount } from 'src/plugins/management/public/types';
 
 import { securityMock } from '../../mocks';
@@ -52,6 +52,7 @@ describe('apiKeysManagementApp', () => {
           element: container,
           setBreadcrumbs,
           history: scopedHistoryMock.create(),
+          theme$: themeServiceMock.createTheme$(),
         });
     });
 

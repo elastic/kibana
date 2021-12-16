@@ -163,7 +163,7 @@ export const TagList = React.memo(
                 <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiButton
-                      color="secondary"
+                      color="success"
                       data-test-subj="edit-tags-submit"
                       fill
                       iconType="save"

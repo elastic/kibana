@@ -18,6 +18,7 @@ import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
 
 export type APMServiceAlert = ValuesType<
   APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
@@ -30,12 +31,14 @@ export interface APMServiceContextValue {
   transactionTypes: string[];
   alerts: APMServiceAlert[];
   runtimeName?: string;
+  fallbackToTransactions: boolean;
 }
 
 export const APMServiceContext = createContext<APMServiceContextValue>({
   serviceName: '',
   transactionTypes: [],
   alerts: [],
+  fallbackToTransactions: false,
 });
 
 export function ApmServiceContextProvider({
@@ -46,7 +49,7 @@ export function ApmServiceContextProvider({
   const {
     path: { serviceName },
     query,
-    query: { rangeFrom, rangeTo },
+    query: { kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -77,6 +80,10 @@ export function ApmServiceContextProvider({
     end,
   });
 
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
+
   return (
     <APMServiceContext.Provider
       value={{
@@ -86,6 +93,7 @@ export function ApmServiceContextProvider({
         transactionTypes,
         alerts,
         runtimeName,
+        fallbackToTransactions,
       }}
       children={children}
     />

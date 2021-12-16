@@ -15,6 +15,7 @@ import type {
   ItemsPerSearchOrUndefined,
   ThreatFiltersOrUndefined,
   ThreatIndexOrUndefined,
+  ThreatIndicatorPathOrUndefined,
   ThreatLanguageOrUndefined,
   ThreatMappingOrUndefined,
   ThreatQueryOrUndefined,
@@ -113,6 +114,7 @@ export interface UpdateProperties {
   threshold: ThresholdOrUndefined;
   threatFilters: ThreatFiltersOrUndefined;
   threatIndex: ThreatIndexOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;

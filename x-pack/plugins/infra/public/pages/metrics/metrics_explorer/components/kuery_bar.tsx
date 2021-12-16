@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
+import { fromKueryExpression } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
 import { DataViewBase } from '@kbn/es-query';
 import { WithKueryAutocompletion } from '../../../../containers/with_kuery_autocompletion';
 import { AutocompleteField } from '../../../../components/autocomplete_field';
-import { esKuery, QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
 
 type LoadSuggestionsFn = (
   e: string,
@@ -32,7 +32,7 @@ interface Props {
 
 function validateQuery(query: string) {
   try {
-    esKuery.fromKueryExpression(query);
+    fromKueryExpression(query);
   } catch (err) {
     return false;
   }

@@ -41,6 +41,8 @@ import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
+import { TransitionPromptHook } from 'history';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { TransportRequestParams } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
@@ -170,6 +172,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
     // @deprecated
     onAppLeave: (handler: AppLeaveHandler) => void;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+    theme$: Observable<CoreTheme>;
 }
 
 // @public
@@ -407,6 +410,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
+    theme: ThemeServiceSetup;
+    // (undocumented)
     uiSettings: IUiSettingsClient;
 }
 
@@ -437,6 +442,8 @@ export interface CoreStart {
     // (undocumented)
     savedObjects: SavedObjectsStart;
     // (undocumented)
+    theme: ThemeServiceStart;
+    // (undocumented)
     uiSettings: IUiSettingsClient;
 }
 
@@ -454,6 +461,11 @@ export class CoreSystem {
     } | undefined>;
     // (undocumented)
     stop(): void;
+}
+
+// @public
+export interface CoreTheme {
+    readonly darkMode: boolean;
 }
 
 // @internal (undocumented)
@@ -495,6 +507,12 @@ export interface DocLinksStart {
         readonly canvas: {
             readonly guide: string;
         };
+        readonly cloud: {
+            readonly indexManagement: string;
+        };
+        readonly console: {
+            readonly guide: string;
+        };
         readonly dashboard: {
             readonly guide: string;
             readonly drilldowns: string;
@@ -526,10 +544,61 @@ export interface DocLinksStart {
             readonly install: string;
             readonly start: string;
         };
+        readonly appSearch: {
+            readonly apiRef: string;
+            readonly apiClients: string;
+            readonly apiKeys: string;
+            readonly authentication: string;
+            readonly crawlRules: string;
+            readonly curations: string;
+            readonly duplicateDocuments: string;
+            readonly entryPoints: string;
+            readonly guide: string;
+            readonly indexingDocuments: string;
+            readonly indexingDocumentsSchema: string;
+            readonly logSettings: string;
+            readonly metaEngines: string;
+            readonly precisionTuning: string;
+            readonly relevanceTuning: string;
+            readonly resultSettings: string;
+            readonly searchUI: string;
+            readonly security: string;
+            readonly synonyms: string;
+            readonly webCrawler: string;
+            readonly webCrawlerEventLogs: string;
+        };
         readonly enterpriseSearch: {
-            readonly base: string;
-            readonly appSearchBase: string;
-            readonly workplaceSearchBase: string;
+            readonly configuration: string;
+            readonly licenseManagement: string;
+            readonly mailService: string;
+            readonly usersAccess: string;
+        };
+        readonly workplaceSearch: {
+            readonly apiKeys: string;
+            readonly box: string;
+            readonly confluenceCloud: string;
+            readonly confluenceServer: string;
+            readonly customSources: string;
+            readonly customSourcePermissions: string;
+            readonly documentPermissions: string;
+            readonly dropbox: string;
+            readonly externalIdentities: string;
+            readonly gitHub: string;
+            readonly gettingStarted: string;
+            readonly gmail: string;
+            readonly googleDrive: string;
+            readonly indexingSchedule: string;
+            readonly jiraCloud: string;
+            readonly jiraServer: string;
+            readonly oneDrive: string;
+            readonly permissions: string;
+            readonly salesforce: string;
+            readonly security: string;
+            readonly serviceNow: string;
+            readonly sharePoint: string;
+            readonly slack: string;
+            readonly synch: string;
+            readonly zendesk: string;
         };
         readonly heartbeat: {
             readonly base: string;
@@ -634,7 +703,6 @@ export interface DocLinksStart {
             readonly luceneQuerySyntax: string;
             readonly percolate: string;
             readonly queryDsl: string;
-            readonly autocompleteChanges: string;
         };
         readonly date: {
             readonly dateMath: string;
@@ -683,7 +751,11 @@ export interface DocLinksStart {
             uptimeDurationAnomaly: string;
         }>;
         readonly alerting: Record<string, string>;
-        readonly maps: Record<string, string>;
+        readonly maps: Readonly<{
+            guide: string;
+            importGeospatialPrivileges: string;
+            gdalTutorial: string;
+        }>;
         readonly monitoring: Record<string, string>;
         readonly security: Readonly<{
             apiKeyServiceSettings: string;
@@ -704,11 +776,17 @@ export interface DocLinksStart {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
-        readonly plugins: Record<string, string>;
+        readonly plugins: {
+            azureRepo: string;
+            gcsRepo: string;
+            hdfsRepo: string;
+            s3Repo: string;
+            snapshotRestoreRepos: string;
+            mapperSize: string;
+        };
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
-            datastreamsILM: string;
             beatsAgentComparison: string;
             guide: string;
             fleetServer: string;
@@ -721,6 +799,7 @@ export interface DocLinksStart {
             datastreams: string;
             datastreamsNamingScheme: string;
             installElasticAgent: string;
+            installElasticAgentStandalone: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;
@@ -1613,13 +1692,13 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> {
 
 // @public
 export class ScopedHistory<HistoryLocationState = unknown> implements History_2<HistoryLocationState> {
-    constructor(parentHistory: History_2, basePath: string);
+    constructor(parentHistory: History_2<HistoryLocationState>, basePath: string);
     get action(): Action;
-    block: (prompt?: string | boolean | History_2.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
+    block: (prompt?: string | boolean | TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
     createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
         prependBasePath?: boolean | undefined;
     }) => Href;
-    createSubHistory: <SubHistoryLocationState = unknown>(basePath: string) => ScopedHistory<SubHistoryLocationState>;
+    createSubHistory: (basePath: string) => ScopedHistory<HistoryLocationState>;
     go: (n: number) => void;
     goBack: () => void;
     goForward: () => void;
@@ -1664,6 +1743,18 @@ export class SimpleSavedObject<T = unknown> {
 
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
+
+// @public (undocumented)
+export interface ThemeServiceSetup {
+    // (undocumented)
+    theme$: Observable<CoreTheme>;
+}
+
+// @public (undocumented)
+export interface ThemeServiceStart {
+    // (undocumented)
+    theme$: Observable<CoreTheme>;
+}
 
 // Warning: (ae-missing-release-tag) "Toast" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1761,6 +1852,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:168:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:173:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { ToolingLog } from '@kbn/dev-utils';
+
 import {
   createListStream,
   createPromiseFromStreams,
   createConcatStream,
   createMapStream,
-  ToolingLog,
-} from '@kbn/dev-utils';
+} from '@kbn/utils';
 
 import { createGenerateDocRecordsStream } from './generate_doc_records_stream';
 import { Progress } from '../progress';
@@ -121,7 +122,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       "calls": Array [
         Array [
           Object {
-            "_source": "true",
+            "_source": true,
             "index": "bar",
             "query": undefined,
             "rest_total_hits_as_int": true,
@@ -136,7 +137,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
         ],
         Array [
           Object {
-            "_source": "true",
+            "_source": true,
             "index": "foo",
             "query": undefined,
             "rest_total_hits_as_int": true,

@@ -11,9 +11,9 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexPattern } from '../../../data/common';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
-import { ElasticSearchHit } from '../services/doc_views/doc_views_types';
 import { getServices } from '../kibana_services';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../common';
+import { ElasticSearchHit } from '../types';
 
 type RequestBody = Pick<estypes.SearchRequest, 'body'>;
 

@@ -2550,6 +2550,436 @@ export const ecsFieldMap = {
     array: false,
     required: false,
   },
+  'threat.enrichments': {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.as.number': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.as.organization.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.confidence': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.description': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.email.address': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.accessed': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.attributes': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.digest_algorithm': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.exists': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.signing_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.status': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.subject_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.team_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.trusted': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.code_signature.valid': {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.created': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.ctime': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.device': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.directory': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.drive_letter': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.extension': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.fork_name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.gid': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.group': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.hash.md5': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.hash.sha1': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.hash.sha256': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.hash.sha512': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.hash.ssdeep': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.inode': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.mime_type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.mode': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.mtime': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.owner': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.path': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.size': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.target_path': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.file.uid': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.first_seen': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.ip': {
+    type: 'ip',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.last_seen': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.marking.tlp': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.modified_at': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.provider': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.reference': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.registry.data.bytes': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.registry.data.strings': {
+    type: 'wildcard',
+    array: true,
+    required: false,
+  },
+  'threat.enrichments.indicator.registry.data.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.registry.hive': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.registry.key': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.registry.path': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.registry.value': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.scanner_stats': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.sightings': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.extension': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.fragment': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.full': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.original': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.password': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.path': {
+    type: 'wildcard',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.port': {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.query': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.registered_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.scheme': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.subdomain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.top_level_domain': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.indicator.url.username': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.feed': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.feed.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.matched.atomic': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.matched.field': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.matched.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.matched.index': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.enrichments.matched.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.group.alias': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'threat.group.id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.group.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.group.reference': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.tactic.id': {
     type: 'keyword',
     array: true,

@@ -55,7 +55,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="eui-textTruncate">
-              <EuiText color="secondary" size="xs" className="eui-textTruncate">
+              <EuiText color="success" size="xs" className="eui-textTruncate">
                 {bucket.percent}%
               </EuiText>
             </EuiFlexItem>

@@ -58,8 +58,8 @@ It collects system wide statistics and statistics per process and filesystem. \
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/system_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['os_system', 'security'],
   };
 }

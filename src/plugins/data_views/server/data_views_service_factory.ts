@@ -11,6 +11,8 @@ import {
   SavedObjectsClientContract,
   ElasticsearchClient,
   UiSettingsServiceStart,
+  KibanaRequest,
+  CoreStart,
 } from 'kibana/server';
 import { DataViewsService } from '../common';
 import { FieldFormatsStart } from '../../field_formats/server';
@@ -23,14 +25,17 @@ export const dataViewsServiceFactory =
     logger,
     uiSettings,
     fieldFormats,
+    capabilities,
   }: {
     logger: Logger;
     uiSettings: UiSettingsServiceStart;
     fieldFormats: FieldFormatsStart;
+    capabilities: CoreStart['capabilities'];
   }) =>
   async (
     savedObjectsClient: SavedObjectsClientContract,
-    elasticsearchClient: ElasticsearchClient
+    elasticsearchClient: ElasticsearchClient,
+    request?: KibanaRequest
   ) => {
     const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
@@ -46,5 +51,9 @@ export const dataViewsServiceFactory =
       onNotification: ({ title, text }) => {
         logger.warn(`${title}${text ? ` : ${text}` : ''}`);
       },
+      getCanSave: async () =>
+        request
+          ? (await capabilities.resolveCapabilities(request)).indexPatterns.save === true
+          : false,
     });
   };

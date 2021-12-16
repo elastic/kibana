@@ -7,7 +7,7 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 import { EuiCheckbox, htmlIdGenerator } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface CheckboxShowChartsProps {
   showCharts: boolean;

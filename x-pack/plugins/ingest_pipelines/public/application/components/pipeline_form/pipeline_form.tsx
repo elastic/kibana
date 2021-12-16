@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useRef } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { useForm, Form, FormConfig } from '../../../shared_imports';
@@ -138,7 +138,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
-                  color="secondary"
+                  color="success"
                   iconType="check"
                   onClick={form.submit}
                   data-test-subj="submitButton"

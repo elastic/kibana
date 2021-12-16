@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { DataSourceStrings, TIMELION_QUERY_URL, TIMELION, CANVAS } from '../../../i18n';

@@ -6,6 +6,7 @@
  */
 
 import { PARTITION_FIELDS, ANOMALY_RESULT_TYPE } from '../constants/anomalies';
+import type { KibanaUrlConfig } from './custom_urls';
 
 export interface Influencer {
   influencer_field_name: string;
@@ -38,8 +39,20 @@ export interface AnomalyRecordDoc {
   multi_bucket_impact?: number;
   over_field_name?: string;
   over_field_value?: string;
-  // TODO provide the causes resource interface.
-  causes?: any[];
+  causes?: Array<{
+    function: string;
+    function_description: string;
+    probability: number;
+    actual: number[];
+    typical: number[];
+    field_name?: string;
+    over_field_name?: string;
+    over_field_value?: string;
+    by_field_name?: string;
+    by_field_value?: string;
+    partition_field_name?: string;
+    partition_field_value?: string | number;
+  }>;
 }
 
 export interface AnomaliesTableRecord {
@@ -57,6 +70,8 @@ export interface AnomaliesTableRecord {
   typical?: number[];
   typicalSort?: any;
   metricDescriptionSort?: number;
+  customUrls?: KibanaUrlConfig[];
+  isTimeSeriesViewRecord?: boolean;
 }
 
 export type PartitionFieldsType = typeof PARTITION_FIELDS[number];

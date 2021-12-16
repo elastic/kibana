@@ -19,9 +19,10 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
   keptLayerIds,
 }) => {
   if (
-    state?.shape === CHART_SHAPES.HEATMAP &&
-    (state.xAccessor || state.yAccessor || state.valueAccessor) &&
-    table.changeType !== 'extended'
+    (state?.shape === CHART_SHAPES.HEATMAP &&
+      (state.xAccessor || state.yAccessor || state.valueAccessor) &&
+      table.changeType !== 'extended') ||
+    table.columns.some((col) => col.operation.isStaticValue)
   ) {
     return [];
   }

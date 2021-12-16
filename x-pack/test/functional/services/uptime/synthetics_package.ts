@@ -38,7 +38,7 @@ export function SyntheticsPackageProvider({ getService }: FtrProviderContext) {
     // Retrieve information about the Synthetics package
     // EPM does not currently have an API to get the "lastest" information for a page given its name,
     // so we'll retrieve a list of packages and then find the package info in the list.
-    let apiRequest: Promise<GetPackagesResponse['response'][0] | undefined>;
+    let apiRequest: Promise<GetPackagesResponse['items'][0] | undefined>;
 
     return () => {
       if (!apiRequest) {
@@ -57,7 +57,7 @@ export function SyntheticsPackageProvider({ getService }: FtrProviderContext) {
             })
             .then((response: { body: GetPackagesResponse }) => {
               const { body } = response;
-              const syntheticsPackageInfo = body.response.find(
+              const syntheticsPackageInfo = body.items.find(
                 (epmPackage) => epmPackage.name === 'synthetics'
               );
               if (!syntheticsPackageInfo) {

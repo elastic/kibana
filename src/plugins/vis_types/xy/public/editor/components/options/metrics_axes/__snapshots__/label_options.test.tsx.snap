@@ -27,7 +27,6 @@ exports[`LabelOptions component should init with the default set of props 1`] = 
   />
   <SwitchOption
     data-test-subj=""
-    disabled={false}
     label="Filter labels"
     paramName="filter"
     setValue={[MockFunction]}
@@ -40,35 +39,45 @@ exports[`LabelOptions component should init with the default set of props 1`] = 
     gutterSize="s"
   >
     <EuiFlexItem>
-      <SelectOption
-        disabled={false}
-        label="Align"
-        options={
-          Array [
-            Object {
-              "text": "Horizontal",
-              "value": 0,
-            },
-            Object {
-              "text": "Vertical",
-              "value": 90,
-            },
-            Object {
-              "text": "Angled",
-              "value": 75,
-            },
-          ]
-        }
-        paramName="rotate"
-        setValue={[Function]}
-      />
+      <EuiToolTip
+        delay="long"
+        display="inlineBlock"
+        position="right"
+      >
+        <SelectOption
+          label="Align"
+          options={
+            Array [
+              Object {
+                "text": "Horizontal",
+                "value": 0,
+              },
+              Object {
+                "text": "Vertical",
+                "value": 90,
+              },
+              Object {
+                "text": "Angled",
+                "value": 75,
+              },
+            ]
+          }
+          paramName="rotate"
+          setValue={[Function]}
+        />
+      </EuiToolTip>
     </EuiFlexItem>
     <EuiFlexItem>
-      <TruncateLabelsOption
-        disabled={false}
-        setValue={[MockFunction]}
-        value={0}
-      />
+      <EuiToolTip
+        delay="long"
+        display="inlineBlock"
+        position="right"
+      >
+        <TruncateLabelsOption
+          setValue={[MockFunction]}
+          value={0}
+        />
+      </EuiToolTip>
     </EuiFlexItem>
   </EuiFlexGroup>
 </Fragment>

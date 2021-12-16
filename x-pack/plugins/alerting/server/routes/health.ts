@@ -45,22 +45,30 @@ export const healthRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         try {
-          const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
+          // Verify that user has access to at least one rule type
+          const ruleTypes = Array.from(await context.alerting.getRulesClient().listAlertTypes());
+          if (ruleTypes.length > 0) {
+            const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
 
-          const securityHealth = await getSecurityHealth(
-            async () => (licenseState ? licenseState.getIsSecurityEnabled() : null),
-            async () => encryptedSavedObjects.canEncrypt,
-            context.alerting.areApiKeysEnabled
-          );
+            const securityHealth = await getSecurityHealth(
+              async () => (licenseState ? licenseState.getIsSecurityEnabled() : null),
+              async () => encryptedSavedObjects.canEncrypt,
+              context.alerting.areApiKeysEnabled
+            );
 
-          const frameworkHealth: AlertingFrameworkHealth = {
-            ...securityHealth,
-            alertingFrameworkHeath,
-          };
+            const frameworkHealth: AlertingFrameworkHealth = {
+              ...securityHealth,
+              alertingFrameworkHeath,
+            };
 
-          return res.ok({
-            body: rewriteBodyRes(frameworkHealth),
-          });
+            return res.ok({
+              body: rewriteBodyRes(frameworkHealth),
+            });
+          } else {
+            return res.forbidden({
+              body: { message: `Unauthorized to access alerting framework health` },
+            });
+          }
         } catch (error) {
           return res.badRequest({ body: error });
         }

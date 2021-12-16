@@ -7,4 +7,5 @@
  */
 
 export * from './control_group';
+export * from './control_types';
 export * from './types';

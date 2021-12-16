@@ -16,11 +16,12 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const dockerServers = getService('dockerServers');
 
-  const mappingsPackage = 'overrides-0.1.0';
+  const mappingsPackage = 'overrides';
+  const mappingsPackageVersion = '0.1.0';
   const server = dockerServers.get('registry');
 
-  const deletePackage = async (pkgkey: string) =>
-    supertest.delete(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
+  const deletePackage = async (pkg: string, version: string) =>
+    supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
 
   describe('installs packages that include settings and mappings overrides', async () => {
     skipIfNoDockerRegistry(providerContext);
@@ -28,17 +29,17 @@ export default function (providerContext: FtrProviderContext) {
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests
-        await deletePackage(mappingsPackage);
+        await deletePackage(mappingsPackage, mappingsPackageVersion);
       }
     });
 
     it('should install the overrides package correctly', async function () {
       let { body } = await supertest
-        .post(`/api/fleet/epm/packages/${mappingsPackage}`)
+        .post(`/api/fleet/epm/packages/${mappingsPackage}/${mappingsPackageVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      const templateName = body.response[0].id;
+      const templateName = body.items[0].id;
 
       const { body: indexTemplateResponse } = await es.transport.request<any>(
         {

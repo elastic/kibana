@@ -6,7 +6,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import { SearchRequest } from 'src/plugins/data/public';
+import type { SearchRequest } from 'src/plugins/data/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';

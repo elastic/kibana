@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonEmpty, EuiButtonIcon, EuiButtonIconPropsForButton } from '@elastic/eui';
-import { FilterManager } from '../../../../../../../src/plugins/data/public';
+import type { FilterManager } from '../../../../../../../src/plugins/data/public';
 
 export interface FilterValueFnArgs {
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */

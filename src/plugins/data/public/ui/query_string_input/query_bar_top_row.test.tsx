@@ -17,7 +17,7 @@ import QueryBarTopRow from './query_bar_top_row';
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '../../stubs';
 import { UI_SETTINGS } from '../../../common';
 const startMock = coreMock.createStart();

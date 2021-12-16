@@ -96,6 +96,7 @@ The following table describes the properties of the `options` object.
 |producer|The id of the application producing this rule type.|string|
 |minimumLicenseRequired|The value of a minimum license. Most of the rules are licensed as "basic".|string|
 |ruleTaskTimeout|The length of time a rule can run before being cancelled due to timeout. By default, this value is "5m".|string|
+|cancelAlertsOnRuleTimeout|Whether to skip writing alerts and scheduling actions if a rule execution is cancelled due to timeout. By default, this value is set to "true".|boolean|
 |useSavedObjectReferences.extractReferences|(Optional) When developing a rule type, you can choose to implement hooks for extracting saved object references from rule parameters. This hook will be invoked when a rule is created or updated. Implementing this hook is optional, but if an extract hook is implemented, an inject hook must also be implemented.|Function
 |useSavedObjectReferences.injectReferences|(Optional) When developing a rule type, you can choose to implement hooks for injecting saved object references into rule parameters. This hook will be invoked when a rule is retrieved (get or find). Implementing this hook is optional, but if an inject hook is implemented, an extract hook must also be implemented.|Function
 |isExportable|Whether the rule type is exportable from the Saved Objects Management UI.|boolean|
@@ -114,6 +115,9 @@ This is the primary function for a rule type. Whenever the rule needs to execute
 |services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to perform CRUD operations on any saved object that lives in the same space as the rule.<br><br>The scope of the saved objects client is tied to the user who created the rule (only when security is enabled).|
 |services.alertInstanceFactory(id)|This [alert factory](#alert-factory) creates alerts and must be used in order to execute actions. The id you give to the alert factory is a unique identifier for the alert.|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
+|services.shouldWriteAlerts()|This returns a boolean indicating whether the executor should write out alerts as data. This is determined by whether rule execution has been cancelled due to timeout AND whether both the Kibana `cancelAlertsOnRuleTimeout` flag and the rule type `cancelAlertsOnRuleTimeout` are set to `true`.|
+|services.shouldStopExecution()|This returns a boolean indicating whether rule execution has been cancelled due to timeout.|
+|services.search|This provides an implementation of Elasticsearch client `search` function that aborts searches if rule execution is cancelled mid-search.|
 |startedAt|The date and time the rule type started execution.|
 |previousStartedAt|The previous date and time the rule type started a successful execution.|
 |params|Parameters for the execution. This is where the parameters you require will be passed in. (e.g. threshold). Use rule type validation to ensure values are set before execution.|
@@ -229,7 +233,7 @@ interface MyRuleTypeAlertContext extends AlertInstanceContext {
 
 type MyRuleTypeActionGroups = 'default' | 'warning';
   
-const myRuleType: AlertType<
+const myRuleType: RuleType<
 	MyRuleTypeParams,
 	MyRuleTypeExtractedParams,
 	MyRuleTypeState,
@@ -286,8 +290,19 @@ const myRuleType: AlertType<
 		// Let's assume params is { server: 'server_1', threshold: 0.8 }
 		const { server, threshold } = params;
 
+		// Query Elasticsearch using a cancellable search
+		// If rule execution is cancelled mid-search, the search request will be aborted
+		// and an error will be thrown.
+		const esClient = services.search.asCurrentUser;
+		await esClient.search(esQuery);
+
 		// Call a function to get the server's current CPU usage
 		const currentCpuUsage = await getCpuUsage(server);
+
+		// Periodically check that execution should continue
+		if (services.shouldStopExecution()) {
+			throw new Error('short circuiting rule execution!');
+		}
 
 		// Only execute if CPU usage is greater than threshold
 		if (currentCpuUsage > threshold) {

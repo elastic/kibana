@@ -610,10 +610,15 @@ Object {
     "test-index-*",
   ],
   "template": Object {
+    "aliases": Object {
+      ".alerts-security.alerts-space-id": Object {
+        "is_write_index": false,
+      },
+    },
     "mappings": Object {
       "_meta": Object {
         "aliases_version": 1,
-        "version": 57,
+        "version": 67,
       },
       "dynamic": false,
       "properties": Object {
@@ -6348,6 +6353,6 @@ Object {
       },
     },
   },
-  "version": 57,
+  "version": 67,
 }
 `;

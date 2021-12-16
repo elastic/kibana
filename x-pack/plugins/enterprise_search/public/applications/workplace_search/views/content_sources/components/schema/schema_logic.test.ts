@@ -67,7 +67,7 @@ describe('SchemaLogic', () => {
 
   const fieldCoercionErrors = [
     {
-      external_id: '123',
+      id: '123',
       error: 'error',
     },
   ] as any;

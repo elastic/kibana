@@ -23,7 +23,7 @@ const queryFilter = getQueryFilter('', 'kuery', [], ['*'], []);
 const mockSingleSearchAfter = jest.fn();
 
 // Failing with rule registry enabled
-describe.skip('findThresholdSignals', () => {
+describe('findThresholdSignals', () => {
   let mockService: AlertServicesMock;
 
   beforeEach(() => {

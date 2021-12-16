@@ -10,10 +10,11 @@ import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find, get, isEmpty } from 'lodash/fp';
 import { connect, ConnectedProps } from 'react-redux';
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
-import { TimelineEventsDetailsItem, TimelineId } from '../../../../../common';
+import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
+import { TimelineId } from '../../../../../common/types';
 import { useExceptionModal } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_modal';
 import { AddExceptionModalWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
-import { EventFiltersModal } from '../../../../management/pages/event_filters/view/components/modal';
+import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/flyout';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -23,10 +24,10 @@ import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 
 interface EventDetailsFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
+  detailsEcsData: Ecs | null;
   expandedEvent: {
     eventId: string;
     indexName: string;
-    ecsData?: Ecs;
     refetch?: () => void;
   };
   handleOnEventClosed: () => void;
@@ -46,6 +47,7 @@ interface AddExceptionModalWrapperData {
 export const EventDetailsFooterComponent = React.memo(
   ({
     detailsData,
+    detailsEcsData,
     expandedEvent,
     handleOnEventClosed,
     isHostIsolationPanelOpen,
@@ -56,7 +58,9 @@ export const EventDetailsFooterComponent = React.memo(
     timelineQuery,
   }: EventDetailsFooterProps & PropsFromRedux) => {
     const ruleIndex = useMemo(
-      () => find({ category: 'signal', field: 'signal.rule.index' }, detailsData)?.values,
+      () =>
+        find({ category: 'signal', field: 'signal.rule.index' }, detailsData)?.values ??
+        find({ category: 'kibana', field: 'kibana.alert.rule.index' }, detailsData)?.values,
       [detailsData]
     );
 
@@ -113,7 +117,7 @@ export const EventDetailsFooterComponent = React.memo(
       skip: expandedEvent?.eventId == null,
     });
 
-    const ecsData = expandedEvent.ecsData ?? get(0, alertsEcsData);
+    const ecsData = detailsEcsData ?? get(0, alertsEcsData);
     return (
       <>
         <EuiFlyoutFooter>
@@ -152,7 +156,7 @@ export const EventDetailsFooterComponent = React.memo(
             />
           )}
         {isAddEventFilterModalOpen && ecsData != null && (
-          <EventFiltersModal data={ecsData} onCancel={closeAddEventFilterModal} />
+          <EventFiltersFlyout data={ecsData} onCancel={closeAddEventFilterModal} />
         )}
       </>
     );

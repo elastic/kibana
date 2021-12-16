@@ -17,9 +17,9 @@ import {
 
 import { FleetPlugin } from './plugin';
 
-export { default as apm } from 'elastic-apm-node';
 export type {
   AgentService,
+  AgentClient,
   ESIndexPatternService,
   PackageService,
   AgentPolicyServiceInterface,
@@ -35,8 +35,9 @@ export type {
   PutPackagePolicyUpdateCallback,
   PostPackagePolicyDeleteCallback,
   PostPackagePolicyCreateCallback,
+  FleetRequestHandlerContext,
 } from './types';
-export { AgentNotFoundError } from './errors';
+export { AgentNotFoundError, FleetUnauthorizedError } from './errors';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -93,8 +94,7 @@ export const config: PluginConfigDescriptor = {
     outputs: PreconfiguredOutputsSchema,
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
     developer: schema.object({
-      // TODO: change default to false as soon as EPR issue fixed. Blocker for 8.0.
-      disableRegistryVersionCheck: schema.boolean({ defaultValue: true }),
+      disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
     }),
   }),
 };

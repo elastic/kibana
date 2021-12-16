@@ -13,12 +13,9 @@ import { REASON_FIELD_NAME } from './constants';
 import { reasonColumnRenderer } from './reason_column_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
 
-import {
-  BrowserFields,
-  ColumnHeaderOptions,
-  RowRenderer,
-  RowRendererId,
-} from '../../../../../../common';
+import { RowRendererId, ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
+import { BrowserFields } from '../../../../../../common/search_strategy';
+
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../../../timelines/public/mock';
 import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../../../timelines/public/components';

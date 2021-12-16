@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }) {
     // FF issue: https://github.com/elastic/kibana/issues/35551
     this.tags(['skipFirefox']);
 
-    describe('with offline node', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/116065
+    describe.skip('with offline node', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
@@ -53,8 +54,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/116065
-      describe.skip('skipCloud', function () {
+      describe('skipCloud', function () {
         // TODO: https://github.com/elastic/stack-monitoring/issues/31
         this.tags(['skipCloud']);
 

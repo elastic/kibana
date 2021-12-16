@@ -14,22 +14,31 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { NodeItemWithStats } from './nodes_list';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { NodeItem } from './nodes_list';
 import { formatToListItems } from '../models_management/expanded_row';
 import { AllocatedModels } from './allocated_models';
+import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
+import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 
 interface ExpandedRowProps {
-  item: NodeItemWithStats;
+  item: NodeItem;
 }
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
+  const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
+
   const {
     allocated_models: allocatedModels,
     attributes,
     memory_overview: memoryOverview,
     ...details
   } = item;
+
+  // Process node attributes
+  attributes['ml.machine_memory'] = bytesFormatter(attributes['ml.machine_memory']);
+  attributes['ml.max_jvm_size'] = bytesFormatter(attributes['ml.max_jvm_size']);
+  delete attributes['xpack.installed'];
 
   return (
     <>

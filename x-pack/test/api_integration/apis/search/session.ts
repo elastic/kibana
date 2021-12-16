@@ -16,7 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const spacesService = getService('spaces');
 
-  describe('search session', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/119660
+  describe.skip('search session', () => {
     describe('session management', () => {
       it('should fail to create a session with no name', async () => {
         const sessionId = `my-session-${Math.random()}`;

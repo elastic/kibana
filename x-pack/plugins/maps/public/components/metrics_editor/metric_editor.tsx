@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { IndexPatternField } from 'src/plugins/data/public';
 import { MetricSelect } from './metric_select';
 import { SingleFieldSelect } from '../single_field_select';

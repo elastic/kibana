@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTokensObject } from '@elastic/eui';
 
 interface EuiValues {
@@ -126,22 +126,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiCodeBlock.fullscreenExpand': i18n.translate('core.euiCodeBlock.fullscreenExpand', {
       defaultMessage: 'Expand',
       description: 'ARIA label for a button that enters fullscreen view',
-    }),
-    'euiCodeEditor.startEditing': i18n.translate('core.euiCodeEditor.startEditing', {
-      defaultMessage: 'Press Enter to start editing.',
-      description: 'Screen reader text to prompt editing',
-    }),
-    'euiCodeEditor.startInteracting': i18n.translate('core.euiCodeEditor.startInteracting', {
-      defaultMessage: 'Press Enter to start interacting with the code.',
-      description: 'Screen reader text to prompt interaction',
-    }),
-    'euiCodeEditor.stopEditing': i18n.translate('core.euiCodeEditor.stopEditing', {
-      defaultMessage: "When you're done, press Escape to stop editing.",
-      description: 'Screen reader text to describe ending editing',
-    }),
-    'euiCodeEditor.stopInteracting': i18n.translate('core.euiCodeEditor.stopInteracting', {
-      defaultMessage: "When you're done, press Escape to stop interacting with the code.",
-      description: 'Screen reader text to describe ending interactions',
     }),
     'euiCollapsedItemActions.allActions': i18n.translate(
       'core.euiCollapsedItemActions.allActions',
@@ -679,6 +663,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '+ {messagesLength} more',
         values: { messagesLength },
       }),
+    'euiErrorBoundary.error': i18n.translate('core.euiErrorBoundary.error', {
+      defaultMessage: 'Error',
+      description: 'Error boundary for uncaught exceptions when rendering part of the application',
+    }),
     'euiNotificationEventMessages.accordionAriaLabelButtonText': ({
       messagesLength,
       eventName,
@@ -1062,12 +1050,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Displayed in a button that shows date picker',
       }
     ),
-    'euiSuperSelect.screenReaderAnnouncement': ({ optionsCount }: EuiValues) =>
-      i18n.translate('core.euiSuperSelect.screenReaderAnnouncement', {
+    'euiSuperSelect.screenReaderAnnouncement': i18n.translate(
+      'core.euiSuperSelect.screenReaderAnnouncement',
+      {
         defaultMessage:
-          'You are in a form selector of {optionsCount} items and must select a single option. Use the up and down keys to navigate or escape to close.',
-        values: { optionsCount },
-      }),
+          'You are in a form selector and must select a single option. Use the up and down keys to navigate or escape to close.',
+      }
+    ),
     'euiSuperSelectControl.selectAnOption': ({ selectedValue }: EuiValues) =>
       i18n.translate('core.euiSuperSelectControl.selectAnOption', {
         defaultMessage: 'Select an option: {selectedValue}, is selected',

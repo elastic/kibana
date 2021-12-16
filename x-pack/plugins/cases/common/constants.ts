@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { ConnectorTypes } from './api';
+import { CasesContextFeatures } from './ui/types';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
@@ -55,6 +56,8 @@ export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions`;
 export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}`;
 export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts`;
 
+export const CASE_METRICS_DETAILS_URL = `${CASES_URL}/metrics/{case_id}`;
+
 /**
  * Action routes
  */
@@ -102,3 +105,12 @@ export const MAX_CONCURRENT_SEARCHES = 10;
  */
 
 export const MAX_TITLE_LENGTH = 64;
+
+/**
+ * Cases features
+ */
+
+export const DEFAULT_FEATURES: CasesContextFeatures = Object.freeze({
+  alerts: { sync: true },
+  metrics: [],
+});

@@ -257,6 +257,17 @@ describe('palette panel', () => {
         })
       );
     });
+
+    it('should not render the switch disabled from props', () => {
+      const instance = mountWithIntl(
+        <CustomizablePalette {...props} showRangeTypeSelector={false} />
+      );
+      expect(
+        instance
+          .find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_range_groups"]')
+          .exists()
+      ).toBe(false);
+    });
   });
 
   describe('custom stops', () => {
