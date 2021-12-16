@@ -384,10 +384,6 @@ const HeatmapComponent: FC<HeatmapRenderProps> = ({
         color:
           args.gridConfig.strokeColor ?? chartTheme.axes?.gridLine?.horizontal?.stroke ?? '#D3DAE6',
       },
-      cellHeight: {
-        max: 'fill',
-        min: 1,
-      },
     },
     cell: {
       maxWidth: 'fill',

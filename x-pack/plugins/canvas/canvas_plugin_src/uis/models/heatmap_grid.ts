@@ -35,30 +35,6 @@ export const heatmapGrid = () => ({
       argType: 'color_picker',
     },
     {
-      name: 'yAxisLabelColor',
-      displayName: strings.getYAxisLabelColorDisplayName(),
-      help: strings.getYAxisLabelColorDisplayName(),
-      argType: 'color_picker',
-    },
-    {
-      name: 'cellHeight',
-      displayName: strings.getCellHeightDisplayName(),
-      help: strings.getCellHeightHelp(),
-      argType: 'number',
-    },
-    {
-      name: 'cellWidth',
-      displayName: strings.getCellWidthDisplayName(),
-      help: strings.getCellWidthHelp(),
-      argType: 'number',
-    },
-    {
-      name: 'yAxisLabelWidth',
-      displayName: strings.getYAxisLabelWidthDisplayName(),
-      help: strings.getYAxisLabelWidthHelp(),
-      argType: 'number',
-    },
-    {
       name: 'isCellLabelVisible',
       displayName: strings.getIsCellLabelVisibleDisplayName(),
       help: strings.getIsCellLabelVisibleHelp(),

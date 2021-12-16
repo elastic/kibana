@@ -676,22 +676,6 @@ export const ModelStrings = {
       i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.strokeColorLabel', {
         defaultMessage: 'Specifies the grid stroke color',
       }),
-    getCellHeightDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.cellHeightTitle', {
-        defaultMessage: 'Cell height',
-      }),
-    getCellHeightHelp: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.cellHeightLabel', {
-        defaultMessage: 'Specifies the grid cell height',
-      }),
-    getCellWidthDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.cellWidthTitle', {
-        defaultMessage: 'Cell width',
-      }),
-    getCellWidthHelp: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.cellWidthLabel', {
-        defaultMessage: 'Specifies the grid cell width',
-      }),
     getIsCellLabelVisibleDisplayName: () =>
       i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isCellLabelVisibleTitle', {
         defaultMessage: 'Show cell label',
@@ -715,22 +699,6 @@ export const ModelStrings = {
     getIsXAxisLabelVisibleHelp: () =>
       i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.isXAxisLabelVisibleLabel', {
         defaultMessage: 'Specifies whether or not the X-axis labels are visible',
-      }),
-    getYAxisLabelWidthDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.yAxisLabelWidthTitle', {
-        defaultMessage: 'Y-axis labels width',
-      }),
-    getYAxisLabelWidthHelp: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.yAxisLabelWidthLabel', {
-        defaultMessage: 'Specifies the width of the Y-axis labels',
-      }),
-    getYAxisLabelColorDisplayName: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.yAxisLabelColorTitle', {
-        defaultMessage: 'Y-axis labels color',
-      }),
-    getYAxisLabelColorHelp: () =>
-      i18n.translate('xpack.canvas.uis.models.heatmap_grid.args.yAxisLabelColorLabel', {
-        defaultMessage: 'Specifies the color of the Y-axis labels',
       }),
   },
 };
