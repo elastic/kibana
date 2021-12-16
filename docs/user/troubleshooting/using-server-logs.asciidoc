@@ -1,6 +1,4 @@
-[[kibana-troubleshooting]]
-== Troubleshooting
-
+[[kibana-troubleshooting-kibana-server-logs]]
 === Using {kib} server logs
 {kib} Logs is a great way to see what's going on in your application and to debug performance issues. Navigating through a large number of generated logs can be overwhelming, and following are some techniques that you can use to optimize the process.
 
