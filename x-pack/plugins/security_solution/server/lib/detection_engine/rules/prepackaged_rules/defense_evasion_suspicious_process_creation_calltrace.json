@@ -1,0 +1,45 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when a process is created and immediately accessed from an unknown memory code region and by the same parent process. This may indicate a code injection or hollowing attempt.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Suspicious Process Creation CallTrace",
+  "query": "sequence by host.id with maxspan=1m\n  [process where event.code == \"1\" and\n   /* sysmon process creation */\n   process.parent.name : (\"winword.exe\", \"excel.exe\", \"outlook.exe\", \"powerpnt.exe\", \"eqnedt32.exe\",\n                          \"fltldr.exe\", \"mspub.exe\", \"msaccess.exe\", \"powershell.exe\", \"pwsh.exe\",\n                          \"cscript.exe\", \"wscript.exe\", \"rundll32.exe\", \"regsvr32.exe\", \"mshta.exe\",\n                          \"wmic.exe\", \"cmstp.exe\", \"msxsl.exe\")] by process.parent.entity_id, process.entity_id\n  [process where event.code == \"10\" and\n   /* Sysmon process access event from unknown module */\n   winlog.event_data.CallTrace : \"*UNKNOWN*\"] by process.entity_id, winlog.event_data.TargetProcessGUID\n",
+  "risk_score": 43,
+  "rule_id": "3ed032b2-45d8-4406-bc79-7ad1eabb2c72",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1055",
+          "name": "Process Injection",
+          "reference": "https://attack.mitre.org/techniques/T1055/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

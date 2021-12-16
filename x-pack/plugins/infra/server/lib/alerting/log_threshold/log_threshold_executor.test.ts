@@ -18,7 +18,7 @@ import {
 import {
   Comparator,
   AlertStates,
-  AlertParams,
+  RuleParams,
   Criterion,
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
@@ -126,7 +126,7 @@ const expectedNegativeFilterClauses = [
   },
 ];
 
-const baseAlertParams: Pick<AlertParams, 'count' | 'timeSize' | 'timeUnit'> = {
+const baseRuleParams: Pick<RuleParams, 'count' | 'timeSize' | 'timeUnit'> = {
   count: {
     comparator: Comparator.GT,
     value: 5,
@@ -165,27 +165,27 @@ describe('Log threshold executor', () => {
   });
   describe('Criteria filter building', () => {
     test('Handles positive criteria', () => {
-      const alertParams: AlertParams = {
-        ...baseAlertParams,
+      const ruleParams: RuleParams = {
+        ...baseRuleParams,
         criteria: positiveCriteria,
       };
-      const filters = buildFiltersFromCriteria(alertParams, TIMESTAMP_FIELD);
+      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD);
       expect(filters.mustFilters).toEqual(expectedPositiveFilterClauses);
     });
 
     test('Handles negative criteria', () => {
-      const alertParams: AlertParams = {
-        ...baseAlertParams,
+      const ruleParams: RuleParams = {
+        ...baseRuleParams,
         criteria: negativeCriteria,
       };
-      const filters = buildFiltersFromCriteria(alertParams, TIMESTAMP_FIELD);
+      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD);
 
       expect(filters.mustNotFilters).toEqual(expectedNegativeFilterClauses);
     });
 
     test('Handles time range', () => {
-      const alertParams: AlertParams = { ...baseAlertParams, criteria: [] };
-      const filters = buildFiltersFromCriteria(alertParams, TIMESTAMP_FIELD);
+      const ruleParams: RuleParams = { ...baseRuleParams, criteria: [] };
+      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD);
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].gte).toBe('number');
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].lte).toBe('number');
       expect(filters.rangeFilter.range[TIMESTAMP_FIELD].format).toBe('epoch_millis');
@@ -199,12 +199,12 @@ describe('Log threshold executor', () => {
   describe('ES queries', () => {
     describe('Query generation', () => {
       it('Correctly generates ungrouped queries', () => {
-        const alertParams: AlertParams = {
-          ...baseAlertParams,
+        const ruleParams: RuleParams = {
+          ...baseRuleParams,
           criteria: [...positiveCriteria, ...negativeCriteria],
         };
         const query = getUngroupedESQuery(
-          alertParams,
+          ruleParams,
           TIMESTAMP_FIELD,
           FILEBEAT_INDEX,
           runtimeMappings
@@ -248,13 +248,13 @@ describe('Log threshold executor', () => {
 
       describe('Correctly generates grouped queries', () => {
         it('When using an optimizable threshold comparator', () => {
-          const alertParams: AlertParams = {
-            ...baseAlertParams,
+          const ruleParams: RuleParams = {
+            ...baseRuleParams,
             groupBy: ['host.name'],
             criteria: [...positiveCriteria, ...negativeCriteria],
           };
           const query = getGroupedESQuery(
-            alertParams,
+            ruleParams,
             TIMESTAMP_FIELD,
             FILEBEAT_INDEX,
             runtimeMappings
@@ -313,10 +313,10 @@ describe('Log threshold executor', () => {
         });
 
         it('When not using an optimizable threshold comparator', () => {
-          const alertParams: AlertParams = {
-            ...baseAlertParams,
+          const ruleParams: RuleParams = {
+            ...baseRuleParams,
             count: {
-              ...baseAlertParams.count,
+              ...baseRuleParams.count,
               comparator: Comparator.LT,
             },
             groupBy: ['host.name'],
@@ -324,7 +324,7 @@ describe('Log threshold executor', () => {
           };
 
           const query = getGroupedESQuery(
-            alertParams,
+            ruleParams,
             TIMESTAMP_FIELD,
             FILEBEAT_INDEX,
             runtimeMappings
@@ -408,8 +408,8 @@ describe('Log threshold executor', () => {
     describe('Can process ungrouped results', () => {
       test('It handles the ALERT state correctly', () => {
         const alertUpdaterMock = jest.fn();
-        const alertParams = {
-          ...baseAlertParams,
+        const ruleParams = {
+          ...baseRuleParams,
           criteria: [positiveCriteria[0]],
         };
         const results = {
@@ -421,7 +421,7 @@ describe('Log threshold executor', () => {
         } as UngroupedSearchQueryResponse;
         processUngroupedResults(
           results,
-          alertParams,
+          ruleParams,
           alertsMock.createAlertInstanceFactory,
           alertUpdaterMock
         );
@@ -445,8 +445,8 @@ describe('Log threshold executor', () => {
     describe('Can process grouped results', () => {
       test('It handles the ALERT state correctly', () => {
         const alertUpdaterMock = jest.fn();
-        const alertParams = {
-          ...baseAlertParams,
+        const ruleParams = {
+          ...baseRuleParams,
           criteria: [positiveCriteria[0]],
           groupBy: ['host.name', 'event.dataset'],
         };
@@ -485,7 +485,7 @@ describe('Log threshold executor', () => {
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
         processGroupByResults(
           results,
-          alertParams,
+          ruleParams,
           alertsMock.createAlertInstanceFactory,
           alertUpdaterMock
         );

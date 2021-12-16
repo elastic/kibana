@@ -164,7 +164,10 @@ export class AttributeService<
         try {
           const newAttributes = { ...(input as ValType)[ATTRIBUTE_SERVICE_KEY] };
           newAttributes.title = props.newTitle;
-          const wrappedInput = (await this.wrapAttributes(newAttributes, true)) as RefType;
+          const wrappedInput = (await this.wrapAttributes(
+            newAttributes,
+            true
+          )) as unknown as RefType;
 
           // Remove unneeded attributes from the original input.
           const newInput = omit(input, ATTRIBUTE_SERVICE_KEY);

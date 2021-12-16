@@ -136,6 +136,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [created, started, indexPatternId]);
 
+    const { overlays, theme } = useAppDependencies();
     const api = useApi();
 
     async function createTransform() {
@@ -160,9 +161,11 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           }),
           text: toMountPoint(
             <ToastNotificationText
-              overlays={deps.overlays}
+              overlays={overlays}
+              theme={theme}
               text={getErrorMessage(isPutTransformsResponseSchema(resp) ? respErrors : resp)}
-            />
+            />,
+            { theme$: theme.theme$ }
           ),
         });
         setCreated(false);
@@ -214,7 +217,12 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           values: { transformId },
         }),
         text: toMountPoint(
-          <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(errorMessage)} />
+          <ToastNotificationText
+            overlays={overlays}
+            theme={theme}
+            text={getErrorMessage(errorMessage)}
+          />,
+          { theme$: theme.theme$ }
         ),
       });
       setStarted(false);
@@ -275,7 +283,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               values: { dataViewName },
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+              <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(e)} />,
+              { theme$: theme.theme$ }
             ),
           });
           setLoading(false);
@@ -321,7 +330,12 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                 defaultMessage: 'An error occurred getting the progress percentage:',
               }),
               text: toMountPoint(
-                <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(stats)} />
+                <ToastNotificationText
+                  overlays={overlays}
+                  theme={theme}
+                  text={getErrorMessage(stats)}
+                />,
+                { theme$: theme.theme$ }
               ),
             });
             clearInterval(interval);
