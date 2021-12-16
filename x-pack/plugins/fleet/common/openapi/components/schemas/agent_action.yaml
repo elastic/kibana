@@ -1,0 +1,27 @@
+title: Agent action
+oneOf:
+  - properties:
+      data:
+        type: string
+      ack_data:
+        type: string
+      type:
+        type: string
+        enum:
+          - POLICY_CHANGE
+          - UNENROLL
+          - UPGRADE
+          - POLICY_REASSIGN
+  - properties:
+      type:
+        type: string
+      data:
+        type: object
+        properties:
+          log_level:
+            type: string
+            enum:
+              - debug
+              - info
+              - warning
+              - error
