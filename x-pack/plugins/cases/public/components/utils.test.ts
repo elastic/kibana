@@ -64,26 +64,6 @@ describe('Utils', () => {
       expect(isDeprecatedConnector({ ...connector, actionTypeId: '.servicenow-sir' })).toBe(false);
     });
 
-    it('returns false if the connector is .servicenow but does not have a config property', () => {
-      const { config, ...connectorWithoutConfig } = connector;
-      expect(
-        isDeprecatedConnector({
-          ...connectorWithoutConfig,
-          actionTypeId: '.servicenow',
-        })
-      ).toBe(false);
-    });
-
-    it('returns false if the connector is .servicenow but does not have a usesTableApi property', () => {
-      expect(
-        isDeprecatedConnector({
-          ...connector,
-          actionTypeId: '.servicenow',
-          config: {},
-        })
-      ).toBe(false);
-    });
-
     it('returns true if the connector is .servicenow and the usesTableApi=true', () => {
       expect(
         isDeprecatedConnector({

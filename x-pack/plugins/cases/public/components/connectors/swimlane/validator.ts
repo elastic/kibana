@@ -29,9 +29,8 @@ export const connectorValidator = (
   connector: CaseActionConnector
 ): ReturnType<ValidationConfig['validator']> => {
   const {
-    config: { mappings, connectorType } = { mappings: undefined, connectorType: undefined },
+    config: { mappings, connectorType },
   } = connector;
-
   if (connectorType === SwimlaneConnectorType.Alerts || isAnyRequiredFieldNotSet(mappings)) {
     return {
       message: 'Invalid connector',

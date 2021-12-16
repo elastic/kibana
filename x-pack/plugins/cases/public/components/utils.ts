@@ -86,7 +86,7 @@ export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean 
      * Import Set API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_ImportSetAPI)
      * A ServiceNow connector is considered deprecated if it uses the Table API.
      */
-    return !!connector.config?.usesTableApi;
+    return !!connector.config.usesTableApi;
   }
 
   return false;

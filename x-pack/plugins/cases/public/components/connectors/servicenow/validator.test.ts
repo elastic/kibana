@@ -33,14 +33,5 @@ describe('ServiceNow validator', () => {
 
       expect(connectorValidator(invalidConnector)).toBeFalsy();
     });
-
-    test('it returns an error message if the connector does not have a config field', () => {
-      const { config, ...connectorWithoutConfig } = connector;
-      expect(connectorValidator(connectorWithoutConfig)).toBeFalsy();
-    });
-
-    test('it returns an error message if the connector config is undefined', () => {
-      expect(connectorValidator({ ...connector, config: undefined })).toBeFalsy();
-    });
   });
 });

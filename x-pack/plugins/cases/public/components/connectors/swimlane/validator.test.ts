@@ -43,20 +43,6 @@ describe('Swimlane validator', () => {
       expect(connectorValidator(invalidConnector)).toEqual({ message: 'Invalid connector' });
     });
 
-    test('it returns an error message if the connector config is undefined', () => {
-      const invalidConnector = {
-        ...connector,
-        config: undefined,
-      };
-      expect(connectorValidator(invalidConnector)).toEqual({ message: 'Invalid connector' });
-    });
-
-    test('it returns an error message if the connector config is not present', () => {
-      const { config, ...invalidConnector } = connector;
-
-      expect(connectorValidator(invalidConnector)).toEqual({ message: 'Invalid connector' });
-    });
-
     test.each([SwimlaneConnectorType.Cases, SwimlaneConnectorType.All])(
       'it does not return an error message if the connector is of type %s',
       (connectorType) => {

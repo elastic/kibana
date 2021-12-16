@@ -21,9 +21,7 @@ export * from './resilient';
 export * from './mappings';
 export * from './swimlane';
 
-// This marks the config field as partial because preconfigured connectors will not have a config section
-// see: https://github.com/elastic/kibana/issues/119696 for more details
-export type ActionConnector = Omit<ActionResult, 'config'> & Partial<Pick<ActionResult, 'config'>>;
+export type ActionConnector = ActionResult;
 export type ActionTypeConnector = ActionType;
 
 export const ConnectorFieldsRt = rt.union([
