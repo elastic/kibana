@@ -57,6 +57,14 @@ export const addColorRange = (
   return newColorRanges;
 };
 
+export const deleteColorRange = (index: number, colorRanges: ColorRange[]) => {
+  if (index !== 0 && index !== colorRanges.length - 1) {
+    colorRanges[index - 1].end = colorRanges[index + 1].start;
+  }
+
+  return colorRanges.filter((item, i) => i !== index);
+};
+
 export const distributeEqually = (colorRanges: ColorRange[]) => {
   const colorsCount = colorRanges.length;
   const start = colorRanges[0].start;

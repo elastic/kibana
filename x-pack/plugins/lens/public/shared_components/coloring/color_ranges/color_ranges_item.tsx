@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import type { FocusEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -28,6 +28,7 @@ import { getDataMinMax, getStepValue, isValidColor, roundValue, getAutoValues } 
 
 import type { ColorRange, DataBounds } from './types';
 import type { CustomPaletteParamsConfig } from '../../../../common';
+import { deleteColorRange } from './utils';
 
 const idGeneratorFn = htmlIdGenerator();
 
@@ -35,15 +36,29 @@ export interface ColorRangesItemProps {
   colorRange: ColorRange;
   index: number;
   colorRanges: ColorRange[];
-  isLast?: boolean;
+  isLast: boolean;
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
-  popoverInFocus: boolean;
   isValid: boolean;
   setColorRanges: Function;
-  setPopoverInFocus: Function;
   dataBounds: DataBounds;
   setValid: Function;
 }
+
+const validateLastRange = (
+  colorRanges: ColorRange[],
+  isLast: boolean,
+  isValid: boolean,
+  setValid: Function
+) => {
+  const lastRange = colorRanges[colorRanges.length - 1];
+  if (lastRange.start > lastRange.end) {
+    if (isLast && isValid) {
+      setValid(false);
+    }
+  } else if (!isValid) {
+    setValid(true);
+  }
+};
 
 export function ColorRangeItem({
   isLast,
@@ -51,14 +66,15 @@ export function ColorRangeItem({
   colorRange,
   colorRanges,
   isValid,
-  popoverInFocus,
   paletteConfiguration,
   setColorRanges,
-  setPopoverInFocus,
   dataBounds,
   setValid,
 }: ColorRangesItemProps) {
-  let { autoValue = 'none', rangeType = 'percent' } = paletteConfiguration ?? {};
+  const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
+
+  let { autoValue = 'none' } = paletteConfiguration ?? {};
+  const { rangeType = 'percent' } = paletteConfiguration ?? {};
 
   const isDisabledStart = ['min', 'all'].includes(autoValue!);
   const isDisabledEnd = ['max', 'all'].includes(autoValue!);
@@ -72,55 +88,65 @@ export function ColorRangeItem({
   const prevStartValue = colorRanges[index - 1]?.start ?? -Infinity;
   const nextStartValue = colorRanges[index + 1]?.start ?? Infinity;
 
-  const validateLastRange = () => {
-    const lastRange = colorRanges[colorRanges.length - 1];
-    if (lastRange.start > lastRange.end) {
-      if (isLast && isValid) {
-        setValid(false);
+  const onLeaveFocus = useCallback(
+    () => (e: FocusEvent<HTMLDivElement>) => {
+      const shouldSort = colorRange.start > nextStartValue || prevStartValue > colorRange.start;
+      const isFocusStillInContent =
+        (e.currentTarget as Node)?.contains(e.relatedTarget as Node) || popoverInFocus;
+
+      if (!shouldSort) {
+        validateLastRange(colorRanges, isLast, isValid, setValid);
       }
-    } else if (!isValid) {
-      setValid(true);
-    }
-  };
+
+      if (shouldSort && !isFocusStillInContent) {
+        const maxValue = colorRanges[colorRanges.length - 1].end;
+        let newColorRanges = [...colorRanges].sort(
+          ({ start: startA }, { start: startB }) => Number(startA) - Number(startB)
+        );
+        newColorRanges = newColorRanges.map((newColorRange, i) => {
+          return {
+            id: idGeneratorFn(),
+            color: newColorRange.color,
+            start: newColorRange.start,
+            end: i !== newColorRanges.length - 1 ? newColorRanges[i + 1].start : maxValue,
+          };
+        });
+        const lastRange = newColorRanges[newColorRanges.length - 1];
+        if (lastRange.start > lastRange.end && !isLast) {
+          const oldEnd = lastRange.end;
+          lastRange.end = lastRange.start;
+          lastRange.start = oldEnd;
+        }
+
+        validateLastRange(colorRanges, isLast, isValid, setValid);
+
+        setColorRanges(newColorRanges);
+      }
+    },
+    [
+      colorRange.start,
+      colorRanges,
+      isLast,
+      isValid,
+      nextStartValue,
+      popoverInFocus,
+      prevStartValue,
+      setColorRanges,
+      setValid,
+    ]
+  );
+
+  const onDeleteItem = useCallback(() => {
+    const newColorRanges = deleteColorRange(index, colorRanges);
+
+    setColorRanges(newColorRanges);
+  }, [colorRanges, index, setColorRanges]);
 
   return (
     <EuiFlexItem
       key={colorRange.id}
       data-test-subj={`dynamicColoring_range_row_${indexPostfix}`}
-      onBlur={(e: FocusEvent<HTMLDivElement>) => {
-        const shouldSort = colorRange.start > nextStartValue || prevStartValue > colorRange.start;
-        const isFocusStillInContent =
-          (e.currentTarget as Node)?.contains(e.relatedTarget as Node) || popoverInFocus;
-
-        if (!shouldSort) {
-          validateLastRange();
-        }
-
-        if (shouldSort && !isFocusStillInContent) {
-          const maxValue = colorRanges[colorRanges.length - 1].end;
-          let newColorRanges = [...colorRanges].sort(
-            ({ start: startA }, { start: startB }) => Number(startA) - Number(startB)
-          );
-          newColorRanges = newColorRanges.map((newColorRange, i) => {
-            return {
-              id: idGeneratorFn(),
-              color: newColorRange.color,
-              start: newColorRange.start,
-              end: i !== newColorRanges.length - 1 ? newColorRanges[i + 1].start : maxValue,
-            };
-          });
-          const lastRange = newColorRanges[newColorRanges.length - 1];
-          if (lastRange.start > lastRange.end && !isLast) {
-            const oldEnd = lastRange.end;
-            lastRange.end = lastRange.start;
-            lastRange.start = oldEnd;
-          }
-
-          validateLastRange();
-
-          setColorRanges(newColorRanges);
-        }
-      }}
+      onBlur={onLeaveFocus}
     >
       <EuiSpacer size="s" />
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -227,14 +253,7 @@ export function ColorRangeItem({
               title={i18n.translate('xpack.lens.dynamicColoring.customPalette.deleteButtonLabel', {
                 defaultMessage: 'Delete',
               })}
-              onClick={() => {
-                if (index !== 0 && index !== colorRanges.length - 1) {
-                  colorRanges[index - 1].end = colorRanges[index + 1].start;
-                }
-
-                const newColorRanges = colorRanges.filter((_, i) => i !== index);
-                setColorRanges(newColorRanges);
-              }}
+              onClick={onDeleteItem}
               data-test-subj={`dynamicColoring_removeColorRange_${indexPostfix}`}
             />
           )}

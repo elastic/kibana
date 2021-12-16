@@ -37,7 +37,6 @@ function areStopsValid(colorStops: Array<{ color: string; stop: number }>) {
 export function ColorRanges(props: ColorRangesProps) {
   const { colorRanges, onChange, dataBounds, paletteConfiguration } = props;
   const [isValid, setValid] = useState(true);
-  const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
 
   const autoValue = paletteConfiguration?.autoValue ?? 'none';
 
@@ -93,8 +92,6 @@ export function ColorRanges(props: ColorRangesProps) {
             index={index}
             isValid={isValid}
             setValid={setValid}
-            popoverInFocus={popoverInFocus}
-            setPopoverInFocus={setPopoverInFocus}
             isLast={false}
           />
         ))}
@@ -107,8 +104,6 @@ export function ColorRanges(props: ColorRangesProps) {
           index={localColorRanges.length - 1}
           isValid={isValid}
           setValid={setValid}
-          popoverInFocus={popoverInFocus}
-          setPopoverInFocus={setPopoverInFocus}
           isLast={true}
         />
       </EuiFlexGroup>
