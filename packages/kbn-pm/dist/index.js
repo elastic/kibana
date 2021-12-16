@@ -8922,7 +8922,8 @@ const BootstrapCommand = {
 
     await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["ensureYarnIntegrityFileExists"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kibanaProjectPath, 'node_modules')); // Install bazel machinery tools if needed
 
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["installBazelTools"])(rootPath);
+    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["installBazelTools"])(rootPath); // Setup remote cache settings in .bazelrc.cache if needed
+
     await Object(_utils_bazel_setup_remote_cache__WEBPACK_IMPORTED_MODULE_10__["setupRemoteCache"])(rootPath); // Bootstrap process for Bazel packages
     // Bazel is now managing dependencies so yarn install
     // will happen as part of this
