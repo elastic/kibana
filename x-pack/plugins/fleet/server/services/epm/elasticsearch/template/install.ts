@@ -265,7 +265,6 @@ async function installDataStreamComponentTemplates(params: {
   });
   const templateNames = Object.keys(templates);
   const templateEntries = Object.entries(templates);
-
   // TODO: Check return values for errors
   await Promise.all(
     templateEntries.map(async ([name, body]) => {
@@ -275,7 +274,10 @@ async function installDataStreamComponentTemplates(params: {
         const hasUserSettingsTemplate = result.body.component_templates?.length === 1;
         if (!hasUserSettingsTemplate) {
           // only add if one isn't already present
-          const { clusterPromise } = putComponentTemplate(esClient, { body, name, create: true });
+          const { clusterPromise } = putComponentTemplate(esClient, {
+            body,
+            name,
+          });
           return clusterPromise;
         }
       } else {
@@ -303,7 +305,6 @@ export async function ensureDefaultComponentTemplate(esClient: ElasticsearchClie
     await putComponentTemplate(esClient, {
       name: FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
       body: FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
-      create: true,
     });
   }
 
