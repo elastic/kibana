@@ -13,7 +13,6 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { ElasticsearchClient } from 'kibana/server';
-
 import {
   ActionGroup,
   ActionGroupIdsOf,
