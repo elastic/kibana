@@ -8,6 +8,7 @@
 import { get } from 'lodash';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 import { ModelStrings } from '../../../i18n';
+import { ResolvedColumns } from '../../../public/expression_types/arg';
 
 const { HeatmapLegend: strings } = ModelStrings;
 
@@ -51,7 +52,7 @@ export const heatmapLegend = () => ({
       argType: 'toggle',
     },
   ],
-  resolve({ context }: any) {
+  resolve({ context }: any): ResolvedColumns {
     if (getState(context) !== 'ready') {
       return { columns: [] };
     }

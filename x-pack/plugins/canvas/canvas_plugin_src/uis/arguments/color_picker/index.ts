@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { color } from './color';
+export { colorPicker } from './color_picker';

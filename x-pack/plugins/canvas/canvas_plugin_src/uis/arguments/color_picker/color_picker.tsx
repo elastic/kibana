@@ -47,7 +47,7 @@ ColorPicker.propTypes = {
   onValueChange: PropTypes.func.isRequired,
 };
 
-export const color = () => ({
+export const colorPicker = () => ({
   name: 'color',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),

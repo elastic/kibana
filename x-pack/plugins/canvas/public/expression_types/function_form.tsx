@@ -15,13 +15,12 @@ import { SidebarSection } from '../components/sidebar/sidebar_section';
 // @ts-expect-error unconverted components
 import { SidebarSectionTitle } from '../components/sidebar/sidebar_section_title';
 import { BaseForm, BaseFormProps } from './base_form';
-import { Arg, ArgUiConfig } from './arg';
+import { Arg, ArgUiConfig, ResolvedArgProps } from './arg';
 import { ArgDisplayType, Args, ArgType, ArgTypeDef, ArgValue, ExpressionType } from './types';
 import { Model, Transform, View } from '../expression_types';
 import {
   AssetType,
   CanvasElement,
-  DatatableColumn,
   ExpressionAstExpression,
   ExpressionContext,
   ExpressionValue,
@@ -55,12 +54,12 @@ export type RenderArgData = BaseFormProps & {
   onAssetAdd: (type: AssetType['type'], content: AssetType['value']) => string;
   updateContext: (element?: CanvasElement) => void;
   typeInstance?: ExpressionType;
-  columns?: DatatableColumn[];
 };
 
 export type RenderArgProps = {
   typeInstance: FunctionForm;
-} & RenderArgData;
+} & RenderArgData &
+  ResolvedArgProps;
 
 export type FunctionFormProps = {
   args?: ArgUiConfig[];
@@ -234,7 +233,8 @@ export class FunctionForm extends BaseForm {
     const argsWithValues = this.getArgsWithValues(args, argTypeDef);
     try {
       // props are passed to resolve and the returned object is mixed into the template props
-      const props = { ...data, ...this.resolve(data), typeInstance: this };
+      const props: RenderArgProps = { ...data, resolved: this.resolve(data), typeInstance: this };
+
       // allow a hook to override the data args
       const resolvedArgsWithValues = argsWithValues.map((argWithValues) => ({
         ...argWithValues,

@@ -14,6 +14,7 @@
 import { get } from 'lodash';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 import { ModelStrings } from '../../../i18n';
+import { ResolvedColumns } from '../../../public/expression_types/arg';
 
 const { HeatmapGrid: strings } = ModelStrings;
 
@@ -31,13 +32,13 @@ export const heatmapGrid = () => ({
       name: 'strokeColor',
       displayName: strings.getStrokeColorDisplayName(),
       help: strings.getStrokeColorDisplayName(),
-      argType: 'color',
+      argType: 'color_picker',
     },
     {
       name: 'yAxisLabelColor',
       displayName: strings.getYAxisLabelColorDisplayName(),
       help: strings.getYAxisLabelColorDisplayName(),
-      argType: 'color',
+      argType: 'color_picker',
     },
     {
       name: 'cellHeight',
@@ -76,7 +77,7 @@ export const heatmapGrid = () => ({
       argType: 'toggle',
     },
   ],
-  resolve({ context }: any) {
+  resolve({ context }: any): ResolvedColumns {
     if (getState(context) !== 'ready') {
       return { columns: [] };
     }

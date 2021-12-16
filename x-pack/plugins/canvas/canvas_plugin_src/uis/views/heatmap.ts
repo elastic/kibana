@@ -6,6 +6,7 @@
  */
 
 import { get } from 'lodash';
+import { ResolvedColumns } from '../../../public/expression_types/arg';
 
 import { ViewStrings } from '../../../i18n';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
@@ -56,7 +57,7 @@ export const heatmap = () => ({
       argType: 'heatmap_grid',
     },
   ],
-  resolve({ context }: any) {
+  resolve({ context }: any): ResolvedColumns {
     if (getState(context) !== 'ready') {
       return { columns: [] };
     }

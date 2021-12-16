@@ -18,6 +18,7 @@ import {
   ExpressionAstExpression,
   ExpressionValue,
   ExpressionContext,
+  DatatableColumn,
 } from '../../types';
 import { BaseFormProps } from './base_form';
 
@@ -40,6 +41,21 @@ interface ArtOwnProps {
   };
 }
 export type ArgUiConfig = ArtOwnProps & BaseFormProps;
+
+export interface ResolvedColumns {
+  columns: DatatableColumn[];
+}
+export interface ResolvedLabels {
+  labels: string[];
+}
+
+export interface ResolvedDataurl {
+  dataurl: string;
+}
+
+export interface ResolvedArgProps<T = ResolvedColumns | ResolvedLabels | ResolvedDataurl | {}> {
+  resolved: T;
+}
 
 export interface DataArg {
   argValue?: ArgValue | null;
@@ -117,11 +133,22 @@ export class Arg {
   }
 
   // TODO: Document what these otherProps are. Maybe make them named arguments?
-  render(data: DataArg) {
+  render(data: DataArg & ResolvedArgProps) {
     const { onValueChange, onValueRemove, key, label, ...otherProps } = data;
-    const resolved = this.resolve?.(otherProps);
+    const resolvedProps = this.resolve?.(otherProps);
+    const { argValue, onAssetAdd, resolved, filterGroups, argResolver } = otherProps;
+    const argId = key;
     // This is everything the arg_type template needs to render
-    const templateProps = { ...otherProps, ...resolved, onValueChange, typeInstance: this };
+    const templateProps = {
+      argValue,
+      argId,
+      onAssetAdd,
+      onValueChange,
+      typeInstance: this,
+      resolved: { ...resolved, ...resolvedProps },
+      argResolver,
+      filterGroups,
+    };
 
     const formProps = {
       key,
@@ -131,7 +158,7 @@ export class Arg {
       onValueChange,
       onValueRemove,
       templateProps,
-      argId: key,
+      argId,
       options: this.options,
     };
 
