@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const reporting = getService('reporting');
   const security = getService('security');
+  const log = getService('log');
 
   describe('Reporting', () => {
     const createReportingUser = async () => {
@@ -40,19 +41,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await reporting.generateCsv({
-        title: 'CSV Report',
-        browserTimezone: 'UTC',
-        objectType: 'search',
-        version: '7.15.0',
-        searchSource: {
-          version: true,
-          query: { query: '', language: 'kuery' },
-          index: '5193f870-d861-11e9-a311-0fa548c5f953',
-          fields: ['*'],
-          filter: [],
+      // Add one report
+      const { body } = await reporting.generateCsv(
+        {
+          title: 'CSV Report',
+          browserTimezone: 'UTC',
+          objectType: 'search',
+          version: '7.15.0',
+          searchSource: {
+            version: true,
+            query: { query: '', language: 'kuery' },
+            index: '5193f870-d861-11e9-a311-0fa548c5f953',
+            fields: ['*'],
+          },
         },
-      });
+        reporting.REPORTING_USER_USERNAME,
+        reporting.REPORTING_USER_PASSWORD
+      );
+
+      log.info(`Queued report job: ${body.path}`);
 
       await retry.waitFor('Reporting app', async () => {
         await common.navigateToApp('reporting');
