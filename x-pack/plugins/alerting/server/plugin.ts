@@ -260,6 +260,7 @@ export class AlertingPlugin {
       lastExecutionDuration: number;
       averageDrift: number;
       averageDuration: number;
+      totalExecutions: number;
       lastExecutionTimeout?: string;
     }
 
@@ -338,6 +339,31 @@ export class AlertingPlugin {
                   // filter: '(event.action: "execute")',
                 });
 
+                const aggResult = await eventLogClient.getAggregatedData(
+                  'alert',
+                  [id],
+                  {
+                    types: {
+                      terms: {
+                        field: 'event.action',
+                        size: 100,
+                      },
+                    },
+                  },
+                  {
+                    sort_order: 'desc',
+                    // filter: '(event.action: "execute")',
+                  }
+                );
+
+                let totalExecutions = 0;
+                if (aggResult) {
+                  const executeBucket = aggResult.types.buckets.find(
+                    (bucket) => bucket.key === EVENT_LOG_ACTIONS.execute
+                  );
+                  totalExecutions = executeBucket?.doc_count;
+                }
+
                 const lastExecute = events.data.find(
                   (event) =>
                     event?.event?.action === EVENT_LOG_ACTIONS.execute && event?.event?.duration
@@ -346,16 +372,18 @@ export class AlertingPlugin {
                   (event) => event?.event?.action === EVENT_LOG_ACTIONS.executeTimeout
                 );
 
-                const metrics = await services[1].taskManager.getHealthMetrics(id);
-
-                return {
+                const metrics = services[1].taskManager.getHealthMetrics(id);
+                const ruleMetric = {
                   name: rule.name,
                   id,
                   lastExecutionDuration: lastExecute?.event?.duration ?? 0,
                   lastExecutionTimeout: lastTimeout?.['@timestamp'],
                   averageDrift: metrics.drift,
                   averageDuration: metrics.duration,
+                  totalExecutions,
                 };
+
+                return ruleMetric;
               })
             );
 

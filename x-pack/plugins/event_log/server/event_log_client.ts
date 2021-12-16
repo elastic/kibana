@@ -7,6 +7,7 @@
 
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IClusterClient, KibanaRequest } from 'src/core/server';
 import { SpacesServiceStart } from '../../spaces/server';
 
@@ -102,5 +103,33 @@ export class EventLogClient implements IEventLogClient {
       findOptions,
       legacyIds,
     });
+  }
+
+  async getAggregatedData(
+    type: string,
+    ids: string[],
+    aggregateQuery: Record<string, estypes.AggregationsAggregationContainer>,
+    options?: Partial<FindOptionsType>,
+    legacyIds?: string[]
+  ): Promise<Record<string, estypes.AggregationsAggregate> | undefined> {
+    const findOptions = findOptionsSchema.validate(options ?? {});
+
+    const space = await this.spacesService?.getActiveSpace(this.request);
+    const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
+
+    // verify the user has the required permissions to view this saved objects
+    await this.savedObjectGetter(type, ids);
+
+    return await this.esContext.esAdapter.aggregateEvents(
+      {
+        index: this.esContext.esNames.indexPattern,
+        namespace,
+        type,
+        ids,
+        findOptions,
+        legacyIds,
+      },
+      aggregateQuery
+    );
   }
 }
