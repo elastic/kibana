@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { MapStatsCollector } from './map_stats_collector';
-export type { MapStats } from './types';
+export { IndexPatternStatsCollector } from './index_pattern_stats_collector';
+export type { IndexPatternStats } from './types';

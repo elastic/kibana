@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { MapStatsCollector } from './map_stats_collector';
-export type { MapStats } from './types';
+export interface IndexPatternStats {
+  indexPatternsWithGeoFieldCount: number;
+  indexPatternsWithGeoPointFieldCount: number;
+  indexPatternsWithGeoShapeFieldCount: number;
+  geoShapeAggLayersCount: number;
+}

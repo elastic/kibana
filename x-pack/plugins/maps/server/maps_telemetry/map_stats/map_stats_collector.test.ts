@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-//@ts-ignore
+// @ts-ignore
 import mapSavedObjects from '../test_resources/sample_map_saved_objects.json';
 import { MapStatsCollector } from './map_stats_collector';
 
@@ -13,7 +13,7 @@ test('returns zeroed telemetry data when there are no saved objects', async () =
   const mapStatsCollector = new MapStatsCollector();
   const stats = mapStatsCollector.getStats() as any;
   delete stats.timeCaptured;
-  
+
   expect(stats).toEqual({
     mapsTotalCount: 0,
     layerTypes: {},
@@ -34,18 +34,18 @@ test('returns zeroed telemetry data when there are no saved objects', async () =
         max: 0,
         min: 0,
       },
-    }
+    },
   });
 });
 
 test('returns expected telemetry data from saved objects', async () => {
   const mapStatsCollector = new MapStatsCollector();
-  mapSavedObjects.forEach(savedObject => {
+  mapSavedObjects.forEach((savedObject) => {
     mapStatsCollector.push(savedObject.attributes);
   });
   const stats = mapStatsCollector.getStats() as any;
   delete stats.timeCaptured;
-  
+
   expect(stats).toEqual({
     mapsTotalCount: 5,
     layerTypes: {
@@ -110,7 +110,7 @@ test('returns expected telemetry data from saved objects', async () => {
         max: 1,
         min: 1,
         total: 3,
-      }
+      },
     },
     attributesPerMap: {
       dataSourcesCount: {
@@ -157,6 +157,6 @@ test('returns expected telemetry data from saved objects', async () => {
         max: 3,
         min: 1,
       },
-    }
+    },
   });
 });

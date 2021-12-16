@@ -55,11 +55,11 @@ export enum SCALING_KEYS {
 export interface MapStats {
   mapsTotalCount: number;
   timeCaptured: string;
-  layerTypes: { [key in LAYER_KEYS]?: ClusterCountStats; };
-  scalingOptions:  { [key in SCALING_KEYS]?: ClusterCountStats; };
-  joins: { [key in JOIN_KEYS]?: ClusterCountStats; };
-  basemaps: { [key in EMS_BASEMAP_KEYS]?: ClusterCountStats; };
-  resolutions: { [key in RESOLUTION_KEYS]?: ClusterCountStats; };
+  layerTypes: { [key in LAYER_KEYS]?: ClusterCountStats };
+  scalingOptions: { [key in SCALING_KEYS]?: ClusterCountStats };
+  joins: { [key in JOIN_KEYS]?: ClusterCountStats };
+  basemaps: { [key in EMS_BASEMAP_KEYS]?: ClusterCountStats };
+  resolutions: { [key in RESOLUTION_KEYS]?: ClusterCountStats };
   attributesPerMap: {
     dataSourcesCount: Omit<ClusterCountStats, 'total'>;
     layersCount: Omit<ClusterCountStats, 'total'>;
@@ -67,4 +67,3 @@ export interface MapStats {
     emsVectorLayersCount: { [key: string]: Omit<ClusterCountStats, 'total'> };
   };
 }
-
