@@ -7,4 +7,5 @@
 
 export { InternalApiClientProvider, useInternalApiClient } from './context';
 export { useCheckIlmPolicyStatus } from './hooks';
-export { DiagnoseResponse, ReportingAPIClient } from './reporting_api_client';
+export type { DiagnoseResponse } from './reporting_api_client';
+export { ReportingAPIClient } from './reporting_api_client';
