@@ -15,11 +15,12 @@ export interface StreamProcessorOptions {
 export class StreamProcessor {
   constructor(private readonly options: StreamProcessorOptions) {
     [this.intervalAmount, this.intervalUnit] =
-      options.flushInterval ? parseInterval(options.flushInterval) : parseInterval("1m");
+      this.options.flushInterval ? parseInterval(this.options.flushInterval) : parseInterval("1m");
   }
+
   private readonly intervalAmount: number;
   private readonly intervalUnit: any;
-  static readonly defaultProcessors = [
+  static readonly apmProcessors = [
     getTransactionMetrics,
     getSpanDestinationMetrics,
     getBreakdownMetrics,
@@ -55,7 +56,7 @@ export class StreamProcessor {
       }
     }
   }
-  *streamAsync(...eventSources: SpanIterable[]) {
+  async *streamAsync(...eventSources: SpanIterable[]) : AsyncIterator<ApmFields> {
     yield* this.stream(...eventSources);
   }
   streamToArray(...eventSources: SpanIterable[]) {
