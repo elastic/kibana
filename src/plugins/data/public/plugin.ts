@@ -11,7 +11,7 @@ import './index.scss';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ConfigSchema } from '../config';
 import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
-import {
+import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   DataSetupDependencies,

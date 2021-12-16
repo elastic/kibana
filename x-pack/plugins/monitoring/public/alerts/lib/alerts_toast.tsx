@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiLink } from '@elastic/eui';
+import type { Observable } from 'rxjs';
+import type { CoreTheme } from 'kibana/public';
 import { Legacy } from '../../legacy_shims';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -18,21 +19,19 @@ export interface EnableAlertResponse {
   disabledWatcherClusterAlerts?: boolean;
 }
 
-const showApiKeyAndEncryptionError = () => {
+const showApiKeyAndEncryptionError = (theme$?: Observable<CoreTheme>) => {
   const settingsUrl = Legacy.shims.docLinks.links.alerting.generalSettings;
 
   Legacy.shims.toastNotifications.addWarning({
-    title: toMountPoint(
-      <FormattedMessage
-        id="xpack.monitoring.healthCheck.tlsAndEncryptionErrorTitle"
-        defaultMessage="Additional setup required"
-      />
-    ),
+    title: i18n.translate('xpack.monitoring.healthCheck.tlsAndEncryptionErrorTitle', {
+      defaultMessage: 'Additional setup required',
+    }),
     text: toMountPoint(
       <div>
         <p>
           {i18n.translate('xpack.monitoring.healthCheck.tlsAndEncryptionError', {
-            defaultMessage: `Stack Monitoring rules require API keys to be enabled and an encryption key to be configured.`,
+            defaultMessage:
+              'Stack Monitoring rules require API keys to be enabled and an encryption key to be configured.',
           })}
         </p>
         <EuiSpacer size="xs" />
@@ -41,26 +40,25 @@ const showApiKeyAndEncryptionError = () => {
             defaultMessage: 'Learn how.',
           })}
         </EuiLink>
-      </div>
+      </div>,
+      { theme$ }
     ),
   });
 };
 
-const showUnableToDisableWatcherClusterAlertsError = () => {
+const showUnableToDisableWatcherClusterAlertsError = (theme$?: Observable<CoreTheme>) => {
   const settingsUrl = Legacy.shims.docLinks.links.alerting.generalSettings;
 
   Legacy.shims.toastNotifications.addWarning({
-    title: toMountPoint(
-      <FormattedMessage
-        id="xpack.monitoring.healthCheck.unableToDisableWatches.title"
-        defaultMessage="Legacy cluster alerts still active"
-      />
-    ),
+    title: i18n.translate('xpack.monitoring.healthCheck.unableToDisableWatches.title', {
+      defaultMessage: 'Legacy cluster alerts still active',
+    }),
     text: toMountPoint(
       <div>
         <p>
           {i18n.translate('xpack.monitoring.healthCheck.unableToDisableWatches.text', {
-            defaultMessage: `We failed to remove legacy cluster alerts. Please check the Kibana server log for more details, or try again later.`,
+            defaultMessage:
+              'We failed to remove legacy cluster alerts. Please check the Kibana server log for more details, or try again later.',
           })}
         </p>
         <EuiSpacer size="xs" />
@@ -69,38 +67,33 @@ const showUnableToDisableWatcherClusterAlertsError = () => {
             defaultMessage: 'Learn more.',
           })}
         </EuiLink>
-      </div>
+      </div>,
+      { theme$ }
     ),
   });
 };
 
 const showDisabledWatcherClusterAlertsError = () => {
   Legacy.shims.toastNotifications.addWarning({
-    title: toMountPoint(
-      <FormattedMessage
-        id="xpack.monitoring.healthCheck.disabledWatches.title"
-        defaultMessage="New alerts created"
-      />
-    ),
-    text: toMountPoint(
-      <p>
-        {i18n.translate('xpack.monitoring.healthCheck.disabledWatches.text', {
-          defaultMessage: `Review the alert definition using Setup mode and configure additional action connectors to get notified via your favorite method.`,
-        })}
-      </p>
-    ),
+    title: i18n.translate('xpack.monitoring.healthCheck.disabledWatches.title', {
+      defaultMessage: 'New alerts created',
+    }),
+    text: i18n.translate('xpack.monitoring.healthCheck.disabledWatches.text', {
+      defaultMessage:
+        'Review the alert definition using Setup mode and configure additional action connectors to get notified via your favorite method.',
+    }),
     'data-test-subj': 'alertsCreatedToast',
   });
 };
 
-export const showAlertsToast = (response: EnableAlertResponse) => {
+export const showAlertsToast = (response: EnableAlertResponse, theme$?: Observable<CoreTheme>) => {
   const { isSufficientlySecure, hasPermanentEncryptionKey, disabledWatcherClusterAlerts } =
     response;
 
   if (isSufficientlySecure === false || hasPermanentEncryptionKey === false) {
-    showApiKeyAndEncryptionError();
+    showApiKeyAndEncryptionError(theme$);
   } else if (disabledWatcherClusterAlerts === false) {
-    showUnableToDisableWatcherClusterAlertsError();
+    showUnableToDisableWatcherClusterAlertsError(theme$);
   } else if (disabledWatcherClusterAlerts === true) {
     showDisabledWatcherClusterAlertsError();
   }

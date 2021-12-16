@@ -16,6 +16,7 @@ import type {
   DocLinksStart,
   ToastsStart,
   OverlayStart,
+  ThemeServiceStart,
   ChromeRecentlyAccessed,
   IBasePath,
 } from 'kibana/public';
@@ -34,6 +35,7 @@ export interface DependencyCache {
   docLinks: DocLinksStart | null;
   toastNotifications: ToastsStart | null;
   overlays: OverlayStart | null;
+  theme: ThemeServiceStart | null;
   recentlyAccessed: ChromeRecentlyAccessed | null;
   fieldFormats: DataPublicPluginStart['fieldFormats'] | null;
   autocomplete: DataPublicPluginStart['autocomplete'] | null;
@@ -57,6 +59,7 @@ const cache: DependencyCache = {
   docLinks: null,
   toastNotifications: null,
   overlays: null,
+  theme: null,
   recentlyAccessed: null,
   fieldFormats: null,
   autocomplete: null,
@@ -80,6 +83,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.docLinks = deps.docLinks || null;
   cache.toastNotifications = deps.toastNotifications || null;
   cache.overlays = deps.overlays || null;
+  cache.theme = deps.theme || null;
   cache.recentlyAccessed = deps.recentlyAccessed || null;
   cache.fieldFormats = deps.fieldFormats || null;
   cache.autocomplete = deps.autocomplete || null;
@@ -126,6 +130,13 @@ export function getOverlays() {
     throw new Error("overlays haven't been initialized");
   }
   return cache.overlays;
+}
+
+export function getTheme() {
+  if (cache.theme === null) {
+    throw new Error("theme hasn't been initialized");
+  }
+  return cache.theme;
 }
 
 export function getUiSettings() {
