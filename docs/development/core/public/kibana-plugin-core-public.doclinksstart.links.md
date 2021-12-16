@@ -27,6 +27,9 @@ readonly links: {
         readonly cloud: {
             readonly indexManagement: string;
         };
+        readonly console: {
+            readonly guide: string;
+        };
         readonly dashboard: {
             readonly guide: string;
             readonly drilldowns: string;

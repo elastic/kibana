@@ -57,6 +57,9 @@ export class DocLinksService {
         cloud: {
           indexManagement: `${ELASTIC_WEBSITE_URL}/guide/en/cloud/current/ec-configure-index-management.html`,
         },
+        console: {
+          guide: `${KIBANA_DOCS}console-kibana.html`,
+        },
         dashboard: {
           guide: `${KIBANA_DOCS}dashboard.html`,
           drilldowns: `${KIBANA_DOCS}drilldowns.html`,
@@ -611,6 +614,9 @@ export interface DocLinksStart {
     };
     readonly cloud: {
       readonly indexManagement: string;
+    };
+    readonly console: {
+      readonly guide: string;
     };
     readonly dashboard: {
       readonly guide: string;
