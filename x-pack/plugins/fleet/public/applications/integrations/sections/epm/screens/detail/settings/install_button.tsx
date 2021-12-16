@@ -15,9 +15,11 @@ import {
   useCapabilities,
   useGetPackageInstallStatus,
   useInstallPackage,
+  useStartServices,
 } from '../../../../../hooks';
 
 import { sendPostFleetSetup } from '../../../../../../../hooks/use_request/setup';
+import { toMountPoint } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 
 import { ConfirmPackageInstall } from './confirm_package_install';
 
@@ -46,13 +48,33 @@ export function InstallButton(props: InstallationButtonProps) {
     setIsInstallModalVisible(!isInstallModalVisible);
   }, [isInstallModalVisible]);
 
+  const { notifications } = useStartServices();
+
   const handleClickInstall = useCallback(async () => {
     setFleetSetupInProgress(true);
     toggleInstallModal();
-    await sendPostFleetSetup({ forceRecreate: false });
+    const res = await sendPostFleetSetup({ forceRecreate: false });
+    if (res.error) {
+      notifications.toasts.addWarning({
+        title: toMountPoint(
+          <FormattedMessage
+            id="xpack.fleet.integrations.fleetSetupErrorTitle"
+            defaultMessage="Failed to setup Fleet"
+            values={{ title }}
+          />
+        ),
+        text: toMountPoint(
+          <FormattedMessage
+            id="xpack.fleet.integrations.fleetSetupErrorDescription"
+            defaultMessage="Something went wrong while trying to setup Fleet. Please try again by navigating to Fleet tab."
+          />
+        ),
+        iconType: 'alert',
+      });
+    }
     setFleetSetupInProgress(false);
     installPackage({ name, version, title });
-  }, [installPackage, name, title, toggleInstallModal, version]);
+  }, [installPackage, name, title, toggleInstallModal, version, notifications.toasts]);
 
   const installModal = (
     <ConfirmPackageInstall
