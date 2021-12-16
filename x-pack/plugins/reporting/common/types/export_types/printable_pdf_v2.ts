@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { LocatorParams } from '../url';
 import type { LayoutParams } from '../../../../screenshotting/common';
 import type { BaseParams, BasePayload } from '../base';
-import type { LocatorParams } from '../url';
 
 interface BaseParamsPDFV2 {
   layout: LayoutParams;
