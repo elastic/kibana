@@ -6,7 +6,10 @@
  */
 import '../_index.scss';
 import React, { FC } from 'react';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
 // @ts-ignore
@@ -32,16 +35,18 @@ export const FileDataVisualizer: FC<Props> = ({ additionalLinks }) => {
   };
 
   return (
-    <KibanaContextProvider services={{ ...services }}>
-      <FileDataVisualizerView
-        indexPatterns={data.indexPatterns}
-        savedObjectsClient={coreStart.savedObjects.client}
-        http={coreStart.http}
-        fileUpload={fileUpload}
-        resultsLinks={additionalLinks}
-        capabilities={coreStart.application.capabilities}
-      />
-    </KibanaContextProvider>
+    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+      <KibanaContextProvider services={{ ...services }}>
+        <FileDataVisualizerView
+          indexPatterns={data.indexPatterns}
+          savedObjectsClient={coreStart.savedObjects.client}
+          http={coreStart.http}
+          fileUpload={fileUpload}
+          resultsLinks={additionalLinks}
+          capabilities={coreStart.application.capabilities}
+        />
+      </KibanaContextProvider>
+    </KibanaThemeProvider>
   );
 };
 
