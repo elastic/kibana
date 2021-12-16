@@ -14,7 +14,7 @@ import { FetchDeps } from './fetch_all';
 
 export function fetchTotalHits(
   searchSource: ISearchSource,
-  { abortController, inspectorAdapters, searchSessionId }: FetchDeps
+  { abortController, inspectorAdapters, searchSessionId, savedSearch }: FetchDeps
 ) {
   searchSource.setField('trackTotalHits', true);
   searchSource.setField('size', 0);
@@ -34,7 +34,7 @@ export function fetchTotalHits(
     name: 'discover',
     description: 'fetch total hits',
     url: window.location.pathname,
-    id: '',
+    id: savedSearch.id ?? '',
   };
 
   const fetch$ = searchSource
