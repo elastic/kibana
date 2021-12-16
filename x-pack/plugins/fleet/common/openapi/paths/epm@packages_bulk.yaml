@@ -7,16 +7,6 @@ post:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              items:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                    version:
-                      type: string
+            $ref: ../components/schemas/bulk_install_packages_response.yaml
   operationId: bulk-install-packages
 parameters: []

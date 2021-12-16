@@ -93,20 +93,14 @@ paths:
             application/json:
               schema:
                 type: object
+                properties:
+                  name:
+                    type: string
+                  value:
+                    type: string
       operationId: generate-service-token
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                value:
-                  type: string
       deprecated: true
   /service_tokens:
     post:
@@ -119,20 +113,14 @@ paths:
             application/json:
               schema:
                 type: object
+                properties:
+                  name:
+                    type: string
+                  value:
+                    type: string
       operationId: generate-service-token
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                value:
-                  type: string
   /epm/categories:
     get:
       summary: Package categories
@@ -143,23 +131,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  items:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                        title:
-                          type: string
-                        count:
-                          type: number
-                      required:
-                        - id
-                        - title
-                        - count
+                $ref: '#/components/schemas/get_categories_response'
       operationId: get-package-categories
   /epm/packages/limited:
     get:
@@ -189,12 +161,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/search_result'
+                $ref: '#/components/schemas/get_packages_response'
       operationId: list-all-packages
     parameters: []
   /epm/packages/_bulk:
@@ -207,17 +174,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  items:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        name:
-                          type: string
-                        version:
-                          type: string
+                $ref: '#/components/schemas/bulk_install_packages_response'
       operationId: bulk-install-packages
     parameters: []
   /epm/packages/{pkgkey}:
@@ -702,28 +659,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  list:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/agent'
-                    deprecated: true
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/agent'
-                  total:
-                    type: number
-                  page:
-                    type: number
-                  perPage:
-                    type: number
-                required:
-                  - items
-                  - total
-                  - page
-                  - perPage
+                $ref: '#/components/schemas/get_agents_response'
       operationId: get-agents
       security:
         - basicAuth: []
@@ -1411,12 +1347,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  item:
-                    $ref: '#/components/schemas/enrollment_api_key'
-                required:
-                  - item
+                $ref: '#/components/schemas/get_enrollment_api_keys_response'
       operationId: get-enrollment-api-key
     delete:
       summary: Enrollment API Key - Delete
@@ -1896,6 +1827,43 @@ components:
           $ref: '#/components/schemas/settings'
       required:
         - item
+    get_categories_response:
+      title: Get categories response
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            type: object
+            deprecated: true
+            properties:
+              id:
+                type: string
+              title:
+                type: string
+              count:
+                type: number
+            required:
+              - id
+              - title
+              - count
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              title:
+                type: string
+              count:
+                type: number
+            required:
+              - id
+              - title
+              - count
+      required:
+        - items
     search_result:
       title: Search result
       type: object
@@ -1930,6 +1898,46 @@ components:
         - type
         - version
         - status
+    get_packages_response:
+      title: Get Packages response
+      type: object
+      properties:
+        response:
+          type: array
+          deprecated: true
+          items:
+            $ref: '#/components/schemas/search_result'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/search_result'
+      required:
+        - items
+    bulk_install_packages_response:
+      title: Bulk install packages response
+      type: object
+      properties:
+        response:
+          type: array
+          deprecated: true
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              version:
+                type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              version:
+                type: string
+      required:
+        - items
     package_info:
       title: Package information
       type: object
@@ -2159,6 +2167,30 @@ components:
         - enrolled_at
         - id
         - status
+    get_agents_response:
+      title: Get Agent response
+      type: object
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/agent'
+          deprecated: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/agent'
+        total:
+          type: number
+        page:
+          type: number
+        perPage:
+          type: number
+      required:
+        - items
+        - total
+        - page
+        - perPage
     bulk_upgrade_agents:
       title: Bulk upgrade agents
       type: object
@@ -2394,6 +2426,22 @@ components:
         - api_key
         - active
         - created_at
+    get_enrollment_api_keys_response:
+      title: Bulk install packages response
+      type: object
+      properties:
+        list:
+          type: array
+          deprecated: true
+          properties:
+            items:
+              $ref: '#/components/schemas/enrollment_api_key'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/enrollment_api_key'
+      required:
+        - items
     upgrade_diff:
       title: Package policy Upgrade dryrun
       type: array
