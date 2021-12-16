@@ -216,7 +216,7 @@ export abstract class Container<
       const currentEmbeddable = await this.untilEmbeddableLoaded(id);
       const lastPanelInput = lastPanels[id].explicitInput;
       if (isErrorEmbeddable(currentEmbeddable)) continue;
-      if (await currentEmbeddable.getExplicitInputIsEqual(lastPanelInput)) {
+      if (!(await currentEmbeddable.getExplicitInputIsEqual(lastPanelInput))) {
         return false;
       }
     }
