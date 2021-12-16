@@ -152,6 +152,7 @@ export class Plugin
           spaces: pluginsStart.spaces,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           element: params.element,
+          theme$: params.theme$,
           storage: new Storage(window.localStorage),
           setBreadcrumbs: params.setBreadcrumbs,
           history: params.history,
