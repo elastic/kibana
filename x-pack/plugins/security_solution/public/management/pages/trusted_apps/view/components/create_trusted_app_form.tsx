@@ -190,7 +190,7 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
           i18n.translate(
             'xpack.securitySolution.trustedapps.create.conditionFieldDegradedPerformanceMsg',
             {
-              defaultMessage: `[{row}] A wildcard in the filename will affect endpoint's performance`,
+              defaultMessage: `[{row}] A wildcard in the filename will affect the endpoint's performance`,
               values: { row: index + 1 },
             }
           )
