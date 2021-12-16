@@ -58,7 +58,7 @@ export const trustedAppsGetListHttpMocks =
         const generator = new ExceptionsListItemGenerator('seed');
         const perPage = apiQueryParams.per_page ?? 10;
         const data = Array.from({ length: Math.min(perPage, 50) }, () =>
-          generator.generate({ list_id: ENDPOINT_TRUSTED_APPS_LIST_ID })
+          generator.generate({ list_id: ENDPOINT_TRUSTED_APPS_LIST_ID, os_types: ['windows'] })
         );
 
         // FIXME: remove hard-coded IDs below adn get them from the new FleetPackagePolicyGenerator (#2262)
@@ -128,7 +128,9 @@ export const trustedAppsGetOneHttpMocks =
       method: 'get',
       handler: ({ query }): ExceptionListItemSchema => {
         const apiQueryParams = query as ReadExceptionListItemSchema;
-        const exceptionItem = new ExceptionsListItemGenerator('seed').generate();
+        const exceptionItem = new ExceptionsListItemGenerator('seed').generate({
+          os_types: ['windows'],
+        });
 
         exceptionItem.item_id = apiQueryParams.item_id ?? exceptionItem.item_id;
         exceptionItem.namespace_type =
@@ -155,7 +157,7 @@ export const trustedAppPostHttpMocks = httpHandlerMockFactory<TrustedAppPostHttp
         body as string
       ) as CreateExceptionListItemSchema;
       const response: ExceptionListItemSchema = {
-        ...new ExceptionsListItemGenerator('seed').generate(),
+        ...new ExceptionsListItemGenerator('seed').generate({ os_types: ['windows'] }),
         ...updatedExceptionItem,
       };
       response.id = path.split('/').pop() ?? response.id;
