@@ -114,22 +114,21 @@ export const getDataFromFieldsHits = (
         },
       ];
     }
-
+    // format nested fields
+    let nestedFields;
     if (isRuleParametersFieldOrSubfield(field, prependField)) {
-      const parameterFields = Array.isArray(item)
+      nestedFields = Array.isArray(item)
         ? item
             .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
             .flat()
         : getDataFromFieldsHits(item, dotField, fieldCategory);
-      return [...accumulator, ...parameterFields];
+    } else {
+      nestedFields = Array.isArray(item)
+        ? item
+            .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
+            .flat()
+        : getDataFromFieldsHits(item, prependField, fieldCategory);
     }
-
-    // format nested fields
-    const nestedFields = Array.isArray(item)
-      ? item
-          .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
-          .flat()
-      : getDataFromFieldsHits(item, prependField, fieldCategory);
 
     // combine duplicate fields
     const flat: Record<string, TimelineEventsDetailsItem> = [
