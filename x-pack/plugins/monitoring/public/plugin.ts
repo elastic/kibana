@@ -29,6 +29,12 @@ import {
   RULE_DETAILS,
 } from '../common/constants';
 import { setConfig } from './external_config';
+import { Legacy } from './legacy_shims';
+import {
+  MonitoringConfig,
+  MonitoringStartPluginDependencies,
+  LegacyMonitoringStartPluginDependencies,
+} from './types';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -86,7 +92,7 @@ export class MonitoringPlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const externalConfig = this.getExternalConfig();
-        const deps: MonitoringStartPluginDependencies = {
+        const deps: LegacyMonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
           element: params.element,
           core: coreStart,
