@@ -479,6 +479,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
                     extendedColumns={extendedColumns}
                     loading={progress < 100}
+                    showPreviewByDefault={false}
+                    onChange={setDataVisualizerListState}
                   />
                 </EuiPanel>
               </EuiFlexItem>

@@ -68,6 +68,14 @@ export interface IndexDataVisualizerLocatorParams extends SerializableRecord {
   visibleFieldTypes?: string[];
   searchSessionId?: string;
   filters?: Filter[];
+  showAllFields?: boolean;
+  showEmptyFields?: boolean;
+  pageSize?: number;
+  sortDirection?: 'asc' | 'desc';
+  samplerShardSize?: number;
+  pageIndex?: number;
+  sortField?: string;
+  showDistributions?: number;
 }
 
 export type IndexDataVisualizerLocator = LocatorPublic<IndexDataVisualizerLocatorParams>;
@@ -90,6 +98,14 @@ export class IndexDataVisualizerLocatorDefinition
       visibleFieldTypes,
       searchSessionId,
       filters,
+      showAllFields,
+      showEmptyFields,
+      pageSize,
+      sortDirection,
+      samplerShardSize,
+      pageIndex,
+      sortField,
+      showDistributions,
     } = params;
 
     const appState: {
@@ -99,6 +115,14 @@ export class IndexDataVisualizerLocatorDefinition
       visibleFieldNames?: string[];
       visibleFieldTypes?: string[];
       filters?: Filter[];
+      showAllFields?: boolean;
+      showEmptyFields?: boolean;
+      pageSize?: number;
+      sortDirection?: 'asc' | 'desc';
+      samplerShardSize?: number;
+      pageIndex?: number;
+      sortField?: string;
+      showDistributions?: number;
     } = {};
     const queryState: QueryState = {};
 
@@ -120,6 +144,15 @@ export class IndexDataVisualizerLocatorDefinition
 
     if (visibleFieldNames) appState.visibleFieldNames = visibleFieldNames;
     if (visibleFieldTypes) appState.visibleFieldTypes = visibleFieldTypes;
+
+    if (showAllFields) appState.showAllFields = showAllFields;
+    if (showEmptyFields) appState.showEmptyFields = showEmptyFields;
+    if (pageSize) appState.pageSize = pageSize;
+    if (sortDirection) appState.sortDirection = sortDirection;
+    if (samplerShardSize) appState.samplerShardSize = samplerShardSize;
+    if (pageIndex) appState.pageIndex = pageIndex;
+    if (sortField) appState.sortField = sortField;
+    if (showDistributions) appState.sortField = sortField;
 
     if (timeRange) queryState.time = timeRange;
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
