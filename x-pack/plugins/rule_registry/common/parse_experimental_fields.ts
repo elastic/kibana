@@ -21,7 +21,7 @@ export const parseExperimentalFields = (input: unknown) => {
   if (isLeft(validate)) {
     throw new Error(PathReporter.report(validate).join('\n'));
   }
-  return experimentalFieldRuntimeType.encode(validate.right); 
+  return experimentalFieldRuntimeType.encode(validate.right);
 };
 
 export type ParsedExperimentalFields = ReturnType<typeof parseExperimentalFields>;
