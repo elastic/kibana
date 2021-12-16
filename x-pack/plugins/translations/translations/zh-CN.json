@@ -3499,7 +3499,6 @@
     "kibana-react.solutionNav.collapsibleLabel": "折叠侧边导航",
     "kibana-react.solutionNav.mobileTitleText": "{solutionName} 菜单",
     "kibana-react.solutionNav.openLabel": "打开侧边导航",
-    "kibana-react.splitPanel.adjustPanelSizeAriaLabel": "按左/右箭头键调整面板大小",
     "kibana-react.tableListView.listing.createNewItemButtonLabel": "创建 {entityName}",
     "kibana-react.tableListView.listing.deleteButtonMessage": "删除 {itemCount} 个 {entityName}",
     "kibana-react.tableListView.listing.deleteConfirmModalDescription": "无法恢复删除的 {entityNamePlural}。",
