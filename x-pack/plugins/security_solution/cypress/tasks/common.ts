@@ -155,6 +155,22 @@ export const deleteCases = () => {
   });
 };
 
+export const postDataView = (indexPattern: string) => {
+  cy.request({
+    method: 'POST',
+    url: `/api/index_patterns/index_pattern`,
+    body: {
+      index_pattern: {
+        fieldAttrs: '{}',
+        title: indexPattern,
+        timeFieldName: '@timestamp',
+        fields: '{}',
+      },
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+  });
+};
+
 export const scrollToBottom = () => cy.scrollTo('bottom');
 
 export const waitForPageToBeLoaded = () => {
