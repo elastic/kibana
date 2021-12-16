@@ -21,10 +21,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { isEmpty, without } from 'lodash/fp';
 import React, { useMemo, useState } from 'react';
+import { useMutation, useQueryClient } from 'react-query';
 import { PolicyData } from '../../../../../../../common/endpoint/types';
+import { useHttp, useToasts } from '../../../../../../common/lib/kibana';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
+import { updateOneHostIsolationExceptionItem } from '../../../../host_isolation_exceptions/service';
 import { useFetchHostIsolationExceptionsList } from '../../../../host_isolation_exceptions/view/hooks';
 import { PolicyArtifactsAssignableList } from '../../artifacts/assignable';
 
@@ -37,9 +41,52 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
   policy: PolicyData;
   onClose: () => void;
 }) => {
-  const [selectedArtifactIds, setSelectedArtifactIds] = useState<string[]>([]);
+  const http = useHttp();
+  const toasts = useToasts();
+  const queryClient = useQueryClient();
 
+  const [selectedArtifactIds, setSelectedArtifactIds] = useState<string[]>([]);
   const [currentFilter, setCurrentFilter] = useState('');
+
+  const onUpdateSuccesss = (updatedExceptions: ExceptionListItemSchema[]) => {
+    if (updatedExceptions.length > 0) {
+      toasts.addSuccess({
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.layout.flyout.toastSuccess.title',
+          {
+            defaultMessage: 'Success',
+          }
+        ),
+        text:
+          updatedExceptions.length > 1
+            ? i18n.translate(
+                'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.layout.flyout.toastSuccess.textMultiples',
+                {
+                  defaultMessage: '{count} host isolation exceptions have been added to your list.',
+                  values: { count: updatedExceptions.length },
+                }
+              )
+            : i18n.translate(
+                'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.layout.flyout.toastSuccess.textSingle',
+                {
+                  defaultMessage: '"{name}" has been added to your host isolation exceptions list.',
+                  values: { name: updatedExceptions[0].name },
+                }
+              ),
+      });
+    }
+  };
+
+  const onUpdateError = () => {
+    toasts.addDanger(
+      i18n.translate(
+        'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastError.text',
+        {
+          defaultMessage: `An error occurred updating artifacts`,
+        }
+      )
+    );
+  };
 
   const exceptionsRequest = useFetchHostIsolationExceptionsList({
     excludedPolicies: [policy.id, 'all'],
@@ -48,7 +95,34 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
     perPage: MAX_ALLOWED_RESULTS,
   });
 
-  const handleOnConfirmAction = () => {};
+  const mutation = useMutation(
+    () => {
+      const prom: Array<Promise<ExceptionListItemSchema>> = [];
+
+      exceptionsRequest.data?.data.forEach((exception) => {
+        if (selectedArtifactIds.includes(exception.id)) {
+          exception.tags = [...exception.tags, `policy:${policy.id}`];
+          prom.push(updateOneHostIsolationExceptionItem(http, exception));
+        }
+      });
+
+      return Promise.all(prom);
+    },
+    {
+      onSuccess: onUpdateSuccesss,
+      onError: onUpdateError,
+      onSettled: () => {
+        queryClient.invalidateQueries(['endpointSpecificPolicies']);
+        queryClient.invalidateQueries(['hostIsolationExceptions']);
+        onClose();
+      },
+    }
+  );
+
+  const handleOnConfirmAction = () => {
+    mutation.mutate();
+  };
+
   const handleOnSearch = (term: string) => {
     // reset existing selection
     setSelectedArtifactIds([]);
@@ -175,7 +249,7 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
               data-test-subj="hostIsolationExceptions-assign-confirm-button"
               fill
               onClick={handleOnConfirmAction}
-              isLoading={exceptionsRequest.isLoading}
+              isLoading={exceptionsRequest.isLoading || mutation.isLoading}
               disabled={isEmpty(selectedArtifactIds)}
               title={policy.name}
             >
