@@ -389,7 +389,8 @@ export const EditPackagePolicyForm = memo<{
   const [formState, setFormState] = useState<PackagePolicyFormState>('INVALID');
   const savePackagePolicy = async () => {
     setFormState('LOADING');
-    const result = await sendUpdatePackagePolicy(packagePolicyId, packagePolicy);
+    const { elasticsearch, ...restPackagePolicy } = packagePolicy; // ignore 'elasticsearch' property since it fails route validation
+    const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
     setFormState('SUBMITTED');
     return result;
   };
