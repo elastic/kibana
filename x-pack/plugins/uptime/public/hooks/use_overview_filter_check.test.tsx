@@ -32,6 +32,7 @@ function getWrapper(customSearch?: string): React.FC {
 }
 
 const SEARCH_WITH_FILTERS = '?dateRangeStart=now-30m&filters=%5B%5B"url.port"%2C%5B"5601"%5D%5D%5D';
+const SEARCH_WITH_KUERY = '?search=monitor.id%20%3A%20"header-test"';
 
 describe('useOverviewFilterCheck', () => {
   beforeEach(() => {
@@ -66,6 +67,32 @@ describe('useOverviewFilterCheck', () => {
       result: { current },
     } = renderHook(() => useOverviewFilterCheck(), {
       wrapper: getWrapper(SEARCH_WITH_FILTERS),
+    });
+
+    const fn = jest.fn();
+    current(fn);
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns a function that will not run code if search is uninitialized', () => {
+    jest.spyOn(reactRedux, 'useSelector').mockImplementation(() => '');
+    const {
+      result: { current },
+    } = renderHook(() => useOverviewFilterCheck(), {
+      wrapper: getWrapper(SEARCH_WITH_KUERY),
+    });
+
+    const fn = jest.fn();
+    current(fn);
+    expect(fn).not.toHaveBeenCalledTimes(1);
+  });
+
+  it('returns a function that will run if search is initialized', () => {
+    jest.spyOn(reactRedux, 'useSelector').mockImplementation(() => 'search is initialized');
+    const {
+      result: { current },
+    } = renderHook(() => useOverviewFilterCheck(), {
+      wrapper: getWrapper(SEARCH_WITH_KUERY),
     });
 
     const fn = jest.fn();
