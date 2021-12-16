@@ -74,13 +74,12 @@ export const CaseMetricsResponseRt = rt.partial(
     /**
      * External connectors associated with the case
      */
-    connectors: rt.array(
-      rt.type({
-        id: rt.string,
-        name: rt.string,
-        pushCount: rt.number,
-      })
-    ),
+    connectors: rt.type({
+      /**
+       * Total number of connectors in the case
+       */
+      total: rt.number,
+    }),
     /**
      * The case's open,close,in-progress details
      */

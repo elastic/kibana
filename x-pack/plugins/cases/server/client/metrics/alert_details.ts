@@ -24,7 +24,7 @@ export class AlertDetails implements MetricsHandler {
   ) {}
 
   public getFeatures(): Set<string> {
-    return new Set(['alertHosts', 'alertUsers']);
+    return new Set(['alerts.hosts', 'alerts.users']);
   }
 
   public setupFeature(feature: string) {
