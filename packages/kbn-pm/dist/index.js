@@ -58995,7 +58995,7 @@ async function setupRemoteCache(repoRootPath) {
   try {
     const {
       stdout
-    } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_3__["spawn"])('vault', ['read', '-field=readonly-key', 'secret/kibana-issues/dev/bazel-remote-cache'], {
+    } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_3__["spawn"])('vault', ['read', '-field=readonly-key', 'secret/kibana-issues/dev/bazel-remote-cachxe'], {
       stdio: 'pipe'
     });
     apiKey = stdout.trim();
@@ -59004,6 +59004,7 @@ async function setupRemoteCache(repoRootPath) {
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] building packages will work, but will be slower in many cases.');
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] to setup vault, if you are an Elastic employee, visit:');
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] https://github.com/elastic/infra/tree/master/docs/vault#github-auth');
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[bazel_tools] ${ex}`);
     return;
   }
 
