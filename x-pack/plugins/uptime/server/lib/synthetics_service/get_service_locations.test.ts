@@ -30,16 +30,18 @@ describe('getServiceLocations', function () {
       manifestUrl: 'http://local.dev',
     });
 
-    expect(locations).toEqual([
-      {
-        geo: {
-          lat: 41.25,
-          lon: -95.86,
+    expect(locations).toEqual({
+      locations: [
+        {
+          geo: {
+            lat: 41.25,
+            lon: -95.86,
+          },
+          id: 'us_central',
+          label: 'US Central',
+          url: 'https://local.dev',
         },
-        id: 'us_central',
-        label: 'US Central',
-        url: 'https://local.dev',
-      },
-    ]);
+      ],
+    });
   });
 });

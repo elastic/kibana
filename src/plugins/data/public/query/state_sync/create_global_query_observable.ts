@@ -9,12 +9,12 @@
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { isFilterPinned } from '@kbn/es-query';
-import { TimefilterSetup } from '../timefilter';
+import type { TimefilterSetup } from '../timefilter';
 import { FilterManager } from '../filter_manager';
 import { QueryState, QueryStateChange } from './index';
 import { createStateContainer } from '../../../../kibana_utils/public';
 import { compareFilters, COMPARE_ALL_OPTIONS } from '../../../common';
-import { QueryStringContract } from '../query_string';
+import type { QueryStringContract } from '../query_string';
 
 export function createQueryStateObservable({
   timefilter: { timefilter },

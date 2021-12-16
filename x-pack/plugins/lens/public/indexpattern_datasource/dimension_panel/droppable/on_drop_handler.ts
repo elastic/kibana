@@ -13,7 +13,7 @@ import {
   copyColumn,
 } from '../../operations';
 import { mergeLayer } from '../../state_helpers';
-import { isDraggedField } from '../../utils';
+import { isDraggedField } from '../../pure_utils';
 import { getNewOperation, getField } from './get_drop_props';
 import { IndexPatternPrivateState, DraggedField } from '../../types';
 import { trackUiEvent } from '../../../lens_ui_telemetry';

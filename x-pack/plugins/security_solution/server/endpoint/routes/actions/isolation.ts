@@ -18,7 +18,6 @@ import {
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   failedFleetActionErrorCode,
-  FORBIDDEN_MESSAGE,
 } from '../../../../common/endpoint/constants';
 import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
 import {
@@ -35,6 +34,7 @@ import { getMetadataForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
 import { APP_ID } from '../../../../common/constants';
 import { doLogsEndpointActionDsExists } from '../../utils';
+import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**
  * Registers the Host-(un-)isolation routes
@@ -43,6 +43,8 @@ export function registerHostIsolationRoutes(
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) {
+  const logger = endpointContext.logFactory.get('hostIsolation');
+
   // perform isolation
   router.post(
     {
@@ -50,7 +52,11 @@ export function registerHostIsolationRoutes(
       validate: HostIsolationRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    isolationRequestHandler(endpointContext, true)
+    withEndpointAuthz(
+      { all: ['canIsolateHost'] },
+      logger,
+      isolationRequestHandler(endpointContext, true)
+    )
   );
 
   // perform UN-isolate
@@ -60,7 +66,11 @@ export function registerHostIsolationRoutes(
       validate: HostIsolationRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    isolationRequestHandler(endpointContext, false)
+    withEndpointAuthz(
+      { all: ['canUnIsolateHost'] },
+      logger,
+      isolationRequestHandler(endpointContext, false)
+    )
   );
 }
 
@@ -100,17 +110,6 @@ export const isolationRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
-    const { canIsolateHost, canUnIsolateHost } = context.securitySolution.endpointAuthz;
-
-    // Ensure user has authorization to use this api
-    if ((!canIsolateHost && isolate) || (!canUnIsolateHost && !isolate)) {
-      return res.forbidden({
-        body: {
-          message: FORBIDDEN_MESSAGE,
-        },
-      });
-    }
-
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
 
     // fetch the Agent IDs to send the commands to
@@ -203,13 +202,9 @@ export const isolationRequestHandler = function (
     }
 
     try {
-      let esClient = context.core.elasticsearch.client.asCurrentUser;
-      if (doesLogsEndpointActionsDsExist) {
-        // create action request record as system user with user in .fleet-actions
-        esClient = context.core.elasticsearch.client.asInternalUser;
-      }
-      // write as the current user if the new indices do not exist
-      // <v7.16 requires the current user to be super user
+      const esClient = context.core.elasticsearch.client.asInternalUser;
+      // write as the internal user if the new indices do not exist
+      // 8.0+ requires internal user to write to system indices
       fleetActionIndexResult = await esClient.index<EndpointAction>({
         index: AGENT_ACTIONS_INDEX,
         body: {

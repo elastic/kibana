@@ -8,7 +8,7 @@
 
 import { duration } from 'moment';
 import { first } from 'rxjs/operators';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { fromRoot } from '@kbn/utils';
 import {
   createPluginInitializerContext,

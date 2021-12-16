@@ -8,17 +8,18 @@
 import './management_app.scss';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
+import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
 
+import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
 import {
   KibanaPageTemplate,
   KibanaPageTemplateProps,
   reactRouterNavigate,
+  KibanaThemeProvider,
 } from '../../../../kibana_react/public';
 import { SectionsServiceStart } from '../../types';
 
@@ -83,24 +84,26 @@ export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppPr
 
   return (
     <I18nProvider>
-      <KibanaPageTemplate
-        restrictWidth={false}
-        // EUI TODO
-        // The different template options need to be manually recreated by the individual pages.
-        // These classes help enforce the layouts.
-        pageContentProps={{ className: 'kbnAppWrapper' }}
-        pageContentBodyProps={{ className: 'kbnAppWrapper' }}
-        solutionNav={solution}
-      >
-        <ManagementRouter
-          history={history}
-          theme$={theme$}
-          setBreadcrumbs={setBreadcrumbsScoped}
-          onAppMounted={onAppMounted}
-          sections={sections}
-          dependencies={dependencies}
-        />
-      </KibanaPageTemplate>
+      <KibanaThemeProvider theme$={theme$}>
+        <KibanaPageTemplate
+          restrictWidth={false}
+          // EUI TODO
+          // The different template options need to be manually recreated by the individual pages.
+          // These classes help enforce the layouts.
+          pageContentProps={{ className: 'kbnAppWrapper' }}
+          pageContentBodyProps={{ className: 'kbnAppWrapper' }}
+          solutionNav={solution}
+        >
+          <ManagementRouter
+            history={history}
+            theme$={theme$}
+            setBreadcrumbs={setBreadcrumbsScoped}
+            onAppMounted={onAppMounted}
+            sections={sections}
+            dependencies={dependencies}
+          />
+        </KibanaPageTemplate>
+      </KibanaThemeProvider>
     </I18nProvider>
   );
 };

@@ -8,7 +8,7 @@
 
 import { createSavedQueryService } from './saved_query_service';
 import { httpServiceMock } from '../../../../../core/public/mocks';
-import { SavedQueryAttributes } from '../../../common';
+import type { SavedQueryAttributes } from '../../../common';
 
 const http = httpServiceMock.createStartContract();
 

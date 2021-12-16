@@ -43,7 +43,7 @@ import {
 import { AppAction } from '../../../../../common/store/actions';
 import { useTrustedAppsSelector } from '../hooks';
 
-import { ABOUT_TRUSTED_APPS, CREATE_TRUSTED_APP_ERROR } from '../translations';
+import { ABOUT_TRUSTED_APPS } from '../translations';
 import { defaultNewTrustedApp } from '../../store/builders';
 import { getTrustedAppsListPath } from '../../../../common/routing';
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
@@ -84,35 +84,9 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       };
     }, [isLoadingPolicies, policyList]);
 
-    const creationErrorsMessage = useMemo<string | undefined>(() => {
-      let errorMessage = creationErrors
-        ? CREATE_TRUSTED_APP_ERROR[creationErrors.message.replace(/(\[(.*)\]\: )/, '')] ||
-          creationErrors.message
-        : undefined;
-
-      if (
-        creationErrors &&
-        creationErrors.attributes &&
-        creationErrors.attributes.type === 'TrustedApps/PolicyNotFound'
-      ) {
-        policies.options.forEach((policy) => {
-          errorMessage = errorMessage?.replace(policy.id, policy.name);
-        });
-      } else if (
-        creationErrors &&
-        creationErrors.attributes &&
-        creationErrors.attributes.type === 'EndpointLicenseError'
-      ) {
-        errorMessage = i18n.translate(
-          'xpack.securitySolution.trustedapps.createTrustedAppFlyout.byPolicyLicenseError',
-          {
-            defaultMessage:
-              'Your Kibana license has been downgraded. As such, individual policy configuration is no longer supported.',
-          }
-        );
-      }
-      return errorMessage;
-    }, [creationErrors, policies]);
+    const creationErrorsMessage = useMemo<CreateTrustedAppFormProps['error'] | undefined>(() => {
+      return creationErrors?.message ?? [];
+    }, [creationErrors]);
 
     const getTestId = useTestIdGenerator(dataTestSubj);
 

@@ -33,8 +33,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const apiResponse = await supertest.get(API_URLS.SYNTHETICS_MONITORS);
 
-      const monitor1 = apiResponse.body.saved_objects.find((obj: any) => obj.id === id1);
-      const monitor2 = apiResponse.body.saved_objects.find((obj: any) => obj.id === id2);
+      const monitor1 = apiResponse.body.monitors.find((obj: any) => obj.id === id1);
+      const monitor2 = apiResponse.body.monitors.find((obj: any) => obj.id === id2);
 
       expect(monitor1.id).eql(id1);
       expect(monitor2.id).eql(id2);

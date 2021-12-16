@@ -108,7 +108,9 @@ export function alertingServiceProvider(
       try {
         const dataViewsService = await getDataViewsService();
 
-        const dataView = (await dataViewsService.find(indexPattern, 1))[0];
+        const dataViews = await dataViewsService.find(indexPattern);
+        const dataView = dataViews.find(({ title }) => title === indexPattern);
+
         if (!dataView) return;
 
         return dataView.fieldFormatMap;

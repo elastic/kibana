@@ -20,6 +20,7 @@ export enum ConfigKey {
   METADATA = '__ui',
   MONITOR_TYPE = 'type',
   NAME = 'name',
+  LOCATIONS = 'locations',
   PARAMS = 'params',
   PASSWORD = 'password',
   PROXY_URL = 'proxy_url',

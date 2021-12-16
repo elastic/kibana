@@ -13,37 +13,52 @@ export function getInstallCommandForPlatform(
   serviceToken: string,
   policyId?: string,
   fleetServerHost?: string,
-  isProductionDeployment?: boolean
+  isProductionDeployment?: boolean,
+  sslCATrustedFingerprint?: string
 ) {
-  let commandArguments = '';
-  const newLineSeparator = platform === 'windows' ? '`' : '\\';
+  const commandArguments = [];
+  const newLineSeparator = platform === 'windows' ? '`\n' : '\\\n';
 
   if (isProductionDeployment && fleetServerHost) {
-    commandArguments += `--url=${fleetServerHost} ${newLineSeparator}\n`;
-  } else {
-    commandArguments += `  ${newLineSeparator}\n`;
+    commandArguments.push(['url', fleetServerHost]);
   }
 
-  commandArguments += `  --fleet-server-es=${esHost}`;
-  commandArguments += ` ${newLineSeparator}\n  --fleet-server-service-token=${serviceToken}`;
+  commandArguments.push(['fleet-server-es', esHost]);
+  commandArguments.push(['fleet-server-service-token', serviceToken]);
   if (policyId) {
-    commandArguments += ` ${newLineSeparator}\n  --fleet-server-policy=${policyId}`;
+    commandArguments.push(['fleet-server-policy', policyId]);
+  }
+
+  if (sslCATrustedFingerprint) {
+    commandArguments.push(['fleet-server-es-ca-trusted-fingerprint', sslCATrustedFingerprint]);
   }
 
   if (isProductionDeployment) {
-    commandArguments += ` ${newLineSeparator}\n  --certificate-authorities=<PATH_TO_CA>`;
-    commandArguments += ` ${newLineSeparator}\n  --fleet-server-es-ca=<PATH_TO_ES_CERT>`;
-    commandArguments += ` ${newLineSeparator}\n  --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT>`;
-    commandArguments += ` ${newLineSeparator}\n  --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY>`;
+    commandArguments.push(['certificate-authorities', '<PATH_TO_CA>']);
+    if (!sslCATrustedFingerprint) {
+      commandArguments.push(['fleet-server-es-ca', '<PATH_TO_ES_CERT>']);
+    }
+    commandArguments.push(['fleet-server-cert', '<PATH_TO_FLEET_SERVER_CERT>']);
+    commandArguments.push(['fleet-server-cert-key', '<PATH_TO_FLEET_SERVER_CERT_KEY>']);
+  } else {
+    commandArguments.push(['fleet-server-insecure-http']);
   }
+
+  const commandArgumentsStr = commandArguments.reduce((acc, [key, val]) => {
+    if (acc === '' && key === 'url') {
+      return `--${key}=${val}`;
+    }
+    const valOrEmpty = val ? `=${val}` : '';
+    return (acc += ` ${newLineSeparator}  --${key}${valOrEmpty}`);
+  }, '');
 
   switch (platform) {
     case 'linux-mac':
-      return `sudo ./elastic-agent install ${commandArguments}`;
+      return `sudo ./elastic-agent install ${commandArgumentsStr}`;
     case 'windows':
-      return `.\\elastic-agent.exe install ${commandArguments}`;
+      return `.\\elastic-agent.exe install ${commandArgumentsStr}`;
     case 'rpm-deb':
-      return `sudo elastic-agent enroll ${commandArguments}`;
+      return `sudo elastic-agent enroll ${commandArgumentsStr}`;
     default:
       return '';
   }

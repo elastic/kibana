@@ -9,12 +9,13 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DiscoverNavigationProps } from '../../../utils/use_navigation_props';
 interface TableRowDetailsProps {
   open: boolean;
   colLength: number;
   isTimeBased: boolean;
-  getContextAppHref: () => string;
-  getSingleDocHref: () => string;
+  singleDocProps: DiscoverNavigationProps;
+  surrDocsProps: DiscoverNavigationProps;
   children: JSX.Element;
 }
 
@@ -22,8 +23,8 @@ export const TableRowDetails = ({
   open,
   colLength,
   isTimeBased,
-  getContextAppHref,
-  getSingleDocHref,
+  singleDocProps,
+  surrDocsProps,
   children,
 }: TableRowDetailsProps) => {
   if (!open) {
@@ -54,7 +55,7 @@ export const TableRowDetails = ({
           <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               {isTimeBased && (
-                <EuiLink data-test-subj="docTableRowAction" href={getContextAppHref()}>
+                <EuiLink data-test-subj="docTableRowAction" {...surrDocsProps}>
                   <FormattedMessage
                     id="discover.docTable.tableRow.viewSurroundingDocumentsLinkText"
                     defaultMessage="View surrounding documents"
@@ -63,7 +64,7 @@ export const TableRowDetails = ({
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink data-test-subj="docTableRowAction" href={getSingleDocHref()}>
+              <EuiLink data-test-subj="docTableRowAction" {...singleDocProps}>
                 <FormattedMessage
                   id="discover.docTable.tableRow.viewSingleDocumentLinkText"
                   defaultMessage="View single document"

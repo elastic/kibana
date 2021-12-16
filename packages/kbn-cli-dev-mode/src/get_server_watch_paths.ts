@@ -9,7 +9,7 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 interface Options {
   pluginPaths: string[];

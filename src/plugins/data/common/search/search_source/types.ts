@@ -12,7 +12,8 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { Query } from '../..';
 import { Filter } from '../../es_query';
 import { IndexPattern } from '../..';
-import { SearchSource } from './search_source';
+import type { SearchSource } from './search_source';
+import { PersistableStateService } from '../../../../kibana_utils/common';
 
 /**
  * search source interface
@@ -24,7 +25,8 @@ export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
  * high level search service
  * @public
  */
-export interface ISearchStartSearchSource {
+export interface ISearchStartSearchSource
+  extends PersistableStateService<SerializedSearchSourceFields> {
   /**
    * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
    * @param fields
@@ -43,15 +45,17 @@ export enum SortDirection {
   desc = 'desc',
 }
 
-export interface SortDirectionFormat {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SortDirectionFormat = {
   order: SortDirection;
   format?: string;
-}
+};
 
-export interface SortDirectionNumeric {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SortDirectionNumeric = {
   order: SortDirection;
   numeric_type?: 'double' | 'long' | 'date' | 'date_nanos';
-}
+};
 
 export type EsQuerySortValue = Record<
   string,
@@ -114,7 +118,8 @@ export interface SearchSourceFields {
   parent?: SearchSourceFields;
 }
 
-export interface SerializedSearchSourceFields {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SerializedSearchSourceFields = {
   type?: string;
   /**
    * {@link Query}
@@ -159,7 +164,7 @@ export interface SerializedSearchSourceFields {
   terminate_after?: number;
 
   parent?: SerializedSearchSourceFields;
-}
+};
 
 export interface SearchSourceOptions {
   callParentStartHandlers?: boolean;

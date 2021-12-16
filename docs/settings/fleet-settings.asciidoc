@@ -87,6 +87,7 @@ Optional properties are:
   `data_output_id`:: ID of the output to send data (Need to be identical to `monitoring_output_id`)
   `monitoring_output_id`:: ID of the output to send monitoring data. (Need to be identical to `data_output_id`)
   `package_policies`:: List of integration policies to add to this policy.
+    `id`::: Unique ID of the integration policy. The ID may be a number or string.
     `name`::: (required) Name of the integration policy.
     `package`::: (required) Integration that this policy configures
       `name`:::: Name of the integration associated with this policy.
@@ -128,6 +129,7 @@ xpack.fleet.agentPolicies:
       - package:
           name: system
         name: System Integration
+        id: preconfigured-system
         inputs:
           - type: system/metrics
             enabled: true

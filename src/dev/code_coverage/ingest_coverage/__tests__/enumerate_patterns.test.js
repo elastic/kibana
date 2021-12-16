@@ -7,7 +7,8 @@
  */
 
 import { enumeratePatterns } from '../team_assignment/enumerate_patterns';
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 const log = new ToolingLog({
   level: 'info',

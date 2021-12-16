@@ -17,6 +17,7 @@ import { APMPlugin } from './plugin';
 // All options should be documented in the APM configuration settings: https://github.com/elastic/kibana/blob/main/docs/settings/apm-settings.asciidoc
 // and be included on cloud allow list unless there are specific reasons not to
 const configSchema = schema.object({
+  autoCreateApmDataView: schema.boolean({ defaultValue: true }),
   serviceMapEnabled: schema.boolean({ defaultValue: true }),
   serviceMapFingerprintBucketSize: schema.number({ defaultValue: 100 }),
   serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
@@ -25,7 +26,6 @@ const configSchema = schema.object({
   }),
   serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
   serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
-  autocreateApmIndexPattern: schema.boolean({ defaultValue: true }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     transactionGroupBucketSize: schema.number({ defaultValue: 1000 }),
@@ -59,7 +59,15 @@ const configSchema = schema.object({
 
 // plugin config
 export const config: PluginConfigDescriptor<APMConfig> = {
-  deprecations: ({ renameFromRoot, deprecateFromRoot, unusedFromRoot }) => [
+  deprecations: ({
+    rename,
+    renameFromRoot,
+    deprecateFromRoot,
+    unusedFromRoot,
+  }) => [
+    rename('autocreateApmIndexPattern', 'autoCreateApmDataView', {
+      level: 'warning',
+    }),
     renameFromRoot(
       'apm_oss.transactionIndices',
       'xpack.apm.indices.transaction',

@@ -349,10 +349,12 @@ export class VisualizeChartPageObject extends FtrService {
     return await this.testSubjects.getVisibleText('dataGridHeader');
   }
 
-  public async getFieldLinkInVisTable(fieldName: string, rowIndex: number = 1) {
-    const headers = await this.dataGrid.getHeaders();
-    const fieldColumnIndex = headers.indexOf(fieldName);
-    const cell = await this.dataGrid.getCellElement(rowIndex, fieldColumnIndex + 1);
+  public async getFieldLinkInVisTable(
+    fieldName: string,
+    rowIndex: number = 0,
+    colIndex: number = 0
+  ) {
+    const cell = await this.dataGrid.getCellElement(rowIndex, colIndex);
     return await cell.findByTagName('a');
   }
 

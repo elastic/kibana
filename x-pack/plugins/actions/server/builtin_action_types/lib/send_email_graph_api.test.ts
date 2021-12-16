@@ -350,5 +350,6 @@ function getSendEmailOptions(
     },
     hasAuth: true,
     configurationUtilities,
+    connectorId: '1',
   };
 }

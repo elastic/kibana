@@ -7,7 +7,7 @@
 
 import { CaseMetricsResponse } from '../../../common/api';
 import { Operations } from '../../authorization';
-import { createCaseError } from '../../common';
+import { createCaseError } from '../../common/error';
 import { CasesClient } from '../client';
 import { CasesClientArgs } from '../types';
 import { MetricsHandler } from './types';
@@ -20,7 +20,7 @@ export class AlertsCount implements MetricsHandler {
   ) {}
 
   public getFeatures(): Set<string> {
-    return new Set(['alertsCount']);
+    return new Set(['alerts.count']);
   }
 
   public async compute(): Promise<CaseMetricsResponse> {

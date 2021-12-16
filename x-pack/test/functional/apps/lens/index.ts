@@ -55,6 +55,8 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       loadTestFile(require.resolve('./table'));
       loadTestFile(require.resolve('./runtime_fields'));
       loadTestFile(require.resolve('./dashboard'));
+      loadTestFile(require.resolve('./multi_terms'));
+      loadTestFile(require.resolve('./epoch_millis'));
     });
 
     describe('', function () {

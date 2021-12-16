@@ -8,11 +8,7 @@
 import { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import {
-  buildShowBuildingBlockFilter,
-  buildShowBuildingBlockFilterRuleRegistry,
-} from '../../../detections/components/alerts_table/default_config';
+import { buildShowBuildingBlockFilter } from '../../../detections/components/alerts_table/default_config';
 
 // On the Overview page, in the Detection Alert Trend, we never show
 // "building block" alerts to remove noise from the Overview UI.
@@ -20,17 +16,9 @@ import {
 const SHOW_BUILDING_BLOCK_ALERTS = false;
 
 export const useFiltersForSignalsByCategory = (baseFilters: Filter[]) => {
-  // TODO: Once we are past experimental phase this code should be removed
-  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
-
   const resultingFilters = useMemo(
-    () => [
-      ...baseFilters,
-      ...(ruleRegistryEnabled
-        ? buildShowBuildingBlockFilterRuleRegistry(SHOW_BUILDING_BLOCK_ALERTS) // TODO: Once we are past experimental phase this code should be removed
-        : buildShowBuildingBlockFilter(SHOW_BUILDING_BLOCK_ALERTS)),
-    ],
-    [baseFilters, ruleRegistryEnabled]
+    () => [...baseFilters, ...buildShowBuildingBlockFilter(SHOW_BUILDING_BLOCK_ALERTS)],
+    [baseFilters]
   );
 
   return resultingFilters;

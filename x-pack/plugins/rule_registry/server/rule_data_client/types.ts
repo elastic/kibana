@@ -14,6 +14,7 @@ import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 
 export interface IRuleDataClient {
   indexName: string;
+  indexNameWithNamespace(namespace: string): string;
   kibanaVersion: string;
   isWriteEnabled(): boolean;
   getReader(options?: { namespace?: string }): IRuleDataReader;

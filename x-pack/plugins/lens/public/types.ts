@@ -303,6 +303,10 @@ export interface DatasourcePublicAPI {
   datasourceId: string;
   getTableSpec: () => Array<{ columnId: string }>;
   getOperationForColumnId: (columnId: string) => Operation | null;
+  /**
+   * Collect all default visual values given the current state
+   */
+  getVisualDefaults: () => Record<string, Record<string, unknown>>;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {

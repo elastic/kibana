@@ -92,7 +92,7 @@ const endpointListApiPathHandlerMocks = ({
 }: {
   /** route handlers will be setup for each individual host in this array */
   endpointsResults?: MetadataListResponse['data'];
-  epmPackages?: GetPackagesResponse['response'];
+  epmPackages?: GetPackagesResponse['items'];
   endpointPackagePolicies?: GetPolicyListResponse['items'];
   policyResponse?: HostPolicyResponse;
   agentPolicy?: GetAgentPoliciesResponseItem;
@@ -103,7 +103,7 @@ const endpointListApiPathHandlerMocks = ({
     // endpoint package info
     [INGEST_API_EPM_PACKAGES]: (): GetPackagesResponse => {
       return {
-        response: epmPackages,
+        items: epmPackages,
       };
     },
 
@@ -150,7 +150,7 @@ const endpointListApiPathHandlerMocks = ({
     [INGEST_API_FLEET_AGENTS]: (): GetAgentsResponse => {
       return {
         total: totalAgentsUsingEndpoint,
-        list: [],
+        items: [],
         totalInactive: 0,
         page: 1,
         perPage: 10,

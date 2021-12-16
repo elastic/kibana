@@ -31,8 +31,8 @@ export async function createStaticDataView({
   spaceId?: string;
 }): Promise<boolean> {
   return withApmSpan('create_static_data_view', async () => {
-    // don't autocreate APM data view if it's been disabled via the config
-    if (!config.autocreateApmIndexPattern) {
+    // don't auto-create APM data view if it's been disabled via the config
+    if (!config.autoCreateApmDataView) {
       return false;
     }
 
