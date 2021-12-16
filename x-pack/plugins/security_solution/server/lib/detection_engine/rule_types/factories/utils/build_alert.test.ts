@@ -169,7 +169,6 @@ describe('buildAlert', () => {
         severity: 'high',
         severity_mapping: [],
         updated_by: 'sample user',
-        tags: ['some fake tag 1', 'some fake tag 2'],
         to: 'now',
         type: 'query',
         threat: [
@@ -345,7 +344,6 @@ describe('buildAlert', () => {
         severity: 'high',
         severity_mapping: [],
         updated_by: 'sample user',
-        tags: ['some fake tag 1', 'some fake tag 2'],
         to: 'now',
         type: 'query',
         threat: [
