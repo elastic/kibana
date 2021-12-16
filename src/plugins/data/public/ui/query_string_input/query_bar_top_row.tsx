@@ -131,6 +131,13 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     props?.onFiltersUpdated?.(filters);
   }
 
+  function onAddMultipleFilters(selectedFilters: Filter[]) {
+    props.toggleAddFilterModal?.(false);
+
+    const filters = [...props.filters, ...selectedFilters];
+    props?.onFiltersUpdated?.(filters);
+  }
+
   function applySavedQueries() {
     props.toggleAddFilterModal?.(false);
     props?.applySelectedSavedQueries?.();
@@ -251,7 +258,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
             onCancel={() => props.toggleAddFilterModal?.(false)}
             filter={newFilter}
             indexPatterns={props.indexPatterns!}
-            onSubmit={onAdd}
+            onSubmit={onAddMultipleFilters}
             applySavedQueries={applySavedQueries}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
             savedQueryManagement={props.savedQueryManagement}

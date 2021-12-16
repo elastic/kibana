@@ -27,14 +27,7 @@ interface Props extends PhraseSuggestorProps {
 class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
   public render() {
     return (
-      <EuiFormRow
-        fullWidth={this.props.fullWidth}
-        display="columnCompressed"
-        label={this.props.intl.formatMessage({
-          id: 'data.filter.filterEditor.valueInputLabel',
-          defaultMessage: 'Value',
-        })}
-      >
+      <EuiFormRow fullWidth={this.props.fullWidth}>
         {this.isSuggestingValues() ? (
           this.renderWithSuggestions()
         ) : (
@@ -44,7 +37,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
             disabled={this.props.disabled}
             placeholder={this.props.intl.formatMessage({
               id: 'data.filter.filterEditor.valueInputPlaceholder',
-              defaultMessage: 'Enter a value',
+              defaultMessage: 'Value(s)',
             })}
             value={this.props.value}
             onChange={this.props.onChange}

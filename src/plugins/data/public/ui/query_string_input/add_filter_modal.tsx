@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, ReactNode } from 'react';
+import React, { useState } from 'react';
 import {
   Filter,
-  FieldFilter,
   buildFilter,
   buildCustomFilter,
   cleanFilter,
@@ -31,30 +30,24 @@ import {
   EuiForm,
   EuiSpacer,
   EuiHorizontalRule,
-  EuiPanel,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '../../../../kibana_react/public';
 import { getIndexPatternFromFilter } from '../../query';
 import {
-  getFieldFromFilter,
   getFilterableFields,
-  getOperatorFromFilter,
   getOperatorOptions,
-  isFilterValid,
 } from '../filter_bar/filter_editor/lib/filter_editor_utils';
 import { Operator } from '../filter_bar/filter_editor/lib/filter_operators';
 
-import {
-  GenericComboBox,
-  GenericComboBoxProps,
-} from '../filter_bar/filter_editor/generic_combo_box';
+import { GenericComboBox } from '../filter_bar/filter_editor/generic_combo_box';
 import { PhraseValueInput } from '../filter_bar/filter_editor/phrase_value_input';
 import { PhrasesValuesInput } from '../filter_bar/filter_editor/phrases_values_input';
 import { RangeValueInput } from '../filter_bar/filter_editor/range_value_input';
 
-import { IIndexPattern, IFieldType, SavedQuery } from '../..';
+import { IIndexPattern, IFieldType } from '../..';
 
 const tabs = [
   {
@@ -77,6 +70,12 @@ const tabs = [
   },
 ];
 
+interface FilterGroup {
+  field: IFieldType | undefined;
+  operator: Operator | undefined;
+  value: any;
+}
+
 export function AddFilterModal({
   onSubmit,
   onCancel,
@@ -87,7 +86,7 @@ export function AddFilterModal({
   savedQueryManagement,
   initialAddFilterMode,
 }: {
-  onSubmit: (filter: Filter) => void;
+  onSubmit: (filters: Filter[]) => void;
   applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
@@ -99,30 +98,35 @@ export function AddFilterModal({
   const [selectedIndexPattern, setSelectedIndexPattern] = useState(
     getIndexPatternFromFilter(filter, indexPatterns)
   );
-  const [selectedField, setSelectedField] = useState<IFieldType | undefined>(undefined);
-  const [selectedOperator, setSelectedOperator] = useState<Operator | undefined>(undefined);
-  const [filterParams, setFilterParams] = useState(getFilterParams(filter));
   const [addFilterMode, setAddFilterMode] = useState<string>(initialAddFilterMode ?? tabs[0].type);
   const [queryDsl, setQueryDsl] = useState<string>(JSON.stringify(cleanFilter(filter), null, 2));
+  const [localFilters, setLocalFilters] = useState<FilterGroup[]>([
+    { field: undefined, operator: undefined, value: getFilterParams(filter) },
+  ]);
 
   const onIndexPatternChange = ([selectedPattern]: IIndexPattern[]) => {
     setSelectedIndexPattern(selectedPattern);
-    setSelectedField(undefined);
-    setSelectedOperator(undefined);
-    setFilterParams(undefined);
+    setLocalFilters([{ field: undefined, operator: undefined, value: undefined }]);
   };
 
-  const onFieldChange = ([field]: IFieldType[]) => {
-    setSelectedField(field);
-    setSelectedOperator(undefined);
-    setFilterParams(undefined);
+  const onFieldChange = ([field]: IFieldType[], localFilterIndex: number) => {
+    const updatedLocalFilter = { ...localFilters[localFilterIndex], field };
+    setLocalFilters([...localFilters.slice(0, localFilterIndex), updatedLocalFilter]);
   };
 
-  const onOperatorChange = ([operator]: Operator[]) => {
+  const onOperatorChange = ([operator]: Operator[], localFilterIndex: number) => {
     // Only reset params when the operator type changes
-    const params = selectedOperator?.type === operator.type ? filterParams : undefined;
-    setSelectedOperator(operator);
-    setFilterParams(params);
+    const params =
+      localFilters[localFilterIndex].operator?.type === operator.type
+        ? localFilters[localFilterIndex].value
+        : undefined;
+    const updatedLocalFilter = { ...localFilters[localFilterIndex], operator, value: params };
+    setLocalFilters([...localFilters.slice(0, localFilterIndex), updatedLocalFilter]);
+  };
+
+  const onParamsChange = (newFilterParams: any, localFilterIndex: number) => {
+    const updatedLocalFilter = { ...localFilters[localFilterIndex], value: newFilterParams };
+    setLocalFilters([...localFilters.slice(0, localFilterIndex), updatedLocalFilter]);
   };
 
   const renderIndexPatternInput = () => {
@@ -163,82 +167,86 @@ export function AddFilterModal({
     );
   };
 
-  const renderFieldInput = () => {
+  const renderFieldInput = (localFilterIndex: number) => {
     const fields = selectedIndexPattern ? getFilterableFields(selectedIndexPattern) : [];
+    const selectedFieldTemp = localFilters[localFilterIndex].field;
     return (
-      <EuiFormRow
-        fullWidth
-        display="columnCompressed"
-        label={i18n.translate('data.filter.filterEditor.fieldSelectLabel', {
-          defaultMessage: 'Field',
-        })}
-      >
-        <GenericComboBox
-          fullWidth
-          compressed
-          id="fieldInput"
-          isDisabled={!selectedIndexPattern}
-          placeholder={i18n.translate('data.filter.filterEditor.fieldSelectPlaceholder', {
-            defaultMessage: 'Select a field first',
-          })}
-          options={fields}
-          selectedOptions={selectedField ? [selectedField] : []}
-          getLabel={(field: IFieldType) => field.name}
-          onChange={onFieldChange}
-          singleSelection={{ asPlainText: true }}
-          isClearable={false}
-          data-test-subj="filterFieldSuggestionList"
-        />
-      </EuiFormRow>
+      <EuiFlexItem>
+        <EuiFormRow fullWidth>
+          <GenericComboBox
+            fullWidth
+            compressed
+            id="fieldInput"
+            isDisabled={!selectedIndexPattern}
+            placeholder={i18n.translate('data.filter.filterEditor.fieldSelectPlaceholder', {
+              defaultMessage: 'Field',
+            })}
+            options={fields}
+            selectedOptions={selectedFieldTemp ? [selectedFieldTemp] : []}
+            getLabel={(field: IFieldType) => field.name}
+            onChange={(selected: IFieldType[]) => {
+              onFieldChange(selected, localFilterIndex);
+            }}
+            singleSelection={{ asPlainText: true }}
+            isClearable={false}
+            data-test-subj="filterFieldSuggestionList"
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
     );
   };
 
-  const renderOperatorInput = () => {
-    const operators = selectedField ? getOperatorOptions(selectedField) : [];
+  const renderOperatorInput = (localFilterIndex: number) => {
+    const selectedFieldTemp = localFilters[localFilterIndex].field;
+    const operators = selectedFieldTemp ? getOperatorOptions(selectedFieldTemp) : [];
+    const selectedOperatorTemp = localFilters[localFilterIndex].operator;
     return (
-      <EuiFormRow
-        fullWidth
-        display="columnCompressed"
-        label={i18n.translate('data.filter.filterEditor.operatorSelectLabel', {
-          defaultMessage: 'Operator',
-        })}
-      >
-        <GenericComboBox
-          fullWidth
-          compressed
-          isDisabled={!selectedField}
-          placeholder={
-            selectedField
-              ? i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderSelect', {
-                  defaultMessage: 'Select',
-                })
-              : i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderWaiting', {
-                  defaultMessage: 'Waiting',
-                })
-          }
-          options={operators}
-          selectedOptions={selectedOperator ? [selectedOperator] : []}
-          getLabel={({ message }) => message}
-          onChange={onOperatorChange}
-          singleSelection={{ asPlainText: true }}
-          isClearable={false}
-          data-test-subj="filterOperatorList"
-        />
-      </EuiFormRow>
+      <EuiFlexItem>
+        <EuiFormRow fullWidth>
+          <GenericComboBox
+            fullWidth
+            compressed
+            isDisabled={!selectedFieldTemp}
+            placeholder={
+              selectedFieldTemp
+                ? i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderSelect', {
+                    defaultMessage: 'Operator',
+                  })
+                : i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderWaiting', {
+                    defaultMessage: 'Waiting',
+                  })
+            }
+            options={operators}
+            selectedOptions={selectedOperatorTemp ? [selectedOperatorTemp] : []}
+            getLabel={({ message }) => message}
+            onChange={(selected: Operator[]) => {
+              onOperatorChange(selected, localFilterIndex);
+            }}
+            singleSelection={{ asPlainText: true }}
+            isClearable={false}
+            data-test-subj="filterOperatorList"
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
     );
   };
 
-  const renderParamsEditor = () => {
-    switch (selectedOperator?.type) {
+  const renderParamsEditor = (localFilterIndex: number) => {
+    const selectedOperatorTemp = localFilters[localFilterIndex].operator;
+    const selectedFieldTemp = localFilters[localFilterIndex].field;
+    const selectedParamsTemp = localFilters[localFilterIndex].value;
+    switch (selectedOperatorTemp?.type) {
       case 'exists':
         return '';
       case 'phrases':
         return (
           <PhrasesValuesInput
             indexPattern={selectedIndexPattern}
-            field={selectedField}
-            values={filterParams}
-            onChange={setFilterParams}
+            field={selectedFieldTemp}
+            values={selectedParamsTemp}
+            onChange={(newFilterParams: any) => {
+              onParamsChange(newFilterParams, localFilterIndex);
+            }}
             timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
             fullWidth
             compressed
@@ -247,9 +255,11 @@ export function AddFilterModal({
       case 'range':
         return (
           <RangeValueInput
-            field={selectedField}
-            value={filterParams}
-            onChange={setFilterParams}
+            field={selectedFieldTemp}
+            value={selectedParamsTemp}
+            onChange={(newFilterParams: any) => {
+              onParamsChange(newFilterParams, localFilterIndex);
+            }}
             fullWidth
             compressed
           />
@@ -257,11 +267,13 @@ export function AddFilterModal({
       default:
         return (
           <PhraseValueInput
-            disabled={!selectedIndexPattern || !selectedOperator}
+            disabled={!selectedIndexPattern || !selectedOperatorTemp}
             indexPattern={selectedIndexPattern}
-            field={selectedField}
-            value={filterParams}
-            onChange={setFilterParams}
+            field={selectedFieldTemp}
+            value={selectedParamsTemp}
+            onChange={(newFilterParams: any) => {
+              onParamsChange(newFilterParams, localFilterIndex);
+            }}
             data-test-subj="phraseValueInput"
             timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
             fullWidth
@@ -313,31 +325,35 @@ export function AddFilterModal({
         alias,
         $state.store
       );
-      onSubmit(builtCustomFilter);
-    } else if (
-      addFilterMode === 'quick_form' &&
-      selectedIndexPattern &&
-      selectedField &&
-      selectedOperator
-    ) {
-      const builtFilter = buildFilter(
-        selectedIndexPattern,
-        selectedField,
-        selectedOperator.type,
-        selectedOperator.negate,
-        filter.meta.disabled ?? false,
-        filterParams ?? '',
-        alias,
-        $state.store
-      );
-      onSubmit(builtFilter);
+      onSubmit([builtCustomFilter]);
+    } else if (addFilterMode === 'quick_form' && selectedIndexPattern) {
+      const builtFilters = localFilters.map((localFilter) => {
+        if (localFilter.field && localFilter.operator) {
+          return buildFilter(
+            selectedIndexPattern,
+            localFilter.field,
+            localFilter.operator.type,
+            localFilter.operator.negate,
+            filter.meta.disabled ?? false,
+            localFilter.value ?? '',
+            alias,
+            $state.store
+          );
+        }
+      });
+      if (builtFilters && builtFilters.length) {
+        const finalFilters = builtFilters.filter(
+          (value) => typeof value !== 'undefined'
+        ) as Filter[];
+        onSubmit(finalFilters);
+      }
     } else if (addFilterMode === 'saved_filters') {
       applySavedQueries();
     }
   };
 
   return (
-    <EuiModal maxWidth={700} onClose={onCancel} style={{ width: 700 }}>
+    <EuiModal maxWidth={800} onClose={onCancel} style={{ width: 700 }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h3>
@@ -368,14 +384,40 @@ export function AddFilterModal({
 
       <EuiModalBody>
         <EuiForm>
-          {addFilterMode === 'quick_form' && (
-            <EuiPanel color="subdued">
-              {renderFieldInput()}
-              {renderOperatorInput()}
-              <EuiSpacer size="s" />
-              <div data-test-subj="filterParams">{renderParamsEditor()}</div>
-            </EuiPanel>
-          )}
+          {addFilterMode === 'quick_form' &&
+            localFilters.map((localFilter, index) => {
+              return (
+                <>
+                  <EuiFlexGroup>
+                    {renderFieldInput(index)}
+                    {renderOperatorInput(index)}
+                    <EuiSpacer size="s" />
+                    <EuiFlexItem data-test-subj="filterParams">
+                      {renderParamsEditor(index)}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        display="base"
+                        onClick={() => {
+                          setLocalFilters([
+                            ...localFilters,
+                            {
+                              field: undefined,
+                              operator: undefined,
+                              value: undefined,
+                            },
+                          ]);
+                        }}
+                        iconType="plus"
+                        size="s"
+                        aria-label="Add filter group"
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="s" />
+                </>
+              );
+            })}
           {addFilterMode === 'query_builder' && renderCustomEditor()}
           {addFilterMode === 'saved_filters' && savedQueryManagement}
         </EuiForm>

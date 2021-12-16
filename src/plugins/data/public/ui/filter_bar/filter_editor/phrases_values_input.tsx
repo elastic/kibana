@@ -28,20 +28,13 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
     const { values, intl, onChange, fullWidth, compressed } = this.props;
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
     return (
-      <EuiFormRow
-        fullWidth={fullWidth}
-        display="columnCompressed"
-        label={intl.formatMessage({
-          id: 'data.filter.filterEditor.valuesSelectLabel',
-          defaultMessage: 'Values',
-        })}
-      >
+      <EuiFormRow fullWidth={fullWidth}>
         <StringComboBox
           compressed={compressed}
           fullWidth={fullWidth}
           placeholder={intl.formatMessage({
             id: 'data.filter.filterEditor.valuesSelectPlaceholder',
-            defaultMessage: 'Select values',
+            defaultMessage: 'Value(s)',
           })}
           options={options}
           getLabel={(option) => option}
