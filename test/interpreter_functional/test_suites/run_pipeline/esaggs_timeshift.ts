@@ -99,57 +99,6 @@ export default function ({
       expect(getCell(result, 0, 1)).to.be(4763);
     });
 
-    it('shifts multiple metrics with previous and date histograms', async () => {
-      const expression = `
-          kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
-          | esaggs index={indexPatternLoad id='logstash-*'}
-          aggs={aggDateHistogram id="0" enabled=true schema="bucket" field="@timestamp" interval="4h" min_doc_count="1"}
-          aggs={aggCount id="1" enabled=true schema="metric"}
-          aggs={aggCount id="2" enabled=true schema="metric" timeShift="previous"}
-        `;
-      const result = await expectExpression(
-        'esaggs_shift_multi_metric_previous_date_histogram',
-        expression
-      ).getResponse();
-      expect(result.rows).to.eql([
-        {
-          'col-0-0': 1442788200000,
-          'col-1-1': 30,
-          'col-2-2': 20,
-        },
-        {
-          'col-0-0': 1442802600000,
-          'col-1-1': 292,
-          'col-2-2': 309,
-        },
-        {
-          'col-0-0': 1442817000000,
-          'col-1-1': 1218,
-          'col-2-2': 1346,
-        },
-        {
-          'col-0-0': 1442831400000,
-          'col-1-1': 1970,
-          'col-2-2': 1940,
-        },
-        {
-          'col-0-0': 1442845800000,
-          'col-1-1': 952,
-          'col-2-2': 973,
-        },
-        {
-          'col-0-0': 1442860200000,
-          'col-1-1': 148,
-          'col-2-2': 164,
-        },
-        {
-          'col-0-0': 1442874600000,
-          'col-1-1': 8,
-          'col-2-2': 11,
-        },
-      ]);
-    });
-
     it('shifts single percentile', async () => {
       const expression = `
           kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
