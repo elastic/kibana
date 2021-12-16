@@ -174,7 +174,7 @@ export const getQueryField = (str: string): string => {
 };
 const getQueryStringResultProvider =
   (record: CustomUrlAnomalyRecordDoc, getResultTokenValue: GetResultTokenValue) =>
-  (resultPrefix: string, queryString: string, resultPostfix: string): string => {
+  (resultPrefix: string, queryString: string, resultPostfix: string, isKuery: boolean): string => {
     const URL_LENGTH_LIMIT = 2000;
 
     let availableCharactersLeft = URL_LENGTH_LIMIT - resultPrefix.length - resultPostfix.length;
@@ -192,6 +192,8 @@ const getQueryStringResultProvider =
 
     fieldsLoop: for (let i = 0; i < queryFields.length; i++) {
       const field = queryFields[i];
+      const fieldName = isKuery ? `"${queryFields[i]}"` : escapeForElasticsearchQuery(field);
+
       // Use lodash get to allow nested JSON fields to be retrieved.
       let tokenValues: string[] | string | null = get(record, field) || null;
       if (tokenValues === null) {
@@ -204,9 +206,7 @@ const getQueryStringResultProvider =
       // combine values with OR operator e.g. `(influencerField:value or influencerField:another_value)`.
       let result = '';
       for (let j = 0; j < tokenValues.length; j++) {
-        const part = `${j > 0 ? ' OR ' : ''}${escapeForElasticsearchQuery(
-          field
-        )}:"${getResultTokenValue(tokenValues[j])}"`;
+        const part = `${j > 0 ? ' OR ' : ''}${fieldName}:"${getResultTokenValue(tokenValues[j])}"`;
 
         // Build up a URL string which is not longer than the allowed length and isn't corrupted by invalid query.
         if (availableCharactersLeft < part.length) {
@@ -278,11 +278,18 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
       if (match !== null && match[2] !== undefined) {
         const [, prefix, queryDef, postfix] = match;
 
+        const isKuery = queryDef.indexOf('language:kuery') > -1;
+
         const q = rison.decode(queryDef);
 
         if (isRisonObject(q) && q.hasOwnProperty('query')) {
           const [resultPrefix, resultPostfix] = [prefix, postfix].map(replaceSingleTokenValues);
-          const resultQuery = getQueryStringResult(resultPrefix, q.query as string, resultPostfix);
+          const resultQuery = getQueryStringResult(
+            resultPrefix,
+            q.query as string,
+            resultPostfix,
+            isKuery
+          );
           return `${resultPrefix}${rison.encode({ ...q, query: resultQuery })}${resultPostfix}`;
         }
       }
@@ -291,7 +298,12 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
         /(.+&kuery=)(.*?)[^!](&.+)/,
         (fullMatch, prefix: string, queryString: string, postfix: string) => {
           const [resultPrefix, resultPostfix] = [prefix, postfix].map(replaceSingleTokenValues);
-          const resultQuery = getQueryStringResult(resultPrefix, queryString, resultPostfix);
+          const resultQuery = getQueryStringResult(
+            resultPrefix,
+            queryString,
+            resultPostfix,
+            str.indexOf('language:kuery') > -1
+          );
           return `${resultPrefix}${resultQuery}${resultPostfix}`;
         }
       );
