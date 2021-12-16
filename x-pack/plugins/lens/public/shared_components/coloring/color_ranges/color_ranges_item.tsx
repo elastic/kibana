@@ -204,7 +204,6 @@ export function ColorRangeItem({
             data-test-subj={`dynamicColoring_range_value_${indexPostfix}`}
             value={value}
             disabled={isDisabled}
-            min={-Infinity}
             onChange={({ target }) => {
               const newValue = target.value.trim();
 
@@ -223,13 +222,7 @@ export function ColorRangeItem({
               setColorRanges([...colorRanges]);
             }}
             append={rangeType === 'percent' ? '%' : undefined}
-            prepend={
-              isLast ? (
-                <span className="euiFormLabel">&#8804;</span>
-              ) : (
-                <span className="euiFormLabel">&#8805;</span>
-              )
-            }
+            prepend={<span className="euiFormLabel">{isLast ? '\u2264' : '\u2265'}</span>}
             aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.rangeAriaLabel', {
               defaultMessage: 'Range {index}',
               values: {
