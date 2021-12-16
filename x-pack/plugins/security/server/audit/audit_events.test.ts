@@ -18,6 +18,7 @@ import {
   SpaceAuditAction,
   spaceAuditEvent,
   userLoginEvent,
+  userLogoutEvent,
 } from './audit_events';
 
 describe('#savedObjectEvent', () => {
@@ -295,6 +296,35 @@ describe('#userLoginEvent', () => {
         },
         "message": "Failed attempt to login using basic provider [name=basic1]",
         "user": undefined,
+      }
+    `);
+  });
+});
+
+describe('#userLogoutEvent', () => {
+  test('creates event with `success` outcome', () => {
+    expect(
+      userLogoutEvent({
+        username: 'elastic',
+        provider: { name: 'basic1', type: 'basic' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "user_logout",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "success",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+        },
+        "message": "User [elastic] has logged out using basic provider [name=basic1]",
+        "user": Object {
+          "name": "elastic",
+        },
       }
     `);
   });

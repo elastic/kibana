@@ -21,7 +21,7 @@ import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser, AuthenticationProvider } from '../../common/model';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import type { AuditServiceSetup } from '../audit';
-import { accessAgreementAcknowledgedEvent, userLoginEvent } from '../audit';
+import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -414,6 +414,17 @@ export class Authenticator {
     assertRequest(request);
 
     const sessionValue = await this.getSessionValue(request);
+
+    if (sessionValue) {
+      const auditLogger = this.options.audit.asScoped(request);
+      auditLogger.log(
+        userLogoutEvent({
+          username: sessionValue.username,
+          provider: sessionValue.provider,
+        })
+      );
+    }
+
     const suggestedProviderName =
       sessionValue?.provider.name ??
       request.url.searchParams.get(LOGOUT_PROVIDER_QUERY_STRING_PARAMETER);
