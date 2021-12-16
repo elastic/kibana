@@ -154,7 +154,7 @@ export async function buildMapsIndexPatternsTelemetry(
 }
 
 async function findMaps(
-  onMap: (savedObject: SavedObject<MapSavedObjectAttributes>) => void
+  callback: (savedObject: SavedObject<MapSavedObjectAttributes>) => void
 ) {
   const savedObjectsClient = getSavedObjectClient();
 
@@ -168,9 +168,11 @@ async function findMaps(
       type: MAP_SAVED_OBJECT_TYPE,
       page: currentPage++,
     });
-    const { page, per_page: perPage, saved_objects: savedObjects, total } = results;
-    savedObjects.forEach(savedObject => {
-      onMap(savedObject);
+    perPage = results.per_page;
+    page = results.page;
+    total = results.page;
+    results.saved_objects.forEach(savedObject => {
+      callback(savedObject);
     });
   } while (page * perPage < total);
 }

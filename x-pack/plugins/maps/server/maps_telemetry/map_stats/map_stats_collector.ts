@@ -29,7 +29,6 @@ import {
 } from '../../../../../../src/plugins/maps_ems/common/';
 import { ClusterCountStats, EMS_BASEMAP_KEYS, JOIN_KEYS, LAYER_KEYS, MapStats, RESOLUTION_KEYS, SCALING_KEYS } from './types';
 
-
 /*
  * Use MapStatsCollector instance to track map saved object stats.
  */
@@ -86,7 +85,9 @@ export class MapStatsCollector {
       this._updateCounts(getResolutionKey(layerDescriptor), resolutionCounts);
       this._updateCounts(getScalingKey(layerDescriptor), scalingCounts);
       this._updateCounts(getEmsFileId(layerDescriptor), emsFileCounts);
-      this._updateCounts(layerDescriptor.type, layerTypeCounts);
+      if (layerDescriptor.type) {
+        this._updateCounts(layerDescriptor.type, layerTypeCounts);
+      }
     });
     this._updateClusterStats(this._basemapClusterStats, basemapCounts);
     this._updateClusterStats(this._joinClusterStats, joinCounts);
@@ -170,7 +171,7 @@ export class MapStatsCollector {
   _excludeTotal(clusterStats: { [key: string]: ClusterCountStats; }): { [key: string]: Omit<ClusterCountStats, 'total'>; } {
     const results: { [key: string]: Omit<ClusterCountStats, 'total'>; } = {};
     for (const key in clusterStats) {
-      const stats = { ...clusterStats[key] };
+      const stats = { ...clusterStats[key] } as { min: number; max: number; total?: number; avg: number; };
       delete stats.total;
       results[key] = stats
     }
