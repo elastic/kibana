@@ -49,6 +49,11 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
   });
 
   const handleOnConfirmAction = () => {};
+  const handleOnSearch = (term: string) => {
+    // reset existing selection
+    setSelectedArtifactIds([]);
+    setCurrentFilter(term);
+  };
 
   const handleSelectArtifact = (artifactId: string, selected: boolean) => {
     setSelectedArtifactIds((currentSelectedArtifactIds) =>
@@ -117,7 +122,7 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
       <EuiFlyoutBody>
         {(exceptionsRequest.data?.total || 0) > MAX_ALLOWED_RESULTS ? searchWarningMessage : null}
         <SearchExceptions
-          onSearch={setCurrentFilter}
+          onSearch={handleOnSearch}
           placeholder={i18n.translate(
             'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.layout.searh.label',
             {
