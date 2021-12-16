@@ -1,0 +1,70 @@
+#!/usr/bin/env groovy
+library 'kibana-pipeline-library'
+
+pipeline {
+    agent { label 'docker && tests-xxl' }
+    options {
+        timeout(time: 90, unit: 'MINUTES')
+    }
+    stages {
+        stage ('Running load simulation for pull request') {
+            steps {
+                script {
+                    //restore default behaviour
+                    env.CI = ""
+                }
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "${params.branch_specifier}"]], // check if it will return 'main'
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'kibana-load-testing']],
+                    submoduleCfg: [],
+                    userRemoteConfigs: [[
+                        credentialsId: 'f6c7695a-671e-4f4f-a331-acdce44ff9ba',
+                        url: "git@github.com:elastic/kibana-load-testing",
+                    ]],
+                ])
+                script {
+                    withVaultSecret(secret: 'secret/kibana-issues/prod/coverage/elasticsearch', secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
+                        withVaultSecret(secret: 'secret/kibana-issues/prod/coverage/elasticsearch', secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
+                            withVaultSecret(secret: 'secret/kibana-issues/prod/coverage/elasticsearch', secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
+                                sh """
+                                export HOME=${env.WORKSPACE}
+                                export KIBANA_BRANCH=${env.KIBANA_BRANCH}
+                                ./kibana-load-testing/scripts/build_and_test.sh -s '${params.SIMULATION}'
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+                    script {
+                        withVaultSecret(secret: 'secret/kibana-issues/prod/coverage/elasticsearch', secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
+                            withVaultSecret(secret: 'secret/kibana-issues/prod/coverage/elasticsearch', secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
+                                withVaultSecret(secret: 'secret/kibana-issues/prod/coverage/elasticsearch', secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
+                                    sh """
+                                        export HOME=${env.WORKSPACE}   
+                                        ./kibana-load-testing/scripts/archive_results.sh                            
+                                    """
+                                }
+                            }
+                        }
+                    }
+                }
+                success {
+                    script {
+                        withVaultSecret(secret: 'secret/kibana-issues/prod/coverage/elasticsearch', secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
+                            withVaultSecret(secret: 'secret/kibana-issues/prod/coverage/elasticsearch', secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
+                                withVaultSecret(secret: 'secret/kibana-issues/prod/coverage/elasticsearch', secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
+                                    sh '''./kibana-load-testing/scripts/ingest_results.sh'''
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
