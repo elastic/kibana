@@ -14,7 +14,13 @@ interface CreateActionEventLogRecordParams {
   action: string;
   name?: string;
   message?: string;
-  namespace?: string;
+  namespace?:
+    | {
+        namespace: string;
+      }
+    | {
+        namespace?: undefined;
+      };
   timestamp?: string;
   task?: {
     scheduled?: string;
@@ -43,7 +49,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
         type: so.type,
         id: so.id,
         type_id: so.typeId,
-        namespace,
+        ...namespace,
       })),
       ...(task ? { task: { scheduled: task.scheduled, schedule_delay: task.scheduleDelay } } : {}),
     },

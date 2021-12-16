@@ -17,7 +17,7 @@ import { ActionType } from '../types';
 import { actionsMock, actionsClientMock } from '../mocks';
 import { pick } from 'lodash';
 
-const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
+let actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
 
 const actionsClient = actionsClientMock.create();
@@ -36,20 +36,21 @@ const executeParams = {
 const spacesMock = spacesServiceMock.createStartContract();
 const loggerMock = loggingSystemMock.create().get();
 const getActionsClientWithRequest = jest.fn();
-actionExecutor.initialize({
-  logger: loggerMock,
-  spaces: spacesMock,
-  getServices: () => services,
-  getActionsClientWithRequest,
-  actionTypeRegistry,
-  encryptedSavedObjectsClient,
-  eventLogger,
-  preconfiguredActions: [],
-});
 
 beforeEach(() => {
   jest.resetAllMocks();
   spacesMock.getSpaceId.mockReturnValue('some-namespace');
+  actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
+  actionExecutor.initialize({
+    logger: loggerMock,
+    spaces: spacesMock,
+    getServices: () => services,
+    getActionsClientWithRequest,
+    actionTypeRegistry,
+    encryptedSavedObjectsClient,
+    eventLogger,
+    preconfiguredActions: [],
+  });
   getActionsClientWithRequest.mockResolvedValue(actionsClient);
 });
 
@@ -513,7 +514,7 @@ test('logs a warning when alert executor returns invalid status', async () => {
   );
 });
 
-test('return executed action info', async () => {
+test('writes to event log for execute timeout', async () => {
   setupActionExecutorMock();
 
   await actionExecutor.logCancellation({
@@ -521,7 +522,7 @@ test('return executed action info', async () => {
     relatedSavedObjects: [],
     request: {} as KibanaRequest,
   });
-  expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
   expect(eventLogger.logEvent.mock.calls[0][0]).toMatchObject({
     event: {
       action: 'execute-timeout',
@@ -531,13 +532,13 @@ test('return executed action info', async () => {
         {
           rel: 'primary',
           type: 'action',
-          id: '1',
+          id: 'action1',
           type_id: 'test',
           namespace: 'some-namespace',
         },
       ],
     },
-    message: 'action started: test:1: action-1',
+    message: `action: test:action1: 'action-1' execution cancelled due to timeout - exceeded default timeout of "5m"`,
   });
 });
 
@@ -586,6 +587,17 @@ test('writes to event log for execute and execute start', async () => {
 });
 
 function setupActionExecutorMock() {
+  actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
+  actionExecutor.initialize({
+    logger: loggerMock,
+    spaces: spacesMock,
+    getServices: () => services,
+    getActionsClientWithRequest,
+    actionTypeRegistry,
+    encryptedSavedObjectsClient,
+    eventLogger,
+    preconfiguredActions: [],
+  });
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',

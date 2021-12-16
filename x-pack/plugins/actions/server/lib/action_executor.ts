@@ -183,7 +183,7 @@ export class ActionExecutor {
         const event = createActionEventLogRecordObject({
           actionId,
           action: EVENT_LOG_ACTIONS.execute,
-          namespace: spaceId,
+          namespace,
           ...task,
           savedObjects: [
             {
@@ -323,7 +323,7 @@ export class ActionExecutor {
       message: `action: ${this.actionInfo.actionTypeId}:${actionId}: '${
         this.actionInfo.name ?? ''
       }' execution cancelled due to timeout - exceeded default timeout of "5m"`,
-      namespace: spaceId,
+      namespace,
       ...task,
       savedObjects: [
         {

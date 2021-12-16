@@ -63,7 +63,7 @@ const actionExecutorInitializerParams = {
   actionTypeRegistry,
   getActionsClientWithRequest: jest.fn(async () => actionsClientMock.create()),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
-  eventLogger: eventLoggerMock.create(),
+  eventLogger,
   preconfiguredActions: [],
 };
 const taskRunnerFactoryInitializerParams = {
@@ -73,7 +73,6 @@ const taskRunnerFactoryInitializerParams = {
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   basePathService: httpServiceMock.createBasePath(),
   getUnsecuredSavedObjectsClient: jest.fn().mockReturnValue(services.savedObjectsClient),
-  eventLogger,
 };
 
 beforeEach(() => {
@@ -260,28 +259,12 @@ test('task runner should implement CancellableTask cancel method with logging wa
   });
 
   await taskRunner.cancel();
-  expect(eventLogger.logEvent.mock.calls[0][0]).toMatchObject({
-    event: {
-      action: 'execute-timeout',
-    },
-    kibana: {
-      saved_objects: [
-        {
-          rel: 'primary',
-          type: 'action',
-          id: '2',
-          type_id: 'test',
-          namespace: 'test',
-        },
-      ],
-    },
-    message: `action: test:2: 'action 1' execution cancelled due to timeout - exceeded default timeout of "5m"`,
-  });
+  expect(mockedActionExecutor.logCancellation.mock.calls[0][0].actionId).toBe('2');
 
   expect(mockedActionExecutor.logCancellation.mock.calls.length).toBe(1);
 
   expect(taskRunnerFactoryInitializerParams.logger.debug).toHaveBeenCalledWith(
-    `Cancelling action task for test action with id 2 - execution error due to timeout.`
+    `Cancelling action task for action with id 2 - execution error due to timeout.`
   );
 });
 
