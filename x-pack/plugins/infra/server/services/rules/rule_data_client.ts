@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from 'src/core/server';
+import { Logger } from 'src/core/server';
 import { Dataset, RuleRegistryPluginSetupContract } from '../../../../rule_registry/server';
 import type { InfraFeatureId } from '../../../common/constants';
-import { RuleRegistrationContext, RulesServiceStartDeps } from './types';
+import { RuleRegistrationContext } from './types';
 
 export const createRuleDataClient = ({
   ownerFeatureId,
   registrationContext,
-  getStartServices,
   logger,
   ruleDataService,
 }: {
   ownerFeatureId: InfraFeatureId;
   registrationContext: RuleRegistrationContext;
-  getStartServices: CoreSetup<RulesServiceStartDeps>['getStartServices'];
   logger: Logger;
   ruleDataService: RuleRegistryPluginSetupContract['ruleDataService'];
 }) => {

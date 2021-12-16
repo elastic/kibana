@@ -24,12 +24,8 @@ export class RulesService {
     private readonly logger: Logger
   ) {}
 
-  public setup(
-    core: CoreSetup<RulesServiceStartDeps>,
-    setupDeps: RulesServiceSetupDeps
-  ): RulesServiceSetup {
+  public setup(setupDeps: RulesServiceSetupDeps): RulesServiceSetup {
     const ruleDataClient = createRuleDataClient({
-      getStartServices: core.getStartServices,
       logger: this.logger,
       ownerFeatureId: this.ownerFeatureId,
       registrationContext: this.registrationContext,

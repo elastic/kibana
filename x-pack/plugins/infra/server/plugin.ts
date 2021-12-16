@@ -144,8 +144,8 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
       ...domainLibs,
       getLogQueryFields: createGetLogQueryFields(sources, framework),
       handleEsError,
-      logsRules: this.logsRules.setup(core, plugins),
-      metricsRules: this.metricsRules.setup(core, plugins),
+      logsRules: this.logsRules.setup(plugins),
+      metricsRules: this.metricsRules.setup(plugins),
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);
