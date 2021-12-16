@@ -57,6 +57,19 @@ export const addColorRange = (
   return newColorRanges;
 };
 
+export const sortColorRanges = (colorRanges: ColorRange[]) => {
+  const maxValue = colorRanges[colorRanges.length - 1].end;
+
+  return [...colorRanges]
+    .sort(({ start: startA }, { start: startB }) => Number(startA) - Number(startB))
+    .map((newColorRange, i, array) => ({
+      id: idGeneratorFn(),
+      color: newColorRange.color,
+      start: newColorRange.start,
+      end: i !== array.length - 1 ? array[i + 1].start : maxValue,
+    }));
+};
+
 export const deleteColorRange = (index: number, colorRanges: ColorRange[]) => {
   if (index !== 0 && index !== colorRanges.length - 1) {
     colorRanges[index - 1].end = colorRanges[index + 1].start;

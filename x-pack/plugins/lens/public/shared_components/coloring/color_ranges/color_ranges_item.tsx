@@ -10,7 +10,6 @@ import type { FocusEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  htmlIdGenerator,
   EuiFieldNumber,
   EuiColorPicker,
   EuiButtonIcon,
@@ -21,6 +20,7 @@ import {
   EuiSpacer,
   EuiTextColor,
 } from '@elastic/eui';
+
 import { ValueMaxIcon } from '../../../assets/value_max';
 import { ValueMinIcon } from '../../../assets/value_min';
 import { RelatedIcon } from '../../../assets/related';
@@ -28,9 +28,8 @@ import { getDataMinMax, getStepValue, isValidColor, roundValue, getAutoValues } 
 
 import type { ColorRange, DataBounds } from './types';
 import type { CustomPaletteParamsConfig } from '../../../../common';
-import { deleteColorRange } from './utils';
 
-const idGeneratorFn = htmlIdGenerator();
+import { deleteColorRange, sortColorRanges } from './utils';
 
 export interface ColorRangesItemProps {
   colorRange: ColorRange;
@@ -84,53 +83,43 @@ export function ColorRangeItem({
   const indexPostfix = isLast ? index + 1 : index;
   const showEdit = !showDelete && isLast ? isDisabledEnd : isDisabledStart;
   const isDisabled = isLast ? isDisabledEnd : index === 0 ? isDisabledStart : false;
+
+  // ? how it works?
   const isInvalid = (!isValid && isLast) || value === undefined || Number.isNaN(value);
-  const prevStartValue = colorRanges[index - 1]?.start ?? -Infinity;
-  const nextStartValue = colorRanges[index + 1]?.start ?? Infinity;
 
   const onLeaveFocus = useCallback(
     () => (e: FocusEvent<HTMLDivElement>) => {
+      const prevStartValue = colorRanges[index - 1]?.start ?? -Infinity;
+      const nextStartValue = colorRanges[index + 1]?.start ?? Infinity;
+
       const shouldSort = colorRange.start > nextStartValue || prevStartValue > colorRange.start;
       const isFocusStillInContent =
         (e.currentTarget as Node)?.contains(e.relatedTarget as Node) || popoverInFocus;
 
-      if (!shouldSort) {
-        validateLastRange(colorRanges, isLast, isValid, setValid);
-      }
-
       if (shouldSort && !isFocusStillInContent) {
-        const maxValue = colorRanges[colorRanges.length - 1].end;
-        let newColorRanges = [...colorRanges].sort(
-          ({ start: startA }, { start: startB }) => Number(startA) - Number(startB)
-        );
-        newColorRanges = newColorRanges.map((newColorRange, i) => {
-          return {
-            id: idGeneratorFn(),
-            color: newColorRange.color,
-            start: newColorRange.start,
-            end: i !== newColorRanges.length - 1 ? newColorRanges[i + 1].start : maxValue,
-          };
-        });
+        const newColorRanges = sortColorRanges(colorRanges);
         const lastRange = newColorRanges[newColorRanges.length - 1];
+
+        // ?
         if (lastRange.start > lastRange.end && !isLast) {
           const oldEnd = lastRange.end;
           lastRange.end = lastRange.start;
           lastRange.start = oldEnd;
         }
 
-        validateLastRange(colorRanges, isLast, isValid, setValid);
-
         setColorRanges(newColorRanges);
       }
+
+      // ?
+      validateLastRange(colorRanges, isLast, isValid, setValid);
     },
     [
       colorRange.start,
       colorRanges,
+      index,
       isLast,
       isValid,
-      nextStartValue,
       popoverInFocus,
-      prevStartValue,
       setColorRanges,
       setValid,
     ]
@@ -150,18 +139,7 @@ export function ColorRangeItem({
     >
       <EuiSpacer size="s" />
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem
-          grow={false}
-          onBlur={() => {
-            // make sure that the popover is closed
-            if (!colorRange.color && !popoverInFocus) {
-              const newColorRanges = [...colorRanges];
-              newColorRanges[index].color = colorRanges[index].color;
-              setColorRanges(newColorRanges);
-            }
-          }}
-          data-test-subj={`dynamicColoring_range_color_${indexPostfix}`}
-        >
+        <EuiFlexItem grow={false} data-test-subj={`dynamicColoring_range_color_${indexPostfix}`}>
           {isLast ? (
             <EuiIcon type={RelatedIcon} size="l" />
           ) : (
