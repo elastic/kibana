@@ -16,6 +16,7 @@ import type {
 import { Collector } from './collector';
 import type { ICollector, CollectorOptions } from './types';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';
+import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../../common/constants';
 
 // Needed for the general array containing all the collectors. We don't really care about their types here
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,7 +35,8 @@ export class CollectorSet {
   constructor({ logger, maximumWaitTimeForAllCollectorsInS, collectors = [] }: CollectorSetConfig) {
     this.logger = logger;
     this.collectors = new Map(collectors.map((collector) => [collector.type, collector]));
-    this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS || 10;
+    this.maximumWaitTimeForAllCollectorsInS =
+      maximumWaitTimeForAllCollectorsInS || DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S;
   }
 
   /**
@@ -91,11 +93,18 @@ export class CollectorSet {
     return [...this.collectors.values()].find((c) => c.type === type);
   };
 
-  private getReadyCollectors = async (): Promise<AnyCollector[]> => {
-    const secondInMs = 1000;
+  private getReadyCollectors = async (
+    collectors: Map<string, AnyCollector> = this.collectors
+  ): Promise<AnyCollector[]> => {
+    if (!(collectors instanceof Map)) {
+      throw new Error(
+        `areAllCollectorsReady method given bad Map of collectors: ` + typeof collectors
+      );
+    }
 
+    const secondInMs = 1000;
     const collectorsWithStatus = await Promise.all(
-      [...this.collectors.values()].map(async (collector) => {
+      [...collectors.values()].map(async (collector) => {
         const isReadyWithTimeout = await withTimeout<boolean>({
           promise: (async (): Promise<boolean> => {
             try {
@@ -150,10 +159,11 @@ export class CollectorSet {
   public bulkFetch = async (
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    kibanaRequest: KibanaRequest | undefined // intentionally `| undefined` to enforce providing the parameter
+    kibanaRequest: KibanaRequest | undefined, // intentionally `| undefined` to enforce providing the parameter
+    collectors: Map<string, AnyCollector> = this.collectors
   ) => {
     this.logger.debug(`Getting ready collectors`);
-    const readyCollectors = await this.getReadyCollectors();
+    const readyCollectors = await this.getReadyCollectors(collectors);
     const responses = await Promise.all(
       readyCollectors.map(async (collector) => {
         this.logger.debug(`Fetching data from ${collector.type} collector`);
