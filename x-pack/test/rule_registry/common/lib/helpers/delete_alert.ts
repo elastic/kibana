@@ -14,18 +14,12 @@ import { getAlertsTargetIndices } from './get_alerts_target_indices';
 export const deleteAlert = async (
   getService: GetService,
   user: User,
-  registrationContext: string,
   spaceId: string,
   id: string | undefined
 ) => {
   const es = getService('es');
   const supertest = getService('supertestWithoutAuth');
-  const { body: targetIndices } = await getAlertsTargetIndices(
-    getService,
-    user,
-    registrationContext,
-    spaceId
-  );
+  const { body: targetIndices } = await getAlertsTargetIndices(getService, user, spaceId);
   if (id) {
     const { body, status } = await supertest
       .delete(`${getSpaceUrlPrefix(spaceId)}/api/alerts/alert/${id}`)

@@ -20,7 +20,6 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
         const { body: targetIndices } = await getAlertsTargetIndices(
           getService,
           obsOnlyRead,
-          'observability.apm',
           'space1'
         );
         const errorOrUndefined = await es.indices
