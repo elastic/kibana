@@ -7,6 +7,9 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+// import type { BoolQuery } from '@kbn/es-query';
+// import type { QueryDslQueryContainer } from '@elastic/elasticsearch';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { convertEsError } from './errors';
 
 /**
@@ -38,6 +41,13 @@ export async function callIndexAliasApi(
   }
 }
 
+interface FieldCapsApiParams {
+  callCluster: ElasticsearchClient;
+  indices: string[] | string;
+  fieldCapsOptions?: { allow_no_indices: boolean };
+  filter?: QueryDslQueryContainer;
+}
+
 /**
  *  Call the fieldCaps API for a list of indices.
  *
@@ -50,16 +60,21 @@ export async function callIndexAliasApi(
  *  @param  {Object} fieldCapsOptions
  *  @return {Promise<FieldCapsResponse>}
  */
-export async function callFieldCapsApi(
-  callCluster: ElasticsearchClient,
-  indices: string[] | string,
-  fieldCapsOptions: { allow_no_indices: boolean } = { allow_no_indices: false }
-) {
+export async function callFieldCapsApi(params: FieldCapsApiParams) {
+  const {
+    callCluster,
+    indices,
+    filter,
+    fieldCapsOptions = {
+      allow_no_indices: false,
+    },
+  } = params;
   try {
     return await callCluster.fieldCaps({
       index: indices,
       fields: '*',
       ignore_unavailable: true,
+      index_filter: filter,
       ...fieldCapsOptions,
     });
   } catch (error) {

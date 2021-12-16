@@ -85,6 +85,8 @@ export function registerRoutes(
           rollup_index: schema.maybe(schema.string()),
           allow_no_index: schema.maybe(schema.boolean()),
         }),
+        // todo avoid any
+        body: schema.maybe(schema.object({ index_filter: schema.any() })),
       },
     },
     async (context, request, response) => {
@@ -97,6 +99,7 @@ export function registerRoutes(
         rollup_index: rollupIndex,
         allow_no_index: allowNoIndex,
       } = request.query;
+      const filter = request.body?.index_filter;
 
       let parsedFields: string[] = [];
       try {
@@ -114,6 +117,7 @@ export function registerRoutes(
           fieldCapsOptions: {
             allow_no_indices: allowNoIndex || false,
           },
+          filter,
         });
 
         return response.ok({

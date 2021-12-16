@@ -259,6 +259,7 @@ export class DataViewsService {
       type: options.type,
       rollupIndex: options.rollupIndex,
       allowNoIndex: options.allowNoIndex,
+      filter: options.filter,
     });
   };
 
