@@ -1504,5 +1504,46 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.heatmap.args.gridConfigDisplayName', {
         defaultMessage: 'Heatmap layout configuration',
       }),
+    getSplitRowAccessorDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.splitRowAccessorDisplayName', {
+        defaultMessage: 'Split row',
+      }),
+    getSplitRowAccessorHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.plitRowAccessorHelp', {
+        defaultMessage: 'The id of the split row or the corresponding dimension',
+      }),
+    getSplitColumnAccessorDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.splitColumnAccessorDisplayName', {
+        defaultMessage: 'Split column',
+      }),
+    getSplitColumnAccessorHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.splitColumnAccessorHelp', {
+        defaultMessage: 'The id of the split column or the corresponding dimension',
+      }),
+    getShowTooltipDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.showTooltipDisplayName', {
+        defaultMessage: 'Show tooltip',
+      }),
+    getShowTooltipHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.showTooltipHelp', {
+        defaultMessage: 'Show tooltip on hover',
+      }),
+    getHighlightInHoverDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.highlightInHoverDisplayName', {
+        defaultMessage: 'Hightlight on hover',
+      }),
+    getHighlightInHoverHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.highlightInHoverHelp', {
+        defaultMessage:
+          'When this is enabled, it highlights the ranges of the same color on legend hover',
+      }),
+    getLastRangeIsRightOpenDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.lastRangeIsRightOpenDisplayName', {
+        defaultMessage: 'Last range is right open',
+      }),
+    getLastRangeIsRightOpenHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.heatmap.args.lastRangeIsRightOpenHelp', {
+        defaultMessage: 'If is set to true, the last range value will be right open',
+      }),
   },
 };
