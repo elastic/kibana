@@ -169,7 +169,7 @@ export function AddFilterModal({
 
   const renderFieldInput = (localFilterIndex: number) => {
     const fields = selectedIndexPattern ? getFilterableFields(selectedIndexPattern) : [];
-    const selectedFieldTemp = localFilters[localFilterIndex].field;
+    const selectedField = localFilters[localFilterIndex].field;
     return (
       <EuiFlexItem>
         <EuiFormRow fullWidth>
@@ -182,7 +182,7 @@ export function AddFilterModal({
               defaultMessage: 'Field',
             })}
             options={fields}
-            selectedOptions={selectedFieldTemp ? [selectedFieldTemp] : []}
+            selectedOptions={selectedField ? [selectedField] : []}
             getLabel={(field: IFieldType) => field.name}
             onChange={(selected: IFieldType[]) => {
               onFieldChange(selected, localFilterIndex);
@@ -197,18 +197,18 @@ export function AddFilterModal({
   };
 
   const renderOperatorInput = (localFilterIndex: number) => {
-    const selectedFieldTemp = localFilters[localFilterIndex].field;
-    const operators = selectedFieldTemp ? getOperatorOptions(selectedFieldTemp) : [];
-    const selectedOperatorTemp = localFilters[localFilterIndex].operator;
+    const selectedField = localFilters[localFilterIndex].field;
+    const operators = selectedField ? getOperatorOptions(selectedField) : [];
+    const selectedOperator = localFilters[localFilterIndex].operator;
     return (
       <EuiFlexItem>
         <EuiFormRow fullWidth>
           <GenericComboBox
             fullWidth
             compressed
-            isDisabled={!selectedFieldTemp}
+            isDisabled={!selectedField}
             placeholder={
-              selectedFieldTemp
+              selectedField
                 ? i18n.translate('data.filter.filterEditor.operatorSelectPlaceholderSelect', {
                     defaultMessage: 'Operator',
                   })
@@ -217,7 +217,7 @@ export function AddFilterModal({
                   })
             }
             options={operators}
-            selectedOptions={selectedOperatorTemp ? [selectedOperatorTemp] : []}
+            selectedOptions={selectedOperator ? [selectedOperator] : []}
             getLabel={({ message }) => message}
             onChange={(selected: Operator[]) => {
               onOperatorChange(selected, localFilterIndex);
@@ -232,18 +232,18 @@ export function AddFilterModal({
   };
 
   const renderParamsEditor = (localFilterIndex: number) => {
-    const selectedOperatorTemp = localFilters[localFilterIndex].operator;
-    const selectedFieldTemp = localFilters[localFilterIndex].field;
-    const selectedParamsTemp = localFilters[localFilterIndex].value;
-    switch (selectedOperatorTemp?.type) {
+    const selectedOperator = localFilters[localFilterIndex].operator;
+    const selectedField = localFilters[localFilterIndex].field;
+    const selectedParams = localFilters[localFilterIndex].value;
+    switch (selectedOperator?.type) {
       case 'exists':
         return '';
       case 'phrases':
         return (
           <PhrasesValuesInput
             indexPattern={selectedIndexPattern}
-            field={selectedFieldTemp}
-            values={selectedParamsTemp}
+            field={selectedField}
+            values={selectedParams}
             onChange={(newFilterParams: any) => {
               onParamsChange(newFilterParams, localFilterIndex);
             }}
@@ -255,8 +255,8 @@ export function AddFilterModal({
       case 'range':
         return (
           <RangeValueInput
-            field={selectedFieldTemp}
-            value={selectedParamsTemp}
+            field={selectedField}
+            value={selectedParams}
             onChange={(newFilterParams: any) => {
               onParamsChange(newFilterParams, localFilterIndex);
             }}
@@ -267,10 +267,10 @@ export function AddFilterModal({
       default:
         return (
           <PhraseValueInput
-            disabled={!selectedIndexPattern || !selectedOperatorTemp}
+            disabled={!selectedIndexPattern || !selectedOperator}
             indexPattern={selectedIndexPattern}
-            field={selectedFieldTemp}
-            value={selectedParamsTemp}
+            field={selectedField}
+            value={selectedParams}
             onChange={(newFilterParams: any) => {
               onParamsChange(newFilterParams, localFilterIndex);
             }}
@@ -413,6 +413,21 @@ export function AddFilterModal({
                         aria-label="Add filter group"
                       />
                     </EuiFlexItem>
+                    {localFilters.length > 1 && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          display="base"
+                          onClick={() => {
+                            const updatedFilters = localFilters.filter((_, idx) => idx !== index);
+                            setLocalFilters(updatedFilters);
+                          }}
+                          iconType="trash"
+                          size="s"
+                          color="danger"
+                          aria-label="Delete filter group"
+                        />
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                   <EuiSpacer size="s" />
                 </>
