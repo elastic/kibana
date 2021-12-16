@@ -6,7 +6,6 @@
  */
 
 import _ from 'lodash';
-import { LayerDescriptor } from '../../../common/descriptor_types';
 import {
   GRID_RESOLUTION,
   LAYER_TYPE,
@@ -16,11 +15,13 @@ import {
 } from '../../../common/constants';
 import {
   EMSTMSSourceDescriptor,
+  EMSFileSourceDescriptor,
   ESGeoGridSourceDescriptor,
   ESSearchSourceDescriptor,
   LayerDescriptor,
   VectorLayerDescriptor,
 } from '../../../common/descriptor_types';
+import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
 import {
   DEFAULT_EMS_DARKMAP_ID,
   DEFAULT_EMS_ROADMAP_DESATURATED_ID,
@@ -34,7 +35,9 @@ import { ClusterCountStats, EMS_BASEMAP_KEYS, JOIN_KEYS, LAYER_KEYS, MapStats, R
  */
 export class MapStatsCollector {
   private _mapCount = 0;
+  private _emsFileCountsPerMap: Array<{ [key: string]: number; }> = [];
   private _layerCountsPerMap: number[] = [];
+  private _layerTypeCountsPerMap: Array<{ [key: string]: number; }> = [];
   private _sourceCountsPerMap: number[] = [];
 
   private _basemapClusterStats: { [key in EMS_BASEMAP_KEYS]?: ClusterCountStats; } = {};
@@ -44,15 +47,27 @@ export class MapStatsCollector {
   private _scalingClusterStats: { [key in SCALING_KEYS]?: ClusterCountStats; } = {};
 
 
-  add(layerList: LayerDescriptor[]) {
+  push(attributes: MapSavedObjectAttributes) {
+    if (!attributes || !attributes.layerListJSON) {
+      return;
+    }
+
+    let layerList: LayerDescriptor[] = [];
+    try {
+      layerList = JSON.parse(attributes.layerListJSON);
+    } catch (e) {
+      return;
+    }
+
     this._mapCount++;
     this._layerCountsPerMap.push(layerList.length);
+    this._layerTypeCountsPerMap.push(_.countBy(layerList, 'type'));
     const sourceIdList = layerList
       .map((layer: LayerDescriptor) => {
-        return 'id' in layer.sourceDescriptor ? layer.sourceDescriptor.id | null;
+        return layer.sourceDescriptor && 'id' in layer.sourceDescriptor ? layer.sourceDescriptor.id : null;
       })
-      .filter((id: string | null) => {
-        return id !== null;
+      .filter((id: string | null | undefined) => {
+        return id;
       });
     this._sourceCountsPerMap.push(_.uniq(sourceIdList).length);
 
@@ -61,18 +76,21 @@ export class MapStatsCollector {
     const layerCounts: { [key in LAYER_KEYS]?: number } = {};
     const resolutionCounts: { [key in RESOLUTION_KEYS]?: number } = {};
     const scalingCounts: { [key in SCALING_KEYS]?: number } = {};
+    const emsFileCounts: { [key: string]: number; } = {};
     layerList.forEach(layerDescriptor => {
       this._updateCounts(getBasemapKey(layerDescriptor), basemapCounts);
       this._updateCounts(getJoinKey(layerDescriptor), joinCounts);
       this._updateCounts(getLayerKey(layerDescriptor), layerCounts);
       this._updateCounts(getResolutionKey(layerDescriptor), resolutionCounts);
       this._updateCounts(getScalingKey(layerDescriptor), scalingCounts);
+      this._updateCounts(getEmsFileId(layerDescriptor), emsFileCounts);
     });
-    this._updateClusterStats<EMS_BASEMAP_KEYS>(this._basemapClusterStats, basemapCounts);
-    this._updateClusterStats<JOIN_KEYS>(this._joinClusterStats, joinCounts);
-    this._updateClusterStats<LAYER_KEYS>(this._layerClusterStats, layerCounts);
-    this._updateClusterStats<RESOLUTION_KEYS>(this._resolutionClusterStats, resolutionCounts);
-    this._updateClusterStats<SCALING_KEYS>(this._scalingClusterStats, scalingCounts);
+    this._updateClusterStats(this._basemapClusterStats, basemapCounts);
+    this._updateClusterStats(this._joinClusterStats, joinCounts);
+    this._updateClusterStats(this._layerClusterStats, layerCounts);
+    this._updateClusterStats(this._resolutionClusterStats, resolutionCounts);
+    this._updateClusterStats(this._scalingClusterStats, scalingCounts);
+    this._emsFileCountsPerMap.push(emsFileCounts);
   }
 
   getStats(): MapStats {
@@ -89,28 +107,36 @@ export class MapStatsCollector {
       attributesPerMap: {
         // Count of data sources per map
         dataSourcesCount: {
-          min: this._sourceCountsPerMap.length ? _.min(this._sourceCountsPerMap) : 0,
-          max: this._sourceCountsPerMap.length ? _.max(this._sourceCountsPerMap) : 0,
+          min: this._sourceCountsPerMap.length ? _.min(this._sourceCountsPerMap)! : 0,
+          max: this._sourceCountsPerMap.length ? _.max(this._sourceCountsPerMap)! : 0,
           avg: this._mapCount > 0 ? sourceCountSum / this._mapCount : 0,
         },
         // Total count of layers per map
         layersCount: {
-          min: this._layerCountsPerMap.length ? _.min(this._layerCountsPerMap) : 0,
-          max: this._layerCountsPerMap.length ? _.max(this._layerCountsPerMap) : 0,
+          min: this._layerCountsPerMap.length ? _.min(this._layerCountsPerMap)! : 0,
+          max: this._layerCountsPerMap.length ? _.max(this._layerCountsPerMap)! : 0,
           avg: this._mapCount > 0 ? layerCountSum / this._mapCount : 0,
+        },
+        // Count of layers by type
+        layerTypesCount: {
+          ...getUniqueLayerCounts(this._layerTypeCountsPerMap, this._mapCount),
+        },
+        // Count of layer by EMS region
+        emsVectorLayersCount: {
+          ...getUniqueLayerCounts(this._emsFileCountsPerMap, this._mapCount),
         },
       }
     };
   }
 
-  _updateClusterStats<Keys>(clusterStats: { [key in <Keys>]: ClusterCountStats; }, counts: { [key in <Keys>]: number; }) {
+  _updateClusterStats(clusterStats: { [key: string]: ClusterCountStats; }, counts: { [key: string]: number; }) {
     for (const key in counts) {
       if (!counts.hasOwnProperty(key)) {
         continue;
       }
 
       if (!clusterStats[key]) {
-        clusterCounts[key] = {
+        clusterStats[key] = {
           min: counts[key],
           max: counts[key],
           total: counts[key],
@@ -121,11 +147,16 @@ export class MapStatsCollector {
         clusterStats[key].max = Math.max(counts[key], clusterStats[key].max);
         clusterStats[key].total += counts[key];
       }
-      clusterStats[key].avg = clusterStats[key].total / this._mapCount;
+    }
+
+    for (const key in clusterStats) {
+      if (clusterStats.hasOwnProperty(key)) {
+        clusterStats[key].avg = clusterStats[key].total / this._mapCount;
+      }
     }
   }
 
-  _updateCounts<Keys>(key: <Keys> | null, counts: { [key in <Keys>]: number; }) {
+  _updateCounts(key: string | null, counts: { [key: string]: number; }) {
     if (key) {
       if (key in counts) {
         counts[key] += 1;
@@ -136,9 +167,40 @@ export class MapStatsCollector {
   }
 }
 
+function getUniqueLayerCounts(layerCountsList: Array<{ [key: string]: number; }>, mapsCount: number): { [key: string]: Omit<ClusterCountStats, 'total'> } {
+  const uniqueLayerTypes = _.uniq(_.flatten(layerCountsList.map((lTypes) => Object.keys(lTypes))));
+
+  return uniqueLayerTypes.reduce((accu: Omit<ClusterCountStats, 'total'>, type: string) => {
+    const typeCounts = layerCountsList.reduce(
+      (tCountsAccu: number[], tCounts: { [key: string]: number; }): number[] => {
+        if (tCounts[type]) {
+          tCountsAccu.push(tCounts[type]);
+        }
+        return tCountsAccu;
+      },
+      []
+    );
+    const typeCountsSum = _.sum(typeCounts);
+    accu[type] = {
+      min: typeCounts.length ? (_.min(typeCounts) as number) : 0,
+      max: typeCounts.length ? (_.max(typeCounts) as number) : 0,
+      avg: typeCountsSum ? typeCountsSum / mapsCount : 0,
+    };
+    return accu;
+  }, {});
+}
+
+function getEmsFileId(layerDescriptor: LayerDescriptor): string | null {
+  return layerDescriptor.sourceDescriptor !== null &&
+    layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.EMS_FILE &&
+    'id'  in layerDescriptor.sourceDescriptor
+    ? (layerDescriptor.sourceDescriptor as EMSFileSourceDescriptor).id
+    : null;
+}
+
 function getBasemapKey(layerDescriptor: LayerDescriptor): EMS_BASEMAP_KEYS | null {
   if (
-    !layerDescriptor.sourceDescriptor &&
+    !layerDescriptor.sourceDescriptor ||
     layerDescriptor.sourceDescriptor.type !== SOURCE_TYPES.EMS_TMS
   ) {
     return null;

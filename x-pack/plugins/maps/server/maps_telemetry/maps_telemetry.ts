@@ -16,31 +16,19 @@ import {
   SOURCE_TYPES,
 } from '../../common/constants';
 import {
-  AbstractSourceDescriptor,
   ESGeoGridSourceDescriptor,
   ESSearchSourceDescriptor,
   LayerDescriptor,
 } from '../../common/descriptor_types';
-import { MapSavedObject, MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import {
   getElasticsearch,
   getIndexPatternsServiceFactory,
   getSavedObjectClient,
 } from '../kibana_server_services';
 import { injectReferences } from '././../../common/migrations/references';
-import {
-  getBaseMapsPerCluster,
-  getGridResolutionsPerCluster,
-  getScalingOptionsPerCluster,
-  getTelemetryLayerTypesPerCluster,
-  getTermJoinsPerCluster,
-  TELEMETRY_BASEMAP_COUNTS_PER_CLUSTER,
-  TELEMETRY_GRID_RESOLUTION_COUNTS_PER_CLUSTER,
-  TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER,
-  TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER,
-  TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER,
-} from './util';
 import { SavedObjectsClient } from '../../../../../src/core/server';
+import { MapStats, MapStatsCollector } from './map_stats';
 
 async function getIndexPatternsService() {
   const factory = getIndexPatternsServiceFactory();
@@ -50,18 +38,6 @@ async function getIndexPatternsService() {
   );
 }
 
-interface IStats {
-  [key: string]: {
-    min: number;
-    max: number;
-    avg: number;
-  };
-}
-
-interface ILayerTypeCount {
-  [key: string]: number;
-}
-
 export interface GeoIndexPatternsUsage {
   indexPatternsWithGeoFieldCount?: number;
   indexPatternsWithGeoPointFieldCount?: number;
@@ -69,72 +45,7 @@ export interface GeoIndexPatternsUsage {
   geoShapeAggLayersCount?: number;
 }
 
-export interface LayersStatsUsage {
-  mapsTotalCount: number;
-  timeCaptured: string;
-  layerTypes: TELEMETRY_LAYER_TYPE_COUNTS_PER_CLUSTER;
-  scalingOptions: TELEMETRY_SCALING_OPTION_COUNTS_PER_CLUSTER;
-  joins: TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER;
-  basemaps: TELEMETRY_BASEMAP_COUNTS_PER_CLUSTER;
-  resolutions: TELEMETRY_GRID_RESOLUTION_COUNTS_PER_CLUSTER;
-  attributesPerMap: {
-    dataSourcesCount: {
-      min: number;
-      max: number;
-      avg: number;
-    };
-    layersCount: {
-      min: number;
-      max: number;
-      avg: number;
-    };
-    layerTypesCount: IStats;
-    emsVectorLayersCount: IStats;
-  };
-}
-
-export type MapsUsage = LayersStatsUsage & GeoIndexPatternsUsage;
-
-function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: number) {
-  const uniqueLayerTypes = _.uniq(_.flatten(layerCountsList.map((lTypes) => Object.keys(lTypes))));
-
-  return uniqueLayerTypes.reduce((accu: IStats, type: string) => {
-    const typeCounts = layerCountsList.reduce(
-      (tCountsAccu: number[], tCounts: ILayerTypeCount): number[] => {
-        if (tCounts[type]) {
-          tCountsAccu.push(tCounts[type]);
-        }
-        return tCountsAccu;
-      },
-      []
-    );
-    const typeCountsSum = _.sum(typeCounts);
-    accu[type] = {
-      min: typeCounts.length ? (_.min(typeCounts) as number) : 0,
-      max: typeCounts.length ? (_.max(typeCounts) as number) : 0,
-      avg: typeCountsSum ? typeCountsSum / mapsCount : 0,
-    };
-    return accu;
-  }, {});
-}
-
-function getEMSLayerCount(layerLists: LayerDescriptor[][]): ILayerTypeCount[] {
-  return layerLists.map((layerList: LayerDescriptor[]) => {
-    const emsLayers = layerList.filter((layer: LayerDescriptor) => {
-      return (
-        layer.sourceDescriptor !== null &&
-        layer.sourceDescriptor.type === SOURCE_TYPES.EMS_FILE &&
-        (layer.sourceDescriptor as AbstractSourceDescriptor).id
-      );
-    });
-    const emsCountsById = _(emsLayers).countBy((layer: LayerDescriptor) => {
-      return (layer.sourceDescriptor as AbstractSourceDescriptor).id;
-    });
-
-    const layerTypeCount = emsCountsById.value();
-    return layerTypeCount as ILayerTypeCount;
-  }) as ILayerTypeCount[];
-}
+export type MapsUsage = MapStats & GeoIndexPatternsUsage;
 
 async function isFieldGeoShape(
   indexPatternId: string,
@@ -198,16 +109,6 @@ async function getGeoShapeAggCount(layerLists: LayerDescriptor[][]): Promise<num
   return _.sum(countsPerMap);
 }
 
-export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescriptor[][] {
-  return mapSavedObjects.map((savedMapObject) => {
-    const layerList =
-      savedMapObject.attributes && savedMapObject.attributes.layerListJSON
-        ? JSON.parse(savedMapObject.attributes.layerListJSON)
-        : [];
-    return layerList as LayerDescriptor[];
-  });
-}
-
 async function filterIndexPatternsByField(fields: string[]) {
   const indexPatternsService = await getIndexPatternsService();
   const indexPatternIds = await indexPatternsService.getIds(true);
@@ -252,112 +153,48 @@ export async function buildMapsIndexPatternsTelemetry(
   };
 }
 
-export function buildMapsSavedObjectsTelemetry(layerLists: LayerDescriptor[][]): LayersStatsUsage {
-  const mapsCount = layerLists.length;
-  const dataSourcesCount = layerLists.map((layerList: LayerDescriptor[]) => {
-    // todo: not every source-descriptor has an id
-    // @ts-ignore
-    const sourceIdList = layerList.map((layer: LayerDescriptor) => layer.sourceDescriptor.id);
-    return _.uniq(sourceIdList).length;
-  });
-
-  const layersCount = layerLists.map((lList) => lList.length);
-  const layerTypesCount = layerLists.map((lList) => _.countBy(lList, 'type'));
-
-  // Count of EMS Vector layers used
-  const emsLayersCount = getEMSLayerCount(layerLists);
-
-  const dataSourcesCountSum = _.sum(dataSourcesCount);
-  const layersCountSum = _.sum(layersCount);
-
-  const telemetryLayerTypeCounts = getTelemetryLayerTypesPerCluster(layerLists);
-  const scalingOptions = getScalingOptionsPerCluster(layerLists);
-  const joins = getTermJoinsPerCluster(layerLists);
-  const basemaps = getBaseMapsPerCluster(layerLists);
-  const resolutions = getGridResolutionsPerCluster(layerLists);
-
-  return {
-    // Total count of maps
-    mapsTotalCount: mapsCount,
-    // Time of capture
-    timeCaptured: new Date().toISOString(),
-    layerTypes: telemetryLayerTypeCounts,
-    scalingOptions,
-    joins,
-    basemaps,
-    resolutions,
-    attributesPerMap: {
-      // Count of data sources per map
-      dataSourcesCount: {
-        min: dataSourcesCount.length ? _.min(dataSourcesCount)! : 0,
-        max: dataSourcesCount.length ? _.max(dataSourcesCount)! : 0,
-        avg: dataSourcesCountSum ? layersCountSum / mapsCount : 0,
-      },
-      // Total count of layers per map
-      layersCount: {
-        min: layersCount.length ? _.min(layersCount)! : 0,
-        max: layersCount.length ? _.max(layersCount)! : 0,
-        avg: layersCountSum ? layersCountSum / mapsCount : 0,
-      },
-      // Count of layers by type
-      layerTypesCount: {
-        ...getUniqueLayerCounts(layerTypesCount, mapsCount),
-      },
-      // Count of layer by EMS region
-      emsVectorLayersCount: {
-        ...getUniqueLayerCounts(emsLayersCount, mapsCount),
-      },
-    },
-  };
-}
-
-export async function execTransformOverMultipleSavedObjectPages<T>(
-  savedObjectType: string,
-  transform: (savedObjects: Array<SavedObject<T>>) => void
+async function findMaps(
+  onMap: (savedObject: SavedObject<MapSavedObjectAttributes>) => void
 ) {
   const savedObjectsClient = getSavedObjectClient();
 
   let currentPage = 1;
-  // Seed values
   let page = 0;
   let perPage = 0;
   let total = 0;
-  let savedObjects = [];
 
   do {
-    const savedObjectsFindResult = await savedObjectsClient.find<T>({
-      type: savedObjectType,
+    const results = await savedObjectsClient.find<MapSavedObjectAttributes>({
+      type: MAP_SAVED_OBJECT_TYPE,
       page: currentPage++,
     });
-    ({ page, per_page: perPage, saved_objects: savedObjects, total } = savedObjectsFindResult);
-    transform(savedObjects);
+    const { page, per_page: perPage, saved_objects: savedObjects, total } = results;
+    savedObjects.forEach(savedObject => {
+      onMap(savedObject);
+    });
   } while (page * perPage < total);
 }
 
 export async function getMapsTelemetry(): Promise<MapsUsage> {
-  // Get layer descriptors for Maps saved objects. This is not set up
-  // to be done incrementally (i.e. - per page) but minimally we at least
-  // build a list of small footprint objects
+  const mapStatsCollector = new MapStatsCollector();
   const layerLists: LayerDescriptor[][] = [];
-  await execTransformOverMultipleSavedObjectPages<MapSavedObjectAttributes>(
-    MAP_SAVED_OBJECT_TYPE,
-    (savedObjects) => {
-      const savedObjectsWithIndexPatternIds = savedObjects.map((savedObject) => {
-        return {
-          ...savedObject,
-          ...injectReferences(savedObject),
-        };
-      });
-      return layerLists.push(...getLayerLists(savedObjectsWithIndexPatternIds));
+  await findMaps(
+    (savedObject) => {
+      mapStatsCollector.push(savedObject.attributes);
+
+      const savedObjectWithIndexPatternIds = {
+        ...savedObject,
+        ...injectReferences(savedObject),
+      };
+      layerLists.push(savedObjectWithIndexPatternIds);
     }
   );
-  const savedObjectsTelemetry = buildMapsSavedObjectsTelemetry(layerLists);
-
+  
   // Incrementally harvest index pattern saved objects telemetry
   const indexPatternsTelemetry = await buildMapsIndexPatternsTelemetry(layerLists);
 
   return {
     ...indexPatternsTelemetry,
-    ...savedObjectsTelemetry,
+    ...mapStatsCollector.getStats(),
   };
 }

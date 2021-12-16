@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-interface ClusterCountStats {
+export interface ClusterCountStats {
   min: number;
   max: number;
   total: number;
