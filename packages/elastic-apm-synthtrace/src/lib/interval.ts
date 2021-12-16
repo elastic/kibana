@@ -7,101 +7,14 @@
  */
 import moment from 'moment';
 import { ApmFields } from './apm/apm_fields';
-import { getTransactionMetrics } from './apm/utils/get_transaction_metrics';
-import { getSpanDestinationMetrics } from './apm/utils/get_span_destination_metrics';
-import { getBreakdownMetrics } from './apm/utils/get_breakdown_metrics';
+import { SpanGenerator, SpanIterable } from './span_iterable';
 
-export const defaultProcessors = [
-  getTransactionMetrics,
-  getSpanDestinationMetrics,
-  getBreakdownMetrics,
-];
-export async function* streamProcess(
-  processors: Array<(events: ApmFields[]) => ApmFields[]>,
-  ...eventSources: SpanIterable[]
-) {
-  let localBuffer = [];
-  let flushAfter: number | null = null;
-  for (const eventSource of eventSources) {
-    for (const event of eventSource) {
-      localBuffer.push(event);
-      if (flushAfter === undefined)
-        flushAfter = moment(new Date(event['@timestamp'] as number)).add(1, 'm').valueOf()
-
-      yield event;
-      // TODO move away from chunking and feed this data one by one to processors
-      if (
-        (flushAfter !== null && Date.now().valueOf() >= flushAfter) ||
-        localBuffer.length === 10000
-      ) {
-        for (const processor of processors) {
-          yield* processor(localBuffer);
-        }
-        localBuffer = [];
-        flushAfter = null;
-      }
-    }
+export function parseInterval(interval: string): [number, string] {
+  const args = interval.match(/(\d+)(s|m|h|d)/);
+  if (!args || args.length < 3) {
+    throw new Error('Failed to parse interval');
   }
-  if (localBuffer.length > 0) {
-    for (const processor of processors) {
-      yield* processor(localBuffer);
-    }
-  }
-}
-export interface SpanIterable extends Iterable<ApmFields>, AsyncIterable<ApmFields> {
-  toArray(): ApmFields[];
-  concat(...iterables: SpanIterable[]): ConcatenatedSpanGenerators;
-}
-export class SpanGenerator implements SpanIterable {
-  constructor(
-    private readonly interval: Interval,
-    private readonly dataGenerator: Array<(interval: Interval) => Generator<ApmFields>>
-  ) {}
-
-  toArray(): ApmFields[] {
-    return Array.from(this);
-  }
-  concat(...iterables: SpanGenerator[]) {
-    return new ConcatenatedSpanGenerators([this, ...iterables]);
-  }
-  *[Symbol.iterator]() {
-    for (const iterator of this.dataGenerator) {
-      for (const fields of iterator(this.interval)) {
-        yield fields;
-      }
-    }
-  }
-  async *[Symbol.asyncIterator]() {
-    for (const iterator of this.dataGenerator) {
-      for (const fields of iterator(this.interval)) {
-        yield fields;
-      }
-    }
-  }
-}
-export class ConcatenatedSpanGenerators implements SpanIterable {
-  constructor(private readonly dataGenerators: SpanIterable[]) {}
-
-  toArray(): ApmFields[] {
-    return Array.from(this);
-  }
-  concat(...iterables: SpanIterable[]) {
-    return new ConcatenatedSpanGenerators([...this.dataGenerators, ...iterables]);
-  }
-  *[Symbol.iterator]() {
-    for (const iterator of this.dataGenerators) {
-      for (const fields of iterator) {
-        yield fields;
-      }
-    }
-  }
-  async *[Symbol.asyncIterator]() {
-    for (const iterator of this.dataGenerators) {
-      for (const fields of iterator) {
-        yield fields;
-      }
-    }
-  }
+  return [Number(args[1]), args[2] as any];
 }
 
 export class Interval implements Iterable<number> {
@@ -109,12 +22,18 @@ export class Interval implements Iterable<number> {
     private readonly from: Date,
     private readonly to: Date,
     private readonly interval: string,
-    private readonly yieldRate: number = 1
-  ) {}
+    private readonly yieldRate: number = 1,
+  ) {
+    [this.intervalAmount, this.intervalUnit] = parseInterval(interval)
+  }
+
+  private readonly intervalAmount: number;
+  private readonly intervalUnit: any;
 
   transactions(map: (timestamp: number) => ApmFields[]) {
     return this.flatMap(map);
   }
+
   flatMap(map: (timestamp: number, index?: number) => ApmFields[]): SpanIterable {
     return new SpanGenerator(this, [
       function* (i) {
@@ -133,12 +52,8 @@ export class Interval implements Iterable<number> {
     return new Interval(this.from, this.to, this.interval, rate);
   }
 
-  private *_generate(): Iterable<number> {
+  private* _generate(): Iterable<number> {
     let now = this.from;
-    const args = this.interval.match(/(\d+)(s|m|h|d)/);
-    if (!args) {
-      throw new Error('Failed to parse interval');
-    }
     const yieldRate = () => {
       const timestamp = now.getTime();
       return new Array<number>(this.yieldRate).fill(timestamp);
@@ -147,8 +62,8 @@ export class Interval implements Iterable<number> {
       yield* yieldRate();
       now = new Date(
         moment(now)
-          .add(Number(args[1]), args[2] as any)
-          .valueOf()
+          .add(this.intervalAmount, this.intervalUnit)
+          .valueOf(),
       );
     } while (now < this.to);
   }

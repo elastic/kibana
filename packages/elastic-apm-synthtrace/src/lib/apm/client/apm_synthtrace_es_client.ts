@@ -12,7 +12,8 @@ import { getApmWriteTargets } from '../utils/get_apm_write_targets';
 import { Logger } from '../../utils/create_logger';
 import { ApmElasticsearchOutputWriteTargets } from '../utils/apm_events_to_elasticsearch_output';
 import { ApmFields } from '../apm_fields';
-import { defaultProcessors, SpanIterable, streamProcess } from '../../interval';
+import { SpanIterable } from '../../span_iterable';
+import { defaultProcessors, streamProcessAsync } from '../../stream_processor';
 
 export class ApmSynthtraceEsClient {
   constructor(private readonly client: Client, private readonly logger: Logger) {}
@@ -35,7 +36,8 @@ export class ApmSynthtraceEsClient {
     const writeTargets = await this.getWriteTargets();
 
     await this.client.helpers.bulk<ApmFields>({
-      datasource: streamProcess(defaultProcessors, events),
+      datasource: streamProcessAsync(defaultProcessors, events),
+      // TODO bug in client not passing generic to BulkHelperOptions<>
       onDocument: (doc: unknown) => {
         const d = doc as ApmFields;
         const index =

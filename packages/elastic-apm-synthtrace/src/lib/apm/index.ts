@@ -7,12 +7,12 @@
  */
 import { service } from './service';
 import { browser } from './browser';
-import { getTransactionMetrics } from './utils/get_transaction_metrics';
-import { getSpanDestinationMetrics } from './utils/get_span_destination_metrics';
+import { getTransactionMetrics } from './processors/get_transaction_metrics';
+import { getSpanDestinationMetrics } from './processors/get_span_destination_metrics';
 import { getObserverDefaults } from './defaults/get_observer_defaults';
 import { getChromeUserAgentDefaults } from './defaults/get_chrome_user_agent_defaults';
 import { apmEventsToElasticsearchOutput } from './utils/apm_events_to_elasticsearch_output';
-import { getBreakdownMetrics } from './utils/get_breakdown_metrics';
+import { getBreakdownMetrics } from './processors/get_breakdown_metrics';
 import { getApmWriteTargets } from './utils/get_apm_write_targets';
 import { ApmSynthtraceEsClient } from './client/apm_synthtrace_es_client';
 

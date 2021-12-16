@@ -8,8 +8,8 @@
 
 import { apm } from '../../lib/apm';
 import { timerange } from '../../lib/timerange';
-import { getSpanDestinationMetrics } from '../../lib/apm/utils/get_span_destination_metrics';
-import { streamProcess } from '../../lib/interval';
+import { getSpanDestinationMetrics } from '../../lib/apm/processors/get_span_destination_metrics';
+import { StreamProcessor  } from '../../lib/stream_processor';
 
 describe('span destination metrics', () => {
   let events: Array<Record<string, any>>;
@@ -22,8 +22,8 @@ describe('span destination metrics', () => {
       new Date('2021-01-01T00:00:00.000Z'),
       new Date('2021-01-01T00:15:00.000Z'),
     );
-
-    events = Array.from(streamProcess([getSpanDestinationMetrics],
+    const processor = new StreamProcessor({processors: [getSpanDestinationMetrics], flushInterval: "15m"});
+    events = processor.streamToArray(
       range
         .interval('1m')
         .rate(25)
@@ -67,8 +67,8 @@ describe('span destination metrics', () => {
             )
             .serialize(),
         ),
-    ))
-      .filter(fields => fields['metricset.name'] === 'span_destination');
+    )
+    .filter(fields => fields['metricset.name'] === 'span_destination');
   });
 
   it('generates the right amount of span metrics', () => {

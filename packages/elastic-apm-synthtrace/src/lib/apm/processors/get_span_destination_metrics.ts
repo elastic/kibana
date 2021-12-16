@@ -7,7 +7,7 @@
  */
 
 import { ApmFields } from '../apm_fields';
-import { aggregate } from './aggregate';
+import { aggregate } from '../utils/aggregate';
 
 export function getSpanDestinationMetrics(events: ApmFields[]) {
   const exitSpans = events.filter((event) => !!event['span.destination.service.resource']);

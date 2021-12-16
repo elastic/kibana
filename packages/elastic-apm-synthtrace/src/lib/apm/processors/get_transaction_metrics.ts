@@ -8,7 +8,7 @@
 
 import { sortBy } from 'lodash';
 import { ApmFields } from '../apm_fields';
-import { aggregate } from './aggregate';
+import { aggregate } from '../utils/aggregate';
 
 function sortAndCompressHistogram(histogram?: { values: number[]; counts: number[] }) {
   return sortBy(histogram?.values).reduce(

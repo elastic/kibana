@@ -8,8 +8,8 @@
 
 import { apm } from '../../lib/apm';
 import { timerange } from '../../lib/timerange';
-import { getTransactionMetrics } from '../../lib/apm/utils/get_transaction_metrics';
-import { streamProcess } from '../../lib/interval';
+import { getTransactionMetrics } from '../../lib/apm/processors/get_transaction_metrics';
+import { StreamProcessor } from '../../lib/stream_processor';
 
 describe('transaction metrics', () => {
   let events: Array<Record<string, any>>;
@@ -29,7 +29,8 @@ describe('transaction metrics', () => {
         .duration(1000)
         .timestamp(timestamp)
 
-    events = Array.from(streamProcess([getTransactionMetrics],
+    const processor = new StreamProcessor({processors: [getTransactionMetrics], flushInterval: "15m"});
+    events = processor.streamToArray(
       range
         .interval('1m')
         .rate(25)
@@ -47,7 +48,6 @@ describe('transaction metrics', () => {
             .serialize()
        )
      )
-    )
     .filter(fields => fields['metricset.name'] === 'transaction');
   });
 

@@ -8,7 +8,7 @@
 import objectHash from 'object-hash';
 import { groupBy, pickBy } from 'lodash';
 import { ApmFields } from '../apm_fields';
-import { createPicker } from './create_picker';
+import { createPicker } from '../utils/create_picker';
 
 const instanceFields = [
   'container.*',
@@ -41,7 +41,10 @@ export function getBreakdownMetrics(events: ApmFields[]) {
 
   Object.keys(txWithSpans).forEach((transactionId) => {
     const txEvents = txWithSpans[transactionId];
-    const transaction = txEvents.find((event) => event['processor.event'] === 'transaction')!;
+    const transaction = txEvents.find((event) => event['processor.event'] === 'transaction');
+    if (transaction === undefined) {
+      return
+    }
 
     const eventsById: Record<string, ApmFields> = {};
     const activityByParentId: Record<string, Array<{ from: number; to: number }>> = {};
