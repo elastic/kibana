@@ -48,7 +48,7 @@ ColorPicker.propTypes = {
 };
 
 export const colorPicker = () => ({
-  name: 'color',
+  name: 'color_picker',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(withDebounceArg(ColorPicker)),
