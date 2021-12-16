@@ -52,9 +52,10 @@ describe('Sourcerer', () => {
     before(() => {
       createUsersAndRoles(usersToCreate, rolesToCreate);
     });
-    it(`role(s) ${secReadCasesAllUser.roles.join()} shows error when user does not have permissions`, () => {
+    it(`reader role is able to read`, () => {
       loginWithUserAndWaitForPageWithoutDateRange(HOSTS_URL, secReadCasesAllUser);
-      cy.get(TOASTER).should('have.text', 'Write role required to generate data');
+      openSourcerer();
+      isDataViewSelection(siemDataViewTitle);
     });
   });
 

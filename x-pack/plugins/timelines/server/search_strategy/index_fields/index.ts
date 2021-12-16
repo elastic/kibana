@@ -8,7 +8,11 @@
 import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
-import { ElasticsearchClient, SavedObjectsServiceStart, StartServicesAccessor } from 'kibana/server';
+import {
+  ElasticsearchClient,
+  SavedObjectsServiceStart,
+  StartServicesAccessor,
+} from 'kibana/server';
 import {
   IndexPatternsFetcher,
   ISearchStrategy,
@@ -130,13 +134,13 @@ export const requestIndexFieldSearch = async (
         throw r;
       }
     }
-    console.log('dataView.title', dataView.title);
+
     const patternList = dataView.title.split(',');
     indicesExist = (await findExistingIndices(patternList, esClient.asCurrentUser)).reduce(
       (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
       []
     );
-    console.log('indicesExist', indicesExist);
+
     if (!request.onlyCheckIfIndicesExist) {
       const dataViewSpec = dataView.toSpec();
       const fieldDescriptor = [Object.values(dataViewSpec.fields ?? {})];
