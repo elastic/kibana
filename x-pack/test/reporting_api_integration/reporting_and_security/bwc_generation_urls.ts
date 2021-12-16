@@ -53,7 +53,6 @@ export default function ({ getService }: FtrProviderContext) {
         const reportPaths = [];
         reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_6_2));
         reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_VISUALIZATION_6_2));
-        reportPaths.push(await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_FILTER_QUERY_6_2));
 
         await reportingAPI.expectAllJobsToFinishSuccessfully(reportPaths);
       }).timeout(1540000);
