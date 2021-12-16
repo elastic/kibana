@@ -38,7 +38,7 @@ export const useAlertsModal = () => {
         {}
       )!;
       window.localStorage.setItem('ALERTS_MODAL_DECISION_MADE', 'true');
-      showAlertsToast(response);
+      showAlertsToast(response, services.theme?.theme$);
     } catch (err) {
       await handleRequestError(err);
     }
