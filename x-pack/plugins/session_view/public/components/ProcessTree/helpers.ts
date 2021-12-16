@@ -9,9 +9,6 @@ import { ProcessImpl } from './hooks';
 
 export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[]) => {
   events.forEach((event) => {
-    if (event.process.entity_id === '3d07f844-ad71-5fd0-969d-40c58c751fd3') {
-      debugger
-    }
     const { entity_id: id } = event.process;
     let process = processMap[id];
 
@@ -33,9 +30,7 @@ export const buildProcessTree = (
   sessionEntityId: string,
   backwardDirection: boolean = false
 ) => {
-  debugger
   events.forEach((event) => {
-    debugger
     const process = processMap[event.process.entity_id];
     const parentProcess = processMap[event.process.parent?.entity_id];
 
@@ -118,7 +113,6 @@ export const processNewEvents = (
   }
 
   const updatedProcessMap = updateProcessMap(eventsProcessMap, events);
-  debugger
   const builtProcessMap = buildProcessTree(
     updatedProcessMap,
     events,

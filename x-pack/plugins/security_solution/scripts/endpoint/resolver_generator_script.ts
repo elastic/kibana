@@ -53,7 +53,7 @@ async function main() {
     kibana: {
       alias: 'k',
       describe: 'kibana url',
-      default: 'http://elastic:changeme@localhost:5601/zwt',
+      default: 'http://elastic:changeme@localhost:5601',
       type: 'string',
     },
     eventIndex: {
