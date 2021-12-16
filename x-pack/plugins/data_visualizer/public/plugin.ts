@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup, CoreStart } from 'kibana/public';
+import { ChartsPluginStart } from 'src/plugins/charts/public';
 import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type { SharePluginStart } from '../../../../src/plugins/share/public';
 import { Plugin } from '../../../../src/core/public';
@@ -23,6 +24,7 @@ import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables';
 import { FieldFormatsStart } from '../../../../src/plugins/field_formats/public';
+import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -36,8 +38,10 @@ export interface DataVisualizerStartDependencies {
   security?: SecurityPluginSetup;
   share: SharePluginStart;
   lens?: LensPublicStart;
+  charts: ChartsPluginStart;
   dataViewFieldEditor?: IndexPatternFieldEditorStart;
   fieldFormats: FieldFormatsStart;
+  uiActions?: UiActionsStart;
 }
 
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
