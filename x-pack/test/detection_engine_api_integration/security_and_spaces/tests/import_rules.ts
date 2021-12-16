@@ -486,7 +486,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('importing a non-default-space 7.16 rule with a connector made in the non-default space should result in a 200', async () => {
+      it.only('importing a non-default-space 7.16 rule with a connector made in the non-default space should result in a 200', async () => {
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
         );
@@ -560,6 +560,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach('file', buffer, 'rules.ndjson')
           .expect(200);
+        console.error('WHAT HAPPENED', JSON.stringify(body, null, 2));
         expect(body.success).to.eql(true);
         expect(body.success_count).to.eql(1);
         expect(body.errors.length).to.eql(0);

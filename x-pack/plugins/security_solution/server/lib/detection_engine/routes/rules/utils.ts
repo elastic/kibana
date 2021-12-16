@@ -8,7 +8,7 @@
 import { countBy } from 'lodash/fp';
 import uuid from 'uuid';
 import { Action } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
@@ -195,6 +195,10 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };
 
+const createQueryTerm = (input: string) => input.replace(/\\/g, '\\\\').replace(/\"/g, '\\"');
+const createQuery = (type: string, id: string, rawIdPrefix: string) =>
+  `"${createQueryTerm(`${rawIdPrefix}${type}:${id}`)}" | "${createQueryTerm(id)}"`;
+
 /**
  * Query for a saved object with a given origin id and replace the
  * id in the provided action with the _id from the query result
@@ -204,45 +208,22 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
  */
 export const swapActionIds = async (
   action: Action,
-  esClient: ElasticsearchClient
+  savedObjectsClient: SavedObjectsClientContract
 ): Promise<Action | Error> => {
   try {
-    // actions are hidden SO types so we need to query
-    // with the elasticsearch client.. unless there
-    // is a better way to do this..
-    const actionWithRequestedOriginId = await esClient.search({
-      index: '.kibana',
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  originId: {
-                    // we are attempting to import a rule that contains an action.
-                    // That action (connector) has the old, pre-8.0 _id.
-                    // We need to swap the old, pre-8.0 _id for the new id (alias_target_id)
-                    // and replace the id of the action in the rule with the new _id
-                    value: action.id,
-                  },
-                },
-              },
-              {
-                term: {
-                  type: {
-                    value: 'action',
-                  },
-                },
-              },
-            ],
-          },
-        },
-      },
+    // TODO: might need to pass down namespace
+    // but for now it's blank to do local testing.
+    const search = createQuery('action', action.id, '');
+    const foundAction = await savedObjectsClient.find<Action>({
+      type: 'action',
+      search,
+      rootSearchFields: ['_id', 'originId'],
     });
-    if (actionWithRequestedOriginId.body.hits.hits.length === 1) {
+
+    if (foundAction.saved_objects.length === 1) {
       // id is of the form 'action:1234-5678...' so I need to split off the 'action' prefix
-      return { ...action, id: actionWithRequestedOriginId.body.hits.hits[0]._id.split(':')[1] };
-    } else if (actionWithRequestedOriginId.body.hits.hits.length > 1) {
+      return { ...action, id: foundAction.saved_objects[0].id };
+    } else if (foundAction.saved_objects.length > 1) {
       return new Error(
         `action connector with originId: ${action.id} had conflicts. Please resolve these conflicts either in the file you are attempting to upload or resolve the conflicting action connector in Kibana.`
       );
@@ -285,7 +266,7 @@ export const swapActionIds = async (
  */
 export const migrateLegacyActionsIds = async (
   rules: PromiseFromStreams[],
-  esClient: ElasticsearchClient
+  savedObjectsClient: SavedObjectsClientContract
 ): Promise<PromiseFromStreams[]> => {
   const isImportRule = (r: unknown): r is ImportRulesSchemaDecoded => !(r instanceof Error);
   return Promise.all(
@@ -294,7 +275,7 @@ export const migrateLegacyActionsIds = async (
         // can we swap the pre 8.0 action connector(s) id with the new,
         // post-8.0 action id (swap the originId for the new _id?)
         const newActions: Array<Action | Error> = await Promise.all(
-          rule.actions.map((action: Action) => swapActionIds(action, esClient))
+          rule.actions.map((action: Action) => swapActionIds(action, savedObjectsClient))
         );
 
         // any errors discovered while trying to migrate
