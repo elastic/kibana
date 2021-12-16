@@ -18,11 +18,11 @@ export class PlaceholderWidget implements monaco.editor.IContentWidget {
 
   private domNode: undefined | HTMLElement;
 
-  getId(): string {
+  public getId(): string {
     return 'KBN_CODE_EDITOR_PLACEHOLDER_WIDGET_ID';
   }
 
-  getDomNode(): HTMLElement {
+  public getDomNode(): HTMLElement {
     if (!this.domNode) {
       const domNode = document.createElement('div');
       domNode.innerText = this.placeholderText;
@@ -33,7 +33,7 @@ export class PlaceholderWidget implements monaco.editor.IContentWidget {
     return this.domNode;
   }
 
-  getPosition(): monaco.editor.IContentWidgetPosition | null {
+  public getPosition(): monaco.editor.IContentWidgetPosition | null {
     return {
       position: {
         column: 1,
