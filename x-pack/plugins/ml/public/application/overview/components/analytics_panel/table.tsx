@@ -17,7 +17,7 @@ import {
   getTaskStateBadge,
   progressColumn,
 } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_columns';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
+import { formatHumanReadableDateTime } from '../../../../../common/util/date_utils';
 
 import { useTableActions } from './actions';
 
@@ -64,7 +64,7 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
         defaultMessage: 'Creation time',
       }),
       dataType: 'date',
-      render: (time: number) => formatHumanReadableDateTimeSeconds(time),
+      render: (time: number) => formatHumanReadableDateTime(time),
       textOnly: true,
       truncateText: true,
       sortable: true,

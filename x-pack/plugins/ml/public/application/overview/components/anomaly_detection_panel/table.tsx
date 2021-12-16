@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
+import { formatHumanReadableDateTime } from '../../../../../common/util/date_utils';
 import { useGroupActions } from './actions';
 import { Group, GroupsDictionary } from './anomaly_detection_panel';
 import { JobStatsBarStats, StatsBar } from '../../../components/stats_bar';
@@ -137,7 +137,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData }) => {
         defaultMessage: 'Latest timestamp',
       }),
       dataType: 'date',
-      render: (time: number) => formatHumanReadableDateTimeSeconds(time),
+      render: (time: number) => formatHumanReadableDateTime(time),
       textOnly: true,
       truncateText: true,
       sortable: true,
