@@ -47,6 +47,22 @@ const LENS_METRIC_TYPES: { [key: string]: AggOptions } = {
     name: 'cumulative_sum',
     isFullReference: true,
   },
+  avg_bucket: {
+    name: 'overall_average',
+    isFullReference: true,
+  },
+  max_bucket: {
+    name: 'overall_max',
+    isFullReference: true,
+  },
+  min_bucket: {
+    name: 'overall_min',
+    isFullReference: true,
+  },
+  sum_bucket: {
+    name: 'overall_sum',
+    isFullReference: true,
+  },
   max: {
     name: 'max',
     isFullReference: false,
@@ -200,7 +216,7 @@ export const triggerVisualizeToLensActions = async (
         return null;
       }
       if (pipelineAggMap.name !== 'count' && pipelineAggMap.name !== 'sum') {
-        const script = `${aggregation}(${pipelineAggMap.name}(${subFunctionMetric.field}))`;
+        const script = `${aggregationMap.name}(${pipelineAggMap.name}(${subFunctionMetric.field}))`;
         metricsArray = [
           {
             agg: 'formula',
@@ -225,6 +241,32 @@ export const triggerVisualizeToLensActions = async (
           },
         ];
       }
+    } else if (
+      aggregation === 'avg_bucket' ||
+      aggregation === 'max_bucket' ||
+      aggregation === 'min_bucket' ||
+      aggregation === 'sum_bucket'
+    ) {
+      const subFunctionMetric = layer.metrics.find(
+        (metric) => metric.id === layer.metrics[metricIdx].field
+      );
+      if (!subFunctionMetric) {
+        return null;
+      }
+      const pipelineAggMap = LENS_METRIC_TYPES[subFunctionMetric.type];
+      if (!pipelineAggMap) {
+        return null;
+      }
+      const script = `${aggregationMap.name}(${pipelineAggMap.name}(${subFunctionMetric.field}))`;
+      metricsArray = [
+        {
+          agg: 'formula',
+          isFullReference: true,
+          color: layer.color,
+          fieldName: 'document',
+          params: { formula: script, shift: timeShift },
+        },
+      ];
     } else {
       // construct metrics from the last series.metric item
       metricsArray = [
