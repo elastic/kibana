@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-// /*
-//  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-//  * or more contributor license agreements. Licensed under the Elastic License
-//  * 2.0; you may not use this file except in compliance with the Elastic License
-//  * 2.0.
-//  */
-
-import { timeRangeMiddleware } from './time_range_middleware';
-
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import moment from 'moment';
-import { initialState } from './lens_slice';
-import { LensAppState } from './types';
 import { PayloadAction } from '@reduxjs/toolkit';
-import { mockDataPlugin } from '../mocks';
+import moment from 'moment';
 
+import { contextMiddleware } from '.';
+import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { initialState } from '../lens_slice';
+import { LensAppState } from '../types';
+import { mockDataPlugin, mockStoreDeps } from '../../mocks';
+
+const storeDeps = mockStoreDeps();
 const createMiddleware = (data: DataPublicPluginStart) => {
-  const middleware = timeRangeMiddleware(data);
+  const middleware = contextMiddleware({
+    ...storeDeps,
+    lensServices: {
+      ...storeDeps.lensServices,
+      data,
+    },
+  });
   const store = {
     getState: jest.fn(() => ({ lens: initialState })),
     dispatch: jest.fn(),
@@ -34,7 +34,7 @@ const createMiddleware = (data: DataPublicPluginStart) => {
   return { store, next, invoke };
 };
 
-describe('timeRangeMiddleware', () => {
+describe('contextMiddleware', () => {
   describe('time update', () => {
     it('does update the searchSessionId when the state changes and too much time passed', () => {
       const data = mockDataPlugin();

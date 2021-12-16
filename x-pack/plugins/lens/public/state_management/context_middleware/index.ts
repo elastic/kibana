@@ -7,10 +7,28 @@
 
 import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { setState, LensDispatch } from '.';
-import { LensAppState } from './types';
-import { getResolvedDateRange, containsDynamicMath } from '../utils';
+import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { setState, LensDispatch, LensStoreDeps, navigateAway } from '..';
+import { LensAppState } from '../types';
+import { getResolvedDateRange, containsDynamicMath } from '../../utils';
+import { subscribeToExternalContext } from './subscribe_to_external_context';
+
+export const contextMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {
+  const unsubscribeFromExternalContext = subscribeToExternalContext(
+    storeDeps.lensServices.data,
+    store.getState,
+    store.dispatch
+  );
+  return (next: Dispatch) => (action: PayloadAction<Partial<LensAppState>>) => {
+    if (!action.payload?.searchSessionId) {
+      updateTimeRange(storeDeps.lensServices.data, store.dispatch);
+    }
+    if (navigateAway.match(action)) {
+      return unsubscribeFromExternalContext();
+    }
+    next(action);
+  };
+};
 
 const TIME_LAG_PERCENTAGE_LIMIT = 0.02;
 const TIME_LAG_MIN_LIMIT = 10000; // for a small timerange to avoid infinite data refresh timelag minimum is TIME_LAG_ABSOLUTE ms
@@ -19,15 +37,6 @@ const TIME_LAG_MIN_LIMIT = 10000; // for a small timerange to avoid infinite dat
  * checks if TIME_LAG_PERCENTAGE_LIMIT passed to renew searchSessionId
  * and request new data.
  */
-export const timeRangeMiddleware = (data: DataPublicPluginStart) => (store: MiddlewareAPI) => {
-  return (next: Dispatch) => (action: PayloadAction<Partial<LensAppState>>) => {
-    if (!action.payload?.searchSessionId) {
-      updateTimeRange(data, store.dispatch);
-    }
-    next(action);
-  };
-};
-
 function updateTimeRange(data: DataPublicPluginStart, dispatch: LensDispatch) {
   const timefilter = data.query.timefilter.timefilter;
   const unresolvedTimeRange = timefilter.getTime();
