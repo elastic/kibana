@@ -73,6 +73,16 @@
       "stabilityDays": 7
     },
     {
+      "groupName": "typescript",
+      "matchPackageNames": ["typescript", "prettier", "@types/jsdom"],
+      "matchPackagePatterns": ["^@typescript-eslint"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true,
+      "stabilityDays": 7
+    },
+    {
       "groupName": "polyfills",
       "matchPackageNames": ["core-js"],
       "matchPackagePatterns": ["polyfill"],
