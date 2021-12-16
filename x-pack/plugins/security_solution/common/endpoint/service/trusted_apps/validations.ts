@@ -34,8 +34,8 @@ export const getDuplicateFields = (entries: ConditionEntry[]) => {
     .map((entry) => entry[0]);
 };
 
-const WIN_EXEC_PATH = /\\(\w+|\w+[\w+|-]+\/ )+\w+[\w+|-]+\.*\w+$/i;
-const UNIX_EXEC_PATH = /(\/|\w+[\w+|-]+\\ )+\w+[\w+|-]+\.*\w*$/i;
+const WIN_EXEC_PATH = /\\(\w+|\w*[\w+|-]+\/ +)+\w+[\w+|-]+\.*\w+$/i;
+const UNIX_EXEC_PATH = /(\/|\w*[\w+|-]+\\ +)+\w+[\w+|-]+\.*\w*$/i;
 
 export const hasSimpleExecutableName = ({
   os,
