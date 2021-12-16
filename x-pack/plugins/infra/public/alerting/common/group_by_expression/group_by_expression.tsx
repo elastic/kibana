@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { IFieldType } from 'src/plugins/data/public';
+import { DataViewField } from 'src/plugins/data_views/common';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPopoverTitle,
@@ -19,7 +19,7 @@ import { GroupBySelector } from './selector';
 
 interface Props {
   selectedGroups?: string[];
-  fields: IFieldType[];
+  fields: DataViewField[];
   onChange: (groupBy: string[]) => void;
   label?: string;
 }
