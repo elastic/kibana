@@ -17,10 +17,9 @@ import { executionContextServiceMock } from '../../execution_context/execution_c
 import { ServerMetricsCollector } from '../collectors/server';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
-const requestWaitDelay = 25;
+const requestWaitDelay = 35;
 
-// FLAKY: https://github.com/elastic/kibana/issues/59234
-describe.skip('ServerMetricsCollector', () => {
+describe('ServerMetricsCollector', () => {
   let server: HttpService;
   let collector: ServerMetricsCollector;
   let hapiServer: HapiServer;
@@ -106,6 +105,7 @@ describe.skip('ServerMetricsCollector', () => {
       expect.objectContaining({
         total: 3,
         disconnects: 0,
+        statusCodes: expect.objectContaining({ '200': 1 }),
       })
     );
 
@@ -155,8 +155,8 @@ describe.skip('ServerMetricsCollector', () => {
     await Promise.all([sendGet('/500-ms'), sendGet('/500-ms')]);
     metrics = await collector.collect();
 
-    expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(250);
-    expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(500);
+    expect(metrics.response_times?.avg_in_millis).toBeGreaterThanOrEqual(250);
+    expect(metrics.response_times?.max_in_millis).toBeGreaterThanOrEqual(500);
   });
 
   it('collect connection count', async () => {
