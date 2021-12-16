@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  EuiButton,
   EuiLink,
   EuiPageContent,
   EuiPageHeader,
@@ -17,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { PolicyData } from '../../../../../../common/endpoint/types';
 import { useAppUrl } from '../../../../../common/lib/kibana';
@@ -24,12 +26,16 @@ import {
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
 } from '../../../../common/constants';
-import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
+import {
+  getHostIsolationExceptionsListPath,
+  getPolicyHostIsolationExceptionsPath,
+} from '../../../../common/routing';
 import { useFetchHostIsolationExceptionsList } from '../../../host_isolation_exceptions/view/hooks';
 import { getCurrentArtifactsLocation } from '../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../policy_hooks';
-import { PolicyHostIsolationExceptionsEmptyUnexisting } from './components/empty_unexisting';
+import { PolicyHostIsolationExceptionsAssignFlyout } from './components/assign_flyout';
 import { PolicyHostIsolationExceptionsEmptyUnassigned } from './components/empty_unassigned';
+import { PolicyHostIsolationExceptionsEmptyUnexisting } from './components/empty_unexisting';
 import { PolicyHostIsolationExceptionsList } from './components/list';
 
 export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyData }) => {
@@ -37,7 +43,9 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
 
   const policyId = policy.id;
 
+  const history = useHistory();
   const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+
   const toHostIsolationList = getAppUrl({
     appId: APP_UI_ID,
     path: getHostIsolationExceptionsListPath(),
@@ -93,6 +101,24 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
     toHostIsolationList,
   ]);
 
+  const handleAssignButton = () => {
+    history.push(
+      getPolicyHostIsolationExceptionsPath(policyId, {
+        ...location,
+        show: 'list',
+      })
+    );
+  };
+
+  const handleFlyoutOnClose = () => {
+    history.push(
+      getPolicyHostIsolationExceptionsPath(policyId, {
+        ...location,
+        show: undefined,
+      })
+    );
+  };
+
   const isLoading =
     policySearchedExceptionsListRequest.isLoading ||
     allPolicyExceptionsListRequest.isLoading ||
@@ -118,6 +144,10 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
   // render header and list
   return !isLoading && policySearchedExceptionsListRequest.data ? (
     <div data-test-subj={'policyHostIsolationExceptionsTab'}>
+      {location.show === 'list' ? (
+        <PolicyHostIsolationExceptionsAssignFlyout policy={policy} onClose={handleFlyoutOnClose} />
+      ) : null}
+
       <EuiPageHeader alignItems="center">
         <EuiPageHeaderSection>
           <EuiTitle size="m">
@@ -136,6 +166,21 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
           <EuiText size="xs" data-test-subj="policyHostIsolationExceptionsTabSubtitle">
             <p>{subTitle}</p>
           </EuiText>
+        </EuiPageHeaderSection>
+        <EuiPageHeaderSection>
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            data-test-subj="hostIsolationExceptions-assign-button"
+            onClick={handleAssignButton}
+          >
+            {i18n.translate(
+              'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.layout.assignToPolicy',
+              {
+                defaultMessage: 'Assign host isolation exceptions to policy',
+              }
+            )}
+          </EuiButton>
         </EuiPageHeaderSection>
       </EuiPageHeader>
 
