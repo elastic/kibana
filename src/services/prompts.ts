@@ -18,6 +18,57 @@ async function prompt<T = unknown>(options: Question) {
   return promptResult;
 }
 
+function getPullRequestStateBadges(c: Commit) {
+  if (c.targetBranchesFromLabels.expected.length === 0) {
+    return c.existingTargetPullRequests
+      .map((item) => {
+        if (item.state === 'MERGED') {
+          return chalk.green(item.branch);
+        }
+
+        return chalk.gray(item.branch);
+      })
+      .join(', ');
+  }
+
+  return c.targetBranchesFromLabels.expected
+    .map((branch) => {
+      const isMerged = c.targetBranchesFromLabels.merged.includes(branch);
+      if (isMerged) {
+        return chalk.green(branch);
+      }
+
+      const isUnmerged = c.targetBranchesFromLabels.unmerged.includes(branch);
+      if (isUnmerged) {
+        return chalk.gray(branch);
+      }
+
+      const isMissing = c.targetBranchesFromLabels.missing.includes(branch);
+      if (isMissing) {
+        return chalk.red(branch);
+      }
+
+      return '[??]';
+    })
+    .join(', ');
+}
+
+export function getChoicesForCommitPrompt(commits: Commit[]) {
+  return commits.map((c, i) => {
+    const position = chalk.gray(`${i + 1}.`);
+
+    const pullRequestStateBadges = getPullRequestStateBadges(c);
+
+    return {
+      name: `${position} ${c.formattedMessage} ${pullRequestStateBadges}`,
+      short: c.pullNumber
+        ? `#${c.pullNumber} (${getShortSha(c.sha)})`
+        : getShortSha(c.sha),
+      value: c,
+    };
+  });
+}
+
 export async function promptForCommits({
   commitChoices,
   isMultipleChoice,
@@ -25,38 +76,9 @@ export async function promptForCommits({
   commitChoices: Commit[];
   isMultipleChoice: boolean;
 }): Promise<Commit[]> {
-  const choices = commitChoices.map((c, i) => {
-    const existingPRs = c.targetBranchesFromLabels.expected
-      .map((branch) => {
-        const isMerged = c.targetBranchesFromLabels.merged.includes(branch);
-        if (isMerged) {
-          return chalk.green(branch);
-        }
+  const choices = getChoicesForCommitPrompt(commitChoices);
 
-        const isUnmerged = c.targetBranchesFromLabels.unmerged.includes(branch);
-        if (isUnmerged) {
-          return chalk.gray(branch);
-        }
-
-        const isMissing = c.targetBranchesFromLabels.missing.includes(branch);
-        if (isMissing) {
-          return chalk.red(branch);
-        }
-      })
-      .join(', ');
-
-    const position = chalk.gray(`${i + 1}.`);
-
-    return {
-      name: `${position} ${c.formattedMessage} ${existingPRs}`,
-      short: c.pullNumber
-        ? `#${c.pullNumber} (${getShortSha(c.sha)})`
-        : getShortSha(c.sha),
-      value: c,
-    };
-  });
-
-  const res = await prompt<Commit[]>({
+  const res = await prompt<Commit | Commit[]>({
     loop: false,
     pageSize: 15,
     choices: choices,
@@ -66,7 +88,7 @@ export async function promptForCommits({
 
   const selectedCommits = Array.isArray(res) ? res.reverse() : [res];
   return isEmpty(selectedCommits)
-    ? promptForCommits({ commitChoices: commitChoices, isMultipleChoice })
+    ? promptForCommits({ commitChoices, isMultipleChoice })
     : selectedCommits;
 }
 

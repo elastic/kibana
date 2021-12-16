@@ -156,6 +156,7 @@ describe('runWithOptions', () => {
       {
         authorId: 'sqren_author_id',
         maxNumber: 10,
+        commitPath: null,
         repoName: 'kibana',
         repoOwner: 'elastic',
         sourceBranch: 'my-source-branch-from-options',
@@ -165,16 +166,119 @@ describe('runWithOptions', () => {
 
   it('prompt calls should match snapshot', () => {
     expect(inquirer.prompt).toHaveBeenCalledTimes(2);
-    expect(inquirerPromptMock.mock.calls).toMatchSnapshot();
+    expect(
+      // @ts-expect-error
+      inquirerPromptMock.mock.calls[0][0][0].choices.map(({ name, short }) => ({
+        name,
+        short,
+      }))
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "name": "1. Add 👻 (2e63475c) ",
+          "short": "2e63475c",
+        },
+        Object {
+          "name": "2. Add witch (#85) ",
+          "short": "#85 (f3b618b9)",
+        },
+        Object {
+          "name": "3. Add SF mention (#80) 6.3",
+          "short": "#80 (79cf1845)",
+        },
+        Object {
+          "name": "4. Add backport config (3827bbba) ",
+          "short": "3827bbba",
+        },
+        Object {
+          "name": "5. Initial commit (5ea0da55) ",
+          "short": "5ea0da55",
+        },
+      ]
+    `);
   });
 
   it('exec should be called with correct args', () => {
     expect(rpcExecMock).toHaveBeenCalledTimes(10);
-    expect(rpcExecMock.mock.calls).toMatchSnapshot();
+    expect(rpcExecMock.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "git remote rm origin",
+          Object {
+            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+          },
+        ],
+        Array [
+          "git remote rm sqren",
+          Object {
+            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+          },
+        ],
+        Array [
+          "git remote add sqren https://x-access-token:myAccessToken@github.com/sqren/kibana.git",
+          Object {
+            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+          },
+        ],
+        Array [
+          "git remote rm elastic",
+          Object {
+            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+          },
+        ],
+        Array [
+          "git remote add elastic https://x-access-token:myAccessToken@github.com/elastic/kibana.git",
+          Object {
+            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+          },
+        ],
+        Array [
+          "git reset --hard && git clean -d --force && git fetch elastic 6.x && git checkout -B backport/6.x/commit-2e63475c elastic/6.x --no-track",
+          Object {
+            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+          },
+        ],
+        Array [
+          "git fetch elastic my-source-branch-from-options:my-source-branch-from-options --force",
+          Object {
+            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+          },
+        ],
+        Array [
+          "git cherry-pick 2e63475c483f7844b0f2833bc57fdee32095bacb",
+          Object {
+            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+          },
+        ],
+        Array [
+          "git push sqren backport/6.x/commit-2e63475c:backport/6.x/commit-2e63475c --force",
+          Object {
+            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+          },
+        ],
+        Array [
+          "git reset --hard && git checkout my-source-branch-from-options && git branch -D backport/6.x/commit-2e63475c",
+          Object {
+            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
+          },
+        ],
+      ]
+    `);
   });
 
   it('git clone should be called with correct args', () => {
     expect(rpcExecOriginalMock).toHaveBeenCalledTimes(1);
-    expect(rpcExecOriginalMock.mock.calls).toMatchSnapshot();
+    expect(rpcExecOriginalMock.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "git clone https://x-access-token:myAccessToken@github.com/elastic/kibana.git --progress",
+          Object {
+            "cwd": "/myHomeDir/.backport/repositories/elastic",
+            "maxBuffer": 104857600,
+          },
+          [Function],
+        ],
+      ]
+    `);
   });
 });

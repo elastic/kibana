@@ -257,7 +257,10 @@ export async function commitChanges(
   }
 }
 
-export async function getConflictingFiles(options: ValidConfigOptions) {
+export async function getConflictingFiles(
+  options: ValidConfigOptions,
+  absolutePath = true
+) {
   const repoPath = getRepoPath(options);
   try {
     await exec(`git --no-pager diff --check`, { cwd: repoPath });
@@ -275,7 +278,7 @@ export async function getConflictingFiles(options: ValidConfigOptions) {
         .map((line: string) => {
           const posSeparator = line.indexOf(':');
           const filename = line.slice(0, posSeparator).trim();
-          return pathResolve(repoPath, filename);
+          return absolutePath ? pathResolve(repoPath, filename) : filename;
         });
 
       return uniq(files);

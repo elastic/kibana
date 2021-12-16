@@ -62,7 +62,7 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
                     {
                       node: {
                         labels: {
-                          nodes: [{ name: 'my-label-a' }],
+                          nodes: [{ name: 'v6.3.0' }],
                         },
 
                         baseRefName: 'master',

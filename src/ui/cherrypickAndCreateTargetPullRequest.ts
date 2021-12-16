@@ -176,9 +176,11 @@ async function waitForCherrypick(
       cherrypickSpinner.succeed();
       return;
     }
-  } finally {
-    // stop spinner
+    // cherrypick failed due to conflicts
     cherrypickSpinner.fail();
+  } catch (e) {
+    cherrypickSpinner.fail();
+    throw e;
   }
 
   // resolve conflicts automatically

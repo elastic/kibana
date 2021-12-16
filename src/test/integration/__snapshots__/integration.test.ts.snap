@@ -81,23 +81,23 @@ Array [
       $maxNumber: Int!
       $sourceBranch: String!
       $authorId: ID
+      $commitPath: String
     ) {
       repository(owner: $repoOwner, name: $repoName) {
         ref(qualifiedName: $sourceBranch) {
           target {
             ... on Commit {
-              
-  _0: history(
-    first: $maxNumber
-    author: { id: $authorId }
-    
-  ) {
-    edges {
-      node {
-       ...SourceCommitWithTargetPullRequest
-      }
-    }
-  }
+              history(
+                first: $maxNumber
+                author: { id: $authorId }
+                path: $commitPath
+              ) {
+                edges {
+                  node {
+                    ...SourceCommitWithTargetPullRequest
+                  }
+                }
+              }
             }
           }
         }
@@ -166,6 +166,7 @@ Array [
   ",
     "variables": Object {
       "authorId": "sqren_author_id",
+      "commitPath": null,
       "maxNumber": 10,
       "repoName": "backport-demo",
       "repoOwner": "backport-org",
@@ -256,23 +257,23 @@ Array [
       $maxNumber: Int!
       $sourceBranch: String!
       $authorId: ID
+      $commitPath: String
     ) {
       repository(owner: $repoOwner, name: $repoName) {
         ref(qualifiedName: $sourceBranch) {
           target {
             ... on Commit {
-              
-  _0: history(
-    first: $maxNumber
-    author: { id: $authorId }
-    
-  ) {
-    edges {
-      node {
-       ...SourceCommitWithTargetPullRequest
-      }
-    }
-  }
+              history(
+                first: $maxNumber
+                author: { id: $authorId }
+                path: $commitPath
+              ) {
+                edges {
+                  node {
+                    ...SourceCommitWithTargetPullRequest
+                  }
+                }
+              }
             }
           }
         }
@@ -341,6 +342,7 @@ Array [
   ",
     "variables": Object {
       "authorId": "sqren_author_id",
+      "commitPath": null,
       "maxNumber": 10,
       "repoName": "backport-demo",
       "repoOwner": "backport-org",

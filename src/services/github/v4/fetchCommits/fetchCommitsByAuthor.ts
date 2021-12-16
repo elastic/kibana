@@ -1,6 +1,7 @@
 import { isEmpty, uniqBy, orderBy } from 'lodash';
 import ora from 'ora';
 import { ValidConfigOptions } from '../../../../options/options';
+import { filterNil } from '../../../../utils/filterEmpty';
 import { HandledError } from '../../../HandledError';
 import {
   Commit,
@@ -11,38 +12,23 @@ import {
 import { apiRequestV4 } from '../apiRequestV4';
 import { fetchAuthorId } from '../fetchAuthorId';
 
-function getCommitHistoryFragment(commitPath: string | null, index = 0) {
-  return /* GraphQL */ `
-  _${index}: history(
-    first: $maxNumber
-    author: { id: $authorId }
-    ${commitPath ? `path: "${commitPath}"` : ''}
-  ) {
-    edges {
-      node {
-       ...${sourceCommitWithTargetPullRequestFragment.name}
-      }
-    }
-  }`;
-}
-
-export async function fetchCommitsByAuthor(
-  options: ValidConfigOptions
-): Promise<Commit[]> {
+function fetchByCommitPath({
+  options,
+  authorId,
+  commitPath,
+}: {
+  options: ValidConfigOptions;
+  authorId: string | null;
+  commitPath: string | null;
+}) {
   const {
     accessToken,
-    commitPaths,
     githubApiBaseUrlV4,
     maxNumber,
     repoName,
     repoOwner,
     sourceBranch,
   } = options;
-
-  const commitHistoryFragment =
-    commitPaths.length > 0
-      ? commitPaths.map(getCommitHistoryFragment).join('\n')
-      : getCommitHistoryFragment(null);
 
   const query = /* GraphQL */ `
     query CommitsByAuthor(
@@ -51,12 +37,23 @@ export async function fetchCommitsByAuthor(
       $maxNumber: Int!
       $sourceBranch: String!
       $authorId: ID
+      $commitPath: String
     ) {
       repository(owner: $repoOwner, name: $repoName) {
         ref(qualifiedName: $sourceBranch) {
           target {
             ... on Commit {
-              ${commitHistoryFragment}
+              history(
+                first: $maxNumber
+                author: { id: $authorId }
+                path: $commitPath
+              ) {
+                edges {
+                  node {
+                    ...${sourceCommitWithTargetPullRequestFragment.name}
+                  }
+                }
+              }
             }
           }
         }
@@ -66,44 +63,62 @@ export async function fetchCommitsByAuthor(
     ${sourceCommitWithTargetPullRequestFragment.source}
   `;
 
+  return apiRequestV4<CommitByAuthorResponse>({
+    githubApiBaseUrlV4,
+    accessToken,
+    query,
+    variables: {
+      repoOwner,
+      repoName,
+      sourceBranch,
+      maxNumber,
+      authorId,
+      commitPath,
+    },
+  });
+}
+
+export async function fetchCommitsByAuthor(
+  options: ValidConfigOptions
+): Promise<Commit[]> {
+  const { sourceBranch, commitPaths } = options;
+
   const spinner = ora(
     `Loading commits from branch "${sourceBranch}"...`
   ).start();
-  let res: CommitByAuthorResponse;
+  let responses: CommitByAuthorResponse[];
   try {
     const authorId = await fetchAuthorId(options);
-    res = await apiRequestV4<CommitByAuthorResponse>({
-      githubApiBaseUrlV4,
-      accessToken,
-      query,
-      variables: {
-        repoOwner,
-        repoName,
-        sourceBranch,
-        maxNumber,
-        authorId,
-      },
-    });
+
+    responses = await Promise.all(
+      isEmpty(commitPaths)
+        ? [fetchByCommitPath({ options, authorId, commitPath: null })]
+        : commitPaths.map((commitPath) =>
+            fetchByCommitPath({ options, authorId, commitPath })
+          )
+    );
+
     spinner.stop();
   } catch (e) {
     spinner.fail();
     throw e;
   }
 
-  if (res.repository.ref === null) {
+  // we only need to check if the first item is `null` (if the first is `null` they all are)
+  if (responses[0].repository.ref === null) {
     throw new HandledError(
       `The upstream branch "${sourceBranch}" does not exist. Try specifying a different branch with "--source-branch <your-branch>"`
     );
   }
 
-  const commits = Object.values(res.repository.ref.target).flatMap(
-    (historyResponse) => {
-      return historyResponse.edges.map((edge) => {
+  const commits = responses
+    .flatMap((res) => {
+      return res.repository.ref?.target.history.edges.map((edge) => {
         const sourceCommit = edge.node;
         return parseSourceCommit({ options, sourceCommit });
       });
-    }
-  );
+    })
+    .filter(filterNil);
 
   // terminate if not commits were found
   if (isEmpty(commits)) {
@@ -128,7 +143,7 @@ export interface CommitByAuthorResponse {
   repository: {
     ref: {
       target: {
-        [commitPath: string]: {
+        history: {
           edges: Array<{ node: SourceCommitWithTargetPullRequest }>;
         };
       };
