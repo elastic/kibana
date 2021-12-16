@@ -43,6 +43,10 @@ const LENS_METRIC_TYPES: { [key: string]: AggOptions } = {
     name: 'differences',
     isFullReference: true,
   },
+  cumulative_sum: {
+    name: 'cumulative_sum',
+    isFullReference: true,
+  },
   max: {
     name: 'max',
     isFullReference: false,
@@ -159,6 +163,7 @@ export const triggerVisualizeToLensActions = async (
           params: { formula: finalScript, shift: timeShift },
         },
       ];
+      // improve this
     } else if (aggregation === 'moving_average' || aggregation === 'derivative') {
       const subFunctionMetric = layer.metrics.find(
         (metric) => metric.id === layer.metrics[metricIdx].field
@@ -176,10 +181,50 @@ export const triggerVisualizeToLensActions = async (
           isFullReference: aggregationMap.isFullReference,
           pipelineAggType: pipelineAggMap.name,
           color: layer.color,
-          fieldName: subFunctionMetric?.field ?? 'document',
+          fieldName:
+            subFunctionMetric?.field && pipelineAggMap.name !== 'count'
+              ? subFunctionMetric?.field
+              : 'document',
           params: { shift: timeShift, window: layer.metrics[metricIdx].window },
         },
       ];
+    } else if (aggregation === 'cumulative_sum') {
+      const subFunctionMetric = layer.metrics.find(
+        (metric) => metric.id === layer.metrics[metricIdx].field
+      );
+      if (!subFunctionMetric) {
+        return null;
+      }
+      const pipelineAggMap = LENS_METRIC_TYPES[subFunctionMetric.type];
+      if (!pipelineAggMap) {
+        return null;
+      }
+      if (pipelineAggMap.name !== 'count' && pipelineAggMap.name !== 'sum') {
+        const script = `${aggregation}(${pipelineAggMap.name}(${subFunctionMetric.field}))`;
+        metricsArray = [
+          {
+            agg: 'formula',
+            isFullReference: true,
+            color: layer.color,
+            fieldName: 'document',
+            params: { formula: script, shift: timeShift },
+          },
+        ];
+      } else {
+        metricsArray = [
+          {
+            agg: aggregationMap.name,
+            isFullReference: aggregationMap.isFullReference,
+            pipelineAggType: pipelineAggMap.name,
+            color: layer.color,
+            fieldName:
+              subFunctionMetric?.field && pipelineAggMap.name !== 'count'
+                ? subFunctionMetric?.field
+                : 'document',
+            params: { shift: timeShift, window: layer.metrics[metricIdx].window },
+          },
+        ];
+      }
     } else {
       // construct metrics from the last series.metric item
       metricsArray = [
@@ -192,6 +237,8 @@ export const triggerVisualizeToLensActions = async (
         },
       ];
     }
+    // console.dir(metricsArray);
+    // console.dir(layer);
 
     const triggerOptions: LayersSettings = {
       indexPatternId,
