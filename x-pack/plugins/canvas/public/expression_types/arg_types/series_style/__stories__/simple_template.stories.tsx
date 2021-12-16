@@ -35,6 +35,7 @@ class Interactive extends React.Component<{}, { argValue: ExpressionAstExpressio
   public render() {
     return (
       <SimpleTemplate
+        resolved={{ labels: [] }}
         argValue={this.state.argValue}
         onValueChange={(argValue) => {
           action('onValueChange')(argValue);
