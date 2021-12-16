@@ -34,6 +34,35 @@ export const getDuplicateFields = (entries: ConditionEntry[]) => {
     .map((entry) => entry[0]);
 };
 
+/*
+ * regex to match executable names
+ * starts matching from the eol of the path
+ * file names with a single or multiple spaces (for spaced names)
+ * and hyphens and combinations of these that produce complex names
+ * such as:
+ * c:\home\lib\dmp.dmp
+ * c:\home\lib\my-binary-app-+/ some/  x/ dmp.dmp
+ * /home/lib/dmp.dmp
+ * /home/lib/my-binary-app+-\ some\  x\ dmp.dmp
+ */
+const WIN_EXEC_PATH = /\\(\w+|\w*[\w+|-]+\/ +)+\w+[\w+|-]+\.*\w+$/i;
+const UNIX_EXEC_PATH = /(\/|\w*[\w+|-]+\\ +)+\w+[\w+|-]+\.*\w*$/i;
+
+export const hasSimpleExecutableName = ({
+  os,
+  type,
+  value,
+}: {
+  os: OperatingSystem;
+  type: TrustedAppEntryTypes;
+  value: string;
+}): boolean => {
+  if (type === 'wildcard') {
+    return os === OperatingSystem.WINDOWS ? WIN_EXEC_PATH.test(value) : UNIX_EXEC_PATH.test(value);
+  }
+  return true;
+};
+
 export const isPathValid = ({
   os,
   field,
