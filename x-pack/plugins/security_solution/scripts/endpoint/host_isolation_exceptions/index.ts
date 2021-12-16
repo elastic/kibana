@@ -16,13 +16,11 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import { KbnClient } from '@kbn/test';
 import { AxiosError, AxiosResponse } from 'axios';
-import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
   PACKAGE_POLICY_API_ROUTES,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../fleet/common/constants';
 import { HostIsolationExceptionGenerator } from '../../../common/endpoint/data_generators/host_isolation_exception_generator';
-import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { GetPolicyListResponse } from '../../../public/management/pages/policy/types';
 import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
 

@@ -10,7 +10,6 @@ import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
 import { basename } from 'path';
-import { AxiosResponse } from 'axios';
 import {
   ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
@@ -21,13 +20,7 @@ import {
 import { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { TrustedApp } from '../../../common/endpoint/types';
 import { TrustedAppGenerator } from '../../../common/endpoint/data_generators/trusted_app_generator';
-import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
-import { GetPolicyListResponse } from '../../../public/management/pages/policy/types';
-import {
-  PACKAGE_POLICY_API_ROUTES,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../fleet/common';
+
 import { newTrustedAppToCreateExceptionListItem } from '../../../public/management/pages/trusted_apps/service/mappers';
 import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
 
@@ -140,19 +133,6 @@ const createRunLogger = () => {
           }
         }
       },
-    },
-  });
-};
-
-const fetchEndpointPolicies = (
-  kbnClient: KbnClient
-): Promise<AxiosResponse<GetPolicyListResponse>> => {
-  return kbnClient.request<GetPolicyListResponse>({
-    method: 'GET',
-    path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
-    query: {
-      perPage: 100,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
     },
   });
 };
