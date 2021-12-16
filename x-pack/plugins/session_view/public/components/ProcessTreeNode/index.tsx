@@ -23,7 +23,7 @@ interface ProcessDeps {
   isSessionLeader?: boolean;
   isOrphan?: boolean;
   depth?: number;
-  onProcessSelected(process: Process): void;
+  onProcessSelected?: (process: Process) => void;
 }
 
 /**
@@ -119,8 +119,10 @@ export function ProcessTreeNode({
     if (!isSessionLeader && process.children.length > 0) {
       buttons.push(
         <EuiButton
+          key="child-processes-button"
           css={styles.getButtonStyle(ButtonType.children)}
           onClick={() => setChildrenExpanded(!childrenExpanded)}
+          data-test-subj="processTreeNodeChildProcessesButton"
         >
           <FormattedMessage
             id="xpack.sessionView.childProcesses"
@@ -134,6 +136,7 @@ export function ProcessTreeNode({
     if (alerts.length) {
       buttons.push(
         <EuiButton
+          key="alert-button"
           css={styles.getButtonStyle(ButtonType.alerts)}
           onClick={() => setAlertsExpanded(!alertsExpanded)}
           data-test-subj="processTreeNodeAlertButton"
@@ -191,8 +194,19 @@ export function ProcessTreeNode({
   const renderProcess = () => {
     return (
       <span>
-        {process.isUserEntered() && <EuiIcon css={styles.userEnteredIcon} type="user" />}
-        <EuiIcon type={hasExec ? 'console' : 'branch'} /> {template()}
+        {process.isUserEntered() && (
+          <EuiIcon
+            data-test-subj="processTreeNodeUserIcon"
+            css={styles.userEnteredIcon}
+            type="user"
+          />
+        )}
+        {hasExec ? (
+          <EuiIcon data-test-subj="processTreeNodeExecIcon" type="console" />
+        ) : (
+          <EuiIcon type="branch" />
+        )}
+        {template()}
         {isOrphan ? '(orphaned)' : ''}
       </span>
     );
@@ -203,7 +217,10 @@ export function ProcessTreeNode({
 
     if (user.name === 'root' && user.id !== parent.user.id) {
       return (
-        <EuiButton css={styles.getButtonStyle(ButtonType.userChanged)}>
+        <EuiButton
+          data-test-subj="processTreeNodeRootEscalationFlag"
+          css={styles.getButtonStyle(ButtonType.userChanged)}
+        >
           <FormattedMessage
             id="xpack.sessionView.execUserChange"
             defaultMessage="Root escalation"
@@ -223,7 +240,7 @@ export function ProcessTreeNode({
       return;
     }
 
-    onProcessSelected(process);
+    onProcessSelected?.(process);
   };
 
   const id = process.id;
@@ -237,7 +254,7 @@ export function ProcessTreeNode({
         data-test-subj="processTreeNode"
       >
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
-        <div css={styles.wrapper} onClick={onProcessClicked}>
+        <div data-test-subj="processTreeNodeRow" css={styles.wrapper} onClick={onProcessClicked}>
           {isSessionLeader ? renderSessionLeader() : renderProcess()}
           {renderRootEscalation()}
           {renderButtons()}
