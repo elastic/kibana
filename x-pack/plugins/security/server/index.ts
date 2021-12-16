@@ -41,6 +41,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   exposeToBrowser: {
     loginAssistanceMessage: true,
     showInsecureClusterWarning: true,
+    sameSiteCookies: true,
   },
 };
 export const plugin: PluginInitializer<
