@@ -216,7 +216,7 @@ const normalizeEventFiltersPageLocation = (
 };
 
 const normalizeHostIsolationExceptionsPageLocation = (
-  location?: Partial<EventFiltersPageLocation>
+  location?: Partial<HostIsolationExceptionsPageLocation>
 ): Partial<EventFiltersPageLocation> => {
   if (location) {
     return {
@@ -229,6 +229,9 @@ const normalizeHostIsolationExceptionsPageLocation = (
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
       ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
       ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
+      ...(!isDefaultOrMissing(location.included_policies, '')
+        ? { included_policies: location.included_policies }
+        : ''),
     };
   } else {
     return {};
@@ -373,6 +376,7 @@ export const extractHostIsolationExceptionsPageLocation = (
 
   return {
     ...extractListPaginationParams(query),
+    included_policies: extractIncludedPolicies(query),
     show:
       showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,
     id: extractFirstParamValue(query, 'id'),
