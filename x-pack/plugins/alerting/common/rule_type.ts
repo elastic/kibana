@@ -8,6 +8,15 @@
 import { LicenseType } from '../../licensing/common/types';
 import { RecoveredActionGroupId, DefaultActionGroupId } from './builtin_action_groups';
 
+interface ConsumerPrivileges {
+  read: boolean;
+  all: boolean;
+}
+
+interface ActionVariable {
+  name: string;
+  description: string;
+}
 export interface RuleType<
   ActionGroupIds extends Exclude<string, RecoveredActionGroupId> = DefaultActionGroupId,
   RecoveryActionGroupId extends string = RecoveredActionGroupId
@@ -16,7 +25,11 @@ export interface RuleType<
   name: string;
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   recoveryActionGroup: ActionGroup<RecoveryActionGroupId>;
-  actionVariables: string[];
+  actionVariables: {
+    context: ActionVariable[];
+    state: ActionVariable[];
+    params: ActionVariable[];
+  };
   defaultActionGroupId: ActionGroupIds;
   producer: string;
   minimumLicenseRequired: LicenseType;
@@ -24,6 +37,8 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   defaultScheduleInterval?: string;
   minimumScheduleInterval?: string;
+  enabledInLicense: boolean;
+  authorizedConsumers: Record<string, ConsumerPrivileges>;
 }
 
 export interface ActionGroup<ActionGroupIds extends string> {

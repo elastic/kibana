@@ -16,11 +16,17 @@ const mockAlertType = (id: string): RuleType => ({
   name: id,
   actionGroups: [],
   recoveryActionGroup: RecoveredActionGroup,
-  actionVariables: [],
+  actionVariables: {
+    context: [],
+    state: [],
+    params: [],
+  },
   defaultActionGroupId: 'default',
   producer: 'alerts',
   minimumLicenseRequired: 'basic',
   isExportable: true,
+  enabledInLicense: true,
+  authorizedConsumers: { foo: { read: true, all: true } },
 });
 
 describe('AlertNavigationRegistry', () => {
