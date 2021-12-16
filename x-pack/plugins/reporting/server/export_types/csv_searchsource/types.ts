@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { RawValue, JobParamsCSV, TaskPayloadCSV } from '../../../common/types';
+export type { JobParamsCSV, TaskPayloadCSV } from '../../../common/types';
