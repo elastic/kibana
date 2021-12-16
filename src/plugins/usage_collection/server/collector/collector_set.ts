@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { withTimeout } from '@kbn/std';
 import { snakeCase } from 'lodash';
 import type {
   Logger,
@@ -28,14 +28,13 @@ interface CollectorSetConfig {
 }
 
 export class CollectorSet {
-  private _waitingForAllCollectorsTimestamp?: number;
   private readonly logger: Logger;
   private readonly maximumWaitTimeForAllCollectorsInS: number;
   private readonly collectors: Map<string, AnyCollector>;
   constructor({ logger, maximumWaitTimeForAllCollectorsInS, collectors = [] }: CollectorSetConfig) {
     this.logger = logger;
     this.collectors = new Map(collectors.map((collector) => [collector.type, collector]));
-    this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS || 60;
+    this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS || 10;
   }
 
   /**
@@ -92,61 +91,71 @@ export class CollectorSet {
     return [...this.collectors.values()].find((c) => c.type === type);
   };
 
-  public areAllCollectorsReady = async (collectorSet: CollectorSet = this) => {
-    if (!(collectorSet instanceof CollectorSet)) {
-      throw new Error(
-        `areAllCollectorsReady method given bad collectorSet parameter: ` + typeof collectorSet
-      );
-    }
+  private getReadyCollectors = async (): Promise<AnyCollector[]> => {
+    const secondInMs = 1000;
 
-    const collectors = [...collectorSet.collectors.values()];
     const collectorsWithStatus = await Promise.all(
-      collectors.map(async (collector) => {
-        return {
-          isReady: await collector.isReady(),
-          collector,
-        };
+      [...this.collectors.values()].map(async (collector) => {
+        const isReadyWithTimeout = await withTimeout<boolean>({
+          promise: (async (): Promise<boolean> => {
+            try {
+              return await collector.isReady();
+            } catch (err) {
+              this.logger.debug(
+                `Collector failed to get ready` +
+                  `${this.maximumWaitTimeForAllCollectorsInS}s and will return data from all collectors that are ready.`
+              );
+              return false;
+            }
+          })(),
+          timeoutMs: this.maximumWaitTimeForAllCollectorsInS * secondInMs,
+        });
+
+        return { isReadyWithTimeout, collector };
       })
     );
 
-    const collectorsTypesNotReady = collectorsWithStatus
-      .filter((collectorWithStatus) => collectorWithStatus.isReady === false)
-      .map((collectorWithStatus) => collectorWithStatus.collector.type);
-
-    const allReady = collectorsTypesNotReady.length === 0;
-
-    if (!allReady && this.maximumWaitTimeForAllCollectorsInS >= 0) {
-      const nowTimestamp = +new Date();
-      this._waitingForAllCollectorsTimestamp =
-        this._waitingForAllCollectorsTimestamp || nowTimestamp;
-      const timeWaitedInMS = nowTimestamp - this._waitingForAllCollectorsTimestamp;
-      const timeLeftInMS = this.maximumWaitTimeForAllCollectorsInS * 1000 - timeWaitedInMS;
-      if (timeLeftInMS <= 0) {
-        this.logger.debug(
-          `All collectors are not ready (waiting for ${collectorsTypesNotReady.join(',')}) ` +
-            `but we have waited the required ` +
-            `${this.maximumWaitTimeForAllCollectorsInS}s and will return data from all collectors that are ready.`
-        );
-
-        return true;
-      } else {
-        this.logger.debug(`All collectors are not ready. Waiting for ${timeLeftInMS}ms longer.`);
-      }
-    } else {
-      this._waitingForAllCollectorsTimestamp = undefined;
+    const hasTimedOutCollectors = collectorsWithStatus.some(
+      (collectorWithStatus) => collectorWithStatus.isReadyWithTimeout.timedout
+    );
+    if (hasTimedOutCollectors) {
+      this.logger.debug(
+        `Some collectors timedout getting ready. ` +
+          `Waited for ${this.maximumWaitTimeForAllCollectorsInS}s and will return data from collectors that are ready.`
+      );
     }
 
-    return allReady;
+    const nonTimedOutCollectors = collectorsWithStatus.filter(
+      (collectorWithStatus) => collectorWithStatus.isReadyWithTimeout.timedout === false
+    ) as unknown as Array<{ isReadyWithTimeout: { value: boolean }; collector: AnyCollector }>;
+
+    const collectorsTypesNotReady = nonTimedOutCollectors
+      .filter((collectorWithStatus) => collectorWithStatus.isReadyWithTimeout.value === false)
+      .map((collectorWithStatus) => collectorWithStatus.collector.type);
+
+    if (collectorsTypesNotReady.length) {
+      this.logger.debug(
+        `Some collectors are not ready (${collectorsTypesNotReady.join(',')}) ` +
+          `will return data from all collectors that are ready.`
+      );
+    }
+
+    const readyCollectors = nonTimedOutCollectors
+      .filter((collectorWithStatus) => collectorWithStatus.isReadyWithTimeout.value === true)
+      .map((collectorWithStatus) => collectorWithStatus.collector);
+
+    return readyCollectors;
   };
 
   public bulkFetch = async (
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    kibanaRequest: KibanaRequest | undefined, // intentionally `| undefined` to enforce providing the parameter
-    collectors: Map<string, AnyCollector> = this.collectors
+    kibanaRequest: KibanaRequest | undefined // intentionally `| undefined` to enforce providing the parameter
   ) => {
+    this.logger.debug(`Getting ready collectors`);
+    const readyCollectors = await this.getReadyCollectors();
     const responses = await Promise.all(
-      [...collectors.values()].map(async (collector) => {
+      readyCollectors.map(async (collector) => {
         this.logger.debug(`Fetching data from ${collector.type} collector`);
         try {
           const context = {
