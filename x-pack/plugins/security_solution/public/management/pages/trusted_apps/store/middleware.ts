@@ -105,7 +105,11 @@ const refreshListIfNeeded = async (
       const filterKuery = parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined;
       if (filterKuery) kuery.push(filterKuery);
 
-      const policiesKuery = parsePoliciesToKQL(includedPolicies, excludedPolicies) || undefined;
+      const policiesKuery =
+        parsePoliciesToKQL(
+          includedPolicies ? includedPolicies.split(',') : [],
+          excludedPolicies ? excludedPolicies.split(',') : []
+        ) || undefined;
       if (policiesKuery) kuery.push(policiesKuery);
 
       const response = await trustedAppsService.getTrustedAppsList({

@@ -209,6 +209,9 @@ const normalizeEventFiltersPageLocation = (
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
       ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
       ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
+      ...(!isDefaultOrMissing(location.included_policies, '')
+        ? { included_policies: location.included_policies }
+        : ''),
     };
   } else {
     return {};
@@ -288,6 +291,11 @@ export const extractTrustedAppsListPaginationParams = (query: querystring.Parsed
   excluded_policies: extractExcludedPolicies(query),
 });
 
+export const extractArtifactsListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
+  ...extractListPaginationParams(query),
+  included_policies: extractIncludedPolicies(query),
+});
+
 export const extractTrustedAppsListPageLocation = (
   query: querystring.ParsedUrlQuery
 ): TrustedAppsListPageLocation => {
@@ -349,7 +357,7 @@ export const extractEventFiltetrsPageLocation = (
   const showParamValue = extractFirstParamValue(query, 'show') as EventFiltersPageLocation['show'];
 
   return {
-    ...extractListPaginationParams(query),
+    ...extractArtifactsListPaginationParams(query),
     show:
       showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,
     id: extractFirstParamValue(query, 'id'),
