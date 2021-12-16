@@ -23,7 +23,7 @@ import {
   LIGHT_THEME_TRANSPARENT,
 } from './editor_theme';
 
-import { PlaceHolderWidget } from './placeholder_widget';
+import { PlaceholderWidget } from './placeholder_widget';
 
 import './editor.scss';
 
@@ -149,7 +149,7 @@ export const CodeEditor: React.FC<Props> = ({
   const isReadOnly = options?.readOnly ?? false;
 
   const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const _placeholderWidget = useRef<monaco.editor.IContentWidget | null>(null);
+  const _placeholderWidget = useRef<PlaceholderWidget | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
@@ -384,14 +384,12 @@ export const CodeEditor: React.FC<Props> = ({
 
   useEffect(() => {
     if (placeholder && !value && _editor.current) {
-      _placeholderWidget.current = new PlaceHolderWidget(placeholder, _editor.current);
-      _editor.current.addContentWidget(_placeholderWidget.current);
+      // Mounts editor inside constructor
+      _placeholderWidget.current = new PlaceholderWidget(placeholder, _editor.current);
     }
     return () => {
-      if (_placeholderWidget.current) {
-        _editor.current?.removeContentWidget(_placeholderWidget.current);
-        _placeholderWidget.current = null;
-      }
+      _placeholderWidget.current?.dispose();
+      _placeholderWidget.current = null;
     };
   }, [placeholder, value]);
 

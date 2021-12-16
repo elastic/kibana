@@ -193,17 +193,17 @@ describe('<CodeEditor />', () => {
       );
     });
 
-    it('displays placeholder text when it is provided', () => {
+    it('displays placeholder element when placeholder text is provided', () => {
       expect(getPlaceholderDomElement()?.innerText).toBe('myplaceholder');
     });
 
-    it('does not display placeholder it is not provided', () => {
+    it('does not display placeholder element when placeholder text is not provided', () => {
       component.setProps({ ...component.props(), placeholder: undefined, value: '' });
       component.update();
       expect(getPlaceholderDomElement()).toBe(null);
     });
 
-    it('does not display placeholder text when user input has been provided', () => {
+    it('does not display placeholder element when user input has been provided', () => {
       component.setProps({ ...component.props(), value: 'some input' });
       component.update();
       expect(getPlaceholderDomElement()).toBe(null);

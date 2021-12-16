@@ -8,11 +8,13 @@
 
 import { monaco } from '@kbn/monaco';
 
-export class PlaceHolderWidget implements monaco.editor.IContentWidget {
+export class PlaceholderWidget implements monaco.editor.IContentWidget {
   constructor(
     private readonly placeholderText: string,
     private readonly editor: monaco.editor.ICodeEditor
-  ) {}
+  ) {
+    editor.addContentWidget(this);
+  }
 
   private domNode: undefined | HTMLElement;
 
@@ -39,5 +41,9 @@ export class PlaceHolderWidget implements monaco.editor.IContentWidget {
       },
       preference: [monaco.editor.ContentWidgetPositionPreference.EXACT],
     };
+  }
+
+  public dispose(): void {
+    this.editor.removeContentWidget(this);
   }
 }
