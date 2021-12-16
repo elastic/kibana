@@ -511,6 +511,64 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
   return result;
 }
 
+function getCancellableRuleType() {
+  const paramsSchema = schema.object({
+    doLongSearch: schema.boolean(),
+    doLongPostProcessing: schema.boolean(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: RuleType<ParamsType, never, {}, {}, {}, 'default'> = {
+    id: 'test.cancellableRule',
+    name: 'Test: Rule That Implements Cancellation',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    ruleTaskTimeout: '3s',
+    async executor(ruleExecutorOptions) {
+      const { services, params } = ruleExecutorOptions;
+      const doLongSearch = params.doLongSearch;
+      const doLongPostProcessing = params.doLongPostProcessing;
+
+      const aggs = doLongSearch
+        ? {
+            delay: {
+              shard_delay: {
+                value: '10s',
+              },
+            },
+          }
+        : {};
+
+      const query = {
+        index: ES_TEST_INDEX_NAME,
+        body: {
+          query: {
+            bool: {
+              filter: {
+                match_all: {},
+              },
+            },
+          },
+          ...(aggs ? { aggs } : {}),
+        },
+      };
+
+      await services.search.asCurrentUser.search(query as any);
+
+      if (doLongPostProcessing) {
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+      }
+
+      if (services.shouldStopExecution()) {
+        throw new Error('execution short circuited!');
+      }
+    },
+  };
+  return result;
+}
+
 export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
   { alerting }: Pick<FixtureSetupDeps, 'alerting'>
@@ -626,4 +684,5 @@ export function defineAlertTypes(
   alerting.registerType(exampleAlwaysFiringAlertType);
   alerting.registerType(getLongRunningPatternRuleType());
   alerting.registerType(getLongRunningPatternRuleType(false));
+  alerting.registerType(getCancellableRuleType());
 }

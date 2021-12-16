@@ -191,6 +191,12 @@ describe('Task Runner Cancel', () => {
     await taskRunner.cancel();
     await promise;
 
+    const logger = taskRunnerFactoryInitializerParams.logger;
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      3,
+      `Aborting any in-progress ES searches for rule type test with id 1`
+    );
+
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     // execute-start event, timeout event and then an execute event because rule executors are not cancelling anything yet
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
@@ -394,7 +400,7 @@ describe('Task Runner Cancel', () => {
     await promise;
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(6);
+    expect(logger.debug).toHaveBeenCalledTimes(7);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -402,18 +408,22 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       3,
-      `Updating rule task for test rule with id 1 - execution error due to timeout`
+      'Aborting any in-progress ES searches for rule type test with id 1'
     );
     expect(logger.debug).nthCalledWith(
       4,
-      `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+      `Updating rule task for test rule with id 1 - execution error due to timeout`
     );
     expect(logger.debug).nthCalledWith(
       5,
-      `no scheduling of actions for rule test:1: 'rule-name': rule execution has been cancelled.`
+      `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
     );
     expect(logger.debug).nthCalledWith(
       6,
+      `no scheduling of actions for rule test:1: 'rule-name': rule execution has been cancelled.`
+    );
+    expect(logger.debug).nthCalledWith(
+      7,
       'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
@@ -511,7 +521,7 @@ describe('Task Runner Cancel', () => {
 
   function testActionsExecute() {
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(5);
+    expect(logger.debug).toHaveBeenCalledTimes(6);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -519,14 +529,18 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       3,
-      `Updating rule task for test rule with id 1 - execution error due to timeout`
+      'Aborting any in-progress ES searches for rule type test with id 1'
     );
     expect(logger.debug).nthCalledWith(
       4,
-      `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+      `Updating rule task for test rule with id 1 - execution error due to timeout`
     );
     expect(logger.debug).nthCalledWith(
       5,
+      `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+    );
+    expect(logger.debug).nthCalledWith(
+      6,
       'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
