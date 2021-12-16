@@ -50,29 +50,23 @@ export function buildDefaultArgExpr(argUiConfig: ArgUiConfig): string | undefine
   if (argUiConfig.default) {
     return buildArg(argUiConfig, argUiConfig.default);
   }
-
   if (!argConfig) {
-    const arg = argTypeRegistry.get(argUiConfig.argType);
-    if (!arg) {
-      return undefined;
-    }
-
-    const defExpr = arg.default;
-    if (defExpr) {
-      return buildArg(argUiConfig, defExpr);
-    }
     return undefined;
   }
 
   const defaultArgs = argConfig.args.map((arg) => {
-    const defExpr = arg.default;
-    if (defExpr) {
-      return buildArg(arg, defExpr);
+    const argConf = getArgTypeDef(arg.argType);
+
+    if (arg.default && argConf && Array.isArray(argConf.args)) {
+      return buildArg(arg, arg.default);
     }
     return buildDefaultArgExpr(arg);
   });
 
   const validArgs = filterValidArguments(defaultArgs);
-  const defExpr = validArgs.length ? `{${argUiConfig.argType} ${validArgs.join(' ')}}` : undefined;
+  const defExpr = validArgs.length
+    ? `{${argUiConfig.argType} ${validArgs.join(' ')}}`
+    : `{${argUiConfig.argType}}`;
+
   return defExpr;
 }
