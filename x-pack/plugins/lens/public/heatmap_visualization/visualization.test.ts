@@ -68,7 +68,6 @@ describe('heatmap', () => {
           position: Position.Right,
           type: LEGEND_FUNCTION,
           maxLines: 1,
-          shouldTruncate: true,
         },
         gridConfig: {
           type: HEATMAP_GRID_FUNCTION,

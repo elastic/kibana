@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 import React, { CSSProperties, lazy } from 'react';
+import { Observable } from 'rxjs';
+import { CoreTheme } from 'kibana/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { i18n } from '@kbn/i18n';
-import { withSuspense } from '../../../presentation_util/public';
+import { CoreSetup } from '../../../../core/public';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
+import { withSuspense, defaultTheme$ } from '../../../presentation_util/public';
 import { MetricRendererConfig } from '../../common/types';
 
 const strings = {
@@ -26,30 +30,36 @@ const strings = {
 const LazyMetricComponent = lazy(() => import('../components/metric_component'));
 const MetricComponent = withSuspense(LazyMetricComponent);
 
-export const metricRenderer = (): ExpressionRenderDefinition<MetricRendererConfig> => ({
-  name: 'metric',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelpDescription(),
-  reuseDomNode: true,
-  render: async (
-    domNode: HTMLElement,
-    config: MetricRendererConfig,
-    handlers: IInterpreterRenderHandlers
-  ) => {
-    handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
-    });
+export const getMetricRenderer =
+  (theme$: Observable<CoreTheme> = defaultTheme$) =>
+  (): ExpressionRenderDefinition<MetricRendererConfig> => ({
+    name: 'metric',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelpDescription(),
+    reuseDomNode: true,
+    render: async (
+      domNode: HTMLElement,
+      config: MetricRendererConfig,
+      handlers: IInterpreterRenderHandlers
+    ) => {
+      handlers.onDestroy(() => {
+        unmountComponentAtNode(domNode);
+      });
 
-    render(
-      <MetricComponent
-        label={config.label}
-        labelFont={config.labelFont ? (config.labelFont.spec as CSSProperties) : {}}
-        metric={config.metric}
-        metricFont={config.metricFont ? (config.metricFont.spec as CSSProperties) : {}}
-        metricFormat={config.metricFormat}
-      />,
-      domNode,
-      () => handlers.done()
-    );
-  },
-});
+      render(
+        <KibanaThemeProvider theme$={theme$}>
+          <MetricComponent
+            label={config.label}
+            labelFont={config.labelFont ? (config.labelFont.spec as CSSProperties) : {}}
+            metric={config.metric}
+            metricFont={config.metricFont ? (config.metricFont.spec as CSSProperties) : {}}
+            metricFormat={config.metricFormat}
+          />
+        </KibanaThemeProvider>,
+        domNode,
+        () => handlers.done()
+      );
+    },
+  });
+
+export const metricRendererFactory = (core: CoreSetup) => getMetricRenderer(core.theme.theme$);

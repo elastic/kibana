@@ -14,9 +14,10 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { Case } from '../../containers/types';
-import { CaseType } from '../../../common';
+import { CaseType } from '../../../common/api';
 import { UsePostComment, usePostComment } from '../../containers/use_post_comment';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { getConnectorById } from '../utils';
 
 const initialCaseValue: FormProps = {
@@ -34,7 +35,6 @@ interface Props {
   children?: JSX.Element | JSX.Element[];
   hideConnectorServiceNowSir?: boolean;
   onSuccess?: (theCase: Case) => Promise<void>;
-  syncAlertsDefaultValue?: boolean;
 }
 
 export const FormContext: React.FC<Props> = ({
@@ -43,10 +43,10 @@ export const FormContext: React.FC<Props> = ({
   children,
   hideConnectorServiceNowSir,
   onSuccess,
-  syncAlertsDefaultValue = true,
 }) => {
   const { connectors, loading: isLoadingConnectors } = useConnectors();
   const { owner } = useCasesContext();
+  const { isSyncAlertsEnabled } = useCasesFeatures();
   const { postCase } = usePostCase();
   const { postComment } = usePostComment();
   const { pushCaseToExternalService } = usePostPushToService();
@@ -56,7 +56,7 @@ export const FormContext: React.FC<Props> = ({
       {
         connectorId: dataConnectorId,
         fields,
-        syncAlerts = syncAlertsDefaultValue,
+        syncAlerts = isSyncAlertsEnabled,
         ...dataWithoutConnectorId
       },
       isValid
@@ -93,6 +93,7 @@ export const FormContext: React.FC<Props> = ({
       }
     },
     [
+      isSyncAlertsEnabled,
       connectors,
       postCase,
       caseType,
@@ -101,7 +102,6 @@ export const FormContext: React.FC<Props> = ({
       onSuccess,
       postComment,
       pushCaseToExternalService,
-      syncAlertsDefaultValue,
     ]
   );
 

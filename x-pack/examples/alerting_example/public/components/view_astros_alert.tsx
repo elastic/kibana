@@ -26,7 +26,7 @@ import { isEmpty } from 'lodash';
 import { ALERTING_EXAMPLE_APP_ID, AlwaysFiringParams } from '../../common/constants';
 import {
   Alert,
-  AlertTaskState,
+  RuleTaskState,
   LEGACY_BASE_ALERT_API_PATH,
 } from '../../../../plugins/alerting/common';
 
@@ -40,7 +40,7 @@ function hasCraft(state: any): state is { craft: string } {
 }
 export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
   const [alert, setAlert] = useState<Alert<AlwaysFiringParams> | null>(null);
-  const [alertState, setAlertState] = useState<AlertTaskState | null>(null);
+  const [alertState, setAlertState] = useState<RuleTaskState | null>(null);
 
   useEffect(() => {
     if (!alert) {
@@ -50,7 +50,7 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
     }
     if (!alertState) {
       http
-        .get<AlertTaskState | null>(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/state`)
+        .get<RuleTaskState | null>(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/state`)
         .then(setAlertState);
     }
   }, [alert, alertState, http, id]);

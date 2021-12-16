@@ -17,7 +17,9 @@ import { TimelionRenderValue } from './timelion_vis_fn';
 import { UI_SETTINGS } from '../common/constants';
 import { RangeFilterParams } from '../../../data/public';
 
-const TimelionVisComponent = lazy(() => import('./components/timelion_vis_component'));
+const LazyTimelionVisComponent = lazy(() =>
+  import('./async_services').then(({ TimelionVisComponent }) => ({ default: TimelionVisComponent }))
+);
 const TimelionVisLegacyComponent = lazy(() => import('./legacy/timelion_vis_component'));
 
 export const getTimelionVisRenderer: (
@@ -36,7 +38,7 @@ export const getTimelionVisRenderer: (
 
     const VisComponent = deps.uiSettings.get(UI_SETTINGS.LEGACY_CHARTS_LIBRARY, false)
       ? TimelionVisLegacyComponent
-      : TimelionVisComponent;
+      : LazyTimelionVisComponent;
 
     const onBrushEvent = (rangeFilterParams: RangeFilterParams) => {
       handlers.event({

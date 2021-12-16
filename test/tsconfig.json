@@ -5,7 +5,7 @@
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
-    "types": ["node", "resize-observer-polyfill", "@emotion/react/types/css-prop"]
+    "types": ["node", "@emotion/react/types/css-prop"]
   },
   "include": [
     "**/*",

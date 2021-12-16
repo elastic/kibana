@@ -184,10 +184,7 @@ export function ErrorGroupOverview() {
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
-              <FailedTransactionRateChart
-                kuery={kuery}
-                environment={environment}
-              />
+              <FailedTransactionRateChart kuery={kuery} />
             </EuiFlexItem>
           </ChartPointerEventContextProvider>
         </EuiFlexGroup>

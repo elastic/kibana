@@ -17,7 +17,7 @@ import {
   deleteAllCaseItems,
 } from '../../../../common/lib/utils';
 import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validation';
-import { CaseResponse } from '../../../../../../plugins/cases/common';
+import { CaseResponse } from '../../../../../../plugins/cases/common/api';
 import {
   globalRead,
   noKibanaPrivileges,

@@ -19,6 +19,7 @@ import { DiscoverServices } from '../../build_services';
 import { indexPatternsMock } from '../../__mocks__/index_patterns';
 import { act } from 'react-dom/test-utils';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';
+import { themeServiceMock } from '../../../../../core/public/mocks';
 
 const mockFilterManager = createFilterManagerMock();
 const mockNavigationPlugin = { ui: { TopNavMenu: mockTopNavMenu } };
@@ -60,7 +61,10 @@ describe('ContextApp test', () => {
       indexPatterns: indexPatternsMock,
       toastNotifications: { addDanger: () => {} },
       navigation: mockNavigationPlugin,
-      core: { notifications: { toasts: [] } },
+      core: {
+        notifications: { toasts: [] },
+        theme: { theme$: themeServiceMock.createStartContract().theme$ },
+      },
       history: () => {},
       fieldFormats: {
         getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),

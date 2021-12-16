@@ -7,8 +7,16 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import {
+  createAction,
+  createAlert,
+  createAlertManualCleanup,
+  createFailingAlert,
+  disableAlert,
+  muteAlert,
+} from '../../lib/alert_api_actions';
 import { ObjectRemover } from '../../lib/object_remover';
-import { generateUniqueKey, getTestAlertData, getTestActionData } from '../../lib/get_test_data';
+import { generateUniqueKey } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -17,52 +25,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const retry = getService('retry');
   const objectRemover = new ObjectRemover(supertest);
-
-  async function createAlertManualCleanup(overwrites: Record<string, any> = {}) {
-    const { body: createdAlert } = await supertest
-      .post(`/api/alerting/rule`)
-      .set('kbn-xsrf', 'foo')
-      .send(getTestAlertData(overwrites))
-      .expect(200);
-    return createdAlert;
-  }
-
-  async function createFailingAlert() {
-    return await createAlert({
-      rule_type_id: 'test.failing',
-      schedule: { interval: '30s' },
-    });
-  }
-
-  async function createAlert(overwrites: Record<string, any> = {}) {
-    const createdAlert = await createAlertManualCleanup(overwrites);
-    objectRemover.add(createdAlert.id, 'alert', 'alerts');
-    return createdAlert;
-  }
-
-  async function createAction(overwrites: Record<string, any> = {}) {
-    const { body: createdAction } = await supertest
-      .post(`/api/actions/connector`)
-      .set('kbn-xsrf', 'foo')
-      .send(getTestActionData(overwrites))
-      .expect(200);
-    objectRemover.add(createdAction.id, 'action', 'actions');
-    return createdAction;
-  }
-
-  async function muteAlert(alertId: string) {
-    const { body: alert } = await supertest
-      .post(`/api/alerting/rule/${alertId}/_mute_all`)
-      .set('kbn-xsrf', 'foo');
-    return alert;
-  }
-
-  async function disableAlert(alertId: string) {
-    const { body: alert } = await supertest
-      .post(`/api/alerting/rule/${alertId}/_disable`)
-      .set('kbn-xsrf', 'foo');
-    return alert;
-  }
 
   async function refreshAlertsList() {
     await testSubjects.click('rulesTab');
@@ -80,9 +42,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should display alerts in alphabetical order', async () => {
       const uniqueKey = generateUniqueKey();
-      await createAlert({ name: 'b', tags: [uniqueKey] });
-      await createAlert({ name: 'c', tags: [uniqueKey] });
-      await createAlert({ name: 'a', tags: [uniqueKey] });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: { name: 'b', tags: [uniqueKey] },
+      });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: { name: 'c', tags: [uniqueKey] },
+      });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: { name: 'a', tags: [uniqueKey] },
+      });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(uniqueKey);
 
@@ -95,7 +69,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should search for alert', async () => {
-      const createdAlert = await createAlert();
+      const createdAlert = await createAlert({
+        supertest,
+        objectRemover,
+      });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -108,8 +85,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should update alert list on the search clear button click', async () => {
-      await createAlert({ name: 'b' });
-      await createAlert({ name: 'c', tags: [] });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: { name: 'b' },
+      });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: { name: 'c', tags: [] },
+      });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts('b');
 
@@ -138,7 +123,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should search for tags', async () => {
-      const createdAlert = await createAlert({ tags: ['tag', 'tagtag', 'taggity tag'] });
+      const createdAlert = await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: { tags: ['tag', 'tagtag', 'taggity tag'] },
+      });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(`${createdAlert.name} tag`);
 
@@ -151,7 +140,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should display an empty list when search did not return any alerts', async () => {
-      await createAlert();
+      await createAlert({
+        supertest,
+        objectRemover,
+      });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(`An Alert That For Sure Doesn't Exist!`);
 
@@ -159,7 +151,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should disable single alert', async () => {
-      const createdAlert = await createAlert();
+      const createdAlert = await createAlert({
+        supertest,
+        objectRemover,
+      });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -175,8 +170,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should re-enable single alert', async () => {
-      const createdAlert = await createAlert();
-      await disableAlert(createdAlert.id);
+      const createdAlert = await createAlert({
+        supertest,
+        objectRemover,
+      });
+      await disableAlert({ supertest, alertId: createdAlert.id });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -191,7 +189,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should mute single alert', async () => {
-      const createdAlert = await createAlert();
+      const createdAlert = await createAlert({
+        supertest,
+        objectRemover,
+      });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -207,7 +208,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should be able to mute the rule with non "alerts" consumer from a non editable context', async () => {
-      const createdAlert = await createAlert({ consumer: 'siem' });
+      const createdAlert = await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: { consumer: 'siem' },
+      });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -223,8 +228,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should unmute single alert', async () => {
-      const createdAlert = await createAlert();
-      await muteAlert(createdAlert.id);
+      const createdAlert = await createAlert({
+        supertest,
+        objectRemover,
+      });
+      await muteAlert({ supertest, alertId: createdAlert.id });
       await refreshAlertsList();
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -239,8 +247,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should delete single alert', async () => {
-      await createAlert();
-      const secondAlert = await createAlertManualCleanup();
+      await createAlert({
+        supertest,
+        objectRemover,
+      });
+      const secondAlert = await createAlertManualCleanup({ supertest });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(secondAlert.name);
 
@@ -262,7 +273,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should mute all selection', async () => {
-      const createdAlert = await createAlert();
+      const createdAlert = await createAlert({ supertest, objectRemover });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -285,7 +296,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should unmute all selection', async () => {
-      const createdAlert = await createAlert();
+      const createdAlert = await createAlert({ supertest, objectRemover });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -307,7 +318,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should disable all selection', async () => {
-      const createdAlert = await createAlert();
+      const createdAlert = await createAlert({ supertest, objectRemover });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -328,7 +339,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should enable all selection', async () => {
-      const createdAlert = await createAlert();
+      const createdAlert = await createAlert({ supertest, objectRemover });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -352,7 +363,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should delete all selection', async () => {
       const namePrefix = generateUniqueKey();
-      const createdAlert = await createAlertManualCleanup({ name: `${namePrefix}-1` });
+      const createdAlert = await createAlertManualCleanup({
+        supertest,
+        overwrites: { name: `${namePrefix}-1` },
+      });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
 
@@ -376,8 +390,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should filter alerts by the status', async () => {
-      await createAlert();
-      const failingAlert = await createFailingAlert();
+      await createAlert({ supertest, objectRemover });
+      const failingAlert = await createFailingAlert({ supertest, objectRemover });
       // initialy alert get Pending status, so we need to retry refresh list logic to get the post execution statuses
       await retry.try(async () => {
         await refreshAlertsList();
@@ -398,7 +412,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should display total alerts by status and error banner only when exists alerts with status error', async () => {
-      const createdAlert = await createAlert();
+      const createdAlert = await createAlert({ supertest, objectRemover });
       await retry.try(async () => {
         await refreshAlertsList();
         const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
@@ -414,7 +428,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       expect(alertsErrorBannerWhenNoErrors).to.have.length(0);
 
-      await createFailingAlert();
+      await createFailingAlert({ supertest, objectRemover });
       await retry.try(async () => {
         await refreshAlertsList();
         const alertsErrorBannerExistErrors = await find.allByCssSelector(
@@ -438,8 +452,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should filter alerts by the alert type', async () => {
-      await createAlert();
-      const failingAlert = await createFailingAlert();
+      await createAlert({ supertest, objectRemover });
+      const failingAlert = await createFailingAlert({ supertest, objectRemover });
       await refreshAlertsList();
       await testSubjects.click('alertTypeFilterButton');
       expect(await (await testSubjects.find('alertType0Group')).getVisibleText()).to.eql('Alerts');
@@ -455,16 +469,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should filter alerts by the action type', async () => {
-      await createAlert();
-      const action = await createAction();
+      await createAlert({
+        supertest,
+        objectRemover,
+      });
+      const action = await createAction({ supertest, objectRemover });
       const noopAlertWithAction = await createAlert({
-        actions: [
-          {
-            id: action.id,
-            group: 'default',
-            params: { level: 'info', message: 'gfghfhg' },
-          },
-        ],
+        supertest,
+        objectRemover,
+        overwrites: {
+          actions: [
+            {
+              id: action.id,
+              group: 'default',
+              params: { level: 'info', message: 'gfghfhg' },
+            },
+          ],
+        },
       });
       await refreshAlertsList();
       await testSubjects.click('actionTypeFilterButton');

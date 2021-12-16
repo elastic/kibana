@@ -28,10 +28,10 @@ import {
 } from '../../utils/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { ElasticSearchHit } from '../../../../services/doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../../../inspector';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
+import { ElasticSearchHit } from '../../../../types';
 
 jest.mock('../../../../kibana_services', () => ({
   ...jest.requireActual('../../../../kibana_services'),
@@ -150,6 +150,7 @@ function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): Disco
     services,
     state: { columns: [] },
     stateContainer: {} as GetStateReturn,
+    setExpandedDoc: jest.fn(),
   };
 }
 

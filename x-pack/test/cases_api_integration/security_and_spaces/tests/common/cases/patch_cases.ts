@@ -724,6 +724,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           await es.indices.refresh({ index: defaultSignalsIndex });
+          await es.indices.refresh({ index: signalsIndex2 });
 
           let signals = await getSignals();
           // There should be no change in their status since syncing is disabled
@@ -747,6 +748,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })) as CasesResponse;
 
           await es.indices.refresh({ index: defaultSignalsIndex });
+          await es.indices.refresh({ index: signalsIndex2 });
 
           signals = await getSignals();
 
@@ -772,6 +774,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
           await es.indices.refresh({ index: defaultSignalsIndex });
+          await es.indices.refresh({ index: signalsIndex2 });
 
           signals = await getSignals();
 

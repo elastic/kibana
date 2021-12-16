@@ -7,11 +7,11 @@
 
 import { ENDPOINT_DEFAULT_PAGE, ENDPOINT_DEFAULT_PAGE_SIZE } from '../constants';
 import { HostStatus } from '../types';
-import { GetMetadataListRequestSchemaV2 } from './metadata';
+import { GetMetadataListRequestSchema } from './metadata';
 
 describe('endpoint metadata schema', () => {
   describe('GetMetadataListRequestSchemaV2', () => {
-    const query = GetMetadataListRequestSchemaV2.query;
+    const query = GetMetadataListRequestSchema.query;
 
     it('should return correct query params when valid', () => {
       const queryParams = {

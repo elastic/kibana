@@ -36,7 +36,7 @@ describe('createStaticDataView', () => {
     const savedObjectsClient = getMockSavedObjectsClient('apm-*');
     await createStaticDataView({
       setup,
-      config: { autocreateApmIndexPattern: false } as APMConfig,
+      config: { autoCreateApmDataView: false } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -53,7 +53,7 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup,
-      config: { autocreateApmIndexPattern: true } as APMConfig,
+      config: { autoCreateApmDataView: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -70,7 +70,7 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup,
-      config: { autocreateApmIndexPattern: true } as APMConfig,
+      config: { autoCreateApmDataView: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -90,7 +90,7 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup,
-      config: { autocreateApmIndexPattern: true } as APMConfig,
+      config: { autoCreateApmDataView: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });
@@ -117,7 +117,7 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup,
-      config: { autocreateApmIndexPattern: true } as APMConfig,
+      config: { autoCreateApmDataView: true } as APMConfig,
       savedObjectsClient,
       spaceId: 'default',
     });

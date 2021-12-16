@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import {
   DataPublicPluginStart,
   isCompleteResponse,
@@ -16,39 +16,35 @@ import {
 import { Adapters } from '../../../../../inspector';
 import { getChartAggConfigs, getDimensions } from './index';
 import { tabifyAggResponse } from '../../../../../data/common';
-import { buildPointSeriesData } from '../components/chart/point_series';
-import { FetchStatus } from '../../types';
-import { SavedSearchData } from './use_saved_search';
+import { buildPointSeriesData, Chart } from '../components/chart/point_series';
+import { TimechartBucketInterval } from './use_saved_search';
 import { AppState } from '../services/discover_state';
 import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
-import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
+
+interface Result {
+  totalHits: number;
+  chartData: Chart;
+  bucketInterval: TimechartBucketInterval | undefined;
+}
 
 export function fetchChart(
-  data$: SavedSearchData,
   searchSource: ISearchSource,
   {
     abortController,
     appStateContainer,
     data,
     inspectorAdapters,
-    onResults,
     searchSessionId,
   }: {
     abortController: AbortController;
     appStateContainer: ReduxLikeStateContainer<AppState>;
     data: DataPublicPluginStart;
     inspectorAdapters: Adapters;
-    onResults: (foundDocuments: boolean) => void;
     searchSessionId: string;
   }
-) {
-  const { charts$, totalHits$ } = data$;
-
+): Promise<Result> {
   const interval = appStateContainer.getState().interval ?? 'auto';
   const chartAggConfigs = updateSearchSource(searchSource, interval, data);
-
-  sendLoadingMsg(charts$);
-  sendLoadingMsg(totalHits$);
 
   const executionContext = {
     type: 'application',
@@ -74,15 +70,9 @@ export function fetchChart(
       },
       executionContext,
     })
-    .pipe(filter((res) => isCompleteResponse(res)));
-
-  fetch$.subscribe(
-    (res) => {
-      try {
-        const totalHitsNr = res.rawResponse.hits.total as number;
-        totalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: totalHitsNr });
-        onResults(totalHitsNr > 0);
-
+    .pipe(
+      filter((res) => isCompleteResponse(res)),
+      map((res) => {
         const bucketAggConfig = chartAggConfigs.aggs[1];
         const tabifiedData = tabifyAggResponse(chartAggConfigs, res.rawResponse);
         const dimensions = getDimensions(chartAggConfigs, data);
@@ -90,27 +80,15 @@ export function fetchChart(
           ? bucketAggConfig?.buckets?.getInterval()
           : undefined;
         const chartData = buildPointSeriesData(tabifiedData, dimensions!);
-        charts$.next({
-          fetchStatus: FetchStatus.COMPLETE,
+        return {
           chartData,
           bucketInterval,
-        });
-      } catch (e) {
-        charts$.next({
-          fetchStatus: FetchStatus.ERROR,
-          error: e,
-        });
-      }
-    },
-    (error) => {
-      if (error instanceof Error && error.name === 'AbortError') {
-        return;
-      }
-      sendErrorMsg(charts$, error);
-      sendErrorMsg(totalHits$, error);
-    }
-  );
-  return fetch$;
+          totalHits: res.rawResponse.hits.total as number,
+        };
+      })
+    );
+
+  return fetch$.toPromise();
 }
 
 export function updateSearchSource(

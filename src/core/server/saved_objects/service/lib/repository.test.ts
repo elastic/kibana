@@ -976,8 +976,9 @@ describe('SavedObjectsRepository', () => {
     describe('migration', () => {
       it(`migrates the docs and serializes the migrated docs`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocument);
-        await bulkCreateSuccess([obj1, obj2]);
-        const docs = [obj1, obj2].map((x) => ({ ...x, ...mockTimestampFields }));
+        const modifiedObj1 = { ...obj1, coreMigrationVersion: '8.0.0' };
+        await bulkCreateSuccess([modifiedObj1, obj2]);
+        const docs = [modifiedObj1, obj2].map((x) => ({ ...x, ...mockTimestampFields }));
         expectMigrationArgs(docs[0], true, 1);
         expectMigrationArgs(docs[1], true, 2);
 
@@ -2271,7 +2272,16 @@ describe('SavedObjectsRepository', () => {
 
       it(`self-generates an id if none is provided`, async () => {
         await createSuccess(type, attributes);
-        expect(client.create).toHaveBeenCalledWith(
+        expect(client.create).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          }),
+          expect.anything()
+        );
+        await createSuccess(type, attributes, { id: '' });
+        expect(client.create).toHaveBeenNthCalledWith(
+          2,
           expect.objectContaining({
             id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           }),
@@ -2556,8 +2566,22 @@ describe('SavedObjectsRepository', () => {
 
       it(`migrates a document and serializes the migrated doc`, async () => {
         const migrationVersion = mockMigrationVersion;
-        await createSuccess(type, attributes, { id, references, migrationVersion });
-        const doc = { type, id, attributes, references, migrationVersion, ...mockTimestampFields };
+        const coreMigrationVersion = '8.0.0';
+        await createSuccess(type, attributes, {
+          id,
+          references,
+          migrationVersion,
+          coreMigrationVersion,
+        });
+        const doc = {
+          type,
+          id,
+          attributes,
+          references,
+          migrationVersion,
+          coreMigrationVersion,
+          ...mockTimestampFields,
+        };
         expectMigrationArgs(doc);
 
         const migratedDoc = migrator.migrateDocument(doc);
@@ -3543,6 +3567,20 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
+      it('search for the right fields when typeToNamespacesMap is set', async () => {
+        const relevantOpts = {
+          ...commonOptions,
+          fields: ['title'],
+          type: '',
+          namespaces: [],
+          typeToNamespacesMap: new Map([[type, [namespace]]]),
+        };
+
+        await findSuccess(relevantOpts, namespace);
+        const esOptions = client.search.mock.calls[0][0];
+        expect(esOptions?._source ?? []).toContain('index-pattern.title');
+      });
+
       it(`accepts hasReferenceOperator`, async () => {
         const relevantOpts: SavedObjectsFindOptions = {
           ...commonOptions,
@@ -4132,6 +4170,13 @@ describe('SavedObjectsRepository', () => {
         await test({});
       });
 
+      it(`throws when id is empty`, async () => {
+        await expect(
+          savedObjectsRepository.incrementCounter(type, '', counterFields)
+        ).rejects.toThrowError(createBadRequestError('id cannot be empty'));
+        expect(client.update).not.toHaveBeenCalled();
+      });
+
       it(`throws when counterField is not CounterField type`, async () => {
         const test = async (field: unknown[]) => {
           await expect(
@@ -4655,6 +4700,13 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when type is hidden`, async () => {
         await expectNotFoundError(HIDDEN_TYPE, id);
+        expect(client.update).not.toHaveBeenCalled();
+      });
+
+      it(`throws when id is empty`, async () => {
+        await expect(savedObjectsRepository.update(type, '', attributes)).rejects.toThrowError(
+          createBadRequestError('id cannot be empty')
+        );
         expect(client.update).not.toHaveBeenCalled();
       });
 

@@ -18,7 +18,7 @@ import {
   IndexPattern,
   IndexPatternsContract,
   ISearchSource,
-  SearchSourceFields,
+  SerializedSearchSourceFields,
 } from '../../data/public';
 
 /** @deprecated */
@@ -43,7 +43,7 @@ export interface SavedObject {
   migrationVersion?: Record<string, any>;
   save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
   searchSource?: ISearchSource;
-  searchSourceFields?: SearchSourceFields;
+  searchSourceFields?: SerializedSearchSourceFields;
   showInRecentlyAccessed: boolean;
   title: string;
   unresolvedIndexPatternReference?: SavedObjectReference;

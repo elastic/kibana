@@ -126,7 +126,7 @@ export function registerTransactionDurationAnomalyAlertType({
           return {};
         }
 
-        const jobIds = mlJobs.map((job) => job.job_id);
+        const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
           body: {
             size: 0,
@@ -190,7 +190,7 @@ export function registerTransactionDurationAnomalyAlertType({
             .map((bucket) => {
               const latest = bucket.latest_score.top[0].metrics;
 
-              const job = mlJobs.find((j) => j.job_id === latest.job_id);
+              const job = mlJobs.find((j) => j.jobId === latest.job_id);
 
               if (!job) {
                 logger.warn(
@@ -202,7 +202,7 @@ export function registerTransactionDurationAnomalyAlertType({
               return {
                 serviceName: latest.partition_field_value as string,
                 transactionType: latest.by_field_value as string,
-                environment: job.custom_settings!.job_tags!.environment,
+                environment: job.environment,
                 score: latest.record_score as number,
               };
             })

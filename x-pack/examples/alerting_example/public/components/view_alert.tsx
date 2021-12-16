@@ -24,7 +24,7 @@ import { isEmpty } from 'lodash';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 import {
   Alert,
-  AlertTaskState,
+  RuleTaskState,
   LEGACY_BASE_ALERT_API_PATH,
 } from '../../../../plugins/alerting/common';
 
@@ -34,7 +34,7 @@ type Props = RouteComponentProps & {
 };
 export const ViewAlertPage = withRouter(({ http, id }: Props) => {
   const [alert, setAlert] = useState<Alert | null>(null);
-  const [alertState, setAlertState] = useState<AlertTaskState | null>(null);
+  const [alertState, setAlertState] = useState<RuleTaskState | null>(null);
 
   useEffect(() => {
     if (!alert) {
@@ -42,7 +42,7 @@ export const ViewAlertPage = withRouter(({ http, id }: Props) => {
     }
     if (!alertState) {
       http
-        .get<AlertTaskState | null>(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/state`)
+        .get<RuleTaskState | null>(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/state`)
         .then(setAlertState);
     }
   }, [alert, alertState, http, id]);

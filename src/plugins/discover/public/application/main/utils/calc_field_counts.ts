@@ -7,7 +7,7 @@
  */
 
 import { flattenHit, IndexPattern } from '../../../../../data/common';
-import { ElasticSearchHit } from '../../../services/doc_views/doc_views_types';
+import { ElasticSearchHit } from '../../../types';
 
 /**
  * This function is recording stats of the available fields, for usage in sidebar and sharing

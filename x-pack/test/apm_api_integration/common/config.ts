@@ -16,6 +16,7 @@ import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
 import { RegistryProvider } from './registry';
 import { synthtraceEsClientService } from './synthtrace_es_client_service';
+import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 
 export interface ApmFtrConfig {
   name: APMFtrConfigName;
@@ -99,7 +100,7 @@ export function createTestConfig(config: ApmFtrConfig) {
             ),
           };
         },
-
+        ml: MachineLearningAPIProvider,
         // legacy clients
         legacySupertestAsNoAccessUser: getLegacySupertestClient(kibanaServer, ApmUser.noAccessUser),
         legacySupertestAsApmReadUser: getLegacySupertestClient(kibanaServer, ApmUser.apmReadUser),

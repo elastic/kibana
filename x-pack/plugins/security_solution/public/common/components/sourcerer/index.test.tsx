@@ -19,14 +19,31 @@ import {
 } from '../../mock';
 import { createStore } from '../../store';
 import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
+import { waitFor } from '@testing-library/dom';
+import { useSourcererDataView } from '../../containers/sourcerer';
 
 const mockDispatch = jest.fn();
+
+jest.mock('../../containers/sourcerer');
+const mockUseUpdateDataView = jest.fn().mockReturnValue(() => true);
+jest.mock('./use_update_data_view', () => ({
+  useUpdateDataView: () => mockUseUpdateDataView,
+}));
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 
   return {
     ...original,
     useDispatch: () => mockDispatch,
+  };
+});
+
+jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
+  const original = jest.requireActual('../../../../../../../src/plugins/kibana_react/public');
+
+  return {
+    ...original,
+    toMountPoint: jest.fn(),
   };
 });
 
@@ -57,12 +74,21 @@ const patternListNoSignals = patternList
   .filter((p) => p !== mockGlobalState.sourcerer.signalIndexName)
   .sort();
 let store: ReturnType<typeof createStore>;
+const sourcererDataView = {
+  indicesExist: true,
+  loading: false,
+};
+
 describe('Sourcerer component', () => {
   const { storage } = createSecuritySolutionStorageMock();
 
   beforeEach(() => {
     store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
     jest.clearAllMocks();
+  });
+
+  afterAll(() => {
     jest.restoreAllMocks();
   });
 
@@ -215,7 +241,6 @@ describe('Sourcerer component', () => {
             ...mockGlobalState.sourcerer.sourcererScopes,
             [SourcererScopeName.default]: {
               ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-              loading: false,
               selectedDataViewId: '1234',
               selectedPatterns: ['filebeat-*'],
             },
@@ -267,7 +292,6 @@ describe('Sourcerer component', () => {
           ...mockGlobalState.sourcerer.sourcererScopes,
           [SourcererScopeName.default]: {
             ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-            loading: false,
             selectedDataViewId: id,
             selectedPatterns: patternListNoSignals.slice(0, 2),
           },
@@ -313,8 +337,6 @@ describe('Sourcerer component', () => {
           ...mockGlobalState.sourcerer.sourcererScopes,
           [SourcererScopeName.timeline]: {
             ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-            loading: false,
-            patternList,
             selectedDataViewId: id,
             selectedPatterns: patternList.slice(0, 2),
           },
@@ -355,7 +377,6 @@ describe('Sourcerer component', () => {
             ...mockGlobalState.sourcerer.sourcererScopes,
             [SourcererScopeName.default]: {
               ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-              loading: false,
               selectedDataViewId: id,
               selectedPatterns: patternListNoSignals.slice(0, 2),
             },
@@ -629,6 +650,7 @@ describe('timeline sourcerer', () => {
   };
 
   beforeAll(() => {
+    (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
     wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...testProps} />
@@ -713,6 +735,7 @@ describe('timeline sourcerer', () => {
     };
 
     store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
     wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
@@ -754,6 +777,7 @@ describe('Sourcerer integration tests', () => {
   const { storage } = createSecuritySolutionStorageMock();
 
   beforeEach(() => {
+    (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
     store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -795,11 +819,15 @@ describe('No data', () => {
   const { storage } = createSecuritySolutionStorageMock();
 
   beforeEach(() => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...sourcererDataView,
+      indicesExist: false,
+    });
     store = createStore(mockNoIndicesState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
-  test('Hide sourcerer', () => {
+  test('Hide sourcerer - default ', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
@@ -807,5 +835,124 @@ describe('No data', () => {
     );
 
     expect(wrapper.find(`[data-test-subj="sourcerer-trigger"]`).exists()).toEqual(false);
+  });
+  test('Hide sourcerer - detections ', () => {
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.detections} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj="sourcerer-trigger"]`).exists()).toEqual(false);
+  });
+  test('Hide sourcerer - timeline ', () => {
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).exists()).toEqual(true);
+  });
+});
+
+describe('Update available', () => {
+  const { storage } = createSecuritySolutionStorageMock();
+  const state2 = {
+    ...mockGlobalState,
+    sourcerer: {
+      ...mockGlobalState.sourcerer,
+      kibanaDataViews: [
+        mockGlobalState.sourcerer.defaultDataView,
+        {
+          ...mockGlobalState.sourcerer.defaultDataView,
+          id: '1234',
+          title: 'auditbeat-*',
+          patternList: ['auditbeat-*'],
+        },
+        {
+          ...mockGlobalState.sourcerer.defaultDataView,
+          id: '12347',
+          title: 'packetbeat-*',
+          patternList: ['packetbeat-*'],
+        },
+      ],
+      sourcererScopes: {
+        ...mockGlobalState.sourcerer.sourcererScopes,
+        [SourcererScopeName.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          loading: false,
+          patternList,
+          selectedDataViewId: null,
+          selectedPatterns: ['myFakebeat-*'],
+          missingPatterns: ['myFakebeat-*'],
+        },
+      },
+    },
+  };
+
+  let wrapper: ReactWrapper;
+
+  beforeEach(() => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...sourcererDataView,
+      activePatterns: ['myFakebeat-*'],
+    });
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+    wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
+      </TestProviders>
+    );
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('Show Update available label', () => {
+    expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-badge"]`).exists()).toBeTruthy();
+  });
+
+  test('Show correct tooltip', () => {
+    expect(wrapper.find(`[data-test-subj="sourcerer-tooltip"]`).prop('content')).toEqual(
+      'myFakebeat-*'
+    );
+  });
+
+  test('Show UpdateDefaultDataViewModal', () => {
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+
+    expect(wrapper.find(`UpdateDefaultDataViewModal`).prop('isShowing')).toEqual(true);
+  });
+
+  test('Show Add index pattern in UpdateDefaultDataViewModal', () => {
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+
+    expect(wrapper.find(`button[data-test-subj="sourcerer-update-data-view"]`).text()).toEqual(
+      'Add index pattern'
+    );
+  });
+
+  test('Set all the index patterns from legacy timeline to sourcerer, after clicking on "Add index pattern"', async () => {
+    wrapper.find(`[data-test-subj="timeline-sourcerer-trigger"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-deprecated-update"]`).first().simulate('click');
+
+    wrapper.find(`button[data-test-subj="sourcerer-update-data-view"]`).simulate('click');
+
+    await waitFor(() => wrapper.update());
+    expect(mockDispatch).toHaveBeenCalledWith(
+      sourcererActions.setSelectedDataView({
+        id: SourcererScopeName.timeline,
+        selectedDataViewId: 'security-solution',
+        selectedPatterns: ['myFakebeat-*'],
+        shouldValidateSelectedPatterns: false,
+      })
+    );
   });
 });

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../common';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../common/constants';
 
 /**
  * The name of the saved object reference indicating the action connector ID. This is stored in the Saved Object reference

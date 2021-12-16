@@ -22,7 +22,8 @@ import {
 } from '../../../../../src/plugins/charts/public';
 import { AutoScale } from './auto_scale';
 import { VisualizationContainer } from '../visualization_container';
-import { EmptyPlaceholder, getContrastColor } from '../shared_components';
+import { getContrastColor } from '../shared_components';
+import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import type { FormatFactory } from '../../common';
 import type { MetricChartProps } from '../../common/expressions';

@@ -18,8 +18,8 @@ export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';
 // EPM API routes
 const EPM_PACKAGES_MANY = `${EPM_API_ROOT}/packages`;
 const EPM_PACKAGES_BULK = `${EPM_PACKAGES_MANY}/_bulk`;
-const EPM_PACKAGES_ONE = `${EPM_PACKAGES_MANY}/{pkgkey}`;
-const EPM_PACKAGES_FILE = `${EPM_PACKAGES_MANY}/{pkgName}/{pkgVersion}`;
+const EPM_PACKAGES_ONE_DEPRECATED = `${EPM_PACKAGES_MANY}/{pkgkey}`;
+const EPM_PACKAGES_ONE = `${EPM_PACKAGES_MANY}/{pkgName}/{pkgVersion}`;
 export const EPM_API_ROUTES = {
   BULK_INSTALL_PATTERN: EPM_PACKAGES_BULK,
   LIST_PATTERN: EPM_PACKAGES_MANY,
@@ -28,9 +28,13 @@ export const EPM_API_ROUTES = {
   INSTALL_FROM_REGISTRY_PATTERN: EPM_PACKAGES_ONE,
   INSTALL_BY_UPLOAD_PATTERN: EPM_PACKAGES_MANY,
   DELETE_PATTERN: EPM_PACKAGES_ONE,
-  FILEPATH_PATTERN: `${EPM_PACKAGES_FILE}/{filePath*}`,
+  FILEPATH_PATTERN: `${EPM_PACKAGES_ONE}/{filePath*}`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
   STATS_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/stats`,
+
+  INFO_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
+  INSTALL_FROM_REGISTRY_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
+  DELETE_PATTERN_DEPRECATED: EPM_PACKAGES_ONE_DEPRECATED,
 };
 
 // Data stream API routes
@@ -79,7 +83,9 @@ export const SETTINGS_API_ROUTES = {
 // App API routes
 export const APP_API_ROUTES = {
   CHECK_PERMISSIONS_PATTERN: `${API_ROOT}/check-permissions`,
-  GENERATE_SERVICE_TOKEN_PATTERN: `${API_ROOT}/service-tokens`,
+  GENERATE_SERVICE_TOKEN_PATTERN: `${API_ROOT}/service_tokens`,
+  // deprecated since 8.0
+  GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED: `${API_ROOT}/service-tokens`,
 };
 
 // Agent API routes
@@ -95,16 +101,23 @@ export const AGENT_API_ROUTES = {
   BULK_UNENROLL_PATTERN: `${API_ROOT}/agents/bulk_unenroll`,
   REASSIGN_PATTERN: `${API_ROOT}/agents/{agentId}/reassign`,
   BULK_REASSIGN_PATTERN: `${API_ROOT}/agents/bulk_reassign`,
-  STATUS_PATTERN: `${API_ROOT}/agent-status`,
+  STATUS_PATTERN: `${API_ROOT}/agent_status`,
+  // deprecated since 8.0
+  STATUS_PATTERN_DEPRECATED: `${API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {
-  CREATE_PATTERN: `${API_ROOT}/enrollment-api-keys`,
-  LIST_PATTERN: `${API_ROOT}/enrollment-api-keys`,
-  INFO_PATTERN: `${API_ROOT}/enrollment-api-keys/{keyId}`,
-  DELETE_PATTERN: `${API_ROOT}/enrollment-api-keys/{keyId}`,
+  CREATE_PATTERN: `${API_ROOT}/enrollment_api_keys`,
+  LIST_PATTERN: `${API_ROOT}/enrollment_api_keys`,
+  INFO_PATTERN: `${API_ROOT}/enrollment_api_keys/{keyId}`,
+  DELETE_PATTERN: `${API_ROOT}/enrollment_api_keys/{keyId}`,
+  // deprecated since 8.0
+  CREATE_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys`,
+  LIST_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys`,
+  INFO_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys/{keyId}`,
+  DELETE_PATTERN_DEPRECATED: `${API_ROOT}/enrollment-api-keys/{keyId}`,
 };
 
 // Agents setup API routes

@@ -21,7 +21,7 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,
-  getTransactionDurationFieldForTransactions,
+  getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
 import { Setup } from '../../../lib/helpers/setup_request';
@@ -64,7 +64,7 @@ function searchLatency({
     searchAggregatedTransactions,
   });
 
-  const transactionDurationField = getTransactionDurationFieldForTransactions(
+  const transactionDurationField = getDurationFieldForTransactions(
     searchAggregatedTransactions
   );
 

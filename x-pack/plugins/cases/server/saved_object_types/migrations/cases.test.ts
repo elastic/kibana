@@ -9,11 +9,11 @@ import { SavedObjectSanitizedDoc } from 'kibana/server';
 import {
   CaseAttributes,
   CaseFullExternalService,
-  CASE_SAVED_OBJECT,
   ConnectorTypes,
   noneConnectorId,
-} from '../../../common';
-import { getNoneCaseConnector } from '../../common';
+} from '../../../common/api';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { getNoneCaseConnector } from '../../common/utils';
 import { createExternalService, ESCaseConnectorWithId } from '../../services/test_utils';
 import { caseConnectorIdMigration } from './cases';
 

@@ -229,7 +229,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 <p>
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyFormGroupDescription"
-                    defaultMessage="Agent policies are used to manage a group of integrations across a set of agents"
+                    defaultMessage="Agent policies are used to manage a group of integrations across a set of agents."
                   />
                 </p>
               </EuiText>

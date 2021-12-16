@@ -10,6 +10,7 @@ import type {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
+  SavedObjectsImporter,
 } from 'src/core/server';
 
 import {
@@ -36,7 +37,6 @@ import { installMlModel } from '../elasticsearch/ml_model/';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
-
 import { packagePolicyService } from '../..';
 
 import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
@@ -48,6 +48,7 @@ import { deleteKibanaSavedObjectsAssets } from './remove';
 
 export async function _installPackage({
   savedObjectsClient,
+  savedObjectsImporter,
   esClient,
   logger,
   installedPkg,
@@ -57,6 +58,7 @@ export async function _installPackage({
   installSource,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
   esClient: ElasticsearchClient;
   logger: Logger;
   installedPkg?: SavedObject<Installation>;
@@ -100,21 +102,6 @@ export async function _installPackage({
       });
     }
 
-    // kick off `installKibanaAssets` as early as possible because they're the longest running operations
-    // we don't `await` here because we don't want to delay starting the many other `install*` functions
-    // however, without an `await` or a `.catch` we haven't defined how to handle a promise rejection
-    // we define it many lines and potentially seconds of wall clock time later in
-    // `await installKibanaAssetsPromise`
-    // if we encounter an error before we there, we'll have an "unhandled rejection" which causes its own problems
-    // the program will log something like this _and exit/crash_
-    //   Unhandled Promise rejection detected:
-    //   RegistryResponseError or some other error
-    //   Terminating process...
-    //    server crashed  with status code 1
-    //
-    // add a `.catch` to prevent the "unhandled rejection" case
-    // in that `.catch`, set something that indicates a failure
-    // check for that failure later and act accordingly (throw, ignore, return)
     const kibanaAssets = await getKibanaAssets(paths);
     if (installedPkg)
       await deleteKibanaSavedObjectsAssets(
@@ -127,12 +114,13 @@ export async function _installPackage({
       pkgName,
       kibanaAssets
     );
-    let installKibanaAssetsError;
-    const installKibanaAssetsPromise = installKibanaAssets({
-      savedObjectsClient,
+
+    await installKibanaAssets({
+      logger,
+      savedObjectsImporter,
       pkgName,
       kibanaAssets,
-    }).catch((reason) => (installKibanaAssetsError = reason));
+    });
 
     // the rest of the installation must happen in sequential order
     // currently only the base package has an ILM policy
@@ -210,10 +198,6 @@ export async function _installPackage({
       );
     }
     const installedTemplateRefs = getAllTemplateRefs(installedTemplates);
-
-    // make sure the assets are installed (or didn't error)
-    if (installKibanaAssetsError) throw installKibanaAssetsError;
-    await installKibanaAssetsPromise;
 
     const packageAssetResults = await saveArchiveEntries({
       savedObjectsClient,

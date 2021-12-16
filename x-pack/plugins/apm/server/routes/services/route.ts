@@ -44,7 +44,14 @@ import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_pr
 import { getServicesDetailedStatistics } from './get_services_detailed_statistics';
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
+import { getAnomalyTimeseries } from '../../lib/anomaly_detection/get_anomaly_timeseries';
+import {
+  UnknownMLCapabilitiesError,
+  InsufficientMLCapabilities,
+  MLPrivilegesUninitialized,
+} from '../../../../ml/server';
 import { getServiceInstancesDetailedStatisticsPeriods } from './get_service_instances/detailed_statistics';
+import { ML_ERRORS } from '../../../common/anomaly_detection';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -848,6 +855,55 @@ const serviceInfrastructureRoute = createApmServerRoute({
   },
 });
 
+const serviceAnomalyChartsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/anomaly_charts',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([rangeRt, t.type({ transactionType: t.string })]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (resources) => {
+    const setup = await setupRequest(resources);
+
+    if (!setup.ml) {
+      throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
+    }
+
+    const {
+      path: { serviceName },
+      query: { start, end, transactionType },
+    } = resources.params;
+
+    try {
+      const allAnomalyTimeseries = await getAnomalyTimeseries({
+        serviceName,
+        transactionType,
+        start,
+        end,
+        mlSetup: setup.ml,
+        logger: resources.logger,
+      });
+
+      return {
+        allAnomalyTimeseries,
+      };
+    } catch (error) {
+      if (
+        error instanceof UnknownMLCapabilitiesError ||
+        error instanceof InsufficientMLCapabilities ||
+        error instanceof MLPrivilegesUninitialized
+      ) {
+        throw Boom.forbidden(error.message);
+      }
+      throw error;
+    }
+  },
+});
+
 export const serviceRouteRepository = createApmServerRouteRepository()
   .add(servicesRoute)
   .add(servicesDetailedStatisticsRoute)
@@ -867,4 +923,5 @@ export const serviceRouteRepository = createApmServerRouteRepository()
   .add(serviceProfilingTimelineRoute)
   .add(serviceProfilingStatisticsRoute)
   .add(serviceAlertsRoute)
-  .add(serviceInfrastructureRoute);
+  .add(serviceInfrastructureRoute)
+  .add(serviceAnomalyChartsRoute);

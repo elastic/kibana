@@ -55,6 +55,7 @@ const options: DashboardContainerServices = {
   uiActions: {} as any,
   uiSettings: uiSettingsServiceMock.createStartContract(),
   http: coreMock.createStart().http,
+  theme: coreMock.createStart().theme,
   presentationUtil,
 };
 

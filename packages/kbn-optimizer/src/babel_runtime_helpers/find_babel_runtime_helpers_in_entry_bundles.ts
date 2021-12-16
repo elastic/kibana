@@ -8,7 +8,8 @@
 
 import Path from 'path';
 
-import { run, REPO_ROOT } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { OptimizerConfig } from '../optimizer';
 import { parseStats, inAnyEntryChunk } from './parse_stats';

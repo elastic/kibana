@@ -37,10 +37,12 @@ describe('EnterpriseSearch', () => {
       errorConnecting: true,
       config: { host: 'localhost' },
     });
-    const wrapper = shallow(<EnterpriseSearch />);
+    const wrapper = shallow(<EnterpriseSearch errorConnectingMessage="I am an error" />);
 
     expect(wrapper.find(VersionMismatchPage)).toHaveLength(0);
-    expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
+    const errorConnecting = wrapper.find(ErrorConnecting);
+    expect(errorConnecting).toHaveLength(1);
+    expect(errorConnecting.prop('errorConnectingMessage')).toEqual('I am an error');
     expect(wrapper.find(ProductSelector)).toHaveLength(0);
 
     setMockValues({
