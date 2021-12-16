@@ -576,6 +576,7 @@
     "@types/kbn__i18n-react": "link:bazel-bin/packages/kbn-i18n-react/npm_module_types",
     "@types/kbn__mapbox-gl": "link:bazel-bin/packages/kbn-mapbox-gl/npm_module_types",
     "@types/kbn__monaco": "link:bazel-bin/packages/kbn-monaco/npm_module_types",
+    "@types/kbn__optimizer": "link:bazel-bin/packages/kbn-optimizer/npm_module_types",
     "@types/license-checker": "15.0.0",
     "@types/listr": "^0.14.0",
     "@types/loader-utils": "^1.1.3",
