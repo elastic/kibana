@@ -9,6 +9,7 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart } from 'src/core/public';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 import { KibanaPageTemplate } from '../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
@@ -45,6 +46,7 @@ describe('renderApp', () => {
       i18n: { Context: ({ children }: { children: React.ReactNode }) => children },
       uiSettings: { get: () => false },
       http: { basePath: { prepend: (path: string) => path } },
+      theme: themeServiceMock.createStartContract(),
     } as unknown as CoreStart;
     const config = {
       unsafe: {
@@ -57,6 +59,7 @@ describe('renderApp', () => {
       element: window.document.createElement('div'),
       history: createMemoryHistory(),
       setHeaderActionMenu: () => {},
+      theme$: themeServiceMock.createTheme$(),
     } as unknown as AppMountParameters;
 
     expect(() => {

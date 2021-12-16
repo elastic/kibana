@@ -23,13 +23,16 @@ import {
 import { UptimeServerSetup } from '../adapters';
 import { installSyntheticsIndexTemplates } from '../../rest_api/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
-import { ServiceLocations } from '../../../common/runtime_types/monitor_management';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { UptimeConfig } from '../../../common/config';
-import { MonitorConfigs, FormattedMonitorConfigs, ServiceAPIClient } from './service_api_client';
+import { ServiceAPIClient } from './service_api_client';
+import { formatMonitorConfig } from './formatters/format_configs';
+import { ConfigKey, MonitorFields } from '../../../common/runtime_types/monitor_management';
+
+export type MonitorFieldsWithID = MonitorFields & { id: string };
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -166,8 +169,11 @@ export class SyntheticsService {
     };
   }
 
-  async pushConfigs(request?: KibanaRequest, configs?: MonitorConfigs) {
+  async pushConfigs(request?: KibanaRequest, configs?: MonitorFieldsWithID[]) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+    if (monitors.length === 0) {
+      return;
+    }
     const data = {
       monitors,
       output: await this.getOutput(request),
@@ -181,7 +187,7 @@ export class SyntheticsService {
     }
   }
 
-  async deleteConfigs(request: KibanaRequest, configs: MonitorConfigs) {
+  async deleteConfigs(request: KibanaRequest, configs: MonitorFieldsWithID[]) {
     const data = {
       monitors: this.formatConfigs(configs),
       output: await this.getOutput(request),
@@ -198,58 +204,16 @@ export class SyntheticsService {
     });
 
     const savedObjectsList = monitorsSavedObjects?.saved_objects ?? [];
-    return savedObjectsList.map<ValuesType<MonitorConfigs>>(({ attributes, id }) => ({
+    return savedObjectsList.map<ValuesType<MonitorFields[]>>(({ attributes, id }) => ({
       ...attributes,
       id,
     }));
   }
 
-  formatConfigs(configs: MonitorConfigs): FormattedMonitorConfigs {
-    // TODO: Move to dedicated formatter class
-
-    function parseSchedule(schedule: any) {
-      if (schedule?.number) {
-        return `@every ${schedule.number}${schedule.unit}`;
-      }
-      return schedule;
-    }
-
-    /* despite urls being plural, it will never be an array
-     * the plural is held over from legacy implementations */
-    function parseUrl(urls?: string) {
-      if (!urls) {
-        return undefined;
-      }
-      return urls;
-    }
-
-    function parseInlineSource(monAttrs: any) {
-      if (monAttrs['source.inline.script']) {
-        return {
-          inline: {
-            script: monAttrs['source.inline.script'],
-          },
-        };
-      }
-    }
-
-    function parseLocations(locations: ServiceLocations) {
-      return locations.map((location) => location.id);
-    }
-
-    return configs.map((monAttrs) => {
-      const { id, schedule, type, name, locations, tags, urls } = monAttrs;
-      return {
-        id,
-        type,
-        name,
-        locations: parseLocations(locations || []),
-        tags,
-        source: parseInlineSource(monAttrs),
-        urls: parseUrl(urls),
-        schedule: parseSchedule(schedule),
-      };
-    });
+  formatConfigs(configs: MonitorFields[]) {
+    return configs.map((config: Partial<MonitorFields>) =>
+      formatMonitorConfig(Object.keys(config) as ConfigKey[], config)
+    );
   }
 }
 

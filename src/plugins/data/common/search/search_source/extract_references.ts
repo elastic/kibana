@@ -14,7 +14,7 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../data/common';
 
 export const extractReferences = (
   state: SerializedSearchSourceFields
-): [SerializedSearchSourceFields & { indexRefName?: string }, SavedObjectReference[]] => {
+): [SerializedSearchSourceFields, SavedObjectReference[]] => {
   let searchSourceFields: SerializedSearchSourceFields & { indexRefName?: string } = { ...state };
   const references: SavedObjectReference[] = [];
   if (searchSourceFields.index) {

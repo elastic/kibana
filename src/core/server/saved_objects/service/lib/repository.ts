@@ -303,7 +303,6 @@ export class SavedObjectsRepository {
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
     const {
-      id = SavedObjectsUtils.generateId(),
       migrationVersion,
       coreMigrationVersion,
       overwrite = false,
@@ -313,6 +312,7 @@ export class SavedObjectsRepository {
       initialNamespaces,
       version,
     } = options;
+    const id = options.id || SavedObjectsUtils.generateId();
     const namespace = normalizeNamespace(options.namespace);
 
     this.validateInitialNamespaces(type, initialNamespaces);
@@ -1231,6 +1231,9 @@ export class SavedObjectsRepository {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
+    if (!id) {
+      throw SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'); // prevent potentially upserting a saved object with an empty ID
+    }
 
     const { version, references, upsert, refresh = DEFAULT_REFRESH_SETTING } = options;
     const namespace = normalizeNamespace(options.namespace);
@@ -1753,6 +1756,10 @@ export class SavedObjectsRepository {
       initialize = false,
       upsertAttributes,
     } = options;
+
+    if (!id) {
+      throw SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'); // prevent potentially upserting a saved object with an empty ID
+    }
 
     const normalizedCounterFields = counterFields.map((counterField) => {
       /**

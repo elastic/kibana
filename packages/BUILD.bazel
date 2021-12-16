@@ -89,8 +89,12 @@ filegroup(
       "//packages/kbn-dev-utils:build_types",
       "//packages/kbn-docs-utils:build_types",
       "//packages/kbn-es-archiver:build_types",
+      "//packages/kbn-es-query:build_types",
+      "//packages/kbn-field-types:build_types",
       "//packages/kbn-i18n:build_types",
       "//packages/kbn-i18n-react:build_types",
+      "//packages/kbn-mapbox-gl:build_types",
+      "//packages/kbn-optimizer:build_types",
   ],
 )
 
