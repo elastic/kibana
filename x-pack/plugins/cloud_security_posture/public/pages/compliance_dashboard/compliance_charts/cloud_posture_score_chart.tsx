@@ -14,11 +14,13 @@ import { useNavigateToCSPFindings } from '../../../common/hooks/use_navigate_to_
 import { BenchmarkStats } from '../../../../../server/cloud_posture/types';
 import { statusColors } from '../../../common/constants';
 
+interface CloudPostureScoreChartProps {
+  data: BenchmarkStats;
+}
+
 export const CloudPostureScoreChart = ({
-  totalPassed,
-  totalFailed,
-  name: benchmarkName,
-}: BenchmarkStats) => {
+  data: { totalPassed, totalFailed, name: benchmarkName },
+}: CloudPostureScoreChartProps) => {
   const { navigate } = useNavigateToCSPFindings();
   if (totalPassed === undefined || totalFailed === undefined || name === undefined) return null;
 
