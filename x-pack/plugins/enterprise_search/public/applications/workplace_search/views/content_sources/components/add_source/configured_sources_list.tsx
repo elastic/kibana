@@ -29,7 +29,6 @@ import {
   CONFIGURED_SOURCES_LIST_UNCONNECTED_TOOLTIP,
   CONFIGURED_SOURCES_LIST_ACCOUNT_ONLY_TOOLTIP,
   CONFIGURED_SOURCES_CONNECT_BUTTON,
-  CONFIGURED_SOURCES_CONNECT_ANOTHER_BUTTON,
   CONFIGURED_SOURCES_EMPTY_STATE,
   CONFIGURED_SOURCES_TITLE,
   CONFIGURED_SOURCES_EMPTY_BODY,
@@ -100,6 +99,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                               !accountContextOnly &&
                               isOrganization &&
                               unConnectedTooltip}
+                            {accountContextOnly && isOrganization && accountOnlyTooltip}
                           </h4>
                         </EuiText>
                       </EuiFlexItem>
@@ -122,12 +122,14 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                       {(!isOrganization || (isOrganization && !accountContextOnly)) && (
                         <EuiFlexItem grow>
                           <EuiButtonEmptyTo to={`${getSourcesPath(addPath, isOrganization)}/connect`}>
-                            {CONFIGURED_SOURCES_CONNECT_ANOTHER_BUTTON}
+                            {CONFIGURED_SOURCES_CONNECT_BUTTON}
                           </EuiButtonEmptyTo>
                         </EuiFlexItem>
                       ) || (
                           <EuiFlexItem grow={false}>
-                            {accountContextOnly && isOrganization && accountOnlyTooltip}
+                            <EuiText size="s" color="subdued" className="test">
+                              <p>Add an organizational content source</p>
+                            </EuiText>
                           </EuiFlexItem>
                         )}
 
