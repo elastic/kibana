@@ -28,6 +28,7 @@ import { deprecationsServiceMock } from './deprecations/deprecations_service.moc
 import { themeServiceMock } from './theme/theme_service.mock';
 
 export { chromeServiceMock } from './chrome/chrome_service.mock';
+export { capabilitiesServiceMock } from './application/capabilities/capabilities_service.mock';
 export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 export { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
