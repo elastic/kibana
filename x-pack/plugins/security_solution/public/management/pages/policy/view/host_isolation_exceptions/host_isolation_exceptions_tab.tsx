@@ -9,7 +9,6 @@ import {
   EuiPageContent,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiProgress,
   EuiSpacer,
   EuiText,
   EuiTitle,
