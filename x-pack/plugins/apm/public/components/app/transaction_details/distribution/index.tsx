@@ -18,28 +18,27 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useUiTracker } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
 
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 import { TransactionDistributionChart } from '../../../shared/charts/transaction_distribution_chart';
-import { useTransactionColors } from '../../correlations/use_transaction_colors';
 
 import type { TabContentProps } from '../types';
 import { useWaterfallFetcher } from '../use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
 import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
+import { HeightRetainer } from '../../../shared/HeightRetainer';
+import { ChartTitleToolTip } from '../../correlations/chart_title_tool_tip';
 
 // Enforce min height so it's consistent across all tabs on the same level
 // to prevent "flickering" behavior
-const MIN_TAB_TITLE_HEIGHT = 56;
+export const MIN_TAB_TITLE_HEIGHT = 56;
 
 type Selection = [number, number];
 
@@ -68,7 +67,6 @@ export function TransactionDistribution({
   selection,
   traceSamples,
 }: TransactionDistributionProps) {
-  const transactionColors = useTransactionColors();
   const { urlParams } = useUrlParams();
   const { waterfall, status: waterfallStatus } = useWaterfallFetcher();
 
@@ -105,115 +103,96 @@ export function TransactionDistribution({
     useTransactionDistributionChartData();
 
   return (
-    <div data-test-subj="apmTransactionDistributionTabContent">
-      <EuiFlexGroup style={{ minHeight: MIN_TAB_TITLE_HEIGHT }}>
-        <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <EuiTitle size="xs">
-            <h5 data-test-subj="apmTransactionDistributionChartTitle">
-              {i18n.translate(
-                'xpack.apm.transactionDetails.distribution.panelTitle',
-                {
-                  defaultMessage: 'Latency distribution',
-                }
-              )}
-            </h5>
-          </EuiTitle>
-        </EuiFlexItem>
-        {hasData && !selection && (
+    <HeightRetainer>
+      <div data-test-subj="apmTransactionDistributionTabContent">
+        <EuiFlexGroup
+          style={{ minHeight: MIN_TAB_TITLE_HEIGHT }}
+          alignItems="center"
+          gutterSize="s"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h5 data-test-subj="apmTransactionDistributionChartTitle">
+                {i18n.translate(
+                  'xpack.apm.transactionDetails.distribution.panelTitle',
+                  {
+                    defaultMessage: 'Latency distribution',
+                  }
+                )}
+              </h5>
+            </EuiTitle>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <ChartTitleToolTip />
+          </EuiFlexItem>
+
           <EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
-              <EuiFlexItem
-                grow={false}
-                style={{ flexDirection: 'row', alignItems: 'center' }}
-              >
-                <EuiIcon type="iInCircle" title={emptySelectionText} size="s" />
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-                style={{ flexDirection: 'row', alignItems: 'center' }}
-              >
-                <EuiText size="xs">{emptySelectionText}</EuiText>
-              </EuiFlexItem>
+            <EuiFlexGroup
+              justifyContent="flexEnd"
+              alignItems="center"
+              gutterSize="xs"
+            >
+              {selection ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge
+                    iconType="cross"
+                    iconSide="left"
+                    onClick={onTrackedClearSelection}
+                    onClickAriaLabel={clearSelectionAriaLabel}
+                    iconOnClick={onTrackedClearSelection}
+                    iconOnClickAriaLabel={clearSelectionAriaLabel}
+                    data-test-sub="apmTransactionDetailsDistributionClearSelectionBadge"
+                  >
+                    {i18n.translate(
+                      'xpack.apm.transactionDetails.distribution.selectionText',
+                      {
+                        defaultMessage: `Selection: {formattedSelection}`,
+                        values: {
+                          formattedSelection: getFormattedSelection(selection),
+                        },
+                      }
+                    )}
+                  </EuiBadge>
+                </EuiFlexItem>
+              ) : (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon
+                      type="iInCircle"
+                      title={emptySelectionText}
+                      size="s"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs">{emptySelectionText}</EuiText>
+                  </EuiFlexItem>
+                </>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
-        )}
-        {hasData && selection && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge
-              iconType="cross"
-              iconSide="left"
-              onClick={onTrackedClearSelection}
-              onClickAriaLabel={clearSelectionAriaLabel}
-              iconOnClick={onTrackedClearSelection}
-              iconOnClickAriaLabel={clearSelectionAriaLabel}
-              data-test-sub="apmTransactionDetailsDistributionClearSelectionBadge"
-            >
-              {i18n.translate(
-                'xpack.apm.transactionDetails.distribution.selectionText',
-                {
-                  defaultMessage: `Selection: {formattedSelection}`,
-                  values: {
-                    formattedSelection: getFormattedSelection(selection),
-                  },
-                }
-              )}
-            </EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+        </EuiFlexGroup>
 
-      <EuiText color="subdued" size="xs">
-        <FormattedMessage
-          id="xpack.apm.transactionDetails.tabs.transactionDistributionChartDescription"
-          defaultMessage="Log-log plot for latency (x) by transactions (y) with overlapping bands for {allTransactions} and {failedTransactions}."
-          values={{
-            allTransactions: (
-              <span style={{ color: transactionColors.ALL_TRANSACTIONS }}>
-                <FormattedMessage
-                  id="xpack.apm.transactionDetails.tabs.transactionDistributionChartAllTransactions"
-                  defaultMessage="all transactions"
-                />
-              </span>
-            ),
-            failedTransactions: (
-              <span
-                style={{ color: transactionColors.ALL_FAILED_TRANSACTIONS }}
-              >
-                <FormattedMessage
-                  id="xpack.apm.transactionDetails.tabs.transactionDistributionChartFailedTransactions"
-                  defaultMessage="failed transactions"
-                />
-              </span>
-            ),
-          }}
+        <EuiSpacer size="s" />
+
+        <TransactionDistributionChart
+          data={chartData}
+          markerCurrentTransaction={markerCurrentTransaction}
+          markerValue={percentileThresholdValue ?? 0}
+          onChartSelection={onTrackedChartSelection as BrushEndListener}
+          hasData={hasData}
+          selection={selection}
+          status={status}
         />
-      </EuiText>
 
-      <EuiSpacer size="s" />
-
-      <TransactionDistributionChart
-        data={chartData}
-        markerCurrentTransaction={markerCurrentTransaction}
-        markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
-        markerValue={percentileThresholdValue ?? 0}
-        onChartSelection={onTrackedChartSelection as BrushEndListener}
-        hasData={hasData}
-        palette={[
-          transactionColors.ALL_TRANSACTIONS,
-          transactionColors.ALL_FAILED_TRANSACTIONS,
-        ]}
-        selection={selection}
-        status={status}
-      />
-
-      <EuiSpacer size="s" />
-
-      <WaterfallWithSummary
-        urlParams={urlParams}
-        waterfall={waterfall}
-        isLoading={waterfallStatus === FETCH_STATUS.LOADING}
-        traceSamples={traceSamples}
-      />
-    </div>
+        <EuiSpacer size="s" />
+        <WaterfallWithSummary
+          urlParams={urlParams}
+          waterfall={waterfall}
+          isLoading={waterfallStatus === FETCH_STATUS.LOADING}
+          traceSamples={traceSamples}
+        />
+      </div>
+    </HeightRetainer>
   );
 }

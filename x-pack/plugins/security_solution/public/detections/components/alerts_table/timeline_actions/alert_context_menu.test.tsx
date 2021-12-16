@@ -86,7 +86,12 @@ describe('InvestigateInResolverAction', () => {
   });
 
   test('it does NOT render AddToCase context menu item when timelineId is not in the allowed list', () => {
-    const wrapper = mount(<AlertContextMenu {...props} timelineId="timeline-test" />, {
+    // In order to enable alert context menu without a timelineId, event needs to be event.kind === 'event' and agent.type === 'endpoint'
+    const customProps = {
+      ...props,
+      ecsRowData: { ...ecsRowData, agent: { type: ['endpoint'] }, event: { kind: ['event'] } },
+    };
+    const wrapper = mount(<AlertContextMenu {...customProps} timelineId="timeline-test" />, {
       wrappingComponent: TestProviders,
     });
     wrapper.find(actionMenuButton).simulate('click');

@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Buffer } from 'buffer';
-import { stringify } from 'querystring';
-import { ApiError, Client, RequestEvent, errors, Transport } from '@elastic/elasticsearch';
+import { Client, Transport } from '@elastic/elasticsearch';
+
 import type {
-  RequestBody,
   TransportRequestParams,
   TransportRequestOptions,
 } from '@elastic/elasticsearch/lib/Transport';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
+import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 
 const noop = () => undefined;
 
@@ -47,7 +46,6 @@ export const configureClient = (
   }
 
   const client = new Client({ ...clientOptions, Transport: KibanaTransport });
-  addLogging(client, logger.get('query', type));
 
   // --------------------------------------------------------------------------------- //
   // Hack to disable the "Product check" only in the scoped clients while we           //
@@ -55,90 +53,9 @@ export const configureClient = (
   if (scoped) skipProductCheck(client);
   // --------------------------------------------------------------------------------- //
 
+  instrumentEsQueryAndDeprecationLogger({ logger, client, type });
+
   return client;
-};
-
-const convertQueryString = (qs: string | Record<string, any> | undefined): string => {
-  if (qs === undefined || typeof qs === 'string') {
-    return qs ?? '';
-  }
-  return stringify(qs);
-};
-
-function ensureString(body: RequestBody): string {
-  if (typeof body === 'string') return body;
-  if (Buffer.isBuffer(body)) return '[buffer]';
-  if ('readable' in body && body.readable && typeof body._read === 'function') return '[stream]';
-  return JSON.stringify(body);
-}
-
-/**
- * Returns a debug message from an Elasticsearch error in the following format:
- * [error type] error reason
- */
-export function getErrorMessage(error: ApiError): string {
-  if (error instanceof errors.ResponseError) {
-    return `[${error.meta.body?.error?.type}]: ${error.meta.body?.error?.reason ?? error.message}`;
-  }
-  return `[${error.name}]: ${error.message}`;
-}
-
-/**
- * returns a string in format:
- *
- * status code
- * method URL
- * request body
- *
- * so it could be copy-pasted into the Dev console
- */
-function getResponseMessage(event: RequestEvent): string {
-  const errorMeta = getRequestDebugMeta(event);
-  const body = errorMeta.body ? `\n${errorMeta.body}` : '';
-  return `${errorMeta.statusCode}\n${errorMeta.method} ${errorMeta.url}${body}`;
-}
-
-/**
- * Returns stringified debug information from an Elasticsearch request event
- * useful for logging in case of an unexpected failure.
- */
-export function getRequestDebugMeta(event: RequestEvent): {
-  url: string;
-  body: string;
-  statusCode: number | null;
-  method: string;
-} {
-  const params = event.meta.request.params;
-  // definition is wrong, `params.querystring` can be either a string or an object
-  const querystring = convertQueryString(params.querystring);
-  return {
-    url: `${params.path}${querystring ? `?${querystring}` : ''}`,
-    body: params.body ? `${ensureString(params.body)}` : '',
-    method: params.method,
-    statusCode: event.statusCode,
-  };
-}
-
-const addLogging = (client: Client, logger: Logger) => {
-  client.on('response', (error, event) => {
-    if (event) {
-      const opaqueId = event.meta.request.options.opaqueId;
-      const meta = opaqueId
-        ? {
-            http: { request: { id: event.meta.request.options.opaqueId } },
-          }
-        : undefined; // do not clutter logs if opaqueId is not present
-      if (error) {
-        if (error instanceof errors.ResponseError) {
-          logger.debug(`${getResponseMessage(event)} ${getErrorMessage(error)}`, meta);
-        } else {
-          logger.debug(getErrorMessage(error), meta);
-        }
-      } else {
-        logger.debug(getResponseMessage(event), meta);
-      }
-    }
-  });
 };
 
 /**

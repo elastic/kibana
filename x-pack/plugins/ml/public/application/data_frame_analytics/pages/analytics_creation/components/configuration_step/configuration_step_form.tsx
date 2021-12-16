@@ -670,6 +670,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       <AnalysisFieldsTable
         dependentVariable={dependentVariable}
         includes={includes}
+        isJobTypeWithDepVar={isJobTypeWithDepVar}
         minimumFieldsRequiredMessage={minimumFieldsRequiredMessage}
         setMinimumFieldsRequiredMessage={setMinimumFieldsRequiredMessage}
         tableItems={firstUpdate.current ? includesTableItems : tableItems}

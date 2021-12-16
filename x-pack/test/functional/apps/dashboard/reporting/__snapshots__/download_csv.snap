@@ -562,6 +562,37 @@ exports[`dashboard Reporting Download CSV E-Commerce Data Downloads a filtered C
 "
 `;
 
+exports[`dashboard Reporting Download CSV E-Commerce Data Downloads filtered Discover saved search report 1`] = `
+"\\"order_date\\",\\"customer_first_name\\",\\"customer_last_name\\",\\"customer_full_name\\"
+\\"Jun 25, 2019 @ 00:00:00.000\\",Betty,Reese,\\"Betty Reese\\"
+\\"Jun 25, 2019 @ 00:00:00.000\\",Betty,Brewer,\\"Betty Brewer\\"
+\\"Jun 25, 2019 @ 00:00:00.000\\",Betty,Bryant,\\"Betty Bryant\\"
+\\"Jun 25, 2019 @ 00:00:00.000\\",Betty,Perkins,\\"Betty Perkins\\"
+\\"Jun 24, 2019 @ 00:00:00.000\\",Betty,Stokes,\\"Betty Stokes\\"
+\\"Jun 24, 2019 @ 00:00:00.000\\",Betty,Jackson,\\"Betty Jackson\\"
+\\"Jun 24, 2019 @ 00:00:00.000\\",Betty,Farmer,\\"Betty Farmer\\"
+\\"Jun 24, 2019 @ 00:00:00.000\\",Betty,Rivera,\\"Betty Rivera\\"
+\\"Jun 23, 2019 @ 00:00:00.000\\",Betty,King,\\"Betty King\\"
+\\"Jun 23, 2019 @ 00:00:00.000\\",Betty,Graham,\\"Betty Graham\\"
+\\"Jun 23, 2019 @ 00:00:00.000\\",Betty,Allison,\\"Betty Allison\\"
+\\"Jun 23, 2019 @ 00:00:00.000\\",Betty,Gilbert,\\"Betty Gilbert\\"
+\\"Jun 22, 2019 @ 00:00:00.000\\",Betty,Jimenez,\\"Betty Jimenez\\"
+\\"Jun 22, 2019 @ 00:00:00.000\\",Betty,Fletcher,\\"Betty Fletcher\\"
+\\"Jun 22, 2019 @ 00:00:00.000\\",Betty,Mccarthy,\\"Betty Mccarthy\\"
+\\"Jun 22, 2019 @ 00:00:00.000\\",Betty,Bryant,\\"Betty Bryant\\"
+\\"Jun 22, 2019 @ 00:00:00.000\\",Betty,Maldonado,\\"Betty Maldonado\\"
+\\"Jun 22, 2019 @ 00:00:00.000\\",Betty,Ruiz,\\"Betty Ruiz\\"
+\\"Jun 22, 2019 @ 00:00:00.000\\",Betty,Morrison,\\"Betty Morrison\\"
+\\"Jun 22, 2019 @ 00:00:00.000\\",Betty,Cross,\\"Betty Cross\\"
+\\"Jun 22, 2019 @ 00:00:00.000\\",Betty,Swanson,\\"Betty Swanson\\"
+\\"Jun 21, 2019 @ 00:00:00.000\\",Betty,Bryan,\\"Betty Bryan\\"
+\\"Jun 21, 2019 @ 00:00:00.000\\",Betty,Thompson,\\"Betty Thompson\\"
+\\"Jun 21, 2019 @ 00:00:00.000\\",Betty,Ramsey,\\"Betty Ramsey\\"
+\\"Jun 21, 2019 @ 00:00:00.000\\",Betty,Webb,\\"Betty Webb\\"
+\\"Jun 21, 2019 @ 00:00:00.000\\",Betty,Massey,\\"Betty Massey\\"
+"
+`;
+
 exports[`dashboard Reporting Download CSV Field Formatters and Scripted Fields Download CSV export of a saved search panel 1`] = `
 "date,\\"_id\\",name,gender,value,year,\\"years_ago\\",\\"date_informal\\"
 \\"Jan 1, 1982 @ 00:00:00.000\\",\\"1982-Fethany-F\\",Fethany,F,780,1982,\\"37.00000000000000000000\\",\\"Jan 1st 82\\"

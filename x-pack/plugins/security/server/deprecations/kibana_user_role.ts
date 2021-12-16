@@ -32,18 +32,11 @@ interface Deps {
   packageInfo: PackageInfo;
 }
 
-function getDeprecationTitle() {
-  return i18n.translate('xpack.security.deprecations.kibanaUser.deprecationTitle', {
-    defaultMessage: 'The "{userRoleName}" role is deprecated',
-    values: { userRoleName: KIBANA_USER_ROLE_NAME },
-  });
-}
-
 function getDeprecationMessage() {
   return i18n.translate('xpack.security.deprecations.kibanaUser.deprecationMessage', {
     defaultMessage:
-      'Use the "{adminRoleName}" role to grant access to all Kibana features in all spaces.',
-    values: { adminRoleName: KIBANA_ADMIN_ROLE_NAME },
+      'Use the "{kibanaAdminRoleName}" role to grant access to all Kibana features in all spaces.',
+    values: { kibanaAdminRoleName: KIBANA_ADMIN_ROLE_NAME },
   });
 }
 
@@ -73,6 +66,13 @@ async function getUsersDeprecations(
   logger: Logger,
   packageInfo: PackageInfo
 ): Promise<DeprecationsDetails[]> {
+  const deprecationTitle = i18n.translate(
+    'xpack.security.deprecations.kibanaUser.usersDeprecationTitle',
+    {
+      defaultMessage: 'The "{kibanaUserRoleName}" role is deprecated: check user roles',
+      values: { kibanaUserRoleName: KIBANA_USER_ROLE_NAME },
+    }
+  );
   let users: SecurityGetUserResponse;
   try {
     users = (await client.security.getUser()).body;
@@ -88,7 +88,7 @@ async function getUsersDeprecations(
         )}.`
       );
     }
-    return deprecationError(packageInfo, err);
+    return deprecationError(deprecationTitle, packageInfo, err);
   }
 
   const usersWithKibanaUserRole = Object.values(users)
@@ -100,7 +100,7 @@ async function getUsersDeprecations(
 
   return [
     {
-      title: getDeprecationTitle(),
+      title: deprecationTitle,
       message: getDeprecationMessage(),
       level: 'warning',
       deprecationType: 'feature',
@@ -115,10 +115,10 @@ async function getUsersDeprecations(
             'xpack.security.deprecations.kibanaUser.usersDeprecationCorrectiveAction',
             {
               defaultMessage:
-                'Remove the "{userRoleName}" role from all users and add the "{adminRoleName}" role. The affected users are: {users}.',
+                'Remove the "{kibanaUserRoleName}" role from all users and add the "{kibanaAdminRoleName}" role. The affected users are: {users}.',
               values: {
-                userRoleName: KIBANA_USER_ROLE_NAME,
-                adminRoleName: KIBANA_ADMIN_ROLE_NAME,
+                kibanaUserRoleName: KIBANA_USER_ROLE_NAME,
+                kibanaAdminRoleName: KIBANA_ADMIN_ROLE_NAME,
                 users: usersWithKibanaUserRole.join(', '),
               },
             }
@@ -134,6 +134,13 @@ async function getRoleMappingsDeprecations(
   logger: Logger,
   packageInfo: PackageInfo
 ): Promise<DeprecationsDetails[]> {
+  const deprecationTitle = i18n.translate(
+    'xpack.security.deprecations.kibanaUser.roleMappingsDeprecationTitle',
+    {
+      defaultMessage: 'The "{kibanaUserRoleName}" role is deprecated: check role mappings',
+      values: { kibanaUserRoleName: KIBANA_USER_ROLE_NAME },
+    }
+  );
   let roleMappings: SecurityGetRoleMappingResponse;
   try {
     roleMappings = (await client.security.getRoleMapping()).body;
@@ -149,7 +156,7 @@ async function getRoleMappingsDeprecations(
         )}.`
       );
     }
-    return deprecationError(packageInfo, err);
+    return deprecationError(deprecationTitle, packageInfo, err);
   }
 
   const roleMappingsWithKibanaUserRole = Object.entries(roleMappings)
@@ -161,7 +168,7 @@ async function getRoleMappingsDeprecations(
 
   return [
     {
-      title: getDeprecationTitle(),
+      title: deprecationTitle,
       message: getDeprecationMessage(),
       level: 'warning',
       deprecationType: 'feature',
@@ -176,10 +183,10 @@ async function getRoleMappingsDeprecations(
             'xpack.security.deprecations.kibanaUser.roleMappingsDeprecationCorrectiveAction',
             {
               defaultMessage:
-                'Remove the "{userRoleName}" role from all role mappings and add the "{adminRoleName}" role. The affected role mappings are: {roleMappings}.',
+                'Remove the "{kibanaUserRoleName}" role from all role mappings and add the "{kibanaAdminRoleName}" role. The affected role mappings are: {roleMappings}.',
               values: {
-                userRoleName: KIBANA_USER_ROLE_NAME,
-                adminRoleName: KIBANA_ADMIN_ROLE_NAME,
+                kibanaUserRoleName: KIBANA_USER_ROLE_NAME,
+                kibanaAdminRoleName: KIBANA_ADMIN_ROLE_NAME,
                 roleMappings: roleMappingsWithKibanaUserRole.join(', '),
               },
             }
@@ -190,13 +197,15 @@ async function getRoleMappingsDeprecations(
   ];
 }
 
-function deprecationError(packageInfo: PackageInfo, error: Error): DeprecationsDetails[] {
-  const title = getDeprecationTitle();
-
+function deprecationError(
+  deprecationTitle: string,
+  packageInfo: PackageInfo,
+  error: Error
+): DeprecationsDetails[] {
   if (getErrorStatusCode(error) === 403) {
     return [
       {
-        title,
+        title: deprecationTitle,
         level: 'fetch_error',
         deprecationType: 'feature',
         message: i18n.translate('xpack.security.deprecations.kibanaUser.forbiddenErrorMessage', {
@@ -220,7 +229,7 @@ function deprecationError(packageInfo: PackageInfo, error: Error): DeprecationsD
 
   return [
     {
-      title,
+      title: deprecationTitle,
       level: 'fetch_error',
       deprecationType: 'feature',
       message: i18n.translate('xpack.security.deprecations.kibanaUser.unknownErrorMessage', {

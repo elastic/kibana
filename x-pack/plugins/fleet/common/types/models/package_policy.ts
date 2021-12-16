@@ -56,6 +56,7 @@ export interface PackagePolicyInput extends Omit<NewPackagePolicyInput, 'streams
 }
 
 export interface NewPackagePolicy {
+  id?: string | number;
   name: string;
   description?: string;
   namespace: string;

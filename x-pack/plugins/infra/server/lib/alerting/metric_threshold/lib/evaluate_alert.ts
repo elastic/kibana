@@ -56,7 +56,8 @@ interface CompositeAggregationsResponse {
 export interface EvaluatedAlertParams {
   criteria: MetricExpressionParams[];
   groupBy: string | undefined | string[];
-  filterQuery: string | undefined;
+  filterQuery?: string;
+  filterQueryText?: string;
   shouldDropPartialBuckets?: boolean;
 }
 
@@ -68,6 +69,7 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
   timeframe?: { start?: number; end: number }
 ) => {
   const { criteria, groupBy, filterQuery, shouldDropPartialBuckets } = params;
+
   return Promise.all(
     criteria.map(async (criterion) => {
       const currentValues = await getMetric(

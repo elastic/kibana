@@ -17,8 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const deployment = getService('deployment');
   const PageObjects = getPageObjects(['security', 'common']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/98562
-  describe.skip('Basic functionality', function () {
+  describe('Basic functionality', function () {
     this.tags('includeFirefox');
 
     const testCredentials = { username: 'admin_user', password: 'change_me' };

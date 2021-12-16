@@ -221,6 +221,7 @@ export class ApmConfiguration {
         targetBranch: process.env.GITHUB_PR_TARGET_BRANCH || '',
         ciBuildNumber: process.env.BUILDKITE_BUILD_NUMBER || '',
         ciBuildId: process.env.BUILDKITE_BUILD_ID || '',
+        ciBuildJobId: process.env.BUILDKITE_JOB_ID || '',
         isPr: process.env.BUILDKITE_PULL_REQUEST ? true : false,
         prId: process.env.BUILDKITE_PULL_REQUEST || '',
       },

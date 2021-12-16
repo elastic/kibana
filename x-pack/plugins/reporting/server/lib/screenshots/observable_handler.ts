@@ -76,6 +76,7 @@ export class ScreenshotObservableHandler {
         index,
         urlOrUrlLocatorTuple,
         this.conditionalHeaders,
+        this.layout,
         this.logger
       )
     ).pipe(this.waitUntil(this.timeouts.openUrl));

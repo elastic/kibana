@@ -116,7 +116,7 @@ exports[`IndexedFieldsTable IndexedFieldsTable with rollup index pattern should 
           "isUserEditable": false,
           "kbnType": undefined,
           "name": "conflictingField",
-          "type": "conflict",
+          "type": "keyword, long",
         },
         Object {
           "displayName": "amount",
@@ -274,7 +274,7 @@ exports[`IndexedFieldsTable should render normally 1`] = `
           "isUserEditable": false,
           "kbnType": undefined,
           "name": "conflictingField",
-          "type": "conflict",
+          "type": "keyword, long",
         },
         Object {
           "displayName": "amount",

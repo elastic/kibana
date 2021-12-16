@@ -40,7 +40,7 @@ describe('index', () => {
       const { messages } = applyStackAlertDeprecations({ enabled: false });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"xpack.stack_alerts.enabled\\" is deprecated. The ability to disable this plugin will be removed in 8.0.0.",
+          "This setting will be removed in 8.0 and the Stack Rules plugin will always be enabled.",
         ]
       `);
     });

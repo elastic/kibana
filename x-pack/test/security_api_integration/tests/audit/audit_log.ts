@@ -22,7 +22,14 @@ class FileWrapper {
   }
   async readJSON() {
     const content = await this.read();
-    return content.map((l) => JSON.parse(l));
+    try {
+      return content.map((l) => JSON.parse(l));
+    } catch (err) {
+      const contentString = content.join('\n');
+      throw new Error(
+        `Failed to parse audit log JSON, error: "${err.message}", audit.log contents:\n${contentString}`
+      );
+    }
   }
   // writing in a file is an async operation. we use this method to make sure logs have been written.
   async isNotEmpty() {

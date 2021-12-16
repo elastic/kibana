@@ -10,7 +10,8 @@ import { esKuery } from '../../../../../src/plugins/data/public';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
-  indexPattern: DataViewBase
+  indexPattern: DataViewBase,
+  swallowErrors: boolean = true
 ) => {
   try {
     return kueryExpression
@@ -19,6 +20,8 @@ export const convertKueryToElasticSearchQuery = (
         )
       : '';
   } catch (err) {
-    return '';
+    if (swallowErrors) {
+      return '';
+    } else throw err;
   }
 };

@@ -80,7 +80,7 @@ const AlertsTableComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
   const { filterManager } = useKibana().services.data.query;
-  const ACTION_BUTTON_COUNT = 3;
+  const ACTION_BUTTON_COUNT = 4;
 
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 
