@@ -93,112 +93,118 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount
 
   const noDFAJobs = errorMessage === undefined && isInitialized === true && analytics.length === 0;
 
-  if (noDFAJobs) {
-    return (
-      <EuiEmptyPrompt
-        layout="horizontal"
-        hasBorder={true}
-        hasShadow={false}
-        icon={<EuiImage size="fullWidth" src={adImage} alt="anomaly_detection" />}
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.ml.overview.analyticsList.createFirstJobMessage"
-              defaultMessage="Create your first data frame analytics job"
-            />
-          </h2>
-        }
-        body={
-          <>
-            <p>
-              <FormattedMessage
-                id="xpack.ml.overview.analyticsList.emptyPromptText"
-                defaultMessage="Data frame analytics enables you to perform outlier detection, regression, or classification analysis and put the annotated data in a new index. The classification and regression trained models can also be used for inference in pipelines and aggregations."
-              />
-            </p>
-            <EuiCallOut
-              size="s"
-              title={
-                <FormattedMessage
-                  id="xpack.ml.overview.analyticsList.emptyPromptHelperText"
-                  defaultMessage="Data frame analytics requires specifically structured source data. Use {transforms} to create data frames before you create the jobs."
-                  values={{
-                    transforms: (
-                      <EuiLink href={transformsLink} target="blank" color={'accent'}>
-                        <FormattedMessage
-                          id="xpack.ml.overview.gettingStartedSectionTransforms"
-                          defaultMessage="Elasticsearch's transforms"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              }
-              iconType="iInCircle"
-            />
-          </>
-        }
-        actions={
-          <EuiButton
-            onClick={() => setIsSourceIndexModalVisible(true)}
-            color="primary"
-            fill
-            isDisabled={jobCreationDisabled}
-            data-test-subj="mlOverviewCreateDFAJobButton"
-          >
-            <FormattedMessage
-              id="xpack.ml.overview.analyticsList.createJobButtonText"
-              defaultMessage="Create job"
-            />
-          </EuiButton>
-        }
-      />
-    );
-  }
-
   return (
-    <EuiPanel className={panelClass} hasShadow={false} hasBorder>
-      {typeof errorMessage !== 'undefined' ? errorDisplay : null}
-      {isInitialized === false && (
-        <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />
-      )}
+    <>
+      {noDFAJobs ? (
+        <EuiEmptyPrompt
+          layout="horizontal"
+          hasBorder={true}
+          hasShadow={false}
+          icon={<EuiImage size="fullWidth" src={adImage} alt="anomaly_detection" />}
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.ml.overview.analyticsList.createFirstJobMessage"
+                defaultMessage="Create your first data frame analytics job"
+              />
+            </h2>
+          }
+          body={
+            <>
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.overview.analyticsList.emptyPromptText"
+                  defaultMessage="Data frame analytics enables you to perform outlier detection, regression, or classification analysis and put the annotated data in a new index. The classification and regression trained models can also be used for inference in pipelines and aggregations."
+                />
+              </p>
+              <EuiCallOut
+                size="s"
+                title={
+                  <FormattedMessage
+                    id="xpack.ml.overview.analyticsList.emptyPromptHelperText"
+                    defaultMessage="Data frame analytics requires specifically structured source data. Use {transforms} to create data frames before you create the jobs."
+                    values={{
+                      transforms: (
+                        <EuiLink href={transformsLink} target="blank" color={'accent'}>
+                          <FormattedMessage
+                            id="xpack.ml.overview.gettingStartedSectionTransforms"
+                            defaultMessage="Elasticsearch's transforms"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                }
+                iconType="iInCircle"
+              />
+            </>
+          }
+          actions={
+            <EuiButton
+              onClick={() => {
+                setIsSourceIndexModalVisible(true);
+              }}
+              color="primary"
+              fill
+              isDisabled={jobCreationDisabled}
+              data-test-subj="mlOverviewCreateDFAJobButton"
+            >
+              <FormattedMessage
+                id="xpack.ml.overview.analyticsList.createJobButtonText"
+                defaultMessage="Create job"
+              />
+            </EuiButton>
+          }
+        />
+      ) : (
+        <EuiPanel className={panelClass} hasShadow={false} hasBorder>
+          {typeof errorMessage !== 'undefined' ? errorDisplay : null}
+          {isInitialized === false && (
+            <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />
+          )}
 
-      {isInitialized === true && analytics.length > 0 && (
-        <>
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiText size="m">
-                <h3>
-                  {i18n.translate('xpack.ml.overview.analyticsList.PanelTitle', {
-                    defaultMessage: 'Analytics',
-                  })}
-                </h3>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize={'s'} alignItems="center">
-                {analyticsStats !== undefined ? (
-                  <EuiFlexItem grow={false}>
-                    <StatsBar stats={analyticsStats} dataTestSub={'mlOverviewAnalyticsStatsBar'} />
-                  </EuiFlexItem>
-                ) : null}
+          {isInitialized === true && analytics.length > 0 && (
+            <>
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButton size="m" fill href={manageJobsLink}>
-                    {i18n.translate('xpack.ml.overview.analyticsList.manageJobsButtonText', {
-                      defaultMessage: 'Manage jobs',
-                    })}
-                  </EuiButton>
+                  <EuiText size="m">
+                    <h3>
+                      {i18n.translate('xpack.ml.overview.analyticsList.PanelTitle', {
+                        defaultMessage: 'Analytics',
+                      })}
+                    </h3>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize={'s'} alignItems="center">
+                    {analyticsStats !== undefined ? (
+                      <EuiFlexItem grow={false}>
+                        <StatsBar
+                          stats={analyticsStats}
+                          dataTestSub={'mlOverviewAnalyticsStatsBar'}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+                    <EuiFlexItem grow={false}>
+                      <EuiButton size="m" fill href={manageJobsLink}>
+                        {i18n.translate('xpack.ml.overview.analyticsList.manageJobsButtonText', {
+                          defaultMessage: 'Manage jobs',
+                        })}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer />
-          <AnalyticsTable items={analytics} />
-        </>
+              <EuiSpacer />
+              <AnalyticsTable items={analytics} />
+            </>
+          )}
+        </EuiPanel>
       )}
-      {isSourceIndexModalVisible === true && (
+
+      {isSourceIndexModalVisible ? (
         <SourceSelection onClose={() => setIsSourceIndexModalVisible(false)} />
-      )}
-    </EuiPanel>
+      ) : null}
+    </>
   );
 };
