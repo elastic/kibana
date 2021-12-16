@@ -1,0 +1,4 @@
+{
+  "main": "../target_node/experimental_field_names",
+  "types": "../target_types/experimental_field_names"
+}

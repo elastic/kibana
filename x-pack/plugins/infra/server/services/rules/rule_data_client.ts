@@ -34,7 +34,7 @@ export const createRuleDataClient = ({
     componentTemplates: [
       {
         name: 'mappings',
-        mappings: mappingFromFieldMap({ ...experimentalRuleFieldMap }, 'strict'),
+        mappings: mappingFromFieldMap(experimentalRuleFieldMap, 'strict'),
       },
     ],
   });
