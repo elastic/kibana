@@ -12,7 +12,7 @@ import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { ExpressionFormHandlers } from '../../../common/lib/expression_form_handlers';
 import { UpdatePropsRef } from '../../../types/arguments';
 
-interface ArgTemplateFormProps {
+export interface ArgTemplateFormProps {
   template?: (
     domNode: HTMLElement,
     config: ArgTemplateFormProps['argumentProps'],
@@ -24,8 +24,10 @@ interface ArgTemplateFormProps {
     label?: string;
     setLabel: (label: string) => void;
     expand?: boolean;
+    argValue: any;
     setExpand?: (expand: boolean) => void;
-    onValueRemove?: (argName: string, argIndex: string) => void;
+    onValueRemove?: () => void;
+    onValueChange: (value: any) => void;
     resetErrorState: () => void;
     renderError: () => void;
   };

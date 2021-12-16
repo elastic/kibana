@@ -31,13 +31,13 @@ export const heatmapGrid = () => ({
       name: 'strokeColor',
       displayName: strings.getStrokeColorDisplayName(),
       help: strings.getStrokeColorDisplayName(),
-      argType: 'color', // TODO: change to a single color picker.
+      argType: 'color',
     },
     {
       name: 'yAxisLabelColor',
       displayName: strings.getYAxisLabelColorDisplayName(),
       help: strings.getYAxisLabelColorDisplayName(),
-      argType: 'string', // TODO: change to a single color picker.
+      argType: 'color',
     },
     {
       name: 'cellHeight',

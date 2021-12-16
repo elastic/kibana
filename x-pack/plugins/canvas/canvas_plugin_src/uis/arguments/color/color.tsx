@@ -15,6 +15,7 @@ import {
   useColorPickerState,
 } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
+import { withDebounceArg } from '../../../../public/components/with_debounce_arg';
 import { ArgumentStrings } from '../../../../i18n';
 
 const { Color: strings } = ArgumentStrings;
@@ -50,6 +51,6 @@ export const color = () => ({
   name: 'color',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
-  simpleTemplate: templateFromReactComponent(ColorPicker),
-  // default: '"#000"',
+  simpleTemplate: templateFromReactComponent(withDebounceArg(ColorPicker)),
+  default: '"#000"',
 });

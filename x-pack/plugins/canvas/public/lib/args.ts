@@ -29,16 +29,21 @@ const filterValidArguments = (args: Array<string | undefined>) =>
   args.filter((arg) => arg !== undefined);
 
 const formatExpr = (expr: string) => {
-  const exprWithoutBrackets = removeFigureBrackets(expr);
-  return toExpression(fromExpression(exprWithoutBrackets));
+  if (isWithBrackets(expr)) {
+    const exprWithoutBrackets = removeFigureBrackets(expr);
+    return toExpression(fromExpression(exprWithoutBrackets));
+  }
+  return expr;
 };
 
 const removeFigureBrackets = (expr: string) => {
-  if (expr[0] === '{' && expr[expr.length - 1] === '}') {
+  if (isWithBrackets(expr)) {
     return expr.substring(1, expr.length - 1);
   }
   return expr;
 };
+
+const isWithBrackets = (expr: string) => expr[0] === '{' && expr[expr.length - 1] === '}';
 
 export function buildDefaultArgExpr(argUiConfig: ArgUiConfig): string | undefined {
   const argConfig = getArgTypeDef(argUiConfig.argType);
