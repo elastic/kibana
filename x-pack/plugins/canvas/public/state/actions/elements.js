@@ -30,7 +30,7 @@ const { actionsElements: strings } = ErrorStrings;
 
 const { set, del } = immutable;
 
-export function getSiblingContext(state, elementId, checkIndex, path = ['ast']) {
+export function getSiblingContext(state, elementId, checkIndex, path = ['ast.chain']) {
   const prevContextPath = [elementId, 'expressionContext', ...path, checkIndex];
   const prevContextValue = getResolvedArgsValue(state, prevContextPath);
 
