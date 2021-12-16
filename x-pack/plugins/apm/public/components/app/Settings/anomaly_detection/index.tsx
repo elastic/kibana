@@ -11,18 +11,13 @@ import { ML_ERRORS } from '../../../../../common/anomaly_detection';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { JobsList } from './jobs_list';
 import { AddEnvironments } from './add_environments';
-import { useFetcher } from '../../../../hooks/use_fetcher';
 import { LicensePrompt } from '../../../shared/license_prompt';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { useAnomalyDetectionJobsContext } from '../../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 
 export type AnomalyDetectionApiResponse =
   APIReturnType<'GET /internal/apm/settings/anomaly-detection/jobs'>;
-
-const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
-  jobs: [],
-  hasLegacyJobs: false,
-};
 
 export function AnomalyDetection() {
   const plugin = useApmPluginContext();
@@ -33,20 +28,14 @@ export function AnomalyDetection() {
   const [viewAddEnvironments, setViewAddEnvironments] = useState(false);
 
   const {
-    refetch,
-    data = DEFAULT_VALUE,
-    status,
-  } = useFetcher(
-    (callApmApi) => {
-      if (canGetJobs) {
-        return callApmApi({
-          endpoint: `GET /internal/apm/settings/anomaly-detection/jobs`,
-        });
-      }
-    },
-    [canGetJobs],
-    { preservePreviousData: false, showToastOnError: false }
-  );
+    anomalyDetectionJobsStatus,
+    anomalyDetectionJobsRefetch,
+    anomalyDetectionJobsData = {
+      jobs: [],
+      hasLegacyJobs: false,
+    } as AnomalyDetectionApiResponse,
+    anomalyDetectionSetupState,
+  } = useAnomalyDetectionJobsContext();
 
   if (!hasValidLicense) {
     return (
@@ -71,9 +60,11 @@ export function AnomalyDetection() {
     <>
       {viewAddEnvironments ? (
         <AddEnvironments
-          currentEnvironments={data.jobs.map(({ environment }) => environment)}
+          currentEnvironments={anomalyDetectionJobsData.jobs.map(
+            ({ environment }) => environment
+          )}
           onCreateJobSuccess={() => {
-            refetch();
+            anomalyDetectionJobsRefetch();
             setViewAddEnvironments(false);
           }}
           onCancel={() => {
@@ -82,10 +73,14 @@ export function AnomalyDetection() {
         />
       ) : (
         <JobsList
-          data={data}
-          status={status}
+          data={anomalyDetectionJobsData}
+          status={anomalyDetectionJobsStatus}
+          setupState={anomalyDetectionSetupState}
           onAddEnvironments={() => {
             setViewAddEnvironments(true);
+          }}
+          onUpdateComplete={() => {
+            anomalyDetectionJobsRefetch();
           }}
         />
       )}

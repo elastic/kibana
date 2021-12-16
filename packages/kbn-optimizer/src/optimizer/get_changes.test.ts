@@ -9,7 +9,8 @@
 jest.mock('execa');
 
 import { getChanges } from './get_changes';
-import { REPO_ROOT, createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 const execa: jest.Mock = jest.requireMock('execa');
 

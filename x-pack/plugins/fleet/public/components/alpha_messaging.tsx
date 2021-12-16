@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiLink } from '@elastic/eui';
 
 import { AlphaFlyout } from './alpha_flyout';

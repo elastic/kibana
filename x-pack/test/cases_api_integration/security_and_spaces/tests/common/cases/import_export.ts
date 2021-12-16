@@ -20,18 +20,20 @@ import {
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
+  CASES_URL,
+  CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+} from '../../../../../../plugins/cases/common/constants';
+import {
   AttributesTypeUser,
   CommentsResponse,
-  CASES_URL,
   CaseType,
-  CASE_SAVED_OBJECT,
   CaseAttributes,
-  CASE_USER_ACTION_SAVED_OBJECT,
   CaseUserActionAttributes,
-  CASE_COMMENT_SAVED_OBJECT,
   CasePostRequest,
   CaseUserActionResponse,
-} from '../../../../../../plugins/cases/common';
+} from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

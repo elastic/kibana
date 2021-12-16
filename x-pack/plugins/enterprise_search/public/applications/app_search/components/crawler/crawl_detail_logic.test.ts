@@ -13,25 +13,45 @@ import { nextTick } from '@kbn/test/jest';
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { CrawlDetailLogic, CrawlDetailValues } from './crawl_detail_logic';
-import { CrawlerStatus, CrawlRequestFromServer } from './types';
-import { crawlRequestServerToClient } from './utils';
+import { CrawlType, CrawlerStatus, CrawlRequestWithDetailsFromServer } from './types';
+import { crawlRequestWithDetailsServerToClient } from './utils';
 
 const DEFAULT_VALUES: CrawlDetailValues = {
   dataLoading: true,
   flyoutClosed: true,
   crawlRequest: null,
   crawlRequestFromServer: null,
+  selectedTab: 'preview',
 };
 
-const crawlRequestResponse: CrawlRequestFromServer = {
+const crawlRequestResponse: CrawlRequestWithDetailsFromServer = {
   id: '12345',
   status: CrawlerStatus.Pending,
   created_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
   began_at: null,
   completed_at: null,
+  type: CrawlType.Full,
+  crawl_config: {
+    domain_allowlist: [],
+    seed_urls: [],
+    sitemap_urls: [],
+    max_crawl_depth: 10,
+  },
+  stats: {
+    status: {
+      urls_allowed: 4,
+      pages_visited: 4,
+      crawl_duration_msec: 100,
+      avg_response_time_msec: 10,
+      status_codes: {
+        200: 4,
+        404: 0,
+      },
+    },
+  },
 };
 
-const clientCrawlRequest = crawlRequestServerToClient(crawlRequestResponse);
+const clientCrawlRequest = crawlRequestWithDetailsServerToClient(crawlRequestResponse);
 
 describe('CrawlDetailLogic', () => {
   const { mount } = new LogicMounter(CrawlDetailLogic);
@@ -46,7 +66,7 @@ describe('CrawlDetailLogic', () => {
     expect(CrawlDetailLogic.values).toEqual(DEFAULT_VALUES);
   });
 
-  describe('reducers', () => {
+  describe('actions', () => {
     describe('closeFlyout', () => {
       it('closes the flyout', () => {
         mount({ flyoutClosed: false });
@@ -77,14 +97,43 @@ describe('CrawlDetailLogic', () => {
         });
       });
     });
-  });
 
-  describe('listeners', () => {
+    describe('setSelectedTab', () => {
+      it('sets the select tab', () => {
+        mount({
+          selectedTab: 'preview',
+        });
+
+        CrawlDetailLogic.actions.setSelectedTab('json');
+
+        expect(CrawlDetailLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          selectedTab: 'json',
+        });
+      });
+    });
+
+    describe('openFlyout', () => {
+      it('opens the flyout and resets the selected tab', () => {
+        mount({
+          flyoutClosed: true,
+          selectedTab: 'json',
+        });
+
+        CrawlDetailLogic.actions.openFlyout();
+
+        expect(CrawlDetailLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          flyoutClosed: false,
+          selectedTab: 'preview',
+        });
+      });
+    });
+
     describe('fetchCrawlRequest', () => {
-      it('opens the flyout and sets loading to true', () => {
+      it('sets loading to true', () => {
         mount({
           dataLoading: false,
-          flyoutClosed: true,
         });
 
         CrawlDetailLogic.actions.fetchCrawlRequest('12345');
@@ -92,7 +141,6 @@ describe('CrawlDetailLogic', () => {
         expect(CrawlDetailLogic.values).toEqual({
           ...DEFAULT_VALUES,
           dataLoading: true,
-          flyoutClosed: false,
         });
       });
 

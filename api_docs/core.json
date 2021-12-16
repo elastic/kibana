@@ -949,7 +949,7 @@
             "id": "def-public.Capabilities.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: Record<string, boolean | Record<string, boolean>>",
+            "label": "[key: string]: Record<string, boolean | Record<string, boolean>>",
             "description": [
               "Custom capabilities, registered by plugins."
             ],
@@ -4459,7 +4459,7 @@
             "id": "def-public.SavedObjectAttributes.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: SavedObjectAttribute",
+            "label": "[key: string]: SavedObjectAttribute",
             "description": [],
             "signature": [
               "[key: string]:  ",
@@ -5915,7 +5915,7 @@
             "id": "def-public.SavedObjectsMigrationVersion.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[pluginName: string}]: string",
+            "label": "[pluginName: string]: string",
             "description": [],
             "signature": [
               "[pluginName: string]:  string"
@@ -6375,7 +6375,7 @@
             "id": "def-public.UiSettingsState.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: Pick<UiSettingsParams<unknown>, \"name\" | \"type\" | \"description\" | \"options\" | \"order\" | \"value\" | \"category\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"metric\"> & UserProvidedValues<...>",
+            "label": "[key: string]: Pick<UiSettingsParams<unknown>, \"name\" | \"type\" | \"description\" | \"options\" | \"order\" | \"value\" | \"category\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"metric\"> & UserProvidedValues<...>",
             "description": [],
             "signature": [
               "[key: string]:  Pick<",
@@ -8353,7 +8353,7 @@
             "id": "def-server.Capabilities.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: Record<string, boolean | Record<string, boolean>>",
+            "label": "[key: string]: Record<string, boolean | Record<string, boolean>>",
             "description": [
               "Custom capabilities, registered by plugins."
             ],
@@ -16090,7 +16090,7 @@
             "id": "def-server.SavedObjectAttributes.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: SavedObjectAttribute",
+            "label": "[key: string]: SavedObjectAttribute",
             "description": [],
             "signature": [
               "[key: string]:  ",
@@ -16164,7 +16164,7 @@
             "id": "def-server.SavedObjectsMigrationVersion.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[pluginName: string}]: string",
+            "label": "[pluginName: string]: string",
             "description": [],
             "signature": [
               "[pluginName: string]:  string"

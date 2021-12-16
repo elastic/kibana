@@ -18,16 +18,24 @@ import {
   CrawlRequest,
   CrawlerDomain,
   CrawlType,
+  CrawlRequestWithDetailsFromServer,
+  CrawlRequestWithDetails,
+  CrawlEvent,
+  CrawlEventFromServer,
+  CrawlRequestStatsFromServer,
 } from './types';
 
 import {
   crawlerDomainServerToClient,
   crawlerDataServerToClient,
   crawlDomainValidationToResult,
+  crawlEventServerToClient,
   crawlRequestServerToClient,
+  crawlRequestWithDetailsServerToClient,
   getDeleteDomainConfirmationMessage,
   getDeleteDomainSuccessMessage,
   getCrawlRulePathPatternTooltip,
+  crawlRequestStatsServerToClient,
 } from './utils';
 
 const DEFAULT_CRAWL_RULE: CrawlRule = {
@@ -120,6 +128,164 @@ describe('crawlRequestServerToClient', () => {
   });
 });
 
+describe('crawlRequestStatsServerToClient', () => {
+  it('converts the API payload into properties matching our code style', () => {
+    const defaultServerPayload: CrawlRequestStatsFromServer = {
+      status: {
+        urls_allowed: 4,
+        pages_visited: 4,
+        crawl_duration_msec: 100,
+        avg_response_time_msec: 10,
+        status_codes: {
+          200: 4,
+          404: 0,
+        },
+      },
+    };
+
+    expect(crawlRequestStatsServerToClient(defaultServerPayload)).toEqual({
+      status: {
+        urlsAllowed: 4,
+        pagesVisited: 4,
+        crawlDurationMSec: 100,
+        avgResponseTimeMSec: 10,
+        statusCodes: {
+          200: 4,
+          404: 0,
+        },
+      },
+    });
+  });
+});
+
+describe('crawlRequestWithDetailsServerToClient', () => {
+  it('converts the API payload into properties matching our code style', () => {
+    const id = '507f1f77bcf86cd799439011';
+
+    const defaultServerPayload: CrawlRequestWithDetailsFromServer = {
+      id,
+      status: CrawlerStatus.Pending,
+      created_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      began_at: null,
+      completed_at: null,
+      type: CrawlType.Full,
+      crawl_config: {
+        domain_allowlist: [],
+        seed_urls: [],
+        sitemap_urls: [],
+        max_crawl_depth: 10,
+      },
+      stats: {
+        status: {
+          urls_allowed: 4,
+          pages_visited: 4,
+          crawl_duration_msec: 100,
+          avg_response_time_msec: 10,
+          status_codes: {
+            200: 4,
+            404: 0,
+          },
+        },
+      },
+    };
+
+    const defaultClientPayload: CrawlRequestWithDetails = {
+      id,
+      status: CrawlerStatus.Pending,
+      createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      beganAt: null,
+      completedAt: null,
+      type: CrawlType.Full,
+      crawlConfig: {
+        domainAllowlist: [],
+        seedUrls: [],
+        sitemapUrls: [],
+        maxCrawlDepth: 10,
+      },
+      stats: {
+        status: {
+          urlsAllowed: 4,
+          pagesVisited: 4,
+          crawlDurationMSec: 100,
+          avgResponseTimeMSec: 10,
+          statusCodes: {
+            200: 4,
+            404: 0,
+          },
+        },
+      },
+    };
+
+    expect(crawlRequestWithDetailsServerToClient(defaultServerPayload)).toStrictEqual(
+      defaultClientPayload
+    );
+    expect(
+      crawlRequestWithDetailsServerToClient({
+        ...defaultServerPayload,
+        began_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      })
+    ).toStrictEqual({ ...defaultClientPayload, beganAt: 'Mon, 31 Aug 2020 17:00:00 +0000' });
+    expect(
+      crawlRequestWithDetailsServerToClient({
+        ...defaultServerPayload,
+        completed_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      })
+    ).toStrictEqual({ ...defaultClientPayload, completedAt: 'Mon, 31 Aug 2020 17:00:00 +0000' });
+  });
+});
+
+describe('crawlEventServerToClient', () => {
+  it('converts the API payload into properties matching our code style', () => {
+    const id = '507f1f77bcf86cd799439011';
+
+    const defaultServerPayload: CrawlEventFromServer = {
+      id,
+      status: CrawlerStatus.Pending,
+      created_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      began_at: null,
+      completed_at: null,
+      type: CrawlType.Full,
+      crawl_config: {
+        domain_allowlist: [],
+        seed_urls: [],
+        sitemap_urls: [],
+        max_crawl_depth: 10,
+      },
+      stage: 'crawl',
+    };
+
+    const defaultClientPayload: CrawlEvent = {
+      id,
+      status: CrawlerStatus.Pending,
+      createdAt: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      beganAt: null,
+      completedAt: null,
+      type: CrawlType.Full,
+      crawlConfig: {
+        domainAllowlist: [],
+        seedUrls: [],
+        sitemapUrls: [],
+        maxCrawlDepth: 10,
+      },
+      stage: 'crawl',
+    };
+
+    expect(crawlEventServerToClient(defaultServerPayload)).toStrictEqual(defaultClientPayload);
+    expect(
+      crawlEventServerToClient({
+        ...defaultServerPayload,
+        began_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      })
+    ).toStrictEqual({ ...defaultClientPayload, beganAt: 'Mon, 31 Aug 2020 17:00:00 +0000' });
+    expect(
+      crawlEventServerToClient({
+        ...defaultServerPayload,
+        completed_at: 'Mon, 31 Aug 2020 17:00:00 +0000',
+      })
+    ).toStrictEqual({ ...defaultClientPayload, completedAt: 'Mon, 31 Aug 2020 17:00:00 +0000' });
+  });
+});
+
 describe('crawlerDataServerToClient', () => {
   let output: CrawlerData;
 
@@ -166,6 +332,9 @@ describe('crawlerDataServerToClient', () => {
           type: CrawlType.Full,
           crawl_config: {
             domain_allowlist: ['https://www.elastic.co'],
+            seed_urls: [],
+            sitemap_urls: [],
+            max_crawl_depth: 10,
           },
         },
       ],
@@ -219,6 +388,9 @@ describe('crawlerDataServerToClient', () => {
         type: 'full',
         crawlConfig: {
           domainAllowlist: ['https://www.elastic.co'],
+          seedUrls: [],
+          sitemapUrls: [],
+          maxCrawlDepth: 10,
         },
       },
     ]);

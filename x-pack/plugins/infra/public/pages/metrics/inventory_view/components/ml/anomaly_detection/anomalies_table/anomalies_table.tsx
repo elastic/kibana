@@ -26,7 +26,7 @@ import {
   EuiText,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { datemathToEpochMillis } from '../../../../../../../utils/datemath';
 import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
 import { withTheme } from '../../../../../../../../../../../src/plugins/kibana_react/common';

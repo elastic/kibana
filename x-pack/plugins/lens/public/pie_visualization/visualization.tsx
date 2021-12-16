@@ -8,8 +8,10 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type {
   Visualization,
   OperationMetadata,
@@ -20,8 +22,9 @@ import { toExpression, toPreviewExpression } from './to_expression';
 import type { PieLayerState, PieVisualizationState } from '../../common/expressions';
 import { layerTypes } from '../../common';
 import { suggestions } from './suggestions';
-import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
+import { PartitionChartsMeta } from './partition_charts_meta';
 import { DimensionEditor, PieToolbar } from './toolbar';
+import { checkTableForContainsSmallValues } from './render_helpers';
 
 function newLayerState(layerId: string): PieLayerState {
   return {
@@ -38,7 +41,7 @@ function newLayerState(layerId: string): PieLayerState {
 
 const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
 const numberMetricOperations = (op: OperationMetadata) =>
-  !op.isBucketed && op.dataType === 'number';
+  !op.isBucketed && op.dataType === 'number' && !op.isStaticValue;
 
 const applyPaletteToColumnConfig = (
   columns: AccessorConfig[],
@@ -60,38 +63,20 @@ const applyPaletteToColumnConfig = (
 
 export const getPieVisualization = ({
   paletteService,
+  kibanaTheme,
 }: {
   paletteService: PaletteRegistry;
+  kibanaTheme: ThemeServiceStart;
 }): Visualization<PieVisualizationState> => ({
   id: 'lnsPie',
 
-  visualizationTypes: [
-    {
-      id: 'donut',
-      icon: CHART_NAMES.donut.icon,
-      label: CHART_NAMES.donut.label,
-      groupLabel: CHART_NAMES.donut.groupLabel,
-    },
-    {
-      id: 'pie',
-      icon: CHART_NAMES.pie.icon,
-      label: CHART_NAMES.pie.label,
-      groupLabel: CHART_NAMES.pie.groupLabel,
-    },
-    {
-      id: 'treemap',
-      icon: CHART_NAMES.treemap.icon,
-      label: CHART_NAMES.treemap.label,
-      groupLabel: CHART_NAMES.treemap.groupLabel,
-    },
-    {
-      id: 'mosaic',
-      icon: CHART_NAMES.mosaic.icon,
-      label: CHART_NAMES.mosaic.label,
-      showExperimentalBadge: true,
-      groupLabel: CHART_NAMES.mosaic.groupLabel,
-    },
-  ],
+  visualizationTypes: Object.entries(PartitionChartsMeta).map(([key, meta]) => ({
+    id: key,
+    icon: meta.icon,
+    label: meta.label,
+    groupLabel: meta.groupLabel,
+    showExperimentalBadge: meta.isExperimental,
+  })),
 
   getVisualizationTypeId(state) {
     return state.shape;
@@ -109,7 +94,7 @@ export const getPieVisualization = ({
   },
 
   getDescription(state) {
-    return CHART_NAMES[state.shape] ?? CHART_NAMES.pie;
+    return PartitionChartsMeta[state.shape] ?? PartitionChartsMeta.pie;
   },
 
   switchVisualizationType: (visualizationTypeId, state) => ({
@@ -161,25 +146,25 @@ export const getPieVisualization = ({
       };
 
       switch (state.shape) {
-        case 'mosaic':
-        case 'treemap':
-          return {
-            ...baseProps,
-            groupLabel: i18n.translate('xpack.lens.pie.treemapGroupLabel', {
-              defaultMessage: 'Group by',
-            }),
-            supportsMoreColumns: sortedColumns.length < MAX_TREEMAP_BUCKETS,
-            dataTestSubj: 'lnsPie_groupByDimensionPanel',
-            requiredMinDimensionCount: state.shape === 'mosaic' ? 2 : undefined,
-          };
-        default:
+        case 'donut':
+        case 'pie':
           return {
             ...baseProps,
             groupLabel: i18n.translate('xpack.lens.pie.sliceGroupLabel', {
               defaultMessage: 'Slice by',
             }),
-            supportsMoreColumns: sortedColumns.length < MAX_PIE_BUCKETS,
+            supportsMoreColumns: sortedColumns.length < PartitionChartsMeta.pie.maxBuckets,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
+          };
+        default:
+          return {
+            ...baseProps,
+            groupLabel: i18n.translate('xpack.lens.pie.treemapGroupLabel', {
+              defaultMessage: 'Group by',
+            }),
+            supportsMoreColumns: sortedColumns.length < PartitionChartsMeta[state.shape].maxBuckets,
+            dataTestSubj: 'lnsPie_groupByDimensionPanel',
+            requiredMinDimensionCount: PartitionChartsMeta[state.shape].requiredMinDimensionCount,
           };
       }
     };
@@ -232,9 +217,11 @@ export const getPieVisualization = ({
   },
   renderDimensionEditor(domElement, props) {
     render(
-      <I18nProvider>
-        <DimensionEditor {...props} paletteService={paletteService} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <DimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
@@ -260,9 +247,11 @@ export const getPieVisualization = ({
 
   renderToolbar(domElement, props) {
     render(
-      <I18nProvider>
-        <PieToolbar {...props} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <PieToolbar {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
@@ -271,33 +260,51 @@ export const getPieVisualization = ({
     if (state?.layers.length === 0 || !frame.activeData) {
       return;
     }
-
-    const metricColumnsWithArrayValues = [];
+    const warningMessages = [];
 
     for (const layer of state.layers) {
       const { layerId, metric } = layer;
-      const rows = frame.activeData[layerId] && frame.activeData[layerId].rows;
+      const rows = frame.activeData[layerId]?.rows;
+      const numericColumn = frame.activeData[layerId]?.columns.find(
+        ({ meta }) => meta?.type === 'number'
+      );
+
       if (!rows || !metric) {
         break;
       }
-      const columnToLabel = frame.datasourceLayers[layerId].getOperationForColumnId(metric)?.label;
 
+      if (
+        numericColumn &&
+        state.shape === 'waffle' &&
+        layer.groups.length &&
+        checkTableForContainsSmallValues(frame.activeData[layerId], numericColumn.id, 1)
+      ) {
+        warningMessages.push(
+          <FormattedMessage
+            id="xpack.lens.pie.smallValuesWarningMessage"
+            defaultMessage="Waffle charts are unable to effectively display small field values. To display all field values, use the Data table or Treemap."
+          />
+        );
+      }
+
+      const columnToLabel = frame.datasourceLayers[layerId].getOperationForColumnId(metric)?.label;
       const hasArrayValues = rows.some((row) => Array.isArray(row[metric]));
       if (hasArrayValues) {
-        metricColumnsWithArrayValues.push(columnToLabel || metric);
+        warningMessages.push(
+          <FormattedMessage
+            key={columnToLabel || metric}
+            id="xpack.lens.pie.arrayValues"
+            defaultMessage="{label} contains array values. Your visualization may not render as
+        expected."
+            values={{
+              label: <strong>{columnToLabel || metric}</strong>,
+            }}
+          />
+        );
       }
     }
-    return metricColumnsWithArrayValues.map((label) => (
-      <FormattedMessage
-        key={label}
-        id="xpack.lens.pie.arrayValues"
-        defaultMessage="{label} contains array values. Your visualization may not render as
-        expected."
-        values={{
-          label: <strong>{label}</strong>,
-        }}
-      />
-    ));
+
+    return warningMessages;
   },
 
   getErrorMessages(state) {

@@ -21,7 +21,7 @@ import {
   EuiCallOut,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { esQuery, IndexPattern, Query } from '../../../../../../../plugins/data/public';
@@ -51,7 +51,7 @@ interface TestScriptState {
 export class TestScript extends Component<TestScriptProps, TestScriptState> {
   static contextType = contextType;
 
-  public readonly context!: IndexPatternManagmentContextValue;
+  public declare readonly context: IndexPatternManagmentContextValue;
 
   defaultProps = {
     name: 'myScriptedField',

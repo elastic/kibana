@@ -9,7 +9,7 @@
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
 import { IndexPattern, IndexPatternField } from '../../../../../../../data/public';
-import { ElasticSearchHit } from '../../../../../services/doc_views/doc_views_types';
+import { ElasticSearchHit } from '../../../../../types';
 
 export function getDetails(
   field: IndexPatternField,

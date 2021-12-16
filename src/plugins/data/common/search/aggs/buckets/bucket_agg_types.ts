@@ -19,4 +19,6 @@ export enum BUCKET_TYPES {
   GEOHASH_GRID = 'geohash_grid',
   GEOTILE_GRID = 'geotile_grid',
   DATE_HISTOGRAM = 'date_histogram',
+  SAMPLER = 'sampler',
+  DIVERSIFIED_SAMPLER = 'diversified_sampler',
 }

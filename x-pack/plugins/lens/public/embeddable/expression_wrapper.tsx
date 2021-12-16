@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, EuiEmptyPrompt } from '@elastic/eui';
 import {
   ExpressionRendererEvent,

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Action } from 'redux-actions';
+import type { Action } from 'redux-actions';
 import { call, put, takeLatest, select } from 'redux-saga/effects';
+
 import { fetchEffectFactory } from './fetch_effect';
 import { deleteAlertAction, getExistingAlertAction } from '../actions/alerts';
 import { disableAlertById, fetchAlertRecords } from '../api/alerts';
@@ -23,18 +24,21 @@ export function* fetchAlertsEffect() {
     )
   );
 
-  yield takeLatest(String(deleteAlertAction.get), function* (action: Action<{ alertId: string }>) {
-    try {
-      const response = yield call(disableAlertById, action.payload);
-      yield put(deleteAlertAction.success(response));
-      kibanaService.core.notifications.toasts.addSuccess('Alert successfully deleted!');
-      const monitorId = yield select(monitorIdSelector);
-      yield put(getExistingAlertAction.get({ monitorId }));
-    } catch (err) {
-      kibanaService.core.notifications.toasts.addError(err, {
-        title: 'Alert cannot be deleted',
-      });
-      yield put(deleteAlertAction.fail(err));
+  yield takeLatest(
+    String(deleteAlertAction.get),
+    function* (action: Action<{ alertId: string }>): Generator {
+      try {
+        const response = yield call(disableAlertById, action.payload);
+        yield put(deleteAlertAction.success(response));
+        kibanaService.core.notifications.toasts.addSuccess('Alert successfully deleted!');
+        const monitorId = (yield select(monitorIdSelector)) as ReturnType<typeof monitorIdSelector>;
+        yield put(getExistingAlertAction.get({ monitorId }));
+      } catch (err) {
+        kibanaService.core.notifications.toasts.addError(err, {
+          title: 'Alert cannot be deleted',
+        });
+        yield put(deleteAlertAction.fail(err));
+      }
     }
-  });
+  );
 }

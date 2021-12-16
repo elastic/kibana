@@ -23,8 +23,6 @@ export const createMockConfig = (): ConfigType => {
     maxTimelineImportExportSize: 10000,
     maxTimelineImportPayloadBytes: 10485760,
     enableExperimental,
-    endpointResultListDefaultFirstPageIndex: 0,
-    endpointResultListDefaultPageSize: 10,
     packagerTaskInterval: '60s',
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],

@@ -11,7 +11,7 @@ import { useGetCasesStatus, UseGetCasesStatus } from './use_get_cases_status';
 import { casesStatus } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
-import { SECURITY_SOLUTION_OWNER } from '../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

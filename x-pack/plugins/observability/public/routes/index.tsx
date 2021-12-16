@@ -8,13 +8,13 @@
 import * as t from 'io-ts';
 import React from 'react';
 import { casesPath } from '../../common';
-import { ExploratoryViewPage } from '../components/shared/exploratory_view';
-import { AlertsPage } from '../pages/alerts';
 import { CasesPage } from '../pages/cases';
+import { AlertsPage } from '../pages/alerts/containers/alerts_page';
 import { HomePage } from '../pages/home';
 import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
+import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -74,7 +74,7 @@ export const routes = {
   },
   '/exploratory-view/': {
     handler: () => {
-      return <ExploratoryViewPage />;
+      return <ObservabilityExploratoryView />;
     },
     params: {
       query: t.partial({

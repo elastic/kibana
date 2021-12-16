@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { scopedHistoryMock } from 'src/core/public/mocks';
 import uuid from 'uuid';
 import '../../../../../common/mock/match_media';
 import { deleteRulesAction, duplicateRulesAction, editRuleAction } from './actions';
@@ -18,7 +17,6 @@ jest.mock('./actions', () => ({
   editRuleAction: jest.fn(),
 }));
 
-const history = scopedHistoryMock.create();
 const duplicateRulesActionMock = duplicateRulesAction as jest.Mock;
 const deleteRulesActionMock = deleteRulesAction as jest.Mock;
 const editRuleActionMock = editRuleAction as jest.Mock;
@@ -45,7 +43,6 @@ describe('AllRulesTable Columns', () => {
       const duplicateRulesActionObject = getActions(
         dispatch,
         dispatchToaster,
-        history,
         navigateToApp,
         reFetchRules,
         refetchPrePackagedRulesStatus,
@@ -62,7 +59,6 @@ describe('AllRulesTable Columns', () => {
       const deleteRulesActionObject = getActions(
         dispatch,
         dispatchToaster,
-        history,
         navigateToApp,
         reFetchRules,
         refetchPrePackagedRulesStatus,

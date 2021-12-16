@@ -82,7 +82,7 @@ const basicTimeline: TimelineModel = {
   columns: [],
   defaultColumns: [],
   dataProviders: [{ ...basicDataProvider }],
-  dataViewId: '',
+  dataViewId: null,
   dateRange: {
     start: '2020-07-07T08:20:18.966Z',
     end: '2020-07-08T08:20:18.966Z',
@@ -202,7 +202,7 @@ describe('Timeline', () => {
       const update = addNewTimeline({
         id: 'bar',
         columns: defaultHeaders,
-        dataViewId: '',
+        dataViewId: null,
         indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
@@ -214,7 +214,7 @@ describe('Timeline', () => {
       const update = addNewTimeline({
         id: 'bar',
         columns: timelineDefaults.columns,
-        dataViewId: '',
+        dataViewId: null,
         indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
@@ -232,7 +232,7 @@ describe('Timeline', () => {
       const update = addNewTimeline({
         id: 'bar',
         columns: defaultHeaders,
-        dataViewId: '',
+        dataViewId: null,
         indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,

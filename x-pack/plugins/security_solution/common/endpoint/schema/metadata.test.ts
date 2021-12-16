@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { ENDPOINT_DEFAULT_PAGE, ENDPOINT_DEFAULT_PAGE_SIZE } from '../constants';
 import { HostStatus } from '../types';
-import { GetMetadataListRequestSchemaV2 } from './metadata';
+import { GetMetadataListRequestSchema } from './metadata';
 
 describe('endpoint metadata schema', () => {
   describe('GetMetadataListRequestSchemaV2', () => {
-    const query = GetMetadataListRequestSchemaV2.query;
+    const query = GetMetadataListRequestSchema.query;
 
     it('should return correct query params when valid', () => {
       const queryParams = {
@@ -23,7 +24,7 @@ describe('endpoint metadata schema', () => {
     });
 
     it('should correctly use default values', () => {
-      const expected = { page: 0, pageSize: 10 };
+      const expected = { page: ENDPOINT_DEFAULT_PAGE, pageSize: ENDPOINT_DEFAULT_PAGE_SIZE };
       expect(query.validate(undefined)).toEqual(expected);
       expect(query.validate({ page: undefined })).toEqual(expected);
       expect(query.validate({ pageSize: undefined })).toEqual(expected);
@@ -56,7 +57,11 @@ describe('endpoint metadata schema', () => {
 
     it('should work with valid hostStatus', () => {
       const queryParams = { hostStatuses: [HostStatus.HEALTHY, HostStatus.UPDATING] };
-      const expected = { page: 0, pageSize: 10, ...queryParams };
+      const expected = {
+        page: ENDPOINT_DEFAULT_PAGE,
+        pageSize: ENDPOINT_DEFAULT_PAGE_SIZE,
+        ...queryParams,
+      };
       expect(query.validate(queryParams)).toEqual(expected);
     });
 

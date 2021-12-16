@@ -40,6 +40,7 @@ export const getManageTimelineById = () =>
   createSelector(
     selectTGridById,
     ({
+      dataViewId,
       documentType,
       defaultColumns,
       isLoading,
@@ -49,6 +50,7 @@ export const getManageTimelineById = () =>
       selectAll,
       title,
     }) => ({
+      dataViewId,
       documentType,
       defaultColumns,
       isLoading,

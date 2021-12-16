@@ -7,7 +7,7 @@
 
 import React, { Fragment, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { CommonAlert } from '../../common/types/alerts';
 import { Legacy } from '../legacy_shims';

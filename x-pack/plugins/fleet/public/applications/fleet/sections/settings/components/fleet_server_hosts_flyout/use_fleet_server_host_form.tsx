@@ -5,15 +5,63 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { sendPutSettings, useComboInput, useStartServices } from '../../../../hooks';
 import { isDiffPathProtocol } from '../../../../../../../common';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
+import { getAgentAndPolicyCount } from '../../services/agent_and_policies_count';
 
 const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
+
+const ConfirmTitle = () => (
+  <FormattedMessage
+    id="xpack.fleet.settings.fleetServerHostsFlyout.confirmModalTitle"
+    defaultMessage="Save and deploy changes?"
+  />
+);
+
+interface ConfirmDescriptionProps {
+  agentCount: number;
+  agentPolicyCount: number;
+}
+
+const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
+  agentCount,
+  agentPolicyCount,
+}) => (
+  <FormattedMessage
+    id="xpack.fleet.settings.fleetServerHostsFlyout.confirmModalText"
+    defaultMessage="This action will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
+    values={{
+      agents: (
+        <strong>
+          <FormattedMessage
+            id="xpack.fleet.settings.fleetServerHostsFlyout.agentsCount"
+            defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
+            values={{
+              agentCount,
+            }}
+          />
+        </strong>
+      ),
+      policies: (
+        <strong>
+          <FormattedMessage
+            id="xpack.fleet.settings.fleetServerHostsFlyout.agentPolicyCount"
+            defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
+            values={{
+              agentPolicyCount,
+            }}
+          />
+        </strong>
+      ),
+    }}
+  />
+);
 
 function validateFleetServerHosts(value: string[]) {
   if (value.length === 0) {
@@ -76,7 +124,7 @@ export function useFleetServerHostsForm(
   fleetServerHostsDefaultValue: string[],
   onSuccess: () => void
 ) {
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { notifications } = useStartServices();
   const { confirm } = useConfirmModal();
 
@@ -97,15 +145,11 @@ export function useFleetServerHostsForm(
       if (!validate) {
         return;
       }
+      const { agentCount, agentPolicyCount } = await getAgentAndPolicyCount();
       if (
         !(await confirm(
-          i18n.translate('xpack.fleet.settings.fleetServerHostsFlyout.confirmModalTitle', {
-            defaultMessage: 'Save and deploy changes?',
-          }),
-          i18n.translate('xpack.fleet.settings.fleetServerHostsFlyout.confirmModalDescription', {
-            defaultMessage:
-              'This action will update all of your agent policies and all of your agents. Are you sure you wish to continue?',
-          })
+          <ConfirmTitle />,
+          <ConfirmDescription agentCount={agentCount} agentPolicyCount={agentPolicyCount} />
         ))
       ) {
         return;
@@ -136,6 +180,7 @@ export function useFleetServerHostsForm(
 
   return {
     isLoading,
+    isDisabled: isLoading || !fleetServerHostsInput.hasChanged,
     submit,
     fleetServerHostsInput,
   };

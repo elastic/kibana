@@ -2475,7 +2475,7 @@
                     "id": "def-server.Map.setFeatureState.$2.Unnamed",
                     "type": "IndexSignature",
                     "tags": [],
-                    "label": "[key: string}]: any",
+                    "label": "[key: string]: any",
                     "description": [],
                     "signature": [
                       "[key: string]:  any"

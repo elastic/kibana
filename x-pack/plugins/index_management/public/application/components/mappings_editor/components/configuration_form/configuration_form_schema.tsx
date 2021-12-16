@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiCode } from '@elastic/eui';
 
 import { documentationService } from '../../../../services/documentation';
@@ -188,6 +188,14 @@ export const configurationFormSchema: FormSchema = {
     required: {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.routingLabel', {
         defaultMessage: 'Require _routing value for CRUD operations',
+      }),
+      defaultValue: false,
+    },
+  },
+  _size: {
+    enabled: {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.sizeLabel', {
+        defaultMessage: 'Index the _source field size in bytes',
       }),
       defaultValue: false,
     },

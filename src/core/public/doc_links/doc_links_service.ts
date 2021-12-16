@@ -9,7 +9,7 @@
 import { deepFreeze } from '@kbn/std';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
-interface StartDeps {
+export interface StartDeps {
   injectedMetadata: InjectedMetadataSetup;
 }
 
@@ -30,6 +30,9 @@ export class DocLinksService {
     const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
     const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
     const STACK_GETTING_STARTED = `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack-get-started/${DOC_LINK_VERSION}/`;
+    const APP_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}/`;
+    const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
+    const WORKPLACE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
@@ -50,6 +53,12 @@ export class DocLinksService {
         },
         canvas: {
           guide: `${KIBANA_DOCS}canvas.html`,
+        },
+        cloud: {
+          indexManagement: `${ELASTIC_WEBSITE_URL}/guide/en/cloud/current/ec-configure-index-management.html`,
+        },
+        console: {
+          guide: `${KIBANA_DOCS}console-kibana.html`,
         },
         dashboard: {
           guide: `${KIBANA_DOCS}dashboard.html`,
@@ -77,10 +86,61 @@ export class DocLinksService {
           auditdModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}/auditbeat-module-auditd.html`,
           systemModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}/auditbeat-module-system.html`,
         },
+        appSearch: {
+          apiRef: `${APP_SEARCH_DOCS}api-reference.html`,
+          apiClients: `${APP_SEARCH_DOCS}api-clients.html`,
+          apiKeys: `${APP_SEARCH_DOCS}authentication.html#authentication-api-keys`,
+          authentication: `${APP_SEARCH_DOCS}authentication.html`,
+          crawlRules: `${APP_SEARCH_DOCS}crawl-web-content.html#crawl-web-content-manage-crawl-rules`,
+          curations: `${APP_SEARCH_DOCS}curations-guide.html`,
+          duplicateDocuments: `${APP_SEARCH_DOCS}web-crawler-reference.html#web-crawler-reference-content-deduplication`,
+          entryPoints: `${APP_SEARCH_DOCS}crawl-web-content.html#crawl-web-content-manage-entry-points`,
+          guide: `${APP_SEARCH_DOCS}index.html`,
+          indexingDocuments: `${APP_SEARCH_DOCS}indexing-documents-guide.html`,
+          indexingDocumentsSchema: `${APP_SEARCH_DOCS}indexing-documents-guide.html#indexing-documents-guide-schema`,
+          logSettings: `${APP_SEARCH_DOCS}logs.html`,
+          metaEngines: `${APP_SEARCH_DOCS}meta-engines-guide.html`,
+          precisionTuning: `${APP_SEARCH_DOCS}precision-tuning.html`,
+          relevanceTuning: `${APP_SEARCH_DOCS}relevance-tuning-guide.html`,
+          resultSettings: `${APP_SEARCH_DOCS}result-settings-guide.html`,
+          searchUI: `${APP_SEARCH_DOCS}reference-ui-guide.html`,
+          security: `${APP_SEARCH_DOCS}security-and-users.html`,
+          synonyms: `${APP_SEARCH_DOCS}synonyms-guide.html`,
+          webCrawler: `${APP_SEARCH_DOCS}web-crawler.html`,
+          webCrawlerEventLogs: `${APP_SEARCH_DOCS}view-web-crawler-events-logs.html`,
+        },
         enterpriseSearch: {
-          base: `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}`,
-          appSearchBase: `${ELASTIC_WEBSITE_URL}guide/en/app-search/${DOC_LINK_VERSION}`,
-          workplaceSearchBase: `${ELASTIC_WEBSITE_URL}guide/en/workplace-search/${DOC_LINK_VERSION}`,
+          configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
+          licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
+          mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
+          usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
+        },
+        workplaceSearch: {
+          apiKeys: `${WORKPLACE_SEARCH_DOCS}workplace-search-api-authentication.html`,
+          box: `${WORKPLACE_SEARCH_DOCS}workplace-search-box-connector.html`,
+          confluenceCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-cloud-connector.html`,
+          confluenceServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-server-connector.html`,
+          customSources: `${WORKPLACE_SEARCH_DOCS}workplace-search-custom-api-sources.html`,
+          customSourcePermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-custom-api-sources.html#custom-api-source-document-level-access-control`,
+          documentPermissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-sources-document-permissions.html`,
+          dropbox: `${WORKPLACE_SEARCH_DOCS}workplace-search-dropbox-connector.html`,
+          externalIdentities: `${WORKPLACE_SEARCH_DOCS}workplace-search-external-identities-api.html`,
+          gettingStarted: `${WORKPLACE_SEARCH_DOCS}workplace-search-getting-started.html`,
+          gitHub: `${WORKPLACE_SEARCH_DOCS}workplace-search-github-connector.html`,
+          gmail: `${WORKPLACE_SEARCH_DOCS}workplace-search-gmail-connector.html`,
+          googleDrive: `${WORKPLACE_SEARCH_DOCS}workplace-search-google-drive-connector.html`,
+          indexingSchedule: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html#_indexing_schedule`,
+          jiraCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-cloud-connector.html`,
+          jiraServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-server-connector.html`,
+          oneDrive: `${WORKPLACE_SEARCH_DOCS}workplace-search-onedrive-connector.html`,
+          permissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html#organizational-sources-private-sources`,
+          salesforce: `${WORKPLACE_SEARCH_DOCS}workplace-search-salesforce-connector.html`,
+          security: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html`,
+          serviceNow: `${WORKPLACE_SEARCH_DOCS}workplace-search-servicenow-connector.html`,
+          sharePoint: `${WORKPLACE_SEARCH_DOCS}workplace-search-sharepoint-online-connector.html`,
+          slack: `${WORKPLACE_SEARCH_DOCS}workplace-search-slack-connector.html`,
+          synch: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html`,
+          zendesk: `${WORKPLACE_SEARCH_DOCS}workplace-search-zendesk-connector.html`,
         },
         metricbeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`,
@@ -186,6 +246,7 @@ export class DocLinksService {
           ilmWaitForSnapshot: `${ELASTICSEARCH_DOCS}ilm-wait-for-snapshot.html`,
           indexModules: `${ELASTICSEARCH_DOCS}index-modules.html`,
           indexSettings: `${ELASTICSEARCH_DOCS}index-modules.html#index-modules-settings`,
+          dynamicIndexSettings: `${ELASTICSEARCH_DOCS}index-modules.html#dynamic-index-settings`,
           indexTemplates: `${ELASTICSEARCH_DOCS}index-templates.html`,
           mapping: `${ELASTICSEARCH_DOCS}mapping.html`,
           mappingAnalyzer: `${ELASTICSEARCH_DOCS}analyzer.html`,
@@ -428,6 +489,7 @@ export class DocLinksService {
           hdfsRepo: `${PLUGIN_DOCS}repository-hdfs.html`,
           s3Repo: `${PLUGIN_DOCS}repository-s3.html`,
           snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
+          mapperSize: `${PLUGIN_DOCS}mapper-size-usage.html`,
         },
         snapshotRestore: {
           guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
@@ -488,7 +550,7 @@ export class DocLinksService {
         fleet: {
           guide: `${FLEET_DOCS}index.html`,
           fleetServer: `${FLEET_DOCS}fleet-server.html`,
-          fleetServerAddFleetServer: `${FLEET_DOCS}fleet-server.html#add-fleet-server`,
+          fleetServerAddFleetServer: `${FLEET_DOCS}add-a-fleet-server.html`,
           settings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           settingsFleetServerHostSettings: `${FLEET_DOCS}fleet-settings.html#fleet-server-hosts-setting`,
           settingsFleetServerProxySettings: `${KIBANA_DOCS}fleet-settings-kb.html#fleet-data-visualizer-settings`,
@@ -498,11 +560,12 @@ export class DocLinksService {
           datastreams: `${FLEET_DOCS}data-streams.html`,
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
           installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
+          installElasticAgentStandalone: `${FLEET_DOCS}install-standalone-elastic-agent.html`,
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
           learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
           apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
-          onPremRegistry: `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/${DOC_LINK_VERSION}/air-gapped.html`,
+          onPremRegistry: `${FLEET_DOCS}air-gapped.html`,
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
@@ -549,6 +612,12 @@ export interface DocLinksStart {
     readonly canvas: {
       readonly guide: string;
     };
+    readonly cloud: {
+      readonly indexManagement: string;
+    };
+    readonly console: {
+      readonly guide: string;
+    };
     readonly dashboard: {
       readonly guide: string;
       readonly drilldowns: string;
@@ -580,10 +649,61 @@ export interface DocLinksStart {
       readonly install: string;
       readonly start: string;
     };
+    readonly appSearch: {
+      readonly apiRef: string;
+      readonly apiClients: string;
+      readonly apiKeys: string;
+      readonly authentication: string;
+      readonly crawlRules: string;
+      readonly curations: string;
+      readonly duplicateDocuments: string;
+      readonly entryPoints: string;
+      readonly guide: string;
+      readonly indexingDocuments: string;
+      readonly indexingDocumentsSchema: string;
+      readonly logSettings: string;
+      readonly metaEngines: string;
+      readonly precisionTuning: string;
+      readonly relevanceTuning: string;
+      readonly resultSettings: string;
+      readonly searchUI: string;
+      readonly security: string;
+      readonly synonyms: string;
+      readonly webCrawler: string;
+      readonly webCrawlerEventLogs: string;
+    };
     readonly enterpriseSearch: {
-      readonly base: string;
-      readonly appSearchBase: string;
-      readonly workplaceSearchBase: string;
+      readonly configuration: string;
+      readonly licenseManagement: string;
+      readonly mailService: string;
+      readonly usersAccess: string;
+    };
+    readonly workplaceSearch: {
+      readonly apiKeys: string;
+      readonly box: string;
+      readonly confluenceCloud: string;
+      readonly confluenceServer: string;
+      readonly customSources: string;
+      readonly customSourcePermissions: string;
+      readonly documentPermissions: string;
+      readonly dropbox: string;
+      readonly externalIdentities: string;
+      readonly gitHub: string;
+      readonly gettingStarted: string;
+      readonly gmail: string;
+      readonly googleDrive: string;
+      readonly indexingSchedule: string;
+      readonly jiraCloud: string;
+      readonly jiraServer: string;
+      readonly oneDrive: string;
+      readonly permissions: string;
+      readonly salesforce: string;
+      readonly security: string;
+      readonly serviceNow: string;
+      readonly sharePoint: string;
+      readonly slack: string;
+      readonly synch: string;
+      readonly zendesk: string;
     };
     readonly heartbeat: {
       readonly base: string;
@@ -761,7 +881,14 @@ export interface DocLinksStart {
     }>;
     readonly watcher: Record<string, string>;
     readonly ccs: Record<string, string>;
-    readonly plugins: Record<string, string>;
+    readonly plugins: {
+      azureRepo: string;
+      gcsRepo: string;
+      hdfsRepo: string;
+      s3Repo: string;
+      snapshotRestoreRepos: string;
+      mapperSize: string;
+    };
     readonly snapshotRestore: Record<string, string>;
     readonly ingest: Record<string, string>;
     readonly fleet: Readonly<{
@@ -777,6 +904,7 @@ export interface DocLinksStart {
       datastreams: string;
       datastreamsNamingScheme: string;
       installElasticAgent: string;
+      installElasticAgentStandalone: string;
       upgradeElasticAgent: string;
       upgradeElasticAgent712lower: string;
       learnMoreBlog: string;

@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { omit } from 'lodash';
 import React, { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,7 +17,7 @@ import {
   EuiHealth,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { IFieldType } from 'src/plugins/data/public';
+import { omit } from 'lodash';
 import { pctToDecimal, decimalToPct } from '../../../../common/utils/corrected_percent_convert';
 import {
   WhenExpression,
@@ -33,6 +32,7 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../server/lib/alerting/metric_threshold/types';
 import { builtInComparators } from '../../../../../triggers_actions_ui/public';
+import { DerivedIndexPattern } from '../../../containers/metrics_source';
 
 const customComparators = {
   ...builtInComparators,
@@ -46,7 +46,7 @@ const customComparators = {
 };
 
 interface ExpressionRowProps {
-  fields: IFieldType[];
+  fields: DerivedIndexPattern['fields'];
   expressionId: number;
   expression: MetricExpression;
   errors: IErrorObject;

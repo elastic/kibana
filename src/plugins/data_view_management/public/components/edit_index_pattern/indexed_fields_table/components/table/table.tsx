@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '../../../../../../../kibana_react/public';
 
 import { IIndexPattern } from '../../../../../../../data/public';
@@ -349,9 +349,11 @@ export class Table extends PureComponent<IndexedFieldProps> {
   }
 
   renderFieldType(type: string, field: IndexedFieldItem) {
+    const conflictDescription =
+      field.conflictDescriptions && field.conflictDescriptions[field.name];
     return (
       <span>
-        {type !== 'conflict' ? type : ''}
+        {type === 'conflict' && conflictDescription ? '' : type}
         {field.conflictDescriptions
           ? getConflictBtn(field.name, field.conflictDescriptions, this.props.openModal)
           : ''}

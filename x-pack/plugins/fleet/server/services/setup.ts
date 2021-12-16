@@ -139,8 +139,8 @@ export async function ensureFleetGlobalEsAssets(
   // Ensure Global Fleet ES assets are installed
   logger.debug('Creating Fleet component template and ingest pipeline');
   const globalAssetsRes = await Promise.all([
-    ensureDefaultComponentTemplate(esClient),
-    ensureFleetFinalPipelineIsInstalled(esClient),
+    ensureDefaultComponentTemplate(esClient, logger),
+    ensureFleetFinalPipelineIsInstalled(esClient, logger),
   ]);
 
   if (globalAssetsRes.some((asset) => asset.isCreated)) {

@@ -37,13 +37,13 @@ import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { Alert, RecoveredActionGroup } from '../../common';
 import { omit } from 'lodash';
-import { UntypedNormalizedAlertType } from '../rule_type_registry';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { ExecuteOptions } from '../../../actions/server/create_execute_function';
 
-const alertType: jest.Mocked<UntypedNormalizedAlertType> = {
+const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test',
-  name: 'My test alert',
+  name: 'My test rule',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
@@ -107,7 +107,7 @@ describe('Task Runner', () => {
     ruleTypeRegistry,
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: false,
-    maxEphemeralActionsPerAlert: 10,
+    maxEphemeralActionsPerRule: 10,
     cancelAlertsOnRuleTimeout: true,
   };
 
@@ -133,7 +133,7 @@ describe('Task Runner', () => {
 
   const mockDate = new Date('2019-02-12T21:01:22.479Z');
 
-  const mockedAlertTypeSavedObject: Alert<AlertTypeParams> = {
+  const mockedRuleTypeSavedObject: Alert<AlertTypeParams> = {
     id: '1',
     consumer: 'bar',
     createdAt: mockDate,
@@ -142,14 +142,14 @@ describe('Task Runner', () => {
     muteAll: false,
     notifyWhen: 'onActiveAlert',
     enabled: true,
-    alertTypeId: alertType.id,
+    alertTypeId: ruleType.id,
     apiKey: '',
     apiKeyOwner: 'elastic',
     schedule: { interval: '10s' },
-    name: 'alert-name',
-    tags: ['alert-', '-tags'],
-    createdBy: 'alert-creator',
-    updatedBy: 'alert-updater',
+    name: 'rule-name',
+    tags: ['rule-', '-tags'],
+    createdBy: 'rule-creator',
+    updatedBy: 'rule-updater',
     mutedInstanceIds: [],
     params: {
       bar: true,
@@ -188,7 +188,7 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.renderActionParameterTemplates.mockImplementation(
       (actionTypeId, actionId, params) => params
     );
-    ruleTypeRegistry.get.mockReturnValue(alertType);
+    ruleTypeRegistry.get.mockReturnValue(ruleType);
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()
     );
@@ -196,7 +196,7 @@ describe('Task Runner', () => {
 
   test('successfully executes the task', async () => {
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       {
         ...mockedTaskInstance,
         state: {
@@ -206,12 +206,13 @@ describe('Task Runner', () => {
       },
       taskRunnerFactoryInitializerParams
     );
-    rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -228,8 +229,8 @@ describe('Task Runner', () => {
                                     },
                                   }
                   `);
-    expect(alertType.executor).toHaveBeenCalledTimes(1);
-    const call = alertType.executor.mock.calls[0][0];
+    expect(ruleType.executor).toHaveBeenCalledTimes(1);
+    const call = ruleType.executor.mock.calls[0][0];
     expect(call.params).toMatchInlineSnapshot(`
                                       Object {
                                         "bar": true,
@@ -238,13 +239,13 @@ describe('Task Runner', () => {
     expect(call.startedAt).toMatchInlineSnapshot(`1970-01-01T00:00:00.000Z`);
     expect(call.previousStartedAt).toMatchInlineSnapshot(`1969-12-31T23:55:00.000Z`);
     expect(call.state).toMatchInlineSnapshot(`Object {}`);
-    expect(call.name).toBe('alert-name');
-    expect(call.tags).toEqual(['alert-', '-tags']);
-    expect(call.createdBy).toBe('alert-creator');
-    expect(call.updatedBy).toBe('alert-updater');
+    expect(call.name).toBe('rule-name');
+    expect(call.tags).toEqual(['rule-', '-tags']);
+    expect(call.createdBy).toBe('rule-creator');
+    expect(call.updatedBy).toBe('rule-updater');
     expect(call.rule).not.toBe(null);
-    expect(call.rule.name).toBe('alert-name');
-    expect(call.rule.tags).toEqual(['alert-', '-tags']);
+    expect(call.rule.name).toBe('rule-name');
+    expect(call.rule.tags).toEqual(['rule-', '-tags']);
     expect(call.rule.consumer).toBe('bar');
     expect(call.rule.enabled).toBe(true);
     expect(call.rule.schedule).toMatchInlineSnapshot(`
@@ -252,15 +253,15 @@ describe('Task Runner', () => {
             "interval": "10s",
           }
         `);
-    expect(call.rule.createdBy).toBe('alert-creator');
-    expect(call.rule.updatedBy).toBe('alert-updater');
+    expect(call.rule.createdBy).toBe('rule-creator');
+    expect(call.rule.updatedBy).toBe('rule-updater');
     expect(call.rule.createdAt).toBe(mockDate);
     expect(call.rule.updatedAt).toBe(mockDate);
     expect(call.rule.notifyWhen).toBe('onActiveAlert');
     expect(call.rule.throttle).toBe(null);
     expect(call.rule.producer).toBe('alerts');
     expect(call.rule.ruleTypeId).toBe('test');
-    expect(call.rule.ruleTypeName).toBe('My test alert');
+    expect(call.rule.ruleTypeName).toBe('My test rule');
     expect(call.rule.actions).toMatchInlineSnapshot(`
           Array [
             Object {
@@ -287,10 +288,10 @@ describe('Task Runner', () => {
 
     const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(3);
-    expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
-      'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
+      'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -298,7 +299,6 @@ describe('Task Runner', () => {
     expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "@timestamp": "1970-01-01T00:00:00.000Z",
         "event": Object {
           "action": "execute-start",
           "category": Array [
@@ -321,7 +321,7 @@ describe('Task Runner', () => {
             "scheduled": "1970-01-01T00:00:00.000Z",
           },
         },
-        "message": "alert execution start: \\"1\\"",
+        "message": "rule execution start: \\"1\\"",
         "rule": Object {
           "category": "test",
           "id": "1",
@@ -353,14 +353,14 @@ describe('Task Runner', () => {
         id: '1',
         name: 'execute test',
         type: 'alert',
-        description: 'execute [test] with name [alert-name] in [default] namespace',
+        description: 'execute [test] with name [rule-name] in [default] namespace',
       },
       expect.any(Function)
     );
   });
 
   testAgainstEphemeralSupport(
-    'actionsPlugin.execute is called per alert instance that is scheduled',
+    'actionsPlugin.execute is called per alert alert that is scheduled',
     (
         customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
         enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
@@ -373,7 +373,7 @@ describe('Task Runner', () => {
           true
         );
         actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
-        alertType.executor.mockImplementation(
+        ruleType.executor.mockImplementation(
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
@@ -389,16 +389,17 @@ describe('Task Runner', () => {
           }
         );
         const taskRunner = new TaskRunner(
-          alertType,
+          ruleType,
           mockedTaskInstance,
           customTaskRunnerFactoryInitializerParams
         );
-        rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+        rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
           id: '1',
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -434,21 +435,20 @@ describe('Task Runner', () => {
 
         const logger = customTaskRunnerFactoryInitializerParams.logger;
         expect(logger.debug).toHaveBeenCalledTimes(4);
-        expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
         expect(logger.debug).nthCalledWith(
           2,
-          `alert test:1: 'alert-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+          `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
         );
         expect(logger.debug).nthCalledWith(
           3,
-          'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+          'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
         );
-        // alertExecutionStatus for test:1: {\"lastExecutionDate\":\"1970-01-01T00:00:00.000Z\",\"status\":\"error\",\"error\":{\"reason\":\"unknown\",\"message\":\"Cannot read property 'catch' of undefined\"}}
+        // ruleExecutionStatus for test:1: {\"lastExecutionDate\":\"1970-01-01T00:00:00.000Z\",\"status\":\"error\",\"error\":{\"reason\":\"unknown\",\"message\":\"Cannot read property 'catch' of undefined\"}}
 
         const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
         expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
-          '@timestamp': '1970-01-01T00:00:00.000Z',
           event: {
             action: 'execute-start',
             category: ['alerts'],
@@ -469,7 +469,7 @@ describe('Task Runner', () => {
               },
             ],
           },
-          message: `alert execution start: "1"`,
+          message: `rule execution start: "1"`,
           rule: {
             category: 'test',
             id: '1',
@@ -501,12 +501,12 @@ describe('Task Runner', () => {
               },
             ],
           },
-          message: "test:1: 'alert-name' created new instance: '1'",
+          message: "test:1: 'rule-name' created new alert: '1'",
           rule: {
             category: 'test',
             id: '1',
             license: 'basic',
-            name: 'alert-name',
+            name: 'rule-name',
             namespace: undefined,
             ruleset: 'alerts',
           },
@@ -530,12 +530,12 @@ describe('Task Runner', () => {
             ],
           },
           message:
-            "test:1: 'alert-name' active instance: '1' in actionGroup(subgroup): 'default(subDefault)'",
+            "test:1: 'rule-name' active alert: '1' in actionGroup(subgroup): 'default(subDefault)'",
           rule: {
             category: 'test',
             id: '1',
             license: 'basic',
-            name: 'alert-name',
+            name: 'rule-name',
             namespace: undefined,
             ruleset: 'alerts',
           },
@@ -569,18 +569,17 @@ describe('Task Runner', () => {
             ],
           },
           message:
-            "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup(subgroup): 'default(subDefault)' action: action:1",
+            "alert: test:1: 'rule-name' instanceId: '1' scheduled actionGroup(subgroup): 'default(subDefault)' action: action:1",
           rule: {
             category: 'test',
             id: '1',
             license: 'basic',
-            name: 'alert-name',
+            name: 'rule-name',
             namespace: undefined,
             ruleset: 'alerts',
           },
         });
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(5, {
-          '@timestamp': '1970-01-01T00:00:00.000Z',
           event: { action: 'execute', category: ['alerts'], kind: 'alert', outcome: 'success' },
           kibana: {
             alerting: {
@@ -600,12 +599,12 @@ describe('Task Runner', () => {
               },
             ],
           },
-          message: "alert executed: test:1: 'alert-name'",
+          message: "rule executed: test:1: 'rule-name'",
           rule: {
             category: 'test',
             id: '1',
             license: 'basic',
-            name: 'alert-name',
+            name: 'rule-name',
             ruleset: 'alerts',
           },
         });
@@ -615,7 +614,7 @@ describe('Task Runner', () => {
   test('actionsPlugin.execute is skipped if muteAll is true', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
-    alertType.executor.mockImplementation(
+    ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
@@ -629,12 +628,12 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
     rulesClient.get.mockResolvedValue({
-      ...mockedAlertTypeSavedObject,
+      ...mockedRuleTypeSavedObject,
       muteAll: true,
     });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
@@ -642,6 +641,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -650,25 +650,24 @@ describe('Task Runner', () => {
 
     const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(5);
-    expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
-      `alert test:1: 'alert-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+      `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
     );
     expect(logger.debug).nthCalledWith(
       3,
-      `no scheduling of actions for alert test:1: 'alert-name': alert is muted.`
+      `no scheduling of actions for rule test:1: 'rule-name': rule is muted.`
     );
     expect(logger.debug).nthCalledWith(
       4,
-      'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
-      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute-start',
         category: ['alerts'],
@@ -689,7 +688,7 @@ describe('Task Runner', () => {
           },
         ],
       },
-      message: `alert execution start: \"1\"`,
+      message: `rule execution start: \"1\"`,
       rule: {
         category: 'test',
         id: '1',
@@ -720,12 +719,12 @@ describe('Task Runner', () => {
           },
         ],
       },
-      message: "test:1: 'alert-name' created new instance: '1'",
+      message: "test:1: 'rule-name' created new alert: '1'",
       rule: {
         category: 'test',
         id: '1',
         license: 'basic',
-        name: 'alert-name',
+        name: 'rule-name',
         namespace: undefined,
         ruleset: 'alerts',
       },
@@ -753,18 +752,17 @@ describe('Task Runner', () => {
           },
         ],
       },
-      message: "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+      message: "test:1: 'rule-name' active alert: '1' in actionGroup: 'default'",
       rule: {
         category: 'test',
         id: '1',
         license: 'basic',
-        name: 'alert-name',
+        name: 'rule-name',
         namespace: undefined,
         ruleset: 'alerts',
       },
     });
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(4, {
-      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute',
         category: ['alerts'],
@@ -789,19 +787,19 @@ describe('Task Runner', () => {
           },
         ],
       },
-      message: "alert executed: test:1: 'alert-name'",
+      message: "rule executed: test:1: 'rule-name'",
       rule: {
         category: 'test',
         id: '1',
         license: 'basic',
-        name: 'alert-name',
+        name: 'rule-name',
         ruleset: 'alerts',
       },
     });
   });
 
   testAgainstEphemeralSupport(
-    'skips firing actions for active instance if instance is muted',
+    'skips firing actions for active alert if alert is muted',
     (
         customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
         enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
@@ -814,7 +812,7 @@ describe('Task Runner', () => {
           true
         );
         actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
-        alertType.executor.mockImplementation(
+        ruleType.executor.mockImplementation(
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
@@ -829,12 +827,12 @@ describe('Task Runner', () => {
           }
         );
         const taskRunner = new TaskRunner(
-          alertType,
+          ruleType,
           mockedTaskInstance,
           customTaskRunnerFactoryInitializerParams
         );
         rulesClient.get.mockResolvedValue({
-          ...mockedAlertTypeSavedObject,
+          ...mockedRuleTypeSavedObject,
           mutedInstanceIds: ['2'],
         });
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
@@ -842,6 +840,7 @@ describe('Task Runner', () => {
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -850,26 +849,26 @@ describe('Task Runner', () => {
 
         const logger = customTaskRunnerFactoryInitializerParams.logger;
         expect(logger.debug).toHaveBeenCalledTimes(5);
-        expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
         expect(logger.debug).nthCalledWith(
           2,
-          `alert test:1: 'alert-name' has 2 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"},{\"instanceId\":\"2\",\"actionGroup\":\"default\"}]`
+          `rule test:1: 'rule-name' has 2 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"},{\"instanceId\":\"2\",\"actionGroup\":\"default\"}]`
         );
         expect(logger.debug).nthCalledWith(
           3,
-          `skipping scheduling of actions for '2' in alert test:1: 'alert-name': instance is muted`
+          `skipping scheduling of actions for '2' in rule test:1: 'rule-name': rule is muted`
         );
         expect(logger.debug).nthCalledWith(
           4,
-          'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+          'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
         );
       }
   );
 
-  test('actionsPlugin.execute is not called when notifyWhen=onActionGroupChange and alert instance state does not change', async () => {
+  test('actionsPlugin.execute is not called when notifyWhen=onActionGroupChange and alert alert state does not change', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
-    alertType.executor.mockImplementation(
+    ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
@@ -883,7 +882,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       {
         ...mockedTaskInstance,
         state: {
@@ -905,7 +904,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     rulesClient.get.mockResolvedValue({
-      ...mockedAlertTypeSavedObject,
+      ...mockedRuleTypeSavedObject,
       notifyWhen: 'onActionGroupChange',
     });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
@@ -913,6 +912,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -926,7 +926,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -949,7 +948,7 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert execution start: \\"1\\"",
+            "message": "rule execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -984,19 +983,18 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "message": "test:1: 'rule-name' active alert: '1' in actionGroup: 'default'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -1023,12 +1021,12 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert executed: test:1: 'alert-name'",
+            "message": "rule executed: test:1: 'rule-name'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -1038,7 +1036,7 @@ describe('Task Runner', () => {
   });
 
   testAgainstEphemeralSupport(
-    'actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert instance state has changed',
+    'actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert alert state has changed',
     (
         customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
         enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
@@ -1050,7 +1048,7 @@ describe('Task Runner', () => {
         customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
           true
         );
-        alertType.executor.mockImplementation(
+        ruleType.executor.mockImplementation(
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
@@ -1064,7 +1062,7 @@ describe('Task Runner', () => {
           }
         );
         const taskRunner = new TaskRunner(
-          alertType,
+          ruleType,
           {
             ...mockedTaskInstance,
             state: {
@@ -1082,7 +1080,7 @@ describe('Task Runner', () => {
           customTaskRunnerFactoryInitializerParams
         );
         rulesClient.get.mockResolvedValue({
-          ...mockedAlertTypeSavedObject,
+          ...mockedRuleTypeSavedObject,
           notifyWhen: 'onActionGroupChange',
         });
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
@@ -1090,6 +1088,7 @@ describe('Task Runner', () => {
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -1099,7 +1098,7 @@ describe('Task Runner', () => {
   );
 
   testAgainstEphemeralSupport(
-    'actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert instance state subgroup has changed',
+    'actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert state subgroup has changed',
     (
         customTaskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType,
         enqueueFunction: (options: ExecuteOptions) => Promise<void | RunNowResult>
@@ -1112,7 +1111,7 @@ describe('Task Runner', () => {
         customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
           true
         );
-        alertType.executor.mockImplementation(
+        ruleType.executor.mockImplementation(
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
@@ -1128,7 +1127,7 @@ describe('Task Runner', () => {
           }
         );
         const taskRunner = new TaskRunner(
-          alertType,
+          ruleType,
           {
             ...mockedTaskInstance,
             state: {
@@ -1150,7 +1149,7 @@ describe('Task Runner', () => {
           customTaskRunnerFactoryInitializerParams
         );
         rulesClient.get.mockResolvedValue({
-          ...mockedAlertTypeSavedObject,
+          ...mockedRuleTypeSavedObject,
           notifyWhen: 'onActionGroupChange',
         });
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
@@ -1158,6 +1157,7 @@ describe('Task Runner', () => {
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -1180,7 +1180,7 @@ describe('Task Runner', () => {
           true
         );
         actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
-        alertType.executor.mockImplementation(
+        ruleType.executor.mockImplementation(
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
@@ -1194,16 +1194,17 @@ describe('Task Runner', () => {
           }
         );
         const taskRunner = new TaskRunner(
-          alertType,
+          ruleType,
           mockedTaskInstance,
           customTaskRunnerFactoryInitializerParams
         );
-        rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+        rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
           id: '1',
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -1264,7 +1265,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -1287,7 +1287,7 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert execution start: \\"1\\"",
+            "message": "rule execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -1322,12 +1322,12 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' created new instance: '1'",
+            "message": "test:1: 'rule-name' created new alert: '1'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -1358,12 +1358,12 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "message": "test:1: 'rule-name' active alert: '1' in actionGroup: 'default'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -1398,19 +1398,18 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
+            "message": "alert: test:1: 'rule-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -1437,12 +1436,12 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert executed: test:1: 'alert-name'",
+            "message": "rule executed: test:1: 'rule-name'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -1467,7 +1466,7 @@ describe('Task Runner', () => {
         );
         actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
 
-        alertType.executor.mockImplementation(
+        ruleType.executor.mockImplementation(
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
@@ -1481,7 +1480,7 @@ describe('Task Runner', () => {
           }
         );
         const taskRunner = new TaskRunner(
-          alertType,
+          ruleType,
           {
             ...mockedTaskInstance,
             state: {
@@ -1508,12 +1507,13 @@ describe('Task Runner', () => {
           },
           customTaskRunnerFactoryInitializerParams
         );
-        rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+        rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
           id: '1',
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -1539,18 +1539,18 @@ describe('Task Runner', () => {
 
         const logger = customTaskRunnerFactoryInitializerParams.logger;
         expect(logger.debug).toHaveBeenCalledTimes(5);
-        expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
         expect(logger.debug).nthCalledWith(
           2,
-          `alert test:1: 'alert-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+          `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
         );
         expect(logger.debug).nthCalledWith(
           3,
-          `alert test:1: 'alert-name' has 1 recovered alert instances: [\"2\"]`
+          `rule test:1: 'rule-name' has 1 recovered alerts: [\"2\"]`
         );
         expect(logger.debug).nthCalledWith(
           4,
-          'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+          'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
         );
 
         const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
@@ -1560,7 +1560,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -1583,7 +1582,7 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert execution start: \\"1\\"",
+            "message": "rule execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -1618,12 +1617,12 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' instance '2' has recovered",
+            "message": "test:1: 'rule-name' alert '2' has recovered",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -1654,12 +1653,12 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "message": "test:1: 'rule-name' active alert: '1' in actionGroup: 'default'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -1694,12 +1693,12 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "alert: test:1: 'alert-name' instanceId: '2' scheduled actionGroup: 'recovered' action: action:2",
+            "message": "alert: test:1: 'rule-name' instanceId: '2' scheduled actionGroup: 'recovered' action: action:2",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -1734,19 +1733,18 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
+            "message": "alert: test:1: 'rule-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -1773,12 +1771,12 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert executed: test:1: 'alert-name'",
+            "message": "rule executed: test:1: 'rule-name'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -1833,7 +1831,7 @@ describe('Task Runner', () => {
         );
         actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(new Promise(() => {}));
 
-        alertType.executor.mockImplementation(
+        ruleType.executor.mockImplementation(
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
@@ -1850,7 +1848,7 @@ describe('Task Runner', () => {
           }
         );
         const taskRunner = new TaskRunner(
-          alertType,
+          ruleType,
           {
             ...mockedTaskInstance,
             state: {
@@ -1866,12 +1864,13 @@ describe('Task Runner', () => {
           },
           customTaskRunnerFactoryInitializerParams
         );
-        rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+        rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
         encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
           id: alertId,
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -1895,16 +1894,16 @@ describe('Task Runner', () => {
 
         const logger = customTaskRunnerFactoryInitializerParams.logger;
         expect(logger.debug).toHaveBeenCalledWith(
-          `alert test:${alertId}: 'alert-name' has 1 active alert instances: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
+          `rule test:${alertId}: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`
         );
 
         expect(logger.debug).nthCalledWith(
           3,
-          `alert test:${alertId}: 'alert-name' has 1 recovered alert instances: [\"2\"]`
+          `rule test:${alertId}: 'rule-name' has 1 recovered alerts: [\"2\"]`
         );
         expect(logger.debug).nthCalledWith(
           4,
-          `alertExecutionStatus for test:${alertId}: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`
+          `ruleExecutionStatus for test:${alertId}: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`
         );
 
         const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
@@ -1935,13 +1934,13 @@ describe('Task Runner', () => {
           id: 'customRecovered',
           name: 'Custom Recovered',
         };
-        const alertTypeWithCustomRecovery = {
-          ...alertType,
+        const ruleTypeWithCustomRecovery = {
+          ...ruleType,
           recoveryActionGroup,
           actionGroups: [{ id: 'default', name: 'Default' }, recoveryActionGroup],
         };
 
-        alertTypeWithCustomRecovery.executor.mockImplementation(
+        ruleTypeWithCustomRecovery.executor.mockImplementation(
           async ({
             services: executorServices,
           }: AlertExecutorOptions<
@@ -1955,7 +1954,7 @@ describe('Task Runner', () => {
           }
         );
         const taskRunner = new TaskRunner(
-          alertTypeWithCustomRecovery,
+          ruleTypeWithCustomRecovery,
           {
             ...mockedTaskInstance,
             state: {
@@ -1969,7 +1968,7 @@ describe('Task Runner', () => {
           customTaskRunnerFactoryInitializerParams
         );
         rulesClient.get.mockResolvedValue({
-          ...mockedAlertTypeSavedObject,
+          ...mockedRuleTypeSavedObject,
           actions: [
             {
               group: 'default',
@@ -1994,6 +1993,7 @@ describe('Task Runner', () => {
           type: 'alert',
           attributes: {
             apiKey: Buffer.from('123:abc').toString('base64'),
+            enabled: true,
           },
           references: [],
         });
@@ -2049,7 +2049,7 @@ describe('Task Runner', () => {
   );
 
   test('persists alertInstances passed in from state, only if they are scheduled for execution', async () => {
-    alertType.executor.mockImplementation(
+    ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
@@ -2064,7 +2064,7 @@ describe('Task Runner', () => {
     );
     const date = new Date().toISOString();
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       {
         ...mockedTaskInstance,
         state: {
@@ -2091,12 +2091,13 @@ describe('Task Runner', () => {
       },
       taskRunnerFactoryInitializerParams
     );
-    rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2127,7 +2128,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -2150,7 +2150,7 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert execution start: \\"1\\"",
+            "message": "rule execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -2186,12 +2186,12 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' instance '2' has recovered",
+            "message": "test:1: 'rule-name' alert '2' has recovered",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -2222,19 +2222,18 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "message": "test:1: 'rule-name' active alert: '1' in actionGroup: 'default'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -2261,12 +2260,12 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert executed: test:1: 'alert-name'",
+            "message": "rule executed: test:1: 'rule-name'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -2278,7 +2277,7 @@ describe('Task Runner', () => {
   test('validates params before executing the alert type', async () => {
     const taskRunner = new TaskRunner(
       {
-        ...alertType,
+        ...ruleType,
         validate: {
           params: schema.object({
             param1: schema.string(),
@@ -2294,12 +2293,13 @@ describe('Task Runner', () => {
       },
       taskRunnerFactoryInitializerParams
     );
-    rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2312,22 +2312,23 @@ describe('Task Runner', () => {
       }
     `);
     expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
-      `Executing Alert foo:test:1 has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]`
+      `Executing Rule foo:test:1 has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]`
     );
   });
 
   test('uses API key when provided', async () => {
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
-    rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2351,15 +2352,17 @@ describe('Task Runner', () => {
 
   test(`doesn't use API key when not provided`, async () => {
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
-    rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
-      attributes: {},
+      attributes: {
+        enabled: true,
+      },
       references: [],
     });
 
@@ -2381,14 +2384,14 @@ describe('Task Runner', () => {
 
   test('rescheduled the Alert if the schedule has update during a task run', async () => {
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
 
-    rulesClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    rulesClient.get.mockResolvedValueOnce(mockedRuleTypeSavedObject);
     rulesClient.get.mockResolvedValueOnce({
-      ...mockedAlertTypeSavedObject,
+      ...mockedRuleTypeSavedObject,
       schedule: { interval: '30s' },
     });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -2396,6 +2399,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2414,8 +2418,8 @@ describe('Task Runner', () => {
     `);
   });
 
-  test('recovers gracefully when the AlertType executor throws an exception', async () => {
-    alertType.executor.mockImplementation(
+  test('recovers gracefully when the RuleType executor throws an exception', async () => {
+    ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
@@ -2430,17 +2434,18 @@ describe('Task Runner', () => {
     );
 
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
 
-    rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2463,7 +2468,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -2486,7 +2490,7 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert execution start: \\"1\\"",
+            "message": "rule execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -2497,7 +2501,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "error": Object {
               "message": "OMG",
             },
@@ -2528,7 +2531,7 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert execution failure: test:1: 'alert-name'",
+            "message": "rule execution failure: test:1: 'rule-name'",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -2547,12 +2550,12 @@ describe('Task Runner', () => {
     });
 
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
 
-    rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
 
     const runnerResult = await taskRunner.run();
 
@@ -2572,7 +2575,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -2595,7 +2597,7 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert execution start: \\"1\\"",
+            "message": "rule execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -2606,7 +2608,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "error": Object {
               "message": "OMG",
             },
@@ -2656,17 +2657,18 @@ describe('Task Runner', () => {
     });
 
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
 
-    rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2689,7 +2691,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -2712,7 +2713,7 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert execution start: \\"1\\"",
+            "message": "rule execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -2723,7 +2724,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "error": Object {
               "message": "OMG",
             },
@@ -2773,17 +2773,18 @@ describe('Task Runner', () => {
     });
 
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
 
-    rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2806,7 +2807,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -2829,7 +2829,7 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert execution start: \\"1\\"",
+            "message": "rule execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -2840,7 +2840,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "error": Object {
               "message": "OMG",
             },
@@ -2890,7 +2889,7 @@ describe('Task Runner', () => {
     });
 
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -2900,6 +2899,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -2922,7 +2922,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -2945,7 +2944,7 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert execution start: \\"1\\"",
+            "message": "rule execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -2956,7 +2955,6 @@ describe('Task Runner', () => {
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "error": Object {
               "message": "OMG",
             },
@@ -3010,7 +3008,7 @@ describe('Task Runner', () => {
     const legacyTaskInstance = omit(mockedTaskInstance, 'schedule');
 
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       legacyTaskInstance,
       taskRunnerFactoryInitializerParams
     );
@@ -3020,6 +3018,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3041,7 +3040,7 @@ describe('Task Runner', () => {
       previousStartedAt: '1970-01-05T00:00:00.000Z',
     };
 
-    alertType.executor.mockImplementation(
+    ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
@@ -3056,7 +3055,7 @@ describe('Task Runner', () => {
     );
 
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       {
         ...mockedTaskInstance,
         state: originalAlertSate,
@@ -3064,12 +3063,13 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
 
-    rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3087,7 +3087,7 @@ describe('Task Runner', () => {
     });
 
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       {
         ...mockedTaskInstance,
         params: {
@@ -3103,6 +3103,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3111,7 +3112,7 @@ describe('Task Runner', () => {
     return taskRunner.run().catch((ex) => {
       expect(ex).toMatchInlineSnapshot(`[Error: Saved object [alert/1] not found]`);
       expect(logger.debug).toHaveBeenCalledWith(
-        `Executing Alert foo:test:1 has resulted in Error: Saved object [alert/1] not found`
+        `Executing Rule foo:test:1 has resulted in Error: Saved object [alert/1] not found`
       );
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
@@ -3128,7 +3129,7 @@ describe('Task Runner', () => {
     });
 
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       {
         ...mockedTaskInstance,
         params: {
@@ -3144,6 +3145,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3152,7 +3154,7 @@ describe('Task Runner', () => {
     return taskRunner.run().catch((ex) => {
       expect(ex).toMatchInlineSnapshot(`[Error: Saved object [alert/1] not found]`);
       expect(logger.debug).toHaveBeenCalledWith(
-        `Executing Alert test space:test:1 has resulted in Error: Saved object [alert/1] not found`
+        `Executing Rule test space:test:1 has resulted in Error: Saved object [alert/1] not found`
       );
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
@@ -3165,7 +3167,7 @@ describe('Task Runner', () => {
   test('start time is logged for new alerts', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
-    alertType.executor.mockImplementation(
+    ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
@@ -3180,7 +3182,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       {
         ...mockedTaskInstance,
         state: {
@@ -3191,7 +3193,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     rulesClient.get.mockResolvedValue({
-      ...mockedAlertTypeSavedObject,
+      ...mockedRuleTypeSavedObject,
       notifyWhen: 'onActionGroupChange',
       actions: [],
     });
@@ -3200,6 +3202,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3212,7 +3215,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -3235,7 +3237,7 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert execution start: \\"1\\"",
+            "message": "rule execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -3270,12 +3272,12 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' created new instance: '1'",
+            "message": "test:1: 'rule-name' created new alert: '1'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -3306,12 +3308,12 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' created new instance: '2'",
+            "message": "test:1: 'rule-name' created new alert: '2'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -3342,12 +3344,12 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "message": "test:1: 'rule-name' active alert: '1' in actionGroup: 'default'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -3378,19 +3380,18 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' active instance: '2' in actionGroup: 'default'",
+            "message": "test:1: 'rule-name' active alert: '2' in actionGroup: 'default'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -3417,12 +3418,12 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert executed: test:1: 'alert-name'",
+            "message": "rule executed: test:1: 'rule-name'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -3434,7 +3435,7 @@ describe('Task Runner', () => {
   test('duration is updated for active alerts when alert state contains start time', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
-    alertType.executor.mockImplementation(
+    ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
@@ -3449,7 +3450,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       {
         ...mockedTaskInstance,
         state: {
@@ -3477,7 +3478,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     rulesClient.get.mockResolvedValue({
-      ...mockedAlertTypeSavedObject,
+      ...mockedRuleTypeSavedObject,
       notifyWhen: 'onActionGroupChange',
       actions: [],
     });
@@ -3486,6 +3487,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3498,7 +3500,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -3521,7 +3522,7 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert execution start: \\"1\\"",
+            "message": "rule execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -3556,12 +3557,12 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "message": "test:1: 'rule-name' active alert: '1' in actionGroup: 'default'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -3592,19 +3593,18 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' active instance: '2' in actionGroup: 'default'",
+            "message": "test:1: 'rule-name' active alert: '2' in actionGroup: 'default'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -3631,12 +3631,12 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert executed: test:1: 'alert-name'",
+            "message": "rule executed: test:1: 'rule-name'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -3648,7 +3648,7 @@ describe('Task Runner', () => {
   test('duration is not calculated for active alerts when alert state does not contain start time', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
-    alertType.executor.mockImplementation(
+    ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
@@ -3663,7 +3663,7 @@ describe('Task Runner', () => {
       }
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       {
         ...mockedTaskInstance,
         state: {
@@ -3683,7 +3683,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     rulesClient.get.mockResolvedValue({
-      ...mockedAlertTypeSavedObject,
+      ...mockedRuleTypeSavedObject,
       notifyWhen: 'onActionGroupChange',
       actions: [],
     });
@@ -3692,6 +3692,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3704,7 +3705,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -3727,7 +3727,7 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert execution start: \\"1\\"",
+            "message": "rule execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -3760,12 +3760,12 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "message": "test:1: 'rule-name' active alert: '1' in actionGroup: 'default'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -3794,19 +3794,18 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' active instance: '2' in actionGroup: 'default'",
+            "message": "test:1: 'rule-name' active alert: '2' in actionGroup: 'default'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -3833,12 +3832,12 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert executed: test:1: 'alert-name'",
+            "message": "rule executed: test:1: 'rule-name'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -3850,9 +3849,9 @@ describe('Task Runner', () => {
   test('end is logged for active alerts when alert state contains start time and alert recovers', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
-    alertType.executor.mockImplementation(async () => {});
+    ruleType.executor.mockImplementation(async () => {});
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       {
         ...mockedTaskInstance,
         state: {
@@ -3880,7 +3879,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     rulesClient.get.mockResolvedValue({
-      ...mockedAlertTypeSavedObject,
+      ...mockedRuleTypeSavedObject,
       notifyWhen: 'onActionGroupChange',
       actions: [],
     });
@@ -3889,6 +3888,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -3901,7 +3901,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -3924,7 +3923,7 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert execution start: \\"1\\"",
+            "message": "rule execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -3959,12 +3958,12 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' instance '1' has recovered",
+            "message": "test:1: 'rule-name' alert '1' has recovered",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -3995,19 +3994,18 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' instance '2' has recovered",
+            "message": "test:1: 'rule-name' alert '2' has recovered",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -4034,12 +4032,12 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert executed: test:1: 'alert-name'",
+            "message": "rule executed: test:1: 'rule-name'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -4051,7 +4049,7 @@ describe('Task Runner', () => {
   test('end calculation is skipped for active alerts when alert state does not contain start time and alert recovers', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
-    alertType.executor.mockImplementation(
+    ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
       }: AlertExecutorOptions<
@@ -4063,7 +4061,7 @@ describe('Task Runner', () => {
       >) => {}
     );
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       {
         ...mockedTaskInstance,
         state: {
@@ -4083,7 +4081,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     rulesClient.get.mockResolvedValue({
-      ...mockedAlertTypeSavedObject,
+      ...mockedRuleTypeSavedObject,
       notifyWhen: 'onActionGroupChange',
       actions: [],
     });
@@ -4092,6 +4090,7 @@ describe('Task Runner', () => {
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -4104,7 +4103,6 @@ describe('Task Runner', () => {
       Array [
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute-start",
               "category": Array [
@@ -4127,7 +4125,7 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert execution start: \\"1\\"",
+            "message": "rule execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
@@ -4159,12 +4157,12 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' instance '1' has recovered",
+            "message": "test:1: 'rule-name' alert '1' has recovered",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -4192,19 +4190,18 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' instance '2' has recovered",
+            "message": "test:1: 'rule-name' alert '2' has recovered",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
         ],
         Array [
           Object {
-            "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
               "category": Array [
@@ -4231,12 +4228,12 @@ describe('Task Runner', () => {
                 "scheduled": "1970-01-01T00:00:00.000Z",
               },
             },
-            "message": "alert executed: test:1: 'alert-name'",
+            "message": "rule executed: test:1: 'rule-name'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "name": "alert-name",
+              "name": "rule-name",
               "ruleset": "alerts",
             },
           },
@@ -4247,7 +4244,7 @@ describe('Task Runner', () => {
 
   test('successfully executes the task with ephemeral tasks enabled', async () => {
     const taskRunner = new TaskRunner(
-      alertType,
+      ruleType,
       {
         ...mockedTaskInstance,
         state: {
@@ -4260,12 +4257,13 @@ describe('Task Runner', () => {
         supportsEphemeralTasks: true,
       }
     );
-    rulesClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
         apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
       },
       references: [],
     });
@@ -4282,8 +4280,8 @@ describe('Task Runner', () => {
                                     },
                                   }
                   `);
-    expect(alertType.executor).toHaveBeenCalledTimes(1);
-    const call = alertType.executor.mock.calls[0][0];
+    expect(ruleType.executor).toHaveBeenCalledTimes(1);
+    const call = ruleType.executor.mock.calls[0][0];
     expect(call.params).toMatchInlineSnapshot(`
                                       Object {
                                         "bar": true,
@@ -4292,13 +4290,13 @@ describe('Task Runner', () => {
     expect(call.startedAt).toMatchInlineSnapshot(`1970-01-01T00:00:00.000Z`);
     expect(call.previousStartedAt).toMatchInlineSnapshot(`1969-12-31T23:55:00.000Z`);
     expect(call.state).toMatchInlineSnapshot(`Object {}`);
-    expect(call.name).toBe('alert-name');
-    expect(call.tags).toEqual(['alert-', '-tags']);
-    expect(call.createdBy).toBe('alert-creator');
-    expect(call.updatedBy).toBe('alert-updater');
+    expect(call.name).toBe('rule-name');
+    expect(call.tags).toEqual(['rule-', '-tags']);
+    expect(call.createdBy).toBe('rule-creator');
+    expect(call.updatedBy).toBe('rule-updater');
     expect(call.rule).not.toBe(null);
-    expect(call.rule.name).toBe('alert-name');
-    expect(call.rule.tags).toEqual(['alert-', '-tags']);
+    expect(call.rule.name).toBe('rule-name');
+    expect(call.rule.tags).toEqual(['rule-', '-tags']);
     expect(call.rule.consumer).toBe('bar');
     expect(call.rule.enabled).toBe(true);
     expect(call.rule.schedule).toMatchInlineSnapshot(`
@@ -4306,15 +4304,15 @@ describe('Task Runner', () => {
             "interval": "10s",
           }
         `);
-    expect(call.rule.createdBy).toBe('alert-creator');
-    expect(call.rule.updatedBy).toBe('alert-updater');
+    expect(call.rule.createdBy).toBe('rule-creator');
+    expect(call.rule.updatedBy).toBe('rule-updater');
     expect(call.rule.createdAt).toBe(mockDate);
     expect(call.rule.updatedAt).toBe(mockDate);
     expect(call.rule.notifyWhen).toBe('onActiveAlert');
     expect(call.rule.throttle).toBe(null);
     expect(call.rule.producer).toBe('alerts');
     expect(call.rule.ruleTypeId).toBe('test');
-    expect(call.rule.ruleTypeName).toBe('My test alert');
+    expect(call.rule.ruleTypeName).toBe('My test rule');
     expect(call.rule.actions).toMatchInlineSnapshot(`
           Array [
             Object {
@@ -4341,10 +4339,10 @@ describe('Task Runner', () => {
 
     const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(3);
-    expect(logger.debug).nthCalledWith(1, 'executing alert test:1 at 1970-01-01T00:00:00.000Z');
+    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
-      'alertExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
+      'ruleExecutionStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -4352,7 +4350,6 @@ describe('Task Runner', () => {
     expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "@timestamp": "1970-01-01T00:00:00.000Z",
         "event": Object {
           "action": "execute-start",
           "category": Array [
@@ -4375,7 +4372,7 @@ describe('Task Runner', () => {
             "scheduled": "1970-01-01T00:00:00.000Z",
           },
         },
-        "message": "alert execution start: \\"1\\"",
+        "message": "rule execution start: \\"1\\"",
         "rule": Object {
           "category": "test",
           "id": "1",
@@ -4400,5 +4397,85 @@ describe('Task Runner', () => {
       },
       { refresh: false, namespace: undefined }
     );
+  });
+
+  test('successfully bails on execution if the rule is disabled', async () => {
+    const state = {
+      ...mockedTaskInstance.state,
+      previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+    };
+    const taskRunner = new TaskRunner(
+      ruleType,
+      {
+        ...mockedTaskInstance,
+        state,
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: false,
+      },
+      references: [],
+    });
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult.state.previousStartedAt?.toISOString()).toBe(state.previousStartedAt);
+    expect(runnerResult.schedule).toStrictEqual(mockedTaskInstance.schedule);
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.logEvent.mock.calls[0][0]).toStrictEqual({
+      event: {
+        action: 'execute-start',
+        kind: 'alert',
+        category: ['alerts'],
+      },
+      kibana: {
+        saved_objects: [
+          { rel: 'primary', type: 'alert', id: '1', namespace: undefined, type_id: 'test' },
+        ],
+        task: { scheduled: '1970-01-01T00:00:00.000Z', schedule_delay: 0 },
+      },
+      rule: {
+        id: '1',
+        license: 'basic',
+        category: 'test',
+        ruleset: 'alerts',
+      },
+      message: 'rule execution start: "1"',
+    });
+    expect(eventLogger.logEvent.mock.calls[1][0]).toStrictEqual({
+      event: {
+        action: 'execute',
+        kind: 'alert',
+        category: ['alerts'],
+        reason: 'disabled',
+        outcome: 'failure',
+      },
+      kibana: {
+        saved_objects: [
+          { rel: 'primary', type: 'alert', id: '1', namespace: undefined, type_id: 'test' },
+        ],
+        task: {
+          scheduled: '1970-01-01T00:00:00.000Z',
+          schedule_delay: 0,
+        },
+        alerting: { status: 'error' },
+      },
+      rule: {
+        id: '1',
+        license: 'basic',
+        category: 'test',
+        ruleset: 'alerts',
+      },
+      error: {
+        message: 'Rule failed to execute because rule ran after it was disabled.',
+      },
+      message: 'test:1: execution failed',
+    });
   });
 });

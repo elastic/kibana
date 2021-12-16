@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { Query, Filter } from '@kbn/es-query';
 import { CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
-import { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/public';
+import { TimeRange } from '../../../../../../src/plugins/data/public';
 import {
   Embeddable,
   EmbeddableInput,
@@ -77,7 +78,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
     }
 
     ReactDOM.render(
-      <CoreProviders core={this.core} plugins={this.pluginDeps}>
+      <CoreProviders core={this.core} plugins={this.pluginDeps} theme$={this.core.theme.theme$}>
         <EuiThemeProvider>
           <div style={{ width: '100%' }}>
             <LazyLogStreamWrapper

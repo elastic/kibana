@@ -10,7 +10,7 @@ import React, { Fragment } from 'react';
 
 import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DefaultFormatEditor, defaultState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
@@ -26,7 +26,7 @@ export class NumberFormatEditor extends DefaultFormatEditor<NumberFormatEditorPa
   static contextType = contextType;
   static formatId = formatId;
 
-  context!: React.ContextType<typeof contextType>;
+  declare context: React.ContextType<typeof contextType>;
   state = {
     ...defaultState,
     sampleInputs: [10000, 12.345678, -1, -999, 0.52],

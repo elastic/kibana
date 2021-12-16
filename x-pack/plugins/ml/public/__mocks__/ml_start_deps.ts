@@ -7,7 +7,6 @@
 
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import { kibanaLegacyPluginMock } from '../../../../../src/plugins/kibana_legacy/public/mocks';
 import { sharePluginMock } from '../../../../../src/plugins/share/public/mocks';
 import { embeddablePluginMock } from '../../../../../src/plugins/embeddable/public/mocks';
 import { triggersActionsUiMock } from '../../../triggers_actions_ui/public/mocks';
@@ -15,7 +14,6 @@ import { triggersActionsUiMock } from '../../../triggers_actions_ui/public/mocks
 export const createMlStartDepsMock = () => ({
   data: dataPluginMock.createStartContract(),
   share: sharePluginMock.createStartContract(),
-  kibanaLegacy: kibanaLegacyPluginMock.createStartContract(),
   uiActions: uiActionsPluginMock.createStartContract(),
   spaces: jest.fn(),
   embeddable: embeddablePluginMock.createStartContract(),

@@ -47,7 +47,8 @@ export async function openReplacePanelFlyout(options: {
         savedObjectsFinder={savedObjectFinder}
         notifications={notifications}
         getEmbeddableFactories={getEmbeddableFactories}
-      />
+      />,
+      { theme$: core.theme.theme$ }
     ),
     {
       'data-test-subj': 'dashboardReplacePanel',

@@ -180,7 +180,7 @@
                     "id": "def-server.DockerServersService.Unnamed.$1.Unnamed",
                     "type": "IndexSignature",
                     "tags": [],
-                    "label": "[name: string}]: DockerServerSpec",
+                    "label": "[name: string]: DockerServerSpec",
                     "description": [],
                     "signature": [
                       "[name: string]:  ",

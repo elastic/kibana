@@ -2050,6 +2050,24 @@
             ],
             "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.ExitFullScreenButtonProps.toggleChrome",
+            "type": "CompoundType",
+            "tags": [
+              "note",
+              "default"
+            ],
+            "label": "toggleChrome",
+            "description": [
+              "\nOptional argument that determines whether we toggle the chrome bar\nthe button unmounts.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

@@ -13,7 +13,8 @@ import Boom from '@hapi/boom';
 
 import { RouteDeps } from '../types';
 import { escapeHatch, wrapError } from '../utils';
-import { CASE_COMMENTS_URL, CommentPatchRequestRt, throwErrors } from '../../../../common';
+import { CommentPatchRequestRt, throwErrors } from '../../../../common/api';
+import { CASE_COMMENTS_URL } from '../../../../common/constants';
 
 export function initPatchCommentApi({ router, logger }: RouteDeps) {
   router.patch(

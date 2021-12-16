@@ -24,6 +24,8 @@ export * from './xy_visualization/xy_visualization';
 export * from './xy_visualization';
 export * from './heatmap_visualization/heatmap_visualization';
 export * from './heatmap_visualization';
+export * from './visualizations/gauge/gauge_visualization';
+export * from './visualizations/gauge';
 
 export * from './indexpattern_datasource/indexpattern';
 export * from './indexpattern_datasource';

@@ -53,6 +53,10 @@ export class AggField extends CountAggField {
     return this._getAggType() !== AGG_TYPE.UNIQUE_COUNT;
   }
 
+  isCount() {
+    return this._getAggType() === AGG_TYPE.UNIQUE_COUNT;
+  }
+
   _getAggType(): AGG_TYPE {
     return this._aggType;
   }

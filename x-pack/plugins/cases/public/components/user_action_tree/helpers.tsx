@@ -16,15 +16,15 @@ import {
 import React, { useContext } from 'react';
 import classNames from 'classnames';
 import { ThemeContext } from 'styled-components';
+import { Comment } from '../../../common/ui/types';
 import {
   CaseFullExternalService,
   ActionConnector,
   CaseStatuses,
   CommentType,
-  Comment,
   CommentRequestActionsType,
   noneConnectorId,
-} from '../../../common';
+} from '../../../common/api';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseStringAsConnector, parseStringAsExternalService } from '../../common/user_actions';

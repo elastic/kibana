@@ -25,19 +25,17 @@ import * as i18n from './translations';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
+import { Case, CaseUserActions, Ecs } from '../../../common/ui/types';
 import {
   ActionConnector,
   ActionsCommentRequestRt,
   AlertCommentRequestRt,
-  Case,
-  CaseUserActions,
   CommentType,
   ContextTypeUserRt,
-  Ecs,
-} from '../../../common';
+} from '../../../common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseStringAsExternalService } from '../../common/user_actions';
-import { OnUpdateFields } from '../case_view';
+import type { OnUpdateFields } from '../case_view/types';
 import {
   getConnectorLabelTitle,
   getLabelTitle,

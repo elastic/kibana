@@ -40,8 +40,6 @@ image:concepts/images/global-search.png["Global search showing matches to apps a
 {kib} requires a data view to tell it which {es} data you want to access,
 and whether the data is time-based. A data view can point to one or more {es}
 data streams, indices, or index aliases by name.
-For example, `logs-elasticsearch-prod-*` is an index pattern,
-and it is time-based with a time field of `@timestamp`. The time field is not editable.
 
 Data views are typically created by an administrator when sending data to {es}.
 You can <<data-views,create or update data views>> in *Stack Management*, or by using a script
@@ -129,8 +127,7 @@ Previously, {kib} used the {ref}/search-aggregations-bucket-terms-aggregation.ht
 Structured filters are a more interactive way to create {es} queries,
 and are commonly used when building dashboards that are shared by multiple analysts.
 Each filter can be disabled, inverted, or pinned across all apps.
-The structured filters are the only way to use the {es} Query DSL in JSON form,
-or to target a specific index pattern for filtering. Each of the structured
+Each of the structured
 filters is combined with AND logic on the rest of the query.
 
 [role="screenshot"]

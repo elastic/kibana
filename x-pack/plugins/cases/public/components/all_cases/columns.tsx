@@ -22,16 +22,14 @@ import {
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
+import { Case, DeleteCase, SubCase } from '../../../common/ui/types';
 import {
   CaseStatuses,
   CaseType,
   CommentType,
   CommentRequestAlertType,
-  DeleteCase,
-  Case,
-  SubCase,
   ActionConnector,
-} from '../../../common';
+} from '../../../common/api';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsLink } from '../links';
@@ -69,7 +67,6 @@ const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
 export interface GetCasesColumn {
-  disableAlerts?: boolean;
   dispatchUpdateCaseProperty: (u: UpdateCase) => void;
   filterStatus: string;
   handleIsLoading: (a: boolean) => void;
@@ -84,7 +81,6 @@ export interface GetCasesColumn {
   updateCase?: (newCase: Case) => void;
 }
 export const useCasesColumns = ({
-  disableAlerts = false,
   dispatchUpdateCaseProperty,
   filterStatus,
   handleIsLoading,
@@ -246,19 +242,15 @@ export const useCasesColumns = ({
       },
       truncateText: true,
     },
-    ...(!disableAlerts
-      ? [
-          {
-            align: RIGHT_ALIGNMENT,
-            field: 'totalAlerts',
-            name: ALERTS,
-            render: (totalAlerts: Case['totalAlerts']) =>
-              totalAlerts != null
-                ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
-                : getEmptyTagValue(),
-          },
-        ]
-      : []),
+    {
+      align: RIGHT_ALIGNMENT,
+      field: 'totalAlerts',
+      name: ALERTS,
+      render: (totalAlerts: Case['totalAlerts']) =>
+        totalAlerts != null
+          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+          : getEmptyTagValue(),
+    },
     {
       align: RIGHT_ALIGNMENT,
       field: 'totalComment',

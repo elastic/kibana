@@ -119,8 +119,13 @@ const DatePicker = styled(EuiFlexItem)`
     width: auto;
   }
 `;
-
 DatePicker.displayName = 'DatePicker';
+
+const SourcererFlex = styled(EuiFlexItem)`
+  align-items: flex-end;
+`;
+
+SourcererFlex.displayName = 'SourcererFlex';
 
 const VerticalRule = styled.div`
   width: 2px;
@@ -189,8 +194,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     loading: loadingSourcerer,
     indexPattern,
     runtimeMappings,
+    // important to get selectedPatterns from useSourcererDataView
+    // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
+
   const { uiSettings } = useKibana().services;
   const ACTION_BUTTON_COUNT = 5;
 
@@ -343,7 +351,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   setFullScreen={setTimelineFullScreen}
                 />
               )}
-              <DatePicker grow={1}>
+              <DatePicker grow={10}>
                 <SuperDatePicker
                   id="timeline"
                   timelineId={timelineId}
@@ -353,11 +361,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <SourcererFlex grow={1}>
                 {activeTab === TimelineTabs.query && (
                   <Sourcerer scope={SourcererScopeName.timeline} />
                 )}
-              </EuiFlexItem>
+              </SourcererFlex>
             </EuiFlexGroup>
             <TimelineHeaderContainer data-test-subj="timelineHeader">
               <TimelineHeader

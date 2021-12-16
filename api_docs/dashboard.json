@@ -2872,7 +2872,7 @@
                 "id": "def-common.migratePanelsTo730.$4.Unnamed",
                 "type": "IndexSignature",
                 "tags": [],
-                "label": "[key: string}]: SerializableRecord",
+                "label": "[key: string]: SerializableRecord",
                 "description": [],
                 "signature": [
                   "[key: string]:  ",

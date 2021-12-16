@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiText, EuiIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const OutOfDate = React.memo<{ style?: React.CSSProperties }>(({ style, ...otherProps }) => {
   return (

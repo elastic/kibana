@@ -12,7 +12,8 @@ import { useActions, useValues } from 'kea';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
+  EuiTableFieldDataColumnType,
+  EuiTableComputedColumnType,
   EuiEmptyPrompt,
   EuiLink,
 } from '@elastic/eui';
@@ -28,9 +29,11 @@ import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 
 export const CrawlRequestsTable: React.FC = () => {
   const { events } = useValues(CrawlerLogic);
-  const { fetchCrawlRequest } = useActions(CrawlDetailLogic);
+  const { fetchCrawlRequest, openFlyout } = useActions(CrawlDetailLogic);
 
-  const columns: Array<EuiBasicTableColumn<CrawlEvent>> = [
+  const columns: Array<
+    EuiTableFieldDataColumnType<CrawlEvent> | EuiTableComputedColumnType<CrawlEvent>
+  > = [
     {
       field: 'id',
       name: i18n.translate(
@@ -41,7 +44,16 @@ export const CrawlRequestsTable: React.FC = () => {
       ),
       render: (id: string, event: CrawlEvent) => {
         if (event.stage === 'crawl') {
-          return <EuiLink onClick={() => fetchCrawlRequest(id)}>{id}</EuiLink>;
+          return (
+            <EuiLink
+              onClick={() => {
+                fetchCrawlRequest(id);
+                openFlyout();
+              }}
+            >
+              {id}
+            </EuiLink>
+          );
         }
         return <span>{id}</span>;
       },

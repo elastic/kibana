@@ -27,7 +27,7 @@ import {
   ResolvedSanitizedRule,
   AlertAction,
   AlertAggregations,
-  AlertTaskState,
+  RuleTaskState,
   AlertSummary,
   ExecutionDuration,
   AlertStatus,
@@ -36,7 +36,7 @@ import {
   AlertNotifyWhenType,
   AlertTypeParams,
   ActionVariable,
-  AlertType as CommonAlertType,
+  RuleType as CommonRuleType,
 } from '../../alerting/common';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
@@ -48,7 +48,7 @@ export type {
   Alert,
   AlertAction,
   AlertAggregations,
-  AlertTaskState,
+  RuleTaskState,
   AlertSummary,
   ExecutionDuration,
   AlertStatus,
@@ -118,6 +118,13 @@ export interface Sorting {
   direction: string;
 }
 
+interface CustomConnectorSelectionItem {
+  getText: (actionConnector: ActionConnector) => string;
+  getComponent: (
+    actionConnector: ActionConnector
+  ) => React.LazyExoticComponent<ComponentType<{ actionConnector: ActionConnector }>> | undefined;
+}
+
 export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
   id: string;
   iconClass: IconType;
@@ -135,6 +142,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
     >
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
+  customConnectorSelectItem?: CustomConnectorSelectionItem;
 }
 
 export interface GenericValidationResult<T> {
@@ -200,7 +208,7 @@ export interface AlertType<
   ActionGroupIds extends string = string,
   RecoveryActionGroupId extends string = string
 > extends Pick<
-    CommonAlertType<ActionGroupIds, RecoveryActionGroupId>,
+    CommonRuleType<ActionGroupIds, RecoveryActionGroupId>,
     | 'id'
     | 'name'
     | 'actionGroups'

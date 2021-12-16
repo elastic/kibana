@@ -14,7 +14,7 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | Deprecated API | Referencing plugin(s) | Remove By |
 | ---------------|-----------|-----------|
 | <DocLink id="kibDashboardPluginApi" section="def-public.DashboardStart.dashboardUrlGenerator" text="dashboardUrlGenerator"/> | securitySolution | - |
-| <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.indexPatterns" text="indexPatterns"/> | home, savedObjects, security, fleet, discover, dashboard, lens, observability, maps, fileUpload, dataVisualizer, ml, infra, graph, monitoring, securitySolution, stackAlerts, transform, uptime, indexPatternEditor, dataViewManagement, inputControlVis, kibanaOverview, savedObjectsManagement, visualize, visTypeTimelion, visTypeTimeseries, visTypeVega | - |
+| <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.indexPatterns" text="indexPatterns"/> | home, savedObjects, security, fleet, discover, dashboard, lens, observability, maps, fileUpload, dataVisualizer, ml, infra, graph, monitoring, securitySolution, stackAlerts, transform, uptime, dataViewManagement, inputControlVis, kibanaOverview, savedObjectsManagement, visualize, visTypeTimelion, visTypeTimeseries, visTypeVega | - |
 | <DocLink id="kibDataViewsPluginApi" section="def-server.DataViewsServerPluginStart.indexPatternsServiceFactory" text="indexPatternsServiceFactory"/> | data, lens, visTypeTimeseries, infra, maps, securitySolution, timelines, visTypeTimelion | - |
 | <DocLink id="kibLicensingPluginApi" section="def-public.PublicLicense.mode" text="mode"/> | apm, security, securitySolution | - |
 | <DocLink id="kibLicensingPluginApi" section="def-server.PublicLicense.mode" text="mode"/> | apm, security, securitySolution | - |
@@ -23,11 +23,11 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibCorePluginApi" section="def-public.AppLeaveHandler" text="AppLeaveHandler"/> | securitySolution | - |
 | <DocLink id="kibDataPluginApi" section="def-public.IndexPatternsService" text="IndexPatternsService"/> | dataViews, visTypeTimeseries, maps, lens, discover, data | - |
 | <DocLink id="kibDataPluginApi" section="def-public.IndexPatternsContract" text="IndexPatternsContract"/> | dataViews, discover, observability, savedObjects, security, dashboard, lens, maps, graph, stackAlerts, transform, dataViewManagement, inputControlVis, savedObjectsManagement, visTypeTimelion, data | - |
-| <DocLink id="kibDataPluginApi" section="def-public.IndexPattern" text="IndexPattern"/> | dataViews, visTypeTimeseries, reporting, discover, observability, maps, dataVisualizer, apm, lens, transform, savedObjects, dataViewFieldEditor, visualizations, dashboard, graph, stackAlerts, uptime, indexPatternEditor, dataViewManagement, inputControlVis, savedObjectsManagement, visualize, visDefaultEditor, visTypeVega, data | - |
-| <DocLink id="kibDataPluginApi" section="def-public.IndexPatternField" text="IndexPatternField"/> | dataViews, discover, maps, dataVisualizer, lens, indexPatternEditor, dataViewManagement, inputControlVis, visDefaultEditor, visTypeTimeseries, data | - |
+| <DocLink id="kibDataPluginApi" section="def-public.IndexPattern" text="IndexPattern"/> | dataViews, visTypeTimeseries, reporting, discover, observability, maps, dataVisualizer, apm, lens, transform, savedObjects, dataViewFieldEditor, visualizations, dashboard, graph, stackAlerts, uptime, dataViewEditor, dataViewManagement, inputControlVis, savedObjectsManagement, visualize, visDefaultEditor, visTypeVega, data | - |
+| <DocLink id="kibDataPluginApi" section="def-public.IndexPatternField" text="IndexPatternField"/> | dataViews, discover, maps, dataVisualizer, lens, dataViewEditor, dataViewManagement, inputControlVis, visDefaultEditor, visTypeTimeseries, data | - |
 | <DocLink id="kibDataPluginApi" section="def-public.IIndexPattern" text="IIndexPattern"/> | dataViews, monitoring, dataViewManagement, stackAlerts, transform | - |
 | <DocLink id="kibDataPluginApi" section="def-public.IndexPatternAttributes" text="IndexPatternAttributes"/> | dataViews, discover, transform, canvas | - |
-| <DocLink id="kibDataPluginApi" section="def-public.IndexPatternSpec" text="IndexPatternSpec"/> | dataViews, observability, indexPatternEditor | - |
+| <DocLink id="kibDataPluginApi" section="def-public.IndexPatternSpec" text="IndexPatternSpec"/> | dataViews, observability, dataViewEditor | - |
 | <DocLink id="kibDataPluginApi" section="def-public.IndexPatternListItem" text="IndexPatternListItem"/> | dataViews, dataViewManagement | - |
 | <DocLink id="kibDataPluginApi" section="def-public.IndexPatternType" text="IndexPatternType"/> | dataViews | - |
 | <DocLink id="kibDataPluginApi" section="def-common.IIndexPattern" text="IIndexPattern"/> | dataViews, monitoring, dataViewManagement, stackAlerts, transform, data | - |
@@ -35,23 +35,32 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibDataPluginApi" section="def-common.IIndexPatternsApiClient" text="IIndexPatternsApiClient"/> | dataViews, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.IndexPatternFieldMap" text="IndexPatternFieldMap"/> | dataViews, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataViewSpec.intervalName" text="intervalName"/> | dataViews | - |
-| <DocLink id="kibDataPluginApi" section="def-common.IndexPatternSpec" text="IndexPatternSpec"/> | dataViews, observability, indexPatternEditor, data | - |
+| <DocLink id="kibDataPluginApi" section="def-common.IndexPatternSpec" text="IndexPatternSpec"/> | dataViews, observability, dataViewEditor, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.IndexPatternsContract" text="IndexPatternsContract"/> | dataViews, discover, observability, savedObjects, security, dashboard, lens, maps, graph, stackAlerts, transform, dataViewManagement, inputControlVis, savedObjectsManagement, visTypeTimelion, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.IndexPatternListItem" text="IndexPatternListItem"/> | dataViews, dataViewManagement, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.INDEX_PATTERN_SAVED_OBJECT_TYPE" text="INDEX_PATTERN_SAVED_OBJECT_TYPE"/> | dataViews, visualizations, dashboard, data | - |
-| <DocLink id="kibDataPluginApi" section="def-common.IndexPatternField" text="IndexPatternField"/> | dataViews, discover, maps, dataVisualizer, lens, indexPatternEditor, dataViewManagement, inputControlVis, visDefaultEditor, visTypeTimeseries, data | - |
+| <DocLink id="kibDataPluginApi" section="def-common.IndexPatternField" text="IndexPatternField"/> | dataViews, discover, maps, dataVisualizer, lens, dataViewEditor, dataViewManagement, inputControlVis, visDefaultEditor, visTypeTimeseries, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.IndexPatternType" text="IndexPatternType"/> | dataViews, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.IndexPatternsService" text="IndexPatternsService"/> | dataViews, visTypeTimeseries, maps, lens, discover, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataViewsService.ensureDefaultDataView" text="ensureDefaultDataView"/> | dataViews, discover, dashboard, lens, visualize | - |
-| <DocLink id="kibDataPluginApi" section="def-common.IndexPattern" text="IndexPattern"/> | dataViews, visTypeTimeseries, reporting, discover, observability, maps, dataVisualizer, apm, lens, transform, savedObjects, dataViewFieldEditor, visualizations, dashboard, graph, stackAlerts, uptime, indexPatternEditor, dataViewManagement, inputControlVis, savedObjectsManagement, visualize, visDefaultEditor, visTypeVega, data | - |
+| <DocLink id="kibDataPluginApi" section="def-common.IndexPattern" text="IndexPattern"/> | dataViews, visTypeTimeseries, reporting, discover, observability, maps, dataVisualizer, apm, lens, transform, savedObjects, dataViewFieldEditor, visualizations, dashboard, graph, stackAlerts, uptime, dataViewEditor, dataViewManagement, inputControlVis, savedObjectsManagement, visualize, visDefaultEditor, visTypeVega, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.flattenHit" text="flattenHit"/> | dataViews, maps | - |
+| <DocLink id="kibDataPluginApi" section="def-common.DataView.addScriptedField" text="addScriptedField"/> | dataViews | - |
+| <DocLink id="kibDataPluginApi" section="def-common.DataView.removeScriptedField" text="removeScriptedField"/> | dataViewManagement, dataViews | - |
+| <DocLink id="kibDataPluginApi" section="def-common.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | visTypeTimeseries, graph, dataViewManagement, dataViews | - |
+| <DocLink id="kibDataPluginApi" section="def-common.DataView.getScriptedFields" text="getScriptedFields"/> | dataViews, dataViewManagement | - |
 | <DocLink id="kibDataPluginApi" section="def-server.IndexPatternAttributes" text="IndexPatternAttributes"/> | dataViews, discover, transform, canvas | - |
-| <DocLink id="kibDataPluginApi" section="def-server.IndexPatternField" text="IndexPatternField"/> | dataViews, discover, maps, dataVisualizer, lens, indexPatternEditor, dataViewManagement, inputControlVis, visDefaultEditor, visTypeTimeseries | - |
-| <DocLink id="kibDataPluginApi" section="def-server.IndexPattern" text="IndexPattern"/> | dataViews, visTypeTimeseries, reporting, discover, observability, maps, dataVisualizer, apm, lens, transform, savedObjects, dataViewFieldEditor, visualizations, dashboard, graph, stackAlerts, uptime, indexPatternEditor, dataViewManagement, inputControlVis, savedObjectsManagement, visualize, visDefaultEditor, visTypeVega | - |
+| <DocLink id="kibDataPluginApi" section="def-server.IndexPatternField" text="IndexPatternField"/> | dataViews, discover, maps, dataVisualizer, lens, dataViewEditor, dataViewManagement, inputControlVis, visDefaultEditor, visTypeTimeseries | - |
+| <DocLink id="kibDataPluginApi" section="def-server.IndexPattern" text="IndexPattern"/> | dataViews, visTypeTimeseries, reporting, discover, observability, maps, dataVisualizer, apm, lens, transform, savedObjects, dataViewFieldEditor, visualizations, dashboard, graph, stackAlerts, uptime, dataViewEditor, dataViewManagement, inputControlVis, savedObjectsManagement, visualize, visDefaultEditor, visTypeVega | - |
 | <DocLink id="kibDataPluginApi" section="def-server.IndexPatternsService" text="IndexPatternsService"/> | dataViews, visTypeTimeseries, maps, lens, discover | - |
 | <DocLink id="kibDataPluginApi" section="def-server.DataView.flattenHit" text="flattenHit"/> | dataViews, maps | - |
+| <DocLink id="kibDataPluginApi" section="def-server.DataView.addScriptedField" text="addScriptedField"/> | dataViews | - |
+| <DocLink id="kibDataPluginApi" section="def-server.DataView.removeScriptedField" text="removeScriptedField"/> | dataViewManagement, dataViews | - |
+| <DocLink id="kibDataPluginApi" section="def-server.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | visTypeTimeseries, graph, dataViewManagement, dataViews | - |
+| <DocLink id="kibDataPluginApi" section="def-server.DataView.getScriptedFields" text="getScriptedFields"/> | dataViews, dataViewManagement | - |
 | <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.fieldFormats" text="fieldFormats"/> | fleet, dataViewFieldEditor, discover, dashboard, lens, ml, stackAlerts, dataViewManagement, visTypePie, visTypeTable, visTypeTimeseries, visTypeXy, visTypeVislib | - |
 | <DocLink id="kibDataPluginApi" section="def-server.DataPluginStart.fieldFormats" text="fieldFormats"/> | reporting, visTypeTimeseries | - |
+| <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | visTypeTimeseries, graph, dataViewManagement | - |
 | <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.flattenHit" text="flattenHit"/> | maps | - |
 | <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectsStart.settings" text="settings"/> | dashboard, maps, graph, visualize | - |
 | <DocLink id="kibLicensingPluginApi" section="def-server.LicensingPluginSetup.license$" text="license$"/> | spaces, security, reporting, actions, alerting, ml, fleet, remoteClusters, graph, indexLifecycleManagement, maps, painlessLab, rollup, searchprofiler, snapshotRestore, transform, upgradeAssistant | - |
@@ -71,6 +80,8 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectLoader" text="SavedObjectLoader"/> | dashboard | - |
 | <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObject" text="SavedObject"/> | savedObjectsTaggingOss, dashboard | - |
 | <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectsStart.SavedObjectClass" text="SavedObjectClass"/> | dashboard | - |
+| <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.removeScriptedField" text="removeScriptedField"/> | dataViewManagement | - |
+| <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.getScriptedFields" text="getScriptedFields"/> | dataViewManagement | - |
 | <DocLink id="kibCorePluginApi" section="def-public.SavedObjectsImportSuccess.createNewCopy" text="createNewCopy"/> | spaces, savedObjectsManagement | - |
 | <DocLink id="kibCorePluginApi" section="def-server.SavedObjectsImportSuccess.createNewCopy" text="createNewCopy"/> | spaces, savedObjectsManagement | - |
 | <DocLink id="kibDataPluginApi" section="def-public.SearchSourceFields.fieldsFromSource" text="fieldsFromSource"/> | reporting | - |
@@ -99,23 +110,14 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibDataPluginApi" section="def-public.IFieldType" text="IFieldType"/> | dataViews, fleet, infra, monitoring, stackAlerts, dataViewManagement | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-common.IFieldType" text="IFieldType"/> | dataViews, fleet, infra, monitoring, stackAlerts, dataViewManagement, data | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.intervalName" text="intervalName"/> | dataViews | 8.1 |
-| <DocLink id="kibDataPluginApi" section="def-common.DataView.addScriptedField" text="addScriptedField"/> | dataViews | 8.1 |
-| <DocLink id="kibDataPluginApi" section="def-common.DataView.removeScriptedField" text="removeScriptedField"/> | dataViewManagement, dataViews | 8.1 |
-| <DocLink id="kibDataPluginApi" section="def-common.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | visTypeTimeseries, graph, dataViewManagement, dataViews | 8.1 |
-| <DocLink id="kibDataPluginApi" section="def-common.DataView.getScriptedFields" text="getScriptedFields"/> | dataViews, dataViewManagement | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-server.IFieldType" text="IFieldType"/> | dataViews, fleet, infra, monitoring, stackAlerts, dataViewManagement | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-server.DataView.intervalName" text="intervalName"/> | dataViews | 8.1 |
-| <DocLink id="kibDataPluginApi" section="def-server.DataView.addScriptedField" text="addScriptedField"/> | dataViews | 8.1 |
-| <DocLink id="kibDataPluginApi" section="def-server.DataView.removeScriptedField" text="removeScriptedField"/> | dataViewManagement, dataViews | 8.1 |
-| <DocLink id="kibDataPluginApi" section="def-server.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | visTypeTimeseries, graph, dataViewManagement, dataViews | 8.1 |
-| <DocLink id="kibDataPluginApi" section="def-server.DataView.getScriptedFields" text="getScriptedFields"/> | dataViews, dataViewManagement | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-public.EsQueryConfig" text="EsQueryConfig"/> | visTypeTimeseries | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-public.Filter" text="Filter"/> | discover, visualizations, dashboard, lens, observability, maps, infra, dashboardEnhanced, discoverEnhanced, urlDrilldown, inputControlVis, visualize, visTypeTimelion, visTypeVega, ml, visTypeTimeseries | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-common.Filter" text="Filter"/> | discover, visualizations, dashboard, lens, observability, maps, infra, dashboardEnhanced, discoverEnhanced, urlDrilldown, inputControlVis, visualize, visTypeTimelion, visTypeVega, ml, visTypeTimeseries | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-common.EsQueryConfig" text="EsQueryConfig"/> | visTypeTimeseries | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-server.Filter" text="Filter"/> | discover, visualizations, dashboard, lens, observability, maps, infra, dashboardEnhanced, discoverEnhanced, urlDrilldown, inputControlVis, visualize, visTypeTimelion, visTypeVega, ml, visTypeTimeseries | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-server.EsQueryConfig" text="EsQueryConfig"/> | visTypeTimeseries | 8.1 |
-| <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | visTypeTimeseries, graph, dataViewManagement | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-public.SearchSource.fetch" text="fetch"/> | discover, maps, inputControlVis | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-public.esFilters" text="esFilters"/> | discover, visualizations, dashboard, lens, observability, maps, dashboardEnhanced, discoverEnhanced, visualize | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-common.SearchSource.fetch" text="fetch"/> | discover, maps, inputControlVis | 8.1 |
@@ -127,8 +129,6 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibDataPluginApi" section="def-common.PhraseFilter" text="PhraseFilter"/> | observability | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-public.getKbnTypeNames" text="getKbnTypeNames"/> | dataViewManagement | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-common.getKbnTypeNames" text="getKbnTypeNames"/> | dataViewManagement | 8.1 |
-| <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.removeScriptedField" text="removeScriptedField"/> | dataViewManagement | 8.1 |
-| <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.getScriptedFields" text="getScriptedFields"/> | dataViewManagement | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-public.RangeFilterParams" text="RangeFilterParams"/> | visTypeTimelion | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-common.RangeFilterParams" text="RangeFilterParams"/> | visTypeTimelion | 8.1 |
 | <DocLink id="kibDataPluginApi" section="def-public.castEsToKbnFieldTypeName" text="castEsToKbnFieldTypeName"/> | dataViewFieldEditor | 8.1 |

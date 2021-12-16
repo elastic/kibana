@@ -13,6 +13,7 @@ import { useKibana } from '../../../../../../../../src/plugins/kibana_react/publ
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
 import { getDataHandler } from '../../../../data_handler';
+import { useExploratoryView } from '../contexts/exploatory_view_config';
 
 export interface IndexPatternContext {
   loading: boolean;
@@ -28,7 +29,7 @@ interface ProviderProps {
   children: JSX.Element;
 }
 
-type HasAppDataState = Record<AppDataType, boolean | null>;
+type HasAppDataState = Record<AppDataType, boolean | undefined>;
 export type IndexPatternState = Record<AppDataType, IndexPattern>;
 export type IndexPatternErrors = Record<AppDataType, HttpFetchError>;
 type LoadingState = Record<AppDataType, boolean>;
@@ -39,27 +40,26 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
   const [indexPatternErrors, setIndexPatternErrors] = useState<IndexPatternErrors>(
     {} as IndexPatternErrors
   );
-  const [hasAppData, setHasAppData] = useState<HasAppDataState>({
-    infra_metrics: null,
-    infra_logs: null,
-    synthetics: null,
-    ux: null,
-    apm: null,
-    mobile: null,
-  } as HasAppDataState);
+  const [hasAppData, setHasAppData] = useState<HasAppDataState>({} as HasAppDataState);
 
   const {
     services: { data },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
+  const { indexPatterns: indexPatternsList } = useExploratoryView();
+
   const loadIndexPattern: IndexPatternContext['loadIndexPattern'] = useCallback(
     async ({ dataType }) => {
-      if (hasAppData[dataType] === null && !loading[dataType]) {
+      if (typeof hasAppData[dataType] === 'undefined' && !loading[dataType]) {
         setLoading((prevState) => ({ ...prevState, [dataType]: true }));
 
         try {
           let hasDataT = false;
           let indices: string | undefined = '';
+          if (indexPatternsList[dataType]) {
+            indices = indexPatternsList[dataType];
+            hasDataT = true;
+          }
           switch (dataType) {
             case 'ux':
             case 'synthetics':
@@ -91,7 +91,7 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
         }
       }
     },
-    [data, hasAppData, loading]
+    [data, hasAppData, indexPatternsList, loading]
   );
 
   return (

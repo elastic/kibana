@@ -5494,7 +5494,7 @@
             "id": "def-public.Adapters.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: any",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
               "[key: string]:  any"
@@ -7806,7 +7806,7 @@
             "id": "def-public.OutputSpec.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: PropertySpec",
+            "label": "[key: string]: PropertySpec",
             "description": [],
             "signature": [
               "[key: string]:  ",

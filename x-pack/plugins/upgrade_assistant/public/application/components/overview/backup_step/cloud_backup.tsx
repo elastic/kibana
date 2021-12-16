@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import moment from 'moment-timezone';
-import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {

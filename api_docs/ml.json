@@ -1865,7 +1865,7 @@
             "id": "def-server.AnomalyCategorizerStatsDoc.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: any",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
               "[key: string]:  any"
@@ -2033,7 +2033,7 @@
             "id": "def-server.AnomalyRecordDoc.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: any",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
               "[key: string]:  any"

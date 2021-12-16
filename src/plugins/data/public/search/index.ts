@@ -27,6 +27,7 @@ export type {
   SearchRequest,
   SearchSourceDependencies,
   SearchSourceFields,
+  SerializedSearchSourceFields,
 } from '../../common/search';
 export {
   ES_SEARCH_STRATEGY,

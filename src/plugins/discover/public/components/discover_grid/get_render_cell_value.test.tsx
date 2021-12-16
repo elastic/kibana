@@ -10,8 +10,8 @@ import React from 'react';
 import { ReactWrapper, shallow } from 'enzyme';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { ElasticSearchHit } from '../../services/doc_views/doc_views_types';
 import { flattenHit } from 'src/plugins/data/common';
+import { ElasticSearchHit } from '../../types';
 
 jest.mock('../../../../kibana_react/public', () => ({
   useUiSetting: () => true,
@@ -23,7 +23,7 @@ jest.mock('../../../../kibana_react/public', () => ({
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     uiSettings: {
-      get: jest.fn(),
+      get: jest.fn((key) => key === 'discover:maxDocFieldsDisplayed' && 200),
     },
     fieldFormats: {
       getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),

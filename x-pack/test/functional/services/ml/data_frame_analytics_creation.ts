@@ -532,15 +532,15 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertCreateIndexPatternSwitchExists() {
-      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardCreateIndexPatternSwitch`, {
+      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox`, {
         allowHidden: true,
       });
     },
 
     async getCreateIndexPatternSwitchCheckState(): Promise<boolean> {
       const state = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobWizardCreateIndexPatternSwitch',
-        'aria-checked'
+        'mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox',
+        'checked'
       );
       return state === 'true';
     },
@@ -584,7 +584,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async setCreateIndexPatternSwitchState(checkState: boolean) {
       if ((await this.getCreateIndexPatternSwitchCheckState()) !== checkState) {
-        await testSubjects.click('mlAnalyticsCreateJobWizardCreateIndexPatternSwitch');
+        await testSubjects.click('mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox');
       }
       await this.assertCreateIndexPatternSwitchCheckState(checkState);
     },

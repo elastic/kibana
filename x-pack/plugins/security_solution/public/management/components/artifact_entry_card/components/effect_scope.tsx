@@ -8,7 +8,7 @@
 import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { CommonProps, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   GLOBAL_EFFECT_SCOPE,
   POLICY_EFFECT_SCOPE,

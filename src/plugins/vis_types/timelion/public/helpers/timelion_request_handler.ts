@@ -9,7 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import type { KibanaExecutionContext } from 'kibana/public';
 import { DataView } from 'src/plugins/data/common';
-import { KibanaContext, TimeRange, Filter, esQuery, Query } from '../../../../data/public';
+import { Filter, buildEsQuery } from '@kbn/es-query';
+import { KibanaContext, TimeRange, Query, getEsQueryConfig } from '../../../../data/public';
 import { TimelionVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
 import { TimelionVisParams } from '../timelion_vis_fn';
@@ -90,7 +91,7 @@ export function getTimelionRequestHandler({
         .catch(() => undefined);
     }
 
-    const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
+    const esQueryConfigs = getEsQueryConfig(uiSettings);
 
     // parse the time range client side to make sure it behaves like other charts
     const timeRangeBounds = timefilter.calculateBounds(timeRange);
@@ -109,7 +110,7 @@ export function getTimelionRequestHandler({
           sheet: [expression],
           extended: {
             es: {
-              filter: esQuery.buildEsQuery(dataView, query, filters, esQueryConfigs),
+              filter: buildEsQuery(dataView, query, filters, esQueryConfigs),
             },
           },
           time: {

@@ -25,10 +25,16 @@ paths:
     $ref: paths/epm@packages.yaml
   '/epm/packages/{pkgkey}':
     $ref: 'paths/epm@packages@{pkgkey}.yaml'
+    deprecated: true
+  '/epm/packages/{pkgName}/{pkgVersion}':
+    $ref: 'paths/epm@packages@{pkg_name}@{pkg_version}.yaml'  
   # Agent-related endpoints
   /agents/setup:
     $ref: paths/agents@setup.yaml
   /agent-status:
+    $ref: paths/agent_status.yaml
+    deprecated: true
+  /agent_status:
     $ref: paths/agent_status.yaml
   /agents:
     $ref: paths/agents.yaml
@@ -56,7 +62,13 @@ paths:
     $ref: paths/agent_policies@delete.yaml
   /enrollment-api-keys:
     $ref: paths/enrollment_api_keys.yaml
+    deprecated: true
   '/enrollment-api-keys/{keyId}':
+    $ref: 'paths/enrollment_api_keys@{key_id}.yaml'  
+    deprecated: true
+  /enrollment_api_keys:
+    $ref: paths/enrollment_api_keys.yaml
+  '/enrollment_api_keys/{keyId}':
     $ref: 'paths/enrollment_api_keys@{key_id}.yaml'
   /package_policies:
     $ref: paths/package_policies.yaml

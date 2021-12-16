@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from 'kibana/public';
 import { ReindexWarning, ReindexWarningTypes } from '../../../../../../../common/types';
 

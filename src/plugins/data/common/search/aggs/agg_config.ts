@@ -402,6 +402,10 @@ export class AggConfig {
     return this.type.getValue(this, bucket);
   }
 
+  getResponseId() {
+    return this.type.getResponseId(this);
+  }
+
   getKey(bucket: any, key?: string) {
     if (this.type.getKey) {
       return this.type.getKey(bucket, key, this);

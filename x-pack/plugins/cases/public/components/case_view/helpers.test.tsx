@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AssociationType, CommentType, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { AssociationType, CommentType } from '../../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { Comment } from '../../containers/types';
 
 import { getManualAlertIdsWithNoRuleId } from './helpers';

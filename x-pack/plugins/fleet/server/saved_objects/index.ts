@@ -113,6 +113,7 @@ const getSavedObjectTypes = (
         is_default_monitoring: { type: 'boolean' },
         hosts: { type: 'keyword' },
         ca_sha256: { type: 'keyword', index: false },
+        ca_trusted_fingerprint: { type: 'keyword', index: false },
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },

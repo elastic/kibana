@@ -5,11 +5,20 @@
  * 2.0.
  */
 
+import type { DataViewBase, Query } from '@kbn/es-query';
+import { CoreStart, HttpStart } from 'kibana/public';
 import { Dispatch } from 'redux';
 import semverGte from 'semver/functions/gte';
-
-import { CoreStart, HttpStart } from 'kibana/public';
-import type { DataViewBase, Query } from '@kbn/es-query';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
+import {
+  BASE_POLICY_RESPONSE_ROUTE,
+  ENDPOINT_ACTION_LOG_ROUTE,
+  HOST_METADATA_GET_ROUTE,
+  HOST_METADATA_LIST_ROUTE,
+  metadataCurrentIndexPattern,
+  METADATA_UNITED_INDEX,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
+} from '../../../../../common/endpoint/constants';
 import {
   ActivityLog,
   GetHostPolicyResponse,
@@ -21,32 +30,24 @@ import {
   ImmutableObject,
   MetadataListResponse,
 } from '../../../../../common/endpoint/types';
-import { GetPolicyListResponse } from '../../policy/types';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
+import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
+import { AppAction } from '../../../../common/store/actions';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
 import {
-  isOnEndpointPage,
-  hasSelectedEndpoint,
-  selectedAgent,
-  uiQueryParams,
-  listData,
-  endpointPackageInfo,
-  nonExistingPolicies,
-  patterns,
-  searchBarQuery,
-  getIsIsolationRequestPending,
-  getCurrentIsolationRequestState,
-  getActivityLogData,
-  getActivityLogDataPaging,
-  getLastLoadedActivityLogData,
-  getActivityLogError,
-  detailsData,
-  getIsEndpointPackageInfoUninitialized,
-  getIsOnEndpointDetailsActivityLog,
-  getMetadataTransformStats,
-  isMetadataTransformStatsLoading,
-  getActivityLogIsUninitializedOrHasSubsequentAPIError,
-  endpointPackageVersion,
-} from './selectors';
+  asStaleResourceState,
+  createFailedResourceState,
+  createLoadedResourceState,
+  createLoadingResourceState,
+} from '../../../state';
+import {
+  sendGetAgentPolicyList,
+  sendGetEndpointSecurityPackage,
+  sendGetFleetAgentsWithEndpoint,
+} from '../../policy/store/services/ingest';
+import { GetPolicyListResponse } from '../../policy/types';
 import {
   AgentIdsPendingActions,
   EndpointState,
@@ -54,34 +55,32 @@ import {
   TransformStats,
   TransformStatsResponse,
 } from '../types';
-import {
-  sendGetEndpointSecurityPackage,
-  sendGetAgentPolicyList,
-  sendGetFleetAgentsWithEndpoint,
-} from '../../policy/store/services/ingest';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
-import {
-  ENDPOINT_ACTION_LOG_ROUTE,
-  HOST_METADATA_GET_ROUTE,
-  HOST_METADATA_LIST_ROUTE,
-  BASE_POLICY_RESPONSE_ROUTE,
-  metadataCurrentIndexPattern,
-  METADATA_UNITED_INDEX,
-} from '../../../../../common/endpoint/constants';
-import {
-  asStaleResourceState,
-  createFailedResourceState,
-  createLoadedResourceState,
-  createLoadingResourceState,
-} from '../../../state';
-import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
-import { AppAction } from '../../../../common/store/actions';
-import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
-import { EndpointPackageInfoStateChanged } from './action';
-import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { getIsInvalidDateRange } from '../utils';
-import { METADATA_TRANSFORM_STATS_URL } from '../../../../../common/constants';
-import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies';
+import { EndpointPackageInfoStateChanged } from './action';
+import {
+  detailsData,
+  endpointPackageInfo,
+  endpointPackageVersion,
+  getActivityLogData,
+  getActivityLogDataPaging,
+  getActivityLogError,
+  getActivityLogIsUninitializedOrHasSubsequentAPIError,
+  getCurrentIsolationRequestState,
+  getIsEndpointPackageInfoUninitialized,
+  getIsIsolationRequestPending,
+  getIsOnEndpointDetailsActivityLog,
+  getLastLoadedActivityLogData,
+  getMetadataTransformStats,
+  hasSelectedEndpoint,
+  isMetadataTransformStatsLoading,
+  isOnEndpointPage,
+  listData,
+  nonExistingPolicies,
+  patterns,
+  searchBarQuery,
+  selectedAgent,
+  uiQueryParams,
+} from './selectors';
 
 type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
@@ -784,7 +783,7 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
 
   try {
     const transformStatsResponse: TransformStatsResponse = await http.get(
-      METADATA_TRANSFORM_STATS_URL
+      METADATA_TRANSFORMS_STATUS_ROUTE
     );
 
     dispatch({

@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent, useState } from 'react';
 import moment from 'moment-timezone';
-import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiButton, EuiLoadingContent } from '@elastic/eui';

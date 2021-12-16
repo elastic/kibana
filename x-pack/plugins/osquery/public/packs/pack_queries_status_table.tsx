@@ -21,7 +21,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n-react';
 import moment from 'moment-timezone';
 
 import {
@@ -131,12 +131,12 @@ function getLensAttributes(
     references: [
       {
         id: 'logs-*',
-        name: 'dataView-datasource-current-dataView',
+        name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
         id: 'logs-*',
-        name: 'dataView-datasource-layer-layer1',
+        name: 'indexpattern-datasource-layer-layer1',
         type: 'index-pattern',
       },
       {

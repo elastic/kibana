@@ -360,7 +360,7 @@
                     "id": "def-public.IServiceSettings.setQueryParams.$1.Unnamed",
                     "type": "IndexSignature",
                     "tags": [],
-                    "label": "[p: string}]: string",
+                    "label": "[p: string]: string",
                     "description": [],
                     "signature": [
                       "[p: string]:  string"

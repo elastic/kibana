@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getDataStart } from '../../services';
 import { KBN_FIELD_TYPES, Query } from '../../../../../../plugins/data/public';

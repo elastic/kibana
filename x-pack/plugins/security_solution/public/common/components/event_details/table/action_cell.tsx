@@ -8,26 +8,22 @@
 import React, { useCallback, useState } from 'react';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
-import { EventFieldsData, FieldsData } from '../types';
+import { EnrichedFieldInfo } from '../types';
 import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
-import { BrowserField } from '../../../containers/source';
 
-interface Props {
+interface Props extends EnrichedFieldInfo {
   contextId: string;
-  data: FieldsData | EventFieldsData;
+  applyWidthAndPadding?: boolean;
   disabled?: boolean;
-  eventId: string;
-  fieldFromBrowserField?: BrowserField;
   getLinkValue?: (field: string) => string | null;
-  linkValue?: string | null | undefined;
   onFilterAdded?: () => void;
   timelineId: string;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
-  values: string[] | null | undefined;
 }
 
 export const ActionCell: React.FC<Props> = React.memo(
   ({
+    applyWidthAndPadding = true,
     contextId,
     data,
     eventId,
@@ -66,6 +62,7 @@ export const ActionCell: React.FC<Props> = React.memo(
 
     return (
       <HoverActions
+        applyWidthAndPadding={applyWidthAndPadding}
         closeTopN={closeTopN}
         dataType={data.type}
         dataProvider={actionCellConfig?.dataProvider}

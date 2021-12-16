@@ -173,6 +173,7 @@ export interface ThreatListDoc {
 export type ThreatListItem = estypes.SearchHit<ThreatListDoc>;
 
 export interface ThreatEnrichment {
+  feed: Record<string, unknown>;
   indicator: Record<string, unknown>;
   matched: Record<string, unknown>;
 }

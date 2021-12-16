@@ -768,7 +768,7 @@
             "id": "def-public.Adapters.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: any",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
               "[key: string]:  any"
@@ -1229,7 +1229,7 @@
             "id": "def-public.RequestStatistics.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: RequestStatistic",
+            "label": "[key: string]: RequestStatistic",
             "description": [],
             "signature": [
               "[key: string]:  ",
@@ -2031,7 +2031,7 @@
             "id": "def-common.Adapters.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: any",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
               "[key: string]:  any"
@@ -2239,7 +2239,7 @@
             "id": "def-common.RequestStatistics.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: RequestStatistic",
+            "label": "[key: string]: RequestStatistic",
             "description": [],
             "signature": [
               "[key: string]:  ",

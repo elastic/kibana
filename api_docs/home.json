@@ -1349,7 +1349,7 @@
             "id": "def-server.TutorialContext.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string}]: unknown",
+            "label": "[key: string]: unknown",
             "description": [],
             "signature": [
               "[key: string]:  unknown"
