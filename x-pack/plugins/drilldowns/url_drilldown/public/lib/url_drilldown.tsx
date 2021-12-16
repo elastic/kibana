@@ -201,7 +201,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     return [...eventVariables, ...contextVariables, ...globalVariables];
   };
 
-  private readonly getExampleUrl = (context: ActionFactoryContext): string => {
+  public readonly getExampleUrl = (context: ActionFactoryContext): string => {
     const defaultExample = 'https://www.example.com/?{{event.key}}={{event.value}}';
     const [trigger] = context.triggers;
 
