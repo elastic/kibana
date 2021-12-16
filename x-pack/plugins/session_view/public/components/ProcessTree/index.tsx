@@ -11,8 +11,6 @@ import { ProcessEvent, Process } from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 
-const HIDE_ORPHANS = true;
-
 interface ProcessTreeDeps {
   // process.entity_id to act as root node (typically a session (or entry session) leader).
   sessionEntityId: string;
@@ -27,8 +25,9 @@ interface ProcessTreeDeps {
   searchQuery?: string;
 
   // currently selected process
-  selectedProcess: Process | null;
-  onProcessSelected(process: Process): void;
+  selectedProcess?: Process | null;
+  onProcessSelected?: (process: Process) => void;
+  hideOrphans?: boolean;
 }
 
 export const ProcessTree = ({
@@ -38,6 +37,7 @@ export const ProcessTree = ({
   searchQuery,
   selectedProcess,
   onProcessSelected,
+  hideOrphans = true,
 }: ProcessTreeDeps) => {
   const styles = useStyles();
 
@@ -126,7 +126,7 @@ export const ProcessTree = ({
   console.log(searchResults);
 
   const renderOrphans = () => {
-    if (!HIDE_ORPHANS) {
+    if (!hideOrphans) {
       return orphans.map((process) => {
         return (
           <ProcessTreeNode
