@@ -7,20 +7,21 @@
 
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { technicalRuleFieldMap } from './assets/field_maps/technical_rule_field_map';
+import { experimentalRuleFieldMap } from './assets/field_maps/experimental_rule_field_map';
+
 import { runtimeTypeFromFieldMap } from './field_map';
 
-const technicalFieldRuntimeType = runtimeTypeFromFieldMap({
-  ...technicalRuleFieldMap,
+const experimentalFieldRuntimeType = runtimeTypeFromFieldMap({
+  ...experimentalRuleFieldMap,
 });
 
-export const parseTechnicalFields = (input: unknown) => {
-  const validate = technicalFieldRuntimeType.decode(input);
+export const parseExperimentalFields = (input: unknown) => {
+  const validate = experimentalFieldRuntimeType.decode(input);
 
   if (isLeft(validate)) {
     throw new Error(PathReporter.report(validate).join('\n'));
   }
-  return technicalFieldRuntimeType.encode(validate.right);
+  return experimentalFieldRuntimeType.encode(validate.right); 
 };
 
-export type ParsedTechnicalFields = ReturnType<typeof parseTechnicalFields>;
+export type ParsedExperimentalFields = ReturnType<typeof parseExperimentalFields>;

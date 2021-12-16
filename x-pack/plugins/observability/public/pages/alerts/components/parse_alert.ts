@@ -14,13 +14,14 @@ import {
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
 import type { TopAlert } from '../';
 import { parseTechnicalFields } from '../../../../../rule_registry/common/parse_technical_fields';
+import { parseExperimentalFields } from '../../../../../rule_registry/common/parse_experimental_fields';
 import { asDuration, asPercent } from '../../../../common/utils/formatters';
 import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 
 export const parseAlert =
   (observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry) =>
   (alert: Record<string, unknown>): TopAlert => {
-    const parsedFields = parseTechnicalFields(alert);
+    const parsedFields = { ...parseTechnicalFields(alert), ...parseExperimentalFields(alert) };
     const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[ALERT_RULE_TYPE_ID]!);
     const formatted = {
       link: undefined,
