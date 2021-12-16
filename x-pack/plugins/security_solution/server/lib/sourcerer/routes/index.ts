@@ -12,7 +12,8 @@ import type {
   DataView,
   DataViewListItem,
 } from '../../../../../../../src/plugins/data_views/common';
-import { SavedObjectAction } from '../../../../../security/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectAction } from '../../../../../security/server/audit/audit_events';
 import { DEFAULT_TIME_FIELD, SOURCERER_API_URL } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
@@ -61,13 +62,13 @@ export const createSourcererDataViewRoute = (
          */
         const unsecuredDataViewService = await indexPatterns.dataViewsServiceFactory(
           unsecuredSavedObjectClient,
-          context.core.elasticsearch.client.asInternalUser,
+          context.core.elasticsearch.client.asCurrentUser,
           request,
           true
         );
         const dataViewService = await indexPatterns.dataViewsServiceFactory(
           context.core.savedObjects.client,
-          context.core.elasticsearch.client.asInternalUser,
+          context.core.elasticsearch.client.asCurrentUser,
           request
         );
 
@@ -102,8 +103,6 @@ export const createSourcererDataViewRoute = (
               title: patternListAsTitle,
               timeFieldName: DEFAULT_TIME_FIELD,
             });
-            // ?? dataViewId -> type thing here, should never happen
-            allDataViews.push({ ...siemDataView, id: siemDataView.id ?? dataViewId });
           } catch (error) {
             auditLogger?.log(
               sourcererSavedObjectEvent({
@@ -135,20 +134,20 @@ export const createSourcererDataViewRoute = (
             );
             throw error;
           }
-          if (allDataViews.some((dv) => dv.id === dataViewId)) {
-            allDataViews = allDataViews.map((v) =>
-              v.id === dataViewId ? { ...v, title: patternListAsTitle } : v
-            );
-          } else {
-            allDataViews.push({ ...siemDataView, id: siemDataView.id ?? dataViewId });
-          }
+        }
+
+        if (allDataViews.some((dv) => dv.id === dataViewId)) {
+          allDataViews = allDataViews.map((v) =>
+            v.id === dataViewId ? { ...v, title: patternListAsTitle } : v
+          );
+        } else {
+          allDataViews.push({ ...siemDataView, id: siemDataView.id ?? dataViewId });
         }
 
         const defaultDataView = await buildDefaultDataview(
           siemDataView,
           context.core.elasticsearch.client.asCurrentUser
         );
-
         return response.ok({
           body: {
             defaultDataView,
@@ -211,13 +210,13 @@ export const getSourcererDataViewRoute = (
          */
         const unsecuredDataViewService = await indexPatterns.dataViewsServiceFactory(
           unsecuredSavedObjectClient,
-          context.core.elasticsearch.client.asInternalUser,
+          context.core.elasticsearch.client.asCurrentUser,
           request,
           true
         );
         const dataViewService = await indexPatterns.dataViewsServiceFactory(
           context.core.savedObjects.client,
-          context.core.elasticsearch.client.asInternalUser,
+          context.core.elasticsearch.client.asCurrentUser,
           request
         );
 

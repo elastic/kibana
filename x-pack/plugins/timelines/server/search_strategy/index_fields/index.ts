@@ -8,7 +8,7 @@
 import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
-import { ElasticsearchClient, StartServicesAccessor } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsServiceStart, StartServicesAccessor } from 'kibana/server';
 import {
   IndexPatternsFetcher,
   ISearchStrategy,
@@ -29,7 +29,8 @@ const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';
 
 export const indexFieldsProvider = (
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  savedObjects: SavedObjectsServiceStart
 ): ISearchStrategy<
   IndexFieldsStrategyRequest<'indices' | 'dataView'>,
   IndexFieldsStrategyResponse
@@ -41,7 +42,7 @@ export const indexFieldsProvider = (
 
   return {
     search: (request, options, deps) =>
-      from(requestIndexFieldSearch(request, deps, beatFields, getStartServices)),
+      from(requestIndexFieldSearch(request, deps, beatFields, getStartServices, savedObjects)),
   };
 };
 
@@ -72,9 +73,10 @@ export const findExistingIndices = async (
 
 export const requestIndexFieldSearch = async (
   request: IndexFieldsStrategyRequest<'indices' | 'dataView'>,
-  { savedObjectsClient, esClient }: SearchStrategyDependencies,
+  { savedObjectsClient, esClient, request: kRequest }: SearchStrategyDependencies,
   beatFields: BeatFields,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  savedObjects: SavedObjectsServiceStart
 ): Promise<IndexFieldsStrategyResponse> => {
   const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
   const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
@@ -87,9 +89,20 @@ export const requestIndexFieldSearch = async (
       data: { indexPatterns },
     },
   ] = await getStartServices();
-  const dataViewService = await indexPatterns.indexPatternsServiceFactory(
+  const unsecuredSavedObjectClient = savedObjects.getScopedClient(kRequest, {
+    excludedWrappers: ['security'],
+  });
+
+  const unsecuredDataViewService = await indexPatterns.dataViewsServiceFactory(
+    unsecuredSavedObjectClient,
+    esClient.asCurrentUser,
+    kRequest,
+    true
+  );
+  const dataViewService = await indexPatterns.dataViewsServiceFactory(
     savedObjectsClient,
-    esClient.asCurrentUser
+    esClient.asCurrentUser,
+    kRequest
   );
 
   let indicesExist: string[] = [];
@@ -100,7 +113,11 @@ export const requestIndexFieldSearch = async (
   if ('dataViewId' in request) {
     let dataView;
     try {
-      dataView = await dataViewService.get(request.dataViewId);
+      if (request.dataViewId.includes('security-solution')) {
+        dataView = await unsecuredDataViewService.get(request.dataViewId);
+      } else {
+        dataView = await dataViewService.get(request.dataViewId);
+      }
     } catch (r) {
       if (
         r.output.payload.statusCode === 404 &&
@@ -113,12 +130,13 @@ export const requestIndexFieldSearch = async (
         throw r;
       }
     }
-
+    console.log('dataView.title', dataView.title);
     const patternList = dataView.title.split(',');
     indicesExist = (await findExistingIndices(patternList, esClient.asCurrentUser)).reduce(
       (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
       []
     );
+    console.log('indicesExist', indicesExist);
     if (!request.onlyCheckIfIndicesExist) {
       const dataViewSpec = dataView.toSpec();
       const fieldDescriptor = [Object.values(dataViewSpec.fields ?? {})];

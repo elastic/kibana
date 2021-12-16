@@ -7,7 +7,8 @@
 
 import { EcsEventOutcome, EcsEventType } from '@kbn/logging';
 import type { AuditEvent } from '../../../../../security/server';
-import { SavedObjectAction } from '../../../../../security/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectAction } from '../../../../../security/server/audit/audit_events';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../../../../src/plugins/data_views/common';
 
 export type SourcererSavedObjectAction =
