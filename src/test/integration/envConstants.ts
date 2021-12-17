@@ -1,6 +1,5 @@
 import { resolve } from 'path';
 
-// paths
 export const INTEGRATION_TEST_DIR_PATH = resolve('./src/test/integration');
 
 export const INTEGRATION_TEST_DATA_PATH = resolve(

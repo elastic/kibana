@@ -1,5 +1,4 @@
 import { isEmpty } from 'lodash';
-import ora from 'ora';
 import { ValidConfigOptions } from '../../../../options/options';
 import { HandledError } from '../../../HandledError';
 import {
@@ -43,24 +42,15 @@ export async function fetchPullRequestBySearchQuery(
 
   const authorFilter = all ? '' : `author:${author}`;
   const searchQuery = `type:pr is:merged sort:updated-desc repo:${repoOwner}/${repoName} ${authorFilter} ${prFilter} base:${sourceBranch}`;
-  const spinner = ora('Loading pull requests...').start();
-  let res: PullRequestBySearchQueryResponse;
-
-  try {
-    res = await apiRequestV4<PullRequestBySearchQueryResponse>({
-      githubApiBaseUrlV4,
-      accessToken,
-      query,
-      variables: {
-        query: searchQuery,
-        maxNumber: maxNumber,
-      },
-    });
-    spinner.stop();
-  } catch (e) {
-    spinner.fail();
-    throw e;
-  }
+  const res = await apiRequestV4<PullRequestBySearchQueryResponse>({
+    githubApiBaseUrlV4,
+    accessToken,
+    query,
+    variables: {
+      query: searchQuery,
+      maxNumber: maxNumber,
+    },
+  });
 
   const commits = res.search.nodes.map((pullRequestNode) => {
     const sourceCommit = pullRequestNode.mergeCommit;

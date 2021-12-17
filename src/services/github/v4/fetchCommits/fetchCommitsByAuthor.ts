@@ -1,5 +1,4 @@
 import { isEmpty, uniqBy, orderBy } from 'lodash';
-import ora from 'ora';
 import { ValidConfigOptions } from '../../../../options/options';
 import { filterNil } from '../../../../utils/filterEmpty';
 import { HandledError } from '../../../HandledError';
@@ -83,26 +82,14 @@ export async function fetchCommitsByAuthor(
 ): Promise<Commit[]> {
   const { sourceBranch, commitPaths } = options;
 
-  const spinner = ora(
-    `Loading commits from branch "${sourceBranch}"...`
-  ).start();
-  let responses: CommitByAuthorResponse[];
-  try {
-    const authorId = await fetchAuthorId(options);
-
-    responses = await Promise.all(
-      isEmpty(commitPaths)
-        ? [fetchByCommitPath({ options, authorId, commitPath: null })]
-        : commitPaths.map((commitPath) =>
-            fetchByCommitPath({ options, authorId, commitPath })
-          )
-    );
-
-    spinner.stop();
-  } catch (e) {
-    spinner.fail();
-    throw e;
-  }
+  const authorId = await fetchAuthorId(options);
+  const responses = await Promise.all(
+    isEmpty(commitPaths)
+      ? [fetchByCommitPath({ options, authorId, commitPath: null })]
+      : commitPaths.map((commitPath) =>
+          fetchByCommitPath({ options, authorId, commitPath })
+        )
+  );
 
   // we only need to check if the first item is `null` (if the first is `null` they all are)
   if (responses[0].repository.ref === null) {

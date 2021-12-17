@@ -2,10 +2,13 @@ import nock from 'nock';
 import ora from 'ora';
 import { ValidConfigOptions } from '../options/options';
 import * as childProcess from '../services/child-process-promisified';
+import { CommitByAuthorResponse } from '../services/github/v4/fetchCommits/fetchCommitsByAuthor';
+import { commitsByAuthorMock } from '../services/github/v4/mocks/commitsByAuthorMock';
 import * as logger from '../services/logger';
 import * as prompts from '../services/prompts';
 import { Commit } from '../services/sourceCommit';
 import { ExecError } from '../test/ExecError';
+import { mockGqlRequest } from '../test/nockHelpers';
 import { PromiseReturnType } from '../types/PromiseReturnType';
 import { SpyHelper } from '../types/SpyHelper';
 import { cherrypickAndCreateTargetPullRequest } from './cherrypickAndCreateTargetPullRequest';
@@ -200,6 +203,8 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
     let res: PromiseReturnType<typeof cherrypickAndCreateTargetPullRequest>;
     let promptSpy: SpyHelper<typeof prompts['confirmPrompt']>;
     let execSpy: ReturnType<typeof setupExecSpy>;
+    let commitsByAuthorCalls: ReturnType<typeof mockGqlRequest>;
+
     beforeEach(async () => {
       // spies
       promptSpy = jest.spyOn(prompts, 'confirmPrompt').mockResolvedValue(true);
@@ -208,13 +213,14 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
       const options = {
         assignees: [] as string[],
         fork: true,
-        targetPRLabels: ['backport'],
+        githubApiBaseUrlV4: 'http://localhost/graphql',
         prTitle: '[{targetBranch}] {commitMessages}',
         repoName: 'kibana',
         repoOwner: 'elastic',
-        username: 'sqren',
         sourceBranch: 'myDefaultSourceBranch',
         sourcePRLabels: [] as string[],
+        targetPRLabels: ['backport'],
+        username: 'sqren',
       } as ValidConfigOptions;
 
       const scope = nock('https://api.github.com')
@@ -225,6 +231,12 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
           body: 'Backports the following commits to 6.x:\n - myCommitMessage',
         })
         .reply(200, { html_url: 'myHtmlUrl', number: 1337 });
+
+      commitsByAuthorCalls = mockGqlRequest<CommitByAuthorResponse>({
+        name: 'CommitsByAuthor',
+        statusCode: 200,
+        body: { data: commitsByAuthorMock },
+      });
 
       res = await cherrypickAndCreateTargetPullRequest({
         options,
@@ -259,7 +271,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
       expect(promptSpy.mock.calls.length).toBe(3);
 
       expect(promptSpy.mock.calls[0][0]).toMatchInlineSnapshot(`
-        "Please fix the issues in: /myHomeDir/.backport/repositories/elastic/kibana
+        "Fix the following conflicts manually
 
         Conflicting files:
          - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
@@ -269,23 +281,35 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
       `);
 
       expect(promptSpy.mock.calls[1][0]).toMatchInlineSnapshot(`
-        "Please fix the issues in: /myHomeDir/.backport/repositories/elastic/kibana
-
-        Conflicting files:
-         - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
-
-
-        Press ENTER when the conflicts are resolved and files are staged"
-      `);
-
-      expect(promptSpy.mock.calls[2][0]).toMatchInlineSnapshot(`
-        "Please fix the issues in: /myHomeDir/.backport/repositories/elastic/kibana
+        "Fix the following conflicts manually
 
 
         Unstaged files:
          - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
 
         Press ENTER when the conflicts are resolved and files are staged"
+      `);
+
+      expect(promptSpy.mock.calls[2][0]).toMatchInlineSnapshot(`
+        "Fix the following conflicts manually
+
+
+        Unstaged files:
+         - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
+
+        Press ENTER when the conflicts are resolved and files are staged"
+      `);
+    });
+
+    it('commitsByAuthor is called with correct arguments', () => {
+      expect(commitsByAuthorCalls[0].variables).toMatchInlineSnapshot(`
+        Object {
+          "authorId": null,
+          "commitPath": "conflicting-file.txt",
+          "repoName": "kibana",
+          "repoOwner": "elastic",
+          "sourceBranch": "myDefaultSourceBranch",
+        }
       `);
     });
 
@@ -315,7 +339,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
       `);
       expect(consoleLogSpy.mock.calls[1][0]).toMatchInlineSnapshot(`
         "
-        ----------------------------------------
+        The commit could not be backported due to conflicts
         "
       `);
       expect(consoleLogSpy.mock.calls[2][0]).toMatchInlineSnapshot(`
@@ -323,9 +347,11 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         ----------------------------------------
         "
       `);
-      expect(consoleLogSpy.mock.calls[3][0]).toMatchInlineSnapshot(
-        `"View pull request: myHtmlUrl"`
-      );
+      expect(consoleLogSpy.mock.calls[3][0]).toMatchInlineSnapshot(`
+        "
+        ----------------------------------------
+        "
+      `);
     });
   });
 });
@@ -350,6 +376,11 @@ function setupExecSpy() {
       // cherrypick
       if (cmd === 'git cherry-pick mySha') {
         throw new ExecError({ cmd });
+      }
+
+      // getIsCommitInBranch
+      if (cmd.startsWith('git merge-base --is-ancestor')) {
+        return { stderr: '', stdout: '' };
       }
 
       // getConflictingFiles
@@ -395,6 +426,6 @@ function setupExecSpy() {
         return { stdout: ``, stderr: '' };
       }
 
-      throw new Error(`Missing mock for "${cmd}"`);
+      throw new Error(`Missing exec mock for "${cmd}"`);
     });
 }

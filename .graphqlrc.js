@@ -20,7 +20,7 @@ module.exports = {
       'GitHub API V4': {
         url: 'https://api.github.com/graphql',
         headers: {
-          Authorization: `token ${accessToken.trim()}`,
+          Authorization: `token ${accessToken}`,
           'user-agent': 'JS GraphQL',
         },
       },

@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import { ValidConfigOptions } from './options/options';
 import { HandledError } from './services/HandledError';
 import { logger, consoleLog, redact } from './services/logger';
@@ -18,9 +17,6 @@ export type Result = {
 
 export async function runWithOptions(options: ValidConfigOptions) {
   logger.verbose('Backport options', options);
-  if (options.dryRun) {
-    consoleLog(chalk.red('Dry run: Nothing will be pushed to Github\n'));
-  }
 
   const commits = await getCommits(options);
   const targetBranches = await getTargetBranches(options, commits);

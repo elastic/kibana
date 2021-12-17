@@ -1,9 +1,8 @@
 import { Octokit } from '@octokit/rest';
-import chalk from 'chalk';
 import ora from 'ora';
 import { ValidConfigOptions } from '../../../options/options';
 import { HandledError } from '../../HandledError';
-import { logger, consoleLog } from '../../logger';
+import { logger } from '../../logger';
 import { Commit } from '../../sourceCommit';
 import { fetchExistingPullRequest } from '../v4/fetchExistingPullRequest';
 import { getGithubV3ErrorMessage } from './getGithubV3ErrorMessage';
@@ -29,20 +28,8 @@ export async function createPullRequest({
     `Creating PR with title: "${prPayload.title}". ${prPayload.head} -> ${prPayload.base}`
   );
 
-  const { accessToken, dryRun, githubApiBaseUrlV3 } = options;
+  const { accessToken, githubApiBaseUrlV3 } = options;
   const spinner = ora(`Creating pull request`).start();
-
-  if (dryRun) {
-    spinner.succeed('Dry run: Creating pull request');
-
-    // output PR summary
-    consoleLog(chalk.bold('\nPull request summary:'));
-    consoleLog(`Branch: ${prPayload.head} -> ${prPayload.base}`);
-    consoleLog(`Title: ${prPayload.title}`);
-    consoleLog(`Body: ${prPayload.body}\n`);
-
-    return { url: 'example_url', number: 1337 };
-  }
 
   try {
     const octokit = new Octokit({

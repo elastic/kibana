@@ -123,6 +123,7 @@ Array [
         edges {
           node {
             # Source PR
+            url
             number
             labels(first: 50) {
               nodes {
@@ -139,6 +140,7 @@ Array [
 
                       # Target PRs
                       ... on PullRequest {
+                        url
                         title
                         state
                         baseRefName
@@ -299,6 +301,7 @@ Array [
         edges {
           node {
             # Source PR
+            url
             number
             labels(first: 50) {
               nodes {
@@ -315,6 +318,7 @@ Array [
 
                       # Target PRs
                       ... on PullRequest {
+                        url
                         title
                         state
                         baseRefName

@@ -1,4 +1,5 @@
 import inquirer from 'inquirer';
+import { last } from 'lodash';
 import nock from 'nock';
 import { ValidConfigOptions } from './options/options';
 import { runWithOptions } from './runWithOptions';
@@ -10,6 +11,23 @@ import { commitsByAuthorMock } from './services/github/v4/mocks/commitsByAuthorM
 import { mockGqlRequest, getNockCallsForScope } from './test/nockHelpers';
 import { PromiseReturnType } from './types/PromiseReturnType';
 import { SpyHelper } from './types/SpyHelper';
+
+jest.mock('./services/child-process-promisified', () => {
+  return {
+    exec: jest.fn(async (cmd: string) => {
+      throw new Error(`Mock required for exec with cmd: "${cmd}"`);
+    }),
+
+    execAsCallback: jest.fn((...args) => {
+      last(args)();
+      return {
+        stderr: {
+          on: () => null,
+        },
+      };
+    }),
+  };
+});
 
 describe('runWithOptions', () => {
   let rpcExecMock: SpyHelper<typeof childProcess.exec>;
@@ -37,7 +55,6 @@ describe('runWithOptions', () => {
       autoMergeMethod: 'merge',
       branchLabelMapping: undefined,
       ci: false,
-      dryRun: false,
       editor: 'code',
       forceLocalConfig: undefined,
       fork: true,

@@ -115,15 +115,30 @@ describe('fetchCommitsByAuthor', () => {
     it('returns related OPEN PRs', async () => {
       const commitWithOpenPR = res.find((commit) => commit.pullNumber === 9);
       expect(commitWithOpenPR?.existingTargetPullRequests).toEqual([
-        { branch: '7.8', state: 'OPEN', number: 10 },
+        {
+          branch: '7.8',
+          state: 'OPEN',
+          number: 10,
+          url: 'https://github.com/backport-org/backport-e2e/pull/10',
+        },
       ]);
     });
 
     it('returns related MERGED PRs', async () => {
       const commitWithMergedPRs = res.find((commit) => commit.pullNumber === 5);
       expect(commitWithMergedPRs?.existingTargetPullRequests).toEqual([
-        { branch: '7.x', state: 'MERGED', number: 6 },
-        { branch: '7.8', state: 'MERGED', number: 7 },
+        {
+          branch: '7.x',
+          state: 'MERGED',
+          number: 6,
+          url: 'https://github.com/backport-org/backport-e2e/pull/6',
+        },
+        {
+          branch: '7.8',
+          state: 'MERGED',
+          number: 7,
+          url: 'https://github.com/backport-org/backport-e2e/pull/7',
+        },
       ]);
     });
 

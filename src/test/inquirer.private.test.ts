@@ -2,6 +2,8 @@ import { spawn } from 'child_process';
 import stripAnsi from 'strip-ansi';
 import { getDevAccessToken } from './private/getDevAccessToken';
 
+const TIMEOUT_IN_SECONDS = 10;
+
 describe('inquirer cli', () => {
   let devAccessToken: string;
 
@@ -95,6 +97,7 @@ describe('inquirer cli', () => {
   });
 
   it(`should list commits from master`, async () => {
+    jest.setTimeout(TIMEOUT_IN_SECONDS * 1000 * 1.1);
     const output = await runBackportAsync(
       [
         '--branch',
@@ -174,8 +177,7 @@ function runBackportAsync(
   const p = new Promise<string>((resolve, reject) => {
     let data = '';
 
-    // fail if expectations hasn't been found within 4s
-    const TIMEOUT_IN_SECONDS = 4;
+    // fail if expectations hasn't been found within 10 seconds
     const timeout = setTimeout(() => {
       reject(`Expectation '${waitForString}' not found within ${TIMEOUT_IN_SECONDS} seconds in:
       '${data.toString()}'`);

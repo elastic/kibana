@@ -47,11 +47,17 @@ describe('fetchPullRequestBySearchQuery', () => {
         {
           committedDate: '2020-08-16T21:44:28Z',
           existingTargetPullRequests: [
-            { branch: '7.8', state: 'OPEN', number: 10 },
+            {
+              branch: '7.8',
+              state: 'OPEN',
+              number: 10,
+              url: 'https://github.com/backport-org/backport-e2e/pull/10',
+            },
           ],
           formattedMessage: 'Add sheep emoji (#9)',
           originalMessage: 'Add sheep emoji (#9)',
           pullNumber: 9,
+          pullUrl: 'https://github.com/backport-org/backport-e2e/pull/9',
           sha: 'eebf165c82a4b718d95c11b3877e365b1949ff28',
           sourceBranch: 'master',
           targetBranchesFromLabels: {
@@ -64,12 +70,23 @@ describe('fetchPullRequestBySearchQuery', () => {
         {
           committedDate: '2020-08-15T12:40:19Z',
           existingTargetPullRequests: [
-            { branch: '7.x', state: 'MERGED', number: 6 },
-            { branch: '7.8', state: 'MERGED', number: 7 },
+            {
+              branch: '7.x',
+              state: 'MERGED',
+              number: 6,
+              url: 'https://github.com/backport-org/backport-e2e/pull/6',
+            },
+            {
+              branch: '7.8',
+              state: 'MERGED',
+              number: 7,
+              url: 'https://github.com/backport-org/backport-e2e/pull/7',
+            },
           ],
           formattedMessage: 'Add 🍏 emoji (#5)',
           originalMessage: 'Add 🍏 emoji (#5)',
           pullNumber: 5,
+          pullUrl: 'https://github.com/backport-org/backport-e2e/pull/5',
           sha: 'ee8c492334cef1ca077a56addb79a26f79821d2f',
           sourceBranch: 'master',
           targetBranchesFromLabels: {

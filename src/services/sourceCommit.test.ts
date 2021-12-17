@@ -37,6 +37,7 @@ function getMockSourceCommit({
       edges: [
         {
           node: {
+            url: `https://github.com/elastic/kibana/pull/${sourcePullRequest.number}`,
             labels: {
               nodes: (sourcePullRequest.labels ?? []).map((name) => ({ name })),
             },
@@ -48,6 +49,7 @@ function getMockSourceCommit({
                   node: {
                     targetPullRequest: {
                       __typename: 'PullRequest',
+                      url: `https://github.com/elastic/kibana/pull/${timelineItem.number}`,
                       title: timelineItem.title ?? 'Default PR title (#123)',
                       number: timelineItem.number,
                       state: timelineItem.state,
@@ -104,7 +106,12 @@ describe('getExistingTargetPullRequests', () => {
     });
     const existingPRs = getExistingTargetPullRequests(mockSourceCommit);
     expect(existingPRs).toEqual([
-      { branch: '6.x', state: 'MERGED', number: 5678 },
+      {
+        branch: '6.x',
+        state: 'MERGED',
+        number: 5678,
+        url: 'https://github.com/elastic/kibana/pull/5678',
+      },
     ]);
   });
 
@@ -185,7 +192,12 @@ describe('getExistingTargetPullRequests', () => {
     });
     const existingPRs = getExistingTargetPullRequests(mockSourceCommit);
     expect(existingPRs).toEqual([
-      { branch: '6.x', state: 'MERGED', number: 5678 },
+      {
+        branch: '6.x',
+        state: 'MERGED',
+        number: 5678,
+        url: 'https://github.com/elastic/kibana/pull/5678',
+      },
     ]);
   });
 
@@ -226,7 +238,12 @@ describe('getExistingTargetPullRequests', () => {
     });
     const existingPRs = getExistingTargetPullRequests(mockSourceCommit);
     expect(existingPRs).toEqual([
-      { branch: '6.x', state: 'MERGED', number: 5678 },
+      {
+        branch: '6.x',
+        state: 'MERGED',
+        number: 5678,
+        url: 'https://github.com/elastic/kibana/pull/5678',
+      },
     ]);
   });
 });
@@ -268,12 +285,23 @@ describe('parseSourceCommit', () => {
     expect(commit).toEqual({
       committedDate: '2021-12-22T00:00:00Z',
       existingTargetPullRequests: [
-        { branch: '6.x', number: 5678, state: 'MERGED' },
-        { branch: '6.2', number: 9876, state: 'OPEN' },
+        {
+          branch: '6.x',
+          number: 5678,
+          state: 'MERGED',
+          url: 'https://github.com/elastic/kibana/pull/5678',
+        },
+        {
+          branch: '6.2',
+          number: 9876,
+          state: 'OPEN',
+          url: 'https://github.com/elastic/kibana/pull/9876',
+        },
       ],
       formattedMessage: 'My commit message (#1234)',
       originalMessage: 'My commit message (#1234)',
       pullNumber: 1234,
+      pullUrl: 'https://github.com/elastic/kibana/pull/1234',
       sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
       sourceBranch: 'source-branch-from-associated-pull-request',
       targetBranchesFromLabels: {

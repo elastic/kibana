@@ -1,5 +1,3 @@
-import chalk from 'chalk';
-import ora from 'ora';
 import { ValidConfigOptions } from '../../../../options/options';
 import { HandledError } from '../../../HandledError';
 import {
@@ -8,7 +6,6 @@ import {
   sourceCommitWithTargetPullRequestFragment,
   parseSourceCommit,
 } from '../../../sourceCommit';
-import { getShortSha } from '../../commitFormatters';
 import { apiRequestV4 } from '../apiRequestV4';
 
 export async function fetchCommitBySha(
@@ -35,25 +32,16 @@ export async function fetchCommitBySha(
     ${sourceCommitWithTargetPullRequestFragment.source}
   `;
 
-  const spinner = ora(`Loading commit "${getShortSha(sha)}"`).start();
-
-  let res: CommitsByShaResponse;
-  try {
-    res = await apiRequestV4<CommitsByShaResponse>({
-      githubApiBaseUrlV4,
-      accessToken,
-      query,
-      variables: {
-        repoOwner,
-        repoName,
-        oid: sha,
-      },
-    });
-    spinner.stop();
-  } catch (e) {
-    spinner.fail();
-    throw e;
-  }
+  const res = await apiRequestV4<CommitsByShaResponse>({
+    githubApiBaseUrlV4,
+    accessToken,
+    query,
+    variables: {
+      repoOwner,
+      repoName,
+      oid: sha,
+    },
+  });
 
   const sourceCommit = res.repository.object;
   if (!sourceCommit) {
@@ -62,16 +50,7 @@ export async function fetchCommitBySha(
     );
   }
 
-  const commit = parseSourceCommit({ options, sourceCommit });
-
-  spinner.stopAndPersist({
-    symbol: chalk.green('?'),
-    text: `${chalk.bold('Select commit')} ${chalk.cyan(
-      commit.formattedMessage
-    )}`,
-  });
-
-  return commit;
+  return parseSourceCommit({ options, sourceCommit });
 }
 
 interface CommitsByShaResponse {

@@ -13,7 +13,6 @@ import {
 
 jest.unmock('make-dir');
 jest.unmock('del');
-jest.unmock('../../services/child-process-promisified');
 
 describe('integration', () => {
   afterAll(() => {

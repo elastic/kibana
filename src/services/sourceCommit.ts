@@ -20,11 +20,13 @@ export interface Commit {
   formattedMessage: string;
   originalMessage: string;
   pullNumber?: number;
+  pullUrl?: string;
   existingTargetPullRequests: ExistingTargetPullRequests;
 }
 
 export interface PullRequestNode {
   baseRefName: string;
+  url: string;
   number: number;
   labels: {
     nodes: {
@@ -42,6 +44,7 @@ interface TimelinePullRequestEdge {
   node: {
     targetPullRequest: {
       __typename: 'PullRequest';
+      url: string;
       title: string;
       state: 'OPEN' | 'CLOSED' | 'MERGED';
       baseRefName: string;
@@ -116,6 +119,7 @@ export function parseSourceCommit({
     formattedMessage,
     originalMessage: commitMessage,
     pullNumber,
+    pullUrl: pullRequestNode?.url,
     existingTargetPullRequests,
   };
 }
@@ -141,6 +145,7 @@ export const sourceCommitWithTargetPullRequestFragment = {
         edges {
           node {
             # Source PR
+            url
             number
             labels(first: 50) {
               nodes {
@@ -157,6 +162,7 @@ export const sourceCommitWithTargetPullRequestFragment = {
 
                       # Target PRs
                       ... on PullRequest {
+                        url
                         title
                         state
                         baseRefName
@@ -203,10 +209,8 @@ export function getExistingTargetPullRequests(
     .filter((item) => {
       const { targetPullRequest } = item.node;
 
-      if (
-        targetPullRequest.state !== 'MERGED' &&
-        targetPullRequest.state !== 'OPEN'
-      ) {
+      // ignore closed PRs
+      if (targetPullRequest.state === 'CLOSED') {
         return false;
       }
 
@@ -244,6 +248,7 @@ export function getExistingTargetPullRequests(
     .map((item) => {
       const { targetPullRequest } = item.node;
       return {
+        url: targetPullRequest.url,
         number: targetPullRequest.number,
         branch: targetPullRequest.baseRefName,
         state: targetPullRequest.state,

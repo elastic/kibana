@@ -20,7 +20,6 @@ describe('addAssigneesToPullRequest', () => {
         repoOwner: 'backport-org',
         accessToken: 'my-token',
         username: 'sqren',
-        dryRun: false,
       } as ValidConfigOptions,
       pullNumber,
       assignees

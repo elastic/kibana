@@ -5,26 +5,8 @@
 
 /* eslint-disable @typescript-eslint/no-empty-function */
 import os from 'os';
-import { last } from 'lodash';
 
 jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
-
-jest.mock('../../services/child-process-promisified', () => {
-  return {
-    exec: jest.fn(async (cmd: string) => {
-      throw new Error(`Mock required for exec with cmd: "${cmd}"`);
-    }),
-
-    execAsCallback: jest.fn((...args) => {
-      last(args)();
-      return {
-        stderr: {
-          on: () => {},
-        },
-      };
-    }),
-  };
-});
 
 jest.mock('../../services/fs-promisified', () => {
   return {

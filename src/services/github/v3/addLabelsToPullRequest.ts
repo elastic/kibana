@@ -4,13 +4,7 @@ import { ValidConfigOptions } from '../../../options/options';
 import { logger } from '../../logger';
 
 export async function addLabelsToPullRequest(
-  {
-    githubApiBaseUrlV3,
-    repoName,
-    repoOwner,
-    accessToken,
-    dryRun,
-  }: ValidConfigOptions,
+  { githubApiBaseUrlV3, repoName, repoOwner, accessToken }: ValidConfigOptions,
   pullNumber: number,
   labels: string[]
 ): Promise<void> {
@@ -19,11 +13,6 @@ export async function addLabelsToPullRequest(
   const spinner = ora(text).start();
 
   try {
-    if (dryRun) {
-      spinner.succeed(`Dry run: ${text}`);
-      return;
-    }
-
     const octokit = new Octokit({
       auth: accessToken,
       baseUrl: githubApiBaseUrlV3,

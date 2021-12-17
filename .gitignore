@@ -6,3 +6,4 @@
 .DS_Store
 /src/test/integration/mock-environment
 /src/test/private/accessToken.txt
+/src/services/git-test-sandbox

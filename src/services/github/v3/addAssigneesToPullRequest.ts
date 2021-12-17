@@ -10,7 +10,6 @@ export async function addAssigneesToPullRequest(
     repoOwner,
     accessToken,
     username,
-    dryRun,
   }: ValidConfigOptions,
   pullNumber: number,
   assignees: string[]
@@ -24,11 +23,6 @@ export async function addAssigneesToPullRequest(
   const spinner = ora(text).start();
 
   try {
-    if (dryRun) {
-      spinner.succeed(`Dry run: ${text}`);
-      return;
-    }
-
     const octokit = new Octokit({
       auth: accessToken,
       baseUrl: githubApiBaseUrlV3,

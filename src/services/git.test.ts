@@ -1,5 +1,11 @@
+import { resolve } from 'path';
+import del from 'del';
+import makeDir from 'make-dir';
 import { ValidConfigOptions } from '../options/options';
 import * as childProcess from '../services/child-process-promisified';
+import { ExecError } from '../test/ExecError';
+import { SpyHelper } from '../types/SpyHelper';
+import * as env from './env';
 import {
   addRemote,
   getUnstagedFiles,
@@ -13,13 +19,96 @@ import {
   isLocalConfigFileUntracked,
   isLocalConfigFileModified,
   getUpstreamFromGitRemote,
-} from '../services/git';
-import { ExecError } from '../test/ExecError';
-import { SpyHelper } from '../types/SpyHelper';
+  getIsCommitInBranch,
+} from './git';
 import { Commit } from './sourceCommit';
+
+jest.unmock('make-dir');
+jest.unmock('del');
 
 beforeEach(() => {
   jest.clearAllMocks();
+});
+
+describe('getIsCommitInBranch', () => {
+  let firstSha: string;
+  let secondSha: string;
+  let getRepoPathSpy: jest.SpyInstance;
+
+  beforeEach(async () => {
+    const GIT_SANDBOX_DIR_PATH = resolve(`${__dirname}/git-test-sandbox`);
+    const execOpts = { cwd: GIT_SANDBOX_DIR_PATH };
+
+    const createAndCommitFile = async (filename: string, content: string) => {
+      await childProcess.exec(`echo "I${content}" > ${filename}`, execOpts);
+      await childProcess.exec(
+        `git add -A && git commit -m 'Add ${filename}'`,
+        execOpts
+      );
+    };
+
+    const getCurrentSha = async () => {
+      const { stdout } = await childProcess.exec(
+        'git rev-parse HEAD',
+        execOpts
+      );
+      return stdout.trim();
+    };
+
+    await del(GIT_SANDBOX_DIR_PATH);
+    await makeDir(GIT_SANDBOX_DIR_PATH);
+
+    // create and commit first file
+    await childProcess.exec('git init', execOpts);
+    await createAndCommitFile('My first file', 'foo.md');
+    firstSha = await getCurrentSha();
+
+    // create 7.x branch (but stay on `main` branch)
+    await childProcess.exec('git branch 7.x', execOpts);
+
+    // create and commit second file
+    await createAndCommitFile('My second file', 'bar.md');
+    secondSha = await getCurrentSha();
+
+    // checkout 7.x
+    await childProcess.exec('git checkout 7.x', execOpts);
+
+    // mock repo path to point to git-sandbox dir
+    getRepoPathSpy = jest
+      .spyOn(env, 'getRepoPath')
+      .mockReturnValue(GIT_SANDBOX_DIR_PATH);
+  });
+
+  afterEach(() => {
+    getRepoPathSpy.mockRestore();
+  });
+
+  it('should contain the first commit', async () => {
+    const isFirstCommitInBranch = await getIsCommitInBranch(
+      {} as ValidConfigOptions,
+      firstSha
+    );
+
+    expect(isFirstCommitInBranch).toEqual(true);
+  });
+
+  it('should not contain the second commit', async () => {
+    const isSecondCommitInBranch = await getIsCommitInBranch(
+      {} as ValidConfigOptions,
+      secondSha
+    );
+
+    expect(isSecondCommitInBranch).toEqual(false);
+  });
+
+  it('should not contain a random commit', async () => {
+    const isSecondCommitInBranch = await getIsCommitInBranch(
+      {} as ValidConfigOptions,
+      'abcdefg'
+    );
+
+    expect(isSecondCommitInBranch).toEqual(false);
+  });
 });
 
 describe('getUnstagedFiles', () => {

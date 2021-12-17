@@ -76,6 +76,7 @@ describe('fetchCommitsByAuthor', () => {
           formattedMessage: 'Add witch (#85)',
           originalMessage: 'Add witch (#85)',
           pullNumber: 85,
+          pullUrl: 'https://github.com/elastic/kibana/pull/85',
           existingTargetPullRequests: [],
           targetBranchesFromLabels: {
             expected: [],
@@ -92,8 +93,14 @@ describe('fetchCommitsByAuthor', () => {
           originalMessage:
             'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
           pullNumber: 80,
+          pullUrl: 'https://github.com/elastic/kibana/pull/80',
           existingTargetPullRequests: [
-            { branch: '6.3', state: 'MERGED', number: 99 },
+            {
+              branch: '6.3',
+              state: 'MERGED',
+              number: 99,
+              url: 'https://github.com/elastic/kibana/pull/99',
+            },
           ],
           targetBranchesFromLabels: {
             expected: [],

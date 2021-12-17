@@ -1,5 +1,3 @@
-import chalk from 'chalk';
-import ora from 'ora';
 import { ValidConfigOptions } from '../../../../options/options';
 import { HandledError } from '../../../HandledError';
 import {
@@ -34,27 +32,16 @@ export async function fetchCommitByPullNumber(
     ${sourceCommitWithTargetPullRequestFragment.source}
   `;
 
-  const spinner = ora(
-    `Loading merge commit from pull request #${options.pullNumber}`
-  ).start();
-
-  let res: CommitByPullNumberResponse;
-  try {
-    res = await apiRequestV4<CommitByPullNumberResponse>({
-      githubApiBaseUrlV4,
-      accessToken,
-      query,
-      variables: {
-        repoOwner,
-        repoName,
-        pullNumber,
-      },
-    });
-    spinner.stop();
-  } catch (e) {
-    spinner.fail();
-    throw e;
-  }
+  const res = await apiRequestV4<CommitByPullNumberResponse>({
+    githubApiBaseUrlV4,
+    accessToken,
+    query,
+    variables: {
+      repoOwner,
+      repoName,
+      pullNumber,
+    },
+  });
 
   const pullRequestNode = res.repository.pullRequest;
   if (!pullRequestNode) {
@@ -65,17 +52,7 @@ export async function fetchCommitByPullNumber(
   if (sourceCommit === null) {
     throw new HandledError(`The PR #${pullNumber} is not merged`);
   }
-  const commit = parseSourceCommit({ options, sourceCommit });
-
-  // add styles to make it look like a prompt question
-  spinner.stopAndPersist({
-    symbol: chalk.green('?'),
-    text: `${chalk.bold('Select pull request')} ${chalk.cyan(
-      commit.formattedMessage
-    )}`,
-  });
-
-  return commit;
+  return parseSourceCommit({ options, sourceCommit });
 }
 
 interface CommitByPullNumberResponse {
