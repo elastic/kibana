@@ -22,8 +22,9 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Import commands.js using ES2015 syntax:
+// eslint-disable-next-line import/no-extraneous-dependencies
 import 'cypress-react-selector';
+// Import commands.js using ES2015 syntax:
 import './commands';
 // import './coverage';
 
