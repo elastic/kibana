@@ -6,7 +6,6 @@
  */
 
 import { Logger, KibanaRequest, RequestHandlerContext } from 'kibana/server';
-import { ExceptionListClient } from '../../lists/server';
 
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';

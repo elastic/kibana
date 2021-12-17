@@ -57,8 +57,13 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
     initRoutes(router, config);
 
     return {
-      getExceptionListClient: (savedObjectsClient, user): ExceptionListClient => {
+      getExceptionListClient: (
+        savedObjectsClient,
+        user,
+        disableServerExtensionPoints = false
+      ): ExceptionListClient => {
         return new ExceptionListClient({
+          disableServerExtensionPoints,
           savedObjectsClient,
           serverExtensionsClient: this.extensionPoints.getClient(),
           user,

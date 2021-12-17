@@ -38,7 +38,8 @@ export type GetListClientType = (
 
 export type GetExceptionListClientType = (
   savedObjectsClient: SavedObjectsClientContract,
-  user: string
+  user: string,
+  disableServerExtensionPoints?: boolean
 ) => ExceptionListClient;
 
 export interface ListPluginSetup {

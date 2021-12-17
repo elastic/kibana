@@ -20,12 +20,9 @@ import { Type } from 'io-ts';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import * as t from 'io-ts';
+import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import type { ExtensionPointStorageClientInterface } from '../extension_points';
-import {
-  exactCheck,
-  formatErrors,
-} from '../../../../../../../../../../private/var/tmp/_bazel_ptavares/a4a237a05d507fc23e0818d3647eedfe/execroot/kibana/bazel-out/darwin-fastbuild/bin/packages/kbn-securitysolution-io-ts-utils';
 
 import {
   ConstructorOptions,
@@ -84,13 +81,18 @@ export class ExceptionListClient {
   private readonly user: string;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly serverExtensionsClient: ExtensionPointStorageClientInterface;
+  private readonly disableServerExtensionPoints: boolean;
 
-  constructor({ user, savedObjectsClient, serverExtensionsClient }: ConstructorOptions) {
-    // FIXME:PT add option to "turn off running external extension points
-
+  constructor({
+    user,
+    savedObjectsClient,
+    serverExtensionsClient,
+    disableServerExtensionPoints = false,
+  }: ConstructorOptions) {
     this.user = user;
     this.savedObjectsClient = savedObjectsClient;
     this.serverExtensionsClient = serverExtensionsClient;
+    this.disableServerExtensionPoints = disableServerExtensionPoints;
   }
 
   /**
@@ -427,16 +429,18 @@ export class ExceptionListClient {
       type,
     };
 
-    itemData = await this.serverExtensionsClient.pipeRun(
-      'exceptionsListPreCreateItem',
-      itemData,
-      (data: CreateExceptionListItemOptions) => {
-        this.validateData(
-          createExceptionListItemSchema,
-          transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema(data)
-        );
-      }
-    );
+    if (!this.disableServerExtensionPoints) {
+      itemData = await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreCreateItem',
+        itemData,
+        (data: CreateExceptionListItemOptions) => {
+          this.validateData(
+            createExceptionListItemSchema,
+            transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema(data)
+          );
+        }
+      );
+    }
 
     return createExceptionListItem({
       ...itemData,
