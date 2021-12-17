@@ -7,10 +7,10 @@
 
 import { ActionTypes, Actions } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import { BuilderArgs, BuilderReturnValue } from '../types';
+import { UserActionParameters, BuilderReturnValue } from '../types';
 
 export class TagsUserActionBuilder extends UserActionBuilder {
-  build(args: BuilderArgs): BuilderReturnValue {
+  build(args: UserActionParameters<'tags'>): BuilderReturnValue {
     return this.buildCommonUserAction({
       ...args,
       action: args.action ?? Actions.add,

@@ -7,16 +7,16 @@
 
 import { Actions, ActionTypes } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import { BuilderArgs, BuilderReturnValue } from '../types';
+import { UserActionParameters, BuilderReturnValue } from '../types';
 
 export class DeleteCaseUserActionBuilder extends UserActionBuilder {
-  build(args: BuilderArgs): BuilderReturnValue {
+  build(args: UserActionParameters<'delete_case'>): BuilderReturnValue {
     const { caseId, owner, user, connectorId } = args;
     return {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
         action: Actions.delete,
-        payload: null,
+        payload: {},
         type: ActionTypes.delete_case,
       },
       references: [

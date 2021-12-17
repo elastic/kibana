@@ -7,17 +7,17 @@
 
 import { Actions, ActionTypes } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import { BuilderArgs, BuilderReturnValue } from '../types';
+import { UserActionParameters, BuilderReturnValue } from '../types';
 
 export class ConnectorUserActionBuilder extends UserActionBuilder {
-  build(args: BuilderArgs): BuilderReturnValue {
+  build(args: UserActionParameters<'connector'>): BuilderReturnValue {
     return this.buildCommonUserAction({
       ...args,
       action: Actions.update,
       valueKey: 'connector',
       value: this.extractConnectorId(args.payload.connector),
       type: ActionTypes.connector,
-      extraReferences: this.createConnectorReference(args.payload.connector.id),
+      connectorId: args.payload.connector.id,
     });
   }
 }

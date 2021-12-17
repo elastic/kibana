@@ -615,7 +615,7 @@ describe('CaseUserActionService', () => {
                 type: ActionTypes.comment,
                 action,
                 attachmentId: 'test-id',
-                payload: { comment },
+                payload: { attachment: comment },
               });
 
               expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(

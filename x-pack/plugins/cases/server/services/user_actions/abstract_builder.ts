@@ -19,13 +19,19 @@ import {
   SUB_CASE_REF_NAME,
 } from '../../common/constants';
 import {
+  ActionTypes,
   CaseConnector,
   CaseExternalServiceBasic,
   NONE_CONNECTOR_ID,
   User,
 } from '../../../common/api';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { BuilderArgs, BuilderReturnValue, CommonBuilderArguments } from './types';
+import {
+  BuilderParameters,
+  BuilderReturnValue,
+  CommonBuilderArguments,
+  UserActionParameters,
+} from './types';
 
 export abstract class UserActionBuilder {
   protected getCommonUserActionAttributes({ user, owner }: { user: User; owner: string }) {
@@ -60,27 +66,29 @@ export abstract class UserActionBuilder {
     ];
   }
 
-  protected createActionReference(id: string | null, name: string) {
+  protected createActionReference(id: string | null, name: string): SavedObjectReference[] {
     return id != null && id !== NONE_CONNECTOR_ID
       ? [{ id, type: ACTION_SAVED_OBJECT_TYPE, name }]
       : [];
   }
 
-  protected createCommentReferences(commentId: string): SavedObjectReference[] {
-    return [
-      {
-        type: CASE_COMMENT_SAVED_OBJECT,
-        name: COMMENT_REF_NAME,
-        id: commentId,
-      },
-    ];
+  protected createCommentReferences(id: string | null): SavedObjectReference[] {
+    return id != null
+      ? [
+          {
+            type: CASE_COMMENT_SAVED_OBJECT,
+            name: COMMENT_REF_NAME,
+            id,
+          },
+        ]
+      : [];
   }
 
-  protected createConnectorReference(id: string | null) {
+  protected createConnectorReference(id: string | null): SavedObjectReference[] {
     return this.createActionReference(id, CONNECTOR_ID_REFERENCE_NAME);
   }
 
-  protected createConnectorPushReference(id: string | null) {
+  protected createConnectorPushReference(id: string | null): SavedObjectReference[] {
     return this.createActionReference(id, PUSH_CONNECTOR_ID_REFERENCE_NAME);
   }
 
@@ -99,9 +107,10 @@ export abstract class UserActionBuilder {
     valueKey,
     caseId,
     subCaseId,
+    attachmentId,
+    connectorId,
     type,
-    extraReferences = [],
-  }: CommonBuilderArguments) => {
+  }: CommonBuilderArguments): BuilderReturnValue => {
     return {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
@@ -109,9 +118,20 @@ export abstract class UserActionBuilder {
         payload: { [valueKey]: value },
         type,
       },
-      references: [...this.createCaseReferences(caseId, subCaseId), ...extraReferences],
+      references: [
+        ...this.createCaseReferences(caseId, subCaseId),
+        ...this.createCommentReferences(attachmentId ?? null),
+        ...(type === ActionTypes.connector
+          ? this.createConnectorReference(connectorId ?? null)
+          : []),
+        ...(type === ActionTypes.pushed
+          ? this.createConnectorPushReference(connectorId ?? null)
+          : []),
+      ],
     };
   };
 
-  public abstract build(args: BuilderArgs): BuilderReturnValue;
+  public abstract build<T extends keyof BuilderParameters>(
+    args: UserActionParameters<T>
+  ): BuilderReturnValue;
 }

@@ -384,7 +384,7 @@ export const addComment = async (
       subCaseId: updatedCase.subCaseId,
       attachmentId: newComment.id,
       payload: {
-        comment: query,
+        attachment: query,
       },
       user,
       owner: newComment.attributes.owner,

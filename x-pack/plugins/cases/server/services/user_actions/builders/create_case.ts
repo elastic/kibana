@@ -7,10 +7,10 @@
 
 import { Actions, ActionTypes, CaseStatuses } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import { BuilderArgs, BuilderReturnValue } from '../types';
+import { UserActionParameters, BuilderReturnValue } from '../types';
 
 export class CreateCaseUserActionBuilder extends UserActionBuilder {
-  build(args: BuilderArgs): BuilderReturnValue {
+  build(args: UserActionParameters<'create_case'>): BuilderReturnValue {
     const { payload, caseId, subCaseId, owner, user } = args;
     const connectorWithoutId = this.extractConnectorId(payload.connector);
     return {

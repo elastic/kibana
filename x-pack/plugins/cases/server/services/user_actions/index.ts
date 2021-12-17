@@ -33,7 +33,6 @@ import {
   NONE_CONNECTOR_ID,
   SubCaseAttributes,
   User,
-  UserActionTypes,
 } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
@@ -52,7 +51,7 @@ import {
 } from '../../common/constants';
 import { findConnectorIdReference } from '../transform';
 import { isTwoArraysDifference } from '../../client/utils';
-import { BuilderReturnValue, CommonArguments } from './types';
+import { BuilderParameters, BuilderReturnValue, CommonArguments, CreateUserAction } from './types';
 import { BuilderFactory } from './builder_factory';
 
 interface GetCaseUserActionArgs extends ClientArgs {
@@ -96,10 +95,9 @@ interface BulkCreateBulkUpdateCaseUserActions extends ClientArgs {
 interface BulkCreateAttachmentDeletionUserAction extends Omit<CommonUserActionArgs, 'owner'> {
   attachments: Array<{ id: string; owner: string; attachment: CommentRequest }>;
 }
-interface CreateUserAction extends CommonUserActionArgs {
-  type: UserActionTypes;
-  payload: Record<string, unknown>;
-}
+
+type CreateUserActionClient<T extends keyof BuilderParameters> = CreateUserAction<T> &
+  CommonUserActionArgs;
 
 export class CaseUserActionService {
   private static readonly userActionFieldsAllowed: Set<string> = new Set(Object.keys(ActionTypes));
@@ -166,6 +164,7 @@ export class CaseUserActionService {
         subCaseId,
         owner,
         user,
+        // @ts-ignore
         payload: { [field]: newValue },
       });
 
@@ -266,7 +265,7 @@ export class CaseUserActionService {
           user,
           owner: attachment.owner,
           attachmentId: attachment.id,
-          payload: { comment: attachment.attachment },
+          payload: { attachment: attachment.attachment },
         });
 
         if (deleteCommentUserAction == null) {
@@ -281,7 +280,7 @@ export class CaseUserActionService {
     await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
   }
 
-  public async createUserAction({
+  public async createUserAction<T extends keyof BuilderParameters>({
     unsecuredSavedObjectsClient,
     action,
     type,
@@ -292,10 +291,11 @@ export class CaseUserActionService {
     payload,
     connectorId,
     attachmentId,
-  }: CreateUserAction) {
+  }: CreateUserActionClient<T>) {
     try {
       this.log.debug(`Attempting to create a user action of type: ${type}`);
-      const userActionBuilder = this.builderFactory.getBuilder(type);
+      const userActionBuilder = this.builderFactory.getBuilder<T>(type);
+
       const userAction = userActionBuilder?.build({
         action,
         caseId,
@@ -304,6 +304,7 @@ export class CaseUserActionService {
         owner,
         connectorId,
         attachmentId,
+        // @ts-ignore
         payload,
       });
 

@@ -185,7 +185,7 @@ export async function update(
       caseId: caseID,
       subCaseId: subCaseID,
       attachmentId: updatedComment.id,
-      payload: { comment: queryRestAttributes },
+      payload: { attachment: queryRestAttributes },
       user,
       owner: myComment.attributes.owner,
     });

@@ -179,7 +179,7 @@ export async function deleteComment(
       caseId: id,
       subCaseId: subCaseID,
       attachmentId: attachmentID,
-      payload: { comment: { ...myComment.attributes } },
+      payload: { attachment: { ...myComment.attributes } },
       user,
       owner: myComment.attributes.owner,
     });

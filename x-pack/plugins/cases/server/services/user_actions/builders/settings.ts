@@ -7,10 +7,10 @@
 
 import { Actions, ActionTypes } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import { BuilderArgs, BuilderReturnValue } from '../types';
+import { UserActionParameters, BuilderReturnValue } from '../types';
 
 export class SettingsUserActionBuilder extends UserActionBuilder {
-  build(args: BuilderArgs): BuilderReturnValue {
+  build(args: UserActionParameters<'settings'>): BuilderReturnValue {
     return this.buildCommonUserAction({
       ...args,
       action: Actions.update,

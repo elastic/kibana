@@ -7,18 +7,16 @@
 
 import { ActionTypes, Actions } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import { BuilderArgs, BuilderReturnValue } from '../types';
+import { UserActionParameters, BuilderReturnValue } from '../types';
 
 export class CommentUserActionBuilder extends UserActionBuilder {
-  build(args: BuilderArgs): BuilderReturnValue {
+  build(args: UserActionParameters<'comment'>): BuilderReturnValue {
     return this.buildCommonUserAction({
       ...args,
       action: args.action ?? Actions.update,
       valueKey: 'comment',
-      value: args.payload.comment,
+      value: args.payload.attachment,
       type: ActionTypes.comment,
-      extraReferences:
-        args.attachmentId != null ? this.createCommentReferences(args.attachmentId) : [],
     });
   }
 }

@@ -7,17 +7,17 @@
 
 import { Actions, ActionTypes } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import { BuilderArgs, BuilderReturnValue } from '../types';
+import { UserActionParameters, BuilderReturnValue } from '../types';
 
 export class PushedUserActionBuilder extends UserActionBuilder {
-  build(args: BuilderArgs): BuilderReturnValue {
+  build(args: UserActionParameters<'pushed'>): BuilderReturnValue {
     return this.buildCommonUserAction({
       ...args,
       action: Actions.push_to_service,
       valueKey: 'externalService',
       value: this.extractConnectorIdFromExternalService(args.payload.externalService),
       type: ActionTypes.pushed,
-      extraReferences: this.createConnectorPushReference(args.payload.externalService.connector_id),
+      connectorId: args.payload.externalService.connector_id,
     });
   }
 }
