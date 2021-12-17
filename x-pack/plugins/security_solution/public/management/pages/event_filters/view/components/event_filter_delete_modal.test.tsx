@@ -15,6 +15,7 @@ import { EventFilterDeleteModal } from './event_filter_delete_modal';
 import { fireEvent } from '@testing-library/dom';
 import { showDeleteModal } from '../../store/selector';
 import { isFailedResourceState, isLoadedResourceState } from '../../../../state';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('When event filters delete modal is shown', () => {
   let renderAndSetup: () => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -39,6 +40,12 @@ describe('When event filters delete modal is shown', () => {
 
   const getCurrentState = () => store.getState().management.eventFilters;
 
+  const partialEventFilter: Partial<ExceptionListItemSchema> = {
+    id: '123',
+    name: 'tic-tac-toe',
+    tags: [],
+  };
+
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
 
@@ -53,10 +60,7 @@ describe('When event filters delete modal is shown', () => {
 
         mockedContext.store.dispatch({
           type: 'eventFilterForDeletion',
-          payload: {
-            id: '123',
-            name: 'tic-tac-toe',
-          },
+          payload: partialEventFilter,
         });
       });
 
@@ -69,6 +73,38 @@ describe('When event filters delete modal is shown', () => {
   it('should display name of event filter in body message', async () => {
     await renderAndSetup();
     expect(getBody().textContent).toMatch(/You are removing event filter "tic-tac-toe"/);
+  });
+
+  it("should display calllout when it's assigned to one policy", async () => {
+    partialEventFilter.tags = ['policy:1'];
+    await renderAndSetup();
+    expect(renderResult.getByTestId('eventFilterDeleteModalCalloutMessage').textContent).toMatch(
+      /Deleting this entry will remove it from 1 associated policy./
+    );
+  });
+
+  it("should display calllout when it's assigned to more than one policy", async () => {
+    partialEventFilter.tags = ['policy:1', 'policy:2', 'policy:3'];
+    await renderAndSetup();
+    expect(renderResult.getByTestId('eventFilterDeleteModalCalloutMessage').textContent).toMatch(
+      /Deleting this entry will remove it from 3 associated policies./
+    );
+  });
+
+  it("should display calllout when it's assigned globally", async () => {
+    partialEventFilter.tags = ['policy:all'];
+    await renderAndSetup();
+    expect(renderResult.getByTestId('eventFilterDeleteModalCalloutMessage').textContent).toMatch(
+      /Deleting this entry will remove it from all associated policies./
+    );
+  });
+
+  it("should display calllout when it's unassigned", async () => {
+    partialEventFilter.tags = [];
+    await renderAndSetup();
+    expect(renderResult.getByTestId('eventFilterDeleteModalCalloutMessage').textContent).toMatch(
+      /Deleting this entry will remove it from 0 associated policies./
+    );
   });
 
   it('should close dialog if cancel button is clicked', async () => {
