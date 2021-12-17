@@ -38,8 +38,8 @@ describe('getConfig', () => {
   it('assigns the correct formatter per y axis', () => {
     const config = getConfig(visData, visParamsWithTwoYAxes);
     expect(config.yAxes.length).toBe(2);
-    expect(config.yAxes[0].ticks?.formatter).toStrictEqual(config.aspects.y[1].formatter);
-    expect(config.yAxes[1].ticks?.formatter).toStrictEqual(config.aspects.y[0].formatter);
+    expect(config.yAxes[0].ticks?.formatter).toStrictEqual(config.aspects.y[0].formatter);
+    expect(config.yAxes[1].ticks?.formatter).toStrictEqual(config.aspects.y[1].formatter);
   });
 
   it('assigns the correct number of yAxes if the agg is hidden', () => {
