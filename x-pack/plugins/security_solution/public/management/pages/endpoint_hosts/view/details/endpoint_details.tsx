@@ -125,7 +125,7 @@ export const EndpointDetails = memo(() => {
     <>
       {(show === 'policy_response' || show === 'isolate' || show === 'unisolate') && (
         <EndpointDetailsFlyoutHeader
-          hasBorder={true}
+          hasBorder
           endpointId={hostDetails?.agent.id}
           hostname={hostDetails?.host?.hostname}
         />

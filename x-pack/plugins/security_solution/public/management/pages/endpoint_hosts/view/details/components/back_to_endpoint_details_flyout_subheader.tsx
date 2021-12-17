@@ -48,7 +48,7 @@ export const BackToEndpointDetailsFlyoutSubHeader = memo<{ endpointId: string }>
     }, [backToDetailsClickHandler, getAppUrl, detailsRoutePath]);
 
     return (
-      <div className="buttons">
+      <div>
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
         <EuiButtonEmpty
           flush="both"
@@ -57,7 +57,6 @@ export const BackToEndpointDetailsFlyoutSubHeader = memo<{ endpointId: string }>
           size="xs"
           href={backButtonProps?.href ?? ''}
           onClick={backButtonProps?.onClick}
-          className="flyoutSubHeaderBackButton"
         >
           {backButtonProps?.title}
         </EuiButtonEmpty>
