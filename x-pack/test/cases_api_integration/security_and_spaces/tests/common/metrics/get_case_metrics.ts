@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { getPostCaseRequest, postCommentAlertReq } from '../../../..//common/lib/mock';
+import { getPostCaseRequest, postCommentAlertReq } from '../../../../common/lib/mock';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId: theCase.id,
-          features: ['alertsCount'],
+          features: ['alerts.count'],
         });
 
         expect(metrics).to.eql({
@@ -116,7 +116,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const metrics = await getCaseMetrics({
           supertest,
           caseId: theCase.id,
-          features: ['alertsCount'],
+          features: ['alerts.count'],
         });
 
         expect(metrics).to.eql({

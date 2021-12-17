@@ -28,7 +28,7 @@ import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
-  const { setHeaderActionMenu } = useContext(HeaderActionMenuContext);
+  const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
   const { initialize } = useLogSourceContext();
 
@@ -76,8 +76,8 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
       <HelpCenterContent feedbackLink={feedbackLinkUrl} appName={pageTitle} />
 
-      {setHeaderActionMenu && (
-        <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+      {setHeaderActionMenu && theme$ && (
+        <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
           <EuiHeaderLinks gutterSize="xs">
             <EuiHeaderLink color={'text'} {...settingsLinkProps}>
               {settingsTabTitle}
