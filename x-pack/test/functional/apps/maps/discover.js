@@ -35,8 +35,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.maps.waitForLayersToLoad();
       const doesLayerExist = await PageObjects.maps.doesLayerExist('geo_shapes*');
       expect(doesLayerExist).to.equal(true);
-      const hits = await PageObjects.maps.getHits();
-      expect(hits).to.equal('4');
       await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
     });
 
@@ -55,8 +53,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.maps.waitForLayersToLoad();
       const doesLayerExist = await PageObjects.maps.doesLayerExist('logstash-*');
       expect(doesLayerExist).to.equal(true);
-      const hits = await PageObjects.maps.getHits();
-      expect(hits).to.equal('7');
       await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
     });
   });

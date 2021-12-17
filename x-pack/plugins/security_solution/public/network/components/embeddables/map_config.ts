@@ -206,7 +206,7 @@ export const getDestinationLayer = (
   sourceDescriptor: {
     id: uuid.v4(),
     type: 'ES_SEARCH',
-    SCALING_TYPES.LIMIT,
+    scalingType: SCALING_TYPES.LIMIT,
     applyGlobalQuery: true,
     geoField: layerDetails.geoField,
     filterByMapBounds: true,
