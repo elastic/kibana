@@ -20,14 +20,14 @@ import { TimestampOverrideOrUndefined } from '../../../../common/detection_engin
 
 interface SingleSearchAfterParams {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
-  searchAfterSortIds: estypes.SearchSortResults | undefined;
+  searchAfterSortIds: estypes.SortResults | undefined;
   index: string[];
   from: string;
   to: string;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   pageSize: number;
-  sortOrder?: estypes.SearchSortOrder;
+  sortOrder?: estypes.SortOrder;
   filter: estypes.QueryDslQueryContainer;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
@@ -69,10 +69,10 @@ export const singleSearchAfter = async ({
     });
 
     const start = performance.now();
-    const { body: nextSearchAfterResult } =
-      await services.scopedClusterClient.asCurrentUser.search<SignalSource>(
-        searchAfterQuery as estypes.SearchRequest
-      );
+    const { body: nextSearchAfterResult } = await services.scopedClusterClient.asCurrentUser.search<
+      SignalSource,
+      Record<string, estypes.AggregationsAggregate>
+    >(searchAfterQuery as estypes.SearchRequest);
     const end = performance.now();
 
     const searchErrors = createErrorsFromShard({
