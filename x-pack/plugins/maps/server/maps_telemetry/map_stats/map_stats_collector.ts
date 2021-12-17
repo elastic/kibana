@@ -186,6 +186,10 @@ export class MapStatsCollector {
   } {
     const results: { [key: string]: Omit<ClusterCountStats, 'total'> } = {};
     for (const key in clusterStats) {
+      if (!clusterStats.hasOwnProperty(key)) {
+        continue;
+      }
+
       const stats = { ...clusterStats[key] } as {
         min: number;
         max: number;
