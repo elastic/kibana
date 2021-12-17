@@ -11,6 +11,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import intersection from 'lodash/intersection';
 
 import type { Logger } from '../../../logging';
+import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import type { IndexMapping } from '../../mappings';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
@@ -206,7 +207,16 @@ export async function updateObjectsSpaces({
         { ignore: [404] }
       )
     : undefined;
-
+  // fail fast if we can't verify a 404 response is from Elasticsearch
+  if (
+    bulkGetResponse &&
+    isNotFoundFromUnsupportedServer({
+      statusCode: bulkGetResponse.statusCode,
+      headers: bulkGetResponse.headers,
+    })
+  ) {
+    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+  }
   const time = new Date().toISOString();
   let bulkOperationRequestIndexCounter = 0;
   const bulkOperationParams: estypes.BulkOperationContainer[] = [];

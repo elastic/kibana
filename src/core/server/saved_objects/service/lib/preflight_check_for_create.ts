@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type {
@@ -19,6 +20,7 @@ import { getObjectKey, isLeft, isRight } from './internal_utils';
 import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
 import type { RepositoryEsClient } from './repository_es_client';
 import { ALL_NAMESPACES_STRING } from './utils';
+import { SavedObjectsErrorHelpers } from './errors';
 
 /**
  * If the object will be created in this many spaces (or "*" all current and future spaces), we use find to fetch all aliases.
@@ -274,6 +276,17 @@ async function bulkGetObjectsAndAliases(
         { ignore: [404] }
       )
     : undefined;
+
+  // throw if we can't verify a 404 response is from Elasticsearch
+  if (
+    bulkGetResponse &&
+    isNotFoundFromUnsupportedServer({
+      statusCode: bulkGetResponse.statusCode,
+      headers: bulkGetResponse.headers,
+    })
+  ) {
+    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+  }
 
   return { bulkGetResponse, aliasSpaces };
 }
