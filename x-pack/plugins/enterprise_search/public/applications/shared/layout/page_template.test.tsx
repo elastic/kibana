@@ -7,8 +7,6 @@
 
 import { setMockValues } from '../../__mocks__/kea_logic';
 
-jest.mock('./beta', () => ({ appendBetaNotificationItem: jest.fn() })); // Mostly adding this to get tests passing. Should be removed once we're out of beta
-
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -81,7 +79,7 @@ describe('EnterpriseSearchPageTemplate', () => {
       expect(wrapper.find('.emptyState').exists()).toBe(true);
       expect(wrapper.find('.test').exists()).toBe(false);
 
-      // @see https://github.com/elastic/kibana/blob/master/dev_docs/tutorials/kibana_page_template.mdx#isemptystate
+      // @see https://github.com/elastic/kibana/blob/main/dev_docs/tutorials/kibana_page_template.mdx#isemptystate
       // if you want to use KibanaPageTemplate's `isEmptyState` without a custom emptyState
     });
 

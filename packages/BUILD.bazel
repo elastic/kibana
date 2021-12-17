@@ -1,12 +1,13 @@
-# Grouping target to call all underlying packages build
-# targets so we can build them all at once
+# It will build all declared code packages
 filegroup(
-  name = "build",
+  name = "build_pkg_code",
   srcs = [
-     "//packages/elastic-datemath:build",
+      "//packages/elastic-apm-synthtrace:build",
+      "//packages/elastic-datemath:build",
       "//packages/elastic-eslint-config-kibana:build",
       "//packages/elastic-safer-lodash-set:build",
       "//packages/kbn-ace:build",
+      "//packages/kbn-alerts:build",
       "//packages/kbn-analytics:build",
       "//packages/kbn-apm-config-loader:build",
       "//packages/kbn-apm-utils:build",
@@ -26,15 +27,16 @@ filegroup(
       "//packages/kbn-expect:build",
       "//packages/kbn-field-types:build",
       "//packages/kbn-i18n:build",
+      "//packages/kbn-i18n-react:build",
       "//packages/kbn-interpreter:build",
       "//packages/kbn-io-ts-utils:build",
-      "//packages/kbn-legacy-logging:build",
       "//packages/kbn-logging:build",
       "//packages/kbn-mapbox-gl:build",
       "//packages/kbn-monaco:build",
       "//packages/kbn-optimizer:build",
       "//packages/kbn-plugin-generator:build",
       "//packages/kbn-plugin-helpers:build",
+      "//packages/kbn-react-field:build",
       "//packages/kbn-rule-data-utils:build",
       "//packages/kbn-securitysolution-autocomplete:build",
       "//packages/kbn-securitysolution-list-constants:build",
@@ -45,6 +47,7 @@ filegroup(
       "//packages/kbn-securitysolution-list-api:build",
       "//packages/kbn-securitysolution-list-hooks:build",
       "//packages/kbn-securitysolution-list-utils:build",
+      "//packages/kbn-securitysolution-rules:build",
       "//packages/kbn-securitysolution-utils:build",
       "//packages/kbn-securitysolution-es-utils:build",
       "//packages/kbn-securitysolution-t-grid:build",
@@ -57,11 +60,54 @@ filegroup(
       "//packages/kbn-telemetry-tools:build",
       "//packages/kbn-test:build",
       "//packages/kbn-test-subj-selector:build",
+      "//packages/kbn-timelion-grammar:build",
       "//packages/kbn-tinymath:build",
       "//packages/kbn-typed-react-router-config:build",
       "//packages/kbn-ui-framework:build",
-      "//packages/kbn-ui-shared-deps:build",
+      "//packages/kbn-ui-shared-deps-npm:build",
+      "//packages/kbn-ui-shared-deps-src:build",
       "//packages/kbn-utility-types:build",
       "//packages/kbn-utils:build",
+  ],
+)
+
+# It will build all declared package types
+filegroup(
+  name = "build_pkg_types",
+  srcs = [
+      "//packages/elastic-apm-synthtrace:build_types",
+      "//packages/elastic-datemath:build_types",
+      "//packages/kbn-ace:build_types",
+      "//packages/kbn-alerts:build_types",
+      "//packages/kbn-analytics:build_types",
+      "//packages/kbn-apm-config-loader:build_types",
+      "//packages/kbn-apm-utils:build_types",
+      "//packages/kbn-cli-dev-mode:build_types",
+      "//packages/kbn-config:build_types",
+      "//packages/kbn-config-schema:build_types",
+      "//packages/kbn-crypto:build_types",
+      "//packages/kbn-dev-utils:build_types",
+      "//packages/kbn-docs-utils:build_types",
+      "//packages/kbn-es-archiver:build_types",
+      "//packages/kbn-es-query:build_types",
+      "//packages/kbn-field-types:build_types",
+      "//packages/kbn-i18n:build_types",
+      "//packages/kbn-i18n-react:build_types",
+      "//packages/kbn-mapbox-gl:build_types",
+      "//packages/kbn-monaco:build_types",
+      "//packages/kbn-optimizer:build_types",
+  ],
+)
+
+
+
+# Grouping target to call all underlying packages build
+# targets so we can build them all at once
+# It will auto build all declared code packages and types packages
+filegroup(
+  name = "build",
+  srcs = [
+      ":build_pkg_code",
+      ":build_pkg_types"
   ],
 )

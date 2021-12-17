@@ -8,12 +8,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
+import type { IndexPatternField } from 'src/plugins/data/public';
 import { SingleFieldSelect } from './single_field_select';
-import { IFieldType } from '../../../../../src/plugins/data/common';
 
 interface Props {
   value: string;
-  geoFields: IFieldType[];
+  geoFields: IndexPatternField[];
   onChange: (geoFieldName?: string) => void;
 }
 

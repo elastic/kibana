@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
 import { EndpointDetailsFlyout } from './details';
@@ -58,8 +58,8 @@ import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { TableRowActions } from './components/table_row_actions';
 import { EndpointAgentStatus } from './components/endpoint_agent_status';
 import { CallOut } from '../../../../common/components/callouts';
-import { WARNING_TRANSFORM_STATES } from '../types';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
+import { WARNING_TRANSFORM_STATES, APP_UI_ID } from '../../../../../common/constants';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -128,14 +128,17 @@ export const EndpointList = () => {
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
   const [showTransformFailedCallout, setShowTransformFailedCallout] = useState(false);
+  const [shouldCheckTransforms, setShouldCheckTransforms] = useState(true);
 
   useEffect(() => {
-    if (!endpointsExist || !listData?.length) {
+    // if no endpoint policy, skip transform check
+    if (!shouldCheckTransforms || !policyItems || !policyItems.length) {
       return;
     }
 
     dispatch({ type: 'loadMetadataTransformStats' });
-  }, [endpointsExist, listData.length, dispatch]);
+    setShouldCheckTransforms(false);
+  }, [policyItems, shouldCheckTransforms, dispatch]);
 
   useEffect(() => {
     const hasFailure = metadataTransformStats.some((transform) =>
@@ -182,14 +185,14 @@ export const EndpointList = () => {
       }/add-integration`,
       state: {
         onCancelNavigateTo: [
-          'securitySolution',
+          APP_UI_ID,
           {
             path: getEndpointListPath({ name: 'endpointList' }),
           },
         ],
         onCancelUrl: getAppUrl({ path: getEndpointListPath({ name: 'endpointList' }) }),
         onSaveNavigateTo: [
-          'securitySolution',
+          APP_UI_ID,
           {
             path: getEndpointListPath({ name: 'endpointList' }),
           },
@@ -221,18 +224,13 @@ export const EndpointList = () => {
 
   const PAD_LEFT: React.CSSProperties = useMemo(() => ({ paddingLeft: '6px' }), []);
 
-  const handleDeployEndpointsClick = useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>(
-    'fleet',
-    {
+  const handleDeployEndpointsClick =
+    useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>('fleet', {
       path: `/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
       state: {
-        onDoneNavigateTo: [
-          'securitySolution',
-          { path: getEndpointListPath({ name: 'endpointList' }) },
-        ],
+        onDoneNavigateTo: [APP_UI_ID, { path: getEndpointListPath({ name: 'endpointList' }) }],
       },
-    }
-  );
+    });
 
   const selectionOptions = useMemo<EuiSelectableProps['options']>(() => {
     return policyItems.map((item) => {
@@ -303,7 +301,6 @@ export const EndpointList = () => {
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
           defaultMessage: 'Agent status',
         }),
-        // eslint-disable-next-line react/display-name
         render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
           return (
             <EndpointAgentStatus hostStatus={hostStatus} endpointMetadata={endpointInfo.metadata} />
@@ -317,7 +314,6 @@ export const EndpointList = () => {
           defaultMessage: 'Policy',
         }),
         truncateText: true,
-        // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
           return (
             <>
@@ -392,7 +388,6 @@ export const EndpointList = () => {
         name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
           defaultMessage: 'OS',
         }),
-        // eslint-disable-next-line react/display-name
         render: (os: string) => {
           return (
             <EuiToolTip content={os} anchorClassName="eui-textTruncate">
@@ -409,7 +404,6 @@ export const EndpointList = () => {
         name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
           defaultMessage: 'IP address',
         }),
-        // eslint-disable-next-line react/display-name
         render: (ip: string[]) => {
           return (
             <EuiToolTip
@@ -431,7 +425,6 @@ export const EndpointList = () => {
         name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
           defaultMessage: 'Version',
         }),
-        // eslint-disable-next-line react/display-name
         render: (version: string) => {
           return (
             <EuiToolTip content={version} anchorClassName="eui-textTruncate">
@@ -464,7 +457,6 @@ export const EndpointList = () => {
         }),
         actions: [
           {
-            // eslint-disable-next-line react/display-name
             render: (item: HostInfo) => {
               return <TableRowActions endpointMetadata={item.metadata} />;
             },
@@ -542,14 +534,19 @@ export const EndpointList = () => {
     return endpointsExist && !patternsError;
   }, [endpointsExist, patternsError]);
 
-  const transformFailedCalloutDescription = useMemo(
-    () => (
+  const transformFailedCalloutDescription = useMemo(() => {
+    const failingTransformIds = metadataTransformStats
+      .filter((transformStat) => WARNING_TRANSFORM_STATES.has(transformStat.state))
+      .map((transformStat) => transformStat.id)
+      .join(', ');
+
+    return (
       <>
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.transformFailed.message"
           defaultMessage="A required transform, {transformId}, is currently failing. Most of the time this can be fixed by {transformsPage}. For additional help, please visit the {docsPage}"
           values={{
-            transformId: metadataTransformStats[0]?.id || metadataTransformPrefix,
+            transformId: failingTransformIds || metadataTransformPrefix,
             transformsPage: (
               <LinkToApp
                 data-test-subj="failed-transform-restart-link"
@@ -565,7 +562,7 @@ export const EndpointList = () => {
             docsPage: (
               <EuiLink
                 data-test-subj="failed-transform-docs-link"
-                href={services?.docLinks?.links.transforms.guide}
+                href={services?.docLinks?.links.endpoints.troubleshooting}
                 target="_blank"
               >
                 <FormattedMessage
@@ -578,9 +575,8 @@ export const EndpointList = () => {
         />
         <EuiSpacer size="s" />
       </>
-    ),
-    [metadataTransformStats, services?.docLinks?.links.transforms.guide]
-  );
+    );
+  }, [metadataTransformStats, services?.docLinks?.links.endpoints.troubleshooting]);
 
   const transformFailedCallout = useMemo(() => {
     if (!showTransformFailedCallout) {

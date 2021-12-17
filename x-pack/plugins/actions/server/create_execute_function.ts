@@ -15,7 +15,7 @@ import {
 } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
-import { isSavedObjectExecutionSource } from './lib';
+import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
 import { RelatedSavedObjects } from './lib/related_saved_objects';
 
 interface CreateExecuteFunctionOptions {
@@ -53,12 +53,32 @@ export function createExecutionEnqueuerFunction({
       );
     }
 
-    const action = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
+    const { action, isPreconfigured } = await getAction(
+      unsecuredSavedObjectsClient,
+      preconfiguredActions,
+      id
+    );
     validateCanActionBeUsed(action);
 
     const { actionTypeId } = action;
     if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
       actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    }
+
+    // Get saved object references from action ID and relatedSavedObjects
+    const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
+      id,
+      isPreconfigured,
+      relatedSavedObjects
+    );
+    const executionSourceReference = executionSourceAsSavedObjectReferences(source);
+
+    const taskReferences = [];
+    if (executionSourceReference.references) {
+      taskReferences.push(...executionSourceReference.references);
+    }
+    if (references) {
+      taskReferences.push(...references);
     }
 
     const actionTaskParamsRecord = await unsecuredSavedObjectsClient.create(
@@ -67,9 +87,11 @@ export function createExecutionEnqueuerFunction({
         actionId: id,
         params,
         apiKey,
-        relatedSavedObjects,
+        relatedSavedObjects: relatedSavedObjectWithRefs,
       },
-      executionSourceAsSavedObjectReferences(source)
+      {
+        references: taskReferences,
+      }
     );
 
     await taskManager.schedule({
@@ -93,7 +115,7 @@ export function createEphemeralExecutionEnqueuerFunction({
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
     { id, params, spaceId, source, apiKey }: ExecuteOptions
   ): Promise<RunNowResult> {
-    const action = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
+    const { action } = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
     validateCanActionBeUsed(action);
 
     const { actionTypeId } = action;
@@ -148,12 +170,12 @@ async function getAction(
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string
-): Promise<PreConfiguredAction | RawAction> {
+): Promise<{ action: PreConfiguredAction | RawAction; isPreconfigured: boolean }> {
   const pcAction = preconfiguredActions.find((action) => action.id === actionId);
   if (pcAction) {
-    return pcAction;
+    return { action: pcAction, isPreconfigured: true };
   }
 
   const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
-  return attributes;
+  return { action: attributes, isPreconfigured: false };
 }

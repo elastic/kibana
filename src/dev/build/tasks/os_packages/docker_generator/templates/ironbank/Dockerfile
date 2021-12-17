@@ -2,9 +2,9 @@
 # Build stage 0
 # Extract Kibana and make various file manipulations.
 ################################################################################
-ARG BASE_REGISTRY=registry1.dsop.io
+ARG BASE_REGISTRY=registry1.dso.mil
 ARG BASE_IMAGE=redhat/ubi/ubi8
-ARG BASE_TAG=8.4
+ARG BASE_TAG=8.5
 
 FROM ${BASE_REGISTRY}/${BASE_IMAGE}:${BASE_TAG} as prep_files
 
@@ -51,6 +51,7 @@ COPY --from=prep_files --chown=1000:0 /usr/share/kibana /usr/share/kibana
 WORKDIR /usr/share/kibana
 RUN ln -s /usr/share/kibana /opt/kibana
 
+{{! Please notify @elastic/kibana-security if you want to remove or change this environment variable. }}
 ENV ELASTIC_CONTAINER true
 ENV PATH=/usr/share/kibana/bin:$PATH
 
@@ -59,7 +60,7 @@ COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
-COPY --chown=1000:0 bin/kibana-docker /usr/local/bin/
+COPY --chmod=755 bin/kibana-docker /usr/local/bin/
 
 # Remove the suid bit everywhere to mitigate "Stack Clash"
 RUN find / -xdev -perm -4000 -exec chmod u-s {} +

@@ -245,32 +245,6 @@ describe('Fetch', () => {
       });
     });
 
-    // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
-    it('should not allow overwriting of kbn-system-api when asSystemRequest: true', async () => {
-      fetchMock.get('*', {});
-      await expect(
-        fetchInstance.fetch('/my/path', {
-          headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
-          asSystemRequest: true,
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-api]"`
-      );
-    });
-
-    // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
-    it('should not allow overwriting of kbn-system-api when asSystemRequest: false', async () => {
-      fetchMock.get('*', {});
-      await expect(
-        fetchInstance.fetch('/my/path', {
-          headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
-          asSystemRequest: false,
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-api]"`
-      );
-    });
-
     it('should return response', async () => {
       fetchMock.get('*', { foo: 'bar' });
       const json = await fetchInstance.fetch('/my/path');
@@ -464,7 +438,7 @@ describe('Fetch', () => {
         headers: { 'Content-Type': 'application/ndjson' },
       });
 
-      const data = await fetchInstance.post('/my/path', {
+      const data = await fetchInstance.post<FormData>('/my/path', {
         body,
         headers: {
           'Content-Type': undefined,

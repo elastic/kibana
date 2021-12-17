@@ -98,6 +98,9 @@ export interface CrawlerDomain {
   defaultCrawlRule?: CrawlRule;
   entryPoints: EntryPoint[];
   sitemaps: Sitemap[];
+  deduplicationEnabled: boolean;
+  deduplicationFields: string[];
+  availableDeduplicationFields: string[];
 }
 
 export interface CrawlerDomainFromServer {
@@ -110,14 +113,21 @@ export interface CrawlerDomainFromServer {
   default_crawl_rule?: CrawlRule;
   entry_points: EntryPoint[];
   sitemaps: Sitemap[];
+  deduplication_enabled: boolean;
+  deduplication_fields: string[];
+  available_deduplication_fields: string[];
 }
 
 export interface CrawlerData {
   domains: CrawlerDomain[];
+  events: CrawlEvent[];
+  mostRecentCrawlRequest: CrawlRequest | null;
 }
 
 export interface CrawlerDataFromServer {
   domains: CrawlerDomainFromServer[];
+  events: CrawlEventFromServer[];
+  most_recent_crawl_request: CrawlRequestFromServer | null;
 }
 
 export interface CrawlerDomainValidationResultFromServer {
@@ -129,7 +139,7 @@ export interface CrawlerDomainValidationResultFromServer {
   }>;
 }
 
-export type CrawlerDomainValidationStepState = '' | 'loading' | 'valid' | 'invalid';
+export type CrawlerDomainValidationStepState = '' | 'loading' | 'valid' | 'warning' | 'invalid';
 
 export interface CrawlerDomainValidationStep {
   state: CrawlerDomainValidationStepState;
@@ -169,6 +179,10 @@ export enum CrawlerStatus {
   Skipped = 'skipped',
 }
 
+export enum CrawlType {
+  Full = 'full',
+  Partial = 'partial',
+}
 export interface CrawlRequestFromServer {
   id: string;
   status: CrawlerStatus;
@@ -184,6 +198,70 @@ export interface CrawlRequest {
   beganAt: string | null;
   completedAt: string | null;
 }
+
+export interface CrawlRequestStats {
+  status: {
+    avgResponseTimeMSec?: number;
+    crawlDurationMSec?: number;
+    pagesVisited?: number;
+    urlsAllowed?: number;
+    statusCodes?: {
+      [code: string]: number;
+    };
+  };
+}
+
+export interface CrawlRequestStatsFromServer {
+  status: {
+    avg_response_time_msec?: number;
+    crawl_duration_msec?: number;
+    pages_visited?: number;
+    urls_allowed?: number;
+    status_codes?: {
+      [code: string]: number;
+    };
+  };
+}
+
+export interface CrawlConfig {
+  domainAllowlist: string[];
+  seedUrls: string[];
+  sitemapUrls: string[];
+  maxCrawlDepth: number;
+}
+
+export interface CrawlConfigFromServer {
+  domain_allowlist: string[];
+  seed_urls: string[];
+  sitemap_urls: string[];
+  max_crawl_depth: number;
+}
+
+export type CrawlRequestWithDetailsFromServer = CrawlRequestFromServer & {
+  type: CrawlType;
+  crawl_config: CrawlConfigFromServer;
+  stats: CrawlRequestStatsFromServer;
+};
+
+export type CrawlRequestWithDetails = CrawlRequest & {
+  type: CrawlType;
+  crawlConfig: CrawlConfig;
+  stats: CrawlRequestStats | null;
+};
+
+export type CrawlEventStage = 'crawl' | 'process';
+
+export type CrawlEventFromServer = CrawlRequestFromServer & {
+  stage: CrawlEventStage;
+  type: CrawlType;
+  crawl_config: CrawlConfigFromServer;
+};
+
+export type CrawlEvent = CrawlRequest & {
+  stage: CrawlEventStage;
+  type: CrawlType;
+  crawlConfig: CrawlConfig;
+};
 
 export const readableCrawlerStatuses: { [key in CrawlerStatus]: string } = {
   [CrawlerStatus.Pending]: i18n.translate(
@@ -225,6 +303,17 @@ export const readableCrawlerStatuses: { [key in CrawlerStatus]: string } = {
   [CrawlerStatus.Skipped]: i18n.translate(
     'xpack.enterpriseSearch.appSearch.crawler.crawlerStatusOptions.skipped',
     { defaultMessage: 'Skipped' }
+  ),
+};
+
+export const readableCrawlTypes: { [key in CrawlType]: string } = {
+  [CrawlType.Full]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlTypeOptions.full',
+    { defaultMessage: 'Full' }
+  ),
+  [CrawlType.Partial]: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlTypeOptions.partial',
+    { defaultMessage: 'Partial' }
   ),
 };
 

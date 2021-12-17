@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useState, useMemo, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../../types';
@@ -101,7 +101,7 @@ export const AgentPolicyActionMenu = memo<{
                 >
                   <FormattedMessage
                     id="xpack.fleet.agentPolicyActionMenu.copyPolicyActionText"
-                    defaultMessage="Copy policy"
+                    defaultMessage="Duplicate policy"
                   />
                 </EuiContextMenuItem>,
               ];

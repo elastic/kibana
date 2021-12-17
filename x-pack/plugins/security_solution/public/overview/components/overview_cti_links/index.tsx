@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { TiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
 import { CtiEnabledModule } from './cti_enabled_module';
 import { CtiDisabledModule } from './cti_disabled_module';
 
@@ -15,21 +16,27 @@ export type ThreatIntelLinkPanelProps = Pick<
   GlobalTimeArgs,
   'from' | 'to' | 'deleteQuery' | 'setQuery'
 > & {
-  isThreatIntelModuleEnabled: boolean | undefined;
+  allIntegrationsInstalled: boolean | undefined;
+  allTiDataSources: TiDataSources[];
 };
 
 const ThreatIntelLinkPanelComponent: React.FC<ThreatIntelLinkPanelProps> = (props) => {
-  switch (props.isThreatIntelModuleEnabled) {
-    case true:
-      return <CtiEnabledModule {...props} data-test-subj="cti-enabled-module" />;
-    case false:
-      return <CtiDisabledModule data-test-subj="cti-disabled-module" />;
-    case undefined:
-    default:
-      return null;
-  }
+  const { allIntegrationsInstalled, allTiDataSources } = props;
+  const isThreatIntelModuleEnabled = allTiDataSources.length > 0;
+  return isThreatIntelModuleEnabled ? (
+    <div data-test-subj="cti-enabled-module">
+      <CtiEnabledModule
+        {...props}
+        allTiDataSources={allTiDataSources}
+        allIntegrationsInstalled={Boolean(allIntegrationsInstalled)}
+      />
+    </div>
+  ) : (
+    <div data-test-subj="cti-disabled-module">
+      <CtiDisabledModule />
+    </div>
+  );
 };
 
-ThreatIntelLinkPanelComponent.displayName = 'ThreatIntelDashboardLinksComponent';
-
 export const ThreatIntelLinkPanel = React.memo(ThreatIntelLinkPanelComponent);
+ThreatIntelLinkPanel.displayName = 'ThreatIntelDashboardLinksComponent';

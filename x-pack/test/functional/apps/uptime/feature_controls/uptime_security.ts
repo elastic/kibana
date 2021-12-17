@@ -25,6 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
     });
 
@@ -68,6 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const navLinks = await appsMenu.readLinks();
         expect(navLinks.map((link) => link.text)).to.eql([
           'Overview',
+          'Alerts',
           'Uptime',
           'Stack Management',
         ]);
@@ -121,7 +123,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows uptime navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Uptime', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Alerts', 'Uptime', 'Stack Management']);
       });
 
       it('can navigate to Uptime app', async () => {
@@ -134,7 +136,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no uptime privileges', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/104249
+    describe.skip('no uptime privileges', () => {
       before(async () => {
         await security.role.create('no_uptime_privileges_role', {
           elasticsearch: {

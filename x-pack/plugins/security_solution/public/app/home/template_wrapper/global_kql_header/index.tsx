@@ -11,7 +11,7 @@ import { useGlobalHeaderPortal } from '../../../../common/hooks/use_global_heade
 
 const StyledStickyWrapper = styled.div`
   position: sticky;
-  z-index: ${(props) => props.theme.eui.euiZLevel2};
+  z-index: ${(props) => props.theme.eui.euiZHeaderBelowDataGrid};
   // TOP location is declared in src/public/rendering/_base.scss to keep in line with Kibana Chrome
 `;
 

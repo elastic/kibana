@@ -70,3 +70,9 @@ export const ENDPOINT_EVENT_FILTERS_LIST_NAME = 'Endpoint Security Event Filters
 
 /** Description of event filters agnostic list */
 export const ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION = 'Endpoint Security Event Filters List';
+
+export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID = 'endpoint_host_isolation_exceptions';
+export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME =
+  'Endpoint Security Host isolation exceptions List';
+export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION =
+  'Endpoint Security Host isolation exceptions List';

@@ -10,11 +10,12 @@
 ```typescript
 export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> 
 ```
+<b>Extends:</b> SavedObject&lt;T&gt;
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [score](./kibana-plugin-core-server.savedobjectsfindresult.score.md) | <code>number</code> | The Elasticsearch <code>_score</code> of this result. |
-|  [sort](./kibana-plugin-core-server.savedobjectsfindresult.sort.md) | <code>string[]</code> | The Elasticsearch <code>sort</code> value of this result. |
+|  [score](./kibana-plugin-core-server.savedobjectsfindresult.score.md) | number | The Elasticsearch <code>_score</code> of this result. |
+|  [sort?](./kibana-plugin-core-server.savedobjectsfindresult.sort.md) | string\[\] | <i>(Optional)</i> The Elasticsearch <code>sort</code> value of this result. |
 

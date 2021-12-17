@@ -10,6 +10,7 @@ import Path from 'path';
 import Fs from 'fs';
 import Zlib from 'zlib';
 import { inspect } from 'util';
+import prettier from 'prettier';
 
 import cpy from 'cpy';
 import del from 'del';
@@ -132,7 +133,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   expect(foo.cache.getModuleCount()).toBe(6);
   expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps/target/public_path_module_creator.js,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps-npm/target_node/public_path_module_creator.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
@@ -155,7 +156,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       <absolute path>/node_modules/@kbn/optimizer/postcss.config.js,
       <absolute path>/node_modules/css-loader/package.json,
       <absolute path>/node_modules/style-loader/package.json,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps/target/public_path_module_creator.js,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps-npm/target_node/public_path_module_creator.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.ts,
@@ -175,7 +176,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
 
   expect(baz.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps/target/public_path_module_creator.js,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps-npm/target_node/public_path_module_creator.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/worker/entry_point_creator.ts,
@@ -245,9 +246,13 @@ it('prepares assets for distribution', async () => {
  * Verifies that the file matches the expected output and has matching compressed variants.
  */
 const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabel: string) => {
-  const raw = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, filePath), 'utf8');
+  const path = Path.resolve(MOCK_REPO_DIR, filePath);
+  const raw = Fs.readFileSync(path, 'utf8');
+  const pretty = prettier.format(raw, {
+    filepath: path,
+  });
 
-  expect(raw).toMatchSnapshot(snapshotLabel);
+  expect(pretty).toMatchSnapshot(snapshotLabel);
 
   // Verify the brotli variant matches
   expect(

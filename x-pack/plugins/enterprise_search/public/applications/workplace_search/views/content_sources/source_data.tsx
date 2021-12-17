@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../shared/doc_links';
+
 import { SOURCE_NAMES, SOURCE_OBJ_TYPES, GITHUB_LINK_TITLE } from '../../constants';
 import {
   ADD_BOX_PATH,
@@ -45,43 +47,8 @@ import {
   EDIT_SLACK_PATH,
   EDIT_ZENDESK_PATH,
   EDIT_CUSTOM_PATH,
-  BOX_DOCS_URL,
-  CONFLUENCE_DOCS_URL,
-  CONFLUENCE_SERVER_DOCS_URL,
-  GITHUB_ENTERPRISE_DOCS_URL,
-  DROPBOX_DOCS_URL,
-  GITHUB_DOCS_URL,
-  GMAIL_DOCS_URL,
-  GOOGLE_DRIVE_DOCS_URL,
-  JIRA_DOCS_URL,
-  JIRA_SERVER_DOCS_URL,
-  ONEDRIVE_DOCS_URL,
-  SALESFORCE_DOCS_URL,
-  SERVICENOW_DOCS_URL,
-  SHAREPOINT_DOCS_URL,
-  SLACK_DOCS_URL,
-  ZENDESK_DOCS_URL,
-  CUSTOM_SOURCE_DOCS_URL,
 } from '../../routes';
 import { FeatureIds, SourceDataItem } from '../../types';
-
-const connectStepDescription = {
-  attachments: i18n.translate(
-    'xpack.enterpriseSearch.workplaceSearch.sources.connectStepDescription.attachments',
-    {
-      defaultMessage:
-        'Content found within Attachments (PDFs, Microsoft Office Files, and other popular textual file formats) will be automatically indexed and searchable.',
-    }
-  ),
-  files: i18n.translate(
-    'xpack.enterpriseSearch.workplaceSearch.sources.connectStepDescription.files',
-    {
-      defaultMessage:
-        'Content found within PDFs, Microsoft Office Files, and other popular textual file formats will be automatically indexed and searchable.',
-    }
-  ),
-  empty: '',
-};
 
 export const staticSourceData = [
   {
@@ -93,18 +60,9 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: BOX_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchBox,
       applicationPortalUrl: 'https://app.box.com/developers/console',
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.box',
-      {
-        defaultMessage:
-          '{sourceName} is a cloud-based storage service for organizations of all sizes. Create, store, share and automatically synchronize documents across your desktop and web.',
-        values: { sourceName: SOURCE_NAMES.BOX },
-      }
-    ),
-    connectStepDescription: connectStepDescription.files,
     objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.ALL_FILES],
     features: {
       basicOrgContext: [
@@ -131,18 +89,9 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: true,
-      documentationUrl: CONFLUENCE_DOCS_URL,
-      applicationPortalUrl: 'https://developer.atlassian.com/apps/',
+      documentationUrl: docLinks.workplaceSearchConfluenceCloud,
+      applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.confluence',
-      {
-        defaultMessage:
-          '{sourceName} is a team workspace, where knowledge and collaboration meet. Often used as an organizational wiki and intranet, it usually houses valuable information for staff across multiple areas of your business.',
-        values: { sourceName: SOURCE_NAMES.CONFLUENCE },
-      }
-    ),
-    connectStepDescription: connectStepDescription.attachments,
     objTypes: [
       SOURCE_OBJ_TYPES.PAGES,
       SOURCE_OBJ_TYPES.ATTACHMENTS,
@@ -174,17 +123,8 @@ export const staticSourceData = [
       isPublicKey: true,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: CONFLUENCE_SERVER_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchConfluenceServer,
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.confluenceServer',
-      {
-        defaultMessage:
-          '{sourceName} is a team workspace, where knowledge and collaboration meet. Often used as an organizational wiki and intranet, it usually houses valuable information for staff across multiple areas of your business.',
-        values: { sourceName: SOURCE_NAMES.CONFLUENCE },
-      }
-    ),
-    connectStepDescription: connectStepDescription.attachments,
     objTypes: [
       SOURCE_OBJ_TYPES.PAGES,
       SOURCE_OBJ_TYPES.ATTACHMENTS,
@@ -215,18 +155,9 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: DROPBOX_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchDropbox,
       applicationPortalUrl: 'https://www.dropbox.com/developers/apps',
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.dropbox',
-      {
-        defaultMessage:
-          '{sourceName} is a cloud-based storage service for organizations of all sizes. Create, store, share and automatically synchronize documents across your desktop and web.',
-        values: { sourceName: SOURCE_NAMES.DROPBOX },
-      }
-    ),
-    connectStepDescription: connectStepDescription.files,
     objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.ALL_FILES],
     features: {
       basicOrgContext: [
@@ -234,6 +165,7 @@ export const staticSourceData = [
         FeatureIds.SyncedItems,
         FeatureIds.GlobalAccessPermissions,
       ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
       platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
       platinumPrivateContext: [
         FeatureIds.Private,
@@ -253,23 +185,15 @@ export const staticSourceData = [
       hasOauthRedirect: true,
       needsBaseUrl: false,
       needsConfiguration: true,
-      documentationUrl: GITHUB_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchGitHub,
       applicationPortalUrl: 'https://github.com/settings/developers',
       applicationLinkTitle: GITHUB_LINK_TITLE,
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.github',
-      {
-        defaultMessage:
-          '{sourceName} is a development platform, version control and collaboration platform for teams of all sizes. From open source to business, you can host and review code, manage projects, and build software across departments and continents.',
-        values: { sourceName: SOURCE_NAMES.GITHUB },
-      }
-    ),
-    connectStepDescription: connectStepDescription.empty,
     objTypes: [
       SOURCE_OBJ_TYPES.ISSUES,
       SOURCE_OBJ_TYPES.PULL_REQUESTS,
       SOURCE_OBJ_TYPES.REPOSITORY_LIST,
+      SOURCE_OBJ_TYPES.FILES,
     ],
     features: {
       basicOrgContext: [
@@ -277,6 +201,7 @@ export const staticSourceData = [
         FeatureIds.SyncedItems,
         FeatureIds.GlobalAccessPermissions,
       ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
       platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
       platinumPrivateContext: [
         FeatureIds.Private,
@@ -302,23 +227,15 @@ export const staticSourceData = [
           defaultMessage: 'GitHub Enterprise URL',
         }
       ),
-      documentationUrl: GITHUB_ENTERPRISE_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchGitHub,
       applicationPortalUrl: 'https://github.com/settings/developers',
       applicationLinkTitle: GITHUB_LINK_TITLE,
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.githubEnterprise',
-      {
-        defaultMessage:
-          '{sourceName} is a development platform, version control and collaboration platform for teams of all sizes. From open source to business, you can host and review code, manage projects, and build software across departments and continents.',
-        values: { sourceName: SOURCE_NAMES.GITHUB_ENTERPRISE },
-      }
-    ),
-    connectStepDescription: connectStepDescription.empty,
     objTypes: [
       SOURCE_OBJ_TYPES.ISSUES,
       SOURCE_OBJ_TYPES.PULL_REQUESTS,
       SOURCE_OBJ_TYPES.REPOSITORY_LIST,
+      SOURCE_OBJ_TYPES.FILES,
     ],
     features: {
       basicOrgContext: [
@@ -326,6 +243,7 @@ export const staticSourceData = [
         FeatureIds.SyncedItems,
         FeatureIds.GlobalAccessPermissions,
       ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
       platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
       platinumPrivateContext: [
         FeatureIds.Private,
@@ -344,18 +262,9 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: GMAIL_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchGmail,
       applicationPortalUrl: 'https://console.developers.google.com/',
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.gmail',
-      {
-        defaultMessage:
-          '{sourceName} is a free email service developed by Google. It is fast, reliable, and trusted by millions of people and organizations around the world. Workplace Search brings all of your Gmail content into one relevant and ease-to-use search experience.',
-        values: { sourceName: SOURCE_NAMES.GMAIL },
-      }
-    ),
-    connectStepDescription: connectStepDescription.empty,
     objTypes: [SOURCE_OBJ_TYPES.EMAILS],
     features: {
       platinumPrivateContext: [FeatureIds.Remote, FeatureIds.Private, FeatureIds.SearchableContent],
@@ -371,18 +280,9 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: GOOGLE_DRIVE_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchGoogleDrive,
       applicationPortalUrl: 'https://console.developers.google.com/',
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.googleDrive',
-      {
-        defaultMessage:
-          '{sourceName} is a cloud-based storage and collaboration service for organizations of all sizes, with a focus on G Suite document (Google Docs, Sheets, Slides, etc) storage and collaboration. Create, store, share and automatically synchronize documents across your desktop and web.',
-        values: { sourceName: SOURCE_NAMES.GOOGLE_DRIVE },
-      }
-    ),
-    connectStepDescription: connectStepDescription.files,
     objTypes: [
       SOURCE_OBJ_TYPES.FOLDERS,
       SOURCE_OBJ_TYPES.G_SUITE_FILES,
@@ -410,21 +310,12 @@ export const staticSourceData = [
     addPath: ADD_JIRA_PATH,
     editPath: EDIT_JIRA_PATH,
     configuration: {
-      isPublicKey: true,
+      isPublicKey: false,
       hasOauthRedirect: true,
-      needsBaseUrl: false,
-      documentationUrl: JIRA_DOCS_URL,
-      applicationPortalUrl: '',
+      needsBaseUrl: true,
+      documentationUrl: docLinks.workplaceSearchJiraCloud,
+      applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.jira',
-      {
-        defaultMessage:
-          '{sourceName} is an issue tracking product that provides bug tracking, workflow automation, and agile project management tools for teams of all sizes. ',
-        values: { sourceName: SOURCE_NAMES.JIRA },
-      }
-    ),
-    connectStepDescription: connectStepDescription.files,
     objTypes: [
       SOURCE_OBJ_TYPES.EPICS,
       SOURCE_OBJ_TYPES.PROJECTS,
@@ -458,18 +349,9 @@ export const staticSourceData = [
       isPublicKey: true,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: JIRA_SERVER_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchJiraServer,
       applicationPortalUrl: '',
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.jiraServer',
-      {
-        defaultMessage:
-          '{sourceName} is an issue tracking product that provides bug tracking, workflow automation, and agile project management tools for teams of all sizes. ',
-        values: { sourceName: SOURCE_NAMES.JIRA_SERVER },
-      }
-    ),
-    connectStepDescription: connectStepDescription.files,
     objTypes: [
       SOURCE_OBJ_TYPES.EPICS,
       SOURCE_OBJ_TYPES.PROJECTS,
@@ -502,18 +384,9 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: ONEDRIVE_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchOneDrive,
       applicationPortalUrl: 'https://portal.azure.com/',
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.oneDrive',
-      {
-        defaultMessage:
-          '{sourceName} is a cloud-based storage service for organizations of all sizes, with a focus on Office 365 document storage and collaboration. Create, store, share and automatically synchronize documents across your organization.',
-        values: { sourceName: SOURCE_NAMES.ONEDRIVE },
-      }
-    ),
-    connectStepDescription: connectStepDescription.files,
     objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.ALL_FILES],
     features: {
       basicOrgContext: [
@@ -540,24 +413,17 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: SALESFORCE_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchSalesforce,
       applicationPortalUrl: 'https://salesforce.com/',
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.salesforce',
-      {
-        defaultMessage:
-          '{sourceName} is a cloud-based customer relationship management (CRM) platform with a focus on customer service, marketing automation, analytics, and sales operation tooling.',
-        values: { sourceName: SOURCE_NAMES.SALESFORCE },
-      }
-    ),
-    connectStepDescription: connectStepDescription.attachments,
     objTypes: [
       SOURCE_OBJ_TYPES.CONTACTS,
       SOURCE_OBJ_TYPES.OPPORTUNITIES,
       SOURCE_OBJ_TYPES.LEADS,
       SOURCE_OBJ_TYPES.ACCOUNTS,
+      SOURCE_OBJ_TYPES.ATTACHMENTS,
       SOURCE_OBJ_TYPES.CAMPAIGNS,
+      SOURCE_OBJ_TYPES.CASES,
     ],
     features: {
       basicOrgContext: [
@@ -583,24 +449,17 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: SALESFORCE_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchSalesforce,
       applicationPortalUrl: 'https://test.salesforce.com/',
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.salesforceSandbox',
-      {
-        defaultMessage:
-          '{sourceName} is a cloud-based customer relationship management (CRM) platform with a focus on customer service, marketing automation, analytics, and sales operation tooling.',
-        values: { sourceName: SOURCE_NAMES.SALESFORCE_SANDBOX },
-      }
-    ),
-    connectStepDescription: connectStepDescription.attachments,
     objTypes: [
       SOURCE_OBJ_TYPES.CONTACTS,
       SOURCE_OBJ_TYPES.OPPORTUNITIES,
       SOURCE_OBJ_TYPES.LEADS,
       SOURCE_OBJ_TYPES.ACCOUNTS,
+      SOURCE_OBJ_TYPES.ATTACHMENTS,
       SOURCE_OBJ_TYPES.CAMPAIGNS,
+      SOURCE_OBJ_TYPES.CASES,
     ],
     features: {
       basicOrgContext: [
@@ -626,18 +485,9 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: false,
       needsBaseUrl: true,
-      documentationUrl: SERVICENOW_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchServiceNow,
       applicationPortalUrl: 'https://www.servicenow.com/my-account/sign-in.html',
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.serviceNow',
-      {
-        defaultMessage:
-          '{sourceName} is a cloud-based IT Service Management (ITSM) platform focusing on workflow automation and internal organizational support.',
-        values: { sourceName: SOURCE_NAMES.SERVICENOW },
-      }
-    ),
-    connectStepDescription: connectStepDescription.empty,
     objTypes: [
       SOURCE_OBJ_TYPES.USERS,
       SOURCE_OBJ_TYPES.INCIDENTS,
@@ -668,18 +518,9 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: SHAREPOINT_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchSharePoint,
       applicationPortalUrl: 'https://portal.azure.com/',
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.sharePoint',
-      {
-        defaultMessage:
-          '{sourceName} is a cloud-based collaboration, knowledge management and storage platform for organizations of all sizes. Often used as a centralized content management system (CMS), SharePoint Online stores a wealth of information across departments and teams.',
-        values: { sourceName: SOURCE_NAMES.SHAREPOINT },
-      }
-    ),
-    connectStepDescription: connectStepDescription.files,
     objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.SITES, SOURCE_OBJ_TYPES.ALL_FILES],
     features: {
       basicOrgContext: [
@@ -706,18 +547,9 @@ export const staticSourceData = [
       isPublicKey: false,
       hasOauthRedirect: true,
       needsBaseUrl: false,
-      documentationUrl: SLACK_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchSlack,
       applicationPortalUrl: 'https://api.slack.com/apps/',
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.slack',
-      {
-        defaultMessage:
-          '{sourceName} is a communication tool that enables real-time collaboration and decision making. With {sourceName}, keep track of the work happening across teams, engage directly with your coworkers on ongoing projects and communicate with other organizations.',
-        values: { sourceName: SOURCE_NAMES.SLACK },
-      }
-    ),
-    connectStepDescription: connectStepDescription.empty,
     objTypes: [
       SOURCE_OBJ_TYPES.PUBLIC_MESSAGES,
       SOURCE_OBJ_TYPES.PRIVATE_MESSAGES,
@@ -738,18 +570,9 @@ export const staticSourceData = [
       hasOauthRedirect: true,
       needsBaseUrl: false,
       needsSubdomain: true,
-      documentationUrl: ZENDESK_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchZendesk,
       applicationPortalUrl: 'https://www.zendesk.com/login/',
     },
-    sourceDescription: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.zendesk',
-      {
-        defaultMessage:
-          '{sourceName} is cloud-based customer relationship management and customer support platform that provides tools for tracking, prioritizing, and solving customer support tickets.',
-        values: { sourceName: SOURCE_NAMES.ZENDESK },
-      }
-    ),
-    connectStepDescription: connectStepDescription.empty,
     objTypes: [SOURCE_OBJ_TYPES.TICKETS],
     features: {
       basicOrgContext: [
@@ -779,11 +602,9 @@ export const staticSourceData = [
         defaultMessage:
           'To create a Custom API Source, provide a human-readable and descriptive name. The name will appear as-is in the various search experiences and management interfaces.',
       }),
-      documentationUrl: CUSTOM_SOURCE_DOCS_URL,
+      documentationUrl: docLinks.workplaceSearchCustomSources,
       applicationPortalUrl: '',
     },
-    sourceDescription: '',
-    connectStepDescription: connectStepDescription.empty,
     accountContextOnly: false,
   },
 ] as SourceDataItem[];

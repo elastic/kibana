@@ -8,8 +8,8 @@
 /* eslint-disable no-console */
 import yargs from 'yargs';
 import fs from 'fs';
-import { Client, ClientOptions } from '@elastic/elasticsearch';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { Client, errors } from '@elastic/elasticsearch';
+import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import { ToolingLog, CA_CERT_PATH } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
@@ -19,7 +19,7 @@ main();
 
 async function deleteIndices(indices: string[], client: Client) {
   const handleErr = (err: unknown) => {
-    if (err instanceof ResponseError && err.statusCode !== 404) {
+    if (err instanceof errors.ResponseError && err.statusCode !== 404) {
       console.log(JSON.stringify(err, null, 2));
       // eslint-disable-next-line no-process-exit
       process.exit(1);
@@ -165,6 +165,14 @@ async function main() {
       type: 'boolean',
       default: false,
     },
+    logsEndpoint: {
+      alias: 'le',
+      describe:
+        'By default .logs-endpoint.action and .logs-endpoint.action.responses are not indexed. \
+        Add endpoint actions and responses using this option. Starting with v7.16.0.',
+      type: 'boolean',
+      default: false,
+    },
     ssl: {
       alias: 'ssl',
       describe: 'Use https for elasticsearch and kbn clients',
@@ -188,7 +196,7 @@ async function main() {
       url,
       certificateAuthorities: [ca],
     });
-    clientOptions = { node, ssl: { ca: [ca] } };
+    clientOptions = { node, tls: { ca: [ca] } };
   } else {
     kbnClient = new KbnClient({
       log: new ToolingLog({
@@ -226,6 +234,7 @@ async function main() {
     argv.alertIndex,
     argv.alertsPerHost,
     argv.fleet,
+    argv.logsEndpoint,
     {
       ancestors: argv.ancestors,
       generations: argv.generations,

@@ -6,7 +6,6 @@
  */
 
 import { useStartServices } from '../../../hooks/use_core';
-import { PLUGIN_ID } from '../../../constants';
 import { epmRouteService } from '../../../services';
 import type { PackageSpecIcon, PackageSpecScreenshot, RegistryImage } from '../../../../common';
 
@@ -16,7 +15,7 @@ const removeRelativePath = (relativePath: string): string =>
 export function useLinks() {
   const { http } = useStartServices();
   return {
-    toAssets: (path: string) => http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/${path}`),
+    toSharedAssets: (path: string) => http.basePath.prepend(`/plugins/kibanaReact/assets/${path}`),
     toPackageImage: (
       img: PackageSpecIcon | PackageSpecScreenshot | RegistryImage,
       pkgName: string,
@@ -40,8 +39,7 @@ export function useLinks() {
       version: string;
     }) => {
       const imagePath = removeRelativePath(path);
-      const pkgkey = `${packageName}-${version}`;
-      const filePath = `${epmRouteService.getInfoPath(pkgkey)}/${imagePath}`;
+      const filePath = `${epmRouteService.getInfoPath(packageName, version)}/${imagePath}`;
       return http.basePath.prepend(filePath);
     },
   };

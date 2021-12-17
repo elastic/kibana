@@ -12,6 +12,7 @@ import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public
 import type { LensPluginStartDependencies } from '../plugin';
 import { getTimeZone } from '../utils';
 import type { FormatFactory } from '../../common';
+import { LEGACY_TIME_AXIS } from '../../../../../src/plugins/charts/common';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
@@ -21,38 +22,15 @@ export interface XyVisualizationPluginSetupPlugins {
 }
 
 export class XyVisualization {
-  constructor() {}
-
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
     { expressions, formatFactory, editorFrame }: XyVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const {
-        legendConfig,
-        yAxisConfig,
-        tickLabelsConfig,
-        gridlinesConfig,
-        axisTitlesVisibilityConfig,
-        axisExtentConfig,
-        labelsOrientationConfig,
-        layerConfig,
-        xyChart,
-        getXyChartRenderer,
-        getXyVisualization,
-      } = await import('../async_services');
+      const { getXyChartRenderer, getXyVisualization } = await import('../async_services');
       const [, { charts, fieldFormats }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
-      expressions.registerFunction(() => legendConfig);
-      expressions.registerFunction(() => yAxisConfig);
-      expressions.registerFunction(() => tickLabelsConfig);
-      expressions.registerFunction(() => axisExtentConfig);
-      expressions.registerFunction(() => labelsOrientationConfig);
-      expressions.registerFunction(() => gridlinesConfig);
-      expressions.registerFunction(() => axisTitlesVisibilityConfig);
-      expressions.registerFunction(() => layerConfig);
-      expressions.registerFunction(() => xyChart);
-
+      const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
       expressions.registerRenderer(
         getXyChartRenderer({
           formatFactory,
@@ -60,9 +38,16 @@ export class XyVisualization {
           chartsActiveCursorService: charts.activeCursor,
           paletteService: palettes,
           timeZone: getTimeZone(core.uiSettings),
+          useLegacyTimeAxis,
+          kibanaTheme: core.theme,
         })
       );
-      return getXyVisualization({ paletteService: palettes, fieldFormats });
+      return getXyVisualization({
+        paletteService: palettes,
+        fieldFormats,
+        useLegacyTimeAxis,
+        kibanaTheme: core.theme,
+      });
     });
   }
 }

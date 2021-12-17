@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { AppMountParameters } from 'kibana/public';
+import type { AppMountParameters } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../src/plugins/kibana_react/public';
 import {
   getCoreChrome,
   getCoreI18n,
@@ -62,12 +62,10 @@ function setAppChrome() {
   });
 }
 
-export async function renderApp({
-  element,
-  history,
-  onAppLeave,
-  setHeaderActionMenu,
-}: AppMountParameters) {
+export async function renderApp(
+  { element, history, onAppLeave, setHeaderActionMenu, theme$ }: AppMountParameters,
+  AppUsageTracker: React.FC
+) {
   goToSpecifiedPath = (path) => history.push(path);
   kbnUrlStateStorage = createKbnUrlStateStorage({
     useHash: false,
@@ -80,7 +78,7 @@ export async function renderApp({
   setAppChrome();
 
   function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
-    const { embeddableId, originatingApp, valueInput } =
+    const { embeddableId, originatingApp, valueInput, originatingPath } =
       stateTransfer.getIncomingEditorState(APP_ID) || {};
 
     let mapEmbeddableInput;
@@ -101,35 +99,42 @@ export async function renderApp({
         setHeaderActionMenu={setHeaderActionMenu}
         stateTransfer={stateTransfer}
         originatingApp={originatingApp}
+        originatingPath={originatingPath}
+        history={history}
+        key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
       />
     );
   }
 
   const I18nContext = getCoreI18n().Context;
   render(
-    <I18nContext>
-      <Router history={history}>
-        <Switch>
-          <Route path={`/map/:savedMapId`} render={renderMapApp} />
-          <Route exact path={`/map`} render={renderMapApp} />
-          // Redirect other routes to list, or if hash-containing, their non-hash equivalents
-          <Route
-            path={``}
-            render={({ location: { pathname, hash } }) => {
-              if (hash) {
-                // Remove leading hash
-                const newPath = hash.substr(1);
-                return <Redirect to={newPath} />;
-              } else if (pathname === '/' || pathname === '') {
-                return <ListPage stateTransfer={stateTransfer} />;
-              } else {
-                return <Redirect to="/" />;
-              }
-            }}
-          />
-        </Switch>
-      </Router>
-    </I18nContext>,
+    <AppUsageTracker>
+      <I18nContext>
+        <KibanaThemeProvider theme$={theme$}>
+          <Router history={history}>
+            <Switch>
+              <Route path={`/map/:savedMapId`} render={renderMapApp} />
+              <Route exact path={`/map`} render={renderMapApp} />
+              // Redirect other routes to list, or if hash-containing, their non-hash equivalents
+              <Route
+                path={``}
+                render={({ location: { pathname, hash } }) => {
+                  if (hash) {
+                    // Remove leading hash
+                    const newPath = hash.substr(1);
+                    return <Redirect to={newPath} />;
+                  } else if (pathname === '/' || pathname === '') {
+                    return <ListPage stateTransfer={stateTransfer} />;
+                  } else {
+                    return <Redirect to="/" />;
+                  }
+                }}
+              />
+            </Switch>
+          </Router>
+        </KibanaThemeProvider>
+      </I18nContext>
+    </AppUsageTracker>,
     element
   );
 

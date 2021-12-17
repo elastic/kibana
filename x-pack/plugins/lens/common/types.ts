@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { FilterMeta, Filter } from '../../../../src/plugins/data/common';
-import type { IFieldFormat } from '../../../../src/plugins/field_formats/common';
-import type { Datatable, SerializedFieldFormat } from '../../../../src/plugins/expressions/common';
+import type { Filter, FilterMeta } from '@kbn/es-query';
+import type {
+  IFieldFormat,
+  SerializedFieldFormat,
+} from '../../../../src/plugins/field_formats/common';
+import type { Datatable } from '../../../../src/plugins/expressions/common';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
@@ -55,7 +58,15 @@ export interface CustomPaletteParams {
   colorStops?: ColorStop[];
   steps?: number;
 }
+export type CustomPaletteParamsConfig = CustomPaletteParams & {
+  maxSteps?: number;
+};
 
-export type RequiredPaletteParamTypes = Required<CustomPaletteParams>;
+export type RequiredPaletteParamTypes = Required<CustomPaletteParams> & {
+  maxSteps?: number;
+};
 
-export type LayerType = 'data' | 'threshold';
+export type LayerType = 'data' | 'referenceLine';
+
+// Shared by XY Chart and Heatmap as for now
+export type ValueLabelConfig = 'hide' | 'inside' | 'outside';

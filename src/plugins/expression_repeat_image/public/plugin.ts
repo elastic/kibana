@@ -9,7 +9,7 @@
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
 import { repeatImageFunction } from '../common/expression_functions';
-import { repeatImageRenderer } from './expression_renderers';
+import { repeatImageRendererFactory } from './expression_renderers';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -29,10 +29,11 @@ export class ExpressionRepeatImagePlugin
       ExpressionRepeatImagePluginStart,
       SetupDeps,
       StartDeps
-    > {
+    >
+{
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRepeatImagePluginSetup {
     expressions.registerFunction(repeatImageFunction);
-    expressions.registerRenderer(repeatImageRenderer);
+    expressions.registerRenderer(repeatImageRendererFactory(core));
   }
 
   public start(core: CoreStart): ExpressionRepeatImagePluginStart {}

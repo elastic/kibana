@@ -6,7 +6,7 @@
  */
 
 import { UrlStateType } from '../url_state/constants';
-import { SecurityPageName } from '../../../app/types';
+import type { SecurityPageName } from '../../../app/types';
 import { UrlState } from '../url_state/types';
 import { SiemRouteType } from '../../utils/route/types';
 
@@ -47,6 +47,7 @@ export type SecurityNavKey =
   | SecurityPageName.endpoints
   | SecurityPageName.eventFilters
   | SecurityPageName.exceptions
+  | SecurityPageName.hostIsolationExceptions
   | SecurityPageName.hosts
   | SecurityPageName.network
   | SecurityPageName.overview

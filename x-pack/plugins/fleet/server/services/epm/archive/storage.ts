@@ -23,12 +23,17 @@ import type {
 } from '../../../../common';
 import { pkgToPkgKey } from '../registry';
 
+import { appContextService } from '../../app_context';
+
 import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from './index';
 import type { ArchiveEntry } from './index';
 import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
 
+const ONE_BYTE = 1024 * 1024;
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
-const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;
+const MAX_ES_ASSET_BYTES = 4 * ONE_BYTE;
+// Updated to accomodate larger package size in some ML model packages
+const ML_MAX_ES_ASSET_BYTES = 50 * ONE_BYTE;
 
 export interface PackageAsset {
   package_name: string;
@@ -62,15 +67,20 @@ export async function archiveEntryToESDocument(opts: {
   const bufferIsBinary = await isBinaryFile(buffer);
   const dataUtf8 = bufferIsBinary ? '' : buffer.toString('utf8');
   const dataBase64 = bufferIsBinary ? buffer.toString('base64') : '';
+  const currentMaxAssetBytes = path.includes('ml_model')
+    ? ML_MAX_ES_ASSET_BYTES
+    : MAX_ES_ASSET_BYTES;
 
   // validation: filesize? asset type? anything else
-  if (dataUtf8.length > MAX_ES_ASSET_BYTES) {
-    throw new Error(`File at ${path} is larger than maximum allowed size of ${MAX_ES_ASSET_BYTES}`);
+  if (dataUtf8.length > currentMaxAssetBytes) {
+    throw new Error(
+      `File at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`
+    );
   }
 
-  if (dataBase64.length > MAX_ES_ASSET_BYTES) {
+  if (dataBase64.length > currentMaxAssetBytes) {
     throw new Error(
-      `After base64 encoding file at ${path} is larger than maximum allowed size of ${MAX_ES_ASSET_BYTES}`
+      `After base64 encoding file at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`
     );
   }
 
@@ -165,6 +175,7 @@ export const getEsPackage = async (
   references: PackageAssetReference[],
   savedObjectsClient: SavedObjectsClientContract
 ) => {
+  const logger = appContextService.getLogger();
   const pkgKey = pkgToPkgKey({ name: pkgName, version: pkgVersion });
   const bulkRes = await savedObjectsClient.bulkGet<PackageAsset>(
     references.map((reference) => ({
@@ -172,7 +183,26 @@ export const getEsPackage = async (
       fields: ['asset_path', 'data_utf8', 'data_base64'],
     }))
   );
+  const errors = bulkRes.saved_objects.filter((so) => so.error || !so.attributes);
   const assets = bulkRes.saved_objects.map((so) => so.attributes);
+
+  if (errors.length) {
+    const resolvedErrors = errors.map((so) =>
+      so.error
+        ? { type: so.type, id: so.id, error: so.error }
+        : !so.attributes
+        ? { type: so.type, id: so.id, error: { error: `No attributes retrieved` } }
+        : { type: so.type, id: so.id, error: { error: `Unknown` } }
+    );
+
+    logger.warn(
+      `Failed to retrieve ${pkgName}-${pkgVersion} package from ES storage. bulkGet failed for assets: ${JSON.stringify(
+        resolvedErrors
+      )}`
+    );
+
+    return undefined;
+  }
 
   const paths: string[] = [];
   const entries: ArchiveEntry[] = assets.map(packageAssetToArchiveEntry);
@@ -234,7 +264,7 @@ export const getEsPackage = async (
       dataStreams.push({
         dataset: dataset || `${pkgName}.${dataStreamPath}`,
         package: pkgName,
-        ingest_pipeline: ingestPipeline || 'default',
+        ingest_pipeline: ingestPipeline,
         path: dataStreamPath,
         streams,
         ...dataStreamManifestProps,

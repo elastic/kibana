@@ -4,11 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
 
-import { SavedObjectsFindResult, SavedObjectsFindResponse, SavedObject } from 'kibana/server';
-import { isEmpty } from 'lodash';
-import { AlertInfo } from '.';
+import Boom from '@hapi/boom';
+import {
+  SavedObjectsFindResult,
+  SavedObjectsFindResponse,
+  SavedObject,
+  SavedObjectReference,
+} from 'kibana/server';
+import { flatMap, uniqWith, isEmpty, xorWith } from 'lodash';
+import { AlertInfo } from './types';
+import { LensServerPluginSetup } from '../../../lens/server';
 
 import {
   AssociationType,
@@ -26,13 +32,17 @@ import {
   CommentsResponse,
   CommentType,
   ConnectorTypes,
-  ENABLE_CASE_CONNECTOR,
   SubCaseAttributes,
   SubCaseResponse,
   SubCasesFindResponse,
   User,
-} from '../../common';
+} from '../../common/api';
+import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
 import { UpdateAlertRequest } from '../client/alerts/types';
+import {
+  parseCommentString,
+  getLensVisualizations,
+} from '../../common/utils/markdown_plugins/utils';
 
 /**
  * Default sort field for querying saved objects.
@@ -398,3 +408,56 @@ export const getNoneCaseConnector = () => ({
   type: ConnectorTypes.none,
   fields: null,
 });
+
+export const extractLensReferencesFromCommentString = (
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
+  comment: string
+): SavedObjectReference[] => {
+  const extract = lensEmbeddableFactory()?.extract;
+
+  if (extract) {
+    const parsedComment = parseCommentString(comment);
+    const lensVisualizations = getLensVisualizations(parsedComment.children);
+    const flattenRefs = flatMap(
+      lensVisualizations,
+      (lensObject) => extract(lensObject)?.references ?? []
+    );
+
+    const uniqRefs = uniqWith(
+      flattenRefs,
+      (refA, refB) => refA.type === refB.type && refA.id === refB.id && refA.name === refB.name
+    );
+
+    return uniqRefs;
+  }
+  return [];
+};
+
+export const getOrUpdateLensReferences = (
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
+  newComment: string,
+  currentComment?: SavedObject<CommentRequestUserType>
+) => {
+  if (!currentComment) {
+    return extractLensReferencesFromCommentString(lensEmbeddableFactory, newComment);
+  }
+
+  const savedObjectReferences = currentComment.references;
+  const savedObjectLensReferences = extractLensReferencesFromCommentString(
+    lensEmbeddableFactory,
+    currentComment.attributes.comment
+  );
+
+  const currentNonLensReferences = xorWith(
+    savedObjectReferences,
+    savedObjectLensReferences,
+    (refA, refB) => refA.type === refB.type && refA.id === refB.id
+  );
+
+  const newCommentLensReferences = extractLensReferencesFromCommentString(
+    lensEmbeddableFactory,
+    newComment
+  );
+
+  return currentNonLensReferences.concat(newCommentLensReferences);
+};

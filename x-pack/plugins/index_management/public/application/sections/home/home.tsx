@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { documentationService } from '../../services/documentation';
 import { DataStreamList } from './data_stream_list';
@@ -85,6 +85,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   return (
     <>
       <EuiPageHeader
+        data-test-subj="indexManagementHeaderContent"
         pageTitle={
           <span data-test-subj="appTitle">
             <FormattedMessage id="xpack.idxMgmt.home.appTitle" defaultMessage="Index Management" />

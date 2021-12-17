@@ -8,7 +8,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 import {
   getGenericComboBoxProps,
@@ -20,14 +20,14 @@ const AS_PLAIN_TEXT = { asPlainText: true };
 interface OperatorProps {
   fieldInputWidth?: number;
   fieldTypeFilter?: string[];
-  indexPattern: IndexPatternBase | undefined;
+  indexPattern: DataViewBase | undefined;
   isClearable: boolean;
   isDisabled: boolean;
   isLoading: boolean;
   isRequired?: boolean;
-  onChange: (a: IndexPatternFieldBase[]) => void;
+  onChange: (a: DataViewFieldBase[]) => void;
   placeholder: string;
-  selectedField: IndexPatternFieldBase | undefined;
+  selectedField: DataViewFieldBase | undefined;
 }
 
 export const FieldComponent: React.FC<OperatorProps> = ({
@@ -56,7 +56,7 @@ export const FieldComponent: React.FC<OperatorProps> = ({
 
   const handleValuesChange = useCallback(
     (newOptions: EuiComboBoxOptionOption[]): void => {
-      const newValues: IndexPatternFieldBase[] = newOptions.map(
+      const newValues: DataViewFieldBase[] = newOptions.map(
         ({ label }) => availableFields[labels.indexOf(label)]
       );
       onChange(newValues);
@@ -94,13 +94,13 @@ export const FieldComponent: React.FC<OperatorProps> = ({
 FieldComponent.displayName = 'Field';
 
 interface ComboBoxFields {
-  availableFields: IndexPatternFieldBase[];
-  selectedFields: IndexPatternFieldBase[];
+  availableFields: DataViewFieldBase[];
+  selectedFields: DataViewFieldBase[];
 }
 
 const getComboBoxFields = (
-  indexPattern: IndexPatternBase | undefined,
-  selectedField: IndexPatternFieldBase | undefined,
+  indexPattern: DataViewBase | undefined,
+  selectedField: DataViewFieldBase | undefined,
   fieldTypeFilter: string[]
 ): ComboBoxFields => {
   const existingFields = getExistingFields(indexPattern);
@@ -113,29 +113,27 @@ const getComboBoxFields = (
 const getComboBoxProps = (fields: ComboBoxFields): GetGenericComboBoxPropsReturn => {
   const { availableFields, selectedFields } = fields;
 
-  return getGenericComboBoxProps<IndexPatternFieldBase>({
+  return getGenericComboBoxProps<DataViewFieldBase>({
     getLabel: (field) => field.name,
     options: availableFields,
     selectedOptions: selectedFields,
   });
 };
 
-const getExistingFields = (indexPattern: IndexPatternBase | undefined): IndexPatternFieldBase[] => {
+const getExistingFields = (indexPattern: DataViewBase | undefined): DataViewFieldBase[] => {
   return indexPattern != null ? indexPattern.fields : [];
 };
 
-const getSelectedFields = (
-  selectedField: IndexPatternFieldBase | undefined
-): IndexPatternFieldBase[] => {
+const getSelectedFields = (selectedField: DataViewFieldBase | undefined): DataViewFieldBase[] => {
   return selectedField ? [selectedField] : [];
 };
 
 const getAvailableFields = (
-  existingFields: IndexPatternFieldBase[],
-  selectedFields: IndexPatternFieldBase[],
+  existingFields: DataViewFieldBase[],
+  selectedFields: DataViewFieldBase[],
   fieldTypeFilter: string[]
-): IndexPatternFieldBase[] => {
-  const fieldsByName = new Map<string, IndexPatternFieldBase>();
+): DataViewFieldBase[] => {
+  const fieldsByName = new Map<string, DataViewFieldBase>();
 
   existingFields.forEach((f) => fieldsByName.set(f.name, f));
   selectedFields.forEach((f) => fieldsByName.set(f.name, f));

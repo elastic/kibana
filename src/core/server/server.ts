@@ -21,7 +21,6 @@ import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
-import { LegacyService } from './legacy';
 import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
@@ -37,7 +36,6 @@ import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
-import { config as kibanaConfig } from './kibana_config';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
@@ -51,7 +49,7 @@ import {
   ServiceConfigDescriptor,
 } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
-import { DeprecationsService } from './deprecations';
+import { DeprecationsService, config as deprecationConfig } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { config as externalUrlConfig } from './external_url';
 import { config as executionContextConfig } from './execution_context';
@@ -69,7 +67,6 @@ export class Server {
   private readonly elasticsearch: ElasticsearchService;
   private readonly http: HttpService;
   private readonly rendering: RenderingService;
-  private readonly legacy: LegacyService;
   private readonly log: Logger;
   private readonly plugins: PluginsService;
   private readonly savedObjects: SavedObjectsService;
@@ -108,7 +105,6 @@ export class Server {
     this.http = new HttpService(core);
     this.rendering = new RenderingService(core);
     this.plugins = new PluginsService(core);
-    this.legacy = new LegacyService(core);
     this.elasticsearch = new ElasticsearchService(core);
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
@@ -132,7 +128,7 @@ export class Server {
 
   public async preboot() {
     this.log.debug('prebooting server');
-    const prebootTransaction = apm.startTransaction('server_preboot', 'kibana_platform');
+    const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
 
     const environmentPreboot = await this.environment.preboot();
 
@@ -188,7 +184,7 @@ export class Server {
 
   public async setup() {
     this.log.debug('setting up server');
-    const setupTransaction = apm.startTransaction('server_setup', 'kibana_platform');
+    const setupTransaction = apm.startTransaction('server-setup', 'kibana-platform');
 
     const environmentSetup = this.environment.setup();
 
@@ -204,6 +200,10 @@ export class Server {
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
       executionContext: executionContextSetup,
+    });
+
+    const deprecationsSetup = await this.deprecations.setup({
+      http: httpSetup,
     });
 
     // setup i18n prior to any other service, to have translations ready
@@ -228,6 +228,7 @@ export class Server {
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
+      deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
     });
 
@@ -243,6 +244,7 @@ export class Server {
       environment: environmentSetup,
       http: httpSetup,
       metrics: metricsSetup,
+      coreUsageData: coreUsageDataSetup,
     });
 
     const renderingSetup = await this.rendering.setup({
@@ -257,10 +259,6 @@ export class Server {
     });
 
     const loggingSetup = this.logging.setup();
-
-    const deprecationsSetup = this.deprecations.setup({
-      http: httpSetup,
-    });
 
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
@@ -278,14 +276,11 @@ export class Server {
       logging: loggingSetup,
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
+      coreUsageData: coreUsageDataSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
-
-    await this.legacy.setup({
-      http: httpSetup,
-    });
 
     this.registerCoreContext(coreSetup);
     this.coreApp.setup(coreSetup, uiPlugins);
@@ -296,10 +291,11 @@ export class Server {
 
   public async start() {
     this.log.debug('starting server');
-    const startTransaction = apm.startTransaction('server_start', 'kibana_platform');
+    const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
 
     const executionContextStart = this.executionContext.start();
     const elasticsearchStart = await this.elasticsearch.start();
+    const deprecationsStart = this.deprecations.start();
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
@@ -317,6 +313,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
+
     this.status.start();
 
     this.coreStart = {
@@ -328,6 +325,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
       coreUsageData: coreUsageDataStart,
+      deprecations: deprecationsStart,
     };
 
     await this.plugins.start(this.coreStart);
@@ -342,7 +340,6 @@ export class Server {
   public async stop() {
     this.log.debug('stopping server');
 
-    await this.legacy.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();
     await this.savedObjects.stop();
@@ -375,7 +372,6 @@ export class Server {
       loggingConfig,
       httpConfig,
       pluginsConfig,
-      kibanaConfig,
       savedObjectsConfig,
       savedObjectsMigrationConfig,
       uiSettingsConfig,
@@ -383,6 +379,7 @@ export class Server {
       statusConfig,
       pidConfig,
       i18nConfig,
+      deprecationConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);

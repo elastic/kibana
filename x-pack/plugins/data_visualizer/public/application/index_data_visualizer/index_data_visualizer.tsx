@@ -9,11 +9,13 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
-// @ts-ignore
 import { encode } from 'rison-node';
 import { SimpleSavedObject } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   IndexDataVisualizerViewProps,
@@ -29,7 +31,7 @@ import {
   isRisonSerializationRequired,
 } from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { DataView } from '../../../../../../src/plugins/data/common';
 import { ResultLink } from '../common/components/results_links';
 
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
@@ -39,10 +41,9 @@ export interface DataVisualizerUrlStateContextProviderProps {
   additionalLinks: ResultLink[];
 }
 
-export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateContextProviderProps> = ({
-  IndexDataVisualizerComponent,
-  additionalLinks,
-}) => {
+export const DataVisualizerUrlStateContextProvider: FC<
+  DataVisualizerUrlStateContextProviderProps
+> = ({ IndexDataVisualizerComponent, additionalLinks }) => {
   const {
     services: {
       data: { indexPatterns },
@@ -51,14 +52,12 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
     },
   } = useDataVisualizerKibana();
   const history = useHistory();
+  const { search: searchString } = useLocation();
 
-  const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern | undefined>(
-    undefined
-  );
+  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView | undefined>(undefined);
   const [currentSavedSearch, setCurrentSavedSearch] = useState<SimpleSavedObject<unknown> | null>(
     null
   );
-  const { search: searchString } = useLocation();
 
   useEffect(() => {
     const prevSearchString = searchString;
@@ -69,8 +68,9 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
         const savedSearchId = parsedQueryString.savedSearchId;
         try {
           const savedSearch = await savedObjectsClient.get('search', savedSearchId);
-          const indexPatternId = savedSearch.references.find((ref) => ref.type === 'index-pattern')
-            ?.id;
+          const indexPatternId = savedSearch.references.find(
+            (ref) => ref.type === 'index-pattern'
+          )?.id;
           if (indexPatternId !== undefined && savedSearch) {
             try {
               const indexPattern = await indexPatterns.get(indexPatternId);
@@ -78,8 +78,8 @@ export const DataVisualizerUrlStateContextProvider: FC<DataVisualizerUrlStateCon
               setCurrentIndexPattern(indexPattern);
             } catch (e) {
               toasts.addError(e, {
-                title: i18n.translate('xpack.dataVisualizer.index.indexPatternErrorMessage', {
-                  defaultMessage: 'Error finding index pattern',
+                title: i18n.translate('xpack.dataVisualizer.index.dataViewErrorMessage', {
+                  defaultMessage: 'Error finding data view',
                 }),
               });
             }
@@ -190,7 +190,9 @@ export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ add
     security,
     fileUpload,
     lens,
-    indexPatternFieldEditor,
+    dataViewFieldEditor,
+    uiActions,
+    charts,
   } = getPluginsStart();
   const services = {
     data,
@@ -200,16 +202,20 @@ export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ add
     security,
     fileUpload,
     lens,
-    indexPatternFieldEditor,
+    dataViewFieldEditor,
+    uiActions,
+    charts,
     ...coreStart,
   };
 
   return (
-    <KibanaContextProvider services={{ ...services }}>
-      <DataVisualizerUrlStateContextProvider
-        IndexDataVisualizerComponent={IndexDataVisualizerView}
-        additionalLinks={additionalLinks}
-      />
-    </KibanaContextProvider>
+    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+      <KibanaContextProvider services={{ ...services }}>
+        <DataVisualizerUrlStateContextProvider
+          IndexDataVisualizerComponent={IndexDataVisualizerView}
+          additionalLinks={additionalLinks}
+        />
+      </KibanaContextProvider>
+    </KibanaThemeProvider>
   );
 };

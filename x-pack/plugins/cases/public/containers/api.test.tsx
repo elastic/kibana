@@ -7,13 +7,8 @@
 
 import { KibanaServices } from '../common/lib/kibana';
 
-import {
-  CASES_URL,
-  ConnectorTypes,
-  CommentType,
-  CaseStatuses,
-  SECURITY_SOLUTION_OWNER,
-} from '../../common';
+import { ConnectorTypes, CommentType, CaseStatuses } from '../../common/api';
+import { CASES_URL, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 
 import {
   deleteCases,
@@ -30,6 +25,7 @@ import {
   postCase,
   postComment,
   pushCase,
+  resolveCase,
 } from './api';
 
 import {
@@ -68,7 +64,7 @@ describe('Case Configuration API', () => {
     });
     const data = ['1', '2'];
 
-    test('check url, method, signal', async () => {
+    test('should be called with correct check url, method, signal', async () => {
       await deleteCases(data, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'DELETE',
@@ -77,7 +73,7 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('happy path', async () => {
+    test('should return correct response', async () => {
       const resp = await deleteCases(data, abortCtrl.signal);
       expect(resp).toEqual('');
     });
@@ -89,7 +85,7 @@ describe('Case Configuration API', () => {
       fetchMock.mockResolvedValue(actionLicenses);
     });
 
-    test('check url, method, signal', async () => {
+    test('should be called with correct check url, method, signal', async () => {
       await getActionLicense(abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`/api/actions/connector_types`, {
         method: 'GET',
@@ -97,7 +93,7 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('happy path', async () => {
+    test('should return correct response', async () => {
       const resp = await getActionLicense(abortCtrl.signal);
       expect(resp).toEqual(actionLicenses);
     });
@@ -110,7 +106,7 @@ describe('Case Configuration API', () => {
     });
     const data = basicCase.id;
 
-    test('check url, method, signal', async () => {
+    test('should be called with correct check url, method, signal', async () => {
       await getCase(data, true, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}`, {
         method: 'GET',
@@ -119,9 +115,37 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('happy path', async () => {
+    test('should return correct response', async () => {
       const resp = await getCase(data, true, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
+    });
+  });
+
+  describe('resolveCase', () => {
+    const targetAliasId = '12345';
+    const basicResolveCase = {
+      outcome: 'aliasMatch',
+      case: basicCaseSnake,
+    };
+    const caseId = basicCase.id;
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({ ...basicResolveCase, target_alias_id: targetAliasId });
+    });
+
+    test('should be called with correct check url, method, signal', async () => {
+      await resolveCase(caseId, true, abortCtrl.signal);
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${caseId}/resolve`, {
+        method: 'GET',
+        query: { includeComments: true },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('should return correct response', async () => {
+      const resp = await resolveCase(caseId, true, abortCtrl.signal);
+      expect(resp).toEqual({ ...basicResolveCase, case: basicCase, targetAliasId });
     });
   });
 
@@ -130,7 +154,7 @@ describe('Case Configuration API', () => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(allCasesSnake);
     });
-    test('check url, method, signal', async () => {
+    test('should be called with correct check url, method, signal', async () => {
       await getCases({
         filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
         queryParams: DEFAULT_QUERY_PARAMS,
@@ -148,7 +172,7 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('correctly applies filters', async () => {
+    test('should applies correct filters', async () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
@@ -175,7 +199,7 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('tags with weird chars get handled gracefully', async () => {
+    test('should handle tags with weird chars', async () => {
       const weirdTags: string[] = ['(', '"double"'];
 
       await getCases({
@@ -204,7 +228,7 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('happy path', async () => {
+    test('should return correct response', async () => {
       const resp = await getCases({
         filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
         queryParams: DEFAULT_QUERY_PARAMS,
@@ -219,7 +243,7 @@ describe('Case Configuration API', () => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(casesStatusSnake);
     });
-    test('check url, method, signal', async () => {
+    test('should be called with correct check url, method, signal', async () => {
       await getCasesStatus(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/status`, {
         method: 'GET',
@@ -228,7 +252,7 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('happy path', async () => {
+    test('should return correct response', async () => {
       const resp = await getCasesStatus(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(resp).toEqual(casesStatus);
     });
@@ -240,7 +264,7 @@ describe('Case Configuration API', () => {
       fetchMock.mockResolvedValue(caseUserActionsSnake);
     });
 
-    test('check url, method, signal', async () => {
+    test('should be called with correct check url, method, signal', async () => {
       await getCaseUserActions(basicCase.id, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions`, {
         method: 'GET',
@@ -248,7 +272,7 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('happy path', async () => {
+    test('should return correct response', async () => {
       const resp = await getCaseUserActions(basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(caseUserActions);
     });
@@ -260,7 +284,7 @@ describe('Case Configuration API', () => {
       fetchMock.mockResolvedValue(respReporters);
     });
 
-    test('check url, method, signal', async () => {
+    test('should be called with correct check url, method, signal', async () => {
       await getReporters(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/reporters`, {
         method: 'GET',
@@ -271,7 +295,7 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('happy path', async () => {
+    test('should return correct response', async () => {
       const resp = await getReporters(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(resp).toEqual(respReporters);
     });
@@ -283,7 +307,7 @@ describe('Case Configuration API', () => {
       fetchMock.mockResolvedValue(tags);
     });
 
-    test('check url, method, signal', async () => {
+    test('should be called with correct check url, method, signal', async () => {
       await getTags(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/tags`, {
         method: 'GET',
@@ -294,7 +318,7 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('happy path', async () => {
+    test('should return correct response', async () => {
       const resp = await getTags(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(resp).toEqual(tags);
     });
@@ -306,7 +330,7 @@ describe('Case Configuration API', () => {
       fetchMock.mockResolvedValue([basicCaseSnake]);
     });
     const data = { description: 'updated description' };
-    test('check url, method, signal', async () => {
+    test('should be called with correct check url, method, signal', async () => {
       await patchCase(basicCase.id, data, basicCase.version, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'PATCH',
@@ -317,7 +341,7 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('happy path', async () => {
+    test('should return correct response', async () => {
       const resp = await patchCase(
         basicCase.id,
         { description: 'updated description' },
@@ -341,7 +365,7 @@ describe('Case Configuration API', () => {
       },
     ];
 
-    test('check url, method, signal', async () => {
+    test('should be called with correct check url, method, signal', async () => {
       await patchCasesStatus(data, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'PATCH',
@@ -350,7 +374,7 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('happy path', async () => {
+    test('should return correct response', async () => {
       const resp = await patchCasesStatus(data, abortCtrl.signal);
       expect(resp).toEqual({ ...cases });
     });
@@ -362,7 +386,7 @@ describe('Case Configuration API', () => {
       fetchMock.mockResolvedValue(basicCaseSnake);
     });
 
-    test('check url, method, signal', async () => {
+    test('should be called with correct check url, method, signal', async () => {
       await patchComment({
         caseId: basicCase.id,
         commentId: basicCase.comments[0].id,
@@ -384,7 +408,7 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('happy path', async () => {
+    test('should return correct response', async () => {
       const resp = await patchComment({
         caseId: basicCase.id,
         commentId: basicCase.comments[0].id,
@@ -418,7 +442,7 @@ describe('Case Configuration API', () => {
       owner: SECURITY_SOLUTION_OWNER,
     };
 
-    test('check url, method, signal', async () => {
+    test('should be called with correct check url, method, signal', async () => {
       await postCase(data, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'POST',
@@ -427,7 +451,7 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('happy path', async () => {
+    test('should return correct response', async () => {
       const resp = await postCase(data, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
     });
@@ -444,7 +468,7 @@ describe('Case Configuration API', () => {
       type: CommentType.user as const,
     };
 
-    test('check url, method, signal', async () => {
+    test('should be called with correct check url, method, signal', async () => {
       await postComment(data, basicCase.id, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments`, {
         method: 'POST',
@@ -453,7 +477,7 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('happy path', async () => {
+    test('should return correct response', async () => {
       const resp = await postComment(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
     });
@@ -467,7 +491,7 @@ describe('Case Configuration API', () => {
       fetchMock.mockResolvedValue(pushedCaseSnake);
     });
 
-    test('check url, method, signal', async () => {
+    test('should be called with correct check url, method, signal', async () => {
       await pushCase(basicCase.id, connectorId, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(
         `${CASES_URL}/${basicCase.id}/connector/${connectorId}/_push`,
@@ -479,7 +503,7 @@ describe('Case Configuration API', () => {
       );
     });
 
-    test('happy path', async () => {
+    test('should return correct response', async () => {
       const resp = await pushCase(basicCase.id, connectorId, abortCtrl.signal);
       expect(resp).toEqual(pushedCase);
     });

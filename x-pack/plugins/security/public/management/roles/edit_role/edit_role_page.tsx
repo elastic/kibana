@@ -23,7 +23,7 @@ import type { ChangeEvent, FunctionComponent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   Capabilities,
@@ -35,12 +35,11 @@ import type {
   ScopedHistory,
 } from 'src/core/public';
 import type { IndexPatternsContract } from 'src/plugins/data/public';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { KibanaFeature } from '../../../../../features/common';
 import type { FeaturesPluginStart } from '../../../../../features/public';
-import type { Space } from '../../../../../spaces/public';
+import type { Space, SpacesApiUi } from '../../../../../spaces/public';
 import type { SecurityLicense } from '../../../../common/licensing';
 import type {
   BuiltinESPrivileges,
@@ -185,10 +184,8 @@ function useRole(
             privileges: [],
           };
 
-          const {
-            allowRoleDocumentLevelSecurity,
-            allowRoleFieldLevelSecurity,
-          } = license.getFeatures();
+          const { allowRoleDocumentLevelSecurity, allowRoleFieldLevelSecurity } =
+            license.getFeatures();
 
           if (allowRoleFieldLevelSecurity) {
             emptyOption.field_security = {
@@ -227,7 +224,7 @@ function useRole(
 function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup) {
   const [spaces, setSpaces] = useState<{ enabled: boolean; list: Space[] } | null>(null);
   useEffect(() => {
-    http.get('/api/spaces/space').then(
+    http.get<Space[]>('/api/spaces/space').then(
       (fetchedSpaces) => setSpaces({ enabled: true, list: fetchedSpaces }),
       (err: IHttpFetchError) => {
         // Spaces plugin can be disabled and hence this endpoint can be unavailable.
@@ -439,7 +436,6 @@ export const EditRolePage: FunctionComponent<Props> = ({
         <KibanaPrivilegesRegion
           kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
           spaces={spaces.list}
-          spacesEnabled={spaces.enabled}
           uiCapabilities={uiCapabilities}
           canCustomizeSubFeaturePrivileges={license.getFeatures().allowSubFeaturePrivileges}
           editable={!isRoleReadOnly}
@@ -524,7 +520,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
       setFormError(null);
 
       try {
-        await rolesAPIClient.saveRole({ role, spacesEnabled: spaces.enabled });
+        await rolesAPIClient.saveRole({ role });
       } catch (error) {
         notifications.toasts.addDanger(
           error?.body?.message ??
@@ -569,24 +565,17 @@ export const EditRolePage: FunctionComponent<Props> = ({
     backToRoleList();
   };
 
-  const description = spaces.enabled ? (
-    <FormattedMessage
-      id="xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription"
-      defaultMessage="Set privileges on your Elasticsearch data and control access to your Kibana spaces."
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.security.management.editRole.setPrivilegesToKibanaDescription"
-      defaultMessage="Set privileges on your Elasticsearch data and control access to Kibana."
-    />
-  );
-
   return (
     <div className="editRolePage">
       <EuiForm {...formError}>
         {getFormTitle()}
         <EuiSpacer />
-        <EuiText size="s">{description}</EuiText>
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription"
+            defaultMessage="Set privileges on your Elasticsearch data and control access to your Kibana spaces."
+          />
+        </EuiText>
         {isRoleReserved && (
           <Fragment>
             <EuiSpacer size="s" />

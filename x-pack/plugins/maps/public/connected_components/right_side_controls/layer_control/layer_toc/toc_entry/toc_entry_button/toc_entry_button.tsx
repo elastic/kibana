@@ -100,24 +100,18 @@ export class TOCEntryButton extends Component<Props, State> {
         values: { minZoom, maxZoom },
       });
     } else {
-      const customIconAndTooltipContent = this.props.layer.getCustomIconAndTooltipContent();
-      if (customIconAndTooltipContent) {
-        icon = customIconAndTooltipContent.icon;
-        if (!customIconAndTooltipContent.areResultsTrimmed) {
-          tooltipContent = customIconAndTooltipContent.tooltipContent;
-        } else {
-          footnotes.push({
-            icon: <EuiIcon color="subdued" type="partial" size="s" />,
-            message: customIconAndTooltipContent.tooltipContent,
-          });
-        }
+      const { icon: layerIcon, tooltipContent: layerTooltipContent } =
+        this.props.layer.getLayerIcon(true);
+      icon = layerIcon;
+      if (layerTooltipContent) {
+        tooltipContent = layerTooltipContent;
       }
 
       if (this.props.isUsingSearch && this.props.layer.getQueryableIndexPatternIds().length) {
         footnotes.push({
           icon: <EuiIcon color="subdued" type="filter" size="s" />,
           message: i18n.translate('xpack.maps.layer.isUsingSearchMsg', {
-            defaultMessage: 'Results narrowed by query and filters',
+            defaultMessage: 'Results narrowed by global search',
           }),
         });
       }
@@ -125,7 +119,7 @@ export class TOCEntryButton extends Component<Props, State> {
         footnotes.push({
           icon: <EuiIcon color="subdued" type="clock" size="s" />,
           message: i18n.translate('xpack.maps.layer.isUsingTimeFilter', {
-            defaultMessage: 'Results narrowed by time filter',
+            defaultMessage: 'Results narrowed by global time',
           }),
         });
       }

@@ -14,7 +14,6 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { first } from 'rxjs/operators';
 
 import {
   EnvironmentService,
@@ -35,6 +34,7 @@ import { UsageCollectionSetup } from '../../usage_collection/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { AppNavLinkStatus } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
+import { SharePluginSetup } from '../../share/public';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -43,6 +43,7 @@ export interface HomePluginStartDependencies {
 }
 
 export interface HomePluginSetupDependencies {
+  share: SharePluginSetup;
   usageCollection?: UsageCollectionSetup;
   urlForwarding: UrlForwardingSetup;
 }
@@ -54,7 +55,8 @@ export class HomePublicPlugin
       HomePublicPluginStart,
       HomePluginSetupDependencies,
       HomePluginStartDependencies
-    > {
+    >
+{
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
@@ -64,7 +66,7 @@ export class HomePublicPlugin
 
   public setup(
     core: CoreSetup<HomePluginStartDependencies>,
-    { urlForwarding, usageCollection }: HomePluginSetupDependencies
+    { share, urlForwarding, usageCollection }: HomePluginSetupDependencies
   ): HomePublicPluginSetup {
     core.application.register({
       id: PLUGIN_ID,
@@ -74,11 +76,10 @@ export class HomePublicPlugin
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')
           : () => {};
-        const [
-          coreStart,
-          { telemetry, data, urlForwarding: urlForwardingStart },
-        ] = await core.getStartServices();
+        const [coreStart, { telemetry, data, urlForwarding: urlForwardingStart }] =
+          await core.getStartServices();
         setServices({
+          share,
           trackUiMetric,
           kibanaVersion: this.initializerContext.env.packageInfo.version,
           http: coreStart.http,
@@ -104,7 +105,7 @@ export class HomePublicPlugin
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
         );
         const { renderApp } = await import('./application');
-        return await renderApp(params.element, coreStart, params.history);
+        return await renderApp(params.element, params.theme$, coreStart, params.history);
       },
     });
     urlForwarding.forwardApp('home', 'home');
@@ -134,26 +135,8 @@ export class HomePublicPlugin
     };
   }
 
-  public start(
-    { application: { capabilities, currentAppId$ }, http }: CoreStart,
-    { urlForwarding }: HomePluginStartDependencies
-  ) {
+  public start({ application: { capabilities } }: CoreStart) {
     this.featuresCatalogueRegistry.start({ capabilities });
-
-    // If the home app is the initial location when loading Kibana...
-    if (
-      window.location.pathname === http.basePath.prepend(HOME_APP_BASE_PATH) &&
-      window.location.hash === ''
-    ) {
-      // ...wait for the app to mount initially and then...
-      currentAppId$.pipe(first()).subscribe((appId) => {
-        if (appId === 'home') {
-          // ...navigate to default app set by `kibana.defaultAppId`.
-          // This doesn't do anything as along as the default settings are kept.
-          urlForwarding.navigateToDefaultApp({ overwriteHash: false });
-        }
-      });
-    }
 
     return { featureCatalogue: this.featuresCatalogueRegistry };
   }

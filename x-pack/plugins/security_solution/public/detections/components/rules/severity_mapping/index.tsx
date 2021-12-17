@@ -29,7 +29,7 @@ import {
   AutocompleteFieldMatchComponent,
 } from '@kbn/securitysolution-autocomplete';
 
-import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { SeverityOptionItem } from '../step_about_rule/data';
@@ -56,7 +56,7 @@ interface SeverityFieldProps {
   dataTestSubj: string;
   field: FieldHook<AboutStepSeverity>;
   idAria: string;
-  indices: IndexPatternBase;
+  indices: DataViewBase;
   isDisabled: boolean;
   options: SeverityOptionItem[];
 }
@@ -85,7 +85,7 @@ export const SeverityField = ({
   );
 
   const handleFieldChange = useCallback(
-    (index: number, severity: Severity, [newField]: IndexPatternFieldBase[]): void => {
+    (index: number, severity: Severity, [newField]: DataViewFieldBase[]): void => {
       const newMappingItems: SeverityMapping = [
         {
           ...mapping[index],
@@ -295,8 +295,8 @@ export const SeverityField = ({
 };
 
 /**
- * Looks for field metadata (IndexPatternFieldBase) in existing index pattern.
- * If specified field doesn't exist, returns a stub IndexPatternFieldBase created based on the mapping --
+ * Looks for field metadata (DataViewFieldBase) in existing index pattern.
+ * If specified field doesn't exist, returns a stub DataViewFieldBase created based on the mapping --
  * because the field might not have been indexed yet, but we still need to display the mapping.
  *
  * @param mapping Mapping of a specified field name + value to a certain severity value.
@@ -304,8 +304,8 @@ export const SeverityField = ({
  */
 const getFieldTypeByMapping = (
   mapping: SeverityMappingItem,
-  pattern: IndexPatternBase
-): IndexPatternFieldBase => {
+  pattern: DataViewBase
+): DataViewFieldBase => {
   const { field } = mapping;
   const [knownFieldType] = pattern.fields.filter(({ name }) => field === name);
   return knownFieldType ?? { name: field, type: 'string' };

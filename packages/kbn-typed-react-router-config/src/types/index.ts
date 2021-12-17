@@ -13,6 +13,12 @@ import { RequiredKeys, ValuesType } from 'utility-types';
 // import { unconst } from '../unconst';
 import { NormalizePath } from './utils';
 
+// type PathsOfRoute<TRoute extends Route> =
+//   | TRoute['path']
+//   | (TRoute extends { children: Route[] }
+//       ? AppendPath<TRoute['path'], '/*'> | PathsOf<TRoute['children']>
+//       : never);
+
 export type PathsOf<TRoutes extends Route[]> = keyof MapRoutes<TRoutes> & string;
 
 export interface RouteMatch<TRoute extends Route = Route> {
@@ -57,6 +63,7 @@ interface PlainRoute {
   children?: PlainRoute[];
   params?: t.Type<any>;
   defaults?: Record<string, Record<string, string>>;
+  pre?: ReactElement;
 }
 
 interface ReadonlyPlainRoute {
@@ -65,6 +72,7 @@ interface ReadonlyPlainRoute {
   readonly children?: readonly ReadonlyPlainRoute[];
   readonly params?: t.Type<any>;
   readonly defaults?: Record<string, Record<string, string>>;
+  pre?: ReactElement;
 }
 
 export type Route = PlainRoute | ReadonlyPlainRoute;
@@ -119,6 +127,10 @@ export type TypeAsArgs<TObject> = keyof TObject extends never
   ? [TObject] | []
   : [TObject];
 
+export type FlattenRoutesOf<TRoutes extends Route[]> = Array<
+  Omit<ValuesType<MapRoutes<TRoutes>>, 'parents'>
+>;
+
 export interface Router<TRoutes extends Route[]> {
   matchRoutes<TPath extends PathsOf<TRoutes>>(
     path: TPath,
@@ -134,11 +146,28 @@ export interface Router<TRoutes extends Route[]> {
     location: Location,
     optional: TOptional
   ): TOptional extends true ? TypeOf<TRoutes, TPath> | undefined : TypeOf<TRoutes, TPath>;
+  getParams<T1 extends PathsOf<TRoutes>, T2 extends PathsOf<TRoutes>>(
+    path1: T1,
+    path2: T2,
+    location: Location
+  ): TypeOf<TRoutes, T1> | TypeOf<TRoutes, T2>;
+  getParams<T1 extends PathsOf<TRoutes>, T2 extends PathsOf<TRoutes>, T3 extends PathsOf<TRoutes>>(
+    path1: T1,
+    path2: T2,
+    path3: T3,
+    location: Location
+  ): TypeOf<TRoutes, T1> | TypeOf<TRoutes, T2> | TypeOf<TRoutes, T3>;
+  getParams<TPath extends PathsOf<TRoutes>, TOptional extends boolean>(
+    path: TPath,
+    location: Location,
+    optional: TOptional
+  ): TOptional extends true ? TypeOf<TRoutes, TPath> | undefined : TypeOf<TRoutes, TPath>;
   link<TPath extends PathsOf<TRoutes>>(
     path: TPath,
     ...args: TypeAsArgs<TypeOf<TRoutes, TPath, false>>
   ): string;
   getRoutePath(route: Route): string;
+  getRoutesToMatch(path: string): FlattenRoutesOf<TRoutes>;
 }
 
 type AppendPath<
@@ -146,114 +175,101 @@ type AppendPath<
   TPath extends string
 > = NormalizePath<`${TPrefix}${NormalizePath<`/${TPath}`>}`>;
 
-type MaybeUnion<T extends Record<string, any>, U extends Record<string, any>> = Omit<T, keyof U> &
+type MaybeUnion<T extends Record<string, any>, U extends Record<string, any>> = Omit<T, keyof U> & {
+  [key in keyof U]: key extends keyof T ? T[key] | U[key] : U[key];
+};
+
+type MapRoute<TRoute extends Route, TParents extends Route[] = []> = MaybeUnion<
   {
-    [key in keyof U]: key extends keyof T ? T[key] | U[key] : U[key];
-  };
+    [key in TRoute['path']]: TRoute & { parents: TParents };
+  },
+  TRoute extends { children: Route[] }
+    ? MaybeUnion<
+        MapRoutes<TRoute['children'], [...TParents, TRoute]>,
+        {
+          [key in AppendPath<TRoute['path'], '*'>]: ValuesType<
+            MapRoutes<TRoute['children'], [...TParents, TRoute]>
+          >;
+        }
+      >
+    : {}
+>;
 
-type MapRoute<
-  TRoute extends Route,
-  TPrefix extends string,
-  TParents extends Route[] = []
-> = TRoute extends Route
-  ? MaybeUnion<
-      {
-        [key in AppendPath<TPrefix, TRoute['path']>]: TRoute & { parents: TParents };
-      },
-      TRoute extends { children: Route[] }
-        ? MaybeUnion<
-            MapRoutes<
-              TRoute['children'],
-              AppendPath<TPrefix, TRoute['path']>,
-              [...TParents, TRoute]
-            >,
-            {
-              [key in AppendPath<TPrefix, AppendPath<TRoute['path'], '*'>>]: ValuesType<
-                MapRoutes<
-                  TRoute['children'],
-                  AppendPath<TPrefix, TRoute['path']>,
-                  [...TParents, TRoute]
-                >
-              >;
-            }
-          >
-        : {}
-    >
-  : {};
-
-type MapRoutes<
-  TRoutes,
-  TPrefix extends string = '',
-  TParents extends Route[] = []
-> = TRoutes extends [Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents>
+type MapRoutes<TRoutes, TParents extends Route[] = []> = TRoutes extends [Route]
+  ? MapRoute<TRoutes[0], TParents>
   : TRoutes extends [Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> & MapRoute<TRoutes[1], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> & MapRoute<TRoutes[1], TParents>
   : TRoutes extends [Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> & MapRoute<TRoutes[1], TParents> & MapRoute<TRoutes[2], TParents>
   : TRoutes extends [Route, Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents> &
-      MapRoute<TRoutes[3], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents>
   : TRoutes extends [Route, Route, Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents> &
-      MapRoute<TRoutes[3], TPrefix, TParents> &
-      MapRoute<TRoutes[4], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents> &
+      MapRoute<TRoutes[4], TParents>
   : TRoutes extends [Route, Route, Route, Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents> &
-      MapRoute<TRoutes[3], TPrefix, TParents> &
-      MapRoute<TRoutes[4], TPrefix, TParents> &
-      MapRoute<TRoutes[5], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents> &
+      MapRoute<TRoutes[4], TParents> &
+      MapRoute<TRoutes[5], TParents>
   : TRoutes extends [Route, Route, Route, Route, Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents> &
-      MapRoute<TRoutes[3], TPrefix, TParents> &
-      MapRoute<TRoutes[4], TPrefix, TParents> &
-      MapRoute<TRoutes[5], TPrefix, TParents> &
-      MapRoute<TRoutes[6], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents> &
+      MapRoute<TRoutes[4], TParents> &
+      MapRoute<TRoutes[5], TParents> &
+      MapRoute<TRoutes[6], TParents>
   : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents> &
-      MapRoute<TRoutes[3], TPrefix, TParents> &
-      MapRoute<TRoutes[4], TPrefix, TParents> &
-      MapRoute<TRoutes[5], TPrefix, TParents> &
-      MapRoute<TRoutes[6], TPrefix, TParents> &
-      MapRoute<TRoutes[7], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents> &
+      MapRoute<TRoutes[4], TParents> &
+      MapRoute<TRoutes[5], TParents> &
+      MapRoute<TRoutes[6], TParents> &
+      MapRoute<TRoutes[7], TParents>
   : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents> &
-      MapRoute<TRoutes[3], TPrefix, TParents> &
-      MapRoute<TRoutes[4], TPrefix, TParents> &
-      MapRoute<TRoutes[5], TPrefix, TParents> &
-      MapRoute<TRoutes[6], TPrefix, TParents> &
-      MapRoute<TRoutes[7], TPrefix, TParents> &
-      MapRoute<TRoutes[8], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents> &
+      MapRoute<TRoutes[4], TParents> &
+      MapRoute<TRoutes[5], TParents> &
+      MapRoute<TRoutes[6], TParents> &
+      MapRoute<TRoutes[7], TParents> &
+      MapRoute<TRoutes[8], TParents>
   : TRoutes extends [Route, Route, Route, Route, Route, Route, Route, Route, Route, Route]
-  ? MapRoute<TRoutes[0], TPrefix, TParents> &
-      MapRoute<TRoutes[1], TPrefix, TParents> &
-      MapRoute<TRoutes[2], TPrefix, TParents> &
-      MapRoute<TRoutes[3], TPrefix, TParents> &
-      MapRoute<TRoutes[4], TPrefix, TParents> &
-      MapRoute<TRoutes[5], TPrefix, TParents> &
-      MapRoute<TRoutes[6], TPrefix, TParents> &
-      MapRoute<TRoutes[7], TPrefix, TParents> &
-      MapRoute<TRoutes[8], TPrefix, TParents> &
-      MapRoute<TRoutes[9], TPrefix, TParents>
+  ? MapRoute<TRoutes[0], TParents> &
+      MapRoute<TRoutes[1], TParents> &
+      MapRoute<TRoutes[2], TParents> &
+      MapRoute<TRoutes[3], TParents> &
+      MapRoute<TRoutes[4], TParents> &
+      MapRoute<TRoutes[5], TParents> &
+      MapRoute<TRoutes[6], TParents> &
+      MapRoute<TRoutes[8], TParents> &
+      MapRoute<TRoutes[7], TParents> &
+      MapRoute<TRoutes[9], TParents>
   : {};
 
 // const element = null as any;
 
 // const routes = unconst([
+//   {
+//     path: '/link-to/transaction/{transactionId}',
+//     element,
+//   },
+//   {
+//     path: '/link-to/trace/{traceId}',
+//     element,
+//   },
 //   {
 //     path: '/',
 //     element,
@@ -263,20 +279,11 @@ type MapRoutes<
 //         element,
 //         children: [
 //           {
-//             path: '/agent-configuration',
+//             path: '/settings/agent-configuration',
 //             element,
 //           },
 //           {
-//             path: '/agent-configuration/create',
-//             element,
-//             params: t.partial({
-//               query: t.partial({
-//                 pageStep: t.string,
-//               }),
-//             }),
-//           },
-//           {
-//             path: '/agent-configuration/edit',
+//             path: '/settings/agent-configuration/create',
 //             element,
 //             params: t.partial({
 //               query: t.partial({
@@ -285,23 +292,36 @@ type MapRoutes<
 //             }),
 //           },
 //           {
-//             path: '/apm-indices',
+//             path: '/settings/agent-configuration/edit',
+//             element,
+//             params: t.partial({
+//               query: t.partial({
+//                 pageStep: t.string,
+//               }),
+//             }),
+//           },
+//           {
+//             path: '/settings/apm-indices',
 //             element,
 //           },
 //           {
-//             path: '/customize-ui',
+//             path: '/settings/custom-links',
 //             element,
 //           },
 //           {
-//             path: '/schema',
+//             path: '/settings/schema',
 //             element,
 //           },
 //           {
-//             path: '/anomaly-detection',
+//             path: '/settings/anomaly-detection',
 //             element,
 //           },
 //           {
-//             path: '/',
+//             path: '/settings/agent-keys',
+//             element,
+//           },
+//           {
+//             path: '/settings',
 //             element,
 //           },
 //         ],
@@ -330,19 +350,27 @@ type MapRoutes<
 //         ]),
 //         children: [
 //           {
-//             path: '/overview',
+//             path: '/services/:serviceName/overview',
 //             element,
 //           },
 //           {
-//             path: '/transactions',
+//             path: '/services/:serviceName/transactions',
 //             element,
 //           },
 //           {
-//             path: '/errors',
+//             path: '/services/:serviceName/transactions/view',
+//             element,
+//           },
+//           {
+//             path: '/services/:serviceName/dependencies',
+//             element,
+//           },
+//           {
+//             path: '/services/:serviceName/errors',
 //             element,
 //             children: [
 //               {
-//                 path: '/:groupId',
+//                 path: '/services/:serviceName/errors/:groupId',
 //                 element,
 //                 params: t.type({
 //                   path: t.type({
@@ -351,7 +379,7 @@ type MapRoutes<
 //                 }),
 //               },
 //               {
-//                 path: '/',
+//                 path: '/services/:serviceName/errors',
 //                 element,
 //                 params: t.partial({
 //                   query: t.partial({
@@ -365,19 +393,37 @@ type MapRoutes<
 //             ],
 //           },
 //           {
-//             path: '/foo',
+//             path: '/services/:serviceName/metrics',
 //             element,
 //           },
 //           {
-//             path: '/bar',
+//             path: '/services/:serviceName/nodes',
+//             element,
+//             children: [
+//               {
+//                 path: '/services/{serviceName}/nodes/{serviceNodeName}/metrics',
+//                 element,
+//               },
+//               {
+//                 path: '/services/:serviceName/nodes',
+//                 element,
+//               },
+//             ],
+//           },
+//           {
+//             path: '/services/:serviceName/service-map',
 //             element,
 //           },
 //           {
-//             path: '/baz',
+//             path: '/services/:serviceName/logs',
 //             element,
 //           },
 //           {
-//             path: '/',
+//             path: '/services/:serviceName/profiling',
+//             element,
+//           },
+//           {
+//             path: '/services/:serviceName',
 //             element,
 //           },
 //         ],
@@ -405,6 +451,24 @@ type MapRoutes<
 //             element,
 //           },
 //           {
+//             path: '/backends',
+//             element,
+//             children: [
+//               {
+//                 path: '/backends/{backendName}/overview',
+//                 element,
+//               },
+//               {
+//                 path: '/backends/overview',
+//                 element,
+//               },
+//               {
+//                 path: '/backends',
+//                 element,
+//               },
+//             ],
+//           },
+//           {
 //             path: '/',
 //             element,
 //           },
@@ -417,9 +481,11 @@ type MapRoutes<
 // type Routes = typeof routes;
 
 // type Mapped = keyof MapRoutes<Routes>;
+// type Paths = PathsOf<Routes>;
 
 // type Bar = ValuesType<Match<Routes, '/*'>>['route']['path'];
 // type Foo = OutputOf<Routes, '/*'>;
+// // type Baz = OutputOf<Routes, '/services/:serviceName/errors'>;
 
 // const { path }: Foo = {} as any;
 
@@ -427,4 +493,4 @@ type MapRoutes<
 //   return {} as any;
 // }
 
-// const params = _useApmParams('/*');
+// // const params = _useApmParams('/services/:serviceName/nodes/*');

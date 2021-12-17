@@ -63,7 +63,6 @@ import {
   editItemId,
   editingTrustedApp,
   getListItems,
-  editItemState,
   getCurrentLocationIncludedPolicies,
   getCurrentLocationExcludedPolicies,
 } from './selectors';
@@ -106,7 +105,11 @@ const refreshListIfNeeded = async (
       const filterKuery = parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined;
       if (filterKuery) kuery.push(filterKuery);
 
-      const policiesKuery = parsePoliciesToKQL(includedPolicies, excludedPolicies) || undefined;
+      const policiesKuery =
+        parsePoliciesToKQL(
+          includedPolicies ? includedPolicies.split(',') : [],
+          excludedPolicies ? excludedPolicies.split(',') : []
+        ) || undefined;
       if (policiesKuery) kuery.push(policiesKuery);
 
       const response = await trustedAppsService.getTrustedAppsList({
@@ -191,6 +194,7 @@ const submitCreationIfNeeded = async (
       if (editMode) {
         responseTrustedApp = (
           await trustedAppsService.updateTrustedApp(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             { id: editItemId(currentState)! },
             // TODO: try to remove the cast
             entry as PostTrustedAppCreateRequest
@@ -412,12 +416,7 @@ const fetchEditTrustedAppIfNeeded = async (
         dispatch({
           type: 'trustedAppCreationEditItemStateChanged',
           payload: {
-            // No easy way to get around this that I can see. `previousState` does not
-            // seem to allow everything that `editItem` state can hold, so not even sure if using
-            // type guards would work here
-            // @ts-ignore
             type: 'LoadingResourceState',
-            previousState: editItemState(currentState)!,
           },
         });
 
@@ -479,6 +478,6 @@ export const createTrustedAppsPageMiddleware = (
   };
 };
 
-export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<TrustedAppsListPageState> = (
-  coreStart
-) => createTrustedAppsPageMiddleware(new TrustedAppsHttpService(coreStart.http));
+export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<
+  TrustedAppsListPageState
+> = (coreStart) => createTrustedAppsPageMiddleware(new TrustedAppsHttpService(coreStart.http));

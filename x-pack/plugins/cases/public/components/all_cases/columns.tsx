@@ -10,6 +10,7 @@ import {
   EuiAvatar,
   EuiBadgeGroup,
   EuiBadge,
+  EuiButton,
   EuiLink,
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
@@ -21,17 +22,17 @@ import {
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
+import { Case, DeleteCase, SubCase } from '../../../common/ui/types';
 import {
   CaseStatuses,
   CaseType,
-  DeleteCase,
-  Case,
-  SubCase,
+  CommentType,
+  CommentRequestAlertType,
   ActionConnector,
-} from '../../../common';
+} from '../../../common/api';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
-import { CaseDetailsHrefSchema, CaseDetailsLink, CasesNavigation } from '../links';
+import { CaseDetailsLink } from '../links';
 import * as i18n from './translations';
 import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
 import { ALERTS } from '../../common/translations';
@@ -43,6 +44,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
+import { PostComment } from '../../containers/use_post_comment';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -65,28 +67,32 @@ const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
 export interface GetCasesColumn {
-  caseDetailsNavigation?: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
-  disableAlerts?: boolean;
   dispatchUpdateCaseProperty: (u: UpdateCase) => void;
   filterStatus: string;
   handleIsLoading: (a: boolean) => void;
   isLoadingCases: string[];
   refreshCases?: (a?: boolean) => void;
-  showActions: boolean;
+  isSelectorView: boolean;
   userCanCrud: boolean;
   connectors?: ActionConnector[];
+  onRowClick?: (theCase: Case) => void;
+  alertData?: Omit<CommentRequestAlertType, 'type'>;
+  postComment?: (args: PostComment) => Promise<void>;
+  updateCase?: (newCase: Case) => void;
 }
 export const useCasesColumns = ({
-  caseDetailsNavigation,
-  disableAlerts = false,
   dispatchUpdateCaseProperty,
   filterStatus,
   handleIsLoading,
   isLoadingCases,
   refreshCases,
-  showActions,
+  isSelectorView,
   userCanCrud,
   connectors = [],
+  onRowClick,
+  alertData,
+  postComment,
+  updateCase,
 }: GetCasesColumn): CasesColumns[] => {
   // Delete case
   const {
@@ -132,6 +138,25 @@ export const useCasesColumns = ({
     [toggleDeleteModal]
   );
 
+  const assignCaseAction = useCallback(
+    async (theCase: Case) => {
+      if (alertData != null) {
+        await postComment?.({
+          caseId: theCase.id,
+          data: {
+            type: CommentType.alert,
+            ...alertData,
+          },
+          updateCase,
+        });
+      }
+      if (onRowClick) {
+        onRowClick(theCase);
+      }
+    },
+    [alertData, onRowClick, postComment, updateCase]
+  );
+
   useEffect(() => {
     handleIsLoading(isDeleting || isLoadingCases.indexOf('caseUpdate') > -1);
   }, [handleIsLoading, isDeleting, isLoadingCases]);
@@ -148,19 +173,17 @@ export const useCasesColumns = ({
       name: i18n.NAME,
       render: (theCase: Case | SubCase) => {
         if (theCase.id != null && theCase.title != null) {
-          const caseDetailsLinkComponent =
-            caseDetailsNavigation != null ? (
-              <CaseDetailsLink
-                caseDetailsNavigation={caseDetailsNavigation}
-                detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
-                subCaseId={isSubCase(theCase) ? theCase.id : undefined}
-                title={theCase.title}
-              >
-                <TruncatedText text={theCase.title} />
-              </CaseDetailsLink>
-            ) : (
+          const caseDetailsLinkComponent = isSelectorView ? (
+            <TruncatedText text={theCase.title} />
+          ) : (
+            <CaseDetailsLink
+              detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
+              subCaseId={isSubCase(theCase) ? theCase.id : undefined}
+              title={theCase.title}
+            >
               <TruncatedText text={theCase.title} />
-            );
+            </CaseDetailsLink>
+          );
           return theCase.status !== CaseStatuses.closed ? (
             caseDetailsLinkComponent
           ) : (
@@ -219,19 +242,15 @@ export const useCasesColumns = ({
       },
       truncateText: true,
     },
-    ...(!disableAlerts
-      ? [
-          {
-            align: RIGHT_ALIGNMENT,
-            field: 'totalAlerts',
-            name: ALERTS,
-            render: (totalAlerts: Case['totalAlerts']) =>
-              totalAlerts != null
-                ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
-                : getEmptyTagValue(),
-          },
-        ]
-      : []),
+    {
+      align: RIGHT_ALIGNMENT,
+      field: 'totalAlerts',
+      name: ALERTS,
+      render: (totalAlerts: Case['totalAlerts']) =>
+        totalAlerts != null
+          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+          : getEmptyTagValue(),
+    },
     {
       align: RIGHT_ALIGNMENT,
       field: 'totalComment',
@@ -281,38 +300,66 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-    {
-      name: i18n.STATUS,
-      render: (theCase: Case) => {
-        if (theCase?.subCases == null || theCase.subCases.length === 0) {
-          if (theCase.status == null || theCase.type === CaseType.collection) {
-            return getEmptyTagValue();
-          }
-          return (
-            <StatusContextMenu
-              currentStatus={theCase.status}
-              disabled={!userCanCrud || isLoadingCases.length > 0}
-              onStatusChanged={(status) =>
-                handleDispatchUpdate({
-                  updateKey: 'status',
-                  updateValue: status,
-                  caseId: theCase.id,
-                  version: theCase.version,
-                })
+    ...(isSelectorView
+      ? [
+          {
+            align: RIGHT_ALIGNMENT,
+            render: (theCase: Case) => {
+              if (theCase.id != null) {
+                return (
+                  <EuiButton
+                    data-test-subj={`cases-table-row-select-${theCase.id}`}
+                    onClick={() => {
+                      assignCaseAction(theCase);
+                    }}
+                    size="s"
+                    fill={true}
+                  >
+                    {i18n.SELECT}
+                  </EuiButton>
+                );
               }
-            />
-          );
-        }
+              return getEmptyTagValue();
+            },
+          },
+        ]
+      : []),
+    ...(!isSelectorView
+      ? [
+          {
+            name: i18n.STATUS,
+            render: (theCase: Case) => {
+              if (theCase?.subCases == null || theCase.subCases.length === 0) {
+                if (theCase.status == null || theCase.type === CaseType.collection) {
+                  return getEmptyTagValue();
+                }
+                return (
+                  <StatusContextMenu
+                    currentStatus={theCase.status}
+                    disabled={!userCanCrud || isLoadingCases.length > 0}
+                    onStatusChanged={(status) =>
+                      handleDispatchUpdate({
+                        updateKey: 'status',
+                        updateValue: status,
+                        caseId: theCase.id,
+                        version: theCase.version,
+                      })
+                    }
+                  />
+                );
+              }
 
-        const badges = getSubCasesStatusCountsBadges(theCase.subCases);
-        return badges.map(({ color, count }, index) => (
-          <EuiBadge key={index} color={color}>
-            {count}
-          </EuiBadge>
-        ));
-      },
-    },
-    ...(showActions
+              const badges = getSubCasesStatusCountsBadges(theCase.subCases);
+              return badges.map(({ color, count }, index) => (
+                <EuiBadge key={index} color={color}>
+                  {count}
+                </EuiBadge>
+              ));
+            },
+          },
+        ]
+      : []),
+    ...(userCanCrud && !isSelectorView
       ? [
           {
             name: (

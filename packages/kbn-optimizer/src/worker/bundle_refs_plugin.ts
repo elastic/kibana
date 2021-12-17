@@ -43,10 +43,12 @@ type ModuleFactory = (data: RequestData, callback: Callback<BundleRefModule>) =>
 export class BundleRefsPlugin {
   private readonly resolvedRefEntryCache = new Map<BundleRef, Promise<string>>();
   private readonly resolvedRequestCache = new Map<string, Promise<string | undefined>>();
-  private readonly ignorePrefix = Path.resolve(this.bundle.contextDir) + Path.sep;
+  private readonly ignorePrefix: string;
   private allowedBundleIds = new Set<string>();
 
-  constructor(private readonly bundle: Bundle, private readonly bundleRefs: BundleRefs) {}
+  constructor(private readonly bundle: Bundle, private readonly bundleRefs: BundleRefs) {
+    this.ignorePrefix = Path.resolve(this.bundle.contextDir) + Path.sep;
+  }
 
   /**
    * Called by webpack when the plugin is passed in the webpack config
@@ -65,21 +67,22 @@ export class BundleRefsPlugin {
       // entry then create a BundleRefModule instead of a NormalModule.
       compilationParams.normalModuleFactory.hooks.factory.tap(
         'BundleRefsPlugin/normalModuleFactory/factory',
-        (wrappedFactory: ModuleFactory): ModuleFactory => (data, callback) => {
-          const context = data.context;
-          const dep = data.dependencies[0];
+        (wrappedFactory: ModuleFactory): ModuleFactory =>
+          (data, callback) => {
+            const context = data.context;
+            const dep = data.dependencies[0];
 
-          this.maybeReplaceImport(context, dep.request).then(
-            (module) => {
-              if (!module) {
-                wrappedFactory(data, callback);
-              } else {
-                callback(undefined, module);
-              }
-            },
-            (error) => callback(error)
-          );
-        }
+            this.maybeReplaceImport(context, dep.request).then(
+              (module) => {
+                if (!module) {
+                  wrappedFactory(data, callback);
+                } else {
+                  callback(undefined, module);
+                }
+              },
+              (error) => callback(error)
+            );
+          }
       );
     });
 

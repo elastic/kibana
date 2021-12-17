@@ -16,11 +16,11 @@ import {
 } from '../../../../../../triggers_actions_ui/public';
 import {
   Comparator,
-  isRatioAlert,
-  PartialAlertParams,
-  PartialCountAlertParams,
+  isRatioRule,
+  PartialRuleParams,
+  PartialCountRuleParams,
   PartialCriteria as PartialCriteriaType,
-  PartialRatioAlertParams,
+  PartialRatioRuleParams,
   ThresholdType,
   timeUnitRT,
   isOptimizableGroupedThreshold,
@@ -64,9 +64,9 @@ const createDefaultCriterion = (
     ? { field: DEFAULT_FIELD, comparator: Comparator.EQ, value }
     : { field: undefined, comparator: undefined, value: undefined };
 
-const createDefaultCountAlertParams = (
+const createDefaultCountRuleParams = (
   availableFields: LogIndexField[]
-): PartialCountAlertParams => ({
+): PartialCountRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {
     value: 75,
@@ -75,9 +75,9 @@ const createDefaultCountAlertParams = (
   criteria: [createDefaultCriterion(availableFields, 'error')],
 });
 
-const createDefaultRatioAlertParams = (
+const createDefaultRatioRuleParams = (
   availableFields: LogIndexField[]
-): PartialRatioAlertParams => ({
+): PartialRatioRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {
     value: 2,
@@ -90,7 +90,7 @@ const createDefaultRatioAlertParams = (
 });
 
 export const ExpressionEditor: React.FC<
-  AlertTypeParamsExpressionProps<PartialAlertParams, LogsContextMeta>
+  AlertTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>
 > = (props) => {
   const isInternal = props.metadata?.isInternal ?? false;
   const [sourceId] = useSourceId();
@@ -160,7 +160,7 @@ export const SourceStatusWrapper: React.FC = ({ children }) => {
 };
 
 export const Editor: React.FC<
-  AlertTypeParamsExpressionProps<PartialAlertParams, LogsContextMeta>
+  AlertTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>
 > = (props) => {
   const { setAlertParams, alertParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
@@ -231,14 +231,15 @@ export const Editor: React.FC<
     [setAlertParams]
   );
 
-  const defaultCountAlertParams = useMemo(() => createDefaultCountAlertParams(supportedFields), [
-    supportedFields,
-  ]);
+  const defaultCountAlertParams = useMemo(
+    () => createDefaultCountRuleParams(supportedFields),
+    [supportedFields]
+  );
 
   const updateType = useCallback(
     (type: ThresholdType) => {
       const defaults =
-        type === 'count' ? defaultCountAlertParams : createDefaultRatioAlertParams(supportedFields);
+        type === 'count' ? defaultCountAlertParams : createDefaultRatioRuleParams(supportedFields);
       // Reset properties that don't make sense switching from one context to the other
       setAlertParams('count', defaults.count);
       setAlertParams('criteria', defaults.criteria);
@@ -274,7 +275,7 @@ export const Editor: React.FC<
       criteria={alertParams.criteria}
       defaultCriterion={defaultCountAlertParams.criteria[0]}
       errors={criteriaErrors}
-      alertParams={alertParams}
+      ruleParams={alertParams}
       sourceId={sourceId}
       updateCriteria={updateCriteria}
     />
@@ -284,7 +285,7 @@ export const Editor: React.FC<
     <>
       <TypeSwitcher criteria={alertParams.criteria || []} updateType={updateType} />
 
-      {alertParams.criteria && !isRatioAlert(alertParams.criteria) && criteriaComponent}
+      {alertParams.criteria && !isRatioRule(alertParams.criteria) && criteriaComponent}
 
       <Threshold
         comparator={alertParams.count?.comparator}
@@ -307,7 +308,7 @@ export const Editor: React.FC<
         fields={groupByFields}
       />
 
-      {alertParams.criteria && isRatioAlert(alertParams.criteria) && criteriaComponent}
+      {alertParams.criteria && isRatioRule(alertParams.criteria) && criteriaComponent}
 
       {shouldShowGroupByOptimizationWarning && (
         <>
@@ -337,7 +338,7 @@ export default ExpressionEditor;
 // components.
 export const ExpressionLike = ({ text }: { text: string }) => {
   return (
-    <div className="euiExpression euiExpression-isUppercase euiExpression--secondary">
+    <div className="euiExpression euiExpression-isUppercase euiExpression--success">
       <span className="euiExpression__description">{text}</span>
     </div>
   );

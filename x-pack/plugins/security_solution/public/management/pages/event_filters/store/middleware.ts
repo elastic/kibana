@@ -35,7 +35,7 @@ import {
   getDeletionState,
 } from './selector';
 
-import { parseQueryFilterToKQL } from '../../../common/utils';
+import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../constants';
 import {
   EventFiltersListPageData,
@@ -44,6 +44,7 @@ import {
   EventFiltersServiceGetListOptions,
 } from '../types';
 import {
+  asStaleResourceState,
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
@@ -203,9 +204,9 @@ const checkIfEventFilterDataExist: MiddlewareActionHandler = async (
 ) => {
   dispatch({
     type: 'eventFiltersListPageDataExistsChanged',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
-    payload: createLoadingResourceState(getListPageDataExistsState(getState())),
+    payload: createLoadingResourceState(
+      asStaleResourceState(getListPageDataExistsState(getState()))
+    ),
   });
 
   try {
@@ -232,20 +233,29 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
     dispatch({
       type: 'eventFiltersListPageDataChanged',
       payload: {
-        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-        // @ts-ignore
         type: 'LoadingResourceState',
-        previousState: getCurrentListPageDataState(state),
+        previousState: asStaleResourceState(getCurrentListPageDataState(state)),
       },
     });
 
-    const { page_size: pageSize, page_index: pageIndex, filter } = getCurrentLocation(state);
+    const {
+      page_size: pageSize,
+      page_index: pageIndex,
+      filter,
+      included_policies: includedPolicies,
+    } = getCurrentLocation(state);
+
+    const kuery = parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined;
+
     const query: EventFiltersServiceGetListOptions = {
       page: pageIndex + 1,
       perPage: pageSize,
       sortField: 'created_at',
       sortOrder: 'desc',
-      filter: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
+      filter: parsePoliciesAndFilterToKql({
+        kuery,
+        policies: includedPolicies ? includedPolicies.split(',') : [],
+      }),
     };
 
     try {
@@ -300,9 +310,7 @@ const eventFilterDeleteEntry: MiddlewareActionHandler = async (
 
   dispatch({
     type: 'eventFilterDeleteStatusChanged',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
-    payload: createLoadingResourceState(getDeletionState(state).status),
+    payload: createLoadingResourceState(asStaleResourceState(getDeletionState(state).status)),
   });
 
   try {
@@ -349,6 +357,6 @@ export const createEventFiltersPageMiddleware = (
   };
 };
 
-export const eventFiltersPageMiddlewareFactory: ImmutableMiddlewareFactory<EventFiltersListPageState> = (
-  coreStart
-) => createEventFiltersPageMiddleware(new EventFiltersHttpService(coreStart.http));
+export const eventFiltersPageMiddlewareFactory: ImmutableMiddlewareFactory<
+  EventFiltersListPageState
+> = (coreStart) => createEventFiltersPageMiddleware(new EventFiltersHttpService(coreStart.http));

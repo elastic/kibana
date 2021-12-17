@@ -11,7 +11,7 @@ import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
 import { getNodes } from '../../../../lib/elasticsearch/nodes';
 import { getNodesShardCount } from '../../../../lib/elasticsearch/shards/get_nodes_shard_count';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { getPaginatedNodes } from '../../../../lib/elasticsearch/nodes/get_nodes/get_paginated_nodes';
 import { LISTING_METRICS_NAMES } from '../../../../lib/elasticsearch/nodes/get_nodes/nodes_listing_metrics';

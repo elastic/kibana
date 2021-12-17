@@ -103,8 +103,13 @@ export const useRequest = <D = any, E = Error>(
           : serializedResponseData;
         setData(responseData);
       }
-      // Setting isLoading to false also acts as a signal for scheduling the next poll request.
-      setIsLoading(false);
+      // There can be situations in which a component that consumes this hook gets unmounted when
+      // the request returns an error. So before changing the isLoading state, check if the component
+      // is still mounted.
+      if (isMounted.current === true) {
+        // Setting isLoading to false also acts as a signal for scheduling the next poll request.
+        setIsLoading(false);
+      }
     },
     [requestBody, httpClient, deserializer, clearPollInterval]
   );

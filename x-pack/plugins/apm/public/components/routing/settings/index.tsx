@@ -16,9 +16,10 @@ import { AgentConfigurations } from '../../app/Settings/agent_configurations';
 import { CreateAgentConfigurationRouteView } from './create_agent_configuration_route_view';
 import { EditAgentConfigurationRouteView } from './edit_agent_configuration_route_view';
 import { ApmIndices } from '../../app/Settings/ApmIndices';
-import { CustomizeUI } from '../../app/Settings/customize_ui';
+import { CustomLinkOverview } from '../../app/Settings/custom_link';
 import { Schema } from '../../app/Settings/schema';
 import { AnomalyDetection } from '../../app/Settings/anomaly_detection';
+import { AgentKeys } from '../../app/Settings/agent_keys';
 
 function page<TPath extends string>({
   path,
@@ -58,7 +59,7 @@ export const settings = {
   ),
   children: [
     page({
-      path: '/agent-configuration',
+      path: '/settings/agent-configuration',
       tab: 'agent-configurations',
       title: i18n.translate(
         'xpack.apm.views.settings.agentConfiguration.title',
@@ -68,7 +69,7 @@ export const settings = {
     }),
     {
       ...page({
-        path: '/agent-configuration/create',
+        path: '/settings/agent-configuration/create',
         title: i18n.translate(
           'xpack.apm.views.settings.createAgentConfiguration.title',
           { defaultMessage: 'Create Agent Configuration' }
@@ -84,7 +85,7 @@ export const settings = {
     },
     {
       ...page({
-        path: '/agent-configuration/edit',
+        path: '/settings/agent-configuration/edit',
         title: i18n.translate(
           'xpack.apm.views.settings.editAgentConfiguration.title',
           { defaultMessage: 'Edit Agent Configuration' }
@@ -94,14 +95,14 @@ export const settings = {
       }),
       params: t.partial({
         query: t.partial({
-          name: t.string,
           environment: t.string,
+          name: t.string,
           pageStep: agentConfigurationPageStepRt,
         }),
       }),
     },
     page({
-      path: '/apm-indices',
+      path: '/settings/apm-indices',
       title: i18n.translate('xpack.apm.views.settings.indices.title', {
         defaultMessage: 'Indices',
       }),
@@ -109,15 +110,15 @@ export const settings = {
       element: <ApmIndices />,
     }),
     page({
-      path: '/customize-ui',
-      title: i18n.translate('xpack.apm.views.settings.customizeUI.title', {
-        defaultMessage: 'Customize app',
+      path: '/settings/custom-links',
+      title: i18n.translate('xpack.apm.views.settings.customLink.title', {
+        defaultMessage: 'Custom Links',
       }),
-      tab: 'customize-ui',
-      element: <CustomizeUI />,
+      tab: 'custom-links',
+      element: <CustomLinkOverview />,
     }),
     page({
-      path: '/schema',
+      path: '/settings/schema',
       title: i18n.translate('xpack.apm.views.settings.schema.title', {
         defaultMessage: 'Schema',
       }),
@@ -125,15 +126,23 @@ export const settings = {
       tab: 'schema',
     }),
     page({
-      path: '/anomaly-detection',
+      path: '/settings/anomaly-detection',
       title: i18n.translate('xpack.apm.views.settings.anomalyDetection.title', {
         defaultMessage: 'Anomaly detection',
       }),
       element: <AnomalyDetection />,
       tab: 'anomaly-detection',
     }),
+    page({
+      path: '/settings/agent-keys',
+      title: i18n.translate('xpack.apm.views.settings.agentKeys.title', {
+        defaultMessage: 'Agent keys',
+      }),
+      element: <AgentKeys />,
+      tab: 'agent-keys',
+    }),
     {
-      path: '/',
+      path: '/settings',
       element: <Redirect to="/settings/agent-configuration" />,
     },
   ],

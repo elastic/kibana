@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import {
@@ -19,41 +20,53 @@ import {
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
+import { EntityType } from '../../../../../timelines/common';
+import { Ecs } from '../../../../common/ecs';
 
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
+  ecs: Ecs | null;
 }
 
 export interface UseTimelineEventsDetailsProps {
+  entityType?: EntityType;
   docValueFields: DocValueFields[];
   indexName: string;
   eventId: string;
+  runtimeMappings: MappingRuntimeFields;
   skip: boolean;
 }
 
 export const useTimelineEventsDetails = ({
+  entityType = EntityType.EVENTS,
   docValueFields,
   indexName,
   eventId,
+  runtimeMappings,
   skip,
-}: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData']] => {
+}: UseTimelineEventsDetailsProps): [
+  boolean,
+  EventsArgs['detailsData'],
+  object | undefined,
+  EventsArgs['ecs']
+] => {
   const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    timelineDetailsRequest,
-    setTimelineDetailsRequest,
-  ] = useState<TimelineEventsDetailsRequestOptions | null>(null);
+  const [timelineDetailsRequest, setTimelineDetailsRequest] =
+    useState<TimelineEventsDetailsRequestOptions | null>(null);
   const { addError, addWarning } = useAppToasts();
 
-  const [timelineDetailsResponse, setTimelineDetailsResponse] = useState<EventsArgs['detailsData']>(
-    null
-  );
+  const [timelineDetailsResponse, setTimelineDetailsResponse] =
+    useState<EventsArgs['detailsData']>(null);
+  const [ecsData, setEcsData] = useState<EventsArgs['ecs']>(null);
+
+  const [rawEventData, setRawEventData] = useState<object | undefined>(undefined);
 
   const timelineDetailsSearch = useCallback(
     (request: TimelineEventsDetailsRequestOptions | null) => {
@@ -78,6 +91,8 @@ export const useTimelineEventsDetails = ({
               if (isCompleteResponse(response)) {
                 setLoading(false);
                 setTimelineDetailsResponse(response.data || []);
+                setRawEventData(response.rawResponse.hits.hits[0]);
+                setEcsData(response.ecs || null);
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
@@ -105,16 +120,18 @@ export const useTimelineEventsDetails = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         docValueFields,
+        entityType,
         indexName,
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
+        runtimeMappings,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [docValueFields, eventId, indexName]);
+  }, [docValueFields, entityType, eventId, indexName, runtimeMappings]);
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);
@@ -124,5 +141,5 @@ export const useTimelineEventsDetails = ({
     };
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
-  return [loading, timelineDetailsResponse];
+  return [loading, timelineDetailsResponse, rawEventData, ecsData];
 };

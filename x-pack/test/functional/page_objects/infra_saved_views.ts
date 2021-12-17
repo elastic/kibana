@@ -10,6 +10,7 @@ import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
@@ -74,14 +75,15 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     },
 
     async ensureViewIsLoaded(name: string) {
-      const subject = await testSubjects.find('savedViews-openPopover');
-      expect(await subject.getVisibleText()).to.be(name);
+      await retry.try(async () => {
+        const subject = await testSubjects.find('savedViews-openPopover');
+        expect(await subject.getVisibleText()).to.be(name);
+      });
     },
 
     async ensureViewIsLoadable(name: string) {
-      const subjects = await testSubjects.getVisibleTextAll('savedViews-loadList');
-      const includesName = subjects.some((s) => s.includes(name));
-      expect(includesName).to.be(true);
+      const subject = await testSubjects.find('savedViews-loadList');
+      await subject.findByCssSelector(`li[title="${name}"]`);
     },
 
     async closeSavedViewsLoadModal() {

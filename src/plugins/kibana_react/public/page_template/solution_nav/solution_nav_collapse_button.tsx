@@ -13,21 +13,20 @@ import classNames from 'classnames';
 import { EuiButtonIcon, EuiButtonIconPropsForButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export type KibanaPageTemplateSolutionNavCollapseButtonProps = Partial<EuiButtonIconPropsForButton> & {
-  /**
-   * Boolean state of current collapsed status
-   */
-  isCollapsed: boolean;
-};
+export type KibanaPageTemplateSolutionNavCollapseButtonProps =
+  Partial<EuiButtonIconPropsForButton> & {
+    /**
+     * Boolean state of current collapsed status
+     */
+    isCollapsed: boolean;
+  };
 
 /**
  * Creates the styled icon button for showing/hiding solution nav
  */
-export const KibanaPageTemplateSolutionNavCollapseButton: FunctionComponent<KibanaPageTemplateSolutionNavCollapseButtonProps> = ({
-  className,
-  isCollapsed,
-  ...rest
-}) => {
+export const KibanaPageTemplateSolutionNavCollapseButton: FunctionComponent<
+  KibanaPageTemplateSolutionNavCollapseButtonProps
+> = ({ className, isCollapsed, ...rest }) => {
   const classes = classNames(
     'kbnPageTemplateSolutionNavCollapseButton',
     {

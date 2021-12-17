@@ -5,19 +5,56 @@
  * 2.0.
  */
 
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTabs,
+  EuiTab,
+  EuiLoadingElastic,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+} from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 
 import { Container, Nav, Wrapper } from './layouts';
 import { OsqueryAppRoutes } from '../routes';
 import { useRouterNavigate } from '../common/lib/kibana';
 import { ManageIntegrationLink } from './manage_integration_link';
+import { useOsqueryIntegrationStatus } from '../common/hooks';
+import { OsqueryAppEmptyState } from './empty_state';
 
 const OsqueryAppComponent = () => {
   const location = useLocation();
   const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
+  const { data: osqueryIntegration, isFetched } = useOsqueryIntegrationStatus();
+
+  if (!isFetched) {
+    return (
+      <EuiPage paddingSize="none">
+        <EuiPageBody>
+          <EuiPageContent
+            verticalPosition="center"
+            horizontalPosition="center"
+            paddingSize="none"
+            color="subdued"
+            hasShadow={false}
+          >
+            <EuiLoadingElastic size="xxl" />
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    );
+  }
+
+  if (isFetched && osqueryIntegration?.install_status !== 'installed') {
+    return <OsqueryAppEmptyState />;
+  }
 
   return (
     <Container>
@@ -26,12 +63,6 @@ const OsqueryAppComponent = () => {
           <EuiFlexGroup gutterSize="l" alignItems="center">
             <EuiFlexItem>
               <EuiTabs display="condensed">
-                {/* <EuiTab isSelected={section === 'overview'} {...useRouterNavigate('overview')}>
-                  <FormattedMessage
-                    id="xpack.osquery.appNavigation.overviewLinkText"
-                    defaultMessage="Overview"
-                  />
-                </EuiTab> */}
                 <EuiTab
                   isSelected={section === 'live_queries'}
                   {...useRouterNavigate('live_queries')}
@@ -41,13 +72,10 @@ const OsqueryAppComponent = () => {
                     defaultMessage="Live queries"
                   />
                 </EuiTab>
-                <EuiTab
-                  isSelected={section === 'scheduled_query_groups'}
-                  {...useRouterNavigate('scheduled_query_groups')}
-                >
+                <EuiTab isSelected={section === 'packs'} {...useRouterNavigate('packs')}>
                   <FormattedMessage
-                    id="xpack.osquery.appNavigation.scheduledQueryGroupsLinkText"
-                    defaultMessage="Scheduled query groups"
+                    id="xpack.osquery.appNavigation.packsLinkText"
+                    defaultMessage="Packs"
                   />
                 </EuiTab>
                 <EuiTab

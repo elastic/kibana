@@ -38,7 +38,7 @@ const DATA_FRAME_ANALYTICS_DEEP_LINK: AppDeepLink = {
       title: i18n.translate('xpack.ml.deepLink.trainedModels', {
         defaultMessage: 'Trained Models',
       }),
-      path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_MODELS_MANAGE}`,
+      path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
     },
   ],
 };

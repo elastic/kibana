@@ -15,7 +15,7 @@ import {
   EuiSelect,
   EuiFormRow,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent } from '../../../../types';
 import {
@@ -122,7 +122,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
           defaultMessage="Assign policy"
         />
       }
-      buttonColor="danger"
+      buttonColor="primary"
     >
       <p>
         <FormattedMessage

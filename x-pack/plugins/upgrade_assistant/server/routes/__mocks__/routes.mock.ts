@@ -9,16 +9,18 @@ import { RequestHandler, RequestHandlerContext } from 'src/core/server';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
+  deprecationsServiceMock,
 } from '../../../../../../src/core/server/mocks';
 
-export const routeHandlerContextMock = ({
+export const routeHandlerContextMock = {
   core: {
     elasticsearch: {
       client: elasticsearchServiceMock.createScopedClusterClient(),
     },
     savedObjects: { client: savedObjectsClientMock.create() },
+    deprecations: { client: deprecationsServiceMock.createClient() },
   },
-} as unknown) as RequestHandlerContext;
+} as unknown as RequestHandlerContext;
 
 /**
  * Creates a very crude mock of the new platform router implementation. This enables use to test
@@ -31,15 +33,14 @@ export const routeHandlerContextMock = ({
 export const createMockRouter = () => {
   const paths: Record<string, Record<string, RequestHandler<any, any, any>>> = {};
 
-  const assign = (method: string) => (
-    { path }: { path: string },
-    handler: RequestHandler<any, any, any>
-  ) => {
-    paths[method] = {
-      ...(paths[method] || {}),
-      ...{ [path]: handler },
+  const assign =
+    (method: string) =>
+    ({ path }: { path: string }, handler: RequestHandler<any, any, any>) => {
+      paths[method] = {
+        ...(paths[method] || {}),
+        ...{ [path]: handler },
+      };
     };
-  };
 
   return {
     getHandler({ method, pathPattern }: { method: string; pathPattern: string }) {

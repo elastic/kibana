@@ -8,7 +8,7 @@
 
 import { Assign } from '@kbn/utility-types';
 import { DatatableColumn } from 'src/plugins/expressions';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import { IndexPattern } from '../..';
 import {
   aggAvg,
   aggBucketAvg,
@@ -67,6 +67,7 @@ import {
   AggParamsStdDeviation,
   AggParamsSum,
   AggParamsTerms,
+  AggParamsMultiTerms,
   AggParamsTopHit,
   aggPercentileRanks,
   aggPercentiles,
@@ -76,6 +77,7 @@ import {
   aggStdDeviation,
   aggSum,
   aggTerms,
+  aggMultiTerms,
   aggTopHit,
   AggTypesRegistry,
   AggTypesRegistrySetup,
@@ -88,22 +90,22 @@ import {
   aggFilteredMetric,
   aggSinglePercentile,
 } from './';
+import { AggParamsSampler } from './buckets/sampler';
+import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
 
-export { IAggConfig, AggConfigSerialized } from './agg_config';
-export { CreateAggConfigParams, IAggConfigs } from './agg_configs';
-export { IAggType } from './agg_type';
-export { AggParam, AggParamOption } from './agg_params';
-export { IFieldParamType } from './param_types';
-export { IMetricAggType } from './metrics/metric_agg_type';
-export { IpRangeKey } from './buckets/lib/ip_range';
-export { OptionedValueProp } from './param_types/optioned';
+export type { IAggConfig, AggConfigSerialized } from './agg_config';
+export type { CreateAggConfigParams, IAggConfigs } from './agg_configs';
+export type { IAggType } from './agg_type';
+export type { AggParam, AggParamOption } from './agg_params';
+export type { IFieldParamType } from './param_types';
+export type { IMetricAggType } from './metrics/metric_agg_type';
+export type { IpRangeKey } from './buckets/lib/ip_range';
+export type { OptionedValueProp } from './param_types/optioned';
 
-/** @internal */
 export interface AggsCommonSetup {
   types: AggTypesRegistrySetup;
 }
 
-/** @internal */
 export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   datatableUtilities: {
@@ -127,23 +129,20 @@ export interface AggsCommonStart {
  */
 export type AggsStart = Assign<AggsCommonStart, { types: AggTypesRegistryStart }>;
 
-/** @internal */
 export interface BaseAggParams {
   json?: string;
   customLabel?: string;
   timeShift?: string;
 }
 
-/** @internal */
 export interface AggExpressionType {
   type: 'agg_type';
   value: AggConfigSerialized;
 }
 
 /** @internal */
-export type AggExpressionFunctionArgs<
-  Name extends keyof AggParamsMapping
-> = AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
+export type AggExpressionFunctionArgs<Name extends keyof AggParamsMapping> =
+  AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
 
 /**
  * A global list of the param interfaces for each agg type.
@@ -164,6 +163,9 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.HISTOGRAM]: AggParamsHistogram;
   [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
   [BUCKET_TYPES.TERMS]: AggParamsTerms;
+  [BUCKET_TYPES.MULTI_TERMS]: AggParamsMultiTerms;
+  [BUCKET_TYPES.SAMPLER]: AggParamsSampler;
+  [BUCKET_TYPES.DIVERSIFIED_SAMPLER]: AggParamsDiversifiedSampler;
   [METRIC_TYPES.AVG]: AggParamsAvg;
   [METRIC_TYPES.CARDINALITY]: AggParamsCardinality;
   [METRIC_TYPES.COUNT]: BaseAggParams;
@@ -204,6 +206,7 @@ export interface AggFunctionsMapping {
   aggHistogram: ReturnType<typeof aggHistogram>;
   aggDateHistogram: ReturnType<typeof aggDateHistogram>;
   aggTerms: ReturnType<typeof aggTerms>;
+  aggMultiTerms: ReturnType<typeof aggMultiTerms>;
   aggAvg: ReturnType<typeof aggAvg>;
   aggBucketAvg: ReturnType<typeof aggBucketAvg>;
   aggBucketMax: ReturnType<typeof aggBucketMax>;

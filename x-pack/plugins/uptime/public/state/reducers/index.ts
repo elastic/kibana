@@ -7,12 +7,10 @@
 
 import { combineReducers } from 'redux';
 import { monitorReducer } from './monitor';
-import { overviewFiltersReducer } from './overview_filters';
 import { uiReducer } from './ui';
 import { monitorStatusReducer } from './monitor_status';
 import { monitorListReducer } from './monitor_list';
 import { dynamicSettingsReducer } from './dynamic_settings';
-import { indexPatternReducer } from './index_pattern';
 import { pingReducer } from './ping';
 import { pingListReducer } from './ping_list';
 import { monitorDurationReducer } from './monitor_duration';
@@ -24,15 +22,15 @@ import { alertsReducer } from '../alerts/alerts';
 import { journeyReducer } from './journey';
 import { networkEventsReducer } from './network_events';
 import { syntheticsReducer } from './synthetics';
+import { monitorManagementListReducer } from './monitor_management';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
-  overviewFilters: overviewFiltersReducer,
   ui: uiReducer,
   monitorList: monitorListReducer,
+  monitorManagementList: monitorManagementListReducer,
   monitorStatus: monitorStatusReducer,
   dynamicSettings: dynamicSettingsReducer,
-  indexPattern: indexPatternReducer,
   ping: pingReducer,
   pingList: pingListReducer,
   ml: mlJobsReducer,

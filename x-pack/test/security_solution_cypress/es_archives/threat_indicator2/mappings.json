@@ -2,11 +2,11 @@
   "type": "index",
   "value": {
     "aliases": {
-      "filebeat-7.12.0": {
+      "logs-ti": {
         "is_write_index": false
       }
     },
-    "index": "filebeat-7.12.0-2021.03.11-000001",
+    "index": "logs-ti_abusech.malware",
     "mappings": {
       "_meta": {
         "beat": "filebeat",
@@ -194,7 +194,7 @@
             }
           }
         },
-        "threatintel": {
+        "threat": {
           "properties": {
             "abusemalware": {
               "properties": {
@@ -794,6 +794,14 @@
                 "type": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                }
+              }
+            },
+            "feed": {
+              "properties": {
+                  "name": {
+                    "ignore_above": 1024,
+                    "type": "keyword"
                 }
               }
             }

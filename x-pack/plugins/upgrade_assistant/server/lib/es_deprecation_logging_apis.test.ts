@@ -10,6 +10,7 @@ import {
   getDeprecationLoggingStatus,
   isDeprecationLoggingEnabled,
   setDeprecationLogging,
+  isDeprecationLogIndexingEnabled,
 } from './es_deprecation_logging_apis';
 
 describe('getDeprecationLoggingStatus', () => {
@@ -28,7 +29,16 @@ describe('setDeprecationLogging', () => {
       const dataClient = elasticsearchServiceMock.createScopedClusterClient();
       await setDeprecationLogging(dataClient, true);
       expect(dataClient.asCurrentUser.cluster.putSettings).toHaveBeenCalledWith({
-        body: { transient: { 'logger.deprecation': 'WARN' } },
+        body: {
+          persistent: {
+            'logger.deprecation': 'WARN',
+            'cluster.deprecation_indexing.enabled': true,
+          },
+          transient: {
+            'logger.deprecation': 'WARN',
+            'cluster.deprecation_indexing.enabled': true,
+          },
+        },
       });
     });
   });
@@ -38,14 +48,23 @@ describe('setDeprecationLogging', () => {
       const dataClient = elasticsearchServiceMock.createScopedClusterClient();
       await setDeprecationLogging(dataClient, false);
       expect(dataClient.asCurrentUser.cluster.putSettings).toHaveBeenCalledWith({
-        body: { transient: { 'logger.deprecation': 'ERROR' } },
+        body: {
+          persistent: {
+            'logger.deprecation': 'ERROR',
+            'cluster.deprecation_indexing.enabled': false,
+          },
+          transient: {
+            'logger.deprecation': 'ERROR',
+            'cluster.deprecation_indexing.enabled': false,
+          },
+        },
       });
     });
   });
 });
 
 describe('isDeprecationLoggingEnabled', () => {
-  ['default', 'persistent', 'transient'].forEach((tier) => {
+  ['defaults', 'persistent', 'transient'].forEach((tier) => {
     ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ALL'].forEach((level) => {
       it(`returns true when ${tier} is set to ${level}`, () => {
         expect(isDeprecationLoggingEnabled({ [tier]: { logger: { deprecation: level } } })).toBe(
@@ -55,7 +74,7 @@ describe('isDeprecationLoggingEnabled', () => {
     });
   });
 
-  ['default', 'persistent', 'transient'].forEach((tier) => {
+  ['defaults', 'persistent', 'transient'].forEach((tier) => {
     ['ERROR', 'FATAL'].forEach((level) => {
       it(`returns false when ${tier} is set to ${level}`, () => {
         expect(isDeprecationLoggingEnabled({ [tier]: { logger: { deprecation: level } } })).toBe(
@@ -68,7 +87,7 @@ describe('isDeprecationLoggingEnabled', () => {
   it('allows transient to override persistent and default', () => {
     expect(
       isDeprecationLoggingEnabled({
-        default: { logger: { deprecation: 'FATAL' } },
+        defaults: { logger: { deprecation: 'FATAL' } },
         persistent: { logger: { deprecation: 'FATAL' } },
         transient: { logger: { deprecation: 'WARN' } },
       })
@@ -78,8 +97,29 @@ describe('isDeprecationLoggingEnabled', () => {
   it('allows persistent to override default', () => {
     expect(
       isDeprecationLoggingEnabled({
-        default: { logger: { deprecation: 'FATAL' } },
+        defaults: { logger: { deprecation: 'FATAL' } },
         persistent: { logger: { deprecation: 'WARN' } },
+      })
+    ).toBe(true);
+  });
+});
+
+describe('isDeprecationLogIndexingEnabled', () => {
+  it('allows transient to override persistent and default', () => {
+    expect(
+      isDeprecationLogIndexingEnabled({
+        defaults: { cluster: { deprecation_indexing: { enabled: 'false' } } },
+        persistent: { cluster: { deprecation_indexing: { enabled: 'false' } } },
+        transient: { cluster: { deprecation_indexing: { enabled: 'true' } } },
+      })
+    ).toBe(true);
+  });
+
+  it('allows persistent to override default', () => {
+    expect(
+      isDeprecationLogIndexingEnabled({
+        defaults: { cluster: { deprecation_indexing: { enabled: 'false' } } },
+        persistent: { cluster: { deprecation_indexing: { enabled: 'true' } } },
       })
     ).toBe(true);
   });

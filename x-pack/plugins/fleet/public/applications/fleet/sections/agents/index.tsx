@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Router, Route, Switch, useHistory } from 'react-router-dom';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
 
@@ -39,9 +39,10 @@ export const AgentsApp: React.FunctionComponent = () => {
     perPage: 1000,
   });
 
-  const agentPolicies = useMemo(() => agentPoliciesRequest.data?.items || [], [
-    agentPoliciesRequest.data,
-  ]);
+  const agentPolicies = useMemo(
+    () => agentPoliciesRequest.data?.items || [],
+    [agentPoliciesRequest.data]
+  );
 
   const fleetStatus = useFleetStatus();
 

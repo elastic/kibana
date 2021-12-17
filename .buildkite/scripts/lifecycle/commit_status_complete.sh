@@ -4,7 +4,7 @@ set -euo pipefail
 
 if [[ "${GITHUB_COMMIT_STATUS_ENABLED:-}" == "true" ]]; then
   COMMIT_STATUS=success
-  if [[ "${BUILD_FAILED:-}"  == "true" ]]; then
+  if [[ "${BUILD_SUCCESSFUL:-}"  != "true" ]]; then
     COMMIT_STATUS=failure
   fi
 

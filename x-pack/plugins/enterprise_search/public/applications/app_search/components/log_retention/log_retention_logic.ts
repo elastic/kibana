@@ -74,7 +74,7 @@ export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetent
 
       try {
         const { http } = HttpLogic.values;
-        const response = await http.get('/api/app_search/log_settings');
+        const response = await http.get('/internal/app_search/log_settings');
 
         actions.updateLogRetention(
           convertLogRetentionFromServerToClient(response as LogRetentionServer)
@@ -90,7 +90,7 @@ export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetent
 
       try {
         const { http } = HttpLogic.values;
-        const response = await http.put('/api/app_search/log_settings', {
+        const response = await http.put('/internal/app_search/log_settings', {
           body: JSON.stringify(updateData),
         });
         actions.updateLogRetention(

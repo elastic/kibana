@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { EuiPageTemplate } from '@elastic/eui';
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  createKibanaReactContext,
+  KibanaPageTemplate,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { casesFeatureId } from '../../../common';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
-import { AllCasesPage } from './all_cases';
+import { CasesPage } from './';
 
 export default {
   title: 'app/Cases',
-  component: AllCasesPage,
+  component: CasesPage,
   decorators: [
     (Story: ComponentType) => {
-      const KibanaReactContext = createKibanaReactContext(({
+      const KibanaReactContext = createKibanaReactContext({
         application: {
           capabilities: { [casesFeatureId]: { read_cases: true } },
           getUrlForApp: () => '',
@@ -31,11 +33,11 @@ export default {
           ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
         },
         uiSettings: { get: () => true },
-      } as unknown) as Partial<CoreStart>);
+      } as unknown as Partial<CoreStart>);
 
-      const pluginContextValue = ({
-        ObservabilityPageTemplate: EuiPageTemplate,
-      } as unknown) as PluginContextValue;
+      const pluginContextValue = {
+        ObservabilityPageTemplate: KibanaPageTemplate,
+      } as unknown as PluginContextValue;
 
       return (
         <MemoryRouter>
@@ -51,5 +53,5 @@ export default {
 };
 
 export function EmptyState() {
-  return <AllCasesPage />;
+  return <CasesPage />;
 }

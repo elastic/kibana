@@ -85,15 +85,12 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(uiSettingsClient.get).toHaveBeenCalledTimes(2);
+      expect(uiSettingsClient.get).toHaveBeenCalledTimes(1);
       expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:darkMode');
-      expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:version');
     });
 
     it('calls getThemeTag with the correct parameters', async () => {
-      uiSettingsClient.get.mockImplementation((settingName) => {
-        return Promise.resolve(settingName === 'theme:darkMode' ? true : 'v8');
-      });
+      uiSettingsClient.get.mockResolvedValue(true);
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -126,15 +123,12 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(uiSettingsClient.get).toHaveBeenCalledTimes(2);
+      expect(uiSettingsClient.get).toHaveBeenCalledTimes(1);
       expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:darkMode');
-      expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:version');
     });
 
     it('calls getThemeTag with the correct parameters', async () => {
-      uiSettingsClient.get.mockImplementation((settingName) => {
-        return Promise.resolve(settingName === 'theme:darkMode' ? true : 'v8');
-      });
+      uiSettingsClient.get.mockResolvedValue(true);
 
       const request = httpServerMock.createKibanaRequest();
 

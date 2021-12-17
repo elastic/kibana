@@ -6,17 +6,33 @@
  * Side Public License, v 1.
  */
 
+import chalk from 'chalk';
 import type { Subscription } from 'rxjs';
 
 import type { TypeOf } from '@kbn/config-schema';
+import { getDataPath } from '@kbn/utils';
 import type { CorePreboot, Logger, PluginInitializerContext, PrebootPlugin } from 'src/core/server';
 
 import { ElasticsearchConnectionStatus } from '../common';
 import type { ConfigSchema, ConfigType } from './config';
+import { ElasticsearchService } from './elasticsearch_service';
+import { KibanaConfigWriter } from './kibana_config_writer';
 import { defineRoutes } from './routes';
+import { VerificationService } from './verification_service';
 
-export class UserSetupPlugin implements PrebootPlugin {
+// List of the Elasticsearch hosts Kibana uses by default.
+const DEFAULT_ELASTICSEARCH_HOSTS = [
+  'http://localhost:9200',
+  // It's a default host we use in the official Kibana Docker image (see `kibana_yml.template.ts`).
+  ...(process.env.ELASTIC_CONTAINER ? ['http://elasticsearch:9200'] : []),
+];
+
+export class InteractiveSetupPlugin implements PrebootPlugin {
   readonly #logger: Logger;
+  readonly #elasticsearch: ElasticsearchService;
+  readonly #verification: VerificationService;
+
+  #elasticsearchConnectionStatusSubscription?: Subscription;
 
   #configSubscription?: Subscription;
   #config?: ConfigType;
@@ -27,13 +43,15 @@ export class UserSetupPlugin implements PrebootPlugin {
     return this.#config;
   };
 
-  #elasticsearchConnectionStatus = ElasticsearchConnectionStatus.Unknown;
-  readonly #getElasticsearchConnectionStatus = () => {
-    return this.#elasticsearchConnectionStatus;
-  };
-
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.#logger = this.initializerContext.logger.get();
+    this.#elasticsearch = new ElasticsearchService(
+      this.initializerContext.logger.get('elasticsearch'),
+      initializerContext.env.packageInfo.version
+    );
+    this.#verification = new VerificationService(
+      this.initializerContext.logger.get('verification')
+    );
   }
 
   public setup(core: CorePreboot) {
@@ -49,10 +67,23 @@ export class UserSetupPlugin implements PrebootPlugin {
     const shouldActiveSetupMode =
       !core.elasticsearch.config.credentialsSpecified &&
       core.elasticsearch.config.hosts.length === 1 &&
-      core.elasticsearch.config.hosts[0] === 'http://localhost:9200';
+      DEFAULT_ELASTICSEARCH_HOSTS.includes(core.elasticsearch.config.hosts[0]);
     if (!shouldActiveSetupMode) {
+      const reason = core.elasticsearch.config.credentialsSpecified
+        ? 'Kibana system user credentials are specified'
+        : core.elasticsearch.config.hosts.length > 1
+        ? 'more than one Elasticsearch host is specified'
+        : 'non-default Elasticsearch host is used';
       this.#logger.debug(
-        'Interactive setup mode will not be activated since Elasticsearch connection is already configured.'
+        `Interactive setup mode will not be activated since Elasticsearch connection is already configured: ${reason}.`
+      );
+      return;
+    }
+
+    const verificationCode = this.#verification.setup();
+    if (!verificationCode) {
+      this.#logger.error(
+        'Interactive setup mode could not be activated. Ensure Kibana has permission to write to its config folder.'
       );
       return;
     }
@@ -65,45 +96,66 @@ export class UserSetupPlugin implements PrebootPlugin {
       })
     );
 
-    // If preliminary check above indicates that user didn't alter default Elasticsearch connection
-    // details, it doesn't mean Elasticsearch connection isn't configured. There is a chance that they
-    // already disabled security features in Elasticsearch and everything should work by default.
-    // We should check if we can connect to Elasticsearch with default configuration to know if we
-    // need to activate interactive setup. This check can take some time, so we should register our
-    // routes to let interactive setup UI to handle user requests until the check is complete.
-    core.elasticsearch
-      .createClient('ping')
-      .asInternalUser.ping()
-      .then(
-        (pingResponse) => {
-          if (pingResponse.body) {
-            this.#logger.debug(
-              'Kibana is already properly configured to connect to Elasticsearch. Interactive setup mode will not be activated.'
-            );
-            this.#elasticsearchConnectionStatus = ElasticsearchConnectionStatus.Configured;
-            completeSetup({ shouldReloadConfig: false });
-          } else {
-            this.#logger.debug(
-              'Kibana is not properly configured to connect to Elasticsearch. Interactive setup mode will be activated.'
-            );
-            this.#elasticsearchConnectionStatus = ElasticsearchConnectionStatus.NotConfigured;
-          }
-        },
-        () => {
-          // TODO: we should probably react differently to different errors. 401 - credentials aren't correct, etc.
-          // Do we want to constantly ping ES if interactive mode UI isn't active? Just in case user runs Kibana and then
-          // configure Elasticsearch so that it can eventually connect to it without any configuration changes?
-          this.#elasticsearchConnectionStatus = ElasticsearchConnectionStatus.NotConfigured;
+    // If preliminary checks above indicate that user didn't alter default Elasticsearch connection
+    // details, it doesn't mean Elasticsearch connection isn't configured. There is a chance that
+    // user has already disabled security features in Elasticsearch and everything should work by
+    // default. We should check if we can connect to Elasticsearch with default configuration to
+    // know if we need to activate interactive setup. This check can take some time, so we should
+    // register our routes to let interactive setup UI to handle user requests until the check is
+    // complete. Moreover Elasticsearch may be just temporarily unavailable and we should poll its
+    // status until we can connect or use configures connection via interactive setup mode.
+    const elasticsearch = this.#elasticsearch.setup({
+      elasticsearch: core.elasticsearch,
+      connectionCheckInterval: this.#getConfig().connectionCheck.interval,
+    });
+
+    this.#elasticsearchConnectionStatusSubscription = elasticsearch.connectionStatus$.subscribe(
+      (status) => {
+        if (status === ElasticsearchConnectionStatus.Configured) {
+          this.#logger.debug(
+            'Skipping interactive setup mode since Kibana is already properly configured to connect to Elasticsearch at http://localhost:9200.'
+          );
+          completeSetup({ shouldReloadConfig: false });
+        } else {
+          this.#logger.debug(
+            'Starting interactive setup mode since Kibana cannot to connect to Elasticsearch at http://localhost:9200.'
+          );
+          const pathname = core.http.basePath.prepend('/');
+          const { protocol, hostname, port } = core.http.getServerInfo();
+          const url = `${protocol}://${hostname}:${port}${pathname}?code=${verificationCode.code}`;
+
+          // eslint-disable-next-line no-console
+          console.log(`
+
+${chalk.whiteBright.bold(`${chalk.cyanBright('i')} Kibana has not been configured.`)}
+
+Go to ${chalk.cyanBright.underline(url)} to get started.
+
+`);
         }
-      );
+      }
+    );
+
+    // If possible, try to use `*.dev.yml` config when Kibana is run in development mode.
+    const configPath = this.initializerContext.env.mode.dev
+      ? this.initializerContext.env.configs.find((config) => config.endsWith('.dev.yml')) ??
+        this.initializerContext.env.configs[0]
+      : this.initializerContext.env.configs[0];
 
     core.http.registerRoutes('', (router) => {
       defineRoutes({
         router,
         basePath: core.http.basePath,
         logger: this.#logger.get('routes'),
+        preboot: { ...core.preboot, completeSetup },
+        kibanaConfigWriter: new KibanaConfigWriter(
+          configPath,
+          getDataPath(),
+          this.#logger.get('kibana-config')
+        ),
+        elasticsearch,
+        verificationCode,
         getConfig: this.#getConfig.bind(this),
-        getElasticsearchConnectionStatus: this.#getElasticsearchConnectionStatus.bind(this),
       });
     });
   }
@@ -115,5 +167,13 @@ export class UserSetupPlugin implements PrebootPlugin {
       this.#configSubscription.unsubscribe();
       this.#configSubscription = undefined;
     }
+
+    if (this.#elasticsearchConnectionStatusSubscription) {
+      this.#elasticsearchConnectionStatusSubscription.unsubscribe();
+      this.#elasticsearchConnectionStatusSubscription = undefined;
+    }
+
+    this.#elasticsearch.stop();
+    this.#verification.stop();
   }
 }

@@ -10,7 +10,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { Observable } from 'rxjs';
 
 import { CoreStart } from 'kibana/public';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { SwimlaneType } from '../../application/explorer/explorer_constants';
@@ -54,22 +54,15 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
 
   const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
 
-  const [
-    swimlaneType,
-    swimlaneData,
-    perPage,
-    setPerPage,
-    timeBuckets,
-    isLoading,
-    error,
-  ] = useSwimlaneInputResolver(
-    embeddableInput,
-    onInputChange,
-    refresh,
-    services,
-    chartWidth,
-    fromPage
-  );
+  const [swimlaneType, swimlaneData, perPage, setPerPage, timeBuckets, isLoading, error] =
+    useSwimlaneInputResolver(
+      embeddableInput,
+      onInputChange,
+      refresh,
+      services,
+      chartWidth,
+      fromPage
+    );
 
   useEffect(() => {
     onOutputChange({

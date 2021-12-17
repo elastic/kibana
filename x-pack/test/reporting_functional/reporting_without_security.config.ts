@@ -17,10 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [resolve(__dirname, './reporting_without_security')],
     kbnTestServer: {
       ...reportingConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...reportingConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.security.enabled=false`,
-      ],
+      serverArgs: [...reportingConfig.get('kbnTestServer.serverArgs')],
     },
     esTestCluster: {
       ...reportingConfig.get('esTestCluster'),

@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {
@@ -32,6 +32,7 @@ import {
   Axis,
   Chart,
   CurveType,
+  CustomAnnotationTooltip,
   LineAnnotation,
   LineSeries,
   LineAnnotationDatum,
@@ -68,6 +69,14 @@ function setLineAnnotationHeader(lineDatum: LineAnnotationDatum) {
   lineDatum.header = dateFormatter(lineDatum.dataValue);
   return lineDatum;
 }
+
+const customTooltip: CustomAnnotationTooltip = ({ details, datum }) => (
+  <div className="echAnnotation__tooltip">
+    {/* @ts-ignore 'header does not exist on type RectAnnotationDatum' */}
+    <p className="echAnnotation__header">{dateFormatter(datum.header)}</p>
+    <div className="echAnnotation__details">{details}</div>
+  </div>
+);
 
 export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, onClose }) => {
   const [data, setData] = useState<{
@@ -185,8 +194,9 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
         aria-label={i18n.translate('xpack.ml.jobsList.datafeedChart.datafeedChartFlyoutAriaLabel', {
           defaultMessage: 'Datafeed chart flyout',
         })}
+        data-test-subj="mlAnnotationsViewDatafeedFlyout"
       >
-        <EuiFlyoutHeader hasBorder>
+        <EuiFlyoutHeader hasBorder data-test-subj="mlAnnotationsViewDatafeedFlyoutTitle">
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="xl">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -308,143 +318,146 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                     </EuiToolTip>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <Chart size={CHART_SIZE}>
-                      <Settings
-                        showLegend
-                        legendPosition={Position.Bottom}
-                        theme={{
-                          lineSeriesStyle: {
-                            point: {
-                              visible: false,
-                            },
-                          },
-                        }}
-                      />
-                      <Axis
-                        id="bottom"
-                        position={Position.Bottom}
-                        showOverlappingTicks
-                        tickFormat={dateFormatter}
-                        title={i18n.translate('xpack.ml.jobsList.datafeedChart.xAxisTitle', {
-                          defaultMessage: 'Bucket span ({bucketSpan})',
-                          values: { bucketSpan },
-                        })}
-                      />
-                      <Axis
-                        id="left"
-                        title={i18n.translate('xpack.ml.jobsList.datafeedChart.yAxisTitle', {
-                          defaultMessage: 'Count',
-                        })}
-                        position={Position.Left}
-                      />
-                      {showModelSnapshots ? (
-                        <LineAnnotation
-                          id={i18n.translate(
-                            'xpack.ml.jobsList.datafeedChart.modelSnapshotsLineSeriesId',
-                            {
-                              defaultMessage: 'Model snapshots',
-                            }
-                          )}
-                          key="model-snapshots-results-line"
-                          domainType={AnnotationDomainType.XDomain}
-                          dataValues={modelSnapshotData}
-                          marker={<EuiIcon type="asterisk" />}
-                          markerPosition={Position.Top}
-                          style={{
-                            line: {
-                              strokeWidth: 3,
-                              stroke: euiTheme.euiColorVis1,
-                              opacity: 0.5,
+                    <div data-test-subj="mlAnnotationsViewDatafeedFlyoutChart">
+                      <Chart size={CHART_SIZE}>
+                        <Settings
+                          showLegend
+                          legendPosition={Position.Bottom}
+                          theme={{
+                            lineSeriesStyle: {
+                              point: {
+                                visible: false,
+                              },
                             },
                           }}
                         />
-                      ) : null}
-                      {showAnnotations ? (
-                        <>
+                        <Axis
+                          id="bottom"
+                          position={Position.Bottom}
+                          showOverlappingTicks
+                          tickFormat={dateFormatter}
+                          title={i18n.translate('xpack.ml.jobsList.datafeedChart.xAxisTitle', {
+                            defaultMessage: 'Bucket span ({bucketSpan})',
+                            values: { bucketSpan },
+                          })}
+                        />
+                        <Axis
+                          id="left"
+                          title={i18n.translate('xpack.ml.jobsList.datafeedChart.yAxisTitle', {
+                            defaultMessage: 'Count',
+                          })}
+                          position={Position.Left}
+                        />
+                        {showModelSnapshots ? (
                           <LineAnnotation
                             id={i18n.translate(
-                              'xpack.ml.jobsList.datafeedChart.annotationLineSeriesId',
+                              'xpack.ml.jobsList.datafeedChart.modelSnapshotsLineSeriesId',
                               {
-                                defaultMessage: 'Annotations line result',
+                                defaultMessage: 'Model snapshots',
                               }
                             )}
-                            key="annotation-results-line"
+                            key="model-snapshots-results-line"
                             domainType={AnnotationDomainType.XDomain}
-                            dataValues={annotationData.line}
-                            marker={<EuiIcon type="annotation" />}
+                            dataValues={modelSnapshotData}
+                            marker={<EuiIcon type="asterisk" />}
                             markerPosition={Position.Top}
                             style={{
                               line: {
                                 strokeWidth: 3,
-                                stroke: euiTheme.euiColorDangerText,
+                                stroke: euiTheme.euiColorVis1,
                                 opacity: 0.5,
                               },
                             }}
                           />
-                          <RectAnnotation
-                            key="annotation-results-rect"
-                            dataValues={annotationData.rect}
-                            id={i18n.translate(
-                              'xpack.ml.jobsList.datafeedChart.annotationRectSeriesId',
-                              {
-                                defaultMessage: 'Annotations rectangle result',
-                              }
-                            )}
-                            style={{ fill: euiTheme.euiColorDangerText }}
-                          />
-                        </>
-                      ) : null}
-                      {messageData.length > 0 ? (
-                        <>
-                          <LineAnnotation
-                            id={i18n.translate(
-                              'xpack.ml.jobsList.datafeedChart.messageLineAnnotationId',
-                              {
-                                defaultMessage: 'Job messages line result',
-                              }
-                            )}
-                            key="messages-results-line"
-                            domainType={AnnotationDomainType.XDomain}
-                            dataValues={messageData}
-                            marker={<EuiIcon type="tableDensityNormal" />}
-                            markerPosition={Position.Top}
-                            style={{
-                              line: {
-                                strokeWidth: 3,
-                                stroke: euiTheme.euiColorAccent,
-                                opacity: 0.5,
-                              },
-                            }}
-                          />
-                        </>
-                      ) : null}
-                      <LineSeries
-                        key={'source-results'}
-                        color={euiTheme.euiColorPrimary}
-                        id={i18n.translate('xpack.ml.jobsList.datafeedChart.sourceSeriesId', {
-                          defaultMessage: 'Source indices',
-                        })}
-                        xScaleType={ScaleType.Time}
-                        yScaleType={ScaleType.Linear}
-                        xAccessor={0}
-                        yAccessors={[1]}
-                        data={sourceData}
-                        curve={CurveType.LINEAR}
-                      />
-                      <LineSeries
-                        key={'job-results'}
-                        color={euiTheme.euiColorAccentText}
-                        id={i18n.translate('xpack.ml.jobsList.datafeedChart.bucketSeriesId', {
-                          defaultMessage: 'Job results',
-                        })}
-                        xScaleType={ScaleType.Time}
-                        yScaleType={ScaleType.Linear}
-                        xAccessor={0}
-                        yAccessors={[1]}
-                        data={bucketData}
-                        curve={CurveType.LINEAR}
-                      />
-                    </Chart>
+                        ) : null}
+                        {showAnnotations ? (
+                          <>
+                            <LineAnnotation
+                              id={i18n.translate(
+                                'xpack.ml.jobsList.datafeedChart.annotationLineSeriesId',
+                                {
+                                  defaultMessage: 'Annotations line result',
+                                }
+                              )}
+                              key="annotation-results-line"
+                              domainType={AnnotationDomainType.XDomain}
+                              dataValues={annotationData.line}
+                              marker={<EuiIcon type="annotation" />}
+                              markerPosition={Position.Top}
+                              style={{
+                                line: {
+                                  strokeWidth: 3,
+                                  stroke: euiTheme.euiColorDangerText,
+                                  opacity: 0.5,
+                                },
+                              }}
+                            />
+                            <RectAnnotation
+                              key="annotation-results-rect"
+                              customTooltip={customTooltip}
+                              dataValues={annotationData.rect}
+                              id={i18n.translate(
+                                'xpack.ml.jobsList.datafeedChart.annotationRectSeriesId',
+                                {
+                                  defaultMessage: 'Annotations rectangle result',
+                                }
+                              )}
+                              style={{ fill: euiTheme.euiColorDangerText }}
+                            />
+                          </>
+                        ) : null}
+                        {messageData.length > 0 ? (
+                          <>
+                            <LineAnnotation
+                              id={i18n.translate(
+                                'xpack.ml.jobsList.datafeedChart.messageLineAnnotationId',
+                                {
+                                  defaultMessage: 'Job messages line result',
+                                }
+                              )}
+                              key="messages-results-line"
+                              domainType={AnnotationDomainType.XDomain}
+                              dataValues={messageData}
+                              marker={<EuiIcon type="tableDensityNormal" />}
+                              markerPosition={Position.Top}
+                              style={{
+                                line: {
+                                  strokeWidth: 3,
+                                  stroke: euiTheme.euiColorAccent,
+                                  opacity: 0.5,
+                                },
+                              }}
+                            />
+                          </>
+                        ) : null}
+                        <LineSeries
+                          key={'source-results'}
+                          color={euiTheme.euiColorPrimary}
+                          id={i18n.translate('xpack.ml.jobsList.datafeedChart.sourceSeriesId', {
+                            defaultMessage: 'Source indices',
+                          })}
+                          xScaleType={ScaleType.Time}
+                          yScaleType={ScaleType.Linear}
+                          xAccessor={0}
+                          yAccessors={[1]}
+                          data={sourceData}
+                          curve={CurveType.LINEAR}
+                        />
+                        <LineSeries
+                          key={'job-results'}
+                          color={euiTheme.euiColorAccentText}
+                          id={i18n.translate('xpack.ml.jobsList.datafeedChart.bucketSeriesId', {
+                            defaultMessage: 'Job results',
+                          })}
+                          xScaleType={ScaleType.Time}
+                          yScaleType={ScaleType.Linear}
+                          xAccessor={0}
+                          yAccessors={[1]}
+                          data={bucketData}
+                          curve={CurveType.LINEAR}
+                        />
+                      </Chart>
+                    </div>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiToolTip

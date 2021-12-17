@@ -12,26 +12,40 @@ import { FieldFormatsRegistry } from './field_formats_registry';
 /** @public **/
 export type FieldFormatsContentType = 'html' | 'text';
 
-/** @internal **/
+/**
+ * Html converter options
+ */
 export interface HtmlContextTypeOptions {
-  field?: any;
-  indexPattern?: any;
-  hit?: Record<string, any>;
+  field?: { name: string };
+  hit?: { highlight: Record<string, string[]> };
 }
 
-/** @internal **/
+/**
+ * To html converter function
+ * @public
+ */
 export type HtmlContextTypeConvert = (value: any, options?: HtmlContextTypeOptions) => string;
 
-/** @internal **/
-export type TextContextTypeOptions = Record<string, any>;
+/**
+ * Plain text converter options
+ * @remark
+ * no options for now
+ */
+export type TextContextTypeOptions = object;
 
-/** @internal **/
+/**
+ * To plain text converter function
+ * @public
+ */
 export type TextContextTypeConvert = (value: any, options?: TextContextTypeOptions) => string;
 
-/** @internal **/
+/**
+ * Converter function
+ * @public
+ */
 export type FieldFormatConvertFunction = HtmlContextTypeConvert | TextContextTypeConvert;
 
-/** @internal **/
+/** @public **/
 export interface FieldFormatConvert {
   text: TextContextTypeConvert;
   html: HtmlContextTypeConvert;
@@ -61,7 +75,7 @@ export enum FIELD_FORMAT_IDS {
 /** @public */
 export interface FieldFormatConfig {
   id: FieldFormatId;
-  params: Record<string, any>;
+  params: FieldFormatParams;
   es?: boolean;
 }
 
@@ -74,10 +88,10 @@ export interface FieldFormatConfig {
  * This matches the signature of the public `core.uiSettings.get`, and
  * should only be used in scenarios where async access to uiSettings is
  * not possible.
- * 
+ *
  @public
  */
-export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
+export type FieldFormatsGetConfigFn<T = unknown> = (key: string, defaultOverride?: T) => T;
 
 export type IFieldFormat = FieldFormat;
 
@@ -86,9 +100,12 @@ export type IFieldFormat = FieldFormat;
  */
 export type FieldFormatId = FIELD_FORMAT_IDS | string;
 
-/** @internal **/
+/**
+ * Alternative to typeof {@link FieldFormat} but with specified ids
+ * @public
+ */
 export type FieldFormatInstanceType = (new (
-  params?: any,
+  params?: FieldFormatParams,
   getConfig?: FieldFormatsGetConfigFn
 ) => FieldFormat) & {
   // Static properties:
@@ -98,8 +115,23 @@ export type FieldFormatInstanceType = (new (
   fieldType: string | string[];
 };
 
-export interface IFieldFormatMetaParams {
-  [key: string]: any;
+/**
+ * Params provided when creating a formatter.
+ * Params are vary per formatter
+ *
+ * TODO: support strict typing for params depending on format type
+ * https://github.com/elastic/kibana/issues/108158
+ */
+export interface FieldFormatParams {
+  [param: string]: any;
+}
+
+/**
+ * Params provided by the registry to every field formatter
+ *
+ * @public
+ */
+export interface FieldFormatMetaParams {
   parsedUrl?: {
     origin: string;
     pathname?: string;
@@ -116,7 +148,7 @@ export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' | 'regis
  *
  * @public
  */
-export interface SerializedFieldFormat<TParams = Record<string, any>> {
+export interface SerializedFieldFormat<TParams = FieldFormatParams> {
   id?: string;
   params?: TParams;
 }

@@ -6,37 +6,57 @@
  */
 
 import React, { useEffect } from 'react';
-
-import { UrlStorageContextProvider, useSeriesStorage } from './use_series_storage';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { Route, Router } from 'react-router-dom';
 import { render } from '@testing-library/react';
+import { UrlStorageContextProvider, useSeriesStorage, reportTypeKey } from './use_series_storage';
+import { getHistoryFromUrl } from '../rtl_helpers';
+import type { AppDataType } from '../types';
+import { ReportTypes } from '../configurations/constants';
+import * as useTrackMetric from '../../../../hooks/use_track_metric';
 
-const mockSingleSeries = {
-  'performance-distribution': {
-    reportType: 'data-distribution',
-    dataType: 'ux',
+const mockSingleSeries = [
+  {
+    name: 'performance-distribution',
+    dataType: 'ux' as AppDataType,
     breakdown: 'user_agent.name',
     time: { from: 'now-15m', to: 'now' },
   },
-};
+];
 
-const mockMultipleSeries = {
-  'performance-distribution': {
-    reportType: 'data-distribution',
-    dataType: 'ux',
+const mockMultipleSeries = [
+  {
+    name: 'performance-distribution',
+    dataType: 'ux' as AppDataType,
     breakdown: 'user_agent.name',
     time: { from: 'now-15m', to: 'now' },
+    filters: [
+      {
+        field: 'url.full',
+        value: 'https://elastic.co',
+      },
+    ],
+    selectedMetricField: 'transaction.duration.us',
   },
-  'kpi-over-time': {
-    reportType: 'kpi-over-time',
-    dataType: 'synthetics',
+  {
+    name: 'kpi-over-time',
+    dataType: 'synthetics' as AppDataType,
     breakdown: 'user_agent.name',
     time: { from: 'now-15m', to: 'now' },
+    filters: [
+      {
+        field: 'monitor.type',
+        value: 'browser',
+      },
+    ],
+    selectedMetricField: 'monitor.duration.us',
   },
-};
+];
 
-describe('userSeries', function () {
+describe('userSeriesStorage', function () {
   function setupTestComponent(seriesData: any) {
     const setData = jest.fn();
+
     function TestComponent() {
       const data = useSeriesStorage();
 
@@ -48,11 +68,20 @@ describe('userSeries', function () {
     }
 
     render(
-      <UrlStorageContextProvider
-        storage={{ get: jest.fn().mockReturnValue(seriesData), set: jest.fn() }}
-      >
-        <TestComponent />
-      </UrlStorageContextProvider>
+      <Router history={getHistoryFromUrl('/app/observability/exploratory-view/configure')}>
+        <Route path={'/app/observability/exploratory-view/:mode'}>
+          <UrlStorageContextProvider
+            storage={{
+              get: jest
+                .fn()
+                .mockImplementation((key: string) => (key === 'sr' ? seriesData : null)),
+              set: jest.fn(),
+            }}
+          >
+            <TestComponent />
+          </UrlStorageContextProvider>
+        </Route>
+      </Router>
     );
 
     return setData;
@@ -63,69 +92,199 @@ describe('userSeries', function () {
     expect(setData).toHaveBeenCalledTimes(2);
     expect(setData).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        allSeries: {
-          'performance-distribution': {
-            breakdown: 'user_agent.name',
+        allSeries: [
+          {
+            name: 'performance-distribution',
             dataType: 'ux',
-            reportType: 'data-distribution',
+            breakdown: 'user_agent.name',
             time: { from: 'now-15m', to: 'now' },
           },
-        },
-        allSeriesIds: ['performance-distribution'],
+        ],
         firstSeries: {
-          breakdown: 'user_agent.name',
+          name: 'performance-distribution',
           dataType: 'ux',
-          reportType: 'data-distribution',
+          breakdown: 'user_agent.name',
           time: { from: 'now-15m', to: 'now' },
         },
-        firstSeriesId: 'performance-distribution',
       })
     );
   });
 
-  it('should return expected result when there are multiple series series', function () {
+  it('should return expected result when there are multiple series', function () {
     const setData = setupTestComponent(mockMultipleSeries);
 
     expect(setData).toHaveBeenCalledTimes(2);
     expect(setData).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        allSeries: {
-          'performance-distribution': {
-            breakdown: 'user_agent.name',
-            dataType: 'ux',
-            reportType: 'data-distribution',
-            time: { from: 'now-15m', to: 'now' },
-          },
-          'kpi-over-time': {
-            reportType: 'kpi-over-time',
-            dataType: 'synthetics',
-            breakdown: 'user_agent.name',
-            time: { from: 'now-15m', to: 'now' },
-          },
-        },
-        allSeriesIds: ['performance-distribution', 'kpi-over-time'],
-        firstSeries: {
-          breakdown: 'user_agent.name',
-          dataType: 'ux',
-          reportType: 'data-distribution',
-          time: { from: 'now-15m', to: 'now' },
-        },
-        firstSeriesId: 'performance-distribution',
+        allSeries: mockMultipleSeries,
+        firstSeries: mockMultipleSeries[0],
       })
     );
   });
 
   it('should return expected result when there are no series', function () {
-    const setData = setupTestComponent({});
+    const setData = setupTestComponent([]);
 
-    expect(setData).toHaveBeenCalledTimes(2);
+    expect(setData).toHaveBeenCalledTimes(1);
     expect(setData).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        allSeries: {},
-        allSeriesIds: [],
+        allSeries: [],
         firstSeries: undefined,
-        firstSeriesId: undefined,
       })
     );
+  });
+
+  it('ensures that only one series has a breakdown', () => {
+    function wrapper({ children }: { children: React.ReactElement }) {
+      return (
+        <UrlStorageContextProvider
+          storage={{
+            get: jest
+              .fn()
+              .mockImplementation((key: string) => (key === 'sr' ? mockMultipleSeries : null)),
+            set: jest.fn(),
+          }}
+        >
+          {children}
+        </UrlStorageContextProvider>
+      );
+    }
+    const { result } = renderHook(() => useSeriesStorage(), { wrapper });
+
+    act(() => {
+      result.current.setSeries(1, mockMultipleSeries[1]);
+    });
+
+    expect(result.current.allSeries).toEqual([
+      mockMultipleSeries[0],
+      {
+        ...mockMultipleSeries[1],
+        breakdown: undefined,
+      },
+    ]);
+  });
+
+  it('sets reportType when calling applyChanges', () => {
+    const setStorage = jest.fn();
+    function wrapper({ children }: { children: React.ReactElement }) {
+      return (
+        <UrlStorageContextProvider
+          storage={{
+            get: jest
+              .fn()
+              .mockImplementation((key: string) =>
+                key === 'sr' ? mockMultipleSeries : 'kpi-over-time'
+              ),
+            set: setStorage,
+          }}
+        >
+          {children}
+        </UrlStorageContextProvider>
+      );
+    }
+    const { result } = renderHook(() => useSeriesStorage(), { wrapper });
+
+    act(() => {
+      result.current.setReportType(ReportTypes.DISTRIBUTION);
+    });
+
+    act(() => {
+      result.current.applyChanges();
+    });
+
+    expect(setStorage).toBeCalledWith(reportTypeKey, ReportTypes.DISTRIBUTION);
+  });
+
+  it('returns reportType in state, not url storage, from hook', () => {
+    const setStorage = jest.fn();
+    function wrapper({ children }: { children: React.ReactElement }) {
+      return (
+        <UrlStorageContextProvider
+          storage={{
+            get: jest
+              .fn()
+              .mockImplementation((key: string) =>
+                key === 'sr' ? mockMultipleSeries : 'kpi-over-time'
+              ),
+            set: setStorage,
+          }}
+        >
+          {children}
+        </UrlStorageContextProvider>
+      );
+    }
+    const { result } = renderHook(() => useSeriesStorage(), { wrapper });
+
+    act(() => {
+      result.current.setReportType(ReportTypes.DISTRIBUTION);
+    });
+
+    expect(result.current.reportType).toEqual(ReportTypes.DISTRIBUTION);
+  });
+
+  it('ensures that telemetry is called', () => {
+    const trackEvent = jest.fn();
+    jest.spyOn(useTrackMetric, 'useUiTracker').mockReturnValue(trackEvent);
+    function wrapper({ children }: { children: React.ReactElement }) {
+      return (
+        <UrlStorageContextProvider
+          storage={{
+            get: jest
+              .fn()
+              .mockImplementation((key: string) =>
+                key === 'sr' ? mockMultipleSeries : 'kpi-over-time'
+              ),
+            set: jest.fn(),
+          }}
+        >
+          {children}
+        </UrlStorageContextProvider>
+      );
+    }
+    const { result } = renderHook(() => useSeriesStorage(), { wrapper });
+
+    act(() => {
+      result.current.applyChanges();
+    });
+
+    expect(trackEvent).toBeCalledTimes(7);
+    expect(trackEvent).toBeCalledWith({
+      app: 'observability-overview',
+      metric: 'exploratory_view__filters__filter_url.full',
+      metricType: 'count',
+    });
+    expect(trackEvent).toBeCalledWith({
+      app: 'observability-overview',
+      metric: 'exploratory_view__filters__filter_monitor.type',
+      metricType: 'count',
+    });
+    expect(trackEvent).toBeCalledWith({
+      app: 'observability-overview',
+      metric: 'exploratory_view__filters__report_type_kpi-over-time__data_type_ux__filter_url.full',
+      metricType: 'count',
+    });
+    expect(trackEvent).toBeCalledWith({
+      app: 'observability-overview',
+      metric:
+        'exploratory_view__filters__report_type_kpi-over-time__data_type_synthetics__filter_monitor.type',
+      metricType: 'count',
+    });
+    expect(trackEvent).toBeCalledWith({
+      app: 'observability-overview',
+      metric:
+        'exploratory_view__report_type_kpi-over-time__data_type_synthetics__metric_type_monitor.duration.us',
+      metricType: 'count',
+    });
+    expect(trackEvent).toBeCalledWith({
+      app: 'observability-overview',
+      metric:
+        'exploratory_view__report_type_kpi-over-time__data_type_ux__metric_type_transaction.duration.us',
+      metricType: 'count',
+    });
+    expect(trackEvent).toBeCalledWith({
+      app: 'observability-overview',
+      metric: 'exploratory_view_apply_changes',
+      metricType: 'count',
+    });
   });
 });

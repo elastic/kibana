@@ -2,7 +2,7 @@
   "elasticsearch": {
     "cluster": [],
     "indices": [
-      { "names": [".siem-signals-*"], "privileges": ["read", "write", "maintenance"] },
+      { "names": [".alerts-security*", ".siem-signals-*"], "privileges": ["read", "write", "maintenance"] },
       {
         "names": [
           "apm-*-transaction*",
@@ -25,7 +25,10 @@
     {
       "feature": {
         "ml": ["read"],
-        "siem": ["read"],
+        "siem": ["read", "read_alerts"],
+        "securitySolutionCases": ["read"],
+        "indexPatterns": ["read"],
+        "savedObjectsManagement": ["read"],
         "actions": ["read"],
         "builtInAlerts": ["read"]
       },

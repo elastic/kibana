@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   describe('lens heatmap', () => {
     before(async () => {
@@ -60,21 +61,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend
       expect(debugState.legend!.items).to.eql([
-        { key: '5722.77', name: '> 5,722.77', color: '#6092c0' },
-        { key: '8529.22', name: '> 8,529.22', color: '#a8bfda' },
-        { key: '11335.66', name: '> 11,335.66', color: '#ebeff5' },
-        { key: '14142.11', name: '> 14,142.11', color: '#ecb385' },
-        { key: '16948.55', name: '> 16,948.55', color: '#e7664c' },
+        { key: '5,722.77 - 8,529.22', name: '5,722.77 - 8,529.22', color: '#6092c0' },
+        { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#a8bfda' },
+        { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#ebeff5' },
+        { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#ecb385' },
+        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#e7664c' },
       ]);
     });
 
     it('should reflect stop colors change on the chart', async () => {
       await PageObjects.lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
       await PageObjects.lens.openPalettePanel('lnsHeatmap');
-      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '10', {
-        clearWithKeyboard: true,
+      await retry.try(async () => {
+        await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '10', {
+          clearWithKeyboard: true,
+          typeCharByChar: true,
+        });
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
@@ -84,11 +88,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has changed
       expect(debugState.legend!.items).to.eql([
-        { key: '7126', name: '> 7,126', color: '#6092c0' },
-        { key: '8529.22', name: '> 8,529.22', color: '#a8bfda' },
-        { key: '11335.66', name: '> 11,335.66', color: '#ebeff5' },
-        { key: '14142.11', name: '> 14,142.11', color: '#ecb385' },
-        { key: '16948.55', name: '> 16,948.55', color: '#e7664c' },
+        { key: '7,126 - 8,529.22', name: '7,126 - 8,529.22', color: '#6092c0' },
+        { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#a8bfda' },
+        { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#ebeff5' },
+        { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#ecb385' },
+        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#e7664c' },
       ]);
     });
 
@@ -104,11 +108,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has changed
       expect(debugState.legend!.items).to.eql([
-        { key: '7126', name: '> 7,126', color: '#6092c0' },
-        { key: '8529.22', name: '> 8,529.22', color: '#a8bfda' },
-        { key: '11335.66', name: '> 11,335.66', color: '#ebeff5' },
-        { key: '14142.11', name: '> 14,142.11', color: '#ecb385' },
-        { key: '16948.55', name: '> 16,948.55', color: '#e7664c' },
+        { key: '7,126 - 8,529.22', name: '7,126 - 8,529.22', color: '#6092c0' },
+        { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#a8bfda' },
+        { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#ebeff5' },
+        { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#ecb385' },
+        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#e7664c' },
       ]);
     });
 
@@ -126,11 +130,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has changed
       expect(debugState.legend!.items).to.eql([
-        { key: '0', name: '> 0', color: '#6092c0' },
-        { key: '8529.22', name: '> 8,529.22', color: '#a8bfda' },
-        { key: '11335.66', name: '> 11,335.66', color: '#ebeff5' },
-        { key: '14142.11', name: '> 14,142.11', color: '#ecb385' },
-        { key: '16948.55', name: '> 16,948.55', color: '#e7664c' },
+        { key: '0 - 8,529.21', name: '0 - 8,529.21', color: '#6092c0' },
+        { key: '8,529.21 - 11,335.66', name: '8,529.21 - 11,335.66', color: '#a8bfda' },
+        { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#ebeff5' },
+        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ecb385' },
+        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#e7664c' },
       ]);
     });
 
@@ -146,11 +150,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has changed
       expect(debugState.legend!.items).to.eql([
-        { key: '5722.77', name: '> 5,722.77', color: '#209280' },
-        { key: '8529.22', name: '> 8,529.22', color: '#54b399' },
-        { key: '11335.66', name: '> 11,335.66', color: '#d6bf57' },
-        { key: '14142.11', name: '> 14,142.11', color: '#e7664c' },
-        { key: '16948.55', name: '> 16,948.55', color: '#cc5642' },
+        { key: '5,722.77 - 8,529.22', name: '5,722.77 - 8,529.22', color: '#209280' },
+        { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#54b399' },
+        { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#d6bf57' },
+        { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#e7664c' },
+        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#cc5642' },
       ]);
     });
 
@@ -166,11 +170,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has not changed
       expect(debugState.legend!.items).to.eql([
-        { key: '5722.77', name: '> 5,722.77', color: '#209280' },
-        { key: '8529.22', name: '> 8,529.22', color: '#54b399' },
-        { key: '11335.66', name: '> 11,335.66', color: '#d6bf57' },
-        { key: '14142.11', name: '> 14,142.11', color: '#e7664c' },
-        { key: '16948.55', name: '> 16,948.55', color: '#cc5642' },
+        { key: '5,722.77 - 8,529.22', name: '5,722.77 - 8,529.22', color: '#209280' },
+        { key: '8,529.22 - 11,335.66', name: '8,529.22 - 11,335.66', color: '#54b399' },
+        { key: '11,335.66 - 14,142.11', name: '11,335.66 - 14,142.11', color: '#d6bf57' },
+        { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#e7664c' },
+        { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#cc5642' },
       ]);
     });
   });

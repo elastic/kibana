@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { has } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta } from './types';
+import type { Filter, FilterMeta } from './types';
 
 export interface MatchAllFilterMeta extends FilterMeta {
   field: string;
@@ -16,7 +17,9 @@ export interface MatchAllFilterMeta extends FilterMeta {
 
 export type MatchAllFilter = Filter & {
   meta: MatchAllFilterMeta;
-  match_all: any;
+  query: {
+    match_all: estypes.QueryDslMatchAllQuery;
+  };
 };
 
 /**
@@ -25,5 +28,5 @@ export type MatchAllFilter = Filter & {
  *
  * @public
  */
-export const isMatchAllFilter = (filter: FieldFilter): filter is MatchAllFilter =>
-  has(filter, 'match_all');
+export const isMatchAllFilter = (filter: Filter): filter is MatchAllFilter =>
+  has(filter, 'query.match_all');

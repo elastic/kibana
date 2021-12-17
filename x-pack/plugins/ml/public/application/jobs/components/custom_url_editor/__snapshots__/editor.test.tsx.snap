@@ -295,8 +295,8 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
-          defaultMessage="Index pattern"
-          id="xpack.ml.customUrlsEditor.indexPatternLabel"
+          defaultMessage="Data view"
+          id="xpack.ml.customUrlsEditor.dataViewLabel"
           values={Object {}}
         />
       }
@@ -309,11 +309,11 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
         options={
           Array [
             Object {
-              "text": "Index Pattern 1",
+              "text": "Data view 1",
               "value": "pattern1",
             },
             Object {
-              "text": "Index Pattern 2",
+              "text": "Data view 2",
               "value": "pattern2",
             },
           ]
@@ -535,8 +535,8 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       hasEmptyLabelSpace={false}
       label={
         <FormattedMessage
-          defaultMessage="Index pattern"
-          id="xpack.ml.customUrlsEditor.indexPatternLabel"
+          defaultMessage="Data view"
+          id="xpack.ml.customUrlsEditor.dataViewLabel"
           values={Object {}}
         />
       }
@@ -549,11 +549,11 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
         options={
           Array [
             Object {
-              "text": "Index Pattern 1",
+              "text": "Data view 1",
               "value": "pattern1",
             },
             Object {
-              "text": "Index Pattern 2",
+              "text": "Data view 2",
               "value": "pattern2",
             },
           ]

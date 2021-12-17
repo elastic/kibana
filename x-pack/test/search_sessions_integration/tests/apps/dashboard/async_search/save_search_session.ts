@@ -17,10 +17,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const searchSessions = getService('searchSessions');
   const queryBar = getService('queryBar');
+  const elasticChart = getService('elasticChart');
+
+  const enableNewChartLibraryDebug = async () => {
+    await elasticChart.setNewChartUiDebugFlag();
+    await queryBar.submitQuery();
+  };
 
   describe('save a search sessions', () => {
     before(async function () {
-      const { body } = await es.info();
+      const body = await es.info();
       if (!body.version.number.includes('SNAPSHOT')) {
         log.debug('Skipping because this build does not have the required shard_delay agg');
         this.skip();
@@ -92,13 +98,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Check that session is restored
       await searchSessions.expectState('restored');
       await testSubjects.missingOrFail('embeddableErrorLabel');
-      const data = await PageObjects.visChart.getBarChartData('Sum of bytes');
-      expect(data.length).to.be(5);
 
       // switching dashboard to edit mode (or any other non-fetch required) state change
       // should leave session state untouched
       await PageObjects.dashboard.switchToEditMode();
       await searchSessions.expectState('restored');
+
+      const xyChartSelector = 'visTypeXyChart';
+      await enableNewChartLibraryDebug();
+      const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
+      expect(data.length).to.be(5);
 
       // navigating to a listing page clears the session
       await PageObjects.dashboard.gotoDashboardLandingPage();

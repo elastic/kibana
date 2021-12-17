@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SerializableRecord } from '@kbn/utility-types';
 import { ActionFactoryRegistry } from '../types';
 import {
   ActionFactory,
@@ -21,7 +22,7 @@ import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_ut
 
 import { DynamicActionsState } from '../../common/types';
 
-export { DynamicActionsState };
+export type { DynamicActionsState };
 
 export interface UiActionsServiceEnhancementsParams {
   readonly actionFactories?: ActionFactoryRegistry;
@@ -31,7 +32,8 @@ export interface UiActionsServiceEnhancementsParams {
 }
 
 export class UiActionsServiceEnhancements
-  implements PersistableStateDefinition<DynamicActionsState> {
+  implements PersistableStateDefinition<DynamicActionsState>
+{
   protected readonly actionFactories: ActionFactoryRegistry;
   protected readonly deps: Omit<UiActionsServiceEnhancementsParams, 'actionFactories'>;
 
@@ -60,8 +62,15 @@ export class UiActionsServiceEnhancements
       this.deps
     );
 
-    this.actionFactories.set(actionFactory.id, actionFactory as ActionFactory<any, any, any>);
-    this.registerFeatureUsage(definition);
+    this.actionFactories.set(
+      actionFactory.id,
+      actionFactory as unknown as ActionFactory<
+        SerializableRecord,
+        ExecutionContext,
+        BaseActionFactoryContext
+      >
+    );
+    this.registerFeatureUsage(definition as unknown as ActionFactoryDefinition);
   };
 
   public readonly getActionFactory = (actionFactoryId: string): ActionFactory => {
@@ -143,12 +152,15 @@ export class UiActionsServiceEnhancements
     this.registerActionFactory(actionFactory);
   };
 
-  private registerFeatureUsage = (definition: ActionFactoryDefinition<any, any, any>): void => {
+  private registerFeatureUsage = (definition: ActionFactoryDefinition): void => {
     if (!definition.minimalLicense || !definition.licenseFeatureName) return;
     this.deps.featureUsageSetup.register(definition.licenseFeatureName, definition.minimalLicense);
   };
 
-  public readonly telemetry = (state: DynamicActionsState, telemetry: Record<string, any> = {}) => {
+  public readonly telemetry = (
+    state: DynamicActionsState,
+    telemetry: Record<string, string | number | boolean> = {}
+  ) => {
     let telemetryData = telemetry;
     state.events.forEach((event: SerializedEvent) => {
       if (this.actionFactories.has(event.action.factoryId)) {

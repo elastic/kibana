@@ -5,21 +5,18 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  EuiCallOut,
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
   EuiFlexGroupProps,
+  EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { enableInspectEsQueries } from '../../../../observability/public';
-import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
-import { useKibanaUrl } from '../../hooks/useKibanaUrl';
-import { useBreakPoints } from '../../hooks/use_break_points';
+import { useTimeRangeId } from '../../context/time_range_id/use_time_range_id';
+import { toBoolean, toNumber } from '../../context/url_params_context/helpers';
+import { useApmParams } from '../../hooks/use_apm_params';
+import { useBreakpoints } from '../../hooks/use_breakpoints';
 import { DatePicker } from './DatePicker';
 import { KueryBar } from './kuery_bar';
 import { TimeComparison } from './time_comparison';
@@ -30,51 +27,40 @@ interface Props {
   showKueryBar?: boolean;
   showTimeComparison?: boolean;
   showTransactionTypeSelector?: boolean;
+  kueryBarPlaceholder?: string;
+  kueryBarBoolFilter?: QueryDslQueryContainer[];
 }
 
-function DebugQueryCallout() {
-  const { uiSettings } = useApmPluginContext().core;
-  const advancedSettingsUrl = useKibanaUrl('/app/management/kibana/settings', {
-    query: {
-      query: 'category:(observability)',
-    },
-  });
+function ApmDatePicker() {
+  const { query } = useApmParams('/*');
 
-  if (!uiSettings.get(enableInspectEsQueries)) {
-    return null;
+  if (!('rangeFrom' in query)) {
+    throw new Error('range not available in route parameters');
   }
 
+  const {
+    rangeFrom,
+    rangeTo,
+    refreshPaused: refreshPausedFromUrl = 'true',
+    refreshInterval: refreshIntervalFromUrl = '0',
+  } = query;
+
+  const refreshPaused = toBoolean(refreshPausedFromUrl);
+
+  const refreshInterval = toNumber(refreshIntervalFromUrl);
+
+  const { incrementTimeRangeId } = useTimeRangeId();
+
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.apm.searchBar.inspectEsQueriesEnabled.callout.title',
-            {
-              defaultMessage:
-                'Inspectable ES queries (`apm:enableInspectEsQueries`)',
-            }
-          )}
-          iconType="beaker"
-          color="warning"
-        >
-          <FormattedMessage
-            id="xpack.apm.searchBar.inspectEsQueriesEnabled.callout.description"
-            defaultMessage="You can now inspect every Elasticsearch query by opening your browser's Dev Tool and looking at the API responses. The setting can be disabled in Kibana's {advancedSettingsLink}"
-            values={{
-              advancedSettingsLink: (
-                <EuiLink href={advancedSettingsUrl}>
-                  {i18n.translate(
-                    'xpack.apm.searchBar.inspectEsQueriesEnabled.callout.description.advancedSettings',
-                    { defaultMessage: 'Advanced Settings' }
-                  )}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiCallOut>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <DatePicker
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
+      refreshPaused={refreshPaused}
+      refreshInterval={refreshInterval}
+      onTimeRangeRefresh={() => {
+        incrementTimeRangeId();
+      }}
+    />
   );
 }
 
@@ -83,8 +69,10 @@ export function SearchBar({
   showKueryBar = true,
   showTimeComparison = false,
   showTransactionTypeSelector = false,
+  kueryBarBoolFilter,
+  kueryBarPlaceholder,
 }: Props) {
-  const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakPoints();
+  const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakpoints();
 
   if (hidden) {
     return null;
@@ -95,7 +83,6 @@ export function SearchBar({
 
   return (
     <>
-      <DebugQueryCallout />
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}
@@ -115,7 +102,10 @@ export function SearchBar({
 
             {showKueryBar && (
               <EuiFlexItem>
-                <KueryBar />
+                <KueryBar
+                  placeholder={kueryBarPlaceholder}
+                  boolFilter={kueryBarBoolFilter}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -133,7 +123,7 @@ export function SearchBar({
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <DatePicker />
+              <ApmDatePicker />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

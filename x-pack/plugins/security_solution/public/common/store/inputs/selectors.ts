@@ -7,7 +7,7 @@
 
 import { createSelector } from 'reselect';
 
-import { Filter, Query } from '../../../../../../../src/plugins/data/public';
+import type { Filter, Query } from '@kbn/es-query';
 import { State } from '../types';
 
 import { InputsModel, InputsRange, GlobalQuery } from './model';
@@ -57,7 +57,7 @@ export const globalTimeRangeSelector = createSelector(selectGlobal, (global) => 
 
 export const globalPolicySelector = createSelector(selectGlobal, (global) => global.policy);
 
-export const globalQuery = createSelector(selectGlobal, (global) => global.queries);
+export const globalQuery = () => createSelector(selectGlobal, (global) => global.queries);
 
 export const globalQueryByIdSelector = () => createSelector(selectGlobalQuery, (query) => query);
 

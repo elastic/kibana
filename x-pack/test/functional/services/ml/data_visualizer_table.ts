@@ -110,11 +110,11 @@ export function MachineLearningDataVisualizerTableProvider(
         if (!(await testSubjects.exists(this.detailsSelector(fieldName)))) {
           const selector = this.rowSelector(
             fieldName,
-            `dataVisualizerDetailsToggle-${fieldName}-arrowDown`
+            `dataVisualizerDetailsToggle-${fieldName}-arrowRight`
           );
           await testSubjects.click(selector);
           await testSubjects.existOrFail(
-            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowUp`),
+            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowDown`),
             {
               timeout: 1000,
             }
@@ -128,10 +128,10 @@ export function MachineLearningDataVisualizerTableProvider(
       await retry.tryForTime(10000, async () => {
         if (await testSubjects.exists(this.detailsSelector(fieldName))) {
           await testSubjects.click(
-            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowUp`)
+            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowDown`)
           );
           await testSubjects.existOrFail(
-            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowDown`),
+            this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-arrowRight`),
             {
               timeout: 1000,
             }
@@ -150,7 +150,7 @@ export function MachineLearningDataVisualizerTableProvider(
       const docCount = await testSubjects.getVisibleText(docCountFormattedSelector);
       expect(docCount).to.eql(
         docCountFormatted,
-        `Expected field document count to be '${docCountFormatted}' (got '${docCount}')`
+        `Expected field ${fieldName}'s document count to be '${docCountFormatted}' (got '${docCount}')`
       );
     }
 
@@ -361,7 +361,27 @@ export function MachineLearningDataVisualizerTableProvider(
       });
     }
 
-    public async assertTopValuesContents(fieldName: string, expectedTopValuesCount: number) {
+    public async assertTopValuesContent(fieldName: string, expectedTopValues: string[]) {
+      const selector = this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValuesContent');
+      const topValuesElement = await testSubjects.find(selector);
+      const topValuesBars = await topValuesElement.findAllByTestSubject(
+        'dataVisualizerFieldDataTopValueBar'
+      );
+
+      const topValuesBarsValues = await Promise.all(
+        topValuesBars.map(async (bar) => {
+          const visibleText = await bar.getVisibleText();
+          return visibleText ? visibleText.split('\n')[0] : undefined;
+        })
+      );
+
+      expect(topValuesBarsValues).to.eql(
+        expectedTopValues,
+        `Expected top values for field '${fieldName}' to equal '${expectedTopValues}' (got '${topValuesBarsValues}')`
+      );
+    }
+
+    public async assertTopValuesCount(fieldName: string, expectedTopValuesCount: number) {
       const selector = this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValuesContent');
       const topValuesElement = await testSubjects.find(selector);
       const topValuesBars = await topValuesElement.findAllByTestSubject(
@@ -401,7 +421,7 @@ export function MachineLearningDataVisualizerTableProvider(
       await testSubjects.existOrFail(
         this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValues')
       );
-      await this.assertTopValuesContents(fieldName, topValuesCount);
+      await this.assertTopValuesCount(fieldName, topValuesCount);
 
       if (checkDistributionPreviewExist) {
         await this.assertDistributionPreviewExist(fieldName);
@@ -433,7 +453,8 @@ export function MachineLearningDataVisualizerTableProvider(
     public async assertKeywordFieldContents(
       fieldName: string,
       docCountFormatted: string,
-      topValuesCount: number
+      topValuesCount: number,
+      exampleContent?: string[]
     ) {
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
@@ -442,7 +463,11 @@ export function MachineLearningDataVisualizerTableProvider(
       await testSubjects.existOrFail(
         this.detailsSelector(fieldName, 'dataVisualizerFieldDataTopValuesContent')
       );
-      await this.assertTopValuesContents(fieldName, topValuesCount);
+      await this.assertTopValuesCount(fieldName, topValuesCount);
+
+      if (exampleContent) {
+        await this.assertTopValuesContent(fieldName, exampleContent);
+      }
       await this.ensureDetailsClosed(fieldName);
     }
 
@@ -508,13 +533,19 @@ export function MachineLearningDataVisualizerTableProvider(
       docCountFormatted: string,
       exampleCount: number,
       viewableInLens: boolean,
-      hasActionMenu?: boolean
+      hasActionMenu?: boolean,
+      exampleContent?: string[]
     ) {
       // Currently the data used in the data visualizer tests only contains these field types.
       if (fieldType === ML_JOB_FIELD_TYPES.DATE) {
         await this.assertDateFieldContents(fieldName, docCountFormatted);
       } else if (fieldType === ML_JOB_FIELD_TYPES.KEYWORD) {
-        await this.assertKeywordFieldContents(fieldName, docCountFormatted, exampleCount);
+        await this.assertKeywordFieldContents(
+          fieldName,
+          docCountFormatted,
+          exampleCount,
+          exampleContent
+        );
       } else if (fieldType === ML_JOB_FIELD_TYPES.TEXT) {
         await this.assertTextFieldContents(fieldName, docCountFormatted, exampleCount);
       } else if (fieldType === ML_JOB_FIELD_TYPES.GEO_POINT) {

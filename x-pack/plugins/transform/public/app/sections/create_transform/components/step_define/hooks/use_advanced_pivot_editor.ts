@@ -26,18 +26,15 @@ export const useAdvancedPivotEditor = (
   // Advanced editor for pivot config state
   const [isAdvancedEditorSwitchModalVisible, setAdvancedEditorSwitchModalVisible] = useState(false);
 
-  const [
-    isAdvancedPivotEditorApplyButtonEnabled,
-    setAdvancedPivotEditorApplyButtonEnabled,
-  ] = useState(false);
+  const [isAdvancedPivotEditorApplyButtonEnabled, setAdvancedPivotEditorApplyButtonEnabled] =
+    useState(false);
 
   const [isAdvancedPivotEditorEnabled, setAdvancedPivotEditorEnabled] = useState(
     defaults.isAdvancedPivotEditorEnabled
   );
 
-  const [advancedEditorConfigLastApplied, setAdvancedEditorConfigLastApplied] = useState(
-    stringifiedPivotConfig
-  );
+  const [advancedEditorConfigLastApplied, setAdvancedEditorConfigLastApplied] =
+    useState(stringifiedPivotConfig);
 
   const {
     convertToJson,

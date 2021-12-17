@@ -34,6 +34,7 @@ interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   eventId: string;
+  isDraggable?: boolean;
   timelineId: string;
   timelineTabType: TimelineTabs | 'flyout';
 }
@@ -89,14 +90,13 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
     font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
     font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 
-    .eventFieldsTable__hoverActionButtons {
-      &:focus-within {
-        .timelines__hoverActionButton,
-        .securitySolution__hoverActionButton {
-          opacity: 1;
-        }
+    .hoverActions-active {
+      .timelines__hoverActionButton,
+      .securitySolution__hoverActionButton {
+        opacity: 1;
       }
     }
+
     &:hover {
       .timelines__hoverActionButton,
       .securitySolution__hoverActionButton {
@@ -110,9 +110,6 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
         opacity: 0;
       } */
       opacity: 0;
-      &:focus {
-        opacity: 1;
-      }
     }
   }
 
@@ -140,7 +137,7 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
 
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
-  ({ browserFields, data, eventId, timelineTabType, timelineId }) => {
+  ({ browserFields, data, eventId, isDraggable, timelineTabType, timelineId }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
     const dispatch = useDispatch();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -221,6 +218,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           timelineId,
           toggleColumn,
           getLinkValue,
+          isDraggable,
         }),
       [
         browserFields,
@@ -231,6 +229,7 @@ export const EventFieldsBrowser = React.memo<Props>(
         timelineTabType,
         toggleColumn,
         getLinkValue,
+        isDraggable,
       ]
     );
 
@@ -282,6 +281,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           rowProps={onSetRowProps}
           search={search}
           sorting={false}
+          data-test-subj="event-fields-browser"
         />
       </TableWrapper>
     );

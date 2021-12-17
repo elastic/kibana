@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
+import { Request } from '@hapi/hapi';
+import { ensureRawRequest, KibanaRequest } from './router';
 
 /**
  * Status indicating an outcome of the authentication.
@@ -33,7 +33,7 @@ export enum AuthStatus {
  * @public
  */
 export type GetAuthState = <T = unknown>(
-  request: KibanaRequest | LegacyRequest
+  request: KibanaRequest
 ) => { status: AuthStatus; state: T };
 
 /**
@@ -41,16 +41,16 @@ export type GetAuthState = <T = unknown>(
  * @param request {@link KibanaRequest} - an incoming request.
  * @public
  */
-export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
+export type IsAuthenticated = (request: KibanaRequest) => boolean;
 
 /** @internal */
 export class AuthStateStorage {
-  private readonly storage = new WeakMap<LegacyRequest, unknown>();
+  private readonly storage = new WeakMap<Request, unknown>();
   constructor(private readonly canBeAuthenticated: () => boolean) {}
-  public set = (request: KibanaRequest | LegacyRequest, state: unknown) => {
+  public set = (request: KibanaRequest | Request, state: unknown) => {
     this.storage.set(ensureRawRequest(request), state);
   };
-  public get = <T = unknown>(request: KibanaRequest | LegacyRequest) => {
+  public get = <T = unknown>(request: KibanaRequest | Request) => {
     const key = ensureRawRequest(request);
     const state = this.storage.get(key) as T;
     const status: AuthStatus = this.storage.has(key)

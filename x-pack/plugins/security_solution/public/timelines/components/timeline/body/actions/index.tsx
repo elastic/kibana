@@ -12,26 +12,32 @@ import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import {
-  eventHasNotes,
-  getEventType,
-  getPinOnClick,
-  InvestigateInResolverAction,
-} from '../helpers';
+import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
-import { AddEventNoteAction } from '../actions/add_note_icon_item';
-import { PinEventAction } from '../actions/pin_event_action';
+import { AddEventNoteAction } from './add_note_icon_item';
+import { PinEventAction } from './pin_event_action';
 import { EventsTdContent } from '../../styles';
-import { useKibana, useGetUserCasesPermissions } from '../../../../../common/lib/kibana';
-import { APP_ID } from '../../../../../../common/constants';
 import * as i18n from '../translations';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../../timelines/public';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
-import { useInsertTimeline } from '../../../../../cases/components/use_insert_timeline';
-import { TimelineId, ActionProps, OnPinEvent } from '../../../../../../common/types/timeline';
+import {
+  setActiveTabTimeline,
+  updateTimelineGraphEventId,
+} from '../../../../store/timeline/actions';
+import {
+  useGlobalFullScreen,
+  useTimelineFullScreen,
+} from '../../../../../common/containers/use_full_screen';
+import {
+  TimelineId,
+  ActionProps,
+  OnPinEvent,
+  TimelineTabs,
+} from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
+import { isInvestigateInResolverActionEnabled } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 
 const ActionsContainer = styled.div`
   align-items: center;
@@ -40,21 +46,20 @@ const ActionsContainer = styled.div`
 
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
-  width,
   checked,
   columnValues,
-  eventId,
   data,
   ecsData,
+  eventId,
   eventIdToNoteIds,
   isEventPinned = false,
   isEventViewer = false,
   loadingEventIds,
   onEventDetailsPanelOpened,
   onRowSelected,
+  onRuleChange,
   refetch,
   showCheckboxes,
-  onRuleChange,
   showNotes,
   timelineId,
   toggleShowNotes,
@@ -63,7 +68,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { timelines: timelinesUi } = useKibana().services;
 
   const onPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId })),
@@ -99,26 +103,37 @@ const ActionsComponent: React.FC<ActionProps> = ({
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
   );
   const eventType = getEventType(ecsData);
-  const casePermissions = useGetUserCasesPermissions();
-  const insertTimelineHook = useInsertTimeline;
-  const isEventContextMenuEnabledForEndpoint = useMemo(
-    () => ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint'),
-    [ecsData.event?.kind, ecsData.agent?.type]
-  );
-  const addToCaseActionProps = useMemo(() => {
-    return {
-      ariaLabel: i18n.ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
-      event: { data: [], ecs: ecsData, _id: ecsData._id },
-      useInsertTimeline: insertTimelineHook,
-      casePermissions,
-      appId: APP_ID,
-    };
-  }, [ariaRowindex, ecsData, casePermissions, insertTimelineHook, columnValues]);
+
+  const isContextMenuDisabled = useMemo(() => {
+    return (
+      eventType !== 'signal' &&
+      !(ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint'))
+    );
+  }, [ecsData, eventType]);
+
+  const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
+  const { setGlobalFullScreen } = useGlobalFullScreen();
+  const { setTimelineFullScreen } = useTimelineFullScreen();
+  const handleClick = useCallback(() => {
+    const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
+    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
+    if (timelineId === TimelineId.active) {
+      if (dataGridIsFullScreen) {
+        setTimelineFullScreen(true);
+      }
+      dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
+    } else {
+      if (dataGridIsFullScreen) {
+        setGlobalFullScreen(true);
+      }
+    }
+  }, [dispatch, ecsData._id, timelineId, setGlobalFullScreen, setTimelineFullScreen]);
+
   return (
     <ActionsContainer>
       {showCheckboxes && !tGridEnabled && (
         <div key="select-event-container" data-test-subj="select-event-container">
-          <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
             {loadingEventIds.includes(eventId) ? (
               <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
             ) : (
@@ -134,30 +149,24 @@ const ActionsComponent: React.FC<ActionProps> = ({
         </div>
       )}
       <div key="expand-event">
-        <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+        <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
           <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
             <EuiButtonIcon
               aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
               data-test-subj="expand-event"
-              iconType="arrowRight"
+              iconType="expand"
               onClick={onEventDetailsPanelOpened}
+              size="s"
             />
           </EuiToolTip>
         </EventsTdContent>
       </div>
       <>
-        <InvestigateInResolverAction
-          ariaLabel={i18n.ACTION_INVESTIGATE_IN_RESOLVER_FOR_ROW({ ariaRowindex, columnValues })}
-          key="investigate-in-resolver"
-          timelineId={timelineId}
-          ecsData={ecsData}
-        />
-        {timelineId !== TimelineId.active && eventType === 'signal' && (
+        {timelineId !== TimelineId.active && (
           <InvestigateInTimelineAction
             ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
             key="investigate-in-timeline"
             ecsRowData={ecsData}
-            nonEcsRowData={data}
           />
         )}
 
@@ -180,23 +189,39 @@ const ActionsComponent: React.FC<ActionProps> = ({
             />
           </>
         )}
-        {[
-          TimelineId.detectionsPage,
-          TimelineId.detectionsRulesDetailsPage,
-          TimelineId.active,
-        ].includes(timelineId as TimelineId) &&
-          timelinesUi.getAddToCasePopover(addToCaseActionProps)}
         <AlertContextMenu
           ariaLabel={i18n.MORE_ACTIONS_FOR_ROW({ ariaRowindex, columnValues })}
+          ariaRowindex={ariaRowindex}
+          columnValues={columnValues}
           key="alert-context-menu"
           ecsRowData={ecsData}
           timelineId={timelineId}
-          disabled={eventType !== 'signal' && !isEventContextMenuEnabledForEndpoint}
+          disabled={isContextMenuDisabled}
           refetch={refetch ?? noop}
           onRuleChange={onRuleChange}
         />
+        {isDisabled === false ? (
+          <div>
+            <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+              <EuiToolTip
+                data-test-subj="view-in-analyzer-tool-tip"
+                content={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
+              >
+                <EuiButtonIcon
+                  aria-label={i18n.ACTION_INVESTIGATE_IN_RESOLVER_FOR_ROW({
+                    ariaRowindex,
+                    columnValues,
+                  })}
+                  data-test-subj="view-in-analyzer"
+                  iconType="analyzeEvent"
+                  onClick={handleClick}
+                  size="s"
+                />
+              </EuiToolTip>
+            </EventsTdContent>
+          </div>
+        ) : null}
       </>
-      {timelinesUi.getAddToCaseAction(addToCaseActionProps)}
     </ActionsContainer>
   );
 };

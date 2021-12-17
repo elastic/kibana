@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import request, { Cookie } from 'request';
-import { delay } from 'bluebird';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 import type { AuthenticationProvider } from '../../../../plugins/security/common/model';
@@ -38,14 +38,14 @@ export default function ({ getService }: FtrProviderContext) {
     expect(apiResponse.body.authentication_provider).to.eql(provider);
 
     return Array.isArray(apiResponse.headers['set-cookie'])
-      ? request.cookie(apiResponse.headers['set-cookie'][0])!
+      ? parseCookie(apiResponse.headers['set-cookie'][0])!
       : undefined;
   }
 
   async function getNumberOfSessionDocuments() {
     return (
       // @ts-expect-error doesn't handle total as number
-      (await es.search({ index: '.kibana_security_session*' })).body.hits.total.value as number
+      (await es.search({ index: '.kibana_security_session*' })).hits.total.value as number
     );
   }
 
@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
     const authenticationResponse = await supertest
       .post('/api/security/saml/callback')
       .set('kbn-xsrf', 'xxx')
-      .set('Cookie', request.cookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
+      .set('Cookie', parseCookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
       .send({
         SAMLResponse: await getSAMLResponse({
           destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
       })
       .expect(302);
 
-    const cookie = request.cookie(authenticationResponse.headers['set-cookie'][0])!;
+    const cookie = parseCookie(authenticationResponse.headers['set-cookie'][0])!;
     await checkSessionCookie(cookie, 'a@b.c', { type: 'saml', name: providerName });
     return cookie;
   }
@@ -94,14 +94,14 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      const sessionCookie = request.cookie(response.headers['set-cookie'][0])!;
+      const sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, { type: 'basic', name: 'basic1' });
       expect(await getNumberOfSessionDocuments()).to.be(1);
 
       // Cleanup routine runs every 10s, and idle timeout threshold is three times larger than 5s
       // idle timeout, let's wait for 40s to make sure cleanup routine runs when idle timeout
       // threshold is exceeded.
-      await delay(40000);
+      await setTimeoutAsync(40000);
 
       // Session info is removed from the index and cookie isn't valid anymore
       expect(await getNumberOfSessionDocuments()).to.be(0);
@@ -115,15 +115,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should properly clean up session expired because of idle timeout when providers override global session config', async function () {
       this.timeout(60000);
 
-      const [
-        samlDisableSessionCookie,
-        samlOverrideSessionCookie,
-        samlFallbackSessionCookie,
-      ] = await Promise.all([
-        loginWithSAML('saml_disable'),
-        loginWithSAML('saml_override'),
-        loginWithSAML('saml_fallback'),
-      ]);
+      const [samlDisableSessionCookie, samlOverrideSessionCookie, samlFallbackSessionCookie] =
+        await Promise.all([
+          loginWithSAML('saml_disable'),
+          loginWithSAML('saml_override'),
+          loginWithSAML('saml_fallback'),
+        ]);
 
       const response = await supertest
         .post('/internal/security/login')
@@ -136,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      const basicSessionCookie = request.cookie(response.headers['set-cookie'][0])!;
+      const basicSessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(basicSessionCookie, basicUsername, {
         type: 'basic',
         name: 'basic1',
@@ -146,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Cleanup routine runs every 10s, and idle timeout threshold is three times larger than 5s
       // idle timeout, let's wait for 40s to make sure cleanup routine runs when idle timeout
       // threshold is exceeded.
-      await delay(40000);
+      await setTimeoutAsync(40000);
 
       // Session for basic and SAML that used global session settings should not be valid anymore.
       expect(await getNumberOfSessionDocuments()).to.be(2);
@@ -186,7 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      let sessionCookie = request.cookie(response.headers['set-cookie'][0])!;
+      let sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, { type: 'basic', name: 'basic1' });
       expect(await getNumberOfSessionDocuments()).to.be(1);
 
@@ -194,7 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
       // least twice.
       for (const counter of [...Array(20).keys()]) {
         // Session idle timeout is 15s, let's wait 10s and make a new request that would extend the session.
-        await delay(1500);
+        await setTimeoutAsync(1500);
 
         sessionCookie = (await checkSessionCookie(sessionCookie, basicUsername, {
           type: 'basic',

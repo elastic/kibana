@@ -11,7 +11,7 @@ import './index.scss';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ConfigSchema } from '../config';
 import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
-import {
+import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   DataSetupDependencies,
@@ -21,12 +21,6 @@ import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
-import {
-  IndexPatternsService,
-  onRedirectNoIndexPattern,
-  IndexPatternsApiClient,
-  UiSettingsPublicToCommon,
-} from './index_patterns';
 import {
   setIndexPatterns,
   setNotifications,
@@ -44,8 +38,6 @@ import {
   createSelectRangeAction,
 } from './actions';
 import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
-import { SavedObjectsClientPublicToCommon } from './index_patterns';
-import { getIndexPatternLoad } from './index_patterns/expressions';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
@@ -58,7 +50,8 @@ export class DataPublicPlugin
       DataPublicPluginStart,
       DataSetupDependencies,
       DataStartDependencies
-    > {
+    >
+{
   private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly queryService: QueryService;
@@ -87,8 +80,6 @@ export class DataPublicPlugin
     }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
-
-    expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
 
     this.usageCollection = usageCollection;
 
@@ -131,44 +122,27 @@ export class DataPublicPlugin
         usageCollection,
       }),
       search: searchService,
-      fieldFormats,
       query: queryService,
     };
   }
 
   public start(
     core: CoreStart,
-    { uiActions, fieldFormats }: DataStartDependencies
+    { uiActions, fieldFormats, dataViews }: DataStartDependencies
   ): DataPublicPluginStart {
-    const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
+    const { uiSettings, notifications, overlays } = core;
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
-
-    const indexPatterns = new IndexPatternsService({
-      uiSettings: new UiSettingsPublicToCommon(uiSettings),
-      savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
-      apiClient: new IndexPatternsApiClient(http),
-      fieldFormats,
-      onNotification: (toastInputFields) => {
-        notifications.toasts.add(toastInputFields);
-      },
-      onError: notifications.toasts.addError.bind(notifications.toasts),
-      onRedirectNoIndexPattern: onRedirectNoIndexPattern(
-        application.capabilities,
-        application.navigateToApp,
-        overlays
-      ),
-    });
-    setIndexPatterns(indexPatterns);
+    setIndexPatterns(dataViews);
 
     const query = this.queryService.start({
       storage: this.storage,
-      savedObjectsClient: savedObjects.client,
+      http: core.http,
       uiSettings,
     });
 
-    const search = this.searchService.start(core, { fieldFormats, indexPatterns });
+    const search = this.searchService.start(core, { fieldFormats, indexPatterns: dataViews });
     setSearchService(search);
 
     uiActions.addTriggerAction(
@@ -197,7 +171,8 @@ export class DataPublicPlugin
       },
       autocomplete: this.autocomplete.start(),
       fieldFormats,
-      indexPatterns,
+      indexPatterns: dataViews,
+      dataViews,
       query,
       search,
       nowProvider: this.nowProvider,
@@ -213,7 +188,7 @@ export class DataPublicPlugin
     return {
       ...dataServices,
       ui: {
-        IndexPatternSelect: createIndexPatternSelect(indexPatterns),
+        IndexPatternSelect: createIndexPatternSelect(dataViews),
         SearchBar,
       },
     };

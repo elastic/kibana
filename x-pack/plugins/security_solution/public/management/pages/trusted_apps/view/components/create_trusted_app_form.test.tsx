@@ -21,12 +21,25 @@ import {
 
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
 import { defaultNewTrustedApp } from '../../store/builders';
-import { forceHTMLElementOffsetWidth } from './effected_policy_select/test_utils';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { licenseService } from '../../../../../common/hooks/use_license';
+import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+
+jest.mock('../../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 describe('When using the Trusted App Form', () => {
   const dataTestSubjForForm = 'createForm';
@@ -67,11 +80,6 @@ describe('When using the Trusted App Form', () => {
   const getOsField = (dataTestSub: string = dataTestSubjForForm): HTMLButtonElement => {
     return renderResult.getByTestId(`${dataTestSub}-osSelectField`) as HTMLButtonElement;
   };
-  const getGlobalSwitchField = (dataTestSub: string = dataTestSubjForForm): HTMLButtonElement => {
-    return renderResult.getByTestId(
-      `${dataTestSub}-effectedPolicies-globalSwitch`
-    ) as HTMLButtonElement;
-  };
   const getDescriptionField = (dataTestSub: string = dataTestSubjForForm): HTMLTextAreaElement => {
     return renderResult.getByTestId(`${dataTestSub}-descriptionField`) as HTMLTextAreaElement;
   };
@@ -110,10 +118,14 @@ describe('When using the Trusted App Form', () => {
   const getAllValidationErrors = (): HTMLElement[] => {
     return Array.from(renderResult.container.querySelectorAll('.euiFormErrorText'));
   };
+  const getAllValidationWarnings = (): HTMLElement[] => {
+    return Array.from(renderResult.container.querySelectorAll('.euiFormHelpText'));
+  };
 
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
     useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
 
     mockedContext = createAppRootMockRenderer();
 
@@ -122,6 +134,8 @@ describe('When using the Trusted App Form', () => {
     formProps = {
       'data-test-subj': dataTestSubjForForm,
       trustedApp: latestUpdatedTrustedApp,
+      isEditMode: false,
+      isDirty: false,
       onChange: jest.fn((updates) => {
         latestUpdatedTrustedApp = updates.item;
       }),
@@ -139,7 +153,11 @@ describe('When using the Trusted App Form', () => {
   describe('and the form is rendered', () => {
     beforeEach(() => render());
 
-    it('should show Name as required', () => {
+    it('should show Name as required after blur', () => {
+      expect(getNameField().required).toBe(false);
+      reactTestingLibrary.act(() => {
+        fireEvent.blur(getNameField());
+      });
       expect(getNameField().required).toBe(true);
     });
 
@@ -181,9 +199,9 @@ describe('When using the Trusted App Form', () => {
 
     it('should show an initial condition entry with labels', () => {
       const defaultCondition = getCondition();
-      const labels = Array.from(
-        defaultCondition.querySelectorAll('.euiFormRow__labelWrapper')
-      ).map((label) => (label.textContent || '').trim());
+      const labels = Array.from(defaultCondition.querySelectorAll('.euiFormRow__labelWrapper')).map(
+        (label) => (label.textContent || '').trim()
+      );
       expect(labels).toEqual(['Field', 'Operator', 'Value', '']);
     });
 
@@ -192,7 +210,7 @@ describe('When using the Trusted App Form', () => {
       expect(getConditionRemoveButton(defaultCondition).disabled).toBe(true);
     });
 
-    it('should display 2 options for Field', () => {
+    it('should display 3 options for Field for Windows', () => {
       const conditionFieldSelect = getConditionFieldSelect(getCondition());
       reactTestingLibrary.act(() => {
         fireEvent.click(conditionFieldSelect, { button: 1 });
@@ -202,6 +220,7 @@ describe('When using the Trusted App Form', () => {
           '.euiSuperSelect__listbox button.euiSuperSelect__item'
         )
       ).map((button) => button.textContent);
+      expect(options.length).toEqual(3);
       expect(options).toEqual([
         'Hashmd5, sha1, or sha256',
         'PathThe full path of the application',
@@ -209,7 +228,11 @@ describe('When using the Trusted App Form', () => {
       ]);
     });
 
-    it('should show the value field as required', () => {
+    it('should show the value field as required after blur', () => {
+      expect(getConditionValue(getCondition()).required).toEqual(false);
+      reactTestingLibrary.act(() => {
+        fireEvent.blur(getConditionValue(getCondition()));
+      });
       expect(getConditionValue(getCondition()).required).toEqual(true);
     });
 
@@ -248,54 +271,49 @@ describe('When using the Trusted App Form', () => {
   });
 
   describe('the Policy Selection area', () => {
-    it('should show loader when setting `policies.isLoading` to true', () => {
+    beforeEach(() => {
+      const policy = generator.generatePolicyPackagePolicy();
+      policy.name = 'test policy A';
+      policy.id = '123';
+
+      formProps.policies.options = [policy];
+    });
+
+    it('should have `global` switch on if effective scope is global and policy options hidden', () => {
+      render();
+      const globalButton = renderResult.getByTestId(
+        `${dataTestSubjForForm}-effectedPolicies-global`
+      ) as HTMLButtonElement;
+
+      expect(globalButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
+      expect(renderResult.queryByTestId('policy-123')).toBeNull();
+    });
+
+    it('should have policy options visible and specific policies checked if scope is per-policy', () => {
+      (formProps.trustedApp as NewTrustedApp).effectScope = {
+        type: 'policy',
+        policies: ['123'],
+      };
+      render();
+      const perPolicyButton = renderResult.getByTestId(
+        `${dataTestSubjForForm}-effectedPolicies-perPolicy`
+      ) as HTMLButtonElement;
+
+      expect(perPolicyButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
+      expect(renderResult.getByTestId('policy-123').getAttribute('aria-disabled')).toEqual('false');
+      expect(renderResult.getByTestId('policy-123').getAttribute('aria-selected')).toEqual('true');
+    });
+    it('should show loader when setting `policies.isLoading` to true and scope is per-policy', () => {
       formProps.policies.isLoading = true;
+      (formProps.trustedApp as NewTrustedApp).effectScope = {
+        type: 'policy',
+        policies: ['123'],
+      };
       render();
       expect(
         renderResult.getByTestId(`${dataTestSubjForForm}-effectedPolicies-policiesSelectable`)
           .textContent
       ).toEqual('Loading options');
-    });
-
-    describe('and policies exist', () => {
-      beforeEach(() => {
-        const policy = generator.generatePolicyPackagePolicy();
-        policy.name = 'test policy A';
-        policy.id = '123';
-
-        formProps.policies.options = [policy];
-      });
-
-      it('should display the policies available, but disabled if ', () => {
-        render();
-        expect(renderResult.getByTestId('policy-123'));
-      });
-
-      it('should have `global` switch on if effective scope is global and policy options disabled', () => {
-        render();
-        expect(getGlobalSwitchField().getAttribute('aria-checked')).toEqual('true');
-        expect(renderResult.getByTestId('policy-123').getAttribute('aria-disabled')).toEqual(
-          'true'
-        );
-        expect(renderResult.getByTestId('policy-123').getAttribute('aria-selected')).toEqual(
-          'false'
-        );
-      });
-
-      it('should have specific policies checked if scope is per-policy', () => {
-        (formProps.trustedApp as NewTrustedApp).effectScope = {
-          type: 'policy',
-          policies: ['123'],
-        };
-        render();
-        expect(getGlobalSwitchField().getAttribute('aria-checked')).toEqual('false');
-        expect(renderResult.getByTestId('policy-123').getAttribute('aria-disabled')).toEqual(
-          'false'
-        );
-        expect(renderResult.getByTestId('policy-123').getAttribute('aria-selected')).toEqual(
-          'true'
-        );
-      });
     });
   });
 
@@ -306,6 +324,58 @@ describe('When using the Trusted App Form', () => {
       expect(
         renderResult.queryByText('Apply trusted application globally')
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('the Policy Selection area when the license downgrades to gold or below', () => {
+    beforeEach(() => {
+      // select per policy for trusted app
+      const policy = generator.generatePolicyPackagePolicy();
+      policy.name = 'test policy A';
+      policy.id = '123';
+
+      formProps.policies.options = [policy];
+
+      (formProps.trustedApp as NewTrustedApp).effectScope = {
+        type: 'policy',
+        policies: ['123'],
+      };
+
+      formProps.isEditMode = true;
+
+      // downgrade license
+      (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    });
+
+    it('maintains policy configuration but does not allow the user to edit add/remove individual policies in edit mode', () => {
+      render();
+      const perPolicyButton = renderResult.getByTestId(
+        `${dataTestSubjForForm}-effectedPolicies-perPolicy`
+      ) as HTMLButtonElement;
+
+      expect(perPolicyButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
+      expect(renderResult.getByTestId('policy-123').getAttribute('aria-disabled')).toEqual('true');
+      expect(renderResult.getByTestId('policy-123-checkbox')).toBeChecked();
+    });
+    it("allows the user to set the trusted app entry to 'Global' in the edit option", () => {
+      render();
+      const globalButtonInput = renderResult.getByTestId('globalPolicy') as HTMLButtonElement;
+
+      reactTestingLibrary.act(() => {
+        fireEvent.click(globalButtonInput);
+      });
+
+      expect(formProps.onChange.mock.calls[0][0].item.effectScope.type).toBe('global');
+    });
+    it('hides the policy assignment section if the TA is set to global', () => {
+      (formProps.trustedApp as NewTrustedApp).effectScope = {
+        type: 'global',
+      };
+      expect(renderResult.queryByTestId(`${dataTestSubjForForm}-effectedPolicies`)).toBeNull();
+    });
+    it('hides the policy assignment section if the user is adding a new TA', () => {
+      formProps.isEditMode = false;
+      expect(renderResult.queryByTestId(`${dataTestSubjForForm}-effectedPolicies`)).toBeNull();
     });
   });
 
@@ -406,6 +476,49 @@ describe('When using the Trusted App Form', () => {
               operator: 'included',
               type: 'match',
               value: 'e50fb1a0e5fff590ece385082edc6c41',
+            },
+          ],
+        },
+      });
+    });
+
+    it('should not validate form to true if name input is empty', () => {
+      const props = {
+        name: 'some name',
+        description: '',
+        effectScope: {
+          type: 'global',
+        },
+        os: OperatingSystem.WINDOWS,
+        entries: [
+          { field: ConditionEntryField.PATH, operator: 'included', type: 'wildcard', value: 'x' },
+        ],
+      } as NewTrustedApp;
+
+      formProps.trustedApp = props;
+      render();
+
+      formProps.trustedApp = {
+        ...props,
+        name: '',
+      };
+      rerender();
+
+      expect(getAllValidationErrors()).toHaveLength(0);
+      expect(getAllValidationWarnings()).toHaveLength(1);
+      expect(formProps.onChange).toHaveBeenLastCalledWith({
+        isValid: false,
+        item: {
+          name: '',
+          description: '',
+          os: OperatingSystem.WINDOWS,
+          effectScope: { type: 'global' },
+          entries: [
+            {
+              field: ConditionEntryField.PATH,
+              operator: 'included',
+              type: 'wildcard',
+              value: 'x',
             },
           ],
         },

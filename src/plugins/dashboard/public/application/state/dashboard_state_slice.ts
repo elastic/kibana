@@ -10,6 +10,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { Filter, Query } from '../../services/data';
 import { ViewMode } from '../../services/embeddable';
+import type { DashboardControlGroupInput } from '../lib/dashboard_control_group';
 import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
 
 export const dashboardStateSlice = createSlice({
@@ -40,6 +41,12 @@ export const dashboardStateSlice = createSlice({
       if (action.payload.tags) {
         state.tags = action.payload.tags;
       }
+    },
+    setControlGroupState: (
+      state,
+      action: PayloadAction<DashboardControlGroupInput | undefined>
+    ) => {
+      state.controlGroupInput = action.payload;
     },
     setUseMargins: (state, action: PayloadAction<boolean>) => {
       state.options.useMargins = action.payload;
@@ -92,6 +99,7 @@ export const dashboardStateSlice = createSlice({
 
 export const {
   setStateFromSaveModal,
+  setControlGroupState,
   setDashboardOptions,
   setExpandedPanelId,
   setHidePanelTitles,

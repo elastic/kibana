@@ -2,21 +2,23 @@
 [[errors]]
 === Errors
 
-TIP: {apm-overview-ref-v}/errors.html[Errors] are groups of exceptions with a similar exception or log message.
+TIP: {apm-guide-ref}/data-model-errors.html[Errors] are groups of exceptions with a similar exception or log message.
 
-The *Errors* overview provides a high-level view of the error message and culprit,
-the number of occurrences, and the most recent occurrence.
-Just like the transaction overview, you'll notice we group together like errors.
-This makes it very easy to quickly see which errors are affecting your services,
+The *Errors* overview provides a high-level view of the exceptions that APM agents catch,
+or that users manually report with APM agent APIs.
+Like errors are grouped together to make it easy to quickly see which errors are affecting your services,
 and to take actions to rectify them.
 
+A service returning a 5xx code from a request handler, controller, etc., will not create
+an exception that an APM agent can catch, and will therefore not show up in this view.
+
 [role="screenshot"]
-image::apm/images/apm-errors-overview.png[Example view of the errors overview in the APM app in Kibana]
+image::apm/images/apm-errors-overview.png[APM Errors overview]
 
 Selecting an error group ID or error message brings you to the *Error group*.
 
 [role="screenshot"]
-image::apm/images/apm-error-group.png[Example view of the error group page in the APM app in Kibana]
+image::apm/images/apm-error-group.png[APM Error group]
 
 Here, you'll see the error message, culprit, and the number of occurrences over time.
 

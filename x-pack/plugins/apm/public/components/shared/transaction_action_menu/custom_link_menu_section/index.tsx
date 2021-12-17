@@ -30,8 +30,8 @@ import {
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { CreateEditCustomLinkFlyout } from '../../../app/Settings/customize_ui/custom_link/create_edit_custom_link_flyout';
-import { convertFiltersToQuery } from '../../../app/Settings/customize_ui/custom_link/create_edit_custom_link_flyout/helper';
+import { CreateEditCustomLinkFlyout } from '../../../app/Settings/custom_link/create_edit_custom_link_flyout';
+import { convertFiltersToQuery } from '../../../app/Settings/custom_link/create_edit_custom_link_flyout/helper';
 import { LoadingStatePrompt } from '../../LoadingStatePrompt';
 import { CustomLinkToolbar } from './CustomLinkToolbar';
 import { CustomLinkList } from './custom_link_list';
@@ -61,7 +61,7 @@ export function CustomLinkMenuSection({
     (callApmApi) =>
       callApmApi({
         isCachable: false,
-        endpoint: 'GET /api/apm/settings/custom_links',
+        endpoint: 'GET /internal/apm/settings/custom_links',
         params: { query: convertFiltersToQuery(filters) },
       }),
     [filters]

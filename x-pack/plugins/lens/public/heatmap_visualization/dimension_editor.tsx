@@ -64,7 +64,7 @@ export function HeatmapDimensionEditor(
         <EuiFlexItem>
           <EuiColorPaletteDisplay
             data-test-subj="lnsHeatmap_dynamicColoring_palette"
-            palette={getStopsForFixedMode(displayStops, activePalette.params?.colorStops)}
+            palette={getStopsForFixedMode(displayStops, activePalette?.params?.colorStops)}
             type={FIXED_PROGRESSION}
             onClick={() => {
               setIsPaletteOpen(!isPaletteOpen);

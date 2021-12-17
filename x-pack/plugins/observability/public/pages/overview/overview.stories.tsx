@@ -36,43 +36,55 @@ function unregisterAll() {
   unregisterDataHandler({ appName: 'synthetics' });
 }
 
-const sampleAPMIndices = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  'apm_oss.transactionIndices': 'apm-*',
-} as ApmIndicesConfig;
+const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 
 const withCore = makeDecorator({
   name: 'withCore',
   parameterName: 'core',
-  wrapper: (storyFn, context, { options }) => {
+  wrapper: (storyFn, context, { options: { theme, ...options } }) => {
     unregisterAll();
 
-    const KibanaReactContext = createKibanaReactContext(({
+    const KibanaReactContext = createKibanaReactContext({
       application: { getUrlForApp: () => '' },
-      chrome: { docTitle: { change: () => {} } },
+      chrome: {
+        docTitle: {
+          change: () => {},
+        },
+      },
       uiSettings: { get: () => [] },
-      usageCollection: { reportUiCounter: () => {} },
-    } as unknown) as Partial<CoreStart>);
+      usageCollection: {
+        reportUiCounter: () => {},
+      },
+    } as unknown as Partial<CoreStart>);
 
     return (
       <MemoryRouter>
         <KibanaReactContext.Provider>
           <PluginContext.Provider
             value={{
-              appMountParameters: ({
+              appMountParameters: {
                 setHeaderActionMenu: () => {},
-              } as unknown) as AppMountParameters,
+              } as unknown as AppMountParameters,
               config: {
-                unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
+                unsafe: {
+                  alertingExperience: { enabled: true },
+                  cases: { enabled: true },
+                  overviewNext: { enabled: false },
+                },
               },
               core: options as CoreStart,
-              plugins: ({
+              plugins: {
                 data: {
                   query: {
-                    timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
+                    timefilter: {
+                      timefilter: {
+                        setTime: () => {},
+                        getTime: () => ({}),
+                      },
+                    },
                   },
                 },
-              } as unknown) as ObservabilityPublicPluginsStart,
+              } as unknown as ObservabilityPublicPluginsStart,
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
             }}
@@ -85,7 +97,7 @@ const withCore = makeDecorator({
   },
 });
 
-const core = ({
+const core = {
   http: {
     basePath: {
       prepend: (link: string) => `http://localhost:5601${link}`,
@@ -160,25 +172,25 @@ const core = ({
       return euiSettings[key];
     },
   },
-} as unknown) as CoreStart;
+} as unknown as CoreStart;
 
-const coreWithAlerts = ({
+const coreWithAlerts = {
   ...core,
   http: {
     ...core.http,
     get: alertsFetchData,
   },
-} as unknown) as CoreStart;
+} as unknown as CoreStart;
 
-const coreWithNewsFeed = ({
+const coreWithNewsFeed = {
   ...core,
   http: {
     ...core.http,
     get: newsFeedFetchData,
   },
-} as unknown) as CoreStart;
+} as unknown as CoreStart;
 
-const coreAlertsThrowsError = ({
+const coreAlertsThrowsError = {
   ...core,
   http: {
     ...core.http,
@@ -186,7 +198,7 @@ const coreAlertsThrowsError = ({
       throw new Error('Error fetching Alerts data');
     },
   },
-} as unknown) as CoreStart;
+} as unknown as CoreStart;
 
 storiesOf('app/Overview', module)
   .addDecorator(withCore(core))

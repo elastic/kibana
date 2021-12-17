@@ -7,7 +7,7 @@
     "declarationMap": true,
 
     // the plugin contains some heavy json files
-    "resolveJsonModule": false,
+    "resolveJsonModule": false
   },
   "include": [
     "../../../typings/**/*",
@@ -20,13 +20,14 @@
     "shareable_runtime/**/*",
     "storybook/**/*",
     "tasks/mocks/*",
-    "types/**/*",
+    "types/**/*"
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/bfetch/tsconfig.json"},
+    { "path": "../../../src/plugins/bfetch/tsconfig.json" },
     { "path": "../../../src/plugins/charts/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json"},
+    { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../src/plugins/share/tsconfig.json" },
     { "path": "../../../src/plugins/discover/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
     { "path": "../../../src/plugins/expressions/tsconfig.json" },
@@ -38,9 +39,9 @@
     { "path": "../../../src/plugins/expression_shape/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
     { "path": "../../../src/plugins/inspector/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_legacy/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../../src/plugins/presentation_util/tsconfig.json" },
     { "path": "../../../src/plugins/saved_objects/tsconfig.json" },
     { "path": "../../../src/plugins/ui_actions/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
@@ -49,5 +50,6 @@
     { "path": "../lens/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },
     { "path": "../reporting/tsconfig.json" },
+    { "path": "../spaces/tsconfig.json" },
   ]
 }

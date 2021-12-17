@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-
-import { JsonObject } from '@kbn/utility-types';
-import { buildEsQuery } from '@kbn/es-query';
-
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '../util/object_utils';
 
 export function isMultiBucketAggregate(
@@ -26,7 +22,4 @@ export const ES_CLIENT_TOTAL_HITS_RELATION: Record<
   GTE: 'gte',
 } as const;
 
-export type InfluencersFilterQuery =
-  | ReturnType<typeof buildEsQuery>
-  | estypes.QueryDslQueryContainer
-  | JsonObject;
+export type InfluencersFilterQuery = estypes.QueryDslQueryContainer;

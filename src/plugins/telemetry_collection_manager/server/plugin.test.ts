@@ -45,6 +45,12 @@ describe('Telemetry Collection Manager', () => {
     const telemetryCollectionManager = new TelemetryCollectionManagerPlugin(initializerContext);
     const setupApi = telemetryCollectionManager.setup(coreMock.createSetup(), { usageCollection });
     const collectionStrategy = createCollectionStrategy(1);
+    beforeEach(() => {
+      // Reset cache on every request.
+      // 10s cache to avoid misatekly invalidating cache during test runs
+      // eslint-disable-next-line dot-notation
+      telemetryCollectionManager['cacheManager'].resetCache();
+    });
 
     describe('before start', () => {
       test('registers a collection strategy', () => {
@@ -91,7 +97,9 @@ describe('Telemetry Collection Manager', () => {
         cluster_uuid: 'clusterUuid',
         cluster_name: 'clusterName',
         timestamp: new Date().toISOString(),
-        cluster_stats: {},
+        cluster_stats: {
+          cluster_uuid: 'clusterUuid',
+        },
         stack_stats: {},
         version: 'version',
       };
@@ -120,7 +128,12 @@ describe('Telemetry Collection Manager', () => {
               { clusterUuid: 'clusterUuid' },
             ]);
             collectionStrategy.statsGetter.mockResolvedValue([basicStats]);
-            await expect(setupApi.getStats(config)).resolves.toStrictEqual([expect.any(String)]);
+            await expect(setupApi.getStats(config)).resolves.toStrictEqual([
+              {
+                clusterUuid: 'clusterUuid',
+                stats: expect.any(String),
+              },
+            ]);
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
             ).toBeInstanceOf(TelemetrySavedObjectsClient);
@@ -141,7 +154,10 @@ describe('Telemetry Collection Manager', () => {
               { clusterUuid: 'clusterUuid' },
             ]);
             await expect(setupApi.getOptInStats(true, config)).resolves.toStrictEqual([
-              expect.any(String),
+              {
+                clusterUuid: 'clusterUuid',
+                stats: expect.any(String),
+              },
             ]);
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
@@ -153,7 +169,10 @@ describe('Telemetry Collection Manager', () => {
               { clusterUuid: 'clusterUuid' },
             ]);
             await expect(setupApi.getOptInStats(false, config)).resolves.toStrictEqual([
-              expect.any(String),
+              {
+                clusterUuid: 'clusterUuid',
+                stats: expect.any(String),
+              },
             ]);
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
@@ -181,11 +200,38 @@ describe('Telemetry Collection Manager', () => {
             ]);
             collectionStrategy.statsGetter.mockResolvedValue([basicStats]);
             await expect(setupApi.getStats(config)).resolves.toStrictEqual([
-              { ...basicStats, collectionSource: 'test_collection' },
+              {
+                clusterUuid: 'clusterUuid',
+                stats: {
+                  ...basicStats,
+                  cacheDetails: { updatedAt: expect.any(String), fetchedAt: expect.any(String) },
+                  collectionSource: 'test_collection',
+                },
+              },
             ]);
+
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
             ).not.toBeInstanceOf(TelemetrySavedObjectsClient);
+          });
+
+          test('returns cached object on multiple calls', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
+              { clusterUuid: 'clusterUuid' },
+            ]);
+            collectionStrategy.statsGetter.mockResolvedValue([basicStats]);
+            await setupApi.getStats(config);
+
+            await expect(setupApi.getStats(config)).resolves.toStrictEqual([
+              {
+                clusterUuid: 'clusterUuid',
+                stats: {
+                  ...basicStats,
+                  cacheDetails: { updatedAt: expect.any(String), fetchedAt: expect.any(String) },
+                  collectionSource: 'test_collection',
+                },
+              },
+            ]);
           });
         });
 
@@ -203,7 +249,10 @@ describe('Telemetry Collection Manager', () => {
               { clusterUuid: 'clusterUuid' },
             ]);
             await expect(setupApi.getOptInStats(true, config)).resolves.toStrictEqual([
-              { cluster_uuid: 'clusterUuid', opt_in_status: true },
+              {
+                clusterUuid: 'clusterUuid',
+                stats: { opt_in_status: true, cluster_uuid: 'clusterUuid' },
+              },
             ]);
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
@@ -215,7 +264,10 @@ describe('Telemetry Collection Manager', () => {
               { clusterUuid: 'clusterUuid' },
             ]);
             await expect(setupApi.getOptInStats(false, config)).resolves.toStrictEqual([
-              { cluster_uuid: 'clusterUuid', opt_in_status: false },
+              {
+                clusterUuid: 'clusterUuid',
+                stats: { opt_in_status: false, cluster_uuid: 'clusterUuid' },
+              },
             ]);
             expect(
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient

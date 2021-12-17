@@ -11,13 +11,14 @@ import {
   mergeOtherBucketAggResponse,
   updateMissingBucket,
   OTHER_BUCKET_SEPARATOR as SEP,
+  constructSingleTermOtherFilter,
 } from './_terms_other_bucket_helper';
 import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './bucket_agg_type';
 import { mockAggTypesRegistry } from '../test_helpers';
-import type { IndexPatternField } from '../../../index_patterns';
-import { IndexPattern } from '../../../index_patterns/index_patterns/index_pattern';
+import type { IndexPatternField } from '../../..';
+import { IndexPattern } from '../../..';
 
 const indexPattern = {
   id: '1234',
@@ -42,7 +43,7 @@ const indexPattern = {
   ],
 } as IndexPattern;
 
-indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
 
 const singleTerm = {
   aggs: [
@@ -377,6 +378,86 @@ describe('Terms Agg Other bucket helper', () => {
       }
     });
 
+    test('correctly builds query for nested terms agg with one disabled', () => {
+      const oneDisabledNestedTerms = {
+        aggs: [
+          {
+            id: '2',
+            type: BUCKET_TYPES.TERMS,
+            enabled: false,
+            params: {
+              field: {
+                name: 'machine.os.raw',
+                indexPattern,
+                filterable: true,
+              },
+              size: 2,
+              otherBucket: false,
+              missingBucket: true,
+            },
+          },
+          {
+            id: '1',
+            type: BUCKET_TYPES.TERMS,
+            params: {
+              field: {
+                name: 'geo.src',
+                indexPattern,
+                filterable: true,
+              },
+              size: 2,
+              otherBucket: true,
+              missingBucket: false,
+            },
+          },
+        ],
+      };
+      const aggConfigs = getAggConfigs(oneDisabledNestedTerms.aggs);
+      const agg = buildOtherBucketAgg(
+        aggConfigs,
+        aggConfigs.aggs[1] as IBucketAggConfig,
+        singleTermResponse
+      );
+      const expectedResponse = {
+        'other-filter': {
+          aggs: undefined,
+          filters: {
+            filters: {
+              '': {
+                bool: {
+                  filter: [
+                    {
+                      exists: {
+                        field: 'geo.src',
+                      },
+                    },
+                  ],
+                  must: [],
+                  must_not: [
+                    {
+                      match_phrase: {
+                        'geo.src': 'ios',
+                      },
+                    },
+                    {
+                      match_phrase: {
+                        'geo.src': 'win xp',
+                      },
+                    },
+                  ],
+                  should: [],
+                },
+              },
+            },
+          },
+        },
+      };
+      expect(agg).toBeDefined();
+      if (agg) {
+        expect(agg()).toEqual(expectedResponse);
+      }
+    });
+
     test('does not build query if sum_other_doc_count is 0 (exhaustive terms)', () => {
       const aggConfigs = getAggConfigs(nestedTerm.aggs);
       expect(
@@ -493,7 +574,8 @@ describe('Terms Agg Other bucket helper', () => {
           singleTermResponse,
           singleOtherResponse,
           aggConfigs.aggs[0] as IBucketAggConfig,
-          otherAggConfig()
+          otherAggConfig(),
+          constructSingleTermOtherFilter
         );
         expect((mergedResponse!.aggregations!['1'] as any).buckets[3].key).toEqual('__other__');
       }
@@ -514,7 +596,8 @@ describe('Terms Agg Other bucket helper', () => {
           nestedTermResponse,
           nestedOtherResponse,
           aggConfigs.aggs[1] as IBucketAggConfig,
-          otherAggConfig()
+          otherAggConfig(),
+          constructSingleTermOtherFilter
         );
 
         expect((mergedResponse!.aggregations!['1'] as any).buckets[1]['2'].buckets[3].key).toEqual(

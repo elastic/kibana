@@ -32,9 +32,7 @@ import {
   CUSTOM_QUERY_REQUIRED,
   DEFAULT_RISK_SCORE_INPUT,
   DEFINE_CONTINUE_BUTTON,
-  DEFINE_EDIT_TAB,
   EQL_QUERY_INPUT,
-  EQL_QUERY_PREVIEW_HISTOGRAM,
   EQL_QUERY_VALIDATION_SPINNER,
   EQL_TYPE,
   FALSE_POSITIVES_INPUT,
@@ -92,6 +90,8 @@ import {
   EMAIL_CONNECTOR_PORT_INPUT,
   EMAIL_CONNECTOR_USER_INPUT,
   EMAIL_CONNECTOR_PASSWORD_INPUT,
+  EMAIL_CONNECTOR_SERVICE_SELECTOR,
+  PREVIEW_HISTOGRAM,
 } from '../screens/create_new_rule';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
@@ -253,7 +253,7 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   rule: CustomRule | OverrideRule
 ) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id!)).click();
+  cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
@@ -272,7 +272,7 @@ export const fillDefineThresholdRule = (rule: ThresholdRule) => {
   const threshold = 1;
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id!)).click();
+  cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(COMBO_BOX_CLEAR_BTN).first().click();
 
   rule.index.forEach((index) => {
@@ -293,14 +293,16 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   const thresholdField = 0;
   const threshold = 1;
 
-  const typeThresholdField = ($el: Cypress.ObjectLike) => cy.wrap($el).type(rule.thresholdField);
+  const typeThresholdField = ($el: Cypress.ObjectLike) =>
+    cy.wrap($el).type(rule.thresholdField, { delay: 35 });
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id!)).click();
+  cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
+      cy.wrap(inputs[thresholdField]).click();
       cy.wrap(inputs[thresholdField]).pipe(typeThresholdField);
       cy.get(THRESHOLD_FIELD_SELECTION).click({ force: true });
       cy.wrap(inputs[threshold]).clear().type(rule.threshold);
@@ -311,20 +313,23 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
 };
 
 export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
+  if (rule.customQuery == null) {
+    throw new TypeError('The rule custom query should never be undefined or null ');
+  }
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
-  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.customQuery!);
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.customQuery);
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
   cy.get(RULES_CREATION_PREVIEW)
     .find(QUERY_PREVIEW_BUTTON)
     .should('not.be.disabled')
     .click({ force: true });
-  cy.get(EQL_QUERY_PREVIEW_HISTOGRAM)
+  cy.get(PREVIEW_HISTOGRAM)
     .invoke('text')
     .then((text) => {
       if (text !== 'Hits') {
         cy.get(RULES_CREATION_PREVIEW).find(QUERY_PREVIEW_BUTTON).click({ force: true });
-        cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
+        cy.get(PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
       }
     });
   cy.get(TOAST_ERROR).should('not.exist');
@@ -394,11 +399,12 @@ export const fillIndexAndIndicatorIndexPattern = (
 ) => {
   getIndexPatternClearButton().click();
   getIndicatorIndex().type(`${indexPattern}{enter}`);
-  getIndicatorIndicatorIndex().type(`${indicatorIndex}{enter}`);
+  getIndicatorIndicatorIndex().type(`{backspace}{enter}${indicatorIndex}{enter}`);
 };
 
 export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConnector()) => {
   cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
+  cy.get(EMAIL_CONNECTOR_SERVICE_SELECTOR).select(connector.service);
   cy.get(EMAIL_CONNECTOR_FROM_INPUT).type(connector.from);
   cy.get(EMAIL_CONNECTOR_HOST_INPUT).type(connector.host);
   cy.get(EMAIL_CONNECTOR_PORT_INPUT).type(connector.port);
@@ -437,7 +443,7 @@ export const getIndexPatternInvalidationText = () => cy.contains(AT_LEAST_ONE_IN
 export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 
 /** Returns the continue button on the step of define */
-export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
+export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON).should('exist');
 
 /** Returns the indicator index pattern */
 export const getIndicatorIndex = () => cy.get(THREAT_MATCH_INDICATOR_INDEX).eq(0);
@@ -447,7 +453,7 @@ export const getIndicatorIndicatorIndex = () =>
   cy.get(THREAT_MATCH_INDICATOR_INDICATOR_INDEX).eq(0);
 
 /** Returns the index pattern's clear button  */
-export const getIndexPatternClearButton = () => cy.get(COMBO_BOX_CLEAR_BTN).first();
+export const getIndexPatternClearButton = () => cy.get(COMBO_BOX_CLEAR_BTN).should('exist').first();
 
 /** Returns the custom query input */
 export const getCustomQueryInput = () => cy.get(THREAT_MATCH_CUSTOM_QUERY_INPUT).eq(0);
@@ -468,6 +474,7 @@ export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatIndicatorRul
     indexField: rule.indicatorMappingField,
     indicatorIndexField: rule.indicatorIndexField,
   });
+  getCustomIndicatorQueryInput().type('{selectall}{enter}*:*');
   getDefineContinueButton().should('exist').click({ force: true });
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
@@ -487,10 +494,6 @@ export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRu
   getDefineContinueButton().should('exist').click({ force: true });
 
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).should('not.exist');
-};
-
-export const goToDefineStepTab = () => {
-  cy.get(DEFINE_EDIT_TAB).click({ force: true });
 };
 
 export const goToAboutStepTab = () => {

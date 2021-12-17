@@ -6,33 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  IndexPattern,
-  IIndexPattern,
-  IndexPatternsContract,
-  Query,
-  IndexPatternAttributes,
-} from '../../../../../../src/plugins/data/public';
+import type { Query } from '../../../../../../src/plugins/data/public';
+import type { DataView, DataViewsContract } from '../../../../../../src/plugins/data_views/public';
+import type { SavedSearchSavedObject } from '../../../common/types/kibana';
 import { getToastNotifications, getSavedObjectsClient } from './dependency_cache';
-import { IndexPatternSavedObject, SavedSearchSavedObject } from '../../../common/types/kibana';
 
-let indexPatternCache: IndexPatternSavedObject[] = [];
 let savedSearchesCache: SavedSearchSavedObject[] = [];
-let indexPatternsContract: IndexPatternsContract | null = null;
+let dataViewsContract: DataViewsContract | null = null;
 
-export function loadIndexPatterns(indexPatterns: IndexPatternsContract) {
-  indexPatternsContract = indexPatterns;
-  const savedObjectsClient = getSavedObjectsClient();
-  return savedObjectsClient
-    .find<IndexPatternAttributes>({
-      type: 'index-pattern',
-      fields: ['id', 'title', 'type', 'fields'],
-      perPage: 10000,
-    })
-    .then((response) => {
-      indexPatternCache = response.savedObjects;
-      return indexPatternCache;
-    });
+export async function cacheDataViewsContract(dvc: DataViewsContract) {
+  dataViewsContract = dvc;
 }
 
 export function loadSavedSearches() {
@@ -54,34 +37,46 @@ export async function loadSavedSearchById(id: string) {
   return ss.error === undefined ? ss : null;
 }
 
-export function getIndexPatterns() {
-  return indexPatternCache;
-}
-
-export function getIndexPatternsContract() {
-  return indexPatternsContract;
-}
-
-export function getIndexPatternNames() {
-  return indexPatternCache.map((i) => i.attributes && i.attributes.title);
-}
-
-export function getIndexPatternIdFromName(name: string) {
-  for (let j = 0; j < indexPatternCache.length; j++) {
-    if (indexPatternCache[j].get('title') === name) {
-      return indexPatternCache[j].id;
-    }
+export async function getDataViewNames() {
+  if (dataViewsContract === null) {
+    throw new Error('Data views are not initialized!');
   }
-  return null;
+  return (await dataViewsContract.getIdsWithTitle()).map(({ title }) => title);
 }
-export interface IndexPatternAndSavedSearch {
+
+export async function getDataViewIdFromName(name: string): Promise<string | null> {
+  if (dataViewsContract === null) {
+    throw new Error('Data views are not initialized!');
+  }
+  const dataViews = await dataViewsContract.find(name);
+  const dataView = dataViews.find(({ title }) => title === name);
+  if (!dataView) {
+    return null;
+  }
+  return dataView.id ?? dataView.title;
+}
+
+export function getDataViewById(id: string): Promise<DataView> {
+  if (dataViewsContract === null) {
+    throw new Error('Data views are not initialized!');
+  }
+
+  if (id) {
+    return dataViewsContract.get(id);
+  } else {
+    return dataViewsContract.create({});
+  }
+}
+
+export interface DataViewAndSavedSearch {
   savedSearch: SavedSearchSavedObject | null;
-  indexPattern: IIndexPattern | null;
+  dataView: DataView | null;
 }
-export async function getIndexPatternAndSavedSearch(savedSearchId: string) {
-  const resp: IndexPatternAndSavedSearch = {
+
+export async function getDataViewAndSavedSearch(savedSearchId: string) {
+  const resp: DataViewAndSavedSearch = {
     savedSearch: null,
-    indexPattern: null,
+    dataView: null,
   };
 
   if (savedSearchId === undefined) {
@@ -92,30 +87,18 @@ export async function getIndexPatternAndSavedSearch(savedSearchId: string) {
   if (ss === null) {
     return resp;
   }
-  const indexPatternId = ss.references.find((r) => r.type === 'index-pattern')?.id;
-  resp.indexPattern = await getIndexPatternById(indexPatternId!);
+  const dataViewId = ss.references.find((r) => r.type === 'index-pattern')?.id;
+  resp.dataView = await getDataViewById(dataViewId!);
   resp.savedSearch = ss;
   return resp;
 }
 
-export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
+export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObject) {
   const search = savedSearch.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
   return JSON.parse(search.searchSourceJSON) as {
     query: Query;
     filter: any[];
   };
-}
-
-export function getIndexPatternById(id: string): Promise<IndexPattern> {
-  if (indexPatternsContract !== null) {
-    if (id) {
-      return indexPatternsContract.get(id);
-    } else {
-      return indexPatternsContract.create({});
-    }
-  } else {
-    throw new Error('Index patterns are not initialized!');
-  }
 }
 
 export function getSavedSearchById(id: string): SavedSearchSavedObject | undefined {
@@ -127,16 +110,16 @@ export function getSavedSearchById(id: string): SavedSearchSavedObject | undefin
  * an optional flag will trigger the display a notification at the top of the page
  * warning that the index is not time based
  */
-export function timeBasedIndexCheck(indexPattern: IndexPattern, showNotification = false) {
-  if (!indexPattern.isTimeBased()) {
+export function timeBasedIndexCheck(dataView: DataView, showNotification = false) {
+  if (!dataView.isTimeBased()) {
     if (showNotification) {
       const toastNotifications = getToastNotifications();
       toastNotifications.addWarning({
-        title: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationTitle', {
-          defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',
-          values: { indexPatternTitle: indexPattern.title },
+        title: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationTitle', {
+          defaultMessage: 'The data view {dataViewName} is not based on a time series',
+          values: { dataViewName: dataView.title },
         }),
-        text: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationDescription', {
+        text: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationDescription', {
           defaultMessage: 'Anomaly detection only runs over time-based indices',
         }),
       });
@@ -148,9 +131,9 @@ export function timeBasedIndexCheck(indexPattern: IndexPattern, showNotification
 }
 
 /**
- * Returns true if the index pattern contains a :
+ * Returns true if the data view name contains a :
  * which means it is cross-cluster
  */
-export function isCcsIndexPattern(indexPatternTitle: string) {
-  return indexPatternTitle.includes(':');
+export function isCcsIndexPattern(dataViewName: string) {
+  return dataViewName.includes(':');
 }

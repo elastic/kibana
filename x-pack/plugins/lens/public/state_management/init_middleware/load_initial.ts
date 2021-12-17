@@ -6,101 +6,129 @@
  */
 
 import { MiddlewareAPI } from '@reduxjs/toolkit';
-import { isEqual } from 'lodash';
-import { setState } from '..';
-import { updateLayer, updateVisualizationState, LensStoreDeps } from '..';
+import { i18n } from '@kbn/i18n';
+import { History } from 'history';
+import { setState, initEmpty, LensStoreDeps } from '..';
+import { getPreloadedState } from '../lens_slice';
+import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId } from '../../utils';
 import { initializeDatasources } from '../../editor_frame_service/editor_frame';
-import { generateId } from '../../id_generator';
-import {
-  getVisualizeFieldSuggestions,
-  switchToSuggestion,
-} from '../../editor_frame_service/editor_frame/suggestion_helpers';
-import { getPersistedDoc } from '../../app_plugin/save_modal_container';
+import { LensAppServices } from '../../app_plugin/types';
+import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
+import { Document, injectFilterReferences } from '../../persistence';
+
+export const getPersisted = async ({
+  initialInput,
+  lensServices,
+  history,
+}: {
+  initialInput: LensEmbeddableInput;
+  lensServices: LensAppServices;
+  history?: History<unknown>;
+}): Promise<
+  { doc: Document; sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'sourceId'> } | undefined
+> => {
+  const { notifications, spaces, attributeService } = lensServices;
+  let doc: Document;
+
+  try {
+    const result = await attributeService.unwrapAttributes(initialInput);
+    if (!result) {
+      return {
+        doc: {
+          ...initialInput,
+          type: LENS_EMBEDDABLE_TYPE,
+        } as unknown as Document,
+        sharingSavedObjectProps: {
+          outcome: 'exactMatch',
+        },
+      };
+    }
+    const { metaInfo, attributes } = result;
+    const sharingSavedObjectProps = metaInfo?.sharingSavedObjectProps;
+    if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch' && history) {
+      // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
+      const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
+      const newPath = lensServices.http.basePath.prepend(
+        `${getEditPath(newObjectId)}${history.location.search}`
+      );
+      await spaces.ui.redirectLegacyUrl(
+        newPath,
+        i18n.translate('xpack.lens.legacyUrlConflict.objectNoun', {
+          defaultMessage: 'Lens visualization',
+        })
+      );
+    }
+    doc = {
+      ...initialInput,
+      ...attributes,
+      type: LENS_EMBEDDABLE_TYPE,
+    };
+
+    return {
+      doc,
+      sharingSavedObjectProps: {
+        aliasTargetId: sharingSavedObjectProps?.aliasTargetId,
+        outcome: sharingSavedObjectProps?.outcome,
+      },
+    };
+  } catch (e) {
+    notifications.toasts.addDanger(
+      i18n.translate('xpack.lens.app.docLoadingError', {
+        defaultMessage: 'Error loading saved document',
+      })
+    );
+  }
+};
 
 export function loadInitial(
   store: MiddlewareAPI,
+  storeDeps: LensStoreDeps,
   {
-    lensServices,
-    datasourceMap,
-    visualizationMap,
-    embeddableEditorIncomingState,
-    initialContext,
-  }: LensStoreDeps,
-  redirectCallback: (savedObjectId?: string) => void,
-  initialInput?: LensEmbeddableInput
+    redirectCallback,
+    initialInput,
+    history,
+  }: {
+    redirectCallback: (savedObjectId?: string) => void;
+    initialInput?: LensEmbeddableInput;
+    history?: History<unknown>;
+  }
 ) {
-  const { getState, dispatch } = store;
-  const { attributeService, chrome, notifications, data, dashboardFeatureFlag } = lensServices;
-  const { persistedDoc } = getState().lens;
+  const { lensServices, datasourceMap, embeddableEditorIncomingState, initialContext } = storeDeps;
+  const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
+    getPreloadedState(storeDeps);
+  const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
+  const { lens } = store.getState();
   if (
     !initialInput ||
     (attributeService.inputIsRefType(initialInput) &&
-      initialInput.savedObjectId === persistedDoc?.savedObjectId)
+      initialInput.savedObjectId === lens.persistedDoc?.savedObjectId)
   ) {
-    return initializeDatasources(
-      datasourceMap,
-      getState().lens.datasourceStates,
-      undefined,
-      initialContext,
-      {
-        isFullEditor: true,
-      }
-    )
+    return initializeDatasources(datasourceMap, lens.datasourceStates, undefined, initialContext, {
+      isFullEditor: true,
+    })
       .then((result) => {
-        const datasourceStates = Object.entries(result).reduce(
-          (state, [datasourceId, datasourceState]) => ({
-            ...state,
-            [datasourceId]: {
-              ...datasourceState,
+        store.dispatch(
+          initEmpty({
+            newState: {
+              ...emptyState,
+              searchSessionId: data.search.session.getSessionId() || data.search.session.start(),
+              datasourceStates: Object.entries(result).reduce(
+                (state, [datasourceId, datasourceState]) => ({
+                  ...state,
+                  [datasourceId]: {
+                    ...datasourceState,
+                    isLoading: false,
+                  },
+                }),
+                {}
+              ),
               isLoading: false,
             },
-          }),
-          {}
-        );
-        dispatch(
-          setState({
-            datasourceStates,
-            isLoading: false,
+            initialContext,
           })
         );
-        if (initialContext) {
-          const selectedSuggestion = getVisualizeFieldSuggestions({
-            datasourceMap,
-            datasourceStates,
-            visualizationMap,
-            activeVisualizationId: Object.keys(visualizationMap)[0] || null,
-            visualizationState: null,
-            visualizeTriggerFieldContext: initialContext,
-          });
-          if (selectedSuggestion) {
-            switchToSuggestion(dispatch, selectedSuggestion, 'SWITCH_VISUALIZATION');
-          }
-        }
-        const activeDatasourceId = getInitialDatasourceId(datasourceMap);
-        const visualization = getState().lens.visualization;
-        const activeVisualization =
-          visualization.activeId && visualizationMap[visualization.activeId];
-
-        if (visualization.state === null && activeVisualization) {
-          const newLayerId = generateId();
-
-          const initialVisualizationState = activeVisualization.initialize(() => newLayerId);
-          dispatch(
-            updateLayer({
-              datasourceId: activeDatasourceId!,
-              layerId: newLayerId,
-              updater: datasourceMap[activeDatasourceId!].insertLayer,
-            })
-          );
-          dispatch(
-            updateVisualizationState({
-              visualizationId: activeVisualization.id,
-              updater: initialVisualizationState,
-            })
-          );
-        }
       })
       .catch((e: { message: string }) => {
         notifications.toasts.addDanger({
@@ -109,17 +137,20 @@ export function loadInitial(
         redirectCallback();
       });
   }
-  getPersistedDoc({
-    initialInput,
-    attributeService,
-    data,
-    chrome,
-    notifications,
-  })
+
+  getPersisted({ initialInput, lensServices, history })
     .then(
-      (doc) => {
-        if (doc) {
-          const currentSessionId = data.search.session.getSessionId();
+      (persisted) => {
+        if (persisted) {
+          const { doc, sharingSavedObjectProps } = persisted;
+          if (attributeService.inputIsRefType(initialInput)) {
+            lensServices.chrome.recentlyAccessed.add(
+              getFullPath(initialInput.savedObjectId),
+              doc.title,
+              initialInput.savedObjectId
+            );
+          }
+
           const docDatasourceStates = Object.entries(doc.state.datasourceStates).reduce(
             (stateMap, [datasourceId, datasourceState]) => ({
               ...stateMap,
@@ -131,6 +162,10 @@ export function loadInitial(
             {}
           );
 
+          const filters = injectFilterReferences(doc.state.filters, doc.references);
+          // Don't overwrite any pinned filters
+          data.query.filterManager.setAppFilters(filters);
+
           initializeDatasources(
             datasourceMap,
             docDatasourceStates,
@@ -141,10 +176,12 @@ export function loadInitial(
             }
           )
             .then((result) => {
-              const activeDatasourceId = getInitialDatasourceId(datasourceMap, doc);
-
-              dispatch(
+              const currentSessionId = data.search.session.getSessionId();
+              store.dispatch(
                 setState({
+                  isSaveable: true,
+                  sharingSavedObjectProps,
+                  filters,
                   query: doc.state.query,
                   searchSessionId:
                     dashboardFeatureFlag.allowByValueEmbeddables &&
@@ -153,8 +190,8 @@ export function loadInitial(
                     currentSessionId
                       ? currentSessionId
                       : data.search.session.start(),
-                  ...(!isEqual(persistedDoc, doc) ? { persistedDoc: doc } : null),
-                  activeDatasourceId,
+                  persistedDoc: doc,
+                  activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
                   visualization: {
                     activeId: doc.visualizationType,
                     state: doc.state.visualization,
@@ -183,7 +220,7 @@ export function loadInitial(
         }
       },
       () => {
-        dispatch(
+        store.dispatch(
           setState({
             isLoading: false,
           })
@@ -191,9 +228,10 @@ export function loadInitial(
         redirectCallback();
       }
     )
-    .catch((e: { message: string }) =>
+    .catch((e: { message: string }) => {
       notifications.toasts.addDanger({
         title: e.message,
-      })
-    );
+      });
+      redirectCallback();
+    });
 }

@@ -10,14 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerSourceEnginesRoutes } from './source_engines';
 
 describe('source engine routes', () => {
-  describe('GET /api/app_search/engines/{name}/source_engines', () => {
+  describe('GET /internal/app_search/engines/{name}/source_engines', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{name}/source_engines',
+        path: '/internal/app_search/engines/{name}/source_engines',
       });
 
       registerSourceEnginesRoutes({
@@ -53,14 +53,14 @@ describe('source engine routes', () => {
     });
   });
 
-  describe('POST /api/app_search/engines/{name}/source_engines/bulk_create', () => {
+  describe('POST /internal/app_search/engines/{name}/source_engines/bulk_create', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{name}/source_engines/bulk_create',
+        path: '/internal/app_search/engines/{name}/source_engines/bulk_create',
       });
 
       registerSourceEnginesRoutes({
@@ -92,18 +92,19 @@ describe('source engine routes', () => {
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/:name/source_engines/bulk_create',
+        hasJsonResponse: false,
       });
     });
   });
 
-  describe('DELETE /api/app_search/engines/{name}/source_engines/{source_engine_name}', () => {
+  describe('DELETE /internal/app_search/engines/{name}/source_engines/{source_engine_name}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/app_search/engines/{name}/source_engines/{source_engine_name}',
+        path: '/internal/app_search/engines/{name}/source_engines/{source_engine_name}',
       });
 
       registerSourceEnginesRoutes({
@@ -145,6 +146,7 @@ describe('source engine routes', () => {
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/:name/source_engines/:source_engine_name',
+        hasJsonResponse: false,
       });
     });
   });

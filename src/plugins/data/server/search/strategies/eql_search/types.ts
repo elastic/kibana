@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface EqlSearchResponse<T = unknown> extends estypes.SearchResponse<T> {
   id?: string;

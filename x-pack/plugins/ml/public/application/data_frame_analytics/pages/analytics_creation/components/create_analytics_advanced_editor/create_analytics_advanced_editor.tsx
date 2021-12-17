@@ -7,22 +7,11 @@
 
 import React, { FC, Fragment, useEffect, useMemo, useRef } from 'react';
 import { debounce } from 'lodash';
-import {
-  EuiCallOut,
-  EuiCodeEditor,
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiSpacer,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { XJsonMode } from '../../../../../../../shared_imports';
-
-const xJsonMode = new XJsonMode();
-
+import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { useNotifications } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
@@ -36,14 +25,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
 
   const { advancedEditorMessages, advancedEditorRawString, isJobCreated } = state;
 
-  const {
-    createIndexPattern,
-    destinationIndexPatternTitleExists,
-    jobId,
-    jobIdEmpty,
-    jobIdExists,
-    jobIdValid,
-  } = state.form;
+  const { jobId, jobIdEmpty, jobIdExists, jobIdValid } = state.form;
 
   const forceInput = useRef<HTMLInputElement | null>(null);
   const { toasts } = useNotifications();
@@ -155,22 +137,37 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
         )}
         style={{ maxWidth: '100%' }}
       >
-        <EuiCodeEditor
-          isReadOnly={isJobCreated}
-          mode={xJsonMode}
-          width="100%"
+        <CodeEditor
+          languageId={'json'}
+          height={500}
+          languageConfiguration={{
+            autoClosingPairs: [
+              {
+                open: '{',
+                close: '}',
+              },
+            ],
+          }}
           value={advancedEditorRawString}
           onChange={onChange}
-          setOptions={{
-            fontSize: '12px',
+          options={{
+            ariaLabel: i18n.translate(
+              'xpack.ml.dataframe.analytics.create.advancedEditor.codeEditorAriaLabel',
+              {
+                defaultMessage: 'Advanced analytics job editor',
+              }
+            ),
+            automaticLayout: true,
+            readOnly: isJobCreated,
+            fontSize: 12,
+            scrollBeyondLastLine: false,
+            quickSuggestions: true,
+            minimap: {
+              enabled: false,
+            },
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
           }}
-          theme="textmate"
-          aria-label={i18n.translate(
-            'xpack.ml.dataframe.analytics.create.advancedEditor.codeEditorAriaLabel',
-            {
-              defaultMessage: 'Advanced analytics job editor',
-            }
-          )}
         />
       </EuiFormRow>
       <EuiSpacer />
@@ -193,34 +190,6 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
           <EuiSpacer />
         </Fragment>
       ))}
-      {!isJobCreated && (
-        <Fragment>
-          <EuiFormRow
-            isInvalid={createIndexPattern && destinationIndexPatternTitleExists}
-            error={
-              createIndexPattern &&
-              destinationIndexPatternTitleExists && [
-                i18n.translate(
-                  'xpack.ml.dataframe.analytics.create.indexPatternAlreadyExistsError',
-                  {
-                    defaultMessage: 'An index pattern with this title already exists.',
-                  }
-                ),
-              ]
-            }
-          >
-            <EuiSwitch
-              disabled={isJobCreated}
-              name="mlDataFrameAnalyticsCreateIndexPattern"
-              label={i18n.translate('xpack.ml.dataframe.analytics.create.createIndexPatternLabel', {
-                defaultMessage: 'Create index pattern',
-              })}
-              checked={createIndexPattern === true}
-              onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
-            />
-          </EuiFormRow>
-        </Fragment>
-      )}
       <EuiSpacer />
       <CreateStep {...props} step={ANALYTICS_STEPS.CREATE} />
     </EuiForm>

@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiSpacer, EuiForm, EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer, EuiForm } from '@elastic/eui';
 import useMount from 'react-use/lib/useMount';
 import { i18n } from '@kbn/i18n';
 import { JobSelectorControl } from './job_selector';
@@ -31,8 +31,10 @@ import { getLookbackInterval, getTopNBuckets } from '../../common/util/alerts';
 import { isDefined } from '../../common/types/guards';
 import { AlertTypeParamsExpressionProps } from '../../../triggers_actions_ui/public';
 import { parseInterval } from '../../common/util/parse_interval';
+import { BetaBadge } from './beta_badge';
 
-export type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
+export type MlAnomalyAlertTriggerProps =
+  AlertTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
 
 const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   alertParams,
@@ -53,11 +55,10 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   const [jobConfigs, setJobConfigs] = useState<CombinedJobWithStats[]>([]);
 
   const onAlertParamChange = useCallback(
-    <T extends keyof MlAnomalyDetectionAlertParams>(param: T) => (
-      update: MlAnomalyDetectionAlertParams[T]
-    ) => {
-      setAlertParams(param, update);
-    },
+    <T extends keyof MlAnomalyDetectionAlertParams>(param: T) =>
+      (update: MlAnomalyDetectionAlertParams[T]) => {
+        setAlertParams(param, update);
+      },
     []
   );
 
@@ -87,7 +88,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   const availableResultTypes = useMemo(() => {
     if (jobConfigs.length === 0) return Object.values(ANOMALY_RESULT_TYPE);
 
-    return (jobConfigs ?? []).some((v) => v.analysis_config.influencers.length > 0)
+    return (jobConfigs ?? []).some((v) => Boolean(v.analysis_config?.influencers?.length))
       ? Object.values(ANOMALY_RESULT_TYPE)
       : [ANOMALY_RESULT_TYPE.BUCKET, ANOMALY_RESULT_TYPE.RECORD];
   }, [jobConfigs]);
@@ -154,21 +155,11 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
   return (
     <EuiForm data-test-subj={'mlAnomalyAlertForm'}>
-      <EuiFlexGroup gutterSize={'none'} justifyContent={'flexEnd'}>
-        <EuiFlexItem grow={false}>
-          <EuiBetaBadge
-            label={i18n.translate('xpack.ml.anomalyDetectionAlert.betaBadgeLabel', {
-              defaultMessage: 'Beta',
-            })}
-            tooltipContent={i18n.translate(
-              'xpack.ml.anomalyDetectionAlert.betaBadgeTooltipContent',
-              {
-                defaultMessage: `Anomaly detection alerts are a beta feature. We'd love to hear your feedback.`,
-              }
-            )}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <BetaBadge
+        message={i18n.translate('xpack.ml.anomalyDetectionAlert.betaBadgeTooltipContent', {
+          defaultMessage: `Anomaly detection alerts are a beta feature. We'd love to hear your feedback.`,
+        })}
+      />
 
       <JobSelectorControl
         jobsAndGroupIds={jobsAndGroupIds}

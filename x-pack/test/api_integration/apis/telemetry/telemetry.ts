@@ -7,8 +7,7 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import type { SuperTest } from 'supertest';
-import type supertestAsPromised from 'supertest-as-promised';
+import type SuperTest from 'supertest';
 import deepmerge from 'deepmerge';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -20,6 +19,23 @@ import monitoringRootTelemetrySchema from '../../../../plugins/telemetry_collect
 import ossPluginsTelemetrySchema from '../../../../../src/plugins/telemetry/schema/oss_plugins.json';
 import xpackPluginsTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_plugins.json';
 import { assertTelemetryPayload } from '../../../../../test/api_integration/apis/telemetry/utils';
+import type { UnencryptedTelemetryPayload } from '../../../../../src/plugins/telemetry/common/types';
+import type {
+  UsageStatsPayload,
+  CacheDetails,
+} from '../../../../../src/plugins/telemetry_collection_manager/server/types';
+
+function omitCacheDetails(usagePayload: Array<Record<string, unknown>>) {
+  return usagePayload.map(({ cacheDetails, ...item }) => item);
+}
+
+function updateFixtureTimestamps(fixture: Array<Record<string, unknown>>, timestamp: string) {
+  return fixture.map((item) => ({ ...item, timestamp }));
+}
+
+function getCacheDetails(body: UnencryptedTelemetryPayload): CacheDetails[] {
+  return body.map(({ stats }) => (stats as UsageStatsPayload).cacheDetails);
+}
 
 /**
  * Update the .monitoring-* documents loaded via the archiver to the recent `timestamp`
@@ -29,7 +45,7 @@ import { assertTelemetryPayload } from '../../../../../test/api_integration/apis
  * @param timestamp The new timestamp to be set
  */
 function updateMonitoringDates(
-  esSupertest: SuperTest<supertestAsPromised.Test>,
+  esSupertest: SuperTest.SuperTest<SuperTest.Test>,
   fromTimestamp: string,
   toTimestamp: string,
   timestamp: string
@@ -93,15 +109,16 @@ export default function ({ getService }: FtrProviderContext) {
         await esArchiver.load(archive);
         await updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestamp);
 
-        const { body } = await supertest
+        const { body }: { body: UnencryptedTelemetryPayload } = await supertest
           .post('/api/telemetry/v2/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
-          .send({ unencrypted: true })
+          .send({ unencrypted: true, refreshCache: true })
           .expect(200);
 
         expect(body.length).to.be.greaterThan(1);
-        localXPack = body.shift();
-        monitoring = body;
+        const telemetryStats = body.map(({ stats }) => stats);
+        localXPack = telemetryStats.shift() as Record<string, unknown>;
+        monitoring = telemetryStats as Array<Record<string, unknown>>;
       });
       after(() => esArchiver.unload(archive));
 
@@ -115,6 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
           monitoringRootTelemetrySchema.properties.monitoringTelemetry.properties.stats.items
         );
         const plugins = deepmerge(ossPluginsTelemetrySchema, xpackPluginsTelemetrySchema);
+
         try {
           assertTelemetryPayload({ root, plugins }, localXPack);
           monitoring.forEach((stats) => {
@@ -129,7 +147,10 @@ export default function ({ getService }: FtrProviderContext) {
       it('should load multiple trial-license clusters', async () => {
         expect(monitoring).length(3);
         expect(localXPack.collectionSource).to.eql('local_xpack');
-        expect(monitoring).to.eql(multiClusterFixture.map((item) => ({ ...item, timestamp })));
+
+        expect(omitCacheDetails(monitoring)).to.eql(
+          updateFixtureTimestamps(multiClusterFixture, timestamp)
+        );
       });
     });
 
@@ -143,16 +164,79 @@ export default function ({ getService }: FtrProviderContext) {
       });
       after(() => esArchiver.unload(archive));
       it('should load non-expiring basic cluster', async () => {
-        const { body } = await supertest
+        const { body }: { body: UnencryptedTelemetryPayload } = await supertest
+          .post('/api/telemetry/v2/clusters/_stats')
+          .set('kbn-xsrf', 'xxx')
+          .send({ unencrypted: true, refreshCache: true })
+          .expect(200);
+
+        expect(body).length(2);
+        const telemetryStats = body.map(({ stats }) => stats);
+
+        const [localXPack, ...monitoring] = telemetryStats as Array<Record<string, unknown>>;
+        expect(localXPack.collectionSource).to.eql('local_xpack');
+        expect(omitCacheDetails(monitoring)).to.eql(
+          updateFixtureTimestamps(basicClusterFixture, timestamp)
+        );
+      });
+    });
+
+    describe('Telemetry caching', () => {
+      const archive = 'x-pack/test/functional/es_archives/monitoring/basic_6.3.x';
+      const fromTimestamp = '2018-07-23T22:54:59.087Z';
+      const toTimestamp = '2018-07-23T22:55:05.933Z';
+      let cacheLastUpdated: string[] = [];
+
+      before(async () => {
+        await esArchiver.load(archive);
+        await updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestamp);
+
+        // hit the endpoint to cache results
+        const { body }: { body: UnencryptedTelemetryPayload } = await supertest
+          .post('/api/telemetry/v2/clusters/_stats')
+          .set('kbn-xsrf', 'xxx')
+          .send({ unencrypted: true, refreshCache: true })
+          .expect(200);
+
+        cacheLastUpdated = getCacheDetails(body).map(({ updatedAt }) => updatedAt);
+      });
+      after(() => esArchiver.unload(archive));
+
+      it('returns cached results by default', async () => {
+        const now = Date.now();
+        const { body }: { body: UnencryptedTelemetryPayload } = await supertest
           .post('/api/telemetry/v2/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
           .send({ unencrypted: true })
           .expect(200);
 
         expect(body).length(2);
-        const [localXPack, ...monitoring] = body;
-        expect(localXPack.collectionSource).to.eql('local_xpack');
-        expect(monitoring).to.eql(basicClusterFixture.map((item) => ({ ...item, timestamp })));
+
+        const cacheDetails = getCacheDetails(body);
+        // Check that the fetched payload is actually cached by comparing cache and updatedAt timestamps
+        expect(cacheDetails.map(({ updatedAt }) => updatedAt)).to.eql(cacheLastUpdated);
+        // Check that the fetchedAt timestamp is updated when the data is fethed
+        cacheDetails.forEach(({ fetchedAt }) => {
+          expect(new Date(fetchedAt).getTime()).to.be.greaterThan(now);
+        });
+      });
+    });
+
+    it('grabs a fresh copy on refresh', async () => {
+      const now = Date.now();
+      const { body }: { body: UnencryptedTelemetryPayload } = await supertest
+        .post('/api/telemetry/v2/clusters/_stats')
+        .set('kbn-xsrf', 'xxx')
+        .send({ unencrypted: true, refreshCache: true })
+        .expect(200);
+
+      expect(body).length(1);
+      getCacheDetails(body).forEach(({ updatedAt, fetchedAt }) => {
+        // Check that the cache is fresh by comparing updatedAt timestamp with
+        // the timestamp the data was fetched.
+        expect(new Date(updatedAt).getTime()).to.be.greaterThan(now);
+        // Check that the fetchedAt timestamp is updated when the data is fethed
+        expect(new Date(fetchedAt).getTime()).to.be.greaterThan(now);
       });
     });
   });

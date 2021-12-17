@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { Query, Filter } from 'src/plugins/data/public';
-import type { LayerType } from '../../common';
+import type { PaletteOutput } from 'src/plugins/charts/common';
+import { Filter } from '@kbn/es-query';
+import { Query } from 'src/plugins/data/public';
+import type { CustomPaletteParams, LayerType } from '../../common';
 
 export type OperationTypePre712 =
   | 'avg'
@@ -192,3 +194,16 @@ export interface LensDocShape715<VisualizationState = unknown> {
     filters: Filter[];
   };
 }
+
+export type VisState716 =
+  // Datatable
+  | {
+      columns: Array<{
+        palette?: PaletteOutput<CustomPaletteParams>;
+        colorMode?: 'none' | 'cell' | 'text';
+      }>;
+    }
+  // Heatmap
+  | {
+      palette?: PaletteOutput<CustomPaletteParams>;
+    };

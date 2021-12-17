@@ -22,7 +22,7 @@ import { registerTestBed, TestBed } from '@kbn/test/jest';
 import { LoadMappingsProvider } from './load_mappings_provider';
 
 const ComponentToTest = ({ onJson }: { onJson: () => void }) => (
-  <LoadMappingsProvider onJson={onJson}>
+  <LoadMappingsProvider onJson={onJson} esNodesPlugins={[]}>
     {(openModal) => (
       <button onClick={openModal} data-test-subj="load-json-button">
         Load JSON
@@ -37,20 +37,22 @@ const setup = (props: any) =>
     defaultProps: props,
   })();
 
-const openModalWithJsonContent = ({ component, find }: TestBed) => (json: any) => {
-  act(() => {
-    find('load-json-button').simulate('click');
-  });
-
-  component.update();
-
-  act(() => {
-    // Set the mappings to load
-    find('mockCodeEditor').simulate('change', {
-      jsonString: JSON.stringify(json),
+const openModalWithJsonContent =
+  ({ component, find }: TestBed) =>
+  (json: any) => {
+    act(() => {
+      find('load-json-button').simulate('click');
     });
-  });
-};
+
+    component.update();
+
+    act(() => {
+      // Set the mappings to load
+      find('mockCodeEditor').simulate('change', {
+        jsonString: JSON.stringify(json),
+      });
+    });
+  };
 
 describe('<LoadMappingsProvider />', () => {
   test('it should forward valid mapping definition', () => {

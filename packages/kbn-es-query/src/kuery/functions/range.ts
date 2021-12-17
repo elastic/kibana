@@ -6,48 +6,39 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { getRangeScript, RangeFilterParams } from '../../filters';
 import { getFields } from './utils/get_fields';
-import { getTimeZoneFromSettings } from '../../utils';
+import { getDataViewFieldSubtypeNested, getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { IndexPatternBase, KueryNode } from '../..';
+import type { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
 
-export function buildNodeParams(fieldName: string, params: RangeFilterParams) {
-  const paramsToMap = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
-  const fieldNameArg =
-    typeof fieldName === 'string'
-      ? ast.fromLiteralExpression(fieldName)
-      : nodeTypes.literal.buildNode(fieldName);
-
-  const args = _.map(paramsToMap, (value: number | string, key: string) => {
-    return nodeTypes.namedArg.buildNode(key, value);
-  });
-
-  return {
-    arguments: [fieldNameArg, ...args],
-  };
+export function buildNodeParams(
+  fieldName: string,
+  operator: keyof Pick<RangeFilterParams, 'gt' | 'gte' | 'lt' | 'lte'>,
+  value: number | string
+) {
+  // Run through the parser instead treating it as a literal because it may contain wildcards
+  const fieldNameArg = ast.fromLiteralExpression(fieldName);
+  const valueArg = nodeTypes.literal.buildNode(value);
+  return { arguments: [fieldNameArg, operator, valueArg] };
 }
 
 export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: IndexPatternBase,
-  config: Record<string, any> = {},
+  config: KueryQueryOptions = {},
   context: Record<string, any> = {}
-) {
-  const [fieldNameArg, ...args] = node.arguments;
+): estypes.QueryDslQueryContainer {
+  const [fieldNameArg, operatorArg, valueArg] = node.arguments;
   const fullFieldNameArg = getFullFieldNameNode(
     fieldNameArg,
     indexPattern,
     context?.nested ? context.nested.path : undefined
   );
   const fields = indexPattern ? getFields(fullFieldNameArg, indexPattern) : [];
-  const namedArgs = extractArguments(args);
-  const queryParams = _.mapValues(namedArgs, (arg: KueryNode) => {
-    return ast.toElasticsearchQuery(arg);
-  });
 
   // If no fields are found in the index pattern we send through the given field name as-is. We do this to preserve
   // the behaviour of lucene on dashboards where there are panels based on different index patterns that have different
@@ -56,7 +47,7 @@ export function toElasticsearchQuery(
   // keep things familiar for now.
   if (fields && fields.length === 0) {
     fields.push({
-      name: (ast.toElasticsearchQuery(fullFieldNameArg) as unknown) as string,
+      name: ast.toElasticsearchQuery(fullFieldNameArg) as unknown as string,
       scripted: false,
       type: '',
     });
@@ -66,21 +57,22 @@ export function toElasticsearchQuery(
     const wrapWithNestedQuery = (query: any) => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
-      if (
-        !(fullFieldNameArg.type === 'wildcard') ||
-        !_.get(field, 'subType.nested') ||
-        context!.nested
-      ) {
+      const subTypeNested = getDataViewFieldSubtypeNested(field);
+      if (!(fullFieldNameArg.type === 'wildcard') || !subTypeNested?.nested || context!.nested) {
         return query;
       } else {
         return {
           nested: {
-            path: field.subType!.nested!.path,
+            path: subTypeNested.nested.path,
             query,
             score_mode: 'none',
           },
         };
       }
+    };
+
+    const queryParams = {
+      [operatorArg]: ast.toElasticsearchQuery(valueArg),
     };
 
     if (field.scripted) {
@@ -113,22 +105,4 @@ export function toElasticsearchQuery(
       minimum_should_match: 1,
     },
   };
-}
-
-function extractArguments(args: any) {
-  if ((args.gt && args.gte) || (args.lt && args.lte)) {
-    throw new Error('range ends cannot be both inclusive and exclusive');
-  }
-
-  const unnamedArgOrder = ['gte', 'lte', 'format'];
-
-  return args.reduce((acc: any, arg: any, index: number) => {
-    if (arg.type === 'namedArg') {
-      acc[arg.name] = arg.value;
-    } else {
-      acc[unnamedArgOrder[index]] = arg;
-    }
-
-    return acc;
-  }, {});
 }

@@ -6,22 +6,27 @@
  */
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { RowRenderer } from '../../..';
+import type { Filter } from '@kbn/es-query';
+import { RowRenderer } from '../../../types';
 import { Ecs } from '../../../ecs';
 import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 import { ColumnHeaderOptions } from '../columns';
 
 /** The following props are provided to the function called by `renderCellValue` */
 export type CellValueElementProps = EuiDataGridCellValueElementProps & {
+  asPlainText?: boolean;
+  browserFields?: BrowserFields;
   data: TimelineNonEcsData[];
+  ecsData?: Ecs;
   eventId: string; // _id
+  globalFilters?: Filter[];
   header: ColumnHeaderOptions;
   isDraggable: boolean;
+  isTimeline?: boolean; // Default cell renderer is used for both the alert table and timeline. This allows us to cheaply separate concerns
   linkValues: string[] | undefined;
-  timelineId: string;
+  rowRenderers?: RowRenderer[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setFlyoutAlert?: (data: any) => void;
-  ecsData?: Ecs;
-  rowRenderers?: RowRenderer[];
-  browserFields?: BrowserFields;
+  timelineId: string;
+  truncate?: boolean;
 };

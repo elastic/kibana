@@ -24,7 +24,7 @@ import {
 } from '../../../common/constants';
 import { VectorStyle } from '../styles/vector/vector_style';
 import { ESGeoGridSource } from '../sources/es_geo_grid_source';
-import { VectorLayer } from './vector_layer';
+import { GeoJsonVectorLayer } from './vector_layer';
 import { HeatmapLayer } from './heatmap_layer';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
 import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
@@ -32,6 +32,16 @@ import { getSourceAggKey } from '../../../common/get_agg_key';
 import { isMetricCountable } from '../util/is_metric_countable';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
+
+export interface CreateTileMapLayerDescriptorParams {
+  label: string;
+  mapType: string;
+  colorSchema: string;
+  indexPatternId?: string;
+  geoFieldName?: string;
+  metricAgg: string;
+  metricFieldName?: string;
+}
 
 function isHeatmap(mapType: string): boolean {
   return mapType.toLowerCase() === 'heatmap';
@@ -81,15 +91,7 @@ export function createTileMapLayerDescriptor({
   geoFieldName,
   metricAgg,
   metricFieldName,
-}: {
-  label: string;
-  mapType: string;
-  colorSchema: string;
-  indexPatternId?: string;
-  geoFieldName?: string;
-  metricAgg: string;
-  metricFieldName?: string;
-}): LayerDescriptor | null {
+}: CreateTileMapLayerDescriptorParams): LayerDescriptor | null {
   if (!indexPatternId || !geoFieldName) {
     return null;
   }
@@ -160,7 +162,7 @@ export function createTileMapLayerDescriptor({
     };
   }
 
-  return VectorLayer.createDescriptor({
+  return GeoJsonVectorLayer.createDescriptor({
     label,
     sourceDescriptor: geoGridSourceDescriptor,
     style: VectorStyle.createDescriptor(styleProperties),

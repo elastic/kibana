@@ -7,11 +7,13 @@
 
 import { useMemo } from 'react';
 import { useFetcher } from './use_fetcher';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
 import { useTheme } from './use_theme';
 import { getTimeRangeComparison } from '../components/shared/time_comparison/get_time_range_comparison';
+import { useTimeRange } from './use_time_range';
+import { useApmParams } from './use_apm_params';
 
 export function useTransactionLatencyChartsFetcher({
   kuery,
@@ -24,14 +26,18 @@ export function useTransactionLatencyChartsFetcher({
   const theme = useTheme();
   const {
     urlParams: {
-      start,
-      end,
       transactionName,
       latencyAggregationType,
       comparisonType,
       comparisonEnabled,
     },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
+
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
@@ -51,7 +57,7 @@ export function useTransactionLatencyChartsFetcher({
       ) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/charts/latency',
+            'GET /internal/apm/services/{serviceName}/transactions/charts/latency',
           params: {
             path: { serviceName },
             query: {

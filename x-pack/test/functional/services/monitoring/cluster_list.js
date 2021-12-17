@@ -46,6 +46,10 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
       return testSubjects.click(ALERTS_MODAL_BUTTON);
     }
 
+    acceptAlertsModal() {
+      return testSubjects.click('alerts-modal-button');
+    }
+
     getClusterLink(clusterUuid) {
       return testSubjects.find(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > clusterLink`);
     }

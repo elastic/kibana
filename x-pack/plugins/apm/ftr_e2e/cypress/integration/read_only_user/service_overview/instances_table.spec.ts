@@ -6,35 +6,32 @@
  */
 
 import url from 'url';
-import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
+import { synthtrace } from '../../../../synthtrace';
+import { opbeans } from '../../../fixtures/synthtrace/opbeans';
 
-const { start, end } = archives_metadata['apm_8.0.0'];
+const start = '2021-10-10T00:00:00.000Z';
+const end = '2021-10-10T00:15:00.000Z';
 
 const serviceOverviewHref = url.format({
   pathname: '/app/apm/services/opbeans-java/overview',
   query: { rangeFrom: start, rangeTo: end },
 });
 
+const serviceNodeName = 'opbeans-java-prod-1';
+
 const apisToIntercept = [
   {
     endpoint:
-      '/api/apm/services/opbeans-java/service_overview_instances/main_statistics',
+      '/internal/apm/services/opbeans-java/service_overview_instances/main_statistics?*',
     name: 'instancesMainRequest',
   },
   {
     endpoint:
-      '/api/apm/services/opbeans-java/service_overview_instances/detailed_statistics',
+      '/internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics?*',
     name: 'instancesDetailsRequest',
   },
   {
-    endpoint:
-      '/api/apm/services/opbeans-java/service_overview_instances/details/31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad',
-    name: 'instanceDetailsRequest',
-  },
-  {
-    endpoint:
-      '/api/apm/services/opbeans-java/service_overview_instances/details/31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad',
+    endpoint: `/internal/apm/services/opbeans-java/service_overview_instances/details/${serviceNodeName}?*`,
     name: 'instanceDetailsRequest',
   },
 ];
@@ -43,25 +40,31 @@ describe('Instances table', () => {
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
-  describe('when data is not loaded', () => {
-    it('shows empty message', () => {
-      cy.visit(serviceOverviewHref);
-      cy.contains('opbeans-java');
-      cy.get('[data-test-subj="serviceInstancesTableContainer"]').contains(
-        'No items found'
-      );
-    });
-  });
+
+  // describe('when data is not loaded', () => {
+  //   it('shows empty message', () => {
+  //     cy.visit(serviceOverviewHref);
+  //     cy.contains('opbeans-java');
+  //     cy.get('[data-test-subj="serviceInstancesTableContainer"]').contains(
+  //       'No items found'
+  //     );
+  //   });
+  // });
 
   describe('when data is loaded', () => {
-    before(() => {
-      esArchiverLoad('apm_8.0.0');
+    before(async () => {
+      await synthtrace.index(
+        opbeans({
+          from: new Date(start).getTime(),
+          to: new Date(end).getTime(),
+        })
+      );
     });
-    after(() => {
-      esArchiverUnload('apm_8.0.0');
+
+    after(async () => {
+      await synthtrace.clean();
     });
-    const serviceNodeName =
-      '31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad';
+
     it('has data in the table', () => {
       cy.visit(serviceOverviewHref);
       cy.contains('opbeans-java');
@@ -101,7 +104,7 @@ describe('Instances table', () => {
       cy.wait('@instancesDetailsRequest');
       cy.get(
         `[data-test-subj="instanceActionsButton_${serviceNodeName}"]`
-      ).realClick();
+      ).click();
       cy.contains('Pod logs');
       cy.contains('Pod metrics');
       cy.contains('Container logs');

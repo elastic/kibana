@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { ValidatedDualRange, Value } from './validated_dual_range';
+export type { Value } from './validated_dual_range';
+export { ValidatedDualRange } from './validated_dual_range';

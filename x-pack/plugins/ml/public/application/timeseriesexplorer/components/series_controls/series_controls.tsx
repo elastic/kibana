@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectProps } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { EntityControl } from '../entity_control';
@@ -112,9 +112,8 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJobId);
   }, [selectedDetectorIndex, selectedEntities, selectedJobId]);
 
-  const [storageFieldsConfig, setStorageFieldsConfig] = useStorage<PartitionFieldsConfig>(
-    ML_ENTITY_FIELDS_CONFIG
-  );
+  const [storageFieldsConfig, setStorageFieldsConfig] =
+    useStorage<PartitionFieldsConfig>(ML_ENTITY_FIELDS_CONFIG);
 
   // Merge the default config with the one from the local storage
   const resultFieldsConfig = useMemo(() => {

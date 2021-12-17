@@ -17,10 +17,9 @@ import { LensIconChartBarHorizontalStacked } from '../assets/chart_bar_horizonta
 import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
 import { LensIconChartLine } from '../assets/chart_line';
 
-import { VisualizationType } from '../types';
-import {
+import type { VisualizationType } from '../types';
+import type {
   SeriesType,
-  ValueLabelConfig,
   LegendConfig,
   AxisExtentConfig,
   XYLayerConfig,
@@ -29,6 +28,7 @@ import {
   FittingFunction,
   LabelsOrientationConfig,
 } from '../../common/expressions';
+import type { ValueLabelConfig } from '../../common/types';
 
 // Persisted parts of the state
 export interface XYState {
@@ -69,6 +69,7 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Bar vertical',
     }),
     groupLabel: groupLabelForBar,
+    sortPriority: 4,
   },
   {
     id: 'bar_horizontal',
@@ -153,5 +154,6 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Line',
     }),
     groupLabel: groupLabelForLineAndArea,
+    sortPriority: 2,
   },
 ];

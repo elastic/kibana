@@ -9,6 +9,7 @@ import {
   UI_SETTINGS_DATEFORMAT_TZ,
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
+  UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
 } from '../../../../common/constants';
 import { IUiSettingsClient } from 'kibana/server';
 import { savedObjectsClientMock, uiSettingsServiceMock } from 'src/core/server/mocks';
@@ -36,6 +37,8 @@ describe('getExportSettings', () => {
           return ',';
         case UI_SETTINGS_DATEFORMAT_TZ:
           return 'Browser';
+        case UI_SETTINGS_SEARCH_INCLUDE_FROZEN:
+          return false;
       }
 
       return 'helo world';
@@ -49,6 +52,7 @@ describe('getExportSettings', () => {
         "checkForFormulas": undefined,
         "escapeFormulaValues": undefined,
         "escapeValue": [Function],
+        "includeFrozen": false,
         "maxSizeBytes": undefined,
         "scroll": Object {
           "duration": undefined,

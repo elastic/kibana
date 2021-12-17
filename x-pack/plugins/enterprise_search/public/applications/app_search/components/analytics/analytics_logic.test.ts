@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockKibanaValues,
-  mockHttpValues,
-  mockFlashMessageHelpers,
-} from '../../../__mocks__/kea_logic';
+import { LogicMounter, mockKibanaValues, mockHttpValues } from '../../../__mocks__/kea_logic';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'test-engine' } },
 }));
 
 import { nextTick } from '@kbn/test/jest';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { DEFAULT_START_DATE, DEFAULT_END_DATE } from './constants';
 
@@ -26,7 +23,6 @@ describe('AnalyticsLogic', () => {
   const { mount } = new LogicMounter(AnalyticsLogic);
   const { history } = mockKibanaValues;
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -163,7 +159,7 @@ describe('AnalyticsLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/analytics/queries',
+          '/internal/app_search/engines/test-engine/analytics/queries',
           {
             query: {
               start: DEFAULT_START_DATE,
@@ -185,7 +181,7 @@ describe('AnalyticsLogic', () => {
         AnalyticsLogic.actions.loadAnalyticsData();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/analytics/queries',
+          '/internal/app_search/engines/test-engine/analytics/queries',
           {
             query: {
               start: '1970-01-01',
@@ -197,14 +193,9 @@ describe('AnalyticsLogic', () => {
         );
       });
 
-      it('handles errors', async () => {
-        http.get.mockReturnValueOnce(Promise.reject('error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-
         AnalyticsLogic.actions.loadAnalyticsData();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -229,7 +220,7 @@ describe('AnalyticsLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/analytics/queries/some-query',
+          '/internal/app_search/engines/test-engine/analytics/queries/some-query',
           {
             query: {
               start: DEFAULT_START_DATE,
@@ -248,7 +239,7 @@ describe('AnalyticsLogic', () => {
         AnalyticsLogic.actions.loadQueryData('some-query');
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/analytics/queries/some-query',
+          '/internal/app_search/engines/test-engine/analytics/queries/some-query',
           {
             query: {
               start: '1970-12-30',
@@ -259,14 +250,9 @@ describe('AnalyticsLogic', () => {
         );
       });
 
-      it('handles errors', async () => {
-        http.get.mockReturnValueOnce(Promise.reject('error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-
         AnalyticsLogic.actions.loadQueryData('some-query');
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });

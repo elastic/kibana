@@ -75,4 +75,31 @@ export const migrations = {
     }),
     references: doc.references || [],
   }),
+  '8.0.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
+    ...doc,
+    ...(doc.attributes && {
+      attributes: Object.keys(doc.attributes).reduce(
+        (acc, key) =>
+          [
+            // owner: Team:Geo
+            'visualization:regionmap:showWarnings',
+            'visualization:tileMap:WMSdefaults',
+            'visualization:tileMap:maxPrecision',
+            // owner: Team:Core
+            'telemetry:optIn',
+            'xPackMonitoring:allowReport',
+            'theme:version',
+          ].includes(key)
+            ? {
+                ...acc,
+              }
+            : {
+                ...acc,
+                [key]: doc.attributes[key],
+              },
+        {}
+      ),
+    }),
+    references: doc.references || [],
+  }),
 };

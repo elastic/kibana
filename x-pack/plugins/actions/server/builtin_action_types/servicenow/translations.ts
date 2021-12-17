@@ -19,6 +19,10 @@ export const SERVICENOW_SIR = i18n.translate('xpack.actions.builtin.serviceNowSI
   defaultMessage: 'ServiceNow SecOps',
 });
 
+export const SERVICENOW_ITOM = i18n.translate('xpack.actions.builtin.serviceNowITOMTitle', {
+  defaultMessage: 'ServiceNow ITOM',
+});
+
 export const ALLOWED_HOSTS_ERROR = (message: string) =>
   i18n.translate('xpack.actions.builtin.configuration.apiAllowedHostsError', {
     defaultMessage: 'error configuring connector action: {message}',

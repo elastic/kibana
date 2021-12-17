@@ -81,13 +81,13 @@ export class LicenseExpirationRule extends BaseRule {
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
     clusters: AlertCluster[],
-    availableCcs: string[]
+    availableCcs: boolean
   ): Promise<AlertData[]> {
     let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const licenses = await fetchLicenses(esClient, clusters, esIndexPattern);
+    const licenses = await fetchLicenses(esClient, clusters, esIndexPattern, params.filterQuery);
 
     return licenses.map((license) => {
       const { clusterUuid, type, expiryDateMS, status, ccs } = license;

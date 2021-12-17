@@ -10,13 +10,22 @@ import fs from 'fs';
 import Path from 'path';
 
 import { Project } from 'ts-morph';
-import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
 
 import { writePluginDocs } from '../mdx/write_plugin_mdx_docs';
-import { ApiDeclaration, ApiStats, PluginApi, Reference, TextWithLinks, TypeKind } from '../types';
+import {
+  ApiDeclaration,
+  ApiStats,
+  PluginApi,
+  PluginOrPackage,
+  Reference,
+  TextWithLinks,
+  TypeKind,
+} from '../types';
 import { getKibanaPlatformPlugin } from './kibana_platform_plugin_mock';
 import { groupPluginApi } from '../utils';
 import { getPluginApiMap } from '../get_plugin_api_map';
+import { collectApiStatsForPlugin } from '../stats';
 
 const log = new ToolingLog({
   level: 'debug',
@@ -25,6 +34,8 @@ const log = new ToolingLog({
 
 let doc: PluginApi;
 let mdxOutputFolder: string;
+let pluginAStats: ApiStats;
+let pluginBStats: ApiStats;
 
 function linkCount(signature: TextWithLinks): number {
   return signature.reduce((cnt, next) => (typeof next === 'string' ? cnt : cnt + 1), 0);
@@ -96,27 +107,38 @@ beforeAll(() => {
     Path.resolve(__dirname, '__fixtures__/src/plugin_b')
   );
   pluginA.manifest.serviceFolders = ['foo'];
-  const plugins: KibanaPlatformPlugin[] = [pluginA, pluginB];
+  const plugins: PluginOrPackage[] = [pluginA, pluginB];
 
-  const { pluginApiMap } = getPluginApiMap(project, plugins, log, { collectReferences: false });
-  const pluginStats: ApiStats = {
-    deprecatedAPIsReferencedCount: 0,
-    missingComments: [],
-    isAnyType: [],
-    noReferences: [],
-    apiCount: 3,
-    missingExports: 0,
-  };
+  const { pluginApiMap, missingApiItems, referencedDeprecations } = getPluginApiMap(
+    project,
+    plugins,
+    log,
+    { collectReferences: false }
+  );
 
   doc = pluginApiMap.pluginA;
+
+  pluginAStats = collectApiStatsForPlugin(doc, missingApiItems, referencedDeprecations);
+  pluginBStats = collectApiStatsForPlugin(
+    pluginApiMap.pluginB,
+    missingApiItems,
+    referencedDeprecations
+  );
+
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
-  writePluginDocs(mdxOutputFolder, { doc, plugin: pluginA, pluginStats, log });
+  writePluginDocs(mdxOutputFolder, { doc, plugin: pluginA, pluginStats: pluginAStats, log });
   writePluginDocs(mdxOutputFolder, {
     doc: pluginApiMap.pluginB,
     plugin: pluginB,
-    pluginStats,
+    pluginStats: pluginBStats,
     log,
   });
+});
+
+it('Stats', () => {
+  // Type "imAnAny"
+  expect(pluginAStats.isAnyType.length).toBe(1);
+  expect(pluginBStats.isAnyType.length).toBe(0);
 });
 
 it('Setup type is extracted', () => {
@@ -191,13 +213,20 @@ describe('functions', () => {
     const hi = obj?.children?.find((c) => c.label === 'hi');
     expect(hi).toBeDefined();
 
-    const obj2 = fn?.children?.find((c) => c.label === '{ fn }');
+    const obj2 = fn?.children?.find((c) => c.label === '{ fn1, fn2 }');
     expect(obj2).toBeDefined();
-    expect(obj2!.children?.length).toBe(1);
+    expect(obj2!.children?.length).toBe(2);
+    expect(obj2!.id).toBe('def-public.crazyFunction.$2');
 
-    const fn2 = obj2?.children?.find((c) => c.label === 'fn');
-    expect(fn2).toBeDefined();
-    expect(fn2?.type).toBe(TypeKind.FunctionKind);
+    const fn1 = obj2?.children?.find((c) => c.label === 'fn1');
+    expect(fn1).toBeDefined();
+    expect(fn1?.type).toBe(TypeKind.FunctionKind);
+    expect(fn1!.id).toBe('def-public.crazyFunction.$2.fn1');
+
+    const fn3 = fn1?.children?.find((c) => c.label === 'foo');
+    expect(fn3).toBeDefined();
+    expect(fn3?.type).toBe(TypeKind.ObjectKind);
+    expect(fn3!.id).toBe('def-public.crazyFunction.$2.fn1.$1');
   });
 
   it('Fn with internal tag is not exported', () => {
@@ -301,7 +330,7 @@ describe('Types', () => {
           "section": "def-public.MyProps",
           "text": "MyProps",
         },
-        ">",
+        ", string | React.JSXElementConstructor<any>>",
       ]
     `);
   });
@@ -419,6 +448,14 @@ describe('Types', () => {
 });
 
 describe('interfaces and classes', () => {
+  it('Interface with index signature exported correctly', () => {
+    const anInterface = doc.client.find((c) => c.label === 'InterfaceWithIndexSignature');
+    expect(anInterface?.children).toBeDefined();
+    expect(anInterface?.children?.length).toBe(1);
+    expect(anInterface?.children![0].signature).toBeDefined();
+    expect(anInterface?.children![0].signature?.length).toBeGreaterThanOrEqual(1);
+  });
+
   it('Basic interface exported correctly', () => {
     const anInterface = doc.client.find((c) => c.label === 'IReturnAReactComponent');
     expect(anInterface).toBeDefined();
@@ -551,6 +588,7 @@ describe('interfaces and classes', () => {
 
     const fn = exampleInterface?.children?.find((c) => c.label === 'fnTypeWithGeneric');
     expect(fn).toBeDefined();
+    expect(fn!.id).toBe('def-public.ExampleInterface.fnTypeWithGeneric');
 
     // `fnTypeWithGeneric` is defined as:
     //  fnTypeWithGeneric: FnTypeWithGeneric<string>;
@@ -560,6 +598,11 @@ describe('interfaces and classes', () => {
     // to be a function, and thus this doesn't show up as a single referenced type with no kids. If we ever fixed that,
     // it would be find to change expectations here to be no children and TypeKind instead of FunctionKind.
     expect(fn?.children).toBeDefined();
+
+    const t = fn!.children?.find((c) => c.label === 't');
+    expect(t).toBeDefined();
+    expect(t!.id).toBe('def-public.ExampleInterface.fnTypeWithGeneric.$1');
+
     expect(fn?.type).toBe(TypeKind.FunctionKind);
     expect(fn?.signature).toBeDefined();
     expect(linkCount(fn!.signature!)).toBe(2);

@@ -31,11 +31,10 @@ const CallOutComponent = ({
   type,
   hasLicenseError,
 }: CallOutProps) => {
-  const handleCallOut = useCallback((e) => handleButtonClick(e, id, type), [
-    handleButtonClick,
-    id,
-    type,
-  ]);
+  const handleCallOut = useCallback(
+    (e) => handleButtonClick(e, id, type),
+    [handleButtonClick, id, type]
+  );
 
   const isCaseClosed = useMemo(
     () => messages.map((m) => m.id).includes(CLOSED_CASE_PUSH_ERROR_ID),
@@ -60,7 +59,7 @@ const CallOutComponent = ({
       {!isCaseClosed && !hasLicenseError && (
         <EuiButton
           data-test-subj={`callout-onclick-${id}`}
-          color={type === 'success' ? 'secondary' : type}
+          color={type === 'success' ? 'success' : type}
           onClick={handleCallOut}
         >
           {i18n.ADD_CONNECTOR}

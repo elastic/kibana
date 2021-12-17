@@ -14,7 +14,7 @@ import {
 
 import { BehaviorSubject } from 'rxjs';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '../config';
 import { configServiceMock, getEnvOptions } from '../config/mocks';
 import { CoreContext } from '../core_context';
@@ -55,6 +55,7 @@ function createPlugin(
       requiredBundles: [],
       server,
       ui,
+      owner: { name: 'foo' },
     },
     opaqueId: Symbol(id),
     initializerContext: { logger } as any,

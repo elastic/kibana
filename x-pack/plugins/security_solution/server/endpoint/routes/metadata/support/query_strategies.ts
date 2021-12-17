@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/api/types';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { HostMetadata } from '../../../../../common/endpoint/types';
 import { HostListQueryResult, HostQueryResult } from '../../../types';
 
@@ -38,7 +38,7 @@ export const queryResponseToHostListResult = (
 
   return {
     resultLength:
-      ((response.hits?.total as unknown) as { value: number; relation: string }).value || 0,
+      (response.hits?.total as unknown as { value: number; relation: string }).value || 0,
     resultList: list,
   };
 };

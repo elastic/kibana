@@ -7,43 +7,39 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiTitle, EuiText, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiText, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
+import { docLinks } from '../../../shared/doc_links';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-import { DOCS_PREFIX } from '../../routes';
 
 import GettingStarted from './assets/getting_started.png';
 
-const GETTING_STARTED_LINK_URL = `${DOCS_PREFIX}/workplace-search-getting-started.html`;
+const GETTING_STARTED_LINK_URL = docLinks.workplaceSearchGettingStarted;
 
 export const SetupGuide: React.FC = () => {
   return (
     <SetupGuideLayout
       productName={WORKPLACE_SEARCH_PLUGIN.NAME}
       productEuiIcon="logoWorkplaceSearch"
-      standardAuthLink={`${DOCS_PREFIX}/workplace-search-security.html#standard`}
-      elasticsearchNativeAuthLink={`${DOCS_PREFIX}/workplace-search-security.html#elasticsearch-native-realm`}
     >
       <SetPageChrome trail={[SETUP_GUIDE_TITLE]} />
       <SendTelemetry action="viewed" metric="setup_guide" />
 
-      <EuiLink href={GETTING_STARTED_LINK_URL} target="_blank">
-        <img
-          className="setupGuide__thumbnail"
-          src={GettingStarted}
-          alt={i18n.translate('xpack.enterpriseSearch.workplaceSearch.setupGuide.imageAlt', {
-            defaultMessage:
-              'Getting started with Workplace Search - a guide to show you how to get Workplace Search up and running',
-          })}
-          width="1280"
-          height-="720"
-        />
-      </EuiLink>
+      <img
+        className="setupGuide__thumbnail"
+        src={GettingStarted}
+        alt={i18n.translate('xpack.enterpriseSearch.workplaceSearch.setupGuide.imageAlt', {
+          defaultMessage:
+            'Getting started with Workplace Search - a guide to show you how to get Workplace Search up and running',
+        })}
+        width="1280"
+        height="720"
+      />
 
       <EuiTitle size="s">
         <p>
@@ -55,7 +51,10 @@ export const SetupGuide: React.FC = () => {
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiButton target="_blank" fill href={GETTING_STARTED_LINK_URL} iconType="popout">
-        Get started with Workplace Search
+        <FormattedMessage
+          id="xpack.enterpriseSearch.workplaceSearch.setupGuide.button"
+          defaultMessage="Get started with Workplace Search"
+        />
       </EuiButton>
       <EuiSpacer size="l" />
       <EuiText>

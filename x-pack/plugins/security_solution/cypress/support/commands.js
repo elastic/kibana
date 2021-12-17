@@ -31,21 +31,7 @@
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
-Cypress.Commands.add(
-  'stubSearchStrategyApi',
-  function (stubObject, factoryQueryType, searchStrategyName = 'securitySolutionSearchStrategy') {
-    cy.intercept('POST', '/internal/bsearch', (req) => {
-      if (searchStrategyName === 'indexFields') {
-        req.reply(stubObject.rawResponse);
-      } else if (factoryQueryType === 'overviewHost') {
-        req.reply(stubObject.overviewHost);
-      } else if (factoryQueryType === 'overviewNetwork') {
-        req.reply(stubObject.overviewNetwork);
-      }
-      req.reply();
-    });
-  }
-);
+import 'cypress-file-upload';
 
 Cypress.Commands.add(
   'attachFile',

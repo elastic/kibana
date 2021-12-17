@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { useTrackPageview } from '../../../../../observability/public';
 
@@ -14,9 +14,9 @@ interface LogEntryCategoriesSetupContentProps {
   onOpenSetup: () => void;
 }
 
-export const LogEntryCategoriesSetupContent: React.FunctionComponent<LogEntryCategoriesSetupContentProps> = ({
-  onOpenSetup,
-}) => {
+export const LogEntryCategoriesSetupContent: React.FunctionComponent<
+  LogEntryCategoriesSetupContentProps
+> = ({ onOpenSetup }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup', delay: 15000 });
 

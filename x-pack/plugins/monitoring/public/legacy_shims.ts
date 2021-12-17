@@ -8,7 +8,10 @@
 import { CoreStart, HttpSetup, IUiSettingsClient, AppMountParameters } from 'kibana/public';
 import { Observable } from 'rxjs';
 import { HttpRequestInit } from '../../../../src/core/public';
-import { MonitoringStartPluginDependencies } from './types';
+import {
+  MonitoringStartPluginDependencies,
+  LegacyMonitoringStartPluginDependencies,
+} from './types';
 import { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TypeRegistry } from '../../triggers_actions_ui/public/application/type_registry';
@@ -40,7 +43,6 @@ export interface KFetchKibanaOptions {
 export interface IShims {
   toastNotifications: CoreStart['notifications']['toasts'];
   capabilities: CoreStart['application']['capabilities'];
-  getAngularInjector: () => angular.auto.IInjectorService;
   getBasePath: () => string;
   getInjected: (name: string, defaultValue?: unknown) => unknown;
   breadcrumbs: {
@@ -69,21 +71,17 @@ export interface IShims {
 export class Legacy {
   private static _shims: IShims;
 
-  public static init(
-    {
-      core,
-      data,
-      isCloud,
-      triggersActionsUi,
-      usageCollection,
-      appMountParameters,
-    }: MonitoringStartPluginDependencies,
-    ngInjector: angular.auto.IInjectorService
-  ) {
+  public static init({
+    core,
+    data,
+    isCloud,
+    triggersActionsUi,
+    usageCollection,
+    appMountParameters,
+  }: LegacyMonitoringStartPluginDependencies) {
     this._shims = {
       toastNotifications: core.notifications.toasts,
       capabilities: core.application.capabilities,
-      getAngularInjector: (): angular.auto.IInjectorService => ngInjector,
       getBasePath: (): string => core.http.basePath.get(),
       getInjected: (name: string, defaultValue?: unknown): string | unknown =>
         core.injectedMetadata.getInjectedVar(name, defaultValue),
@@ -146,5 +144,9 @@ export class Legacy {
       throw new Error('Legacy needs to be initiated with Legacy.init(...) before use');
     }
     return Legacy._shims;
+  }
+
+  public static isInitializated(): boolean {
+    return Boolean(Legacy._shims);
   }
 }

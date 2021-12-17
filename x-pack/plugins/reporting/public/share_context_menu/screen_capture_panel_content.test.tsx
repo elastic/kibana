@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { coreMock } from 'src/core/public/mocks';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content';
@@ -63,6 +63,43 @@ test('ScreenCapturePanelContent properly renders a view with "canvas" layout opt
   expect(component.text()).toMatch('Full page layout');
 });
 
+test('ScreenCapturePanelContent allows POST URL to be copied when objectId is provided', () => {
+  const component = mount(
+    <IntlProvider locale="en">
+      <ScreenCapturePanelContent
+        layoutOption="canvas"
+        reportType="Analytical App"
+        requiresSavedState={false}
+        apiClient={apiClient}
+        uiSettings={uiSettings}
+        toasts={coreSetup.notifications.toasts}
+        getJobParams={getJobParamsDefault}
+        objectId={'1234-5'}
+      />
+    </IntlProvider>
+  );
+  expect(component.text()).toMatch('Copy POST URL');
+  expect(component.text()).not.toMatch('Unsaved work');
+});
+
+test('ScreenCapturePanelContent does not allow POST URL to be copied when objectId is not provided', () => {
+  const component = mount(
+    <IntlProvider locale="en">
+      <ScreenCapturePanelContent
+        layoutOption="canvas"
+        reportType="Analytical App"
+        requiresSavedState={false}
+        apiClient={apiClient}
+        uiSettings={uiSettings}
+        toasts={coreSetup.notifications.toasts}
+        getJobParams={getJobParamsDefault}
+      />
+    </IntlProvider>
+  );
+  expect(component.text()).not.toMatch('Copy POST URL');
+  expect(component.text()).toMatch('Unsaved work');
+});
+
 test('ScreenCapturePanelContent properly renders a view with "print" layout option', () => {
   const component = mount(
     <IntlProvider locale="en">
@@ -85,8 +122,10 @@ test('ScreenCapturePanelContent decorated job params are visible in the POST URL
   const component = mount(
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
+        objectId="test"
         reportType="Analytical App"
         requiresSavedState={false}
+        isDirty={false}
         apiClient={apiClient}
         uiSettings={uiSettings}
         toasts={coreSetup.notifications.toasts}
@@ -96,6 +135,6 @@ test('ScreenCapturePanelContent decorated job params are visible in the POST URL
   );
 
   expect(component.find('EuiCopy').prop('textToCopy')).toMatchInlineSnapshot(
-    `"http://localhost/api/reporting/generate/Analytical%20App?jobParams=%28browserTimezone%3AAmerica%2FNew_York%2Clayout%3A%28dimensions%3A%28height%3A768%2Cwidth%3A1024%29%2Cid%3Apreserve_layout%2Cselectors%3A%28itemsCountAttribute%3Adata-shared-items-count%2CrenderComplete%3A%5Bdata-shared-item%5D%2Cscreenshot%3A%5Bdata-shared-items-container%5D%2CtimefilterDurationAttribute%3Adata-shared-timefilter-duration%29%29%2CobjectType%3Atest-object-type%2Ctitle%3A%27Test%20Report%20Title%27%2Cversion%3A%277.15.0%27%29"`
+    `"http://localhost/api/reporting/generate/Analytical%20App?jobParams=%28browserTimezone%3AAmerica%2FNew_York%2Clayout%3A%28dimensions%3A%28height%3A768%2Cwidth%3A1024%29%2Cid%3Apreserve_layout%29%2CobjectType%3Atest-object-type%2Ctitle%3A%27Test%20Report%20Title%27%2Cversion%3A%277.15.0%27%29"`
   );
 });

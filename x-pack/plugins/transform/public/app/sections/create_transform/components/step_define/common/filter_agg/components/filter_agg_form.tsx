@@ -6,8 +6,8 @@
  */
 
 import React, { useContext, useMemo } from 'react';
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFormRow, EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { commonFilterAggs, filterAggsFieldSupport } from '../constants';
@@ -72,10 +72,22 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
     <>
       <EuiFormRow
         label={
-          <FormattedMessage
-            id="xpack.transform.agg.popoverForm.filerAggLabel"
-            defaultMessage="Filter query"
-          />
+          <>
+            <FormattedMessage
+              id="xpack.transform.agg.popoverForm.filerAggLabel"
+              defaultMessage="Filter query"
+            />
+            <EuiToolTip
+              content={
+                <FormattedMessage
+                  id="xpack.transform.agg.popoverForm.filerQueryAdvancedSuggestionTooltip"
+                  defaultMessage="To add other filter query aggregations, edit the JSON config."
+                />
+              }
+            >
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </EuiToolTip>
+          </>
         }
       >
         <EuiSelect

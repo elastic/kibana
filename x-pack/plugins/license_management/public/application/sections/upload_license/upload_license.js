@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { TelemetryOptIn } from '../../components/telemetry_opt_in';
 import { shouldShowTelemetryOptIn } from '../../lib/telemetry';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 

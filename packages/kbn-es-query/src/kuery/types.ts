@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SerializableRecord } from '@kbn/utility-types';
 import { NodeTypes } from './node_types';
 
 /** @public */
@@ -22,9 +23,7 @@ export type DslQuery = estypes.QueryDslQueryContainer;
 
 /** @internal */
 export interface KueryParseOptions {
-  helpers: {
-    [key: string]: any;
-  };
+  helpers: SerializableRecord;
   startRule: string;
   allowLeadingWildcards: boolean;
   cursorSymbol?: string;

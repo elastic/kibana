@@ -7,11 +7,12 @@
 
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+
 import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
 import type { LensMultiTable } from '../../types';
 import type { PieExpressionProps, PieExpressionArgs } from './types';
 
-export interface PieRender {
+interface PieRender {
   type: 'render';
   as: 'lens_pie_renderer';
   value: PieExpressionProps;
@@ -48,7 +49,7 @@ export const pie: ExpressionFunctionDefinition<
     },
     shape: {
       types: ['string'],
-      options: ['pie', 'donut', 'treemap'],
+      options: ['pie', 'donut', 'treemap', 'mosaic'],
       help: '',
     },
     hideLabels: {
@@ -71,6 +72,18 @@ export const pie: ExpressionFunctionDefinition<
       help: '',
     },
     nestedLegend: {
+      types: ['boolean'],
+      help: '',
+    },
+    legendMaxLines: {
+      types: ['number'],
+      help: '',
+    },
+    truncateLegend: {
+      types: ['boolean'],
+      help: '',
+    },
+    showValuesInLegend: {
       types: ['boolean'],
       help: '',
     },

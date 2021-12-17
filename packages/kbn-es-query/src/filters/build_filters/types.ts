@@ -7,13 +7,10 @@
  */
 
 import { ExistsFilter } from './exists_filter';
-import { GeoBoundingBoxFilter } from './geo_bounding_box_filter';
-import { GeoPolygonFilter } from './geo_polygon_filter';
 import { PhrasesFilter } from './phrases_filter';
 import { PhraseFilter } from './phrase_filter';
 import { RangeFilter } from './range_filter';
 import { MatchAllFilter } from './match_all_filter';
-import { MissingFilter } from './missing_filter';
 
 /**
  * A common type for filters supported by this package
@@ -21,19 +18,10 @@ import { MissingFilter } from './missing_filter';
  **/
 export type FieldFilter =
   | ExistsFilter
-  | GeoBoundingBoxFilter
-  | GeoPolygonFilter
   | PhraseFilter
   | PhrasesFilter
   | RangeFilter
-  | MatchAllFilter
-  | MissingFilter;
-
-/**
- * A common type for filters supported by this package
- * @public
- **/
-export type FilterParams = any;
+  | MatchAllFilter;
 
 /**
  * An enum of all types of filters supported by this package
@@ -45,16 +33,14 @@ export enum FILTERS {
   PHRASE = 'phrase',
   EXISTS = 'exists',
   MATCH_ALL = 'match_all',
-  MISSING = 'missing',
   QUERY_STRING = 'query_string',
   RANGE = 'range',
   RANGE_FROM_VALUE = 'range_from_value',
-  GEO_BOUNDING_BOX = 'geo_bounding_box',
-  GEO_POLYGON = 'geo_polygon',
   SPATIAL_FILTER = 'spatial_filter',
 }
 
 /**
+  Filter,
  * An enum to denote whether a filter is specific to an application's context or whether it should be applied globally.
  * @public
  */
@@ -65,11 +51,13 @@ export enum FilterStateStore {
 
 // eslint-disable-next-line
 export type FilterMeta = {
-  alias: string | null;
-  disabled: boolean;
-  negate: boolean;
+  alias?: string | null;
+  disabled?: boolean;
+  negate?: boolean;
   // controlledBy is there to identify who owns the filter
   controlledBy?: string;
+  // allows grouping of filters
+  group?: string;
   // index and type are optional only because when you create a new filter, there are no defaults
   index?: string;
   isMultiIndex?: boolean;
@@ -85,7 +73,7 @@ export type Filter = {
     store: FilterStateStore;
   };
   meta: FilterMeta;
-  query?: any; // TODO: can we use the Query type her?
+  query?: Record<string, any>;
 };
 
 // eslint-disable-next-line

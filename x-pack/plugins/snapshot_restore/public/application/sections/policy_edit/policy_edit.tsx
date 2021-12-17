@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageContentBody, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
@@ -60,9 +60,11 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
   } = useLoadIndices();
 
   // Load policy
-  const { error: errorLoadingPolicy, isLoading: isLoadingPolicy, data: policyData } = useLoadPolicy(
-    name
-  );
+  const {
+    error: errorLoadingPolicy,
+    isLoading: isLoadingPolicy,
+    data: policyData,
+  } = useLoadPolicy(name);
 
   // Update policy state when data is loaded
   useEffect(() => {

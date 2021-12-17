@@ -5,16 +5,6 @@
  * 2.0.
  */
 
-jest.mock('./browsers/install', () => ({
-  installBrowser: jest.fn().mockImplementation(() => ({
-    binaryPath$: {
-      pipe: jest.fn().mockImplementation(() => ({
-        toPromise: () => Promise.resolve(),
-      })),
-    },
-  })),
-}));
-
 import { coreMock } from 'src/core/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { TaskManagerSetupContract } from '../../task_manager/server';
@@ -36,16 +26,16 @@ describe('Reporting Plugin', () => {
     initContext = coreMock.createPluginInitializerContext(configSchema);
     coreSetup = coreMock.createSetup(configSchema);
     coreStart = coreMock.createStart();
-    pluginSetup = ({
+    pluginSetup = {
       licensing: {},
       features: featuresPluginMock.createSetup(),
       usageCollection: {
         makeUsageCollector: jest.fn(),
         registerCollector: jest.fn(),
       },
-      taskManager: ({
+      taskManager: {
         registerTaskDefinitions: jest.fn(),
-      } as unknown) as TaskManagerSetupContract,
+      } as unknown as TaskManagerSetupContract,
       security: {
         authc: {
           getCurrentUser: () => ({
@@ -55,12 +45,12 @@ describe('Reporting Plugin', () => {
           }),
         },
       },
-    } as unknown) as any;
-    pluginStart = ({
+    } as unknown as any;
+    pluginStart = {
       data: {
         fieldFormats: {},
       },
-    } as unknown) as any;
+    } as unknown as any;
   });
 
   it('has a sync setup process', () => {

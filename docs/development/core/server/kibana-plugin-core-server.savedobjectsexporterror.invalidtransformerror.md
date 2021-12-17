@@ -4,7 +4,7 @@
 
 ## SavedObjectsExportError.invalidTransformError() method
 
-Error returned when a [export tranform](./kibana-plugin-core-server.savedobjectsexporttransform.md) performed an invalid operation during the transform, such as removing objects from the export, or changing an object's type or id.
+Error returned when a [export transform](./kibana-plugin-core-server.savedobjectsexporttransform.md) performed an invalid operation during the transform, such as removing objects from the export, or changing an object's type or id.
 
 <b>Signature:</b>
 
@@ -16,9 +16,9 @@ static invalidTransformError(objectKeys: string[]): SavedObjectsExportError;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objectKeys | <code>string[]</code> |  |
+|  objectKeys | string\[\] |  |
 
 <b>Returns:</b>
 
-`SavedObjectsExportError`
+SavedObjectsExportError
 

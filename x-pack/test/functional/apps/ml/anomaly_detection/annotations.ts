@@ -185,6 +185,29 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('data feed flyout', function () {
+      const annotationId = `data-feed-flyout-annotation-id-${Date.now()}`;
+
+      before(async () => {
+        await ml.api.indexAnnotation(annotation as Partial<Annotation>, annotationId);
+      });
+
+      it('displays delayed data chart for annotation', async () => {
+        await ml.testExecution.logTestStep(
+          'should display delayed data action in annotations table'
+        );
+
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToJobManagement();
+        await ml.jobTable.waitForJobsToLoad();
+        await ml.jobTable.filterWithSearchString(jobId, 1);
+        await ml.jobTable.openAnnotationsTab(jobId);
+
+        await ml.jobAnnotations.openDatafeedChartFlyout(annotationId, jobId);
+        await ml.jobAnnotations.assertDelayedDataChartExists();
+      });
+    });
+
     describe('deleting', function () {
       const annotationId = `delete-annotation-id-${Date.now()}`;
 
@@ -237,56 +260,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobTable.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationsRowMissing(annotationId);
-      });
-    });
-
-    describe('with errors', function () {
-      before(async () => {
-        // Points the read/write aliases of annotations to an index with wrong mappings
-        // so we can simulate errors when requesting annotations.
-        await ml.testResources.setupBrokenAnnotationsIndexState(jobId);
-      });
-
-      it('displays error on broken annotation index and recovers after fix', async () => {
-        await ml.testExecution.logTestStep('loads from job list row link');
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToJobManagement();
-
-        await ml.jobTable.waitForJobsToLoad();
-        await ml.jobTable.filterWithSearchString(jobId, 1);
-
-        await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobId);
-        await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
-
-        await ml.testExecution.logTestStep(
-          'should display the annotations section showing an error'
-        );
-        await ml.singleMetricViewer.assertAnnotationsExists('error');
-
-        await ml.testExecution.logTestStep('should navigate to anomaly explorer');
-        await ml.navigation.navigateToAnomalyExplorerViaSingleMetricViewer();
-
-        await ml.testExecution.logTestStep(
-          'should display the annotations section showing an error'
-        );
-        await ml.anomalyExplorer.assertAnnotationsPanelExists('error');
-
-        await ml.testExecution.logTestStep(
-          'should display the annotations section without an error'
-        );
-        // restores the aliases to point to the original working annotations index
-        // so we can run tests against successfully loaded annotations sections.
-        await ml.testResources.restoreAnnotationsIndexState();
-        await ml.anomalyExplorer.refreshPage();
-        await ml.anomalyExplorer.assertAnnotationsPanelExists('loaded');
-
-        await ml.testExecution.logTestStep('should navigate to single metric viewer');
-        await ml.navigation.navigateToSingleMetricViewerViaAnomalyExplorer();
-
-        await ml.testExecution.logTestStep(
-          'should display the annotations section without an error'
-        );
-        await ml.singleMetricViewer.assertAnnotationsExists('loaded');
       });
     });
   });

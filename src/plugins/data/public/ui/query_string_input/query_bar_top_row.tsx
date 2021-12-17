@@ -24,9 +24,9 @@ import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Que
 import { useKibana, withKibana } from '../../../../kibana_react/public';
 import QueryStringInputUI from './query_string_input';
 import { UI_SETTINGS } from '../../../common';
-import { PersistedLog, getQueryLog } from '../../query';
+import { getQueryLog } from '../../query';
+import type { PersistedLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
-import { AutocompleteFtuePopover } from './autocomplete_ftue_popover';
 
 const QueryStringInput = withKibana(QueryStringInputUI);
 
@@ -174,26 +174,24 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
     return (
       <EuiFlexItem>
-        <AutocompleteFtuePopover storage={storage} isVisible={isQueryInputFocused}>
-          <QueryStringInput
-            disableAutoFocus={props.disableAutoFocus}
-            indexPatterns={props.indexPatterns!}
-            prepend={props.prepend}
-            query={props.query!}
-            screenTitle={props.screenTitle}
-            onChange={onQueryChange}
-            onChangeQueryInputFocus={onChangeQueryInputFocus}
-            onSubmit={onInputSubmit}
-            persistedLog={persistedLog}
-            dataTestSubj={props.dataTestSubj}
-            placeholder={props.placeholder}
-            isClearable={props.isClearable}
-            iconType={props.iconType}
-            nonKqlMode={props.nonKqlMode}
-            nonKqlModeHelpText={props.nonKqlModeHelpText}
-            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-          />
-        </AutocompleteFtuePopover>
+        <QueryStringInput
+          disableAutoFocus={props.disableAutoFocus}
+          indexPatterns={props.indexPatterns!}
+          prepend={props.prepend}
+          query={props.query!}
+          screenTitle={props.screenTitle}
+          onChange={onQueryChange}
+          onChangeQueryInputFocus={onChangeQueryInputFocus}
+          onSubmit={onInputSubmit}
+          persistedLog={persistedLog}
+          dataTestSubj={props.dataTestSubj}
+          placeholder={props.placeholder}
+          isClearable={props.isClearable}
+          iconType={props.iconType}
+          nonKqlMode={props.nonKqlMode}
+          nonKqlModeHelpText={props.nonKqlModeHelpText}
+          timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+        />
       </EuiFlexItem>
     );
   }
@@ -231,6 +229,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         isDisabled={isDateRangeInvalid}
         isLoading={props.isLoading}
         onClick={onClickSubmitButton}
+        fill={false}
         data-test-subj="querySubmitButton"
       />
     );

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, Query } from 'src/plugins/data/public';
+import { Filter, Query } from '@kbn/es-query';
 
 export interface Pre600FilterQuery {
   // pre 6.0.0 global query:queryString:options were stored per dashboard and would
@@ -29,7 +29,7 @@ export interface SearchSource730 {
 }
 
 function isQueryFilter(filter: Filter | { query: unknown }): filter is Pre600FilterQuery {
-  return filter.query && !(filter as Filter).meta;
+  return filter.query !== undefined && !(filter as Filter).meta;
 }
 
 export function moveFiltersToQuery(

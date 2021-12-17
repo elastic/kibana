@@ -16,23 +16,14 @@ import {
   EuiPanel,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { NodeDetailStatus } from '../node_detail_status';
-import { Logs } from '../../logs/';
+import { Logs } from '../../logs';
 import { MonitoringTimeseriesContainer } from '../../chart';
-import { ShardAllocation } from '../shard_allocation/shard_allocation';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertsCallout } from '../../../alerts/callout';
+import { ShardAllocation } from '../shard_allocation';
 
-export const Node = ({
-  nodeSummary,
-  metrics,
-  logs,
-  alerts,
-  nodeId,
-  clusterUuid,
-  scope,
-  ...props
-}) => {
+export const Node = ({ nodeSummary, metrics, logs, alerts, nodeId, clusterUuid, ...props }) => {
   /*
   // This isn't doing anything due to a possible bug.  https://github.com/elastic/kibana/issues/106309
   if (alerts) {
@@ -52,7 +43,6 @@ export const Node = ({
  */
   const metricsToShow = [
     metrics.node_jvm_mem,
-    metrics.node_mem,
     metrics.node_total_io,
     metrics.node_cpu_metric,
     metrics.node_load_average,
@@ -92,7 +82,7 @@ export const Node = ({
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPanel>
-          <ShardAllocation scope={scope} />
+          <ShardAllocation {...props} />
         </EuiPanel>
       </EuiPageBody>
     </EuiPage>

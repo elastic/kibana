@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WarningsFlyoutStep renders 1`] = `
+<Fragment>
+  <EuiFlyoutBody />
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          flush="left"
+          iconType="arrowLeft"
+          onClick={[MockFunction]}
+        >
+          <FormattedMessage
+            defaultMessage="Back"
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          color="primary"
+          disabled={false}
+          fill={true}
+          onClick={[MockFunction]}
+        >
+          <FormattedMessage
+            defaultMessage="Continue reindexing"
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.continueButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</Fragment>
+`;

@@ -7,20 +7,21 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiCard } from '@elastic/eui';
+import { EuiCard, EuiFlexItem, EuiBadge, EuiToolTip, EuiSpacer } from '@elastic/eui';
 
-import type { PackageListItem } from '../../../types';
-import { useLink } from '../../../hooks';
-import { PackageIcon } from '../../../components';
+import { TrackApplicationView } from '../../../../../../../../../src/plugins/usage_collection/public';
 
-import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from './release_badge';
+import { CardIcon } from '../../../../../components/package_icon';
+import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
 
-type PackageCardProps = PackageListItem;
+import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from './release_badge';
 
-// adding the `href` causes EuiCard to use a `a` instead of a `button`
-// `a` tags use `euiLinkColor` which results in blueish Badge text
+export type PackageCardProps = IntegrationCardItem;
+
+// Min-height is roughly 3 lines of content.
+// This keeps the cards from looking overly unbalanced because of content differences.
 const Card = styled(EuiCard)`
-  color: inherit;
+  min-height: 127px;
 `;
 
 export function PackageCard({
@@ -28,40 +29,51 @@ export function PackageCard({
   name,
   title,
   version,
-  release,
-  status,
   icons,
   integration,
-  ...restProps
+  url,
+  release,
+  id,
 }: PackageCardProps) {
-  const { getHref } = useLink();
-  let urlVersion = version;
-  // if this is an installed package, link to the version installed
-  if ('savedObject' in restProps) {
-    urlVersion = restProps.savedObject.attributes.version || version;
+  let releaseBadge: React.ReactNode | null = null;
+
+  if (release && release !== 'ga') {
+    releaseBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <EuiToolTip display="inlineBlock" content={RELEASE_BADGE_DESCRIPTION[release]}>
+            <EuiBadge color="hollow">{RELEASE_BADGE_LABEL[release]}</EuiBadge>
+          </EuiToolTip>
+        </span>
+      </EuiFlexItem>
+    );
   }
 
+  const testid = `integration-card:${id}`;
   return (
-    <Card
-      title={title || ''}
-      description={description}
-      icon={
-        <PackageIcon
-          icons={icons}
-          packageName={name}
-          integrationName={integration}
-          version={version}
-          size="xl"
-        />
-      }
-      href={getHref('integration_details_overview', {
-        pkgkey: `${name}-${urlVersion}`,
-        ...(integration ? { integration } : {}),
-      })}
-      betaBadgeLabel={release && release !== 'ga' ? RELEASE_BADGE_LABEL[release] : undefined}
-      betaBadgeTooltipContent={
-        release && release !== 'ga' ? RELEASE_BADGE_DESCRIPTION[release] : undefined
-      }
-    />
+    <TrackApplicationView viewId={testid}>
+      <Card
+        data-test-subj={testid}
+        layout="horizontal"
+        title={title || ''}
+        titleSize="xs"
+        description={description}
+        hasBorder
+        icon={
+          <CardIcon
+            icons={icons}
+            packageName={name}
+            integrationName={integration}
+            version={version}
+            size="xl"
+          />
+        }
+        href={url}
+        target={url.startsWith('http') || url.startsWith('https') ? '_blank' : undefined}
+      >
+        {releaseBadge}
+      </Card>
+    </TrackApplicationView>
   );
 }

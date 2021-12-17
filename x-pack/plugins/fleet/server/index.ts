@@ -9,57 +9,65 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 
-import { PreconfiguredPackagesSchema, PreconfiguredAgentPoliciesSchema } from './types';
+import {
+  PreconfiguredPackagesSchema,
+  PreconfiguredAgentPoliciesSchema,
+  PreconfiguredOutputsSchema,
+} from './types';
 
 import { FleetPlugin } from './plugin';
 
-export { default as apm } from 'elastic-apm-node';
-export {
+export type {
   AgentService,
+  AgentClient,
   ESIndexPatternService,
-  getRegistryUrl,
   PackageService,
   AgentPolicyServiceInterface,
   ArtifactsClientInterface,
   Artifact,
+  ListArtifactsProps,
 } from './services';
+export { getRegistryUrl } from './services';
 
-export { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
+export type { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
 export type {
   ExternalCallback,
   PutPackagePolicyUpdateCallback,
   PostPackagePolicyDeleteCallback,
   PostPackagePolicyCreateCallback,
+  FleetRequestHandlerContext,
 } from './types';
-export { AgentNotFoundError } from './errors';
+export { AgentNotFoundError, FleetUnauthorizedError } from './errors';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     epm: true,
     agents: true,
   },
-  deprecations: ({ renameFromRoot, unused }) => [
-    renameFromRoot('xpack.ingestManager', 'xpack.fleet'),
-    renameFromRoot('xpack.fleet.fleet', 'xpack.fleet.agents'),
-    unused('agents.kibana'),
-    unused('agents.maxConcurrentConnections'),
-    unused('agents.agentPolicyRolloutRateLimitIntervalMs'),
-    unused('agents.agentPolicyRolloutRateLimitRequestPerInterval'),
-    unused('agents.pollingRequestTimeout'),
-    unused('agents.tlsCheckDisabled'),
-    unused('agents.fleetServerEnabled'),
+  deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
+    // Unused settings before Fleet server exists
+    unused('agents.kibana', { level: 'critical' }),
+    unused('agents.maxConcurrentConnections', { level: 'critical' }),
+    unused('agents.agentPolicyRolloutRateLimitIntervalMs', { level: 'critical' }),
+    unused('agents.agentPolicyRolloutRateLimitRequestPerInterval', { level: 'critical' }),
+    unused('agents.pollingRequestTimeout', { level: 'critical' }),
+    unused('agents.tlsCheckDisabled', { level: 'critical' }),
+    unused('agents.fleetServerEnabled', { level: 'critical' }),
+    // Renaming elasticsearch.host => elasticsearch.hosts
     (fullConfig, fromPath, addDeprecation) => {
       const oldValue = fullConfig?.xpack?.fleet?.agents?.elasticsearch?.host;
       if (oldValue) {
         delete fullConfig.xpack.fleet.agents.elasticsearch.host;
         fullConfig.xpack.fleet.agents.elasticsearch.hosts = [oldValue];
         addDeprecation({
+          configPath: 'xpack.fleet.agents.elasticsearch.host',
           message: `Config key [xpack.fleet.agents.elasticsearch.host] is deprecated and replaced by [xpack.fleet.agents.elasticsearch.hosts]`,
           correctiveActions: {
             manualSteps: [
               `Use [xpack.fleet.agents.elasticsearch.hosts] with an array of host instead.`,
             ],
           },
+          level: 'critical',
         });
       }
 
@@ -67,7 +75,6 @@ export const config: PluginConfigDescriptor = {
     },
   ],
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
     registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     agents: schema.object({
@@ -84,13 +91,17 @@ export const config: PluginConfigDescriptor = {
     }),
     packages: PreconfiguredPackagesSchema,
     agentPolicies: PreconfiguredAgentPoliciesSchema,
+    outputs: PreconfiguredOutputsSchema,
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
+    developer: schema.object({
+      disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
+    }),
   }),
 };
 
 export type FleetConfigType = TypeOf<typeof config.schema>;
 
-export { PackagePolicyServiceInterface } from './services/package_policy';
+export type { PackagePolicyServiceInterface } from './services/package_policy';
 
 export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
 

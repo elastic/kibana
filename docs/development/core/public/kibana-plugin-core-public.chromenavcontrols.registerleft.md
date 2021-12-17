@@ -16,9 +16,9 @@ registerLeft(navControl: ChromeNavControl): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  navControl | <code>ChromeNavControl</code> |  |
+|  navControl | ChromeNavControl |  |
 
 <b>Returns:</b>
 
-`void`
+void
 

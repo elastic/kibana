@@ -17,7 +17,7 @@ import {
   EuiPopoverProps,
   EuiPagination,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -67,7 +67,7 @@ const LoadingPanelContainer = styled.div`
 
 LoadingPanelContainer.displayName = 'LoadingPanelContainer';
 
-const PopoverRowItems = styled((EuiPopover as unknown) as FC)<
+const PopoverRowItems = styled(EuiPopover as unknown as FC)<
   EuiPopoverProps & {
     className?: string;
     id?: string;
@@ -240,10 +240,10 @@ export const FooterComponent = ({
     [onChangePage]
   );
 
-  const onButtonClick = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [
-    isPopoverOpen,
-    setIsPopoverOpen,
-  ]);
+  const onButtonClick = useCallback(
+    () => setIsPopoverOpen(!isPopoverOpen),
+    [isPopoverOpen, setIsPopoverOpen]
+  );
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
@@ -272,10 +272,10 @@ export const FooterComponent = ({
     [closePopover, itemsPerPage, itemsPerPageOptions, onChangeItemsPerPage]
   );
 
-  const totalPages = useMemo(() => Math.ceil(totalCount / itemsPerPage), [
-    itemsPerPage,
-    totalCount,
-  ]);
+  const totalPages = useMemo(
+    () => Math.ceil(totalCount / itemsPerPage),
+    [itemsPerPage, totalCount]
+  );
 
   useEffect(() => {
     if (paginationLoading && !isLoading) {
@@ -287,7 +287,7 @@ export const FooterComponent = ({
     return (
       <LoadingPanelContainer>
         <LoadingPanel
-          data-test-subj="LoadingPanelTimeline"
+          dataTestSubj="LoadingPanelTimeline"
           height="35px"
           showBorder={false}
           text={loadingText}

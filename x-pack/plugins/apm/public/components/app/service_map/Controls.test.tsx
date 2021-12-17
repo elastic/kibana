@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as lightTheme } from '@kbn/ui-shared-deps-src/theme';
 import { render } from '@testing-library/react';
 import cytoscape from 'cytoscape';
 import React, { ReactNode } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { Controls } from './Controls';
@@ -21,11 +22,18 @@ const cy = cytoscape({
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
     <CytoscapeContext.Provider value={cy}>
-      <MockApmPluginContextWrapper>
-        <ThemeContext.Provider value={{ eui: lightTheme }}>
-          {children}
-        </ThemeContext.Provider>
-      </MockApmPluginContextWrapper>
+      <MemoryRouter
+        initialEntries={[
+          '/service-map?rangeFrom=now-15m&rangeTo=now&environment=ENVIRONMENT_ALL&kuery=',
+        ]}
+      >
+        <MockApmPluginContextWrapper>
+          <ThemeContext.Provider value={{ eui: lightTheme }}>
+            {children}
+          </ThemeContext.Provider>
+        </MockApmPluginContextWrapper>
+      </MemoryRouter>
+      s
     </CytoscapeContext.Provider>
   );
 }

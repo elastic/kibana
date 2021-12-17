@@ -6,20 +6,29 @@
  */
 
 import { PluginInitializerContext } from 'src/core/public';
-import { getDefaultLayoutSelectors } from '../common';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingPublicPlugin } from './plugin';
 import { getSharedComponents } from './shared';
 
 export interface ReportingSetup {
-  getDefaultLayoutSelectors: typeof getDefaultLayoutSelectors;
   usesUiCapabilities: () => boolean;
   components: ReturnType<typeof getSharedComponents>;
 }
 
 export type ReportingStart = ReportingSetup;
 
-export { constants, getDefaultLayoutSelectors } from '../common';
+export { constants } from '../common';
+export type {
+  JobParamsCSV,
+  JobParamsDownloadCSV,
+  JobParamsPNG,
+  JobParamsPNGV2,
+  JobAppParamsPDFV2,
+  JobParamsPDF,
+  JobParamsPDFV2,
+  JobAppParamsPDF,
+} from '../common/types';
+
 export { ReportingAPIClient, ReportingPublicPlugin as Plugin };
 
 export function plugin(initializerContext: PluginInitializerContext) {

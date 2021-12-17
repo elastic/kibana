@@ -9,7 +9,6 @@
 import {
   mockElasticsearchService,
   mockHttpService,
-  mockLegacyService,
   mockPluginsService,
   mockConfigService,
   mockSavedObjectsService,
@@ -23,10 +22,11 @@ import {
   mockI18nService,
   mockEnvironmentService,
   mockPrebootService,
+  mockDeprecationService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { rawConfigServiceMock, getEnvOptions } from './config/mocks';
 import { Env } from './config';
 import { Server } from './server';
@@ -94,7 +94,6 @@ test('sets up services on "setup"', async () => {
   expect(mockHttpService.setup).not.toHaveBeenCalled();
   expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
-  expect(mockLegacyService.setup).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.setup).not.toHaveBeenCalled();
   expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
   expect(mockRenderingService.setup).not.toHaveBeenCalled();
@@ -102,6 +101,7 @@ test('sets up services on "setup"', async () => {
   expect(mockStatusService.setup).not.toHaveBeenCalled();
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
   expect(mockI18nService.setup).not.toHaveBeenCalled();
+  expect(mockDeprecationService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -109,7 +109,6 @@ test('sets up services on "setup"', async () => {
   expect(mockHttpService.setup).toHaveBeenCalledTimes(1);
   expect(mockElasticsearchService.setup).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.setup).toHaveBeenCalledTimes(1);
-  expect(mockLegacyService.setup).toHaveBeenCalledTimes(1);
   expect(mockSavedObjectsService.setup).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.setup).toHaveBeenCalledTimes(1);
   expect(mockRenderingService.setup).toHaveBeenCalledTimes(1);
@@ -117,6 +116,7 @@ test('sets up services on "setup"', async () => {
   expect(mockStatusService.setup).toHaveBeenCalledTimes(1);
   expect(mockLoggingService.setup).toHaveBeenCalledTimes(1);
   expect(mockI18nService.setup).toHaveBeenCalledTimes(1);
+  expect(mockDeprecationService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -166,6 +166,7 @@ test('runs services on "start"', async () => {
   expect(mockUiSettingsService.start).not.toHaveBeenCalled();
   expect(mockMetricsService.start).not.toHaveBeenCalled();
   expect(mockStatusService.start).not.toHaveBeenCalled();
+  expect(mockDeprecationService.start).not.toHaveBeenCalled();
 
   await server.start();
 
@@ -174,6 +175,7 @@ test('runs services on "start"', async () => {
   expect(mockUiSettingsService.start).toHaveBeenCalledTimes(1);
   expect(mockMetricsService.start).toHaveBeenCalledTimes(1);
   expect(mockStatusService.start).toHaveBeenCalledTimes(1);
+  expect(mockDeprecationService.start).toHaveBeenCalledTimes(1);
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {
@@ -194,7 +196,6 @@ test('stops services on "stop"', async () => {
   expect(mockHttpService.stop).not.toHaveBeenCalled();
   expect(mockElasticsearchService.stop).not.toHaveBeenCalled();
   expect(mockPluginsService.stop).not.toHaveBeenCalled();
-  expect(mockLegacyService.stop).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.stop).not.toHaveBeenCalled();
   expect(mockUiSettingsService.stop).not.toHaveBeenCalled();
   expect(mockMetricsService.stop).not.toHaveBeenCalled();
@@ -206,7 +207,6 @@ test('stops services on "stop"', async () => {
   expect(mockHttpService.stop).toHaveBeenCalledTimes(1);
   expect(mockElasticsearchService.stop).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.stop).toHaveBeenCalledTimes(1);
-  expect(mockLegacyService.stop).toHaveBeenCalledTimes(1);
   expect(mockSavedObjectsService.stop).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.stop).toHaveBeenCalledTimes(1);
   expect(mockMetricsService.stop).toHaveBeenCalledTimes(1);

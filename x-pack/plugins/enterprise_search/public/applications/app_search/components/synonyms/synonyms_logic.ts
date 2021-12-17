@@ -115,12 +115,15 @@ export const SynonymsLogic = kea<MakeLogicType<SynonymsValues, SynonymsActions>>
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(`/api/app_search/engines/${engineName}/synonyms`, {
-          query: {
-            'page[current]': meta.page.current,
-            'page[size]': meta.page.size,
-          },
-        });
+        const response = await http.get<SynonymsApiResponse>(
+          `/internal/app_search/engines/${engineName}/synonyms`,
+          {
+            query: {
+              'page[current]': meta.page.current,
+              'page[size]': meta.page.size,
+            },
+          }
+        );
         actions.onSynonymsLoad(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -132,7 +135,7 @@ export const SynonymsLogic = kea<MakeLogicType<SynonymsValues, SynonymsActions>>
       clearFlashMessages();
 
       try {
-        await http.post(`/api/app_search/engines/${engineName}/synonyms`, {
+        await http.post(`/internal/app_search/engines/${engineName}/synonyms`, {
           body: JSON.stringify({ synonyms }),
         });
         actions.onSynonymSetSuccess(CREATE_SUCCESS);
@@ -147,7 +150,7 @@ export const SynonymsLogic = kea<MakeLogicType<SynonymsValues, SynonymsActions>>
       clearFlashMessages();
 
       try {
-        await http.put(`/api/app_search/engines/${engineName}/synonyms/${id}`, {
+        await http.put(`/internal/app_search/engines/${engineName}/synonyms/${id}`, {
           body: JSON.stringify({ synonyms }),
         });
         actions.onSynonymSetSuccess(UPDATE_SUCCESS);
@@ -162,7 +165,7 @@ export const SynonymsLogic = kea<MakeLogicType<SynonymsValues, SynonymsActions>>
       clearFlashMessages();
 
       try {
-        await http.delete(`/api/app_search/engines/${engineName}/synonyms/${id}`);
+        await http.delete(`/internal/app_search/engines/${engineName}/synonyms/${id}`);
         actions.onSynonymSetSuccess(DELETE_SUCCESS);
       } catch (e) {
         actions.onSynonymSetError();

@@ -7,7 +7,7 @@
  */
 
 import { compact } from 'lodash';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { get, isEqual } from 'lodash';
@@ -18,14 +18,14 @@ import { Query, Filter } from '@kbn/es-query';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
-import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
+import type { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { TimeRange, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
 
-interface SearchBarInjectedDeps {
+export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
   timeHistory: TimeHistoryContract;
@@ -75,6 +75,8 @@ export interface SearchBarOwnProps {
   iconType?: EuiIconProps['type'];
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
+  // defines padding; use 'inPage' to avoid extra padding; use 'detached' if the searchBar appears at the very top of the view, without any wrapper
+  displayStyle?: 'inPage' | 'detached';
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -243,11 +245,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     try {
       let response;
       if (this.props.savedQuery && !saveAsNew) {
-        response = await this.savedQueryService.saveQuery(savedQueryAttributes, {
-          overwrite: true,
-        });
+        response = await this.savedQueryService.updateQuery(
+          savedQueryMeta.id!,
+          savedQueryAttributes
+        );
       } else {
-        response = await this.savedQueryService.saveQuery(savedQueryAttributes);
+        response = await this.savedQueryService.createQuery(savedQueryAttributes);
       }
 
       this.services.notifications.toasts.addSuccess(
@@ -410,14 +413,18 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       );
     }
 
+    const globalQueryBarClasses = classNames('globalQueryBar', {
+      'globalQueryBar--inPage': this.props.displayStyle === 'inPage',
+    });
+
     return (
-      <div className="globalQueryBar" data-test-subj="globalQueryBar">
+      <div className={globalQueryBarClasses} data-test-subj="globalQueryBar">
         {queryBar}
         {filterBar}
 
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
-            savedQuery={this.props.savedQuery ? this.props.savedQuery.attributes : undefined}
+            savedQuery={this.props.savedQuery ? this.props.savedQuery : undefined}
             savedQueryService={this.savedQueryService}
             onSave={this.onSave}
             onClose={() => this.setState({ showSaveQueryModal: false })}

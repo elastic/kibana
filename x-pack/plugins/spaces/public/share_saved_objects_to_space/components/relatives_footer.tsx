@@ -8,9 +8,10 @@
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { SavedObjectReferenceWithContext } from 'src/core/public';
-import type { ShareToSpaceSavedObjectTarget } from 'src/plugins/spaces_oss/public';
+
+import type { ShareToSpaceSavedObjectTarget } from '../types';
 
 interface Props {
   savedObjectTarget: ShareToSpaceSavedObjectTarget;

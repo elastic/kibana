@@ -16,14 +16,17 @@
     { "path": "../../../src/core/tsconfig.json" },
 
     // optionalPlugins from ./kibana.json
+    { "path": "../lens/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
 
     // Required from './kibana.json'
     { "path": "../actions/tsconfig.json" },
+    { "path": "../rule_registry/tsconfig.json" },
     { "path": "../triggers_actions_ui/tsconfig.json"},
     { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" }
+    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../../src/plugins/saved_objects/tsconfig.json" }
   ]
 }

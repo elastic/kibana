@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+export type { FilterCompareOptions } from './helpers';
 export {
   dedupFilters,
   uniqFilters,
   compareFilters,
   COMPARE_ALL_OPTIONS,
-  FilterCompareOptions,
   cleanFilter,
   isFilter,
   isFilters,
@@ -30,9 +30,6 @@ export {
 export {
   isExistsFilter,
   isMatchAllFilter,
-  isGeoBoundingBoxFilter,
-  isGeoPolygonFilter,
-  isMissingFilter,
   isPhraseFilter,
   isPhrasesFilter,
   isRangeFilter,
@@ -56,7 +53,7 @@ export {
   getFilterParams,
 } from './build_filters';
 
-export {
+export type {
   Query,
   Filter,
   LatLon,
@@ -64,15 +61,15 @@ export {
   FilterMeta,
   ExistsFilter,
   RangeFilter,
+  ScriptedRangeFilter,
   PhraseFilter,
+  ScriptedPhraseFilter,
   PhrasesFilter,
   RangeFilterMeta,
-  GeoPolygonFilter,
   MatchAllFilter,
   CustomFilter,
-  MissingFilter,
-  GeoBoundingBoxFilter,
   RangeFilterParams,
+  QueryStringFilter,
 } from './build_filters';
 
 export { FilterStateStore, FILTERS } from './build_filters/types';

@@ -34,7 +34,7 @@ const createObject = (
   type,
   id,
   attributes: { title: `Title for ${type}:${id}` },
-  references: (Symbol() as unknown) as SavedObjectReference[],
+  references: Symbol() as unknown as SavedObjectReference[],
   ...(originId && { originId }),
   ...(updatedAt && { updated_at: updatedAt }),
 });

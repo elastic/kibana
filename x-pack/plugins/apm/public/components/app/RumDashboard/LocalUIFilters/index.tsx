@@ -22,19 +22,19 @@ import {
   UxLocalUIFilterName,
   uxLocalUIFilterNames,
 } from '../../../../../common/ux_ui_filter';
-import { useBreakPoints } from '../../../../hooks/use_break_points';
+import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { FieldValueSuggestions } from '../../../../../../observability/public';
 import { URLFilter } from '../URLFilter';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { SelectedFilters } from './SelectedFilters';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
-import { useIndexPattern } from './use_index_pattern';
+import { useDataView } from './use_data_view';
 import { environmentQuery } from './queries';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { useUxUrlParams } from '../../../../context/url_params_context/use_ux_url_params';
 
 const filterNames: UxLocalUIFilterName[] = [
   'location',
@@ -52,7 +52,7 @@ const RUM_DATA_FILTERS = [
 ];
 
 function LocalUIFilters() {
-  const { indexPatternTitle, indexPattern } = useIndexPattern();
+  const { dataViewTitle, dataView } = useDataView();
 
   const {
     filters = [],
@@ -67,7 +67,7 @@ function LocalUIFilters() {
 
   const {
     urlParams: { start, end, serviceName, environment },
-  } = useUrlParams();
+  } = useUxUrlParams();
 
   const getFilters = useMemo(() => {
     const dataFilters: ESFilter[] = [
@@ -84,7 +84,7 @@ function LocalUIFilters() {
     return dataFilters;
   }, [environment, serviceName]);
 
-  const { isSmall } = useBreakPoints();
+  const { isSmall } = useBreakpoints();
 
   const title = (
     <EuiTitle size="s">
@@ -108,7 +108,7 @@ function LocalUIFilters() {
               <FieldValueSuggestions
                 key={filterName}
                 sourceField={uxFiltersByName[filterName].fieldName}
-                indexPatternTitle={indexPatternTitle}
+                indexPatternTitle={dataViewTitle}
                 label={uxFiltersByName[filterName].title}
                 asCombobox={false}
                 selectedValue={
@@ -144,7 +144,7 @@ function LocalUIFilters() {
         }}
         clearValues={clearValues}
         invertFilter={invertFilter}
-        indexPattern={indexPattern}
+        indexPattern={dataView}
       />
     </>
   );

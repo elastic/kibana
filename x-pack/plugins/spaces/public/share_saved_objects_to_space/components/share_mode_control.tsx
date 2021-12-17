@@ -19,17 +19,16 @@ import {
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
-import { DocumentationLinksService } from '../../lib';
 import { useSpaces } from '../../spaces_context';
-import type { ShareToSpaceTarget } from '../../types';
+import type { SpacesDataEntry } from '../../types';
 import type { ShareOptions } from '../types';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 
 interface Props {
-  spaces: ShareToSpaceTarget[];
+  spaces: SpacesDataEntry[];
   objectNoun: string;
   canShareToAllSpaces: boolean;
   shareOptions: ShareOptions;
@@ -85,10 +84,7 @@ export const ShareModeControl = (props: Props) => {
       return null;
     }
 
-    const kibanaPrivilegesUrl = new DocumentationLinksService(
-      docLinks!
-    ).getKibanaPrivilegesDocUrl();
-
+    const docLink = docLinks?.links.security.kibanaPrivileges;
     return (
       <>
         <EuiCallOut
@@ -108,7 +104,7 @@ export const ShareModeControl = (props: Props) => {
             values={{
               objectNoun,
               readAndWritePrivilegesLink: (
-                <EuiLink href={kibanaPrivilegesUrl} target="_blank">
+                <EuiLink href={docLink} target="_blank">
                   <FormattedMessage
                     id="xpack.spaces.shareToSpace.privilegeWarningLink"
                     defaultMessage="read and write privileges"
@@ -143,7 +139,7 @@ export const ShareModeControl = (props: Props) => {
           onChange(updatedSpaceIds);
         }}
         legend={buttonGroupLegend}
-        color="secondary"
+        color="success"
         isFullWidth={true}
         isDisabled={!canShareToAllSpaces}
       />

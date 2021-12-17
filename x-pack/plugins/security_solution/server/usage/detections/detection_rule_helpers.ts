@@ -5,8 +5,19 @@
  * 2.0.
  */
 
+import {
+  SIGNALS_ID,
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+} from '@kbn/securitysolution-rules';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../../cases/common/constants';
+
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
-import { SIGNALS_ID } from '../../../common/constants';
 import { isElasticRule } from './index';
 import {
   AlertsAggregationResponse,
@@ -187,9 +198,27 @@ export const getDetectionRuleMetrics = async (
 ): Promise<DetectionRuleAdoption> => {
   let rulesUsage: DetectionRulesTypeUsage = initialDetectionRulesUsage;
   const ruleSearchOptions: RuleSearchParams = {
-    body: { query: { bool: { filter: { term: { 'alert.alertTypeId': SIGNALS_ID } } } } },
-    filterPath: [],
-    ignoreUnavailable: true,
+    body: {
+      query: {
+        bool: {
+          filter: {
+            terms: {
+              'alert.alertTypeId': [
+                SIGNALS_ID,
+                EQL_RULE_TYPE_ID,
+                ML_RULE_TYPE_ID,
+                QUERY_RULE_TYPE_ID,
+                SAVED_QUERY_RULE_TYPE_ID,
+                INDICATOR_RULE_TYPE_ID,
+                THRESHOLD_RULE_TYPE_ID,
+              ],
+            },
+          },
+        },
+      },
+    },
+    filter_path: [],
+    ignore_unavailable: true,
     index: kibanaIndex,
     size: MAX_RESULTS_WINDOW,
   };
@@ -202,7 +231,7 @@ export const getDetectionRuleMetrics = async (
       body: {
         aggs: {
           detectionAlerts: {
-            terms: { field: 'signal.rule.id.keyword' },
+            terms: { field: ALERT_RULE_UUID },
           },
         },
         query: {
@@ -223,11 +252,10 @@ export const getDetectionRuleMetrics = async (
     })) as { body: AlertsAggregationResponse };
 
     const cases = await savedObjectClient.find<CasesSavedObject>({
-      type: 'cases-comments',
-      fields: [],
+      type: CASE_COMMENT_SAVED_OBJECT,
       page: 1,
       perPage: MAX_RESULTS_WINDOW,
-      filter: 'cases-comments.attributes.type: alert',
+      filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: alert`,
     });
 
     const casesCache = cases.saved_objects.reduce((cache, { attributes: casesObject }) => {
@@ -246,14 +274,13 @@ export const getDetectionRuleMetrics = async (
 
     const alertsCache = new Map<string, number>();
     alertBuckets.map((bucket) => alertsCache.set(bucket.key, bucket.doc_count));
-
     if (ruleResults.hits?.hits?.length > 0) {
       const ruleObjects = ruleResults.hits.hits.map((hit) => {
         const ruleId = hit._id.split(':')[1];
         const isElastic = isElasticRule(hit._source?.alert.tags);
         return {
           rule_name: hit._source?.alert.name,
-          rule_id: ruleId,
+          rule_id: hit._source?.alert.params.ruleId,
           rule_type: hit._source?.alert.params.type,
           rule_version: hit._source?.alert.params.version,
           enabled: hit._source?.alert.enabled,

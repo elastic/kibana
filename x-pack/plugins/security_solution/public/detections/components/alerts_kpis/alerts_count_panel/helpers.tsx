@@ -6,26 +6,21 @@
  */
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
-import { getMissingFields } from '../common/helpers';
-import type { AlertsStackByField } from '../common/types';
 
 export const getAlertsCountQuery = (
-  stackByField: AlertsStackByField,
+  stackByField: string,
   from: string,
   to: string,
   additionalFilters: Array<{
     bool: { filter: unknown[]; should: unknown[]; must_not: unknown[]; must: unknown[] };
   }> = []
 ) => {
-  const missing = getMissingFields(stackByField);
-
   return {
     size: 0,
     aggs: {
       alertsByGroupingCount: {
         terms: {
           field: stackByField,
-          ...missing,
           order: {
             _count: 'desc',
           },

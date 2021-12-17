@@ -10,9 +10,11 @@ import { Route, Redirect, Switch, useRouteMatch } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
+import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
+import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { AppLogic } from './app_logic';
 import { WorkplaceSearchHeaderActions } from './components/layout';
@@ -23,14 +25,16 @@ import {
   SOURCES_PATH,
   SOURCE_ADDED_PATH,
   OAUTH_AUTHORIZE_PATH,
-  PERSONAL_SOURCES_PATH,
+  PRIVATE_SOURCES_PATH,
   ORG_SETTINGS_PATH,
   USERS_AND_ROLES_PATH,
+  API_KEYS_PATH,
   SECURITY_PATH,
   PERSONAL_SETTINGS_PATH,
   PERSONAL_PATH,
 } from './routes';
 import { AccountSettings } from './views/account_settings';
+import { ApiKeys } from './views/api_keys';
 import { SourcesRouter } from './views/content_sources';
 import { SourceAdded } from './views/content_sources/components/source_added';
 import { ErrorState } from './views/error_state';
@@ -47,13 +51,23 @@ import { SetupGuide } from './views/setup_guide';
 export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
   const { errorConnecting } = useValues(HttpLogic);
-  return !config.host ? (
-    <WorkplaceSearchUnconfigured />
-  ) : errorConnecting ? (
-    <ErrorState />
-  ) : (
-    <WorkplaceSearchConfigured {...props} />
-  );
+  const { enterpriseSearchVersion, kibanaVersion, errorConnectingMessage } = props;
+  const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
+
+  if (!config.host) {
+    return <WorkplaceSearchUnconfigured />;
+  } else if (incompatibleVersions) {
+    return (
+      <VersionMismatchPage
+        enterpriseSearchVersion={enterpriseSearchVersion}
+        kibanaVersion={kibanaVersion}
+      />
+    );
+  } else if (errorConnecting) {
+    return <ErrorState errorConnectingMessage={errorConnectingMessage} />;
+  }
+
+  return <WorkplaceSearchConfigured {...props} />;
 };
 
 export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
@@ -66,7 +80,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
    * EX: http://localhost:5601/app/enterprise_search/workplace_search/p/sources
    */
 
-  const isOrganization = !useRouteMatch(PERSONAL_PATH); // TODO: Once auth is figured out, we need to have a check for the equivalent of `isAdmin`.
+  const isOrganization = !useRouteMatch(PERSONAL_PATH);
 
   setContext(isOrganization);
 
@@ -94,7 +108,8 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       </Route>
       <Route path={PERSONAL_PATH}>
         <Switch>
-          <Route path={PERSONAL_SOURCES_PATH}>
+          <Redirect exact from={PERSONAL_PATH} to={PRIVATE_SOURCES_PATH} />
+          <Route path={PRIVATE_SOURCES_PATH}>
             <SourcesRouter />
           </Route>
           <Route path={PERSONAL_SETTINGS_PATH}>
@@ -119,6 +134,9 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       </Route>
       <Route path={USERS_AND_ROLES_PATH}>
         <RoleMappings />
+      </Route>
+      <Route path={API_KEYS_PATH}>
+        <ApiKeys />
       </Route>
       <Route path={SECURITY_PATH}>
         <Security />

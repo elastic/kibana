@@ -10,6 +10,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { take } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 import { UiPlugins } from '../plugins';
 import { CoreContext } from '../core_context';
@@ -24,7 +25,7 @@ import {
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import { getSettingValue, getStylesheetPaths } from './render_utils';
-import { KibanaRequest, LegacyRequest } from '../http';
+import { KibanaRequest } from '../http';
 import { IUiSettingsClient } from '../ui_settings';
 
 type RenderOptions = (RenderingPrebootDeps & { status?: never }) | RenderingSetupDeps;
@@ -76,7 +77,7 @@ export class RenderingService {
 
   private async render(
     { http, uiPlugins, status }: RenderOptions,
-    request: KibanaRequest | LegacyRequest,
+    request: KibanaRequest,
     uiSettings: IUiSettingsClient,
     { includeUserSettings = true, vars }: IRenderOptions = {}
   ) {
@@ -93,7 +94,7 @@ export class RenderingService {
     };
 
     const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
-    const themeVersion = getSettingValue('theme:version', settings, String);
+    const themeVersion: ThemeVersion = 'v8';
 
     const stylesheetPaths = getStylesheetPaths({
       darkMode,
@@ -109,8 +110,8 @@ export class RenderingService {
       i18n: i18n.translate,
       locale: i18n.getLocale(),
       darkMode,
-      stylesheetPaths,
       themeVersion,
+      stylesheetPaths,
       injectedMetadata: {
         version: env.packageInfo.version,
         buildNumber: env.packageInfo.buildNum,
@@ -122,6 +123,10 @@ export class RenderingService {
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
+        },
+        theme: {
+          darkMode,
+          version: themeVersion,
         },
         csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
         externalUrl: http.externalUrl,

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { get } from 'lodash';
 import memoizeOne from 'memoize-one';
@@ -16,7 +14,8 @@ import { BrowserFields } from '../../containers/source';
 import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 import * as i18n from './translations';
 import { EventFieldsData } from './types';
-import { BrowserField, ColumnHeaderOptions } from '../../../../common';
+import { ColumnHeaderOptions } from '../../../../common/types';
+import { BrowserField } from '../../../../common/search_strategy';
 import { FieldValueCell } from './table/field_value_cell';
 import { FieldNameCell } from './table/field_name_cell';
 import { ActionCell } from './table/action_cell';
@@ -48,6 +47,7 @@ export const getColumns = ({
   timelineId,
   toggleColumn,
   getLinkValue,
+  isDraggable,
 }: {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
@@ -57,6 +57,7 @@ export const getColumns = ({
   timelineId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   getLinkValue: (field: string) => string | null;
+  isDraggable?: boolean;
 }) => [
   {
     field: 'values',
@@ -67,7 +68,7 @@ export const getColumns = ({
     ),
     sortable: false,
     truncateText: false,
-    width: '180px',
+    width: '132px',
     render: (values: string[] | null | undefined, data: EventFieldsData) => {
       const label = data.isObjectArray
         ? i18n.NESTED_COLUMN(data.field)
@@ -138,6 +139,7 @@ export const getColumns = ({
           eventId={eventId}
           fieldFromBrowserField={fieldFromBrowserField}
           getLinkValue={getLinkValue}
+          isDraggable={isDraggable}
           values={values}
         />
       );

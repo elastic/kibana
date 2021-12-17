@@ -146,6 +146,7 @@ type TestSubject =
   | 'fieldNameField.input'
   | 'messageField.input'
   | 'mockCodeEditor'
+  | 'pathField.input'
   | 'tagField.input'
   | 'typeSelectorField'
   | 'dateRoundingField'

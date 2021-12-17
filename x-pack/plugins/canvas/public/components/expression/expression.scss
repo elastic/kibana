@@ -31,6 +31,15 @@
     flex-direction: column;
   }
 
+  .canvasExpressionInput__editor {
+    height: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: $euiSizeS * 7 + 1;
+    right: 0;
+  }
+
   .canvasExpressionInput__inner {
     flex-grow: 1;
     display: flex;

@@ -4,7 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { JsonObject, JsonArray } from '@kbn/utility-types';
+
+export async function getSavedObjectFromES<T>(
+  es: Client,
+  savedObjectType: string,
+  query?: object
+): Promise<TransportResult<estypes.SearchResponse<T>, unknown>> {
+  return await es.search<T>(
+    {
+      index: '.kibana',
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { ...query },
+              {
+                term: {
+                  type: {
+                    value: savedObjectType,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+    { meta: true }
+  );
+}
 
 export const getFilterValue = (hostName: string, from: string, to: string): JsonObject => ({
   bool: {
@@ -47,7 +80,7 @@ export const getFieldsToRequest = (): string[] => [
   'destination.ip',
   'user.name',
   '@timestamp',
-  'signal.status',
+  'kibana.alert.workflow_status',
   'signal.group.id',
   'signal.original_time',
   'signal.rule.building_block_type',

@@ -202,12 +202,4 @@ export class SavedObjectsErrorHelpers {
   public static isGeneralError(error: Error | DecoratedError) {
     return isSavedObjectsClientError(error) && error[code] === CODE_GENERAL_ERROR;
   }
-
-  public static createGenericNotFoundEsUnavailableError(type: string, id: string) {
-    const notFoundError = this.createGenericNotFoundError(type, id);
-    return this.decorateEsUnavailableError(
-      new Error(`${notFoundError.message}`),
-      `x-elastic-product not present or not recognized`
-    );
-  }
 }

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
 import { mount, ReactWrapper } from 'enzyme';
 import { FieldSetting } from '../../types';
@@ -17,8 +17,9 @@ import { notificationServiceMock, docLinksServiceMock } from '../../../../../../
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Field, getEditableValue } from './field';
 
-jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
-jest.mock('brace/mode/markdown', () => 'brace/mode/markdown');
+jest.mock('../../../../../kibana_react/public/ui_settings/use_ui_setting', () => ({
+  useUiSetting: jest.fn(),
+}));
 
 const defaults = {
   requiresPageReload: false,
@@ -353,7 +354,7 @@ describe('Field', () => {
         (component.instance() as Field).getImageAsBase64 = ({}: Blob) => Promise.resolve('');
 
         it('should be able to change value and cancel', async () => {
-          (component.instance() as Field).onImageChange(([userValue] as unknown) as FileList);
+          (component.instance() as Field).onImageChange([userValue] as unknown as FileList);
           expect(handleChange).toBeCalled();
           await wrapper.setProps({
             unsavedChanges: {
@@ -377,9 +378,9 @@ describe('Field', () => {
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-changeImage-${setting.name}`).simulate('click');
           const newUserValue = `${userValue}=`;
-          await (component.instance() as Field).onImageChange(([
+          await (component.instance() as Field).onImageChange([
             newUserValue,
-          ] as unknown) as FileList);
+          ] as unknown as FileList);
           expect(handleChange).toBeCalled();
         });
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { NewPackagePolicy, PackagePolicy } from './types';
+import type { DeletePackagePoliciesResponse, NewPackagePolicy, PackagePolicy } from './types';
+import type { FleetAuthz } from './authz';
 
 export const createNewPackagePolicyMock = (): NewPackagePolicy => {
   return {
@@ -43,5 +44,42 @@ export const createPackagePolicyMock = (): PackagePolicy => {
         streams: [],
       },
     ],
+  };
+};
+
+export const deletePackagePolicyMock = (): DeletePackagePoliciesResponse => {
+  const newPackagePolicy = createNewPackagePolicyMock();
+  return [
+    {
+      id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
+      success: true,
+      package: newPackagePolicy.package,
+    },
+  ];
+};
+
+/**
+ * Creates mock `authz` object
+ */
+export const createFleetAuthzMock = (): FleetAuthz => {
+  return {
+    fleet: {
+      all: true,
+      setup: true,
+      readEnrollmentTokens: true,
+      readAgentPolicies: true,
+    },
+    integrations: {
+      readPackageInfo: true,
+      readInstalledPackages: true,
+      installPackages: true,
+      upgradePackages: true,
+      uploadPackages: true,
+      removePackages: true,
+      readPackageSettings: true,
+      writePackageSettings: true,
+      readIntegrationPolicies: true,
+      writeIntegrationPolicies: true,
+    },
   };
 };

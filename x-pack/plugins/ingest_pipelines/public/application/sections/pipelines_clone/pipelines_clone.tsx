@@ -9,7 +9,7 @@ import React, { FunctionComponent, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiPageContent } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SectionLoading, useKibana, attemptToURIDecode } from '../../../shared_imports';
 
@@ -28,9 +28,12 @@ export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> 
   const { services } = useKibana();
 
   const decodedSourceName = attemptToURIDecode(sourceName)!;
-  const { error, data: pipeline, isLoading, isInitialRequest } = services.api.useLoadPipeline(
-    decodedSourceName
-  );
+  const {
+    error,
+    data: pipeline,
+    isLoading,
+    isInitialRequest,
+  } = services.api.useLoadPipeline(decodedSourceName);
 
   useEffect(() => {
     if (error && !isLoading) {

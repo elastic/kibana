@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getCasesFromAlertsUrl } from '../../../../../../cases/common';
 import { HostIsolationResponse, HostInfo } from '../../../../../common/endpoint/types';
 import {
@@ -13,6 +13,8 @@ import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
+  ALERTS_AS_DATA_FIND_URL,
+  DETECTION_ENGINE_RULES_PREVIEW,
 } from '../../../../../common/constants';
 import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -39,8 +41,8 @@ import { resolvePathVariables } from '../../../../common/utils/resolve_path_vari
 export const fetchQueryAlerts = async <Hit, Aggregations>({
   query,
   signal,
-}: QueryAlerts): Promise<AlertSearchResponse<Hit, Aggregations>> =>
-  KibanaServices.get().http.fetch<AlertSearchResponse<Hit, Aggregations>>(
+}: QueryAlerts): Promise<AlertSearchResponse<Hit, Aggregations>> => {
+  return KibanaServices.get().http.fetch<AlertSearchResponse<Hit, Aggregations>>(
     DETECTION_ENGINE_QUERY_SIGNALS_URL,
     {
       method: 'POST',
@@ -48,12 +50,35 @@ export const fetchQueryAlerts = async <Hit, Aggregations>({
       signal,
     }
   );
+};
+
+/**
+ * Fetch Alerts by providing a query
+ *
+ * @param query String to match a dsl
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const fetchQueryRuleRegistryAlerts = async <Hit, Aggregations>({
+  query,
+  signal,
+}: QueryAlerts): Promise<AlertSearchResponse<Hit, Aggregations>> => {
+  return KibanaServices.get().http.fetch<AlertSearchResponse<Hit, Aggregations>>(
+    ALERTS_AS_DATA_FIND_URL,
+    {
+      method: 'POST',
+      body: JSON.stringify(query),
+      signal,
+    }
+  );
+};
 
 /**
  * Update alert status by query
  *
  * @param query of alerts to update
- * @param status to update to('open' / 'closed' / 'in-progress')
+ * @param status to update to('open' / 'closed' / 'acknowledged')
  * @param signal AbortSignal for cancelling request
  *
  * @throws An error if response is not OK
@@ -106,6 +131,15 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Alert
   KibanaServices.get().http.fetch<AlertsIndex>(DETECTION_ENGINE_INDEX_URL, {
     method: 'POST',
     signal,
+  });
+
+/**
+ * Create Preview if needed it
+ * @throws An error if response is not OK
+ */
+export const createPreview = async (): Promise<AlertsIndex> =>
+  KibanaServices.get().http.fetch<AlertsIndex>(DETECTION_ENGINE_RULES_PREVIEW, {
+    method: 'POST',
   });
 
 /**

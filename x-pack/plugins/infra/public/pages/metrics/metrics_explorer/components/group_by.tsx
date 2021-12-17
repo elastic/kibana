@@ -9,16 +9,17 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import React, { useCallback } from 'react';
-import { IFieldType } from 'src/plugins/data/public';
 import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
+import { DerivedIndexPattern } from '../../../../containers/metrics_source';
 
 interface Props {
   options: MetricsExplorerOptions;
   onChange: (groupBy: string | null | string[]) => void;
-  fields: IFieldType[];
+  fields: DerivedIndexPattern['fields'];
+  errorOptions?: string[];
 }
 
-export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => {
+export const MetricsExplorerGroupBy = ({ options, onChange, fields, errorOptions }: Props) => {
   const handleChange = useCallback(
     (selectedOptions: Array<{ label: string }>) => {
       const groupBy = selectedOptions.map((option) => option.label);
@@ -28,9 +29,17 @@ export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => 
   );
 
   const selectedOptions = Array.isArray(options.groupBy)
-    ? options.groupBy.map((field) => ({ label: field }))
+    ? options.groupBy.map((field) => ({
+        label: field,
+        color: errorOptions?.includes(field) ? 'danger' : undefined,
+      }))
     : options.groupBy
-    ? [{ label: options.groupBy }]
+    ? [
+        {
+          label: options.groupBy,
+          color: errorOptions?.includes(options.groupBy) ? 'danger' : undefined,
+        },
+      ]
     : [];
 
   return (

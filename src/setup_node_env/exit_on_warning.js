@@ -29,13 +29,22 @@ var IGNORE_WARNINGS = [
     file: '/node_modules/supertest/node_modules/superagent/lib/node/index.js',
     line: 418,
   },
+  // TODO @elastic/es-clients
+  // 'Use of deprecated folder mapping "./" in the "exports" field module resolution of the package
+  // at node_modules/@elastic/elasticsearch/package.json.'
+  // This is a breaking change in Node 12, which elasticsearch-js supports.
+  // https://github.com/elastic/elasticsearch-js/issues/1465
+  // https://nodejs.org/api/deprecations.html#DEP0148
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0148',
+  },
   {
     // TODO: @elastic/es-clients - The new client will attempt a Product check and it will `process.emitWarning`
     //  that the security features are blocking such check.
     //  Such emit is causing Node.js to crash unless we explicitly catch it.
     //  We need to discard that warning
-    message:
-      'The client is unable to verify that the server is Elasticsearch due to security privileges on the server side. Some functionality may not be compatible if the server is running an unsupported product.',
+    name: 'ProductNotSupportedSecurityError',
   },
 ];
 

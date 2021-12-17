@@ -19,7 +19,7 @@ import { PluginStartContract as AlertingStart } from '../../alerting/server';
 import { SecurityPluginSetup } from '../../security/server';
 
 import { RuleRegistryPluginConfig } from './config';
-import { RuleDataPluginService } from './rule_data_plugin_service';
+import { IRuleDataService, RuleDataService } from './rule_data_plugin_service';
 import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
 import { AlertsClient } from './alert_data_client/alerts_client';
 import { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
@@ -34,7 +34,7 @@ export interface RuleRegistryPluginStartDependencies {
 }
 
 export interface RuleRegistryPluginSetupContract {
-  ruleDataService: RuleDataPluginService;
+  ruleDataService: IRuleDataService;
 }
 
 export interface RuleRegistryPluginStartContract {
@@ -49,16 +49,19 @@ export class RuleRegistryPlugin
       RuleRegistryPluginStartContract,
       RuleRegistryPluginSetupDependencies,
       RuleRegistryPluginStartDependencies
-    > {
+    >
+{
   private readonly config: RuleRegistryPluginConfig;
   private readonly logger: Logger;
+  private readonly kibanaVersion: string;
   private readonly alertsClientFactory: AlertsClientFactory;
-  private ruleDataService: RuleDataPluginService | null;
+  private ruleDataService: IRuleDataService | null;
   private security: SecurityPluginSetup | undefined;
 
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config.get<RuleRegistryPluginConfig>();
     this.logger = initContext.logger.get();
+    this.kibanaVersion = initContext.env.packageInfo.version;
     this.ruleDataService = null;
     this.alertsClientFactory = new AlertsClientFactory();
   }
@@ -67,7 +70,7 @@ export class RuleRegistryPlugin
     core: CoreSetup<RuleRegistryPluginStartDependencies, RuleRegistryPluginStartContract>,
     plugins: RuleRegistryPluginSetupDependencies
   ): RuleRegistryPluginSetupContract {
-    const { config, logger } = this;
+    const { logger, kibanaVersion } = this;
 
     const startDependencies = core.getStartServices().then(([coreStart, pluginStart]) => {
       return {
@@ -78,10 +81,12 @@ export class RuleRegistryPlugin
 
     this.security = plugins.security;
 
-    this.ruleDataService = new RuleDataPluginService({
+    this.ruleDataService = new RuleDataService({
       logger,
-      isWriteEnabled: config.write.enabled,
-      index: config.index,
+      kibanaVersion,
+      disabledRegistrationContexts: this.config.write.disabledRegistrationContexts,
+      isWriteEnabled: this.config.write.enabled,
+      isWriterCacheEnabled: this.config.write.cache.enabled,
       getClusterClient: async () => {
         const deps = await startDependencies;
         return deps.core.elasticsearch.client.asInternalUser;
@@ -106,7 +111,7 @@ export class RuleRegistryPlugin
     core: CoreStart,
     plugins: RuleRegistryPluginStartDependencies
   ): RuleRegistryPluginStartContract {
-    const { logger, alertsClientFactory, security } = this;
+    const { logger, alertsClientFactory, ruleDataService, security } = this;
 
     alertsClientFactory.initialize({
       logger,
@@ -116,6 +121,7 @@ export class RuleRegistryPlugin
         return plugins.alerting.getAlertingAuthorizationWithRequest(request);
       },
       securityPluginSetup: security,
+      ruleDataService,
     });
 
     const getRacClientWithRequest = (request: KibanaRequest) => {

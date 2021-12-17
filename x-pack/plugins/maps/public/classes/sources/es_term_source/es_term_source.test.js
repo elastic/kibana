@@ -109,3 +109,20 @@ describe('extractPropertiesMap', () => {
     expect(properties[minPropName]).toBe(0);
   });
 });
+
+describe('getSyncMeta', () => {
+  it('should contain meta requiring source re-fetch when changed', () => {
+    const source = new ESTermSource({
+      id: '1234',
+      indexPatternTitle: indexPatternTitle,
+      term: termFieldName,
+      indexPatternId: 'foobar',
+      size: 10,
+    });
+    expect(source.getSyncMeta()).toEqual({
+      indexPatternId: 'foobar',
+      size: 10,
+      term: 'myTermField',
+    });
+  });
+});

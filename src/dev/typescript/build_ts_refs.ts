@@ -8,20 +8,24 @@
 
 import Path from 'path';
 
-import { ToolingLog, REPO_ROOT, ProcRunner } from '@kbn/dev-utils';
+import { ToolingLog, ProcRunner } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { ROOT_REFS_CONFIG_PATH } from './root_refs_config';
+import { Project } from './project';
 
-export async function buildAllTsRefs({
+export async function buildTsRefs({
   log,
   procRunner,
   verbose,
+  project,
 }: {
   log: ToolingLog;
   procRunner: ProcRunner;
   verbose?: boolean;
+  project?: Project;
 }): Promise<{ failed: boolean }> {
-  const relative = Path.relative(REPO_ROOT, ROOT_REFS_CONFIG_PATH);
+  const relative = Path.relative(REPO_ROOT, project ? project.tsConfigPath : ROOT_REFS_CONFIG_PATH);
   log.info(`Building TypeScript projects refs for ${relative}...`);
 
   try {

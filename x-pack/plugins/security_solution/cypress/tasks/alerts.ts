@@ -13,17 +13,15 @@ import {
   CLOSE_SELECTED_ALERTS_BTN,
   CLOSED_ALERTS_FILTER_BTN,
   EXPAND_ALERT_BTN,
-  IN_PROGRESS_ALERTS_FILTER_BTN,
+  ACKNOWLEDGED_ALERTS_FILTER_BTN,
   LOADING_ALERTS_PANEL,
   MANAGE_ALERT_DETECTION_RULES_BTN,
-  MARK_ALERT_IN_PROGRESS_BTN,
-  MARK_SELECTED_ALERTS_IN_PROGRESS_BTN,
+  MARK_ALERT_ACKNOWLEDGED_BTN,
   OPEN_ALERT_BTN,
   OPENED_ALERTS_FILTER_BTN,
   SEND_ALERT_TO_TIMELINE_BTN,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
-  SELECT_EVENT_CHECKBOX,
 } from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -36,7 +34,7 @@ import {
 } from '../screens/alerts_details';
 
 export const addExceptionFromFirstAlert = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
   cy.get(ADD_EXCEPTION_BTN).click();
 };
 
@@ -62,20 +60,25 @@ export const closeAlerts = () => {
     .should('not.be.visible');
 };
 
+export const expandFirstAlertActions = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+};
+
 export const expandFirstAlert = () => {
-  cy.get(EXPAND_ALERT_BTN).should('exist').first().click({ force: true });
+  cy.get(EXPAND_ALERT_BTN).should('exist');
+
+  cy.get(EXPAND_ALERT_BTN)
+    .first()
+    .pipe(($el) => $el.trigger('click'))
+    .should('exist');
 };
 
 export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
 
-export const viewThreatDetails = () => {
-  cy.get(EXPAND_ALERT_BTN).first().click({ force: true });
-};
-
 export const setEnrichmentDates = (from?: string, to?: string) => {
   cy.get(ENRICHMENT_QUERY_RANGE_PICKER).within(() => {
     if (from) {
-      cy.get(ENRICHMENT_QUERY_START_INPUT).type(`{selectall}${from}{enter}`);
+      cy.get(ENRICHMENT_QUERY_START_INPUT).first().type(`{selectall}${from}{enter}`);
     }
     if (to) {
       cy.get(ENRICHMENT_QUERY_END_INPUT).type(`{selectall}${to}{enter}`);
@@ -99,7 +102,12 @@ export const goToOpenedAlerts = () => {
   cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
   cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
   cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
+};
+
+export const refreshAlerts = () => {
+  // ensure we've refetched fields the first time index is defined
+  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(REFRESH_BUTTON).first().click({ force: true });
 };
 
 export const openFirstAlert = () => {
@@ -112,18 +120,16 @@ export const openAlerts = () => {
   cy.get(OPEN_ALERT_BTN).click();
 };
 
-export const goToInProgressAlerts = () => {
-  cy.get(IN_PROGRESS_ALERTS_FILTER_BTN).click();
+export const goToAcknowledgedAlerts = () => {
+  cy.get(ACKNOWLEDGED_ALERTS_FILTER_BTN).click();
+  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
+  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
-export const markInProgressFirstAlert = () => {
+export const markAcknowledgedFirstAlert = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
-  cy.get(MARK_ALERT_IN_PROGRESS_BTN).click();
-};
-
-export const markInProgressAlerts = () => {
-  cy.get(TAKE_ACTION_POPOVER_BTN).click({ force: true });
-  cy.get(MARK_SELECTED_ALERTS_IN_PROGRESS_BTN).click();
+  cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
 };
 
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
@@ -164,9 +170,4 @@ export const waitForAlertsIndexToBeCreated = () => {
 export const waitForAlertsPanelToBeLoaded = () => {
   cy.get(LOADING_ALERTS_PANEL).should('exist');
   cy.get(LOADING_ALERTS_PANEL).should('not.exist');
-};
-
-export const waitForAlertsToBeLoaded = () => {
-  const expectedNumberOfDisplayedAlerts = 25;
-  cy.get(SELECT_EVENT_CHECKBOX).should('have.length', expectedNumberOfDisplayedAlerts);
 };

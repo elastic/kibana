@@ -7,14 +7,14 @@
 
 import React, { Fragment, useEffect, useState } from 'react';
 import { EuiCallOut, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AlertTypeParamsExpressionProps } from '../../../../../triggers_actions_ui/public';
 import { GeoContainmentAlertParams } from '../types';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import {
   esQuery,
   esKuery,

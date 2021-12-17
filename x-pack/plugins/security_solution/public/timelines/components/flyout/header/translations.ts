@@ -61,6 +61,10 @@ export const USER_KPI_TITLE = i18n.translate('xpack.securitySolution.timeline.kp
   defaultMessage: 'Users',
 });
 
+export const READ_MORE = i18n.translate('xpack.securitySolution.timeline.properties.readMore', {
+  defaultMessage: 'Read More',
+});
+
 export const TIMELINE_TOGGLE_BUTTON_ARIA_LABEL = ({
   isOpen,
   title,

@@ -22,6 +22,7 @@ export type HistogramCharts = Array<{
 export function TransformWizardProvider({ getService, getPageObjects }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
   const canvasElement = getService('canvasElement');
+  const log = getService('log');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -106,11 +107,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       // To determine row and column of a cell, we're utilizing the screen reader
       // help text, which enumerates the rows and columns 1-based.
       const cells = $.findTestSubjects('dataGridRowCell')
-        .find('.euiDataGridRowCell__truncate')
         .toArray()
         .map((cell) => {
           const cellText = $(cell).text();
-          const pattern = /^(.*)Row: (\d+), Column: (\d+):$/;
+          const pattern = /^(.*)Row: (\d+); Column: (\d+)$/;
           const matches = cellText.match(pattern);
           expect(matches).to.not.eql(null, `Cell text should match pattern '${pattern}'`);
           return { text: matches![1], row: Number(matches![2]), column: Number(matches![3]) };
@@ -130,7 +130,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       column: number,
       expectedColumnValues: string[]
     ) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
         // only parse columns up to the one we want to assert
         const rows = await this.parseEuiDataGrid(tableSubj, column + 1);
@@ -152,7 +152,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertEuiDataGridColumnValuesNotEmpty(tableSubj: string, column: number) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
         // only parse columns up to the one we want to assert
         const rows = await this.parseEuiDataGrid(tableSubj, column + 1);
@@ -171,7 +171,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertIndexPreview(columns: number, expectedNumberOfRows: number) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
         // only parse the first column as this is sufficient to get assert the row count
         const rowsData = await this.parseEuiDataGrid('transformIndexPreview', 1);
@@ -241,6 +241,11 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertIndexPreviewHistogramCharts(expectedHistogramCharts: HistogramCharts) {
+      if (process.env.TEST_CLOUD) {
+        log.warning('Not running color assertions in cloud');
+        return;
+      }
+
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
       await retry.tryForTime(5000, async () => {
@@ -385,9 +390,9 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async assertRuntimeMappingsEditorContent(expectedContent: string[]) {
       await this.assertRuntimeMappingsEditorExists();
 
-      const runtimeMappingsEditorString = await aceEditor.getValue(
-        'transformAdvancedRuntimeMappingsEditor'
-      );
+      const wrapper = await testSubjects.find('transformAdvancedRuntimeMappingsEditor');
+      const editor = await wrapper.findByCssSelector('.monaco-editor .view-lines');
+      const runtimeMappingsEditorString = await editor.getVisibleText();
       // Not all lines may be visible in the editor and thus aceEditor may not return all lines.
       // This means we might not get back valid JSON so we only test against the first few lines
       // and see if the string matches.
@@ -624,7 +629,9 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertAdvancedPivotEditorContent(expectedValue: string[]) {
-      const advancedEditorString = await aceEditor.getValue('transformAdvancedPivotEditor');
+      const wrapper = await testSubjects.find('transformAdvancedPivotEditor');
+      const editor = await wrapper.findByCssSelector('.monaco-editor .view-lines');
+      const advancedEditorString = await editor.getVisibleText();
       // Not all lines may be visible in the editor and thus aceEditor may not return all lines.
       // This means we might not get back valid JSON so we only test against the first few lines
       // and see if the string matches.
@@ -730,7 +737,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
-        `Create index pattern switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+        `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
     },
 

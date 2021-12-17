@@ -6,7 +6,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { AppState } from '../../state';
+import type { AppState } from '../../state';
 
 // UI Selectors
 export const getBasePath = ({ ui: { basePath } }: AppState) => basePath;
@@ -28,8 +28,6 @@ export const monitorLocationsSelector = (state: AppState, monitorId: string) => 
 export const monitorStatusSelector = (state: AppState) => state.monitorStatus.status;
 
 export const selectDynamicSettings = (state: AppState) => state.dynamicSettings;
-
-export const selectIndexPattern = ({ indexPattern }: AppState) => indexPattern;
 
 export const selectPingHistogram = ({ ping }: AppState) => ping;
 
@@ -74,17 +72,12 @@ export const selectAlertFlyoutVisibility = ({ ui: { alertFlyoutVisible } }: AppS
 
 export const selectAlertFlyoutType = ({ ui: { alertFlyoutType } }: AppState) => alertFlyoutType;
 
-export const selectMonitorStatusAlert = ({ indexPattern, overviewFilters, ui }: AppState) => ({
-  filters: ui.esKuery,
-  indexPattern: indexPattern.index_pattern,
-  locations: overviewFilters.filters.locations,
-});
-
 export const indexStatusSelector = ({ indexStatus }: AppState) => indexStatus.indexStatus;
 
 export const monitorListSelector = ({ monitorList }: AppState) => monitorList;
 
-export const overviewFiltersSelector = ({ overviewFilters }: AppState) => overviewFilters;
+export const monitorManagementListSelector = ({ monitorManagementList }: AppState) =>
+  monitorManagementList;
 
 export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
 
@@ -99,3 +92,5 @@ export const journeySelector = ({ journeys }: AppState) => journeys;
 export const networkEventsSelector = ({ networkEvents }: AppState) => networkEvents;
 
 export const syntheticsSelector = ({ synthetics }: AppState) => synthetics;
+
+export const uptimeWriteSelector = (state: AppState) => state;

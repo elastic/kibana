@@ -11,13 +11,14 @@ import { CoreStart } from 'src/core/public';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
+import { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
-import { ISearchSetup, ISearchStart } from './search';
+import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
-import { IndexPatternsContract } from './index_patterns';
+import { DataViewsContract } from './data_views';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup, UsageCollectionStart } from '../../usage_collection/public';
 import { Setup as InspectorSetup } from '../../inspector/public';
@@ -35,6 +36,7 @@ export interface DataSetupDependencies {
 export interface DataStartDependencies {
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 /**
@@ -43,10 +45,6 @@ export interface DataStartDependencies {
 export interface DataPublicPluginSetup {
   autocomplete: AutocompleteSetup;
   search: ISearchSetup;
-  /**
-   * @deprecated Use fieldFormats plugin instead
-   */
-  fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
 }
 
@@ -81,10 +79,16 @@ export interface DataPublicPluginStart {
    */
   autocomplete: AutocompleteStart;
   /**
-   * index patterns service
-   * {@link IndexPatternsContract}
+   * data views service
+   * {@link DataViewsContract}
    */
-  indexPatterns: IndexPatternsContract;
+  dataViews: DataViewsContract;
+  /**
+   * index patterns service
+   * {@link DataViewsContract}
+   * @deprecated Use dataViews service instead.  All index pattern interfaces were renamed.
+   */
+  indexPatterns: DataViewsContract;
   /**
    * search service
    * {@link ISearchStart}

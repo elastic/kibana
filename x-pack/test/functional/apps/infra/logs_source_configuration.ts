@@ -60,7 +60,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await logsUi.logStreamPage.navigateTo();
 
         await retry.try(async () => {
-          await logsUi.logStreamPage.getNoLogsIndicesPrompt();
+          await logsUi.logStreamPage.getNoDataPage();
         });
       });
 
@@ -113,7 +113,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await logsUi.logStreamPage.getStreamEntries();
 
-        const resp = await supertest
+        const [{ stats }] = await supertest
           .post(`/api/telemetry/v2/clusters/_stats`)
           .set(COMMON_REQUEST_HEADERS)
           .set('Accept', 'application/json')
@@ -123,9 +123,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           .expect(200)
           .then((res: any) => res.body);
 
-        expect(
-          resp[0].stack_stats.kibana.plugins.infraops.last_24_hours.hits.logs
-        ).to.be.greaterThan(0);
+        expect(stats.stack_stats.kibana.plugins.infraops.last_24_hours.hits.logs).to.be.greaterThan(
+          0
+        );
       });
 
       it('can change the log columns', async () => {

@@ -16,7 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...xpackFunctionalConfig.getAll(),
     pageObjects,
-    testFiles: [resolve(__dirname, './apps/fleet')],
+    testFiles: [resolve(__dirname, './apps/fleet'), resolve(__dirname, './apps/home')],
     junit: {
       reportName: 'X-Pack Fleet Functional Tests',
     },
@@ -29,10 +29,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.fleet.enabled=true',
-      ],
+      serverArgs: [...xpackFunctionalConfig.get('kbnTestServer.serverArgs')],
     },
     layout: {
       fixedHeaderHeight: 200,

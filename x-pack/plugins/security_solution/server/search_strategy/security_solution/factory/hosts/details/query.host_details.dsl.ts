@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
+import type { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
 import { cloudFieldsMap, hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import { HostDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import { reduceFields } from '../../../../../utils/build_query/reduce_fields';
@@ -35,9 +35,9 @@ export const buildHostDetailsQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
       aggregations: {

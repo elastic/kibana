@@ -6,11 +6,12 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type {
   Logger,
   KibanaRequest,
   ISavedObjectsRepository,
   IBasePath,
+  ExecutionContextStart,
 } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
@@ -27,7 +28,7 @@ import {
 import { TaskRunner } from './task_runner';
 import { IEventLogger } from '../../../event_log/server';
 import { RulesClient } from '../rules_client';
-import { NormalizedAlertType } from '../rule_type_registry';
+import { NormalizedRuleType } from '../rule_type_registry';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -36,13 +37,15 @@ export interface TaskRunnerContext {
   actionsPlugin: ActionsPluginStartContract;
   eventLogger: IEventLogger;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  executionContext: ExecutionContextStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   basePathService: IBasePath;
   internalSavedObjectsRepository: ISavedObjectsRepository;
   ruleTypeRegistry: RuleTypeRegistry;
   kibanaBaseUrl: string | undefined;
   supportsEphemeralTasks: boolean;
-  maxEphemeralActionsPerAlert: Promise<number>;
+  maxEphemeralActionsPerRule: number;
+  cancelAlertsOnRuleTimeout: boolean;
 }
 
 export class TaskRunnerFactory {
@@ -66,7 +69,7 @@ export class TaskRunnerFactory {
     ActionGroupIds extends string,
     RecoveryActionGroupId extends string
   >(
-    alertType: NormalizedAlertType<
+    ruleType: NormalizedRuleType<
       Params,
       ExtractedParams,
       State,
@@ -89,6 +92,6 @@ export class TaskRunnerFactory {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(alertType, taskInstance, this.taskRunnerContext!);
+    >(ruleType, taskInstance, this.taskRunnerContext!);
   }
 }

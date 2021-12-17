@@ -27,6 +27,7 @@ import {
   PersistedIndexPatternLayer,
   XYState,
   LensEmbeddableInput,
+  DateHistogramIndexPatternColumn,
 } from '../../../plugins/lens/public';
 import { StartDependencies } from './plugin';
 
@@ -55,7 +56,7 @@ function getLensAttributes(
         params: { interval: 'auto' },
         scale: 'interval',
         sourceField: defaultIndexPattern.timeFieldName!,
-      },
+      } as DateHistogramIndexPatternColumn,
     },
   };
 
@@ -173,7 +174,9 @@ export const App = (props: {
                             timeRange: time,
                             attributes: getLensAttributes(props.defaultIndexPattern!, color),
                           },
-                          true
+                          {
+                            openInNewTab: true,
+                          }
                         );
                         // eslint-disable-next-line no-bitwise
                         const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
@@ -195,7 +198,9 @@ export const App = (props: {
                             timeRange: time,
                             attributes: getLensAttributes(props.defaultIndexPattern!, color),
                           },
-                          false
+                          {
+                            openInNewTab: false,
+                          }
                         );
                       }}
                     >
@@ -256,10 +261,10 @@ export const App = (props: {
                 {isSaveModalVisible && (
                   <LensSaveModalComponent
                     initialInput={
-                      (getLensAttributes(
+                      getLensAttributes(
                         props.defaultIndexPattern,
                         color
-                      ) as unknown) as LensEmbeddableInput
+                      ) as unknown as LensEmbeddableInput
                     }
                     onSave={() => {}}
                     onClose={() => setIsSaveModalVisible(false)}

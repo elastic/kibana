@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { ReferenceOrValueEmbeddable, isReferenceOrValueEmbeddable } from './types';
+export type { ReferenceOrValueEmbeddable } from './types';
+export { isReferenceOrValueEmbeddable } from './types';

@@ -73,5 +73,5 @@ export function isMLResponseError(error: any): error is MLResponseError {
 }
 
 export function isBoomError(error: any): error is Boom.Boom {
-  return error.isBoom === true;
+  return error?.isBoom === true;
 }

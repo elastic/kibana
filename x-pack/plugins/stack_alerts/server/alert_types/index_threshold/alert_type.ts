@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
-import { AlertType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
+import { RuleType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
@@ -23,7 +23,7 @@ export const ActionGroupId = 'threshold met';
 export function getAlertType(
   logger: Logger,
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
-): AlertType<Params, never, {}, {}, ActionContext, typeof ActionGroupId> {
+): RuleType<Params, never, {}, {}, ActionContext, typeof ActionGroupId> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
@@ -165,7 +165,9 @@ export function getAlertType(
       interval: undefined,
     };
     // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
-    const result = await (await data).timeSeriesQuery({
+    const result = await (
+      await data
+    ).timeSeriesQuery({
       logger,
       esClient,
       query: queryParams,

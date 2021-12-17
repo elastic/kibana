@@ -11,9 +11,11 @@ import type {
   TimelineType,
   TimelineStatus,
   TimelineTabs,
+  ScrollToTopEvent,
 } from '../../../../common/types/timeline';
 import { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
 import type { TGridModelForTimeline } from '../../../../../timelines/public';
+import { ResolveTimelineConfig } from '../../components/open_timeline/types';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
@@ -23,6 +25,9 @@ export type TimelineModel = TGridModelForTimeline & {
   /** The selected tab to displayed in the timeline */
   activeTab: TimelineTabs;
   prevActiveTab: TimelineTabs;
+
+  /** Used for scrolling to top when swiching tabs. It includes the timestamp of when the event happened */
+  scrollToTop?: ScrollToTopEvent;
   /** Timeline saved object owner */
   createdBy?: string;
   /** A summary of the events and notes in this timeline */
@@ -55,6 +60,7 @@ export type TimelineModel = TGridModelForTimeline & {
   /** Events pinned to this timeline */
   pinnedEventIds: Record<string, boolean>;
   pinnedEventsSaveObject: Record<string, PinnedEvent>;
+  resolveTimelineConfig?: ResolveTimelineConfig;
   showSaveModal?: boolean;
   savedQueryId?: string | null;
   /** When true, show the timeline flyover */
@@ -63,9 +69,12 @@ export type TimelineModel = TGridModelForTimeline & {
   status: TimelineStatus;
   /** updated saved object timestamp */
   updated?: number;
+  /** updated saved object user */
+  updatedBy?: string | null;
   /** timeline is saving */
   isSaving: boolean;
   version: string | null;
+  initialized?: boolean;
 };
 
 export type SubsetTimelineModel = Readonly<
@@ -74,13 +83,17 @@ export type SubsetTimelineModel = Readonly<
     | 'activeTab'
     | 'prevActiveTab'
     | 'columns'
+    | 'defaultColumns'
     | 'dataProviders'
+    | 'dataViewId'
     | 'deletedEventIds'
     | 'description'
+    | 'documentType'
     | 'eventType'
     | 'eventIdToNoteIds'
     | 'excludedRowRendererIds'
     | 'expandedDetail'
+    | 'footerText'
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
@@ -92,15 +105,18 @@ export type SubsetTimelineModel = Readonly<
     | 'itemsPerPageOptions'
     | 'kqlMode'
     | 'kqlQuery'
+    | 'queryFields'
     | 'title'
     | 'timelineType'
     | 'templateTimelineId'
     | 'templateTimelineVersion'
     | 'loadingEventIds'
+    | 'loadingText'
     | 'noteIds'
     | 'pinnedEventIds'
     | 'pinnedEventsSaveObject'
     | 'dateRange'
+    | 'selectAll'
     | 'selectedEventIds'
     | 'show'
     | 'showCheckboxes'
@@ -108,6 +124,7 @@ export type SubsetTimelineModel = Readonly<
     | 'isSaving'
     | 'isLoading'
     | 'savedObjectId'
+    | 'unit'
     | 'version'
     | 'status'
   >

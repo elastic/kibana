@@ -7,24 +7,27 @@
 
 import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
-import {
+import { Filter } from '@kbn/es-query';
+import type {
   ExecutionContextSearch,
-  Filter,
   Query,
   TimefilterContract,
   TimeRange,
   IndexPattern,
 } from 'src/plugins/data/public';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import type { PaletteOutput } from 'src/plugins/charts/public';
+import type { Start as InspectorStart } from 'src/plugins/inspector/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
-import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
+import { RenderMode } from 'src/plugins/expressions';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -40,24 +43,39 @@ import {
   ReferenceOrValueEmbeddable,
 } from '../../../../../src/plugins/embeddable/public';
 import { Document, injectFilterReferences } from '../persistence';
-import { ExpressionWrapper } from './expression_wrapper';
+import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import {
   isLensBrushEvent,
   isLensFilterEvent,
+  isLensEditEvent,
   isLensTableRowContextMenuClickEvent,
   LensBrushEvent,
   LensFilterEvent,
   LensTableRowContextMenuEvent,
+  VisualizationMap,
+  Visualization,
 } from '../types';
 
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
 import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
-import { IBasePath } from '../../../../../src/core/public';
+import { IBasePath, ThemeServiceStart } from '../../../../../src/core/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage } from '../editor_frame_service/types';
+import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
+import { SharingSavedObjectProps } from '../types';
+import type { SpacesPluginStart } from '../../../spaces/public';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
+
+export interface LensUnwrapMetaInfo {
+  sharingSavedObjectProps?: SharingSavedObjectProps;
+}
+
+export interface LensUnwrapResult {
+  attributes: LensSavedObjectAttributes;
+  metaInfo?: LensUnwrapMetaInfo;
+}
 
 interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
@@ -89,19 +107,35 @@ export interface LensEmbeddableDeps {
   documentToExpression: (
     doc: Document
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  visualizationMap: VisualizationMap;
   indexPatternService: IndexPatternsContract;
   expressionRenderer: ReactExpressionRendererType;
   timefilter: TimefilterContract;
   basePath: IBasePath;
+  inspector: InspectorStart;
   getTrigger?: UiActionsStart['getTrigger'] | undefined;
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
   capabilities: { canSaveVisualizations: boolean; canSaveDashboards: boolean };
   usageCollection?: UsageCollectionSetup;
+  spaces?: SpacesPluginStart;
+  theme: ThemeServiceStart;
 }
+
+const getExpressionFromDocument = async (
+  document: Document,
+  documentToExpression: LensEmbeddableDeps['documentToExpression']
+) => {
+  const { ast, errors } = await documentToExpression(document);
+  return {
+    expression: ast ? toExpression(ast) : null,
+    errors,
+  };
+};
 
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput>
+{
   type = DOC_TYPE;
 
   deferEmbeddableLoad = true;
@@ -112,10 +146,10 @@ export class Embeddable
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private isInitialized = false;
-  private activeData: Partial<DefaultInspectorAdapters> | undefined;
   private errors: ErrorMessage[] | undefined;
   private inputReloadSubscriptions: Subscription[];
   private isDestroyed?: boolean;
+  private lensInspector: LensInspector;
 
   private logError(type: 'runtime' | 'validation') {
     this.deps.usageCollection?.reportUiCounter(
@@ -144,7 +178,7 @@ export class Embeddable
       },
       parent
     );
-
+    this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput).then(() => this.onContainerStateChanged(initialInput));
     this.subscription = this.getUpdated$().subscribe(() =>
@@ -246,28 +280,59 @@ export class Embeddable
   }
 
   public getInspectorAdapters() {
-    return this.activeData;
+    return this.lensInspector.adapters;
+  }
+
+  private maybeAddConflictError(
+    errors?: ErrorMessage[],
+    sharingSavedObjectProps?: SharingSavedObjectProps
+  ) {
+    const ret = [...(errors || [])];
+
+    if (sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {
+      ret.push({
+        shortMessage: i18n.translate('xpack.lens.embeddable.legacyURLConflict.shortMessage', {
+          defaultMessage: `You've encountered a URL conflict`,
+        }),
+        longMessage: (
+          <this.deps.spaces.ui.components.getEmbeddableLegacyUrlConflict
+            targetType={DOC_TYPE}
+            sourceId={sharingSavedObjectProps.sourceId!}
+          />
+        ),
+      });
+    }
+
+    return ret?.length ? ret : undefined;
   }
 
   async initializeSavedVis(input: LensEmbeddableInput) {
-    const attributes:
-      | LensSavedObjectAttributes
-      | false = await this.deps.attributeService.unwrapAttributes(input).catch((e: Error) => {
-      this.onFatalError(e);
-      return false;
-    });
-    if (!attributes || this.isDestroyed) {
+    const unwrapResult: LensUnwrapResult | false = await this.deps.attributeService
+      .unwrapAttributes(input)
+      .catch((e: Error) => {
+        this.onFatalError(e);
+        return false;
+      });
+    if (!unwrapResult || this.isDestroyed) {
       return;
     }
+
+    const { metaInfo, attributes } = unwrapResult;
+
     this.savedVis = {
       ...attributes,
       type: this.type,
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
-    const { ast, errors } = await this.deps.documentToExpression(this.savedVis);
-    this.errors = errors;
-    this.expression = ast ? toExpression(ast) : null;
-    if (errors) {
+
+    const { expression, errors } = await getExpressionFromDocument(
+      this.savedVis,
+      this.deps.documentToExpression
+    );
+    this.expression = expression;
+    this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
+
+    if (this.errors) {
       this.logError('validation');
     }
     await this.initializeOutput();
@@ -300,15 +365,15 @@ export class Embeddable
     return isDirty;
   }
 
-  private updateActiveData = (
-    data: unknown,
-    inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
-  ) => {
-    this.activeData = inspectorAdapters;
+  private updateActiveData: ExpressionWrapperProps['onData$'] = () => {
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false);
     }
+  };
+
+  private onRender: ExpressionWrapperProps['onRender$'] = () => {
+    this.renderComplete.dispatchComplete();
   };
 
   /**
@@ -318,12 +383,17 @@ export class Embeddable
    */
   render(domNode: HTMLElement | Element) {
     this.domNode = domNode;
+    super.render(domNode as HTMLElement);
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
     if (this.input.onLoad) {
       this.input.onLoad(true);
     }
+
+    this.domNode.setAttribute('data-shared-item', '');
+
+    this.renderComplete.dispatchInProgress();
 
     const executionContext = {
       type: 'lens',
@@ -337,26 +407,31 @@ export class Embeddable
     const input = this.getInput();
 
     render(
-      <ExpressionWrapper
-        ExpressionRenderer={this.expressionRenderer}
-        expression={this.expression || null}
-        errors={this.errors}
-        searchContext={this.getMergedSearchContext()}
-        variables={input.palette ? { theme: { palette: input.palette } } : {}}
-        searchSessionId={this.externalSearchContext.searchSessionId}
-        handleEvent={this.handleEvent}
-        onData$={this.updateActiveData}
-        renderMode={input.renderMode}
-        syncColors={input.syncColors}
-        hasCompatibleActions={this.hasCompatibleActions}
-        className={input.className}
-        style={input.style}
-        executionContext={executionContext}
-        canEdit={this.getIsEditable() && input.viewMode === 'edit'}
-        onRuntimeError={() => {
-          this.logError('runtime');
-        }}
-      />,
+      <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+        <ExpressionWrapper
+          ExpressionRenderer={this.expressionRenderer}
+          expression={this.expression || null}
+          errors={this.errors}
+          lensInspector={this.lensInspector}
+          searchContext={this.getMergedSearchContext()}
+          variables={input.palette ? { theme: { palette: input.palette } } : {}}
+          searchSessionId={this.externalSearchContext.searchSessionId}
+          handleEvent={this.handleEvent}
+          onData$={this.updateActiveData}
+          onRender$={this.onRender}
+          interactive={!input.disableTriggers}
+          renderMode={input.renderMode}
+          syncColors={input.syncColors}
+          hasCompatibleActions={this.hasCompatibleActions}
+          className={input.className}
+          style={input.style}
+          executionContext={executionContext}
+          canEdit={this.getIsEditable() && input.viewMode === 'edit'}
+          onRuntimeError={() => {
+            this.logError('runtime');
+          }}
+        />
+      </KibanaThemeProvider>,
       domNode
     );
   }
@@ -406,7 +481,17 @@ export class Embeddable
     return output;
   }
 
-  handleEvent = (event: ExpressionRendererEvent) => {
+  private get onEditAction(): Visualization['onEditAction'] {
+    const visType = this.savedVis?.visualizationType;
+
+    if (!visType) {
+      return;
+    }
+
+    return this.deps.visualizationMap[visType].onEditAction;
+  }
+
+  handleEvent = async (event: ExpressionRendererEvent) => {
     if (!this.deps.getTrigger || this.input.disableTriggers) {
       return;
     }
@@ -439,12 +524,32 @@ export class Embeddable
         true
       );
       if (this.input.onTableRowClick) {
-        this.input.onTableRowClick((event.data as unknown) as LensTableRowContextMenuEvent['data']);
+        this.input.onTableRowClick(event.data as unknown as LensTableRowContextMenuEvent['data']);
       }
+    }
+
+    // We allow for edit actions in the Embeddable for display purposes only (e.g. changing the datatable sort order).
+    // No state changes made here with an edit action are persisted.
+    if (isLensEditEvent(event) && this.onEditAction) {
+      if (!this.savedVis) return;
+
+      // have to dance since this.savedVis.state is readonly
+      const newVis = JSON.parse(JSON.stringify(this.savedVis)) as Document;
+      newVis.state.visualization = this.onEditAction(newVis.state.visualization, event);
+      this.savedVis = newVis;
+
+      const { expression, errors } = await getExpressionFromDocument(
+        this.savedVis,
+        this.deps.documentToExpression
+      );
+      this.expression = expression;
+      this.errors = errors;
+
+      this.reload();
     }
   };
 
-  async reload() {
+  reload() {
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }

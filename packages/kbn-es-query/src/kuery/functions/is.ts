@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { get, isUndefined } from 'lodash';
+import { isUndefined } from 'lodash';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
-import { getTimeZoneFromSettings } from '../../utils';
+import { getTimeZoneFromSettings, getDataViewFieldSubtypeNested } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { IndexPatternBase, KueryNode, IndexPatternFieldBase } from '../..';
+import { IndexPatternBase, KueryNode, IndexPatternFieldBase, KueryQueryOptions } from '../..';
 
 import * as ast from '../ast';
 
@@ -40,9 +41,9 @@ export function buildNodeParams(fieldName: string, value: any, isPhrase: boolean
 export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: IndexPatternBase,
-  config: Record<string, any> = {},
+  config: KueryQueryOptions = {},
   context: Record<string, any> = {}
-) {
+): estypes.QueryDslQueryContainer {
   const {
     arguments: [fieldNameArg, valueArg, isPhraseArg],
   } = node;
@@ -75,7 +76,7 @@ export function toElasticsearchQuery(
     return {
       multi_match: {
         type,
-        query: value,
+        query: value as unknown as string,
         lenient: true,
       },
     };
@@ -89,7 +90,7 @@ export function toElasticsearchQuery(
   // keep things familiar for now.
   if (fields && fields.length === 0) {
     fields.push({
-      name: (ast.toElasticsearchQuery(fullFieldNameArg) as unknown) as string,
+      name: ast.toElasticsearchQuery(fullFieldNameArg) as unknown as string,
       scripted: false,
       type: '',
     });
@@ -104,16 +105,13 @@ export function toElasticsearchQuery(
     const wrapWithNestedQuery = (query: any) => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
-      if (
-        !(fullFieldNameArg.type === 'wildcard') ||
-        !get(field, 'subType.nested') ||
-        context?.nested
-      ) {
+      const subTypeNested = getDataViewFieldSubtypeNested(field);
+      if (!(fullFieldNameArg.type === 'wildcard') || !subTypeNested?.nested || context?.nested) {
         return query;
       } else {
         return {
           nested: {
-            path: field.subType!.nested!.path,
+            path: subTypeNested.nested.path,
             query,
             score_mode: 'none',
           },

@@ -7,6 +7,8 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import type { Query } from 'src/plugins/data/common';
+import { Filter } from '@kbn/es-query';
 import {
   DrawState,
   EditState,
@@ -14,28 +16,32 @@ import {
   LayerDescriptor,
   MapCenter,
   MapExtent,
-  MapQuery,
   Timeslice,
   TooltipState,
 } from '../../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../../common/constants';
-import { Filter, TimeRange } from '../../../../../../src/plugins/data/public';
+import { TimeRange } from '../../../../../../src/plugins/data/public';
 
-export type MapContext = {
-  zoom?: number;
-  center?: MapCenter;
+export interface MapExtentState {
+  zoom: number;
+  extent: MapExtent;
+  center: MapCenter;
+}
+
+export type MapViewContext = MapExtentState & {
+  buffer: MapExtent;
+};
+
+export type MapContext = Partial<MapViewContext> & {
   scrollZoom: boolean;
-  buffer?: MapExtent;
-  extent?: MapExtent;
   mouseCoordinates?: {
     lat: number;
     lon: number;
   };
   timeFilters?: TimeRange;
   timeslice?: Timeslice;
-  query?: MapQuery;
+  query?: Query;
   filters: Filter[];
-  refreshTimerLastTriggeredAt?: string;
   drawState?: DrawState;
   editState?: EditState;
   searchSessionId?: string;

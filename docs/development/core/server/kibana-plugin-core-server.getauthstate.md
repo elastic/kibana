@@ -9,7 +9,7 @@ Gets authentication state for a request. Returned by `auth` interceptor.
 <b>Signature:</b>
 
 ```typescript
-export declare type GetAuthState = <T = unknown>(request: KibanaRequest | LegacyRequest) => {
+export declare type GetAuthState = <T = unknown>(request: KibanaRequest) => {
     status: AuthStatus;
     state: T;
 };

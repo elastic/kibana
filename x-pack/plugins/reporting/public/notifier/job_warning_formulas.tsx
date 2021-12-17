@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
 import { ToastInput } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';

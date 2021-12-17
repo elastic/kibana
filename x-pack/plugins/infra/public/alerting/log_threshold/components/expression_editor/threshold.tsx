@@ -23,7 +23,7 @@ import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types
 import {
   Comparator,
   ComparatorToi18nMap,
-  AlertParams,
+  RuleParams,
 } from '../../../../../common/alerting/logs/log_threshold/types';
 
 const thresholdPrefix = i18n.translate('xpack.infra.logs.alertFlyout.thresholdPrefix', {
@@ -49,7 +49,7 @@ const getComparatorOptions = (): Array<{
 interface Props {
   comparator?: Comparator;
   value?: number;
-  updateThreshold: (params: Partial<AlertParams['count']>) => void;
+  updateThreshold: (params: Partial<RuleParams['count']>) => void;
   errors: IErrorObject;
 }
 
@@ -65,9 +65,11 @@ export const Threshold: React.FC<Props> = ({ comparator, value, updateThreshold,
             <EuiExpression
               description={thresholdPrefix}
               uppercase={true}
-              value={`${comparator ? ComparatorToi18nMap[comparator] : ''} ${value ? value : ''}`}
+              value={`${comparator ? ComparatorToi18nMap[comparator] : ''} ${
+                typeof value === 'number' ? value : ''
+              }`}
               isActive={isThresholdPopoverOpen}
-              onClick={() => setThresholdPopoverOpenState(true)}
+              onClick={() => setThresholdPopoverOpenState(!isThresholdPopoverOpen)}
             />
           }
           isOpen={isThresholdPopoverOpen}

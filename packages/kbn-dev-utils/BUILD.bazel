@@ -1,9 +1,10 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_BASE_NAME = "kbn-dev-utils"
 PKG_REQUIRE_NAME = "@kbn/dev-utils"
+TYPES_PKG_REQUIRE_NAME = "@types/kbn__dev-utils"
 
 SOURCE_FILES = glob(
   [
@@ -43,7 +44,6 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-std",
   "//packages/kbn-utils",
   "@npm//@babel/core",
   "@npm//axios",
@@ -57,22 +57,18 @@ RUNTIME_DEPS = [
   "@npm//load-json-file",
   "@npm//markdown-it",
   "@npm//normalize-path",
+  "@npm//prettier",
   "@npm//rxjs",
   "@npm//tar",
   "@npm//tree-kill",
   "@npm//vinyl",
-  "@npm//yauzl"
+  "@npm//yauzl",
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-std",
   "//packages/kbn-utils",
-  "@npm//axios",
-  "@npm//execa",
-  "@npm//exit-hook",
-  "@npm//getopts",
-  "@npm//rxjs",
-  "@npm//tree-kill",
+  "@npm//@babel/parser",
+  "@npm//@babel/types",
   "@npm//@types/babel__core",
   "@npm//@types/cheerio",
   "@npm//@types/dedent",
@@ -81,11 +77,18 @@ TYPES_DEPS = [
   "@npm//@types/markdown-it",
   "@npm//@types/node",
   "@npm//@types/normalize-path",
+  "@npm//@types/prettier",
   "@npm//@types/react",
   "@npm//@types/tar",
   "@npm//@types/testing-library__jest-dom",
   "@npm//@types/vinyl",
-  "@npm//@types/yauzl"
+  "@npm//@types/yauzl",
+  "@npm//axios",
+  "@npm//execa",
+  "@npm//exit-hook",
+  "@npm//getopts",
+  "@npm//rxjs",
+  "@npm//tree-kill",
 ]
 
 jsts_transpiler(
@@ -120,7 +123,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -136,6 +139,23 @@ filegroup(
   name = "build",
   srcs = [
     ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm_types(
+  name = "npm_module_types",
+  srcs = SRCS,
+  deps = [":tsc_types"],
+  package_name = TYPES_PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "build_types",
+  srcs = [
+    ":npm_module_types",
   ],
   visibility = ["//visibility:public"],
 )

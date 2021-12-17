@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
-import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
   HostDetailsStrategyResponse,
@@ -28,6 +28,8 @@ import {
   HostsKpiUniqueIpsStrategyResponse,
   HostsKpiUniqueIpsRequestOptions,
   HostFirstLastSeenRequestOptions,
+  HostsRiskScoreStrategyResponse,
+  HostsRiskScoreRequestOptions,
 } from './hosts';
 import {
   NetworkQueries,
@@ -70,6 +72,8 @@ import {
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
   CtiQueries,
+  CtiDataSourceRequestOptions,
+  CtiDataSourceStrategyResponse,
 } from './cti';
 import {
   HostRulesRequestOptions,
@@ -82,7 +86,12 @@ import {
   UserRulesRequestOptions,
   UserRulesStrategyResponse,
 } from './ueba';
+import {
+  HostsKpiRiskyHostsRequestOptions,
+  HostsKpiRiskyHostsStrategyResponse,
+} from './hosts/kpi/risky_hosts';
 
+export * from './cti';
 export * from './hosts';
 export * from './matrix_histogram';
 export * from './network';
@@ -124,6 +133,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostDetailsStrategyResponse
   : T extends UebaQueries.riskScore
   ? RiskScoreStrategyResponse
+  : T extends HostsQueries.hostsRiskScore
+  ? HostsRiskScoreStrategyResponse
   : T extends UebaQueries.hostRules
   ? HostRulesStrategyResponse
   : T extends UebaQueries.userRules
@@ -142,6 +153,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostsKpiAuthenticationsStrategyResponse
   : T extends HostsKpiQueries.kpiHosts
   ? HostsKpiHostsStrategyResponse
+  : T extends HostsKpiQueries.kpiRiskyHosts
+  ? HostsKpiRiskyHostsStrategyResponse
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsStrategyResponse
   : T extends NetworkQueries.details
@@ -174,10 +187,14 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? MatrixHistogramStrategyResponse
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentStrategyResponse
+  : T extends CtiQueries.dataSource
+  ? CtiDataSourceStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptions
+  : T extends HostsQueries.hostsRiskScore
+  ? HostsRiskScoreRequestOptions
   : T extends HostsQueries.details
   ? HostDetailsRequestOptions
   : T extends HostsQueries.overview
@@ -194,6 +211,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostsKpiHostsRequestOptions
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsRequestOptions
+  : T extends HostsKpiQueries.kpiRiskyHosts
+  ? HostsKpiRiskyHostsRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns
@@ -232,6 +251,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? MatrixHistogramRequestOptions
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentRequestOptions
+  : T extends CtiQueries.dataSource
+  ? CtiDataSourceRequestOptions
   : never;
 
 export interface DocValueFieldsInput {

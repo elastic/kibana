@@ -284,12 +284,23 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickQuickSave() {
-    await this.expectQuickSaveButtonEnabled();
-    this.log.debug('clickQuickSave');
-    await this.testSubjects.click('dashboardQuickSaveMenuItem');
+    await this.retry.try(async () => {
+      await this.expectQuickSaveButtonEnabled();
+      this.log.debug('clickQuickSave');
+      await this.testSubjects.click('dashboardQuickSaveMenuItem');
+    });
   }
 
   public async clickNewDashboard(continueEditing = false) {
+    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
+    if (!continueEditing && discardButtonExists) {
+      this.log.debug('found discard button');
+      await this.testSubjects.click('discardDashboardPromptButton');
+      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      if (confirmation) {
+        await this.common.clickConfirmOnModal();
+      }
+    }
     await this.listingTable.clickNewButton('createDashboardPromptButton');
     if (await this.testSubjects.exists('dashboardCreateConfirm')) {
       if (continueEditing) {
@@ -303,6 +314,15 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickNewDashboardExpectWarning(continueEditing = false) {
+    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
+    if (!continueEditing && discardButtonExists) {
+      this.log.debug('found discard button');
+      await this.testSubjects.click('discardDashboardPromptButton');
+      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      if (confirmation) {
+        await this.common.clickConfirmOnModal();
+      }
+    }
     await this.listingTable.clickNewButton('createDashboardPromptButton');
     await this.testSubjects.existOrFail('dashboardCreateConfirm');
     if (continueEditing) {
@@ -392,10 +412,11 @@ export class DashboardPageObject extends FtrService {
    */
   public async saveDashboard(
     dashboardName: string,
-    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true }
+    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true },
+    clickMenuItem = true
   ) {
     await this.retry.try(async () => {
-      await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
+      await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions, clickMenuItem);
 
       if (saveOptions.needsConfirm) {
         await this.ensureDuplicateTitleCallout();
@@ -435,9 +456,12 @@ export class DashboardPageObject extends FtrService {
    */
   public async enterDashboardTitleAndClickSave(
     dashboardTitle: string,
-    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true }
+    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true },
+    clickMenuItem = true
   ) {
-    await this.testSubjects.click('dashboardSaveMenuItem');
+    if (clickMenuItem) {
+      await this.testSubjects.click('dashboardSaveMenuItem');
+    }
     const modalDialog = await this.testSubjects.find('savedObjectSaveModal');
 
     this.log.debug('entering new title');
@@ -510,6 +534,27 @@ export class DashboardPageObject extends FtrService {
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 
+  // returns an array of Boolean values - true if the panel title is visible in view mode, false if it is not
+  public async getVisibilityOfPanelTitles() {
+    this.log.debug('in getVisibilityOfPanels');
+    // only works if the dashboard is in view mode
+    const inViewMode = await this.getIsInViewMode();
+    if (!inViewMode) {
+      await this.clickCancelOutOfEditMode();
+    }
+    const visibilities: boolean[] = [];
+    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle__wrapper');
+    for (const titleObject of titleObjects) {
+      const exists = !(await titleObject.elementHasClass('embPanel__header--floater'));
+      visibilities.push(exists);
+    }
+    // return to edit mode if a switch to view mode above was necessary
+    if (!inViewMode) {
+      await this.switchToEditMode();
+    }
+    return visibilities;
+  }
+
   public async getPanelDimensions() {
     const panels = await this.find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
     return await Promise.all(
@@ -536,7 +581,6 @@ export class DashboardPageObject extends FtrService {
       { name: AREA_CHART_VIS_NAME, description: 'AreaChart' },
       { name: 'Visualization☺漢字 DataTable', description: 'DataTable' },
       { name: LINE_CHART_VIS_NAME, description: 'LineChart' },
-      { name: 'Visualization TileMap', description: 'TileMap' },
       { name: 'Visualization MetricChart', description: 'MetricChart' },
     ];
   }

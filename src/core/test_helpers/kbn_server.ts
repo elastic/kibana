@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import {
   createTestEsCluster,
   CreateTestEsClusterOptions,
@@ -15,7 +16,6 @@ import {
   kibanaTestUser,
 } from '@kbn/test';
 import { defaultsDeep } from 'lodash';
-import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
@@ -33,7 +33,11 @@ const DEFAULTS_SETTINGS = {
     port: 0,
     xsrf: { disableProtection: true },
   },
-  logging: { silent: true },
+  logging: {
+    root: {
+      level: 'off',
+    },
+  },
   plugins: {},
   migrations: { skip: false },
 };
@@ -46,7 +50,6 @@ export function createRootWithSettings(
     configs: [],
     cliArgs: {
       dev: false,
-      silent: false,
       watch: false,
       basePath: false,
       runExamples: false,
@@ -99,7 +102,6 @@ export function createRoot(settings = {}, cliArgs: Partial<CliArgs> = {}) {
  */
 export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArgs> = {}) {
   const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
-    plugins: { scanDirs: [resolve(__dirname, '../../legacy/core_plugins')] },
     elasticsearch: {
       hosts: [esTestConfig.getUrl()],
       username: kibanaServerTestUser.username,

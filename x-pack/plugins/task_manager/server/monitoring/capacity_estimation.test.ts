@@ -7,11 +7,19 @@
 
 import { CapacityEstimationParams, estimateCapacity } from './capacity_estimation';
 import { HealthStatus, RawMonitoringStats } from './monitoring_stats_stream';
+import { mockLogger } from '../test_utils';
 
 describe('estimateCapacity', () => {
+  const logger = mockLogger();
+
+  beforeAll(() => {
+    jest.resetAllMocks();
+  });
+
   test('estimates the max throughput per minute based on the workload and the assumed kibana instances', async () => {
     expect(
       estimateCapacity(
+        logger,
         mockStats(
           { max_workers: 10, poll_interval: 3000 },
           {
@@ -67,6 +75,7 @@ describe('estimateCapacity', () => {
   test('reduces the available capacity per kibana when average task duration exceeds the poll interval', async () => {
     expect(
       estimateCapacity(
+        logger,
         mockStats(
           { max_workers: 10, poll_interval: 3000 },
           {
@@ -124,6 +133,7 @@ describe('estimateCapacity', () => {
   test('estimates the max throughput per minute when duration by persistence is empty', async () => {
     expect(
       estimateCapacity(
+        logger,
         mockStats(
           { max_workers: 10, poll_interval: 3000 },
           {
@@ -160,6 +170,7 @@ describe('estimateCapacity', () => {
   test('estimates the max throughput per minute based on the workload and the assumed kibana instances when there are tasks that repeat each hour or day', async () => {
     expect(
       estimateCapacity(
+        logger,
         mockStats(
           { max_workers: 10, poll_interval: 3000 },
           {
@@ -215,6 +226,7 @@ describe('estimateCapacity', () => {
   test('estimates the max throughput available when there are no active Kibana', async () => {
     expect(
       estimateCapacity(
+        logger,
         mockStats(
           { max_workers: 10, poll_interval: 3000 },
           {
@@ -271,6 +283,7 @@ describe('estimateCapacity', () => {
   test('estimates the max throughput available to handle the workload when there are multiple active kibana instances', async () => {
     expect(
       estimateCapacity(
+        logger,
         mockStats(
           { max_workers: 10, poll_interval: 3000 },
           {
@@ -332,6 +345,7 @@ describe('estimateCapacity', () => {
 
     expect(
       estimateCapacity(
+        logger,
         mockStats(
           { max_workers: 10, poll_interval: 3000 },
           {
@@ -412,6 +426,7 @@ describe('estimateCapacity', () => {
 
     expect(
       estimateCapacity(
+        logger,
         mockStats(
           { max_workers: 10, poll_interval: 3000 },
           {
@@ -493,6 +508,7 @@ describe('estimateCapacity', () => {
   test('marks estimated capacity as OK state when workload and load suggest capacity is sufficient', async () => {
     expect(
       estimateCapacity(
+        logger,
         mockStats(
           { max_workers: 10, poll_interval: 3000 },
           {
@@ -557,6 +573,7 @@ describe('estimateCapacity', () => {
   test('marks estimated capacity as Warning state when capacity is insufficient for recent spikes of non-recurring workload, but sufficient for the recurring workload', async () => {
     expect(
       estimateCapacity(
+        logger,
         mockStats(
           { max_workers: 10, poll_interval: 3000 },
           {
@@ -618,6 +635,7 @@ describe('estimateCapacity', () => {
   test('marks estimated capacity as Error state when workload and load suggest capacity is insufficient', async () => {
     expect(
       estimateCapacity(
+        logger,
         mockStats(
           { max_workers: 10, poll_interval: 3000 },
           {
@@ -679,6 +697,7 @@ describe('estimateCapacity', () => {
   test('recommmends a 20% increase in kibana when a spike in non-recurring tasks forces recurring task capacity to zero', async () => {
     expect(
       estimateCapacity(
+        logger,
         mockStats(
           { max_workers: 10, poll_interval: 3000 },
           {
@@ -754,6 +773,7 @@ describe('estimateCapacity', () => {
   test('recommmends a 20% increase in kibana when a spike in non-recurring tasks in a system with insufficient capacity even for recurring tasks', async () => {
     expect(
       estimateCapacity(
+        logger,
         mockStats(
           { max_workers: 10, poll_interval: 3000 },
           {

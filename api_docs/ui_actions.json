@@ -83,7 +83,7 @@
             "signature": [
               "Map<string, ",
               "TriggerInternal",
-              "<any>>"
+              "<object>>"
             ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false
@@ -656,15 +656,39 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx"
+                "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/application/embeddable/search_embeddable_factory.ts"
+                "path": "src/plugins/discover/public/embeddable/search_embeddable_factory.ts"
               },
               {
                 "plugin": "discover",
                 "path": "src/plugins/discover/public/plugin.tsx"
+              },
+              {
+                "plugin": "embeddable",
+                "path": "src/plugins/embeddable/public/tests/container.test.ts"
+              },
+              {
+                "plugin": "embeddable",
+                "path": "src/plugins/embeddable/public/tests/container.test.ts"
+              },
+              {
+                "plugin": "embeddable",
+                "path": "src/plugins/embeddable/public/tests/container.test.ts"
+              },
+              {
+                "plugin": "embeddable",
+                "path": "src/plugins/embeddable/public/tests/container.test.ts"
+              },
+              {
+                "plugin": "embeddable",
+                "path": "src/plugins/embeddable/public/tests/explicit_input.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/target/types/public/embeddable/search_embeddable_factory.d.ts"
               }
             ],
             "children": [
@@ -1024,15 +1048,15 @@
                 "section": "def-common.UiComponent",
                 "text": "UiComponent"
               },
-              "<{ context: ",
+              "<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
                 "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionExecutionContext",
-                "text": "ActionExecutionContext"
+                "section": "def-public.ActionMenuItemProps",
+                "text": "ActionMenuItemProps"
               },
-              "<Context>; }> | undefined"
+              "<Context>> | undefined"
             ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false
@@ -1458,6 +1482,49 @@
                 "docId": "kibUiActionsPluginApi",
                 "section": "def-public.Trigger",
                 "text": "Trigger"
+              }
+            ],
+            "path": "src/plugins/ui_actions/public/actions/action.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
+        "id": "def-public.ActionMenuItemProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ActionMenuItemProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.ActionMenuItemProps",
+            "text": "ActionMenuItemProps"
+          },
+          "<Context>"
+        ],
+        "path": "src/plugins/ui_actions/public/actions/action.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.ActionMenuItemProps.context",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "Context & ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionExecutionMeta",
+                "text": "ActionExecutionMeta"
               }
             ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",
@@ -2240,15 +2307,7 @@
       "label": "UiActionsStart",
       "description": [],
       "signature": [
-        "{ readonly clear: () => void; readonly fork: () => ",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.UiActionsService",
-          "text": "UiActionsService"
-        },
-        "; readonly addTriggerAction: (triggerId: string, action: ",
+        "{ readonly clear: () => void; readonly addTriggerAction: (triggerId: string, action: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -2318,7 +2377,15 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; }"
+        "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly fork: () => ",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.UiActionsService",
+          "text": "UiActionsService"
+        },
+        "; }"
       ],
       "path": "src/plugins/ui_actions/public/plugin.ts",
       "deprecated": false,

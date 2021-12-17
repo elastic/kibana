@@ -127,7 +127,7 @@ export function registerMlAlerts(
 \\{\\{#context.topRecords.length\\}\\}
   Top records:
   \\{\\{#context.topRecords\\}\\}
-    \\{\\{function\\}\\}(\\{\\{field_name\\}\\}) \\{\\{by_field_value\\}\\} \\{\\{over_field_value\\}\\} \\{\\{partition_field_value\\}\\} [\\{\\{score\\}\\}]
+    \\{\\{function\\}\\}(\\{\\{field_name\\}\\}) \\{\\{by_field_value\\}\\}\\{\\{over_field_value\\}\\}\\{\\{partition_field_value\\}\\} [\\{\\{score\\}\\}]. Typical: \\{\\{typical\\}\\}, Actual: \\{\\{actual\\}\\}
   \\{\\{/context.topRecords\\}\\}
 \\{\\{/context.topRecords.length\\}\\}
 

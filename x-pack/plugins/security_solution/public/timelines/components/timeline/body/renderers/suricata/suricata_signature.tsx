@@ -31,9 +31,9 @@ const SignatureFlexItem = styled(EuiFlexItem)`
 
 SignatureFlexItem.displayName = 'SignatureFlexItem';
 
-const Badge = (styled(EuiBadge)`
+const Badge = styled(EuiBadge)`
   vertical-align: top;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 Badge.displayName = 'Badge';
 
@@ -130,6 +130,7 @@ export const SuricataSignature = React.memo<{
           id={`suricata-signature-default-draggable-${contextId}-${id}-${SURICATA_SIGNATURE_FIELD_NAME}`}
           isDraggable={isDraggable}
           value={signature}
+          tooltipPosition="bottom"
         >
           <div>
             <GoogleLink link={signature}>

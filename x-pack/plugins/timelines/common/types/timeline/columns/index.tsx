@@ -8,9 +8,10 @@
 import { ReactNode } from 'react';
 
 import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
-import { IFieldSubType } from '../../../../../../../src/plugins/data/common';
+import type { IFieldSubType } from '@kbn/es-query';
 import { BrowserFields } from '../../../search_strategy/index_fields';
 import { TimelineNonEcsData } from '../../../search_strategy/timeline';
+import { Ecs } from '../../../ecs';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
@@ -45,10 +46,18 @@ export type ColumnId = string;
 export type TGridCellAction = ({
   browserFields,
   data,
+  ecsData,
+  header,
+  pageSize,
+  timelineId,
 }: {
   browserFields: BrowserFields;
   /** each row of data is represented as one TimelineNonEcsData[] */
   data: TimelineNonEcsData[][];
+  ecsData: Ecs[];
+  header?: ColumnHeaderOptions;
+  pageSize: number;
+  timelineId: string;
 }) => (props: EuiDataGridColumnCellActionProps) => ReactNode;
 
 /** The specification of a column header */
@@ -61,13 +70,14 @@ export type ColumnHeaderOptions = Pick<
   | 'id'
   | 'initialWidth'
   | 'isSortable'
+  | 'schema'
 > & {
   aggregatable?: boolean;
   tGridCellActions?: TGridCellAction[];
   category?: string;
   columnHeaderType: ColumnHeaderType;
-  description?: string;
-  example?: string;
+  description?: string | null;
+  example?: string | number | null;
   format?: string;
   linkField?: string;
   placeholder?: string;

@@ -19,27 +19,42 @@ import {
   actionLicenses,
   allCases,
   basicCase,
+  basicCaseMetrics,
   basicCaseCommentPatch,
   basicCasePost,
+  basicResolvedCase,
   casesStatus,
   caseUserActions,
   pushedCase,
   respReporters,
   tags,
 } from '../mock';
+import { ResolvedCase } from '../../../common/ui/types';
 import {
   CasePatchRequest,
   CasePostRequest,
   CommentRequest,
   User,
   CaseStatuses,
-} from '../../../common';
+  CaseMetricsResponse,
+} from '../../../common/api';
 
 export const getCase = async (
   caseId: string,
   includeComments: boolean = true,
   signal: AbortSignal
 ): Promise<Case> => Promise.resolve(basicCase);
+
+export const resolveCase = async (
+  caseId: string,
+  includeComments: boolean = true,
+  signal: AbortSignal
+): Promise<ResolvedCase> => Promise.resolve(basicResolvedCase);
+
+export const getCaseMetrics = async (
+  caseId: string,
+  signal: AbortSignal
+): Promise<CaseMetricsResponse> => Promise.resolve(basicCaseMetrics);
 
 export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> =>
   Promise.resolve(casesStatus);

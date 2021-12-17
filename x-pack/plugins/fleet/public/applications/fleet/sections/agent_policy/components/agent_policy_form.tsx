@@ -23,7 +23,7 @@ import {
   EuiLink,
   EuiFieldNumber,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 
@@ -237,6 +237,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         }
       >
         <EuiCheckboxGroup
+          disabled={agentPolicy.is_managed === true}
           options={[
             {
               id: dataTypes.Logs,
@@ -420,14 +421,14 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
               <>
                 <FormattedMessage
                   id="xpack.fleet.agentPolicyForm.systemMonitoringText"
-                  defaultMessage="Collect system metrics"
+                  defaultMessage="Collect system logs and metrics"
                 />{' '}
                 <EuiIconTip
                   content={i18n.translate(
                     'xpack.fleet.agentPolicyForm.systemMonitoringTooltipText',
                     {
                       defaultMessage:
-                        'Enable this option to bootstrap your policy with an integration that collects system metrics and information.',
+                        'Enable this option to bootstrap your policy with an integration that collects system logs and metrics.',
                     }
                   )}
                   position="right"

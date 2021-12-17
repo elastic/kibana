@@ -7,38 +7,33 @@
 
 import { isEmpty, isString, flow } from 'lodash/fp';
 
-import { JsonObject } from '@kbn/utility-types';
 import {
   EsQueryConfig,
   Query,
   Filter,
-  esQuery,
-  esKuery,
-  IIndexPattern,
-} from '../../../../../../../src/plugins/data/public';
+  buildEsQuery,
+  toElasticsearchQuery,
+  fromKueryExpression,
+  DataViewBase,
+} from '@kbn/es-query';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
-  indexPattern?: IIndexPattern
+  indexPattern?: DataViewBase
 ) => {
   try {
     return kueryExpression
-      ? JSON.stringify(
-          esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kueryExpression), indexPattern)
-        )
+      ? JSON.stringify(toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern))
       : '';
   } catch (err) {
     return '';
   }
 };
 
-export const convertKueryToDslFilter = (
-  kueryExpression: string,
-  indexPattern: IIndexPattern
-): JsonObject => {
+export const convertKueryToDslFilter = (kueryExpression: string, indexPattern: DataViewBase) => {
   try {
     return kueryExpression
-      ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kueryExpression), indexPattern)
+      ? toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern)
       : {};
   } catch (err) {
     return {};
@@ -77,14 +72,14 @@ export const convertToBuildEsQuery = ({
   filters,
 }: {
   config: EsQueryConfig;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   queries: Query[];
   filters: Filter[];
 }): [string, undefined] | [undefined, Error] => {
   try {
     return [
       JSON.stringify(
-        esQuery.buildEsQuery(
+        buildEsQuery(
           indexPattern,
           queries,
           filters.filter((f) => f.meta.disabled === false),

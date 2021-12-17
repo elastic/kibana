@@ -14,7 +14,7 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { LogEntryCategoriesSetupView } from './log_entry_categories_setup_view';
 import { LogEntryRateSetupView } from './log_entry_rate_setup_view';
@@ -26,12 +26,8 @@ const FLYOUT_HEADING_ID = 'logAnalysisSetupFlyoutHeading';
 export const LogAnalysisSetupFlyout: React.FC<{
   allowedModules?: ModuleId[];
 }> = ({ allowedModules = moduleIds }) => {
-  const {
-    closeFlyout,
-    flyoutView,
-    showModuleList,
-    showModuleSetup,
-  } = useLogAnalysisSetupFlyoutStateContext();
+  const { closeFlyout, flyoutView, showModuleList, showModuleSetup } =
+    useLogAnalysisSetupFlyoutStateContext();
 
   if (flyoutView.view === 'hidden') {
     return null;

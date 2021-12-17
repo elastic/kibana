@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiCallOut, EuiText, EuiAccordion, EuiSpacer } from '@elastic/eui';
@@ -30,6 +30,7 @@ export const CannotImportJobsCallout: FC<Props> = ({ jobs, autoExpand = false })
           values: { num: jobs.length },
         })}
         color="warning"
+        data-test-subj="mlJobMgmtImportJobsCannotBeImportedCallout"
       >
         {autoExpand ? (
           <SkippedJobList jobs={jobs} />

@@ -30,5 +30,5 @@ export const UpgradePackagePolicyPage = memo(() => {
     from = 'upgrade-from-integrations-policy-list';
   }
 
-  return <EditPackagePolicyForm packagePolicyId={packagePolicyId} from={from} />;
+  return <EditPackagePolicyForm packagePolicyId={packagePolicyId} from={from} isUpgrade />;
 });

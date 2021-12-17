@@ -29,7 +29,8 @@ export async function fetchCpuUsageNodeStats(
   index: string,
   startMs: number,
   endMs: number,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<AlertCpuUsageNodeStats[]> {
   // Using pure MS didn't seem to work well with the date_histogram interval
   // but minutes does
@@ -139,6 +140,15 @@ export async function fetchCpuUsageNodeStats(
       },
     },
   };
+
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
 
   const { body: response } = await esClient.search(params);
   const stats: AlertCpuUsageNodeStats[] = [];

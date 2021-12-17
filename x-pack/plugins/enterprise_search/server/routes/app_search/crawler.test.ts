@@ -10,14 +10,14 @@ import { mockDependencies, mockRequestHandler, MockRouter } from '../../__mocks_
 import { registerCrawlerRoutes } from './crawler';
 
 describe('crawler routes', () => {
-  describe('GET /api/app_search/engines/{name}/crawler', () => {
+  describe('GET /internal/app_search/engines/{name}/crawler', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{name}/crawler',
+        path: '/internal/app_search/engines/{name}/crawler',
       });
 
       registerCrawlerRoutes({
@@ -28,7 +28,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler',
+        path: '/api/as/v1/engines/:name/crawler',
       });
     });
 
@@ -43,14 +43,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('GET /api/app_search/engines/{name}/crawler/crawl_requests', () => {
+  describe('GET /internal/app_search/engines/{name}/crawler/crawl_requests', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{name}/crawler/crawl_requests',
+        path: '/internal/app_search/engines/{name}/crawler/crawl_requests',
       });
 
       registerCrawlerRoutes({
@@ -61,7 +61,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests',
       });
     });
 
@@ -76,14 +76,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('POST /api/app_search/engines/{name}/crawler/crawl_requests', () => {
+  describe('GET /internal/app_search/engines/{name}/crawler/crawl_requests/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
-        method: 'post',
-        path: '/api/app_search/engines/{name}/crawler/crawl_requests',
+        method: 'get',
+        path: '/internal/app_search/engines/{name}/crawler/crawl_requests/{id}',
       });
 
       registerCrawlerRoutes({
@@ -94,7 +94,45 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_requests',
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests/:id',
+      });
+    });
+
+    it('validates correctly with name and id', () => {
+      const request = { params: { name: 'some-engine', id: '12345' } };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without name', () => {
+      const request = { params: { id: '12345' } };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without id', () => {
+      const request = { params: { name: 'some-engine' } };
+      mockRouter.shouldThrow(request);
+    });
+  });
+
+  describe('POST /internal/app_search/engines/{name}/crawler/crawl_requests', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/internal/app_search/engines/{name}/crawler/crawl_requests',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests',
       });
     });
 
@@ -109,14 +147,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('POST /api/app_search/engines/{name}/crawler/crawl_requests/cancel', () => {
+  describe('GET /internal/app_search/engines/{name}/crawler/domains', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
-        method: 'post',
-        path: '/api/app_search/engines/{name}/crawler/crawl_requests/cancel',
+        method: 'get',
+        path: '/internal/app_search/engines/{name}/crawler/domains',
       });
 
       registerCrawlerRoutes({
@@ -127,7 +165,46 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_requests/active/cancel',
+        path: '/api/as/v1/engines/:name/crawler/domains',
+      });
+    });
+
+    it('validates correctly', () => {
+      const request = {
+        params: { name: 'some-engine' },
+        query: {
+          'page[current]': 5,
+          'page[size]': 10,
+        },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without required params', () => {
+      const request = { params: {} };
+      mockRouter.shouldThrow(request);
+    });
+  });
+
+  describe('POST /internal/app_search/engines/{name}/crawler/crawl_requests/cancel', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/internal/app_search/engines/{name}/crawler/crawl_requests/cancel',
+      });
+
+      registerCrawlerRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v1/engines/:name/crawler/crawl_requests/active/cancel',
       });
     });
 
@@ -142,14 +219,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('POST /api/app_search/engines/{name}/crawler/domains', () => {
+  describe('POST /internal/app_search/engines/{name}/crawler/domains', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{name}/crawler/domains',
+        path: '/internal/app_search/engines/{name}/crawler/domains',
       });
 
       registerCrawlerRoutes({
@@ -160,7 +237,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains',
+        path: '/api/as/v1/engines/:name/crawler/domains',
       });
     });
 
@@ -198,14 +275,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/engines/{name}/crawler/domains/{id}', () => {
+  describe('DELETE /internal/app_search/engines/{name}/crawler/domains/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/app_search/engines/{name}/crawler/domains/{id}',
+        path: '/internal/app_search/engines/{name}/crawler/domains/{id}',
       });
 
       registerCrawlerRoutes({
@@ -216,7 +293,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains/:id',
+        path: '/api/as/v1/engines/:name/crawler/domains/:id',
       });
     });
 
@@ -244,14 +321,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/engines/{name}/crawler/domains/{id}', () => {
+  describe('PUT /internal/app_search/engines/{name}/crawler/domains/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/app_search/engines/{name}/crawler/domains/{id}',
+        path: '/internal/app_search/engines/{name}/crawler/domains/{id}',
       });
 
       registerCrawlerRoutes({
@@ -262,11 +339,11 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains/:id',
+        path: '/api/as/v1/engines/:name/crawler/domains/:id',
       });
     });
 
-    it('validates correctly with required params', () => {
+    it('validates correctly with crawl rules', () => {
       const request = {
         params: { name: 'some-engine', id: '1234' },
         body: {
@@ -281,20 +358,35 @@ describe('crawler routes', () => {
       mockRouter.shouldValidate(request);
     });
 
-    it('fails otherwise', () => {
-      const request = { params: {}, body: {} };
-      mockRouter.shouldThrow(request);
+    it('validates correctly with deduplication enabled', () => {
+      const request = {
+        params: { name: 'some-engine', id: '1234' },
+        body: {
+          deduplication_enabled: true,
+        },
+      };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('validates correctly with deduplication fields', () => {
+      const request = {
+        params: { name: 'some-engine', id: '1234' },
+        body: {
+          deduplication_fields: ['title', 'description'],
+        },
+      };
+      mockRouter.shouldValidate(request);
     });
   });
 
-  describe('GET /api/app_search/engines/{name}/crawler/domains/{id}', () => {
+  describe('GET /internal/app_search/engines/{name}/crawler/domains/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{name}/crawler/domains/{id}',
+        path: '/internal/app_search/engines/{name}/crawler/domains/{id}',
       });
 
       registerCrawlerRoutes({
@@ -305,7 +397,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/domains/:id',
+        path: '/api/as/v1/engines/:name/crawler/domains/:id',
       });
     });
 
@@ -325,14 +417,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('POST /api/app_search/crawler/validate_url', () => {
+  describe('POST /internal/app_search/crawler/validate_url', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/crawler/validate_url',
+        path: '/internal/app_search/crawler/validate_url',
       });
 
       registerCrawlerRoutes({
@@ -343,7 +435,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/crawler/validate_url',
+        path: '/api/as/v1/crawler/validate_url',
       });
     });
 
@@ -362,14 +454,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('POST /api/app_search/engines/{name}/crawler/process_crawls', () => {
+  describe('POST /internal/app_search/engines/{name}/crawler/process_crawls', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines/{name}/crawler/process_crawls',
+        path: '/internal/app_search/engines/{name}/crawler/process_crawls',
       });
 
       registerCrawlerRoutes({
@@ -380,7 +472,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/process_crawls',
+        path: '/api/as/v1/engines/:name/crawler/process_crawls',
       });
     });
 
@@ -409,14 +501,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('GET /api/app_search/engines/{name}/crawler/crawl_schedule', () => {
+  describe('GET /internal/app_search/engines/{name}/crawler/crawl_schedule', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{name}/crawler/crawl_schedule',
+        path: '/internal/app_search/engines/{name}/crawler/crawl_schedule',
       });
 
       registerCrawlerRoutes({
@@ -427,7 +519,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+        path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
       });
     });
 
@@ -446,14 +538,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/engines/{name}/crawler/crawl_schedule', () => {
+  describe('PUT /internal/app_search/engines/{name}/crawler/crawl_schedule', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/app_search/engines/{name}/crawler/crawl_schedule',
+        path: '/internal/app_search/engines/{name}/crawler/crawl_schedule',
       });
 
       registerCrawlerRoutes({
@@ -464,7 +556,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+        path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
       });
     });
 
@@ -501,14 +593,14 @@ describe('crawler routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/engines/{name}/crawler/crawl_schedule', () => {
+  describe('DELETE /internal/app_search/engines/{name}/crawler/crawl_schedule', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/app_search/engines/{name}/crawler/crawl_schedule',
+        path: '/internal/app_search/engines/{name}/crawler/crawl_schedule',
       });
 
       registerCrawlerRoutes({
@@ -519,7 +611,7 @@ describe('crawler routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:name/crawler/crawl_schedule',
+        path: '/api/as/v1/engines/:name/crawler/crawl_schedule',
       });
     });
 

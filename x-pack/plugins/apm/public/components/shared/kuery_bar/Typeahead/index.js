@@ -157,13 +157,8 @@ export class Typeahead extends Component {
   };
 
   render() {
-    const {
-      disabled,
-      isLoading,
-      placeholder,
-      prepend,
-      suggestions,
-    } = this.props;
+    const { disabled, isLoading, placeholder, prepend, suggestions } =
+      this.props;
 
     return (
       <ClickOutside

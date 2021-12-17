@@ -6,9 +6,16 @@
  */
 
 import React, { FC, ReactNode, useEffect, useState } from 'react';
-import { EuiBasicTable, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexItem,
+  EuiText,
+  HorizontalAlignment,
+  LEFT_ALIGNMENT,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { kibanaFieldFormat, numberAsOrdinal } from '../../../utils';
@@ -21,8 +28,9 @@ import { TopValues } from '../../../top_values';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
+import { ExpandedRowPanel } from './expanded_row_panel';
 
-const METRIC_DISTRIBUTION_CHART_WIDTH = 325;
+const METRIC_DISTRIBUTION_CHART_WIDTH = 260;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 200;
 
 interface SummaryTableItem {
@@ -31,7 +39,7 @@ interface SummaryTableItem {
   value: number | string | undefined | null;
 }
 
-export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
+export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
   const { stats } = config;
 
   useEffect(() => {
@@ -83,12 +91,14 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
     {
       name: '',
       render: (summaryItem: { display: ReactNode }) => summaryItem.display,
-      width: '75px',
+      width: '25px',
+      align: LEFT_ALIGNMENT as HorizontalAlignment,
     },
     {
       field: 'value',
       name: '',
       render: (v: string) => <strong>{v}</strong>,
+      align: RIGHT_ALIGNMENT as HorizontalAlignment,
     },
   ];
 
@@ -101,23 +111,33 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerNumberContent'}>
       <DocumentStatsTable config={config} />
-      <EuiFlexItem className={'dataVisualizerSummaryTableWrapper'}>
+      <ExpandedRowPanel className={'dvSummaryTable__wrapper dvPanel__wrapper'} grow={1}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable<SummaryTableItem>
-          className={'dataVisualizerSummaryTable'}
+          className={'dvSummaryTable'}
           compressed
           items={summaryTableItems}
           columns={summaryTableColumns}
           tableCaption={summaryTableTitle}
           data-test-subj={'dataVisualizerNumberSummaryTable'}
         />
-      </EuiFlexItem>
+      </ExpandedRowPanel>
 
       {stats && (
-        <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" compressed={true} />
+        <TopValues
+          stats={stats}
+          fieldFormat={fieldFormat}
+          barColor="success"
+          compressed={true}
+          onAddFilter={onAddFilter}
+        />
       )}
       {distribution && (
-        <EuiFlexItem data-test-subj={'dataVisualizerFieldDataMetricDistribution'}>
+        <ExpandedRowPanel
+          dataTestSubj={'dataVisualizerFieldDataMetricDistribution'}
+          className="dvPanel__wrapper"
+          grow={false}
+        >
           <EuiFlexItem grow={false}>
             <ExpandedRowFieldHeader>
               <FormattedMessage
@@ -136,7 +156,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="xs">
+            <EuiText size="xs" textAlign={'center'}>
               <FormattedMessage
                 id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.displayingPercentilesLabel"
                 defaultMessage="Displaying {minPercent} - {maxPercent} percentiles"
@@ -147,7 +167,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
               />
             </EuiText>
           </EuiFlexItem>
-        </EuiFlexItem>
+        </ExpandedRowPanel>
       )}
     </ExpandedRowContent>
   );

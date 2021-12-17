@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import moment from 'moment';
 
@@ -34,7 +32,7 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     field: 'node',
     name: i18n.ISSUER,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: ({ _id, issuers }) =>
       getRowItemDraggables({
@@ -47,7 +45,7 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     field: 'node',
     name: i18n.SUBJECT,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: ({ _id, subjects }) =>
       getRowItemDraggables({
@@ -60,7 +58,7 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     field: 'node._id',
     name: i18n.SHA1_FINGERPRINT,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: true,
     render: (sha1) =>
       getRowItemDraggable({
@@ -73,7 +71,7 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     field: 'node',
     name: i18n.JA3_FINGERPRINT,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: ({ _id, ja3 }) =>
       getRowItemDraggables({
@@ -86,7 +84,7 @@ export const getTlsColumns = (tableId: string): TlsColumns => [
     field: 'node',
     name: i18n.VALID_UNTIL,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: ({ _id, notAfter }) =>
       getRowItemDraggables({

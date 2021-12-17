@@ -6,17 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchConnectionStatus } from './elasticsearch_connection_status';
+import type { PeerCertificate } from 'tls';
 
-/**
- * A set of state details that interactive setup view retrieves from the Kibana server.
- */
-export interface InteractiveSetupViewState {
-  /**
-   * Current status of the Elasticsearch connection.
-   */
-  elasticsearchConnectionStatus: ElasticsearchConnectionStatus;
-}
+import type { ElasticsearchConnectionStatus } from './elasticsearch_connection_status';
 
 /**
  * The token that allows one to configure Kibana instance to communicate with an existing Elasticsearch cluster that
@@ -42,4 +34,37 @@ export interface EnrollmentToken {
    * An Elasticsearch API key (not encoded) that can be used as credentials authorized to call the enrollment related APIs in Elasticsearch.
    */
   key: string;
+}
+
+export interface Certificate {
+  issuer: Partial<PeerCertificate['issuer']>;
+  valid_from: PeerCertificate['valid_from'];
+  valid_to: PeerCertificate['valid_to'];
+  subject: Partial<PeerCertificate['subject']>;
+  fingerprint256: PeerCertificate['fingerprint256'];
+  raw: string;
+}
+
+export interface PingResult {
+  /**
+   * Indicates whether the cluster requires authentication.
+   */
+  authRequired: boolean;
+
+  /**
+   * Full certificate chain of cluster at requested address. Only present if cluster uses HTTPS.
+   */
+  certificateChain?: Certificate[];
+}
+
+export interface StatusResult {
+  /**
+   * Full certificate chain of cluster at requested address. Only present if cluster uses HTTPS.
+   */
+  connectionStatus: ElasticsearchConnectionStatus;
+
+  /**
+   * Indicates whether Kibana is currently on hold and cannot proceed to `setup` yet.
+   */
+  isSetupOnHold: boolean;
 }

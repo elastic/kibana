@@ -6,27 +6,28 @@
  */
 
 import { SavedObject } from 'kibana/server';
-import { getAlertExecutionStatusPending } from '../lib/alert_execution_status';
-import { RawAlert } from '../types';
+import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
+import { RawRule } from '../types';
 
-export function transformRulesForExport(rules: SavedObject[]): Array<SavedObject<RawAlert>> {
+export function transformRulesForExport(rules: SavedObject[]): Array<SavedObject<RawRule>> {
   const exportDate = new Date().toISOString();
-  return rules.map((rule) => transformRuleForExport(rule as SavedObject<RawAlert>, exportDate));
+  return rules.map((rule) => transformRuleForExport(rule as SavedObject<RawRule>, exportDate));
 }
 
 function transformRuleForExport(
-  rule: SavedObject<RawAlert>,
+  rule: SavedObject<RawRule>,
   exportDate: string
-): SavedObject<RawAlert> {
+): SavedObject<RawRule> {
   return {
     ...rule,
     attributes: {
       ...rule.attributes,
+      legacyId: null,
       enabled: false,
       apiKey: null,
       apiKeyOwner: null,
       scheduledTaskId: null,
-      executionStatus: getAlertExecutionStatusPending(exportDate),
+      executionStatus: getRuleExecutionStatusPending(exportDate),
     },
   };
 }

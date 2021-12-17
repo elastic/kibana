@@ -20,6 +20,8 @@ export const configSchema = schema.object({
   maxEphemeralActionsPerAlert: schema.number({
     defaultValue: DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT,
   }),
+  defaultRuleTaskTimeout: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
+  cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
 });
 
 export type AlertsConfig = TypeOf<typeof configSchema>;

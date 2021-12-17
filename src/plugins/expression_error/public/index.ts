@@ -14,5 +14,11 @@ export function plugin() {
   return new ExpressionErrorPlugin();
 }
 
-export * from './expression_renderers';
+export {
+  getErrorRenderer,
+  getDebugRenderer,
+  errorRendererFactory,
+  debugRendererFactory,
+} from './expression_renderers';
+
 export { LazyDebugComponent, LazyErrorComponent } from './components';

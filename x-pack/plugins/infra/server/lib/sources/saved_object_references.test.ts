@@ -17,8 +17,14 @@ describe('extractSavedObjectReferences function', () => {
       sourceConfigurationWithIndexPatternReference
     );
 
-    expect(references).toMatchObject([{ id: 'INDEX_PATTERN_ID' }]);
+    expect(references).toMatchObject([
+      { id: 'INDEX_PATTERN_ID' },
+      { id: 'INVENTORY_DEFAULT_VIEW' },
+      { id: 'METRICS_EXPLORER_DEFAULT_VIEW' },
+    ]);
     expect(attributes).toHaveProperty(['logIndices', 'indexPatternId'], references[0].name);
+    expect(attributes).toHaveProperty(['inventoryDefaultView'], references[1].name);
+    expect(attributes).toHaveProperty(['metricsExplorerDefaultView'], references[2].name);
   });
 
   it('ignores log index name references', () => {
@@ -26,7 +32,29 @@ describe('extractSavedObjectReferences function', () => {
       sourceConfigurationWithIndexNameReference
     );
 
-    expect(references).toHaveLength(0);
+    expect(references).toHaveLength(2);
+    expect(attributes).toHaveProperty(['logIndices', 'indexName'], 'INDEX_NAME');
+  });
+
+  it('ignores default inventory view', () => {
+    const { attributes, references } = extractSavedObjectReferences({
+      ...sourceConfigurationWithIndexNameReference,
+      inventoryDefaultView: '0',
+    });
+
+    expect(references).toHaveLength(1);
+    expect(references).toMatchObject([{ id: 'METRICS_EXPLORER_DEFAULT_VIEW' }]);
+    expect(attributes).toHaveProperty(['logIndices', 'indexName'], 'INDEX_NAME');
+  });
+
+  it('ignores default metrics explorer view', () => {
+    const { attributes, references } = extractSavedObjectReferences({
+      ...sourceConfigurationWithIndexNameReference,
+      metricsExplorerDefaultView: '0',
+    });
+
+    expect(references).toHaveLength(1);
+    expect(references).toMatchObject([{ id: 'INVENTORY_DEFAULT_VIEW' }]);
     expect(attributes).toHaveProperty(['logIndices', 'indexName'], 'INDEX_NAME');
   });
 });
@@ -73,12 +101,7 @@ const sourceConfigurationWithIndexPatternReference: InfraSourceConfiguration = {
   name: 'NAME',
   description: 'DESCRIPTION',
   fields: {
-    container: 'CONTAINER_FIELD',
-    host: 'HOST_FIELD',
     message: ['MESSAGE_FIELD'],
-    pod: 'POD_FIELD',
-    tiebreaker: 'TIEBREAKER_FIELD',
-    timestamp: 'TIMESTAMP_FIELD',
   },
   logColumns: [],
   logIndices: {

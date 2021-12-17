@@ -24,7 +24,7 @@ export function EditAPMPolicyForm({ newPolicy, onChange }: Props) {
   const [firstInput, ...restInputs] = newPolicy?.inputs;
   const vars = firstInput?.vars;
 
-  function handleChange(newVars: PackagePolicyVars, isValid: boolean) {
+  function updateAPMPolicy(newVars: PackagePolicyVars, isValid: boolean) {
     onChange({
       isValid,
       updatedPolicy: {
@@ -35,7 +35,7 @@ export function EditAPMPolicyForm({ newPolicy, onChange }: Props) {
   return (
     <APMPolicyForm
       vars={vars}
-      onChange={handleChange}
+      updateAPMPolicy={updateAPMPolicy}
       isCloudPolicy={newPolicy.policy_id === POLICY_ELASTIC_AGENT_ON_CLOUD}
     />
   );

@@ -9,6 +9,7 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart } from 'src/core/public';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 import { KibanaPageTemplate } from '../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
@@ -18,14 +19,14 @@ describe('renderApp', () => {
   const originalConsole = global.console;
   beforeAll(() => {
     // mocks console to avoid poluting the test output
-    global.console = ({ error: jest.fn() } as unknown) as typeof console;
+    global.console = { error: jest.fn() } as unknown as typeof console;
   });
 
   afterAll(() => {
     global.console = originalConsole;
   });
   it('renders', async () => {
-    const plugins = ({
+    const plugins = {
       usageCollection: { reportUiCounter: () => {} },
       data: {
         query: {
@@ -34,8 +35,8 @@ describe('renderApp', () => {
           },
         },
       },
-    } as unknown) as ObservabilityPublicPluginsStart;
-    const core = ({
+    } as unknown as ObservabilityPublicPluginsStart;
+    const core = {
       application: { currentAppId$: new Observable(), navigateToUrl: () => {} },
       chrome: {
         docTitle: { change: () => {} },
@@ -45,13 +46,21 @@ describe('renderApp', () => {
       i18n: { Context: ({ children }: { children: React.ReactNode }) => children },
       uiSettings: { get: () => false },
       http: { basePath: { prepend: (path: string) => path } },
-    } as unknown) as CoreStart;
-    const config = { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } };
-    const params = ({
+      theme: themeServiceMock.createStartContract(),
+    } as unknown as CoreStart;
+    const config = {
+      unsafe: {
+        alertingExperience: { enabled: true },
+        cases: { enabled: true },
+        overviewNext: { enabled: false },
+      },
+    };
+    const params = {
       element: window.document.createElement('div'),
       history: createMemoryHistory(),
       setHeaderActionMenu: () => {},
-    } as unknown) as AppMountParameters;
+      theme$: themeServiceMock.createTheme$(),
+    } as unknown as AppMountParameters;
 
     expect(() => {
       const unmount = renderApp({

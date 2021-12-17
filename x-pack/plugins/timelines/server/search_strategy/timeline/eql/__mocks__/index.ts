@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EqlSearchStrategyResponse } from '../../../../../../../../src/plugins/data/common';
-import { EqlSearchResponse } from '../../../../../common';
+import type { EqlSearchStrategyResponse } from '../../../../../../../../src/plugins/data/common';
+import { EqlSearchResponse } from '../../../../../common/search_strategy';
 
-export const sequenceResponse = ({
+export const sequenceResponse = {
   rawResponse: {
     body: {
       is_partial: false,
@@ -788,9 +788,9 @@ export const sequenceResponse = ({
     meta: {},
     hits: {},
   },
-} as unknown) as EqlSearchStrategyResponse<EqlSearchResponse<unknown>>;
+} as unknown as EqlSearchStrategyResponse<EqlSearchResponse<unknown>>;
 
-export const eventsResponse = ({
+export const eventsResponse = {
   rawResponse: {
     body: {
       is_partial: false,
@@ -1282,4 +1282,4 @@ export const eventsResponse = ({
     meta: {},
     hits: {},
   },
-} as unknown) as EqlSearchStrategyResponse<EqlSearchResponse<unknown>>;
+} as unknown as EqlSearchStrategyResponse<EqlSearchResponse<unknown>>;

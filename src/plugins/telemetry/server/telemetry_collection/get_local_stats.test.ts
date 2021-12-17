@@ -7,7 +7,7 @@
  */
 
 import { merge, omit } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { getLocalStats, handleLocalStats } from './get_local_stats';
 import {
@@ -80,6 +80,7 @@ function mockStatsCollectionConfig(
     esClient: mockGetLocalStats(clusterInfo, clusterStats),
     usageCollection: mockUsageCollection(kibana),
     kibanaRequest: httpServerMock.createKibanaRequest(),
+    refreshCache: false,
   };
 }
 
@@ -114,13 +115,13 @@ describe('get_local_stats', () => {
       },
     },
   ];
-  const clusterStats = ({
+  const clusterStats = {
     _nodes: { failed: 123 },
     cluster_name: 'real-cool',
     indices: { totally: 456 },
     nodes: { yup: 'abc' },
     random: 123,
-  } as unknown) as estypes.ClusterStatsResponse;
+  } as unknown as estypes.ClusterStatsResponse;
 
   const kibana = {
     kibana: {

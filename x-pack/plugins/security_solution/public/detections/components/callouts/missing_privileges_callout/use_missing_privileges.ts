@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { SAVED_OBJECTS_MANAGEMENT_FEATURE_ID } from '../../../../../common/constants';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import { Privilege } from '../../../containers/detection_engine/alerts/types';
 import { useUserData } from '../../user_info';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -63,7 +63,7 @@ export const useMissingPrivileges = (): MissingPrivileges => {
     }
 
     if (canUserCRUD === false) {
-      featurePrivileges.push([SAVED_OBJECTS_MANAGEMENT_FEATURE_ID, ['all']]);
+      featurePrivileges.push([SECURITY_FEATURE_ID, ['all']]);
     }
 
     const missingItemsPrivileges = getMissingIndexPrivileges(listPrivileges.result.listItems.index);

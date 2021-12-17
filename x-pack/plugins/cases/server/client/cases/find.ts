@@ -18,9 +18,10 @@ import {
   caseStatuses,
   CasesFindResponseRt,
   excess,
-} from '../../../common';
+} from '../../../common/api';
 
-import { createCaseError, transformCases } from '../../common';
+import { createCaseError } from '../../common/error';
+import { transformCases } from '../../common/utils';
 import { constructQueryOptions } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
@@ -43,10 +44,8 @@ export const find = async (
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const {
-      filter: authorizationFilter,
-      ensureSavedObjectsAreAuthorized,
-    } = await authorization.getAuthorizationFilter(Operations.findCases);
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(Operations.findCases);
 
     const queryArgs = {
       tags: queryParams.tags,

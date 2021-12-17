@@ -7,17 +7,14 @@
 
 import * as t from 'io-ts';
 import React from 'react';
-import { alertStatusRt } from '../../common/typings';
-import { ExploratoryViewPage } from '../components/shared/exploratory_view';
-import { AlertsPage } from '../pages/alerts';
-import { AllCasesPage } from '../pages/cases/all_cases';
-import { CaseDetailsPage } from '../pages/cases/case_details';
-import { ConfigureCasesPage } from '../pages/cases/configure_cases';
-import { CreateCasePage } from '../pages/cases/create_case';
+import { casesPath } from '../../common';
+import { CasesPage } from '../pages/cases';
+import { AlertsPage } from '../pages/alerts/containers/alerts_page';
 import { HomePage } from '../pages/home';
 import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
+import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -36,12 +33,14 @@ export const routes = {
       return <HomePage />;
     },
     params: {},
+    exact: true,
   },
   '/landing': {
     handler: () => {
       return <LandingPage />;
     },
     params: {},
+    exact: true,
   },
   '/overview': {
     handler: ({ query }: any) => {
@@ -55,53 +54,27 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
+    exact: true,
   },
-  '/cases': {
+  [casesPath]: {
     handler: () => {
-      return <AllCasesPage />;
+      return <CasesPage />;
     },
     params: {},
-  },
-  '/cases/create': {
-    handler: () => {
-      return <CreateCasePage />;
-    },
-    params: {},
-  },
-  '/cases/configure': {
-    handler: () => {
-      return <ConfigureCasesPage />;
-    },
-    params: {},
-  },
-  '/cases/:detailName': {
-    handler: () => {
-      return <CaseDetailsPage />;
-    },
-    params: {
-      path: t.partial({
-        detailName: t.string,
-      }),
-    },
+    exact: false,
   },
   '/alerts': {
-    handler: (routeParams: any) => {
-      return <AlertsPage routeParams={routeParams} />;
-    },
-    params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        kuery: t.string,
-        status: alertStatusRt,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-      }),
-    },
-  },
-  '/exploratory-view': {
     handler: () => {
-      return <ExploratoryViewPage />;
+      return <AlertsPage />;
+    },
+    params: {
+      // Technically gets a '_a' param by using Kibana URL state sync helpers
+    },
+    exact: true,
+  },
+  '/exploratory-view/': {
+    handler: () => {
+      return <ObservabilityExploratoryView />;
     },
     params: {
       query: t.partial({
@@ -111,19 +84,6 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
+    exact: true,
   },
-  // enable this to test multi series architecture
-  // '/exploratory-view/multi': {
-  //   handler: () => {
-  //     return <ExploratoryViewPage multiSeries={true} />;
-  //   },
-  //   params: {
-  //     query: t.partial({
-  //       rangeFrom: t.string,
-  //       rangeTo: t.string,
-  //       refreshPaused: jsonRt.pipe(t.boolean),
-  //       refreshInterval: jsonRt.pipe(t.number),
-  //     }),
-  //   },
-  // },
 };

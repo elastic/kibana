@@ -18,7 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useKibanaVersion } from '../../../../../hooks';

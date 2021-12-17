@@ -10,16 +10,16 @@ import { shallow } from 'enzyme';
 import { Header } from './header';
 import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
-const layerMock = ({
+const layerMock = {
   getDisplayName: async () => {
     return 'myLayerName';
   },
-  getCustomIconAndTooltipContent: () => {
+  getLayerIcon: () => {
     return {
       icon: <span>mockIcon</span>,
     };
   },
-} as unknown) as IVectorLayer;
+} as unknown as IVectorLayer;
 
 const defaultProps = {
   findLayerById: (layerId: string) => {

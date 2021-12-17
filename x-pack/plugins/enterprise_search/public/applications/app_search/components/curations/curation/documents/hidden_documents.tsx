@@ -9,12 +9,13 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DataPanel } from '../../../data_panel';
 
 import { SHOW_DOCUMENT_ACTION } from '../../constants';
+import { HIDDEN_DOCUMENTS_TITLE } from '../constants';
 import { CurationLogic } from '../curation_logic';
 import { AddResultButton, CurationResult, convertToResultFormat } from '../results';
 
@@ -25,35 +26,25 @@ export const HiddenDocuments: React.FC = () => {
   const documents = curation.hidden;
   const hasDocuments = documents.length > 0;
 
+  const CountBadge: React.FC = () => <EuiBadge color="accent">{documents.length}</EuiBadge>;
+
   return (
     <DataPanel
-      filled
-      iconType="eyeClosed"
-      title={
-        <h2>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.title',
-            { defaultMessage: 'Hidden documents' }
-          )}
-        </h2>
-      }
-      subtitle={i18n.translate(
-        'xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.description',
-        { defaultMessage: 'Hidden documents will not appear in organic results.' }
-      )}
+      iconType={CountBadge}
+      title={<h2>{HIDDEN_DOCUMENTS_TITLE}</h2>}
       action={
         hasDocuments && (
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
             <EuiFlexItem>
-              <AddResultButton />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButtonEmpty onClick={clearHiddenIds} iconType="menuUp" size="s">
+              <EuiButtonEmpty onClick={clearHiddenIds} size="s">
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.removeAllButtonLabel',
-                  { defaultMessage: 'Restore all' }
+                  { defaultMessage: 'Unhide all' }
                 )}
               </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <AddResultButton />
             </EuiFlexItem>
           </EuiFlexGroup>
         )
@@ -61,18 +52,22 @@ export const HiddenDocuments: React.FC = () => {
       isLoading={hiddenDocumentsLoading}
     >
       {hasDocuments ? (
-        documents.map((document) => (
-          <CurationResult
-            key={document.id}
-            result={convertToResultFormat(document)}
-            actions={[
-              {
-                ...SHOW_DOCUMENT_ACTION,
-                onClick: () => removeHiddenId(document.id),
-              },
-            ]}
-          />
-        ))
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {documents.map((document, index) => (
+            <EuiFlexItem key={index}>
+              <CurationResult
+                result={convertToResultFormat(document)}
+                index={index}
+                actions={[
+                  {
+                    ...SHOW_DOCUMENT_ACTION,
+                    onClick: () => removeHiddenId(document.id),
+                  },
+                ]}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
       ) : (
         <EuiEmptyPrompt
           titleSize="s"

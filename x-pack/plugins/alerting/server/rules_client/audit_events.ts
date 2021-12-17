@@ -11,6 +11,7 @@ import { AuditEvent } from '../../../security/server';
 export enum RuleAuditAction {
   CREATE = 'rule_create',
   GET = 'rule_get',
+  RESOLVE = 'rule_resolve',
   UPDATE = 'rule_update',
   UPDATE_API_KEY = 'rule_update_api_key',
   ENABLE = 'rule_enable',
@@ -21,6 +22,7 @@ export enum RuleAuditAction {
   UNMUTE = 'rule_unmute',
   MUTE_ALERT = 'rule_alert_mute',
   UNMUTE_ALERT = 'rule_alert_unmute',
+  AGGREGATE = 'rule_aggregate',
 }
 
 type VerbsTuple = [string, string, string];
@@ -28,6 +30,7 @@ type VerbsTuple = [string, string, string];
 const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_create: ['create', 'creating', 'created'],
   rule_get: ['access', 'accessing', 'accessed'],
+  rule_resolve: ['access', 'accessing', 'accessed'],
   rule_update: ['update', 'updating', 'updated'],
   rule_update_api_key: ['update API key of', 'updating API key of', 'updated API key of'],
   rule_enable: ['enable', 'enabling', 'enabled'],
@@ -38,11 +41,13 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_unmute: ['unmute', 'unmuting', 'unmuted'],
   rule_alert_mute: ['mute alert of', 'muting alert of', 'muted alert of'],
   rule_alert_unmute: ['unmute alert of', 'unmuting alert of', 'unmuted alert of'],
+  rule_aggregate: ['access', 'accessing', 'accessed'],
 };
 
 const eventTypes: Record<RuleAuditAction, EcsEventType> = {
   rule_create: 'creation',
   rule_get: 'access',
+  rule_resolve: 'access',
   rule_update: 'change',
   rule_update_api_key: 'change',
   rule_enable: 'change',
@@ -53,6 +58,7 @@ const eventTypes: Record<RuleAuditAction, EcsEventType> = {
   rule_unmute: 'change',
   rule_alert_mute: 'change',
   rule_alert_unmute: 'change',
+  rule_aggregate: 'access',
 };
 
 export interface RuleAuditEventParams {

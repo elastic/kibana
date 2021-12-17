@@ -6,28 +6,18 @@
  */
 
 import { mapValues } from 'lodash';
-import { createTestConfig } from '../common/config';
+import { createTestConfig, CreateTestConfig } from '../common/config';
 
 const apmFtrConfigs = {
   basic: {
     license: 'basic' as const,
-    kibanaConfig: {
-      // disable v2 migrations to prevent issue where kibana index is deleted
-      // during a migration
-      'migrations.enableV2': 'false',
-    },
   },
   trial: {
     license: 'trial' as const,
-    kibanaConfig: {
-      'migrations.enableV2': 'false',
-    },
   },
   rules: {
     license: 'trial' as const,
     kibanaConfig: {
-      'migrations.enableV2': 'false',
-      'xpack.ruleRegistry.index': '.kibana-alerts',
       'xpack.ruleRegistry.write.enabled': 'true',
     },
   },
@@ -35,9 +25,12 @@ const apmFtrConfigs = {
 
 export type APMFtrConfigName = keyof typeof apmFtrConfigs;
 
-export const configs = mapValues(apmFtrConfigs, (value, key) => {
-  return createTestConfig({
-    name: key as APMFtrConfigName,
-    ...value,
-  });
-});
+export const configs: Record<APMFtrConfigName, CreateTestConfig> = mapValues(
+  apmFtrConfigs,
+  (value, key) => {
+    return createTestConfig({
+      name: key as APMFtrConfigName,
+      ...value,
+    });
+  }
+);

@@ -17,7 +17,8 @@ export interface EmbeddableExamplesSetupDependencies {
 }
 
 export class EmbeddableExamplesPlugin
-  implements Plugin<void, void, EmbeddableExamplesSetupDependencies> {
+  implements Plugin<void, void, EmbeddableExamplesSetupDependencies>
+{
   public setup(core: CoreSetup, { embeddable }: EmbeddableExamplesSetupDependencies) {
     core.savedObjects.registerType(todoSavedObject);
     core.savedObjects.registerType(bookSavedObject);

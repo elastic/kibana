@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import {
   checkAAD,
@@ -31,11 +30,11 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
     after(() => objectRemover.removeAll());
 
     async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
-      const scheduledTask: ApiResponse<estypes.GetResponse<TaskManagerDoc>> = await es.get({
+      const scheduledTask = await es.get<TaskManagerDoc>({
         id: `task:${id}`,
         index: '.kibana_task_manager',
       });
-      return scheduledTask.body._source!;
+      return scheduledTask._source!;
     }
 
     for (const scenario of UserAtSpaceScenarios) {

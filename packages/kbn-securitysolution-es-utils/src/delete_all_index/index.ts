@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '../elasticsearch_client';
+import type { ElasticsearchClient } from '../elasticsearch_client';
 
 export const deleteAllIndex = async (
   esClient: ElasticsearchClient,
@@ -25,7 +25,7 @@ export const deleteAllIndex = async (
       {
         index: pattern,
       },
-      { ignore: [404] }
+      { ignore: [404], meta: true }
     );
 
     // @ts-expect-error status doesn't exist on response

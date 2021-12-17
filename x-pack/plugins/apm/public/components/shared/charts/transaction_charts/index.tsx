@@ -12,30 +12,40 @@ import { ChartPointerEventContextProvider } from '../../../../context/chart_poin
 import { ServiceOverviewThroughputChart } from '../../../app/service_overview/service_overview_throughput_chart';
 import { LatencyChart } from '../latency_chart';
 import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
-import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
+import { FailedTransactionRateChart } from '../failed_transaction_rate_chart';
 
 export function TransactionCharts({
   kuery,
   environment,
+  start,
+  end,
+  transactionName,
 }: {
   kuery: string;
   environment: string;
+  start: string;
+  end: string;
+  transactionName?: string;
 }) {
   return (
     <>
-      <AnnotationsContextProvider environment={environment}>
+      <AnnotationsContextProvider
+        environment={environment}
+        start={start}
+        end={end}
+      >
         <ChartPointerEventContextProvider>
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem data-cy={`transaction-duration-charts`}>
               <EuiPanel hasBorder={true}>
-                <LatencyChart kuery={kuery} environment={environment} />
+                <LatencyChart kuery={kuery} />
               </EuiPanel>
             </EuiFlexItem>
 
             <EuiFlexItem style={{ flexShrink: 1 }}>
               <ServiceOverviewThroughputChart
-                environment={environment}
                 kuery={kuery}
+                transactionName={transactionName}
               />
             </EuiFlexItem>
           </EuiFlexGrid>
@@ -44,10 +54,7 @@ export function TransactionCharts({
 
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem>
-              <TransactionErrorRateChart
-                kuery={kuery}
-                environment={environment}
-              />
+              <FailedTransactionRateChart kuery={kuery} />
             </EuiFlexItem>
             <EuiFlexItem>
               <TransactionBreakdownChart

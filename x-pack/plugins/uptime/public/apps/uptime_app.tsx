@@ -10,8 +10,10 @@ import { Router } from 'react-router-dom';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from 'kibana/public';
+import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
+  KibanaThemeProvider,
   RedirectAppLinks,
 } from '../../../../../src/plugins/kibana_react/public';
 import { ClientPluginsSetup, ClientPluginsStart } from './plugin';
@@ -31,6 +33,9 @@ import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { UptimeIndexPatternContextProvider } from '../contexts/uptime_index_pattern_context';
+import { InspectorContextProvider } from '../../../observability/public';
+import { UptimeUiConfig } from '../../common/config';
 
 export interface UptimeAppColors {
   danger: string;
@@ -59,6 +64,7 @@ export interface UptimeAppProps {
   commonlyUsedRanges: CommonlyUsedRange[];
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   appMountParameters: AppMountParameters;
+  config: UptimeUiConfig;
 }
 
 const Application = (props: UptimeAppProps) => {
@@ -73,6 +79,7 @@ const Application = (props: UptimeAppProps) => {
     setBadge,
     startPlugins,
     appMountParameters,
+    config,
   } = props;
 
   useEffect(() => {
@@ -93,6 +100,7 @@ const Application = (props: UptimeAppProps) => {
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
   kibanaService.core = core;
+  kibanaService.theme = props.appMountParameters.theme$;
 
   store.dispatch(setBasePath(basePath));
 
@@ -101,40 +109,51 @@ const Application = (props: UptimeAppProps) => {
   return (
     <EuiErrorBoundary>
       <i18nCore.Context>
-        <ReduxProvider store={store}>
-          <KibanaContextProvider
-            services={{
-              ...core,
-              ...plugins,
-              storage,
-              data: startPlugins.data,
-              triggersActionsUi: startPlugins.triggersActionsUi,
-              observability: startPlugins.observability,
-            }}
-          >
-            <Router history={appMountParameters.history}>
-              <EuiThemeProvider darkMode={darkMode}>
-                <UptimeRefreshContextProvider>
-                  <UptimeSettingsContextProvider {...props}>
-                    <UptimeThemeContextProvider darkMode={darkMode}>
-                      <UptimeStartupPluginsContextProvider {...startPlugins}>
-                        <div data-test-subj="uptimeApp">
-                          <RedirectAppLinks application={core.application}>
-                            <main>
-                              <UptimeAlertsFlyoutWrapper />
-                              <PageRouter />
-                              <ActionMenu appMountParameters={appMountParameters} />
-                            </main>
-                          </RedirectAppLinks>
-                        </div>
-                      </UptimeStartupPluginsContextProvider>
-                    </UptimeThemeContextProvider>
-                  </UptimeSettingsContextProvider>
-                </UptimeRefreshContextProvider>
-              </EuiThemeProvider>
-            </Router>
-          </KibanaContextProvider>
-        </ReduxProvider>
+        <KibanaThemeProvider theme$={props.appMountParameters.theme$}>
+          <ReduxProvider store={store}>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                ...plugins,
+                storage,
+                data: startPlugins.data,
+                inspector: startPlugins.inspector,
+                triggersActionsUi: startPlugins.triggersActionsUi,
+                observability: startPlugins.observability,
+              }}
+            >
+              <Router history={appMountParameters.history}>
+                <EuiThemeProvider darkMode={darkMode}>
+                  <UptimeRefreshContextProvider>
+                    <UptimeSettingsContextProvider {...props}>
+                      <UptimeThemeContextProvider darkMode={darkMode}>
+                        <UptimeStartupPluginsContextProvider {...startPlugins}>
+                          <UptimeIndexPatternContextProvider data={startPlugins.data}>
+                            <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
+                              <RedirectAppLinks
+                                className={APP_WRAPPER_CLASS}
+                                application={core.application}
+                              >
+                                <InspectorContextProvider>
+                                  <UptimeAlertsFlyoutWrapper />
+                                  <PageRouter config={config} />
+                                  <ActionMenu
+                                    appMountParameters={appMountParameters}
+                                    config={config}
+                                  />
+                                </InspectorContextProvider>
+                              </RedirectAppLinks>
+                            </div>
+                          </UptimeIndexPatternContextProvider>
+                        </UptimeStartupPluginsContextProvider>
+                      </UptimeThemeContextProvider>
+                    </UptimeSettingsContextProvider>
+                  </UptimeRefreshContextProvider>
+                </EuiThemeProvider>
+              </Router>
+            </KibanaContextProvider>
+          </ReduxProvider>
+        </KibanaThemeProvider>
       </i18nCore.Context>
     </EuiErrorBoundary>
   );

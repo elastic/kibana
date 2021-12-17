@@ -18,7 +18,8 @@ import { registerUsageCollector } from './collectors';
 import { SearchSessionService } from './search';
 
 export class EnhancedDataServerPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
   private readonly logger: Logger;
   private sessionService!: SearchSessionService;
   private config: ConfigSchema;
@@ -52,7 +53,7 @@ export class EnhancedDataServerPlugin
     });
 
     if (deps.usageCollection) {
-      registerUsageCollector(deps.usageCollection, this.initializerContext, this.logger);
+      registerUsageCollector(deps.usageCollection, core.savedObjects.getKibanaIndex(), this.logger);
     }
   }
 

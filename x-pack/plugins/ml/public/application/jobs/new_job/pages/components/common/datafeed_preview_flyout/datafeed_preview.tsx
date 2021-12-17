@@ -7,7 +7,7 @@
 
 import React, { FC, useState, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,9 +29,10 @@ export const DatafeedPreview: FC<{
     jobs: { datafeedPreview },
   } = useMlApiContext();
   // the ace editor requires a fixed height
-  const editorHeight = useMemo(() => `${window.innerHeight - 230 - heightOffset}px`, [
-    heightOffset,
-  ]);
+  const editorHeight = useMemo(
+    () => `${window.innerHeight - 230 - heightOffset}px`,
+    [heightOffset]
+  );
   const [loading, setLoading] = useState(false);
   const [previewJsonString, setPreviewJsonString] = useState('');
   const [outOfDate, setOutOfDate] = useState(false);

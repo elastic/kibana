@@ -25,6 +25,11 @@ export interface NewPackagePolicyInputStream {
   data_stream: {
     dataset: string;
     type: string;
+    elasticsearch?: {
+      privileges?: {
+        indices?: string[];
+      };
+    };
   };
   vars?: PackagePolicyConfigRecord;
   config?: PackagePolicyConfigRecord;
@@ -51,6 +56,7 @@ export interface PackagePolicyInput extends Omit<NewPackagePolicyInput, 'streams
 }
 
 export interface NewPackagePolicy {
+  id?: string | number;
   name: string;
   description?: string;
   namespace: string;
@@ -60,6 +66,11 @@ export interface NewPackagePolicy {
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
+  elasticsearch?: {
+    privileges?: {
+      cluster?: string[];
+    };
+  };
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {

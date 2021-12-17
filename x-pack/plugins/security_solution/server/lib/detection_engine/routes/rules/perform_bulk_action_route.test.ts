@@ -17,22 +17,28 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { performBulkActionRoute } from './perform_bulk_action_route';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe('perform_bulk_action', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('perform_bulk_action - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     server = serverMock.create();
+    logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
-    performBulkActionRoute(server.router, ml);
+    performBulkActionRoute(server.router, ml, logger, isRuleRegistryEnabled);
   });
 
   describe('status codes', () => {
@@ -62,7 +68,7 @@ describe('perform_bulk_action', () => {
     });
 
     it('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(getBulkActionRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });

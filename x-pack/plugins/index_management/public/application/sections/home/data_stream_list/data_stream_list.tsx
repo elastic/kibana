@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -61,7 +61,12 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   } = useAppContext();
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
-  const { error, isLoading, data: dataStreams, resendRequest: reload } = useLoadDataStreams({
+  const {
+    error,
+    isLoading,
+    data: dataStreams,
+    resendRequest: reload,
+  } = useLoadDataStreams({
     includeStats: isIncludeStatsChecked,
   });
 

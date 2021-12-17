@@ -12,11 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '../../../common/util/date_utils';
 import { AnnotationsTable } from '../../../common/types/annotations';
 import { ChartTooltipService } from '../components/chart_tooltip';
+import { useCurrentEuiTheme } from '../components/color_range_legend';
 
 export const X_AXIS_RIGHT_OVERFLOW = 50;
 export const Y_AXIS_LABEL_WIDTH = 170;
 export const Y_AXIS_LABEL_PADDING = 8;
-export const Y_AXIS_LABEL_FONT_COLOR = '#6a717d';
 const ANNOTATION_CONTAINER_HEIGHT = 12;
 const ANNOTATION_MIN_WIDTH = 8;
 
@@ -37,6 +37,8 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
   tooltipService,
 }) => {
   const canvasRef = React.useRef<HTMLDivElement | null>(null);
+
+  const { euiTheme } = useCurrentEuiTheme();
 
   useEffect(() => {
     if (canvasRef.current !== null && Array.isArray(annotationsData)) {
@@ -67,8 +69,8 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
         )
         .attr('x', Y_AXIS_LABEL_WIDTH + Y_AXIS_LABEL_PADDING)
         .attr('y', ANNOTATION_CONTAINER_HEIGHT)
-        .style('fill', Y_AXIS_LABEL_FONT_COLOR)
-        .style('font-size', '12px');
+        .style('fill', euiTheme.euiTextSubduedColor)
+        .style('font-size', euiTheme.euiFontSizeXS);
 
       // Add border
       svg
@@ -77,7 +79,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
         .attr('y', 0)
         .attr('height', ANNOTATION_CONTAINER_HEIGHT)
         .attr('width', endingXPos - startingXPos)
-        .style('stroke', '#cccccc')
+        .style('stroke', euiTheme.euiBorderColor)
         .style('fill', 'none')
         .style('stroke-width', 1);
 

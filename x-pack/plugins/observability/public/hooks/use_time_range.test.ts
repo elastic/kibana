@@ -24,8 +24,14 @@ describe('useTimeRange', () => {
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
       core: {} as CoreStart,
       appMountParameters: {} as AppMountParameters,
-      config: { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } },
-      plugins: ({
+      config: {
+        unsafe: {
+          alertingExperience: { enabled: true },
+          cases: { enabled: true },
+          overviewNext: { enabled: false },
+        },
+      },
+      plugins: {
         data: {
           query: {
             timefilter: {
@@ -38,7 +44,7 @@ describe('useTimeRange', () => {
             },
           },
         },
-      } as unknown) as ObservabilityPublicPluginsStart,
+      } as unknown as ObservabilityPublicPluginsStart,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       ObservabilityPageTemplate: () => null,
     }));
@@ -67,8 +73,14 @@ describe('useTimeRange', () => {
         jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
           core: {} as CoreStart,
           appMountParameters: {} as AppMountParameters,
-          config: { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } },
-          plugins: ({
+          config: {
+            unsafe: {
+              alertingExperience: { enabled: true },
+              cases: { enabled: true },
+              overviewNext: { enabled: false },
+            },
+          },
+          plugins: {
             data: {
               query: {
                 timefilter: {
@@ -81,7 +93,7 @@ describe('useTimeRange', () => {
                 },
               },
             },
-          } as unknown) as ObservabilityPublicPluginsStart,
+          } as unknown as ObservabilityPublicPluginsStart,
           observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
           ObservabilityPageTemplate: () => null,
         }));

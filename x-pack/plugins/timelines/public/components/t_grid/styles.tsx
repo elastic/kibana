@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
@@ -270,18 +270,18 @@ export const EventsTrData = styled.div.attrs(({ className = '' }) => ({
 const TIMELINE_EVENT_DETAILS_OFFSET = 40;
 
 interface WidthProp {
-  width?: number;
+  width: number;
 }
 
 export const EventsTrSupplementContainer = styled.div.attrs<WidthProp>(({ width }) => ({
   role: 'dialog',
   style: {
-    width: `${width! - TIMELINE_EVENT_DETAILS_OFFSET}px`,
+    width: `${width - TIMELINE_EVENT_DETAILS_OFFSET}px`,
   },
 }))<WidthProp>``;
 
 export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
-  className: `siemEventsTable__trSupplement ${className}`,
+  className: `siemEventsTable__trSupplement ${className}` as string,
 }))<{ className: string }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
@@ -409,7 +409,7 @@ export const EventsHeadingTitleSpan = styled.span.attrs(({ className }) => ({
 `;
 
 export const EventsHeadingExtra = styled.div.attrs(({ className = '' }) => ({
-  className: `siemEventsHeading__extra ${className}`,
+  className: `siemEventsHeading__extra ${className}` as string,
 }))`
   margin-left: auto;
   margin-right: 2px;
@@ -459,12 +459,21 @@ export const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(
   })
 )<{ $isVisible: boolean }>``;
 
-export const UpdatedFlexItem = styled(EuiFlexItem)<{ show: boolean }>`
-  height: 0px;
-  position: relative;
-  top: ${({ theme }) => theme.eui.paddingSizes.s};
-  ${({ show }) => (show ? '' : 'visibility: hidden;')}
+export const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible?: boolean }>`
+  overflow: hidden;
+  margin: 0;
+  min-height: 490px;
+  display: ${({ $visible = true }) => ($visible ? 'flex' : 'none')};
+`;
+
+export const UpdatedFlexGroup = styled(EuiFlexGroup)`
+  position: absolute;
   z-index: ${({ theme }) => theme.eui.euiZLevel1};
+  right: 0px;
+`;
+
+export const UpdatedFlexItem = styled(EuiFlexItem)<{ $show: boolean }>`
+  ${({ $show }) => ($show ? '' : 'visibility: hidden;')}
 `;
 
 export const AlertCount = styled.span`

@@ -5,17 +5,14 @@
  * 2.0.
  */
 import { useEffect, useState } from 'react';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isEmpty } from 'lodash';
 
-import {
-  buildAlertsQuery,
-  formatAlertToEcsSignal,
-} from '../../../../cases/components/case_view/helpers';
 import { Ecs } from '../../../../../common/ecs';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
+import { buildAlertsQuery, formatAlertToEcsSignal } from '../../../../common/utils/alerts';
 
 export const useFetchEcsAlertsData = ({
   alertIds,
@@ -60,7 +57,7 @@ export const useFetchEcsAlertsData = ({
       } catch (e) {
         if (isSubscribed) {
           if (onError) {
-            onError(e);
+            onError(e as Error);
           }
         }
       }

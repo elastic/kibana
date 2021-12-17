@@ -27,6 +27,15 @@ const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 
 jest.mock('../../../../common/lib/kibana');
 
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+  return {
+    ...original,
+    useDispatch: () => jest.fn(),
+    useSelector: () => jest.fn(),
+  };
+});
+
 describe('#getCommonColumns', () => {
   let mockResults: OpenTimelineResult[];
 

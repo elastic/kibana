@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { coreMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { getStatsWithXpack } from './get_stats_with_xpack';
 import { SavedObjectsClient } from '../../../../../src/core/server';
@@ -119,6 +119,7 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
         usageCollection,
         soClient,
         kibanaRequest: undefined,
+        refreshCache: false,
       },
       context
     );
@@ -141,6 +142,7 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
         usageCollection,
         soClient,
         kibanaRequest: undefined,
+        refreshCache: false,
       },
       context
     );
@@ -168,6 +170,7 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
         usageCollection,
         soClient,
         kibanaRequest: undefined,
+        refreshCache: false,
       },
       context
     );

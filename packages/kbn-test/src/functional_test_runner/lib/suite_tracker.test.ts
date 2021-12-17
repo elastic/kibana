@@ -14,7 +14,7 @@ jest.mock('@kbn/utils', () => {
   return { REPO_ROOT: '/dev/null/root' };
 });
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { Lifecycle } from './lifecycle';
 import { SuiteTracker } from './suite_tracker';
 import { Suite } from '../fake_mocha_types';
@@ -51,12 +51,12 @@ describe('SuiteTracker', () => {
   let MOCKS: Record<string, Suite>;
 
   const createMock = (overrides = {}) => {
-    return ({
+    return {
       file: resolve(REPO_ROOT, MOCK_TEST_PATH),
       title: 'A Test',
       suiteTag: MOCK_TEST_PATH,
       ...overrides,
-    } as unknown) as Suite;
+    } as unknown as Suite;
   };
 
   const runLifecycleWithMocks = async (mocks: Suite[], fn: (objs: any) => any = () => {}) => {

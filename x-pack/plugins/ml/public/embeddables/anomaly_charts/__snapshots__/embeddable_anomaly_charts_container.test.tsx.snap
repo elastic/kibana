@@ -33,6 +33,7 @@ Object {
   "timefilter": Object {
     "calculateBounds": [MockFunction],
     "createFilter": [MockFunction],
+    "createRelativeFilter": [MockFunction],
     "disableAutoRefreshSelector": [MockFunction],
     "disableTimeRangeSelector": [MockFunction],
     "enableAutoRefreshSelector": [MockFunction],

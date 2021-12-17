@@ -12,7 +12,7 @@ import { TaskManagerStartContract, TaskRunCreatorFunction } from '../../../../ta
 import { numberToDuration } from '../../../common/schema_utils';
 import { ReportingConfigType } from '../../config';
 import { statuses } from '../statuses';
-import { Report } from '../store';
+import { SavedReport } from '../store';
 import { ReportingTask, ReportingTaskStatus, REPORTING_MONITOR_TYPE, ReportTaskParams } from './';
 
 /*
@@ -115,7 +115,7 @@ export class MonitorReportsTask implements ReportingTask {
             }
 
             // clear process expiration and set status to pending
-            const report = new Report({ ...recoveredJob, ...recoveredJob._source });
+            const report = new SavedReport({ ...recoveredJob, ...recoveredJob._source });
             await reportingStore.prepareReportForRetry(report); // if there is a version conflict response, this just throws and logs an error
 
             // clear process expiration and reschedule

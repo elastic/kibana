@@ -5,57 +5,39 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Location } from 'history';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { IUrlParams } from '../../../context/url_params_context/types';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
-import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
-import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
+import { replace } from '../../shared/Links/url_helpers';
 import { TransactionsTable } from '../../shared/transactions_table';
-import { useRedirect } from './useRedirect';
-
-function getRedirectLocation({
-  location,
-  transactionType,
-  urlParams,
-}: {
-  location: Location;
-  transactionType?: string;
-  urlParams: IUrlParams;
-}): Location | undefined {
-  const transactionTypeFromUrlParams = urlParams.transactionType;
-
-  if (!transactionTypeFromUrlParams && transactionType) {
-    return {
-      ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        transactionType,
-      }),
-    };
-  }
-}
 
 export function TransactionOverview() {
   const {
-    query: { environment, kuery },
-  } = useApmParams('/services/:serviceName/transactions');
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      transactionType: transactionTypeFromUrl,
+    },
+  } = useApmParams('/services/{serviceName}/transactions');
 
-  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
-    kuery,
-  });
-  const location = useLocation();
-  const { urlParams } = useUrlParams();
-  const { transactionType, serviceName } = useApmServiceContext();
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const { transactionType, serviceName, fallbackToTransactions } =
+    useApmServiceContext();
+
+  const history = useHistory();
 
   // redirect to first transaction type
-  useRedirect(getRedirectLocation({ location, transactionType, urlParams }));
+  if (!transactionTypeFromUrl && transactionType) {
+    replace(history, { query: { transactionType } });
+  }
 
   // TODO: improve urlParams typings.
   // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
@@ -69,13 +51,18 @@ export function TransactionOverview() {
         <>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <AggregatedTransactionsCallout />
+              <AggregatedTransactionsBadge />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
         </>
       )}
-      <TransactionCharts kuery={kuery} environment={environment} />
+      <TransactionCharts
+        kuery={kuery}
+        environment={environment}
+        start={start}
+        end={end}
+      />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
         <TransactionsTable
@@ -84,6 +71,8 @@ export function TransactionOverview() {
           showAggregationAccurateCallout
           environment={environment}
           kuery={kuery}
+          start={start}
+          end={end}
         />
       </EuiPanel>
     </>

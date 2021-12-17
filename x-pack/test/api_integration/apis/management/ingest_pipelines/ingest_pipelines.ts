@@ -15,13 +15,8 @@ const API_BASE_PATH = '/api/ingest_pipelines';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const {
-    createPipeline,
-    deletePipeline,
-    cleanupPipelines,
-    createIndex,
-    deleteIndex,
-  } = registerEsHelpers(getService);
+  const { createPipeline, deletePipeline, cleanupPipelines, createIndex, deleteIndex } =
+    registerEsHelpers(getService);
 
   describe('Pipelines', function () {
     after(async () => {
@@ -150,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
           await createPipeline({ body: PIPELINE, id: PIPELINE_ID }, true);
         } catch (err) {
           // eslint-disable-next-line no-console
-          console.log('[Setup error] Error creating ingest node pipeline');
+          console.log('[Setup error] Error creating ingest pipeline');
           throw err;
         }
       });
@@ -204,7 +199,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.eql({
           statusCode: 404,
           error: 'Not Found',
-          message: 'Response Error',
+          message: '{}',
           attributes: {},
         });
       });
@@ -230,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
           await createPipeline({ body: PIPELINE, id: PIPELINE_ID }, true);
         } catch (err) {
           // eslint-disable-next-line no-console
-          console.log('[Setup error] Error creating ingest node pipeline');
+          console.log('[Setup error] Error creating ingest pipeline');
           throw err;
         }
       });
@@ -494,10 +489,35 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body).to.eql({
           error: 'Not Found',
-          message: 'Response Error',
+          message: '{"_index":"test_index","_id":"2","found":false}',
           statusCode: 404,
           attributes: {},
         });
+      });
+    });
+
+    describe('Map CSV to pipeline', () => {
+      it('should map to a pipeline', async () => {
+        const validCsv =
+          'source_field,copy_action,format_action,timestamp_format,destination_field,Notes\nsrcip,,,,source.address,Copying srcip to source.address';
+        const { body } = await supertest
+          .post(`${API_BASE_PATH}/parse_csv`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            copyAction: 'copy',
+            file: validCsv,
+          })
+          .expect(200);
+
+        expect(body.processors).to.eql([
+          {
+            set: {
+              field: 'source.address',
+              value: '{{srcip}}',
+              if: 'ctx.srcip != null',
+            },
+          },
+        ]);
       });
     });
   });

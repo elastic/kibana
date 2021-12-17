@@ -8,6 +8,7 @@
 import { APMBaseDoc } from './apm_base_doc';
 import { Cloud } from './fields/cloud';
 import { Container } from './fields/container';
+import { EventOutcome } from './fields/event_outcome';
 import { Host } from './fields/host';
 import { Http } from './fields/http';
 import { Kubernetes } from './fields/kubernetes';
@@ -28,6 +29,7 @@ export interface TransactionRaw extends APMBaseDoc {
   processor: Processor;
   timestamp: TimestampUs;
   trace: { id: string }; // trace is required
+  event?: { outcome?: EventOutcome };
   transaction: {
     duration: { us: number };
     id: string;

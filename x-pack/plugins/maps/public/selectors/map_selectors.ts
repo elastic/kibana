@@ -9,24 +9,29 @@ import { createSelector } from 'reselect';
 import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import { Adapters } from 'src/plugins/inspector/public';
-import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
-// @ts-ignore
-import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile_layer';
-import { IVectorLayer, VectorLayer } from '../classes/layers/vector_layer';
+import type { Query } from 'src/plugins/data/common';
+import { Filter } from '@kbn/es-query';
+import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
+import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
+import {
+  BlendedVectorLayer,
+  IVectorLayer,
+  MvtVectorLayer,
+  GeoJsonVectorLayer,
+} from '../classes/layers/vector_layer';
 import { VectorStyle } from '../classes/styles/vector/vector_style';
 import { HeatmapLayer } from '../classes/layers/heatmap_layer';
-import { BlendedVectorLayer } from '../classes/layers/blended_vector_layer/blended_vector_layer';
 import { getTimeFilter } from '../kibana_services';
 import {
   getChartsPaletteServiceGetColor,
   getInspectorAdapters,
 } from '../reducers/non_serializable_instances';
-import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vector_layer';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/copy_persistent_state';
 import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
+  LAYER_TYPE,
   SOURCE_DATA_REQUEST_ID,
   SPATIAL_FILTERS_LAYER_ID,
   STYLE_TYPE,
@@ -45,16 +50,16 @@ import {
   LayerDescriptor,
   MapCenter,
   MapExtent,
-  MapQuery,
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 import { MapSettings } from '../reducers/map';
-import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
+import { TimeRange } from '../../../../../src/plugins/data/public';
 import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
+import { EMSTMSSource } from '../classes/sources/ems_tms_source';
 import { ILayer } from '../classes/layers/layer';
 import { getIsReadOnly } from './ui_selectors';
 
@@ -66,9 +71,9 @@ export function createLayerInstance(
   const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
 
   switch (layerDescriptor.type) {
-    case TileLayer.type:
-      return new TileLayer({ layerDescriptor, source: source as ITMSSource });
-    case VectorLayer.type:
+    case LAYER_TYPE.RASTER_TILE:
+      return new RasterTileLayer({ layerDescriptor, source: source as ITMSSource });
+    case LAYER_TYPE.GEOJSON_VECTOR:
       const joins: InnerJoin[] = [];
       const vectorLayerDescriptor = layerDescriptor as VectorLayerDescriptor;
       if (vectorLayerDescriptor.joins) {
@@ -77,27 +82,27 @@ export function createLayerInstance(
           joins.push(join);
         });
       }
-      return new VectorLayer({
+      return new GeoJsonVectorLayer({
         layerDescriptor: vectorLayerDescriptor,
         source: source as IVectorSource,
         joins,
         chartsPaletteServiceGetColor,
       });
-    case VectorTileLayer.type:
-      return new VectorTileLayer({ layerDescriptor, source: source as ITMSSource });
-    case HeatmapLayer.type:
+    case LAYER_TYPE.EMS_VECTOR_TILE:
+      return new EmsVectorTileLayer({ layerDescriptor, source: source as EMSTMSSource });
+    case LAYER_TYPE.HEATMAP:
       return new HeatmapLayer({
         layerDescriptor: layerDescriptor as HeatmapLayerDescriptor,
         source: source as ESGeoGridSource,
       });
-    case BlendedVectorLayer.type:
+    case LAYER_TYPE.BLENDED_VECTOR:
       return new BlendedVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
         chartsPaletteServiceGetColor,
       });
-    case TiledVectorLayer.type:
-      return new TiledVectorLayer({
+    case LAYER_TYPE.MVT_VECTOR:
+      return new MvtVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
       });
@@ -179,7 +184,7 @@ export const getTimeFilters = ({ map }: MapStoreState): TimeRange =>
 
 export const getTimeslice = ({ map }: MapStoreState) => map.mapState.timeslice;
 
-export const getQuery = ({ map }: MapStoreState): MapQuery | undefined => map.mapState.query;
+export const getQuery = ({ map }: MapStoreState): Query | undefined => map.mapState.query;
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
 
@@ -200,9 +205,6 @@ export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
 
 export const getEditState = ({ map }: MapStoreState): EditState | undefined =>
   map.mapState.editState;
-
-export const getRefreshTimerLastTriggeredAt = ({ map }: MapStoreState): string | undefined =>
-  map.mapState.refreshTimerLastTriggeredAt;
 
 function getLayerDescriptor(state: MapStoreState, layerId: string) {
   const layerListRaw = getLayerListRaw(state);
@@ -225,7 +227,6 @@ export const getDataFilters = createSelector(
   getMapZoom,
   getTimeFilters,
   getTimeslice,
-  getRefreshTimerLastTriggeredAt,
   getQuery,
   getFilters,
   getSearchSessionId,
@@ -237,7 +238,6 @@ export const getDataFilters = createSelector(
     mapZoom,
     timeFilters,
     timeslice,
-    refreshTimerLastTriggeredAt,
     query,
     filters,
     searchSessionId,
@@ -250,7 +250,6 @@ export const getDataFilters = createSelector(
       zoom: mapZoom,
       timeFilters,
       timeslice,
-      refreshTimerLastTriggeredAt,
       query,
       filters,
       searchSessionId,
@@ -272,8 +271,8 @@ export const getSpatialFiltersLayer = createSelector(
       name: 'spatialFilters',
     });
 
-    return new VectorLayer({
-      layerDescriptor: VectorLayer.createDescriptor({
+    return new GeoJsonVectorLayer({
+      layerDescriptor: GeoJsonVectorLayer.createDescriptor({
         id: SPATIAL_FILTERS_LAYER_ID,
         visible: settings.showSpatialFilters,
         alpha: settings.spatialFiltersAlpa,

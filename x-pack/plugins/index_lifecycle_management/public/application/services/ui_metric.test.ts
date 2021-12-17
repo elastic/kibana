@@ -9,7 +9,6 @@ import {
   UIM_CONFIG_COLD_PHASE,
   UIM_CONFIG_WARM_PHASE,
   UIM_CONFIG_SET_PRIORITY,
-  UIM_CONFIG_FREEZE_INDEX,
   defaultIndexPriority,
 } from '../constants/';
 
@@ -59,21 +58,5 @@ describe('getUiMetricsForPhases', () => {
         },
       })
     ).toEqual([UIM_CONFIG_WARM_PHASE, UIM_CONFIG_SET_PRIORITY]);
-  });
-
-  test('gets freeze index', () => {
-    expect(
-      getUiMetricsForPhases({
-        cold: {
-          min_age: '0ms',
-          actions: {
-            freeze: {},
-            set_priority: {
-              priority: parseInt(defaultIndexPriority.cold, 10),
-            },
-          },
-        },
-      })
-    ).toEqual([UIM_CONFIG_COLD_PHASE, UIM_CONFIG_FREEZE_INDEX]);
   });
 });

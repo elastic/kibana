@@ -6,18 +6,15 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup, ToastsApi } from 'kibana/public';
-import { ActionConnector } from '../../../../common';
+import { HttpSetup, IToasts } from 'kibana/public';
+import { ActionConnector } from '../../../../common/api';
 import { getChoices } from './api';
 import { Choice } from './types';
 import * as i18n from './translations';
 
 export interface UseGetChoicesProps {
   http: HttpSetup;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  toastNotifications: IToasts;
   connector?: ActionConnector;
   fields: string[];
   onSuccess?: (choices: Choice[]) => void;

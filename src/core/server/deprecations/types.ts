@@ -6,17 +6,25 @@
  * Side Public License, v 1.
  */
 
+import type { MaybePromise } from '@kbn/utility-types';
 import type { SavedObjectsClientContract } from '../saved_objects/types';
 import type { IScopedClusterClient } from '../elasticsearch';
 
-type MaybePromise<T> = T | Promise<T>;
-
-export interface DomainDeprecationDetails extends DeprecationsDetails {
-  domainId: string;
-}
-
-export interface DeprecationsDetails {
-  /* The message to be displayed for the deprecation. */
+/**
+ * Base properties shared by all types of deprecations
+ *
+ * @public
+ */
+export interface BaseDeprecationDetails {
+  /**
+   * The title of the deprecation.
+   * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
+   */
+  title: string;
+  /**
+   * The description message to be displayed for the deprecation.
+   * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
+   */
   message: string;
   /**
    * levels:
@@ -35,11 +43,11 @@ export interface DeprecationsDetails {
    * across kibana deprecations.
    */
   deprecationType?: 'config' | 'feature';
-  /* (optional) link to the documentation for more details on the deprecation. */
+  /** (optional) link to the documentation for more details on the deprecation. */
   documentationUrl?: string;
-  /* (optional) specify the fix for this deprecation requires a full kibana restart. */
+  /** (optional) specify the fix for this deprecation requires a full kibana restart. */
   requireRestart?: boolean;
-  /* corrective action needed to fix this deprecation. */
+  /** corrective action needed to fix this deprecation. */
   correctiveActions: {
     /**
      * (optional) The api to be called to automatically fix the deprecation
@@ -47,33 +55,72 @@ export interface DeprecationsDetails {
      * handle their deprecations.
      */
     api?: {
-      /* Kibana route path. Passing a query string is allowed */
+      /** Kibana route path. Passing a query string is allowed */
       path: string;
-      /* Kibana route method: 'POST' or 'PUT'. */
+      /** Kibana route method: 'POST' or 'PUT'. */
       method: 'POST' | 'PUT';
-      /* Additional details to be passed to the route. */
+      /** Additional details to be passed to the route. */
       body?: {
         [key: string]: any;
       };
+      /* Allow to omit context in the request of the body */
+      omitContextFromBody?: boolean;
     };
     /**
      * Specify a list of manual steps users need to follow to
      * fix the deprecation before upgrade. Required even if an API
      * corrective action is set in case the API fails.
+     * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
      */
     manualSteps: string[];
   };
 }
 
+/**
+ * @public
+ */
+export interface ConfigDeprecationDetails extends BaseDeprecationDetails {
+  configPath: string;
+  deprecationType: 'config';
+}
+
+/**
+ * @public
+ */
+export interface FeatureDeprecationDetails extends BaseDeprecationDetails {
+  deprecationType?: 'feature' | undefined;
+}
+
+/**
+ * @public
+ */
+export type DeprecationsDetails = ConfigDeprecationDetails | FeatureDeprecationDetails;
+
+/**
+ * @internal
+ */
+export type DomainDeprecationDetails = DeprecationsDetails & {
+  domainId: string;
+};
+
+/**
+ * @public
+ */
 export interface RegisterDeprecationsConfig {
   getDeprecations: (context: GetDeprecationsContext) => MaybePromise<DeprecationsDetails[]>;
 }
 
+/**
+ * @public
+ */
 export interface GetDeprecationsContext {
   esClient: IScopedClusterClient;
   savedObjectsClient: SavedObjectsClientContract;
 }
 
+/**
+ * @public
+ */
 export interface DeprecationsGetResponse {
   deprecations: DomainDeprecationDetails[];
 }

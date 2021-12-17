@@ -16,8 +16,6 @@ import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_ap
 import { LicenseContext } from '../../../context/license/license_context';
 import * as useFetcherModule from '../../../hooks/use_fetcher';
 import { ServiceMap } from '.';
-import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
-import { Router } from 'react-router-dom';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 const history = createMemoryHistory();
@@ -49,15 +47,15 @@ const expiredLicense = new License({
 });
 
 function createWrapper(license: License | null) {
+  history.replace('/service-map?rangeFrom=now-15m&rangeTo=now');
+
   return ({ children }: { children?: ReactNode }) => {
     return (
       <EuiThemeProvider>
         <KibanaReactContext.Provider>
           <LicenseContext.Provider value={license || undefined}>
-            <MockApmPluginContextWrapper>
-              <Router history={history}>
-                <UrlParamsProvider>{children}</UrlParamsProvider>
-              </Router>
+            <MockApmPluginContextWrapper history={history}>
+              {children}
             </MockApmPluginContextWrapper>
           </LicenseContext.Provider>
         </KibanaReactContext.Provider>
@@ -71,7 +69,12 @@ describe('ServiceMap', () => {
     it('renders null', async () => {
       expect(
         await render(
-          <ServiceMap environment={ENVIRONMENT_ALL.value} kuery="" />,
+          <ServiceMap
+            environment={ENVIRONMENT_ALL.value}
+            kuery=""
+            start="2021-08-20T10:00:00.000Z"
+            end="2021-08-20T10:15:00.000Z"
+          />,
           {
             wrapper: createWrapper(null),
           }
@@ -84,7 +87,12 @@ describe('ServiceMap', () => {
     it('renders the license banner', async () => {
       expect(
         await render(
-          <ServiceMap environment={ENVIRONMENT_ALL.value} kuery="" />,
+          <ServiceMap
+            environment={ENVIRONMENT_ALL.value}
+            kuery=""
+            start="2021-08-20T10:00:00.000Z"
+            end="2021-08-20T10:15:00.000Z"
+          />,
           {
             wrapper: createWrapper(expiredLicense),
           }
@@ -104,7 +112,12 @@ describe('ServiceMap', () => {
 
         expect(
           await render(
-            <ServiceMap environment={ENVIRONMENT_ALL.value} kuery="" />,
+            <ServiceMap
+              environment={ENVIRONMENT_ALL.value}
+              kuery=""
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />,
             {
               wrapper: createWrapper(activeLicense),
             }

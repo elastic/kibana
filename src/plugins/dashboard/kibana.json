@@ -10,16 +10,22 @@
     "data",
     "embeddable",
     "inspector",
-    "kibanaLegacy",
     "navigation",
     "savedObjects",
     "share",
+    "screenshotMode",
     "uiActions",
     "urlForwarding",
     "presentationUtil",
     "visualizations"
   ],
-  "optionalPlugins": ["home", "spacesOss", "savedObjectsTaggingOss", "usageCollection"],
+  "optionalPlugins": [
+    "home",
+    "spaces",
+    "savedObjectsTaggingOss",
+    "screenshotMode",
+    "usageCollection"
+  ],
   "server": true,
   "ui": true,
   "requiredBundles": ["home", "kibanaReact", "kibanaUtils", "presentationUtil"]

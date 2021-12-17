@@ -10,7 +10,6 @@ import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { KibanaRequest } from '../../../../src/core/server';
 import { savedObjectsClientMock } from '../../../../src/core/server/mocks';
 import { securityMock } from '../../security/server/mocks';
-import { ALERTS_FEATURE_ID } from '../common';
 import {
   AlertingAuthorizationClientFactory,
   AlertingAuthorizationClientFactoryOpts,
@@ -18,7 +17,6 @@ import {
 import { featuresPluginMock } from '../../features/server/mocks';
 
 jest.mock('./authorization/alerting_authorization');
-jest.mock('./authorization/audit_logger');
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const features = featuresPluginMock.createStart();
@@ -26,14 +24,15 @@ const features = featuresPluginMock.createStart();
 const securityPluginSetup = securityMock.createSetup();
 const securityPluginStart = securityMock.createStart();
 
-const alertingAuthorizationClientFactoryParams: jest.Mocked<AlertingAuthorizationClientFactoryOpts> = {
-  ruleTypeRegistry: ruleTypeRegistryMock.create(),
-  getSpace: jest.fn(),
-  getSpaceId: jest.fn(),
-  features,
-};
+const alertingAuthorizationClientFactoryParams: jest.Mocked<AlertingAuthorizationClientFactoryOpts> =
+  {
+    ruleTypeRegistry: ruleTypeRegistryMock.create(),
+    getSpace: jest.fn(),
+    getSpaceId: jest.fn(),
+    features,
+  };
 
-const fakeRequest = ({
+const fakeRequest = {
   app: {},
   headers: {},
   getBasePath: () => '',
@@ -48,7 +47,7 @@ const fakeRequest = ({
     },
   },
   getSavedObjectsClient: () => savedObjectsClient,
-} as unknown) as Request;
+} as unknown as Request;
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -62,7 +61,6 @@ test('creates an alerting authorization client with proper constructor arguments
     ...alertingAuthorizationClientFactoryParams,
   });
   const request = KibanaRequest.from(fakeRequest);
-  const { AlertingAuthorizationAuditLogger } = jest.requireMock('./authorization/audit_logger');
 
   factory.create(request);
 
@@ -72,20 +70,15 @@ test('creates an alerting authorization client with proper constructor arguments
     authorization: securityPluginStart.authz,
     ruleTypeRegistry: alertingAuthorizationClientFactoryParams.ruleTypeRegistry,
     features: alertingAuthorizationClientFactoryParams.features,
-    auditLogger: expect.any(AlertingAuthorizationAuditLogger),
     getSpace: expect.any(Function),
     getSpaceId: expect.any(Function),
   });
-
-  expect(AlertingAuthorizationAuditLogger).toHaveBeenCalled();
-  expect(securityPluginSetup.audit.getLogger).toHaveBeenCalledWith(ALERTS_FEATURE_ID);
 });
 
 test('creates an alerting authorization client with proper constructor arguments', async () => {
   const factory = new AlertingAuthorizationClientFactory();
   factory.initialize(alertingAuthorizationClientFactoryParams);
   const request = KibanaRequest.from(fakeRequest);
-  const { AlertingAuthorizationAuditLogger } = jest.requireMock('./authorization/audit_logger');
 
   factory.create(request);
 
@@ -94,11 +87,7 @@ test('creates an alerting authorization client with proper constructor arguments
     request,
     ruleTypeRegistry: alertingAuthorizationClientFactoryParams.ruleTypeRegistry,
     features: alertingAuthorizationClientFactoryParams.features,
-    auditLogger: expect.any(AlertingAuthorizationAuditLogger),
     getSpace: expect.any(Function),
     getSpaceId: expect.any(Function),
   });
-
-  expect(AlertingAuthorizationAuditLogger).toHaveBeenCalled();
-  expect(securityPluginSetup.audit.getLogger).not.toHaveBeenCalled();
 });

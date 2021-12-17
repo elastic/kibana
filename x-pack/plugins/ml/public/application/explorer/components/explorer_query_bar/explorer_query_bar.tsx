@@ -8,13 +8,9 @@
 import React, { FC, useState, useEffect } from 'react';
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  Query,
-  esKuery,
-  esQuery,
-  QueryStringInput,
-} from '../../../../../../../../src/plugins/data/public';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import { Query, QueryStringInput } from '../../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
 import { explorerService } from '../../explorer_dashboard_service';
 import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
@@ -28,11 +24,11 @@ export function getKqlQueryValues({
 }: {
   inputString: string | { [key: string]: any };
   queryLanguage: string;
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
 }): { clearSettings: boolean; settings: any } {
   let influencersFilterQuery: InfluencersFilterQuery = {};
   const filteredFields: string[] = [];
-  const ast = esKuery.fromKueryExpression(inputString);
+  const ast = fromKueryExpression(inputString);
   const isAndOperator = ast && ast.function === 'and';
   // if ast.type == 'function' then layout of ast.arguments:
   // [{ arguments: [ { type: 'literal', value: 'AAL' } ] },{ arguments: [ { type: 'literal', value: 'AAL' } ] }]
@@ -50,12 +46,9 @@ export function getKqlQueryValues({
     });
   }
   if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-    influencersFilterQuery = esKuery.toElasticsearchQuery(
-      esKuery.fromKueryExpression(inputString),
-      indexPattern
-    );
+    influencersFilterQuery = toElasticsearchQuery(fromKueryExpression(inputString), indexPattern);
   } else if (queryLanguage === SEARCH_QUERY_LANGUAGE.LUCENE) {
-    influencersFilterQuery = esQuery.luceneStringToDsl(inputString);
+    influencersFilterQuery = luceneStringToDsl(inputString);
   }
 
   const clearSettings = Boolean(
@@ -96,7 +89,7 @@ function getInitSearchInputState({
 interface ExplorerQueryBarProps {
   filterActive: boolean;
   filterPlaceHolder: string;
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   queryString?: string;
   updateLanguage: (language: string) => void;
 }

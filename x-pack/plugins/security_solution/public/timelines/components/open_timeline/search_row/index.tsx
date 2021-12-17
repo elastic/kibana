@@ -62,6 +62,7 @@ export const SearchRow = React.memo<Props>(
             ? i18n.SEARCH_PLACEHOLDER
             : i18n.SEARCH_TEMPLATE_PLACEHOLDER,
         incremental: false,
+        'data-test-subj': 'search-bar',
       }),
       [timelineType]
     );
@@ -70,7 +71,7 @@ export const SearchRow = React.memo<Props>(
       <SearchRowContainer>
         <SearchRowFlexGroup gutterSize="s">
           <EuiFlexItem>
-            <EuiSearchBar data-test-subj="search-bar" box={searchBox} onChange={onQueryChange} />
+            <EuiSearchBar box={searchBox} onChange={onQueryChange} />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>

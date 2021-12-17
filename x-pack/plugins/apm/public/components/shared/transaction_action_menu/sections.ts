@@ -11,8 +11,8 @@ import { IBasePath } from 'kibana/public';
 import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
 import url from 'url';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { IUrlParams } from '../../../context/url_params_context/types';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import type { ApmUrlParams } from '../../../context/url_params_context/types';
 import { getDiscoverHref } from '../Links/DiscoverLinks/DiscoverLink';
 import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
 import { getInfraHref } from '../Links/InfraLink';
@@ -38,7 +38,7 @@ export const getSections = ({
   transaction: Transaction;
   basePath: IBasePath;
   location: Location;
-  urlParams: IUrlParams;
+  urlParams: ApmUrlParams;
 }) => {
   const hostName = transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;

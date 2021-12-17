@@ -19,7 +19,7 @@ import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser } from '../../common/model';
 import { shouldProviderUseLoginForm } from '../../common/model';
-import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import type { AuditServiceSetup } from '../audit';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -41,10 +41,9 @@ interface AuthenticationServiceSetupParams {
 }
 
 interface AuthenticationServiceStartParams {
-  http: Pick<HttpServiceStart, 'auth' | 'basePath'>;
+  http: Pick<HttpServiceStart, 'auth' | 'basePath' | 'getServerInfo'>;
   config: ConfigType;
   clusterClient: IClusterClient;
-  legacyAuditLogger: SecurityAuditLogger;
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
   session: PublicMethodsOf<Session>;
@@ -99,7 +98,8 @@ export class AuthenticationService {
     // 2. Login selector is disabled, but the provider with the lowest `order` uses login form
     const isLoginPageAvailable =
       config.authc.selector.enabled ||
-      shouldProviderUseLoginForm(config.authc.sortedProviders[0].type);
+      (config.authc.sortedProviders.length > 0 &&
+        shouldProviderUseLoginForm(config.authc.sortedProviders[0].type));
 
     http.registerAuth(async (request, response, t) => {
       if (!license.isLicenseAvailable()) {
@@ -224,7 +224,6 @@ export class AuthenticationService {
     clusterClient,
     featureUsageService,
     http,
-    legacyAuditLogger,
     loggers,
     session,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
@@ -234,12 +233,22 @@ export class AuthenticationService {
       license: this.license,
     });
 
+    /**
+     * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
+     * to construct a server base URL (deprecated, used by the SAML provider only).
+     */
+    const getServerBaseURL = () => {
+      const { protocol, hostname, port } = http.getServerInfo();
+      const serverConfig = { protocol, hostname, port, ...config.public };
+
+      return `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`;
+    };
+
     const getCurrentUser = (request: KibanaRequest) =>
       http.auth.get<AuthenticatedUser>(request).state ?? null;
 
     this.session = session;
     this.authenticator = new Authenticator({
-      legacyAuditLogger,
       audit,
       loggers,
       clusterClient,
@@ -247,6 +256,7 @@ export class AuthenticationService {
       config: { authc: config.authc },
       getCurrentUser,
       featureUsageService,
+      getServerBaseURL,
       license: this.license,
       session,
     });

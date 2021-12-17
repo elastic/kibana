@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 
 import {
@@ -557,7 +557,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage: 'Pipeline',
     }),
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.pipeline', {
-      defaultMessage: 'Runs another ingest node pipeline.',
+      defaultMessage: 'Runs another ingest pipeline.',
     }),
     getDefaultDescription: ({ name }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.pipeline', {

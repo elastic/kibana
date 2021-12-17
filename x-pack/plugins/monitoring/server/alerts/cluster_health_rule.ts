@@ -67,13 +67,18 @@ export class ClusterHealthRule extends BaseRule {
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
     clusters: AlertCluster[],
-    availableCcs: string[]
+    availableCcs: boolean
   ): Promise<AlertData[]> {
     let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const healths = await fetchClusterHealth(esClient, clusters, esIndexPattern);
+    const healths = await fetchClusterHealth(
+      esClient,
+      clusters,
+      esIndexPattern,
+      params.filterQuery
+    );
     return healths.map((clusterHealth) => {
       const shouldFire = clusterHealth.health !== AlertClusterHealthType.Green;
       const severity =

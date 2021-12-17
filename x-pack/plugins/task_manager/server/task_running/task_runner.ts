@@ -12,11 +12,15 @@
  */
 
 import apm from 'elastic-apm-node';
+import uuid from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { performance } from 'perf_hooks';
 import { identity, defaults, flow } from 'lodash';
-import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-
+import {
+  Logger,
+  SavedObjectsErrorHelpers,
+  ExecutionContextStart,
+} from '../../../../../src/core/server';
+import { UsageCounter } from '../../../../../src/plugins/usage_collection/server';
 import { Middleware } from '../lib/middleware';
 import {
   asOk,
@@ -56,6 +60,10 @@ import { isUnrecoverableError } from './errors';
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
+export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
+export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
+export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
+
 export interface TaskRunner {
   isExpired: boolean;
   expiration: Date;
@@ -65,9 +73,11 @@ export interface TaskRunner {
   markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<Result<SuccessfulRunResult, FailedRunResult>>;
   id: string;
+  taskExecutionId: string;
   stage: string;
   isEphemeral?: boolean;
   toString: () => string;
+  isSameTask: (executionId: string) => boolean;
 }
 
 export enum TaskRunningStage {
@@ -93,6 +103,8 @@ type Opts = {
   store: Updatable;
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
   defaultMaxAttempts: number;
+  executionContext: ExecutionContextStart;
+  usageCounter?: UsageCounter;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -137,6 +149,9 @@ export class TaskManagerRunner implements TaskRunner {
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
   private defaultMaxAttempts: number;
+  private uuid: string;
+  private readonly executionContext: ExecutionContextStart;
+  private usageCounter?: UsageCounter;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -157,6 +172,8 @@ export class TaskManagerRunner implements TaskRunner {
     beforeMarkRunning,
     defaultMaxAttempts,
     onTaskEvent = identity,
+    executionContext,
+    usageCounter,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -166,6 +183,9 @@ export class TaskManagerRunner implements TaskRunner {
     this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
+    this.executionContext = executionContext;
+    this.usageCounter = usageCounter;
+    this.uuid = uuid.v4();
   }
 
   /**
@@ -173,6 +193,21 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public get id() {
     return this.instance.task.id;
+  }
+
+  /**
+   * Gets the execution id of this task instance.
+   */
+  public get taskExecutionId() {
+    return `${this.id}::${this.uuid}`;
+  }
+
+  /**
+   * Test whether given execution ID identifies a different execution of this same task
+   * @param id
+   */
+  public isSameTask(executionId: string) {
+    return executionId.startsWith(this.id);
   }
 
   /**
@@ -249,7 +284,7 @@ export class TaskManagerRunner implements TaskRunner {
     }
     this.logger.debug(`Running task ${this}`);
 
-    const apmTrans = apm.startTransaction(this.taskType, 'taskManager run', {
+    const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
 
@@ -261,7 +296,15 @@ export class TaskManagerRunner implements TaskRunner {
 
     try {
       this.task = this.definition.createTaskRunner(modifiedContext);
-      const result = await withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run());
+      const ctx = {
+        type: 'task manager',
+        name: `run ${this.instance.task.taskType}`,
+        id: this.instance.task.id,
+        description: 'run task',
+      };
+      const result = await this.executionContext.withContext(ctx, () =>
+        withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
+      );
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
         this.processResult(validatedResult, stopTaskTimer())
@@ -297,9 +340,12 @@ export class TaskManagerRunner implements TaskRunner {
         }`
       );
     }
-    performance.mark('markTaskAsRunning_start');
 
-    const apmTrans = apm.startTransaction('taskManager', 'taskManager markTaskAsRunning');
+    const apmTrans = apm.startTransaction(
+      TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+      TASK_MANAGER_TRANSACTION_TYPE
+    );
+    apmTrans?.addLabels({ entityId: this.taskType });
 
     const now = new Date();
     try {
@@ -345,9 +391,8 @@ export class TaskManagerRunner implements TaskRunner {
         })) as ConcreteTaskInstanceWithStartedAt
       );
 
-      const timeUntilClaimExpiresAfterUpdate = howManyMsUntilOwnershipClaimExpires(
-        ownershipClaimedUntil
-      );
+      const timeUntilClaimExpiresAfterUpdate =
+        howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil);
       if (timeUntilClaimExpiresAfterUpdate < 0) {
         this.logger.debug(
           `[Task Runner] Task ${id} ran after ownership expired (${Math.abs(
@@ -357,12 +402,10 @@ export class TaskManagerRunner implements TaskRunner {
       }
 
       if (apmTrans) apmTrans.end('success');
-      performanceStopMarkingTaskAsRunning();
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asOk(this.instance.task)));
       return true;
     } catch (error) {
       if (apmTrans) apmTrans.end('failure');
-      performanceStopMarkingTaskAsRunning();
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asErr(error)));
       if (!SavedObjectsErrorHelpers.isConflictError(error)) {
         if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
@@ -419,6 +462,11 @@ export class TaskManagerRunner implements TaskRunner {
   private shouldTryToScheduleRetry(): boolean {
     if (this.instance.task.schedule) {
       return true;
+    }
+
+    if (this.isExpired) {
+      this.logger.warn(`Skipping reschedule for task ${this} due to the task expiring`);
+      return false;
     }
 
     const maxAttempts = this.definition.maxAttempts || this.defaultMaxAttempts;
@@ -483,20 +531,28 @@ export class TaskManagerRunner implements TaskRunner {
       unwrap
     )(result);
 
-    this.instance = asRan(
-      await this.bufferedTaskStore.update(
-        defaults(
-          {
-            ...fieldUpdates,
-            // reset fields that track the lifecycle of the concluded `task run`
-            startedAt: null,
-            retryAt: null,
-            ownerId: null,
-          },
-          this.instance.task
+    if (!this.isExpired) {
+      this.instance = asRan(
+        await this.bufferedTaskStore.update(
+          defaults(
+            {
+              ...fieldUpdates,
+              // reset fields that track the lifecycle of the concluded `task run`
+              startedAt: null,
+              retryAt: null,
+              ownerId: null,
+            },
+            this.instance.task
+          )
         )
-      )
-    );
+      );
+    } else {
+      this.usageCounter?.incrementCounter({
+        counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
+        counterType: 'taskManagerTaskRunner',
+        incrementBy: 1,
+      });
+    }
 
     return fieldUpdates.status === TaskStatus.Failed
       ? TaskRunResult.Failed
@@ -600,15 +656,6 @@ function sanitizeInstance(instance: ConcreteTaskInstance): ConcreteTaskInstance 
 
 function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null): number {
   return ownershipClaimedUntil ? ownershipClaimedUntil.getTime() - Date.now() : 0;
-}
-
-function performanceStopMarkingTaskAsRunning() {
-  performance.mark('markTaskAsRunning_stop');
-  performance.measure(
-    'taskRunner.markTaskAsRunning',
-    'markTaskAsRunning_start',
-    'markTaskAsRunning_stop'
-  );
 }
 
 // A type that extracts the Instance type out of TaskRunningStage

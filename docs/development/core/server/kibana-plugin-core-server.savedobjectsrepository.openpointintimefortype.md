@@ -18,12 +18,12 @@ openPointInTimeForType(type: string | string[], { keepAlive, preference }?: Save
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string &#124; string[]</code> |  |
-|  { keepAlive, preference } | <code>SavedObjectsOpenPointInTimeOptions</code> |  |
+|  type | string \| string\[\] |  |
+|  { keepAlive, preference } | SavedObjectsOpenPointInTimeOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsOpenPointInTimeResponse>`
+Promise&lt;SavedObjectsOpenPointInTimeResponse&gt;
 
 {<!-- -->promise<!-- -->} - { id: string }
 
@@ -50,6 +50,5 @@ const page2 = await savedObjectsClient.find({
   searchAfter: lastHit.sort,
 });
 await savedObjectsClient.closePointInTime(page2.pit_id);
-
 ```
 

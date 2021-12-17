@@ -10,41 +10,41 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
+import { nodeBuilder } from '@kbn/es-query';
 import {
   SavedObject,
   SavedObjectsClientContract,
   Logger,
   SavedObjectsUtils,
 } from '../../../../../../src/core/server';
-import { nodeBuilder } from '../../../../../../src/plugins/data/common';
+import { LensServerPluginSetup } from '../../../../lens/server';
 
 import {
   AlertCommentRequestRt,
-  CASE_COMMENT_SAVED_OBJECT,
   CaseResponse,
   CaseStatuses,
   CaseType,
   CommentRequest,
   CommentRequestRt,
   CommentType,
-  ENABLE_CASE_CONNECTOR,
-  MAX_GENERATED_ALERTS_PER_SUB_CASE,
   SubCaseAttributes,
   throwErrors,
   User,
-} from '../../../common';
+} from '../../../common/api';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  ENABLE_CASE_CONNECTOR,
+  MAX_GENERATED_ALERTS_PER_SUB_CASE,
+} from '../../../common/constants';
 import {
   buildCaseUserActionItem,
   buildCommentUserActionItem,
 } from '../../services/user_actions/helpers';
 
 import { AttachmentService, CasesService, CaseUserActionService } from '../../services';
-import {
-  createCaseError,
-  CommentableCase,
-  createAlertUpdateRequest,
-  isCommentRequestTypeGenAlert,
-} from '../../common';
+import { CommentableCase } from '../../common/models';
+import { createCaseError } from '../../common/error';
+import { createAlertUpdateRequest, isCommentRequestTypeGenAlert } from '../../common/utils';
 import { CasesClientArgs, CasesClientInternal } from '..';
 
 import { decodeCommentRequest } from '../utils';
@@ -105,7 +105,7 @@ async function getSubCase({
         caseId,
         subCaseId: newSubCase.id,
         fields: ['status', 'sub_case'],
-        newValue: JSON.stringify({ status: newSubCase.attributes.status }),
+        newValue: { status: newSubCase.attributes.status },
         owner: newSubCase.attributes.owner,
       }),
     ],
@@ -124,7 +124,9 @@ const addGeneratedAlerts = async (
     caseService,
     userActionService,
     logger,
+    lensEmbeddableFactory,
     authorization,
+    alertsService,
   } = clientArgs;
 
   const query = pipe(
@@ -182,17 +184,16 @@ const addGeneratedAlerts = async (
       unsecuredSavedObjectsClient,
       caseService,
       attachmentService,
+      lensEmbeddableFactory,
     });
 
-    const {
-      comment: newComment,
-      commentableCase: updatedCase,
-    } = await commentableCase.createComment({
-      createdDate,
-      user: userDetails,
-      commentReq: query,
-      id: savedObjectID,
-    });
+    const { comment: newComment, commentableCase: updatedCase } =
+      await commentableCase.createComment({
+        createdDate,
+        user: userDetails,
+        commentReq: query,
+        id: savedObjectID,
+      });
 
     if (
       (newComment.attributes.type === CommentType.alert ||
@@ -203,9 +204,7 @@ const addGeneratedAlerts = async (
         comment: query,
         status: subCase.attributes.status,
       });
-      await casesClientInternal.alerts.updateStatus({
-        alerts: alertsToUpdate,
-      });
+      await alertsService.updateAlertsStatus(alertsToUpdate);
     }
 
     await userActionService.bulkCreate({
@@ -219,7 +218,7 @@ const addGeneratedAlerts = async (
           subCaseId: updatedCase.subCaseId,
           commentId: newComment.id,
           fields: ['comment'],
-          newValue: JSON.stringify(query),
+          newValue: query,
           owner: newComment.attributes.owner,
         }),
       ],
@@ -241,12 +240,14 @@ async function getCombinedCase({
   unsecuredSavedObjectsClient,
   id,
   logger,
+  lensEmbeddableFactory,
 }: {
   caseService: CasesService;
   attachmentService: AttachmentService;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   id: string;
   logger: Logger;
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }): Promise<CommentableCase> {
   const [casePromise, subCasePromise] = await Promise.allSettled([
     caseService.getCase({
@@ -260,7 +261,7 @@ async function getCombinedCase({
             id,
           }),
         ]
-      : [Promise.reject('case connector feature is disabled')]),
+      : [Promise.reject(new Error('case connector feature is disabled'))]),
   ]);
 
   if (subCasePromise.status === 'fulfilled') {
@@ -276,6 +277,7 @@ async function getCombinedCase({
         caseService,
         attachmentService,
         unsecuredSavedObjectsClient,
+        lensEmbeddableFactory,
       });
     } else {
       throw Boom.badRequest('Sub case found without reference to collection');
@@ -291,6 +293,7 @@ async function getCombinedCase({
       caseService,
       attachmentService,
       unsecuredSavedObjectsClient,
+      lensEmbeddableFactory,
     });
   }
 }
@@ -332,7 +335,9 @@ export const addComment = async (
     attachmentService,
     user,
     logger,
+    lensEmbeddableFactory,
     authorization,
+    alertsService,
   } = clientArgs;
 
   if (isCommentRequestTypeGenAlert(comment)) {
@@ -362,6 +367,7 @@ export const addComment = async (
       unsecuredSavedObjectsClient,
       id: caseId,
       logger,
+      lensEmbeddableFactory,
     });
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -385,9 +391,7 @@ export const addComment = async (
         status: updatedCase.status,
       });
 
-      await casesClientInternal.alerts.updateStatus({
-        alerts: alertsToUpdate,
-      });
+      await alertsService.updateAlertsStatus(alertsToUpdate);
     }
 
     await userActionService.bulkCreate({
@@ -401,7 +405,7 @@ export const addComment = async (
           subCaseId: updatedCase.subCaseId,
           commentId: newComment.id,
           fields: ['comment'],
-          newValue: JSON.stringify(query),
+          newValue: query,
           owner: newComment.attributes.owner,
         }),
       ],

@@ -8,7 +8,7 @@
 import { flatten, minBy, pick, mapValues, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../id_generator';
-import { DatasourceSuggestion, TableChangeType } from '../types';
+import type { DatasourceSuggestion, TableChangeType } from '../types';
 import { columnToOperation } from './indexpattern';
 import {
   insertNewColumn,
@@ -16,14 +16,15 @@ import {
   getMetricOperationTypes,
   getOperationTypesForField,
   operationDefinitionMap,
-  IndexPatternColumn,
+  BaseIndexPatternColumn,
   OperationType,
   getExistingColumnGroups,
   isReferenced,
   getReferencedColumnIds,
+  hasTermsWithManyBuckets,
 } from './operations';
-import { hasField } from './utils';
-import {
+import { hasField } from './pure_utils';
+import type {
   IndexPattern,
   IndexPatternPrivateState,
   IndexPatternLayer,
@@ -61,11 +62,11 @@ function buildSuggestion({
   // two match up.
   const layers = mapValues(updatedState.layers, (layer) => ({
     ...layer,
-    columns: pick(layer.columns, layer.columnOrder) as Record<string, IndexPatternColumn>,
+    columns: pick(layer.columns, layer.columnOrder) as Record<string, BaseIndexPatternColumn>,
   }));
 
   const columnOrder = layers[layerId].columnOrder;
-  const columnMap = layers[layerId].columns as Record<string, IndexPatternColumn>;
+  const columnMap = layers[layerId].columns as Record<string, BaseIndexPatternColumn>;
   const isMultiRow = Object.values(columnMap).some((column) => column.isBucketed);
 
   return {
@@ -95,10 +96,14 @@ function buildSuggestion({
 export function getDatasourceSuggestionsForField(
   state: IndexPatternPrivateState,
   indexPatternId: string,
-  field: IndexPatternField
+  field: IndexPatternField,
+  filterLayers?: (layerId: string) => boolean
 ): IndexPatternSuggestion[] {
   const layers = Object.keys(state.layers);
-  const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
+  let layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
+  if (filterLayers) {
+    layerIds = layerIds.filter(filterLayers);
+  }
 
   if (layerIds.length === 0) {
     // The field we're suggesting on does not match any existing layer.
@@ -216,7 +221,7 @@ function getExistingLayerSuggestionsForField(
         indexPattern,
         field,
         columnId: generateId(),
-        op: metricOperation.type,
+        op: metricOperation.type as OperationType,
         visualizationGroups: [],
       });
       if (layerWithNewMetric) {
@@ -238,7 +243,7 @@ function getExistingLayerSuggestionsForField(
           indexPattern,
           field,
           columnId: metrics[0],
-          op: metricOperation.type,
+          op: metricOperation.type as OperationType,
           visualizationGroups: [],
         });
         if (layerWithReplacedMetric) {
@@ -331,7 +336,7 @@ function createNewLayerWithMetricAggregation(
   return insertNewColumn({
     op: 'date_histogram',
     layer: insertNewColumn({
-      op: metricOperation.type,
+      op: metricOperation.type as OperationType,
       layer: { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
       columnId: generateId(),
       field,
@@ -346,9 +351,11 @@ function createNewLayerWithMetricAggregation(
 }
 
 export function getDatasourceSuggestionsFromCurrentState(
-  state: IndexPatternPrivateState
+  state: IndexPatternPrivateState,
+  filterLayers: (layerId: string) => boolean = () => true
 ): Array<DatasourceSuggestion<IndexPatternPrivateState>> {
-  const layers = Object.entries(state.layers || {});
+  const layers = Object.entries(state.layers || {}).filter(([layerId]) => filterLayers(layerId));
+
   if (layers.length > 1) {
     // Return suggestions that reduce the data to each layer individually
     return layers
@@ -390,7 +397,7 @@ export function getDatasourceSuggestionsFromCurrentState(
   }
 
   return flatten(
-    Object.entries(state.layers || {})
+    layers
       .filter(([_id, layer]) => layer.columnOrder.length && layer.indexPatternId)
       .map(([layerId, layer]) => {
         const indexPattern = state.indexPatterns[layer.indexPatternId];
@@ -400,7 +407,7 @@ export function getDatasourceSuggestionsFromCurrentState(
             layer.columns[columnId].isBucketed && layer.columns[columnId].dataType === 'date'
         );
         const timeField =
-          indexPattern.timeFieldName && indexPattern.getFieldByName(indexPattern.timeFieldName);
+          indexPattern?.timeFieldName && indexPattern.getFieldByName(indexPattern.timeFieldName);
 
         const hasNumericDimension =
           buckets.length === 1 &&
@@ -418,17 +425,25 @@ export function getDatasourceSuggestionsFromCurrentState(
         );
 
         if (!references.length && metrics.length && buckets.length === 0) {
-          if (timeField) {
+          if (timeField && buckets.length < 1 && !hasTermsWithManyBuckets(layer)) {
             // suggest current metric over time if there is a default time field
             suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));
           }
-          suggestions.push(...createAlternativeMetricSuggestions(indexPattern, layerId, state));
+          if (indexPattern) {
+            suggestions.push(...createAlternativeMetricSuggestions(indexPattern, layerId, state));
+          }
         } else {
           suggestions.push(...createSimplifiedTableSuggestions(state, layerId));
 
           // base range intervals are of number dataType.
           // Custom range/intervals have a different dataType so they still receive the Over Time suggestion
-          if (!timeDimension && timeField && !hasNumericDimension) {
+          if (
+            !timeDimension &&
+            timeField &&
+            buckets.length < 2 &&
+            !hasNumericDimension &&
+            !hasTermsWithManyBuckets(layer)
+          ) {
             // suggest current configuration over time if there is a default time field
             // and no time dimension yet
             suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));

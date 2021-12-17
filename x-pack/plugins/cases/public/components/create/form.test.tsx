@@ -7,22 +7,22 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 
 import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/mock';
 import { schema, FormProps } from './schema';
-import { CreateCaseForm } from './form';
-import { OwnerProvider } from '../owner_context';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { CreateCaseForm, CreateCaseFormProps } from './form';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import { TestProviders } from '../../common/mock';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/configure/use_configure');
+jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 
 const useGetTagsMock = useGetTags as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
@@ -37,9 +37,17 @@ const initialCaseValue: FormProps = {
   syncAlerts: true,
 };
 
+const casesFormProps: CreateCaseFormProps = {
+  onCancel: jest.fn(),
+  onSuccess: jest.fn(),
+};
+
 describe('CreateCaseForm', () => {
   let globalForm: FormHook;
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
+  const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
+    children,
+    testProviderProps = {},
+  }) => {
     const { form } = useForm<FormProps>({
       defaultValue: initialCaseValue,
       options: { stripEmptyFields: false },
@@ -49,9 +57,9 @@ describe('CreateCaseForm', () => {
     globalForm = form;
 
     return (
-      <OwnerProvider owner={[SECURITY_SOLUTION_OWNER]}>
+      <TestProviders {...testProviderProps}>
         <Form form={form}>{children}</Form>
-      </OwnerProvider>
+      </TestProviders>
     );
   };
 
@@ -65,7 +73,7 @@ describe('CreateCaseForm', () => {
   it('it renders with steps', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CreateCaseForm />
+        <CreateCaseForm {...casesFormProps} />
       </MockHookWrapperComponent>
     );
 
@@ -75,7 +83,7 @@ describe('CreateCaseForm', () => {
   it('it renders without steps', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CreateCaseForm withSteps={false} />
+        <CreateCaseForm {...casesFormProps} withSteps={false} />
       </MockHookWrapperComponent>
     );
 
@@ -85,7 +93,7 @@ describe('CreateCaseForm', () => {
   it('it renders all form fields', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CreateCaseForm />
+        <CreateCaseForm {...casesFormProps} />
       </MockHookWrapperComponent>
     );
 
@@ -96,26 +104,32 @@ describe('CreateCaseForm', () => {
     expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
   });
 
+  it('hides the sync alerts toggle', () => {
+    const { queryByText } = render(
+      <MockHookWrapperComponent testProviderProps={{ features: { alerts: { sync: false } } }}>
+        <CreateCaseForm {...casesFormProps} />
+      </MockHookWrapperComponent>
+    );
+
+    expect(queryByText('Sync alert')).not.toBeInTheDocument();
+  });
+
   it('should render spinner when loading', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CreateCaseForm />
+        <CreateCaseForm {...casesFormProps} />
       </MockHookWrapperComponent>
     );
+
+    expect(wrapper.find(`[data-test-subj="create-case-submit"]`).exists()).toBeTruthy();
 
     await act(async () => {
       globalForm.setFieldValue('title', 'title');
       globalForm.setFieldValue('description', 'description');
-      globalForm.submit();
-      // For some weird reason this is needed to pass the test.
-      // It does not do anything useful
-      await wrapper.find(`[data-test-subj="caseTitle"]`);
-      await wrapper.update();
-      await waitFor(() => {
-        expect(
-          wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()
-        ).toBeTruthy();
-      });
+      await wrapper.find(`button[data-test-subj="create-case-submit"]`).simulate('click');
+      wrapper.update();
     });
+
+    expect(wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()).toBeTruthy();
   });
 });

@@ -12,6 +12,7 @@ export interface EmailConnector {
   port: string;
   user: string;
   password: string;
+  service: string;
 }
 
 export const getEmailConnector = (): EmailConnector => ({
@@ -21,4 +22,5 @@ export const getEmailConnector = (): EmailConnector => ({
   port: '80',
   user: 'username',
   password: 'password',
+  service: 'Other',
 });

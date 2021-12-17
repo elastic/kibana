@@ -100,10 +100,10 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     [fetchService, sourceId]
   );
 
-  const createDerivedIndexPattern = (type: 'metrics') => {
+  const createDerivedIndexPattern = () => {
     return {
       fields: source?.status ? source.status.indexFields : [],
-      title: pickIndexPattern(source, type),
+      title: pickIndexPattern(source, 'metrics'),
     };
   };
 
@@ -121,9 +121,10 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     ]
   );
 
-  const isUninitialized = useMemo(() => loadSourceRequest.state === 'uninitialized', [
-    loadSourceRequest.state,
-  ]);
+  const isUninitialized = useMemo(
+    () => loadSourceRequest.state === 'uninitialized',
+    [loadSourceRequest.state]
+  );
 
   const sourceExists = useMemo(() => (source ? !!source.version : undefined), [source]);
 

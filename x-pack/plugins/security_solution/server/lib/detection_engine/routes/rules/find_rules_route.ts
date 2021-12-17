@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
+import { Logger } from 'src/core/server';
 import { findRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
 import {
   findRulesSchema,
@@ -18,11 +18,15 @@ import { findRules } from '../../rules/find_rules';
 import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from './utils';
-import { getBulkRuleActionsSavedObject } from '../../rule_actions/get_bulk_rule_actions_saved_object';
+import { getCurrentRuleStatuses } from './utils/get_current_rule_statuses';
+
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetBulkRuleActionsSavedObject } from '../../rule_actions/legacy_get_bulk_rule_actions_saved_object';
 
 export const findRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient?: IRuleDataClient | null
+  logger: Logger,
+  isRuleRegistryEnabled: boolean
 ) => {
   router.get(
     {
@@ -54,6 +58,7 @@ export const findRulesRoute = (
 
         const execLogClient = context.securitySolution.getExecutionLogClient();
         const rules = await findRules({
+          isRuleRegistryEnabled,
           rulesClient,
           perPage: query.per_page,
           page: query.page,
@@ -62,17 +67,14 @@ export const findRulesRoute = (
           filter: query.filter,
           fields: query.fields,
         });
-        const alertIds = rules.data.map((rule) => rule.id);
+        const ruleIds = rules.data.map((rule) => rule.id);
 
-        const [ruleStatuses, ruleActions] = await Promise.all([
-          execLogClient.findBulk({
-            ruleIds: alertIds,
-            logsCount: 1,
-            spaceId: context.securitySolution.getSpaceId(),
-          }),
-          getBulkRuleActionsSavedObject({ alertIds, savedObjectsClient }),
+        const spaceId = context.securitySolution.getSpaceId();
+        const [currentStatusesByRuleId, ruleActions] = await Promise.all([
+          getCurrentRuleStatuses({ ruleIds, execLogClient, spaceId, logger }),
+          legacyGetBulkRuleActionsSavedObject({ alertIds: ruleIds, savedObjectsClient, logger }),
         ]);
-        const transformed = transformFindAlerts(rules, ruleActions, ruleStatuses);
+        const transformed = transformFindAlerts(rules, currentStatusesByRuleId, ruleActions);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
         } else {

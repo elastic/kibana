@@ -78,11 +78,15 @@ export interface EmailConfig {
   port: number;
   secure?: boolean;
   hasAuth: boolean;
+  service: string;
+  clientId?: string;
+  tenantId?: string;
 }
 
 export interface EmailSecrets {
   user: string | null;
   password: string | null;
+  clientSecret: string | null;
 }
 
 export type EmailActionConnector = UserConfiguredActionConnector<EmailConfig, EmailSecrets>;

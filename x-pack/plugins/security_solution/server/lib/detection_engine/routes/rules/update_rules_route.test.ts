@@ -12,20 +12,22 @@ import {
   getAlertMock,
   getUpdateRequest,
   getFindResultWithSingleHit,
+  getRuleExecutionStatusSucceeded,
   nonRuleFindResult,
   typicalMlRulePayload,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { updateRulesRoute } from './update_rules_route';
 import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
-jest.mock('../../rules/update_rules_notifications');
 
-describe('update_rules', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('update_rules - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -35,22 +37,23 @@ describe('update_rules', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams())); // existing rule
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful update
-    clients.ruleExecutionLogClient.find.mockResolvedValue([]); // successful transform: ;
+    clients.rulesClient.get.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    ); // existing rule
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
+    clients.rulesClient.update.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    ); // successful update
+    clients.ruleExecutionLogClient.getCurrentStatus.mockResolvedValue(
+      getRuleExecutionStatusSucceeded()
+    );
+    clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
-    updateRulesRoute(server.router, ml);
+    updateRulesRoute(server.router, ml, isRuleRegistryEnabled);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when updating a single rule with a valid actionClient and alertClient', async () => {
-      (updateRulesNotifications as jest.Mock).mockResolvedValue({
-        id: 'id',
-        actions: [],
-        alertThrottle: null,
-        ruleThrottle: 'no_actions',
-      });
       const response = await server.inject(getUpdateRequest(), context);
       expect(response.status).toEqual(200);
     });
@@ -67,7 +70,7 @@ describe('update_rules', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(getUpdateRequest(), context);
 
       expect(response.status).toEqual(404);
@@ -83,7 +86,7 @@ describe('update_rules', () => {
     });
 
     test('returns error when updating non-rule', async () => {
-      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
+      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(isRuleRegistryEnabled));
       const response = await server.inject(getUpdateRequest(), context);
 
       expect(response.status).toEqual(404);

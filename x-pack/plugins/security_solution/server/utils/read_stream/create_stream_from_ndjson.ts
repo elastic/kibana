@@ -34,6 +34,12 @@ export const filterExportedCounts = (): Transform => {
   );
 };
 
+export const filterExceptions = (): Transform => {
+  return createFilterStream<ImportRulesSchemaDecoded | RulesObjectsExportResultDetails>(
+    (obj) => obj != null && !has('list_id', obj)
+  );
+};
+
 // Adaptation from: saved_objects/import/create_limit_stream.ts
 export const createLimitStream = (limit: number): Transform => {
   let counter = 0;
@@ -49,11 +55,15 @@ export const createLimitStream = (limit: number): Transform => {
   });
 };
 
-export const transformDataToNdjson = (data: unknown[]): string => {
-  if (data.length !== 0) {
-    const dataString = data.map((rule) => JSON.stringify(rule)).join('\n');
-    return `${dataString}\n`;
-  } else {
-    return '';
-  }
+// // Adaptation from: saved_objects/import/create_limit_stream.ts
+export const createRulesLimitStream = (limit: number): Transform => {
+  return new Transform({
+    objectMode: true,
+    async transform(obj, _, done) {
+      if (obj.rules.length >= limit) {
+        return done(new Error(`Can't import more than ${limit} rules`));
+      }
+      done(undefined, obj);
+    },
+  });
 };

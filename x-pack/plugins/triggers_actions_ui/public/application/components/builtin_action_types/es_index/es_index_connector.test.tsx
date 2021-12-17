@@ -71,6 +71,8 @@ describe('IndexActionConnectorFields renders', () => {
       editActionSecrets: () => {},
       errors: { index: [] },
       readOnly: false,
+      setCallbacks: () => {},
+      isEdit: false,
     };
     const wrapper = mountWithIntl(<IndexActionConnectorFields {...props} />);
 
@@ -117,9 +119,9 @@ describe('IndexActionConnectorFields renders', () => {
       .find(EuiSwitch)
       .filter('[data-test-subj="hasTimeFieldCheckbox"]');
     await act(async () => {
-      timeFieldSwitch.prop('onChange')!(({
+      timeFieldSwitch.prop('onChange')!({
         target: { checked: true },
-      } as unknown) as EuiSwitchEvent);
+      } as unknown as EuiSwitchEvent);
       await nextTick();
       wrapper.update();
     });

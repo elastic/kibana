@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { stopPropagationAndPreventDefault } from '../../../../common';
+import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { WithCopyToClipboard } from '../../clipboard/with_copy_to_clipboard';
 import { HoverActionComponentProps } from './types';
 import { COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME } from '../../clipboard';
@@ -26,12 +26,12 @@ export const COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT = 'c';
 
 export interface CopyProps extends HoverActionComponentProps {
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   isHoverAction?: boolean;
 }
 
 const CopyButton: React.FC<CopyProps> = React.memo(
-  ({ Component, closePopOver, field, isHoverAction, keyboardEvent, ownFocus, value }) => {
+  ({ Component, field, isHoverAction, onClick, keyboardEvent, ownFocus, value }) => {
     const { addSuccess } = useAppToasts();
     const panelRef = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
@@ -46,28 +46,32 @@ const CopyButton: React.FC<CopyProps> = React.memo(
         if (copyToClipboardButton != null) {
           copyToClipboardButton.click();
         }
-        if (closePopOver != null) {
-          closePopOver();
+        if (onClick != null) {
+          onClick();
         }
       }
-    }, [closePopOver, keyboardEvent, ownFocus]);
+    }, [onClick, keyboardEvent, ownFocus]);
 
     const text = useMemo(() => `${field}${value != null ? `: "${value}"` : ''}`, [field, value]);
 
-    const onClick = useCallback(() => {
+    const handleOnClick = useCallback(() => {
       const isSuccess = copy(text, { debug: true });
+      if (onClick != null) {
+        onClick();
+      }
 
       if (isSuccess) {
         addSuccess(SUCCESS_TOAST_TITLE(field), { toastLifeTimeMs: 800 });
       }
-    }, [addSuccess, field, text]);
+    }, [addSuccess, field, onClick, text]);
 
     return Component ? (
       <Component
         aria-label={COPY_TO_CLIPBOARD}
         data-test-subj="copy-to-clipboard"
-        iconType="copyClipboard"
-        onClick={onClick}
+        icon="copy"
+        iconType="copy"
+        onClick={handleOnClick}
         title={COPY_TO_CLIPBOARD}
       >
         {COPY_TO_CLIPBOARD}

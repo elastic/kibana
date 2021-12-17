@@ -11,15 +11,15 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
-} from '../../../case_api_integration/common/lib/authentication';
+} from '../../../cases_api_integration/common/lib/authentication';
 
-import { Role, User } from '../../../case_api_integration/common/lib/authentication/types';
+import { Role, User } from '../../../cases_api_integration/common/lib/authentication/types';
 import {
   createCase,
   deleteAllCaseItems,
   getCase,
-} from '../../../case_api_integration/common/lib/utils';
-import { getPostCaseRequest } from '../../../case_api_integration/common/lib/mock';
+} from '../../../cases_api_integration/common/lib/utils';
+import { getPostCaseRequest } from '../../../cases_api_integration/common/lib/mock';
 import { APP_ID } from '../../../../plugins/security_solution/common/constants';
 
 const secAll: Role = {
@@ -37,6 +37,7 @@ const secAll: Role = {
       {
         feature: {
           siem: ['all'],
+          securitySolutionCases: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -66,7 +67,8 @@ const secAllCasesRead: Role = {
     kibana: [
       {
         feature: {
-          siem: ['minimal_all', 'cases_read'],
+          siem: ['all'],
+          securitySolutionCases: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -96,7 +98,7 @@ const secAllCasesNone: Role = {
     kibana: [
       {
         feature: {
-          siem: ['minimal_all'],
+          siem: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -126,7 +128,8 @@ const secReadCasesAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['minimal_read', 'cases_all'],
+          siem: ['read'],
+          securitySolutionCases: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -156,7 +159,8 @@ const secReadCasesRead: Role = {
     kibana: [
       {
         feature: {
-          siem: ['minimal_read', 'cases_read'],
+          siem: ['read'],
+          securitySolutionCases: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -187,6 +191,7 @@ const secRead: Role = {
       {
         feature: {
           siem: ['read'],
+          securitySolutionCases: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -216,7 +221,7 @@ const secReadCasesNone: Role = {
     kibana: [
       {
         feature: {
-          siem: ['minimal_read'],
+          siem: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },

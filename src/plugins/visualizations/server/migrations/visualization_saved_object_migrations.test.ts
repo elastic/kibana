@@ -9,7 +9,7 @@
 import { visualizationSavedObjectTypeMigrations } from './visualization_saved_object_migrations';
 import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
 
-const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
+const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
 
 const testMigrateMatchAllQuery = (migrate: Function) => {
   it('should migrate obsolete match_all query', () => {
@@ -922,11 +922,11 @@ describe('migration visualization', () => {
 
   describe('7.3.0', () => {
     const logMsgArr: string[] = [];
-    const logger = ({
+    const logger = {
       log: {
         warn: (msg: string) => logMsgArr.push(msg),
       },
-    } as unknown) as SavedObjectMigrationContext;
+    } as unknown as SavedObjectMigrationContext;
 
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['7.3.0'](
@@ -981,7 +981,7 @@ describe('migration visualization', () => {
       `);
       expect(logMsgArr).toMatchInlineSnapshot(`
         Array [
-          "Exception @ migrateGaugeVerticalSplitToAlignment! TypeError: Cannot read property 'gauge' of undefined",
+          "Exception @ migrateGaugeVerticalSplitToAlignment! TypeError: Cannot read properties of undefined (reading 'gauge')",
           "Exception @ migrateGaugeVerticalSplitToAlignment! Payload: {\\"type\\":\\"gauge\\"}",
         ]
       `);
@@ -1636,10 +1636,8 @@ describe('migration visualization', () => {
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
       expect(migratedtimeSeriesDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON).toEqual('{}');
       const { kibanaSavedObjectMeta, ...attributes } = migratedtimeSeriesDoc.attributes;
-      const {
-        kibanaSavedObjectMeta: oldKibanaSavedObjectMeta,
-        ...oldAttributes
-      } = migratedtimeSeriesDoc.attributes;
+      const { kibanaSavedObjectMeta: oldKibanaSavedObjectMeta, ...oldAttributes } =
+        migratedtimeSeriesDoc.attributes;
       expect(attributes).toEqual(oldAttributes);
     });
   });
@@ -1676,7 +1674,8 @@ describe('migration visualization', () => {
       type = 'area',
       categoryAxes?: object[],
       valueAxes?: object[],
-      hasPalette = false
+      hasPalette = false,
+      hasCirclesRadius = false
     ) => ({
       attributes: {
         title: 'My Vis',
@@ -1694,6 +1693,21 @@ describe('migration visualization', () => {
             valueAxes: valueAxes ?? [
               {
                 labels: {},
+              },
+            ],
+            seriesParams: [
+              {
+                show: true,
+                type,
+                mode: 'stacked',
+                drawLinesBetweenPoints: true,
+                lineWidth: 2,
+                showCircles: true,
+                interpolate: 'linear',
+                valueAxis: 'ValueAxis-1',
+                ...(hasCirclesRadius && {
+                  circlesRadius: 3,
+                }),
               },
             ],
             ...(hasPalette && {
@@ -1732,6 +1746,20 @@ describe('migration visualization', () => {
       const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
 
       expect(palette.name).toEqual('default');
+    });
+
+    it("should decorate existing docs with the circlesRadius attribute if it doesn't exist", () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.seriesParams;
+
+      expect(result.circlesRadius).toEqual(1);
+    });
+
+    it('should not decorate existing docs with the circlesRadius attribute if it exists', () => {
+      const migratedTestDoc = migrate(getTestDoc('area', undefined, undefined, true, true));
+      const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.seriesParams;
+
+      expect(result.circlesRadius).toEqual(3);
     });
 
     describe('labels.filter', () => {
@@ -2115,6 +2143,87 @@ describe('migration visualization', () => {
     });
   });
 
+  describe('7.14.0 tsvb - add drop last bucket into TSVB model', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.14.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const createTestDocWithType = (params: any) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: `{
+          "type":"metrics",
+          "params": ${JSON.stringify(params)}
+        }`,
+      },
+    });
+
+    it('should add "drop_last_bucket" into model if it not exist', () => {
+      const params = {};
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(migratedParams).toMatchInlineSnapshot(`
+        Object {
+          "drop_last_bucket": 1,
+        }
+      `);
+    });
+
+    it('should add "series_drop_last_bucket" into model if it not exist', () => {
+      const params = {
+        series: [
+          {
+            override_index_pattern: 1,
+          },
+          {
+            override_index_pattern: 1,
+          },
+          { override_index_pattern: 0 },
+          {},
+          {
+            override_index_pattern: 1,
+            series_drop_last_bucket: 0,
+          },
+          {
+            override_index_pattern: 1,
+            series_drop_last_bucket: 1,
+          },
+        ],
+      };
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(migratedParams.series).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "override_index_pattern": 1,
+            "series_drop_last_bucket": 1,
+          },
+          Object {
+            "override_index_pattern": 1,
+            "series_drop_last_bucket": 1,
+          },
+          Object {
+            "override_index_pattern": 0,
+          },
+          Object {},
+          Object {
+            "override_index_pattern": 1,
+            "series_drop_last_bucket": 0,
+          },
+          Object {
+            "override_index_pattern": 1,
+            "series_drop_last_bucket": 1,
+          },
+        ]
+      `);
+    });
+  });
+
   describe('7.14.0 update pie visualization defaults', () => {
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['7.14.0'](
@@ -2231,6 +2340,38 @@ describe('migration visualization', () => {
       const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
 
       expect(palette.name).toEqual('default');
+    });
+  });
+
+  describe('8.0.0 removeMarkdownLessFromTSVB', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['8.0.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const getTestDoc = () => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type: 'metrics',
+          title: '[Flights] Delay Type',
+          params: {
+            id: 'test1',
+            type: 'markdown',
+            markdwon_less: 'test { color: red }',
+            markdown_css: '#markdown-test1 test { color: red }',
+          },
+        }),
+      },
+    });
+
+    it('should remove markdown_less and id from markdown_css', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const params = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(params.mardwon_less).toBeUndefined();
+      expect(params.markdown_css).toEqual('test { color: red }');
     });
   });
 });

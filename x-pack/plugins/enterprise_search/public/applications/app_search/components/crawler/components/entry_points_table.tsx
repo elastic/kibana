@@ -12,12 +12,12 @@ import { useActions } from 'kea';
 import { EuiFieldText, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { GenericEndpointInlineEditableTable } from '../../../../shared/tables/generic_endpoint_inline_editable_table';
 import { InlineEditableTableColumn } from '../../../../shared/tables/inline_editable_table/types';
 import { ItemWithAnID } from '../../../../shared/tables/types';
-import { DOCS_PREFIX } from '../../../routes';
+import { ENTRY_POINTS_DOCS_URL } from '../../../routes';
 import { CrawlerDomain, EntryPoint } from '../types';
 
 import { EntryPointsTableLogic } from './entry_points_table_logic';
@@ -62,10 +62,10 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
     },
   ];
 
-  const entryPointsRoute = `/api/app_search/engines/${engineName}/crawler/domains/${domain.id}/entry_points`;
+  const entryPointsRoute = `/internal/app_search/engines/${engineName}/crawler/domains/${domain.id}/entry_points`;
 
   const getEntryPointRoute = (entryPoint: EntryPoint) =>
-    `/api/app_search/engines/${engineName}/crawler/domains/${domain.id}/entry_points/${entryPoint.id}`;
+    `/internal/app_search/engines/${engineName}/crawler/domains/${domain.id}/entry_points/${entryPoint.id}`;
 
   return (
     <GenericEndpointInlineEditableTable
@@ -80,11 +80,7 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
             defaultMessage:
               'Include the most important URLs for your website here. Entry point URLs will be the first pages to be indexed and processed for links to other pages.',
           })}{' '}
-          <EuiLink
-            href={`${DOCS_PREFIX}/crawl-web-content.html#crawl-web-content-manage-entry-points`}
-            target="_blank"
-            external
-          >
+          <EuiLink href={ENTRY_POINTS_DOCS_URL} target="_blank" external>
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.crawler.entryPointsTable.learnMoreLinkText',
               { defaultMessage: 'Learn more about entry points.' }

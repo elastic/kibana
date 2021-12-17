@@ -8,8 +8,11 @@
 import React from 'react';
 import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-
-import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
+import {
+  coreMock,
+  scopedHistoryMock,
+  themeServiceMock,
+} from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { TriggersAndActionsUiServices } from '../../../application/app';
 import { RuleTypeRegistryContract, ActionTypeRegistryContract } from '../../../types';
@@ -41,10 +44,12 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       list: jest.fn(),
     } as ActionTypeRegistryContract,
     charts: chartPluginMock.createStartContract(),
+    isCloud: false,
     kibanaFeatures: [],
-    element: ({
+    element: {
       style: { cursor: 'pointer' },
-    } as unknown) as HTMLElement,
+    } as unknown as HTMLElement,
+    theme$: themeServiceMock.createTheme$(),
   } as TriggersAndActionsUiServices;
 };
 

@@ -58,13 +58,40 @@ describe('Color Stops component', () => {
     ).toBe(true);
   });
 
+  it('should disable "add new" button if there is maxStops configured', () => {
+    props.colorStops = [
+      { color: '#aaa', stop: 20 },
+      { color: '#bbb', stop: 40 },
+      { color: '#ccc', stop: 60 },
+      { color: '#ccc', stop: 80 },
+      { color: '#ccc', stop: 90 },
+    ];
+    const component = mount(<CustomStops {...props} />);
+    const componentWithMaxSteps = mount(
+      <CustomStops {...props} paletteConfiguration={{ maxSteps: 5 }} />
+    );
+    expect(
+      component
+        .find('[data-test-subj="my-test_dynamicColoring_addStop"]')
+        .first()
+        .prop('isDisabled')
+    ).toBe(false);
+
+    expect(
+      componentWithMaxSteps
+        .find('[data-test-subj="my-test_dynamicColoring_addStop"]')
+        .first()
+        .prop('isDisabled')
+    ).toBe(true);
+  });
+
   it('should add a new stop with default color and reasonable distance from last one', () => {
     let component = mount(<CustomStops {...props} />);
     const addStopButton = component
       .find('[data-test-subj="my-test_dynamicColoring_addStop"]')
       .first();
     act(() => {
-      addStopButton.prop('onClick')!({} as React.MouseEvent);
+      addStopButton.simulate('click');
     });
     component = component.update();
 
@@ -119,7 +146,7 @@ describe('Color Stops component', () => {
       component
         .find('[data-test-subj="my-test_dynamicColoring_stop_color_0"]')
         .first()
-        .prop('onBlur')!({} as React.FocusEvent);
+        .simulate('blur');
     });
     component = component.update();
     expect(
@@ -134,35 +161,30 @@ describe('Color Stops component', () => {
 
   it('should sort stops value on whole component blur', () => {
     let component = mount(<CustomStops {...props} />);
-    let firstStopValueInput = component
-      .find('[data-test-subj="my-test_dynamicColoring_stop_value_0"]')
-      .first();
+    let firstStopValueInput = component.find(
+      '[data-test-subj="my-test_dynamicColoring_stop_value_0"] input[type="number"]'
+    );
+
     act(() => {
-      firstStopValueInput.prop('onChange')!(({
-        target: { value: ' 90' },
-      } as unknown) as React.ChangeEvent);
+      firstStopValueInput.simulate('change', { target: { value: ' 90' } });
     });
-
-    component = component.update();
-
     act(() => {
       component
         .find('[data-test-subj="my-test_dynamicColoring_stop_row_0"]')
         .first()
-        .prop('onBlur')!({} as React.FocusEvent);
+        .simulate('blur');
     });
     component = component.update();
 
     // retrieve again the input
-    firstStopValueInput = component
-      .find('[data-test-subj="my-test_dynamicColoring_stop_value_0"]')
-      .first();
+    firstStopValueInput = component.find(
+      '[data-test-subj="my-test_dynamicColoring_stop_value_0"] input[type="number"]'
+    );
     expect(firstStopValueInput.prop('value')).toBe('40');
     // the previous one move at the bottom
     expect(
       component
-        .find('[data-test-subj="my-test_dynamicColoring_stop_value_2"]')
-        .first()
+        .find('[data-test-subj="my-test_dynamicColoring_stop_value_2"] input[type="number"]')
         .prop('value')
     ).toBe('90');
   });

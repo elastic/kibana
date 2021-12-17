@@ -6,12 +6,19 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButtonEmpty, EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Filter } from '@kbn/es-query';
 import { StatefulTopN } from '../../top_n';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { SourcererScopeName } from '../../../store/sourcerer/model';
-import { useSourcererScope } from '../../../containers/sourcerer';
+import { useSourcererDataView } from '../../../containers/sourcerer';
 import { TooltipWithKeyboardShortcut } from '../../accessibility';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from '../keyboard_shortcut_constants';
@@ -23,29 +30,51 @@ const SHOW_TOP = (fieldName: string) =>
   });
 
 interface Props {
-  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  className?: string;
+  /** When `Component` is used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality.
+   * When `Component` is used with `EuiContextMenu`, we pass EuiContextMenuItem to render the right style.
+   */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
+  enablePopOver?: boolean;
   field: string;
+  flush?: 'left' | 'right' | 'both';
+  globalFilters?: Filter[];
+  iconSide?: 'left' | 'right';
+  iconType?: string;
+  isExpandable?: boolean;
   onClick: () => void;
   onFilterAdded?: () => void;
   ownFocus: boolean;
-  showTopN: boolean;
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   showTooltip?: boolean;
+  showTopN: boolean;
+  showLegend?: boolean;
   timelineId?: string | null;
+  title?: string;
   value?: string[] | string | null;
 }
 
 export const ShowTopNButton: React.FC<Props> = React.memo(
   ({
+    className,
     Component,
+    enablePopOver,
     field,
+    flush,
+    iconSide,
+    iconType,
+    isExpandable,
     onClick,
     onFilterAdded,
     ownFocus,
+    paddingSize,
+    showLegend,
     showTooltip = true,
     showTopN,
     timelineId,
+    title,
     value,
+    globalFilters,
   }) => {
     const activeScope: SourcererScopeName =
       timelineId === TimelineId.active
@@ -56,61 +85,116 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
           )
         ? SourcererScopeName.detections
         : SourcererScopeName.default;
-    const { browserFields, indexPattern } = useSourcererScope(activeScope);
+    const { browserFields, indexPattern } = useSourcererDataView(activeScope);
 
-    const button = useMemo(
+    const icon = iconType ?? 'visBarVertical';
+    const side = iconSide ?? 'left';
+    const buttonTitle = title ?? SHOW_TOP(field);
+    const basicButton = useMemo(
       () =>
         Component ? (
           <Component
-            aria-label={SHOW_TOP(field)}
+            aria-label={buttonTitle}
+            className={className}
             data-test-subj="show-top-field"
-            iconType="visBarVertical"
+            icon={icon}
+            iconType={icon}
+            iconSide={side}
+            flush={flush}
             onClick={onClick}
-            title={SHOW_TOP(field)}
+            title={buttonTitle}
           >
-            {SHOW_TOP(field)}
+            {buttonTitle}
           </Component>
         ) : (
           <EuiButtonIcon
-            aria-label={SHOW_TOP(field)}
+            aria-label={buttonTitle}
             className="securitySolution__hoverActionButton"
             data-test-subj="show-top-field"
             iconSize="s"
-            iconType="visBarVertical"
+            iconType={icon}
             onClick={onClick}
           />
         ),
-      [Component, field, onClick]
+      [Component, buttonTitle, className, flush, icon, onClick, side]
     );
 
-    return showTopN ? (
-      <EuiPopover button={button} isOpen={showTopN} closePopover={onClick}>
+    const button = useMemo(
+      () =>
+        showTooltip && !showTopN ? (
+          <EuiToolTip
+            content={
+              <TooltipWithKeyboardShortcut
+                additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+                  field,
+                  value,
+                })}
+                content={buttonTitle}
+                shortcut={SHOW_TOP_N_KEYBOARD_SHORTCUT}
+                showShortcut={ownFocus}
+              />
+            }
+          >
+            {basicButton}
+          </EuiToolTip>
+        ) : (
+          basicButton
+        ),
+      [basicButton, buttonTitle, field, ownFocus, showTooltip, showTopN, value]
+    );
+
+    const topNPannel = useMemo(
+      () => (
         <StatefulTopN
           browserFields={browserFields}
           field={field}
           indexPattern={indexPattern}
           onFilterAdded={onFilterAdded}
+          paddingSize={paddingSize}
+          showLegend={showLegend}
           timelineId={timelineId ?? undefined}
           toggleTopN={onClick}
           value={value}
+          globalFilters={globalFilters}
         />
-      </EuiPopover>
-    ) : showTooltip ? (
-      <EuiToolTip
-        content={
-          <TooltipWithKeyboardShortcut
-            additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
-              field,
-              value,
-            })}
-            content={SHOW_TOP(field)}
-            shortcut={SHOW_TOP_N_KEYBOARD_SHORTCUT}
-            showShortcut={ownFocus}
-          />
-        }
-      >
-        {button}
-      </EuiToolTip>
+      ),
+      [
+        browserFields,
+        field,
+        indexPattern,
+        onFilterAdded,
+        paddingSize,
+        showLegend,
+        timelineId,
+        onClick,
+        value,
+        globalFilters,
+      ]
+    );
+
+    if (isExpandable) {
+      return (
+        <>
+          {basicButton}
+          {showTopN && topNPannel}
+        </>
+      );
+    }
+
+    return showTopN ? (
+      enablePopOver ? (
+        <EuiPopover
+          button={basicButton}
+          isOpen={showTopN}
+          closePopover={onClick}
+          panelClassName="withHoverActions__popover"
+          data-test-subj="showTopNContainer"
+        >
+          {topNPannel}
+        </EuiPopover>
+      ) : (
+        topNPannel
+      )
     ) : (
       button
     );

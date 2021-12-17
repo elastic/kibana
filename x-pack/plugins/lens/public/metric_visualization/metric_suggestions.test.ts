@@ -31,6 +31,18 @@ describe('metric_suggestions', () => {
     };
   }
 
+  function staticValueCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'number',
+        label: `Static value: ${columnId}`,
+        isBucketed: false,
+        isStaticValue: true,
+      },
+    };
+  }
+
   function dateCol(columnId: string): TableSuggestionColumn {
     return {
       columnId,
@@ -50,43 +62,55 @@ describe('metric_suggestions', () => {
     };
 
     expect(
-      ([
-        {
-          columns: [dateCol('a')],
-          isMultiRow: true,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-        {
-          columns: [strCol('foo'), strCol('bar')],
-          isMultiRow: true,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-        {
-          layerId: 'l1',
-          isMultiRow: true,
-          columns: [numCol('bar')],
-          changeType: 'unchanged',
-        },
-        {
-          columns: [unknownCol(), numCol('bar')],
-          isMultiRow: true,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-        {
-          columns: [numCol('bar'), numCol('baz')],
-          isMultiRow: false,
-          layerId: 'l1',
-          changeType: 'unchanged',
-        },
-      ] as TableSuggestion[]).map((table) =>
-        expect(getSuggestions({ table, keptLayerIds: ['l1'] })).toEqual([])
-      )
+      (
+        [
+          {
+            columns: [dateCol('a')],
+            isMultiRow: true,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+          {
+            columns: [strCol('foo'), strCol('bar')],
+            isMultiRow: true,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+          {
+            layerId: 'l1',
+            isMultiRow: true,
+            columns: [numCol('bar')],
+            changeType: 'unchanged',
+          },
+          {
+            columns: [unknownCol(), numCol('bar')],
+            isMultiRow: true,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+          {
+            columns: [numCol('bar'), numCol('baz')],
+            isMultiRow: false,
+            layerId: 'l1',
+            changeType: 'unchanged',
+          },
+        ] as TableSuggestion[]
+      ).map((table) => expect(getSuggestions({ table, keptLayerIds: ['l1'] })).toEqual([]))
     );
   });
+  test('does not suggest for a static value', () => {
+    const suggestion = getSuggestions({
+      table: {
+        columns: [staticValueCol('id')],
+        isMultiRow: false,
+        layerId: 'l1',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
 
+    expect(suggestion).toHaveLength(0);
+  });
   test('suggests a basic metric chart', () => {
     const [suggestion, ...rest] = getSuggestions({
       table: {

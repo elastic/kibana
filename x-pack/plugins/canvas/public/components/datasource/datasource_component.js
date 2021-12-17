@@ -87,14 +87,8 @@ export class DatasourceComponent extends PureComponent {
   });
 
   setSelectedDatasource = (value) => {
-    const {
-      datasource,
-      resetArgs,
-      updateArgs,
-      selectDatasource,
-      datasources,
-      setSelecting,
-    } = this.props;
+    const { datasource, resetArgs, updateArgs, selectDatasource, datasources, setSelecting } =
+      this.props;
 
     if (datasource.name === value) {
       // if selecting the current datasource, reset the arguments
@@ -188,13 +182,7 @@ export class DatasourceComponent extends PureComponent {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    disabled={isInvalid}
-                    size="s"
-                    onClick={this.save}
-                    fill
-                    color="secondary"
-                  >
+                  <EuiButton disabled={isInvalid} size="s" onClick={this.save} fill color="success">
                     {strings.getSaveButtonLabel()}
                   </EuiButton>
                 </EuiFlexItem>

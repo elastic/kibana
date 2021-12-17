@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { esFilters, EsQueryConfig, Filter } from '../../../../../../src/plugins/data/public';
+import { Filter, EsQueryConfig, FilterStateStore } from '@kbn/es-query';
 import { DataProviderType } from '../../../common/types/timeline';
 import { mockBrowserFields, mockDataProviders, mockIndexPattern } from '../../mock';
 
@@ -267,7 +267,7 @@ describe('Combined Queries', () => {
         browserFields: mockBrowserFields,
         filters: [
           {
-            $state: { store: esFilters.FilterStateStore.APP_STATE },
+            $state: { store: FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,
@@ -279,7 +279,7 @@ describe('Combined Queries', () => {
             query: { match_phrase: { 'event.category': 'file' } },
           },
           {
-            $state: { store: esFilters.FilterStateStore.APP_STATE },
+            $state: { store: FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,
@@ -288,7 +288,7 @@ describe('Combined Queries', () => {
               type: 'exists',
               value: 'exists',
             },
-            exists: { field: 'host.name' },
+            query: { exists: { field: 'host.name' } },
           } as Filter,
         ],
         kqlQuery: { query: '', language: 'kuery' },
@@ -489,11 +489,13 @@ describe('Combined Queries', () => {
             key: 'nestedField.firstAttributes',
             value: 'exists',
           },
-          exists: {
-            field: 'nestedField.firstAttributes',
+          query: {
+            exists: {
+              field: 'nestedField.firstAttributes',
+            },
           },
           $state: {
-            store: esFilters.FilterStateStore.APP_STATE,
+            store: FilterStateStore.APP_STATE,
           },
         } as Filter,
       ],
@@ -515,7 +517,7 @@ describe('Combined Queries', () => {
       browserFields: mockBrowserFields,
       filters: [
         {
-          $state: { store: esFilters.FilterStateStore.APP_STATE },
+          $state: { store: FilterStateStore.APP_STATE },
           meta: {
             alias: null,
             disabled: false,

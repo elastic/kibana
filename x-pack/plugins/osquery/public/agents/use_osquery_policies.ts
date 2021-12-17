@@ -18,10 +18,12 @@ export const useOsqueryPolicies = () => {
 
   const { isLoading: osqueryPoliciesLoading, data: osqueryPolicies = [] } = useQuery(
     ['osqueryPolicies'],
-    () => http.get('/internal/osquery/fleet_wrapper/package_policies'),
+    () =>
+      http.get<{ items: Array<{ policy_id: string }> }>(
+        '/internal/osquery/fleet_wrapper/package_policies'
+      ),
     {
-      select: (response) =>
-        uniq<string>(response.items.map((p: { policy_id: string }) => p.policy_id)),
+      select: (response) => uniq<string>(response.items.map((p) => p.policy_id)),
       onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
         setErrorToast(error, {
@@ -31,8 +33,8 @@ export const useOsqueryPolicies = () => {
         }),
     }
   );
-  return useMemo(() => ({ osqueryPoliciesLoading, osqueryPolicies }), [
-    osqueryPoliciesLoading,
-    osqueryPolicies,
-  ]);
+  return useMemo(
+    () => ({ osqueryPoliciesLoading, osqueryPolicies }),
+    [osqueryPoliciesLoading, osqueryPolicies]
+  );
 };

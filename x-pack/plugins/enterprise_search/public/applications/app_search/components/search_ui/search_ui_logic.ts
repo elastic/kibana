@@ -103,10 +103,14 @@ export const SearchUILogic = kea<MakeLogicType<SearchUIValues, SearchUIActions>>
         return;
       }
 
-      const url = `/api/app_search/engines/${engineName}/search_ui/field_config`;
+      const url = `/internal/app_search/engines/${engineName}/search_ui/field_config`;
 
       try {
-        const initialFieldValues = await http.get(url);
+        const initialFieldValues = await http.get<
+          InitialFieldValues & {
+            defaultValues: Pick<InitialFieldValues, 'urlField' | 'titleField'>;
+          }
+        >(url);
         const {
           defaultValues: { urlField, titleField },
           validFields,

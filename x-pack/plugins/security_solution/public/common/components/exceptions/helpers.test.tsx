@@ -35,20 +35,24 @@ import {
   OsTypeArray,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { DataViewBase } from '@kbn/es-query';
 
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/entry_match.mock';
 import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
-import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { fields } from '../../../../../../../src/plugins/data/common/mocks';
 import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
 import { CodeSignature } from '../../../../common/ecs/file';
-import { IndexPatternBase } from '@kbn/es-query';
+import {
+  ALERT_ORIGINAL_EVENT_KIND,
+  ALERT_ORIGINAL_EVENT_MODULE,
+} from '../../../../common/field_maps/field_names';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
 
-const getMockIndexPattern = (): IndexPatternBase => ({
+const getMockIndexPattern = (): DataViewBase => ({
   fields,
   id: '1234',
   title: 'logstash-*',
@@ -342,7 +346,7 @@ describe('Exception helpers', () => {
   describe('#getCodeSignatureValue', () => {
     test('it should return empty string if code_signature nested value are undefined', () => {
       // Using the unsafe casting because with our types this shouldn't be possible but there have been issues with old data having undefined values in these fields
-      const payload = ([{ trusted: undefined, subject_name: undefined }] as unknown) as Flattened<
+      const payload = [{ trusted: undefined, subject_name: undefined }] as unknown as Flattened<
         CodeSignature[]
       >;
       const result = getCodeSignatureValue(payload);
@@ -364,7 +368,7 @@ describe('Exception helpers', () => {
           name: 'nested.field',
         },
       ],
-    } as IndexPatternBase;
+    } as DataViewBase;
 
     test('it should return false with an empty array', () => {
       const payload: ExceptionListItemSchema[] = [];
@@ -432,7 +436,7 @@ describe('Exception helpers', () => {
           entries: [
             {
               ...getEntryMatchMock(),
-              field: 'signal.original_event.kind',
+              field: ALERT_ORIGINAL_EVENT_KIND,
             },
             getEntryMatchMock(),
           ],
@@ -442,7 +446,7 @@ describe('Exception helpers', () => {
           entries: [
             {
               ...getEntryMatchMock(),
-              field: 'signal.original_event.module',
+              field: ALERT_ORIGINAL_EVENT_MODULE,
             },
           ],
         },
@@ -1031,7 +1035,7 @@ describe('Exception helpers', () => {
       ]);
     });
 
-    test('it should return pre-populated memory shellcode items for event code `malicious_thread`', () => {
+    test('it should return pre-populated memory shellcode items for event code `shellcode_thread`', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
         process: {
@@ -1049,7 +1053,7 @@ describe('Exception helpers', () => {
           self_injection: true,
         },
         event: {
-          code: 'malicious_thread',
+          code: 'shellcode_thread',
         },
         Target: {
           process: {
@@ -1108,52 +1112,10 @@ describe('Exception helpers', () => {
           value: 'high',
           id: '123',
         },
-        {
-          field: 'Target.process.thread.Ext.start_address_details',
-          type: 'nested',
-          entries: [
-            {
-              field: 'allocation_type',
-              operator: 'included',
-              type: 'match',
-              value: 'PRIVATE',
-              id: '123',
-            },
-            {
-              field: 'allocation_size',
-              operator: 'included',
-              type: 'match',
-              value: '4000',
-              id: '123',
-            },
-            {
-              field: 'region_size',
-              operator: 'included',
-              type: 'match',
-              value: '4000',
-              id: '123',
-            },
-            {
-              field: 'region_protection',
-              operator: 'included',
-              type: 'match',
-              value: 'RWX',
-              id: '123',
-            },
-            {
-              field: 'memory_pe.imphash',
-              operator: 'included',
-              type: 'match',
-              value: 'a hash',
-              id: '123',
-            },
-          ],
-          id: '123',
-        },
       ]);
     });
 
-    test('it should return pre-populated memory shellcode items for event code `malicious_thread` and skip empty', () => {
+    test('it should return pre-populated memory shellcode items for event code `shellcode_thread` and skip empty', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
         process: {
@@ -1171,7 +1133,7 @@ describe('Exception helpers', () => {
           self_injection: true,
         },
         event: {
-          code: 'malicious_thread',
+          code: 'shellcode_thread',
         },
         Target: {
           process: {
@@ -1215,41 +1177,6 @@ describe('Exception helpers', () => {
           operator: 'included',
           type: 'match',
           value: 'high',
-          id: '123',
-        },
-        {
-          field: 'Target.process.thread.Ext.start_address_details',
-          type: 'nested',
-          entries: [
-            {
-              field: 'allocation_size',
-              operator: 'included',
-              type: 'match',
-              value: '4000',
-              id: '123',
-            },
-            {
-              field: 'region_size',
-              operator: 'included',
-              type: 'match',
-              value: '4000',
-              id: '123',
-            },
-            {
-              field: 'region_protection',
-              operator: 'included',
-              type: 'match',
-              value: 'RWX',
-              id: '123',
-            },
-            {
-              field: 'memory_pe.imphash',
-              operator: 'included',
-              type: 'match',
-              value: 'a hash',
-              id: '123',
-            },
-          ],
           id: '123',
         },
       ]);

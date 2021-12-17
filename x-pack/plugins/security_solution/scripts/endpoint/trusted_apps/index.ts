@@ -8,13 +8,31 @@
 import minimist from 'minimist';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
-import bluebird from 'bluebird';
+import pMap from 'p-map';
 import { basename } from 'path';
-import { TRUSTED_APPS_CREATE_API, TRUSTED_APPS_LIST_API } from '../../../common/endpoint/constants';
-import { NewTrustedApp, OperatingSystem, TrustedApp } from '../../../common/endpoint/types';
+import { AxiosResponse } from 'axios';
+import {
+  ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_NAME,
+  EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
+} from '@kbn/securitysolution-list-constants';
+import { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { TrustedApp } from '../../../common/endpoint/types';
+import { TrustedAppGenerator } from '../../../common/endpoint/data_generators/trusted_app_generator';
+import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
+import { GetPolicyListResponse } from '../../../public/management/pages/policy/types';
+import {
+  PACKAGE_POLICY_API_ROUTES,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../../fleet/common';
+import { newTrustedAppToCreateExceptionListItem } from '../../../public/management/pages/trusted_apps/service/mappers';
 
 const defaultLogger = new ToolingLog({ level: 'info', writeTo: process.stdout });
 const separator = '----------------------------------------';
+const trustedAppGenerator = new TrustedAppGenerator();
 
 export const cli = async () => {
   const cliDefaults = {
@@ -31,7 +49,7 @@ export const cli = async () => {
 node ${basename(process.argv[1])} [options]
 
 Options:${Object.keys(cliDefaults.default).reduce((out, option) => {
-      // @ts-ignore
+      // @ts-expect-error TS7053
       return `${out}\n  --${option}=${cliDefaults.default[option]}`;
     }, '')}
 `);
@@ -66,106 +84,63 @@ export const run: (options?: RunOptions) => Promise<TrustedApp[]> = async ({
     url: kibana,
   });
 
-  // touch the Trusted Apps List so it can be created
-  await kbnClient.request({
-    method: 'GET',
-    path: TRUSTED_APPS_LIST_API,
-  });
+  // setup fleet with endpoint integrations
+  // and
+  // and ensure the trusted apps list is created
+  logger.info('setting up Fleet with endpoint and creating trusted apps list');
+  const [installedEndpointPackage] = await Promise.all([
+    setupFleetForEndpoint(kbnClient).then((response) => response.endpointPackage),
 
-  return bluebird.map(
+    ensureCreateEndpointTrustedAppsList(kbnClient),
+  ]);
+
+  // Setup a list of real endpoint policies and return a method to randomly select one
+  const randomPolicyId: () => string = await (async () => {
+    const randomN = (max: number): number => Math.floor(Math.random() * max);
+    const policyIds: string[] =
+      (await fetchEndpointPolicies(kbnClient)).data.items.map((policy) => policy.id) || [];
+
+    // If the number of existing policies is less than 5, then create some more policies
+    if (policyIds.length < 5) {
+      for (let i = 0, t = 5 - policyIds.length; i < t; i++) {
+        policyIds.push(
+          (
+            await indexFleetEndpointPolicy(
+              kbnClient,
+              `Policy for Trusted App assignment ${i + 1}`,
+              installedEndpointPackage.version
+            )
+          ).integrationPolicies[0].id
+        );
+      }
+    }
+
+    return () => policyIds[randomN(policyIds.length)];
+  })();
+
+  return pMap(
     Array.from({ length: count }),
-    () =>
-      kbnClient
+    async () => {
+      const body = trustedAppGenerator.generateTrustedAppForCreate();
+
+      if (body.effectScope.type === 'policy') {
+        body.effectScope.policies = [randomPolicyId(), randomPolicyId()];
+      }
+
+      return kbnClient
         .request<TrustedApp>({
           method: 'POST',
-          path: TRUSTED_APPS_CREATE_API,
-          body: generateTrustedAppEntry(),
+          path: EXCEPTION_LIST_ITEM_URL,
+          body: newTrustedAppToCreateExceptionListItem(body),
         })
         .then(({ data }) => {
           logger.write(data.id);
           return data;
-        }),
+        });
+    },
     { concurrency: 10 }
   );
 };
-
-interface GenerateTrustedAppEntryOptions {
-  os?: OperatingSystem;
-  name?: string;
-}
-const generateTrustedAppEntry: (options?: GenerateTrustedAppEntryOptions) => object = ({
-  os = randomOperatingSystem(),
-  name = randomName(),
-} = {}): NewTrustedApp => {
-  const newTrustedApp: NewTrustedApp = {
-    description: `Generator says we trust ${name}`,
-    name,
-    os,
-    effectScope: {
-      type: 'global',
-    },
-    entries: [
-      {
-        // @ts-ignore
-        field: 'process.hash.*',
-        operator: 'included',
-        type: 'match',
-        value: '1234234659af249ddf3e40864e9fb241',
-      },
-      {
-        // @ts-ignore
-        field: 'process.executable.caseless',
-        operator: 'included',
-        type: 'match',
-        value: '/one/two/three',
-      },
-    ],
-  };
-
-  return newTrustedApp;
-};
-
-const randomN = (max: number): number => Math.floor(Math.random() * max);
-
-const randomName = (() => {
-  const names = [
-    'Symantec Endpoint Security',
-    'Bitdefender GravityZone',
-    'Malwarebytes',
-    'Sophos Intercept X',
-    'Webroot Business Endpoint Protection',
-    'ESET Endpoint Security',
-    'FortiClient',
-    'Kaspersky Endpoint Security',
-    'Trend Micro Apex One',
-    'CylancePROTECT',
-    'VIPRE',
-    'Norton',
-    'McAfee Endpoint Security',
-    'AVG AntiVirus',
-    'CrowdStrike Falcon',
-    'Avast Business Antivirus',
-    'Avira Antivirus',
-    'Cisco AMP for Endpoints',
-    'Eset Endpoint Antivirus',
-    'VMware Carbon Black',
-    'Palo Alto Networks Traps',
-    'Trend Micro',
-    'SentinelOne',
-    'Panda Security for Desktops',
-    'Microsoft Defender ATP',
-  ];
-  const count = names.length;
-
-  return () => names[randomN(count)];
-})();
-
-const randomOperatingSystem = (() => {
-  const osKeys = Object.keys(OperatingSystem) as Array<keyof typeof OperatingSystem>;
-  const count = osKeys.length;
-
-  return () => OperatingSystem[osKeys[randomN(count)]];
-})();
 
 const createRunLogger = () => {
   let groupCount = 1;
@@ -192,4 +167,43 @@ const createRunLogger = () => {
       },
     },
   });
+};
+
+const fetchEndpointPolicies = (
+  kbnClient: KbnClient
+): Promise<AxiosResponse<GetPolicyListResponse>> => {
+  return kbnClient.request<GetPolicyListResponse>({
+    method: 'GET',
+    path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
+    query: {
+      perPage: 100,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+    },
+  });
+};
+
+const ensureCreateEndpointTrustedAppsList = async (kbn: KbnClient) => {
+  const newListDefinition: CreateExceptionListSchema = {
+    description: ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
+    list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+    meta: undefined,
+    name: ENDPOINT_TRUSTED_APPS_LIST_NAME,
+    os_types: [],
+    tags: [],
+    type: 'endpoint',
+    namespace_type: 'agnostic',
+  };
+
+  await kbn
+    .request({
+      method: 'POST',
+      path: EXCEPTION_LIST_URL,
+      body: newListDefinition,
+    })
+    .catch((e) => {
+      // Ignore if list was already created
+      if (e.response.status !== 409) {
+        throw e;
+      }
+    });
 };

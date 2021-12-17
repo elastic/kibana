@@ -10,13 +10,15 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import {
+import type {
   ColumnHeaderOptions,
   ControlColumnProps,
   OnRowSelected,
+  SetEventsLoading,
+  SetEventsDeleted,
   TimelineExpandedDetailType,
-  TimelineTabs,
 } from '../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { getMappedNonEcsValue } from '../data_driven_columns';
 import { tGridActions } from '../../../../store/t_grid';
 
@@ -24,6 +26,7 @@ type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
   controlColumn: ControlColumnProps;
   data: TimelineItem[];
+  disabled: boolean;
   index: number;
   isEventViewer: boolean;
   loadingEventIds: Readonly<string[]>;
@@ -34,33 +37,46 @@ type Props = EuiDataGridCellValueElementProps & {
   tabType?: TimelineTabs;
   timelineId: string;
   width: number;
+  setEventsLoading: SetEventsLoading;
+  setEventsDeleted: SetEventsDeleted;
+  pageRowIndex: number;
 };
 
 const RowActionComponent = ({
   columnHeaders,
   controlColumn,
   data,
+  disabled,
   index,
   isEventViewer,
   loadingEventIds,
   onRowSelected,
   onRuleChange,
+  pageRowIndex,
   rowIndex,
   selectedEventIds,
   showCheckboxes,
   tabType,
   timelineId,
+  setEventsLoading,
+  setEventsDeleted,
   width,
 }: Props) => {
-  const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = useMemo(
-    () => data[rowIndex],
-    [data, rowIndex]
-  );
+  const {
+    data: timelineNonEcsData,
+    ecs: ecsData,
+    _id: eventId,
+    _index: indexName,
+  } = useMemo(() => {
+    const rowData: Partial<TimelineItem> = data[pageRowIndex];
+    return rowData ?? {};
+  }, [data, pageRowIndex]);
 
   const dispatch = useDispatch();
 
   const columnValues = useMemo(
     () =>
+      timelineNonEcsData &&
       columnHeaders
         .map(
           (header) =>
@@ -77,7 +93,7 @@ const RowActionComponent = ({
     const updatedExpandedDetail: TimelineExpandedDetailType = {
       panelView: 'eventDetail',
       params: {
-        eventId,
+        eventId: eventId ?? '',
         indexName: indexName ?? '',
       },
     };
@@ -93,7 +109,7 @@ const RowActionComponent = ({
 
   const Action = controlColumn.rowCellRender;
 
-  if (data.length === 0 || rowIndex >= data.length) {
+  if (!timelineNonEcsData || !ecsData || !eventId) {
     return <span data-test-subj="noData" />;
   }
 
@@ -101,12 +117,13 @@ const RowActionComponent = ({
     <>
       {Action && (
         <Action
-          ariaRowindex={rowIndex + 1}
+          ariaRowindex={pageRowIndex + 1}
           checked={Object.keys(selectedEventIds).includes(eventId)}
           columnId={controlColumn.id || ''}
-          columnValues={columnValues}
+          columnValues={columnValues || ''}
           data={timelineNonEcsData}
           data-test-subj="actions"
+          disabled={disabled}
           ecsData={ecsData}
           eventId={eventId}
           index={index}
@@ -120,6 +137,8 @@ const RowActionComponent = ({
           tabType={tabType}
           timelineId={timelineId}
           width={width}
+          setEventsLoading={setEventsLoading}
+          setEventsDeleted={setEventsDeleted}
         />
       )}
     </>

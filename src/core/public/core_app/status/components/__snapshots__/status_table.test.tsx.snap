@@ -1,43 +1,73 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`StatusTable renders when statuses is provided 1`] = `
-<EuiBasicTable
+<EuiInMemoryTable
   columns={
     Array [
       Object {
+        "align": "center",
         "field": "state",
-        "name": "",
+        "name": "Status",
         "render": [Function],
-        "width": "32px",
+        "sortable": [Function],
+        "width": "100px",
       },
       Object {
         "field": "id",
         "name": "ID",
+        "sortable": true,
       },
       Object {
         "field": "state",
-        "name": "Status",
+        "name": "Status summary",
         "render": [Function],
+      },
+      Object {
+        "align": "right",
+        "isExpander": true,
+        "name": <EuiScreenReaderOnly>
+          <FormattedMessage
+            defaultMessage="Expand row"
+            id="core.statusPage.statusTable.columns.expandRowHeader"
+            values={Object {}}
+          />
+        </EuiScreenReaderOnly>,
+        "render": [Function],
+        "width": "40px",
       },
     ]
   }
   data-test-subj="statusBreakdown"
+  isExpandable={true}
+  itemId={[Function]}
+  itemIdToExpandedRowMap={Object {}}
   items={
     Array [
       Object {
         "id": "plugin:1",
+        "original": Object {
+          "level": "available",
+          "summary": "Ready",
+        },
         "state": Object {
           "id": "available",
           "message": "Ready",
           "title": "green",
-          "uiColor": "secondary",
+          "uiColor": "success",
         },
       },
     ]
   }
-  noItemsMessage="No items found"
   responsive={true}
   rowProps={[Function]}
+  sorting={
+    Object {
+      "sort": Object {
+        "direction": "asc",
+        "field": "state",
+      },
+    }
+  }
   tableLayout="fixed"
 />
 `;

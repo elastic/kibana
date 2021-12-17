@@ -10,8 +10,15 @@ import {
   ESGeoGridSourceDescriptor,
   ESSearchSourceDescriptor,
   LayerDescriptor,
+  VectorLayerDescriptor,
 } from '../../common/descriptor_types';
-import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS, SCALING_TYPES, SOURCE_TYPES } from '../../common';
+import {
+  GRID_RESOLUTION,
+  LAYER_TYPE,
+  RENDER_AS,
+  SCALING_TYPES,
+  SOURCE_TYPES,
+} from '../../common/constants';
 import {
   DEFAULT_EMS_DARKMAP_ID,
   DEFAULT_EMS_ROADMAP_DESATURATED_ID,
@@ -29,7 +36,6 @@ export enum TELEMETRY_LAYER_TYPE {
   ES_AGG_HEATMAP = 'es_agg_heatmap',
   EMS_REGION = 'ems_region',
   EMS_BASEMAP = 'ems_basemap',
-  KBN_REGION = 'kbn_region',
   KBN_TMS_RASTER = 'kbn_tms_raster',
   UX_TMS_RASTER = 'ux_tms_raster', // configured in the UX layer wizard of Maps
   UX_TMS_MVT = 'ux_tms_mvt', // configured in the UX layer wizard of Maps
@@ -109,10 +115,6 @@ export function getTelemetryLayerType(
 
   if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.KIBANA_TILEMAP) {
     return TELEMETRY_LAYER_TYPE.KBN_TMS_RASTER;
-  }
-
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.REGIONMAP_FILE) {
-    return TELEMETRY_LAYER_TYPE.KBN_REGION;
   }
 
   if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.EMS_XYZ) {
@@ -263,9 +265,8 @@ export function getTermJoinsPerCluster(
   layerLists: LayerDescriptor[][]
 ): TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER {
   return getCountsByCluster(layerLists, (layerDescriptor: LayerDescriptor) => {
-    return layerDescriptor.type === LAYER_TYPE.VECTOR &&
-      layerDescriptor.joins &&
-      layerDescriptor.joins.length
+    return layerDescriptor.type === LAYER_TYPE.GEOJSON_VECTOR &&
+      (layerDescriptor as VectorLayerDescriptor)?.joins?.length
       ? TELEMETRY_TERM_JOIN
       : null;
   });

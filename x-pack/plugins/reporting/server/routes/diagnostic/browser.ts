@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { browserStartLogs } from '../../browsers/chromium/driver_factory/start_logs';
 import { LevelLogger as Logger } from '../../lib';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { DiagnosticResponse } from './';
@@ -19,8 +18,7 @@ const logsToHelpMap = {
     {
       defaultMessage: `The browser couldn't start properly due to missing system dependencies. Please see {url}`,
       values: {
-        url:
-          'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies',
+        url: 'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies',
       },
     }
   ),
@@ -30,8 +28,7 @@ const logsToHelpMap = {
     {
       defaultMessage: `The browser couldn't locate a default font. Please see {url} to fix this issue.`,
       values: {
-        url:
-          'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies',
+        url: 'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies',
       },
     }
   ),
@@ -39,8 +36,7 @@ const logsToHelpMap = {
   'No usable sandbox': i18n.translate('xpack.reporting.diagnostic.noUsableSandbox', {
     defaultMessage: `Unable to use Chromium sandbox. This can be disabled at your own risk with 'xpack.reporting.capture.browser.chromium.disableSandbox'. Please see {url}`,
     values: {
-      url:
-        'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-sandbox-dependency',
+      url: 'https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-sandbox-dependency',
     },
   }),
 };
@@ -55,7 +51,8 @@ export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger
     },
     authorizedUserPreRouting(reporting, async (_user, _context, _req, res) => {
       try {
-        const logs = await browserStartLogs(reporting, logger).toPromise();
+        const { screenshotting } = await reporting.getPluginStartDeps();
+        const logs = await screenshotting.diagnose().toPromise();
         const knownIssues = Object.keys(logsToHelpMap) as Array<keyof typeof logsToHelpMap>;
 
         const boundSuccessfully = logs.includes(`DevTools listening on`);

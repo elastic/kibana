@@ -21,18 +21,21 @@ import {
   mockAuthenticationsSearchStrategyResponse,
   mockEventsSearchStrategyResponse,
   mockDnsSearchStrategyResponse,
+  formattedPreviewStrategyResponse,
 } from './__mocks__';
 import { alertsMatrixHistogramConfig } from './alerts';
 import { anomaliesMatrixHistogramConfig } from './anomalies';
 import { authenticationsMatrixHistogramConfig } from './authentications';
 import { eventsMatrixHistogramConfig } from './events';
 import { dnsMatrixHistogramConfig } from './dns';
+import { previewMatrixHistogramConfig } from './preview';
 
 import { mockOptions as mockAlertsOptions } from './alerts/__mocks__';
 import { mockOptions as mockAnomaliesOptions } from './anomalies/__mocks__';
 import { mockOptions as mockAuthenticationsOptions } from './authentications/__mocks__';
 import { mockOptions as mockEventsOptions } from './events/__mocks__';
 import { mockOptions as mockDnsOptions } from './dns/__mocks__';
+import { mockOptions as mockPreviewOptions } from './preview/__mocks__';
 
 describe('Alerts matrixHistogram search strategy', () => {
   const buildMatrixHistogramQuery = jest.spyOn(alertsMatrixHistogramConfig, 'buildDsl');
@@ -207,6 +210,42 @@ describe('Dns matrixHistogram search strategy', () => {
     test('should parse data correctly', async () => {
       const result = await matrixHistogram.parse(mockDnsOptions, mockDnsSearchStrategyResponse);
       expect(result).toMatchObject(formattedDnsSearchStrategyResponse);
+    });
+  });
+});
+
+describe('Preview matrixHistogram search strategy', () => {
+  const buildMatrixHistogramQuery = jest.spyOn(previewMatrixHistogramConfig, 'buildDsl');
+
+  afterEach(() => {
+    buildMatrixHistogramQuery.mockClear();
+  });
+
+  describe('buildDsl', () => {
+    test('should build dsl query', () => {
+      matrixHistogram.buildDsl(mockPreviewOptions);
+      expect(buildMatrixHistogramQuery).toHaveBeenCalledWith(mockPreviewOptions);
+    });
+
+    test('should throw error if histogramType is invalid', () => {
+      const invalidOptions: MatrixHistogramRequestOptions = {
+        ...mockPreviewOptions,
+        histogramType: 'xxx' as MatrixHistogramType,
+      } as MatrixHistogramRequestOptions;
+
+      expect(() => {
+        matrixHistogram.buildDsl(invalidOptions);
+      }).toThrowError(`This histogram type xxx is unknown to the server side`);
+    });
+  });
+
+  describe('parse', () => {
+    test('should parse data correctly', async () => {
+      const result = await matrixHistogram.parse(
+        mockPreviewOptions,
+        mockAlertsSearchStrategyResponse
+      );
+      expect(result).toMatchObject(formattedPreviewStrategyResponse);
     });
   });
 });

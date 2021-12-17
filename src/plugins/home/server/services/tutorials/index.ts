@@ -19,6 +19,7 @@ export type {
   ArtifactsSchema,
   TutorialSchema,
   TutorialProvider,
+  TutorialContext,
   TutorialContextFactory,
   ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';

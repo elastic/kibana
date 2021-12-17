@@ -46,7 +46,7 @@ const INJECTED_METADATA = {
   },
 };
 
-const { createKibanaRequest, createRawRequest } = httpServerMock;
+const { createKibanaRequest } = httpServerMock;
 
 function renderTestCases(
   getRender: () => Promise<
@@ -107,22 +107,10 @@ function renderTestCases(
       expect(data).toMatchSnapshot(INJECTED_METADATA);
     });
 
-    it('renders "core" from legacy request', async () => {
-      const [render] = await getRender();
-      const content = await render(createRawRequest(), uiSettings);
-      const dom = load(content);
-      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
-
-      expect(data).toMatchSnapshot(INJECTED_METADATA);
-    });
-
     it('calls `getStylesheetPaths` with the correct parameters', async () => {
       getSettingValueMock.mockImplementation((settingName: string) => {
         if (settingName === 'theme:darkMode') {
           return true;
-        }
-        if (settingName === 'theme:version') {
-          return 'v8';
         }
         return settingName;
       });

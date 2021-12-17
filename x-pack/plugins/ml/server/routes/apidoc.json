@@ -1,6 +1,6 @@
 {
   "name": "ml_kibana_api",
-  "version": "7.13.0",
+  "version": "8.0.0",
   "description": "This is the documentation of the REST API provided by the Machine Learning Kibana plugin. Each API is experimental and can include breaking changes in any version.",
   "title": "ML Kibana API",
   "order": [
@@ -88,7 +88,7 @@
     "TopCategories",
     "DatafeedPreview",
     "UpdateGroups",
-    "DeletingJobTasks",
+    "BlockingJobTasks",
     "DeleteJobs",
     "RevertModelSnapshot",
     "BulkCreateJobs",
@@ -118,16 +118,19 @@
     "MlInfo",
     "MlEsSearch",
     "MlIndexExists",
+    "MlSpecificIndexExists",
 
     "JobAuditMessages",
     "GetJobAuditMessages",
     "GetAllJobAuditMessages",
     "ClearJobAuditMessages",
+
     "JobValidation",
     "EstimateBucketSpan",
     "CalculateModelMemoryLimit",
     "ValidateCardinality",
     "ValidateJob",
+    "ValidateDataFeedPreview",
 
     "DatafeedService",
     "CreateDatafeed",
@@ -149,6 +152,7 @@
     "SavedObjectsStatus",
     "SyncJobSavedObjects",
     "InitializeJobSavedObjects",
+    "SyncCheck",
     "UpdateJobsSpaces",
     "RemoveJobsFromCurrentSpace",
     "JobsSpaces",
@@ -157,7 +161,10 @@
     "TrainedModels",
     "GetTrainedModel",
     "GetTrainedModelStats",
+    "GetTrainedModelsNodesOverview",
     "GetTrainedModelPipelines",
+    "StartTrainedModelDeployment",
+    "StopTrainedModelDeployment",
     "DeleteTrainedModel",
 
     "Alerting",

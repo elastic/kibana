@@ -38,8 +38,7 @@ import {
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { ExceptionBuilder } from '../../../../../public/shared_imports';
-
+import { getExceptionBuilderComponentLazy } from '../../../../../../lists/public';
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
@@ -138,12 +137,12 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState<ErrorInfo | null>(null);
   const { addError, addSuccess, addWarning } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
-    signalIndexName,
-  ]);
-  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
-    memoSignalIndexName
+  const memoSignalIndexName = useMemo(
+    () => (signalIndexName !== null ? [signalIndexName] : []),
+    [signalIndexName]
   );
+  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] =
+    useFetchIndex(memoSignalIndexName);
 
   const memoMlJobIds = useMemo(() => maybeRule?.machine_learning_job_id ?? [], [maybeRule]);
   const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
@@ -328,11 +327,16 @@ export const AddExceptionModal = memo(function AddExceptionModal({
       const alertIdToClose = shouldCloseAlert && alertData ? alertData._id : undefined;
       const bulkCloseIndex =
         shouldBulkCloseAlert && signalIndexName != null ? [signalIndexName] : undefined;
-      addOrUpdateExceptionItems(ruleId, enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
+      addOrUpdateExceptionItems(
+        maybeRule?.rule_id ?? '',
+        enrichExceptionItems(),
+        alertIdToClose,
+        bulkCloseIndex
+      );
     }
   }, [
     addOrUpdateExceptionItems,
-    ruleId,
+    maybeRule,
     enrichExceptionItems,
     shouldCloseAlert,
     shouldBulkCloseAlert,
@@ -475,7 +479,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                   <EuiSpacer size="l" />
                 </>
               )}
-              {ExceptionBuilder.getExceptionBuilderComponentLazy({
+              {getExceptionBuilderComponentLazy({
                 allowLargeValueLists:
                   !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
                 httpService: http,

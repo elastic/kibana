@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 
 import { getIndexListUri } from '../../../../../../../../../plugins/index_management/public';
@@ -268,11 +268,8 @@ export class DetailPanel extends Component {
       return this.renderAutoFollowPatternNotFound();
     }
 
-    const {
-      followIndexPatternPrefix,
-      followIndexPatternSuffix,
-      leaderIndexPatterns,
-    } = autoFollowPattern;
+    const { followIndexPatternPrefix, followIndexPatternSuffix, leaderIndexPatterns } =
+      autoFollowPattern;
 
     let indexManagementFilter;
 

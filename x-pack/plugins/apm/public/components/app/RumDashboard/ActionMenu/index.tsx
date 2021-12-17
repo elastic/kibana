@@ -11,21 +11,22 @@ import { i18n } from '@kbn/i18n';
 import {
   createExploratoryViewUrl,
   HeaderMenuPortal,
-  SeriesUrl,
 } from '../../../../../../observability/public';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AppMountParameters } from '../../../../../../../../src/core/public';
+import { InspectorHeaderLink } from '../../../shared/apm_header_action_menu/inspector_header_link';
+import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 
 const ANALYZE_DATA = i18n.translate('xpack.apm.analyzeDataButtonLabel', {
-  defaultMessage: 'Analyze data',
+  defaultMessage: 'Explore data',
 });
 
 const ANALYZE_MESSAGE = i18n.translate(
   'xpack.apm.analyzeDataButtonLabel.message',
   {
     defaultMessage:
-      'EXPERIMENTAL - Analyze Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
+      'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
   }
 );
 
@@ -37,16 +38,23 @@ export function UXActionMenu({
   const {
     services: { http },
   } = useKibana();
-  const { urlParams } = useUrlParams();
-  const { rangeTo, rangeFrom } = urlParams;
+  const { urlParams } = useLegacyUrlParams();
+  const { rangeTo, rangeFrom, serviceName } = urlParams;
 
   const uxExploratoryViewLink = createExploratoryViewUrl(
     {
-      'ux-series': ({
-        dataType: 'ux',
-        isNew: true,
-        time: { from: rangeFrom, to: rangeTo },
-      } as unknown) as SeriesUrl,
+      reportType: 'kpi-over-time',
+      allSeries: [
+        {
+          dataType: 'ux',
+          name: `${serviceName}-page-views`,
+          time: { from: rangeFrom!, to: rangeTo! },
+          reportDefinitions: {
+            [SERVICE_NAME]: serviceName ? [serviceName] : [],
+          },
+          selectedMetricField: 'Records',
+        },
+      ],
     },
     http?.basePath.get()
   );
@@ -56,10 +64,12 @@ export function UXActionMenu({
   return (
     <HeaderMenuPortal
       setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
+      theme$={appMountParameters.theme$}
     >
       <EuiHeaderLinks gutterSize="xs">
         <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
           <EuiHeaderLink
+            data-test-subj="uxAnalyzeBtn"
             color="text"
             href={uxExploratoryViewLink}
             iconType="visBarVerticalStacked"
@@ -79,6 +89,7 @@ export function UXActionMenu({
             defaultMessage: 'Add data',
           })}
         </EuiHeaderLink>
+        <InspectorHeaderLink />
       </EuiHeaderLinks>
     </HeaderMenuPortal>
   );

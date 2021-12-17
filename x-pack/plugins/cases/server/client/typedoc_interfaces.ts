@@ -16,6 +16,7 @@
 import {
   AllCommentsResponse,
   CasePostRequest,
+  CaseResolveResponse,
   CaseResponse,
   CasesConfigurePatch,
   CasesConfigureRequest,
@@ -29,7 +30,7 @@ import {
   SubCaseResponse,
   SubCasesFindResponse,
   SubCasesResponse,
-} from '../../common';
+} from '../../common/api';
 
 /**
  * These are simply to make typedoc not attempt to expand the type aliases. If it attempts to expand them
@@ -40,6 +41,7 @@ export interface ICasePostRequest extends CasePostRequest {}
 export interface ICasesFindRequest extends CasesFindRequest {}
 export interface ICasesPatchRequest extends CasesPatchRequest {}
 export interface ICaseResponse extends CaseResponse {}
+export interface ICaseResolveResponse extends CaseResolveResponse {}
 export interface ICasesResponse extends CasesResponse {}
 export interface ICasesFindResponse extends CasesFindResponse {}
 

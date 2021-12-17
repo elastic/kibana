@@ -2,7 +2,7 @@
   "id": "observability",
   "owner": {
     "name": "Observability UI",
-    "gitHubTeam": "observability-ui"
+    "githubTeam": "observability-ui"
   },
   "version": "8.0.0",
   "kibanaVersion": "kibana",
@@ -11,9 +11,12 @@
     "observability"
   ],
   "optionalPlugins": [
+    "discover",
+    "embeddable",
     "home",
     "lens",
     "licensing",
+    "spaces",
     "usageCollection"
   ],
   "requiredPlugins": [
@@ -21,6 +24,7 @@
     "cases",
     "data",
     "features",
+    "inspector",
     "ruleRegistry",
     "timelines",
     "triggersActionsUi"

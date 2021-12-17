@@ -7,8 +7,8 @@
 
 import moment from 'moment';
 import type { IScopedClusterClient } from 'kibana/server';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import type { estypes } from '@elastic/elasticsearch';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
 import type { JobSavedObjectService } from '../../saved_objects';
@@ -53,6 +53,10 @@ export function isClearable(index?: string): boolean {
   }
   return false;
 }
+
+export type JobsErrorsResponse = Array<{ job_id: string; errors: JobMessage[] }>;
+
+export type JobAuditMessagesService = ReturnType<typeof jobAuditMessagesProvider>;
 
 export function jobAuditMessagesProvider(
   { asInternalUser }: IScopedClusterClient,
@@ -178,7 +182,10 @@ export function jobAuditMessagesProvider(
     return { messages, notificationIndices };
   }
 
-  // search highest, most recent audit messages for all jobs for the last 24hrs.
+  /**
+   * Search highest, most recent audit messages for all jobs for the last 24hrs.
+   * @param jobIds
+   */
   async function getAuditMessagesSummary(jobIds: string[]): Promise<AuditMessage[]> {
     // TODO This is the current default value of the cluster setting `search.max_buckets`.
     // This should possibly consider the real settings in a future update.
@@ -400,9 +407,73 @@ export function jobAuditMessagesProvider(
     return (Object.keys(LEVEL) as LevelName[])[Object.values(LEVEL).indexOf(level)];
   }
 
+  /**
+   * Retrieve list of errors per job.
+   * @param jobIds
+   */
+  async function getJobsErrorMessages(
+    jobIds: string[],
+    earliestMs?: number
+  ): Promise<JobsErrorsResponse> {
+    const { body } = await asInternalUser.search({
+      index: ML_NOTIFICATION_INDEX_PATTERN,
+      ignore_unavailable: true,
+      size: 0,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              ...(earliestMs ? [{ range: { timestamp: { gte: earliestMs } } }] : []),
+              { terms: { job_id: jobIds } },
+              {
+                term: { level: { value: MESSAGE_LEVEL.ERROR } },
+              },
+            ],
+          },
+        },
+        aggs: {
+          by_job: {
+            terms: {
+              field: 'job_id',
+              size: jobIds.length,
+            },
+            aggs: {
+              latest_errors: {
+                top_hits: {
+                  size: 10,
+                  sort: [
+                    {
+                      timestamp: {
+                        order: 'desc',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const errors = body.aggregations!.by_job as estypes.AggregationsTermsAggregate<{
+      key: string;
+      doc_count: number;
+      latest_errors: Pick<estypes.SearchResponse<JobMessage>, 'hits'>;
+    }>;
+
+    return errors.buckets.map((bucket) => {
+      return {
+        job_id: bucket.key,
+        errors: bucket.latest_errors.hits.hits.map((v) => v._source!),
+      };
+    });
+  }
+
   return {
     getJobAuditMessages,
     getAuditMessagesSummary,
     clearJobAuditMessages,
+    getJobsErrorMessages,
   };
 }

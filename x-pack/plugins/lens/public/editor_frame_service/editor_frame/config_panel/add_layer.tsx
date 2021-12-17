@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiToolTip,
   EuiButton,
@@ -38,12 +38,17 @@ export function AddLayerButton({
 }: AddLayerButtonProps) {
   const [showLayersChoice, toggleLayersChoice] = useState(false);
 
-  const hasMultipleLayers = Boolean(visualization.appendLayer && visualizationState);
-  if (!hasMultipleLayers) {
+  const supportedLayers = useMemo(() => {
+    if (!visualization.appendLayer || !visualizationState) {
+      return null;
+    }
+    return visualization.getSupportedLayers?.(visualizationState, layersMeta);
+  }, [visualization, visualizationState, layersMeta]);
+
+  if (supportedLayers == null) {
     return null;
   }
-  const supportedLayers = visualization.getSupportedLayers?.(visualizationState, layersMeta);
-  if (supportedLayers?.length === 1) {
+  if (supportedLayers.length === 1) {
     return (
       <EuiToolTip
         display="block"
@@ -52,14 +57,13 @@ export function AddLayerButton({
         })}
         content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
           defaultMessage:
-            'Use multiple layers to combine visualization types or visualize different index patterns.',
+            'Use multiple layers to combine visualization types or visualize different data views.',
         })}
         position="bottom"
       >
         <EuiButton
           className="lnsConfigPanel__addLayerBtn"
           fullWidth
-          size="s"
           data-test-subj="lnsLayerAddButton"
           aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
             defaultMessage: 'Add layer',
@@ -84,7 +88,6 @@ export function AddLayerButton({
         <EuiButton
           className="lnsConfigPanel__addLayerBtn"
           fullWidth
-          size="s"
           data-test-subj="lnsLayerAddButton"
           aria-label={i18n.translate('xpack.lens.configPanel.addLayerButton', {
             defaultMessage: 'Add layer',

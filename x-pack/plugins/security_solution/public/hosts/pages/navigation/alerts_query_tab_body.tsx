@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
 import { TimelineId } from '../../../../common/types/timeline';
 import { AlertsView } from '../../../common/components/alerts_viewer';
 import { AlertsComponentQueryProps } from './types';
@@ -52,6 +52,7 @@ export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentQu
 
   return (
     <AlertsView
+      entityType="events"
       timelineId={TimelineId.hostsPageExternalAlerts}
       {...rest}
       pageFilters={hostPageFilters}

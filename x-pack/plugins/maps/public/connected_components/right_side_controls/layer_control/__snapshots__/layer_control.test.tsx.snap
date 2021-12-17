@@ -37,6 +37,7 @@ exports[`LayerControl is rendered 1`] = `
           <EuiToolTip
             content="Collapse layers panel"
             delay="long"
+            display="inlineBlock"
             position="top"
           >
             <EuiButtonIcon
@@ -81,12 +82,14 @@ exports[`LayerControl isLayerTOCOpen Should render expand button 1`] = `
 <EuiToolTip
   content="Expand layers panel"
   delay="long"
+  display="inlineBlock"
   position="left"
 >
   <EuiButtonIcon
     aria-label="Expand layers panel"
     className="mapLayerControl__openLayerTOCButton"
     color="text"
+    data-test-subj="mapExpandLayerControlButton"
     iconType="menuLeft"
     onClick={[Function]}
   />
@@ -97,12 +100,14 @@ exports[`LayerControl isLayerTOCOpen Should render expand button with error icon
 <EuiToolTip
   content="Expand layers panel"
   delay="long"
+  display="inlineBlock"
   position="left"
 >
   <EuiButtonIcon
     aria-label="Expand layers panel"
     className="mapLayerControl__openLayerTOCButton"
     color="text"
+    data-test-subj="mapExpandLayerControlButton"
     iconType="alert"
     onClick={[Function]}
   />
@@ -113,12 +118,14 @@ exports[`LayerControl isLayerTOCOpen spinner icon Should not render expand butto
 <EuiToolTip
   content="Expand layers panel"
   delay="long"
+  display="inlineBlock"
   position="left"
 >
   <EuiButtonIcon
     aria-label="Expand layers panel"
     className="mapLayerControl__openLayerTOCButton"
     color="text"
+    data-test-subj="mapExpandLayerControlButton"
     iconType="menuLeft"
     onClick={[Function]}
   />
@@ -129,11 +136,13 @@ exports[`LayerControl isLayerTOCOpen spinner icon Should render expand button wi
 <EuiToolTip
   content="Expand layers panel"
   delay="long"
+  display="inlineBlock"
   position="left"
 >
   <button
     aria-label="Expand layers panel"
     className="euiButtonIcon euiButtonIcon--text mapLayerControl__openLayerTOCButton"
+    data-test-subj="mapExpandLayerControlButton"
     onClick={[Function]}
     type="button"
   >
@@ -181,6 +190,7 @@ exports[`LayerControl isReadOnly 1`] = `
           <EuiToolTip
             content="Collapse layers panel"
             delay="long"
+            display="inlineBlock"
             position="top"
           >
             <EuiButtonIcon
@@ -241,6 +251,7 @@ exports[`LayerControl should disable buttons when flyout is open 1`] = `
           <EuiToolTip
             content="Collapse layers panel"
             delay="long"
+            display="inlineBlock"
             position="top"
           >
             <EuiButtonIcon

@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { stringify } from 'query-string';
-import rison, { RisonObject } from 'rison-node';
+import rison from 'rison-node';
+import type { HttpFetchQuery } from 'src/core/public';
 import { HttpSetup, IUiSettingsClient } from 'src/core/public';
+import { buildKibanaPath } from '../../../common/build_kibana_path';
 import {
   API_BASE_GENERATE,
   API_BASE_URL,
   API_GENERATE_IMMEDIATE,
   API_LIST_URL,
   API_MIGRATE_ILM_POLICY_URL,
+  getRedirectAppPath,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
 import {
@@ -45,7 +47,7 @@ interface IReportingAPI {
   // Helpers
   getReportURL(jobId: string): string;
   getReportingJobPath<T>(exportType: string, jobParams: BaseParams & T): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
-  createReportingJob(exportType: string, jobParams: any): Promise<Job>; // Sends a request to queue a job, with the job params in the POST body
+  createReportingJob<T>(exportType: string, jobParams: BaseParams & T): Promise<Job>; // Sends a request to queue a job, with the job params in the POST body
   getServerBasePath(): string; // Provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
 
   // CRUD
@@ -62,17 +64,33 @@ interface IReportingAPI {
   getDownloadLink: DownloadReportFn;
 
   // Diagnostic-related API calls
-  verifyConfig(): Promise<DiagnoseResponse>;
   verifyBrowser(): Promise<DiagnoseResponse>;
   verifyScreenCapture(): Promise<DiagnoseResponse>;
 }
 
 export class ReportingAPIClient implements IReportingAPI {
+  private http: HttpSetup;
+
   constructor(
-    private http: HttpSetup,
+    http: HttpSetup,
     private uiSettings: IUiSettingsClient,
     private kibanaVersion: string
-  ) {}
+  ) {
+    this.http = http;
+  }
+
+  public getKibanaAppHref(job: Job): string {
+    const searchParams = stringify({ jobId: job.id });
+
+    const path = buildKibanaPath({
+      basePath: this.http.basePath.serverBasePath,
+      spaceId: job.spaceId,
+      appPath: getRedirectAppPath(),
+    });
+
+    const href = `${path}?${searchParams}`;
+    return href;
+  }
 
   public getReportURL(jobId: string) {
     const apiBaseUrl = this.http.basePath.prepend(API_LIST_URL);
@@ -88,13 +106,13 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async deleteReport(jobId: string) {
-    return await this.http.delete(`${API_LIST_URL}/delete/${jobId}`, {
+    return await this.http.delete<void>(`${API_LIST_URL}/delete/${jobId}`, {
       asSystemRequest: true,
     });
   }
 
   public async list(page = 0, jobIds: string[] = []) {
-    const query = { page } as any;
+    const query: HttpFetchQuery = { page };
     if (jobIds.length > 0) {
       // Only getting the first 10, to prevent URL overflows
       query.ids = jobIds.slice(0, 10).join(',');
@@ -109,7 +127,7 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public async total() {
-    return await this.http.get(`${API_LIST_URL}/count`, {
+    return await this.http.get<number>(`${API_LIST_URL}/count`, {
       asSystemRequest: true,
     });
   }
@@ -144,14 +162,14 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public getReportingJobPath(exportType: string, jobParams: BaseParams) {
-    const risonObject: RisonObject = jobParams as Record<string, any>;
-    const params = stringify({ jobParams: rison.encode(risonObject) });
+    const params = stringify({
+      jobParams: rison.encode(jobParams),
+    });
     return `${this.http.basePath.prepend(API_BASE_GENERATE)}/${exportType}?${params}`;
   }
 
   public async createReportingJob(exportType: string, jobParams: BaseParams) {
-    const risonObject: RisonObject = jobParams as Record<string, any>;
-    const jobParamsRison = rison.encode(risonObject);
+    const jobParamsRison = rison.encode(jobParams);
     const resp: { job: ReportApiJSON } = await this.http.post(
       `${API_BASE_GENERATE}/${exportType}`,
       {
@@ -196,25 +214,19 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
-  public async verifyConfig() {
-    return await this.http.post(`${API_BASE_URL}/diagnose/config`, {
+  public verifyBrowser() {
+    return this.http.post<DiagnoseResponse>(`${API_BASE_URL}/diagnose/browser`, {
       asSystemRequest: true,
     });
   }
 
-  public async verifyBrowser() {
-    return await this.http.post(`${API_BASE_URL}/diagnose/browser`, {
+  public verifyScreenCapture() {
+    return this.http.post<DiagnoseResponse>(`${API_BASE_URL}/diagnose/screenshot`, {
       asSystemRequest: true,
     });
   }
 
-  public async verifyScreenCapture() {
-    return await this.http.post(`${API_BASE_URL}/diagnose/screenshot`, {
-      asSystemRequest: true,
-    });
-  }
-
-  public async migrateReportingIndicesIlmPolicy() {
-    return await this.http.put(`${API_MIGRATE_ILM_POLICY_URL}`);
+  public migrateReportingIndicesIlmPolicy() {
+    return this.http.put(`${API_MIGRATE_ILM_POLICY_URL}`);
   }
 }

@@ -32,12 +32,9 @@ export type TagEnhancedSavedObjectSaveModalDashboardProps = Omit<
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
-export const TagEnhancedSavedObjectSaveModalDashboard: FC<TagEnhancedSavedObjectSaveModalDashboardProps> = ({
-  initialTags,
-  onSave,
-  savedObjectsTagging,
-  ...otherProps
-}) => {
+export const TagEnhancedSavedObjectSaveModalDashboard: FC<
+  TagEnhancedSavedObjectSaveModalDashboardProps
+> = ({ initialTags, onSave, savedObjectsTagging, ...otherProps }) => {
   const [selectedTags, setSelectedTags] = useState(initialTags);
 
   const tagSelectorOption = useMemo(

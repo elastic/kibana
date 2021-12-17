@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import { useKibana } from '../lib/kibana';
 import { renderHook as _renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import { useUpgradeSecurityPackages } from './use_upgrade_security_packages';
+import { epmRouteService } from '../../../../fleet/common';
 
 jest.mock('../components/user_privileges', () => {
   return {
@@ -21,7 +22,8 @@ jest.mock('../components/user_privileges', () => {
 });
 jest.mock('../lib/kibana');
 
-describe('When using the `useUpgradeSecurityPackages()` hook', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/112910
+describe.skip('When using the `useUpgradeSecurityPackages()` hook', () => {
   let renderResult: RenderHookResult<object, void>;
   let renderHook: () => RenderHookResult<object, void>;
   let kibana: ReturnType<typeof useKibana>;
@@ -56,7 +58,7 @@ describe('When using the `useUpgradeSecurityPackages()` hook', () => {
     );
 
     expect(kibana.services.http.post).toHaveBeenCalledWith(
-      '/api/fleet/epm/packages/_bulk',
+      `${epmRouteService.getBulkInstallPath()}`,
       expect.objectContaining({
         body: '{"packages":["endpoint","security_detection_engine"]}',
       })

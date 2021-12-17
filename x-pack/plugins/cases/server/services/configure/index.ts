@@ -13,12 +13,10 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 
-import { SavedObjectFindOptionsKueryNode, CONNECTOR_ID_REFERENCE_NAME } from '../../common';
-import {
-  CASE_CONFIGURE_SAVED_OBJECT,
-  CasesConfigureAttributes,
-  CasesConfigurePatch,
-} from '../../../common';
+import { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
+import { CasesConfigureAttributes, CasesConfigurePatch } from '../../../common/api';
+import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import {
   transformFieldsToESModel,
@@ -134,16 +132,17 @@ export class CaseConfigureService {
       this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
       const esUpdateInfo = transformAttributesToESModel(updatedAttributes);
 
-      const updatedConfiguration = await unsecuredSavedObjectsClient.update<ESCasesConfigureAttributes>(
-        CASE_CONFIGURE_SAVED_OBJECT,
-        configurationId,
-        {
-          ...esUpdateInfo.attributes,
-        },
-        {
-          references: esUpdateInfo.referenceHandler.build(originalConfiguration.references),
-        }
-      );
+      const updatedConfiguration =
+        await unsecuredSavedObjectsClient.update<ESCasesConfigureAttributes>(
+          CASE_CONFIGURE_SAVED_OBJECT,
+          configurationId,
+          {
+            ...esUpdateInfo.attributes,
+          },
+          {
+            references: esUpdateInfo.referenceHandler.build(originalConfiguration.references),
+          }
+        );
 
       return transformUpdateResponseToExternalModel(updatedConfiguration);
     } catch (error) {
@@ -205,21 +204,15 @@ function transformFindResponseToExternalModel(
   };
 }
 
-function transformAttributesToESModel(
-  configuration: CasesConfigureAttributes
-): {
+function transformAttributesToESModel(configuration: CasesConfigureAttributes): {
   attributes: ESCasesConfigureAttributes;
   referenceHandler: ConnectorReferenceHandler;
 };
-function transformAttributesToESModel(
-  configuration: Partial<CasesConfigureAttributes>
-): {
+function transformAttributesToESModel(configuration: Partial<CasesConfigureAttributes>): {
   attributes: Partial<ESCasesConfigureAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 };
-function transformAttributesToESModel(
-  configuration: Partial<CasesConfigureAttributes>
-): {
+function transformAttributesToESModel(configuration: Partial<CasesConfigureAttributes>): {
   attributes: Partial<ESCasesConfigureAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {

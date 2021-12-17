@@ -14,7 +14,7 @@ import { createTestEsCluster } from '../../es';
 
 interface RunElasticsearchOptions {
   log: ToolingLog;
-  esFrom: string;
+  esFrom?: string;
 }
 export async function runElasticsearch({
   config,

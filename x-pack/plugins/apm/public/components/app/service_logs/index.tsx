@@ -10,7 +10,6 @@ import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { LogStream } from '../../../../../infra/public';
@@ -18,27 +17,26 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
 import {
   CONTAINER_ID,
-  HOSTNAME,
-  POD_NAME,
+  HOST_NAME,
+  SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 export function ServiceLogs() {
   const { serviceName } = useApmServiceContext();
 
   const {
-    query: { environment, kuery },
-  } = useApmParams('/services/:serviceName/logs');
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}/logs');
 
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/infrastructure',
+          endpoint: 'GET /internal/apm/services/{serviceName}/infrastructure',
           params: {
             path: { serviceName },
             query: {
@@ -57,8 +55,7 @@ export function ServiceLogs() {
   const noInfrastructureData = useMemo(() => {
     return (
       isEmpty(data?.serviceInfrastructure?.containerIds) &&
-      isEmpty(data?.serviceInfrastructure?.hostNames) &&
-      isEmpty(data?.serviceInfrastructure?.podNames)
+      isEmpty(data?.serviceInfrastructure?.hostNames)
     );
   }, [data]);
 
@@ -90,21 +87,27 @@ export function ServiceLogs() {
       height={'60vh'}
       startTimestamp={moment(start).valueOf()}
       endTimestamp={moment(end).valueOf()}
-      query={getInfrastructureKQLFilter(data)}
+      query={getInfrastructureKQLFilter(data, serviceName)}
     />
   );
 }
 
-const getInfrastructureKQLFilter = (
-  data?: APIReturnType<'GET /api/apm/services/{serviceName}/infrastructure'>
+export const getInfrastructureKQLFilter = (
+  data:
+    | APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure'>
+    | undefined,
+  serviceName: string
 ) => {
   const containerIds = data?.serviceInfrastructure?.containerIds ?? [];
   const hostNames = data?.serviceInfrastructure?.hostNames ?? [];
-  const podNames = data?.serviceInfrastructure?.podNames ?? [];
 
-  return [
-    ...containerIds.map((id) => `${CONTAINER_ID}: "${id}"`),
-    ...hostNames.map((id) => `${HOSTNAME}: "${id}"`),
-    ...podNames.map((id) => `${POD_NAME}: "${id}"`),
-  ].join(' or ');
+  const infraAttributes = containerIds.length
+    ? containerIds.map((id) => `${CONTAINER_ID}: "${id}"`)
+    : hostNames.map((id) => `${HOST_NAME}: "${id}"`);
+
+  const infraAttributesJoined = infraAttributes.join(' or ');
+
+  return infraAttributes.length
+    ? `${SERVICE_NAME}: "${serviceName}" or (not ${SERVICE_NAME} and (${infraAttributesJoined}))`
+    : `${SERVICE_NAME}: "${serviceName}"`;
 };

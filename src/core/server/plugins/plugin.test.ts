@@ -8,7 +8,7 @@
 
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { schema } from '@kbn/config-schema';
 
 import { Env } from '../config';
@@ -56,6 +56,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     requiredBundles: [],
     server: true,
     ui: true,
+    owner: { name: 'Core' },
     ...manifestProps,
   };
 }

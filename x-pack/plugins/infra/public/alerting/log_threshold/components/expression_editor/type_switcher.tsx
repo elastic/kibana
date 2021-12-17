@@ -11,7 +11,7 @@ import { EuiFlexItem, EuiFlexGroup, EuiPopover, EuiSelect, EuiExpression } from 
 import {
   PartialCriteria,
   ThresholdType,
-  isRatioAlert,
+  isRatioRule,
 } from '../../../../../common/alerting/logs/log_threshold/types';
 import { ExpressionLike } from './editor';
 
@@ -51,7 +51,7 @@ interface Props {
 }
 
 const getThresholdType = (criteria: PartialCriteria): ThresholdType => {
-  return isRatioAlert(criteria) ? 'ratio' : 'count';
+  return isRatioRule(criteria) ? 'ratio' : 'count';
 };
 
 export const TypeSwitcher: React.FC<Props> = ({ criteria, updateType }) => {
@@ -70,7 +70,7 @@ export const TypeSwitcher: React.FC<Props> = ({ criteria, updateType }) => {
                 uppercase={true}
                 value={thresholdType === 'ratio' ? ratioI18n : countI18n}
                 isActive={isThresholdTypePopoverOpen}
-                onClick={() => setThresholdTypePopoverOpenState(true)}
+                onClick={() => setThresholdTypePopoverOpenState(!isThresholdTypePopoverOpen)}
               />
               <ExpressionLike
                 text={

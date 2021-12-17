@@ -17,7 +17,7 @@ import {
   AggregationsFiltersAggregate,
   AggregationsFiltersBucketItem,
   SearchTotalHits,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CoreContext } from '../core_context';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType, InternalHttpServiceSetup } from '../http';
@@ -27,17 +27,18 @@ import type {
   CoreServicesUsageData,
   CoreUsageData,
   CoreUsageDataStart,
-  CoreUsageDataSetup,
+  InternalCoreUsageDataSetup,
   ConfigUsageData,
+  CoreConfigUsageData,
 } from './types';
 import { isConfigured } from './is_configured';
 import { ElasticsearchServiceStart } from '../elasticsearch';
-import { KibanaConfigType } from '../kibana_config';
 import { coreUsageStatsType } from './core_usage_stats';
 import { LEGACY_URL_ALIAS_TYPE } from '../saved_objects/object_types';
 import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 import { MetricsServiceSetup, OpsMetrics } from '..';
+import { CoreIncrementUsageCounter } from './types';
 
 export type ExposedConfigsToUsage = Map<string, Record<string, boolean>>;
 
@@ -53,6 +54,8 @@ export interface StartDeps {
   elasticsearch: ElasticsearchServiceStart;
   exposedConfigsToUsage: ExposedConfigsToUsage;
 }
+
+const kibanaIndex = '.kibana';
 
 /**
  * Because users can configure their Saved Object to any arbitrary index name,
@@ -72,20 +75,9 @@ const kibanaOrTaskManagerIndex = (index: string, kibanaConfigIndex: string) => {
   return index === kibanaConfigIndex ? '.kibana' : '.kibana_task_manager';
 };
 
-/**
- * This is incredibly hacky... The config service doesn't allow you to determine
- * whether or not a config value has been changed from the default value, and the
- * default value is defined in legacy code.
- *
- * This will be going away in 8.0, so please look away for a few months
- *
- * @param index The `kibana.index` setting from the `kibana.yml`
- */
-const isCustomIndex = (index: string) => {
-  return index !== '.kibana';
-};
-
-export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, CoreUsageDataStart> {
+export class CoreUsageDataService
+  implements CoreService<InternalCoreUsageDataSetup, CoreUsageDataStart>
+{
   private logger: Logger;
   private elasticsearchConfig?: ElasticsearchConfigType;
   private configService: CoreContext['configService'];
@@ -94,9 +86,9 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
   private soConfig?: SavedObjectsConfigType;
   private stop$: Subject<void>;
   private opsMetrics?: OpsMetrics;
-  private kibanaConfig?: KibanaConfigType;
   private coreUsageStatsClient?: CoreUsageStatsClient;
   private deprecatedConfigPaths: ChangedDeprecatedPaths = { set: [], unset: [] };
+  private incrementUsageCounter: CoreIncrementUsageCounter = () => {}; // Initially set to noop
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-usage-stats-service');
@@ -128,8 +120,8 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
           .getTypeRegistry()
           .getAllTypes()
           .reduce((acc, type) => {
-            const index = type.indexPattern ?? this.kibanaConfig!.index;
-            return index != null ? acc.add(index) : acc;
+            const index = type.indexPattern ?? kibanaIndex;
+            return acc.add(index);
           }, new Set<string>())
           .values()
       ).map((index) => {
@@ -145,7 +137,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
           .then(({ body }) => {
             const stats = body[0];
             return {
-              alias: kibanaOrTaskManagerIndex(index, this.kibanaConfig!.index),
+              alias: kibanaOrTaskManagerIndex(index, kibanaIndex),
               docsCount: stats['docs.count'] ? parseInt(stats['docs.count'], 10) : 0,
               docsDeleted: stats['docs.deleted'] ? parseInt(stats['docs.deleted'], 10) : 0,
               storeSizeBytes: stats['store.size'] ? parseInt(stats['store.size'], 10) : 0,
@@ -162,7 +154,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     // Note: this agg can be changed to use `savedObjectsRepository.find` in the future after `filters` is supported.
     // See src/core/server/saved_objects/service/lib/aggregations/aggs_types/bucket_aggs.ts for supported aggregations.
     const { body: resp } = await elasticsearch.client.asInternalUser.search({
-      index: this.kibanaConfig!.index,
+      index: kibanaIndex,
       body: {
         track_total_hits: true,
         query: { match: { type: LEGACY_URL_ALIAS_TYPE } },
@@ -253,6 +245,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             truststoreConfigured: isConfigured.record(es.ssl.truststore),
             keystoreConfigured: isConfigured.record(es.ssl.keystore),
           },
+          principal: getEsPrincipalUsage(es),
         },
         http: {
           basePathConfigured: isConfigured.string(http.basePath),
@@ -307,7 +300,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
         },
 
         savedObjects: {
-          customIndex: isCustomIndex(this.kibanaConfig!.index),
+          customIndex: false,
           maxImportPayloadBytes: this.soConfig.maxImportPayloadBytes.getValueInBytes(),
           maxImportExportSize: this.soConfig.maxImportExportSize,
         },
@@ -466,13 +459,6 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
         this.soConfig = config;
       });
 
-    this.configService
-      .atPath<KibanaConfigType>('kibana')
-      .pipe(takeUntil(this.stop$))
-      .subscribe((config) => {
-        this.kibanaConfig = config;
-      });
-
     changedDeprecatedConfigPath$
       .pipe(takeUntil(this.stop$))
       .subscribe((deprecatedConfigPaths) => (this.deprecatedConfigPaths = deprecatedConfigPaths));
@@ -493,7 +479,24 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
 
     this.coreUsageStatsClient = getClient();
 
-    return { registerType, getClient } as CoreUsageDataSetup;
+    const contract: InternalCoreUsageDataSetup = {
+      registerType,
+      getClient,
+      registerUsageCounter: (usageCounter) => {
+        this.incrementUsageCounter = (params) => usageCounter.incrementCounter(params);
+      },
+      incrementUsageCounter: (params) => {
+        try {
+          this.incrementUsageCounter(params);
+        } catch (e) {
+          // Self-defense mechanism since the handler is externally registered
+          this.logger.debug('Failed to increase the usage counter');
+          this.logger.debug(e);
+        }
+      },
+    };
+
+    return contract;
   }
 
   start({ savedObjects, elasticsearch, exposedConfigsToUsage }: StartDeps) {
@@ -511,4 +514,23 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     this.stop$.next();
     this.stop$.complete();
   }
+}
+
+function getEsPrincipalUsage({ username, serviceAccountToken }: ElasticsearchConfigType) {
+  let value: CoreConfigUsageData['elasticsearch']['principal'] = 'unknown';
+  if (isConfigured.string(username)) {
+    switch (username) {
+      case 'elastic': // deprecated
+      case 'kibana': // deprecated
+      case 'kibana_system':
+        value = `${username}_user` as const;
+        break;
+      default:
+        value = 'other_user';
+    }
+  } else if (serviceAccountToken) {
+    // cannot be used with elasticsearch.username
+    value = 'kibana_service_account';
+  }
+  return value;
 }

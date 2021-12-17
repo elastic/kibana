@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ScriptBasedSortClause,
   ScriptClause,
@@ -102,7 +102,7 @@ if (doc['task.runAt'].size()!=0) {
     },
   },
 };
-export const SortByRunAtAndRetryAt = (SortByRunAtAndRetryAtScript as unknown) as Record<
+export const SortByRunAtAndRetryAt = SortByRunAtAndRetryAtScript as unknown as Record<
   string,
   estypes.SearchSort
 >;

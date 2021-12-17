@@ -19,17 +19,17 @@ import {
 import React, { Component, lazy, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   ApplicationStart,
   Capabilities,
   NotificationsStart,
   ScopedHistory,
 } from 'src/core/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
 import { reactRouterNavigate } from '../../../../../../src/plugins/kibana_react/public';
 import type { FeaturesPluginStart, KibanaFeature } from '../../../../features/public';
+import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';

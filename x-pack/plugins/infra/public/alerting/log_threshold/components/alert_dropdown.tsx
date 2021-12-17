@@ -8,7 +8,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiContextMenuItem, EuiContextMenuPanel, EuiHeaderLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertFlyout } from './alert_flyout';
 import { useLinkProps } from '../../../hooks/use_link_props';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';

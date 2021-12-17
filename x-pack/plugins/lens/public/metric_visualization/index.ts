@@ -7,6 +7,7 @@
 
 import type { CoreSetup } from 'kibana/public';
 import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import type { EditorFrameSetup } from '../types';
 import type { FormatFactory } from '../../common';
 
@@ -14,24 +15,22 @@ export interface MetricVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
   formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
+  charts: ChartsPluginSetup;
 }
 
 export class MetricVisualization {
-  constructor() {}
-
   setup(
-    _core: CoreSetup | null,
-    { expressions, formatFactory, editorFrame }: MetricVisualizationPluginSetupPlugins
+    core: CoreSetup,
+    { expressions, formatFactory, editorFrame, charts }: MetricVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const { metricVisualization, metricChart, getMetricChartRenderer } = await import(
-        '../async_services'
+      const { getMetricVisualization, getMetricChartRenderer } = await import('../async_services');
+      const palettes = await charts.palettes.getPalettes();
+
+      expressions.registerRenderer(() =>
+        getMetricChartRenderer(formatFactory, core.uiSettings, core.theme)
       );
-
-      expressions.registerFunction(() => metricChart);
-
-      expressions.registerRenderer(() => getMetricChartRenderer(formatFactory));
-      return metricVisualization;
+      return getMetricVisualization({ paletteService: palettes, theme: core.theme });
     });
   }
 }

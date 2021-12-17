@@ -44,11 +44,11 @@ describe('Security Plugin', () => {
       protocol: 'https',
     });
 
-    mockSetupDependencies = ({
+    mockSetupDependencies = {
       licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
       features: featuresPluginMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
-    } as unknown) as PluginSetupDependencies;
+    } as unknown as PluginSetupDependencies;
 
     mockCoreStart = coreMock.createStart();
 
@@ -67,7 +67,6 @@ describe('Security Plugin', () => {
         Object {
           "audit": Object {
             "asScoped": [Function],
-            "getLogger": [Function],
           },
           "authc": Object {
             "getCurrentUser": [Function],
@@ -122,6 +121,9 @@ describe('Security Plugin', () => {
             "hasAtLeast": [Function],
             "isEnabled": [Function],
             "isLicenseAvailable": [Function],
+          },
+          "privilegeDeprecationsService": Object {
+            "getKibanaRolesByFeatureId": [Function],
           },
         }
       `);

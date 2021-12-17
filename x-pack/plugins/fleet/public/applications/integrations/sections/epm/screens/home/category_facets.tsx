@@ -8,36 +8,61 @@
 import { EuiFacetButton, EuiFacetGroup } from '@elastic/eui';
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { Loading } from '../../../../components';
-import type { CategorySummaryItem, CategorySummaryList } from '../../../../types';
+
+export interface CategoryFacet {
+  count: number;
+  id: string;
+  title: string;
+}
+
+export const ALL_CATEGORY = {
+  id: '',
+  title: i18n.translate('xpack.fleet.epmList.allPackagesFilterLinkText', {
+    defaultMessage: 'All categories',
+  }),
+};
+
+export const INSTALLED_CATEGORY = {
+  id: '',
+  title: i18n.translate('xpack.fleet.epmList.allPackagesInstalledFilterLinkText', {
+    defaultMessage: 'All installed',
+  }),
+};
+
+export interface Props {
+  isLoading?: boolean;
+  categories: CategoryFacet[];
+  selectedCategory: string;
+  onCategoryChange: (category: CategoryFacet) => unknown;
+}
 
 export function CategoryFacets({
   isLoading,
   categories,
   selectedCategory,
   onCategoryChange,
-}: {
-  isLoading?: boolean;
-  categories: CategorySummaryList;
-  selectedCategory: string;
-  onCategoryChange: (category: CategorySummaryItem) => unknown;
-}) {
+}: Props) {
   const controls = (
     <EuiFacetGroup>
       {isLoading ? (
         <Loading />
       ) : (
-        categories.map((category) => (
-          <EuiFacetButton
-            isSelected={category.id === selectedCategory}
-            key={category.id}
-            id={category.id}
-            quantity={category.count}
-            onClick={() => onCategoryChange(category)}
-          >
-            {category.title}
-          </EuiFacetButton>
-        ))
+        categories.map((category) => {
+          return (
+            <EuiFacetButton
+              isSelected={category.id === selectedCategory}
+              key={category.id}
+              id={category.id}
+              quantity={category.count}
+              onClick={() => onCategoryChange(category)}
+            >
+              {category.title}
+            </EuiFacetButton>
+          );
+        })
       )}
     </EuiFacetGroup>
   );

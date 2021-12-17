@@ -6,7 +6,12 @@
  */
 
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
-import { Artifact, ArtifactsClientInterface } from '../../../../../fleet/server';
+import {
+  Artifact,
+  ArtifactsClientInterface,
+  ListArtifactsProps,
+} from '../../../../../fleet/server';
+import { ListResult } from '../../../../../fleet/common';
 
 export interface EndpointArtifactClientInterface {
   getArtifact(id: string): Promise<InternalArtifactCompleteSchema | undefined>;
@@ -14,6 +19,8 @@ export interface EndpointArtifactClientInterface {
   createArtifact(artifact: InternalArtifactCompleteSchema): Promise<InternalArtifactCompleteSchema>;
 
   deleteArtifact(id: string): Promise<void>;
+
+  listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>>;
 }
 
 /**
@@ -30,6 +37,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
 
     return {
       type: idPieces[1],
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       decodedSha256: idPieces.pop()!,
       identifier: idPieces.join('-'),
     };
@@ -49,6 +57,10 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
     return artifacts.items[0];
   }
 
+  async listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>> {
+    return this.fleetArtifacts.listArtifacts(options);
+  }
+
   async createArtifact(
     artifact: InternalArtifactCompleteSchema
   ): Promise<InternalArtifactCompleteSchema> {
@@ -63,7 +75,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
 
   async deleteArtifact(id: string) {
     // Ignoring the `id` not being in the type until we can refactor the types in endpoint.
-    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const artifactId = (await this.getArtifact(id))?.id!;
     return this.fleetArtifacts.deleteArtifact(artifactId);
   }

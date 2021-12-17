@@ -34,8 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
-    // FLAKY: https://github.com/elastic/kibana/issues/103389
-    describe.skip('field data', function () {
+    describe('field data', function () {
       it('search php should show the correct hit count', async function () {
         const expectedHitCount = '445';
         await retry.try(async function () {
@@ -65,9 +64,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('doc view should show Time and Document columns', async function () {
+      it('doc view should show @timestamp and Document columns', async function () {
         const Docheader = await PageObjects.discover.getDocHeader();
-        expect(Docheader).to.contain('Time');
+        expect(Docheader).to.contain('@timestamp');
         expect(Docheader).to.contain('Document');
       });
 

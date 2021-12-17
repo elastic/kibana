@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import type { AlertConsumers } from '@kbn/rule-data-utils';
+import type { AlertConsumers } from '@kbn/rule-data-utils/alerts_as_data_rbac';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isString, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
-import { tGridActions } from '..';
-
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  DataPublicPluginStart,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../src/plugins/data/public';
+  clearEventsLoading,
+  clearEventsDeleted,
+  setTimelineUpdatedAt,
+} from '../store/t_grid/actions';
+
+import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { isCompleteResponse, isErrorResponse } from '../../../../../src/plugins/data/common';
 import {
   Direction,
   TimelineFactoryQueryTypes,
@@ -41,16 +43,17 @@ import { useAppToasts } from '../hooks/use_app_toasts';
 import { TimelineId } from '../store/t_grid/types';
 import * as i18n from './translations';
 
-type InspectResponse = Inspect & { response: string[] };
+export type InspectResponse = Inspect & { response: string[] };
 
 export const detectionsTimelineIds = [
   TimelineId.detectionsPage,
   TimelineId.detectionsRulesDetailsPage,
 ];
 
-type Refetch = () => void;
+export type Refetch = () => void;
 
 export interface TimelineArgs {
+  consumers: Record<string, number>;
   events: TimelineItem[];
   id: string;
   inspect: InspectResponse;
@@ -68,22 +71,23 @@ type TimelineRequest<T extends KueryFilterQueryKind> = TimelineEventsAllRequestO
 type TimelineResponse<T extends KueryFilterQueryKind> = TimelineEventsAllStrategyResponse;
 
 export interface UseTimelineEventsProps {
+  alertConsumers?: AlertConsumers[];
+  data?: DataPublicPluginStart;
   docValueFields?: DocValueFields[];
-  filterQuery?: ESQuery | string;
-  skip?: boolean;
   endDate: string;
   entityType: EntityType;
   excludeEcsData?: boolean;
-  id: string;
   fields: string[];
+  filterQuery?: ESQuery | string;
+  id: string;
   indexNames: string[];
   language?: KueryFilterQueryKind;
   limit: number;
+  runtimeMappings: MappingRuntimeFields;
+  skip?: boolean;
   sort?: TimelineRequestSortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
-  data?: DataPublicPluginStart;
-  alertConsumers?: AlertConsumers[];
 }
 
 const createFilter = (filterQuery: ESQuery | string | undefined) =>
@@ -124,6 +128,7 @@ export const useTimelineEvents = ({
   startDate,
   language = 'kuery',
   limit,
+  runtimeMappings,
   sort = initSortDefault,
   skip = false,
   timerangeKind,
@@ -133,7 +138,7 @@ export const useTimelineEvents = ({
   const refetch = useRef<Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [activePage, setActivePage] = useState(0);
   const [timelineRequest, setTimelineRequest] = useState<TimelineRequest<typeof language> | null>(
     null
@@ -142,8 +147,8 @@ export const useTimelineEvents = ({
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
-      dispatch(tGridActions.clearEventsLoading({ id }));
-      dispatch(tGridActions.clearEventsDeleted({ id }));
+      dispatch(clearEventsLoading({ id }));
+      dispatch(clearEventsDeleted({ id }));
     }
   }, [dispatch, id]);
 
@@ -164,12 +169,13 @@ export const useTimelineEvents = ({
 
   const setUpdated = useCallback(
     (updatedAt: number) => {
-      dispatch(tGridActions.setTimelineUpdatedAt({ id, updated: updatedAt }));
+      dispatch(setTimelineUpdatedAt({ id, updated: updatedAt }));
     },
     [dispatch, id]
   );
 
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
+    consumers: {},
     id,
     inspect: {
       dsl: [],
@@ -212,10 +218,10 @@ export const useTimelineEvents = ({
             .subscribe({
               next: (response) => {
                 if (isCompleteResponse(response)) {
-                  setLoading(false);
                   setTimelineResponse((prevResponse) => {
                     const newTimelineResponse = {
                       ...prevResponse,
+                      consumers: response.consumers,
                       events: getTimelineEvents(response.edges),
                       inspect: getInspectResponse(response, prevResponse.inspect),
                       pageInfo: response.pageInfo,
@@ -225,6 +231,8 @@ export const useTimelineEvents = ({
                     setUpdated(newTimelineResponse.updatedAt);
                     return newTimelineResponse;
                   });
+                  setLoading(false);
+
                   searchSubscription$.current.unsubscribe();
                 } else if (isErrorResponse(response)) {
                   setLoading(false);
@@ -263,6 +271,7 @@ export const useTimelineEvents = ({
         querySize: prevRequest?.pagination.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
+        runtimeMappings: prevRequest?.runtimeMappings ?? {},
       };
 
       const currentSearchParameters = {
@@ -270,6 +279,7 @@ export const useTimelineEvents = ({
         filterQuery: createFilter(filterQuery),
         querySize: limit,
         sort,
+        runtimeMappings,
         timerange: {
           interval: '12h',
           from: startDate,
@@ -295,6 +305,7 @@ export const useTimelineEvents = ({
           querySize: limit,
         },
         language,
+        runtimeMappings,
         sort,
         timerange: {
           interval: '12h',
@@ -326,6 +337,7 @@ export const useTimelineEvents = ({
     startDate,
     sort,
     fields,
+    runtimeMappings,
   ]);
 
   useEffect(() => {
@@ -345,6 +357,7 @@ export const useTimelineEvents = ({
   useEffect(() => {
     if (isEmpty(filterQuery)) {
       setTimelineResponse({
+        consumers: {},
         id,
         inspect: {
           dsl: [],

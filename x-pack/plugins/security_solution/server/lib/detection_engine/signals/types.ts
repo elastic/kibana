@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BoolQuery } from '@kbn/es-query';
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
-  AlertType,
+  RuleType,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerting/server';
-import { BaseSearchResponse, SearchHit, TermAggregationBucket } from '../../types';
+import { TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,
   BaseHit,
@@ -28,14 +28,15 @@ import {
   EqlSequence,
 } from '../../../../common/detection_engine/types';
 import { ListClient } from '../../../../../lists/server';
-import { Logger, SavedObject } from '../../../../../../../src/core/server';
+import { Logger } from '../../../../../../../src/core/server';
 import { BuildRuleMessage } from './rule_messages';
 import { TelemetryEventsSender } from '../../telemetry/sender';
-import { RuleParams } from '../schemas/rule_schemas';
+import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 import { GenericBulkCreateResponse } from './bulk_create_factory';
 import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
 import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
 import { BuildReasonMessage } from './reason_formatters';
+import { RACAlert } from '../rule_types/types';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -176,6 +177,7 @@ export type EventHit = Exclude<TypeOfFieldMap<EcsFieldMap>, '@timestamp'> & {
 };
 export type WrappedEventHit = BaseHit<EventHit>;
 
+export type AlertSearchResponse = estypes.SearchResponse<RACAlert>;
 export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
@@ -194,7 +196,7 @@ export type RuleExecutorOptions = AlertExecutorOptions<
 // since we are only increasing the strictness of params.
 export const isAlertExecutor = (
   obj: SignalRuleAlertTypeDefinition
-): obj is AlertType<
+): obj is RuleType<
   RuleParams,
   RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
   AlertTypeState,
@@ -205,7 +207,7 @@ export const isAlertExecutor = (
   return true;
 };
 
-export type SignalRuleAlertTypeDefinition = AlertType<
+export type SignalRuleAlertTypeDefinition = RuleType<
   RuleParams,
   RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
   AlertTypeState,
@@ -255,6 +257,7 @@ export interface SignalHit {
 
 export interface AlertAttributes<T extends RuleParams = RuleParams> {
   actions: RuleAlertAction[];
+  alertTypeId: string;
   enabled: boolean;
   name: string;
   tags: string[];
@@ -279,9 +282,11 @@ export interface QueryFilter {
 
 export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
 
-export type BulkCreate = <T>(docs: Array<BaseHit<T>>) => Promise<GenericBulkCreateResponse<T>>;
+export type BulkCreate = <T extends Record<string, unknown>>(
+  docs: Array<BaseHit<T>>
+) => Promise<GenericBulkCreateResponse<T>>;
 
-export type SimpleHit = BaseHit<{ '@timestamp': string }>;
+export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
 
 export type WrapHits = (
   hits: Array<estypes.SearchHit<SignalSource>>,
@@ -299,7 +304,7 @@ export interface SearchAfterAndBulkCreateParams {
     from: moment.Moment;
     maxSignals: number;
   };
-  ruleSO: SavedObject<AlertAttributes>;
+  completeRule: CompleteRule<RuleParams>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
@@ -332,7 +337,9 @@ export interface SearchAfterAndBulkCreateReturnType {
 }
 
 export interface ThresholdAggregationBucket extends TermAggregationBucket {
-  top_threshold_hits: BaseSearchResponse<SignalSource>;
+  max_timestamp: {
+    value_as_string: string;
+  };
   cardinality_count: {
     value: number;
   };
@@ -348,17 +355,16 @@ export interface MultiAggBucket {
     value: string;
   }>;
   docCount: number;
-  topThresholdHits?:
-    | {
-        hits: {
-          hits: SearchHit[];
-        };
-      }
-    | undefined;
+  maxTimestamp: string;
 }
 
 export interface ThresholdQueryBucket extends TermAggregationBucket {
   lastSignalTimestamp: {
     value_as_string: string;
   };
+}
+
+export interface ThresholdAlertState extends AlertTypeState {
+  initialized: boolean;
+  signalHistory: ThresholdSignalHistory;
 }

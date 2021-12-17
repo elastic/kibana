@@ -25,11 +25,12 @@ const DASHBOARD_FEATURE: FeatureCatalogueEntry = {
 
 const KIBANA_SOLUTION: FeatureCatalogueSolution = {
   id: 'kibana',
-  title: 'Kibana',
-  subtitle: 'Visualize & analyze',
-  appDescriptions: ['Analyze data in dashboards.', 'Search and find insights.'],
+  title: 'Analytics',
+  description:
+    'Explore, visualize, and analyze your data using a powerful suite of analytical tools and applications.',
   icon: 'kibanaApp',
   path: `/app/home`,
+  order: 400,
 };
 
 describe('FeatureCatalogueRegistry', () => {

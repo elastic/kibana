@@ -8,7 +8,7 @@
 import classNames from 'classnames';
 import React, { useState, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { ComponentTemplateListItem } from '../../../../../common';
@@ -60,10 +60,8 @@ export const ComponentTemplatesSelector = ({
   emptyPrompt: { text, showCreateButton } = {},
 }: Props) => {
   const { data: components, isLoading, error } = useApi().useLoadComponentTemplates();
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [componentsSelected, setComponentsSelected] = useState<ComponentTemplateListItem[]>([]);
   const isInitialized = useRef(false);

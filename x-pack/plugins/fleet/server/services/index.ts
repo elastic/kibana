@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from 'kibana/server';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from 'kibana/server';
 
-import type { AgentStatus, Agent } from '../types';
-
-import type { GetAgentStatusResponse } from '../../common';
-
-import type { getAgentById, getAgentsByKuery } from './agents';
 import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
-import type { getInstallation } from './epm/packages';
+import type { getInstallation, ensureInstalledPackage } from './epm/packages';
 
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 export { getRegistryUrl } from './epm/registry/registry_url';
@@ -37,39 +31,7 @@ export interface ESIndexPatternService {
 
 export interface PackageService {
   getInstallation: typeof getInstallation;
-}
-
-/**
- * A service that provides exported functions that return information about an Agent
- */
-export interface AgentService {
-  /**
-   * Get an Agent by id
-   */
-  getAgent: typeof getAgentById;
-  /**
-   * Authenticate an agent with access toekn
-   */
-  authenticateAgentWithAccessToken(
-    esClient: ElasticsearchClient,
-    request: KibanaRequest
-  ): Promise<Agent>;
-  /**
-   * Return the status by the Agent's id
-   */
-  getAgentStatusById(esClient: ElasticsearchClient, agentId: string): Promise<AgentStatus>;
-  /**
-   * Return the status by the Agent's Policy id
-   */
-  getAgentStatusForAgentPolicy(
-    esClient: ElasticsearchClient,
-    agentPolicyId?: string,
-    filterKuery?: string
-  ): Promise<GetAgentStatusResponse['results']>;
-  /**
-   * List agents
-   */
-  listAgents: typeof getAgentsByKuery;
+  ensureInstalledPackage: typeof ensureInstalledPackage;
 }
 
 export interface AgentPolicyServiceInterface {
@@ -79,6 +41,10 @@ export interface AgentPolicyServiceInterface {
   getFullAgentPolicy: typeof agentPolicyService['getFullAgentPolicy'];
   getByIds: typeof agentPolicyService['getByIDs'];
 }
+
+// Agent services
+export { AgentServiceImpl } from './agents';
+export type { AgentClient, AgentService } from './agents';
 
 // Saved object services
 export { agentPolicyService } from './agent_policy';

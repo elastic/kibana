@@ -13,7 +13,6 @@ import { existsOperator, isOneOfOperator } from './filter_operators';
 import { Filter, FILTERS } from '../../../../../common';
 import type { FilterLabelStatus } from '../../filter_item';
 
-// @internal
 export interface FilterLabelProps {
   filter: Filter;
   valueLabel?: string;
@@ -55,20 +54,6 @@ export default function FilterLabel({ filter, valueLabel, filterLabelStatus }: F
         <Fragment>
           {prefix}
           {filter.meta.key}: {getValue(`${existsOperator.message}`)}
-        </Fragment>
-      );
-    case FILTERS.GEO_BOUNDING_BOX:
-      return (
-        <Fragment>
-          {prefix}
-          {filter.meta.key}: {getValue(valueLabel)}
-        </Fragment>
-      );
-    case FILTERS.GEO_POLYGON:
-      return (
-        <Fragment>
-          {prefix}
-          {filter.meta.key}: {getValue(valueLabel)}
         </Fragment>
       );
     case FILTERS.PHRASES:

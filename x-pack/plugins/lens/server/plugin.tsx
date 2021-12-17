@@ -7,7 +7,6 @@
 
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { Observable } from 'rxjs';
 import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { FieldFormatsStart } from 'src/plugins/field_formats/server';
@@ -36,14 +35,17 @@ export interface PluginStartContract {
   data: DataPluginStart;
 }
 
-export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
-  private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
+export interface LensServerPluginSetup {
+  lensEmbeddableFactory: typeof lensEmbeddableFactory;
+}
+
+export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {}> {
   private readonly telemetryLogger: Logger;
 
   constructor(private initializerContext: PluginInitializerContext) {
-    this.kibanaIndexConfig = initializerContext.config.legacy.globalConfig$;
     this.telemetryLogger = initializerContext.logger.get('usage');
   }
+
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
     setupSavedObjects(core);
     setupRoutes(core, this.initializerContext.logger.get());
@@ -56,15 +58,13 @@ export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
           .getStartServices()
           .then(([_, { taskManager }]) => taskManager as TaskManagerStartContract)
       );
-      initializeLensTelemetry(
-        this.telemetryLogger,
-        core,
-        this.kibanaIndexConfig,
-        plugins.taskManager
-      );
+      initializeLensTelemetry(this.telemetryLogger, core, plugins.taskManager);
     }
+
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
-    return {};
+    return {
+      lensEmbeddableFactory,
+    };
   }
 
   start(core: CoreStart, plugins: PluginStartContract) {

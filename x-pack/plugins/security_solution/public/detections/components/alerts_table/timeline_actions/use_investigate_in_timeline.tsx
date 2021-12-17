@@ -4,19 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana';
 
 import { TimelineId } from '../../../../../common/types/timeline';
 import { Ecs } from '../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
-import { timelineActions } from '../../../../timelines/store/timeline';
+import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { sendAlertToTimelineAction } from '../actions';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
 import { CreateTimelineProps } from '../types';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../translations';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useFetchEcsAlertsData } from '../../../containers/detection_engine/alerts/use_fetch_ecs_alerts_data';
 
 interface UseInvestigateInTimelineActionProps {
@@ -28,14 +30,23 @@ interface UseInvestigateInTimelineActionProps {
 
 export const useInvestigateInTimeline = ({
   ecsRowData,
-  nonEcsRowData,
   alertIds,
   onInvestigateInTimelineAlertClick,
 }: UseInvestigateInTimelineActionProps) => {
   const {
-    data: { search: searchStrategyClient },
+    data: { search: searchStrategyClient, query },
   } = useKibana().services;
   const dispatch = useDispatch();
+
+  const filterManagerBackup = useMemo(() => query.filterManager, [query.filterManager]);
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
+    getManageTimeline(state, TimelineId.active ?? '')
+  );
+  const filterManager = useMemo(
+    () => activeFilterManager ?? filterManagerBackup,
+    [activeFilterManager, filterManagerBackup]
+  );
 
   const updateTimelineIsLoading = useCallback(
     (payload) => dispatch(timelineActions.updateIsLoading(payload)),
@@ -52,6 +63,7 @@ export const useInvestigateInTimeline = ({
         notes: [],
         timeline: {
           ...timeline,
+          filterManager,
           // by setting as an empty array, it will default to all in the reducer because of the event type
           indexNames: [],
           show: true,
@@ -60,7 +72,7 @@ export const useInvestigateInTimeline = ({
         ruleNote,
       })();
     },
-    [dispatch, updateTimelineIsLoading]
+    [dispatch, filterManager, updateTimelineIsLoading]
   );
 
   const showInvestigateInTimelineAction = alertIds != null;
@@ -77,7 +89,6 @@ export const useInvestigateInTimeline = ({
       await sendAlertToTimelineAction({
         createTimeline,
         ecsData: alertsEcsData,
-        nonEcsData: nonEcsRowData ?? [],
         searchStrategyClient,
         updateTimelineIsLoading,
       });
@@ -87,7 +98,6 @@ export const useInvestigateInTimeline = ({
       await sendAlertToTimelineAction({
         createTimeline,
         ecsData: ecsRowData,
-        nonEcsData: nonEcsRowData ?? [],
         searchStrategyClient,
         updateTimelineIsLoading,
       });
@@ -96,24 +106,26 @@ export const useInvestigateInTimeline = ({
     alertsEcsData,
     createTimeline,
     ecsRowData,
-    nonEcsRowData,
     onInvestigateInTimelineAlertClick,
     searchStrategyClient,
     updateTimelineIsLoading,
   ]);
 
-  const investigateInTimelineAction = showInvestigateInTimelineAction
+  const investigateInTimelineActionItems = showInvestigateInTimelineAction
     ? [
-        {
-          name: ACTION_INVESTIGATE_IN_TIMELINE,
-          onClick: investigateInTimelineAlertClick,
-          disabled: isFetchingAlertEcs,
-        },
+        <EuiContextMenuItem
+          key="investigate-in-timeline-action-item"
+          data-test-subj="investigate-in-timeline-action-item"
+          disabled={ecsRowData == null && isFetchingAlertEcs === true}
+          onClick={investigateInTimelineAlertClick}
+        >
+          {ACTION_INVESTIGATE_IN_TIMELINE}
+        </EuiContextMenuItem>,
       ]
     : [];
 
   return {
-    investigateInTimelineAction,
+    investigateInTimelineActionItems,
     investigateInTimelineAlertClick,
     showInvestigateInTimelineAction,
   };

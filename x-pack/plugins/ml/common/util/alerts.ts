@@ -54,7 +54,7 @@ export function getTopNBuckets(job: Job): number {
   return Math.ceil(narrowBucketLength / bucketSpan.asSeconds());
 }
 
-const implementedTests = ['datafeed', 'mml', 'delayedData'] as JobsHealthTests[];
+const implementedTests = ['datafeed', 'mml', 'delayedData', 'errorMessages'] as JobsHealthTests[];
 
 /**
  * Returns tests configuration combined with default values.

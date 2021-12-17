@@ -115,6 +115,7 @@ export function createPluginPrebootSetupContext(
     http: {
       registerRoutes: deps.http.registerRoutes,
       basePath: deps.http.basePath,
+      getServerInfo: deps.http.getServerInfo,
     },
     preboot: {
       isSetupOnHold: deps.preboot.isSetupOnHold,
@@ -196,6 +197,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
       registerType: deps.savedObjects.registerType,
+      getKibanaIndex: deps.savedObjects.getKibanaIndex,
     },
     status: {
       core$: deps.status.core$,
@@ -210,6 +212,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     getStartServices: () => plugin.startDependencies,
     deprecations: deps.deprecations.getRegistry(plugin.name),
+    coreUsageData: {
+      registerUsageCounter: deps.coreUsageData.registerUsageCounter,
+    },
   };
 }
 

@@ -56,6 +56,31 @@ const [{ type }] = useFormData({ watch: 'type' });
 const [{ type, subType }] = useFormData({ watch: ['type', 'subType'] });
 ```
 
+### onChange
+
+**Type:** `(data: T) => void`
+
+This handler lets you listen to form fields value change _before_ any validation is executed.
+
+```js
+// With "onChange": listen to changes before any validation is triggered
+const onFieldChange = useCallback(({ myField, otherField }) => {
+  // React to changes before any validation is executed
+}, []);
+
+useFormData({
+  watch: ['myField', 'otherField'],
+  onChange: onFieldChange
+});
+
+// Without "onChange": the way to go most of the time
+const [{ myField, otherField }] = useFormData({ watch['myField', 'otherField'] });
+
+useEffect(() => {
+  // React to changes after validation have been triggered
+}, [myField, otherField]);
+```
+
 ## Return
 
 As you have noticed, you get back an array from the hook. The first element of the array is form data and the second argument is a handler to get the **serialized** form data if needed.

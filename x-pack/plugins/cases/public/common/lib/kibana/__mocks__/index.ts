@@ -12,7 +12,11 @@ import {
   createWithKibanaMock,
 } from '../kibana_react.mock';
 
-export const KibanaServices = { get: jest.fn(), getKibanaVersion: jest.fn(() => '8.0.0') };
+export const KibanaServices = {
+  get: jest.fn(),
+  getKibanaVersion: jest.fn(() => '8.0.0'),
+  getConfig: jest.fn(() => null),
+};
 export const useKibana = jest.fn().mockReturnValue({
   services: createStartServicesMock(),
 });
@@ -28,3 +32,16 @@ export const useCurrentUser = jest.fn();
 export const withKibana = jest.fn(createWithKibanaMock());
 export const KibanaContextProvider = jest.fn(createKibanaContextProviderMock());
 export const useGetUserSavedObjectPermissions = jest.fn();
+
+export const useAppUrl = jest.fn().mockReturnValue({
+  getAppUrl: jest.fn(),
+});
+
+export const useNavigateTo = jest.fn().mockReturnValue({
+  navigateTo: jest.fn(),
+});
+
+export const useNavigation = jest.fn().mockReturnValue({
+  getAppUrl: jest.fn(),
+  navigateTo: jest.fn(),
+});

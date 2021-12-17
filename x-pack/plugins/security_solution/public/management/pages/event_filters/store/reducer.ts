@@ -66,10 +66,9 @@ const handleEventFiltersListPageDataChanges: CaseReducer<EventFiltersListPageDat
   };
 };
 
-const handleEventFiltersListPageDataExistChanges: CaseReducer<EventFiltersListPageDataExistsChanged> = (
-  state,
-  action
-) => {
+const handleEventFiltersListPageDataExistChanges: CaseReducer<
+  EventFiltersListPageDataExistsChanged
+> = (state, action) => {
   return {
     ...state,
     listPage: {

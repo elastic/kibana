@@ -146,7 +146,6 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           Object {
             "actions": Array [
               Object {
-                "available": [Function],
                 "data-test-subj": "savedObjectsTableAction-inspect",
                 "description": "Inspect this saved object",
                 "icon": "inspect",
@@ -175,10 +174,10 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             "attributes": Object {},
             "id": "1",
             "meta": Object {
-              "editUrl": "#/management/kibana/indexPatterns/patterns/1",
+              "editUrl": "#/management/kibana/dataViews/dataView/1",
               "icon": "indexPatternApp",
               "inAppUrl": Object {
-                "path": "/management/kibana/indexPatterns/patterns/1",
+                "path": "/management/kibana/dataViews/dataView/1",
                 "uiCapabilitiesPath": "management.kibana.indexPatterns",
               },
               "title": "MyIndexPattern*",
@@ -189,7 +188,12 @@ exports[`Table prevents saved objects from being deleted 1`] = `
         ]
       }
       loading={false}
-      noItemsMessage="No items found"
+      noItemsMessage={
+        <EuiI18n
+          default="No items found"
+          token="euiBasicTable.noItemsMessage"
+        />
+      }
       onChange={[Function]}
       pagination={
         Object {
@@ -362,7 +366,6 @@ exports[`Table should render normally 1`] = `
           Object {
             "actions": Array [
               Object {
-                "available": [Function],
                 "data-test-subj": "savedObjectsTableAction-inspect",
                 "description": "Inspect this saved object",
                 "icon": "inspect",
@@ -391,10 +394,10 @@ exports[`Table should render normally 1`] = `
             "attributes": Object {},
             "id": "1",
             "meta": Object {
-              "editUrl": "#/management/kibana/indexPatterns/patterns/1",
+              "editUrl": "#/management/kibana/dataViews/dataView/1",
               "icon": "indexPatternApp",
               "inAppUrl": Object {
-                "path": "/management/kibana/indexPatterns/patterns/1",
+                "path": "/management/kibana/dataViews/dataView/1",
                 "uiCapabilitiesPath": "management.kibana.indexPatterns",
               },
               "title": "MyIndexPattern*",
@@ -405,7 +408,12 @@ exports[`Table should render normally 1`] = `
         ]
       }
       loading={false}
-      noItemsMessage="No items found"
+      noItemsMessage={
+        <EuiI18n
+          default="No items found"
+          token="euiBasicTable.noItemsMessage"
+        />
+      }
       onChange={[Function]}
       pagination={
         Object {

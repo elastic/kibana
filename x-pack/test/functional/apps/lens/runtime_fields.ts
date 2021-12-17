@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should able to edit field', async () => {
       await PageObjects.lens.clickField('runtimefield');
       await PageObjects.lens.editField();
-      await fieldEditor.setName('runtimefield2');
+      await fieldEditor.setName('runtimefield2', true, true);
       await fieldEditor.save();
       await fieldEditor.confirmSave();
       await PageObjects.lens.searchField('runtime');

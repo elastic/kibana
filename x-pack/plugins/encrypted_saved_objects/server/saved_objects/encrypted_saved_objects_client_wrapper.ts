@@ -11,6 +11,7 @@ import type {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
+  SavedObjectsBulkResolveObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateResponse,
@@ -190,6 +191,28 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
   }
 
+  public async bulkResolve<T = unknown>(
+    objects: SavedObjectsBulkResolveObject[],
+    options?: SavedObjectsBaseOptions
+  ) {
+    const bulkResolveResult = await this.options.baseClient.bulkResolve<T>(objects, options);
+
+    for (const resolved of bulkResolveResult.resolved_objects) {
+      const savedObject = resolved.saved_object;
+      await this.handleEncryptedAttributesInResponse(
+        savedObject,
+        undefined as unknown,
+        getDescriptorNamespace(
+          this.options.baseTypeRegistry,
+          savedObject.type,
+          savedObject.namespaces ? savedObject.namespaces[0] : undefined
+        )
+      );
+    }
+
+    return bulkResolveResult;
+  }
+
   public async resolve<T>(type: string, id: string, options?: SavedObjectsBaseOptions) {
     const resolveResult = await this.options.baseClient.resolve<T>(type, id, options);
     const object = await this.handleEncryptedAttributesInResponse(
@@ -207,7 +230,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     type: string,
     id: string,
     attributes: Partial<T>,
-    options?: SavedObjectsUpdateOptions
+    options?: SavedObjectsUpdateOptions<T>
   ) {
     if (!this.options.service.isRegistered(type)) {
       return await this.options.baseClient.update(type, id, attributes, options);

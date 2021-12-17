@@ -8,7 +8,7 @@
 import React, { memo, useMemo, useState, useEffect, useRef } from 'react';
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   PackageCustomExtensionComponentProps,
   pagePathGetters,
@@ -46,15 +46,17 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
           setStats(summary);
         }
       } catch (error) {
-        toasts.addDanger(
-          i18n.translate(
-            'xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersSummaryError',
-            {
-              defaultMessage: 'There was an error trying to fetch event filters stats: "{error}"',
-              values: { error },
-            }
-          )
-        );
+        if (isMounted.current) {
+          toasts.addDanger(
+            i18n.translate(
+              'xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersSummaryError',
+              {
+                defaultMessage: 'There was an error trying to fetch event filters stats: "{error}"',
+                values: { error },
+              }
+            )
+          );
+        }
       }
     };
     fetchStats();
@@ -78,19 +80,22 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
           path: fleetPackageCustomUrlPath,
         },
       ],
-      backButtonUrl: getAppUrl({ appId: INTEGRATIONS_PLUGIN_ID, path: fleetPackageCustomUrlPath }),
+      backButtonUrl: getAppUrl({
+        appId: INTEGRATIONS_PLUGIN_ID,
+        path: fleetPackageCustomUrlPath,
+      }),
     };
   }, [getAppUrl, pkgkey]);
 
   return (
-    <EuiPanel paddingSize="l">
+    <EuiPanel hasShadow={false} paddingSize="l" hasBorder data-test-subj="fleedEventFiltersCard">
       <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center">
         <StyledEuiFlexGridItem gridarea="title" alignitems="flex-start">
           <EuiText>
             <h4>
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.fleetCustomExtension.eventFiltersLabel"
-                defaultMessage="Event Filters"
+                defaultMessage="Event filters"
               />
             </h4>
           </EuiText>
@@ -110,7 +115,7 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.fleetCustomExtension.manageEventFiltersLinkLabel"
-                defaultMessage="Manage event filters"
+                defaultMessage="Manage"
               />
             </LinkWithIcon>
           </>

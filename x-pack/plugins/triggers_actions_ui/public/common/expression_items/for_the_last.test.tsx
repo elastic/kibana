@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ForLastExpression } from './for_the_last';
 
 describe('for the last expression', () => {

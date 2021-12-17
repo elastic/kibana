@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ALERT_REASON } from '@kbn/rule-data-utils/technical_field_names';
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { TlsTranslations } from '../../../common/translations';
@@ -22,7 +23,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   id: CLIENT_ALERT_TYPES.TLS,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
-    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/tls-certificate-alert.html`;
+    return `${docLinks.links.observability.tlsCertificate}`;
   },
   alertParamsExpression: (params: any) => (
     <TLSAlert core={core} plugins={plugins} params={params} />
@@ -32,7 +33,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   defaultActionMessage,
   requiresAppContext: false,
   format: ({ fields }) => ({
-    reason: fields.reason,
+    reason: fields[ALERT_REASON] || '',
     link: `/app/uptime${CERTIFICATES_ROUTE}`,
   }),
 });

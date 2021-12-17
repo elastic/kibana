@@ -15,5 +15,5 @@ export interface NotificationsSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [toasts](./kibana-plugin-core-public.notificationssetup.toasts.md) | <code>ToastsSetup</code> | [ToastsSetup](./kibana-plugin-core-public.toastssetup.md) |
+|  [toasts](./kibana-plugin-core-public.notificationssetup.toasts.md) | ToastsSetup | [ToastsSetup](./kibana-plugin-core-public.toastssetup.md) |
 

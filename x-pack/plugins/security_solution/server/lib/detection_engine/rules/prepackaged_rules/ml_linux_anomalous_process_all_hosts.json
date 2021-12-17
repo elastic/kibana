@@ -15,7 +15,7 @@
     "v2_linux_anomalous_process_all_hosts_ecs"
   ],
   "name": "Anomalous Process For a Linux Population",
-  "note": "## Triage and analysis\n\n### Investigating an Unusual Linux Process\nDetection alerts from this rule indicate the presence of a Linux process that is rare and unusual for all of the monitored Linux hosts for which Auditbeat data is available. Here are some possible avenues of investigation:\n- Consider the user as identified by the username field. Is this program part of an expected workflow for the user who ran this program on this host?\n- Examine the history of execution. If this process manifested only very recently, it might be part of a new software package. If it has a consistent cadence - for example if it runs monthly or quarterly - it might be part of a monthly or quarterly business process.\n- Examine the process arguments, title and working directory. These may provide indications as to the source of the program or the nature of the tasks it is performing.",
+  "note": "## Triage and analysis\n\n### Investigating an Unusual Linux Process\nDetection alerts from this rule indicate the presence of a Linux process that is rare and unusual for all of the monitored Linux hosts for which Auditbeat data is available. Here are some possible avenues of investigation:\n- Consider the user as identified by the username field. Is this program part of an expected workflow for the user who ran this program on this host?\n- Examine the history of execution. If this process only manifested recently, it might be part of a new software package. If it has a consistent cadence (for example if it runs monthly or quarterly), it might be part of a monthly or quarterly business process.\n- Examine the process arguments, title and working directory. These may provide indications as to the source of the program or the nature of the tasks it is performing.",
   "references": [
     "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
   ],
@@ -30,5 +30,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 6
+  "version": 7
 }

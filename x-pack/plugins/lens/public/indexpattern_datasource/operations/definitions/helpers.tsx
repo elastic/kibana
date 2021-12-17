@@ -6,8 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexPatternColumn, operationDefinitionMap } from '.';
-import { FieldBasedIndexPatternColumn } from './column_types';
+import { GenericIndexPatternColumn, operationDefinitionMap } from '.';
+import {
+  FieldBasedIndexPatternColumn,
+  FormattedIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+} from './column_types';
 import { IndexPattern } from '../../types';
 
 export function getInvalidFieldMessage(
@@ -36,7 +40,7 @@ export function getInvalidFieldMessage(
       operationDefinition &&
       field &&
       !operationDefinition.isTransferable(
-        column as IndexPatternColumn,
+        column as GenericIndexPatternColumn,
         indexPattern,
         operationDefinitionMap
       )
@@ -81,8 +85,7 @@ export function isValidNumber(
   const inputValueAsNumber = Number(inputValue);
   return (
     inputValue !== '' &&
-    inputValue !== null &&
-    inputValue !== undefined &&
+    inputValue != null &&
     !Number.isNaN(inputValueAsNumber) &&
     Number.isFinite(inputValueAsNumber) &&
     (!integer || Number.isInteger(inputValueAsNumber)) &&
@@ -91,17 +94,35 @@ export function isValidNumber(
   );
 }
 
-export function getFormatFromPreviousColumn(previousColumn: IndexPatternColumn | undefined) {
+export function isColumnOfType<C extends GenericIndexPatternColumn>(
+  type: C['operationType'],
+  column: GenericIndexPatternColumn
+): column is C {
+  return column.operationType === type;
+}
+
+export function isColumnFormatted(
+  column: GenericIndexPatternColumn
+): column is FormattedIndexPatternColumn {
+  return Boolean(
+    'params' in column &&
+      (column as FormattedIndexPatternColumn).params &&
+      'format' in (column as FormattedIndexPatternColumn).params!
+  );
+}
+
+export function getFormatFromPreviousColumn(
+  previousColumn: GenericIndexPatternColumn | ReferenceBasedIndexPatternColumn | undefined
+) {
   return previousColumn?.dataType === 'number' &&
-    previousColumn.params &&
-    'format' in previousColumn.params &&
-    previousColumn.params.format
+    isColumnFormatted(previousColumn) &&
+    previousColumn.params
     ? { format: previousColumn.params.format }
     : undefined;
 }
 
 export function getFilter(
-  previousColumn: IndexPatternColumn | undefined,
+  previousColumn: GenericIndexPatternColumn | undefined,
   columnParams: { kql?: string | undefined; lucene?: string | undefined } | undefined
 ) {
   let filter = previousColumn?.filter;

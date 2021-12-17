@@ -35,9 +35,8 @@ import { SynonymsLogic } from '../index';
 
 export const SynonymModal: React.FC = () => {
   const { isModalOpen, modalLoading, activeSynonymSet } = useValues(SynonymsLogic);
-  const { closeModal, createSynonymSet, updateSynonymSet, deleteSynonymSet } = useActions(
-    SynonymsLogic
-  );
+  const { closeModal, createSynonymSet, updateSynonymSet, deleteSynonymSet } =
+    useActions(SynonymsLogic);
 
   const modalTitle = activeSynonymSet ? SYNONYM_UPDATE_TITLE : SYNONYM_CREATE_TITLE;
   const id = activeSynonymSet?.id || 'createNewSynonymSet';

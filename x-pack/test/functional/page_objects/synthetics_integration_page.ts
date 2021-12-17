@@ -61,7 +61,7 @@ export function SyntheticsIntegrationPageProvider({
      * Determines if the policy was created successfully by looking for the creation success toast
      */
     async isPolicyCreatedSuccessfully() {
-      await testSubjects.existOrFail('packagePolicyCreateSuccessToast');
+      await testSubjects.existOrFail('postInstallAddAgentModal');
     },
 
     /**
@@ -115,12 +115,19 @@ export function SyntheticsIntegrationPageProvider({
     },
 
     /**
+     * Finds and returns the enable throttling checkbox
+     */
+    async findThrottleSwitch() {
+      await this.ensureIsOnPackagePage();
+      return await testSubjects.find('syntheticsBrowserIsThrottlingEnabled');
+    },
+
+    /**
      * Finds and returns the enable TLS checkbox
      */
-    async findEnableTLSCheckbox() {
+    async findEnableTLSSwitch() {
       await this.ensureIsOnPackagePage();
-      const tlsCheckboxContainer = await testSubjects.find('syntheticsIsTLSEnabled');
-      return await tlsCheckboxContainer.findByCssSelector('label');
+      return await testSubjects.find('syntheticsIsTLSEnabled');
     },
 
     /**
@@ -205,6 +212,16 @@ export function SyntheticsIntegrationPageProvider({
      */
     async configureRequestBody(testSubj: string, value: string) {
       await testSubjects.click(`syntheticsRequestBodyTab__${testSubj}`);
+      await this.fillCodeEditor(value);
+    },
+
+    /**
+     *
+     * Fills the monaco code editor
+     * @params value {string} value of code input
+     *
+     */
+    async fillCodeEditor(value: string) {
       const codeEditorContainer = await testSubjects.find('codeEditorContainer');
       const textArea = await codeEditorContainer.findByCssSelector('textarea');
       await textArea.clearValue();
@@ -274,11 +291,45 @@ export function SyntheticsIntegrationPageProvider({
     },
 
     /**
+     * Creates a basic browser monitor
+     * @params name {string} the name of the monitor
+     * @params zipUrl {string} the zip url of the synthetics suites
+     */
+    async createBasicBrowserMonitorDetails(
+      {
+        name,
+        inlineScript,
+        zipUrl,
+        folder,
+        params,
+        username,
+        password,
+        apmServiceName,
+        tags,
+      }: Record<string, string>,
+      isInline: boolean = false
+    ) {
+      await this.selectMonitorType('browser');
+      await this.fillTextInputByTestSubj('packagePolicyNameInput', name);
+      await this.createBasicMonitorDetails({ name, apmServiceName, tags });
+      if (isInline) {
+        await testSubjects.click('syntheticsSourceTab__inline');
+        await this.fillCodeEditor(inlineScript);
+        return;
+      }
+      await this.fillTextInputByTestSubj('syntheticsBrowserZipUrl', zipUrl);
+      await this.fillTextInputByTestSubj('syntheticsBrowserZipUrlFolder', folder);
+      await this.fillTextInputByTestSubj('syntheticsBrowserZipUrlUsername', username);
+      await this.fillTextInputByTestSubj('syntheticsBrowserZipUrlPassword', password);
+      await this.fillCodeEditor(params);
+    },
+
+    /**
      * Enables TLS
      */
     async enableTLS() {
-      const tlsCheckbox = await this.findEnableTLSCheckbox();
-      await tlsCheckbox.click();
+      const tlsSwitch = await this.findEnableTLSSwitch();
+      await tlsSwitch.click();
     },
 
     /**
@@ -374,6 +425,43 @@ export function SyntheticsIntegrationPageProvider({
         const field = await testSubjects.find('syntheticsUseLocalResolver');
         const label = await field.findByCssSelector('label');
         await label.click();
+      }
+    },
+
+    /**
+     * Configure browser advanced settings
+     * @params name {string} the name of the monitor
+     * @params zipUrl {string} the zip url of the synthetics suites
+     */
+    async configureBrowserAdvancedOptions({
+      screenshots,
+      syntheticsArgs,
+      isThrottlingEnabled,
+      downloadSpeed,
+      uploadSpeed,
+      latency,
+    }: {
+      screenshots: string;
+      syntheticsArgs: string;
+      isThrottlingEnabled: boolean;
+      downloadSpeed: string;
+      uploadSpeed: string;
+      latency: string;
+    }) {
+      await testSubjects.click('syntheticsBrowserAdvancedFieldsAccordion');
+
+      const throttleSwitch = await this.findThrottleSwitch();
+      if ((await throttleSwitch.isSelected()) !== isThrottlingEnabled) {
+        await throttleSwitch.click();
+      }
+
+      await testSubjects.selectValue('syntheticsBrowserScreenshots', screenshots);
+      await this.setComboBox('syntheticsBrowserSyntheticsArgs', syntheticsArgs);
+
+      if (isThrottlingEnabled) {
+        await this.fillTextInputByTestSubj('syntheticsBrowserDownloadSpeed', downloadSpeed);
+        await this.fillTextInputByTestSubj('syntheticsBrowserUploadSpeed', uploadSpeed);
+        await this.fillTextInputByTestSubj('syntheticsBrowserLatency', latency);
       }
     },
   };

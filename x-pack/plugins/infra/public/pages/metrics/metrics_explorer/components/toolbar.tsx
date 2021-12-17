@@ -6,9 +6,9 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { IIndexPattern, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
@@ -25,9 +25,10 @@ import { MetricsExplorerAggregationPicker } from './aggregation';
 import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } from './chart_options';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { mapKibanaQuickRangesToDatePickerRanges } from '../../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
+import { DerivedIndexPattern } from '../../../../containers/metrics_source';
 
 interface Props {
-  derivedIndexPattern: IIndexPattern;
+  derivedIndexPattern: DerivedIndexPattern;
   timeRange: MetricsExplorerTimeOptions;
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;

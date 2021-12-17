@@ -5,29 +5,34 @@
  * 2.0.
  */
 
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
-import { buildAlertsRuleIdFilter, buildThreatMatchFilter } from './default_config';
+import { ExistsFilter, Filter } from '@kbn/es-query';
+import {
+  buildAlertsFilter,
+  buildAlertStatusesFilter,
+  buildAlertStatusFilter,
+  buildThreatMatchFilter,
+} from './default_config';
 
 jest.mock('./actions');
 
 describe('alerts default_config', () => {
   describe('buildAlertsRuleIdFilter', () => {
     test('given a rule id this will return an array with a single filter', () => {
-      const filters: Filter[] = buildAlertsRuleIdFilter('rule-id-1');
+      const filters: Filter[] = buildAlertsFilter('rule-id-1');
       const expectedFilter: Filter = {
         meta: {
           alias: null,
           negate: false,
           disabled: false,
           type: 'phrase',
-          key: 'signal.rule.id',
+          key: 'kibana.alert.rule.rule_id',
           params: {
             query: 'rule-id-1',
           },
         },
         query: {
           match_phrase: {
-            'signal.rule.id': 'rule-id-1',
+            'kibana.alert.rule.rule_id': 'rule-id-1',
           },
         },
       };
@@ -38,18 +43,19 @@ describe('alerts default_config', () => {
     describe('buildThreatMatchFilter', () => {
       test('given a showOnlyThreatIndicatorAlerts=true this will return an array with a single filter', () => {
         const filters: Filter[] = buildThreatMatchFilter(true);
-        const expectedFilter: Filter = {
+        const expectedFilter: ExistsFilter = {
           meta: {
             alias: null,
             disabled: false,
             negate: false,
-            key: 'signal.rule.threat_mapping',
+            key: 'kibana.alert.rule.threat_mapping',
             type: 'exists',
             value: 'exists',
           },
-          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: {
-            field: 'signal.rule.threat_mapping',
+          query: {
+            exists: {
+              field: 'kibana.alert.rule.threat_mapping',
+            },
           },
         };
         expect(filters).toHaveLength(1);
@@ -59,6 +65,101 @@ describe('alerts default_config', () => {
         const filters: Filter[] = buildThreatMatchFilter(false);
         expect(filters).toHaveLength(0);
       });
+    });
+  });
+
+  describe('buildAlertStatusFilter', () => {
+    test('when status is acknowledged, filter will build for both `in-progress` and `acknowledged`', () => {
+      const filters = buildAlertStatusFilter('acknowledged');
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          key: 'kibana.alert.workflow_status',
+          negate: false,
+          params: {
+            query: 'acknowledged',
+          },
+          type: 'phrase',
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                term: {
+                  'kibana.alert.workflow_status': 'acknowledged',
+                },
+              },
+              {
+                term: {
+                  'kibana.alert.workflow_status': 'in-progress',
+                },
+              },
+            ],
+          },
+        },
+      };
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
+    });
+
+    test('when status is `open` or `closed`, filter will build for solely that status', () => {
+      const filters = buildAlertStatusFilter('open');
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          key: 'kibana.alert.workflow_status',
+          negate: false,
+          params: {
+            query: 'open',
+          },
+          type: 'phrase',
+        },
+        query: {
+          term: {
+            'kibana.alert.workflow_status': 'open',
+          },
+        },
+      };
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
+    });
+  });
+
+  describe('buildAlertStatusesFilter', () => {
+    test('builds filter containing all statuses passed into function', () => {
+      const filters = buildAlertStatusesFilter(['open', 'acknowledged', 'in-progress']);
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                term: {
+                  'kibana.alert.workflow_status': 'open',
+                },
+              },
+              {
+                term: {
+                  'kibana.alert.workflow_status': 'acknowledged',
+                },
+              },
+              {
+                term: {
+                  'kibana.alert.workflow_status': 'in-progress',
+                },
+              },
+            ],
+          },
+        },
+      };
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
     });
   });
 

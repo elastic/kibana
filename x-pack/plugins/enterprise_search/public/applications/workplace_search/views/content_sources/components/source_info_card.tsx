@@ -64,16 +64,12 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
       </EuiText>
 
       {isFederatedSource && (
-        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" alignItems="center">
+        <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={null}>
-            <EuiText textAlign="right" size="s">
-              <strong>{STATUS_LABEL}</strong>
-            </EuiText>
+            <strong>{STATUS_LABEL}</strong>
           </EuiFlexItem>
           <EuiFlexItem grow={null}>
-            <EuiText textAlign="right" size="s">
-              <EuiHealth color="success">{READY_TEXT}</EuiHealth>
-            </EuiText>
+            <EuiHealth color="success">{READY_TEXT}</EuiHealth>
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

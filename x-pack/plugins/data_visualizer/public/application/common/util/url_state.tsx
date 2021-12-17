@@ -7,7 +7,6 @@
 
 import { parse } from 'query-string';
 import { createContext, useCallback, useContext, useMemo } from 'react';
-// @ts-ignore
 import { decode } from 'rison-node';
 
 export interface Dictionary<TValue> {

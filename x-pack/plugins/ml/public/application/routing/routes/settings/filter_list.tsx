@@ -39,7 +39,7 @@ export const filterListRouteFactory = (
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
-  const { context } = useResolver(undefined, undefined, deps.config, {
+  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
     checkFullLicense,
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
     getMlNodeCount,

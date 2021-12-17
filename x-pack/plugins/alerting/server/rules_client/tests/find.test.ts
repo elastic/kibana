@@ -35,8 +35,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: (authorization as unknown) as AlertingAuthorization,
-  actionsAuthorization: (actionsAuthorization as unknown) as ActionsAuthorization,
+  authorization: authorization as unknown as AlertingAuthorization,
+  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
   getUserName: jest.fn(),
@@ -77,7 +77,6 @@ describe('find()', () => {
   beforeEach(() => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
-      logSuccessfulAuthorization() {},
     });
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 1,
@@ -185,6 +184,106 @@ describe('find()', () => {
     `);
   });
 
+  test('finds rules with actions using preconfigured connectors', async () => {
+    unsecuredSavedObjectsClient.find.mockReset();
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'alert',
+          attributes: {
+            alertTypeId: 'myType',
+            schedule: { interval: '10s' },
+            params: {
+              bar: true,
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'default',
+                actionRef: 'action_0',
+                params: {
+                  foo: true,
+                },
+              },
+              {
+                group: 'default',
+                actionRef: 'preconfigured:preconfigured',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+          },
+          score: 1,
+          references: [
+            {
+              name: 'action_0',
+              type: 'action',
+              id: '1',
+            },
+          ],
+        },
+      ],
+    });
+    const rulesClient = new RulesClient(rulesClientParams);
+    const result = await rulesClient.find({ options: {} });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "data": Array [
+          Object {
+            "actions": Array [
+              Object {
+                "group": "default",
+                "id": "1",
+                "params": Object {
+                  "foo": true,
+                },
+              },
+              Object {
+                "group": "default",
+                "id": "preconfigured",
+                "params": Object {
+                  "foo": true,
+                },
+              },
+            ],
+            "alertTypeId": "myType",
+            "createdAt": 2019-02-12T21:01:22.479Z,
+            "id": "1",
+            "notifyWhen": "onActiveAlert",
+            "params": Object {
+              "bar": true,
+            },
+            "schedule": Object {
+              "interval": "10s",
+            },
+            "updatedAt": 2019-02-12T21:01:22.479Z,
+          },
+        ],
+        "page": 1,
+        "perPage": 10,
+        "total": 1,
+      }
+    `);
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "fields": undefined,
+          "filter": undefined,
+          "sortField": undefined,
+          "type": "alert",
+        },
+      ]
+    `);
+  });
+
   test('calls mapSortField', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     await rulesClient.find({ options: { sortField: 'name' } });
@@ -195,7 +294,6 @@ describe('find()', () => {
     jest.resetAllMocks();
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
-      logSuccessfulAuthorization() {},
     });
     const injectReferencesFn = jest.fn().mockReturnValue({
       bar: true,
@@ -391,7 +489,6 @@ describe('find()', () => {
     jest.resetAllMocks();
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
-      logSuccessfulAuthorization() {},
     });
     const injectReferencesFn = jest.fn().mockImplementation(() => {
       throw new Error('something went wrong!');
@@ -528,7 +625,6 @@ describe('find()', () => {
       authorization.getFindAuthorizationFilter.mockResolvedValue({
         filter,
         ensureRuleTypeIsAuthorized() {},
-        logSuccessfulAuthorization() {},
       });
 
       const rulesClient = new RulesClient(rulesClientParams);
@@ -551,10 +647,8 @@ describe('find()', () => {
 
     test('ensures authorization even when the fields required to authorize are omitted from the find', async () => {
       const ensureRuleTypeIsAuthorized = jest.fn();
-      const logSuccessfulAuthorization = jest.fn();
       authorization.getFindAuthorizationFilter.mockResolvedValue({
         ensureRuleTypeIsAuthorized,
-        logSuccessfulAuthorization,
       });
 
       unsecuredSavedObjectsClient.find.mockReset();
@@ -604,7 +698,6 @@ describe('find()', () => {
         type: 'alert',
       });
       expect(ensureRuleTypeIsAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'rule');
-      expect(logSuccessfulAuthorization).toHaveBeenCalled();
     });
   });
 
@@ -648,7 +741,6 @@ describe('find()', () => {
         ensureRuleTypeIsAuthorized: jest.fn(() => {
           throw new Error('Unauthorized');
         }),
-        logSuccessfulAuthorization: jest.fn(),
       });
 
       await expect(async () => await rulesClient.find()).rejects.toThrow();

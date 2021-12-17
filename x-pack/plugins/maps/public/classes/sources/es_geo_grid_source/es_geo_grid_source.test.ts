@@ -53,7 +53,7 @@ describe('ESGeoGridSource', () => {
       metrics: [],
       resolution: GRID_RESOLUTION.COARSE,
       type: SOURCE_TYPES.ES_GEO_GRID,
-      requestType: RENDER_AS.HEATMAP,
+      requestType: RENDER_AS.POINT,
     },
     {}
   );
@@ -155,15 +155,16 @@ describe('ESGeoGridSource', () => {
     extent,
     applyGlobalQuery: true,
     applyGlobalTime: true,
+    applyForceRefresh: true,
     fieldNames: [],
     buffer: extent,
     sourceQuery: {
       query: '',
       language: 'KQL',
-      queryLastTriggeredAt: '2019-04-25T20:53:22.331Z',
     },
     sourceMeta: null,
     zoom: 0,
+    isForceRefresh: false,
   };
 
   describe('getGeoJsonWithMeta', () => {
@@ -280,7 +281,7 @@ describe('ESGeoGridSource', () => {
     });
   });
 
-  describe('ITiledSingleLayerVectorSource', () => {
+  describe('IMvtVectorSource', () => {
     const mvtGeogridSource = new ESGeoGridSource(
       {
         id: 'foobar',
@@ -294,44 +295,16 @@ describe('ESGeoGridSource', () => {
       {}
     );
 
-    it('getLayerName', () => {
-      expect(mvtGeogridSource.getLayerName()).toBe('source_layer');
+    it('getTileSourceLayer', () => {
+      expect(mvtGeogridSource.getTileSourceLayer()).toBe('aggs');
     });
 
-    it('getMinZoom', () => {
-      expect(mvtGeogridSource.getMinZoom()).toBe(0);
-    });
+    it('getTileUrl', async () => {
+      const tileUrl = await mvtGeogridSource.getTileUrl(vectorSourceRequestMeta, '1234');
 
-    it('getMaxZoom', () => {
-      expect(mvtGeogridSource.getMaxZoom()).toBe(24);
-    });
-
-    it('getUrlTemplateWithMeta', async () => {
-      const urlTemplateWithMeta = await mvtGeogridSource.getUrlTemplateWithMeta(
-        vectorSourceRequestMeta
+      expect(tileUrl).toEqual(
+        "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&gridPrecision=8&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'')),'6':('0':aggs,'1':())))&requestType=point&token=1234"
       );
-
-      expect(urlTemplateWithMeta.layerName).toBe('source_layer');
-      expect(urlTemplateWithMeta.minSourceZoom).toBe(0);
-      expect(urlTemplateWithMeta.maxSourceZoom).toBe(24);
-      expect(urlTemplateWithMeta.urlTemplate).toEqual(
-        "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'',queryLastTriggeredAt:'2019-04-25T20:53:22.331Z')),'6':('0':aggs,'1':(gridSplit:(aggs:(gridCentroid:(geo_centroid:(field:bar))),geotile_grid:(bounds:!n,field:bar,precision:!n,shard_size:65535,size:65535))))))&requestType=heatmap&geoFieldType=geo_point"
-      );
-    });
-
-    it('should include searchSourceId in urlTemplateWithMeta', async () => {
-      const urlTemplateWithMeta = await mvtGeogridSource.getUrlTemplateWithMeta({
-        ...vectorSourceRequestMeta,
-        searchSessionId: '1',
-      });
-
-      expect(
-        urlTemplateWithMeta.urlTemplate.startsWith(
-          "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'',queryLastTriggeredAt:'2019-04-25T20:53:22.331Z')),'6':('0':aggs,'1':(gridSplit:(aggs:(gridCentroid:(geo_centroid:(field:bar))),geotile_grid:(bounds:!n,field:bar,precision:!n,shard_size:65535,size:65535))))))&requestType=heatmap&geoFieldType=geo_point&searchSessionId=1"
-        )
-      ).toBe(true);
-
-      expect(urlTemplateWithMeta.urlTemplate.endsWith('&searchSessionId=1')).toBe(true);
     });
   });
 

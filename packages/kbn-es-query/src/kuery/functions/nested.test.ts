@@ -8,7 +8,7 @@
 
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../..';
 
 import * as ast from '../ast';
 
@@ -20,11 +20,12 @@ const childNode = nodeTypes.function.buildNode('is', 'child', 'foo');
 
 describe('kuery functions', () => {
   describe('nested', () => {
-    let indexPattern: IndexPatternBase;
+    let indexPattern: DataViewBase;
 
     beforeEach(() => {
       indexPattern = {
         fields,
+        title: 'dataView',
       };
     });
 
@@ -48,8 +49,8 @@ describe('kuery functions', () => {
         expect(result).toHaveProperty('nested');
         expect(Object.keys(result).length).toBe(1);
 
-        expect(result.nested.path).toBe('nestedField');
-        expect(result.nested.score_mode).toBe('none');
+        expect(result.nested?.path).toBe('nestedField');
+        expect(result.nested?.score_mode).toBe('none');
       });
 
       test('should pass the nested path to subqueries so the full field name can be used', () => {
@@ -59,7 +60,7 @@ describe('kuery functions', () => {
           nodeTypes.function.buildNode('is', 'nestedField.child', 'foo')
         );
 
-        expect(result.nested.query).toEqual(expectedSubQuery);
+        expect(result.nested!.query).toEqual(expectedSubQuery);
       });
     });
   });

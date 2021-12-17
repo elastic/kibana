@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".alerts-observability-apm",
+    "index": ".alerts-observability.apm.alerts",
     "id": "NoxgpHkBqbdrfX07MqXV",
     "source": {
       "event.kind" : "signal",
@@ -18,7 +18,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".alerts-observability-apm",
+    "index": ".alerts-observability.apm.alerts",
     "id": "space1alert",
     "source": {
       "event.kind" : "signal",
@@ -35,7 +35,7 @@
 {
   "type": "doc",
   "value": {
-    "index": ".alerts-observability-apm",
+    "index": ".alerts-observability.apm.alerts",
     "id": "space2alert",
     "source": {
       "event.kind" : "signal",

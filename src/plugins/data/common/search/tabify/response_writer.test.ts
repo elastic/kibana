@@ -9,7 +9,7 @@
 import { TabbedAggResponseWriter } from './response_writer';
 import { AggConfigs, BUCKET_TYPES, METRIC_TYPES } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
-import { TabbedResponseWriterOptions } from './types';
+import type { TabbedResponseWriterOptions } from './types';
 
 describe('TabbedAggResponseWriter class', () => {
   let responseWriter: TabbedAggResponseWriter;
@@ -166,6 +166,7 @@ describe('TabbedAggResponseWriter class', () => {
           field: 'geo.src',
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             enabled: true,
             id: '1',
             indexPatternId: '1234',
@@ -193,6 +194,7 @@ describe('TabbedAggResponseWriter class', () => {
           },
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             appliedTimeRange: undefined,
             enabled: true,
             id: '2',
@@ -227,6 +229,7 @@ describe('TabbedAggResponseWriter class', () => {
           field: 'geo.src',
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             enabled: true,
             id: '1',
             indexPatternId: '1234',
@@ -254,6 +257,7 @@ describe('TabbedAggResponseWriter class', () => {
           },
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             appliedTimeRange: undefined,
             enabled: true,
             id: '2',

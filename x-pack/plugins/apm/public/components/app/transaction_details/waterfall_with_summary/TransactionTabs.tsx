@@ -11,7 +11,7 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { LogStream } from '../../../../../../infra/public';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import type { IUrlParams } from '../../../../context/url_params_context/types';
+import type { ApmUrlParams } from '../../../../context/url_params_context/types';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { TransactionMetadata } from '../../../shared/MetadataTable/TransactionMetadata';
 import { WaterfallContainer } from './waterfall_container';
@@ -19,17 +19,11 @@ import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/wa
 
 interface Props {
   transaction: Transaction;
-  urlParams: IUrlParams;
+  urlParams: ApmUrlParams;
   waterfall: IWaterfall;
-  exceedsMax: boolean;
 }
 
-export function TransactionTabs({
-  transaction,
-  urlParams,
-  waterfall,
-  exceedsMax,
-}: Props) {
+export function TransactionTabs({ transaction, urlParams, waterfall }: Props) {
   const history = useHistory();
   const tabs = [timelineTab, metadataTab, logsTab];
   const currentTab =
@@ -65,7 +59,6 @@ export function TransactionTabs({
       <TabContent
         urlParams={urlParams}
         waterfall={waterfall}
-        exceedsMax={exceedsMax}
         transaction={transaction}
       />
     </React.Fragment>
@@ -99,19 +92,11 @@ const logsTab = {
 function TimelineTabContent({
   urlParams,
   waterfall,
-  exceedsMax,
 }: {
-  urlParams: IUrlParams;
+  urlParams: ApmUrlParams;
   waterfall: IWaterfall;
-  exceedsMax: boolean;
 }) {
-  return (
-    <WaterfallContainer
-      urlParams={urlParams}
-      waterfall={waterfall}
-      exceedsMax={exceedsMax}
-    />
-  );
+  return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
 }
 
 function MetadataTabContent({ transaction }: { transaction: Transaction }) {

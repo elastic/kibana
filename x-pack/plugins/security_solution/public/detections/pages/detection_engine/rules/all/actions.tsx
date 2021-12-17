@@ -7,7 +7,7 @@
 
 import React, { Dispatch } from 'react';
 import { NavigateToAppOptions } from '../../../../../../../../../src/core/public';
-import { APP_ID } from '../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../common/constants';
 import { BulkAction } from '../../../../../../common/detection_engine/schemas/common/schemas';
 import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { SecurityPageName } from '../../../../../app/types';
@@ -37,7 +37,7 @@ export const editRuleAction = (
   ruleId: string,
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>
 ) => {
-  navigateToApp(APP_ID, {
+  navigateToApp(APP_UI_ID, {
     deepLinkId: SecurityPageName.rules,
     path: getEditRuleUrl(ruleId ?? ''),
   });

@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { uniq } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   IndexPattern,
-  IndexPatternColumn,
+  GenericIndexPatternColumn,
   IndexPatternLayer,
   IndexPatternPrivateState,
 } from './types';
@@ -150,9 +150,13 @@ export function getStateTimeShiftWarningMessages(
   if (!state) return;
   const warningMessages: React.ReactNode[] = [];
   Object.entries(state.layers).forEach(([layerId, layer]) => {
+    const layerIndexPattern = state.indexPatterns[layer.indexPatternId];
+    if (!layerIndexPattern) {
+      return;
+    }
     const dateHistogramInterval = getDateHistogramInterval(
       layer,
-      state.indexPatterns[layer.indexPatternId],
+      layerIndexPattern,
       activeData,
       layerId
     );
@@ -225,7 +229,7 @@ export function getStateTimeShiftWarningMessages(
 
 export function getColumnTimeShiftWarnings(
   dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>,
-  column: IndexPatternColumn
+  column: GenericIndexPatternColumn
 ) {
   const { isValueTooSmall, isValueNotMultiple } = getLayerTimeShiftChecks(dateHistogramInterval);
 

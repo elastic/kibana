@@ -19,7 +19,8 @@ import {
   caseConfigurationResposeMock,
   caseConfigurationCamelCaseResponseMock,
 } from './mock';
-import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';
 
 const abortCtrl = new AbortController();
@@ -94,8 +95,7 @@ describe('Case Configuration API', () => {
     test('check url, body, method, signal', async () => {
       await postCaseConfigure(caseConfigurationMock, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith('/api/cases/configure', {
-        body:
-          '{"connector":{"id":"123","name":"My connector","type":".jira","fields":null},"owner":"securitySolution","closure_type":"close-by-user"}',
+        body: '{"connector":{"id":"123","name":"My connector","type":".jira","fields":null},"owner":"securitySolution","closure_type":"close-by-user"}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
@@ -123,8 +123,7 @@ describe('Case Configuration API', () => {
         abortCtrl.signal
       );
       expect(fetchMock).toHaveBeenCalledWith('/api/cases/configure/123', {
-        body:
-          '{"connector":{"id":"456","name":"My Connector 2","type":".none","fields":null},"version":"WzHJ12"}',
+        body: '{"connector":{"id":"456","name":"My Connector 2","type":".none","fields":null},"version":"WzHJ12"}',
         method: 'PATCH',
         signal: abortCtrl.signal,
       });

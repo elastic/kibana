@@ -70,7 +70,10 @@ export function workoutColorForValue(
   const comparisonFn = (v: number, threshold: number) => v - threshold;
 
   // if steps are defined consider the specific rangeMax/Min as data boundaries
-  const maxRange = stops.length ? rangeMax : dataRangeArguments[1];
+  // as of max reduce its value by 1/colors.length for correct continuity checks
+  const maxRange = stops.length
+    ? rangeMax
+    : dataRangeArguments[1] - (dataRangeArguments[1] - dataRangeArguments[0]) / colors.length;
   const minRange = stops.length ? rangeMin : dataRangeArguments[0];
 
   // in case of shorter rangers, extends the steps on the sides to cover the whole set

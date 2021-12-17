@@ -6,8 +6,8 @@
   position: sticky;
   top: 0;
   background: $euiColorEmptyShade;
-  // Raise it above the elements that are after it in DOM order
-  z-index: $euiZLevel1;
+  z-index: $euiZLevel1; // Raise it above the elements that are after it in DOM order
+  padding: 0 $euiSize;
 }
 
 .lnsIndexPatternDimensionEditor-isFullscreen {
@@ -23,19 +23,16 @@
 }
 
 .lnsIndexPatternDimensionEditor__section--padded {
-  padding: $euiSizeS;
+  padding: $euiSize;
+}
+
+.lnsIndexPatternDimensionEditor__section--collapseNext {
+  margin-bottom: -$euiSizeL;
 }
 
 .lnsIndexPatternDimensionEditor__section--shaded {
   background-color: $euiColorLightestShade;
-}
-
-.lnsIndexPatternDimensionEditor__section--top {
   border-bottom: $euiBorderThin;
-}
-
-.lnsIndexPatternDimensionEditor__section--bottom {
-  border-top: $euiBorderThin;
 }
 
 .lnsIndexPatternDimensionEditor__columns {
@@ -56,10 +53,4 @@
 .lnsIndexPatternDimensionEditor__operation > button {
   padding-top: 0;
   padding-bottom: 0;
-}
-
-.lnsIndexPatternDimensionEditor__warning {
-  @include kbnThemeStyle('v7') {
-    border: none;
-  }
 }

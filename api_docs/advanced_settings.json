@@ -122,51 +122,59 @@
                 "type": "Function",
                 "tags": [],
                 "label": "register",
-                "description": [],
+                "description": [
+                  "/**\n     * Attempts to register the provided component, with the ability to optionally allow\n     * the component to override an existing one.\n     *\n     * If the intent is to override, then `allowOverride` must be set to true, otherwise an exception is thrown.\n     *\n     * @param id the id of the component to register\n     * @param component the component\n     * @param allowOverride (default: false) - optional flag to allow this component to override a previously registered component\n     */"
+                ],
                 "signature": [
                   "(id: Id, component: React.ComponentType<Record<string, any> | undefined>, allowOverride?: boolean) => void"
                 ],
                 "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                 "deprecated": false,
-                "returnComment": [],
                 "children": [
                   {
                     "parentPluginId": "advancedSettings",
-                    "id": "def-public.id",
+                    "id": "def-public.ComponentRegistry.setup.register.$1",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "id",
                     "description": [],
                     "signature": [
-                      "\"advanced_settings_page_title\" | \"advanced_settings_page_subtitle\" | \"advanced_settings_page_footer\""
+                      "Id"
                     ],
                     "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "isRequired": true
                   },
                   {
                     "parentPluginId": "advancedSettings",
-                    "id": "def-public.component",
+                    "id": "def-public.ComponentRegistry.setup.register.$2",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "component",
                     "description": [],
                     "signature": [
-                      "React.ComponentClass<Record<string, any> | undefined, any> | React.FunctionComponent<Record<string, any> | undefined>"
+                      "React.ComponentType<Record<string, any> | undefined>"
                     ],
                     "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "isRequired": true
                   },
                   {
                     "parentPluginId": "advancedSettings",
-                    "id": "def-public.allowOverride",
+                    "id": "def-public.ComponentRegistry.setup.register.$3",
                     "type": "boolean",
                     "tags": [],
                     "label": "allowOverride",
                     "description": [],
+                    "signature": [
+                      "boolean"
+                    ],
                     "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "isRequired": true
                   }
-                ]
+                ],
+                "returnComment": []
               }
             ]
           },
@@ -199,28 +207,31 @@
                 "type": "Function",
                 "tags": [],
                 "label": "get",
-                "description": [],
+                "description": [
+                  "/**\n     * Retrieve a registered component by its ID.\n     * If the component does not exist, then an exception is thrown.\n     *\n     * @param id the ID of the component to retrieve\n     */"
+                ],
                 "signature": [
                   "(id: Id) => React.ComponentType<Record<string, any> | undefined>"
                 ],
                 "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                 "deprecated": false,
-                "returnComment": [],
                 "children": [
                   {
                     "parentPluginId": "advancedSettings",
-                    "id": "def-public.id",
+                    "id": "def-public.ComponentRegistry.start.get.$1",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "id",
                     "description": [],
                     "signature": [
-                      "\"advanced_settings_page_title\" | \"advanced_settings_page_subtitle\" | \"advanced_settings_page_footer\""
+                      "Id"
                     ],
                     "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "isRequired": true
                   }
-                ]
+                ],
+                "returnComment": []
               }
             ]
           }
@@ -251,7 +262,7 @@
         "children": [
           {
             "parentPluginId": "advancedSettings",
-            "id": "def-public.props",
+            "id": "def-public.LazyField.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",

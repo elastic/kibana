@@ -12,7 +12,7 @@ import { coreMock } from '../../../../../core/server/mocks';
 import { expressionsPluginMock } from '../../../../../plugins/expressions/server/mocks';
 import { BucketAggType, getAggTypes, MetricAggType } from '../../../common';
 import { createFieldFormatsStartMock } from '../../../../field_formats/server/mocks';
-import { createIndexPatternsStartMock } from '../../index_patterns/mocks';
+import { createIndexPatternsStartMock } from '../../data_views/mocks';
 
 import { AggsService, AggsSetupDependencies, AggsStartDependencies } from './aggs_service';
 

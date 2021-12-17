@@ -9,7 +9,10 @@
 export { ElasticsearchService } from './elasticsearch_service';
 export { config, configSchema } from './elasticsearch_config';
 export { ElasticsearchConfig } from './elasticsearch_config';
-export type { NodesVersionCompatibility } from './version_check/ensure_es_version';
+export type {
+  NodesVersionCompatibility,
+  PollEsNodesVersionOptions,
+} from './version_check/ensure_es_version';
 export type {
   ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
@@ -22,7 +25,6 @@ export type {
   ScopeableRequest,
   ElasticsearchConfigPreboot,
 } from './types';
-export * from './legacy';
 export type {
   IClusterClient,
   ICustomClusterClient,
@@ -36,6 +38,7 @@ export type {
   ShardsResponse,
   GetResponse,
   DeleteDocumentResponse,
+  ElasticsearchErrorDetails,
 } from './client';
 export { getRequestDebugMeta, getErrorMessage } from './client';
-export { isSupportedEsServer } from './supported_server_response_check';
+export { pollEsNodesVersion } from './version_check/ensure_es_version';

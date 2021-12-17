@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectUnsanitizedDoc } from 'src/core/server';
-import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { Space } from '../../../common';
 
 export const migrateTo660 = (doc: SavedObjectUnsanitizedDoc<Space>) => {
   if (!doc.attributes.hasOwnProperty('disabledFeatures')) {

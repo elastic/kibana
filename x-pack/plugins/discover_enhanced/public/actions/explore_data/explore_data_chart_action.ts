@@ -31,7 +31,8 @@ export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
  */
 export class ExploreDataChartAction
   extends AbstractExploreDataAction<ExploreDataChartActionContext>
-  implements Action<ExploreDataChartActionContext> {
+  implements Action<ExploreDataChartActionContext>
+{
   public readonly id = ACTION_EXPLORE_DATA_CHART;
 
   public readonly type = ACTION_EXPLORE_DATA_CHART;

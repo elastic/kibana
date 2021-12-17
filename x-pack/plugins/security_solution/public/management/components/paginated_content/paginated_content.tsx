@@ -30,10 +30,11 @@ import {
   Pagination,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { v4 as generateUUI } from 'uuid';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { MaybeImmutable } from '../../../../common/endpoint/types';
+import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ComponentWithAnyProps = ComponentType<any>;
@@ -153,22 +154,37 @@ export const PaginatedContent = memo(
       [pagination?.pageSize, pagination?.totalItemCount]
     );
 
+    // If loading is done,
+    // then check to ensure the pagination numbers are correct based by ensuring that the
+    // `pageIndex` is not higher than the number of available pages.
     useEffect(() => {
-      if (pageCount > 0 && pageCount < (pagination?.pageIndex || 0) + 1) {
+      if (!loading && pageCount > 0 && pageCount < (pagination?.pageIndex || 0) + 1) {
         onChange({ pageIndex: pageCount - 1, pageSize: pagination?.pageSize || 0 });
       }
-    }, [pageCount, onChange, pagination]);
+    }, [pageCount, onChange, pagination, loading]);
 
     const handleItemsPerPageChange: EuiTablePaginationProps['onChangeItemsPerPage'] = useCallback(
       (pageSize) => {
-        onChange({ pageSize, pageIndex: pagination?.pageIndex || 0 });
+        if (pagination?.pageIndex) {
+          const pageIndex = Math.floor(
+            ((pagination?.pageIndex ?? MANAGEMENT_DEFAULT_PAGE) *
+              (pagination?.pageSize ?? MANAGEMENT_DEFAULT_PAGE_SIZE)) /
+              pageSize
+          );
+          onChange({
+            pageSize,
+            pageIndex: isNaN(pageIndex) ? MANAGEMENT_DEFAULT_PAGE : pageIndex,
+          });
+        } else {
+          onChange({ pageSize, pageIndex: MANAGEMENT_DEFAULT_PAGE });
+        }
       },
-      [onChange, pagination?.pageIndex]
+      [onChange, pagination]
     );
 
     const handlePageChange: EuiTablePaginationProps['onChangePage'] = useCallback(
       (pageIndex) => {
-        onChange({ pageIndex, pageSize: pagination?.pageSize || 10 });
+        onChange({ pageIndex, pageSize: pagination?.pageSize || MANAGEMENT_DEFAULT_PAGE_SIZE });
       },
       [onChange, pagination?.pageSize]
     );
@@ -197,9 +213,10 @@ export const PaginatedContent = memo(
           let key: Key;
 
           if (itemId) {
-            key = (item[itemId] as unknown) as Key;
+            key = item[itemId] as unknown as Key;
           } else {
             if (itemKeys.has(item)) {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               key = itemKeys.get(item)!;
             } else {
               key = generateUUI();

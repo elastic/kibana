@@ -16,6 +16,8 @@ export interface Capabilities {
   canPreviewTransform: boolean;
   canCreateTransform: boolean;
   canStartStopTransform: boolean;
+  canCreateTransformAlerts: boolean;
+  canUseTransformAlerts: boolean;
 }
 
 export type Privilege = [string, string];
@@ -32,27 +34,27 @@ function isPrivileges(arg: unknown): arg is Privileges {
 export const toArray = (value: string | string[]): string[] =>
   Array.isArray(value) ? value : [value];
 
-export const hasPrivilegeFactory = (privileges: Privileges | undefined | null) => (
-  privilege: Privilege
-) => {
-  const [section, requiredPrivilege] = privilege;
-  if (isPrivileges(privileges) && !privileges.missingPrivileges[section]) {
-    // if the section does not exist in our missingPrivileges, everything is OK
-    return true;
-  }
-  if (isPrivileges(privileges) && privileges.missingPrivileges[section]!.length === 0) {
-    return true;
-  }
-  if (requiredPrivilege === '*') {
-    // If length > 0 and we require them all... KO
-    return false;
-  }
-  // If we require _some_ privilege, we make sure that the one
-  // we require is *not* in the missingPrivilege array
-  return (
-    isPrivileges(privileges) && !privileges.missingPrivileges[section]!.includes(requiredPrivilege)
-  );
-};
+export const hasPrivilegeFactory =
+  (privileges: Privileges | undefined | null) => (privilege: Privilege) => {
+    const [section, requiredPrivilege] = privilege;
+    if (isPrivileges(privileges) && !privileges.missingPrivileges[section]) {
+      // if the section does not exist in our missingPrivileges, everything is OK
+      return true;
+    }
+    if (isPrivileges(privileges) && privileges.missingPrivileges[section]!.length === 0) {
+      return true;
+    }
+    if (requiredPrivilege === '*') {
+      // If length > 0 and we require them all... KO
+      return false;
+    }
+    // If we require _some_ privilege, we make sure that the one
+    // we require is *not* in the missingPrivilege array
+    return (
+      isPrivileges(privileges) &&
+      !privileges.missingPrivileges[section]!.includes(requiredPrivilege)
+    );
+  };
 
 // create the text for button's tooltips if the user
 // doesn't have the permission to press that button
@@ -66,6 +68,14 @@ export function createCapabilityFailureMessage(
       message = i18n.translate('xpack.transform.capability.noPermission.createTransformTooltip', {
         defaultMessage: 'You do not have permission to create transforms.',
       });
+      break;
+    case 'canCreateTransformAlerts':
+      message = i18n.translate(
+        'xpack.transform.capability.noPermission.canCreateTransformAlertsTooltip',
+        {
+          defaultMessage: 'You do not have permission to create transform alert rules.',
+        }
+      );
       break;
     case 'canStartStopTransform':
       message = i18n.translate(

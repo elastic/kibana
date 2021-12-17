@@ -5,29 +5,24 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import { findAgentIDsByStatus } from './agent_status';
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '../../../../../../../../src/core/server/mocks';
-import { AgentService } from '../../../../../../fleet/server/services';
-import { createMockAgentService } from '../../../../../../fleet/server/mocks';
+import { ElasticsearchClient } from 'kibana/server';
+import { buildStatusesKuery, findAgentIdsByStatus } from './agent_status';
+import { elasticsearchServiceMock } from '../../../../../../../../src/core/server/mocks';
+import { AgentClient } from '../../../../../../fleet/server/services';
+import { createMockAgentClient } from '../../../../../../fleet/server/mocks';
 import { Agent } from '../../../../../../fleet/common/types/models';
 import { AgentStatusKueryHelper } from '../../../../../../fleet/common/services';
 
 describe('test filtering endpoint hosts by agent status', () => {
-  let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
-  let mockAgentService: jest.Mocked<AgentService>;
+  let mockAgentClient: jest.Mocked<AgentClient>;
   beforeEach(() => {
-    mockSavedObjectClient = savedObjectsClientMock.create();
     mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    mockAgentService = createMockAgentService();
+    mockAgentClient = createMockAgentClient();
   });
 
   it('will accept a valid status condition', async () => {
-    mockAgentService.listAgents.mockImplementationOnce(() =>
+    mockAgentClient.listAgents.mockImplementationOnce(() =>
       Promise.resolve({
         agents: [],
         total: 0,
@@ -36,20 +31,17 @@ describe('test filtering endpoint hosts by agent status', () => {
       })
     );
 
-    const result = await findAgentIDsByStatus(
-      mockAgentService,
-      mockSavedObjectClient,
-      mockElasticsearchClient,
-      ['healthy']
-    );
+    const result = await findAgentIdsByStatus(mockAgentClient, mockElasticsearchClient, [
+      'healthy',
+    ]);
     expect(result).toBeDefined();
   });
 
   it('will filter for offline hosts', async () => {
-    mockAgentService.listAgents
+    mockAgentClient.listAgents
       .mockImplementationOnce(() =>
         Promise.resolve({
-          agents: [({ id: 'id1' } as unknown) as Agent, ({ id: 'id2' } as unknown) as Agent],
+          agents: [{ id: 'id1' } as unknown as Agent, { id: 'id2' } as unknown as Agent],
           total: 2,
           page: 1,
           perPage: 2,
@@ -64,14 +56,11 @@ describe('test filtering endpoint hosts by agent status', () => {
         })
       );
 
-    const result = await findAgentIDsByStatus(
-      mockAgentService,
-      mockSavedObjectClient,
-      mockElasticsearchClient,
-      ['offline']
-    );
+    const result = await findAgentIdsByStatus(mockAgentClient, mockElasticsearchClient, [
+      'offline',
+    ]);
     const offlineKuery = AgentStatusKueryHelper.buildKueryForOfflineAgents();
-    expect(mockAgentService.listAgents.mock.calls[0][1].kuery).toEqual(
+    expect(mockAgentClient.listAgents.mock.calls[0][0].kuery).toEqual(
       expect.stringContaining(offlineKuery)
     );
     expect(result).toBeDefined();
@@ -79,10 +68,10 @@ describe('test filtering endpoint hosts by agent status', () => {
   });
 
   it('will filter for multiple statuses', async () => {
-    mockAgentService.listAgents
+    mockAgentClient.listAgents
       .mockImplementationOnce(() =>
         Promise.resolve({
-          agents: [({ id: 'A' } as unknown) as Agent, ({ id: 'B' } as unknown) as Agent],
+          agents: [{ id: 'A' } as unknown as Agent, { id: 'B' } as unknown as Agent],
           total: 2,
           page: 1,
           perPage: 2,
@@ -97,18 +86,65 @@ describe('test filtering endpoint hosts by agent status', () => {
         })
       );
 
-    const result = await findAgentIDsByStatus(
-      mockAgentService,
-      mockSavedObjectClient,
-      mockElasticsearchClient,
-      ['updating', 'unhealthy']
-    );
+    const result = await findAgentIdsByStatus(mockAgentClient, mockElasticsearchClient, [
+      'updating',
+      'unhealthy',
+    ]);
     const unenrollKuery = AgentStatusKueryHelper.buildKueryForUpdatingAgents();
     const errorKuery = AgentStatusKueryHelper.buildKueryForErrorAgents();
-    expect(mockAgentService.listAgents.mock.calls[0][1].kuery).toEqual(
+    expect(mockAgentClient.listAgents.mock.calls[0][0].kuery).toEqual(
       expect.stringContaining(`${unenrollKuery} OR ${errorKuery}`)
     );
     expect(result).toBeDefined();
     expect(result).toEqual(['A', 'B']);
+  });
+
+  describe('buildStatusesKuery', () => {
+    it('correctly builds kuery for healthy status', () => {
+      const status = ['healthy'];
+      const kuery = buildStatusesKuery(status);
+      const expected =
+        '(not (united.agent.last_checkin < now-120s AND not ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*))) AND not ( ((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) )) AND not ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*))) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*)))';
+      expect(kuery).toEqual(expected);
+    });
+
+    it('correctly builds kuery for offline status', () => {
+      const status = ['offline'];
+      const kuery = buildStatusesKuery(status);
+      const expected =
+        '(united.agent.last_checkin < now-120s AND not ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*))) AND not ( ((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) ))';
+      expect(kuery).toEqual(expected);
+    });
+
+    it('correctly builds kuery for unhealthy status', () => {
+      const status = ['unhealthy'];
+      const kuery = buildStatusesKuery(status);
+      const expected =
+        '((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*)))';
+      expect(kuery).toEqual(expected);
+    });
+
+    it('correctly builds kuery for updating status', () => {
+      const status = ['updating'];
+      const kuery = buildStatusesKuery(status);
+      const expected =
+        '(((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*))';
+      expect(kuery).toEqual(expected);
+    });
+
+    it('correctly builds kuery for inactive status', () => {
+      const status = ['inactive'];
+      const kuery = buildStatusesKuery(status);
+      const expected = '(united.agent.active:false)';
+      expect(kuery).toEqual(expected);
+    });
+
+    it('correctly builds kuery for multiple statuses', () => {
+      const statuses = ['offline', 'unhealthy'];
+      const kuery = buildStatusesKuery(statuses);
+      const expected =
+        '(united.agent.last_checkin < now-120s AND not ((united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*))) AND not ( ((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*) ) OR (united.agent.last_checkin_status:error or united.agent.last_checkin_status:degraded) AND not (((united.agent.upgrade_started_at:*) and not (united.agent.upgraded_at:*)) or (not (united.agent.last_checkin:*)) or (united.agent.unenrollment_started_at:*)))';
+      expect(kuery).toEqual(expected);
+    });
   });
 });

@@ -14,7 +14,7 @@ import {
   EuiSelectable,
   EuiSelectableOption,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysis';
 import { useVisibilityState } from '../../../../utils/use_visibility_state';
@@ -60,7 +60,13 @@ export const IndexSetupDatasetFilter: React.FC<{
   );
 
   const datasetFilterButton = (
-    <EuiFilterButton disabled={isDisabled} isSelected={isVisible} onClick={show}>
+    <EuiFilterButton
+      disabled={isDisabled}
+      isSelected={isVisible}
+      onClick={show}
+      iconType="arrowDown"
+      size="s"
+    >
       <FormattedMessage
         id="xpack.infra.analysisSetup.indexDatasetFilterIncludeAllButtonLabel"
         defaultMessage="{includeType, select, includeAll {All datasets} includeSome {{includedDatasetCount, plural, one {# dataset} other {# datasets}}}}"

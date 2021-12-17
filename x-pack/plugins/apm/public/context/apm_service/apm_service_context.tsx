@@ -13,22 +13,33 @@ import {
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
-import { useServiceAgentNameFetcher } from './use_service_agent_name_fetcher';
+import { useServiceAgentFetcher } from './use_service_agent_fetcher';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
 import { useApmParams } from '../../hooks/use_apm_params';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
 
 export type APMServiceAlert = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']
+  APIReturnType<'GET /internal/apm/services/{serviceName}/alerts'>['alerts']
 >;
 
-export const APMServiceContext = createContext<{
+export interface APMServiceContextValue {
   serviceName: string;
   agentName?: string;
   transactionType?: string;
   transactionTypes: string[];
   alerts: APMServiceAlert[];
-}>({ serviceName: '', transactionTypes: [], alerts: [] });
+  runtimeName?: string;
+  fallbackToTransactions: boolean;
+}
+
+export const APMServiceContext = createContext<APMServiceContextValue>({
+  serviceName: '',
+  transactionTypes: [],
+  alerts: [],
+  fallbackToTransactions: false,
+});
 
 export function ApmServiceContextProvider({
   children,
@@ -38,11 +49,22 @@ export function ApmServiceContextProvider({
   const {
     path: { serviceName },
     query,
-  } = useApmParams('/services/:serviceName');
+    query: { kuery, rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}');
 
-  const { agentName } = useServiceAgentNameFetcher(serviceName);
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const transactionTypes = useServiceTransactionTypesFetcher(serviceName);
+  const { agentName, runtimeName } = useServiceAgentFetcher({
+    serviceName,
+    start,
+    end,
+  });
+
+  const transactionTypes = useServiceTransactionTypesFetcher({
+    serviceName,
+    start,
+    end,
+  });
 
   const transactionType = getTransactionType({
     transactionType: query.transactionType,
@@ -54,7 +76,12 @@ export function ApmServiceContextProvider({
     serviceName,
     transactionType,
     environment: query.environment,
-    kuery: query.kuery,
+    start,
+    end,
+  });
+
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
   });
 
   return (
@@ -65,6 +92,8 @@ export function ApmServiceContextProvider({
         transactionType,
         transactionTypes,
         alerts,
+        runtimeName,
+        fallbackToTransactions,
       }}
       children={children}
     />

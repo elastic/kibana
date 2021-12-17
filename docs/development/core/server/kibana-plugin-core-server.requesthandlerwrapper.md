@@ -22,6 +22,5 @@ export const wrapper: RequestHandlerWrapper = handler => {
     ...
   };
 }
-
 ```
 

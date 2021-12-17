@@ -37,6 +37,5 @@ router.get(
     return response.ok(data);
   }
 );
-
 ```
 

@@ -14,5 +14,13 @@ export type FieldsType = string[] | number[] | boolean[] | object[];
 
 /**
  * The type of the merge strategy functions which must implement to be part of the strategy group
+ * @param doc The document to send in to merge
+ * @param ignoreFields Fields you want to ignore and not merge.
  */
-export type MergeStrategyFunction = ({ doc }: { doc: SignalSourceHit }) => SignalSourceHit;
+export type MergeStrategyFunction = ({
+  doc,
+  ignoreFields,
+}: {
+  doc: SignalSourceHit;
+  ignoreFields: string[];
+}) => SignalSourceHit;

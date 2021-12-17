@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
-import { Datatable } from 'src/plugins/expressions/public';
-import { TimeRange } from 'src/plugins/data/public';
+import type { Datatable } from 'src/plugins/expressions/public';
+import type { TimeRange } from 'src/plugins/data/public';
 import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 
 // mock the specific inner variable:
@@ -22,10 +22,12 @@ jest.mock('../../../../../../src/plugins/data/common/query/timefilter/get_time',
   };
 });
 
-import { timeScale, TimeScaleArgs } from './time_scale';
+import { getTimeScale } from './time_scale';
+import type { TimeScaleArgs } from './types';
 
 describe('time_scale', () => {
   let timeScaleWrapped: (input: Datatable, args: TimeScaleArgs) => Promise<Datatable>;
+  const timeScale = getTimeScale(() => 'UTC');
 
   const emptyTable: Datatable = {
     type: 'datatable',

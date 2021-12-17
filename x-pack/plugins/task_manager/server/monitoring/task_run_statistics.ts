@@ -38,6 +38,7 @@ import {
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
+import { Logger } from '../../../../../src/core/server';
 
 interface FillPoolStat extends JsonObject {
   duration: number[];
@@ -117,43 +118,40 @@ export function createTaskRunAggregator(
   runningAverageWindowSize: number
 ): AggregatedStatProvider<TaskRunStat> {
   const taskRunEventToStat = createTaskRunEventToStat(runningAverageWindowSize);
-  const taskRunEvents$: Observable<
-    Pick<TaskRunStat, 'drift' | 'drift_by_type' | 'execution'>
-  > = taskPollingLifecycle.events.pipe(
-    filter((taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent) && hasTiming(taskEvent)),
-    map((taskEvent: TaskLifecycleEvent) => {
-      const { task, result, persistence }: RanTask | ErroredTask = unwrap(
-        (taskEvent as TaskRun).event
-      );
-      return taskRunEventToStat(task, persistence, taskEvent.timing!, result);
-    })
-  );
+  const taskRunEvents$: Observable<Pick<TaskRunStat, 'drift' | 'drift_by_type' | 'execution'>> =
+    taskPollingLifecycle.events.pipe(
+      filter((taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent) && hasTiming(taskEvent)),
+      map((taskEvent: TaskLifecycleEvent) => {
+        const { task, result, persistence }: RanTask | ErroredTask = unwrap(
+          (taskEvent as TaskRun).event
+        );
+        return taskRunEventToStat(task, persistence, taskEvent.timing!, result);
+      })
+    );
 
   const loadQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  const taskManagerLoadStatEvents$: Observable<
-    Pick<TaskRunStat, 'load'>
-  > = taskPollingLifecycle.events.pipe(
-    filter(
-      (taskEvent: TaskLifecycleEvent) =>
-        isTaskManagerStatEvent(taskEvent) &&
-        taskEvent.id === 'load' &&
-        isOk<number, never>(taskEvent.event)
-    ),
-    map((taskEvent: TaskLifecycleEvent) => {
-      return {
-        load: loadQueue(((taskEvent.event as unknown) as Ok<number>).value),
-      };
-    })
-  );
+  const taskManagerLoadStatEvents$: Observable<Pick<TaskRunStat, 'load'>> =
+    taskPollingLifecycle.events.pipe(
+      filter(
+        (taskEvent: TaskLifecycleEvent) =>
+          isTaskManagerStatEvent(taskEvent) &&
+          taskEvent.id === 'load' &&
+          isOk<number, never>(taskEvent.event)
+      ),
+      map((taskEvent: TaskLifecycleEvent) => {
+        return {
+          load: loadQueue((taskEvent.event as unknown as Ok<number>).value),
+        };
+      })
+    );
 
   const resultFrequencyQueue = createRunningAveragedStat<FillPoolResult>(runningAverageWindowSize);
   const pollingDurationQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const claimDurationQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const claimConflictsQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const claimMismatchesQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  const polledTasksByPersistenceQueue = createRunningAveragedStat<TaskPersistence>(
-    runningAverageWindowSize
-  );
+  const polledTasksByPersistenceQueue =
+    createRunningAveragedStat<TaskPersistence>(runningAverageWindowSize);
   const taskPollingEvents$: Observable<Pick<TaskRunStat, 'polling'>> = combineLatest([
     // get latest polling stats
     taskPollingLifecycle.events.pipe(
@@ -163,10 +161,9 @@ export function createTaskRunAggregator(
           isOk<ClaimAndFillPoolResult, unknown>(taskEvent.event)
       ),
       map((taskEvent: TaskLifecycleEvent) => {
-        const {
-          result,
-          stats: { tasksClaimed, tasksUpdated, tasksConflicted } = {},
-        } = ((taskEvent.event as unknown) as Ok<ClaimAndFillPoolResult>).value;
+        const { result, stats: { tasksClaimed, tasksUpdated, tasksConflicted } = {} } = (
+          taskEvent.event as unknown as Ok<ClaimAndFillPoolResult>
+        ).value;
         const duration = (taskEvent?.timing?.stop ?? 0) - (taskEvent?.timing?.start ?? 0);
         return {
           polling: {
@@ -294,12 +291,10 @@ function createTaskRunEventToStat(runningAverageWindowSize: number) {
   const taskPersistenceQueue = createRunningAveragedStat<TaskPersistence>(runningAverageWindowSize);
   const driftByTaskQueue = createMapOfRunningAveragedStats<number>(runningAverageWindowSize);
   const taskRunDurationQueue = createMapOfRunningAveragedStats<number>(runningAverageWindowSize);
-  const taskRunDurationByPersistenceQueue = createMapOfRunningAveragedStats<number>(
-    runningAverageWindowSize
-  );
-  const resultFrequencyQueue = createMapOfRunningAveragedStats<TaskRunResult>(
-    runningAverageWindowSize
-  );
+  const taskRunDurationByPersistenceQueue =
+    createMapOfRunningAveragedStats<number>(runningAverageWindowSize);
+  const resultFrequencyQueue =
+    createMapOfRunningAveragedStats<TaskRunResult>(runningAverageWindowSize);
   return (
     task: ConcreteTaskInstance,
     persistence: TaskPersistence,
@@ -337,6 +332,7 @@ const DEFAULT_POLLING_FREQUENCIES = {
 };
 
 export function summarizeTaskRunStat(
+  logger: Logger,
   {
     polling: {
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -403,6 +399,7 @@ export function summarizeTaskRunStat(
           executionResultFrequency,
           (typedResultFrequencies, taskType) =>
             summarizeTaskExecutionResultFrequencyStat(
+              logger,
               {
                 ...DEFAULT_TASK_RUN_FREQUENCIES,
                 ...calculateFrequency<TaskRunResult>(typedResultFrequencies),
@@ -418,16 +415,35 @@ export function summarizeTaskRunStat(
 }
 
 function summarizeTaskExecutionResultFrequencyStat(
+  logger: Logger,
   resultFrequencySummary: ResultFrequency,
   executionErrorThreshold: TaskExecutionFailureThreshold
 ): ResultFrequencySummary {
+  const status = getHealthStatus(logger, resultFrequencySummary, executionErrorThreshold);
   return {
     ...resultFrequencySummary,
-    status:
-      resultFrequencySummary.Failed > executionErrorThreshold.warn_threshold
-        ? resultFrequencySummary.Failed > executionErrorThreshold.error_threshold
-          ? HealthStatus.Error
-          : HealthStatus.Warning
-        : HealthStatus.OK,
+    status,
   };
+}
+
+function getHealthStatus(
+  logger: Logger,
+  resultFrequencySummary: ResultFrequency,
+  executionErrorThreshold: TaskExecutionFailureThreshold
+): HealthStatus {
+  if (resultFrequencySummary.Failed > executionErrorThreshold.warn_threshold) {
+    if (resultFrequencySummary.Failed > executionErrorThreshold.error_threshold) {
+      logger.debug(
+        `setting HealthStatus.Error because resultFrequencySummary.Failed (${resultFrequencySummary.Failed}) > error_threshold (${executionErrorThreshold.error_threshold})`
+      );
+      return HealthStatus.Error;
+    } else {
+      logger.debug(
+        `setting HealthStatus.Warning because resultFrequencySummary.Failed (${resultFrequencySummary.Failed}) > warn_threshold (${executionErrorThreshold.warn_threshold})`
+      );
+      return HealthStatus.Warning;
+    }
+  }
+
+  return HealthStatus.OK;
 }

@@ -14,12 +14,15 @@ import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks'
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 jest.mock('../id_generator');
 
 const xyVisualization = getXyVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
+  useLegacyTimeAxis: false,
+  kibanaTheme: themeServiceMock.createStartContract(),
 });
 
 describe('xy_suggestions', () => {
@@ -31,6 +34,18 @@ describe('xy_suggestions', () => {
         label: `Avg ${columnId}`,
         isBucketed: false,
         scale: 'ratio',
+      },
+    };
+  }
+
+  function staticValueCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'number',
+        label: `Static value: ${columnId}`,
+        isBucketed: false,
+        isStaticValue: true,
       },
     };
   }
@@ -88,26 +103,28 @@ describe('xy_suggestions', () => {
 
   test('partially maps invalid combinations, but hides them', () => {
     expect(
-      ([
-        {
-          isMultiRow: true,
-          columns: [dateCol('a')],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-        {
-          isMultiRow: true,
-          columns: [strCol('foo'), strCol('bar')],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-        {
-          isMultiRow: false,
-          columns: [numCol('bar')],
-          layerId: 'first',
-          changeType: 'unchanged',
-        },
-      ] as TableSuggestion[]).map((table) => {
+      (
+        [
+          {
+            isMultiRow: true,
+            columns: [dateCol('a')],
+            layerId: 'first',
+            changeType: 'unchanged',
+          },
+          {
+            isMultiRow: true,
+            columns: [strCol('foo'), strCol('bar')],
+            layerId: 'first',
+            changeType: 'unchanged',
+          },
+          {
+            isMultiRow: false,
+            columns: [numCol('bar')],
+            layerId: 'first',
+            changeType: 'unchanged',
+          },
+        ] as TableSuggestion[]
+      ).map((table) => {
         const suggestions = getSuggestions({ table, keptLayerIds: [] });
         expect(suggestions.every((suggestion) => suggestion.hide)).toEqual(true);
         expect(suggestions).toHaveLength(10);
@@ -115,22 +132,39 @@ describe('xy_suggestions', () => {
     );
   });
 
+  test('rejects the configuration when metric isStaticValue', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [staticValueCol('value'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
+
+    expect(suggestions).toHaveLength(0);
+  });
+
   test('rejects incomplete configurations if there is a state already but no sub visualization id', () => {
     expect(
-      ([
-        {
-          isMultiRow: true,
-          columns: [dateCol('a')],
-          layerId: 'first',
-          changeType: 'reduced',
-        },
-        {
-          isMultiRow: false,
-          columns: [numCol('bar')],
-          layerId: 'first',
-          changeType: 'reduced',
-        },
-      ] as TableSuggestion[]).map((table) => {
+      (
+        [
+          {
+            isMultiRow: true,
+            columns: [dateCol('a')],
+            layerId: 'first',
+            changeType: 'reduced',
+          },
+          {
+            isMultiRow: false,
+            columns: [numCol('bar')],
+            layerId: 'first',
+            changeType: 'reduced',
+          },
+        ] as TableSuggestion[]
+      ).map((table) => {
         const suggestions = getSuggestions({
           table,
           keptLayerIds: [],
@@ -231,16 +265,7 @@ describe('xy_suggestions', () => {
 
     expect(suggestions).toHaveLength(visualizationTypes.length);
     expect(suggestions.map(({ state }) => state.layers.length)).toEqual([
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     ]);
     expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
       'bar_stacked',

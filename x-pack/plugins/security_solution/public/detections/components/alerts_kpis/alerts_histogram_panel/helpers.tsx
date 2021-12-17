@@ -5,13 +5,11 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
-import { isEmpty } from 'lodash/fp';
 import type { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
-import { getMissingFields } from '../common/helpers';
-import type { AlertsStackByField } from '../common/types';
 
 const EMPTY_ALERTS_DATA: HistogramData[] = [];
 
@@ -34,21 +32,18 @@ export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggre
 };
 
 export const getAlertsHistogramQuery = (
-  stackByField: AlertsStackByField,
+  stackByField: string,
   from: string,
   to: string,
   additionalFilters: Array<{
     bool: { filter: unknown[]; should: unknown[]; must_not: unknown[]; must: unknown[] };
   }>
 ) => {
-  const missing = getMissingFields(stackByField);
-
   return {
     aggs: {
       alertsByGrouping: {
         terms: {
           field: stackByField,
-          ...missing,
           order: {
             _count: 'desc',
           },

@@ -34,7 +34,6 @@ describe('Actions Plugin', () => {
 
     beforeEach(() => {
       context = coreMock.createPluginInitializerContext<ActionsConfig>({
-        enabled: true,
         enabledActionTypes: ['*'],
         allowedHosts: ['*'],
         preconfiguredAlertHistoryEsIndex: false,
@@ -61,6 +60,14 @@ describe('Actions Plugin', () => {
         usageCollection: usageCollectionPluginMock.createSetupContract(),
         features: featuresPluginMock.createSetup(),
       };
+      coreSetup.getStartServices.mockResolvedValue([
+        coreMock.createStart(),
+        {
+          ...pluginsSetup,
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+        },
+        {},
+      ]);
     });
 
     it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
@@ -88,8 +95,8 @@ describe('Actions Plugin', () => {
         ];
         expect(handler[0]).toEqual('actions');
 
-        const actionsContextHandler = ((await handler[1](
-          ({
+        const actionsContextHandler = (await handler[1](
+          {
             core: {
               savedObjects: {
                 client: {},
@@ -98,10 +105,10 @@ describe('Actions Plugin', () => {
                 client: jest.fn(),
               },
             },
-          } as unknown) as RequestHandlerContext,
+          } as unknown as RequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
-        )) as unknown) as ActionsApiRequestHandlerContext;
+        )) as unknown as ActionsApiRequestHandlerContext;
         actionsContextHandler!.getActionsClient();
       });
 
@@ -115,17 +122,17 @@ describe('Actions Plugin', () => {
         ];
         expect(handler[0]).toEqual('actions');
 
-        const actionsContextHandler = ((await handler[1](
-          ({
+        const actionsContextHandler = (await handler[1](
+          {
             core: {
               savedObjects: {
                 client: {},
               },
             },
-          } as unknown) as RequestHandlerContext,
+          } as unknown as RequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
-        )) as unknown) as ActionsApiRequestHandlerContext;
+        )) as unknown as ActionsApiRequestHandlerContext;
         expect(() => actionsContextHandler!.getActionsClient()).toThrowErrorMatchingInlineSnapshot(
           `"Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
@@ -185,6 +192,62 @@ describe('Actions Plugin', () => {
         });
       });
     });
+
+    describe('isPreconfiguredConnector', () => {
+      function getConfig(overrides = {}) {
+        return {
+          enabled: true,
+          enabledActionTypes: ['*'],
+          allowedHosts: ['*'],
+          preconfiguredAlertHistoryEsIndex: false,
+          preconfigured: {
+            preconfiguredServerLog: {
+              actionTypeId: '.server-log',
+              name: 'preconfigured-server-log',
+              config: {},
+              secrets: {},
+            },
+          },
+          proxyRejectUnauthorizedCertificates: true,
+          proxyBypassHosts: undefined,
+          proxyOnlyHosts: undefined,
+          rejectUnauthorized: true,
+          maxResponseContentLength: new ByteSizeValue(1000000),
+          responseTimeout: moment.duration('60s'),
+          cleanupFailedExecutionsTask: {
+            enabled: true,
+            cleanupInterval: schema.duration().validate('5m'),
+            idleInterval: schema.duration().validate('1h'),
+            pageSize: 100,
+          },
+          ...overrides,
+        };
+      }
+
+      function setup(config: ActionsConfig) {
+        context = coreMock.createPluginInitializerContext<ActionsConfig>(config);
+        plugin = new ActionsPlugin(context);
+        coreSetup = coreMock.createSetup();
+        pluginsSetup = {
+          taskManager: taskManagerMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
+          licensing: licensingMock.createSetup(),
+          eventLog: eventLogMock.createSetup(),
+          usageCollection: usageCollectionPluginMock.createSetupContract(),
+          features: featuresPluginMock.createSetup(),
+        };
+      }
+
+      it('should correctly return whether connector is preconfigured', async () => {
+        setup(getConfig());
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+        expect(pluginSetup.isPreconfiguredConnector('preconfiguredServerLog')).toEqual(true);
+        expect(pluginSetup.isPreconfiguredConnector('anotherConnectorId')).toEqual(false);
+      });
+    });
   });
 
   describe('start()', () => {
@@ -197,7 +260,6 @@ describe('Actions Plugin', () => {
 
     beforeEach(() => {
       context = coreMock.createPluginInitializerContext<ActionsConfig>({
-        enabled: true,
         enabledActionTypes: ['*'],
         allowedHosts: ['*'],
         preconfiguredAlertHistoryEsIndex: false,

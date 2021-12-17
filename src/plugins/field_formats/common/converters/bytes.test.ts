@@ -8,13 +8,14 @@
 
 import { BytesFormat } from './bytes';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
+import { FieldFormatsGetConfigFn } from '../types';
 
 describe('BytesFormat', () => {
-  const config: Record<string, any> = {};
+  const config: { [key: string]: string } = {
+    [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
+  };
 
-  config[FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN] = '0,0.[000]b';
-
-  const getConfig = (key: string) => config[key];
+  const getConfig: FieldFormatsGetConfigFn = (key: string) => config[key];
 
   test('default pattern', () => {
     const formatter = new BytesFormat({}, getConfig);

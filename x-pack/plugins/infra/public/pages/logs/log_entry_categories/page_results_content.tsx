@@ -32,6 +32,8 @@ import { RecreateJobButton } from '../../../components/logging/log_analysis_setu
 import { AnalyzeInMlButton } from '../../../components/logging/log_analysis_results';
 import { useMlHref, ML_PAGES } from '../../../../../ml/public';
 import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
+import { MLJobsAwaitingNodeWarning } from '../../../../../ml/public';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
@@ -40,10 +42,9 @@ interface LogEntryCategoriesResultsContentProps {
   pageTitle: string;
 }
 
-export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryCategoriesResultsContentProps> = ({
-  onOpenSetup,
-  pageTitle,
-}) => {
+export const LogEntryCategoriesResultsContent: React.FunctionComponent<
+  LogEntryCategoriesResultsContentProps
+> = ({ onOpenSetup, pageTitle }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results', delay: 15000 });
 
@@ -51,6 +52,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
     services: { ml, http },
   } = useKibanaContextForPlugin();
 
+  const { sourceStatus } = useLogSourceContext();
   const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
 
   const {
@@ -147,9 +149,10 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
     [setAutoRefresh]
   );
 
-  const hasResults = useMemo(() => topLogEntryCategories.length > 0, [
-    topLogEntryCategories.length,
-  ]);
+  const hasResults = useMemo(
+    () => topLogEntryCategories.length > 0,
+    [topLogEntryCategories.length]
+  );
 
   const isFirstUse = useMemo(
     () =>
@@ -209,6 +212,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
       endTimestamp={categoryQueryTimeRange.timeRange.endTime}
     >
       <LogsPageTemplate
+        hasData={sourceStatus?.logIndexStatus !== 'missing'}
         pageHeader={{
           pageTitle,
           rightSideItems: [
@@ -245,6 +249,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
+            <MLJobsAwaitingNodeWarning jobIds={Object.values(jobIds)} />
             <CategoryJobNoticesSection
               hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
               hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}

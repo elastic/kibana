@@ -7,11 +7,11 @@
 
 import { HttpSetup, SavedObjectsClientContract } from 'kibana/public';
 import { API_BASE_PATH } from '../../../common/constants';
-import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../src/plugins/data/common';
 
 export class IndexService {
   async canDeleteIndex(http: HttpSetup) {
-    const privilege = await http.get(`${API_BASE_PATH}privileges`);
+    const privilege = await http.get<{ hasAllPrivileges: boolean }>(`${API_BASE_PATH}privileges`);
     if (!privilege) {
       return false;
     }

@@ -259,7 +259,7 @@
             "section": "def-public.Presentable",
             "text": "Presentable"
           },
-          "<FactoryContext>, \"id\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"order\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">,",
+          "<FactoryContext>, \"id\" | \"order\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">,",
           {
             "pluginId": "kibanaUtils",
             "scope": "public",
@@ -288,57 +288,6 @@
         "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
         "deprecated": false,
         "children": [
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.ActionFactory.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.ActionFactory.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "def",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "uiActionsEnhanced",
-                    "scope": "public",
-                    "docId": "kibUiActionsEnhancedPluginApi",
-                    "section": "def-public.ActionFactoryDefinition",
-                    "text": "ActionFactoryDefinition"
-                  },
-                  "<Config, ExecutionContext, FactoryContext>"
-                ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.ActionFactory.Unnamed.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "deps",
-                "description": [],
-                "signature": [
-                  "ActionFactoryDeps"
-                ],
-                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
           {
             "parentPluginId": "uiActionsEnhanced",
             "id": "def-public.ActionFactory.id",
@@ -410,7 +359,15 @@
                 "section": "def-common.UiComponent",
                 "text": "UiComponent"
               },
-              "<{ context: FactoryContext; }> | undefined"
+              "<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionMenuItemProps",
+                "text": "ActionMenuItemProps"
+              },
+              "<FactoryContext>> | undefined"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false
@@ -423,7 +380,15 @@
             "label": "ReactMenuItem",
             "description": [],
             "signature": [
-              "React.FC<{ context: FactoryContext; }> | undefined"
+              "React.FC<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionMenuItemProps",
+                "text": "ActionMenuItemProps"
+              },
+              "<FactoryContext>> | undefined"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false
@@ -483,7 +448,7 @@
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.props",
+                "id": "def-public.ActionFactory.ReactCollectConfig.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -496,7 +461,7 @@
               },
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.context",
+                "id": "def-public.ActionFactory.ReactCollectConfig.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "context",
@@ -525,15 +490,15 @@
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.context",
+                "id": "def-public.ActionFactory.createConfig.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "Context"
+                  "FactoryContext"
                 ],
-                "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
+                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false
               }
             ]
@@ -554,7 +519,7 @@
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.config",
+                "id": "def-public.ActionFactory.isConfigValid.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -562,20 +527,20 @@
                 "signature": [
                   "Config"
                 ],
-                "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
+                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false
               },
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.context",
+                "id": "def-public.ActionFactory.isConfigValid.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "Context"
+                  "FactoryContext"
                 ],
-                "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
+                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false
               }
             ]
@@ -600,6 +565,57 @@
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "uiActionsEnhanced",
+            "id": "def-public.ActionFactory.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.ActionFactory.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "def",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "uiActionsEnhanced",
+                    "scope": "public",
+                    "docId": "kibUiActionsEnhancedPluginApi",
+                    "section": "def-public.ActionFactoryDefinition",
+                    "text": "ActionFactoryDefinition"
+                  },
+                  "<Config, ExecutionContext, FactoryContext>"
+                ],
+                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.ActionFactory.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "ActionFactoryDeps"
+                ],
+                "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -823,7 +839,9 @@
                 "section": "def-common.SerializedEvent",
                 "text": "SerializedEvent"
               },
-              ", telemetryData: Record<string, any>) => Record<string, any>"
+              ", telemetryData: Record<string, ",
+              "PhraseFilterValue",
+              ">) => Record<string, any>"
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
@@ -856,7 +874,9 @@
                 "label": "telemetryData",
                 "description": [],
                 "signature": [
-                  "Record<string, any>"
+                  "Record<string, ",
+                  "PhraseFilterValue",
+                  ">"
                 ],
                 "path": "x-pack/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
@@ -1563,11 +1583,11 @@
               },
               "<",
               {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
               },
               ">, triggers: string[]) => Promise<void>"
             ],
@@ -1593,11 +1613,11 @@
                   },
                   "<",
                   {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.SerializableRecord",
+                    "text": "SerializableRecord"
                   },
                   ">"
                 ],
@@ -1644,11 +1664,11 @@
               },
               "<",
               {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
               },
               ">, triggers: string[]) => Promise<void>"
             ],
@@ -1690,11 +1710,11 @@
                   },
                   "<",
                   {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.SerializableRecord",
+                    "text": "SerializableRecord"
                   },
                   ">"
                 ],
@@ -1877,11 +1897,11 @@
               },
               "<",
               {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
               },
               ">; }[]>"
             ],
@@ -2015,64 +2035,13 @@
     "functions": [
       {
         "parentPluginId": "uiActionsEnhanced",
-        "id": "def-public.ActionWizard",
-        "type": "Function",
-        "tags": [],
-        "label": "ActionWizard",
-        "description": [],
-        "signature": [
-          "({ currentActionFactory, actionFactories, onActionFactoryChange, onConfigChange, config, context, onSelectedTriggersChange, getTriggerInfo, triggers, triggerPickerDocsLink, }: React.PropsWithChildren<",
-          "ActionWizardProps",
-          "<",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "public",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-public.BaseActionFactoryContext",
-            "text": "BaseActionFactoryContext"
-          },
-          ">>) => JSX.Element | null"
-        ],
-        "path": "x-pack/plugins/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.ActionWizard.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  currentActionFactory,\n  actionFactories,\n  onActionFactoryChange,\n  onConfigChange,\n  config,\n  context,\n  onSelectedTriggersChange,\n  getTriggerInfo,\n  triggers,\n  triggerPickerDocsLink,\n}",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              "ActionWizardProps",
-              "<",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.BaseActionFactoryContext",
-                "text": "BaseActionFactoryContext"
-              },
-              ">>"
-            ],
-            "path": "x-pack/plugins/ui_actions_enhanced/public/components/action_wizard/action_wizard.tsx",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActionsEnhanced",
         "id": "def-public.compile",
         "type": "Function",
         "tags": [],
         "label": "compile",
         "description": [],
         "signature": [
-          "(urlTemplate: string, context: object, doEncode: boolean) => string"
+          "(urlTemplate: string, context: object, doEncode: boolean) => Promise<string>"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
         "deprecated": false,
@@ -2243,7 +2212,7 @@
             "section": "def-public.UrlDrilldownScope",
             "text": "UrlDrilldownScope"
           },
-          "<object, object>) => { isValid: boolean; error?: string | undefined; }"
+          "<object, object>) => Promise<{ isValid: boolean; error?: string | undefined; }>"
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
         "deprecated": false,
@@ -2314,7 +2283,7 @@
             "section": "def-public.Presentable",
             "text": "Presentable"
           },
-          "<FactoryContext>, \"id\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"order\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">>,",
+          "<FactoryContext>, \"id\" | \"order\" | \"getDisplayName\" | \"grouping\" | \"getIconType\" | \"MenuItem\" | \"getDisplayNameTooltip\" | \"isCompatible\">>,",
           {
             "pluginId": "kibanaUtils",
             "scope": "public",
@@ -2630,7 +2599,7 @@
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.context",
+                "id": "def-public.DrilldownDefinition.createConfig.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -2683,7 +2652,7 @@
             "tags": [],
             "label": "isConfigValid",
             "description": [
-              "\nA validator function for the config object. Should always return a boolean\ngiven any input."
+              "\nA validator function for the config object. Should always return a boolean."
             ],
             "signature": [
               "(config: Config, context: FactoryContext) => boolean"
@@ -2694,7 +2663,7 @@
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.config",
+                "id": "def-public.DrilldownDefinition.isConfigValid.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -2707,7 +2676,7 @@
               },
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.context",
+                "id": "def-public.DrilldownDefinition.isConfigValid.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -2981,7 +2950,7 @@
             "tags": [],
             "label": "id",
             "description": [
-              "\nAny string that uniquely identifies this item in a list of `DrilldownTemplate[]`."
+              "\nA string that uniquely identifies this item in a list of `DrilldownTemplate[]`."
             ],
             "path": "x-pack/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
             "deprecated": false
@@ -3129,11 +3098,11 @@
               },
               "<",
               {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
               },
               ", object, ",
               {
@@ -3279,15 +3248,13 @@
         "label": "BaseActionConfig",
         "description": [],
         "signature": [
-          "{ [key: string]: ",
           {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
-          "; }"
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          }
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
@@ -3363,11 +3330,11 @@
           },
           "<",
           {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
           },
           ">; }"
         ],
@@ -3448,7 +3415,13 @@
           "text": "UiActionsService"
         },
         ", ",
-        "MethodKeysOf",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "server",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-server.MethodKeysOf",
+          "text": "MethodKeysOf"
+        },
         "<",
         {
           "pluginId": "uiActions",
@@ -3459,7 +3432,7 @@
         },
         ">>,Pick<",
         "UiActionsServiceEnhancements",
-        ", \"telemetry\" | \"extract\" | \"inject\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
+        ", \"telemetry\" | \"inject\" | \"extract\" | \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
       ],
       "path": "x-pack/plugins/ui_actions_enhanced/public/plugin.ts",
       "deprecated": false,
@@ -3482,7 +3455,7 @@
           "children": [
             {
               "parentPluginId": "uiActionsEnhanced",
-              "id": "def-public.props",
+              "id": "def-public.StartContract.DrilldownManager.$1",
               "type": "CompoundType",
               "tags": [],
               "label": "props",
@@ -3495,7 +3468,7 @@
             },
             {
               "parentPluginId": "uiActionsEnhanced",
-              "id": "def-public.context",
+              "id": "def-public.StartContract.DrilldownManager.$2",
               "type": "Any",
               "tags": [],
               "label": "context",
@@ -3862,15 +3835,13 @@
         "label": "BaseActionConfig",
         "description": [],
         "signature": [
-          "{ [key: string]: ",
           {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
-          "; }"
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          }
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
@@ -3932,11 +3903,11 @@
           },
           "<",
           {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
           },
           ">; }"
         ],
@@ -4051,15 +4022,13 @@
         "label": "BaseActionConfig",
         "description": [],
         "signature": [
-          "{ [key: string]: ",
           {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
-          "; }"
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          }
         ],
         "path": "x-pack/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
@@ -4121,11 +4090,11 @@
           },
           "<",
           {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
           },
           ">; }"
         ],

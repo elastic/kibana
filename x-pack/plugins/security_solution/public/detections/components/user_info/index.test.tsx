@@ -8,15 +8,16 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useUserInfo, ManageUserInfo } from './index';
+import { Capabilities } from 'src/core/public';
 
 import { useKibana } from '../../../common/lib/kibana';
 import * as api from '../../containers/detection_engine/alerts/api';
 import { TestProviders } from '../../../common/mock/test_providers';
-import { UserPrivilegesProvider } from '../../../common/components/user_privileges';
+import { UserPrivilegesProvider } from '../../../common/components/user_privileges/user_privileges_context';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/detection_engine/alerts/api');
-jest.mock('../../../common/components/user_privileges/use_endpoint_privileges');
+jest.mock('../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 describe('useUserInfo', () => {
   beforeAll(() => {
@@ -42,10 +43,12 @@ describe('useUserInfo', () => {
       expect(result.all).toHaveLength(1);
       expect(result.current).toEqual({
         canUserCRUD: null,
+        canUserREAD: null,
         hasEncryptionKey: null,
         hasIndexManage: null,
         hasIndexMaintenance: null,
         hasIndexWrite: null,
+        hasIndexRead: null,
         hasIndexUpdateDelete: null,
         isAuthenticated: null,
         isSignalIndexExists: null,
@@ -65,7 +68,9 @@ describe('useUserInfo', () => {
     });
     const wrapper = ({ children }: { children: JSX.Element }) => (
       <TestProviders>
-        <UserPrivilegesProvider>
+        <UserPrivilegesProvider
+          kibanaCapabilities={{ siem: { show: true, crud: true } } as unknown as Capabilities}
+        >
           <ManageUserInfo>{children}</ManageUserInfo>
         </UserPrivilegesProvider>
       </TestProviders>

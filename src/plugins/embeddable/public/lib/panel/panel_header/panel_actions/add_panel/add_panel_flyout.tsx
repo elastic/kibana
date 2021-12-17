@@ -7,10 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { ReactElement } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { CoreSetup, SavedObjectAttributes, SimpleSavedObject } from 'src/core/public';
+import { CoreSetup, SavedObjectAttributes, SimpleSavedObject, Toast } from 'src/core/public';
 
 import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
@@ -41,7 +41,7 @@ function capitalize([first, ...letters]: string) {
 }
 
 export class AddPanelFlyout extends React.Component<Props, State> {
-  private lastToast: any;
+  private lastToast?: string | Toast;
 
   public state = {
     isCreateMenuOpen: false,
@@ -130,6 +130,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
   private getCreateMenuItems(): ReactElement[] {
     return [...this.props.getAllFactories()]
       .filter(
+        // @ts-expect-error ts 4.5 upgrade
         (factory) => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
       )
       .map((factory) => (
@@ -151,7 +152,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
         (embeddableFactory) =>
           Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
       )
-      .map(({ savedObjectMetaData }) => savedObjectMetaData as any);
+      .map(({ savedObjectMetaData }) => savedObjectMetaData);
     const savedObjectsFinder = (
       <SavedObjectFinder
         onChoose={this.onAddPanel}

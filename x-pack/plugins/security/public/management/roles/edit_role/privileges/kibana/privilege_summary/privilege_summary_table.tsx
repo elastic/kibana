@@ -19,10 +19,9 @@ import {
 } from '@elastic/eui';
 import React, { Fragment, useMemo, useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { Space } from '../../../../../../../../spaces/public';
+import type { Space, SpacesApiUi } from '../../../../../../../../spaces/public';
 import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import type { KibanaPrivileges, SecuredFeature } from '../../../../model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';

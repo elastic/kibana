@@ -7,13 +7,13 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, findTestSubject, TestBed, TestBedConfig, delay } from '@kbn/test/jest';
+import { registerTestBed, findTestSubject, TestBed, AsyncTestBedConfig } from '@kbn/test/jest';
 import { WatchStatus } from '../../../public/application/sections/watch_status/components/watch_status';
 import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './jest_constants';
 import { withAppContext } from './app_context.mock';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`${ROUTES.API_ROOT}/watches/watch/${WATCH_ID}/status`],
     componentRoutePath: `${ROUTES.API_ROOT}/watches/watch/:id/status`,
@@ -89,9 +89,8 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
 
     await act(async () => {
       button.simulate('click');
-      await delay(100);
-      component.update();
     });
+    component.update();
   };
 
   return {

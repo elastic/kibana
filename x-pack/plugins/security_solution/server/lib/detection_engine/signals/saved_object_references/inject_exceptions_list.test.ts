@@ -7,10 +7,10 @@
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { SavedObjectReference } from 'src/core/server';
-import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './utils';
 import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
 import { injectExceptionsReferences } from './inject_exceptions_list';
 import { RuleParams } from '../../schemas/rule_schemas';
+import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './utils/constants';
 
 describe('inject_exceptions_list', () => {
   type FuncReturn = ReturnType<typeof injectExceptionsReferences>;
@@ -48,7 +48,7 @@ describe('inject_exceptions_list', () => {
   test('logs expect error message if the exceptionsList is undefined', () => {
     injectExceptionsReferences({
       logger,
-      exceptionsList: (undefined as unknown) as RuleParams['exceptionsList'],
+      exceptionsList: undefined as unknown as RuleParams['exceptionsList'],
       savedObjectReferences: mockSavedObjectReferences(),
     });
     expect(logger.error).toBeCalledWith(
@@ -103,17 +103,6 @@ describe('inject_exceptions_list', () => {
         savedObjectReferences: [{ ...mockSavedObjectReferences()[0], id: '456' }],
       })
     ).toEqual<FuncReturn>([{ ...mockExceptionsList()[0], id: '456' }]);
-  });
-
-  test('logs an error if found with a different saved object reference id', () => {
-    injectExceptionsReferences({
-      logger,
-      exceptionsList: mockExceptionsList(),
-      savedObjectReferences: [{ ...mockSavedObjectReferences()[0], id: '456' }],
-    });
-    expect(logger.error).toBeCalledWith(
-      'The id of the "saved object reference id": 456 is not the same as the "saved object id": 123. Preferring and using the "saved object reference id" instead of the "saved object id"'
-    );
   });
 
   test('returns exceptionItem if the saved object reference cannot match as a fall back', () => {

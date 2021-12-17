@@ -40,6 +40,7 @@ import {
   INDICATOR_INDEX_PATTERNS,
   INDICATOR_INDEX_QUERY,
   INDICATOR_MAPPING,
+  INDICATOR_PREFIX_OVERRIDE,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
@@ -102,12 +103,19 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
+import {
+  SCHEDULE_INTERVAL_AMOUNT_INPUT,
+  SCHEDULE_INTERVAL_UNITS_INPUT,
+  SCHEDULE_LOOKBACK_AMOUNT_INPUT,
+  SCHEDULE_LOOKBACK_UNITS_INPUT,
+} from '../../screens/create_new_rule';
 import { goBackToRuleDetails, waitForKibana } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { goBackToAllRulesTable } from '../../tasks/rule_details';
 
 import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
+const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
@@ -116,7 +124,7 @@ describe('indicator match', () => {
     const expectedTags = getNewThreatIndicatorRule().tags.join('');
     const expectedMitre = formatMitreAttackDescription(getNewThreatIndicatorRule().mitre);
     const expectedNumberOfRules = 1;
-    const expectedNumberOfAlerts = 1;
+    const expectedNumberOfAlerts = '1 alert';
 
     before(() => {
       cleanKibana();
@@ -139,8 +147,7 @@ describe('indicator match', () => {
           getIndicatorIndex().should('have.text', getIndexPatterns().join(''));
         });
 
-        // TODO: Need to fix
-        it.skip('Does NOT show invalidation text on initial page load if indicator index pattern is filled out', () => {
+        it('Does NOT show invalidation text on initial page load if indicator index pattern is filled out', () => {
           getDefineContinueButton().click();
           getIndexPatternInvalidationText().should('not.exist');
         });
@@ -154,8 +161,7 @@ describe('indicator match', () => {
       });
 
       describe('Indicator index patterns', () => {
-        // TODO: Need to fix
-        it.skip('Contains a predefined index pattern', () => {
+        it('Contains a predefined index pattern', () => {
           getIndicatorIndicatorIndex().should('have.text', getThreatIndexPatterns().join(''));
         });
 
@@ -182,8 +188,8 @@ describe('indicator match', () => {
       });
 
       describe('custom indicator query input', () => {
-        it('Has a default set of *:*', () => {
-          getCustomIndicatorQueryInput().should('have.text', '*:*');
+        it(`Has a default set of ${DEFAULT_THREAT_MATCH_QUERY}`, () => {
+          getCustomIndicatorQueryInput().should('have.text', DEFAULT_THREAT_MATCH_QUERY);
         });
 
         it('Shows invalidation text if text is removed', () => {
@@ -384,6 +390,19 @@ describe('indicator match', () => {
           getIndicatorMappingComboField(2).should('not.exist');
         });
       });
+
+      describe('Schedule', () => {
+        it('IM rule has 1h time interval and lookback by default', () => {
+          selectIndicatorMatchType();
+          fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
+          fillAboutRuleAndContinue(getNewThreatIndicatorRule());
+
+          cy.get(SCHEDULE_INTERVAL_AMOUNT_INPUT).invoke('val').should('eql', '1');
+          cy.get(SCHEDULE_INTERVAL_UNITS_INPUT).invoke('val').should('eql', 'h');
+          cy.get(SCHEDULE_LOOKBACK_AMOUNT_INPUT).invoke('val').should('eql', '5');
+          cy.get(SCHEDULE_LOOKBACK_UNITS_INPUT).invoke('val').should('eql', 'm');
+        });
+      });
     });
 
     describe('Generating signals', () => {
@@ -392,8 +411,7 @@ describe('indicator match', () => {
         loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       });
 
-      // TODO: Need to fix
-      it.skip('Creates and activates a new Indicator Match rule', () => {
+      it('Creates and activates a new Indicator Match rule', () => {
         waitForAlertsPanelToBeLoaded();
         waitForAlertsIndexToBeCreated();
         goToManageAlertsDetectionRules();
@@ -430,6 +448,10 @@ describe('indicator match', () => {
         cy.get(ABOUT_DETAILS).within(() => {
           getDetails(SEVERITY_DETAILS).should('have.text', getNewThreatIndicatorRule().severity);
           getDetails(RISK_SCORE_DETAILS).should('have.text', getNewThreatIndicatorRule().riskScore);
+          getDetails(INDICATOR_PREFIX_OVERRIDE).should(
+            'have.text',
+            getNewThreatIndicatorRule().threatIndicatorPath
+          );
           getDetails(REFERENCE_URLS_DETAILS).should((details) => {
             expect(removeExternalLinkText(details.text())).equal(expectedUrls);
           });
@@ -491,7 +513,6 @@ describe('indicator match', () => {
           .should('have.text', getNewThreatIndicatorRule().riskScore);
       });
 
-      // TODO: Need to fix
       it.skip('Investigate alert in timeline', () => {
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
 

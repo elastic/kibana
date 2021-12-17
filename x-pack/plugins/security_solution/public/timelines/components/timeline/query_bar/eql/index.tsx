@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FieldsEqlOptions } from '../../../../../../common/search_strategy';
-import { useSourcererScope } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { EqlQueryBar } from '../../../../../detections/components/rules/eql_query_bar';
@@ -67,9 +67,11 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   const getOptionsSelected = useMemo(() => getEqlOptions(), []);
   const optionsSelected = useDeepEqualSelector((state) => getOptionsSelected(state, timelineId));
 
-  const { loading: indexPatternsLoading, indexPattern, selectedPatterns } = useSourcererScope(
-    SourcererScopeName.timeline
-  );
+  const {
+    loading: indexPatternsLoading,
+    indexPattern,
+    selectedPatterns,
+  } = useSourcererDataView(SourcererScopeName.timeline);
 
   const initialState = {
     ...defaultValues,

@@ -5,35 +5,38 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/api/types';
+import { Moment } from 'moment';
+
+import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/logging';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { Moment } from 'moment';
-import { SavedObject } from '../../../../../../../src/core/server';
+
+import { AlertExecutorOptions, RuleType } from '../../../../../alerting/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
   AlertTypeState,
+  WithoutReservedActionGroups,
 } from '../../../../../alerting/common';
-import { AlertType } from '../../../../../alerting/server';
 import { ListClient } from '../../../../../lists/server';
 import { TechnicalRuleFieldMap } from '../../../../../rule_registry/common/assets/field_maps/technical_rule_field_map';
 import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
-import {
-  AlertTypeWithExecutor,
-  PersistenceServices,
-  IRuleDataClient,
-} from '../../../../../rule_registry/server';
+import { PersistenceServices, IRuleDataClient } from '../../../../../rule_registry/server';
 import { BaseHit } from '../../../../common/detection_engine/types';
 import { ConfigType } from '../../../config';
 import { SetupPlugins } from '../../../plugin';
-import { IRuleDataPluginService } from '../rule_execution_log/types';
-import { RuleParams } from '../schemas/rule_schemas';
+import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 import { BuildRuleMessage } from '../signals/rule_messages';
-import { AlertAttributes, BulkCreate, WrapHits } from '../signals/types';
-import { AlertsFieldMap, RulesFieldMap } from './field_maps';
+import {
+  BulkCreate,
+  SearchAfterAndBulkCreateReturnType,
+  WrapHits,
+  WrapSequences,
+} from '../signals/types';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { IEventLogService } from '../../../../../event_log/server';
+import { AlertsFieldMap, RulesFieldMap } from '../../../../common/field_maps';
+import { IRuleExecutionLogClient } from '../rule_execution_log';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];
@@ -48,18 +51,12 @@ export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   warningMessages: string[];
 }
 
-type SimpleAlertType<
-  TState extends AlertTypeState,
-  TParams extends AlertTypeParams = {},
-  TAlertInstanceContext extends AlertInstanceContext = {}
-> = AlertType<TParams, TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>;
-
 export interface RunOpts<TParams extends RuleParams> {
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
-  rule: SavedObject<AlertAttributes<TParams>>;
+  completeRule: CompleteRule<TParams>;
   searchAfterSize: number;
   tuple: {
     to: Moment;
@@ -67,46 +64,50 @@ export interface RunOpts<TParams extends RuleParams> {
     maxSignals: number;
   };
   wrapHits: WrapHits;
+  wrapSequences: WrapSequences;
 }
 
-export type SecurityAlertTypeExecutor<
-  TState extends AlertTypeState,
-  TServices extends PersistenceServices<TAlertInstanceContext>,
+export type SecurityAlertType<
   TParams extends RuleParams,
-  TAlertInstanceContext extends AlertInstanceContext = {}
-> = (
-  options: Parameters<SimpleAlertType<TState, TParams, TAlertInstanceContext>['executor']>[0] & {
-    runOpts: RunOpts<TParams>;
-  } & { services: TServices }
-) => Promise<SecurityAlertTypeReturnValue<TState>>;
-
-type SecurityAlertTypeWithExecutor<
   TState extends AlertTypeState,
-  TServices extends PersistenceServices<TAlertInstanceContext>,
-  TParams extends RuleParams,
-  TAlertInstanceContext extends AlertInstanceContext = {}
+  TInstanceContext extends AlertInstanceContext = {},
+  TActionGroupIds extends string = never
 > = Omit<
-  AlertType<TParams, TParams, TState, AlertInstanceState, TAlertInstanceContext, string, string>,
+  RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
   'executor'
 > & {
-  executor: SecurityAlertTypeExecutor<TState, TServices, TParams, TAlertInstanceContext>;
+  executor: (
+    options: AlertExecutorOptions<
+      TParams,
+      TState,
+      AlertInstanceState,
+      TInstanceContext,
+      WithoutReservedActionGroups<TActionGroupIds, never>
+    > & {
+      services: PersistenceServices;
+      runOpts: RunOpts<TParams>;
+    }
+  ) => Promise<SearchAfterAndBulkCreateReturnType & { state: TState }>;
 };
 
-export type CreateSecurityRuleTypeFactory = (options: {
+export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
   logger: Logger;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
+  config: ConfigType;
   ruleDataClient: IRuleDataClient;
-  ruleDataService: IRuleDataPluginService;
-}) => <
-  TParams extends RuleParams & { index: string[] | undefined },
-  TAlertInstanceContext extends AlertInstanceContext,
-  TServices extends PersistenceServices<TAlertInstanceContext>,
-  TState extends AlertTypeState
+  eventLogService: IEventLogService;
+  ruleExecutionLogClientOverride?: IRuleExecutionLogClient;
+}
+
+export type CreateSecurityRuleTypeWrapper = (
+  options: CreateSecurityRuleTypeWrapperProps
+) => <
+  TParams extends RuleParams,
+  TState extends AlertTypeState,
+  TInstanceContext extends AlertInstanceContext = {}
 >(
-  type: SecurityAlertTypeWithExecutor<TState, TServices, TParams, TAlertInstanceContext>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-) => AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, any>;
+  type: SecurityAlertType<TParams, TState, TInstanceContext, 'default'>
+) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;
 
 export type RACAlertSignal = TypeOfFieldMap<AlertsFieldMap> & TypeOfFieldMap<RulesFieldMap>;
 export type RACAlert = Exclude<
@@ -121,10 +122,7 @@ export type WrappedRACAlert = BaseHit<RACAlert>;
 
 export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
-  lists: SetupPlugins['lists'];
   logger: Logger;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  ruleDataClient: IRuleDataClient;
+  ml?: SetupPlugins['ml'];
   version: string;
-  ruleDataService: IRuleDataPluginService;
 }

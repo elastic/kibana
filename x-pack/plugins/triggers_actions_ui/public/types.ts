@@ -17,43 +17,49 @@ import {
   AlertHistoryDocumentTemplate,
   ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
+  AsApiContract,
 } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
 import {
   ActionGroup,
   AlertActionParam,
   SanitizedAlert,
+  ResolvedSanitizedRule,
   AlertAction,
   AlertAggregations,
-  AlertTaskState,
-  AlertInstanceSummary,
-  AlertInstanceStatus,
+  RuleTaskState,
+  AlertSummary,
+  ExecutionDuration,
+  AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
   AlertTypeParams,
   ActionVariable,
-  AlertType as CommonAlertType,
+  RuleType as CommonRuleType,
 } from '../../alerting/common';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type Alert = SanitizedAlert<AlertTypeParams>;
+type ResolvedRule = ResolvedSanitizedRule<AlertTypeParams>;
 
-export {
+export type {
   Alert,
   AlertAction,
   AlertAggregations,
-  AlertTaskState,
-  AlertInstanceSummary,
-  AlertInstanceStatus,
+  RuleTaskState,
+  AlertSummary,
+  ExecutionDuration,
+  AlertStatus,
   RawAlertInstance,
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
   AlertTypeParams,
+  ResolvedRule,
 };
+export type { ActionType, AsApiContract };
 export {
-  ActionType,
   AlertHistoryEsIndexConnectorId,
   AlertHistoryDocumentTemplate,
   AlertHistoryDefaultIndexName,
@@ -61,12 +67,20 @@ export {
 };
 
 export type ActionTypeIndex = Record<string, ActionType>;
-export type AlertTypeIndex = Map<string, AlertType>;
+export type RuleTypeIndex = Map<string, AlertType>;
 export type ActionTypeRegistryContract<
   ActionConnector = unknown,
   ActionParams = unknown
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
+
+export type ActionConnectorFieldsCallbacks = {
+  beforeActionConnectorSave?: () => Promise<void>;
+  afterActionConnectorSave?: (connector: ActionConnector) => Promise<void>;
+} | null;
+export type ActionConnectorFieldsSetCallbacks = React.Dispatch<
+  React.SetStateAction<ActionConnectorFieldsCallbacks>
+>;
 
 export interface ActionConnectorFieldsProps<TActionConnector> {
   action: TActionConnector;
@@ -75,6 +89,8 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   errors: IErrorObject;
   readOnly: boolean;
   consumer?: string;
+  setCallbacks: ActionConnectorFieldsSetCallbacks;
+  isEdit: boolean;
 }
 
 export enum AlertFlyoutCloseReason {
@@ -102,6 +118,13 @@ export interface Sorting {
   direction: string;
 }
 
+interface CustomConnectorSelectionItem {
+  getText: (actionConnector: ActionConnector) => string;
+  getComponent: (
+    actionConnector: ActionConnector
+  ) => React.LazyExoticComponent<ComponentType<{ actionConnector: ActionConnector }>> | undefined;
+}
+
 export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
   id: string;
   iconClass: IconType;
@@ -119,6 +142,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
     >
   > | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
+  customConnectorSelectItem?: CustomConnectorSelectionItem;
 }
 
 export interface GenericValidationResult<T> {
@@ -184,7 +208,7 @@ export interface AlertType<
   ActionGroupIds extends string = string,
   RecoveryActionGroupId extends string = string
 > extends Pick<
-    CommonAlertType<ActionGroupIds, RecoveryActionGroupId>,
+    CommonRuleType<ActionGroupIds, RecoveryActionGroupId>,
     | 'id'
     | 'name'
     | 'actionGroups'
@@ -192,6 +216,9 @@ export interface AlertType<
     | 'minimumLicenseRequired'
     | 'recoveryActionGroup'
     | 'defaultActionGroupId'
+    | 'ruleTaskTimeout'
+    | 'defaultScheduleInterval'
+    | 'minimumScheduleInterval'
   > {
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
@@ -204,7 +231,7 @@ export type AlertUpdates = Omit<Alert, 'id' | 'executionStatus'>;
 
 export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];
-  tagsText: string;
+  index: number;
   actionsCount: number;
   isEditable: boolean;
   enabledInLicense: boolean;
@@ -280,6 +307,7 @@ export interface AlertEditProps<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
   onSave?: () => Promise<void>;
   metadata?: MetaData;
+  ruleType?: AlertType<string, string>;
 }
 
 export interface AlertAddProps<MetaData = Record<string, any>> {
@@ -294,4 +322,5 @@ export interface AlertAddProps<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
   onSave?: () => Promise<void>;
   metadata?: MetaData;
+  ruleTypeIndex?: RuleTypeIndex;
 }

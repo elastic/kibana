@@ -57,9 +57,6 @@ export interface PluginsStart {
 export interface SpacesPluginSetup {
   /**
    * Service for interacting with spaces.
-   *
-   * @deprecated Please use the `spacesService` available on this plugin's start contract.
-   * @removeBy 7.16
    */
   spacesService: SpacesServiceSetup;
 
@@ -90,10 +87,9 @@ export interface SpacesPluginStart {
 }
 
 export class SpacesPlugin
-  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart> {
+  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart>
+{
   private readonly config$: Observable<ConfigType>;
-
-  private readonly kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
 
   private readonly log: Logger;
 
@@ -109,7 +105,6 @@ export class SpacesPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
-    this.kibanaIndexConfig$ = initializerContext.config.legacy.globalConfig$;
     this.log = initializerContext.logger.get();
     this.spacesService = new SpacesService();
     this.spacesClientService = new SpacesClientService((message) => this.log.debug(message));
@@ -179,7 +174,7 @@ export class SpacesPlugin
 
     if (plugins.usageCollection) {
       registerSpacesUsageCollector(plugins.usageCollection, {
-        kibanaIndexConfig$: this.kibanaIndexConfig$,
+        kibanaIndex: core.savedObjects.getKibanaIndex(),
         features: plugins.features,
         licensing: plugins.licensing,
         usageStatsServicePromise,

@@ -20,7 +20,8 @@ import { ClientConfigType, SetupDependencies, StartDependencies } from './types'
 import { IlmLocatorDefinition } from './locator';
 
 export class IndexLifecycleManagementPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private breadcrumbService = new BreadcrumbService();
@@ -49,7 +50,7 @@ export class IndexLifecycleManagementPlugin
         id: PLUGIN.ID,
         title: PLUGIN.TITLE,
         order: 2,
-        mount: async ({ element, history, setBreadcrumbs }) => {
+        mount: async ({ element, history, setBreadcrumbs, theme$ }) => {
           const [coreStart, { licensing }] = await getStartServices();
           const {
             chrome: { docTitle },
@@ -77,6 +78,7 @@ export class IndexLifecycleManagementPlugin
             application,
             this.breadcrumbService,
             license,
+            theme$,
             cloud
           );
 
@@ -97,7 +99,7 @@ export class IndexLifecycleManagementPlugin
             defaultMessage:
               'Define lifecycle policies to automatically perform operations as an index ages.',
           }),
-          icon: 'indexSettings',
+          icon: 'indexRollupApp',
           path: '/app/management/data/index_lifecycle_management',
           showOnHomePage: true,
           category: FeatureCatalogueCategory.ADMIN,

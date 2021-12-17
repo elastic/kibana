@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { MockedLogger, loggerMock } from './logger.mock';
+export type { MockedLogger } from './logger.mock';
+export { loggerMock } from './logger.mock';

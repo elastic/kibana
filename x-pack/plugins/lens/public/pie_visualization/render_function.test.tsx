@@ -20,7 +20,7 @@ import type { LensMultiTable } from '../../common';
 import type { PieExpressionArgs } from '../../common/expressions';
 import { PieComponent } from './render_function';
 import { VisualizationContainer } from '../visualization_container';
-import { EmptyPlaceholder } from '../shared_components';
+import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { LensIconChartDonut } from '../assets/chart_donut';
 
@@ -62,6 +62,8 @@ describe('PieVisualization component', () => {
       numberDisplay: 'hidden',
       categoryDisplay: 'default',
       legendDisplay: 'default',
+      legendMaxLines: 1,
+      truncateLegend: true,
       nestedLegend: false,
       percentDecimals: 3,
       hideLabels: false,
@@ -75,7 +77,7 @@ describe('PieVisualization component', () => {
         onClickValue: jest.fn(),
         chartsThemeService,
         paletteService: chartPluginMock.createPaletteRegistry(),
-        renderMode: 'display' as const,
+        renderMode: 'view' as const,
         syncColors: false,
       };
     }
@@ -106,6 +108,20 @@ describe('PieVisualization component', () => {
       expect(component.find(Settings).prop('showLegend')).toEqual(false);
     });
 
+    test('it sets the correct lines per legend item', () => {
+      const component = shallow(<PieComponent args={args} {...getDefaultArgs()} />);
+      expect(component.find(Settings).prop('theme')).toEqual({
+        background: {
+          color: undefined,
+        },
+        legend: {
+          labelOptions: {
+            maxLines: 1,
+          },
+        },
+      });
+    });
+
     test('it calls the color function with the right series layers', () => {
       const defaultArgs = getDefaultArgs();
       const component = shallow(
@@ -131,7 +147,7 @@ describe('PieVisualization component', () => {
       );
 
       (component.find(Partition).prop('layers')![1].shape!.fillColor as NodeColorAccessor)(
-        ({
+        {
           dataName: 'third',
           depth: 2,
           parent: {
@@ -157,7 +173,7 @@ describe('PieVisualization component', () => {
           },
           value: 41,
           sortIndex: 2,
-        } as unknown) as ShapeTreeNode,
+        } as unknown as ShapeTreeNode,
         0,
         [] as HierarchyOfArrays
       );
@@ -286,12 +302,13 @@ describe('PieVisualization component', () => {
       `);
     });
 
-    test('does not set click listener on noInteractivity render mode', () => {
+    test('does not set click listener and legend actions on non-interactive mode', () => {
       const defaultArgs = getDefaultArgs();
       const component = shallow(
-        <PieComponent args={{ ...args }} {...defaultArgs} renderMode="noInteractivity" />
+        <PieComponent args={{ ...args }} {...defaultArgs} interactive={false} />
       );
       expect(component.find(Settings).first().prop('onElementClick')).toBeUndefined();
+      expect(component.find(Settings).first().prop('legendAction')).toBeUndefined();
     });
 
     test('it renders the empty placeholder when metric contains only falsy data', () => {
@@ -358,6 +375,51 @@ describe('PieVisualization component', () => {
       );
       expect(component.find(VisualizationContainer)).toHaveLength(1);
       expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDonut);
+    });
+
+    test('it should dynamically shrink the chart area to when some small slices are detected', () => {
+      const defaultData = getDefaultArgs().data;
+      const emptyData: LensMultiTable = {
+        ...defaultData,
+        tables: {
+          first: {
+            ...defaultData.tables.first,
+            rows: [
+              { a: 60, b: 'I', c: 200, d: 'Row 1' },
+              { a: 1, b: 'J', c: 0.1, d: 'Row 2' },
+            ],
+          },
+        },
+      };
+
+      const component = shallow(
+        <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
+      );
+      expect(component.find(Partition).prop('config')?.outerSizeRatio).toBeCloseTo(1 / 1.05);
+    });
+
+    test('it should bound the shrink the chart area to ~20% when some small slices are detected', () => {
+      const defaultData = getDefaultArgs().data;
+      const emptyData: LensMultiTable = {
+        ...defaultData,
+        tables: {
+          first: {
+            ...defaultData.tables.first,
+            rows: [
+              { a: 60, b: 'I', c: 200, d: 'Row 1' },
+              { a: 1, b: 'J', c: 0.1, d: 'Row 2' },
+              { a: 1, b: 'K', c: 0.1, d: 'Row 3' },
+              { a: 1, b: 'G', c: 0.1, d: 'Row 4' },
+              { a: 1, b: 'H', c: 0.1, d: 'Row 5' },
+            ],
+          },
+        },
+      };
+
+      const component = shallow(
+        <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
+      );
+      expect(component.find(Partition).prop('config')?.outerSizeRatio).toBeCloseTo(1 / 1.2);
     });
   });
 });

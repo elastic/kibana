@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep, getOr } from 'lodash/fp';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
   EventHit,
   TimelineEventsQueries,
@@ -17,9 +17,10 @@ import {
 } from '../../../../../../common/search_strategy';
 import { TimelineFactory } from '../../types';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
-import { TIMELINE_EVENTS_FIELDS } from './constants';
-import { buildFieldsRequest, formatTimelineData } from './helpers';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
+import { buildFieldsRequest } from '../../helpers/build_fields_request';
+import { formatTimelineData } from '../../helpers/format_timeline_data';
+import { TIMELINE_EVENTS_FIELDS } from '../../helpers/constants';
 
 export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
   buildDsl: ({ authFilter, ...options }: TimelineEventsAllRequestOptions) => {
@@ -38,6 +39,7 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
     let { fieldRequested, ...queryOptions } = cloneDeep(options);
     queryOptions.fields = buildFieldsRequest(fieldRequested, queryOptions.excludeEcsData);
     const { activePage, querySize } = options.pagination;
+    const producerBuckets = getOr([], 'aggregations.producers.buckets', response.rawResponse);
     const totalCount = response.rawResponse.hits.total || 0;
     const hits = response.rawResponse.hits.hits;
 
@@ -61,12 +63,21 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
       )
     );
 
+    const consumers: Record<string, number> = producerBuckets.reduce(
+      (acc: Record<string, number>, b: { key: string; doc_count: number }) => ({
+        ...acc,
+        [b.key]: b.doc_count,
+      }),
+      {}
+    );
+
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineEventsAllQuery(queryOptions))],
     };
 
     return {
       ...response,
+      consumers,
       inspect,
       edges,
       // @ts-expect-error code doesn't handle TotalHits

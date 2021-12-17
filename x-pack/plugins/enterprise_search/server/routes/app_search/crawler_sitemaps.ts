@@ -15,7 +15,7 @@ export function registerCrawlerSitemapRoutes({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps',
+      path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -27,7 +27,7 @@ export function registerCrawlerSitemapRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/sitemaps',
+      path: '/api/as/v1/engines/:engineName/crawler/domains/:domainId/sitemaps',
       params: {
         respond_with: 'index',
       },
@@ -36,7 +36,7 @@ export function registerCrawlerSitemapRoutes({
 
   router.put(
     {
-      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
+      path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -49,7 +49,7 @@ export function registerCrawlerSitemapRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/sitemaps/:sitemapId',
+      path: '/api/as/v1/engines/:engineName/crawler/domains/:domainId/sitemaps/:sitemapId',
       params: {
         respond_with: 'index',
       },
@@ -58,7 +58,7 @@ export function registerCrawlerSitemapRoutes({
 
   router.delete(
     {
-      path: '/api/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
+      path: '/internal/app_search/engines/{engineName}/crawler/domains/{domainId}/sitemaps/{sitemapId}',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -68,7 +68,7 @@ export function registerCrawlerSitemapRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/sitemaps/:sitemapId',
+      path: '/api/as/v1/engines/:engineName/crawler/domains/:domainId/sitemaps/:sitemapId',
       params: {
         respond_with: 'index',
       },

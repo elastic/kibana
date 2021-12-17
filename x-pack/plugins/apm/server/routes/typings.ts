@@ -17,23 +17,18 @@ import { AlertingApiRequestHandlerContext } from '../../../alerting/server';
 import type { RacApiRequestHandlerContext } from '../../../rule_registry/server';
 import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { APMConfig } from '..';
-import { APMPluginDependencies } from '../types';
+import {
+  APMPluginSetupDependencies,
+  APMPluginStartDependencies,
+} from '../types';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
+import { UxUIFilters } from '../../typings/ui_filters';
 
 export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
   rac: RacApiRequestHandlerContext;
 }
-
-export type InspectResponse = Array<{
-  response: any;
-  duration: number;
-  requestType: string;
-  requestParams: Record<string, unknown>;
-  esError: Error;
-  operationName: string;
-}>;
 
 export interface APMRouteCreateOptions {
   options: {
@@ -42,6 +37,7 @@ export interface APMRouteCreateOptions {
       | 'access:apm_write'
       | 'access:ml:canGetJobs'
       | 'access:ml:canCreateJob'
+      | 'access:ml:canCloseJob'
     >;
     body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
     disableTelemetry?: boolean;
@@ -58,6 +54,9 @@ export interface APMRouteHandlerResources {
   params: {
     query: {
       _inspect: boolean;
+      start?: number;
+      end?: number;
+      uiFilters?: UxUIFilters;
     };
   };
   config: APMConfig;
@@ -67,11 +66,12 @@ export interface APMRouteHandlerResources {
     start: () => Promise<CoreStart>;
   };
   plugins: {
-    [key in keyof APMPluginDependencies]: {
-      setup: Required<APMPluginDependencies>[key]['setup'];
-      start: () => Promise<Required<APMPluginDependencies>[key]['start']>;
+    [key in keyof APMPluginSetupDependencies]: {
+      setup: Required<APMPluginSetupDependencies>[key];
+      start: () => Promise<Required<APMPluginStartDependencies>[key]>;
     };
   };
   ruleDataClient: IRuleDataClient;
   telemetryUsageCounter?: TelemetryUsageCounter;
+  kibanaVersion: string;
 }

@@ -7,7 +7,7 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiDescribedFormGroup,
@@ -20,12 +20,14 @@ import {
 /**
  * State transitions: fields update
  */
-export const updateFields = (newValues) => ({ fields }) => ({
-  fields: {
-    ...fields,
-    ...newValues,
-  },
-});
+export const updateFields =
+  (newValues) =>
+  ({ fields }) => ({
+    fields: {
+      ...fields,
+      ...newValues,
+    },
+  });
 
 export class FormEntryRow extends PureComponent {
   static propTypes = {

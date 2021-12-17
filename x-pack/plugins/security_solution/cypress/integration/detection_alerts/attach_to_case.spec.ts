@@ -8,7 +8,11 @@
 import { getNewRule } from '../../objects/rule';
 import { ROLES } from '../../../common/test';
 
-import { waitForAlertsIndexToBeCreated, waitForAlertsPanelToBeLoaded } from '../../tasks/alerts';
+import {
+  expandFirstAlertActions,
+  waitForAlertsIndexToBeCreated,
+  waitForAlertsPanelToBeLoaded,
+} from '../../tasks/alerts';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
@@ -16,15 +20,14 @@ import { login, loginAndWaitForPage, waitForPageWithoutDateRange } from '../../t
 import { refreshPage } from '../../tasks/security_header';
 
 import { ALERTS_URL } from '../../urls/navigation';
-import { ATTACH_ALERT_TO_CASE_BUTTON } from '../../screens/alerts_detection_rules';
+import { ATTACH_ALERT_TO_CASE_BUTTON } from '../../screens/alerts';
 
 const loadDetectionsPage = (role: ROLES) => {
   waitForPageWithoutDateRange(ALERTS_URL, role);
   waitForAlertsToPopulate();
 };
 
-// TODO: This test may need changes in our UI based on RBAC
-describe.skip('Alerts timeline', () => {
+describe('Alerts timeline', () => {
   before(() => {
     // First we login as a privileged user to create alerts.
     cleanKibana();
@@ -45,6 +48,7 @@ describe.skip('Alerts timeline', () => {
     });
 
     it('should not allow user with read only privileges to attach alerts to cases', () => {
+      expandFirstAlertActions();
       cy.get(ATTACH_ALERT_TO_CASE_BUTTON).should('not.exist');
     });
   });
@@ -55,6 +59,7 @@ describe.skip('Alerts timeline', () => {
     });
 
     it('should allow a user with crud privileges to attach alerts to cases', () => {
+      expandFirstAlertActions();
       cy.get(ATTACH_ALERT_TO_CASE_BUTTON).first().should('not.be.disabled');
     });
   });

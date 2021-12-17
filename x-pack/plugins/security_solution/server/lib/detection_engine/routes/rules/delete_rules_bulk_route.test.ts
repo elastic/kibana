@@ -18,7 +18,10 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
 
-describe('delete_rules', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('delete_rules - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -26,11 +29,11 @@ describe('delete_rules', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
     clients.rulesClient.delete.mockResolvedValue({}); // successful deletion
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // rule status request
 
-    deleteRulesBulkRoute(server.router);
+    deleteRulesBulkRoute(server.router, isRuleRegistryEnabled);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -81,7 +84,7 @@ describe('delete_rules', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(getDeleteBulkRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });

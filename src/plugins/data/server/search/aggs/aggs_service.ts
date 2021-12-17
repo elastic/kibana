@@ -23,7 +23,7 @@ import {
   TimeRange,
 } from '../../../common';
 import { FieldFormatsStart } from '../../../../field_formats/server';
-import { IndexPatternsServiceStart } from '../../index_patterns';
+import { IndexPatternsServiceStart } from '../../data_views';
 import { AggsSetup, AggsStart } from './types';
 
 /** @internal */
@@ -72,17 +72,17 @@ export class AggsService {
         };
         const isDefaultTimezone = () => getConfig('dateFormat:tz') === 'Browser';
 
-        const {
-          calculateAutoTimeExpression,
-          datatableUtilities,
-          types,
-        } = this.aggsCommonService.start({
-          getConfig,
-          getIndexPattern: (
-            await indexPatterns.indexPatternsServiceFactory(savedObjectsClient, elasticsearchClient)
-          ).get,
-          isDefaultTimezone,
-        });
+        const { calculateAutoTimeExpression, datatableUtilities, types } =
+          this.aggsCommonService.start({
+            getConfig,
+            getIndexPattern: (
+              await indexPatterns.indexPatternsServiceFactory(
+                savedObjectsClient,
+                elasticsearchClient
+              )
+            ).get,
+            isDefaultTimezone,
+          });
 
         const aggTypesDependencies: AggTypesDependencies = {
           calculateBounds: this.calculateBounds,

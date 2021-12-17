@@ -52,7 +52,7 @@ export function RemoveLayerButton({
         // which is a strange UX in this case. e.target.blur doesn't work
         // due to who knows what, but probably event re-writing. Additionally,
         // activeElement does not have blur so, we need to do some casting + safeguards.
-        const el = (document.activeElement as unknown) as { blur: () => void };
+        const el = document.activeElement as unknown as { blur: () => void };
 
         if (el?.blur) {
           el.blur();

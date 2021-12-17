@@ -14,9 +14,8 @@ export function useExplorerUrlState() {
    * Originally `mlExplorerSwimlane` resided directly in the app URL state (`_a` URL state key).
    * With current URL structure it has been moved under the `explorer` key of the app state (_a).
    */
-  const [legacyExplorerState] = usePageUrlState<ExplorerAppState['mlExplorerSwimlane']>(
-    'mlExplorerSwimlane'
-  );
+  const [legacyExplorerState] =
+    usePageUrlState<ExplorerAppState['mlExplorerSwimlane']>('mlExplorerSwimlane');
 
   return usePageUrlState<ExplorerAppState>(ML_PAGES.ANOMALY_EXPLORER, {
     mlExplorerSwimlane: legacyExplorerState,

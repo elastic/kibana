@@ -51,11 +51,19 @@ Any additional options supplied to `test:jest` will be passed onto the Jest CLI 
 ----
 kibana/src/plugins/dashboard/server$ yarn test:jest --coverage
 
-# is equivelant to
+# is equivalent to
 
 yarn jest --coverage --verbose --config /home/tyler/elastic/kibana/src/plugins/dashboard/jest.config.js server
 ----
 
+You can generate code coverage report for a single plugin.
+
+[source,bash]
+----
+yarn jest --coverage --config src/plugins/console/jest.config.js
+----
+
+Html report is available in target/kibana-coverage/jest/path/to/plugin
 
 [discrete]
 === Running browser automation tests

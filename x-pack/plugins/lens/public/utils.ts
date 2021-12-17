@@ -4,16 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { i18n } from '@kbn/i18n';
-import { IndexPattern, IndexPatternsContract, TimefilterContract } from 'src/plugins/data/public';
-import { IUiSettingsClient } from 'kibana/public';
-import moment from 'moment-timezone';
-import { SavedObjectReference } from 'kibana/public';
 import { uniq } from 'lodash';
-import { Document } from './persistence/saved_object_store';
-import { Datasource, DatasourceMap } from './types';
-import { DatasourceStates } from './state_management';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment-timezone';
+
+import type {
+  IndexPattern,
+  IndexPatternsContract,
+  TimefilterContract,
+} from 'src/plugins/data/public';
+import type { IUiSettingsClient } from 'kibana/public';
+import type { SavedObjectReference } from 'kibana/public';
+import type { Document } from './persistence/saved_object_store';
+import type { Datasource, DatasourceMap, Visualization } from './types';
+import type { DatasourceStates, VisualizationState } from './state_management';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
@@ -89,4 +93,17 @@ export async function getIndexPatternsObjects(
     .filter((id, i) => responses[i].status === 'rejected');
   // return also the rejected ids in case we want to show something later on
   return { indexPatterns: fullfilled.map((response) => response.value), rejectedIds };
+}
+
+export function getRemoveOperation(
+  activeVisualization: Visualization,
+  visualizationState: VisualizationState['state'],
+  layerId: string,
+  layerCount: number
+) {
+  if (activeVisualization.getRemoveOperation) {
+    return activeVisualization.getRemoveOperation(visualizationState, layerId);
+  }
+  // fallback to generic count check
+  return layerCount === 1 ? 'clear' : 'remove';
 }

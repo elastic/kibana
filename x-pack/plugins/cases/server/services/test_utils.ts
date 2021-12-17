@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectReference } from 'kibana/server';
+import { SavedObject, SavedObjectReference, SavedObjectsFindResult } from 'kibana/server';
 import { ESConnectorFields } from '.';
-import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common';
+import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
 import {
   CaseConnector,
   CaseFullExternalService,
   CaseStatuses,
   CaseType,
-  CASE_SAVED_OBJECT,
   ConnectorTypes,
   noneConnectorId,
-  SECURITY_SOLUTION_OWNER,
-} from '../../common';
+} from '../../common/api';
+import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './cases/types';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
 
@@ -54,7 +53,7 @@ export const createESJiraConnector = (
       { key: 'parent', value: '2' },
     ],
     type: ConnectorTypes.jira,
-    ...(overrides && { ...overrides }),
+    ...overrides,
   };
 };
 
@@ -94,7 +93,7 @@ export const createExternalService = (
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
-  ...(overrides && { ...overrides }),
+  ...overrides,
 });
 
 export const basicCaseFields = {
@@ -198,3 +197,14 @@ export const createSavedObjectReferences = ({
       ]
     : []),
 ];
+
+export const createConnectorObject = (overrides?: Partial<CaseConnector>) => ({
+  connector: { ...createJiraConnector(), ...overrides },
+});
+
+export const createSOFindResponse = <T>(savedObjects: Array<SavedObjectsFindResult<T>>) => ({
+  saved_objects: savedObjects,
+  total: savedObjects.length,
+  per_page: savedObjects.length,
+  page: 1,
+});

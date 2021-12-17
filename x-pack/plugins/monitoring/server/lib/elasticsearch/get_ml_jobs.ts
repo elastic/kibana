@@ -35,6 +35,8 @@ export function handleResponse(response: ElasticsearchResponse) {
   );
 }
 
+export type MLJobs = ReturnType<typeof handleResponse>;
+
 export function getMlJobs(req: LegacyRequest, esIndexPattern: string) {
   checkParam(esIndexPattern, 'esIndexPattern in getMlJobs');
 

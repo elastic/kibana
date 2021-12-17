@@ -5,60 +5,81 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
 import { useUiTracker } from '../../../../../../observability/public';
 import { ContentsProps } from '.';
-import { NodeStats } from '../../../../../common/service_map';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
-export function BackendContents({ nodeData, environment }: ContentsProps) {
-  const { query } = useApmParams('/*');
+type BackendReturn = APIReturnType<'GET /internal/apm/service-map/backend'>;
+
+const INITIAL_STATE: Partial<BackendReturn> = {
+  currentPeriod: undefined,
+  previousPeriod: undefined,
+};
+
+export function BackendContents({
+  nodeData,
+  environment,
+  start,
+  end,
+}: ContentsProps) {
+  const { query } = useAnyOfApmParams(
+    '/service-map',
+    '/services/{serviceName}/service-map'
+  );
+
+  const { comparisonEnabled, comparisonType } = query;
+
+  const { offset } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonEnabled,
+    comparisonType,
+  });
+
   const apmRouter = useApmRouter();
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
 
   const backendName = nodeData.label;
 
-  const { data = { transactionStats: {} } as NodeStats, status } = useFetcher(
+  const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
-      if (backendName && start && end) {
+      if (backendName) {
         return callApmApi({
-          endpoint: 'GET /api/apm/service-map/backend/{backendName}',
+          endpoint: 'GET /internal/apm/service-map/backend',
           params: {
-            path: { backendName },
             query: {
+              backendName,
               environment,
               start,
               end,
+              offset,
             },
           },
         });
       }
     },
-    [environment, backendName, start, end],
-    {
-      preservePreviousData: false,
-    }
+    [environment, backendName, start, end, offset]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
-  const detailsUrl = apmRouter.link('/backends/:backendName/overview', {
-    path: { backendName },
-    query: query as TypeOf<
-      ApmRoutes,
-      '/backends/:backendName/overview'
-    >['query'],
-  });
+  const detailsUrl = backendName
+    ? apmRouter.link('/backends/overview', {
+        query: {
+          ...query,
+          backendName,
+        } as TypeOf<ApmRoutes, '/backends/overview'>['query'],
+      })
+    : undefined;
 
   const trackEvent = useUiTracker();
 
@@ -67,6 +88,7 @@ export function BackendContents({ nodeData, environment }: ContentsProps) {
       <EuiFlexItem>
         <StatsList data={data} isLoading={isLoading} />
       </EuiFlexItem>
+      <EuiSpacer size="s" />
       <EuiFlexItem>
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
         <EuiButton
@@ -80,8 +102,8 @@ export function BackendContents({ nodeData, environment }: ContentsProps) {
             });
           }}
         >
-          {i18n.translate('xpack.apm.serviceMap.backendDetailsButtonText', {
-            defaultMessage: 'Backend Details',
+          {i18n.translate('xpack.apm.serviceMap.dependencyDetailsButtonText', {
+            defaultMessage: 'Dependency Details',
           })}
         </EuiButton>
       </EuiFlexItem>

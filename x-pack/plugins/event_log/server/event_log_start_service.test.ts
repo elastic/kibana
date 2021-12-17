@@ -44,7 +44,7 @@ describe('EventLogClientService', () => {
 
 function fakeRequest(): KibanaRequest {
   const savedObjectsClient = savedObjectsClientMock.create();
-  return ({
+  return {
     headers: {},
     getBasePath: () => '',
     path: '/',
@@ -58,5 +58,5 @@ function fakeRequest(): KibanaRequest {
       },
     },
     getSavedObjectsClient: () => savedObjectsClient,
-  } as unknown) as KibanaRequest;
+  } as unknown as KibanaRequest;
 }

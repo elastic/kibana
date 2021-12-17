@@ -143,7 +143,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (alertServices as unknown) as AlertServices<
+      services: alertServices as unknown as AlertServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -222,7 +222,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (alertServices as unknown) as AlertServices<
+      services: alertServices as unknown as AlertServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -301,7 +301,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (alertServices as unknown) as AlertServices<
+      services: alertServices as unknown as AlertServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -375,7 +375,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (alertServices as unknown) as AlertServices<
+      services: alertServices as unknown as AlertServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -453,7 +453,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (alertServices as unknown) as AlertServices<
+      services: alertServices as unknown as AlertServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -568,7 +568,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (alertServices as unknown) as AlertServices<
+      services: alertServices as unknown as AlertServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId
@@ -652,7 +652,7 @@ describe('alertType', () => {
       alertId: uuid.v4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
-      services: (alertServices as unknown) as AlertServices<
+      services: alertServices as unknown as AlertServices<
         EsQueryAlertState,
         ActionContext,
         typeof ActionGroupId

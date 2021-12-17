@@ -22,9 +22,9 @@ import * as i18n from './translations';
 import { useCreateTimelineButton } from './use_create_timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 
-const NotesCountBadge = (styled(EuiBadge)`
+const NotesCountBadge = styled(EuiBadge)`
   margin-left: 5px;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 NotesCountBadge.displayName = 'NotesCountBadge';
 
@@ -116,6 +116,7 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
         data-test-subj="timeline-notes-button-small"
         iconType="editorComment"
         onClick={toggleShowNotes}
+        size="s"
         isDisabled={isTemplate}
       />
     );

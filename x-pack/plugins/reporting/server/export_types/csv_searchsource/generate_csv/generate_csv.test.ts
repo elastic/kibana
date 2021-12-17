@@ -49,6 +49,10 @@ const searchSourceMock = { ...searchSourceInstanceMock };
 const mockSearchSourceService: jest.Mocked<ISearchStartSearchSource> = {
   create: jest.fn().mockReturnValue(searchSourceMock),
   createEmpty: jest.fn().mockReturnValue(searchSourceMock),
+  telemetry: jest.fn(),
+  inject: jest.fn(),
+  extract: jest.fn(),
+  getAllMigrations: jest.fn(),
 };
 const mockDataClientSearchDefault = jest.fn().mockImplementation(
   (): Rx.Observable<{ rawResponse: SearchResponse<unknown> }> =>
@@ -75,20 +79,21 @@ const mockSearchSourceGetFieldDefault = jest.fn().mockImplementation((key: strin
           getByName: jest.fn().mockImplementation(() => []),
           getByType: jest.fn().mockImplementation(() => []),
         },
+        metaFields: ['_id', '_index', '_type', '_score'],
         getFormatterForField: jest.fn(),
       };
   }
 });
 
-const mockFieldFormatsRegistry = ({
+const mockFieldFormatsRegistry = {
   deserialize: jest
     .fn()
     .mockImplementation(() => ({ id: 'string', convert: jest.fn().mockImplementation(identity) })),
-} as unknown) as FieldFormatsRegistry;
+} as unknown as FieldFormatsRegistry;
 
 beforeEach(async () => {
   content = '';
-  stream = ({ write: jest.fn((chunk) => (content += chunk)) } as unknown) as typeof stream;
+  stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
   mockEsClient = elasticsearchServiceMock.createScopedClusterClient();
   mockDataClient = dataPluginMock.createStartContract().search.asScoped({} as any);
   mockDataClient.search = mockDataClientSearchDefault;
@@ -198,7 +203,7 @@ it('calculates the bytes of the content', async () => {
     Rx.of({
       rawResponse: {
         hits: {
-          hits: range(0, HITS_TOTAL).map((hit, i) => ({
+          hits: range(0, HITS_TOTAL).map(() => ({
             fields: {
               message: ['this is a great message'],
             },
@@ -226,7 +231,6 @@ it('calculates the bytes of the content', async () => {
     stream
   );
   const csvResult = await generateCsv.generateData();
-  expect(csvResult.size).toBe(2608);
   expect(csvResult.max_size_reached).toBe(false);
   expect(csvResult.warnings).toEqual([]);
 });
@@ -249,7 +253,7 @@ it('warns if max size was reached', async () => {
     Rx.of({
       rawResponse: {
         hits: {
-          hits: range(0, HITS_TOTAL).map((hit, i) => ({
+          hits: range(0, HITS_TOTAL).map(() => ({
             fields: {
               date: ['2020-12-31T00:14:28.000Z'],
               ip: ['110.135.176.89'],
@@ -290,7 +294,7 @@ it('uses the scrollId to page all the data', async () => {
       rawResponse: {
         _scroll_id: 'awesome-scroll-hero',
         hits: {
-          hits: range(0, HITS_TOTAL / 10).map((hit, i) => ({
+          hits: range(0, HITS_TOTAL / 10).map(() => ({
             fields: {
               date: ['2020-12-31T00:14:28.000Z'],
               ip: ['110.135.176.89'],
@@ -305,7 +309,7 @@ it('uses the scrollId to page all the data', async () => {
   mockEsClient.asCurrentUser.scroll = jest.fn().mockResolvedValue({
     body: {
       hits: {
-        hits: range(0, HITS_TOTAL / 10).map((hit, i) => ({
+        hits: range(0, HITS_TOTAL / 10).map(() => ({
           fields: {
             date: ['2020-12-31T00:14:28.000Z'],
             ip: ['110.135.176.89'],
@@ -338,19 +342,20 @@ it('uses the scrollId to page all the data', async () => {
 
   expect(mockDataClient.search).toHaveBeenCalledTimes(1);
   expect(mockDataClient.search).toBeCalledWith(
-    { params: { scroll: '30s', size: 500 } },
+    { params: { ignore_throttled: undefined, scroll: '30s', size: 500 } },
     { strategy: 'es' }
   );
 
   // `scroll` and `clearScroll` must be called with scroll ID in the post body!
   expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledTimes(9);
   expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledWith({
-    body: { scroll: '30s', scroll_id: 'awesome-scroll-hero' },
+    scroll: '30s',
+    scroll_id: 'awesome-scroll-hero',
   });
 
   expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledTimes(1);
   expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledWith({
-    body: { scroll_id: ['awesome-scroll-hero'] },
+    scroll_id: ['awesome-scroll-hero'],
   });
 });
 
@@ -813,4 +818,31 @@ describe('formulas', () => {
     expect(content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(true);
   });
+});
+
+it('can override ignoring frozen indices', async () => {
+  const originalGet = uiSettingsClient.get;
+  uiSettingsClient.get = jest.fn().mockImplementation((key): any => {
+    if (key === 'search:includeFrozen') {
+      return true;
+    }
+    return originalGet(key);
+  });
+
+  const generateCsv = new CsvGenerator(
+    createMockJob({}),
+    mockConfig,
+    { es: mockEsClient, data: mockDataClient, uiSettings: uiSettingsClient },
+    { searchSourceStart: mockSearchSourceService, fieldFormatsRegistry: mockFieldFormatsRegistry },
+    new CancellationToken(),
+    logger,
+    stream
+  );
+
+  await generateCsv.generateData();
+
+  expect(mockDataClient.search).toBeCalledWith(
+    { params: { ignore_throttled: false, scroll: '30s', size: 500 } },
+    { strategy: 'es' }
+  );
 });

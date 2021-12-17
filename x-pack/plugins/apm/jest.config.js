@@ -11,6 +11,14 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: path.resolve(__dirname, '../../..'),
   roots: ['<rootDir>/x-pack/plugins/apm'],
-  setupFiles: ['<rootDir>/x-pack/plugins/apm/.storybook/jest_setup.js'],
-  testPathIgnorePatterns: ['<rootDir>/x-pack/plugins/apm/e2e/'],
+  setupFiles: [
+    '<rootDir>/x-pack/plugins/apm/jest_setup.js',
+    '<rootDir>/x-pack/plugins/apm/.storybook/jest_setup.js',
+  ],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/apm',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/plugins/apm/{common,public,server}/**/*.{js,ts,tsx}',
+    '!<rootDir>/**/*.stories.*',
+  ],
 };

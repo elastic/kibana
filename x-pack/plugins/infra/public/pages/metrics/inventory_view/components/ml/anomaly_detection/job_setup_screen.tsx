@@ -9,7 +9,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { EuiForm, EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyoutFooter } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
@@ -80,9 +80,10 @@ export const JobSetupScreen = (props: Props) => {
     }
   }, [props.jobType, k.jobSummaries, h.jobSummaries]);
 
-  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern(), [
-    createDerivedIndexPattern,
-  ]);
+  const derivedIndexPattern = useMemo(
+    () => createDerivedIndexPattern(),
+    [createDerivedIndexPattern]
+  );
 
   const updateStart = useCallback((date: Moment) => {
     setStartDate(date);

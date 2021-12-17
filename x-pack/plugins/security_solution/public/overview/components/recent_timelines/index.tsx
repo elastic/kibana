@@ -25,7 +25,7 @@ import { LoadingPlaceholders } from '../loading_placeholders';
 import { useTimelineStatus } from '../../../timelines/components/open_timeline/use_timeline_status';
 import { useKibana } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../app/types';
-import { APP_ID } from '../../../../common/constants';
+import { APP_UI_ID } from '../../../../common/constants';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { LinkAnchor } from '../../../common/components/links';
 import { Direction } from '../../../../common/search_strategy';
@@ -38,9 +38,10 @@ const PAGE_SIZE = 3;
 
 const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
   const dispatch = useDispatch();
-  const updateIsLoading = useCallback((payload) => dispatch(dispatchUpdateIsLoading(payload)), [
-    dispatch,
-  ]);
+  const updateIsLoading = useCallback(
+    (payload) => dispatch(dispatchUpdateIsLoading(payload)),
+    [dispatch]
+  );
   const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
 
   const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
@@ -60,7 +61,7 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
   const goToTimelines = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.timelines,
       });
     },

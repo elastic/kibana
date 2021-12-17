@@ -6,40 +6,85 @@
  * Side Public License, v 1.
  */
 
+import { DeprecationsFactoryMock } from './deprecations_service.test.mocks';
+
 /* eslint-disable dot-notation */
-import { DeprecationsService } from './deprecations_service';
+import { DeprecationsService, DeprecationsSetupDeps } from './deprecations_service';
 import { httpServiceMock } from '../http/http_service.mock';
-import { mockRouter } from '../http/router/router.mock';
+import { savedObjectsClientMock, elasticsearchServiceMock, configServiceMock } from '../mocks';
 import { mockCoreContext } from '../core_context.mock';
 import { mockDeprecationsFactory } from './deprecations_factory.mock';
 import { mockDeprecationsRegistry } from './deprecations_registry.mock';
 
 describe('DeprecationsService', () => {
-  const coreContext = mockCoreContext.create();
-  beforeEach(() => jest.clearAllMocks());
+  let coreContext: ReturnType<typeof mockCoreContext.create>;
+  let http: ReturnType<typeof httpServiceMock.createInternalSetupContract>;
+  let router: ReturnType<typeof httpServiceMock.createRouter>;
+  let deprecationsCoreSetupDeps: DeprecationsSetupDeps;
+
+  beforeEach(() => {
+    const configService = configServiceMock.create({
+      atPath: { skip_deprecated_settings: ['hello', 'world'] },
+    });
+    coreContext = mockCoreContext.create({ configService });
+    http = httpServiceMock.createInternalSetupContract();
+    router = httpServiceMock.createRouter();
+    http.createRouter.mockReturnValue(router);
+    deprecationsCoreSetupDeps = { http };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    DeprecationsFactoryMock.mockClear();
+  });
 
   describe('#setup', () => {
-    const http = httpServiceMock.createInternalSetupContract();
-    const router = mockRouter.create();
-    http.createRouter.mockReturnValue(router);
-    const deprecationsCoreSetupDeps = { http };
-
-    it('registers routes', () => {
+    it('registers routes', async () => {
       const deprecationsService = new DeprecationsService(coreContext);
-      deprecationsService.setup(deprecationsCoreSetupDeps);
-      // Registers correct base api path
+      await deprecationsService.setup(deprecationsCoreSetupDeps);
+      // registers correct base api path
       expect(http.createRouter).toBeCalledWith('/api/deprecations');
       // registers get route '/'
       expect(router.get).toHaveBeenCalledTimes(1);
       expect(router.get).toHaveBeenCalledWith({ path: '/', validate: false }, expect.any(Function));
     });
 
-    it('calls registerConfigDeprecationsInfo', () => {
+    it('calls registerConfigDeprecationsInfo', async () => {
       const deprecationsService = new DeprecationsService(coreContext);
       const mockRegisterConfigDeprecationsInfo = jest.fn();
       deprecationsService['registerConfigDeprecationsInfo'] = mockRegisterConfigDeprecationsInfo;
-      deprecationsService.setup(deprecationsCoreSetupDeps);
+      await deprecationsService.setup(deprecationsCoreSetupDeps);
       expect(mockRegisterConfigDeprecationsInfo).toBeCalledTimes(1);
+    });
+
+    it('creates DeprecationsFactory with the correct parameters', async () => {
+      const deprecationsService = new DeprecationsService(coreContext);
+      await deprecationsService.setup(deprecationsCoreSetupDeps);
+
+      expect(DeprecationsFactoryMock).toHaveBeenCalledTimes(1);
+      expect(DeprecationsFactoryMock).toHaveBeenCalledWith({
+        logger: expect.any(Object),
+        config: {
+          ignoredConfigDeprecations: ['hello', 'world'],
+        },
+      });
+    });
+  });
+
+  describe('#start', () => {
+    describe('#asScopedToClient', () => {
+      it('returns client with #getAllDeprecations method', async () => {
+        const esClient = elasticsearchServiceMock.createScopedClusterClient();
+        const savedObjectsClient = savedObjectsClientMock.create();
+        const deprecationsService = new DeprecationsService(coreContext);
+
+        await deprecationsService.setup(deprecationsCoreSetupDeps);
+
+        const start = deprecationsService.start();
+        const deprecationsClient = start.asScopedToClient(esClient, savedObjectsClient);
+
+        expect(deprecationsClient.getAllDeprecations).toBeDefined();
+      });
     });
   });
 
@@ -48,19 +93,20 @@ describe('DeprecationsService', () => {
     const deprecationsRegistry = mockDeprecationsRegistry.create();
     const getDeprecationsContext = mockDeprecationsRegistry.createGetDeprecationsContext();
 
-    it('registers config deprecations', () => {
+    it('registers config deprecations', async () => {
       const deprecationsService = new DeprecationsService(coreContext);
       coreContext.configService.getHandledDeprecatedConfigs.mockReturnValue([
         [
           'testDomain',
           [
             {
+              configPath: 'test',
               message: 'testMessage',
               documentationUrl: 'testDocUrl',
               correctiveActions: {
                 manualSteps: [
                   'Using Kibana user management, change all users using the kibana_user role to the kibana_admin role.',
-                  'Using Kibana role-mapping management, change all role-mappings which assing the kibana_user role to the kibana_admin role.',
+                  'Using Kibana role-mapping management, change all role-mappings which assign the kibana_user role to the kibana_admin role.',
                 ],
               },
             },
@@ -75,16 +121,18 @@ describe('DeprecationsService', () => {
       expect(deprecationsFactory.getRegistry).toBeCalledTimes(1);
       expect(deprecationsFactory.getRegistry).toBeCalledWith('testDomain');
       expect(deprecationsRegistry.registerDeprecations).toBeCalledTimes(1);
-      const configDeprecations = deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
-        getDeprecationsContext
-      );
+      const configDeprecations =
+        await deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
+          getDeprecationsContext
+        );
       expect(configDeprecations).toMatchInlineSnapshot(`
         Array [
           Object {
+            "configPath": "test",
             "correctiveActions": Object {
               "manualSteps": Array [
                 "Using Kibana user management, change all users using the kibana_user role to the kibana_admin role.",
-                "Using Kibana role-mapping management, change all role-mappings which assing the kibana_user role to the kibana_admin role.",
+                "Using Kibana role-mapping management, change all role-mappings which assign the kibana_user role to the kibana_admin role.",
               ],
             },
             "deprecationType": "config",
@@ -92,9 +140,38 @@ describe('DeprecationsService', () => {
             "level": "critical",
             "message": "testMessage",
             "requireRestart": true,
+            "title": "testDomain has a deprecated setting",
           },
         ]
       `);
+    });
+
+    it('accepts `level` field overrides', async () => {
+      const deprecationsService = new DeprecationsService(coreContext);
+      coreContext.configService.getHandledDeprecatedConfigs.mockReturnValue([
+        [
+          'testDomain',
+          [
+            {
+              configPath: 'test',
+              message: 'testMessage',
+              level: 'warning',
+              correctiveActions: {
+                manualSteps: ['step a'],
+              },
+            },
+          ],
+        ],
+      ]);
+
+      deprecationsFactory.getRegistry.mockReturnValue(deprecationsRegistry);
+      deprecationsService['registerConfigDeprecationsInfo'](deprecationsFactory);
+
+      const configDeprecations =
+        await deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(
+          getDeprecationsContext
+        );
+      expect(configDeprecations[0].level).toBe('warning');
     });
   });
 });

@@ -12,11 +12,14 @@ import { CasePlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: ConfigSchema,
+  exposeToBrowser: {
+    markdownPlugins: true,
+  },
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled'),
+    renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),
   ],
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CasePlugin(initializerContext);
 
-export { PluginStartContract } from './plugin';
+export type { PluginStartContract } from './plugin';

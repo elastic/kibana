@@ -38,7 +38,14 @@ export async function alertingFrameworkHealth({
 }: {
   http: HttpSetup;
 }): Promise<AlertingFrameworkHealth> {
-  const res = await http.get(`${BASE_ALERTING_API_PATH}/_health`);
-  const alertingFrameworkHeath = rewriteAlertingFrameworkHeath(res.alerting_framework_heath);
-  return { ...rewriteBodyRes(res), alertingFrameworkHeath };
+  const res = await http.get<AsApiContract<AlertingFrameworkHealth>>(
+    `${BASE_ALERTING_API_PATH}/_health`
+  );
+  const alertingFrameworkHeath = rewriteAlertingFrameworkHeath(
+    res.alerting_framework_heath as unknown as AsApiContract<AlertsHealth>
+  );
+  return {
+    ...rewriteBodyRes(res),
+    alertingFrameworkHeath,
+  };
 }

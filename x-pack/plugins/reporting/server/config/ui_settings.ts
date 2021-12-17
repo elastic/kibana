@@ -17,7 +17,7 @@ const maxLogoSizeInBase64 = kbToBase64Length(200);
 const dataurlRegex = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?(;([a-z0-9]+))?,/;
 const imageTypes = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
 
-const isImageData = (str: any): boolean => {
+const isImageData = (str: string) => {
   const matches = str.match(dataurlRegex);
 
   if (!matches) {
@@ -33,7 +33,7 @@ const isImageData = (str: any): boolean => {
   return true;
 };
 
-const validatePdfLogoBase64String = (str: any) => {
+const validatePdfLogoBase64String = (str: string) => {
   if (typeof str !== 'string' || !isImageData(str)) {
     return i18n.translate('xpack.reporting.uiSettings.validate.customLogo.badFile', {
       defaultMessage: `Sorry, that file will not work. Please try a different image file.`,
@@ -46,7 +46,9 @@ const validatePdfLogoBase64String = (str: any) => {
   }
 };
 
-export const PdfLogoSchema = schema.nullable(schema.any({ validate: validatePdfLogoBase64String }));
+export const PdfLogoSchema = schema.nullable(
+  schema.string({ validate: validatePdfLogoBase64String })
+);
 
 export function registerUiSettings(core: CoreSetup<object, unknown>) {
   core.uiSettings.register({

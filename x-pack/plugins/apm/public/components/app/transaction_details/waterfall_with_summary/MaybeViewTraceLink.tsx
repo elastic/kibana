@@ -9,13 +9,13 @@ import { EuiButton, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
 import { Environment } from '../../../../../common/environment_rt';
 
-export const MaybeViewTraceLink = ({
+export function MaybeViewTraceLink({
   transaction,
   waterfall,
   environment,
@@ -23,10 +23,10 @@ export const MaybeViewTraceLink = ({
   transaction: ITransaction;
   waterfall: IWaterfall;
   environment: Environment;
-}) => {
+}) {
   const {
-    urlParams: { latencyAggregationType },
-  } = useUrlParams();
+    urlParams: { latencyAggregationType, comparisonEnabled, comparisonType },
+  } = useLegacyUrlParams();
 
   const viewFullTraceButtonLabel = i18n.translate(
     'xpack.apm.transactionDetails.viewFullTraceButtonLabel',
@@ -94,6 +94,8 @@ export const MaybeViewTraceLink = ({
           transactionType={rootTransaction.transaction.type}
           environment={nextEnvironment}
           latencyAggregationType={latencyAggregationType}
+          comparisonEnabled={comparisonEnabled}
+          comparisonType={comparisonType}
         >
           <EuiButton fill iconType="apmTrace">
             {viewFullTraceButtonLabel}
@@ -102,4 +104,4 @@ export const MaybeViewTraceLink = ({
       </EuiFlexItem>
     );
   }
-};
+}

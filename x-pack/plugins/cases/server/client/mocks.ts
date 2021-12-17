@@ -12,6 +12,7 @@ import { AttachmentsSubClient } from './attachments/client';
 import { CasesSubClient } from './cases/client';
 import { ConfigureSubClient } from './configure/client';
 import { CasesClientFactory } from './factory';
+import { MetricsSubClient } from './metrics/client';
 import { StatsSubClient } from './stats/client';
 import { SubCasesClient } from './sub_cases/client';
 import { UserActionsSubClient } from './user_actions/client';
@@ -22,6 +23,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
   return {
     create: jest.fn(),
     find: jest.fn(),
+    resolve: jest.fn(),
     get: jest.fn(),
     push: jest.fn(),
     update: jest.fn(),
@@ -29,6 +31,14 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     getTags: jest.fn(),
     getReporters: jest.fn(),
     getCasesByAlertID: jest.fn(),
+  };
+};
+
+type MetricsSubClientMock = jest.Mocked<MetricsSubClient>;
+
+const createMetricsSubClientMock = (): MetricsSubClientMock => {
+  return {
+    getCaseMetrics: jest.fn(),
   };
 };
 
@@ -100,8 +110,9 @@ export const createCasesClientMock = (): CasesClientMock => {
     subCases: createSubCasesClientMock(),
     configure: createConfigureSubClientMock(),
     stats: createStatsSubClientMock(),
+    metrics: createMetricsSubClientMock(),
   };
-  return (client as unknown) as CasesClientMock;
+  return client as unknown as CasesClientMock;
 };
 
 export type CasesClientFactoryMock = jest.Mocked<CasesClientFactory>;
@@ -112,5 +123,5 @@ export const createCasesClientFactory = (): CasesClientFactoryMock => {
     create: jest.fn(),
   };
 
-  return (factory as unknown) as CasesClientFactoryMock;
+  return factory as unknown as CasesClientFactoryMock;
 };

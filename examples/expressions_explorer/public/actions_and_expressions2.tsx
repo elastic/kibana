@@ -19,11 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import {
-  ExpressionsStart,
-  ReactExpressionRenderer,
-  ExpressionsInspectorAdapter,
-} from '../../../src/plugins/expressions/public';
+import { ExpressionsStart } from '../../../src/plugins/expressions/public';
 import { ExpressionEditor } from './editor/expression_editor';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 
@@ -45,12 +41,8 @@ export function ActionsExpressionsExample2({ expressions, actions }: Props) {
     updateExpression(value);
   };
 
-  const inspectorAdapters = {
-    expression: new ExpressionsInspectorAdapter(),
-  };
-
   const handleEvents = (event: any) => {
-    updateVariables({ color: event.value.href === 'http://www.google.com' ? 'red' : 'blue' });
+    updateVariables({ color: event.data.href === 'http://www.google.com' ? 'red' : 'blue' });
   };
 
   return (
@@ -81,11 +73,10 @@ export function ActionsExpressionsExample2({ expressions, actions }: Props) {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiPanel paddingSize="none" role="figure">
-                <ReactExpressionRenderer
+                <expressions.ReactExpressionRenderer
                   data-test-subj="expressionsVariablesTestRenderer"
                   expression={expression}
                   debug={true}
-                  inspectorAdapters={inspectorAdapters}
                   variables={variables}
                   onEvent={handleEvents}
                   renderError={(message: any) => {

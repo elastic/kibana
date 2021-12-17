@@ -37,14 +37,20 @@ describe('APMSection', () => {
       },
     } as HasDataContextValue);
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
-      core: ({
+      core: {
         uiSettings: { get: jest.fn() },
         http: { basePath: { prepend: jest.fn() } },
-      } as unknown) as CoreStart,
+      } as unknown as CoreStart,
       appMountParameters: {} as AppMountParameters,
-      config: { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } },
+      config: {
+        unsafe: {
+          alertingExperience: { enabled: true },
+          cases: { enabled: true },
+          overviewNext: { enabled: false },
+        },
+      },
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      plugins: ({
+      plugins: {
         data: {
           query: {
             timefilter: {
@@ -57,7 +63,7 @@ describe('APMSection', () => {
             },
           },
         },
-      } as unknown) as ObservabilityPublicPluginsStart,
+      } as unknown as ObservabilityPublicPluginsStart,
       ObservabilityPageTemplate: KibanaPageTemplate,
     }));
   });
@@ -78,7 +84,9 @@ describe('APMSection', () => {
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getByText, queryAllByTestId } = render(<APMSection bucketSize="60s" />);
+    const { getByText, queryAllByTestId } = render(
+      <APMSection bucketSize={{ intervalString: '60s', bucketSize: 60 }} />
+    );
 
     expect(getByText('APM')).toBeInTheDocument();
     expect(getByText('View in app')).toBeInTheDocument();
@@ -93,7 +101,9 @@ describe('APMSection', () => {
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getByText, queryAllByTestId } = render(<APMSection bucketSize="60s" />);
+    const { getByText, queryAllByTestId } = render(
+      <APMSection bucketSize={{ intervalString: '60s', bucketSize: 60 }} />
+    );
 
     expect(getByText('APM')).toBeInTheDocument();
     expect(getByText('View in app')).toBeInTheDocument();
@@ -107,7 +117,9 @@ describe('APMSection', () => {
       status: fetcherHook.FETCH_STATUS.LOADING,
       refetch: jest.fn(),
     });
-    const { getByText, queryAllByText, getByTestId } = render(<APMSection bucketSize="60s" />);
+    const { getByText, queryAllByText, getByTestId } = render(
+      <APMSection bucketSize={{ intervalString: '60s', bucketSize: 60 }} />
+    );
 
     expect(getByText('APM')).toBeInTheDocument();
     expect(getByTestId('loading')).toBeInTheDocument();

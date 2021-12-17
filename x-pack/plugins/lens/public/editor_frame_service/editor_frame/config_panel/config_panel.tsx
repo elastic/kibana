@@ -5,29 +5,28 @@
  * 2.0.
  */
 
-import './config_panel.scss';
-
 import React, { useMemo, memo } from 'react';
 import { EuiForm } from '@elastic/eui';
-import { mapValues } from 'lodash';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
-import { appendLayer } from './layer_actions';
 import { ConfigPanelWrapperProps } from './types';
 import { useFocusUpdate } from './use_focus_update';
 import {
+  setLayerDefaultDimension,
   useLensDispatch,
+  removeOrClearLayer,
+  addLayer,
   updateState,
   updateDatasourceState,
   updateVisualizationState,
   setToggleFullscreen,
   useLensSelector,
   selectVisualization,
-  VisualizationState,
 } from '../../../state_management';
 import { AddLayerButton } from './add_layer';
+import { getRemoveOperation } from '../../../utils';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const visualization = useLensSelector(selectVisualization);
@@ -40,18 +39,6 @@ export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: Config
   ) : null;
 });
 
-function getRemoveOperation(
-  activeVisualization: Visualization,
-  visualizationState: VisualizationState['state'],
-  layerId: string,
-  layerCount: number
-) {
-  if (activeVisualization.getRemoveOperation) {
-    return activeVisualization.getRemoveOperation(visualizationState, layerId);
-  }
-  // fallback to generic count check
-  return layerCount === 1 ? 'clear' : 'remove';
-}
 export function LayerPanels(
   props: ConfigPanelWrapperProps & {
     activeVisualization: Visualization;
@@ -74,8 +61,7 @@ export function LayerPanels(
       dispatchLens(
         updateVisualizationState({
           visualizationId: activeVisualization.id,
-          updater: newState,
-          clearStagedPreview: false,
+          newState,
         })
       );
     },
@@ -111,7 +97,6 @@ export function LayerPanels(
       setTimeout(() => {
         dispatchLens(
           updateState({
-            subType: 'UPDATE_ALL_STATES',
             updater: (prevState) => {
               const updatedDatasourceState =
                 typeof newDatasourceState === 'function'
@@ -134,7 +119,6 @@ export function LayerPanels(
                   ...prevState.visualization,
                   state: updatedVisualizationState,
                 },
-                stagedPreview: undefined,
               };
             },
           })
@@ -177,46 +161,29 @@ export function LayerPanels(
                 layerIds.length
               ) === 'clear'
             }
+            onEmptyDimensionAdd={(columnId, { groupId }) => {
+              // avoid state update if the datasource does not support initializeDimension
+              if (
+                activeDatasourceId != null &&
+                datasourceMap[activeDatasourceId]?.initializeDimension
+              ) {
+                dispatchLens(
+                  setLayerDefaultDimension({
+                    layerId,
+                    columnId,
+                    groupId,
+                  })
+                );
+              }
+            }}
             onRemoveLayer={() => {
               dispatchLens(
-                updateState({
-                  subType: 'REMOVE_OR_CLEAR_LAYER',
-                  updater: (state) => {
-                    const isOnlyLayer =
-                      getRemoveOperation(
-                        activeVisualization,
-                        state.visualization.state,
-                        layerId,
-                        layerIds.length
-                      ) === 'clear';
-
-                    return {
-                      ...state,
-                      datasourceStates: mapValues(
-                        state.datasourceStates,
-                        (datasourceState, datasourceId) => {
-                          const datasource = datasourceMap[datasourceId!];
-                          return {
-                            ...datasourceState,
-                            state: isOnlyLayer
-                              ? datasource.clearLayer(datasourceState.state, layerId)
-                              : datasource.removeLayer(datasourceState.state, layerId),
-                          };
-                        }
-                      ),
-                      visualization: {
-                        ...state.visualization,
-                        state:
-                          isOnlyLayer || !activeVisualization.removeLayer
-                            ? activeVisualization.clearLayer(state.visualization.state, layerId)
-                            : activeVisualization.removeLayer(state.visualization.state, layerId),
-                      },
-                      stagedPreview: undefined,
-                    };
-                  },
+                removeOrClearLayer({
+                  visualizationId: activeVisualization.id,
+                  layerId,
+                  layerIds,
                 })
               );
-
               removeLayerRef(layerId);
             }}
             toggleFullscreen={toggleFullscreen}
@@ -228,23 +195,10 @@ export function LayerPanels(
         visualizationState={visualization.state}
         layersMeta={props.framePublicAPI}
         onAddLayerClick={(layerType) => {
-          const id = generateId();
-          dispatchLens(
-            updateState({
-              subType: 'ADD_LAYER',
-              updater: (state) =>
-                appendLayer({
-                  activeVisualization,
-                  generateId: () => id,
-                  trackUiEvent,
-                  activeDatasource: datasourceMap[activeDatasourceId!],
-                  state,
-                  layerType,
-                }),
-            })
-          );
-
-          setNextFocusedLayerId(id);
+          const layerId = generateId();
+          dispatchLens(addLayer({ layerId, layerType }));
+          trackUiEvent('layer_added');
+          setNextFocusedLayerId(layerId);
         }}
       />
     </EuiForm>

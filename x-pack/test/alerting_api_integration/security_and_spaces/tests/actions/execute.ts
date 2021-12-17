@@ -97,6 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
                 'action:test.index-record',
                 reference
               );
+              // @ts-expect-error doesnt handle total: number
               expect(searchResult.body.hits.total.value).to.eql(1);
               const indexedRecord = searchResult.body.hits.hits[0];
               expect(indexedRecord._source).to.eql({
@@ -250,6 +251,7 @@ export default function ({ getService }: FtrProviderContext) {
                 'action:test.index-record',
                 reference
               );
+              // @ts-expect-error doesnt handle total: number
               expect(searchResult.body.hits.total.value).to.eql(1);
               const indexedRecord = searchResult.body.hits.hits[0];
               expect(indexedRecord._source).to.eql({

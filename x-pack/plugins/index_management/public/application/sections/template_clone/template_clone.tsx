@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageContentBody } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
@@ -36,10 +36,11 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
-  const { error: templateToCloneError, data: templateToClone, isLoading } = useLoadIndexTemplate(
-    decodedTemplateName,
-    isLegacy
-  );
+  const {
+    error: templateToCloneError,
+    data: templateToClone,
+    isLoading,
+  } = useLoadIndexTemplate(decodedTemplateName, isLegacy);
 
   const onSave = async (template: TemplateDeserialized) => {
     setIsSaving(true);

@@ -157,7 +157,13 @@ export const SystemGenericFileLine = React.memo<Props>(
             processExecutable={processExecutable}
           />
         </TokensFlexItem>
-        <Args args={args} contextId={contextId} eventId={id} processTitle={processTitle} />
+        <Args
+          args={args}
+          contextId={contextId}
+          eventId={id}
+          processTitle={processTitle}
+          isDraggable={isDraggable}
+        />
         <ExitCodeDraggable
           contextId={contextId}
           endgameExitCode={endgameExitCode}

@@ -6,7 +6,7 @@
  */
 
 export class InvariantError extends Error {
-  name = 'Invariant violation';
+  name = 'InvariantError';
 }
 
 /**

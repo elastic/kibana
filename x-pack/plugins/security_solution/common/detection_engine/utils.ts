@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, capitalize } from 'lodash';
 
 import type {
   EntriesArray,
@@ -51,7 +51,8 @@ export const normalizeThresholdField = (
     ? thresholdField
     : isEmpty(thresholdField)
     ? []
-    : [thresholdField!];
+    : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      [thresholdField!];
 };
 
 export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormalized => {
@@ -72,3 +73,11 @@ export const getRuleStatusText = (
     : value != null
     ? value
     : null;
+
+export const getCapitalizedRuleStatusText = (
+  value: RuleExecutionStatus | null | undefined
+): string | null => {
+  const status = getRuleStatusText(value);
+
+  return status != null ? capitalize(status) : null;
+};

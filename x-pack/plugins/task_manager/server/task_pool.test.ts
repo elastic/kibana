@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import sinon from 'sinon';
 import { of, Subject } from 'rxjs';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
@@ -18,6 +17,15 @@ import uuid from 'uuid';
 import { TaskRunningStage } from './task_running';
 
 describe('TaskPool', () => {
+  beforeEach(() => {
+    jest.useFakeTimers('modern');
+    jest.setSystemTime(new Date(2021, 12, 30));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   test('occupiedWorkers are a sum of running tasks', async () => {
     const pool = new TaskPool({
       maxWorkers$: of(200),
@@ -357,6 +365,33 @@ describe('TaskPool', () => {
     );
   });
 
+  test('only allows one task with the same id in the task pool', async () => {
+    const logger = loggingSystemMock.create().get();
+    const pool = new TaskPool({
+      maxWorkers$: of(2),
+      logger,
+    });
+
+    const shouldRun = mockRun();
+    const shouldNotRun = mockRun();
+
+    const taskId = uuid.v4();
+    const task1 = mockTask({ id: taskId, run: shouldRun });
+    const task2 = mockTask({
+      id: taskId,
+      run: shouldNotRun,
+      isSameTask() {
+        return true;
+      },
+    });
+
+    await pool.run([task1]);
+    await pool.run([task2]);
+
+    expect(shouldRun).toHaveBeenCalledTimes(1);
+    expect(shouldNotRun).not.toHaveBeenCalled();
+  });
+
   function mockRun() {
     return jest.fn(async () => {
       await sleep(0);
@@ -367,6 +402,7 @@ describe('TaskPool', () => {
   function mockTask(overrides = {}) {
     return {
       isExpired: false,
+      taskExecutionId: uuid.v4(),
       id: uuid.v4(),
       cancel: async () => undefined,
       markTaskAsRunning: jest.fn(async () => true),
@@ -386,6 +422,9 @@ describe('TaskPool', () => {
           timeout: '5m',
           createTaskRunner: jest.fn(),
         };
+      },
+      isSameTask() {
+        return false;
       },
       ...overrides,
     };

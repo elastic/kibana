@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "This rule detects network events that may indicate the use of Telnet traffic. Telnet is commonly used by system administrators to remotely control older or embed ed systems using the command line shell. It should almost never be directly exposed to the Internet, as it is frequently targeted and exploited by threat actors as an initial access or back-door vector. As a plain-text protocol, it may also expose usernames and passwords to anyone capable of observing the traffic.",
+  "description": "This rule detects network events that may indicate the use of Telnet traffic. Telnet is commonly used by system administrators to remotely control older or embedded systems using the command line shell. It should almost never be directly exposed to the Internet, as it is frequently targeted and exploited by threat actors as an initial access or backdoor vector. As a plain-text protocol, it may also expose usernames and passwords to anyone capable of observing the traffic.",
   "false_positives": [
     "IoT (Internet of Things) devices and networks may use telnet and can be excluded if desired. Some business work-flows may use Telnet for administration of older devices. These often have a predictable behavior. Telnet activity involving an unusual source or destination may be more suspicious. Telnet activity involving a production server that has no known associated Telnet work-flow or business requirement is often suspicious."
   ],
@@ -71,5 +71,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 8
+  "version": 9
 }

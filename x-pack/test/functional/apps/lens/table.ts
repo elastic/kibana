@@ -60,12 +60,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(2)).to.equal('Average of bytes');
 
-      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger');
+      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger', 1);
 
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('Average of bytes');
 
-      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger');
+      await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger', 4);
 
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('Top values of ip');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('@timestamp per 3 hours');
@@ -122,7 +122,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(styleObj['background-color']).to.be('rgb(235, 239, 245)');
     });
 
+    it('should keep the coloring consistent when changing mode', async () => {
+      // Change mode from percent to number
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      // check that all remained the same
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
+      expect(styleObj['background-color']).to.be('rgb(235, 239, 245)');
+    });
+
+    it('should keep the coloring consistent when moving to custom palette from default', async () => {
+      await PageObjects.lens.changePaletteTo('custom');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      // check that all remained the same
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
+      expect(styleObj['background-color']).to.be('rgb(235, 239, 245)');
+    });
+
     it('tweak the color stops numeric value', async () => {
+      // restore default palette and percent mode
+      await PageObjects.lens.changePaletteTo('temperature');
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_percent');
+      // now tweak the value
       await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '30', {
         clearWithKeyboard: true,
       });

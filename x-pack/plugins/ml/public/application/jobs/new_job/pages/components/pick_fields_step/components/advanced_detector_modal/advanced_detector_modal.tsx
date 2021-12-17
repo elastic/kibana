@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, Fragment, useState, useContext, useEffect } from 'react';
 import {
   EuiComboBox,
@@ -119,11 +119,10 @@ export const AdvancedDetectorModal: FC<Props> = ({
 
   const eventRateField = fields.find((f) => f.id === EVENT_RATE_FIELD_ID);
 
-  const onOptionChange = (func: (p: EuiComboBoxOptionOption) => any) => (
-    selectedOptions: EuiComboBoxOptionOption[]
-  ) => {
-    func(selectedOptions[0] || emptyOption);
-  };
+  const onOptionChange =
+    (func: (p: EuiComboBoxOptionOption) => any) => (selectedOptions: EuiComboBoxOptionOption[]) => {
+      func(selectedOptions[0] || emptyOption);
+    };
 
   function getAgg(title: string) {
     return aggs.find((a) => a.id === title) || null;

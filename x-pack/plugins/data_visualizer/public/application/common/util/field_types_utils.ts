@@ -7,47 +7,53 @@
 
 import { i18n } from '@kbn/i18n';
 import { JOB_FIELD_TYPES } from '../../../../common';
-import type { IndexPatternField } from '../../../../../../../src/plugins/data/common/index_patterns/fields';
+import type { IndexPatternField } from '../../../../../../../src/plugins/data/common';
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 
-export const jobTypeAriaLabels = {
-  BOOLEAN: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.booleanTypeAriaLabel', {
-    defaultMessage: 'boolean type',
-  }),
-  DATE: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.dateTypeAriaLabel', {
-    defaultMessage: 'date type',
-  }),
-  GEO_POINT: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.geoPointTypeAriaLabel', {
-    defaultMessage: '{geoPointParam} type',
-    values: {
-      geoPointParam: 'geo point',
-    },
-  }),
-  IP: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.ipTypeAriaLabel', {
-    defaultMessage: 'ip type',
-  }),
-  KEYWORD: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.keywordTypeAriaLabel', {
-    defaultMessage: 'keyword type',
-  }),
-  NUMBER: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.numberTypeAriaLabel', {
-    defaultMessage: 'number type',
-  }),
-  TEXT: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.textTypeAriaLabel', {
-    defaultMessage: 'text type',
-  }),
-  UNKNOWN: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.unknownTypeAriaLabel', {
-    defaultMessage: 'unknown type',
-  }),
+export const getJobTypeLabel = (type: string) => {
+  return type in jobTypeLabels ? jobTypeLabels[type as keyof typeof jobTypeLabels] : null;
 };
 
-export const getJobTypeAriaLabel = (type: string) => {
-  const requestedFieldType = Object.keys(JOB_FIELD_TYPES).find(
-    (k) => JOB_FIELD_TYPES[k as keyof typeof JOB_FIELD_TYPES] === type
-  );
-  if (requestedFieldType === undefined) {
-    return null;
-  }
-  return jobTypeAriaLabels[requestedFieldType as keyof typeof jobTypeAriaLabels];
+export const jobTypeLabels = {
+  [JOB_FIELD_TYPES.BOOLEAN]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.booleanTypeLabel', {
+    defaultMessage: 'Boolean',
+  }),
+  [JOB_FIELD_TYPES.DATE]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.dateTypeLabel', {
+    defaultMessage: 'Date',
+  }),
+  [JOB_FIELD_TYPES.GEO_POINT]: i18n.translate(
+    'xpack.dataVisualizer.fieldTypeIcon.geoPointTypeLabel',
+    {
+      defaultMessage: 'Geo point',
+    }
+  ),
+  [JOB_FIELD_TYPES.GEO_SHAPE]: i18n.translate(
+    'xpack.dataVisualizer.fieldTypeIcon.geoShapeTypeLabel',
+    {
+      defaultMessage: 'Geo shape',
+    }
+  ),
+  [JOB_FIELD_TYPES.IP]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.ipTypeLabel', {
+    defaultMessage: 'IP',
+  }),
+  [JOB_FIELD_TYPES.KEYWORD]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.keywordTypeLabel', {
+    defaultMessage: 'Keyword',
+  }),
+  [JOB_FIELD_TYPES.NUMBER]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.numberTypeLabel', {
+    defaultMessage: 'Number',
+  }),
+  [JOB_FIELD_TYPES.HISTOGRAM]: i18n.translate(
+    'xpack.dataVisualizer.fieldTypeIcon.histogramTypeLabel',
+    {
+      defaultMessage: 'Histogram',
+    }
+  ),
+  [JOB_FIELD_TYPES.TEXT]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.textTypeLabel', {
+    defaultMessage: 'Text',
+  }),
+  [JOB_FIELD_TYPES.UNKNOWN]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.unknownTypeLabel', {
+    defaultMessage: 'Unknown',
+  }),
 };
 
 // convert kibana types to ML Job types

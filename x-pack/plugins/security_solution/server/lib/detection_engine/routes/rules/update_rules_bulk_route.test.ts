@@ -23,7 +23,10 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe('update_rules_bulk', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('update_rules_bulk - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -33,10 +36,14 @@ describe('update_rules_bulk', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+    clients.rulesClient.update.mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    );
 
-    updateRulesBulkRoute(server.router, ml);
+    clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
+
+    updateRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -60,7 +67,7 @@ describe('update_rules_bulk', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(getUpdateBulkRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });

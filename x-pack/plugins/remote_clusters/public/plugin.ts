@@ -22,7 +22,8 @@ export interface RemoteClustersPluginSetup {
 }
 
 export class RemoteClustersUIPlugin
-  implements Plugin<RemoteClustersPluginSetup, void, Dependencies, any> {
+  implements Plugin<RemoteClustersPluginSetup, void, Dependencies, any>
+{
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   setup(
@@ -42,7 +43,7 @@ export class RemoteClustersUIPlugin
           defaultMessage: 'Remote Clusters',
         }),
         order: 7,
-        mount: async ({ element, setBreadcrumbs, history }) => {
+        mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
           const [core] = await getStartServices();
           const {
             chrome: { docTitle },
@@ -68,7 +69,8 @@ export class RemoteClustersUIPlugin
             element,
             i18nContext,
             { isCloudEnabled, cloudBaseUrl },
-            history
+            history,
+            theme$
           );
 
           return () => {

@@ -6,9 +6,10 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
+import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
-import { LinkAnchor } from '../../../../../common/components/links';
+import { HostDetailsLink } from '../../../../../common/components/links';
 import {
   TimelineId,
   TimelineTabs,
@@ -17,37 +18,45 @@ import {
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
-import { StatefulEventContext } from '../events/stateful_event_context';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { timelineActions } from '../../../../store/timeline';
-import { SecurityPageName } from '../../../../../../common/constants';
-import { useFormatUrl, getHostDetailsUrl } from '../../../../../common/components/link_to';
+import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   contextId: string;
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   eventId: string;
   fieldName: string;
   isDraggable: boolean;
+  isButton?: boolean;
+  onClick?: () => void;
   value: string | number | undefined | null;
+  title?: string;
 }
 
 const HostNameComponent: React.FC<Props> = ({
   fieldName,
+  Component,
   contextId,
   eventId,
   isDraggable,
+  isButton,
+  onClick,
+  title,
   value,
 }) => {
   const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
-
-  const { formatUrl } = useFormatUrl(SecurityPageName.hosts);
-  const isInTimelineContext = hostName && eventContext?.tabType && eventContext?.timelineID;
-
+  const isInTimelineContext =
+    hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
   const openHostDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();
+
+      if (onClick) {
+        onClick();
+      }
       if (eventContext && isInTimelineContext) {
         const { timelineID, tabType } = eventContext;
         const updatedExpandedDetail: TimelineExpandedDetailType = {
@@ -70,22 +79,24 @@ const HostNameComponent: React.FC<Props> = ({
         }
       }
     },
-    [dispatch, eventContext, isInTimelineContext, hostName]
+    [onClick, eventContext, isInTimelineContext, hostName, dispatch]
   );
 
+  // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
+  // When this component is used outside of timeline/alerts table (i.e. in the flyout) we would still like it to link to the Host Details page
   const content = useMemo(
     () => (
-      <LinkAnchor
-        href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
-        data-test-subj="host-details-button"
-        // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
-        // When this component is used outside of timeline (i.e. in the flyout) we would still like it to link to the Host Details page
+      <HostDetailsLink
+        Component={Component}
+        hostName={hostName}
+        isButton={isButton}
         onClick={isInTimelineContext ? openHostDetailsSidePanel : undefined}
+        title={title}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{hostName}</TruncatableText>
-      </LinkAnchor>
+      </HostDetailsLink>
     ),
-    [formatUrl, hostName, isInTimelineContext, openHostDetailsSidePanel]
+    [Component, hostName, isButton, isInTimelineContext, openHostDetailsSidePanel, title]
   );
 
   return isString(value) && hostName.length > 0 ? (

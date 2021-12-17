@@ -7,7 +7,7 @@
 
 import React, { FC, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -92,7 +92,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
 
   return (
     <>
-      <EuiFlyout maxWidth={600} onClose={onClose}>
+      <EuiFlyout maxWidth={600} onClose={onClose} data-test-subj="mlJobMgmtSyncFlyout">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
@@ -118,7 +118,12 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+              <EuiButtonEmpty
+                iconType="cross"
+                onClick={onClose}
+                flush="left"
+                data-test-subj="mlJobMgmtSyncFlyoutCloseButton"
+              >
                 <FormattedMessage
                   id="xpack.ml.management.syncSavedObjectsFlyout.closeButton"
                   defaultMessage="Close"
@@ -126,7 +131,12 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={sync} fill isDisabled={canSync === false || loading === true}>
+              <EuiButton
+                onClick={sync}
+                fill
+                isDisabled={canSync === false || loading === true}
+                data-test-subj="mlJobMgmtSyncFlyoutSyncButton"
+              >
                 <FormattedMessage
                   id="xpack.ml.management.syncSavedObjectsFlyout.syncButton"
                   defaultMessage="Synchronize"

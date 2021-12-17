@@ -2,6 +2,7 @@
   uri:
     url: "http://localhost:5601/api/status"
     status_code: [200, 401]
+    timeout: 120
   register: result
   until: result.status != 503
   retries: 3

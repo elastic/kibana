@@ -20,7 +20,7 @@ describe('updateAlertByIdRoute', () => {
     ({ clients, context } = requestContextMock.createTools());
 
     clients.rac.update.mockResolvedValue({
-      _index: '.alerts-observability-apm',
+      _index: '.alerts-observability.apm.alerts',
       _id: 'NoxgpHkBqbdrfX07MqXV',
       _version: 'WzM2MiwyXQ==',
       result: 'updated',
@@ -37,7 +37,7 @@ describe('updateAlertByIdRoute', () => {
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
-      _index: '.alerts-observability-apm',
+      _index: '.alerts-observability.apm.alerts',
       _id: 'NoxgpHkBqbdrfX07MqXV',
       _version: 'WzM2MiwyXQ==',
       result: 'updated',
@@ -58,7 +58,7 @@ describe('updateAlertByIdRoute', () => {
             body: {
               status: 'closed',
               ids: 'alert-1',
-              index: '.alerts-observability-apm*',
+              index: '.alerts-observability.apm.alerts*',
             },
           }),
           context
@@ -77,7 +77,7 @@ describe('updateAlertByIdRoute', () => {
             body: {
               notStatus: 'closed',
               ids: ['alert-1'],
-              index: '.alerts-observability-apm*',
+              index: '.alerts-observability.apm.alerts*',
             },
           }),
           context

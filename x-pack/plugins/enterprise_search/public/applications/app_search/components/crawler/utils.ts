@@ -16,6 +16,16 @@ import {
   CrawlerDomainValidationStep,
   CrawlRequestFromServer,
   CrawlRequest,
+  CrawlRequestStats,
+  CrawlRequestStatsFromServer,
+  CrawlRule,
+  CrawlerRules,
+  CrawlEventFromServer,
+  CrawlEvent,
+  CrawlConfigFromServer,
+  CrawlConfig,
+  CrawlRequestWithDetailsFromServer,
+  CrawlRequestWithDetails,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -29,6 +39,9 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
     crawl_rules: crawlRules,
     default_crawl_rule: defaultCrawlRule,
     entry_points: entryPoints,
+    deduplication_enabled: deduplicationEnabled,
+    deduplication_fields: deduplicationFields,
+    available_deduplication_fields: availableDeduplicationFields,
   } = payload;
 
   const clientPayload: CrawlerDomain = {
@@ -39,6 +52,9 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
     crawlRules,
     sitemaps,
     entryPoints,
+    deduplicationEnabled,
+    deduplicationFields,
+    availableDeduplicationFields,
   };
 
   if (lastCrawl) {
@@ -50,6 +66,30 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
   }
 
   return clientPayload;
+}
+
+export function crawlRequestStatsServerToClient(
+  crawlStats: CrawlRequestStatsFromServer
+): CrawlRequestStats {
+  const {
+    status: {
+      avg_response_time_msec: avgResponseTimeMSec,
+      crawl_duration_msec: crawlDurationMSec,
+      pages_visited: pagesVisited,
+      urls_allowed: urlsAllowed,
+      status_codes: statusCodes,
+    },
+  } = crawlStats;
+
+  return {
+    status: {
+      urlsAllowed,
+      pagesVisited,
+      avgResponseTimeMSec,
+      crawlDurationMSec,
+      statusCodes,
+    },
+  };
 }
 
 export function crawlRequestServerToClient(crawlRequest: CrawlRequestFromServer): CrawlRequest {
@@ -70,11 +110,80 @@ export function crawlRequestServerToClient(crawlRequest: CrawlRequestFromServer)
   };
 }
 
+export function crawlConfigServerToClient(crawlConfig: CrawlConfigFromServer): CrawlConfig {
+  const {
+    domain_allowlist: domainAllowlist,
+    seed_urls: seedUrls,
+    sitemap_urls: sitemapUrls,
+    max_crawl_depth: maxCrawlDepth,
+  } = crawlConfig;
+
+  return {
+    domainAllowlist,
+    seedUrls,
+    sitemapUrls,
+    maxCrawlDepth,
+  };
+}
+
+export function crawlEventServerToClient(event: CrawlEventFromServer): CrawlEvent {
+  const {
+    id,
+    stage,
+    status,
+    created_at: createdAt,
+    began_at: beganAt,
+    completed_at: completedAt,
+    type,
+    crawl_config: crawlConfig,
+  } = event;
+
+  return {
+    id,
+    stage,
+    status,
+    createdAt,
+    beganAt,
+    completedAt,
+    type,
+    crawlConfig: crawlConfigServerToClient(crawlConfig),
+  };
+}
+
+export function crawlRequestWithDetailsServerToClient(
+  event: CrawlRequestWithDetailsFromServer
+): CrawlRequestWithDetails {
+  const {
+    began_at: beganAt,
+    completed_at: completedAt,
+    crawl_config: crawlConfig,
+    created_at: createdAt,
+    id,
+    stats: crawlStats,
+    status,
+    type,
+  } = event;
+
+  return {
+    beganAt,
+    completedAt,
+    crawlConfig: crawlConfigServerToClient(crawlConfig),
+    createdAt,
+    id,
+    stats: crawlStats && crawlRequestStatsServerToClient(crawlStats),
+    status,
+    type,
+  };
+}
+
 export function crawlerDataServerToClient(payload: CrawlerDataFromServer): CrawlerData {
-  const { domains } = payload;
+  const { domains, events, most_recent_crawl_request: mostRecentCrawlRequest } = payload;
 
   return {
     domains: domains.map((domain) => crawlerDomainServerToClient(domain)),
+    events: events.map((event) => crawlEventServerToClient(event)),
+    mostRecentCrawlRequest:
+      mostRecentCrawlRequest && crawlRequestServerToClient(mostRecentCrawlRequest),
   };
 }
 
@@ -93,7 +202,7 @@ export function crawlDomainValidationToResult(
 
   if (warningResult) {
     return {
-      state: 'invalid',
+      state: 'warning',
       blockingFailure: !data.valid,
       message: warningResult.comment,
     };
@@ -125,6 +234,26 @@ export const getDeleteDomainSuccessMessage = (domainUrl: string) => {
       values: {
         domainUrl,
       },
+    }
+  );
+};
+
+export const getCrawlRulePathPatternTooltip = (crawlRule: CrawlRule) => {
+  if (crawlRule.rule === CrawlerRules.regex) {
+    return i18n.translate(
+      'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.regexPathPatternTooltip',
+      {
+        defaultMessage:
+          'The path pattern is a regular expression compatible with the Ruby language regular expression engine.',
+      }
+    );
+  }
+
+  return i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.pathPatternTooltip',
+    {
+      defaultMessage:
+        'The path pattern is a literal string except for the asterisk (*) character, which is a meta character that will match anything.',
     }
   );
 };

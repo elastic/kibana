@@ -107,26 +107,19 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
           const executeEvents = getEventsByAction(events, 'execute');
           const executeStartEvents = getEventsByAction(events, 'execute-start');
-          const executeActionEvents = getEventsByAction(events, 'execute-action');
           const newInstanceEvents = getEventsByAction(events, 'new-instance');
           const recoveredInstanceEvents = getEventsByAction(events, 'recovered-instance');
 
           // make sure the events are in the right temporal order
           const executeTimes = getTimestamps(executeEvents);
           const executeStartTimes = getTimestamps(executeStartEvents);
-          const executeActionTimes = getTimestamps(executeActionEvents);
           const newInstanceTimes = getTimestamps(newInstanceEvents);
           const recoveredInstanceTimes = getTimestamps(recoveredInstanceEvents);
 
           expect(executeTimes[0] < newInstanceTimes[0]).to.be(true);
-          expect(executeTimes[1] <= newInstanceTimes[0]).to.be(true);
+          expect(executeTimes[1] >= newInstanceTimes[0]).to.be(true);
           expect(executeTimes[2] > newInstanceTimes[0]).to.be(true);
-          expect(executeTimes[1] <= executeActionTimes[0]).to.be(true);
-          expect(executeTimes[2] > executeActionTimes[0]).to.be(true);
           expect(executeStartTimes.length === executeTimes.length).to.be(true);
-          executeStartTimes.forEach((est, index) =>
-            expect(est === executeTimes[index]).to.be(true)
-          );
           expect(recoveredInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
 
           // validate each event
@@ -140,7 +133,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   savedObjects: [
                     { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
                   ],
-                  message: `alert execution start: "${alertId}"`,
+                  message: `rule execution start: "${alertId}"`,
                   shouldHaveTask: true,
                   rule: {
                     id: alertId,
@@ -157,7 +150,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
                   ],
                   outcome: 'success',
-                  message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
+                  message: `rule executed: test.patternFiring:${alertId}: 'abc'`,
                   status: executeStatuses[executeCount++],
                   shouldHaveTask: true,
                   rule: {
@@ -189,15 +182,15 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 });
                 break;
               case 'new-instance':
-                validateInstanceEvent(event, `created new instance: 'instance'`, false);
+                validateInstanceEvent(event, `created new alert: 'instance'`, false);
                 break;
               case 'recovered-instance':
-                validateInstanceEvent(event, `instance 'instance' has recovered`, true);
+                validateInstanceEvent(event, `alert 'instance' has recovered`, true);
                 break;
               case 'active-instance':
                 validateInstanceEvent(
                   event,
-                  `active instance: 'instance' in actionGroup: 'default'`,
+                  `active alert: 'instance' in actionGroup: 'default'`,
                   false
                 );
                 break;
@@ -325,26 +318,19 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
           const executeEvents = getEventsByAction(events, 'execute');
           const executeStartEvents = getEventsByAction(events, 'execute-start');
-          const executeActionEvents = getEventsByAction(events, 'execute-action');
           const newInstanceEvents = getEventsByAction(events, 'new-instance');
           const recoveredInstanceEvents = getEventsByAction(events, 'recovered-instance');
 
           // make sure the events are in the right temporal order
           const executeTimes = getTimestamps(executeEvents);
           const executeStartTimes = getTimestamps(executeStartEvents);
-          const executeActionTimes = getTimestamps(executeActionEvents);
           const newInstanceTimes = getTimestamps(newInstanceEvents);
           const recoveredInstanceTimes = getTimestamps(recoveredInstanceEvents);
 
           expect(executeTimes[0] < newInstanceTimes[0]).to.be(true);
-          expect(executeTimes[1] <= newInstanceTimes[0]).to.be(true);
+          expect(executeTimes[1] >= newInstanceTimes[0]).to.be(true);
           expect(executeTimes[2] > newInstanceTimes[0]).to.be(true);
-          expect(executeTimes[1] <= executeActionTimes[0]).to.be(true);
-          expect(executeTimes[2] > executeActionTimes[0]).to.be(true);
           expect(executeStartTimes.length === executeTimes.length).to.be(true);
-          executeStartTimes.forEach((est, index) =>
-            expect(est === executeTimes[index]).to.be(true)
-          );
           expect(recoveredInstanceTimes[0] > newInstanceTimes[0]).to.be(true);
 
           // validate each event
@@ -358,7 +344,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   savedObjects: [
                     { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
                   ],
-                  message: `alert execution start: "${alertId}"`,
+                  message: `rule execution start: "${alertId}"`,
                   shouldHaveTask: true,
                   rule: {
                     id: alertId,
@@ -375,7 +361,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
                   ],
                   outcome: 'success',
-                  message: `alert executed: test.patternFiring:${alertId}: 'abc'`,
+                  message: `rule executed: test.patternFiring:${alertId}: 'abc'`,
                   status: executeStatuses[executeCount++],
                   shouldHaveTask: true,
                   rule: {
@@ -412,10 +398,10 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 });
                 break;
               case 'new-instance':
-                validateInstanceEvent(event, `created new instance: 'instance'`, false);
+                validateInstanceEvent(event, `created new alert: 'instance'`, false);
                 break;
               case 'recovered-instance':
-                validateInstanceEvent(event, `instance 'instance' has recovered`, true);
+                validateInstanceEvent(event, `alert 'instance' has recovered`, true);
                 break;
               case 'active-instance':
                 expect(
@@ -425,7 +411,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 ).to.be(true);
                 validateInstanceEvent(
                   event,
-                  `active instance: 'instance' in actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})'`,
+                  `active alert: 'instance' in actionGroup(subgroup): 'default(${event?.kibana?.alerting?.action_subgroup})'`,
                   false
                 );
                 break;
@@ -490,8 +476,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             });
           });
 
-          const startEvent = events[0];
-          const executeEvent = events[1];
+          const executeEvents = getEventsByAction(events, 'execute');
+          const executeStartEvents = getEventsByAction(events, 'execute-start');
+
+          const startEvent = executeStartEvents[0];
+          const executeEvent = executeEvents[0];
 
           expect(startEvent).to.be.ok();
           expect(executeEvent).to.be.ok();
@@ -501,7 +490,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             savedObjects: [
               { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
             ],
-            message: `alert execution start: "${alertId}"`,
+            message: `rule execution start: "${alertId}"`,
             shouldHaveTask: true,
             rule: {
               id: alertId,
@@ -515,7 +504,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             spaceId: space.id,
             savedObjects: [{ type: 'alert', id: alertId, rel: 'primary', type_id: 'test.throw' }],
             outcome: 'failure',
-            message: `alert execution failure: test.throw:${alertId}: 'abc'`,
+            message: `rule execution failure: test.throw:${alertId}: 'abc'`,
             errorMessage: 'this alert is intended to fail',
             status: 'error',
             reason: 'execute',
@@ -586,6 +575,7 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   }
 
   const duration = event?.event?.duration;
+  const timestamp = Date.parse(event?.['@timestamp'] || 'undefined');
   const eventStart = Date.parse(event?.event?.start || 'undefined');
   const eventEnd = Date.parse(event?.event?.end || 'undefined');
   const dateNow = Date.now();
@@ -605,6 +595,7 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
       expect(durationDiff < 1).to.equal(true);
       expect(eventStart <= eventEnd).to.equal(true);
       expect(eventEnd <= dateNow).to.equal(true);
+      expect(eventEnd <= timestamp).to.equal(true);
     }
 
     if (shouldHaveEventEnd === false) {

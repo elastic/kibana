@@ -30,21 +30,21 @@ export const buildHostRulesQuery = ({
   ];
 
   return {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex, // can stop getting this from sourcerer and assume default detections index if we want
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: true,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggs: {
         risk_score: {
           sum: {
-            field: 'signal.rule.risk_score',
+            field: 'kibana.alert.rule.risk_score',
           },
         },
         rule_name: {
           terms: {
-            field: 'signal.rule.name',
+            field: 'kibana.alert.rule.name',
             order: {
               risk_score: Direction.desc,
             },
@@ -52,19 +52,19 @@ export const buildHostRulesQuery = ({
           aggs: {
             risk_score: {
               sum: {
-                field: 'signal.rule.risk_score',
+                field: 'kibana.alert.rule.risk_score',
               },
             },
             rule_type: {
               terms: {
-                field: 'signal.rule.type',
+                field: 'kibana.alert.rule.type',
               },
             },
           },
         },
         rule_count: {
           cardinality: {
-            field: 'signal.rule.name',
+            field: 'kibana.alert.rule.name',
           },
         },
       },

@@ -6,6 +6,7 @@
     "declaration": true,
     "declarationMap": true
   },
+  "exclude": ["public/applications/**/cypress/**/*"],
   "include": [
     "common/**/*",
     "public/**/*",

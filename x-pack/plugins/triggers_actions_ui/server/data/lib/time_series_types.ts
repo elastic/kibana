@@ -19,7 +19,7 @@ import {
   getDateStartAfterDateEndErrorMessage,
 } from './date_range_info';
 
-export { TimeSeriesResult, TimeSeriesResultRow, MetricResult } from '../../../common/data';
+export type { TimeSeriesResult, TimeSeriesResultRow, MetricResult } from '../../../common/data';
 
 // The parameters here are very similar to the alert parameters.
 // Missing are `comparator` and `threshold`, which aren't needed to generate

@@ -13,6 +13,7 @@ import {
   EuiProgress,
   EuiConfirmModal,
   EuiWindowEvent,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { debounce } from 'lodash/fp';
@@ -20,11 +21,10 @@ import { History } from 'history';
 
 import {
   useRulesTable,
-  useRulesStatuses,
   CreatePreBuiltRules,
   FilterOptions,
-  Rule,
   RulesSortingFields,
+  Rule,
 } from '../../../../containers/detection_engine/rules';
 
 import { FormatUrl } from '../../../../../common/components/link_to';
@@ -32,14 +32,12 @@ import { HeaderSection } from '../../../../../common/components/header_section';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { useStateToaster } from '../../../../../common/components/toasters';
 import { Loader } from '../../../../../common/components/loader';
-import { Panel } from '../../../../../common/components/panel';
 import { PrePackagedRulesPrompt } from '../../../../components/rules/pre_packaged_rules/load_empty_prompt';
-import { AllRulesTables, SortingType } from '../../../../components/rules/all_rules_tables';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
 import { getBatchItems } from './batch_actions';
-import { getColumns, getMonitoringColumns } from './columns';
+import { getRulesColumns, getMonitoringColumns } from './columns';
 import { showRulesTable } from './helpers';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
@@ -96,6 +94,7 @@ export const RulesTables = React.memo<RulesTableProps>(
     setRefreshRulesData,
     selectedTab,
   }) => {
+    const docLinks = useKibana().services.docLinks;
     const [initLoading, setInitLoading] = useState(true);
 
     const {
@@ -145,7 +144,6 @@ export const RulesTables = React.memo<RulesTableProps>(
       reFetchRules,
     } = rulesTable;
 
-    const { loading: isLoadingRulesStatuses, rulesStatuses } = useRulesStatuses(rules);
     const [, dispatchToaster] = useStateToaster();
     const mlCapabilities = useMlCapabilities();
     const { navigateToApp } = useKibana().services.application;
@@ -167,7 +165,7 @@ export const RulesTables = React.memo<RulesTableProps>(
     }, [loadingRuleIds, loadingRulesAction]);
 
     const sorting = useMemo(
-      (): SortingType => ({
+      () => ({
         sort: {
           field: filterOptions.sortField,
           direction: filterOptions.sortOrder,
@@ -182,15 +180,13 @@ export const RulesTables = React.memo<RulesTableProps>(
       rulesNotUpdated
     );
 
-    const hasActionsPrivileges = useMemo(() => (isBoolean(actions.show) ? actions.show : true), [
-      actions,
-    ]);
+    const hasActionsPrivileges = useMemo(
+      () => (isBoolean(actions.show) ? actions.show : true),
+      [actions]
+    );
 
-    const [
-      isDeleteConfirmationVisible,
-      showDeleteConfirmation,
-      hideDeleteConfirmation,
-    ] = useBoolState();
+    const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
+      useBoolState();
 
     const [confirmDeletion, handleDeletionConfirm, handleDeletionCancel] = useAsyncConfirmation({
       onInit: showDeleteConfirmation,
@@ -267,12 +263,10 @@ export const RulesTables = React.memo<RulesTableProps>(
       [updateOptions, setLastRefreshDate]
     );
 
-    const rulesColumns = useMemo(() => {
-      return getColumns({
+    const [rulesColumns, monitoringColumns] = useMemo(() => {
+      const props = {
         dispatch,
-        dispatchToaster,
         formatUrl,
-        history,
         hasMlPermissions,
         hasPermissions,
         loadingRuleIds:
@@ -281,10 +275,14 @@ export const RulesTables = React.memo<RulesTableProps>(
             ? loadingRuleIds
             : [],
         navigateToApp,
+        hasReadActionsPrivileges: hasActionsPrivileges,
+        dispatchToaster,
+        history,
         reFetchRules,
         refetchPrePackagedRulesStatus,
-        hasReadActionsPrivileges: hasActionsPrivileges,
-      });
+        docLinks,
+      };
+      return [getRulesColumns(props), getMonitoringColumns(props)];
     }, [
       dispatch,
       dispatchToaster,
@@ -298,11 +296,7 @@ export const RulesTables = React.memo<RulesTableProps>(
       loadingRulesAction,
       navigateToApp,
       reFetchRules,
-    ]);
-
-    const monitoringColumns = useMemo(() => getMonitoringColumns(navigateToApp, formatUrl), [
-      navigateToApp,
-      formatUrl,
+      docLinks,
     ]);
 
     useEffect(() => {
@@ -310,10 +304,10 @@ export const RulesTables = React.memo<RulesTableProps>(
     }, [reFetchRules, setRefreshRulesData]);
 
     useEffect(() => {
-      if (initLoading && !loading && !isLoadingRules && !isLoadingRulesStatuses) {
+      if (initLoading && !loading && !isLoadingRules) {
         setInitLoading(false);
       }
-    }, [initLoading, loading, isLoadingRules, isLoadingRulesStatuses]);
+    }, [initLoading, loading, isLoadingRules]);
 
     const handleCreatePrePackagedRules = useCallback(async () => {
       if (createPrePackagedRules != null) {
@@ -449,6 +443,14 @@ export const RulesTables = React.memo<RulesTableProps>(
       [initLoading, prePackagedRuleStatus, rulesCustomInstalled]
     );
 
+    const tableProps =
+      selectedTab === AllRulesTabs.rules
+        ? {
+            'data-test-subj': 'rules-table',
+            columns: rulesColumns,
+          }
+        : { 'data-test-subj': 'monitoring-table', columns: monitoringColumns };
+
     return (
       <>
         <EuiWindowEvent event="mousemove" handler={debounceResetIdleTimer} />
@@ -457,114 +459,106 @@ export const RulesTables = React.memo<RulesTableProps>(
         <EuiWindowEvent event="keydown" handler={debounceResetIdleTimer} />
         <EuiWindowEvent event="scroll" handler={debounceResetIdleTimer} />
         <EuiWindowEvent event="load" handler={debounceResetIdleTimer} />
-        <Panel
-          loading={loading || isLoadingRules || isLoadingRulesStatuses}
-          data-test-subj="allRulesPanel"
+        {!initLoading && (loading || isLoadingRules || isLoadingAnActionOnRule) && isRefreshing && (
+          <EuiProgress
+            data-test-subj="loadingRulesInfoProgress"
+            size="xs"
+            position="absolute"
+            color="accent"
+          />
+        )}
+        <HeaderSection
+          split
+          growLeftSplit={false}
+          title={i18n.ALL_RULES}
+          subtitle={timelines.getLastUpdated({
+            showUpdating: loading || isLoadingRules,
+            updatedAt: lastUpdated,
+          })}
         >
+          {shouldShowRulesTable && (
+            <RulesTableFilters
+              onFilterChanged={onFilterChangedCallback}
+              rulesCustomInstalled={rulesCustomInstalled}
+              rulesInstalled={rulesInstalled}
+              currentFilterTags={filterOptions.tags}
+            />
+          )}
+        </HeaderSection>
+        {!initLoading &&
+          (loading || isLoadingRules || isLoadingAnActionOnRule) &&
+          !isRefreshing && <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />}
+        {shouldShowPrepackagedRulesPrompt && (
+          <PrePackagedRulesPrompt
+            createPrePackagedRules={handleCreatePrePackagedRules}
+            loading={loadingCreatePrePackagedRules}
+            userHasPermissions={hasPermissions}
+          />
+        )}
+        {initLoading && (
+          <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
+        )}
+        {showIdleModal && (
+          <EuiConfirmModal
+            title={i18n.REFRESH_PROMPT_TITLE}
+            onCancel={handleIdleModalContinue}
+            onConfirm={handleIdleModalContinue}
+            confirmButtonText={i18n.REFRESH_PROMPT_CONFIRM}
+            defaultFocusedButton="confirm"
+            data-test-subj="allRulesIdleModal"
+          >
+            <p>{i18n.REFRESH_PROMPT_BODY}</p>
+          </EuiConfirmModal>
+        )}
+        {isDeleteConfirmationVisible && (
+          <EuiConfirmModal
+            title={i18n.DELETE_CONFIRMATION_TITLE}
+            onCancel={handleDeletionCancel}
+            onConfirm={handleDeletionConfirm}
+            confirmButtonText={i18n.DELETE_CONFIRMATION_CONFIRM}
+            cancelButtonText={i18n.DELETE_CONFIRMATION_CANCEL}
+            buttonColor="danger"
+            defaultFocusedButton="confirm"
+            data-test-subj="allRulesDeleteConfirmationModal"
+          >
+            <p>{i18n.DELETE_CONFIRMATION_BODY}</p>
+          </EuiConfirmModal>
+        )}
+        {shouldShowRulesTable && (
           <>
-            {!initLoading &&
-              (loading || isLoadingRules || isLoadingAnActionOnRule) &&
-              isRefreshing && (
-                <EuiProgress
-                  data-test-subj="loadingRulesInfoProgress"
-                  size="xs"
-                  position="absolute"
-                  color="accent"
+            <AllRulesUtilityBar
+              canBulkEdit={hasPermissions}
+              hasPagination={hasPagination}
+              paginationTotal={pagination.total ?? 0}
+              numberSelectedItems={selectedItemsCount}
+              onGetBatchItemsPopoverContent={getBatchItemsPopoverContent}
+              onRefresh={handleManualRefresh}
+              isAutoRefreshOn={isRefreshOn}
+              onRefreshSwitch={handleAutoRefreshSwitch}
+              isAllSelected={isAllSelected}
+              onToggleSelectAll={toggleSelectAll}
+              showBulkActions
+            />
+            <EuiBasicTable
+              itemId="id"
+              items={rules}
+              isSelectable={hasPermissions}
+              noItemsMessage={
+                <EuiEmptyPrompt
+                  title={<h3>{i18n.NO_RULES}</h3>}
+                  titleSize="xs"
+                  body={i18n.NO_RULES_BODY}
                 />
-              )}
-            <HeaderSection
-              split
-              growLeftSplit={false}
-              title={i18n.ALL_RULES}
-              subtitle={timelines.getLastUpdated({
-                showUpdating: loading || isLoadingRules || isLoadingRulesStatuses,
-                updatedAt: lastUpdated,
-              })}
-            >
-              {shouldShowRulesTable && (
-                <RulesTableFilters
-                  onFilterChanged={onFilterChangedCallback}
-                  rulesCustomInstalled={rulesCustomInstalled}
-                  rulesInstalled={rulesInstalled}
-                  currentFilterTags={filterOptions.tags}
-                />
-              )}
-            </HeaderSection>
-
-            {!initLoading &&
-              (loading || isLoadingRules || isLoadingAnActionOnRule) &&
-              !isRefreshing && (
-                <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
-              )}
-
-            {shouldShowPrepackagedRulesPrompt && (
-              <PrePackagedRulesPrompt
-                createPrePackagedRules={handleCreatePrePackagedRules}
-                loading={loadingCreatePrePackagedRules}
-                userHasPermissions={hasPermissions}
-              />
-            )}
-            {initLoading && (
-              <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
-            )}
-            {showIdleModal && (
-              <EuiConfirmModal
-                title={i18n.REFRESH_PROMPT_TITLE}
-                onCancel={handleIdleModalContinue}
-                onConfirm={handleIdleModalContinue}
-                confirmButtonText={i18n.REFRESH_PROMPT_CONFIRM}
-                defaultFocusedButton="confirm"
-                data-test-subj="allRulesIdleModal"
-              >
-                <p>{i18n.REFRESH_PROMPT_BODY}</p>
-              </EuiConfirmModal>
-            )}
-            {isDeleteConfirmationVisible && (
-              <EuiConfirmModal
-                title={i18n.DELETE_CONFIRMATION_TITLE}
-                onCancel={handleDeletionCancel}
-                onConfirm={handleDeletionConfirm}
-                confirmButtonText={i18n.DELETE_CONFIRMATION_CONFIRM}
-                cancelButtonText={i18n.DELETE_CONFIRMATION_CANCEL}
-                buttonColor="danger"
-                defaultFocusedButton="confirm"
-                data-test-subj="allRulesDeleteConfirmationModal"
-              >
-                <p>{i18n.DELETE_CONFIRMATION_BODY}</p>
-              </EuiConfirmModal>
-            )}
-            {shouldShowRulesTable && (
-              <>
-                <AllRulesUtilityBar
-                  canBulkEdit={hasPermissions}
-                  hasPagination={hasPagination}
-                  paginationTotal={pagination.total ?? 0}
-                  numberSelectedItems={selectedItemsCount}
-                  onGetBatchItemsPopoverContent={getBatchItemsPopoverContent}
-                  onRefresh={handleManualRefresh}
-                  isAutoRefreshOn={isRefreshOn}
-                  onRefreshSwitch={handleAutoRefreshSwitch}
-                  isAllSelected={isAllSelected}
-                  onToggleSelectAll={toggleSelectAll}
-                  showBulkActions
-                />
-                <AllRulesTables
-                  selectedTab={selectedTab}
-                  euiBasicTableSelectionProps={euiBasicTableSelectionProps}
-                  hasPermissions={hasPermissions}
-                  monitoringColumns={monitoringColumns}
-                  pagination={paginationMemo}
-                  rules={rules}
-                  rulesColumns={rulesColumns}
-                  rulesStatuses={rulesStatuses}
-                  sorting={sorting}
-                  tableOnChangeCallback={tableOnChangeCallback}
-                  tableRef={tableRef}
-                />
-              </>
-            )}
+              }
+              onChange={tableOnChangeCallback}
+              pagination={paginationMemo}
+              ref={tableRef}
+              selection={euiBasicTableSelectionProps}
+              sorting={sorting}
+              {...tableProps}
+            />
           </>
-        </Panel>
+        )}
       </>
     );
   }

@@ -5,6 +5,7 @@
 /.chromium
 .DS_Store
 .node_binaries
+/.beats
 .native_modules
 node_modules
 !/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
@@ -18,6 +19,7 @@ target
 .idea
 *.iml
 *.log
+types.eslint.config.js
 
 # Ignore example plugin builds
 /examples/*/build
@@ -85,3 +87,8 @@ report.asciidoc
 /bazel
 /bazel-*
 .bazelrc.user
+
+elastic-agent-*
+fleet-server-*
+elastic-agent.yml
+fleet-server.yml

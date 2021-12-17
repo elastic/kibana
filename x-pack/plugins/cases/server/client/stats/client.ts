@@ -19,9 +19,9 @@ import {
   throwErrors,
   excess,
   CasesStatusRequestRt,
-} from '../../../common';
+} from '../../../common/api';
 import { Operations } from '../../authorization';
-import { createCaseError } from '../../common';
+import { createCaseError } from '../../common/error';
 import { constructQueryOptions } from '../utils';
 
 /**
@@ -58,10 +58,8 @@ async function getStatusTotalsByType(
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const {
-      filter: authorizationFilter,
-      ensureSavedObjectsAreAuthorized,
-    } = await authorization.getAuthorizationFilter(Operations.getCaseStatuses);
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(Operations.getCaseStatuses);
 
     // casesStatuses are bounded by us. No need to limit concurrent calls.
     const [openCases, inProgressCases, closedCases] = await Promise.all([

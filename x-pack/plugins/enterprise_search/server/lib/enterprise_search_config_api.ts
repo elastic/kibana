@@ -12,6 +12,7 @@ import { kibanaPackageJson } from '@kbn/utils';
 
 import { KibanaRequest, Logger } from 'src/core/server';
 
+import { isVersionMismatch } from '../../common/is_version_mismatch';
 import { stripTrailingSlash } from '../../common/strip_slashes';
 import { InitialAppData } from '../../common/types';
 import { ConfigType } from '../index';
@@ -68,13 +69,14 @@ export const callEnterpriseSearchConfigAPI = async ({
     warnMismatchedVersions(data?.version?.number, log);
 
     return {
+      enterpriseSearchVersion: data?.version?.number,
+      kibanaVersion: kibanaPackageJson.version,
       access: {
         hasAppSearchAccess: !!data?.current_user?.access?.app_search,
         hasWorkplaceSearchAccess: !!data?.current_user?.access?.workplace_search,
       },
       publicUrl: stripTrailingSlash(data?.settings?.external_url),
       readOnlyMode: !!data?.settings?.read_only_mode,
-      ilmEnabled: !!data?.settings?.ilm_enabled,
       searchOAuth: {
         clientId: data?.settings?.search_oauth?.client_id,
         redirectUrl: data?.settings?.search_oauth?.redirect_url,
@@ -124,13 +126,10 @@ export const callEnterpriseSearchConfigAPI = async ({
           id: data?.current_user?.workplace_search?.account?.id,
           groups: data?.current_user?.workplace_search?.account?.groups || [],
           isAdmin: !!data?.current_user?.workplace_search?.account?.is_admin,
-          canCreatePersonalSources: !!data?.current_user?.workplace_search?.account
-            ?.can_create_personal_sources,
-          canCreateInvitations: !!data?.current_user?.workplace_search?.account
-            ?.can_create_invitations,
-          isCurated: !!data?.current_user?.workplace_search?.account?.is_curated,
-          viewedOnboardingPage: !!data?.current_user?.workplace_search?.account
-            ?.viewed_onboarding_page,
+          canCreatePrivateSources:
+            !!data?.current_user?.workplace_search?.account?.can_create_private_sources,
+          viewedOnboardingPage:
+            !!data?.current_user?.workplace_search?.account?.viewed_onboarding_page,
         },
       },
     };
@@ -151,7 +150,7 @@ export const callEnterpriseSearchConfigAPI = async ({
 export const warnMismatchedVersions = (enterpriseSearchVersion: string, log: Logger) => {
   const kibanaVersion = kibanaPackageJson.version;
 
-  if (enterpriseSearchVersion !== kibanaVersion) {
+  if (isVersionMismatch(enterpriseSearchVersion, kibanaVersion)) {
     log.warn(
       `Your Kibana instance (v${kibanaVersion}) is not the same version as your Enterprise Search instance (v${enterpriseSearchVersion}), which may cause unexpected behavior. Use matching versions for the best experience.`
     );

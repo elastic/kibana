@@ -6,7 +6,8 @@
  */
 
 import type { EuiDataGridColumn } from '@elastic/eui';
-import type { Filter, FilterManager } from '../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
+import type { FilterManager } from '../../../../../../src/plugins/data/public';
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,
@@ -48,6 +49,8 @@ export interface TGridModel extends TGridModelSettings {
     start: string;
     end: string;
   };
+  /** Kibana data view id **/
+  dataViewId: string | null; // null if legacy pre-8.0 timeline
   /** Events to not be rendered **/
   deletedEventIds: string[];
   /** This holds the view information for the flyout when viewing timeline in a consuming view (i.e. hosts page) or the side panel in the primary timeline view */
@@ -82,19 +85,26 @@ export interface TGridModel extends TGridModelSettings {
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   savedObjectId: string | null;
   version: string | null;
+  initialized?: boolean;
 }
 
 export type TGridModelForTimeline = Pick<
   TGridModel,
   | 'columns'
+  | 'defaultColumns'
   | 'dataProviders'
   | 'dateRange'
+  | 'dataViewId'
   | 'deletedEventIds'
+  | 'documentType'
   | 'excludedRowRendererIds'
   | 'expandedDetail'
   | 'filters'
+  | 'filterManager'
+  | 'footerText'
   | 'graphEventId'
   | 'kqlQuery'
+  | 'queryFields'
   | 'id'
   | 'indexNames'
   | 'isLoading'
@@ -102,11 +112,14 @@ export type TGridModelForTimeline = Pick<
   | 'itemsPerPage'
   | 'itemsPerPageOptions'
   | 'loadingEventIds'
+  | 'loadingText'
+  | 'selectAll'
   | 'showCheckboxes'
   | 'sort'
   | 'selectedEventIds'
   | 'savedObjectId'
   | 'title'
+  | 'unit'
   | 'version'
 >;
 
@@ -114,6 +127,8 @@ export type SubsetTGridModel = Readonly<
   Pick<
     TGridModel,
     | 'columns'
+    | 'defaultColumns'
+    | 'dataViewId'
     | 'dateRange'
     | 'deletedEventIds'
     | 'excludedRowRendererIds'

@@ -15,9 +15,11 @@ import {
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../Links/url_helpers';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useUxUrlParams } from '../../../context/url_params_context/use_ux_url_params';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { Environment } from '../../../../common/environment_rt';
+import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 
 function updateEnvironmentUrl(
   history: History,
@@ -60,21 +62,49 @@ function getOptions(environments: string[]) {
   ];
 }
 
-export function EnvironmentFilter() {
-  const history = useHistory();
-  const location = useLocation();
-  const apmParams = useApmParams('/*', true);
-  const { urlParams } = useUrlParams();
+export function ApmEnvironmentFilter() {
+  const { status, environments, environment } = useEnvironmentsContext();
 
-  const { environment, start, end } = urlParams;
-  const { environments, status = 'loading' } = useEnvironmentsFetcher({
-    serviceName:
-      apmParams && 'serviceName' in apmParams.path
-        ? apmParams.path.serviceName
-        : undefined,
+  return (
+    <EnvironmentFilter
+      status={status}
+      environment={environment}
+      environments={environments}
+    />
+  );
+}
+
+export function UxEnvironmentFilter() {
+  const {
+    urlParams: { start, end, environment, serviceName },
+  } = useUxUrlParams();
+
+  const { environments, status } = useEnvironmentsFetcher({
+    serviceName,
     start,
     end,
   });
+
+  return (
+    <EnvironmentFilter
+      environment={(environment || ENVIRONMENT_ALL.value) as Environment}
+      status={status}
+      environments={environments as Environment[]}
+    />
+  );
+}
+
+export function EnvironmentFilter({
+  environment,
+  environments,
+  status,
+}: {
+  environment: Environment;
+  environments: Environment[];
+  status: FETCH_STATUS;
+}) {
+  const history = useHistory();
+  const location = useLocation();
 
   // Set the min-width so we don't see as much collapsing of the select during
   // the loading state. 200px is what is looks like if "production" is
@@ -85,16 +115,18 @@ export function EnvironmentFilter() {
 
   return (
     <EuiSelect
+      fullWidth
       prepend={i18n.translate('xpack.apm.filter.environment.label', {
         defaultMessage: 'Environment',
       })}
       options={options}
-      value={environment || ENVIRONMENT_ALL.value}
+      value={environment}
       onChange={(event) => {
         updateEnvironmentUrl(history, location, event.target.value);
       }}
-      isLoading={status === 'loading'}
+      isLoading={status === FETCH_STATUS.LOADING}
       style={{ minWidth }}
+      data-test-subj="environmentFilter"
     />
   );
 }

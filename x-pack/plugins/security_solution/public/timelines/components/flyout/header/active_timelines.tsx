@@ -10,7 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative } from '@kbn/i18n-react';
 
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_events_count';
@@ -39,6 +39,12 @@ const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
   > span {
     padding: 0;
   }
+`;
+
+const TitleConatiner = styled(EuiFlexItem)`
+  overflow: hidden;
+  display: inline-block;
+  text-overflow: ellipsis;
 `;
 
 const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
@@ -71,6 +77,7 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
         <FormattedRelative
           data-test-subj="timeline-status"
           key="timeline-status-autosaved"
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           value={new Date(updated!)}
         />
       </>
@@ -100,7 +107,7 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
             />
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+        <TitleConatiner grow={false}>{title}</TitleConatiner>
         {!isOpen && (
           <EuiFlexItem grow={false}>
             <TimelineEventsCountBadge />

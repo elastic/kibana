@@ -14,6 +14,8 @@ import { mockEngineValues } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
+
 import { ActiveField } from './types';
 
 import { SearchUILogic } from './';
@@ -21,7 +23,7 @@ import { SearchUILogic } from './';
 describe('SearchUILogic', () => {
   const { mount } = new LogicMounter(SearchUILogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors, setErrorMessage } = mockFlashMessageHelpers;
+  const { setErrorMessage } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -160,7 +162,7 @@ describe('SearchUILogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/app_search/engines/engine1/search_ui/field_config'
+          '/internal/app_search/engines/engine1/search_ui/field_config'
         );
         expect(SearchUILogic.actions.onFieldDataLoaded).toHaveBeenCalledWith({
           validFields: ['test'],
@@ -182,14 +184,9 @@ describe('SearchUILogic', () => {
         );
       });
 
-      it('handles errors', async () => {
-        http.get.mockReturnValueOnce(Promise.reject('error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-
         SearchUILogic.actions.loadFieldData();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });

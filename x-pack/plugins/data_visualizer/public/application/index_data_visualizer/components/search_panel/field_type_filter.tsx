@@ -8,32 +8,28 @@
 import React, { FC, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JOB_FIELD_TYPES_OPTIONS, JobFieldType } from '../../../../../common';
+import { JobFieldType } from '../../../../../common';
 import { FieldTypeIcon } from '../../../common/components/field_type_icon';
 import { MultiSelectPicker, Option } from '../../../common/components/multi_select_picker';
+import { jobTypeLabels } from '../../../common/util/field_types_utils';
 
-export const DatavisualizerFieldTypeFilter: FC<{
+export const DataVisualizerFieldTypeFilter: FC<{
   indexedFieldTypes: JobFieldType[];
   setVisibleFieldTypes(q: string[]): void;
   visibleFieldTypes: string[];
 }> = ({ indexedFieldTypes, setVisibleFieldTypes, visibleFieldTypes }) => {
   const options: Option[] = useMemo(() => {
     return indexedFieldTypes.map((indexedFieldName) => {
-      const item = JOB_FIELD_TYPES_OPTIONS[indexedFieldName];
+      const label = jobTypeLabels[indexedFieldName] ?? '';
 
       return {
         value: indexedFieldName,
         name: (
           <EuiFlexGroup>
-            <EuiFlexItem grow={true}> {item.name}</EuiFlexItem>
+            <EuiFlexItem grow={true}> {label}</EuiFlexItem>
             {indexedFieldName && (
               <EuiFlexItem grow={false}>
-                <FieldTypeIcon
-                  type={indexedFieldName}
-                  fieldName={item.name}
-                  tooltipEnabled={false}
-                  needsAria={true}
-                />
+                <FieldTypeIcon type={indexedFieldName} tooltipEnabled={false} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

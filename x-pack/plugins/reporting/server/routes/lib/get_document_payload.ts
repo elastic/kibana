@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Stream } from 'stream';
 // @ts-ignore
 import contentDisposition from 'content-disposition';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
@@ -12,6 +13,7 @@ import { ReportApiJSON } from '../../../common/types';
 import { ReportingCore } from '../../';
 import { getContentStream, statuses } from '../../lib';
 import { ExportTypeDefinition } from '../../types';
+import { jobsQueryFactory } from './jobs_query';
 
 export interface ErrorFromPayload {
   message: string;
@@ -20,9 +22,9 @@ export interface ErrorFromPayload {
 // interface of the API result
 interface Payload {
   statusCode: number;
-  content: string | Buffer | ErrorFromPayload;
+  content: string | Stream | ErrorFromPayload;
   contentType: string | null;
-  headers: Record<string, any>;
+  headers: Record<string, string | number>;
 }
 
 type TaskRunResult = Required<ReportApiJSON>['output'];
@@ -49,55 +51,50 @@ const getReportingHeaders = (output: TaskRunResult, exportType: ExportTypeDefini
 export function getDocumentPayloadFactory(reporting: ReportingCore) {
   const exportTypesRegistry = reporting.getExportTypesRegistry();
 
-  function encodeContent(
-    content: string | null,
-    exportType: ExportTypeDefinition
-  ): Buffer | string {
-    switch (exportType.jobContentEncoding) {
-      case 'base64':
-        return content ? Buffer.from(content, 'base64') : ''; // convert null to empty string
-      default:
-        return content ? content : ''; // convert null to empty string
-    }
-  }
-
-  async function getCompleted(
-    output: TaskRunResult,
-    jobType: string,
-    title: string,
-    content: string
-  ): Promise<Payload> {
+  async function getCompleted({
+    id,
+    index,
+    output,
+    jobtype: jobType,
+    payload: { title },
+  }: Required<ReportApiJSON>): Promise<Payload> {
     const exportType = exportTypesRegistry.get(
       (item: ExportTypeDefinition) => item.jobType === jobType
     );
+    const encoding = exportType.jobContentEncoding === 'base64' ? 'base64' : 'raw';
+    const content = await getContentStream(reporting, { id, index }, { encoding });
     const filename = getTitle(exportType, title);
     const headers = getReportingHeaders(output, exportType);
 
     return {
+      content,
       statusCode: 200,
-      content: encodeContent(content, exportType),
       contentType: output.content_type,
       headers: {
         ...headers,
         'Content-Disposition': contentDisposition(filename, { type: 'inline' }),
+        'Content-Length': output.size,
       },
     };
   }
 
   // @TODO: These should be semantic HTTP codes as 500/503's indicate
   // error then these are really operating properly.
-  function getFailure(content: string): Payload {
+  async function getFailure({ id }: ReportApiJSON): Promise<Payload> {
+    const jobsQuery = jobsQueryFactory(reporting);
+    const error = await jobsQuery.getError(id);
+
     return {
       statusCode: 500,
       content: {
-        message: `Reporting generation failed: ${content}`,
+        message: `Reporting generation failed: ${error}`,
       },
       contentType: 'application/json',
       headers: {},
     };
   }
 
-  function getIncomplete(status: string) {
+  function getIncomplete({ status }: ReportApiJSON): Payload {
     return {
       statusCode: 503,
       content: status,
@@ -106,28 +103,18 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     };
   }
 
-  return async function getDocumentPayload({
-    id,
-    index,
-    output,
-    status,
-    jobtype: jobType,
-    payload: { title },
-  }: ReportApiJSON): Promise<Payload> {
-    if (output) {
-      const stream = await getContentStream(reporting, { id, index });
-      const content = await stream.toString();
-
-      if (status === statuses.JOB_STATUS_COMPLETED || status === statuses.JOB_STATUS_WARNINGS) {
-        return getCompleted(output, jobType, title, content);
+  return async function getDocumentPayload(report: ReportApiJSON): Promise<Payload> {
+    if (report.output) {
+      if ([statuses.JOB_STATUS_COMPLETED, statuses.JOB_STATUS_WARNINGS].includes(report.status)) {
+        return getCompleted(report as Required<ReportApiJSON>);
       }
 
-      if (status === statuses.JOB_STATUS_FAILED) {
-        return getFailure(content);
+      if (statuses.JOB_STATUS_FAILED === report.status) {
+        return getFailure(report);
       }
     }
 
     // send a 503 indicating that the report isn't completed yet
-    return getIncomplete(status);
+    return getIncomplete(report);
   };
 }

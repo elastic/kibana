@@ -35,9 +35,17 @@ a| <<server-log-action-type, ServerLog>>
 
 | Add a message to a Kibana log.
 
-a| <<servicenow-action-type, ServiceNow>>
+a| <<servicenow-action-type, ServiceNow ITSM>>
 
 | Create an incident in ServiceNow.
+
+a| <<servicenow-sir-action-type, ServiceNow SecOps>>
+
+| Create a security incident in ServiceNow.
+
+a| <<servicenow-itom-action-type, ServiceNow ITOM>>
+
+| Create an event in ServiceNow.
 
 a| <<slack-action-type, Slack>>
 
@@ -135,5 +143,14 @@ image::images/connectors-with-missing-secrets.png[Connectors with missing secret
 For out-of-the-box and standardized connectors, you can <<preconfigured-connector-example, preconfigure connectors>>
 before {kib} starts.
 
+[float]
+[[montoring-connectors]]
+=== Monitoring connectors
+
+The <<task-manager-health-monitoring,Task Manager health API>> helps you understand the performance of all tasks in your environment.
+However, if connectors fail to execute, they will report as successful to Task Manager. The failure stats will not
+accurately depict the performance of connectors.
+
+For more information on connector successes and failures, refer to the <<event-log-index,Event log index>>.
 
 include::connectors/index.asciidoc[]

@@ -78,8 +78,8 @@ export const getTopHitMetricAgg = () => {
               },
             };
           } else {
-            if (field.readFromDocValues) {
-              output.params.docvalue_fields = [
+            if (field.name !== '_source') {
+              output.params.fields = [
                 {
                   field: field.name,
                   // always format date fields as date_time to avoid
@@ -89,7 +89,7 @@ export const getTopHitMetricAgg = () => {
                 },
               ];
             }
-            output.params._source = field.name === '_source' ? true : field.name;
+            output.params._source = field.name === '_source';
           }
         },
       },

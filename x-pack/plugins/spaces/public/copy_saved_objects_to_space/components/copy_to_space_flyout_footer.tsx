@@ -16,12 +16,9 @@ import {
 import React, { Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type {
-  FailedImport,
-  ProcessedImportResponse,
-} from 'src/plugins/saved_objects_management/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { FailedImport, ProcessedImportResponse } from '../lib';
 import type { ImportRetry } from '../types';
 
 interface Props {
@@ -41,13 +38,8 @@ const isResolvableError = ({ error: { type } }: FailedImport) =>
 const isUnresolvableError = (failure: FailedImport) => !isResolvableError(failure);
 
 export const CopyToSpaceFlyoutFooter = (props: Props) => {
-  const {
-    copyInProgress,
-    conflictResolutionInProgress,
-    initialCopyFinished,
-    copyResult,
-    retries,
-  } = props;
+  const { copyInProgress, conflictResolutionInProgress, initialCopyFinished, copyResult, retries } =
+    props;
 
   let summarizedResults = {
     successCount: 0,
@@ -62,8 +54,8 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
       let pendingCount = 0;
       let skippedCount = 0;
       let errorCount = 0;
-      if (spaceResult.status === 'success') {
-        successCount = spaceResult.importCount;
+      if (spaceResult.success === true) {
+        successCount = spaceResult.successfulImports.length;
       } else {
         const uniqueResolvableErrors = spaceResult.failedImports
           .filter(isResolvableError)
@@ -181,7 +173,7 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
             data-test-subj={`cts-summary-success-count`}
             title={summarizedResults.successCount}
             titleSize="s"
-            titleColor={initialCopyFinished ? 'secondary' : 'subdued'}
+            titleColor={initialCopyFinished ? 'success' : 'subdued'}
             isLoading={!initialCopyFinished}
             textAlign="center"
             description={

@@ -1,0 +1,176 @@
+{
+  "id": "visTypeTable",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "visTypeTable",
+        "id": "def-common.TableVisParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "TableVisParams",
+        "description": [],
+        "path": "src/plugins/vis_types/table/common/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visTypeTable",
+            "id": "def-common.TableVisParams.perPage",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "perPage",
+            "description": [],
+            "signature": [
+              "number | \"\""
+            ],
+            "path": "src/plugins/vis_types/table/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visTypeTable",
+            "id": "def-common.TableVisParams.showPartialRows",
+            "type": "boolean",
+            "tags": [],
+            "label": "showPartialRows",
+            "description": [],
+            "path": "src/plugins/vis_types/table/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visTypeTable",
+            "id": "def-common.TableVisParams.showMetricsAtAllLevels",
+            "type": "boolean",
+            "tags": [],
+            "label": "showMetricsAtAllLevels",
+            "description": [],
+            "path": "src/plugins/vis_types/table/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visTypeTable",
+            "id": "def-common.TableVisParams.showToolbar",
+            "type": "boolean",
+            "tags": [],
+            "label": "showToolbar",
+            "description": [],
+            "path": "src/plugins/vis_types/table/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visTypeTable",
+            "id": "def-common.TableVisParams.showTotal",
+            "type": "boolean",
+            "tags": [],
+            "label": "showTotal",
+            "description": [],
+            "path": "src/plugins/vis_types/table/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visTypeTable",
+            "id": "def-common.TableVisParams.totalFunc",
+            "type": "Enum",
+            "tags": [],
+            "label": "totalFunc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visTypeTable",
+                "scope": "common",
+                "docId": "kibVisTypeTablePluginApi",
+                "section": "def-common.AggTypes",
+                "text": "AggTypes"
+              }
+            ],
+            "path": "src/plugins/vis_types/table/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visTypeTable",
+            "id": "def-common.TableVisParams.percentageCol",
+            "type": "string",
+            "tags": [],
+            "label": "percentageCol",
+            "description": [],
+            "path": "src/plugins/vis_types/table/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visTypeTable",
+            "id": "def-common.TableVisParams.autoFitRowToContent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoFitRowToContent",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/vis_types/table/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visTypeTable",
+            "id": "def-common.TableVisParams.row",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "row",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/vis_types/table/common/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "visTypeTable",
+        "id": "def-common.AggTypes",
+        "type": "Enum",
+        "tags": [],
+        "label": "AggTypes",
+        "description": [],
+        "path": "src/plugins/vis_types/table/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "visTypeTable",
+        "id": "def-common.VIS_TYPE_TABLE",
+        "type": "string",
+        "tags": [],
+        "label": "VIS_TYPE_TABLE",
+        "description": [],
+        "signature": [
+          "\"table\""
+        ],
+        "path": "src/plugins/vis_types/table/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

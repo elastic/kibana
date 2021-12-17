@@ -18,11 +18,10 @@ import {
 import React, { Component, memo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../spaces/common';
+import type { Space, SpacesApiUi } from '../../../../../../spaces/public';
 
 interface Props {
   spaces: Space[];

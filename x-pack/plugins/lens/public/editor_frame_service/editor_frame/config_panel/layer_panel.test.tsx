@@ -83,6 +83,7 @@ describe('LayerPanel', () => {
       registerNewLayerRef: jest.fn(),
       isFullscreen: false,
       toggleFullscreen: jest.fn(),
+      onEmptyDimensionAdd: jest.fn(),
     };
   }
 
@@ -156,7 +157,7 @@ describe('LayerPanel', () => {
   });
 
   describe('single group', () => {
-    it('should render the non-editable state', async () => {
+    it('should render the non-editable state and optional label', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
           {
@@ -171,8 +172,11 @@ describe('LayerPanel', () => {
       });
 
       const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+
       const group = instance.find('.lnsLayerPanel__dimensionContainer[data-test-subj="lnsGroup"]');
       expect(group).toHaveLength(1);
+      const optionalLabel = instance.find('[data-test-subj="lnsGroup_optional"]').first();
+      expect(optionalLabel.text()).toEqual('Optional');
     });
 
     it('should render the group with a way to add a new column', async () => {
@@ -221,7 +225,39 @@ describe('LayerPanel', () => {
 
       const group = instance
         .find(EuiFormRow)
-        .findWhere((e) => e.prop('error')?.props?.children === 'Required dimension');
+        .findWhere((e) => e.prop('error') === 'Requires field');
+
+      expect(group).toHaveLength(1);
+    });
+
+    it('should render the required warning when only one group is configured (with requiredMinDimensionCount)', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'x' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+          {
+            groupLabel: 'B',
+            groupId: 'b',
+            accessors: [{ columnId: 'y' }],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+            requiredMinDimensionCount: 2,
+          },
+        ],
+      });
+
+      const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+
+      const group = instance
+        .find(EuiFormRow)
+        .findWhere((e) => e.prop('error') === 'Requires 2 fields');
 
       expect(group).toHaveLength(1);
     });
@@ -918,6 +954,35 @@ describe('LayerPanel', () => {
         })
       );
       expect(updateVisualization).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('add a new dimension', () => {
+    it('should call onEmptyDimensionAdd callback on new dimension creation', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+      const props = getDefaultProps();
+      const { instance } = await mountWithProvider(<LayerPanel {...props} />);
+
+      act(() => {
+        instance.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
+      });
+      instance.update();
+
+      expect(props.onEmptyDimensionAdd).toHaveBeenCalledWith(
+        'newid',
+        expect.objectContaining({ groupId: 'a' })
+      );
     });
   });
 });

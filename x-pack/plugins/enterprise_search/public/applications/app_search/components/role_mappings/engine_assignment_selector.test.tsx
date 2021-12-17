@@ -34,7 +34,6 @@ describe('EngineAssignmentSelector', () => {
     handleAttributeSelectorChange: jest.fn(),
     handleDeleteMapping: jest.fn(),
     handleRoleChange: jest.fn(),
-    handleAuthProviderChange: jest.fn(),
     resetState: jest.fn(),
   };
 
@@ -50,9 +49,6 @@ describe('EngineAssignmentSelector', () => {
     availableEngines: engines,
     selectedEngines: new Set(),
     accessAllEngines: false,
-    availableAuthProviders: [],
-    multipleAuthProvidersConfig: true,
-    selectedAuthProviders: [],
     myRole: {
       availableRoleTypes: mockRole.ability.availableRoleTypes,
     },
@@ -90,9 +86,11 @@ describe('EngineAssignmentSelector', () => {
   it('handles engine checkbox click', async () => {
     const wrapper = shallow(<EngineAssignmentSelector />);
     await waitFor(() =>
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ label: engines[0].name, value: engines[0].name }])
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ label: engines[0].name, value: engines[0].name }])
     );
     wrapper.update();
 

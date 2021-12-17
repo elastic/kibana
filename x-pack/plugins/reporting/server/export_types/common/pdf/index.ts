@@ -12,7 +12,7 @@ import _ from 'lodash';
 import path from 'path';
 import Printer from 'pdfmake';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
-import { LayoutInstance } from '../../../lib/layouts';
+import type { Layout } from '../../../../../screenshotting/server';
 import { getDocOptions, REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
 import { getTemplate } from './get_template';
@@ -21,14 +21,14 @@ const assetPath = path.resolve(__dirname, '..', '..', 'common', 'assets');
 const tableBorderWidth = 1;
 
 export class PdfMaker {
-  private _layout: LayoutInstance;
+  private _layout: Layout;
   private _logo: string | undefined;
   private _title: string;
   private _content: Content[];
   private _printer: Printer;
   private _pdfDoc: PDFKit.PDFDocument | undefined;
 
-  constructor(layout: LayoutInstance, logo: string | undefined) {
+  constructor(layout: Layout, logo: string | undefined) {
     const fontPath = (filename: string) => path.resolve(assetPath, 'fonts', filename);
     const fonts = {
       Roboto: {
@@ -59,10 +59,10 @@ export class PdfMaker {
     // inject a page break for every 2 groups on the page
     if (groupCount > 0 && groupCount % this._layout.groupCount === 0) {
       contents = [
-        ({
+        {
           text: '',
           pageBreak: 'after',
-        } as ContentText) as Content,
+        } as ContentText as Content,
       ].concat(contents);
     }
     this._content.push(contents);
@@ -101,10 +101,13 @@ export class PdfMaker {
     this._addContents(contents);
   }
 
-  addImage(base64EncodedData: string, opts = { title: '', description: '' }) {
+  addImage(
+    image: Buffer,
+    opts: { title?: string; description?: string } = { title: '', description: '' }
+  ) {
     const size = this._layout.getPdfImageSize();
     const img = {
-      image: `data:image/png;base64,${base64EncodedData}`,
+      image: `data:image/png;base64,${image.toString('base64')}`,
       alignment: 'center' as 'center',
       height: size.height,
       width: size.width,

@@ -13,12 +13,13 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import { CoreStart } from '../../../../../src/core/public';
 
+export const mockGetCreateCaseFlyout = jest.fn();
 export const mockGetAllCasesSelectorModal = jest.fn();
 export const mockNavigateToApp = jest.fn();
 
 export const createStartServicesMock = (): CoreStart => {
   const coreServices = coreMock.createStart();
-  return ({
+  return {
     ...coreServices,
     cases: {
       getAllCases: jest.fn(),
@@ -26,18 +27,20 @@ export const createStartServicesMock = (): CoreStart => {
       getConfigureCases: jest.fn(),
       getCreateCase: jest.fn(),
       getRecentCases: jest.fn(),
+      getCreateCaseFlyout: mockGetCreateCaseFlyout,
       getAllCasesSelectorModal: mockGetAllCasesSelectorModal,
     },
     application: {
       ...coreServices.application,
       navigateToApp: mockNavigateToApp,
     },
-  } as unknown) as CoreStart;
+  } as unknown as CoreStart;
 };
 
 export const createWithKibanaMock = () => {
   const services = createStartServicesMock();
 
+  // eslint-disable-next-line react/display-name
   return (Component: unknown) => (props: unknown) => {
     return React.createElement(Component as string, { ...(props as object), kibana: { services } });
   };

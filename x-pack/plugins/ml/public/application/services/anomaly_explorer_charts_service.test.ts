@@ -85,8 +85,8 @@ describe('AnomalyExplorerChartsService', () => {
   };
   const anomalyExplorerService = new AnomalyExplorerChartsService(
     timefilterMock,
-    (mlApiServicesMock as unknown) as MlApiServices,
-    (mlResultsServiceMock as unknown) as MlResultsService
+    mlApiServicesMock as unknown as MlApiServices,
+    mlResultsServiceMock as unknown as MlResultsService
   );
 
   const timeRange = {
@@ -103,7 +103,7 @@ describe('AnomalyExplorerChartsService', () => {
   test('should return anomaly data without explorer service', async () => {
     const anomalyData = (await anomalyExplorerService.getAnomalyData(
       undefined,
-      (combinedJobRecords as unknown) as Record<string, CombinedJob>,
+      combinedJobRecords as unknown as Record<string, CombinedJob>,
       1000,
       mockAnomalyChartRecords,
       timeRange.earliestMs,
@@ -119,7 +119,7 @@ describe('AnomalyExplorerChartsService', () => {
     const anomalyData = (await anomalyExplorerService.getAnomalyData(
       undefined,
       // @ts-ignore
-      (combinedJobRecords as unknown) as Record<string, CombinedJob>,
+      combinedJobRecords as unknown as Record<string, CombinedJob>,
       1000,
       [],
       timeRange.earliestMs,
@@ -140,7 +140,7 @@ describe('AnomalyExplorerChartsService', () => {
 
     const anomalyData = (await anomalyExplorerService.getAnomalyData(
       undefined,
-      (combinedJobRecords as unknown) as Record<string, CombinedJob>,
+      combinedJobRecords as unknown as Record<string, CombinedJob>,
       1000,
       mockAnomalyChartRecordsClone,
       timeRange.earliestMs,

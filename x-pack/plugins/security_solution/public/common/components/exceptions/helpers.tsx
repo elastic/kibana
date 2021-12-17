@@ -33,7 +33,7 @@ import {
   addIdToEntries,
   ExceptionsBuilderExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import { IndexPatternBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import * as i18n from './translations';
 import { AlertData, Flattened } from './types';
 
@@ -44,12 +44,13 @@ import exceptionableLinuxFields from './exceptionable_linux_fields.json';
 import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';
 import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
 import exceptionableEndpointEventFields from './exceptionable_endpoint_event_fields.json';
+import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
 
 export const filterIndexPatterns = (
-  patterns: IndexPatternBase,
+  patterns: DataViewBase,
   type: ExceptionListType,
   osTypes?: OsTypeArray
-): IndexPatternBase => {
+): DataViewBase => {
   switch (type) {
     case 'endpoint':
       const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
@@ -145,7 +146,7 @@ export const prepareExceptionItemsForBulkClose = (
         return {
           ...itemEntry,
           field: itemEntry.field.startsWith('event.')
-            ? itemEntry.field.replace(/^event./, 'signal.original_event.')
+            ? itemEntry.field.replace(/^event./, `${ALERT_ORIGINAL_EVENT}.`)
             : itemEntry.field,
         };
       });
@@ -577,7 +578,7 @@ export const getPrepopulatedMemoryShellcodeException = ({
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
-  const { process, Target } = alertEcsData;
+  const { process } = alertEcsData;
   const entries = filterEmptyExceptionEntries([
     {
       field: 'Memory_protection.feature',
@@ -608,44 +609,6 @@ export const getPrepopulatedMemoryShellcodeException = ({
       operator: 'included' as const,
       type: 'match' as const,
       value: process?.Ext?.token?.integrity_level_name ?? '',
-    },
-    {
-      field: 'Target.process.thread.Ext.start_address_details',
-      type: 'nested' as const,
-      entries: [
-        {
-          field: 'allocation_type',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value: Target?.process?.thread?.Ext?.start_address_details?.allocation_type ?? '',
-        },
-        {
-          field: 'allocation_size',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value: String(Target?.process?.thread?.Ext?.start_address_details?.allocation_size) ?? '',
-        },
-        {
-          field: 'region_size',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value: String(Target?.process?.thread?.Ext?.start_address_details?.region_size) ?? '',
-        },
-        {
-          field: 'region_protection',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value:
-            String(Target?.process?.thread?.Ext?.start_address_details?.region_protection) ?? '',
-        },
-        {
-          field: 'memory_pe.imphash',
-          operator: 'included' as const,
-          type: 'match' as const,
-          value:
-            String(Target?.process?.thread?.Ext?.start_address_details?.memory_pe?.imphash) ?? '',
-        },
-      ],
     },
   ]);
 
@@ -790,7 +753,7 @@ export const getPrepopulatedBehaviorException = ({
  */
 export const entryHasNonEcsType = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  indexPatterns: IndexPatternBase
+  indexPatterns: DataViewBase
 ): boolean => {
   const doesFieldNameExist = (exceptionEntry: Entry): boolean => {
     return indexPatterns.fields.some(({ name }) => name === exceptionEntry.field);
@@ -845,7 +808,7 @@ export const defaultEndpointExceptionItems = (
           alertEcsData,
         }),
       ];
-    case 'malicious_thread':
+    case 'shellcode_thread':
       return [
         getPrepopulatedMemoryShellcodeException({
           listId,

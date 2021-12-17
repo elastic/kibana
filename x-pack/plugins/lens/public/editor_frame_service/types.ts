@@ -11,6 +11,6 @@ export type TableInspectorAdapter = Record<string, Datatable>;
 
 export interface ErrorMessage {
   shortMessage: string;
-  longMessage: string;
+  longMessage: React.ReactNode;
   type?: 'fixable' | 'critical';
 }

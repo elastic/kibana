@@ -5,22 +5,23 @@ exports[`should render 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    error="Index pattern does not contain any geospatial fields"
+    error="Data view does not contain any geospatial fields"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={true}
-    label="Index pattern"
+    label="Data view"
     labelType="label"
   >
     <MockIndexPatternSelect
+      data-test-subj="mapGeoIndexPatternSelect"
       indexPatternId="indexPatternId"
       isClearable={false}
       isDisabled={false}
       isInvalid={true}
       onChange={[Function]}
       onNoIndexPatterns={[Function]}
-      placeholder="Select index pattern"
+      placeholder="Select data view"
     />
   </EuiFormRow>
 </Fragment>
@@ -30,7 +31,7 @@ exports[`should render no index pattern warning when there are no matching index
 <Fragment>
   <EuiCallOut
     color="warning"
-    title="Couldn't find any index patterns"
+    title="Couldn't find any data views"
   >
     <p>
       <FormattedMessage
@@ -39,10 +40,10 @@ exports[`should render no index pattern warning when there are no matching index
         values={Object {}}
       />
       <EuiLink
-        href="abc//app/management/kibana/indexPatterns"
+        href="abc//app/management/kibana/dataViews"
       >
         <FormattedMessage
-          defaultMessage="Create an index pattern."
+          defaultMessage="Create a data view."
           id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
           values={Object {}}
         />
@@ -71,22 +72,23 @@ exports[`should render no index pattern warning when there are no matching index
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    error="Index pattern does not contain any geospatial fields"
+    error="Data view does not contain any geospatial fields"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={true}
-    label="Index pattern"
+    label="Data view"
     labelType="label"
   >
     <MockIndexPatternSelect
+      data-test-subj="mapGeoIndexPatternSelect"
       indexPatternId="indexPatternId"
       isClearable={false}
       isDisabled={true}
       isInvalid={true}
       onChange={[Function]}
       onNoIndexPatterns={[Function]}
-      placeholder="Select index pattern"
+      placeholder="Select data view"
     />
   </EuiFormRow>
 </Fragment>

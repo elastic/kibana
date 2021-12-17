@@ -7,12 +7,14 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 
-import type { IFieldType } from '../../../../../../../src/plugins/data/public';
-import { QueryStringInput, esKuery } from '../../../../../../../src/plugins/data/public';
-import { useStartServices } from '../hooks';
-import { INDEX_NAME, AGENT_SAVED_OBJECT_TYPE } from '../constants';
+import { fromKueryExpression } from '@kbn/es-query';
 
-const HIDDEN_FIELDS = [`${AGENT_SAVED_OBJECT_TYPE}.actions`, '_id', '_index'];
+import type { IFieldType } from '../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../../src/plugins/data/public';
+import { useStartServices } from '../hooks';
+import { INDEX_NAME, AGENTS_PREFIX } from '../constants';
+
+const HIDDEN_FIELDS = [`${AGENTS_PREFIX}.actions`, '_id', '_index'];
 
 interface Props {
   value: string;
@@ -38,7 +40,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
     }
 
     try {
-      esKuery.fromKueryExpression(value);
+      fromKueryExpression(value);
       return true;
     } catch (e) {
       return false;

@@ -8,7 +8,7 @@
 import { run, RunFn, createFailError } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import { AxiosError } from 'axios';
-import bluebird from 'bluebird';
+import pMap from 'p-map';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
@@ -70,8 +70,8 @@ const createEventFilters: RunFn = async ({ flags, log }) => {
 
   await ensureCreateEndpointEventFiltersList(kbn);
 
-  await bluebird.map(
-    Array.from({ length: (flags.count as unknown) as number }),
+  await pMap(
+    Array.from({ length: flags.count as unknown as number }),
     () =>
       kbn
         .request({

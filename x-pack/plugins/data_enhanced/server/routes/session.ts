@@ -22,7 +22,7 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           name: schema.string(),
           appId: schema.string(),
           expires: schema.maybe(schema.string()),
-          urlGeneratorId: schema.string(),
+          locatorId: schema.string(),
           initialState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           restoreState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
         }),
@@ -32,22 +32,15 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
       },
     },
     async (context, request, res) => {
-      const {
-        sessionId,
-        name,
-        expires,
-        initialState,
-        restoreState,
-        appId,
-        urlGeneratorId,
-      } = request.body;
+      const { sessionId, name, expires, initialState, restoreState, appId, locatorId } =
+        request.body;
 
       try {
         const response = await context.search!.saveSession(sessionId, {
           name,
           appId,
           expires,
-          urlGeneratorId,
+          locatorId,
           initialState,
           restoreState,
         });

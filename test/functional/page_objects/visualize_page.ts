@@ -56,8 +56,8 @@ export class VisualizePageObject extends FtrService {
     await this.kibanaServer.uiSettings.replace({
       defaultIndex: 'logstash-*',
       [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
-      'visualization:visualize:legacyChartsLibrary': !isNewLibrary,
       'visualization:visualize:legacyPieChartsLibrary': !isNewLibrary,
+      'visualization:visualize:legacyHeatmapChartsLibrary': !isNewLibrary,
     });
   }
 
@@ -113,8 +113,8 @@ export class VisualizePageObject extends FtrService {
     });
   }
 
-  public async clickRefresh() {
-    if (await this.visChart.isNewChartsLibraryEnabled()) {
+  public async clickRefresh(isNewChartLibrary = false) {
+    if ((await this.visChart.isNewChartsLibraryEnabled()) || isNewChartLibrary) {
       await this.elasticChart.setNewChartUiDebugFlag();
     }
     await this.queryBar.clickQuerySubmitButton();
@@ -165,14 +165,6 @@ export class VisualizePageObject extends FtrService {
     await this.clickVisType('line');
   }
 
-  public async clickRegionMap() {
-    await this.clickVisType('region_map');
-  }
-
-  public async hasRegionMap() {
-    return await this.hasVisType('region_map');
-  }
-
   public async clickMarkdownWidget() {
     await this.clickVisType('markdown');
   }
@@ -187,14 +179,6 @@ export class VisualizePageObject extends FtrService {
 
   public async clickPieChart() {
     await this.clickVisType('pie');
-  }
-
-  public async clickTileMap() {
-    await this.clickVisType('tile_map');
-  }
-
-  public async hasTileMap() {
-    return await this.hasVisType('tile_map');
   }
 
   public async clickTimelion() {
@@ -326,12 +310,16 @@ export class VisualizePageObject extends FtrService {
     if (navigateToVisualize) {
       await this.clickLoadSavedVisButton();
     }
+    await this.listingTable.searchForItemWithName(vizName);
     await this.openSavedVisualization(vizName);
   }
 
   public async openSavedVisualization(vizName: string) {
     const dataTestSubj = `visListingTitleLink-${vizName.split(' ').join('-')}`;
-    await this.testSubjects.click(dataTestSubj, 20000);
+    await this.retry.try(async () => {
+      await this.testSubjects.click(dataTestSubj, 20000);
+      await this.notOnLandingPageOrFail();
+    });
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -351,6 +339,11 @@ export class VisualizePageObject extends FtrService {
   public async onLandingPage() {
     this.log.debug(`VisualizePage.onLandingPage`);
     return await this.testSubjects.exists('visualizationLandingPage');
+  }
+
+  public async notOnLandingPageOrFail() {
+    this.log.debug(`VisualizePage.notOnLandingPageOrFail`);
+    return await this.testSubjects.missingOrFail('visualizationLandingPage');
   }
 
   public async gotoLandingPage() {

@@ -8,15 +8,10 @@
 import pMap from 'p-map';
 import { Boom } from '@hapi/boom';
 import { SavedObject, SavedObjectsClientContract, SavedObjectsFindResponse } from 'kibana/server';
-import {
-  CommentAttributes,
-  ENABLE_CASE_CONNECTOR,
-  MAX_CONCURRENT_SEARCHES,
-  OWNER_FIELD,
-  SubCaseAttributes,
-} from '../../../common';
+import { CommentAttributes, SubCaseAttributes, OWNER_FIELD } from '../../../common/api';
+import { ENABLE_CASE_CONNECTOR, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { CasesClientArgs } from '..';
-import { createCaseError } from '../../common';
+import { createCaseError } from '../../common/error';
 import { AttachmentService, CasesService } from '../../services';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { Operations, OwnerEntity } from '../../authorization';
@@ -168,7 +163,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
             'settings',
             OWNER_FIELD,
             'comment',
-            ...(ENABLE_CASE_CONNECTOR ? ['sub_case'] : []),
+            ...(ENABLE_CASE_CONNECTOR ? ['sub_case' as const] : []),
           ],
           owner: caseInfo.attributes.owner,
         })

@@ -6,6 +6,7 @@
  */
 
 import { AlertingPlugin, AlertingPluginsSetup, PluginSetupContract } from './plugin';
+import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/mocks';
 import { coreMock, statusServiceMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
@@ -15,7 +16,7 @@ import { KibanaRequest } from 'kibana/server';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { KibanaFeature } from '../../features/server';
 import { AlertsConfig } from './config';
-import { AlertType } from './types';
+import { RuleType } from './types';
 import { eventLogMock } from '../../event_log/server/mocks';
 import { actionsMock } from '../../actions/server/mocks';
 
@@ -37,6 +38,8 @@ describe('Alerting Plugin', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 10,
+        defaultRuleTaskTimeout: '5m',
+        cancelAlertsOnRuleTimeout: true,
       });
       plugin = new AlertingPlugin(context);
 
@@ -60,9 +63,43 @@ describe('Alerting Plugin', () => {
       );
     });
 
+    it('should create usage counter if usageCollection plugin is defined', async () => {
+      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+        maxEphemeralActionsPerAlert: 10,
+        defaultRuleTaskTimeout: '5m',
+        cancelAlertsOnRuleTimeout: true,
+      });
+      plugin = new AlertingPlugin(context);
+
+      const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+      const usageCollectionSetup = createUsageCollectionSetupMock();
+
+      const setupMocks = coreMock.createSetup();
+      // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
+      await plugin.setup(setupMocks, {
+        licensing: licensingMock.createSetup(),
+        encryptedSavedObjects: encryptedSavedObjectsSetup,
+        taskManager: taskManagerMock.createSetup(),
+        eventLog: eventLogServiceMock.create(),
+        actions: actionsMock.createSetup(),
+        statusService: statusServiceMock.createSetupContract(),
+        usageCollection: usageCollectionSetup,
+      });
+
+      expect(usageCollectionSetup.createUsageCounter).toHaveBeenCalled();
+      expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
+    });
+
     describe('registerType()', () => {
       let setup: PluginSetupContract;
-      const sampleAlertType: AlertType<never, never, never, never, never, 'default'> = {
+      const sampleRuleType: RuleType<never, never, never, never, never, 'default'> = {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
@@ -89,7 +126,7 @@ describe('Alerting Plugin', () => {
       it('should throw error when license type is invalid', async () => {
         expect(() =>
           setup.registerType({
-            ...sampleAlertType,
+            ...sampleRuleType,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             minimumLicenseRequired: 'foo' as any,
           })
@@ -98,16 +135,54 @@ describe('Alerting Plugin', () => {
 
       it('should not throw when license type is gold', async () => {
         setup.registerType({
-          ...sampleAlertType,
+          ...sampleRuleType,
           minimumLicenseRequired: 'gold',
         });
       });
 
       it('should not throw when license type is basic', async () => {
         setup.registerType({
-          ...sampleAlertType,
+          ...sampleRuleType,
           minimumLicenseRequired: 'basic',
         });
+      });
+
+      it('should apply default config value for ruleTaskTimeout if no value is specified', async () => {
+        const ruleType = {
+          ...sampleRuleType,
+          minimumLicenseRequired: 'basic',
+        } as RuleType<never, never, never, never, never, 'default', never>;
+        await setup.registerType(ruleType);
+        expect(ruleType.ruleTaskTimeout).toBe('5m');
+      });
+
+      it('should apply value for ruleTaskTimeout if specified', async () => {
+        const ruleType = {
+          ...sampleRuleType,
+          minimumLicenseRequired: 'basic',
+          ruleTaskTimeout: '20h',
+        } as RuleType<never, never, never, never, never, 'default', never>;
+        await setup.registerType(ruleType);
+        expect(ruleType.ruleTaskTimeout).toBe('20h');
+      });
+
+      it('should apply default config value for cancelAlertsOnRuleTimeout if no value is specified', async () => {
+        const ruleType = {
+          ...sampleRuleType,
+          minimumLicenseRequired: 'basic',
+        } as RuleType<never, never, never, never, never, 'default', never>;
+        await setup.registerType(ruleType);
+        expect(ruleType.cancelAlertsOnRuleTimeout).toBe(true);
+      });
+
+      it('should apply value for cancelAlertsOnRuleTimeout if specified', async () => {
+        const ruleType = {
+          ...sampleRuleType,
+          minimumLicenseRequired: 'basic',
+          cancelAlertsOnRuleTimeout: false,
+        } as RuleType<never, never, never, never, never, 'default', never>;
+        await setup.registerType(ruleType);
+        expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
       });
     });
   });
@@ -124,6 +199,8 @@ describe('Alerting Plugin', () => {
             removalDelay: '1h',
           },
           maxEphemeralActionsPerAlert: 10,
+          defaultRuleTaskTimeout: '5m',
+          cancelAlertsOnRuleTimeout: true,
         });
         const plugin = new AlertingPlugin(context);
 
@@ -164,6 +241,8 @@ describe('Alerting Plugin', () => {
             removalDelay: '1h',
           },
           maxEphemeralActionsPerAlert: 10,
+          defaultRuleTaskTimeout: '5m',
+          cancelAlertsOnRuleTimeout: true,
         });
         const plugin = new AlertingPlugin(context);
 
@@ -189,7 +268,7 @@ describe('Alerting Plugin', () => {
           taskManager: taskManagerMock.createStart(),
         });
 
-        const fakeRequest = ({
+        const fakeRequest = {
           headers: {},
           getBasePath: () => '',
           path: '/',
@@ -203,7 +282,7 @@ describe('Alerting Plugin', () => {
             },
           },
           getSavedObjectsClient: jest.fn(),
-        } as unknown) as KibanaRequest;
+        } as unknown as KibanaRequest;
         startContract.getRulesClientWithRequest(fakeRequest);
       });
     });
@@ -218,6 +297,8 @@ describe('Alerting Plugin', () => {
           removalDelay: '1h',
         },
         maxEphemeralActionsPerAlert: 100,
+        defaultRuleTaskTimeout: '5m',
+        cancelAlertsOnRuleTimeout: true,
       });
       const plugin = new AlertingPlugin(context);
 
@@ -243,7 +324,7 @@ describe('Alerting Plugin', () => {
         taskManager: taskManagerMock.createStart(),
       });
 
-      const fakeRequest = ({
+      const fakeRequest = {
         headers: {},
         getBasePath: () => '',
         path: '/',
@@ -257,7 +338,7 @@ describe('Alerting Plugin', () => {
           },
         },
         getSavedObjectsClient: jest.fn(),
-      } as unknown) as KibanaRequest;
+      } as unknown as KibanaRequest;
       startContract.getAlertingAuthorizationWithRequest(fakeRequest);
     });
   });

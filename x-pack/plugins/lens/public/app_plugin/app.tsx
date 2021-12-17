@@ -23,6 +23,7 @@ import { LensTopNavMenu } from './lens_top_nav';
 import { LensByReferenceInput } from '../embeddable';
 import { EditorFrameInstance } from '../types';
 import { Document } from '../persistence/saved_object_store';
+
 import {
   setState,
   useLensSelector,
@@ -36,6 +37,8 @@ import {
   getLastKnownDocWithoutPinnedFilters,
   runSaveLensVisualization,
 } from './save_modal_container';
+import { LensInspector } from '../lens_inspector_service';
+import { getEditPath } from '../../common';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -63,11 +66,13 @@ export function App({
     data,
     chrome,
     uiSettings,
+    inspector: lensInspector,
     application,
     notifications,
     savedObjectsTagging,
     getOriginatingAppName,
-
+    spaces,
+    http,
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
   } = lensAppServices;
@@ -80,6 +85,7 @@ export function App({
 
   const {
     persistedDoc,
+    sharingSavedObjectProps,
     isLinkedToOriginatingApp,
     searchSessionId,
     isLoading,
@@ -161,6 +167,28 @@ export function App({
       }
     });
   }, [onAppLeave, lastKnownDoc, isSaveable, persistedDoc, application.capabilities.visualize.save]);
+
+  const getLegacyUrlConflictCallout = useCallback(() => {
+    // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
+    if (spaces && sharingSavedObjectProps?.outcome === 'conflict' && persistedDoc?.savedObjectId) {
+      // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
+      // callout with a warning for the user, and provide a way for them to navigate to the other object.
+      const currentObjectId = persistedDoc.savedObjectId;
+      const otherObjectId = sharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'conflict'
+      const otherObjectPath = http.basePath.prepend(
+        `${getEditPath(otherObjectId)}${history.location.search}`
+      );
+      return spaces.ui.components.getLegacyUrlConflict({
+        objectNoun: i18n.translate('xpack.lens.appName', {
+          defaultMessage: 'Lens visualization',
+        }),
+        currentObjectId,
+        otherObjectId,
+        otherObjectPath,
+      });
+    }
+    return null;
+  }, [persistedDoc, sharingSavedObjectProps, spaces, http, history]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
@@ -267,11 +295,15 @@ export function App({
           indicateNoData={indicateNoData}
           datasourceMap={datasourceMap}
           title={persistedDoc?.title}
+          lensInspector={lensInspector}
         />
+
+        {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
           <MemoizedEditorFrameWrapper
             editorFrame={editorFrame}
             showNoDataPopover={showNoDataPopover}
+            lensInspector={lensInspector}
           />
         )}
       </div>
@@ -308,10 +340,14 @@ export function App({
 const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
   showNoDataPopover,
+  lensInspector,
 }: {
   editorFrame: EditorFrameInstance;
+  lensInspector: LensInspector;
   showNoDataPopover: () => void;
 }) {
   const { EditorFrameContainer } = editorFrame;
-  return <EditorFrameContainer showNoDataPopover={showNoDataPopover} />;
+  return (
+    <EditorFrameContainer showNoDataPopover={showNoDataPopover} lensInspector={lensInspector} />
+  );
 });

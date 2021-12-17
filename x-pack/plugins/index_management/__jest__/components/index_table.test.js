@@ -33,6 +33,7 @@ import { setUiMetricService } from '../../public/application/services/api';
 import { indexManagementStore } from '../../public/application/store';
 import { setExtensionsService } from '../../public/application/store/selectors/extension_service';
 import { ExtensionsService } from '../../public/services';
+import { kibanaVersion } from '../client_integration/helpers';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { notificationServiceMock } from '../../../../../src/core/public/notifications/notifications_service.mock';
@@ -43,10 +44,10 @@ let server = null;
 let store = null;
 const indices = [];
 
-for (let i = 0; i < 105; i++) {
-  const baseFake = {
-    health: i % 2 === 0 ? 'green' : 'yellow',
-    status: i % 2 === 0 ? 'open' : 'closed',
+const getBaseFakeIndex = (isOpen) => {
+  return {
+    health: isOpen ? 'green' : 'yellow',
+    status: isOpen ? 'open' : 'closed',
     primary: 1,
     replica: 1,
     documents: 10000,
@@ -54,13 +55,19 @@ for (let i = 0; i < 105; i++) {
     size: '156kb',
     primary_size: '156kb',
   };
+};
+
+for (let i = 0; i < 105; i++) {
   indices.push({
-    ...baseFake,
+    ...getBaseFakeIndex(true),
     name: `testy${i}`,
   });
   indices.push({
-    ...baseFake,
+    ...getBaseFakeIndex(false),
     name: `.admin${i}`,
+    // Add 2 hidden indices in the list in position 3 & 7
+    // note: for each loop iteration we add 2 indices
+    hidden: i === 1 || i === 3 ? true : false, // ".admin1" and ".admin3" are the only hidden in 8.x
   });
 }
 
@@ -81,7 +88,15 @@ const snapshot = (rendered) => {
   expect(rendered).toMatchSnapshot();
 };
 
-const openMenuAndClickButton = (rendered, rowIndex, buttonIndex) => {
+const names = (rendered) => {
+  return findTestSubject(rendered, 'indexTableIndexNameLink');
+};
+
+const namesText = (rendered) => {
+  return names(rendered).map((button) => button.text());
+};
+
+const openMenuAndClickButton = (rendered, rowIndex, buttonSelector) => {
   // Select a row.
   const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
   checkboxes.at(rowIndex).simulate('change', { target: { checked: true } });
@@ -93,23 +108,25 @@ const openMenuAndClickButton = (rendered, rowIndex, buttonIndex) => {
   rendered.update();
 
   // Click an action in the context menu.
-  const contextMenuButtons = findTestSubject(rendered, 'indexTableContextMenuButton');
-  contextMenuButtons.at(buttonIndex).simulate('click');
+  const contextMenuButton = findTestSubject(rendered, buttonSelector);
+  contextMenuButton.simulate('click');
   rendered.update();
 };
 
-const testEditor = (rendered, buttonIndex, rowIndex = 0) => {
-  openMenuAndClickButton(rendered, rowIndex, buttonIndex);
+const testEditor = (rendered, buttonSelector, rowIndex = 0) => {
+  openMenuAndClickButton(rendered, rowIndex, buttonSelector);
   rendered.update();
   snapshot(findTestSubject(rendered, 'detailPanelTabSelected').text());
 };
 
-const testAction = (rendered, buttonIndex, rowIndex = 0) => {
+const testAction = (rendered, buttonSelector, indexName = 'testy0') => {
+  const rowIndex = namesText(rendered).indexOf(indexName);
   // This is leaking some implementation details about how Redux works. Not sure exactly what's going on
   // but it looks like we're aware of how many Redux actions are dispatched in response to user interaction,
   // so we "time" our assertion based on how many Redux actions we observe. This is brittle because it
   // depends upon how our UI is architected, which will affect how many actions are dispatched.
   // Expect this to break when we rearchitect the UI.
+  // Update: Expect this to be removed when we rearchitect the UI :)
   let dispatchedActionsCount = 0;
   store.subscribe(() => {
     if (dispatchedActionsCount === 1) {
@@ -119,19 +136,16 @@ const testAction = (rendered, buttonIndex, rowIndex = 0) => {
     dispatchedActionsCount++;
   });
 
-  openMenuAndClickButton(rendered, rowIndex, buttonIndex);
+  openMenuAndClickButton(rendered, rowIndex, buttonSelector);
   // take snapshot of initial state.
   snapshot(status(rendered, rowIndex));
 };
 
-const names = (rendered) => {
-  return findTestSubject(rendered, 'indexTableIndexNameLink');
+const getActionMenuButtons = (rendered) => {
+  return findTestSubject(rendered, 'indexContextMenu')
+    .find('button')
+    .map((span) => span.text());
 };
-
-const namesText = (rendered) => {
-  return names(rendered).map((button) => button.text());
-};
-
 describe('index table', () => {
   beforeEach(() => {
     // Mock initialization of services
@@ -224,7 +238,7 @@ describe('index table', () => {
     await runAllPromises();
     rendered.update();
 
-    let button = findTestSubject(rendered, 'indexTableContextMenuButton');
+    let button = findTestSubject(rendered, 'indexActionsContextMenuButton');
     expect(button.length).toEqual(0);
 
     const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
@@ -239,7 +253,7 @@ describe('index table', () => {
     await runAllPromises();
     rendered.update();
 
-    let button = findTestSubject(rendered, 'indexTableContextMenuButton');
+    let button = findTestSubject(rendered, 'indexActionsContextMenuButton');
     expect(button.length).toEqual(0);
 
     const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
@@ -254,15 +268,44 @@ describe('index table', () => {
     expect(button.text()).toEqual('Manage 2 indices');
   });
 
-  test('should show system indices only when the switch is turned on', async () => {
+  test('should show hidden indices only when the switch is turned on', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
 
-    snapshot(rendered.find('.euiPagination li').map((item) => item.text()));
-    const switchControl = rendered.find('.euiSwitch__button');
+    // We have manually set `.admin1` and `.admin3` as hidden indices
+    // We **don't** expect them to be in this list as by default we don't show hidden indices
+    let indicesInTable = namesText(rendered);
+    expect(indicesInTable).not.toContain('.admin1');
+    expect(indicesInTable).not.toContain('.admin3');
+
+    if (kibanaVersion.major >= 8) {
+      // From 8.x indices starting with a period are treated as normal indices
+      expect(indicesInTable).toContain('.admin0');
+      expect(indicesInTable).toContain('.admin2');
+    } else if (kibanaVersion.major < 8) {
+      // In 7.x those are treated as system and are thus hidden
+      expect(indicesInTable).not.toContain('.admin0');
+      expect(indicesInTable).not.toContain('.admin2');
+    }
+
+    snapshot(indicesInTable);
+
+    // Enable "Show hidden indices"
+    const switchControl = findTestSubject(rendered, 'indexTableIncludeHiddenIndicesToggle');
     switchControl.simulate('click');
-    snapshot(rendered.find('.euiPagination li').map((item) => item.text()));
+
+    // We do expect now the `.admin1` and `.admin3` indices to be in the list
+    indicesInTable = namesText(rendered);
+    expect(indicesInTable).toContain('.admin1');
+    expect(indicesInTable).toContain('.admin3');
+
+    if (kibanaVersion.major < 8) {
+      expect(indicesInTable).toContain('.admin0');
+      expect(indicesInTable).toContain('.admin2');
+    }
+
+    snapshot(indicesInTable);
   });
 
   test('should filter based on content of search input', async () => {
@@ -316,7 +359,7 @@ describe('index table', () => {
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map((span) => span.text()));
+    snapshot(getActionMenuButtons(rendered));
   });
 
   test('should show the right context menu options when one index is selected and closed', async () => {
@@ -330,7 +373,7 @@ describe('index table', () => {
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map((span) => span.text()));
+    snapshot(getActionMenuButtons(rendered));
   });
 
   test('should show the right context menu options when one open and one closed index is selected', async () => {
@@ -345,7 +388,7 @@ describe('index table', () => {
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map((span) => span.text()));
+    snapshot(getActionMenuButtons(rendered));
   });
 
   test('should show the right context menu options when more than one open index is selected', async () => {
@@ -360,7 +403,7 @@ describe('index table', () => {
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map((span) => span.text()));
+    snapshot(getActionMenuButtons(rendered));
   });
 
   test('should show the right context menu options when more than one closed index is selected', async () => {
@@ -375,28 +418,28 @@ describe('index table', () => {
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map((span) => span.text()));
+    snapshot(getActionMenuButtons(rendered));
   });
 
   test('flush button works from context menu', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
-    testAction(rendered, 8);
+    testAction(rendered, 'flushIndexMenuButton');
   });
 
   test('clear cache button works from context menu', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
-    testAction(rendered, 7);
+    testAction(rendered, 'clearCacheIndexMenuButton');
   });
 
   test('refresh button works from context menu', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
-    testAction(rendered, 6);
+    testAction(rendered, 'refreshIndexMenuButton');
   });
 
   test('force merge button works from context menu', async () => {
@@ -405,7 +448,7 @@ describe('index table', () => {
     rendered.update();
 
     const rowIndex = 0;
-    openMenuAndClickButton(rendered, rowIndex, 5);
+    openMenuAndClickButton(rendered, rowIndex, 'forcemergeIndexMenuButton');
     snapshot(status(rendered, rowIndex));
     expect(rendered.find('.euiModal').length).toBe(1);
 
@@ -441,55 +484,54 @@ describe('index table', () => {
       JSON.stringify(modifiedIndices),
     ]);
 
-    testAction(rendered, 4);
+    testAction(rendered, 'closeIndexMenuButton');
   });
 
   test('open index button works from context menu', async () => {
-    const rendered = mountWithIntl(component);
-    await runAllPromises();
-    rendered.update();
-
     const modifiedIndices = indices.map((index) => {
       return {
         ...index,
-        status: index.name === 'testy1' ? 'open' : index.status,
+        status: index.name === 'testy1' ? 'closed' : index.status,
       };
     });
 
-    server.respondWith(`${API_BASE_PATH}/indices/reload`, [
+    server.respondWith(`${API_BASE_PATH}/indices`, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(modifiedIndices),
     ]);
 
-    testAction(rendered, 3, 1);
+    const rendered = mountWithIntl(component);
+    await runAllPromises();
+    rendered.update();
+    testAction(rendered, 'openIndexMenuButton', 'testy1');
   });
 
   test('show settings button works from context menu', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
-    testEditor(rendered, 0);
+    testEditor(rendered, 'showSettingsIndexMenuButton');
   });
 
   test('show mappings button works from context menu', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
-    testEditor(rendered, 1);
+    testEditor(rendered, 'showMappingsIndexMenuButton');
   });
 
   test('show stats button works from context menu', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
-    testEditor(rendered, 2);
+    testEditor(rendered, 'showStatsIndexMenuButton');
   });
 
   test('edit index button works from context menu', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
     rendered.update();
-    testEditor(rendered, 3);
+    testEditor(rendered, 'editIndexMenuButton');
   });
 });

@@ -6,10 +6,9 @@
  */
 
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
-import { getDefaultLayoutSelectors } from '../../common';
-import { LayoutParams } from '../../common/types';
+import type { LayoutParams } from '../../../screenshotting/common';
 import { ReportingPanelContent, ReportingPanelProps } from './reporting_panel_content';
 
 export interface Props extends ReportingPanelProps {
@@ -104,7 +103,7 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     this.setState({ useCanvasLayout: evt.target.checked, usePrintLayout: false });
   };
 
-  private getLayout = (): Required<LayoutParams> => {
+  private getLayout = (): LayoutParams => {
     const { layout: outerLayout } = this.props.getJobParams();
 
     let dimensions = outerLayout?.dimensions;
@@ -114,20 +113,15 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
       dimensions = { height, width };
     }
 
-    let selectors = outerLayout?.selectors;
-    if (!selectors) {
-      selectors = getDefaultLayoutSelectors();
-    }
-
     if (this.state.usePrintLayout) {
-      return { id: 'print', dimensions, selectors };
+      return { id: 'print', dimensions };
     }
 
     if (this.state.useCanvasLayout) {
-      return { id: 'canvas', dimensions, selectors };
+      return { id: 'canvas', dimensions };
     }
 
-    return { id: 'preserve_layout', dimensions, selectors };
+    return { id: 'preserve_layout', dimensions };
   };
 
   private getJobParams = () => {

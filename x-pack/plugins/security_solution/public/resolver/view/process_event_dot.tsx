@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useContext } from 'react';
 import styled from 'styled-components';
 import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { NodeSubMenu } from './styles';
 import { applyMatrix3 } from '../models/vector2';
@@ -174,9 +174,10 @@ const UnstyledProcessEventDot = React.memo(
 
     // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
     // this is used to link nodes via aria attributes
-    const nodeHTMLID = useCallback((id: string) => htmlIdGenerator(htmlIDPrefix)(`${id}:node`), [
-      htmlIDPrefix,
-    ]);
+    const nodeHTMLID = useCallback(
+      (id: string) => htmlIdGenerator(htmlIDPrefix)(`${id}:node`),
+      [htmlIDPrefix]
+    );
 
     const ariaLevel: number | null = useSelector((state: ResolverState) =>
       selectors.ariaLevel(state)(nodeID)

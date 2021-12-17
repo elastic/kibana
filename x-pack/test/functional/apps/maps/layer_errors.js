@@ -104,24 +104,6 @@ export default function ({ getPageObjects }) {
       });
     });
 
-    describe('KibanaRegionmapSource with missing region map configuration', () => {
-      const MISSING_REGION_NAME = 'nameThatDoesNotExitForKibanaRegionmapSource';
-      const LAYER_NAME = 'Custom_vector_shapes';
-
-      it('should diplay error message in layer panel', async () => {
-        const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
-        expect(errorMsg).to.equal(
-          `Unable to find map.regionmap configuration for ${MISSING_REGION_NAME}`
-        );
-      });
-
-      it('should allow deletion of layer', async () => {
-        await PageObjects.maps.removeLayer(LAYER_NAME);
-        const exists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
-        expect(exists).to.be(false);
-      });
-    });
-
     describe('KibanaTilemapSource with missing map.tilemap.url configuration', () => {
       const LAYER_NAME = 'Custom_TMS';
 

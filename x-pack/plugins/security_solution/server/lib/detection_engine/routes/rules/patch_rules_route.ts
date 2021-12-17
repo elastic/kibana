@@ -6,7 +6,6 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { patchRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/patch_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -24,14 +23,14 @@ import { buildSiemResponse } from '../utils';
 
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { readRules } from '../../rules/read_rules';
+import { legacyMigrate } from '../../rules/utils';
 import { PartialFilter } from '../../types';
 
 export const patchRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: IRuleDataClient | null
+  isRuleRegistryEnabled: boolean
 ) => {
   router.patch(
     {
@@ -87,6 +86,7 @@ export const patchRulesRoute = (
         threshold,
         threat_filters: threatFilters,
         threat_index: threatIndex,
+        threat_indicator_path: threatIndicatorPath,
         threat_query: threatQuery,
         threat_mapping: threatMapping,
         threat_language: threatLanguage,
@@ -125,14 +125,26 @@ export const patchRulesRoute = (
           throwHttpError(await mlAuthz.validateRuleType(type));
         }
 
-        const existingRule = await readRules({ rulesClient, ruleId, id });
+        const existingRule = await readRules({
+          isRuleRegistryEnabled,
+          rulesClient,
+          ruleId,
+          id,
+        });
         if (existingRule?.params.type) {
           // reject an unauthorized modification of an ML rule
           throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
         }
 
+        const migratedRule = await legacyMigrate({
+          rulesClient,
+          savedObjectsClient,
+          rule: existingRule,
+        });
+
         const rule = await patchRules({
           rulesClient,
+          savedObjectsClient,
           author,
           buildingBlockType,
           description,
@@ -151,7 +163,7 @@ export const patchRulesRoute = (
           timelineTitle,
           meta,
           filters,
-          rule: existingRule,
+          rule: migratedRule,
           index,
           interval,
           maxSignals,
@@ -168,9 +180,11 @@ export const patchRulesRoute = (
           threshold,
           threatFilters,
           threatIndex,
+          threatIndicatorPath,
           threatQuery,
           threatMapping,
           threatLanguage,
+          throttle,
           concurrentSearches,
           itemsPerSearch,
           timestampOverride,
@@ -183,22 +197,12 @@ export const patchRulesRoute = (
           exceptionsList,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
-          const ruleActions = await updateRulesNotifications({
-            ruleAlertId: rule.id,
-            rulesClient,
-            savedObjectsClient,
-            enabled: rule.enabled,
-            actions,
-            throttle,
-            name: rule.name,
-          });
-          const ruleStatuses = await ruleStatusClient.find({
-            logsCount: 1,
+          const ruleStatus = await ruleStatusClient.getCurrentStatus({
             ruleId: rule.id,
             spaceId: context.securitySolution.getSpaceId(),
           });
 
-          const [validated, errors] = transformValidate(rule, ruleActions, ruleStatuses[0]);
+          const [validated, errors] = transformValidate(rule, ruleStatus, isRuleRegistryEnabled);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

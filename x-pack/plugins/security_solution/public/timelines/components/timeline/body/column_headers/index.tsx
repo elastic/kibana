@@ -33,6 +33,9 @@ import {
 import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
 
+import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { useCreateFieldButton } from '../../../create_field_button';
+
 interface Props {
   actionsColumnWidth: number;
   browserFields: BrowserFields;
@@ -169,6 +172,11 @@ export const ColumnHeadersComponent = ({
     [trailingControlColumns]
   );
 
+  const createFieldComponent = useCreateFieldButton(
+    SourcererScopeName.timeline,
+    timelineId as TimelineId
+  );
+
   const LeadingHeaderActions = useMemo(() => {
     return leadingHeaderCells.map(
       (Header: React.ComponentType<HeaderActionProps> | React.ComponentType | undefined, index) => {
@@ -194,6 +202,7 @@ export const ColumnHeadersComponent = ({
                 sort={sort}
                 tabType={tabType}
                 timelineId={timelineId}
+                createFieldComponent={createFieldComponent}
               />
             )}
           </EventsThGroupActions>
@@ -206,6 +215,7 @@ export const ColumnHeadersComponent = ({
     actionsColumnWidth,
     browserFields,
     columnHeaders,
+    createFieldComponent,
     isEventViewer,
     isSelectAllChecked,
     onSelectAll,
@@ -241,6 +251,7 @@ export const ColumnHeadersComponent = ({
                 sort={sort}
                 tabType={tabType}
                 timelineId={timelineId}
+                createFieldComponent={createFieldComponent}
               />
             )}
           </EventsThGroupActions>
@@ -253,6 +264,7 @@ export const ColumnHeadersComponent = ({
     actionsColumnWidth,
     browserFields,
     columnHeaders,
+    createFieldComponent,
     isEventViewer,
     isSelectAllChecked,
     onSelectAll,

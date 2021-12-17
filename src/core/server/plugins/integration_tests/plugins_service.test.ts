@@ -7,7 +7,7 @@
  */
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { mockPackage, mockDiscover } from './plugins_service.test.mocks';
 
 import { join } from 'path';
@@ -42,6 +42,7 @@ describe('PluginsService', () => {
       configPath = [path],
       server = true,
       ui = true,
+      owner = { name: 'foo' },
     }: {
       path?: string;
       disabled?: boolean;
@@ -54,6 +55,7 @@ describe('PluginsService', () => {
       configPath?: ConfigPath;
       server?: boolean;
       ui?: boolean;
+      owner?: { name: string };
     }
   ): PluginWrapper => {
     return new PluginWrapper({
@@ -69,6 +71,7 @@ describe('PluginsService', () => {
         optionalPlugins,
         server,
         ui,
+        owner,
       },
       opaqueId: Symbol(id),
       initializerContext: { logger } as any,

@@ -11,7 +11,7 @@ import { getEsQueryConfig } from './get_es_query_config';
 import { IUiSettingsClient } from 'kibana/public';
 import { UI_SETTINGS } from '..';
 
-const config = ({
+const config = {
   get(item: string) {
     return get(config, item);
   },
@@ -27,7 +27,7 @@ const config = ({
   'dateFormat:tz': {
     dateFormatTZ: 'Browser',
   },
-} as unknown) as IUiSettingsClient;
+} as unknown as IUiSettingsClient;
 
 describe('getEsQueryConfig', () => {
   test('should return the parameters of an Elasticsearch query config requested', () => {

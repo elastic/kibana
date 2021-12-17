@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { safeLoad } from 'js-yaml';
+
 import { installationStatuses } from '../constants';
 import type { PackageInfo, NewPackagePolicy, RegistryPolicyTemplate } from '../types';
 
@@ -13,7 +15,7 @@ import { AWS_PACKAGE, INVALID_AWS_POLICY, VALID_AWS_POLICY } from './fixtures/aw
 
 describe('Fleet - validatePackagePolicy()', () => {
   describe('works for packages with single policy template (aka no integrations)', () => {
-    const mockPackage = ({
+    const mockPackage = {
       name: 'mock-package',
       title: 'Mock package',
       version: '0.0.0',
@@ -66,6 +68,16 @@ describe('Fleet - validatePackagePolicy()', () => {
               input: 'bar',
               title: 'Bar 2',
               vars: [{ default: 'bar2-var-value', name: 'var-name', type: 'text' }],
+            },
+          ],
+        },
+        {
+          dataset: 'bar3',
+          streams: [
+            {
+              input: 'bar',
+              title: 'Bar 3',
+              vars: [{ default: true, name: 'var-name', type: 'bool' }],
             },
           ],
         },
@@ -140,7 +152,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           ],
         },
       ],
-    } as unknown) as PackageInfo;
+    } as unknown as PackageInfo;
 
     const validPackagePolicy: NewPackagePolicy = {
       name: 'pkgPolicy1-1',
@@ -184,6 +196,11 @@ describe('Fleet - validatePackagePolicy()', () => {
               data_stream: { dataset: 'bar2', type: 'logs' },
               enabled: true,
               vars: { 'var-name': { value: undefined, type: 'text' } },
+            },
+            {
+              data_stream: { dataset: 'bar3', type: 'logs' },
+              enabled: true,
+              vars: { 'var-name': { value: true, type: 'text' } },
             },
           ],
         },
@@ -266,6 +283,11 @@ describe('Fleet - validatePackagePolicy()', () => {
               enabled: true,
               vars: { 'var-name': { value: undefined, type: 'text' } },
             },
+            {
+              data_stream: { dataset: 'bar3', type: 'logs' },
+              enabled: true,
+              vars: { 'var-name': { value: 'not a bool', type: 'bool' } },
+            },
           ],
         },
         {
@@ -330,6 +352,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           streams: {
             bar: { vars: { 'var-name': null } },
             bar2: { vars: { 'var-name': null } },
+            bar3: { vars: { 'var-name': null } },
           },
         },
         'with-disabled-streams': {
@@ -350,13 +373,13 @@ describe('Fleet - validatePackagePolicy()', () => {
     };
 
     it('returns no errors for valid package policy', () => {
-      expect(validatePackagePolicy(validPackagePolicy, mockPackage)).toEqual(
+      expect(validatePackagePolicy(validPackagePolicy, mockPackage, safeLoad)).toEqual(
         noErrorsValidationResults
       );
     });
 
     it('returns errors for invalid package policy', () => {
-      expect(validatePackagePolicy(invalidPackagePolicy, mockPackage)).toEqual({
+      expect(validatePackagePolicy(invalidPackagePolicy, mockPackage, safeLoad)).toEqual({
         name: ['Name is required'],
         description: null,
         namespace: null,
@@ -377,6 +400,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             streams: {
               bar: { vars: { 'var-name': ['var-name is required'] } },
               bar2: { vars: { 'var-name': null } },
+              bar3: { vars: { 'var-name': ['Boolean values must be either true or false'] } },
             },
           },
           'with-disabled-streams': {
@@ -401,7 +425,11 @@ describe('Fleet - validatePackagePolicy()', () => {
         enabled: false,
       }));
       expect(
-        validatePackagePolicy({ ...validPackagePolicy, inputs: disabledInputs }, mockPackage)
+        validatePackagePolicy(
+          { ...validPackagePolicy, inputs: disabledInputs },
+          mockPackage,
+          safeLoad
+        )
       ).toEqual(noErrorsValidationResults);
     });
 
@@ -417,7 +445,8 @@ describe('Fleet - validatePackagePolicy()', () => {
       expect(
         validatePackagePolicy(
           { ...invalidPackagePolicy, inputs: inputsWithDisabledStreams },
-          mockPackage
+          mockPackage,
+          safeLoad
         )
       ).toEqual({
         name: ['Name is required'],
@@ -440,6 +469,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             streams: {
               bar: { vars: { 'var-name': null } },
               bar2: { vars: { 'var-name': null } },
+              bar3: { vars: { 'var-name': null } },
             },
           },
           'with-disabled-streams': {
@@ -462,10 +492,14 @@ describe('Fleet - validatePackagePolicy()', () => {
 
     it('returns no errors for packages with no package policies', () => {
       expect(
-        validatePackagePolicy(validPackagePolicy, {
-          ...mockPackage,
-          policy_templates: undefined,
-        })
+        validatePackagePolicy(
+          validPackagePolicy,
+          {
+            ...mockPackage,
+            policy_templates: undefined,
+          },
+          safeLoad
+        )
       ).toEqual({
         name: null,
         description: null,
@@ -473,10 +507,14 @@ describe('Fleet - validatePackagePolicy()', () => {
         inputs: null,
       });
       expect(
-        validatePackagePolicy(validPackagePolicy, {
-          ...mockPackage,
-          policy_templates: [],
-        })
+        validatePackagePolicy(
+          validPackagePolicy,
+          {
+            ...mockPackage,
+            policy_templates: [],
+          },
+          safeLoad
+        )
       ).toEqual({
         name: null,
         description: null,
@@ -487,10 +525,14 @@ describe('Fleet - validatePackagePolicy()', () => {
 
     it('returns no errors for packages with no inputs', () => {
       expect(
-        validatePackagePolicy(validPackagePolicy, {
-          ...mockPackage,
-          policy_templates: [{} as RegistryPolicyTemplate],
-        })
+        validatePackagePolicy(
+          validPackagePolicy,
+          {
+            ...mockPackage,
+            policy_templates: [{} as RegistryPolicyTemplate],
+          },
+          safeLoad
+        )
       ).toEqual({
         name: null,
         description: null,
@@ -498,10 +540,14 @@ describe('Fleet - validatePackagePolicy()', () => {
         inputs: null,
       });
       expect(
-        validatePackagePolicy(validPackagePolicy, {
-          ...mockPackage,
-          policy_templates: [({ inputs: [] } as unknown) as RegistryPolicyTemplate],
-        })
+        validatePackagePolicy(
+          validPackagePolicy,
+          {
+            ...mockPackage,
+            policy_templates: [{ inputs: [] } as unknown as RegistryPolicyTemplate],
+          },
+          safeLoad
+        )
       ).toEqual({
         name: null,
         description: null,
@@ -516,7 +562,8 @@ describe('Fleet - validatePackagePolicy()', () => {
       expect(
         validatePackagePolicy(
           INVALID_AWS_POLICY as NewPackagePolicy,
-          (AWS_PACKAGE as unknown) as PackageInfo
+          AWS_PACKAGE as unknown as PackageInfo,
+          safeLoad
         )
       ).toMatchSnapshot();
     });
@@ -526,7 +573,8 @@ describe('Fleet - validatePackagePolicy()', () => {
         validationHasErrors(
           validatePackagePolicy(
             VALID_AWS_POLICY as NewPackagePolicy,
-            (AWS_PACKAGE as unknown) as PackageInfo
+            AWS_PACKAGE as unknown as PackageInfo,
+            safeLoad
           )
         )
       ).toBe(false);

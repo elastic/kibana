@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { SPACES, ALL_SPACES_ID } from './spaces';
 import { AUTHENTICATION } from './authentication';
@@ -118,17 +118,18 @@ const uniq = <T>(arr: T[]): T[] => Array.from(new Set<T>(arr));
 const isNamespaceAgnostic = (type: string) => type === 'globaltype';
 const isMultiNamespace = (type: string) => type === 'sharedtype' || type === 'sharecapabletype';
 export const expectResponses = {
-  forbiddenTypes: (action: string) => (
-    typeOrTypes: string | string[]
-  ): ExpectResponseBody => async (response: Record<string, any>) => {
-    const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-    const uniqueSorted = uniq(types).sort();
-    expect(response.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to ${action} ${uniqueSorted.join()}`,
-    });
-  },
+  forbiddenTypes:
+    (action: string) =>
+    (typeOrTypes: string | string[]): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
+      const uniqueSorted = uniq(types).sort();
+      expect(response.body).to.eql({
+        statusCode: 403,
+        error: 'Forbidden',
+        message: `Unable to ${action} ${uniqueSorted.join()}`,
+      });
+    },
   forbiddenSpaces: (response: Record<string, any>) => {
     expect(response.body).to.eql({
       statusCode: 403,
@@ -181,11 +182,11 @@ export const expectResponses = {
    * Additional assertions that we use in `import` and `resolve_import_errors` to ensure that
    * newly-created (or overwritten) objects don't have unexpected properties
    */
-  successCreated: async (es: KibanaClient, spaceId: string, type: string, id: string) => {
+  successCreated: async (es: Client, spaceId: string, type: string, id: string) => {
     const isNamespaceUndefined =
       spaceId === SPACES.DEFAULT.spaceId || isNamespaceAgnostic(type) || isMultiNamespace(type);
     const expectedSpacePrefix = isNamespaceUndefined ? '' : `${spaceId}:`;
-    const { body: savedObject } = await es.get<Record<string, any>>({
+    const savedObject = await es.get<Record<string, any>>({
       id: `${expectedSpacePrefix}${type}:${id}`,
       index: '.kibana',
     });

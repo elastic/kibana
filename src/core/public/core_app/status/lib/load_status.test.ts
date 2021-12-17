@@ -9,6 +9,7 @@
 import { StatusResponse } from '../../../../types/status';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { notificationServiceMock } from '../../../notifications/notifications_service.mock';
+import { mocked } from '../../../../server/metrics/event_loop_delays/event_loop_delays_monitor.mocks';
 import { loadStatus } from './load_status';
 
 const mockedResponse: StatusResponse = {
@@ -36,11 +37,11 @@ const mockedResponse: StatusResponse = {
       },
     },
     plugins: {
-      '1': {
+      plugin1: {
         level: 'available',
         summary: 'Ready',
       },
-      '2': {
+      plugin2: {
         level: 'degraded',
         summary: 'Something is weird',
       },
@@ -61,6 +62,7 @@ const mockedResponse: StatusResponse = {
       },
     },
     process: {
+      pid: 1,
       memory: {
         heap: {
           size_limit: 1000000,
@@ -70,9 +72,25 @@ const mockedResponse: StatusResponse = {
         resident_set_size_in_bytes: 1,
       },
       event_loop_delay: 1,
-      pid: 1,
+      event_loop_delay_histogram: mocked.createHistogram(),
       uptime_in_millis: 1,
     },
+    processes: [
+      {
+        pid: 1,
+        memory: {
+          heap: {
+            size_limit: 1000000,
+            used_in_bytes: 100,
+            total_in_bytes: 0,
+          },
+          resident_set_size_in_bytes: 1,
+        },
+        event_loop_delay: 1,
+        event_loop_delay_histogram: mocked.createHistogram(),
+        uptime_in_millis: 1,
+      },
+    ],
     response_times: {
       avg_in_millis: 4000,
       max_in_millis: 8000,
@@ -147,39 +165,50 @@ describe('response processing', () => {
     expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
   });
 
-  test('includes the plugin statuses', async () => {
+  test('includes core statuses', async () => {
     const data = await loadStatus({ http, notifications });
-    expect(data.statuses).toEqual([
+    expect(data.coreStatus).toEqual([
       {
-        id: 'core:elasticsearch',
+        id: 'elasticsearch',
         state: {
           id: 'available',
           title: 'Green',
           message: 'Elasticsearch is available',
-          uiColor: 'secondary',
+          uiColor: 'success',
         },
+        original: mockedResponse.status.core.elasticsearch,
       },
       {
-        id: 'core:savedObjects',
+        id: 'savedObjects',
         state: {
           id: 'available',
           title: 'Green',
           message: 'SavedObjects service has completed migrations and is available',
-          uiColor: 'secondary',
+          uiColor: 'success',
         },
+        original: mockedResponse.status.core.savedObjects,
+      },
+    ]);
+  });
+
+  test('includes the plugin statuses', async () => {
+    const data = await loadStatus({ http, notifications });
+
+    expect(data.pluginStatus).toEqual([
+      {
+        id: 'plugin1',
+        state: { id: 'available', title: 'Green', message: 'Ready', uiColor: 'success' },
+        original: mockedResponse.status.plugins.plugin1,
       },
       {
-        id: 'plugin:1',
-        state: { id: 'available', title: 'Green', message: 'Ready', uiColor: 'secondary' },
-      },
-      {
-        id: 'plugin:2',
+        id: 'plugin2',
         state: {
           id: 'degraded',
           title: 'Yellow',
           message: 'Something is weird',
           uiColor: 'warning',
         },
+        original: mockedResponse.status.plugins.plugin2,
       },
     ]);
   });
@@ -200,13 +229,23 @@ describe('response processing', () => {
     expect(names).toEqual([
       'Heap total',
       'Heap used',
-      'Load',
-      'Response time avg',
-      'Response time max',
       'Requests per second',
+      'Load',
+      'Delay',
+      'Response time avg',
     ]);
-
     const values = data.metrics.map((m) => m.value);
-    expect(values).toEqual([1000000, 100, [4.1, 2.1, 0.1], 4000, 8000, 400]);
+    expect(values).toEqual([1000000, 100, 400, [4.1, 2.1, 0.1], 1, 4000]);
+  });
+
+  test('adds meta details to Load, Delay and Response time', async () => {
+    const data = await loadStatus({ http, notifications });
+    const metricNames = data.metrics.filter((met) => met.meta);
+    expect(metricNames.map((item) => item.name)).toEqual(['Load', 'Delay', 'Response time avg']);
+    expect(metricNames.map((item) => item.meta!.description)).toEqual([
+      'Load interval',
+      'Percentiles',
+      'Response time max',
+    ]);
   });
 });

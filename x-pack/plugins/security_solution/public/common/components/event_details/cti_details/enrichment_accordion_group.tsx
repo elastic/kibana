@@ -84,9 +84,13 @@ const EnrichmentAccordion: React.FC<{
   enrichment: CtiEnrichment;
   index: number;
 }> = ({ enrichment, index }) => {
-  const { id = `threat-details-item`, field, provider, type, value } = getEnrichmentIdentifiers(
-    enrichment
-  );
+  const {
+    id = `threat-details-item`,
+    field,
+    feedName,
+    type,
+    value,
+  } = getEnrichmentIdentifiers(enrichment);
   const accordionId = `${id}${field}`;
   return (
     <StyledEuiAccordion
@@ -94,7 +98,7 @@ const EnrichmentAccordion: React.FC<{
       key={accordionId}
       initialIsOpen={true}
       arrowDisplay="right"
-      buttonContent={<EnrichmentButtonContent field={field} provider={provider} value={value} />}
+      buttonContent={<EnrichmentButtonContent field={field} feedName={feedName} value={value} />}
       extraAction={
         isInvestigationTimeEnrichment(type) && (
           <EuiFlexItem grow={false}>

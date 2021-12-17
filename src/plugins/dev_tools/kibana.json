@@ -3,5 +3,10 @@
   "version": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["urlForwarding"]
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
+  "requiredPlugins": ["urlForwarding"],
+  "requiredBundles": ["kibanaReact"]
 }

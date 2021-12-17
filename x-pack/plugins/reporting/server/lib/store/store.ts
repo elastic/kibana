@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/api/types';
+import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'src/core/server';
 import { LevelLogger, statuses } from '../';
 import { ReportingCore } from '../../';
-import { JobStatus, ReportOutput } from '../../../common/types';
-
-import { ILM_POLICY_NAME } from '../../../common/constants';
-
+import { ILM_POLICY_NAME, REPORTING_SYSTEM_INDEX } from '../../../common/constants';
+import { JobStatus, ReportOutput, ReportSource } from '../../../common/types';
 import { ReportTaskParams } from '../tasks';
-
-import { MIGRATION_VERSION, Report, ReportDocument, ReportSource } from './report';
+import { Report, ReportDocument, SavedReport } from './';
+import { IlmPolicyManager } from './ilm_policy_manager';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
-import { IlmPolicyManager } from './ilm_policy_manager';
+import { MIGRATION_VERSION } from './report';
 
 /*
  * When an instance of Kibana claims a report job, this information tells us about that instance
@@ -26,7 +24,6 @@ import { IlmPolicyManager } from './ilm_policy_manager';
 export type ReportProcessingFields = Required<{
   kibana_id: Report['kibana_id'];
   kibana_name: Report['kibana_name'];
-  browser_type: Report['browser_type'];
   attempts: Report['attempts'];
   started_at: Report['started_at'];
   max_attempts: Report['max_attempts'];
@@ -56,18 +53,6 @@ export interface ReportRecordTimeout {
   };
 }
 
-const checkReportIsEditable = (report: Report) => {
-  const { _id, _index, _seq_no, _primary_term } = report;
-  if (_id == null || _index == null) {
-    throw new Error(`Report is not editable: Job [${_id}] is not synced with ES!`);
-  }
-
-  if (_seq_no == null || _primary_term == null) {
-    throw new Error(
-      `Report is not editable: Job [${_id}] is missing _seq_no and _primary_term fields!`
-    );
-  }
-};
 /*
  * When searching for long-pending reports, we get a subset of fields
  */
@@ -101,7 +86,7 @@ export class ReportingStore {
   constructor(private reportingCore: ReportingCore, private logger: LevelLogger) {
     const config = reportingCore.getConfig();
 
-    this.indexPrefix = config.get('index');
+    this.indexPrefix = REPORTING_SYSTEM_INDEX;
     this.indexInterval = config.get('queue', 'indexInterval');
     this.logger = logger.clone(['store']);
   }
@@ -210,12 +195,12 @@ export class ReportingStore {
       await ilmPolicyManager.createIlmPolicy();
     } catch (e) {
       this.logger.error('Error in start phase');
-      this.logger.error(e.body.error);
+      this.logger.error(e.body?.error);
       throw e;
     }
   }
 
-  public async addReport(report: Report): Promise<Report> {
+  public async addReport(report: Report): Promise<SavedReport> {
     let index = report._index;
     if (!index) {
       const timestamp = indexTimestamp(this.indexInterval);
@@ -229,7 +214,7 @@ export class ReportingStore {
 
       await this.refreshIndex(index);
 
-      return report;
+      return report as SavedReport;
     } catch (err) {
       this.logger.error(`Error in adding a report!`);
       this.logger.error(err);
@@ -242,9 +227,14 @@ export class ReportingStore {
    */
   public async findReportFromTask(
     taskJson: Pick<ReportTaskParams, 'id' | 'index'>
-  ): Promise<Report> {
+  ): Promise<SavedReport> {
     if (!taskJson.index) {
       throw new Error('Task JSON is missing index field!');
+    }
+    if (!taskJson.id || !taskJson.index) {
+      const notRetrievable = new Error(`Unable to retrieve pending report: Invalid report ID!`);
+      this.logger.error(notRetrievable); // for stack trace
+      throw notRetrievable;
     }
 
     try {
@@ -254,14 +244,13 @@ export class ReportingStore {
         id: taskJson.id,
       });
 
-      return new Report({
+      return new SavedReport({
         _id: document._id,
         _index: document._index,
         _seq_no: document._seq_no,
         _primary_term: document._primary_term,
         jobtype: document._source?.jobtype,
         attempts: document._source?.attempts,
-        browser_type: document._source?.browser_type,
         created_at: document._source?.created_at,
         created_by: document._source?.created_by,
         max_attempts: document._source?.max_attempts,
@@ -282,7 +271,7 @@ export class ReportingStore {
   }
 
   public async setReportClaimed(
-    report: Report,
+    report: SavedReport,
     processingInfo: ReportProcessingFields
   ): Promise<UpdateResponse<ReportDocument>> {
     const doc = sourceDoc({
@@ -291,12 +280,10 @@ export class ReportingStore {
     });
 
     try {
-      checkReportIsEditable(report);
-
       const client = await this.getClient();
       const { body } = await client.update<ReportDocument>({
         id: report._id,
-        index: report._index!,
+        index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
         refresh: true,
@@ -314,7 +301,7 @@ export class ReportingStore {
   }
 
   public async setReportFailed(
-    report: Report,
+    report: SavedReport,
     failedInfo: ReportFailedFields
   ): Promise<UpdateResponse<ReportDocument>> {
     const doc = sourceDoc({
@@ -323,12 +310,10 @@ export class ReportingStore {
     });
 
     try {
-      checkReportIsEditable(report);
-
       const client = await this.getClient();
       const { body } = await client.update<ReportDocument>({
         id: report._id,
-        index: report._index!,
+        index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
         refresh: true,
@@ -343,7 +328,7 @@ export class ReportingStore {
   }
 
   public async setReportCompleted(
-    report: Report,
+    report: SavedReport,
     completedInfo: ReportCompletedFields
   ): Promise<UpdateResponse<ReportDocument>> {
     const { output } = completedInfo;
@@ -357,12 +342,10 @@ export class ReportingStore {
     } as ReportSource);
 
     try {
-      checkReportIsEditable(report);
-
       const client = await this.getClient();
       const { body } = await client.update<ReportDocument>({
         id: report._id,
-        index: report._index!,
+        index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
         refresh: true,
@@ -376,19 +359,17 @@ export class ReportingStore {
     }
   }
 
-  public async prepareReportForRetry(report: Report): Promise<UpdateResponse<ReportDocument>> {
+  public async prepareReportForRetry(report: SavedReport): Promise<UpdateResponse<ReportDocument>> {
     const doc = sourceDoc({
       status: statuses.JOB_STATUS_PENDING,
       process_expiration: null,
     });
 
     try {
-      checkReportIsEditable(report);
-
       const client = await this.getClient();
       const { body } = await client.update<ReportDocument>({
         id: report._id,
-        index: report._index!,
+        index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
         refresh: true,

@@ -7,7 +7,7 @@
 
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -31,14 +31,20 @@ import { createMonitoringStats, MonitoringStats } from './monitoring';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
+import { TASK_MANAGER_INDEX } from './constants';
 
-export type TaskManagerSetupContract = {
+export interface TaskManagerSetupContract {
   /**
    * @deprecated
    */
   index: string;
   addMiddleware: (middleware: Middleware) => void;
-} & Pick<TaskTypeDictionary, 'registerTaskDefinitions'>;
+  /**
+   * Method for allowing consumers to register task definitions into the system.
+   * @param taskDefinitions - The Kibana task definitions dictionary
+   */
+  registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
+}
 
 export type TaskManagerStartContract = Pick<
   TaskScheduling,
@@ -49,22 +55,26 @@ export type TaskManagerStartContract = Pick<
   } & { supportsEphemeralTasks: () => boolean };
 
 export class TaskManagerPlugin
-  implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
+  implements Plugin<TaskManagerSetupContract, TaskManagerStartContract>
+{
   private taskPollingLifecycle?: TaskPollingLifecycle;
   private ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
   private taskManagerId?: string;
+  private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
   private logger: Logger;
   private definitions: TaskTypeDictionary;
   private middleware: Middleware = createInitialMiddleware();
   private elasticsearchAndSOAvailability$?: Observable<boolean>;
   private monitoringStats$ = new Subject<MonitoringStats>();
+  private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.logger = initContext.logger.get();
     this.config = initContext.config.get<TaskManagerConfig>();
     this.definitions = new TaskTypeDictionary(this.logger);
+    this.kibanaVersion = initContext.env.packageInfo.version;
   }
 
   public setup(
@@ -85,16 +95,35 @@ export class TaskManagerPlugin
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${this.taskManagerId}`);
     }
 
+    const startServicesPromise = core.getStartServices().then(([coreServices]) => ({
+      elasticsearch: coreServices.elasticsearch,
+    }));
+
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(`taskManager`);
+
     // Routes
     const router = core.http.createRouter();
-    const { serviceStatus$, monitoredHealth$ } = healthRoute(
+    const { serviceStatus$, monitoredHealth$ } = healthRoute({
       router,
-      this.monitoringStats$,
-      this.logger,
-      this.taskManagerId,
-      this.config!
+      monitoringStats$: this.monitoringStats$,
+      logger: this.logger,
+      taskManagerId: this.taskManagerId,
+      config: this.config!,
+      usageCounter: this.usageCounter!,
+      kibanaVersion: this.kibanaVersion,
+      kibanaIndexName: core.savedObjects.getKibanaIndex(),
+      getClusterClient: () =>
+        startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
+    });
+
+    core.status.derivedStatus$.subscribe((status) =>
+      this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
+    );
+    serviceStatus$.subscribe((status) =>
+      this.logger.debug(`status serviceStatus now set to ${status.level}`)
     );
 
+    // here is where the system status is updated
     core.status.set(
       combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
         map(([derivedStatus, serviceStatus]) =>
@@ -109,12 +138,19 @@ export class TaskManagerPlugin
         usageCollection,
         monitoredHealth$,
         this.config.ephemeral_tasks.enabled,
-        this.config.ephemeral_tasks.request_capacity
+        this.config.ephemeral_tasks.request_capacity,
+        this.config.unsafe.exclude_task_types
+      );
+    }
+
+    if (this.config.unsafe.exclude_task_types.length) {
+      this.logger.warn(
+        `Excluding task types from execution: ${this.config.unsafe.exclude_task_types.join(', ')}`
       );
     }
 
     return {
-      index: this.config.index,
+      index: TASK_MANAGER_INDEX,
       addMiddleware: (middleware: Middleware) => {
         this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
@@ -126,15 +162,19 @@ export class TaskManagerPlugin
     };
   }
 
-  public start({ savedObjects, elasticsearch }: CoreStart): TaskManagerStartContract {
+  public start({
+    savedObjects,
+    elasticsearch,
+    executionContext,
+  }: CoreStart): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
     const serializer = savedObjects.createSerializer();
     const taskStore = new TaskStore({
       serializer,
       savedObjectsRepository,
-      esClient: elasticsearch.createClient('taskManager').asInternalUser,
-      index: this.config!.index,
+      esClient: elasticsearch.client.asInternalUser,
+      index: TASK_MANAGER_INDEX,
       definitions: this.definitions,
       taskManagerId: `kibana:${this.taskManagerId!}`,
     });
@@ -150,7 +190,9 @@ export class TaskManagerPlugin
       config: this.config!,
       definitions: this.definitions,
       logger: this.logger,
+      executionContext,
       taskStore,
+      usageCounter: this.usageCounter,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       ...managedConfiguration,
@@ -160,6 +202,7 @@ export class TaskManagerPlugin
       config: this.config!,
       definitions: this.definitions,
       logger: this.logger,
+      executionContext,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       pool: this.taskPollingLifecycle.pool,

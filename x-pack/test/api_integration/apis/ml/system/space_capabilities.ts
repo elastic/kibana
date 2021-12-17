@@ -71,11 +71,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should have the right number of capabilities - space with ML', async () => {
         const { capabilities } = await runRequest(USER.ML_POWERUSER, idSpaceWithMl);
-        expect(Object.keys(capabilities).length).to.eql(30);
+        expect(Object.keys(capabilities).length).to.eql(32);
       });
       it('should have the right number of capabilities - space without ML', async () => {
         const { capabilities } = await runRequest(USER.ML_POWERUSER, idSpaceNoMl);
-        expect(Object.keys(capabilities).length).to.eql(30);
+        expect(Object.keys(capabilities).length).to.eql(32);
       });
 
       it('should get viewer capabilities - space with ML', async () => {
@@ -85,6 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteJob: false,
           canOpenJob: false,
           canCloseJob: false,
+          canResetJob: false,
           canUpdateJob: false,
           canForecastJob: false,
           canCreateDatafeed: false,
@@ -111,6 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
           canGetAnnotations: true,
           canCreateAnnotation: true,
           canDeleteAnnotation: true,
+          canViewMlNodes: false,
         });
       });
 
@@ -121,6 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteJob: false,
           canOpenJob: false,
           canCloseJob: false,
+          canResetJob: false,
           canUpdateJob: false,
           canForecastJob: false,
           canCreateDatafeed: false,
@@ -147,6 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
           canGetAnnotations: false,
           canCreateAnnotation: false,
           canDeleteAnnotation: false,
+          canViewMlNodes: false,
         });
       });
 
@@ -157,6 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteJob: true,
           canOpenJob: true,
           canCloseJob: true,
+          canResetJob: true,
           canUpdateJob: true,
           canForecastJob: true,
           canCreateDatafeed: true,
@@ -183,6 +188,7 @@ export default ({ getService }: FtrProviderContext) => {
           canGetAnnotations: true,
           canCreateAnnotation: true,
           canDeleteAnnotation: true,
+          canViewMlNodes: true,
         });
       });
 
@@ -193,6 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteJob: false,
           canOpenJob: false,
           canCloseJob: false,
+          canResetJob: false,
           canUpdateJob: false,
           canForecastJob: false,
           canCreateDatafeed: false,
@@ -219,6 +226,7 @@ export default ({ getService }: FtrProviderContext) => {
           canGetAnnotations: false,
           canCreateAnnotation: false,
           canDeleteAnnotation: false,
+          canViewMlNodes: false,
         });
       });
     });
