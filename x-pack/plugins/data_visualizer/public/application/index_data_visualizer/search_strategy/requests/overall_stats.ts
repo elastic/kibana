@@ -196,6 +196,7 @@ export const checkNonAggregatableFieldExistsRequest = (
     index,
     size,
     body: searchBody,
+    track_total_hits: 1,
   };
 };
 

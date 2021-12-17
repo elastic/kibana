@@ -36,7 +36,18 @@ const appToIcon = (app: string) => {
   if (app === 'dashboards') {
     return 'dashboard';
   }
+  if (app === 'ml') {
+    return 'machineLearning';
+  }
+
   return app;
+};
+
+// Helper function: translate an app id to user friendly string
+const appToTooltip = (appId: string | undefined) => {
+  if (appId === 'ml') {
+    return 'Machine Learning';
+  }
 };
 
 function isSessionRestorable(status: SearchSessionStatus) {
@@ -64,7 +75,7 @@ export const getColumns = (
       render: (appId: UISession['appId'], { id }) => {
         const app = `${appToIcon(appId)}`;
         return (
-          <EuiToolTip content={capitalize(app)}>
+          <EuiToolTip content={appToTooltip(appId) ?? capitalize(app)}>
             <EuiIcon
               data-test-subj="sessionManagementAppIcon"
               data-test-app-id={app}
