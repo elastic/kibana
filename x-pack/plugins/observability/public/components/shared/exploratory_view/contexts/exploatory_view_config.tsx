@@ -21,6 +21,7 @@ interface ExploratoryViewContextValue {
   indexPatterns: Record<string, string>;
   reportConfigMap: ReportConfigMap;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme$: AppMountParameters['theme$'];
 }
 
 export const ExploratoryViewContext = createContext<ExploratoryViewContextValue>({
@@ -34,6 +35,7 @@ export function ExploratoryViewContextProvider({
   indexPatterns,
   reportConfigMap,
   setHeaderActionMenu,
+  theme$,
 }: { children: JSX.Element } & ExploratoryViewContextValue) {
   const value = {
     reportTypes,
@@ -41,6 +43,7 @@ export function ExploratoryViewContextProvider({
     indexPatterns,
     reportConfigMap,
     setHeaderActionMenu,
+    theme$,
   };
 
   return (
