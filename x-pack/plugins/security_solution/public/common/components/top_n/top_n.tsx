@@ -18,7 +18,11 @@ import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/d
 import { InputsModelId } from '../../store/inputs/constants';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 
-import { TopNOption } from './helpers';
+import {
+  isDetectionsAlertsTable,
+  removeIgnoredAlertFilters,
+  TopNOption,
+} from './helpers';
 import * as i18n from './translations';
 import { getIndicesSelector, IndicesSelector } from './selectors';
 import { State } from '../../store';
@@ -102,13 +106,20 @@ const TopNComponent: React.FC<Props> = ({
     () => (
       <ViewSelect
         data-test-subj="view-select"
-        disabled={options.length === 1}
+        disabled={!isDetectionsAlertsTable(timelineId)}
         onChange={onViewSelected}
         options={options}
         valueOfSelected={view}
       />
     ),
-    [onViewSelected, options, view]
+    [onViewSelected, options, timelineId, view]
+  );
+
+  // alert workflow statuses (e.g. open | closed) and other alert-specific
+  // filters must be ignored when viewing raw alerts
+  const applicableFilters = useMemo(
+    () => removeIgnoredAlertFilters({ filters, timelineId, view }),
+    [filters, timelineId, view]
   );
 
   return (
@@ -125,7 +136,7 @@ const TopNComponent: React.FC<Props> = ({
           <EventsByDataset
             combinedQueries={combinedQueries}
             deleteQuery={deleteQuery}
-            filters={filters}
+            filters={applicableFilters}
             from={from}
             headerChildren={headerChildren}
             indexPattern={indexPattern}
@@ -144,7 +155,7 @@ const TopNComponent: React.FC<Props> = ({
         ) : (
           <SignalsByCategory
             combinedQueries={combinedQueries}
-            filters={filters}
+            filters={applicableFilters}
             headerChildren={headerChildren}
             onlyField={field}
             paddingSize={paddingSize}
