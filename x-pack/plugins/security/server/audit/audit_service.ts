@@ -31,7 +31,6 @@ export interface AuditLogger {
 
 export interface AuditServiceSetup {
   asScoped: (request: KibanaRequest) => AuditLogger;
-  asSystem: (request: KibanaRequest) => AuditLogger;
 }
 
 interface AuditServiceSetupParams {
@@ -151,65 +150,6 @@ export class AuditService {
       return { log };
     };
 
-    /**
-     * Creates an {@link AuditLogger} scoped to a kibana system user and current request.
-     *
-     * @example
-     * ```typescript
-     * const auditLogger = securitySetup.audit.asSystem(request);
-     * auditLogger.log(event);
-     * ```
-     */
-    const asSystem = (request: KibanaRequest): AuditLogger => {
-      /**
-       * Logs an {@link AuditEvent} and automatically adds meta data about the
-       * kibana internal, space and correlation id.
-       *
-       * Guidelines around what events should be logged and how they should be
-       * structured can be found in: `/x-pack/plugins/security/README.md`
-       *
-       * @example
-       * ```typescript
-       * const auditLogger = securitySetup.audit.asSystem(request);
-       * auditLogger.log({
-       *   message: 'User is updating dashboard [id=123]',
-       *   event: {
-       *     action: 'saved_object_update',
-       *     outcome: 'unknown'
-       *   },
-       *   kibana: {
-       *     saved_object: { type: 'dashboard', id: '123' }
-       *   },
-       * });
-       * ```
-       */
-      const log: AuditLogger['log'] = async (event) => {
-        if (!event) {
-          return;
-        }
-        const spaceId = getSpaceId(request);
-        const sessionId = await getSID(request);
-        const meta: AuditEvent = {
-          ...event,
-          user: {
-            name: 'kibana_internal',
-            roles: [],
-          },
-          kibana: {
-            space_id: spaceId,
-            session_id: sessionId,
-            ...event.kibana,
-          },
-          trace: { id: request.id },
-        };
-        if (filterEvent(meta, config.ignore_filters)) {
-          const { message, ...eventMeta } = meta;
-          this.logger.info(message, eventMeta);
-        }
-      };
-      return { log };
-    };
-
     http.registerOnPostAuth((request, response, t) => {
       if (request.auth.isAuthenticated) {
         asScoped(request).log(httpRequestEvent({ request }));
@@ -217,7 +157,7 @@ export class AuditService {
       return t.next();
     });
 
-    return { asScoped, asSystem };
+    return { asScoped };
   }
 
   stop() {

@@ -33,8 +33,7 @@ const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';
 
 export const indexFieldsProvider = (
-  getStartServices: StartServicesAccessor<StartPlugins>,
-  savedObjects: SavedObjectsServiceStart
+  getStartServices: StartServicesAccessor<StartPlugins>
 ): ISearchStrategy<
   IndexFieldsStrategyRequest<'indices' | 'dataView'>,
   IndexFieldsStrategyResponse
@@ -46,7 +45,7 @@ export const indexFieldsProvider = (
 
   return {
     search: (request, options, deps) =>
-      from(requestIndexFieldSearch(request, deps, beatFields, getStartServices, savedObjects)),
+      from(requestIndexFieldSearch(request, deps, beatFields, getStartServices)),
   };
 };
 
@@ -79,8 +78,7 @@ export const requestIndexFieldSearch = async (
   request: IndexFieldsStrategyRequest<'indices' | 'dataView'>,
   { savedObjectsClient, esClient, request: kRequest }: SearchStrategyDependencies,
   beatFields: BeatFields,
-  getStartServices: StartServicesAccessor<StartPlugins>,
-  savedObjects: SavedObjectsServiceStart
+  getStartServices: StartServicesAccessor<StartPlugins>
 ): Promise<IndexFieldsStrategyResponse> => {
   const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
   const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
@@ -93,16 +91,7 @@ export const requestIndexFieldSearch = async (
       data: { indexPatterns },
     },
   ] = await getStartServices();
-  const unsecuredSavedObjectClient = savedObjects.getScopedClient(kRequest, {
-    excludedWrappers: ['security'],
-  });
 
-  const unsecuredDataViewService = await indexPatterns.dataViewsServiceFactory(
-    unsecuredSavedObjectClient,
-    esClient.asCurrentUser,
-    kRequest,
-    true
-  );
   const dataViewService = await indexPatterns.dataViewsServiceFactory(
     savedObjectsClient,
     esClient.asCurrentUser,
@@ -117,11 +106,7 @@ export const requestIndexFieldSearch = async (
   if ('dataViewId' in request) {
     let dataView;
     try {
-      if (request.dataViewId.includes('security-solution')) {
-        dataView = await unsecuredDataViewService.get(request.dataViewId);
-      } else {
-        dataView = await dataViewService.get(request.dataViewId);
-      }
+      dataView = await dataViewService.get(request.dataViewId);
     } catch (r) {
       if (
         r.output.payload.statusCode === 404 &&

@@ -35,12 +35,13 @@ export class TimelinesPlugin
     this.security = plugins.security;
 
     const router = core.http.createRouter();
+
     // Register server side APIs
     defineRoutes(router);
 
+    const IndexFields = indexFieldsProvider(core.getStartServices);
     // Register search strategy
-    core.getStartServices().then(([coreStart, depsStart]) => {
-      const IndexFields = indexFieldsProvider(core.getStartServices, coreStart.savedObjects);
+    core.getStartServices().then(([_, depsStart]) => {
       const TimelineSearchStrategy = timelineSearchStrategyProvider(
         depsStart.data,
         depsStart.alerting,

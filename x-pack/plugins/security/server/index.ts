@@ -29,10 +29,11 @@ export type {
 } from './authentication';
 export type { CheckPrivilegesPayload } from './authorization';
 export type AuthorizationServiceSetup = SecurityPluginStart['authz'];
-export type { AuditLogger, AuditServiceSetup, AuditEvent } from './audit';
+export type { AuditLogger, AuditEvent } from './audit';
 export type { SecurityPluginSetup, SecurityPluginStart };
 export type { AuthenticatedUser } from '../common/model';
 export { ROUTE_TAG_CAN_REDIRECT } from './routes/tags';
+export type { AuditServiceSetup } from './audit';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,

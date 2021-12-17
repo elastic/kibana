@@ -67,7 +67,6 @@ describe('#setup', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "asScoped": [Function],
-        "asSystem": [Function],
       }
     `);
     audit.stop();
@@ -250,94 +249,6 @@ describe('#asScoped', () => {
     });
 
     await auditSetup.asScoped(request).log(undefined);
-    expect(logger.info).not.toHaveBeenCalled();
-    audit.stop();
-  });
-});
-
-describe('#asSystem', () => {
-  it('logs event enriched with meta data', async () => {
-    const audit = new AuditService(logger);
-    const auditSetup = audit.setup({
-      license,
-      config,
-      logging,
-      http,
-      getCurrentUser,
-      getSpaceId,
-      getSID,
-      recordAuditLoggingUsage,
-    });
-    const request = httpServerMock.createKibanaRequest({
-      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
-    });
-
-    await auditSetup.asSystem(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
-    expect(logger.info).toHaveBeenCalledWith('MESSAGE', {
-      event: { action: 'ACTION' },
-      kibana: { space_id: 'default', session_id: 'SESSION_ID' },
-      trace: { id: 'REQUEST_ID' },
-      user: { name: 'kibana_internal', roles: [] },
-    });
-    audit.stop();
-  });
-
-  it('does not log to audit logger if event matches ignore filter', async () => {
-    const audit = new AuditService(logger);
-    const auditSetup = audit.setup({
-      license,
-      config: {
-        enabled: true,
-        appender: {
-          type: 'console',
-          layout: {
-            type: 'json',
-          },
-        },
-        ignore_filters: [{ actions: ['ACTION'] }],
-      },
-      logging,
-      http,
-      getCurrentUser,
-      getSpaceId,
-      getSID,
-      recordAuditLoggingUsage,
-    });
-    const request = httpServerMock.createKibanaRequest({
-      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
-    });
-
-    await auditSetup.asSystem(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
-    expect(logger.info).not.toHaveBeenCalled();
-    audit.stop();
-  });
-
-  it('does not log to audit logger if no event was generated', async () => {
-    const audit = new AuditService(logger);
-    const auditSetup = audit.setup({
-      license,
-      config: {
-        enabled: true,
-        appender: {
-          type: 'console',
-          layout: {
-            type: 'json',
-          },
-        },
-        ignore_filters: [{ actions: ['ACTION'] }],
-      },
-      logging,
-      http,
-      getCurrentUser,
-      getSpaceId,
-      getSID,
-      recordAuditLoggingUsage,
-    });
-    const request = httpServerMock.createKibanaRequest({
-      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
-    });
-
-    await auditSetup.asSystem(request).log(undefined);
     expect(logger.info).not.toHaveBeenCalled();
     audit.stop();
   });
