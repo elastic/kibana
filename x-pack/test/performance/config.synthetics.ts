@@ -15,17 +15,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('../../../test/common/config')
   );
-  const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../../../x-pack/test/functional/config')
-  );
+  const xpackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
+    servers: xpackFunctionalTestsConfig.get('servers'),
+    apps: xpackFunctionalTestsConfig.get('apps'),
     esTestCluster: xpackFunctionalTestsConfig.get('esTestCluster'),
     kbnTestServer: {
       ...xpackFunctionalTestsConfig.get('kbnTestServer'),
       env: {
-        ELASTIC_APM_ACTIVE: 'true',
+        ELASTIC_APM_ACTIVE: process.env.DISABLE_APM === 'true' ? 'false' : 'true',
         ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
         ELASTIC_APM_ENVIRONMENT: process.env.CI ? 'ci' : 'development',
         ELASTIC_APM_TRANSACTION_SAMPLE_RATE: '1.0',
@@ -34,6 +34,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ELASTIC_APM_GLOBAL_LABELS: Object.entries({
           ftrConfig: `x-pack/test/performance/tests/config.synthetics`,
           testRunner: process.env.TEST_RUNNER,
+          performancePhase: process.env.PERFORMANCE_PHASE,
+          networkThrottlingProfile: process.env.KBN_NETWORK_TEST_PROFILE,
         })
           .filter(([, v]) => !!v)
           .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), ''),
