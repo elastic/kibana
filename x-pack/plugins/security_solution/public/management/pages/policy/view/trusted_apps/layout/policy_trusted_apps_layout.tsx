@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiProgress,
 } from '@elastic/eui';
 import { PolicyTrustedAppsEmptyUnassigned, PolicyTrustedAppsEmptyUnexisting } from '../empty';
 import {
@@ -36,6 +35,7 @@ import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { getTrustedAppsListPath } from '../../../../../common/routing';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { ManagementPageLoader } from '../../../../../components/management_page_loader';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
   const { getAppUrl } = useAppUrl();
@@ -168,7 +168,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         ) : displayHeaderAndContent ? (
           <PolicyTrustedAppsList />
         ) : (
-          <EuiProgress size="xs" color="primary" />
+          <ManagementPageLoader data-test-subj="policyTrustedAppsListLoader" />
         )}
       </EuiPageContent>
       {canCreateArtifactsByPolicy && showListFlyout ? <PolicyTrustedAppsFlyout /> : null}

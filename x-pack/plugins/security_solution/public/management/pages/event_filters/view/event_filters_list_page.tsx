@@ -51,6 +51,7 @@ import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks
 import { useToasts } from '../../../../common/lib/kibana';
 import { getLoadPoliciesError } from '../../../common/translations';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
+import { ManagementPageLoader } from '../../../components/management_page_loader';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -233,6 +234,10 @@ export const EventFiltersListPage = memo(() => {
     },
     [artifactCardPropsPerItem]
   );
+
+  if (isLoading && !doesDataExist) {
+    return <ManagementPageLoader data-test-subj="eventFilterListLoader" />;
+  }
 
   return (
     <AdministrationListPage
