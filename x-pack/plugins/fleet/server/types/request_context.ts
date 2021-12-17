@@ -33,7 +33,7 @@ export interface FleetRequestHandlerContext extends RequestHandlerContext {
        */
       readonly internalSoClient: SavedObjectsClientContract;
     };
-    getSpaceId: () => Promise<string>;
+    spaceId: string;
   };
 }
 

@@ -109,7 +109,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
-  const spaceId = await context.fleet.getSpaceId();
+  const spaceId = context.fleet.spaceId;
   try {
     // eslint-disable-next-line prefer-const
     let [agentPolicy, newSysPackagePolicy] = await Promise.all([

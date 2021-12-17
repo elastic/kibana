@@ -29,7 +29,6 @@ import {
   SavedObjectsClient,
   ServiceStatusLevels,
 } from '../../../../src/core/server';
-import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import type {
@@ -300,10 +299,8 @@ export class FleetPlugin
                 .getScopedClient(request, { excludedWrappers: ['security'] });
             },
           },
-          async getSpaceId() {
-            const spaceId = await deps.spaces?.spacesService.getSpaceId(request);
-
-            return spaceId || DEFAULT_SPACE_ID;
+          get spaceId() {
+            return deps.spaces.spacesService.getSpaceId(request);
           },
         };
       }

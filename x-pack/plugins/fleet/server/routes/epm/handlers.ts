@@ -257,7 +257,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const { pkgName, pkgVersion } = request.params;
 
-  const spaceId = await context.fleet.getSpaceId();
+  const spaceId = context.fleet.spaceId;
   const res = await installPackage({
     installSource: 'registry',
     savedObjectsClient,
@@ -298,7 +298,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const savedObjectsClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
-  const spaceId = await context.fleet.getSpaceId();
+  const spaceId = context.fleet.spaceId;
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
     esClient,
@@ -328,7 +328,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
-  const spaceId = await context.fleet.getSpaceId();
+  const spaceId = context.fleet.spaceId;
   const res = await installPackage({
     installSource: 'upload',
     savedObjectsClient,

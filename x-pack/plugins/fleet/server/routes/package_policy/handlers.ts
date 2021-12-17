@@ -90,7 +90,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, ...newPolicy } = request.body;
-  const spaceId = await context.fleet.getSpaceId();
+  const spaceId = context.fleet.spaceId;
   try {
     const newPackagePolicy = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
       soClient,

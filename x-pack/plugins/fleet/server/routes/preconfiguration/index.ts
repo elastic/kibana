@@ -25,7 +25,7 @@ export const updatePreconfigurationHandler: FleetRequestHandler<
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const defaultOutput = await outputService.ensureDefaultOutput(soClient);
-  const spaceId = await context.fleet.getSpaceId();
+  const spaceId = context.fleet.spaceId;
   const { agentPolicies, packages } = request.body;
 
   try {
