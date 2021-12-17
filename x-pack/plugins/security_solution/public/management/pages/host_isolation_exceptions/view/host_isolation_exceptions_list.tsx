@@ -20,9 +20,11 @@ import {
   MANAGEMENT_PAGE_SIZE_OPTIONS,
 } from '../../../common/constants';
 import { getEndpointListPath } from '../../../common/routing';
+import { getLoadPoliciesError } from '../../../common/translations';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
+import { ManagementPageLoader } from '../../../components/management_page_loader';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { SearchExceptions } from '../../../components/search_exceptions';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
@@ -33,7 +35,6 @@ import { HostIsolationExceptionsFormFlyout } from './components/form_flyout';
 import {
   DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
   EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
-  getLoadPoliciesError,
 } from './components/translations';
 import {
   useFetchHostIsolationExceptionsList,
@@ -55,7 +56,18 @@ export const HostIsolationExceptionsList = () => {
 
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
-  const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList();
+  const includedPoliciesParam = location.included_policies;
+
+  const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList({
+    filter: location.filter,
+    page: location.page_index,
+    perPage: location.page_size,
+    policies:
+      includedPoliciesParam && includedPoliciesParam !== ''
+        ? includedPoliciesParam.split(',')
+        : undefined,
+  });
+
   const toasts = useToasts();
 
   // load the list of policies>
@@ -85,8 +97,11 @@ export const HostIsolationExceptionsList = () => {
   }, [history, isLoading, listItems.length, privileges.canIsolateHost]);
 
   const handleOnSearch = useCallback(
-    (query: string) => {
-      navigateCallback({ filter: query });
+    (filter: string, includedPolicies: string) => {
+      navigateCallback({
+        filter,
+        included_policies: includedPolicies,
+      });
     },
     [navigateCallback]
   );
@@ -157,6 +172,10 @@ export const HostIsolationExceptionsList = () => {
     [navigateCallback]
   );
 
+  if (isLoading && !hasDataToShow) {
+    return <ManagementPageLoader data-test-subj="hostIsolationExceptionListLoader" />;
+  }
+
   return (
     <AdministrationListPage
       title={
@@ -204,6 +223,9 @@ export const HostIsolationExceptionsList = () => {
           <SearchExceptions
             defaultValue={location.filter}
             onSearch={handleOnSearch}
+            policyList={policiesRequest.data?.items}
+            hasPolicyFilter={true}
+            defaultIncludedPolicies={location.included_policies}
             placeholder={i18n.translate(
               'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
               {

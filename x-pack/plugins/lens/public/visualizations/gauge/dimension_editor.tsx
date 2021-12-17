@@ -13,16 +13,20 @@ import {
   EuiFlexItem,
   EuiSwitchEvent,
   EuiSwitch,
+  EuiIcon,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import {
-  isNumericFieldForDatatable,
-  GaugeVisualizationState,
   GaugeTicksPositions,
   GaugeColorModes,
-} from '../../../common/expressions';
+} from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import {
+  getMaxValue,
+  getMinValue,
+} from '../../../../../../src/plugins/chart_expressions/expression_gauge/public';
+import { isNumericFieldForDatatable } from '../../../common/expressions';
 import {
   applyPaletteParams,
   CustomizablePalette,
@@ -30,12 +34,12 @@ import {
   FIXED_PROGRESSION,
   getStopsForFixedMode,
   PalettePanelContainer,
+  TooltipWrapper,
 } from '../../shared_components/';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { defaultPaletteParams } from './palette_config';
-
 import './dimension_editor.scss';
-import { getMaxValue, getMinValue } from './utils';
+import { GaugeVisualizationState } from './constants';
+import { defaultPaletteParams } from './palette_config';
 
 export function GaugeDimensionEditor(
   props: VisualizationDimensionEditorProps<GaugeVisualizationState> & {
@@ -191,11 +195,32 @@ export function GaugeDimensionEditor(
             </EuiFlexGroup>
           </EuiFormRow>
           <EuiFormRow
-            fullWidth
             display="columnCompressedSwitch"
-            label={i18n.translate('xpack.lens.shared.ticksPositionOptions', {
-              defaultMessage: 'Ticks on bands',
-            })}
+            fullWidth
+            label={
+              <TooltipWrapper
+                position="top"
+                tooltipContent={i18n.translate('xpack.lens.shared.ticksPositionOptionsTooltip', {
+                  defaultMessage:
+                    'Places ticks on each band border instead of distributing them evenly',
+                })}
+                condition={true}
+                delay="regular"
+              >
+                <span>
+                  {i18n.translate('xpack.lens.shared.ticksPositionOptions', {
+                    defaultMessage: 'Ticks on bands',
+                  })}
+
+                  <EuiIcon
+                    type="questionInCircle"
+                    color="subdued"
+                    size="s"
+                    className="eui-alignTop"
+                  />
+                </span>
+              </TooltipWrapper>
+            }
           >
             <EuiSwitch
               compressed
