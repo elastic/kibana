@@ -37,10 +37,12 @@ export type PureTransition<State extends BaseState, Args extends any[]> = (
  * @public
  */
 export type EnsurePureTransition<T> = Ensure<T, PureTransition<any, any>>;
+
 /**
  * @internal
  */
 export type PureTransitionToTransition<T extends PureTransition<any, any>> = ReturnType<T>;
+
 /**
  * @internal
  */

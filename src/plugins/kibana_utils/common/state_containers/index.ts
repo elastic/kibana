@@ -16,7 +16,6 @@
 export type {
   BaseState,
   BaseStateContainer,
-  TransitionDescription,
   StateContainer,
   ReduxLikeStateContainer,
   Dispatch,
@@ -36,7 +35,9 @@ export type {
   PureSelector,
   PureTransition,
   Transition,
+  TransitionDescription,
 } from './types';
+
 export type { CreateStateContainerOptions } from './create_state_container';
 export { createStateContainer } from './create_state_container';
 export {
