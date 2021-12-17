@@ -80,7 +80,7 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
   const onUpdateError = () => {
     toasts.addDanger(
       i18n.translate(
-        'xpack.securitySolution.endpoint.policy.trustedApps.layout.flyout.toastError.text',
+        'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.layout.flyout.toastError.text',
         {
           defaultMessage: `An error occurred updating artifacts`,
         }
@@ -99,8 +99,8 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
     excludedPolicies: [policy.id, 'all'],
     page: 0,
     perPage: MAX_ALLOWED_RESULTS,
-    // only request if there's no filter and no results from the regular request
-    enabled: currentFilter === '' && exceptionsRequest.data?.total === 0,
+    // only request if there's a filter and no results from the regular request
+    enabled: currentFilter !== '' && exceptionsRequest.data?.total === 0,
   });
 
   const mutation = useMutation(
@@ -180,7 +180,10 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
     }
 
     // there are no host isolation exceptions assignable to this policy
-    if (allPossibleExceptionsRequest.data?.total === 0) {
+    if (
+      allPossibleExceptionsRequest.data?.total === 0 ||
+      (exceptionsRequest.data?.total === 0 && currentFilter === '')
+    ) {
       return (
         <EuiEmptyPrompt
           data-test-subj="hostIsolationExceptions-no-assignable-items"
@@ -198,7 +201,7 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
     if (exceptionsRequest.data?.total === 0) {
       return (
         <EuiEmptyPrompt
-          data-test-subj="noItemsFoundTrustedAppsFlyout"
+          data-test-subj="hostIsolationExceptions-no-items-found"
           title={
             <FormattedMessage
               id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.layout.flyout.noResults"
