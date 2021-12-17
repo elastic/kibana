@@ -24,7 +24,6 @@ import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
-import { getNewIndexPatterns } from '../lib/cluster/get_index_patterns';
 
 export class ElasticsearchVersionMismatchRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedAlert) {
@@ -52,15 +51,9 @@ export class ElasticsearchVersionMismatchRule extends BaseRule {
     esClient: ElasticsearchClient,
     clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    const indexPatterns = getNewIndexPatterns({
-      config: Globals.app.config,
-      moduleType: 'elasticsearch',
-      dataset: 'cluster_stats',
-    });
     const elasticsearchVersions = await fetchElasticsearchVersions(
       esClient,
       clusters,
-      indexPatterns,
       Globals.app.config.ui.max_bucket_size,
       params.filterQuery
     );

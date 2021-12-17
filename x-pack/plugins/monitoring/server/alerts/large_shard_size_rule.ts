@@ -28,7 +28,6 @@ import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { SanitizedAlert, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
-import { getNewIndexPatterns } from '../lib/cluster/get_index_patterns';
 
 export class LargeShardSizeRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedAlert) {
@@ -57,17 +56,11 @@ export class LargeShardSizeRule extends BaseRule {
     esClient: ElasticsearchClient,
     clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    const indexPatterns = getNewIndexPatterns({
-      config: Globals.app.config,
-      moduleType: 'elasticsearch',
-      dataset: 'index',
-    });
     const { threshold, indexPattern: shardIndexPatterns } = params;
 
     const stats = await fetchIndexShardSize(
       esClient,
       clusters,
-      indexPatterns,
       threshold!,
       shardIndexPatterns,
       Globals.app.config.ui.max_bucket_size,

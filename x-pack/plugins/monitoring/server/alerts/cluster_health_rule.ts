@@ -23,9 +23,7 @@ import { RULE_CLUSTER_HEALTH, LEGACY_RULE_DETAILS } from '../../common/constants
 import { AlertMessageTokenType, AlertClusterHealthType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerting/common';
-import { Globals } from '../static_globals';
 import { fetchClusterHealth } from '../lib/alerts/fetch_cluster_health';
-import { getNewIndexPatterns } from '../lib/cluster/get_index_patterns';
 
 const RED_STATUS_MESSAGE = i18n.translate('xpack.monitoring.alerts.clusterHealth.redMessage', {
   defaultMessage: 'Allocate missing primary and replica shards',
@@ -63,12 +61,7 @@ export class ClusterHealthRule extends BaseRule {
     esClient: ElasticsearchClient,
     clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    const indexPatterns = getNewIndexPatterns({
-      config: Globals.app.config,
-      moduleType: 'elasticsearch',
-      dataset: 'cluster_stats',
-    });
-    const healths = await fetchClusterHealth(esClient, clusters, indexPatterns, params.filterQuery);
+    const healths = await fetchClusterHealth(esClient, clusters, params.filterQuery);
     return healths.map((clusterHealth) => {
       const shouldFire = clusterHealth.health !== AlertClusterHealthType.Green;
       const severity =

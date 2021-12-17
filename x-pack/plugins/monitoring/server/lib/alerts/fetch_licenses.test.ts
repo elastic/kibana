@@ -10,6 +10,18 @@ import { elasticsearchClientMock } from '../../../../../../src/core/server/elast
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+jest.mock('../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          ccs: { enabled: true },
+        },
+      },
+    },
+  },
+}));
+
 describe('fetchLicenses', () => {
   const clusterName = 'MyCluster';
   const clusterUuid = 'clusterA';

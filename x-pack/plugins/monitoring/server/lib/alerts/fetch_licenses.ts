@@ -8,15 +8,23 @@ import { ElasticsearchClient } from 'kibana/server';
 import { AlertLicense, AlertCluster } from '../../../common/types/alerts';
 import { ElasticsearchSource } from '../../../common/types/es';
 import { createDatasetFilter } from './create_dataset_query_filter';
+import { Globals } from '../../static_globals';
+import { getConfigCcs } from '../../../common/ccs_utils';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 export async function fetchLicenses(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
   filterQuery?: string
 ): Promise<AlertLicense[]> {
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    dataset: 'cluster_stats',
+    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+  });
   const params = {
-    index,
+    index: indexPatterns,
     filter_path: [
       'hits.hits._source.license.*',
       'hits.hits._source.cluster_uuid',

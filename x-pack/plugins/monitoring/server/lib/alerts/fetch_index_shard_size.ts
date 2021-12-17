@@ -9,8 +9,10 @@ import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, IndexShardSizeStats } from '../../../common/types/alerts';
 import { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../common/types/es';
 import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
-import { Globals } from '../../static_globals';
 import { createDatasetFilter } from './create_dataset_query_filter';
+import { Globals } from '../../static_globals';
+import { getConfigCcs } from '../../../common/ccs_utils';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 type TopHitType = ElasticsearchResponseHit & {
   _source: { index_stats?: Partial<ElasticsearchIndexStats> };
@@ -29,14 +31,19 @@ const gbMultiplier = 1000000000;
 export async function fetchIndexShardSize(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
   threshold: number,
   shardIndexPatterns: string,
   size: number,
   filterQuery?: string
 ): Promise<IndexShardSizeStats[]> {
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    dataset: 'index',
+    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+  });
   const params = {
-    index,
+    index: indexPatterns,
     filter_path: ['aggregations.clusters.buckets'],
     body: {
       size: 0,

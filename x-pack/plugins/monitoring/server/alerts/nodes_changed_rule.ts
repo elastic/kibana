@@ -23,11 +23,8 @@ import { AlertInstance } from '../../../alerting/server';
 import { RULE_NODES_CHANGED, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerting/common';
-import { Globals } from '../static_globals';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { AlertSeverity } from '../../common/enums';
-import { getNewIndexPatterns } from '../lib/cluster/get_index_patterns';
-
 interface AlertNodesChangedStates {
   removed: AlertClusterStatsNode[];
   added: AlertClusterStatsNode[];
@@ -101,15 +98,9 @@ export class NodesChangedRule extends BaseRule {
     esClient: ElasticsearchClient,
     clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    const indexPatterns = getNewIndexPatterns({
-      config: Globals.app.config,
-      moduleType: 'elasticsearch',
-      dataset: 'cluster_stats',
-    });
     const nodesFromClusterStats = await fetchNodesFromClusterStats(
       esClient,
       clusters,
-      indexPatterns,
       params.filterQuery
     );
     return nodesFromClusterStats.map((nodes) => {

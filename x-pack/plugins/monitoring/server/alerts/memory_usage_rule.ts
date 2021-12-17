@@ -32,7 +32,6 @@ import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { parseDuration } from '../../../alerting/common/parse_duration';
 import { Globals } from '../static_globals';
-import { getNewIndexPatterns } from '../lib/cluster/get_index_patterns';
 
 export class MemoryUsageRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedAlert) {
@@ -61,11 +60,6 @@ export class MemoryUsageRule extends BaseRule {
     esClient: ElasticsearchClient,
     clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    const indexPatterns = getNewIndexPatterns({
-      config: Globals.app.config,
-      moduleType: 'elasticsearch',
-      dataset: 'node_stats',
-    });
     const { duration, threshold } = params;
     const parsedDuration = parseDuration(duration as string);
     const endMs = +new Date();
@@ -74,7 +68,6 @@ export class MemoryUsageRule extends BaseRule {
     const stats = await fetchMemoryUsageNodeStats(
       esClient,
       clusters,
-      indexPatterns,
       startMs,
       endMs,
       Globals.app.config.ui.max_bucket_size,

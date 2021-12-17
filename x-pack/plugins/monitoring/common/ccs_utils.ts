@@ -13,7 +13,7 @@ type Config = Partial<MonitoringConfig> & {
   get?: (key: string) => any;
 };
 
-export function getConfigCcs(config: Config): boolean | string {
+export function getConfigCcs(config: Config): boolean {
   let ccsEnabled = false;
   // TODO: NP
   // This function is called with both NP config and LP config

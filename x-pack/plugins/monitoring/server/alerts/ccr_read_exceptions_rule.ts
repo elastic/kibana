@@ -29,7 +29,6 @@ import { parseDuration } from '../../../alerting/common/parse_duration';
 import { SanitizedAlert, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
-import { getNewIndexPatterns } from '../lib/cluster/get_index_patterns';
 
 export class CCRReadExceptionsRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedAlert) {
@@ -69,18 +68,12 @@ export class CCRReadExceptionsRule extends BaseRule {
     esClient: ElasticsearchClient,
     clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    const indexPatterns = getNewIndexPatterns({
-      config: Globals.app.config,
-      moduleType: 'elasticsearch',
-      dataset: 'ccr',
-    });
     const { duration: durationString } = params;
     const duration = parseDuration(durationString);
     const endMs = +new Date();
     const startMs = endMs - duration;
     const stats = await fetchCCRReadExceptions(
       esClient,
-      indexPatterns,
       startMs,
       endMs,
       Globals.app.config.ui.max_bucket_size,

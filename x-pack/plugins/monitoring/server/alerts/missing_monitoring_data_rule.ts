@@ -60,19 +60,12 @@ export class MissingMonitoringDataRule extends BaseRule {
     esClient: ElasticsearchClient,
     clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    // changing this to only search ES because of changes related to https://github.com/elastic/kibana/issues/83309
-    const indexPatterns = getNewIndexPatterns({
-      config: Globals.app.config,
-      moduleType: 'elasticsearch',
-      dataset: 'node_stats',
-    });
     const duration = parseDuration(params.duration);
     const limit = parseDuration(params.limit!);
     const now = +new Date();
     const missingData = await fetchMissingMonitoringData(
       esClient,
       clusters,
-      indexPatterns,
       Globals.app.config.ui.max_bucket_size,
       now,
       now - limit - LIMIT_BUFFER,

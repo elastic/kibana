@@ -32,7 +32,6 @@ import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
 import { parseDuration } from '../../../alerting/common/parse_duration';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
-import { getNewIndexPatterns } from '../lib/cluster/get_index_patterns';
 
 export class CpuUsageRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedAlert) {
@@ -61,18 +60,12 @@ export class CpuUsageRule extends BaseRule {
     esClient: ElasticsearchClient,
     clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    const indexPatterns = getNewIndexPatterns({
-      config: Globals.app.config,
-      moduleType: 'elasticsearch',
-      dataset: 'node_stats',
-    });
     const duration = parseDuration(params.duration);
     const endMs = +new Date();
     const startMs = endMs - duration;
     const stats = await fetchCpuUsageNodeStats(
       esClient,
       clusters,
-      indexPatterns,
       startMs,
       endMs,
       Globals.app.config.ui.max_bucket_size,

@@ -26,7 +26,6 @@ import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { Alert, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
-import { getNewIndexPatterns } from '../lib/cluster/get_index_patterns';
 
 type ActionVariables = Array<{ name: string; description: string }>;
 
@@ -70,18 +69,11 @@ export class ThreadPoolRejectionsRuleBase extends BaseRule {
     esClient: ElasticsearchClient,
     clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    const indexPatterns = getNewIndexPatterns({
-      config: Globals.app.config,
-      moduleType: 'elasticsearch',
-      dataset: 'node_stats',
-    });
-
     const { threshold, duration } = params;
 
     const stats = await fetchThreadPoolRejectionStats(
       esClient,
       clusters,
-      indexPatterns,
       Globals.app.config.ui.max_bucket_size,
       this.threadPoolType,
       duration,

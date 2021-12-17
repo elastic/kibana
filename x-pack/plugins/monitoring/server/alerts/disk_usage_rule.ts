@@ -31,7 +31,6 @@ import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
-import { getNewIndexPatterns } from '../lib/cluster/get_index_patterns';
 
 export class DiskUsageRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedAlert) {
@@ -60,16 +59,10 @@ export class DiskUsageRule extends BaseRule {
     esClient: ElasticsearchClient,
     clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    const indexPatterns = getNewIndexPatterns({
-      config: Globals.app.config,
-      moduleType: 'elasticsearch',
-      dataset: 'node_stats',
-    });
     const { duration, threshold } = params;
     const stats = await fetchDiskUsageNodeStats(
       esClient,
       clusters,
-      indexPatterns,
       duration as string,
       Globals.app.config.ui.max_bucket_size,
       params.filterQuery

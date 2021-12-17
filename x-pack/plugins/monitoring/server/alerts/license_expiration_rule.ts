@@ -27,7 +27,6 @@ import { AlertingDefaults } from './alert_helpers';
 import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
-import { getNewIndexPatterns } from '../lib/cluster/get_index_patterns';
 
 const EXPIRES_DAYS = [60, 30, 14, 7];
 
@@ -77,12 +76,7 @@ export class LicenseExpirationRule extends BaseRule {
     esClient: ElasticsearchClient,
     clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    const indexPatterns = getNewIndexPatterns({
-      config: Globals.app.config,
-      moduleType: 'elasticsearch',
-      dataset: 'cluster_stats',
-    });
-    const licenses = await fetchLicenses(esClient, clusters, indexPatterns, params.filterQuery);
+    const licenses = await fetchLicenses(esClient, clusters, params.filterQuery);
 
     return licenses.map((license) => {
       const { clusterUuid, type, expiryDateMS, status, ccs } = license;

@@ -11,6 +11,9 @@ import moment from 'moment';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../common/constants';
 import { AlertCluster, AlertCpuUsageNodeStats } from '../../../common/types/alerts';
 import { createDatasetFilter } from './create_dataset_query_filter';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
+import { getConfigCcs } from '../../../common/ccs_utils';
 
 interface NodeBucketESResponse {
   key: string;
@@ -27,7 +30,6 @@ interface ClusterBucketESResponse {
 export async function fetchCpuUsageNodeStats(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
   startMs: number,
   endMs: number,
   size: number,
@@ -36,8 +38,15 @@ export async function fetchCpuUsageNodeStats(
   // Using pure MS didn't seem to work well with the date_histogram interval
   // but minutes does
   const intervalInMinutes = moment.duration(endMs - startMs).asMinutes();
+
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    dataset: 'node_stats',
+    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+  });
   const params = {
-    index,
+    index: indexPatterns,
     filter_path: ['aggregations'],
     body: {
       size: 0,
