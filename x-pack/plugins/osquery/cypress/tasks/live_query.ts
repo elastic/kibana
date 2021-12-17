@@ -10,7 +10,9 @@ import { LIVE_QUERY_EDITOR } from '../screens/live_query';
 export const DEFAULT_QUERY = 'select * from processes;';
 
 export const selectAllAgents = () => {
-  cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).click();
+  cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } })
+    .click()
+    .wait(1000);
   cy.react('EuiFilterSelectItem').contains('All agents').click();
 };
 
