@@ -27,7 +27,6 @@ import { parseDuration } from '../../../alerting/common/parse_duration';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
-import { getNewIndexPatterns } from '../lib/cluster/get_index_patterns';
 
 // Go a bit farther back because we need to detect the difference between seeing the monitoring data versus just not looking far enough back
 const LIMIT_BUFFER = 3 * 60 * 1000;

@@ -54,7 +54,6 @@ function getResponse(
 describe('fetchMissingMonitoringData', () => {
   const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
 
-  const index = '.monitoring-*';
   const startMs = 100;
   const size = 10;
 
