@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { HttpSetup } from 'kibana/public';
-import { AlertType } from '../../../types';
+import { RuleType } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
 
-const rewriteResponseRes = (results: Array<AsApiContract<AlertType>>): AlertType[] => {
+const rewriteResponseRes = (results: Array<AsApiContract<RuleType>>): RuleType[] => {
   return results.map((item) => rewriteBodyReq(item));
 };
 
-const rewriteBodyReq: RewriteRequestCase<AlertType> = ({
+const rewriteBodyReq: RewriteRequestCase<RuleType> = ({
   enabled_in_license: enabledInLicense,
   recovery_action_group: recoveryActionGroup,
   action_groups: actionGroups,
@@ -23,7 +23,7 @@ const rewriteBodyReq: RewriteRequestCase<AlertType> = ({
   authorized_consumers: authorizedConsumers,
   rule_task_timeout: ruleTaskTimeout,
   ...rest
-}: AsApiContract<AlertType>) => ({
+}: AsApiContract<RuleType>) => ({
   enabledInLicense,
   recoveryActionGroup,
   actionGroups,
@@ -35,8 +35,8 @@ const rewriteBodyReq: RewriteRequestCase<AlertType> = ({
   ...rest,
 });
 
-export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
-  const res = await http.get<Array<AsApiContract<AlertType<string, string>>>>(
+export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<RuleType[]> {
+  const res = await http.get<Array<AsApiContract<RuleType<string, string>>>>(
     `${BASE_ALERTING_API_PATH}/rule_types`
   );
   return rewriteResponseRes(res);
