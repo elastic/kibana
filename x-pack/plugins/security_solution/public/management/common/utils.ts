@@ -28,19 +28,17 @@ const getPolicyQuery = (policyId: string): string => {
   return `exception-list-agnostic.attributes.tags:"policy:${policyId}"`;
 };
 
-export const parsePoliciesToKQL = (includedPolicies: string, excludedPolicies: string): string => {
+export const parsePoliciesToKQL = (
+  includedPolicies: string[],
+  excludedPolicies: string[] = []
+): string => {
   if (isEmpty(includedPolicies) && isEmpty(excludedPolicies)) return '';
 
-  const parsedIncludedPolicies = includedPolicies ? includedPolicies.split(',') : undefined;
-  const parsedExcludedPolicies = excludedPolicies ? excludedPolicies.split(',') : undefined;
+  const includedPoliciesKuery = includedPolicies.map(getPolicyQuery).join(' OR ');
 
-  const includedPoliciesKuery = parsedIncludedPolicies
-    ? parsedIncludedPolicies.map(getPolicyQuery).join(' OR ')
-    : '';
-
-  const excludedPoliciesKuery = parsedExcludedPolicies
-    ? parsedExcludedPolicies.map((policyId) => `not ${getPolicyQuery(policyId)}`).join(' AND ')
-    : '';
+  const excludedPoliciesKuery = excludedPolicies
+    .map((policyId) => `not ${getPolicyQuery(policyId)}`)
+    .join(' AND ');
 
   const kuery = [];
 
@@ -68,6 +66,6 @@ export const parsePoliciesAndFilterToKql = ({
     return kuery;
   }
 
-  const policiesKQL = parsePoliciesToKQL(policies.join(','), '');
+  const policiesKQL = parsePoliciesToKQL(policies, []);
   return `(${policiesKQL})${kuery ? ` AND (${kuery})` : ''}`;
 };
