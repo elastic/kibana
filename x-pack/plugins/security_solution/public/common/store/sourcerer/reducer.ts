@@ -72,13 +72,17 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
           }),
     },
   }))
-  .case(setSelectedDataView, (state, payload) => ({
-    ...state,
-    sourcererScopes: {
-      ...state.sourcererScopes,
-      ...validateSelectedPatterns(state, payload),
-    },
-  }))
+  .case(setSelectedDataView, (state, payload) => {
+    const { shouldValidateSelectedPatterns = true, ...patternsInfo } = payload;
+
+    return {
+      ...state,
+      sourcererScopes: {
+        ...state.sourcererScopes,
+        ...validateSelectedPatterns(state, patternsInfo, shouldValidateSelectedPatterns),
+      },
+    };
+  })
   .case(setDataView, (state, dataView) => ({
     ...state,
     ...(dataView.id === state.defaultDataView.id

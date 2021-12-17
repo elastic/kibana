@@ -29,7 +29,6 @@ export const usePackQueryErrors = ({
     ['scheduledQueryErrors', { actionId, interval }],
     async () => {
       const searchSource = await data.search.searchSource.create({
-        index: logsDataView,
         fields: ['*'],
         sort: [
           {
@@ -69,6 +68,7 @@ export const usePackQueryErrors = ({
         size: 1000,
       });
 
+      searchSource.setField('index', logsDataView);
       return searchSource.fetch$().toPromise();
     },
     {

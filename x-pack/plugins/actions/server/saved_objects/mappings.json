@@ -41,5 +41,27 @@
         "type": "object"
       }
     }
+  },
+  "connector_token": {
+    "properties": {
+      "connectorId": {
+        "type": "keyword"
+      },
+      "tokenType": {
+        "type": "keyword"
+      },
+      "token": {
+        "type": "binary"
+      },
+      "expiresAt": {
+        "type": "date"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
   }
 }

@@ -36,6 +36,7 @@ import {
 } from './errors';
 import {
   EndpointFleetServicesFactory,
+  EndpointInternalFleetServicesInterface,
   EndpointScopedFleetServicesInterface,
 } from './services/endpoint_fleet_services';
 
@@ -114,10 +115,7 @@ export class EndpointAppContextService {
 
       dependencies.registerIngestCallback(
         'postPackagePolicyDelete',
-        getPackagePolicyDeleteCallback(
-          dependencies.exceptionListsClient,
-          dependencies.config.experimentalFeatures
-        )
+        getPackagePolicyDeleteCallback(dependencies.exceptionListsClient)
       );
     }
   }
@@ -141,6 +139,14 @@ export class EndpointAppContextService {
     }
 
     return this.fleetServicesFactory.asScoped(req);
+  }
+
+  public getInternalFleetServices(): EndpointInternalFleetServicesInterface {
+    if (this.fleetServicesFactory === null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.fleetServicesFactory.asInternalUser();
   }
 
   /** @deprecated use `getScopedFleetServices()` instead */

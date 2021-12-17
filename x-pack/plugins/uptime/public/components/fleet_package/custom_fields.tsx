@@ -19,7 +19,7 @@ import {
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
-import { ConfigKeys, DataStream, Validation } from './types';
+import { ConfigKey, DataStream, Validation } from './types';
 import { usePolicyConfigContext } from './contexts';
 import { TLSFields } from './tls_fields';
 import { HTTPSimpleFields } from './http/simple_fields';
@@ -78,6 +78,8 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [], children 
     }
   };
 
+  const isWithInUptime = window.location.pathname.includes('/app/uptime');
+
   return (
     <EuiForm component="form">
       <EuiDescribedFormGroup
@@ -109,8 +111,8 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [], children 
                   />
                 }
                 isInvalid={
-                  !!validate[ConfigKeys.MONITOR_TYPE]?.({
-                    [ConfigKeys.MONITOR_TYPE]: monitorType,
+                  !!validate[ConfigKey.MONITOR_TYPE]?.({
+                    [ConfigKey.MONITOR_TYPE]: monitorType as DataStream,
                   })
                 }
                 error={
@@ -129,7 +131,7 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [], children 
               </EuiFormRow>
             )}
             <EuiSpacer size="s" />
-            {isBrowser && (
+            {isBrowser && !isWithInUptime && (
               <EuiCallOut
                 title={
                   <FormattedMessage
@@ -176,9 +178,10 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [], children 
               defaultMessage="Configure TLS options, including verification mode, certificate authorities, and client certificates."
             />
           }
+          id="uptimeFleetIsTLSEnabled"
         >
           <EuiSwitch
-            id={'uptimeFleetIsTLSEnabled'}
+            id="uptimeFleetIsTLSEnabled"
             data-test-subj="syntheticsIsTLSEnabled"
             checked={!!isTLSEnabled}
             label={
@@ -195,7 +198,7 @@ export const CustomFields = memo<Props>(({ validate, dataStreams = [], children 
       <EuiSpacer size="m" />
       {isHTTP && <HTTPAdvancedFields validate={validate} />}
       {isTCP && <TCPAdvancedFields />}
-      {isBrowser && <BrowserAdvancedFields />}
+      {isBrowser && <BrowserAdvancedFields validate={validate} />}
     </EuiForm>
   );
 });

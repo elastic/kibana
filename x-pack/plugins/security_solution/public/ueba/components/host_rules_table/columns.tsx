@@ -17,7 +17,7 @@ import { Provider } from '../../../timelines/components/timeline/data_providers/
 import { HostRulesColumns } from './';
 
 import * as i18n from './translations';
-import { HostRulesFields } from '../../../../common';
+import { HostRulesFields } from '../../../../common/search_strategy';
 
 export const getHostRulesColumns = (): HostRulesColumns => [
   {

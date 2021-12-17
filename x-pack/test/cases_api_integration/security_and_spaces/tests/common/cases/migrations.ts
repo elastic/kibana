@@ -13,7 +13,7 @@ import {
 } from '../../../../../../plugins/cases/common/constants';
 import { getCase, getCaseSavedObjectsFromES, resolveCase } from '../../../../common/lib/utils';
 import { superUser } from '../../../../common/lib/authentication/users';
-import { AttributesTypeUser } from '../../../../../../plugins/cases/common';
+import { AttributesTypeUser } from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {

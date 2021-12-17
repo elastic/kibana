@@ -60,7 +60,10 @@ describe('RiskyHostsEnabledModule', () => {
                     host: {
                       name: 'a',
                     },
-                    risk_score: 1,
+                    risk_stats: {
+                      risk_score: 1,
+                      rule_risks: [],
+                    },
                     risk: '',
                   },
                 ],

@@ -55,45 +55,10 @@ describe('Reporting Config Schema', () => {
     ).toBe('qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq');
 
     expect(ConfigSchema.validate({ encryptionKey: 'weaksauce' }).encryptionKey).toBe('weaksauce');
-
-    // disableSandbox
-    expect(
-      ConfigSchema.validate({ capture: { browser: { chromium: { disableSandbox: true } } } })
-        .capture.browser.chromium
-    ).toMatchObject({ disableSandbox: true, proxy: { enabled: false } });
-
     // kibanaServer
     expect(
       ConfigSchema.validate({ kibanaServer: { hostname: 'Frodo' } }).kibanaServer
     ).toMatchObject({ hostname: 'Frodo' });
-  });
-
-  it('allows setting a wildcard for chrome proxy bypass', () => {
-    expect(
-      ConfigSchema.validate({
-        capture: {
-          browser: {
-            chromium: {
-              proxy: {
-                enabled: true,
-                server: 'http://example.com:8080',
-                bypass: ['*.example.com', '*bar.example.com', 'bats.example.com'],
-              },
-            },
-          },
-        },
-      }).capture.browser.chromium.proxy
-    ).toMatchInlineSnapshot(`
-      Object {
-        "bypass": Array [
-          "*.example.com",
-          "*bar.example.com",
-          "bats.example.com",
-        ],
-        "enabled": true,
-        "server": "http://example.com:8080",
-      }
-    `);
   });
 
   it.each(['0', '0.0', '0.0.0'])(

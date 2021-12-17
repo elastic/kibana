@@ -79,7 +79,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    describe('E-Commerce Data', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/120433
+    describe.skip('E-Commerce Data', () => {
       before(async () => {
         await esArchiver.load(ecommerceDataPath);
         await kibanaServer.importExport.load(ecommerceSOPath);

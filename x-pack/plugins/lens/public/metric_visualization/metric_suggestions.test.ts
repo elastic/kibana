@@ -31,6 +31,18 @@ describe('metric_suggestions', () => {
     };
   }
 
+  function staticValueCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'number',
+        label: `Static value: ${columnId}`,
+        isBucketed: false,
+        isStaticValue: true,
+      },
+    };
+  }
+
   function dateCol(columnId: string): TableSuggestionColumn {
     return {
       columnId,
@@ -86,7 +98,19 @@ describe('metric_suggestions', () => {
       ).map((table) => expect(getSuggestions({ table, keptLayerIds: ['l1'] })).toEqual([]))
     );
   });
+  test('does not suggest for a static value', () => {
+    const suggestion = getSuggestions({
+      table: {
+        columns: [staticValueCol('id')],
+        isMultiRow: false,
+        layerId: 'l1',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
 
+    expect(suggestion).toHaveLength(0);
+  });
   test('suggests a basic metric chart', () => {
     const [suggestion, ...rest] = getSuggestions({
       table: {

@@ -19,6 +19,7 @@ import {
   fetchSignificantCorrelations,
   fetchTransactionDurationFieldCandidates,
   fetchTransactionDurationFieldValuePairs,
+  fetchFieldValueFieldStats,
 } from './queries';
 import { fetchFieldsStats } from './queries/field_stats/get_fields_stats';
 
@@ -77,12 +78,12 @@ const fieldStatsRoute = createApmServerRoute({
         transactionName: t.string,
         transactionType: t.string,
       }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
       t.type({
         fieldsToSample: t.array(t.string),
       }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -107,6 +108,51 @@ const fieldStatsRoute = createApmServerRoute({
             index: indices.transaction,
           },
           fieldsToSample
+        )
+    );
+  },
+});
+
+const fieldValueStatsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/correlations/field_value_stats',
+  params: t.type({
+    query: t.intersection([
+      t.partial({
+        serviceName: t.string,
+        transactionName: t.string,
+        transactionType: t.string,
+      }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      t.type({
+        fieldName: t.string,
+        fieldValue: t.union([t.string, t.number]),
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources) => {
+    const { context } = resources;
+    if (!isActivePlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
+
+    const { indices } = await setupRequest(resources);
+    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+
+    const { fieldName, fieldValue, ...params } = resources.params.query;
+
+    return withApmSpan(
+      'get_correlations_field_value_stats',
+      async () =>
+        await fetchFieldValueFieldStats(
+          esClient,
+          {
+            ...params,
+            index: indices.transaction,
+          },
+          { fieldName, fieldValue }
         )
     );
   },
@@ -252,5 +298,6 @@ export const correlationsRouteRepository = createApmServerRouteRepository()
   .add(pValuesRoute)
   .add(fieldCandidatesRoute)
   .add(fieldStatsRoute)
+  .add(fieldValueStatsRoute)
   .add(fieldValuePairsRoute)
   .add(significantCorrelationsRoute);

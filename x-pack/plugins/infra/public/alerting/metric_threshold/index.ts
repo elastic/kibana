@@ -10,18 +10,18 @@ import React from 'react';
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import { validateMetricThreshold } from './components/validation';
 import { formatReason } from './rule_data_formatters';
-import { AlertTypeParams } from '../../../../alerting/common';
+import { AlertTypeParams as RuleTypeParams } from '../../../../alerting/common';
 import {
   MetricExpressionParams,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../server/lib/alerting/metric_threshold/types';
 
-interface MetricThresholdAlertTypeParams extends AlertTypeParams {
+interface MetricThresholdRuleTypeParams extends RuleTypeParams {
   criteria: MetricExpressionParams[];
 }
 
-export function createMetricThresholdAlertType(): ObservabilityRuleTypeModel<MetricThresholdAlertTypeParams> {
+export function createMetricThresholdRuleType(): ObservabilityRuleTypeModel<MetricThresholdRuleTypeParams> {
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     description: i18n.translate('xpack.infra.metrics.alertFlyout.alertDescription', {

@@ -7,11 +7,8 @@
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { TileMetaFeature } from '../../../common/descriptor_types';
-// @ts-expect-error
-import { RGBAImage } from './image_utils';
 import { isGlDrawLayer } from './sort_layers';
 import { ILayer } from '../../classes/layers/layer';
-import { EmsSpriteSheet } from '../../classes/layers/vector_tile_layer/vector_tile_layer';
 import { ES_MVT_META_LAYER_NAME } from '../../classes/layers/vector_layer/mvt_vector_layer/mvt_vector_layer';
 
 export function removeOrphanedSourcesAndLayers(
@@ -62,64 +59,6 @@ export function removeOrphanedSourcesAndLayers(
     }
   }
   mbSourcesToRemove.forEach((mbSourceId) => mbMap.removeSource(mbSourceId));
-}
-
-function getImageData(img: HTMLImageElement) {
-  const canvas = window.document.createElement('canvas');
-  const context = canvas.getContext('2d');
-  if (!context) {
-    throw new Error('failed to create canvas 2d context');
-  }
-  canvas.width = img.width;
-  canvas.height = img.height;
-  context.drawImage(img, 0, 0, img.width, img.height);
-  return context.getImageData(0, 0, img.width, img.height);
-}
-
-function isCrossOriginUrl(url: string) {
-  const a = window.document.createElement('a');
-  a.href = url;
-  return (
-    a.protocol !== window.document.location.protocol ||
-    a.host !== window.document.location.host ||
-    a.port !== window.document.location.port
-  );
-}
-
-export async function loadSpriteSheetImageData(imgUrl: string): Promise<ImageData> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    if (isCrossOriginUrl(imgUrl)) {
-      image.crossOrigin = 'Anonymous';
-    }
-    image.onload = (event) => {
-      resolve(getImageData(image));
-    };
-    image.onerror = (e) => {
-      reject(e);
-    };
-    image.src = imgUrl;
-  });
-}
-
-export function addSpriteSheetToMapFromImageData(
-  json: EmsSpriteSheet,
-  imgData: ImageData,
-  mbMap: MbMap
-) {
-  for (const imageId in json) {
-    if (!(json.hasOwnProperty(imageId) && !mbMap.hasImage(imageId))) {
-      continue;
-    }
-    const { width, height, x, y, sdf, pixelRatio } = json[imageId];
-    if (typeof width !== 'number' || typeof height !== 'number') {
-      continue;
-    }
-
-    const data = new RGBAImage({ width, height });
-    RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
-    mbMap.addImage(imageId, data, { pixelRatio, sdf });
-  }
 }
 
 export function getTileMetaFeatures(mbMap: MbMap, mbSourceId: string): TileMetaFeature[] {

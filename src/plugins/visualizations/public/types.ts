@@ -9,7 +9,7 @@
 import type { SavedObjectsMigrationVersion } from 'kibana/public';
 import {
   IAggConfigs,
-  SearchSourceFields,
+  SerializedSearchSourceFields,
   TimefilterContract,
   AggConfigSerialized,
 } from '../../../plugins/data/public';
@@ -33,7 +33,7 @@ export interface ISavedVis {
   title: string;
   description?: string;
   visState: SavedVisState;
-  searchSourceFields?: SearchSourceFields;
+  searchSourceFields?: SerializedSearchSourceFields;
   uiStateJSON?: string;
   savedSearchRefName?: string;
   savedSearchId?: string;

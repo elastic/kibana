@@ -22,6 +22,7 @@ import {
   CrawlRequestWithDetails,
   CrawlEvent,
   CrawlEventFromServer,
+  CrawlRequestStatsFromServer,
 } from './types';
 
 import {
@@ -34,6 +35,7 @@ import {
   getDeleteDomainConfirmationMessage,
   getDeleteDomainSuccessMessage,
   getCrawlRulePathPatternTooltip,
+  crawlRequestStatsServerToClient,
 } from './utils';
 
 const DEFAULT_CRAWL_RULE: CrawlRule = {
@@ -126,6 +128,36 @@ describe('crawlRequestServerToClient', () => {
   });
 });
 
+describe('crawlRequestStatsServerToClient', () => {
+  it('converts the API payload into properties matching our code style', () => {
+    const defaultServerPayload: CrawlRequestStatsFromServer = {
+      status: {
+        urls_allowed: 4,
+        pages_visited: 4,
+        crawl_duration_msec: 100,
+        avg_response_time_msec: 10,
+        status_codes: {
+          200: 4,
+          404: 0,
+        },
+      },
+    };
+
+    expect(crawlRequestStatsServerToClient(defaultServerPayload)).toEqual({
+      status: {
+        urlsAllowed: 4,
+        pagesVisited: 4,
+        crawlDurationMSec: 100,
+        avgResponseTimeMSec: 10,
+        statusCodes: {
+          200: 4,
+          404: 0,
+        },
+      },
+    });
+  });
+});
+
 describe('crawlRequestWithDetailsServerToClient', () => {
   it('converts the API payload into properties matching our code style', () => {
     const id = '507f1f77bcf86cd799439011';
@@ -141,6 +173,19 @@ describe('crawlRequestWithDetailsServerToClient', () => {
         domain_allowlist: [],
         seed_urls: [],
         sitemap_urls: [],
+        max_crawl_depth: 10,
+      },
+      stats: {
+        status: {
+          urls_allowed: 4,
+          pages_visited: 4,
+          crawl_duration_msec: 100,
+          avg_response_time_msec: 10,
+          status_codes: {
+            200: 4,
+            404: 0,
+          },
+        },
       },
     };
 
@@ -155,6 +200,19 @@ describe('crawlRequestWithDetailsServerToClient', () => {
         domainAllowlist: [],
         seedUrls: [],
         sitemapUrls: [],
+        maxCrawlDepth: 10,
+      },
+      stats: {
+        status: {
+          urlsAllowed: 4,
+          pagesVisited: 4,
+          crawlDurationMSec: 100,
+          avgResponseTimeMSec: 10,
+          statusCodes: {
+            200: 4,
+            404: 0,
+          },
+        },
       },
     };
 
@@ -191,6 +249,7 @@ describe('crawlEventServerToClient', () => {
         domain_allowlist: [],
         seed_urls: [],
         sitemap_urls: [],
+        max_crawl_depth: 10,
       },
       stage: 'crawl',
     };
@@ -206,6 +265,7 @@ describe('crawlEventServerToClient', () => {
         domainAllowlist: [],
         seedUrls: [],
         sitemapUrls: [],
+        maxCrawlDepth: 10,
       },
       stage: 'crawl',
     };
@@ -274,6 +334,7 @@ describe('crawlerDataServerToClient', () => {
             domain_allowlist: ['https://www.elastic.co'],
             seed_urls: [],
             sitemap_urls: [],
+            max_crawl_depth: 10,
           },
         },
       ],
@@ -329,6 +390,7 @@ describe('crawlerDataServerToClient', () => {
           domainAllowlist: ['https://www.elastic.co'],
           seedUrls: [],
           sitemapUrls: [],
+          maxCrawlDepth: 10,
         },
       },
     ]);

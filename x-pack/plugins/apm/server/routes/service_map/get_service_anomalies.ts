@@ -161,17 +161,13 @@ export async function getMLJobs(
   anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
   environment: string
 ) {
-  const response = await getMlJobsWithAPMGroup(anomalyDetectors);
+  const jobs = await getMlJobsWithAPMGroup(anomalyDetectors);
 
   // to filter out legacy jobs we are filtering by the existence of `apm_ml_version` in `custom_settings`
   // and checking that it is compatable.
-  const mlJobs = response.jobs.filter(
-    (job) => (job.custom_settings?.job_tags?.apm_ml_version ?? 0) >= 2
-  );
+  const mlJobs = jobs.filter((job) => job.version >= 2);
   if (environment !== ENVIRONMENT_ALL.value) {
-    const matchingMLJob = mlJobs.find(
-      (job) => job.custom_settings?.job_tags?.environment === environment
-    );
+    const matchingMLJob = mlJobs.find((job) => job.environment === environment);
     if (!matchingMLJob) {
       return [];
     }
@@ -185,5 +181,5 @@ export async function getMLJobIds(
   environment: string
 ) {
   const mlJobs = await getMLJobs(anomalyDetectors, environment);
-  return mlJobs.map((job) => job.job_id);
+  return mlJobs.map((job) => job.jobId);
 }

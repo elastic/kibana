@@ -138,6 +138,36 @@ describe('Datatable Visualization', () => {
       expect(suggestions.length).toBeGreaterThan(0);
     });
 
+    it('should reject suggestion with static value', () => {
+      function staticValueCol(columnId: string): TableSuggestionColumn {
+        return {
+          columnId,
+          operation: {
+            dataType: 'number',
+            label: `Static value: ${columnId}`,
+            isBucketed: false,
+            isStaticValue: true,
+          },
+        };
+      }
+      const suggestions = datatableVisualization.getSuggestions({
+        state: {
+          layerId: 'first',
+          layerType: layerTypes.DATA,
+          columns: [{ columnId: 'col1' }],
+        },
+        table: {
+          isMultiRow: true,
+          layerId: 'first',
+          changeType: 'initial',
+          columns: [staticValueCol('col1'), strCol('col2')],
+        },
+        keptLayerIds: [],
+      });
+
+      expect(suggestions).toHaveLength(0);
+    });
+
     it('should retain width and hidden config from existing state', () => {
       const suggestions = datatableVisualization.getSuggestions({
         state: {

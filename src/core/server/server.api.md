@@ -11,7 +11,7 @@ import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { CliArgs } from '@kbn/config';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
-import { ConditionalType } from '@kbn/config-schema/target_types/types';
+import { ConditionalType } from '@kbn/config-schema';
 import { ConfigDeprecation } from '@kbn/config';
 import { ConfigDeprecationContext } from '@kbn/config';
 import { ConfigDeprecationFactory } from '@kbn/config';
@@ -33,7 +33,6 @@ import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Logger } from '@kbn/logging';
 import { LoggerFactory } from '@kbn/logging';
 import { LogLevel as LogLevel_2 } from '@kbn/logging';
-import { LogLevelId } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { LogRecord } from '@kbn/logging';
 import type { MaybePromise } from '@kbn/utility-types';
@@ -1372,14 +1371,32 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 export const kibanaResponseFactory: {
     custom: <T extends string | Record<string, any> | Error | Buffer | Stream | {
         message: string | Error;
-        attributes?: Record<string, any> | undefined;
+        attributes?: ResponseErrorAttributes | undefined;
     } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
-    badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    notFound: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<ResponseError>;
+    badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    notFound: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
     redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;

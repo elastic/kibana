@@ -17,10 +17,12 @@ import { AppClient } from './client';
 import { ConfigType } from './config';
 import { IRuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/types';
 import { FrameworkRequest } from './lib/framework';
+import { EndpointAuthz } from '../common/endpoint/types/authz';
 
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext extends RequestHandlerContext {
+  endpointAuthz: EndpointAuthz;
   getConfig: () => ConfigType;
   getFrameworkRequest: () => FrameworkRequest;
   getAppClient: () => AppClient;

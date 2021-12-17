@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses } from '../../../common/api';
 import { Stats } from '../status';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 

@@ -9,7 +9,7 @@
 import { deepFreeze } from '@kbn/std';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
-interface StartDeps {
+export interface StartDeps {
   injectedMetadata: InjectedMetadataSetup;
 }
 
@@ -57,6 +57,9 @@ export class DocLinksService {
         cloud: {
           indexManagement: `${ELASTIC_WEBSITE_URL}/guide/en/cloud/current/ec-configure-index-management.html`,
         },
+        console: {
+          guide: `${KIBANA_DOCS}console-kibana.html`,
+        },
         dashboard: {
           guide: `${KIBANA_DOCS}dashboard.html`,
           drilldowns: `${KIBANA_DOCS}drilldowns.html`,
@@ -97,13 +100,11 @@ export class DocLinksService {
           indexingDocumentsSchema: `${APP_SEARCH_DOCS}indexing-documents-guide.html#indexing-documents-guide-schema`,
           logSettings: `${APP_SEARCH_DOCS}logs.html`,
           metaEngines: `${APP_SEARCH_DOCS}meta-engines-guide.html`,
-          nativeAuth: `${APP_SEARCH_DOCS}security-and-users.html#app-search-self-managed-security-and-user-management-elasticsearch-native-realm`,
           precisionTuning: `${APP_SEARCH_DOCS}precision-tuning.html`,
           relevanceTuning: `${APP_SEARCH_DOCS}relevance-tuning-guide.html`,
           resultSettings: `${APP_SEARCH_DOCS}result-settings-guide.html`,
           searchUI: `${APP_SEARCH_DOCS}reference-ui-guide.html`,
           security: `${APP_SEARCH_DOCS}security-and-users.html`,
-          standardAuth: `${APP_SEARCH_DOCS}security-and-users.html#app-search-self-managed-security-and-user-management-standard`,
           synonyms: `${APP_SEARCH_DOCS}synonyms-guide.html`,
           webCrawler: `${APP_SEARCH_DOCS}web-crawler.html`,
           webCrawlerEventLogs: `${APP_SEARCH_DOCS}view-web-crawler-events-logs.html`,
@@ -115,6 +116,7 @@ export class DocLinksService {
           usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
         },
         workplaceSearch: {
+          apiKeys: `${WORKPLACE_SEARCH_DOCS}workplace-search-api-authentication.html`,
           box: `${WORKPLACE_SEARCH_DOCS}workplace-search-box-connector.html`,
           confluenceCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-cloud-connector.html`,
           confluenceServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-server-connector.html`,
@@ -130,7 +132,6 @@ export class DocLinksService {
           indexingSchedule: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html#_indexing_schedule`,
           jiraCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-cloud-connector.html`,
           jiraServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-jira-server-connector.html`,
-          nativeAuth: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html#elasticsearch-native-realm`,
           oneDrive: `${WORKPLACE_SEARCH_DOCS}workplace-search-onedrive-connector.html`,
           permissions: `${WORKPLACE_SEARCH_DOCS}workplace-search-permissions.html#organizational-sources-private-sources`,
           salesforce: `${WORKPLACE_SEARCH_DOCS}workplace-search-salesforce-connector.html`,
@@ -138,7 +139,6 @@ export class DocLinksService {
           serviceNow: `${WORKPLACE_SEARCH_DOCS}workplace-search-servicenow-connector.html`,
           sharePoint: `${WORKPLACE_SEARCH_DOCS}workplace-search-sharepoint-online-connector.html`,
           slack: `${WORKPLACE_SEARCH_DOCS}workplace-search-slack-connector.html`,
-          standardAuth: `${WORKPLACE_SEARCH_DOCS}workplace-search-security.html#standard`,
           synch: `${WORKPLACE_SEARCH_DOCS}workplace-search-customizing-indexing-rules.html`,
           zendesk: `${WORKPLACE_SEARCH_DOCS}workplace-search-zendesk-connector.html`,
         },
@@ -489,6 +489,7 @@ export class DocLinksService {
           hdfsRepo: `${PLUGIN_DOCS}repository-hdfs.html`,
           s3Repo: `${PLUGIN_DOCS}repository-s3.html`,
           snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
+          mapperSize: `${PLUGIN_DOCS}mapper-size-usage.html`,
         },
         snapshotRestore: {
           guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
@@ -564,7 +565,7 @@ export class DocLinksService {
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
           learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
           apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
-          onPremRegistry: `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/${DOC_LINK_VERSION}/air-gapped.html`,
+          onPremRegistry: `${FLEET_DOCS}air-gapped.html`,
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
@@ -614,6 +615,9 @@ export interface DocLinksStart {
     readonly cloud: {
       readonly indexManagement: string;
     };
+    readonly console: {
+      readonly guide: string;
+    };
     readonly dashboard: {
       readonly guide: string;
       readonly drilldowns: string;
@@ -659,13 +663,11 @@ export interface DocLinksStart {
       readonly indexingDocumentsSchema: string;
       readonly logSettings: string;
       readonly metaEngines: string;
-      readonly nativeAuth: string;
       readonly precisionTuning: string;
       readonly relevanceTuning: string;
       readonly resultSettings: string;
       readonly searchUI: string;
       readonly security: string;
-      readonly standardAuth: string;
       readonly synonyms: string;
       readonly webCrawler: string;
       readonly webCrawlerEventLogs: string;
@@ -677,6 +679,7 @@ export interface DocLinksStart {
       readonly usersAccess: string;
     };
     readonly workplaceSearch: {
+      readonly apiKeys: string;
       readonly box: string;
       readonly confluenceCloud: string;
       readonly confluenceServer: string;
@@ -692,7 +695,6 @@ export interface DocLinksStart {
       readonly indexingSchedule: string;
       readonly jiraCloud: string;
       readonly jiraServer: string;
-      readonly nativeAuth: string;
       readonly oneDrive: string;
       readonly permissions: string;
       readonly salesforce: string;
@@ -700,7 +702,6 @@ export interface DocLinksStart {
       readonly serviceNow: string;
       readonly sharePoint: string;
       readonly slack: string;
-      readonly standardAuth: string;
       readonly synch: string;
       readonly zendesk: string;
     };
@@ -880,7 +881,14 @@ export interface DocLinksStart {
     }>;
     readonly watcher: Record<string, string>;
     readonly ccs: Record<string, string>;
-    readonly plugins: Record<string, string>;
+    readonly plugins: {
+      azureRepo: string;
+      gcsRepo: string;
+      hdfsRepo: string;
+      s3Repo: string;
+      snapshotRestoreRepos: string;
+      mapperSize: string;
+    };
     readonly snapshotRestore: Record<string, string>;
     readonly ingest: Record<string, string>;
     readonly fleet: Readonly<{

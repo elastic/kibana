@@ -86,7 +86,7 @@ export const AddDomainValidation: React.FC = () => {
             label={i18n.translate(
               'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.contentVerificationLabel',
               {
-                defaultMessage: 'Content Verification',
+                defaultMessage: 'Content verification',
               }
             )}
           />

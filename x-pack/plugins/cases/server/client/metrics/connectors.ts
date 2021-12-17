@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseMetricsResponse } from '../../../common';
+import { CaseMetricsResponse } from '../../../common/api';
 import { MetricsHandler } from './types';
 
 export class Connectors implements MetricsHandler {
@@ -15,7 +15,7 @@ export class Connectors implements MetricsHandler {
 
   public async compute(): Promise<CaseMetricsResponse> {
     return {
-      connectors: [],
+      connectors: { total: 0 },
     };
   }
 }

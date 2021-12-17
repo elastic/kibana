@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { ConnectorTypes, ActionConnector } from '../../../common';
+import { ConnectorTypes, ActionConnector } from '../../../common/api';
 import {
   UseField,
   useFormData,

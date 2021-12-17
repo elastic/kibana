@@ -51,9 +51,11 @@ describe('WorkplaceSearch', () => {
   it('renders ErrorState', () => {
     setMockValues({ errorConnecting: true });
 
-    const wrapper = shallow(<WorkplaceSearch />);
+    const wrapper = shallow(<WorkplaceSearch errorConnectingMessage="I am an error" />);
 
-    expect(wrapper.find(ErrorState)).toHaveLength(1);
+    const errorState = wrapper.find(ErrorState);
+    expect(errorState).toHaveLength(1);
+    expect(errorState.prop('errorConnectingMessage')).toEqual('I am an error');
   });
 });
 

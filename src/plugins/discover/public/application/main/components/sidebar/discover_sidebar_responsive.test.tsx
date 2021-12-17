@@ -22,11 +22,11 @@ import {
   DiscoverSidebarResponsiveProps,
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
-import { ElasticSearchHit } from '../../../../services/doc_views/doc_views_types';
 import { FetchStatus } from '../../../types';
 import { DataDocuments$ } from '../../utils/use_saved_search';
 import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { ElasticSearchHit } from '../../../../types';
 
 const mockServices = {
   history: () => ({

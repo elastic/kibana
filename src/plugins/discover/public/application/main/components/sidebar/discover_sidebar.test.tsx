@@ -19,10 +19,10 @@ import { flattenHit, IndexPatternAttributes } from '../../../../../../data/commo
 import { SavedObject } from '../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar';
-import { ElasticSearchHit } from '../../../../services/doc_views/doc_views_types';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../__mocks__/services';
 import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { ElasticSearchHit } from '../../../../types';
 
 jest.mock('../../../../kibana_services', () => ({
   getServices: () => mockDiscoverServices,

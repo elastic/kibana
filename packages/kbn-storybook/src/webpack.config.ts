@@ -32,9 +32,11 @@ function isHtmlPlugin(plugin: any): plugin is { options: { template: string } } 
   return !!(typeof plugin.options?.template === 'string');
 }
 
-function isBabelLoaderRule(rule: webpack.RuleSetRule): rule is webpack.RuleSetRule & {
+interface BabelLoaderRule extends webpack.RuleSetRule {
   use: webpack.RuleSetLoader[];
-} {
+}
+
+function isBabelLoaderRule(rule: webpack.RuleSetRule): rule is BabelLoaderRule {
   return !!(
     rule.use &&
     Array.isArray(rule.use) &&

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { HTTPFields, TCPFields, ICMPFields, BrowserFields, ITLSFields, DataStream } from '../types';
+import { HTTPFields, TCPFields, ICMPFields, BrowserFields, TLSFields } from '../types';
 import {
   PolicyConfigContextProvider,
   TCPContextProvider,
@@ -15,22 +15,15 @@ import {
   BrowserContextProvider,
   TLSFieldsContextProvider,
 } from '.';
-
+import { IPolicyConfigContextProvider } from './policy_config_context';
 interface Props {
   children: React.ReactNode;
   httpDefaultValues?: HTTPFields;
   tcpDefaultValues?: TCPFields;
   icmpDefaultValues?: ICMPFields;
   browserDefaultValues?: BrowserFields;
-  tlsDefaultValues?: ITLSFields;
-  policyDefaultValues?: {
-    defaultMonitorType: DataStream;
-    defaultIsTLSEnabled: boolean;
-    defaultIsZipUrlTLSEnabled: boolean;
-    defaultName?: string;
-    defaultLocations?: string[];
-    isEditable: boolean;
-  };
+  tlsDefaultValues?: TLSFields;
+  policyDefaultValues?: Omit<IPolicyConfigContextProvider, 'children'>;
 }
 
 export const SyntheticsProviders = ({

@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import {
   ALERT_REASON,
+  ALERT_RISK_SCORE,
   ALERT_RULE_NAME,
   ALERT_RULE_RISK_SCORE,
   ALERT_RULE_RISK_SCORE_MAPPING,
@@ -16,6 +17,7 @@ import {
   ALERT_RULE_SEVERITY,
   ALERT_RULE_SEVERITY_MAPPING,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY,
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
   EVENT_KIND,
@@ -1000,7 +1002,7 @@ export default ({ getService }: FtrProviderContext) => {
         const signals = await executeRuleAndGetSignals(rule);
         const severities = signals.map((s) => ({
           id: (s?.[ALERT_ANCESTORS] as Ancestor[])[0].id,
-          value: s?.[ALERT_RULE_SEVERITY],
+          value: s?.[ALERT_SEVERITY],
         }));
 
         expect(signals.length).equal(4);
@@ -1034,7 +1036,7 @@ export default ({ getService }: FtrProviderContext) => {
         const signals = await executeRuleAndGetSignals(rule);
         const riskScores = signals.map((s) => ({
           id: (s?.[ALERT_ANCESTORS] as Ancestor[])[0].id,
-          value: s?.[ALERT_RULE_RISK_SCORE],
+          value: s?.[ALERT_RISK_SCORE],
         }));
 
         expect(signals.length).equal(4);
@@ -1071,8 +1073,8 @@ export default ({ getService }: FtrProviderContext) => {
         const signals = await executeRuleAndGetSignals(rule);
         const values = signals.map((s) => ({
           id: (s?.[ALERT_ANCESTORS] as Ancestor[])[0].id,
-          severity: s?.[ALERT_RULE_SEVERITY],
-          risk: s?.[ALERT_RULE_RISK_SCORE],
+          severity: s?.[ALERT_SEVERITY],
+          risk: s?.[ALERT_RISK_SCORE],
         }));
 
         expect(signals.length).equal(4);
@@ -1189,12 +1191,10 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signals.hits.hits.length).to.eql(1);
 
         const statusResponse = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+          .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send({ ids: [ruleResponse.id] });
-        const initialStatusDate = new Date(
-          statusResponse.body[ruleResponse.id].current_status.status_date
-        );
+          .query({ id: ruleResponse.id });
+        const initialStatusDate = new Date(statusResponse.body.status_date);
 
         const initialSignal = signals.hits.hits[0];
 

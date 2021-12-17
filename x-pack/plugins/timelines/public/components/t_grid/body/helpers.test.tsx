@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash/fp';
 
-import { ColumnHeaderOptions } from '../../../../common';
+import { ColumnHeaderOptions } from '../../../../common/types';
 import { Ecs } from '../../../../common/ecs';
 import {
   allowSorting,

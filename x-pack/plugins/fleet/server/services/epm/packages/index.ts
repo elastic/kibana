@@ -7,7 +7,11 @@
 
 import type { SavedObject } from 'src/core/server';
 
-import { unremovablePackages, installationStatuses } from '../../../../common';
+import {
+  unremovablePackages,
+  installationStatuses,
+  KibanaSavedObjectType,
+} from '../../../../common';
 import { KibanaAssetType } from '../../../types';
 import type { AssetType, Installable, Installation } from '../../../types';
 
@@ -40,7 +44,7 @@ export class PackageNotInstalledError extends Error {
 
 // only Kibana Assets use Saved Objects at this point
 export const savedObjectTypes: AssetType[] = Object.values(KibanaAssetType);
-
+export const kibanaSavedObjectTypes: KibanaSavedObjectType[] = Object.values(KibanaSavedObjectType);
 export function createInstallableFrom<T>(
   from: T,
   savedObject?: SavedObject<Installation>

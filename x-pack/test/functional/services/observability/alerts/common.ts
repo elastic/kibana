@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { chunk } from 'lodash';
 import {
   ALERT_STATUS_ACTIVE,
@@ -26,7 +27,7 @@ const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
 
-const ACTION_COLUMN_INDEX = 1;
+const ACTION_COLUMN_INDEX = 0;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
@@ -270,6 +271,15 @@ export function ObservabilityAlertsCommonProvider({
     return actionsOverflowButtons[index] || null;
   };
 
+  const getRuleStatValue = async (testSubj: string) => {
+    const stat = await testSubjects.find(testSubj);
+    const title = await stat.findByCssSelector('.euiStat__title');
+    const count = await title.getVisibleText();
+    const value = Number.parseInt(count, 10);
+    expect(Number.isNaN(value)).to.be(false);
+    return value;
+  };
+
   return {
     getQueryBar,
     clearQueryBar,
@@ -307,5 +317,6 @@ export function ObservabilityAlertsCommonProvider({
     viewRuleDetailsButtonClick,
     viewRuleDetailsLinkClick,
     getAlertsFlyoutViewRuleDetailsLinkOrFail,
+    getRuleStatValue,
   };
 }

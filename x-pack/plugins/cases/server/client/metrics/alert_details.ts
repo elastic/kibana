@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseMetricsResponse } from '../../../common';
+import { CaseMetricsResponse } from '../../../common/api';
 import { MetricsHandler } from './types';
 
 export class AlertDetails implements MetricsHandler {
@@ -16,7 +16,7 @@ export class AlertDetails implements MetricsHandler {
   private retrievedMetrics: boolean = false;
 
   public getFeatures(): Set<string> {
-    return new Set(['alertHosts', 'alertUsers']);
+    return new Set(['alerts.hosts', 'alerts.users']);
   }
 
   public async compute(): Promise<CaseMetricsResponse> {

@@ -9,7 +9,9 @@
 // TODO: https://github.com/elastic/kibana/issues/110893
 /* eslint-disable @kbn/eslint/no_export_all */
 
+import { ExpressionFunction } from 'src/plugins/expressions';
 import { PresentationUtilPlugin } from './plugin';
+import { pluginServices } from './services';
 
 export type {
   PresentationCapabilitiesService,
@@ -33,6 +35,7 @@ export { projectIDs } from '../common/labs';
 export * from '../common/lib';
 
 export {
+  LazyExpressionInput,
   LazyLabsBeakerButton,
   LazyLabsFlyout,
   LazyDashboardPicker,
@@ -43,6 +46,7 @@ export {
 export * from './components/types';
 
 export type { QuickButtonProps } from './components/solution_toolbar';
+
 export {
   AddFromLibraryButton,
   PrimaryActionButton,
@@ -55,10 +59,21 @@ export {
 
 export * from './components/controls';
 
+/**
+ * Register a set of Expression Functions with the Presentation Utility ExpressionInput.  This allows
+ * the Monaco Editor to understand the functions and their arguments.
+ *
+ * This function is async in order to move the logic to an async chunk.
+ *
+ * @param expressionFunctions A set of Expression Functions to use in the ExpressionInput.
+ */
+export const registerExpressionsLanguage = async (expressionFunctions: ExpressionFunction[]) => {
+  const languages = await import('./components/expression_input/language');
+  return languages.registerExpressionsLanguage(expressionFunctions);
+};
+
 export function plugin() {
   return new PresentationUtilPlugin();
 }
-
-import { pluginServices } from './services';
 
 export const useLabs = () => (() => pluginServices.getHooks().labs.useService())();
