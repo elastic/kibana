@@ -112,7 +112,7 @@ export class Plugin implements PluginType {
     }
 
     if (this.server?.config?.unsafe?.service.enabled) {
-      this.syntheticService?.init(coreStart);
+      this.syntheticService?.init();
       this.syntheticService?.scheduleSyncTask(plugins.taskManager);
       if (this.server && this.syntheticService) {
         this.server.syntheticsService = this.syntheticService;
