@@ -14,7 +14,7 @@ import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock, themeServiceMock } from 'src/core/public/mocks';
 import {
   KibanaContextProvider,
   KibanaServices,
@@ -207,6 +207,7 @@ export function render<ExtraCore>(
           indexPatterns={{}}
           reportConfigMap={obsvReportConfigMap}
           setHeaderActionMenu={jest.fn()}
+          theme$={themeServiceMock.createTheme$()}
         >
           <UrlStorageContext.Provider value={{ ...seriesContextValue }}>
             {ui}
