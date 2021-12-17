@@ -20,6 +20,7 @@ import { IndexPatternField, indexPatterns } from '../../../../../../../src/plugi
 import { RenderAsSelect } from './render_as_select';
 import { AggDescriptor } from '../../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../source';
+import { clustersTitle, heatmapTitle } from './es_geo_grid_source';
 
 interface Props {
   currentLayerType?: string;
@@ -81,11 +82,13 @@ export class UpdateSourceEditor extends Component<Props, State> {
   _onResolutionChange = async (resolution: GRID_RESOLUTION, metrics: AggDescriptor[]) => {
     let newLayerType;
     if (
-      this.props.currentLayerType === LAYER_TYPE.VECTOR ||
-      this.props.currentLayerType === LAYER_TYPE.TILED_VECTOR
+      this.props.currentLayerType === LAYER_TYPE.GEOJSON_VECTOR ||
+      this.props.currentLayerType === LAYER_TYPE.MVT_VECTOR
     ) {
       newLayerType =
-        resolution === GRID_RESOLUTION.SUPER_FINE ? LAYER_TYPE.TILED_VECTOR : LAYER_TYPE.VECTOR;
+        resolution === GRID_RESOLUTION.SUPER_FINE
+          ? LAYER_TYPE.MVT_VECTOR
+          : LAYER_TYPE.GEOJSON_VECTOR;
     }
 
     await this.props.onChange(
@@ -147,14 +150,12 @@ export class UpdateSourceEditor extends Component<Props, State> {
         <EuiPanel>
           <EuiTitle size="xs">
             <h6>
-              <FormattedMessage
-                id="xpack.maps.source.esGrid.geoTileGridLabel"
-                defaultMessage="Grid parameters"
-              />
+              {this.props.currentLayerType === LAYER_TYPE.HEATMAP ? heatmapTitle : clustersTitle}
             </h6>
           </EuiTitle>
           <EuiSpacer size="m" />
           <ResolutionEditor
+            isHeatmap={this.props.currentLayerType === LAYER_TYPE.HEATMAP}
             resolution={this.props.resolution}
             onChange={this._onResolutionChange}
             metrics={this.props.metrics}

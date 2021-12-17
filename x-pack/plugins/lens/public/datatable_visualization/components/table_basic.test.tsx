@@ -17,7 +17,7 @@ import {
   SerializedFieldFormat,
 } from 'src/plugins/field_formats/common';
 import { VisualizationContainer } from '../../visualization_container';
-import { EmptyPlaceholder } from '../../shared_components';
+import { EmptyPlaceholder } from '../../../../../../src/plugins/charts/public';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { DataContext, DatatableComponent } from './table_basic';
 import { LensMultiTable } from '../../../common';
@@ -502,6 +502,52 @@ describe('DatatableComponent', () => {
       // set via args
       a: 'center',
       // default for date
+      b: 'left',
+      // default for number
+      c: 'right',
+    });
+  });
+
+  test('it detect last_value filtered metric type', () => {
+    const { data, args } = sampleArgs();
+
+    const table = data.tables.l1;
+    const column = table.columns[1];
+
+    column.meta = {
+      ...column.meta,
+      field: undefined,
+      type: 'number',
+      sourceParams: { ...column.meta.sourceParams, type: 'filtered_metric' },
+    };
+    table.rows[0].b = 'Hello';
+
+    const wrapper = shallow(
+      <DatatableComponent
+        data={data}
+        args={{
+          ...args,
+          columns: [
+            { columnId: 'a', alignment: 'center', type: 'lens_datatable_column' },
+            { columnId: 'b', type: 'lens_datatable_column' },
+            { columnId: 'c', type: 'lens_datatable_column' },
+          ],
+          sortingColumnId: 'b',
+          sortingDirection: 'desc',
+        }}
+        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        dispatchEvent={onDispatchEvent}
+        getType={jest.fn()}
+        renderMode="view"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+      />
+    );
+
+    expect(wrapper.find(DataContext.Provider).prop('value').alignments).toEqual({
+      // set via args
+      a: 'center',
+      // default for string
       b: 'left',
       // default for number
       c: 'right',

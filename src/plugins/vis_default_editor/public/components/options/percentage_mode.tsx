@@ -22,6 +22,7 @@ export interface PercentageModeOptionProps {
   percentageMode: boolean;
   formatPattern?: string;
   'data-test-subj'?: string;
+  disabled?: boolean;
 }
 
 function PercentageModeOption({
@@ -29,6 +30,7 @@ function PercentageModeOption({
   setValue,
   percentageMode,
   formatPattern,
+  disabled,
 }: PercentageModeOptionProps) {
   const { services } = useKibana();
   const defaultPattern = services.uiSettings?.get(
@@ -45,6 +47,7 @@ function PercentageModeOption({
         paramName="percentageMode"
         value={percentageMode}
         setValue={setValue}
+        disabled={disabled}
       />
       <EuiFormRow
         fullWidth

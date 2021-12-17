@@ -12,7 +12,8 @@ import globby from 'globby';
 import loadJsonFile from 'load-json-file';
 
 import { getPluginSearchPaths } from '@kbn/config';
-import { simpleKibanaPlatformPluginDiscovery, REPO_ROOT } from '@kbn/dev-utils';
+import { simpleKibanaPlatformPluginDiscovery } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { ApiScope, PluginOrPackage } from './types';
 
 export function findPlugins(): PluginOrPackage[] {

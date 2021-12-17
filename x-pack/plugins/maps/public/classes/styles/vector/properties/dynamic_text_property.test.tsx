@@ -69,6 +69,9 @@ describe('syncTextFieldWithMb', () => {
         supportsFieldMetaFromLocalData: () => {
           return true;
         },
+        isCount: () => {
+          return false;
+        },
       } as unknown as IField;
       const dynamicTextProperty = new DynamicTextProperty(
         {},

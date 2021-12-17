@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  KibanaRequest,
-  ISavedObjectsRepository,
-} from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
 import chalk from 'chalk';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UMBackendFrameworkAdapter } from './adapters';
@@ -57,7 +52,7 @@ export function createUptimeESClient({
 }: {
   esClient: ElasticsearchClient;
   request?: KibanaRequest;
-  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
+  savedObjectsClient: SavedObjectsClientContract;
 }) {
   return {
     baseESClient: esClient,

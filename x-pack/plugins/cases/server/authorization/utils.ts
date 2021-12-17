@@ -7,7 +7,7 @@
 
 import { remove, uniq } from 'lodash';
 import { nodeBuilder, KueryNode } from '@kbn/es-query';
-import { OWNER_FIELD } from '../../common';
+import { OWNER_FIELD } from '../../common/api';
 
 export const getOwnersFilter = (
   savedObjectType: string,

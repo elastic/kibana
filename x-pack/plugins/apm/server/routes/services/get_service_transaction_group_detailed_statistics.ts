@@ -20,7 +20,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {
   getDocumentTypeFilterForTransactions,
-  getTransactionDurationFieldForTransactions,
+  getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
@@ -72,9 +72,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
     searchAggregatedTransactions,
   });
 
-  const field = getTransactionDurationFieldForTransactions(
-    searchAggregatedTransactions
-  );
+  const field = getDurationFieldForTransactions(searchAggregatedTransactions);
 
   const response = await apmEventClient.search(
     'get_service_transaction_group_detailed_statistics',

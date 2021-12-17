@@ -21,7 +21,6 @@ export const CreateCase = React.memo<CreateCaseFormProps>(
     afterCaseCreated,
     caseType,
     hideConnectorServiceNowSir,
-    disableAlerts,
     onCancel,
     onSuccess,
     timelineIntegration,
@@ -40,7 +39,6 @@ export const CreateCase = React.memo<CreateCaseFormProps>(
           afterCaseCreated={afterCaseCreated}
           caseType={caseType}
           hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-          disableAlerts={disableAlerts}
           onCancel={onCancel}
           onSuccess={onSuccess}
           timelineIntegration={timelineIntegration}

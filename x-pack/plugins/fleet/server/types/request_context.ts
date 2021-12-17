@@ -14,11 +14,18 @@ import type {
   IRouter,
 } from '../../../../../src/core/server';
 import type { FleetAuthz } from '../../common/authz';
+import type { AgentClient } from '../services';
 
 /** @internal */
 export interface FleetRequestHandlerContext extends RequestHandlerContext {
   fleet: {
+    /** {@link FleetAuthz} */
     authz: FleetAuthz;
+    /** {@link AgentClient} */
+    agentClient: {
+      asCurrentUser: AgentClient;
+      asInternalUser: AgentClient;
+    };
     epm: {
       /**
        * Saved Objects client configured to use kibana_system privileges instead of end-user privileges. Should only be
@@ -26,6 +33,7 @@ export interface FleetRequestHandlerContext extends RequestHandlerContext {
        */
       readonly internalSoClient: SavedObjectsClientContract;
     };
+    spaceId: string;
   };
 }
 

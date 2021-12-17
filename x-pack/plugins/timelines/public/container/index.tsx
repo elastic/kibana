@@ -12,7 +12,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { tGridActions } from '..';
+import {
+  clearEventsLoading,
+  clearEventsDeleted,
+  setTimelineUpdatedAt,
+} from '../store/t_grid/actions';
 
 import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { isCompleteResponse, isErrorResponse } from '../../../../../src/plugins/data/common';
@@ -143,8 +147,8 @@ export const useTimelineEvents = ({
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
-      dispatch(tGridActions.clearEventsLoading({ id }));
-      dispatch(tGridActions.clearEventsDeleted({ id }));
+      dispatch(clearEventsLoading({ id }));
+      dispatch(clearEventsDeleted({ id }));
     }
   }, [dispatch, id]);
 
@@ -165,7 +169,7 @@ export const useTimelineEvents = ({
 
   const setUpdated = useCallback(
     (updatedAt: number) => {
-      dispatch(tGridActions.setTimelineUpdatedAt({ id, updated: updatedAt }));
+      dispatch(setTimelineUpdatedAt({ id, updated: updatedAt }));
     },
     [dispatch, id]
   );

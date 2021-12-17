@@ -9,13 +9,13 @@ Constructs a new instance of the `ScopedHistory` class
 <b>Signature:</b>
 
 ```typescript
-constructor(parentHistory: History, basePath: string);
+constructor(parentHistory: History<HistoryLocationState>, basePath: string);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  parentHistory | History |  |
+|  parentHistory | History&lt;HistoryLocationState&gt; |  |
 |  basePath | string |  |
 

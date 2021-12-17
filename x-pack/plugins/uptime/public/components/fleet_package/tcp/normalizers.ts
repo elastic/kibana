@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TCPFields, ConfigKeys } from '../types';
+import { TCPFields, ConfigKey } from '../types';
 import {
   Normalizer,
   commonNormalizers,
@@ -22,21 +22,21 @@ const defaultTCPFields = {
 
 export type TCPNormalizerMap = Record<keyof TCPFields, Normalizer>;
 
-export const getTCPNormalizer = (key: ConfigKeys) => {
+export const getTCPNormalizer = (key: ConfigKey) => {
   return getNormalizer(key, defaultTCPFields);
 };
 
-export const getTCPJsonToJavascriptNormalizer = (key: ConfigKeys) => {
+export const getTCPJsonToJavascriptNormalizer = (key: ConfigKey) => {
   return getJsonToJavascriptNormalizer(key, defaultTCPFields);
 };
 
 export const tcpNormalizers: TCPNormalizerMap = {
-  [ConfigKeys.METADATA]: getTCPJsonToJavascriptNormalizer(ConfigKeys.METADATA),
-  [ConfigKeys.HOSTS]: getTCPNormalizer(ConfigKeys.HOSTS),
-  [ConfigKeys.PROXY_URL]: getTCPNormalizer(ConfigKeys.PROXY_URL),
-  [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: getTCPNormalizer(ConfigKeys.PROXY_USE_LOCAL_RESOLVER),
-  [ConfigKeys.RESPONSE_RECEIVE_CHECK]: getTCPNormalizer(ConfigKeys.RESPONSE_RECEIVE_CHECK),
-  [ConfigKeys.REQUEST_SEND_CHECK]: getTCPNormalizer(ConfigKeys.REQUEST_SEND_CHECK),
+  [ConfigKey.METADATA]: getTCPJsonToJavascriptNormalizer(ConfigKey.METADATA),
+  [ConfigKey.HOSTS]: getTCPNormalizer(ConfigKey.HOSTS),
+  [ConfigKey.PROXY_URL]: getTCPNormalizer(ConfigKey.PROXY_URL),
+  [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: getTCPNormalizer(ConfigKey.PROXY_USE_LOCAL_RESOLVER),
+  [ConfigKey.RESPONSE_RECEIVE_CHECK]: getTCPNormalizer(ConfigKey.RESPONSE_RECEIVE_CHECK),
+  [ConfigKey.REQUEST_SEND_CHECK]: getTCPNormalizer(ConfigKey.REQUEST_SEND_CHECK),
   ...tlsNormalizers,
   ...commonNormalizers,
 };

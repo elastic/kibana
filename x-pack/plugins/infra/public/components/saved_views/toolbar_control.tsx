@@ -176,7 +176,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
             data-test-subj="savedViews-updateView"
             iconType={'refresh'}
             onClick={openUpdateModal}
-            disabled={!currentView || currentView.id === '0'}
+            isDisabled={!currentView || currentView.id === '0'}
             label={i18n.translate('xpack.infra.savedView.updateView', {
               defaultMessage: 'Update view',
             })}

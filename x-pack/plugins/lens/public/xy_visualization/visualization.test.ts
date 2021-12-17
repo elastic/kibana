@@ -1040,6 +1040,21 @@ describe('xy_visualization', () => {
           ])
         );
       });
+
+      it('should be excluded and not crash when a custom palette is used for data layer', () => {
+        const state = getStateWithBaseReferenceLine();
+        // now add a breakdown on the data layer with a custom palette
+        state.layers[0].palette = { type: 'palette', name: 'custom', params: {} };
+        state.layers[0].splitAccessor = 'd';
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'referenceLine',
+        }).groups;
+        // it should not crash basically
+        expect(options).toHaveLength(1);
+      });
     });
 
     describe('color assignment', () => {

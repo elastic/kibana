@@ -8,7 +8,6 @@
 
 import { Logger } from 'src/core/server';
 import isEmpty from 'lodash/isEmpty';
-
 import * as t from 'io-ts';
 import { validateNonExact, parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { SIGNALS_ID } from '@kbn/securitysolution-rules';
@@ -149,6 +148,7 @@ export const signalRulesAlertType = ({
             underlyingClient: config.ruleExecutionLog.underlyingClient,
             savedObjectsClient: services.savedObjectsClient,
             eventLogService,
+            logger,
           });
 
       const completeRule: CompleteRule<RuleParams> = {
@@ -264,6 +264,7 @@ export const signalRulesAlertType = ({
         );
         logger.warn(gapMessage);
         hasError = true;
+
         await ruleStatusClient.logStatusChange({
           ...basicLogArguments,
           newStatus: RuleExecutionStatus.failed,
@@ -279,6 +280,7 @@ export const signalRulesAlertType = ({
           lists,
           savedObjectClient: services.savedObjectsClient,
         });
+
         const exceptionItems = await getExceptions({
           client: exceptionsClient,
           lists: params.exceptionsList ?? [],
@@ -401,9 +403,8 @@ export const signalRulesAlertType = ({
               wrapSequences,
             });
           }
-        } else {
-          throw new Error(`unknown rule type ${type}`);
         }
+
         if (result.warningMessages.length) {
           const warningMessage = buildRuleMessage(
             truncateMessageList(result.warningMessages).join()

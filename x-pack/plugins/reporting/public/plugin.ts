@@ -18,6 +18,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/public';
+import type { ScreenshottingSetup } from '../../screenshotting/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import {
   FeatureCatalogueCategory,
@@ -73,6 +74,7 @@ export interface ReportingPublicPluginSetupDendencies {
   management: ManagementSetup;
   licensing: LicensingPluginSetup;
   uiActions: UiActionsSetup;
+  screenshotting: ScreenshottingSetup;
   share: SharePluginSetup;
 }
 
@@ -145,6 +147,7 @@ export class ReportingPublicPlugin
       home,
       management,
       licensing: { license$ }, // FIXME: 'license$' is deprecated
+      screenshotting,
       share,
       uiActions,
     } = setupDeps;
@@ -203,7 +206,7 @@ export class ReportingPublicPlugin
       id: 'reportingRedirect',
       mount: async (params) => {
         const { mountRedirectApp } = await import('./redirect');
-        return mountRedirectApp({ ...params, share, apiClient });
+        return mountRedirectApp({ ...params, apiClient, screenshotting, share });
       },
       title: 'Reporting redirect app',
       searchable: false,

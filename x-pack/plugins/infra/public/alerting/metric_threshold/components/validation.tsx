@@ -13,11 +13,14 @@ import {
 } from '../../../../server/lib/alerting/metric_threshold/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
+import { QUERY_INVALID } from './expression';
 
 export function validateMetricThreshold({
   criteria,
+  filterQuery,
 }: {
   criteria: MetricExpressionParams[];
+  filterQuery?: string | symbol;
 }): ValidationResult {
   const validationResult = { errors: {} };
   const errors: {
@@ -35,8 +38,16 @@ export function validateMetricThreshold({
       };
       metric: string[];
     };
-  } = {};
+  } & { filterQuery?: string[] } = {};
   validationResult.errors = errors;
+
+  if (filterQuery === QUERY_INVALID) {
+    errors.filterQuery = [
+      i18n.translate('xpack.infra.metrics.alertFlyout.error.invalidFilterQuery', {
+        defaultMessage: 'Filter query is invalid.',
+      }),
+    ];
+  }
 
   if (!criteria || !criteria.length) {
     return validationResult;
@@ -59,6 +70,7 @@ export function validateMetricThreshold({
         threshold1: [],
       },
       metric: [],
+      filterQuery: [],
     };
     if (!c.aggType) {
       errors[id].aggField.push(

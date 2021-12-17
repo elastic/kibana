@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import sinon from 'sinon';
 import { of, Subject } from 'rxjs';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
@@ -18,6 +17,15 @@ import uuid from 'uuid';
 import { TaskRunningStage } from './task_running';
 
 describe('TaskPool', () => {
+  beforeEach(() => {
+    jest.useFakeTimers('modern');
+    jest.setSystemTime(new Date(2021, 12, 30));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   test('occupiedWorkers are a sum of running tasks', async () => {
     const pool = new TaskPool({
       maxWorkers$: of(200),

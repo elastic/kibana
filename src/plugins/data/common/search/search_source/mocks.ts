@@ -40,6 +40,10 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
 export const searchSourceCommonMock: jest.Mocked<ISearchStartSearchSource> = {
   create: jest.fn().mockReturnValue(searchSourceInstanceMock),
   createEmpty: jest.fn().mockReturnValue(searchSourceInstanceMock),
+  telemetry: jest.fn(),
+  getAllMigrations: jest.fn(),
+  inject: jest.fn(),
+  extract: jest.fn(),
 };
 
 export const createSearchSourceMock = (fields?: SearchSourceFields, response?: any) =>

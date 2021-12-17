@@ -14,7 +14,7 @@ import { LinkPanelViewProps } from '../link_panel/types';
 import { Link } from '../link_panel/link';
 import * as i18n from './translations';
 import { VIEW_DASHBOARD } from '../overview_cti_links/translations';
-import { QUERY_ID as RiskyHostsQueryId } from '../../containers/overview_risky_host_links/use_hosts_risk_score';
+import { QUERY_ID as RiskyHostsQueryId } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { NavigateToHost } from './navigate_to_host';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
@@ -30,6 +30,8 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
     align: 'right',
     field: 'count',
     name: 'Risk Score',
+    render: (riskScore) =>
+      Number.isNaN(riskScore) ? riskScore : Number.parseFloat(riskScore).toFixed(2),
     sortable: true,
     truncateText: true,
     width: '15%',

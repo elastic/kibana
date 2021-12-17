@@ -9,7 +9,7 @@ import { isObject, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { parse, TinymathLocation, TinymathVariable } from '@kbn/tinymath';
 import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
-import { esKuery, esQuery } from '../../../../../../../../src/plugins/data/public';
+import { luceneStringToDsl, toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import {
   findMathNodes,
   findVariables,
@@ -190,9 +190,9 @@ export const getQueryValidationError = (
   }
   try {
     if (language === 'kql') {
-      esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query), indexPattern);
+      toElasticsearchQuery(fromKueryExpression(query), indexPattern);
     } else {
-      esQuery.luceneStringToDsl(query);
+      luceneStringToDsl(query);
     }
     return;
   } catch (e) {

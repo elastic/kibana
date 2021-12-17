@@ -21,7 +21,8 @@ import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
 
 import { FieldConfig, Form, UseField, useForm } from '../../common/shared_imports';
-import { ActionConnector, Case, ConnectorTypeFields } from '../../../common';
+import { Case } from '../../../common/ui/types';
+import { ActionConnector, ConnectorTypeFields } from '../../../common/api';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { CaseUserActions } from '../../containers/types';

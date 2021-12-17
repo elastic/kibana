@@ -10,6 +10,7 @@ import { EuiSideNavItemType } from '@elastic/eui';
 import { generateNavLink } from '../../../shared/layout';
 import { NAV } from '../../constants';
 import {
+  API_KEYS_PATH,
   SOURCES_PATH,
   SECURITY_PATH,
   USERS_AND_ROLES_PATH,
@@ -46,6 +47,11 @@ export const useWorkplaceSearchNav = () => {
       id: 'usersRoles',
       name: NAV.ROLE_MAPPINGS,
       ...generateNavLink({ to: USERS_AND_ROLES_PATH }),
+    },
+    {
+      id: 'apiKeys',
+      name: NAV.API_KEYS,
+      ...generateNavLink({ to: API_KEYS_PATH }),
     },
     {
       id: 'security',

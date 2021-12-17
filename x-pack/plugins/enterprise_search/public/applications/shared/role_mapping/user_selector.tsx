@@ -24,7 +24,7 @@ import { Role as WSRole } from '../../workplace_search/types';
 import { USERNAME_LABEL, EMAIL_LABEL } from '../constants';
 import { docLinks } from '../doc_links';
 
-const SMTP_URL = `${docLinks.enterpriseSearchBase}/mailer-configuration.html`;
+const SMTP_URL = `${docLinks.enterpriseSearchMailService}`;
 
 import {
   NEW_USER_LABEL,
