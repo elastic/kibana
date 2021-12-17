@@ -8,9 +8,8 @@
 
 export { getExtractFunction } from './extract';
 export { getInjectFunction } from './inject';
-export { getMigrateFunction, MigrateFunction } from './migrate';
+export type { MigrateFunction } from './migrate';
+export { getMigrateFunction } from './migrate';
 export { getTelemetryFunction } from './telemetry';
-export {
-  SavedObjectEmbeddableInput,
-  isSavedObjectEmbeddableInput,
-} from './saved_object_embeddable';
+export type { SavedObjectEmbeddableInput } from './saved_object_embeddable';
+export { isSavedObjectEmbeddableInput } from './saved_object_embeddable';
