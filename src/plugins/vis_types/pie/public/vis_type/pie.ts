@@ -40,7 +40,7 @@ export const getPieVisTypeDefinition = ({
       maxLegendLines: 1,
       distinctColors: false,
       isDonut: true,
-      emptySizeRatio: EMPTY_SIZE_RATIOS.MEDIUM,
+      emptySizeRatio: EMPTY_SIZE_RATIOS.SMALL,
       palette: {
         type: 'palette',
         name: 'default',

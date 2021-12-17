@@ -139,7 +139,7 @@ const PieOptions = (props: PieOptionsProps) => {
               options={emptySizeRatioOptions}
               idSelected={
                 emptySizeRatioOptions.find(({ value }) => value === stateParams.emptySizeRatio)
-                  ?.id ?? 'emptySizeRatioOption-medium'
+                  ?.id ?? 'emptySizeRatioOption-small'
               }
               onChange={handleEmptySizeRatioChange}
               data-test-subj="visTypePieEmptySizeRatioButtonGroup"

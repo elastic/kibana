@@ -58,7 +58,7 @@ function expressionHelper(
           categoryDisplay: [layer.categoryDisplay],
           legendDisplay: [layer.legendDisplay],
           legendPosition: [layer.legendPosition || 'right'],
-          emptySizeRatio: [layer.emptySizeRatio ?? EMPTY_SIZE_RATIOS.MEDIUM],
+          emptySizeRatio: [layer.emptySizeRatio ?? EMPTY_SIZE_RATIOS.SMALL],
           showValuesInLegend: [shouldShowValuesInLegend(layer, state.shape)],
           percentDecimals: [
             state.shape === 'waffle'

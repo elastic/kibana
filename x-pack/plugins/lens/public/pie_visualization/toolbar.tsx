@@ -225,7 +225,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
               options={emptySizeRatioOptions}
               idSelected={
                 emptySizeRatioOptions.find(({ value }) => value === layer.emptySizeRatio)?.id ??
-                'emptySizeRatioOption-medium'
+                'emptySizeRatioOption-small'
               }
               onChange={onEmptySizeRatioChange}
               data-test-subj="lnsEmptySizeRatioButtonGroup"

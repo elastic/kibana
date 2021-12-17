@@ -24,7 +24,7 @@ describe('interpreter/functions#pie', () => {
     addLegend: true,
     legendPosition: 'right',
     isDonut: true,
-    emptySizeRatio: EMPTY_SIZE_RATIOS.MEDIUM,
+    emptySizeRatio: EMPTY_SIZE_RATIOS.SMALL,
     nestedLegend: true,
     truncateLegend: true,
     maxLegendLines: true,
