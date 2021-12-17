@@ -14,7 +14,7 @@ import {
   ALERT_REASON,
   ALERT_RULE_SEVERITY,
   ALERT_STATUS,
-} from '@kbn/rule-data-utils/technical_field_names';
+} from '@kbn/rule-data-utils';
 
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { Severity } from '../../../components/severity';
