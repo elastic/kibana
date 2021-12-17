@@ -14,13 +14,13 @@ describe('Live Query', () => {
     login();
   });
 
-  describe('should run a live query', () => {
+  describe('should run a query', () => {
     beforeEach(() => {
       navigateTo('/app/osquery');
       cy.waitForReact(1000);
     });
 
-    it('and enable mapping in the results table', () => {
+    it('and enable ecs mapping', () => {
       cy.wait(1000);
       cy.contains('New live query').click();
       selectAllAgents();

@@ -13,12 +13,12 @@ describe('Metrics', () => {
   beforeEach(() => {
     login();
   });
-  describe("should be able to add query from Node's navigation", () => {
+  describe('should enable usage of Osquery', () => {
     beforeEach(() => {
       navigateTo('/app/osquery');
     });
 
-    it('should be able to run the query', () => {
+    it('by being able to run the query', () => {
       cy.get('[data-test-subj="toggleNavButton"]').click();
       cy.contains('Metrics').click();
 
@@ -30,7 +30,7 @@ describe('Metrics', () => {
       submitQuery();
       checkResults();
     });
-    it('should be able to run the previously saved query', () => {
+    it('by being able to run the previously saved query', () => {
       cy.get('[data-test-subj="toggleNavButton"]').click();
       cy.contains('Metrics').click();
 
