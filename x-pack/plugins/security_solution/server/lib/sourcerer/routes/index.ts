@@ -150,7 +150,7 @@ export const createSourcererDataViewRoute = (
           allDataViews.push({ ...siemDataView, id: siemDataView.id ?? dataViewId });
         }
 
-        const defaultDataView = await buildDefaultDataview(
+        const defaultDataView = await buildSourcererDataView(
           siemDataView,
           context.core.elasticsearch.client.asCurrentUser
         );
@@ -240,7 +240,7 @@ export const getSourcererDataViewRoute = (
         }
 
         const kibanaDataView = siemDataView
-          ? await buildDefaultDataview(
+          ? await buildSourcererDataView(
               siemDataView,
               context.core.elasticsearch.client.asCurrentUser
             )
@@ -263,7 +263,7 @@ export const getSourcererDataViewRoute = (
   );
 };
 
-const buildDefaultDataview = async (
+const buildSourcererDataView = async (
   dataView: DataView,
   clientAsCurrentUser: ElasticsearchClient
 ) => {
