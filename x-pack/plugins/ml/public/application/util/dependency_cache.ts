@@ -22,7 +22,7 @@ import type {
 } from 'kibana/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
-import { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
 import type { SecurityPluginSetup } from '../../../../security/public';
 import type { MapsStartApi } from '../../../../maps/public';
