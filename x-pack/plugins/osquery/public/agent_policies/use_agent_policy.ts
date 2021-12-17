@@ -17,15 +17,12 @@ interface UseAgentPolicy {
   skip?: boolean;
 }
 
-interface AgentPolicyResponse {
-  item: never;
-}
-
 export const useAgentPolicy = ({ policyId, skip, silent }: UseAgentPolicy) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery<AgentPolicyResponse, Error>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return useQuery<any, Error>(
     ['agentPolicy', { policyId }],
     () => http.get(`/internal/osquery/fleet_wrapper/agent_policies/${policyId}`),
     {
