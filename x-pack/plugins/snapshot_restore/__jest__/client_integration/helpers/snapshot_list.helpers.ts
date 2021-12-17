@@ -25,13 +25,17 @@ const initTestBed = (query?: string) =>
 export interface SnapshotListTestBed extends TestBed {
   actions: {
     setSearchText: (value: string, advanceTime?: boolean) => void;
+    searchErrorExists: () => boolean;
+    getSearchErrorText: () => string;
   };
 }
 
 const searchBarSelector = 'snapshotListSearch';
+const searchErrorSelector = 'snapshotListSearchError';
+
 export const setup = async (query?: string): Promise<SnapshotListTestBed> => {
   const testBed = await initTestBed(query);
-  const { form, component } = testBed;
+  const { form, component, find, exists } = testBed;
 
   const setSearchText = async (value: string, advanceTime = true) => {
     await act(async () => {
@@ -46,10 +50,20 @@ export const setup = async (query?: string): Promise<SnapshotListTestBed> => {
     }
   };
 
+  const searchErrorExists = (): boolean => {
+    return exists(searchErrorSelector);
+  };
+
+  const getSearchErrorText = (): string => {
+    return find(searchErrorSelector).text();
+  };
+
   return {
     ...testBed,
     actions: {
       setSearchText,
+      searchErrorExists,
+      getSearchErrorText,
     },
   };
 };

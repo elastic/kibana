@@ -158,6 +158,7 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
       {error ? (
         <>
           <EuiCallOut
+            data-test-subj="snapshotListSearchError"
             iconType="alert"
             color="danger"
             title={

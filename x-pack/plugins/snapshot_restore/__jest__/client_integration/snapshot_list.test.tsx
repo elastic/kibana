@@ -51,6 +51,8 @@ const { setup } = pageHelpers.snapshotList;
 describe('<SnapshotList />', () => {
   let testBed: SnapshotListTestBed;
   let setSearchText: SnapshotListTestBed['actions']['setSearchText'];
+  let searchErrorExists: SnapshotListTestBed['actions']['searchErrorExists'];
+  let getSearchErrorText: SnapshotListTestBed['actions']['getSearchErrorText'];
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -81,7 +83,7 @@ describe('<SnapshotList />', () => {
   beforeEach(async () => {
     testBed = await setup();
     ({
-      actions: { setSearchText },
+      actions: { setSearchText, searchErrorExists, getSearchErrorText },
     } = testBed);
   });
 
@@ -298,6 +300,39 @@ describe('<SnapshotList />', () => {
             searchOperator: 'exact',
           });
         });
+      });
+    });
+
+    describe('error handling', () => {
+      test(`doesn't allow more than 1 terms in the query`, async () => {
+        await setSearchText('term1 term2');
+        expect(useLoadSnapshots).lastCalledWith({
+          ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+        });
+        expect(searchErrorExists()).toBeTruthy();
+        expect(getSearchErrorText()).toEqual(
+          'Invalid search: You can only use one clause in the search bar'
+        );
+      });
+
+      test(`doesn't allow more than 1 clauses in the query`, async () => {
+        await setSearchText('snapshot=test_snapshot policyName:test_policy');
+        expect(useLoadSnapshots).lastCalledWith({
+          ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+        });
+        expect(searchErrorExists()).toBeTruthy();
+        expect(getSearchErrorText()).toEqual(
+          'Invalid search: You can only use one clause in the search bar'
+        );
+      });
+
+      test(`doesn't allow unknown properties in the query`, async () => {
+        await setSearchText('unknown_field=test');
+        expect(useLoadSnapshots).lastCalledWith({
+          ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+        });
+        expect(searchErrorExists()).toBeTruthy();
+        expect(getSearchErrorText()).toEqual('Invalid search: Unknown field `unknown_field`');
       });
     });
   });
