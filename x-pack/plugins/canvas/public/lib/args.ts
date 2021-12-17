@@ -13,7 +13,6 @@ import {
   Model,
   View,
   Transform,
-  argTypeRegistry,
 } from '../expression_types';
 import { ArgUiConfig } from '../expression_types/arg';
 
