@@ -52,7 +52,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   const {
     services: {
       data: {
-        indexPatterns: { getTitles: getIndexPatternTitles },
+        dataViews: { getTitles: getIndexPatternTitles },
       },
       notifications: { toasts },
       mlServices: { mlUsageCollection },
