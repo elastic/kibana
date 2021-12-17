@@ -82,6 +82,12 @@ export const createSourcererDataViewRoute = (
         let siemDataView;
         try {
           siemDataView = await unsecuredDataViewService.get(dataViewId);
+          auditLogger?.log(
+            sourcererSavedObjectEvent({
+              action: SavedObjectAction.GET,
+              id: dataViewId,
+            })
+          );
         } catch (error) {
           // if does not exist, it is all good
         }
@@ -233,10 +239,12 @@ export const getSourcererDataViewRoute = (
           siemDataView = await dataViewService.get(dataViewId);
         }
 
-        const kibanaDataView = await buildDefaultDataview(
-          siemDataView,
-          context.core.elasticsearch.client.asCurrentUser
-        );
+        const kibanaDataView = siemDataView
+          ? await buildDefaultDataview(
+              siemDataView,
+              context.core.elasticsearch.client.asCurrentUser
+            )
+          : {};
 
         return response.ok({
           body: kibanaDataView,
