@@ -30,6 +30,7 @@ import { isQueryValid } from './operations/definitions/filters';
 import { checkColumnForPrecisionError } from '../../../../../src/plugins/data/common';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
+import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms';
 
 export function isColumnInvalid(
   layer: IndexPatternLayer,
@@ -192,7 +193,7 @@ export function getPrecisionErrorWarningMessages(
                             paramName: 'orderBy',
                             value: {
                               type: 'rare',
-                              maxDocCount: 3,
+                              maxDocCount: DEFAULT_MAX_DOC_COUNT,
                             },
                           }),
                           indexPattern

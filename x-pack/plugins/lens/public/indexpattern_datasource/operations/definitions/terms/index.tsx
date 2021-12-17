@@ -72,7 +72,7 @@ function ofName(name?: string, count: number = 0, rare: boolean = false) {
 
 const idPrefix = htmlIdGenerator()();
 const DEFAULT_SIZE = 3;
-const DEFAULT_MAX_DOC_COUNT = 2;
+export const DEFAULT_MAX_DOC_COUNT = 1;
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
 
 export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field'> = {

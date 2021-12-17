@@ -58,7 +58,7 @@ export const getRareTermsBucketAgg = () => {
       },
       {
         name: 'max_doc_count',
-        default: 3,
+        default: 1,
       },
     ],
   });
