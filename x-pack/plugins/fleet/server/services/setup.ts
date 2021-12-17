@@ -104,7 +104,8 @@ async function createSetupSideEffects(
     esClient,
     policies,
     packages,
-    defaultOutput
+    defaultOutput,
+    DEFAULT_SPACE_ID
   );
 
   logger.debug('Cleaning up Fleet outputs');

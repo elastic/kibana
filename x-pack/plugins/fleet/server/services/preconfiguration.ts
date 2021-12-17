@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { groupBy, omit, pick, isEqual } from 'lodash';
 import { safeDump } from 'js-yaml';
 
-import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
 import type {
   NewPackagePolicy,
   AgentPolicy,
@@ -146,7 +145,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   policies: PreconfiguredAgentPolicy[] = [],
   packages: PreconfiguredPackage[] = [],
   defaultOutput: Output,
-  spaceId: string = DEFAULT_SPACE_ID
+  spaceId: string
 ): Promise<PreconfigurationResult> {
   const logger = appContextService.getLogger();
 
