@@ -135,8 +135,6 @@ export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: Rou
             jobId,
           };
 
-          // console.log(body);
-
           // Store snapshot in saved object if upgrade not complete
           if (body.completed !== true) {
             await createMlOperation(savedObjectsClient, snapshotInfo);
@@ -200,17 +198,19 @@ export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: Rou
             });
           }
 
+          let upgradeStatus;
+          try {
+            const { body } = await esClient.asCurrentUser.transport.request({
+              method: 'GET',
+              path: `/_ml/anomaly_detectors/${jobId}/model_snapshots/${snapshotId}/_upgrade/_stats`,
+            });
+
+            upgradeStatus = body && body.model_snapshot_upgrades[0];
+          } catch (err) {
+            // dont do anything
+          }
+
           const snapshotOp = foundSnapshots.saved_objects[0];
-
-          const { body } = await esClient.asCurrentUser.transport.request({
-            method: 'GET',
-            path: `/_ml/anomaly_detectors/${jobId}/model_snapshots/${snapshotId}/_upgrade/_stats`,
-          });
-
-          // console.log('WOW');
-          // console.log(body);
-
-          const upgradeStatus = body.model_snapshot_upgrades[0];
           const snapshotInfo: MlOperation = {
             ...snapshotOp.attributes,
           };
