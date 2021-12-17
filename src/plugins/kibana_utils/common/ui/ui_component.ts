@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-interface UiComponentInstance<Props extends object = object> {
+/**
+ * @public
+ */
+export interface UiComponentInstance<Props extends object = object> {
   /**
    * Call this method on initial render and on all subsequent updates.
    *
