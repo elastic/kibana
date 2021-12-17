@@ -63,25 +63,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('open popover with expanded cell content to get json from the editor');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      const documentCell = await dataGrid.getCellElement(1, 4);
+      const documentCell = await dataGrid.getCellElement(0, 3);
       await documentCell.click();
       const expandCellContentButton = await documentCell.findByClassName(
         'euiDataGridRowCell__expandButtonIcon'
       );
       await expandCellContentButton.click();
-      const popoverJson = await monacoEditor.getCodeEditorValue();
-      const expandDocId = JSON.parse(popoverJson)._id;
-      expect(expandDocId).to.be.ok();
+      let expandDocId = '';
 
-      log.debug('open expanded document flyout to get json');
+      await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
+        const text = await monacoEditor.getCodeEditorValue();
+        const flyoutJson = text?.trim().charAt(0) === '{' ? JSON.parse(text) : {};
+        expandDocId = flyoutJson._id;
+        return !!expandDocId;
+      });
+      log.debug(`expanded document id: ${expandDocId}`);
+
       await dataGrid.clickRowToggle();
       await find.clickByCssSelectorWhenNotDisabled('#kbn_doc_viewer_tab_1');
 
-      await retry.waitFor('codeEditorValue to be valid', async () => {
-        const text = await monacoEditor.getCodeEditorValue();
-        const flyoutJson = text?.trim().charAt(0) === '{' ? JSON.parse(text) : {};
-        return flyoutJson._id === expandDocId;
-      });
+      await retry.waitForWithTimeout(
+        'document id in flyout matching the expanded document id',
+        5000,
+        async () => {
+          const text = await monacoEditor.getCodeEditorValue();
+          const flyoutJson = text?.trim().charAt(0) === '{' ? JSON.parse(text) : {};
+          log.debug(`document in flyout id ${flyoutJson._id}`);
+          return flyoutJson._id === expandDocId;
+        }
+      );
     });
 
     describe('expand a document row', function () {
