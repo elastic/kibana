@@ -19956,8 +19956,6 @@
     "xpack.reporting.exportTypes.common.missingJobHeadersErrorMessage": "ジョブヘッダーがありません",
     "xpack.reporting.exportTypes.csv.executeJob.dateFormateSetting": "Kibana の高度な設定「{dateFormatTimezone}」が「ブラウザー」に設定されています。あいまいさを避けるために日付は UTC 形式に変換されます。",
     "xpack.reporting.exportTypes.csv.generateCsv.escapedFormulaValues": "CSVには、値がエスケープされた式が含まれる場合があります",
-    "xpack.reporting.exportTypes.csv.hitIterator.expectedHitsErrorMessage": "次の Elasticsearch からの応答で期待される {hits}：{response}",
-    "xpack.reporting.exportTypes.csv.hitIterator.expectedScrollIdErrorMessage": "次の Elasticsearch からの応答で期待される {scrollId}：{response}",
     "xpack.reporting.exportTypes.printablePdf.documentStreamIsNotgeneratedErrorMessage": "ドキュメントストリームが生成されていません。",
     "xpack.reporting.exportTypes.printablePdf.logoDescription": "Elastic 提供",
     "xpack.reporting.exportTypes.printablePdf.pagingDescription": "{pageCount} ページ中 {currentPage} ページ目",
