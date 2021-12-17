@@ -145,6 +145,7 @@ export const buildAlert = (
     [ALERT_RISK_SCORE]: overrides?.riskScoreOverride ?? completeRule.ruleParams.riskScore,
     [ALERT_RULE_PARAMETERS]: ruleParamsSnakeCase,
     ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
+      ...commonRuleParams,
       uuid: completeRule.alertId,
       actions: actions.map(transformAlertToRuleAction),
       created_at: createdAt.toISOString(),
@@ -157,7 +158,6 @@ export const buildAlert = (
       updated_at: updatedAt.toISOString(),
       updated_by: updatedBy ?? '',
       type: completeRule.ruleParams.type,
-      ...commonRuleParams,
       severity: overrides?.severityOverride ?? completeRule.ruleParams.severity,
       risk_score: overrides?.riskScoreOverride ?? completeRule.ruleParams.riskScore,
     }),
