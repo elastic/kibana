@@ -8,11 +8,11 @@
 import { ErrorWithStatusCode } from '../../../error_with_status_code';
 
 export class DataValidationError extends ErrorWithStatusCode {
-  constructor(public readonly validationErrors: string[], statusCode: number = 500) {
+  constructor(public readonly reason: string[], statusCode: number = 500) {
     super('Data validation failure', statusCode);
   }
 
-  public getValidationFailures(): string[] {
-    return this.validationErrors ?? [];
+  public getReason(): string[] {
+    return this.reason ?? [];
   }
 }

@@ -116,10 +116,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         }
 
         const username = security?.authc.getCurrentUser(request)?.username || 'elastic';
-        return new ExceptionListClient({
-          savedObjectsClient: context.core.savedObjects.client,
-          user: username,
-        });
+        return lists.getExceptionListClient(context.core.savedObjects.client, username);
       },
     };
   }
