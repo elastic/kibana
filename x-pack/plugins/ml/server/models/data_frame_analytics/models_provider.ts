@@ -91,7 +91,7 @@ export function modelsProvider(
         body: { nodes: clusterNodes },
       } = await client.asCurrentUser.nodes.stats();
 
-      const mlNodes = Object.entries(clusterNodes).filter(([, node]) => node.roles.includes('ml'));
+      const mlNodes = Object.entries(clusterNodes).filter(([, node]) => node.roles?.includes('ml'));
 
       const adMemoryReport = await memoryOverviewService.getAnomalyDetectionMemoryOverview();
       const dfaMemoryReport = await memoryOverviewService.getDFAMemoryOverview();
@@ -159,7 +159,7 @@ export function modelsProvider(
                 // TODO remove ts-ignore when elasticsearch client is updated
                 // @ts-ignore
                 total: Number(node.os?.mem.adjusted_total_in_bytes ?? node.os?.mem.total_in_bytes),
-                jvm: Number(node.attributes['ml.max_jvm_size']),
+                jvm: Number(node.attributes!['ml.max_jvm_size']),
               },
               anomaly_detection: {
                 total: memoryRes.adTotalMemory,

@@ -15,4 +15,9 @@ export type ChunkingConfig = estypes.MlChunkingConfig;
 
 export type Aggregation = Record<string, estypes.AggregationsAggregationContainer>;
 
-export type IndicesOptions = estypes.MlDatafeedIndicesOptions;
+export interface IndicesOptions {
+  allow_no_indices?: boolean;
+  expand_wildcards?: estypes.ExpandWildcards;
+  ignore_unavailable?: boolean;
+  ignore_throttled?: boolean;
+}

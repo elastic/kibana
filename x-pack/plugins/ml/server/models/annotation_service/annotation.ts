@@ -403,7 +403,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
 
     const { body } = await asInternalUser.search(searchParams);
     const totalCount =
-      typeof body.hits.total === 'number' ? body.hits.total : body.hits.total.value;
+      typeof body.hits.total === 'number' ? body.hits.total : body.hits.total!.value;
 
     if (totalCount === 0) {
       throw Boom.notFound(`Cannot find annotation with ID ${id}`);
