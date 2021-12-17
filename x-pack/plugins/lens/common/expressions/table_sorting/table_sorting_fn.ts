@@ -80,7 +80,11 @@ export const tableSortingFn: TableSortingExpressionFunction['fn'] = (
                 score = aIndex - bIndex;
               }
               if (sortingType === 'alphabetical' || (sortingType === 'terms' && score === 0)) {
-                score = (aValue as string).localeCompare(bValue as string);
+                if (typeof aValue === 'string' && typeof bValue === 'string') {
+                  score = aValue.localeCompare(bValue);
+                } else {
+                  // Sort out something for Ranges, etc...
+                }
               }
               if (sortingType === 'column') {
                 score = aValue - bValue;
