@@ -84,9 +84,6 @@ test('returns expected telemetry data from saved objects', async () => {
   await asyncForEach(mapSavedObjects, async (savedObject) => {
     await statsCollector.push(savedObject);
   });
-  mapSavedObjects.forEach((savedObject) => {
-    statsCollector.push(savedObject.attributes);
-  });
   const stats = await statsCollector.getStats();
   expect(stats).toEqual({
     geoShapeAggLayersCount: 2, // index pattern '4a7f6010-0aed-11ea-9dd2-95afd7ad44d4' with geo_shape field is used in 2 maps with geo_tile_grid aggregation

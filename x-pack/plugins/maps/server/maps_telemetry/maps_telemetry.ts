@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { asyncForEach } from '@kbn/std';
-import { SavedObject } from 'kibana/server';
-import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import {
   getElasticsearch,
   getIndexPatternsServiceFactory,
@@ -17,34 +13,11 @@ import {
 import { SavedObjectsClient } from '../../../../../src/core/server';
 import { MapStats, MapStatsCollector } from './map_stats';
 import { IndexPatternStats, IndexPatternStatsCollector } from './index_pattern_stats';
+import { findMaps } from './find_maps';
 
 export type MapsUsage = MapStats & IndexPatternStats;
 
-async function findMaps(
-  callback: (savedObject: SavedObject<MapSavedObjectAttributes>) => Promise<void>
-) {
-  const savedObjectsClient = getSavedObjectClient();
-
-  let currentPage = 1;
-  let page = 0;
-  let perPage = 0;
-  let total = 0;
-
-  do {
-    const results = await savedObjectsClient.find<MapSavedObjectAttributes>({
-      type: MAP_SAVED_OBJECT_TYPE,
-      page: currentPage++,
-    });
-    perPage = results.per_page;
-    page = results.page;
-    total = results.page;
-    await asyncForEach(results.saved_objects, async (savedObject) => {
-      await callback(savedObject);
-    });
-  } while (page * perPage < total);
-}
-
-async function getIndexPatternsService() {
+async function getReadOnlyIndexPatternsService() {
   const factory = getIndexPatternsServiceFactory();
   return factory(
     new SavedObjectsClient(getSavedObjectClient()),
@@ -54,9 +27,9 @@ async function getIndexPatternsService() {
 
 export async function getMapsTelemetry(): Promise<MapsUsage> {
   const mapStatsCollector = new MapStatsCollector();
-  const indexPatternService = await getIndexPatternsService();
+  const indexPatternService = await getReadOnlyIndexPatternsService();
   const indexPatternStatsCollector = new IndexPatternStatsCollector(indexPatternService);
-  await findMaps(async (savedObject) => {
+  await findMaps(getSavedObjectClient(), async (savedObject) => {
     mapStatsCollector.push(savedObject.attributes);
     await indexPatternStatsCollector.push(savedObject);
   });
