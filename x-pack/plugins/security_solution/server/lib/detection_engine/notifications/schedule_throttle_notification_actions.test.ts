@@ -70,7 +70,7 @@ describe('schedule_throttle_notification_actions', () => {
       kibanaSiemAppUrl: 'http://www.example.com',
       outputIndex: 'output-123',
       ruleId: 'rule-123',
-      abortableEsClient: elasticsearchServiceMock.createElasticsearchClient(
+      esClient: elasticsearchServiceMock.createElasticsearchClient(
         elasticsearchServiceMock.createSuccessTransportRequestPromise({
           hits: {
             hits: [
@@ -99,7 +99,7 @@ describe('schedule_throttle_notification_actions', () => {
       kibanaSiemAppUrl: 'http://www.example.com',
       outputIndex: 'output-123',
       ruleId: 'rule-123',
-      abortableEsClient: elasticsearchServiceMock.createElasticsearchClient(
+      esClient: elasticsearchServiceMock.createElasticsearchClient(
         elasticsearchServiceMock.createSuccessTransportRequestPromise({
           hits: {
             hits: [],
@@ -129,7 +129,7 @@ describe('schedule_throttle_notification_actions', () => {
       kibanaSiemAppUrl: 'http://www.example.com',
       outputIndex: 'output-123',
       ruleId: 'rule-123',
-      abortableEsClient: elasticsearchServiceMock.createElasticsearchClient(
+      esClient: elasticsearchServiceMock.createElasticsearchClient(
         elasticsearchServiceMock.createSuccessTransportRequestPromise({
           hits: {
             hits: [],
@@ -154,7 +154,7 @@ describe('schedule_throttle_notification_actions', () => {
       kibanaSiemAppUrl: 'http://www.example.com',
       outputIndex: 'output-123',
       ruleId: 'rule-123',
-      abortableEsClient: elasticsearchServiceMock.createElasticsearchClient(
+      esClient: elasticsearchServiceMock.createElasticsearchClient(
         elasticsearchServiceMock.createSuccessTransportRequestPromise({
           hits: {
             hits: [
@@ -183,7 +183,7 @@ describe('schedule_throttle_notification_actions', () => {
       kibanaSiemAppUrl: 'http://www.example.com',
       outputIndex: 'output-123',
       ruleId: 'rule-123',
-      abortableEsClient: elasticsearchServiceMock.createElasticsearchClient(
+      esClient: elasticsearchServiceMock.createElasticsearchClient(
         elasticsearchServiceMock.createSuccessTransportRequestPromise({
           hits: {
             hits: [
@@ -223,7 +223,7 @@ describe('schedule_throttle_notification_actions', () => {
       kibanaSiemAppUrl: 'http://www.example.com',
       outputIndex: 'output-123',
       ruleId: 'rule-123',
-      abortableEsClient: elasticsearchServiceMock.createElasticsearchClient(
+      esClient: elasticsearchServiceMock.createElasticsearchClient(
         elasticsearchServiceMock.createSuccessTransportRequestPromise({
           hits: {
             hits: [
@@ -259,7 +259,7 @@ describe('schedule_throttle_notification_actions', () => {
       kibanaSiemAppUrl: 'http://www.example.com',
       outputIndex: 'output-123',
       ruleId: 'rule-123',
-      abortableEsClient: elasticsearchServiceMock.createElasticsearchClient(
+      esClient: elasticsearchServiceMock.createElasticsearchClient(
         elasticsearchServiceMock.createSuccessTransportRequestPromise({
           hits: {
             hits: [
@@ -290,7 +290,7 @@ describe('schedule_throttle_notification_actions', () => {
       kibanaSiemAppUrl: 'http://www.example.com',
       outputIndex: 'output-123',
       ruleId: 'rule-123',
-      abortableEsClient: elasticsearchServiceMock.createElasticsearchClient(
+      esClient: elasticsearchServiceMock.createElasticsearchClient(
         elasticsearchServiceMock.createSuccessTransportRequestPromise({
           hits: {
             hits: [
@@ -352,7 +352,7 @@ describe('schedule_throttle_notification_actions', () => {
       kibanaSiemAppUrl: 'http://www.example.com',
       outputIndex: 'output-123',
       ruleId: 'rule-123',
-      abortableEsClient: elasticsearchServiceMock.createElasticsearchClient(
+      esClient: elasticsearchServiceMock.createElasticsearchClient(
         elasticsearchServiceMock.createSuccessTransportRequestPromise({
           hits: {
             hits: [
@@ -419,7 +419,7 @@ describe('schedule_throttle_notification_actions', () => {
       kibanaSiemAppUrl: 'http://www.example.com',
       outputIndex: 'output-123',
       ruleId: 'rule-123',
-      abortableEsClient: elasticsearchServiceMock.createElasticsearchClient(
+      esClient: elasticsearchServiceMock.createElasticsearchClient(
         elasticsearchServiceMock.createSuccessTransportRequestPromise({
           hits: {
             hits: [
@@ -474,7 +474,7 @@ describe('schedule_throttle_notification_actions', () => {
       kibanaSiemAppUrl: 'http://www.example.com',
       outputIndex: 'output-123',
       ruleId: 'rule-123',
-      abortableEsClient: elasticsearchServiceMock.createElasticsearchClient(
+      esClient: elasticsearchServiceMock.createElasticsearchClient(
         elasticsearchServiceMock.createSuccessTransportRequestPromise({
           hits: {
             hits: [
@@ -536,7 +536,7 @@ describe('schedule_throttle_notification_actions', () => {
       kibanaSiemAppUrl: 'http://www.example.com',
       outputIndex: 'output-123',
       ruleId: 'rule-123',
-      abortableEsClient: elasticsearchServiceMock.createElasticsearchClient(
+      esClient: elasticsearchServiceMock.createElasticsearchClient(
         elasticsearchServiceMock.createSuccessTransportRequestPromise({
           hits: {
             hits: [

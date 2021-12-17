@@ -93,7 +93,7 @@ export const legacyRulesNotificationAlertType = ({
       size: DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
       index: ruleParams.outputIndex,
       ruleId: ruleParams.ruleId,
-      abortableEsClient: services.search.asCurrentUser,
+      esClient: services.scopedClusterClient.asCurrentUser,
     });
 
     const signals = results.hits.hits.map((hit) => hit._source);

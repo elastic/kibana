@@ -67,11 +67,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         } = options;
         let runState = state;
         const { from, maxSignals, meta, ruleId, timestampOverride, to } = params;
-        const { alertWithPersistence, savedObjectsClient, scopedClusterClient, search } = services;
+        const { alertWithPersistence, savedObjectsClient, scopedClusterClient } = services;
         const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
         const esClient = scopedClusterClient.asCurrentUser;
-        const abortableEsClient = search.asCurrentUser;
 
         const ruleStatusClient = ruleExecutionLogClientOverride
           ? ruleExecutionLogClientOverride
@@ -326,7 +325,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     ?.kibana_siem_app_url,
                   outputIndex: ruleDataClient.indexName,
                   ruleId,
-                  abortableEsClient,
+                  esClient,
                   notificationRuleParams,
                   signals: result.createdSignals,
                   logger,
@@ -384,7 +383,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   ?.kibana_siem_app_url,
                 outputIndex: ruleDataClient.indexName,
                 ruleId,
-                abortableEsClient,
+                esClient,
                 notificationRuleParams,
                 signals: result.createdSignals,
                 logger,
@@ -418,7 +417,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 ?.kibana_siem_app_url,
               outputIndex: ruleDataClient.indexName,
               ruleId,
-              abortableEsClient,
+              esClient,
               notificationRuleParams,
               signals: result.createdSignals,
               logger,

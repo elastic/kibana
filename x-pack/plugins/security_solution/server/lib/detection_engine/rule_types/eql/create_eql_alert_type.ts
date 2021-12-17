@@ -20,6 +20,7 @@ export const createEqlAlertType = (
   return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
+    ruleTaskTimeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
     validate: {
       params: {
         validate: (object: unknown) => {

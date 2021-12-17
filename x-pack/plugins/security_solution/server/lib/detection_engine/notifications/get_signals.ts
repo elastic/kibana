@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import type { SignalSearchResponse, SignalSource } from '../signals/types';
 import { buildSignalsSearchQuery } from './build_signals_query';
-import { IAbortableEsClient } from '../../../../../alerting/server';
 
 interface GetSignalsParams {
   from?: string;
@@ -15,7 +15,7 @@ interface GetSignalsParams {
   size?: number;
   ruleId: string;
   index: string;
-  abortableEsClient: IAbortableEsClient;
+  esClient: ElasticsearchClient;
 }
 
 export const getSignals = async ({
@@ -24,7 +24,7 @@ export const getSignals = async ({
   size,
   ruleId,
   index,
-  abortableEsClient,
+  esClient,
 }: GetSignalsParams): Promise<SignalSearchResponse> => {
   if (from == null || to == null) {
     throw Error('"from" or "to" was not provided to signals query');
@@ -38,7 +38,7 @@ export const getSignals = async ({
     size,
   });
 
-  const { body: result } = await abortableEsClient.search<SignalSource>(query);
+  const { body: result } = await esClient.search<SignalSource>(query);
 
   return result;
 };

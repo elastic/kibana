@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObject, Logger } from 'src/core/server';
+import { ElasticsearchClient, SavedObject, Logger } from 'src/core/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
-import { AlertInstance, IAbortableEsClient } from '../../../../../alerting/server';
+import { AlertInstance } from '../../../../../alerting/server';
 import { RuleParams } from '../schemas/rule_schemas';
 import { deconflictSignalsAndResults, getNotificationResultsLink } from '../notifications/utils';
 import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../common/constants';
@@ -25,7 +25,7 @@ interface ScheduleThrottledNotificationActionsOptions {
   kibanaSiemAppUrl: string | undefined;
   outputIndex: RuleParams['outputIndex'];
   ruleId: RuleParams['ruleId'];
-  abortableEsClient: IAbortableEsClient;
+  esClient: ElasticsearchClient;
   alertInstance: AlertInstance;
   notificationRuleParams: NotificationRuleTypeParams;
   signals: unknown[];
@@ -54,7 +54,7 @@ export const scheduleThrottledNotificationActions = async ({
   kibanaSiemAppUrl,
   outputIndex,
   ruleId,
-  abortableEsClient,
+  esClient,
   alertInstance,
   notificationRuleParams,
   signals,
@@ -93,7 +93,7 @@ export const scheduleThrottledNotificationActions = async ({
       size: DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
       index: outputIndex,
       ruleId,
-      abortableEsClient,
+      esClient,
     });
 
     // This will give us counts up to the max of 10k from tracking total hits.

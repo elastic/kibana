@@ -28,6 +28,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -40,9 +41,11 @@ describe.each([
   let request: ReturnType<typeof requestMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
+  let alertServices: AlertServicesMock;
 
   beforeEach(() => {
     server = serverMock.create();
+    alertServices = alertsMock.createAlertServices();
     ({ clients, context } = requestContextMock.createTools());
     config = createMockConfig();
     const hapiStream = buildHapiStream(ruleIdsToNdJsonString(['rule-1']));
@@ -54,7 +57,7 @@ describe.each([
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
     clients.actionsClient.getAll.mockResolvedValue([]);
-    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
+    alertServices.search.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
     importRulesRoute(server.router, config, ml, isRuleRegistryEnabled);
