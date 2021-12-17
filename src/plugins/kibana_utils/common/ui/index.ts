@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './ui_component';
+export { UiComponent } from './ui_component';
