@@ -77,6 +77,7 @@ describe('test fetchAll', () => {
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
       useNewFieldsApi: true,
+      savedSearch: savedSearchMock,
       services: discoverServiceMock,
     };
     searchSource = savedSearchMock.searchSource.createChild();

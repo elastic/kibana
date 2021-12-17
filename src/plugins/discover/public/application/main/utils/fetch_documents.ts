@@ -7,10 +7,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
-import { Adapters } from '../../../../../inspector/common';
 import { isCompleteResponse, ISearchSource } from '../../../../../data/common';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
-import { DiscoverServices } from '../../../build_services';
+import { FetchDeps } from './fetch_all';
 
 /**
  * Requests the documents for Discover. This will return a promise that will resolve
@@ -18,17 +17,7 @@ import { DiscoverServices } from '../../../build_services';
  */
 export const fetchDocuments = (
   searchSource: ISearchSource,
-  {
-    abortController,
-    inspectorAdapters,
-    searchSessionId,
-    services,
-  }: {
-    abortController: AbortController;
-    inspectorAdapters: Adapters;
-    searchSessionId: string;
-    services: DiscoverServices;
-  }
+  { abortController, inspectorAdapters, searchSessionId, services, savedSearch }: FetchDeps
 ) => {
   searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
   searchSource.setField('trackTotalHits', false);
@@ -47,7 +36,7 @@ export const fetchDocuments = (
     name: 'discover',
     description: 'fetch documents',
     url: window.location.pathname,
-    id: '',
+    id: savedSearch.id ?? '',
   };
 
   const fetch$ = searchSource
