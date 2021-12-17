@@ -48,15 +48,16 @@ export function getConfig(
   } = params;
   const aspects = getAspects(table.columns, params.dimensions);
   const tooltip = getTooltip(aspects, params);
-  const yAxes = params.valueAxes.map((a) => {
+
+  const yAxes: Array<AxisConfig<ScaleContinuousType>> = [];
+
+  params.valueAxes.map((a) => {
     // find the correct aspect for each value axis
     const aspectsIdx = params.seriesParams.findIndex((s) => s.valueAxis === a.id);
-    return getAxis<YScaleType>(
-      a,
-      params.grid,
-      aspects.y[aspectsIdx > -1 ? aspectsIdx : 0],
-      params.seriesParams
-    );
+    const aspect = aspects.y[aspectsIdx > -1 ? aspectsIdx : 0];
+    if (aspect) {
+      yAxes.push(getAxis<YScaleType>(a, params.grid, aspect, params.seriesParams));
+    }
   });
 
   const rotation = getRotation(params.categoryAxes[0]);
