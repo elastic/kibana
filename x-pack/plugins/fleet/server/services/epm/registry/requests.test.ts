@@ -6,9 +6,23 @@
  */
 
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
+import { appContextService } from '../../app_context';
 
-import { fetchUrl } from './requests';
+import { fetchUrl, getResponse } from './requests';
 jest.mock('node-fetch');
+
+let mockRegistryProxyUrl: string | undefined;
+jest.mock('./proxy', () => ({
+  getProxyAgent: jest.fn().mockReturnValue('proxy agent'),
+  getRegistryProxyUrl: () => mockRegistryProxyUrl,
+}));
+
+jest.mock('../../app_context', () => ({
+  appContextService: {
+    getKibanaVersion: jest.fn(),
+    getLogger: jest.fn().mockReturnValue({ debug: jest.fn() }),
+  },
+}));
 
 const { Response, FetchError } = jest.requireActual('node-fetch');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -20,6 +34,35 @@ describe('Registry request', () => {
 
   afterEach(async () => {
     jest.clearAllMocks();
+  });
+
+  describe('fetch options', () => {
+    beforeEach(() => {
+      fetchMock.mockImplementationOnce(() => Promise.resolve(new Response('')));
+      (appContextService.getKibanaVersion as jest.Mock).mockReturnValue('8.0.0');
+    });
+    it('should set User-Agent header including kibana version', async () => {
+      getResponse('');
+
+      expect(fetchMock).toHaveBeenCalledWith('', {
+        headers: {
+          'User-Agent': 'Kibana/8.0.0 node-fetch',
+        },
+      });
+    });
+
+    it('should set User-Agent header including kibana version with agent', async () => {
+      mockRegistryProxyUrl = 'url';
+
+      getResponse('');
+
+      expect(fetchMock).toHaveBeenCalledWith('', {
+        agent: 'proxy agent',
+        headers: {
+          'User-Agent': 'Kibana/8.0.0 node-fetch',
+        },
+      });
+    });
   });
 
   describe('fetchUrl / getResponse errors', () => {

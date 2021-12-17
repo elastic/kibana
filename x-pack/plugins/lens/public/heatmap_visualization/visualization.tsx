@@ -14,6 +14,7 @@ import { Position } from '@elastic/charts';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
+import { HeatmapIcon } from '../../../../../src/plugins/chart_expressions/expression_heatmap/public';
 import type { OperationMetadata, Visualization } from '../types';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
@@ -28,7 +29,6 @@ import {
   LENS_HEATMAP_ID,
 } from './constants';
 import { HeatmapToolbar } from './toolbar_component';
-import { LensIconChartHeatmap } from '../assets/chart_heatmap';
 import { CUSTOM_PALETTE, getStopsForFixedMode } from '../shared_components';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
@@ -104,7 +104,7 @@ export const getHeatmapVisualization = ({
   visualizationTypes: [
     {
       id: 'heatmap',
-      icon: LensIconChartHeatmap,
+      icon: HeatmapIcon,
       label: i18n.translate('xpack.lens.heatmapVisualization.heatmapLabel', {
         defaultMessage: 'Heatmap',
       }),
