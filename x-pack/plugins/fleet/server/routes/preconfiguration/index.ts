@@ -11,11 +11,12 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { PreconfiguredAgentPolicy } from '../../../common';
 
 import { PLUGIN_ID, PRECONFIGURATION_API_ROUTES } from '../../constants';
+import type { FleetRequestHandler } from '../../types';
 import { PutPreconfigurationSchema } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { ensurePreconfiguredPackagesAndPolicies, outputService } from '../../services';
 
-export const updatePreconfigurationHandler: RequestHandler<
+export const updatePreconfigurationHandler: FleetRequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PutPreconfigurationSchema.body>
@@ -23,7 +24,7 @@ export const updatePreconfigurationHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const defaultOutput = await outputService.ensureDefaultOutput(soClient);
-
+  const spaceId = context.fleet.spaceId;
   const { agentPolicies, packages } = request.body;
 
   try {
@@ -32,7 +33,8 @@ export const updatePreconfigurationHandler: RequestHandler<
       esClient,
       (agentPolicies as PreconfiguredAgentPolicy[]) ?? [],
       packages ?? [],
-      defaultOutput
+      defaultOutput,
+      spaceId
     );
     return response.ok({ body });
   } catch (error) {
@@ -47,6 +49,6 @@ export const registerRoutes = (router: IRouter) => {
       validate: PutPreconfigurationSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    updatePreconfigurationHandler
+    updatePreconfigurationHandler as RequestHandler
   );
 };

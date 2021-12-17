@@ -21,7 +21,6 @@ import type {
   CreatePackagePolicyRequestSchema,
   UpdatePackagePolicyRequestSchema,
 } from '../../types/rest_spec';
-
 import type { PackagePolicy } from '../../types';
 
 import { registerRoutes } from './index';
