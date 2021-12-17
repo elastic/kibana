@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
 import { act } from '@testing-library/react';
-import React from 'react';
-import { EventFilterDeleteModal } from './event_filter_delete_modal';
 import { fireEvent } from '@testing-library/dom';
+import { EventFilterDeleteModal } from './event_filter_delete_modal';
+import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { showDeleteModal } from '../../store/selector';
 import { isFailedResourceState, isLoadedResourceState } from '../../../../state';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -24,9 +25,6 @@ describe('When event filters delete modal is shown', () => {
   let history: AppContextTestRender['history'];
   let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
   let store: AppContextTestRender['store'];
-
-  const getBody = () =>
-    renderResult.baseElement.querySelector('[data-test-subj="eventFilterDeleteModalBody"]')!;
 
   const getConfirmButton = () =>
     renderResult.baseElement.querySelector(
@@ -40,17 +38,11 @@ describe('When event filters delete modal is shown', () => {
 
   const getCurrentState = () => store.getState().management.eventFilters;
 
-  const partialEventFilter: Partial<ExceptionListItemSchema> = {
-    id: '123',
-    name: 'tic-tac-toe',
-    tags: [],
-  };
-
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
 
     ({ history, store, coreStart } = mockedContext);
-    renderAndSetup = async () => {
+    renderAndSetup = async (customEventFilterProps?: Partial<ExceptionListItemSchema>) => {
       renderResult = mockedContext.render(<EventFilterDeleteModal />);
 
       await act(async () => {
@@ -60,7 +52,12 @@ describe('When event filters delete modal is shown', () => {
 
         mockedContext.store.dispatch({
           type: 'eventFilterForDeletion',
-          payload: partialEventFilter,
+          payload: getExceptionListItemSchemaMock({
+            id: '123',
+            name: 'tic-tac-toe',
+            tags: [],
+            ...(customEventFilterProps ? customEventFilterProps : {}),
+          }),
         });
       });
 
@@ -71,32 +68,28 @@ describe('When event filters delete modal is shown', () => {
   });
 
   it("should display calllout when it's assigned to one policy", async () => {
-    partialEventFilter.tags = ['policy:1'];
-    await renderAndSetup();
+    await renderAndSetup({ tags: ['policy:1'] });
     expect(renderResult.getByTestId('eventFilterDeleteModalCalloutMessage').textContent).toMatch(
       /Deleting this entry will remove it from 1 associated policy./
     );
   });
 
   it("should display calllout when it's assigned to more than one policy", async () => {
-    partialEventFilter.tags = ['policy:1', 'policy:2', 'policy:3'];
-    await renderAndSetup();
+    await renderAndSetup({ tags: ['policy:1', 'policy:2', 'policy:3'] });
     expect(renderResult.getByTestId('eventFilterDeleteModalCalloutMessage').textContent).toMatch(
       /Deleting this entry will remove it from 3 associated policies./
     );
   });
 
   it("should display calllout when it's assigned globally", async () => {
-    partialEventFilter.tags = ['policy:all'];
-    await renderAndSetup();
+    await renderAndSetup({ tags: ['policy:all'] });
     expect(renderResult.getByTestId('eventFilterDeleteModalCalloutMessage').textContent).toMatch(
       /Deleting this entry will remove it from all associated policies./
     );
   });
 
   it("should display calllout when it's unassigned", async () => {
-    partialEventFilter.tags = [];
-    await renderAndSetup();
+    await renderAndSetup({ tags: [] });
     expect(renderResult.getByTestId('eventFilterDeleteModalCalloutMessage').textContent).toMatch(
       /Deleting this entry will remove it from 0 associated policies./
     );
