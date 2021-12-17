@@ -8,6 +8,7 @@
 
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import { httpServiceMock, themeServiceMock } from '../../../../../core/public/mocks';
+import { docLinksServiceMock } from '../../../../../core/public/mocks';
 
 import type { ObjectStorageClient } from '../../../common/types';
 import { HistoryMock } from '../../services/history.mock';
@@ -36,6 +37,7 @@ export const serviceContextMock = {
       },
       docLinkVersion: 'NA',
       theme$: themeServiceMock.create().start().theme$,
+      docLinks: docLinksServiceMock.createStartContract().links,
     };
   },
 };
