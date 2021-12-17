@@ -98,7 +98,7 @@ export interface FleetSetupDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
 }
 
