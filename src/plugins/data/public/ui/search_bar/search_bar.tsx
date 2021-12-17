@@ -367,7 +367,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
           isLoading={this.props.isLoading}
-          isFill={this.props.fillSubmitButton || false}
+          fillSubmitButton={this.props.fillSubmitButton || false}
           prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}

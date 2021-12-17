@@ -37,12 +37,12 @@ export interface QueryBarTopRowProps {
   dateRangeFrom?: string;
   dateRangeTo?: string;
   disableAutoFocus?: boolean;
+  fillSubmitButton: boolean;
   iconType?: EuiIconProps['type'];
   indexPatterns?: Array<IIndexPattern | string>;
   indicateNoData?: boolean;
   isClearable?: boolean;
   isDirty: boolean;
-  isFill: boolean;
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   nonKqlMode?: 'lucene' | 'text';
@@ -230,7 +230,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         isDisabled={isDateRangeInvalid}
         isLoading={props.isLoading}
         onClick={onClickSubmitButton}
-        fill={props.isFill}
+        fill={props.fillSubmitButton}
         data-test-subj="querySubmitButton"
       />
     );
