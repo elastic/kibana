@@ -199,7 +199,6 @@ describe('Discover grid cell rendering', function () {
               "bytes": 100,
               "extension": ".gz",
             },
-            "_type": "test",
             "highlight": Object {
               "extension": Array [
                 "@kibana-highlighted-field.gz@/kibana-highlighted-field",
@@ -394,7 +393,6 @@ describe('Discover grid cell rendering', function () {
             "_index": "test",
             "_score": 1,
             "_source": undefined,
-            "_type": "test",
             "fields": Object {
               "bytes": Array [
                 100,
