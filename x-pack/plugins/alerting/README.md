@@ -197,7 +197,7 @@ This example rule type receives server and threshold as parameters. It will read
 
 ```typescript
 import { schema } from '@kbn/config-schema';
-import { AlertType, AlertExecutorOptions } from '../../../alerting/server';
+import { RuleType, AlertExecutorOptions } from '../../../alerting/server';
 // These type names will eventually be updated to reflect the new terminology
 import {
 	AlertTypeParams,
@@ -370,7 +370,7 @@ server.newPlatform.setup.plugins.alerting.registerType(myRuleType);
 
 ## Role Based Access-Control
 
-Once you have registered your AlertType, you need to grant your users privileges to use it.
+Once you have registered your RuleType, you need to grant your users privileges to use it.
 When registering a feature in Kibana you can specify multiple types of privileges which are granted to users when they're assigned certain roles.
 
 Assuming your feature introduces its own AlertTypes, you'll want to control which roles have all/read privileges for the rules and alerts for these AlertTypes when they're inside the feature.
@@ -424,7 +424,7 @@ features.registerKibanaFeature({
 						'my-application-id.my-alert-type',
 						// grant `read` over the built-in IndexThreshold
 						'.index-threshold', 
-						// grant `read` over Uptime's TLS AlertType
+						// grant `read` over Uptime's TLS RuleType
 						'xpack.uptime.alerts.actionGroups.tls'
 					],
 				},
@@ -434,7 +434,7 @@ features.registerKibanaFeature({
 						'my-application-id.my-alert-type',
 						// grant `read` over the built-in IndexThreshold
 						'.index-threshold', 
-						// grant `read` over Uptime's TLS AlertType
+						// grant `read` over Uptime's TLS RuleType
 						'xpack.uptime.alerts.actionGroups.tls'
 					],
 				},
@@ -643,14 +643,14 @@ When registering a rule type, you'll likely want to provide a way of viewing rul
 
 In order for the Alerting Framework to know that your plugin has its own internal view for displaying a rule, you must register a navigation handler within the framework.
 
-A navigation handler is nothing more than a function that receives a rule and its corresponding AlertType, and is expected to then return the path *within your plugin* which knows how to display this rule.
+A navigation handler is nothing more than a function that receives a rule and its corresponding RuleType, and is expected to then return the path *within your plugin* which knows how to display this rule.
 
 The signature of such a handler is:
 
 ```typescript
 type AlertNavigationHandler = (
   alert: SanitizedAlert,
-  alertType: AlertType
+  alertType: RuleType
 ) => string;
 ```
 
@@ -668,7 +668,7 @@ alerting.registerNavigation(
 );
 ```
 
-This tells the Alerting Framework that, given a rule of the AlertType whose ID is `my-application-id.my-unique-rule-type`, if that rule's `consumer` value (which is set when the rule is created by your plugin) is your application (whose id is `my-application-id`), then it will navigate to your application using the path `/my-unique-rule/${the id of the rule}`.
+This tells the Alerting Framework that, given a rule of the RuleType whose ID is `my-application-id.my-unique-rule-type`, if that rule's `consumer` value (which is set when the rule is created by your plugin) is your application (whose id is `my-application-id`), then it will navigate to your application using the path `/my-unique-rule/${the id of the rule}`.
 
 The navigation is handled using the `navigateToApp` API, meaning that the path will be automatically picked up by your `react-router-dom` **Route** component, so all you have top do is configure a Route that handles the path `/my-unique-rule/:id`.
 
@@ -689,9 +689,9 @@ This tells the Alerting Framework that any rule whose `consumer` value is your a
 ### Balancing both APIs side by side
 As we mentioned, using `registerDefaultNavigation` will tell the Alerting Framework that your application can handle any type of rule we throw at it, as long as your application created it, using the handler you provided.
 
-The only case in which this handler will not be used to evaluate the navigation for a rule (assuming your application is the `consumer`) is if you have also used the `registerNavigation` API, alongside your `registerDefaultNavigation` usage, to handle that rule's specific AlertType.
+The only case in which this handler will not be used to evaluate the navigation for a rule (assuming your application is the `consumer`) is if you have also used the `registerNavigation` API, alongside your `registerDefaultNavigation` usage, to handle that rule's specific RuleType.
 
-You can use the `registerNavigation` API to specify as many AlertType specific handlers as you like, but you can only use it once per AlertType as we wouldn't know which handler to use if you specified two for the same AlertType. For the same reason, you can only use `registerDefaultNavigation` once per plugin, as it covers all cases for your specific plugin.
+You can use the `registerNavigation` API to specify as many RuleType specific handlers as you like, but you can only use it once per RuleType as we wouldn't know which handler to use if you specified two for the same RuleType. For the same reason, you can only use `registerDefaultNavigation` once per plugin, as it covers all cases for your specific plugin.
 
 ## Internal HTTP APIs
 
@@ -758,7 +758,7 @@ Action Groups are static, and have to be define when the rule type is defined.
 Action Subgroups are dynamic, and can be defined on the fly.
 
 This approach enables users to specify actions under specific action groups, but they can't specify actions that are specific to subgroups.
-As subgroups fall under action groups, we will schedule the actions specified for the action group, but the subgroup allows the AlertType implementer to reuse the same action group for multiple different active subgroups.
+As subgroups fall under action groups, we will schedule the actions specified for the action group, but the subgroup allows the RuleType implementer to reuse the same action group for multiple different active subgroups.
 
 ## Templating Actions
 
