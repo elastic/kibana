@@ -7,7 +7,7 @@
  */
 
 export { Defer, defer } from './defer';
-export { fieldWildcardMatcher } from './field_wildcard';
+export { fieldWildcardMatcher, fieldWildcardFilter } from './field_wildcard';
 export { UiComponent } from './ui';
 export {
   BaseState,
@@ -27,6 +27,7 @@ export {
   EnsurePureSelector,
   EnsurePureTransition,
   PureSelector,
+  PureTransition,
   CreateStateContainerOptions,
   createStateContainerReactHelpers,
   useContainerSelector,
