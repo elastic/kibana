@@ -13,7 +13,8 @@ import {
 } from './assets/field_maps/technical_rule_field_map';
 import { runtimeTypeFromFieldMap } from './field_map';
 
-const technicalFieldRuntimeType = runtimeTypeFromFieldMap<TechnicalRuleFieldMap>(technicalRuleFieldMap);
+const technicalFieldRuntimeType =
+  runtimeTypeFromFieldMap<TechnicalRuleFieldMap>(technicalRuleFieldMap);
 
 export const parseTechnicalFields = (input: unknown) => {
   const validate = technicalFieldRuntimeType.decode(input);
