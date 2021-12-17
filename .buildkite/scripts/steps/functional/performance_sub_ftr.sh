@@ -23,14 +23,14 @@ sleep 120
 cd "$XPACK_DIR"
 
 # warmup round 1
-checks-reporter-with-killswitch "Run Performance Tests (warmup 1)" \
+checks-reporter-with-killswitch "Run Performance Tests with FTR Config (Phase: WARMUP_1)" \
   node scripts/functional_tests \
     --debug --bail \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
     --config test/performance/config.ftr.ts;
 
 # warmup round 2
-checks-reporter-with-killswitch "Run Performance Tests (warmup 2)" \
+checks-reporter-with-killswitch "Run Performance Tests with FTR Config (Phase: WARMUP_2)" \
    node scripts/functional_tests \
      --debug --bail \
      --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
@@ -39,7 +39,7 @@ checks-reporter-with-killswitch "Run Performance Tests (warmup 2)" \
 export DISABLE_APM=false
 export PERFORMANCE_PHASE=TEST
 
-checks-reporter-with-killswitch "Run Performance Tests" \
+checks-reporter-with-killswitch "Run Performance Tests with FTR Config (Phase: TEST)" \
    node scripts/functional_tests \
      --debug --bail \
      --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
