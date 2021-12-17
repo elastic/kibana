@@ -7,7 +7,6 @@
 
 import { FLEET_AGENT_POLICIES, navigateTo } from '../tasks/navigation';
 import { addIntegration } from '../tasks/integrations';
-import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../tasks/live_query';
 import { login } from '../tasks/login';
 
 describe('Add Integration', () => {
@@ -17,17 +16,8 @@ describe('Add Integration', () => {
     login();
   });
 
-  it('should display Osquery integration in the Policies list once installed ', () => {
+  it('should display Osquery integration in the Policies list once installed', () => {
     addAndVerifyIntegration();
-  });
-
-  it.skip('should run live query', () => {
-    navigateTo('/app/osquery/live_queries/new');
-    cy.wait(1000);
-    selectAllAgents();
-    inputQuery();
-    submitQuery();
-    checkResults();
   });
 
   function addAndVerifyIntegration() {

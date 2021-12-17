@@ -174,10 +174,10 @@ const getDefaultPolicyApiKey = async (kibanaUrl, credentials) => {
 
   const agentProcess = startAgentInDocker({ version: '7.16.0', fleetServerHost, policyApiKey: defaultPolicyApiKey });
 
-  const baseCommand = `CYPRESS_BASE_URL=${resources.kibana} CYPRESS_ELASTICSEARCH_URL=${resources.elasticsearch} CYPRESS_ELASTICSEARCH_USERNAME=${credentials.username} CYPRESS_ELASTICSEARCH_PASSWORD=${credentials.password} CYPRESS_integrationFolder=cypress/upgrade_integration yarn --cwd ../../../x-pack/plugins/osquery cypress:run`;
+  const baseCommand = `CYPRESS_BASE_URL=${resources.kibana} CYPRESS_ELASTICSEARCH_URL=${resources.elasticsearch} CYPRESS_ELASTICSEARCH_USERNAME=${credentials.username} CYPRESS_ELASTICSEARCH_PASSWORD=${credentials.password} CYPRESS_integrationFolder=cypress/upgrade_integration yarn --cwd x-pack/plugins/osquery cypress:run`;
 
   await execa.command(
-    `${baseCommand} --spec cypress/upgrade_integration/setup.spec.ts --headed`,
+    `${baseCommand} --spec cypress/upgrade_integration/setup.spec.ts`,
     {
       shell: true,
     }
@@ -187,7 +187,7 @@ const getDefaultPolicyApiKey = async (kibanaUrl, credentials) => {
   await new Promise((r) => setTimeout(r, 180000));
 
   await execa.command(
-    `${baseCommand} --spec cypress/upgrade_integration/live_query.spec.ts --headed`,
+    `${baseCommand} --spec cypress/upgrade_integration/live_query.spec.ts`,
     {
       shell: true,
     }
@@ -202,7 +202,7 @@ const getDefaultPolicyApiKey = async (kibanaUrl, credentials) => {
 
   console.log('running live_query.spec.ts');
   await execa.command(
-    `${baseCommand} --spec cypress/upgrade_integration/live_query.spec.ts --headed`,
+    `${baseCommand} --spec cypress/upgrade_integration/live_query.spec.ts`,
     {
       shell: true,
     }
@@ -217,7 +217,7 @@ const getDefaultPolicyApiKey = async (kibanaUrl, credentials) => {
 
   console.log('running live_query.spec.ts');
   await execa.command(
-    `${baseCommand} --spec cypress/upgrade_integration/live_query.spec.ts --headed`,
+    `${baseCommand} --spec cypress/upgrade_integration/live_query.spec.ts`,
     {
       shell: true,
     }
