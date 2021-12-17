@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { debounce, omit } from 'lodash';
 import { Unit } from '@elastic/datemath';
 import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
-import { IFieldType } from 'src/plugins/data/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { debounce, omit } from 'lodash';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import {
   Comparator,
@@ -67,6 +66,7 @@ import {
 } from '../../../../common/http_api/snapshot_api';
 
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { DerivedIndexPattern } from '../../../containers/metrics_source';
 
 import { ExpressionChart } from './expression_chart';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
@@ -417,7 +417,7 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setRuleParams(id: number, params: Partial<InventoryMetricConditions>): void;
-  fields: IFieldType[];
+  fields: DerivedIndexPattern['fields'];
 }
 
 const NonCollapsibleExpression = euiStyled.div`
