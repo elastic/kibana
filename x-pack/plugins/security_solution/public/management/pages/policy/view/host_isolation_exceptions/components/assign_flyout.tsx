@@ -95,6 +95,14 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
     perPage: MAX_ALLOWED_RESULTS,
   });
 
+  const allPossibleExceptionsRequest = useFetchHostIsolationExceptionsList({
+    excludedPolicies: [policy.id, 'all'],
+    page: 0,
+    perPage: MAX_ALLOWED_RESULTS,
+    // only request if there's no filter and no results from the regular request
+    enabled: currentFilter === '' && exceptionsRequest.data?.total === 0,
+  });
+
   const mutation = useMutation(
     () => {
       const prom: Array<Promise<ExceptionListItemSchema>> = [];
@@ -165,15 +173,47 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
     ),
     []
   );
-  // <EuiEmptyPrompt
-  //   data-test-subj="hostIsolationExceptions-no-assignable-items"
-  //   title={
-  //     <FormattedMessage
-  //       id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.layout.flyout.noAssignable"
-  //       defaultMessage="There are no host isolation exceptions that can be assigned to this policy."
-  //     />
-  //   }
-  // />
+
+  const noItemsMessage = useMemo(() => {
+    if (exceptionsRequest.isLoading || allPossibleExceptionsRequest.isLoading) {
+      return null;
+    }
+
+    // there are no host isolation exceptions assignable to this policy
+    if (allPossibleExceptionsRequest.data?.total === 0) {
+      return (
+        <EuiEmptyPrompt
+          data-test-subj="hostIsolationExceptions-no-assignable-items"
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.layout.flyout.noAssignable"
+              defaultMessage="There are no host isolation exceptions that can be assigned to this policy."
+            />
+          }
+        />
+      );
+    }
+
+    // there are no results for the current search
+    if (exceptionsRequest.data?.total === 0) {
+      return (
+        <EuiEmptyPrompt
+          data-test-subj="noItemsFoundTrustedAppsFlyout"
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.layout.flyout.noResults"
+              defaultMessage="No items found"
+            />
+          }
+        />
+      );
+    }
+  }, [
+    allPossibleExceptionsRequest.data?.total,
+    allPossibleExceptionsRequest.isLoading,
+    exceptionsRequest.data?.total,
+    exceptionsRequest.isLoading,
+  ]);
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -217,17 +257,7 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
           />
         ) : null}
 
-        {exceptionsRequest.data?.total === 0 ? (
-          <EuiEmptyPrompt
-            data-test-subj="noItemsFoundTrustedAppsFlyout"
-            title={
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.layout.flyout.noResults"
-                defaultMessage="No items found"
-              />
-            }
-          />
-        ) : null}
+        {noItemsMessage}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

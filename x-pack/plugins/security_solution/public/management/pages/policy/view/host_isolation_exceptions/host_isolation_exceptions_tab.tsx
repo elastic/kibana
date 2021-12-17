@@ -119,6 +119,11 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
     );
   };
 
+  const assignFlyout =
+    location.show === 'list' ? (
+      <PolicyHostIsolationExceptionsAssignFlyout policy={policy} onClose={handleFlyoutOnClose} />
+    ) : null;
+
   const isLoading =
     policySearchedExceptionsListRequest.isLoading ||
     allPolicyExceptionsListRequest.isLoading ||
@@ -133,10 +138,13 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
       );
     } else {
       return (
-        <PolicyHostIsolationExceptionsEmptyUnassigned
-          policyName={policy.name}
-          toHostIsolationList={toHostIsolationList}
-        />
+        <>
+          {assignFlyout}
+          <PolicyHostIsolationExceptionsEmptyUnassigned
+            policy={policy}
+            toHostIsolationList={toHostIsolationList}
+          />
+        </>
       );
     }
   }
@@ -144,10 +152,7 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
   // render header and list
   return !isLoading && policySearchedExceptionsListRequest.data ? (
     <div data-test-subj={'policyHostIsolationExceptionsTab'}>
-      {location.show === 'list' ? (
-        <PolicyHostIsolationExceptionsAssignFlyout policy={policy} onClose={handleFlyoutOnClose} />
-      ) : null}
-
+      {assignFlyout}
       <EuiPageHeader alignItems="center">
         <EuiPageHeaderSection>
           <EuiTitle size="m">
