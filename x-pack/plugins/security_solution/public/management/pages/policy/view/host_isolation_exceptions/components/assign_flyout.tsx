@@ -216,7 +216,7 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
   ]);
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} data-test-subj="hostIsolationExceptions-assign-flyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
