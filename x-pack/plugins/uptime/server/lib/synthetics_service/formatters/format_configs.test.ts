@@ -142,6 +142,7 @@ describe('formatMonitorConfig', () => {
 
       const expected = {
         ...formattedConfig,
+        throttling: false,
         'throttling.is_enabled': undefined,
         'throttling.upload_speed': undefined,
       };
