@@ -10,12 +10,9 @@ import {
   ALERT_REASON,
   ALERT_RISK_SCORE,
   ALERT_RULE_NAME,
-  ALERT_RULE_RISK_SCORE,
-  ALERT_RULE_RISK_SCORE_MAPPING,
+  ALERT_RULE_PARAMETERS,
   ALERT_RULE_RULE_ID,
   ALERT_RULE_RULE_NAME_OVERRIDE,
-  ALERT_RULE_SEVERITY,
-  ALERT_RULE_SEVERITY_MAPPING,
   ALERT_RULE_UUID,
   ALERT_SEVERITY,
   ALERT_WORKFLOW_STATUS,
@@ -980,11 +977,11 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(signals.length).equal(4);
         signals.forEach((s) => {
-          expect(s?.[ALERT_RULE_SEVERITY]).equal('medium');
-          expect(s?.[ALERT_RULE_SEVERITY_MAPPING]).eql([]);
+          expect(s?.[ALERT_SEVERITY]).equal('medium');
+          expect(s?.[ALERT_RULE_PARAMETERS].severity_mapping).eql([]);
 
-          expect(s?.[ALERT_RULE_RISK_SCORE]).equal(75);
-          expect(s?.[ALERT_RULE_RISK_SCORE_MAPPING]).eql([]);
+          expect(s?.[ALERT_RISK_SCORE]).equal(75);
+          expect(s?.[ALERT_RULE_PARAMETERS].risk_score_mapping).eql([]);
         });
       });
 
@@ -1014,9 +1011,9 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
 
         signals.forEach((s) => {
-          expect(s?.[ALERT_RULE_RISK_SCORE]).equal(75);
-          expect(s?.[ALERT_RULE_RISK_SCORE_MAPPING]).eql([]);
-          expect(s?.[ALERT_RULE_SEVERITY_MAPPING]).eql([
+          expect(s?.[ALERT_RISK_SCORE]).equal(75);
+          expect(s?.[ALERT_RULE_PARAMETERS].risk_score_mapping).eql([]);
+          expect(s?.[ALERT_RULE_PARAMETERS].severity_mapping).eql([
             { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
             { field: 'my_severity', operator: 'equals', value: 'sev_max', severity: 'critical' },
           ]);
@@ -1048,9 +1045,9 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
 
         signals.forEach((s) => {
-          expect(s?.[ALERT_RULE_SEVERITY]).equal('medium');
-          expect(s?.[ALERT_RULE_SEVERITY_MAPPING]).eql([]);
-          expect(s?.[ALERT_RULE_RISK_SCORE_MAPPING]).eql([
+          expect(s?.[ALERT_SEVERITY]).equal('medium');
+          expect(s?.[ALERT_RULE_PARAMETERS].severity_mapping).eql([]);
+          expect(s?.[ALERT_RULE_PARAMETERS].risk_score_mapping).eql([
             { field: 'my_risk', operator: 'equals', value: '' },
           ]);
         });
@@ -1086,11 +1083,11 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
 
         signals.forEach((s) => {
-          expect(s?.[ALERT_RULE_SEVERITY_MAPPING]).eql([
+          expect(s?.[ALERT_RULE_PARAMETERS].severity_mapping).eql([
             { field: 'my_severity', operator: 'equals', value: 'sev_900', severity: 'high' },
             { field: 'my_severity', operator: 'equals', value: 'sev_max', severity: 'critical' },
           ]);
-          expect(s?.[ALERT_RULE_RISK_SCORE_MAPPING]).eql([
+          expect(s?.[ALERT_RULE_PARAMETERS].risk_score_mapping).eql([
             { field: 'my_risk', operator: 'equals', value: '' },
           ]);
         });

@@ -9,6 +9,7 @@ import { Moment } from 'moment';
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/logging';
+import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { AlertExecutorOptions, RuleType } from '../../../../../alerting/server';
@@ -38,6 +39,7 @@ import { IEventLogService } from '../../../../../event_log/server';
 import { AlertsFieldMap, RulesFieldMap } from '../../../../common/field_maps';
 import { TelemetryEventsSender } from '../../telemetry/sender';
 import { IRuleExecutionLogClient } from '../rule_execution_log';
+import { commonParamsCamelToSnake } from '../schemas/rule_converters';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
   bulkCreateTimes: string[];
@@ -111,11 +113,12 @@ export type CreateSecurityRuleTypeWrapper = (
 ) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;
 
 export type RACAlertSignal = TypeOfFieldMap<AlertsFieldMap> & TypeOfFieldMap<RulesFieldMap>;
-export type RACAlert = Exclude<
+export type RACAlert = Omit<
   TypeOfFieldMap<TechnicalRuleFieldMap> & RACAlertSignal,
-  '@timestamp'
+  '@timestamp' | typeof ALERT_RULE_PARAMETERS
 > & {
   '@timestamp': string;
+  [ALERT_RULE_PARAMETERS]: ReturnType<typeof commonParamsCamelToSnake>;
 };
 
 export type RACSourceHit = SearchHit<RACAlert>;

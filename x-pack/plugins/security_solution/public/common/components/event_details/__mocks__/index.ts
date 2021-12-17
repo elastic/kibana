@@ -392,7 +392,7 @@ export const mockAlertDetailsData = [
     originalValue: 'http://localhost:5601/app/security',
   },
   { category: 'kibana', field: 'kibana.alert.rule.max_signals', values: [100], originalValue: 100 },
-  { category: 'kibana', field: 'kibana.alert.rule.risk_score', values: [21], originalValue: 21 },
+  { category: 'kibana', field: 'kibana.alert.risk_score', values: [21], originalValue: 21 },
   {
     category: 'kibana',
     field: 'kibana.alert.rule.risk_score_mapping',
@@ -459,7 +459,7 @@ export const mockAlertDetailsData = [
   { category: 'kibana', field: 'kibana.alert.rule.references', values: [], originalValue: [] },
   {
     category: 'kibana',
-    field: 'kibana.alert.rule.severity',
+    field: 'kibana.alert.severity',
     values: ['low'],
     originalValue: 'low',
   },

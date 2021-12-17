@@ -10,7 +10,6 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { BaseHit } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
-import { buildRuleWithOverrides, buildRuleWithoutOverrides } from '../../../signals/build_rule';
 import { BuildReasonMessage } from '../../../signals/reason_formatters';
 import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
 import { BaseSignalHit, SignalSource, SignalSourceHit, SimpleHit } from '../../../signals/types';
@@ -54,12 +53,8 @@ export const buildBulkBody = (
   buildReasonMessage: BuildReasonMessage
 ): RACAlert => {
   const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields });
-  const rule = applyOverrides
-    ? buildRuleWithOverrides(completeRule, mergedDoc._source ?? {})
-    : buildRuleWithoutOverrides(completeRule);
   const eventFields = buildEventTypeAlert(mergedDoc);
   const filteredSource = filterSource(mergedDoc);
-  const reason = buildReasonMessage({ mergedDoc, rule });
 
   const overrides = applyOverrides
     ? {
@@ -80,6 +75,12 @@ export const buildBulkBody = (
         }).riskScore,
       }
     : undefined;
+
+  const reason = buildReasonMessage({
+    name: overrides?.nameOverride ?? completeRule.ruleConfig.name,
+    severity: overrides?.severityOverride ?? completeRule.ruleParams.severity,
+    mergedDoc,
+  });
 
   if (isSourceDoc(mergedDoc)) {
     return {
