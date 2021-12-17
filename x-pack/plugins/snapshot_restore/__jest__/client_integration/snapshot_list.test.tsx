@@ -142,11 +142,11 @@ describe('<SnapshotList />', () => {
     describe('query parsing', () => {
       describe('snapshot', () => {
         test('term search is converted to partial snapshot search', async () => {
-          await setSearchText('test_snapshot');
+          await setSearchText('term_snapshot_search');
           expect(useLoadSnapshots).lastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'snapshot',
-            searchValue: 'test_snapshot',
+            searchValue: 'term_snapshot_search',
             searchMatch: 'must',
             searchOperator: 'eq',
           });

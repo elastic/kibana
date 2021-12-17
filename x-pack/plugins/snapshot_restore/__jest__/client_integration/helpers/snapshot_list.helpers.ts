@@ -6,18 +6,17 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { AsyncTestBedConfig, registerTestBed, TestBed } from '@kbn/test/jest';
+import { TestBedConfig, registerTestBed, TestBed } from '@kbn/test/jest';
 
 import { BASE_PATH } from '../../../public/application/constants';
 import { SnapshotList } from '../../../public/application/sections/home/snapshot_list';
 import { WithAppDependencies } from './setup_environment';
 
-const getTestBedConfig = (query?: string): AsyncTestBedConfig => ({
+const getTestBedConfig = (query?: string): TestBedConfig => ({
   memoryRouter: {
     initialEntries: [`${BASE_PATH}/snapshots${query ?? ''}`],
     componentRoutePath: `${BASE_PATH}/snapshots/:repositoryName?/:snapshotId*`,
   },
-  doMountAsync: true,
 });
 
 const initTestBed = (query?: string) =>
@@ -25,7 +24,6 @@ const initTestBed = (query?: string) =>
 
 export interface SnapshotListTestBed extends TestBed {
   actions: {
-    clickReloadButton: () => void;
     setSearchText: (value: string, advanceTime?: boolean) => void;
   };
 }
@@ -33,29 +31,24 @@ export interface SnapshotListTestBed extends TestBed {
 const searchBarSelector = 'snapshotListSearch';
 export const setup = async (query?: string): Promise<SnapshotListTestBed> => {
   const testBed = await initTestBed(query);
-  const { find, form, component } = testBed;
-
-  /**
-   * User Actions
-   */
-  const clickReloadButton = () => {
-    find('reloadButton').simulate('click');
-  };
+  const { form, component } = testBed;
 
   const setSearchText = async (value: string, advanceTime = true) => {
     await act(async () => {
       form.setInputValue(searchBarSelector, value);
-      if (advanceTime) {
-        jest.advanceTimersByTime(500);
-      }
     });
     component.update();
+    if (advanceTime) {
+      await act(async () => {
+        jest.advanceTimersByTime(500);
+      });
+      component.update();
+    }
   };
 
   return {
     ...testBed,
     actions: {
-      clickReloadButton,
       setSearchText,
     },
   };
