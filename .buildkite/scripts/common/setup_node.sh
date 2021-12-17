@@ -60,6 +60,7 @@ echo "--- Setup Yarn"
 YARN_VERSION=$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")
 export YARN_VERSION
 
+sleep 3600
 if [[ ! $(which yarn) || $(yarn --version) != "$YARN_VERSION" ]]; then
   npm install -g "yarn@^${YARN_VERSION}"
 fi
