@@ -227,7 +227,7 @@ export class MapEmbeddable
 
     // generic embeddable input is equal, now we compare map specific input elements, ignoring 'mapBuffer'.
     const lastMapInput = omitGenericEmbeddableInput(_.omit(lastInput, 'mapBuffer'));
-    const currentMapInput = omitGenericEmbeddableInput(_.omit(lastInput, 'mapBuffer'));
+    const currentMapInput = omitGenericEmbeddableInput(_.omit(currentInput, 'mapBuffer'));
     return fastIsEqual(lastMapInput, currentMapInput);
   }
 
