@@ -42,6 +42,7 @@ TYPES_DEPS = [
   "@npm//@types/lodash",
   "@npm//@types/node",
   "@npm//@types/object-hash",
+  "@npm//@types/yargs",
   "@npm//moment",
   "@npm//p-limit",
 ]
