@@ -21,13 +21,16 @@ import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../../common/
 // Needed for the general array containing all the collectors. We don't really care about their types here
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyCollector = ICollector<any, any>;
+interface CollectorWithStatus {
+  isReadyWithTimeout: Awaited<ReturnType<typeof withTimeout>>;
+  collector: AnyCollector;
+}
 
 interface CollectorSetConfig {
   logger: Logger;
   maximumWaitTimeForAllCollectorsInS?: number;
   collectors?: AnyCollector[];
 }
-
 export class CollectorSet {
   private readonly logger: Logger;
   private readonly maximumWaitTimeForAllCollectorsInS: number;
@@ -103,7 +106,7 @@ export class CollectorSet {
     }
 
     const secondInMs = 1000;
-    const collectorsWithStatus = await Promise.all(
+    const collectorsWithStatus: CollectorWithStatus[] = await Promise.all(
       [...collectors.values()].map(async (collector) => {
         const isReadyWithTimeout = await withTimeout<boolean>({
           promise: (async (): Promise<boolean> => {
@@ -135,12 +138,17 @@ export class CollectorSet {
     }
 
     const nonTimedOutCollectors = collectorsWithStatus.filter(
-      (collectorWithStatus) => collectorWithStatus.isReadyWithTimeout.timedout === false
-    ) as unknown as Array<{ isReadyWithTimeout: { value: boolean }; collector: AnyCollector }>;
+      (
+        collectorWithStatus
+      ): collectorWithStatus is {
+        isReadyWithTimeout: { timedout: false; value: boolean };
+        collector: AnyCollector;
+      } => collectorWithStatus.isReadyWithTimeout.timedout === false
+    );
 
     const collectorsTypesNotReady = nonTimedOutCollectors
-      .filter((collectorWithStatus) => collectorWithStatus.isReadyWithTimeout.value === false)
-      .map((collectorWithStatus) => collectorWithStatus.collector.type);
+      .filter(({ isReadyWithTimeout }) => isReadyWithTimeout.value === false)
+      .map(({ collector }) => collector.type);
 
     if (collectorsTypesNotReady.length) {
       this.logger.debug(
@@ -150,8 +158,8 @@ export class CollectorSet {
     }
 
     const readyCollectors = nonTimedOutCollectors
-      .filter((collectorWithStatus) => collectorWithStatus.isReadyWithTimeout.value === true)
-      .map((collectorWithStatus) => collectorWithStatus.collector);
+      .filter(({ isReadyWithTimeout }) => isReadyWithTimeout.value === true)
+      .map(({ collector }) => collector);
 
     return readyCollectors;
   };
