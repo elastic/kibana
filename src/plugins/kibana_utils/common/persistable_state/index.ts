@@ -9,6 +9,7 @@
 export type {
   VersionedState,
   PersistableState,
+  PersistableStateDefinition,
   PersistableStateMigrateFn,
   PersistableStateService,
   MigrateFunctionsObject,

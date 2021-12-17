@@ -31,6 +31,10 @@ export interface VersionedState<S extends Serializable = Serializable> {
   state: S;
 }
 
+export type PersistableStateDefinition<P extends SerializableRecord = SerializableRecord> = Partial<
+  PersistableState<P>
+>;
+
 /**
  * Persistable state interface can be implemented by something that persists
  * (stores) state, for example, in a saved object. Once implemented that thing

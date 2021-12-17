@@ -61,5 +61,6 @@ export {
   MigrateFunction,
   MigrateFunctionsObject,
   PersistableState,
+  PersistableStateDefinition,
 } from './persistable_state';
 export { migrateToLatest, mergeMigrationFunctionMaps } from './persistable_state';
