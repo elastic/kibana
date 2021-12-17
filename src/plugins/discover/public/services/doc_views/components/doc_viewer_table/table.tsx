@@ -59,8 +59,8 @@ const MOBILE_OPTIONS = { header: false };
 const PAGE_SIZE_OPTIONS = [25, 50, 100];
 const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
-const EXPANDED_DOC_PAGE_SIZE = 'discover:expandedDocPageSize';
-const EXPANDED_DOC_SEARCH_FIELD = 'discover:expandedDocSearchField';
+const PAGE_SIZE = 'discover:pageSize';
+const SEARCH_TEXT = 'discover:searchText';
 
 const getPinnedFields = (dataViewId: string, storage: Storage): string[] => {
   return (storage.get(PINNED_FIELDS_KEY) || {})[dataViewId] || [];
@@ -71,19 +71,18 @@ const updatePinnedFieldsState = (newFields: string[], dataViewId: string, storag
 };
 
 const getPageSize = (storage: Storage): number => {
-  const pageSize = Number(storage.get(EXPANDED_DOC_PAGE_SIZE));
+  const pageSize = Number(storage.get(PAGE_SIZE));
   return pageSize && PAGE_SIZE_OPTIONS.includes(pageSize) ? pageSize : DEFAULT_PAGE_SIZE;
 };
 const updatePageSize = (newPageSize: number, storage: Storage) => {
-  storage.set(EXPANDED_DOC_PAGE_SIZE, newPageSize);
+  storage.set(PAGE_SIZE, newPageSize);
 };
 
 const getSearchText = (storage: Storage) => {
-  return String(storage.get(EXPANDED_DOC_SEARCH_FIELD)) || '';
+  return storage.get(SEARCH_TEXT) || '';
 };
 const updateSearchText = debounce(
-  (newSearchText: string, storage: Storage) =>
-    storage.set(EXPANDED_DOC_SEARCH_FIELD, newSearchText),
+  (newSearchText: string, storage: Storage) => storage.set(SEARCH_TEXT, newSearchText),
   500
 );
 
