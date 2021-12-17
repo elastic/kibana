@@ -8,13 +8,11 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+
+import { getSourcererDataview } from '../../containers/sourcerer/api';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
-import {
-  getDataViewSelectOptions,
-  getPatternListWithoutSignals,
-  getSourcererDataview,
-} from './helpers';
+import { getDataViewSelectOptions, getPatternListWithoutSignals } from './helpers';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
 interface UsePickIndexPatternsProps {
@@ -61,7 +59,7 @@ export const usePickIndexPatterns = ({
   signalIndexName,
 }: UsePickIndexPatternsProps): UsePickIndexPatterns => {
   const dispatch = useDispatch();
-  const isHooklAlive = useRef(true);
+  const isHookAlive = useRef(true);
   const [loadingIndexPatterns, setLoadingIndexPatterns] = useState(false);
   const alertsOptions = useMemo(
     () => (signalIndexName ? patternListToOptions([signalIndexName]) : []),
@@ -194,7 +192,7 @@ export const usePickIndexPatterns = ({
           // TODO We will need to figure out how to pass an abortController, but as right now this hook is
           // constantly getting destroy and re-init
           const pickedDataViewData = await getSourcererDataview(newSelectedDataViewId);
-          if (isHooklAlive.current) {
+          if (isHookAlive.current) {
             dispatch(
               sourcererActions.updateSourcererDataViews({
                 dataView: pickedDataViewData,
@@ -238,9 +236,9 @@ export const usePickIndexPatterns = ({
   );
 
   useEffect(() => {
-    isHooklAlive.current = true;
+    isHookAlive.current = true;
     return () => {
-      isHooklAlive.current = false;
+      isHookAlive.current = false;
     };
   }, []);
 
