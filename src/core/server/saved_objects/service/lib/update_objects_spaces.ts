@@ -241,7 +241,7 @@ export async function updateObjectsSpaces({
           value: { id, type, spaces: [], error },
         };
       }
-      currentSpaces = doc?._source?.namespaces ?? [];
+      currentSpaces = doc._source?.namespaces ?? [];
       // @ts-expect-error MultiGetHit._source is optional
       versionProperties = getExpectedVersionProperties(version, doc);
     } else if (spaces?.length === 0) {
