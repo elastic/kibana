@@ -402,6 +402,7 @@ export interface Installation extends SavedObjectAttributes {
   install_version: string;
   install_started_at: string;
   install_source: InstallSource;
+  installed_kibana_space_id?: string;
   keep_policies_up_to_date?: boolean;
 }
 

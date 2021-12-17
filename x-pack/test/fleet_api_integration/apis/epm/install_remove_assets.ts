@@ -496,6 +496,7 @@ const expectAssetsInstalled = ({
       package_assets: sortBy(res.attributes.package_assets, (o: AssetReference) => o.type),
     };
     expect(sortedRes).eql({
+      installed_kibana_space_id: 'default',
       installed_kibana: [
         {
           id: 'sample_dashboard',

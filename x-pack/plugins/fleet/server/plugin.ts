@@ -40,6 +40,7 @@ import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/
 import type { FleetConfigType, FleetAuthz } from '../common';
 import { INTEGRATIONS_PLUGIN_ID } from '../common';
 import type { CloudSetup } from '../../cloud/server';
+import type { SpacesPluginStart } from '../../spaces/server';
 
 import {
   PLUGIN_ID,
@@ -96,6 +97,7 @@ export interface FleetSetupDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
+  spaces: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
 }
 
@@ -296,6 +298,9 @@ export class FleetPlugin
                 .getSavedObjects()
                 .getScopedClient(request, { excludedWrappers: ['security'] });
             },
+          },
+          get spaceId() {
+            return deps.spaces.spacesService.getSpaceId(request);
           },
         };
       }
