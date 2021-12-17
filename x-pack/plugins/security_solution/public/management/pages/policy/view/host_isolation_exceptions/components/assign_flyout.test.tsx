@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import uuid from 'uuid';
+import { getExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
 import { PolicyData } from '../../../../../../../common/endpoint/types';
@@ -16,12 +19,16 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { getPolicyHostIsolationExceptionsPath } from '../../../../../common/routing';
-import { getHostIsolationExceptionItems } from '../../../../host_isolation_exceptions/service';
+import {
+  getHostIsolationExceptionItems,
+  updateOneHostIsolationExceptionItem,
+} from '../../../../host_isolation_exceptions/service';
 import { PolicyHostIsolationExceptionsAssignFlyout } from './assign_flyout';
 
 jest.mock('../../../../host_isolation_exceptions/service');
 
 const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
+const updateOneHostIsolationExceptionItemMock = updateOneHostIsolationExceptionItem as jest.Mock;
 const endpointGenerator = new EndpointDocGenerator('seed');
 const emptyList = {
   data: [],
@@ -41,6 +48,7 @@ describe('Policy details host isolation exceptions assign flyout', () => {
 
   beforeEach(() => {
     getHostIsolationExceptionItemsMock.mockClear();
+    updateOneHostIsolationExceptionItemMock.mockClear();
     policy = endpointGenerator.generatePolicyPackagePolicy();
     policyId = policy.id;
     mockedContext = createAppRootMockRenderer();
@@ -101,5 +109,146 @@ describe('Policy details host isolation exceptions assign flyout', () => {
     expect(
       await renderResult.findByTestId('hostIsolationExceptions-no-assignable-items')
     ).toBeTruthy();
+  });
+
+  it('should disable the submit button if no exceptions are selected', async () => {
+    getHostIsolationExceptionItemsMock.mockImplementationOnce(() => {
+      return getFoundExceptionListItemSchemaMock(1);
+    });
+    render();
+    expect(await renderResult.findByTestId('artifactsList')).toBeTruthy();
+    expect(
+      renderResult.getByTestId('hostIsolationExceptions-assign-confirm-button')
+    ).toBeDisabled();
+  });
+
+  it('should enable the submit button if an exeption is selected', async () => {
+    const exceptions = getFoundExceptionListItemSchemaMock(1);
+    const firstOneName = exceptions.data[0].name;
+    getHostIsolationExceptionItemsMock.mockResolvedValue(exceptions);
+
+    render();
+    expect(await renderResult.findByTestId('artifactsList')).toBeTruthy();
+
+    // click the first item
+    userEvent.click(renderResult.getByTestId(`${firstOneName}_checkbox`));
+
+    expect(renderResult.getByTestId('hostIsolationExceptions-assign-confirm-button')).toBeEnabled();
+  });
+
+  describe('when submitting the form', () => {
+    const FIRST_ONE_NAME = uuid.v4();
+    const SECOND_ONE_NAME = uuid.v4();
+    const testTags = ['policy:1234', 'non-policy-tag', 'policy:4321'];
+    let exceptions: FoundExceptionListItemSchema;
+
+    beforeEach(async () => {
+      exceptions = {
+        ...emptyList,
+        total: 2,
+        data: [
+          getExceptionListItemSchemaMock({
+            name: FIRST_ONE_NAME,
+            id: uuid.v4(),
+            tags: testTags,
+          }),
+          getExceptionListItemSchemaMock({
+            name: SECOND_ONE_NAME,
+            id: uuid.v4(),
+            tags: testTags,
+          }),
+        ],
+      };
+      getHostIsolationExceptionItemsMock.mockResolvedValue(exceptions);
+
+      render();
+      // wait fo the list to render
+      expect(await renderResult.findByTestId('artifactsList')).toBeTruthy();
+    });
+
+    it('should submit the exception when submit is pressed (1 exception), display a toast and close the flyout', async () => {
+      updateOneHostIsolationExceptionItemMock.mockImplementation(async (_http, exception) => {
+        return exception;
+      });
+      // click the first item
+      userEvent.click(renderResult.getByTestId(`${FIRST_ONE_NAME}_checkbox`));
+      // submit the form
+      userEvent.click(renderResult.getByTestId('hostIsolationExceptions-assign-confirm-button'));
+
+      // verify the request with the new tag
+      await waitFor(() => {
+        expect(updateOneHostIsolationExceptionItemMock).toHaveBeenCalledWith(
+          mockedContext.coreStart.http,
+          {
+            ...exceptions.data[0],
+            tags: [...testTags, `policy:${policyId}`],
+          }
+        );
+      });
+
+      await waitFor(() => {
+        expect(mockedContext.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+          text: `"${FIRST_ONE_NAME}" has been added to your host isolation exceptions list.`,
+          title: 'Success',
+        });
+      });
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it('should submit the exception when submit is pressed (2 exceptions), display a toast and close the flyout', async () => {
+      updateOneHostIsolationExceptionItemMock.mockImplementation(async (_http, exception) => {
+        return exception;
+      });
+      // click the first  two items
+      userEvent.click(renderResult.getByTestId(`${FIRST_ONE_NAME}_checkbox`));
+      userEvent.click(renderResult.getByTestId(`${SECOND_ONE_NAME}_checkbox`));
+      // submit the form
+      userEvent.click(renderResult.getByTestId('hostIsolationExceptions-assign-confirm-button'));
+
+      // verify the request with the new tag
+      await waitFor(() => {
+        // first exception
+        expect(updateOneHostIsolationExceptionItemMock).toHaveBeenCalledWith(
+          mockedContext.coreStart.http,
+          {
+            ...exceptions.data[0],
+            tags: [...testTags, `policy:${policyId}`],
+          }
+        );
+        // second exception
+        expect(updateOneHostIsolationExceptionItemMock).toHaveBeenCalledWith(
+          mockedContext.coreStart.http,
+          {
+            ...exceptions.data[1],
+            tags: [...testTags, `policy:${policyId}`],
+          }
+        );
+      });
+
+      await waitFor(() => {
+        expect(mockedContext.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+          text: '2 host isolation exceptions have been added to your list.',
+          title: 'Success',
+        });
+      });
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it('should show a toast error when the request fails and close the flyout', async () => {
+      updateOneHostIsolationExceptionItemMock.mockRejectedValue(
+        new Error('the server is too far away')
+      );
+      // click first item
+      userEvent.click(renderResult.getByTestId(`${FIRST_ONE_NAME}_checkbox`));
+      // submit the form
+      userEvent.click(renderResult.getByTestId('hostIsolationExceptions-assign-confirm-button'));
+
+      await waitFor(() => {
+        expect(mockedContext.coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          'An error occurred updating artifacts'
+        );
+        expect(onClose).toHaveBeenCalled();
+      });
+    });
   });
 });

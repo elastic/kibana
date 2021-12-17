@@ -214,6 +214,7 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
   }, [
     allPossibleExceptionsRequest.data?.total,
     allPossibleExceptionsRequest.isLoading,
+    currentFilter,
     exceptionsRequest.data?.total,
     exceptionsRequest.isLoading,
   ]);
