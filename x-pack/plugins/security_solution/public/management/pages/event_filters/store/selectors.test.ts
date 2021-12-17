@@ -233,6 +233,7 @@ describe('event filters selectors', () => {
         filter: '',
         id: '',
         show: undefined,
+        included_policies: '',
       };
     });
 
@@ -359,6 +360,7 @@ describe('event filters selectors', () => {
         page_index: MANAGEMENT_DEFAULT_PAGE,
         page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
         filter: 'filter',
+        included_policies: '1',
       };
       const state = {
         ...initialState,
