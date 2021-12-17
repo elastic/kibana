@@ -7,7 +7,7 @@
 import React, { useContext, useMemo, useCallback } from 'react';
 import { EuiBasicTable, EuiPanel, EuiSpacer, EuiLink } from '@elastic/eui';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
-import { MonitorFields } from '../../../../common/runtime_types/monitor_management';
+import { MonitorFields } from '../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
 import { Actions } from './actions';
 import { MonitorTags } from './tags';

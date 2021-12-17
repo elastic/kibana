@@ -16,10 +16,10 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { MONITOR_MANAGEMENT } from '../../../../common/constants';
 import { setMonitor } from '../../../state/api';
 
-import { Monitor } from '../../fleet_package/types';
+import { SyntheticsMonitor } from '../../fleet_package/types';
 
 interface Props {
-  monitor: Monitor;
+  monitor: SyntheticsMonitor;
   isValid: boolean;
   onSave?: () => void;
 }

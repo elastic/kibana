@@ -6,7 +6,7 @@
  */
 
 import { SimpleSavedObject } from 'kibana/public';
-import { MonitorFields } from '../runtime_types/monitor_management';
+import { SyntheticsMonitor } from '../runtime_types';
 
 /** Represents the average monitor duration ms at a point in time. */
 export interface MonitorDurationAveragePoint {
@@ -32,4 +32,4 @@ export interface MonitorIdParam {
   monitorId: string;
 }
 
-export type SyntheticsMonitorSavedObject = SimpleSavedObject<MonitorFields>;
+export type SyntheticsMonitorSavedObject = SimpleSavedObject<SyntheticsMonitor>;

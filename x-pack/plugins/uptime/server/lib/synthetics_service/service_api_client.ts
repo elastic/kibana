@@ -10,7 +10,7 @@ import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { getServiceLocations } from './get_service_locations';
 import { Logger } from '../../../../../../src/core/server';
-import { MonitorFields, ServiceLocations } from '../../../common/runtime_types/monitor_management';
+import { MonitorFields, ServiceLocations } from '../../../common/runtime_types';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 
