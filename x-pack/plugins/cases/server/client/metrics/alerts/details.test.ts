@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { createCasesClientMock } from '../mocks';
-import { CasesClientArgs } from '../types';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { createAlertServiceMock } from '../../services/mocks';
+import { createCasesClientMock } from '../../mocks';
+import { CasesClientArgs } from '../../types';
+import { loggingSystemMock } from '../../../../../../../src/core/server/mocks';
 
-import { AlertDetails } from './alert_details';
-import { AggregationFields } from '../../services/alerts/types';
+import { AlertDetails } from './details';
+import { mockAlertsService } from './test_utils';
 
 describe('AlertDetails', () => {
   beforeEach(() => {
@@ -35,7 +34,7 @@ describe('AlertDetails', () => {
     });
 
     const handler = new AlertDetails('', client, {} as CasesClientArgs);
-    handler.setupFeature('alertHosts');
+    handler.setupFeature('alerts.hosts');
 
     expect(await handler.compute()).toEqual({
       alerts: {
@@ -50,10 +49,10 @@ describe('AlertDetails', () => {
   it('returns the default zero values for hosts when the count aggregation returns undefined', async () => {
     const client = createMockClient();
     const { mockServices, clientArgs } = createMockClientArgs();
-    mockServices.alertsService.countUniqueValuesForFields.mockImplementation(async () => ({}));
+    mockServices.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails('', client, clientArgs);
-    handler.setupFeature('alertHosts');
+    handler.setupFeature('alerts.hosts');
 
     expect(await handler.compute()).toEqual({
       alerts: {
@@ -68,10 +67,10 @@ describe('AlertDetails', () => {
   it('returns the default zero values for users when the count aggregation returns undefined', async () => {
     const client = createMockClient();
     const { mockServices, clientArgs } = createMockClientArgs();
-    mockServices.alertsService.countUniqueValuesForFields.mockImplementation(async () => ({}));
+    mockServices.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails('', client, clientArgs);
-    handler.setupFeature('alertUsers');
+    handler.setupFeature('alerts.users');
 
     expect(await handler.compute()).toEqual({
       alerts: {
@@ -86,10 +85,10 @@ describe('AlertDetails', () => {
   it('returns the default zero values for hosts when the top hits aggregation returns undefined', async () => {
     const client = createMockClient();
     const { mockServices, clientArgs } = createMockClientArgs();
-    mockServices.alertsService.getMostFrequentValuesForFields.mockImplementation(async () => ({}));
+    mockServices.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails('', client, clientArgs);
-    handler.setupFeature('alertHosts');
+    handler.setupFeature('alerts.hosts');
 
     expect(await handler.compute()).toEqual({
       alerts: {
@@ -104,10 +103,10 @@ describe('AlertDetails', () => {
   it('returns the default zero values for users when the top hits aggregation returns undefined', async () => {
     const client = createMockClient();
     const { mockServices, clientArgs } = createMockClientArgs();
-    mockServices.alertsService.getMostFrequentValuesForFields.mockImplementation(async () => ({}));
+    mockServices.alertsService.executeAggregations.mockImplementation(async () => ({}));
 
     const handler = new AlertDetails('', client, clientArgs);
-    handler.setupFeature('alertUsers');
+    handler.setupFeature('alerts.users');
 
     expect(await handler.compute()).toEqual({
       alerts: {
@@ -145,7 +144,7 @@ describe('AlertDetails', () => {
     const { clientArgs } = createMockClientArgs();
     const handler = new AlertDetails('', client, clientArgs);
 
-    handler.setupFeature('alertHosts');
+    handler.setupFeature('alerts.hosts');
 
     expect(await handler.compute()).toEqual({
       alerts: {
@@ -163,7 +162,7 @@ describe('AlertDetails', () => {
 
     const handler = new AlertDetails('', client, clientArgs);
 
-    handler.setupFeature('alertUsers');
+    handler.setupFeature('alerts.users');
 
     expect(await handler.compute()).toEqual({
       alerts: {
@@ -181,8 +180,8 @@ describe('AlertDetails', () => {
 
     const handler = new AlertDetails('', client, clientArgs);
 
-    handler.setupFeature('alertUsers');
-    handler.setupFeature('alertHosts');
+    handler.setupFeature('alerts.users');
+    handler.setupFeature('alerts.hosts');
 
     expect(await handler.compute()).toEqual({
       alerts: {
@@ -219,43 +218,4 @@ function createMockClientArgs() {
   };
 
   return { mockServices: clientArgs, clientArgs: clientArgs as unknown as CasesClientArgs };
-}
-
-function mockAlertsService() {
-  const alertsService = createAlertServiceMock();
-  alertsService.getMostFrequentValuesForFields.mockImplementation(
-    async ({ fields }: { fields: AggregationFields[] }) => {
-      let result = {};
-      for (const field of fields) {
-        switch (field) {
-          case AggregationFields.Hosts:
-            result = { ...result, hosts: [{ name: 'host1', id: '1', count: 1 }] };
-            break;
-          case AggregationFields.Users:
-            result = { ...result, users: [{ name: 'user1', count: 1 }] };
-            break;
-        }
-      }
-      return result;
-    }
-  );
-
-  alertsService.countUniqueValuesForFields.mockImplementation(
-    async ({ fields }: { fields: AggregationFields[] }) => {
-      let result = {};
-      for (const field of fields) {
-        switch (field) {
-          case AggregationFields.Hosts:
-            result = { ...result, totalHosts: 2 };
-            break;
-          case AggregationFields.Users:
-            result = { ...result, totalUsers: 2 };
-            break;
-        }
-      }
-      return result;
-    }
-  );
-
-  return alertsService;
 }
