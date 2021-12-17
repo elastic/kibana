@@ -133,19 +133,6 @@ describe('formatMonitorConfig', () => {
 
     it('excludes UI fields', () => {
       testBrowserConfig['throttling.is_enabled'] = false;
-
-      const formattedConfig = formatMonitorConfig(
-        Object.keys(testBrowserConfig) as ConfigKey[],
-        testBrowserConfig
-      );
-
-      const expected = { ...formattedConfig, 'throttling.is_enabled': undefined };
-
-      expect(formattedConfig).toEqual(expected);
-    });
-
-    it('excludes empty array values', () => {
-      testBrowserConfig['filter_journeys.tags'] = [];
       testBrowserConfig['throttling.upload_speed'] = '3';
 
       const formattedConfig = formatMonitorConfig(
@@ -155,8 +142,24 @@ describe('formatMonitorConfig', () => {
 
       const expected = {
         ...formattedConfig,
-        'filter_journeys.tags': undefined,
+        'throttling.is_enabled': undefined,
         'throttling.upload_speed': undefined,
+      };
+
+      expect(formattedConfig).toEqual(expected);
+    });
+
+    it('excludes empty array values', () => {
+      testBrowserConfig['filter_journeys.tags'] = [];
+
+      const formattedConfig = formatMonitorConfig(
+        Object.keys(testBrowserConfig) as ConfigKey[],
+        testBrowserConfig
+      );
+
+      const expected = {
+        ...formattedConfig,
+        'filter_journeys.tags': undefined,
       };
 
       expect(formattedConfig).toEqual(expected);
