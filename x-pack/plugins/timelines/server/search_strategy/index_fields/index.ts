@@ -134,11 +134,13 @@ export const requestIndexFieldSearch = async (
         throw r;
       }
     }
+
     const patternList = dataView.title.split(',');
     indicesExist = (await findExistingIndices(patternList, esClient.asCurrentUser)).reduce(
       (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
       []
     );
+
     if (!request.onlyCheckIfIndicesExist) {
       const dataViewSpec = dataView.toSpec();
       const fieldDescriptor = [Object.values(dataViewSpec.fields ?? {})];
