@@ -9258,7 +9258,9 @@
         },
         "timeseries_use_es_indices_total": {
           "type": "long",
-          "_meta": { "description": "Number of TSVB visualizations using elasticsearch indices" }
+          "_meta": {
+            "description": "Number of TSVB visualizations using elasticsearch indices"
+          }
         },
         "timeseries_table_use_aggregate_function": {
           "type": "long",

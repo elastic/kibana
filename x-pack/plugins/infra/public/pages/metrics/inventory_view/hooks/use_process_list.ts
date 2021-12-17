@@ -27,7 +27,7 @@ export function useProcessList(
   searchFilter: object
 ) {
   const { createDerivedIndexPattern } = useSourceContext();
-  const indexPattern = createDerivedIndexPattern('metrics').title;
+  const indexPattern = createDerivedIndexPattern().title;
 
   const [inErrorState, setInErrorState] = useState(false);
   const decodeResponse = (response: any) => {
@@ -76,7 +76,7 @@ export function useProcessList(
 function useProcessListParams(props: { hostTerm: Record<string, string>; to: number }) {
   const { hostTerm, to } = props;
   const { createDerivedIndexPattern } = useSourceContext();
-  const indexPattern = createDerivedIndexPattern('metrics').title;
+  const indexPattern = createDerivedIndexPattern().title;
   return { hostTerm, indexPattern, to };
 }
 const ProcessListContext = createContainter(useProcessListParams);

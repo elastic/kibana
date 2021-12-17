@@ -370,6 +370,13 @@ export const SYNC_DIAGNOSTICS_BUTTON = i18n.translate(
   }
 );
 
+export const DOWNLOAD_DIAGNOSTIC_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.downloadDiagnosticButton',
+  {
+    defaultMessage: 'Download diagnostic bundle',
+  }
+);
+
 export const SOURCE_NAME_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceName.label',
   {

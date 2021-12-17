@@ -11,7 +11,7 @@ import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/logging';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { AlertExecutorOptions, AlertType } from '../../../../../alerting/server';
+import { AlertExecutorOptions, RuleType } from '../../../../../alerting/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -73,7 +73,7 @@ export type SecurityAlertType<
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 > = Omit<
-  AlertType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
+  RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
   'executor'
 > & {
   executor: (
@@ -107,7 +107,7 @@ export type CreateSecurityRuleTypeWrapper = (
   TInstanceContext extends AlertInstanceContext = {}
 >(
   type: SecurityAlertType<TParams, TState, TInstanceContext, 'default'>
-) => AlertType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;
+) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, 'default'>;
 
 export type RACAlertSignal = TypeOfFieldMap<AlertsFieldMap> & TypeOfFieldMap<RulesFieldMap>;
 export type RACAlert = Exclude<

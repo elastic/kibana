@@ -25,7 +25,6 @@ import {
 import { MLJobLink } from './ml_job_link';
 import * as labels from './translations';
 import { MLFlyoutView } from './ml_flyout';
-import { ML_JOB_ID } from '../../../../common/constants';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
@@ -120,14 +119,14 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
           hasMLJob.awaitingNodeAssignment,
           core.services.theme?.theme$
         );
-        const loadMLJob = (jobId: string) =>
-          dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
-
-        loadMLJob(ML_JOB_ID);
-
+        dispatch(getExistingMLJobAction.get({ monitorId: monitorId as string }));
         refreshApp();
-        dispatch(setAlertFlyoutType(CLIENT_ALERT_TYPES.DURATION_ANOMALY));
-        dispatch(setAlertFlyoutVisible(true));
+
+        const hasUptimeWrite = core.services.application?.capabilities.uptime?.save ?? false;
+        if (hasUptimeWrite) {
+          dispatch(setAlertFlyoutType(CLIENT_ALERT_TYPES.DURATION_ANOMALY));
+          dispatch(setAlertFlyoutVisible(true));
+        }
       } else {
         showMLJobNotification(
           monitorId as string,

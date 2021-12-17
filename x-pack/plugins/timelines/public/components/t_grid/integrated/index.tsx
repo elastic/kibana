@@ -94,6 +94,7 @@ const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface TGridIntegratedProps {
   additionalFilters: React.ReactNode;
+  appId: string;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
   columns: ColumnHeaderOptions[];
@@ -138,6 +139,7 @@ export interface TGridIntegratedProps {
 
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   additionalFilters,
+  appId,
   browserFields,
   bulkActions = true,
   columns,
@@ -350,6 +352,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                       <ScrollableFlexItem grow={1}>
                         <StatefulBody
                           activePage={pageInfo.activePage}
+                          appId={appId}
                           browserFields={browserFields}
                           bulkActions={bulkActions}
                           createFieldComponent={createFieldComponent}
