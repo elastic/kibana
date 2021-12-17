@@ -10,6 +10,7 @@ import type { ServiceInventoryProps } from './';
 
 const LazyServiceInventory = React.lazy(() => import('./'));
 
+// eslint-disable-next-line react/function-component-definition
 export const LazyServiceInventoryWrapper: React.FC<ServiceInventoryProps> = (
   props
 ) => (

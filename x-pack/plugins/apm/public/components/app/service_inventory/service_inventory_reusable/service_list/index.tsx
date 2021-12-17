@@ -20,6 +20,7 @@ import React, { useMemo } from 'react';
 import { ValuesType } from 'utility-types';
 import { stringify } from 'query-string';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { ServiceHealthStatus } from '../../../../../../common/service_health_status';
 import {
@@ -79,12 +80,14 @@ export function getServiceColumns({
   breakpoints,
   showHealthStatusColumn,
   serviceParams,
+  http,
 }: {
   showTransactionTypeColumn: boolean;
   showHealthStatusColumn: boolean;
   breakpoints: Breakpoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   serviceParams: ServiceParams;
+  http: HttpSetup;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
@@ -123,7 +126,9 @@ export function getServiceColumns({
           content={
             <StyledLink
               data-test-subj={`serviceLink_${agentName}`}
-              href={`app/apm/services/${serviceName}/overview?${params}`}
+              href={http.basePath.prepend(
+                `/app/apm/services/${serviceName}/overview?${params}`
+              )}
             >
               <EuiFlexGroup
                 alignItems="center"
@@ -256,6 +261,10 @@ export function ServiceList({
   isFailure,
   serviceParams,
 }: Props) {
+  const {
+    services: { http },
+  } = useKibana();
+
   const breakpoints = useBreakpoints();
   const displayHealthStatus = items.some((item) => 'healthStatus' in item);
 
@@ -273,6 +282,7 @@ export function ServiceList({
         breakpoints,
         showHealthStatusColumn: displayHealthStatus,
         serviceParams,
+        http,
       }),
     [
       showTransactionTypeColumn,
@@ -280,6 +290,7 @@ export function ServiceList({
       breakpoints,
       displayHealthStatus,
       serviceParams,
+      http,
     ]
   );
 
