@@ -9,6 +9,8 @@
 
 import { ExtensionPoint } from './types';
 
+type NarrowExtensionPointToType<T extends ExtensionPoint['type']> = ExtensionPoint & { type: T };
+
 export class ExtensionPointStorage {
   private readonly store = new Map<ExtensionPoint['type'], Set<ExtensionPoint>>();
 
@@ -30,8 +32,16 @@ export class ExtensionPointStorage {
     this.store.clear();
   }
 
-  get(extensionType: ExtensionPoint['type']): Set<ExtensionPoint> | undefined {
-    return this.store.get(extensionType);
+  get<T extends ExtensionPoint['type']>(
+    extensionType: T
+  ): Set<NarrowExtensionPointToType<T>> | undefined {
+    const extensionDefinitions = this.store.get(extensionType);
+
+    if (extensionDefinitions) {
+      return extensionDefinitions as Set<NarrowExtensionPointToType<T>>;
+    }
+
+    return undefined;
   }
 
   /**
@@ -49,7 +59,9 @@ class ExtensionPointStorageClient {
    * Retrieve a list (`Set`) of extension points that are registered for a given type
    * @param extensionType
    */
-  get(extensionType: ExtensionPoint['type']): ReadonlySet<Readonly<ExtensionPoint>> | undefined {
+  get<T extends ExtensionPoint['type']>(
+    extensionType: T
+  ): ReturnType<ExtensionPointStorageInterface['get']> {
     return this.storage.get(extensionType);
   }
 
@@ -61,12 +73,15 @@ class ExtensionPointStorageClient {
    * @param initialCallbackInput
    * @param callbackResponseValidator
    */
-  async pipeRun(
-    extensionType: ExtensionPoint['type'],
-    // FIXME:PT fix types
-    initialCallbackInput,
-    callbackResponseValidator
-  ): Promise<unknown> {
+  async pipeRun<
+    T extends ExtensionPoint['type'],
+    D extends NarrowExtensionPointToType<T> = NarrowExtensionPointToType<T>,
+    P extends Parameters<D['callback']> = Parameters<D['callback']>
+  >(
+    extensionType: T,
+    initialCallbackInput: P[0],
+    callbackResponseValidator?: (data: P[0]) => Error | undefined
+  ): Promise<P[0]> {
     let inputArgument = initialCallbackInput;
     const externalExtensions = this.get(extensionType);
 

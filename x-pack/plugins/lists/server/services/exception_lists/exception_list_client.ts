@@ -14,6 +14,7 @@ import {
   FoundExceptionListSchema,
   ImportExceptionsResponseSchema,
   createExceptionListItemSchema,
+  updateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { Type } from 'io-ts';
@@ -75,7 +76,10 @@ import {
   importExceptionsAsStream,
 } from './import_exception_list_and_items';
 import { DataValidationError } from './utils/errors';
-import { transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema } from './utils';
+import {
+  transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema,
+  transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema,
+} from './utils';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -433,8 +437,8 @@ export class ExceptionListClient {
       itemData = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreCreateItem',
         itemData,
-        (data: CreateExceptionListItemOptions) => {
-          this.validateData(
+        (data) => {
+          return this.validateData(
             createExceptionListItemSchema,
             transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema(data)
           );
@@ -480,7 +484,7 @@ export class ExceptionListClient {
     type,
   }: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient, user } = this;
-    return updateExceptionListItem({
+    let updatedItem: UpdateExceptionListItemOptions = {
       _version,
       comments,
       description,
@@ -491,9 +495,26 @@ export class ExceptionListClient {
       name,
       namespaceType,
       osTypes,
-      savedObjectsClient,
       tags,
       type,
+    };
+
+    if (!this.disableServerExtensionPoints) {
+      updatedItem = await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreUpdateItem',
+        updatedItem,
+        (data) => {
+          return this.validateData(
+            updateExceptionListItemSchema,
+            transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema(data)
+          );
+        }
+      );
+    }
+
+    return updateExceptionListItem({
+      ...updatedItem,
+      savedObjectsClient,
       user,
     });
   };
