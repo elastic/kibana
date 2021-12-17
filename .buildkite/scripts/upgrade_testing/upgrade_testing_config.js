@@ -164,7 +164,8 @@ module.exports = (version) => ({
             }
           ],
           "kibana": {
-            "version": version
+            "version": version,
+            "user_settings_yaml": "csp.strict: false"
           }
         },
         "ref_id": "main-kibana"

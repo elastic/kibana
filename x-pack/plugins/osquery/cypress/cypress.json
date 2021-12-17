@@ -7,8 +7,8 @@
     "runMode": 2
   },
   "screenshotsFolder": "../../../target/kibana-osquery/cypress/screenshots",
-  "trashAssetsBeforeRuns": false,
-  "video": false,
+  "trashAssetsBeforeRuns": true,
+  "video": true,
   "videosFolder": "../../../target/kibana-osquery/cypress/videos",
   "viewportHeight": 900,
   "viewportWidth": 1440,

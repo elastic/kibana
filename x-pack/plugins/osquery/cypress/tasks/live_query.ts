@@ -9,10 +9,11 @@ import { AGENT_FIELD, ALL_AGENTS_OPTION, LIVE_QUERY_EDITOR } from '../screens/li
 
 export const selectAllAgents = () => {
   cy.get(AGENT_FIELD).first().click();
-  return cy.get(ALL_AGENTS_OPTION).contains('All agents').click();
+  cy.wait(1000);
+  cy.get(ALL_AGENTS_OPTION).contains('All agents').click();
 };
 
-export const inputQuery = () => cy.get(LIVE_QUERY_EDITOR).type('select * from processes;');
+export const inputQuery = () => cy.get(LIVE_QUERY_EDITOR).type('select * from processes');
 
 export const submitQuery = () => cy.contains('Submit').click();
 
