@@ -34,7 +34,7 @@ describe('AlertingBuiltins Plugin', () => {
       const featuresSetup = featuresPluginMock.createSetup();
       plugin.setup(coreSetup, { alerting: alertingSetup, features: featuresSetup });
 
-      expect(alertingSetup.registerType).toHaveBeenCalledTimes(3);
+      expect(alertingSetup.registerType).toHaveBeenCalledTimes(4);
 
       const indexThresholdArgs = alertingSetup.registerType.mock.calls[0][0];
       const testedIndexThresholdArgs = {
@@ -90,6 +90,25 @@ describe('AlertingBuiltins Plugin', () => {
           ],
           "id": ".es-query",
           "name": "Elasticsearch query",
+        }
+      `);
+
+      const searchThresholdArgs = alertingSetup.registerType.mock.calls[3][0];
+      const testedSearchThresholdArgs = {
+        id: searchThresholdArgs.id,
+        name: searchThresholdArgs.name,
+        actionGroups: searchThresholdArgs.actionGroups,
+      };
+      expect(testedSearchThresholdArgs).toMatchInlineSnapshot(`
+        Object {
+          "actionGroups": Array [
+            Object {
+              "id": "threshold met",
+              "name": "Threshold met",
+            },
+          ],
+          "id": ".search-threshold",
+          "name": "Search threshold",
         }
       `);
 

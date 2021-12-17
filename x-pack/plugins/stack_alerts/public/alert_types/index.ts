@@ -7,13 +7,13 @@
 
 import { getAlertType as getGeoContainmentAlertType } from './geo_containment';
 import { getAlertType as getThresholdAlertType } from './threshold';
+import { getAlertType as getSearchThresholdAlertType } from './search_threshold';
 import { getAlertType as getEsQueryAlertType } from './es_query';
 import { Config } from '../../common';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
 
 export function registerAlertTypes({
   ruleTypeRegistry,
-  config,
 }: {
   ruleTypeRegistry: TriggersAndActionsUIPublicPluginSetup['ruleTypeRegistry'];
   config: Config;
@@ -21,4 +21,5 @@ export function registerAlertTypes({
   ruleTypeRegistry.register(getGeoContainmentAlertType());
   ruleTypeRegistry.register(getThresholdAlertType());
   ruleTypeRegistry.register(getEsQueryAlertType());
+  ruleTypeRegistry.register(getSearchThresholdAlertType());
 }

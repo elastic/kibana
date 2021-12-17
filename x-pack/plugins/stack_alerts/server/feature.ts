@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureConfig } from '../../../plugins/features/common';
 import { ID as IndexThreshold } from './alert_types/index_threshold/alert_type';
+import { ID as SearchThreshold } from './alert_types/search_threshold/rule_type';
 import { GEO_CONTAINMENT_ID as GeoContainment } from './alert_types/geo_containment/alert_type';
 import { ES_QUERY_ID as ElasticsearchQuery } from './alert_types/es_query/alert_type';
 import { STACK_ALERTS_FEATURE_ID } from '../common';
@@ -26,7 +27,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+  alerting: [IndexThreshold, SearchThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
   privileges: {
     all: {
       app: [],
@@ -36,10 +37,22 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       },
       alerting: {
         rule: {
-          all: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+          all: [
+            IndexThreshold,
+            SearchThreshold,
+            GeoContainment,
+            ElasticsearchQuery,
+            TransformHealth,
+          ],
         },
         alert: {
-          all: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+          all: [
+            IndexThreshold,
+            SearchThreshold,
+            GeoContainment,
+            ElasticsearchQuery,
+            TransformHealth,
+          ],
         },
       },
       savedObject: {
@@ -57,10 +70,22 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       },
       alerting: {
         rule: {
-          read: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+          read: [
+            IndexThreshold,
+            SearchThreshold,
+            GeoContainment,
+            ElasticsearchQuery,
+            TransformHealth,
+          ],
         },
         alert: {
-          read: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+          read: [
+            IndexThreshold,
+            SearchThreshold,
+            GeoContainment,
+            ElasticsearchQuery,
+            TransformHealth,
+          ],
         },
       },
       savedObject: {
