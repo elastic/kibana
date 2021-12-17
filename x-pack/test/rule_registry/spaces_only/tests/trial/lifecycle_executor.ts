@@ -76,7 +76,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
         disabledRegistrationContexts: [] as string[],
       });
 
-      // This intializes the service. This happens immediately after the creation
+      // This initializes the service. This happens immediately after the creation
       // of the RuleDataService in the setup phase of the Rule Registry plugin
       ruleDataService.initializeService();
 
@@ -150,7 +150,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
               },
             };
 
-        // This MUST be called by the solutoins executor function
+        // This MUST be called by the solutions executor function
         alertWithLifecycle({
           id,
           fields: {
@@ -173,7 +173,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
           name: 'test rule',
           ruleTypeId: 'observability.test.fake',
           ruleTypeName: 'test',
-          consumer: 'obeservability',
+          consumer: 'observability',
           producer: 'observability.test',
         },
         services: {
@@ -235,7 +235,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
       });
       const source = response.hits.hits[0]._source as any;
 
-      // The state in Elasticsaerch should match the state returned from the executor
+      // The state in Elasticsearch should match the state returned from the executor
       expect(source.testObject).to.eql(nextResults.wrapped && nextResults.wrapped.testObject);
     });
   });
