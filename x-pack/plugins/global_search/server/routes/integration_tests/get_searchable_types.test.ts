@@ -46,7 +46,7 @@ describe('GET /internal/global_search/searchable_types', () => {
 
   it('calls the handler context with correct parameters', async () => {
     await supertest(httpSetup.server.listener)
-      .post('/internal/global_search/searchable_types')
+      .get('/internal/global_search/searchable_types')
       .expect(200);
 
     expect(globalSearchHandlerContext.getSearchableTypes).toHaveBeenCalledTimes(1);
@@ -56,7 +56,7 @@ describe('GET /internal/global_search/searchable_types', () => {
     globalSearchHandlerContext.getSearchableTypes.mockResolvedValue(['type-a', 'type-b']);
 
     const response = await supertest(httpSetup.server.listener)
-      .post('/internal/global_search/searchable_types')
+      .get('/internal/global_search/searchable_types')
       .expect(200);
 
     expect(response.body).toEqual({
@@ -68,12 +68,12 @@ describe('GET /internal/global_search/searchable_types', () => {
     globalSearchHandlerContext.getSearchableTypes.mockRejectedValue(new Error());
 
     const response = await supertest(httpSetup.server.listener)
-      .post('/internal/global_search/searchable_types')
-      .expect(200);
+      .get('/internal/global_search/searchable_types')
+      .expect(500);
 
     expect(response.body).toEqual(
       expect.objectContaining({
-        message: 'An internal server error occurred.',
+        message: 'An internal server error occurred. Check Kibana server logs for details.',
         statusCode: 500,
       })
     );

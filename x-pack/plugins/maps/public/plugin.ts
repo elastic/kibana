@@ -52,7 +52,7 @@ import {
   MapsStartApi,
   suggestEMSTermJoinConfig,
 } from './api';
-import { registerLayerWizard } from './classes/layers/layer_wizard_registry';
+import { registerLayerWizard } from './classes/layers';
 import { registerSource } from './classes/sources/source_registry';
 import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import type { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/public';

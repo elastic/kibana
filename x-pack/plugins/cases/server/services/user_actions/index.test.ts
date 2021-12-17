@@ -7,12 +7,8 @@
 
 import { SavedObject, SavedObjectsFindResult } from 'kibana/server';
 import { transformFindResponseToExternalModel, UserActionItem } from '.';
-import {
-  CaseUserActionAttributes,
-  CASE_USER_ACTION_SAVED_OBJECT,
-  UserAction,
-  UserActionField,
-} from '../../../common';
+import { CaseUserActionAttributes, UserAction, UserActionField } from '../../../common/api';
+import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 
 import {
   createConnectorObject,

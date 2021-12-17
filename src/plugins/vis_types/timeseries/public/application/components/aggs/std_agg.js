@@ -14,7 +14,7 @@ import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_metric_type';
 
 export function StandardAgg(props) {

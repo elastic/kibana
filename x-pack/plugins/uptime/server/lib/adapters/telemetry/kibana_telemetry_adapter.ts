@@ -6,10 +6,10 @@
  */
 
 import moment from 'moment';
-import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PageViewParams, UptimeTelemetry, Usage } from './types';
-import { savedObjectsAdapter } from '../../saved_objects';
+import { savedObjectsAdapter } from '../../saved_objects/saved_objects';
 import { UptimeESClient, createUptimeESClient } from '../../lib';
 
 interface UptimeTelemetryCollector {
@@ -23,7 +23,7 @@ const BUCKET_NUMBER = 24;
 export class KibanaTelemetryAdapter {
   public static registerUsageCollector = (
     usageCollector: UsageCollectionSetup,
-    getSavedObjectsClient: () => ISavedObjectsRepository | undefined
+    getSavedObjectsClient: () => SavedObjectsClientContract | undefined
   ) => {
     if (!usageCollector) {
       return;
@@ -37,7 +37,7 @@ export class KibanaTelemetryAdapter {
 
   public static initUsageCollector(
     usageCollector: UsageCollectionSetup,
-    getSavedObjectsClient: () => ISavedObjectsRepository | undefined
+    getSavedObjectsClient: () => SavedObjectsClientContract | undefined
   ) {
     return usageCollector.makeUsageCollector<Usage>({
       type: 'uptime',
@@ -212,7 +212,7 @@ export class KibanaTelemetryAdapter {
 
   public static async countNoOfUniqueMonitorAndLocations(
     callCluster: UptimeESClient,
-    savedObjectsClient: ISavedObjectsRepository | SavedObjectsClientContract
+    savedObjectsClient: SavedObjectsClientContract
   ) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
     const params = {

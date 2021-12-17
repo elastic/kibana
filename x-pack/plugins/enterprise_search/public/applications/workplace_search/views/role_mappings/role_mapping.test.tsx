@@ -29,7 +29,6 @@ describe('RoleMapping', () => {
   const handleAttributeSelectorChange = jest.fn();
   const handleDeleteMapping = jest.fn();
   const handleRoleChange = jest.fn();
-  const handleAuthProviderChange = jest.fn();
   const resetState = jest.fn();
   const groups = [
     {
@@ -52,9 +51,6 @@ describe('RoleMapping', () => {
     availableGroups: groups,
     selectedGroups: new Set(),
     includeInAllGroups: false,
-    availableAuthProviders: [],
-    multipleAuthProvidersConfig: true,
-    selectedAuthProviders: [],
     roleMappingErrors: [],
   };
 
@@ -69,7 +65,6 @@ describe('RoleMapping', () => {
       handleAttributeSelectorChange,
       handleDeleteMapping,
       handleRoleChange,
-      handleAuthProviderChange,
       resetState,
     });
     setMockValues(mockValues);

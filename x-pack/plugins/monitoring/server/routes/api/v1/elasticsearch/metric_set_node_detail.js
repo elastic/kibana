@@ -20,25 +20,7 @@ export const metricSets = {
       name: 'node_gc_time',
     },
     {
-      keys: [
-        'node_index_mem_overall_1',
-        'node_index_mem_stored_fields',
-        'node_index_mem_doc_values',
-        'node_index_mem_norms',
-      ],
-      name: 'node_index_1',
-    },
-    {
-      keys: ['node_index_mem_overall_2', 'node_index_mem_terms', 'node_index_mem_points'],
-      name: 'node_index_2',
-    },
-    {
-      keys: [
-        'node_index_mem_overall_3',
-        'node_index_mem_fixed_bit_set',
-        'node_index_mem_term_vectors',
-        'node_index_mem_versions',
-      ],
+      keys: ['node_index_mem_fixed_bit_set', 'node_index_mem_versions'],
       name: 'node_index_3',
     },
     {
@@ -100,10 +82,6 @@ export const metricSets = {
     {
       keys: ['node_jvm_mem_max_in_bytes', 'node_jvm_mem_used_in_bytes'],
       name: 'node_jvm_mem',
-    },
-    {
-      keys: ['node_index_mem_overall', 'node_index_mem_terms', 'node_index_mem_points'],
-      name: 'node_mem',
     },
     {
       keys: [],

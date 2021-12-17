@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { euiLightVars } from '@kbn/ui-shared-deps-src/theme';
 
 const StyledSpan = styled.span`
-  color: ${euiLightVars.euiColorSecondaryText};
+  color: ${euiLightVars.euiColorSuccessText};
   font-weight: 500;
   :not(:last-of-type)::after {
     content: '•';

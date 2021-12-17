@@ -1,0 +1,29 @@
+title: Install Result
+type: object
+properties:
+  assets:
+    type: array
+    items: []
+  status:
+    type: string
+    enum:
+      - installed
+      - already_installed
+  error:
+    type: object
+    properties:
+      name:
+        type: string
+      message:
+        type: string
+      stack:
+        type: string
+  installType:
+    type: array
+    items:
+      type: string
+      enum:
+        - metrics
+        - logs
+  required:
+  - installType

@@ -11,10 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { WMSCreateSourceEditor } from './wms_create_source_editor';
 // @ts-ignore
 import { sourceTitle, WMSSource } from './wms_source';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { TileLayer } from '../../layers/tile_layer/tile_layer';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
+import { RasterTileLayer } from '../../layers/raster_tile_layer/raster_tile_layer';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
-import { WebMapServiceLayerIcon } from '../../layers/icons/web_map_service_layer_icon';
+import { WebMapServiceLayerIcon } from '../../layers/wizards/icons/web_map_service_layer_icon';
 
 export const wmsLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
@@ -29,7 +29,7 @@ export const wmsLayerWizardConfig: LayerWizard = {
         return;
       }
 
-      const layerDescriptor = TileLayer.createDescriptor({
+      const layerDescriptor = RasterTileLayer.createDescriptor({
         sourceDescriptor: WMSSource.createDescriptor(sourceConfig),
       });
       previewLayers([layerDescriptor]);

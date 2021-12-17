@@ -265,7 +265,7 @@ export function getTermJoinsPerCluster(
   layerLists: LayerDescriptor[][]
 ): TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER {
   return getCountsByCluster(layerLists, (layerDescriptor: LayerDescriptor) => {
-    return layerDescriptor.type === LAYER_TYPE.VECTOR &&
+    return layerDescriptor.type === LAYER_TYPE.GEOJSON_VECTOR &&
       (layerDescriptor as VectorLayerDescriptor)?.joins?.length
       ? TELEMETRY_TERM_JOIN
       : null;

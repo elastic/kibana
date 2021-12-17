@@ -10,33 +10,34 @@ import type {
   EndpointOf,
 } from '@kbn/server-route-repository';
 import { PickByValue } from 'utility-types';
-import { correlationsRouteRepository } from '../correlations';
-import { alertsChartPreviewRouteRepository } from '../alerts/chart_preview';
+import { correlationsRouteRepository } from '../correlations/route';
+import { alertsChartPreviewRouteRepository } from '../alerts/route';
 import { backendsRouteRepository } from '../backends/route';
 import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
-import { environmentsRouteRepository } from '../environments';
-import { errorsRouteRepository } from '../errors';
-import { apmFleetRouteRepository } from '../fleet';
-import { dataViewRouteRepository } from '../data_view';
-import { latencyDistributionRouteRepository } from '../latency_distribution';
-import { metricsRouteRepository } from '../metrics';
-import { observabilityOverviewRouteRepository } from '../observability_overview';
-import { rumRouteRepository } from '../rum_client';
-import { fallbackToTransactionsRouteRepository } from '../fallback_to_transactions';
-import { serviceRouteRepository } from '../services';
-import { serviceMapRouteRepository } from '../service_map';
-import { serviceNodeRouteRepository } from '../service_nodes';
-import { agentConfigurationRouteRepository } from '../settings/agent_configuration';
-import { anomalyDetectionRouteRepository } from '../settings/anomaly_detection';
-import { apmIndicesRouteRepository } from '../settings/apm_indices';
-import { customLinkRouteRepository } from '../settings/custom_link';
-import { sourceMapsRouteRepository } from '../source_maps';
-import { traceRouteRepository } from '../traces';
-import { transactionRouteRepository } from '../transactions';
+import { environmentsRouteRepository } from '../environments/route';
+import { errorsRouteRepository } from '../errors/route';
+import { apmFleetRouteRepository } from '../fleet/route';
+import { dataViewRouteRepository } from '../data_view/route';
+import { latencyDistributionRouteRepository } from '../latency_distribution/route';
+import { metricsRouteRepository } from '../metrics/route';
+import { observabilityOverviewRouteRepository } from '../observability_overview/route';
+import { rumRouteRepository } from '../rum_client/route';
+import { fallbackToTransactionsRouteRepository } from '../fallback_to_transactions/route';
+import { serviceRouteRepository } from '../services/route';
+import { serviceMapRouteRepository } from '../service_map/route';
+import { serviceNodeRouteRepository } from '../service_nodes/route';
+import { agentConfigurationRouteRepository } from '../settings/agent_configuration/route';
+import { anomalyDetectionRouteRepository } from '../settings/anomaly_detection/route';
+import { apmIndicesRouteRepository } from '../settings/apm_indices/route';
+import { customLinkRouteRepository } from '../settings/custom_link/route';
+import { sourceMapsRouteRepository } from '../source_maps/route';
+import { traceRouteRepository } from '../traces/route';
+import { transactionRouteRepository } from '../transactions/route';
 import { APMRouteHandlerResources } from '../typings';
 import { historicalDataRouteRepository } from '../historical_data';
-import { eventMetadataRouteRepository } from '../event_metadata';
-import { suggestionsRouteRepository } from '../suggestions';
+import { eventMetadataRouteRepository } from '../event_metadata/route';
+import { suggestionsRouteRepository } from '../suggestions/route';
+import { agentKeysRouteRepository } from '../agent_keys/route';
 
 const getTypedGlobalApmServerRouteRepository = () => {
   const repository = createApmServerRouteRepository()
@@ -64,7 +65,9 @@ const getTypedGlobalApmServerRouteRepository = () => {
     .merge(correlationsRouteRepository)
     .merge(fallbackToTransactionsRouteRepository)
     .merge(historicalDataRouteRepository)
-    .merge(eventMetadataRouteRepository);
+    .merge(eventMetadataRouteRepository)
+    .merge(eventMetadataRouteRepository)
+    .merge(agentKeysRouteRepository);
 
   return repository;
 };

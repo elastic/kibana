@@ -35,7 +35,9 @@ import type {
   RowRenderer,
   AlertStatus,
 } from '../../../../common/types/timeline';
-import { esQuery, DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+
+import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
@@ -92,6 +94,7 @@ const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface TGridIntegratedProps {
   additionalFilters: React.ReactNode;
+  appId: string;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
   columns: ColumnHeaderOptions[];
@@ -100,6 +103,7 @@ export interface TGridIntegratedProps {
   dataProviders: DataProvider[];
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
+  disabledCellActions: string[];
   docValueFields: DocValueFields[];
   end: string;
   entityType: EntityType;
@@ -135,6 +139,7 @@ export interface TGridIntegratedProps {
 
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   additionalFilters,
+  appId,
   browserFields,
   bulkActions = true,
   columns,
@@ -142,6 +147,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   dataProviders,
   defaultCellActions,
   deletedEventIds,
+  disabledCellActions,
   docValueFields,
   end,
   entityType,
@@ -190,7 +196,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
 
   const combinedQueries = buildCombinedQuery({
-    config: esQuery.getEsQueryConfig(uiSettings),
+    config: getEsQueryConfig(uiSettings),
     dataProviders,
     indexPattern,
     browserFields,
@@ -247,7 +253,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const filterQuery = useMemo(
     () =>
       getCombinedFilterQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         browserFields,
         dataProviders,
         filters,
@@ -346,11 +352,13 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                       <ScrollableFlexItem grow={1}>
                         <StatefulBody
                           activePage={pageInfo.activePage}
+                          appId={appId}
                           browserFields={browserFields}
                           bulkActions={bulkActions}
                           createFieldComponent={createFieldComponent}
                           data={nonDeletedEvents}
                           defaultCellActions={defaultCellActions}
+                          disabledCellActions={disabledCellActions}
                           filterQuery={filterQuery}
                           filters={filters}
                           filterStatus={filterStatus}

@@ -61,7 +61,7 @@
         "signature": [
           "(sortIds: ",
           "SearchSortResults",
-          " | null | undefined) => React.ReactText[] | null | undefined"
+          " | null | undefined) => (string | number)[] | null | undefined"
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,

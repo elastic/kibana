@@ -44,6 +44,14 @@ interface SavedObjectBody {
   type?: string;
 }
 
+/**
+ * An interface representing a data view that is time based.
+ */
+export interface TimeBasedDataView extends DataView {
+  timeFieldName: NonNullable<DataView['timeFieldName']>;
+  getTimeField: () => DataViewField;
+}
+
 export class DataView implements IIndexPattern {
   public id?: string;
   public title: string = '';
@@ -231,7 +239,6 @@ export class DataView implements IIndexPattern {
    * @param fieldType
    * @param lang
    * @deprecated use runtime field instead
-   * @removeBy 8.1
    */
   async addScriptedField(name: string, script: string, fieldType: string = 'string') {
     const scriptedFields = this.getScriptedFields();
@@ -262,7 +269,6 @@ export class DataView implements IIndexPattern {
    * Remove scripted field from field list
    * @param fieldName
    * @deprecated use runtime field instead
-   * @removeBy 8.1
    */
 
   removeScriptedField(fieldName: string) {
@@ -274,8 +280,7 @@ export class DataView implements IIndexPattern {
 
   /**
    *
-   * @deprecated use runtime field instead
-   * @removeBy 8.1
+   * @deprecated Will be removed when scripted fields are removed
    */
   getNonScriptedFields() {
     return [...this.fields.getAll().filter((field) => !field.scripted)];
@@ -284,17 +289,16 @@ export class DataView implements IIndexPattern {
   /**
    *
    * @deprecated use runtime field instead
-   * @removeBy 8.1
    */
   getScriptedFields() {
     return [...this.fields.getAll().filter((field) => field.scripted)];
   }
 
-  isTimeBased(): boolean {
+  isTimeBased(): this is TimeBasedDataView {
     return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
   }
 
-  isTimeNanosBased(): boolean {
+  isTimeNanosBased(): this is TimeBasedDataView {
     const timeField = this.getTimeField();
     return !!(timeField && timeField.esTypes && timeField.esTypes.indexOf('date_nanos') !== -1);
   }

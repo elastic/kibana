@@ -12,9 +12,10 @@ import ReactMonacoEditor from 'react-monaco-editor';
 import { htmlIdGenerator, EuiToolTip, keys } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import './register_languages';
+import './remeasure_fonts';
 
 import {
   DARK_THEME,
@@ -397,6 +398,10 @@ export const CodeEditor: React.FC<Props> = ({
           },
           scrollbar: {
             useShadows: false,
+            // Scroll events are handled only when there is scrollable content. When there is scrollable content, the
+            // editor should scroll to the bottom then break out of that scroll context and continue scrolling on any
+            // outer scrollbars.
+            alwaysConsumeMouseWheel: false,
           },
           wordBasedSuggestions: false,
           wordWrap: 'on',

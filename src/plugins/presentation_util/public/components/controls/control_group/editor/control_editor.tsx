@@ -86,7 +86,7 @@ export const ControlEditor = ({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="control-editor-flyout">
         <EuiForm>
           <EuiSpacer size="l" />
           {ControlTypeEditor && (
@@ -105,6 +105,7 @@ export const ControlEditor = ({
           )}
           <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
             <EuiFieldText
+              data-test-subj="control-editor-title-input"
               placeholder={defaultTitle}
               value={currentTitle}
               onChange={(e) => {
@@ -147,6 +148,7 @@ export const ControlEditor = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               aria-label={`cancel-${title}`}
+              data-test-subj="control-editor-cancel"
               iconType="cross"
               onClick={() => {
                 onCancel();
@@ -158,6 +160,7 @@ export const ControlEditor = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               aria-label={`save-${title}`}
+              data-test-subj="control-editor-save"
               iconType="check"
               color="primary"
               disabled={!controlEditorValid}

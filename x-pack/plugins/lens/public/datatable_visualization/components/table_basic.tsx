@@ -7,7 +7,7 @@
 
 import './table_basic.scss';
 
-import React, { useCallback, useMemo, useRef, useState, useContext } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
@@ -18,11 +18,12 @@ import {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
+import { EmptyPlaceholder } from '../../../../../../src/plugins/charts/public';
 import type { LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
 import type { FormatFactory } from '../../../common';
 import type { LensGridDirection } from '../../../common/expressions';
 import { VisualizationContainer } from '../../visualization_container';
-import { EmptyPlaceholder, findMinMaxByColumnId } from '../../shared_components';
+import { findMinMaxByColumnId } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import type {
   DataContextType,
@@ -30,6 +31,7 @@ import type {
   LensSortAction,
   LensResizeAction,
   LensToggleAction,
+  LensPagesizeAction,
 } from './types';
 import { createGridColumns } from './columns';
 import { createGridCell } from './cell_value';
@@ -50,6 +52,9 @@ const gridStyle: EuiDataGridStyle = {
   header: 'underline',
 };
 
+export const DEFAULT_PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
+
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const [firstTable] = Object.values(props.data.tables);
 
@@ -59,6 +64,22 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     sortingDirection: props.args.sortingDirection,
   });
   const [firstLocalTable, updateTable] = useState(firstTable);
+
+  // ** Pagination config
+  const [pagination, setPagination] = useState<{ pageIndex: number; pageSize: number } | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    setPagination(
+      props.args.pageSize
+        ? {
+            pageIndex: 0,
+            pageSize: props.args.pageSize ?? DEFAULT_PAGE_SIZE,
+          }
+        : undefined
+    );
+  }, [props.args.pageSize]);
 
   useDeepCompareEffect(() => {
     setColumnConfig({
@@ -102,11 +123,35 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const onEditAction = useCallback(
-    (data: LensSortAction['data'] | LensResizeAction['data'] | LensToggleAction['data']) => {
+    (
+      data:
+        | LensSortAction['data']
+        | LensResizeAction['data']
+        | LensToggleAction['data']
+        | LensPagesizeAction['data']
+    ) => {
       dispatchEvent({ name: 'edit', data });
     },
     [dispatchEvent]
   );
+
+  const onChangeItemsPerPage = useCallback(
+    (pageSize) => onEditAction({ action: 'pagesize', size: pageSize }),
+    [onEditAction]
+  );
+
+  // active page isn't persisted, so we manage this state locally
+  const onChangePage = useCallback(
+    (pageIndex) => {
+      setPagination((_pagination) => {
+        if (_pagination) {
+          return { pageSize: _pagination?.pageSize, pageIndex };
+        }
+      });
+    },
+    [setPagination]
+  );
+
   const onRowContextMenuClick = useCallback(
     (data: LensTableRowContextMenuEvent['data']) => {
       dispatchEvent({ name: 'tableRowContextMenuClick', data });
@@ -168,7 +213,14 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const isNumericMap: Record<string, boolean> = useMemo(() => {
     const numericMap: Record<string, boolean> = {};
     for (const column of firstLocalTable.columns) {
-      numericMap[column.id] = column.meta.type === 'number';
+      // filtered metrics result as "number" type, but have no field
+      numericMap[column.id] =
+        (column.meta.type === 'number' && column.meta.field != null) ||
+        // as fallback check the first available value type
+        // mind here: date can be seen as numbers, to carefully check that is a filtered metric
+        (column.meta.field == null &&
+          typeof firstLocalTable.rows.find((row) => row[column.id] != null)?.[column.id] ===
+            'number');
     }
     return numericMap;
   }, [firstLocalTable]);
@@ -346,6 +398,15 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         }}
       >
         <EuiDataGrid
+          {
+            // we control the key when pagination is on to circumvent an EUI rendering bug
+            // see https://github.com/elastic/eui/issues/5391
+            ...(pagination
+              ? {
+                  key: columns.map(({ id }) => id).join('-') + '-' + pagination.pageSize,
+                }
+              : {})
+          }
           aria-label={dataGridAriaLabel}
           data-test-subj="lnsDataTable"
           rowHeightsOptions={
@@ -362,6 +423,14 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           renderCellValue={renderCellValue}
           gridStyle={gridStyle}
           sorting={sorting}
+          pagination={
+            pagination && {
+              ...pagination,
+              pageSizeOptions: PAGE_SIZE_OPTIONS,
+              onChangeItemsPerPage,
+              onChangePage,
+            }
+          }
           onColumnResize={onColumnResize}
           toolbarVisibility={false}
           renderFooterCellValue={renderSummaryRow}

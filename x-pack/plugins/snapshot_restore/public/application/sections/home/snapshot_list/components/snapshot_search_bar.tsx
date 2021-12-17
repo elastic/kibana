@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SearchFilterConfig } from '@elastic/eui/src/components/search_bar/search_filters';
 import { SchemaType } from '@elastic/eui/src/components/search_bar/search_box';

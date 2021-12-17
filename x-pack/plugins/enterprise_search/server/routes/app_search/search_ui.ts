@@ -23,7 +23,7 @@ export function registerSearchUIRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/as/engines/:engineName/reference_application/field_config',
+      path: '/as/engines/:engineName/search_experience/field_config',
     })
   );
 }

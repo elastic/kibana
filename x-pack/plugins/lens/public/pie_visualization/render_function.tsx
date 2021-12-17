@@ -7,7 +7,7 @@
 
 import { uniq } from 'lodash';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import {
   Chart,
@@ -16,7 +16,6 @@ import {
   Partition,
   PartitionConfig,
   PartitionLayer,
-  PartitionLayout,
   PartitionFillLabel,
   RecursivePartial,
   Position,
@@ -26,11 +25,18 @@ import {
 import { RenderMode } from 'src/plugins/expressions';
 import type { LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
-import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
+import { DEFAULT_PERCENT_DECIMALS } from './constants';
+import { PartitionChartsMeta } from './partition_charts_meta';
 import type { FormatFactory } from '../../common';
 import type { PieExpressionProps } from '../../common/expressions';
-import { getSliceValue, getFilterContext } from './render_helpers';
-import { EmptyPlaceholder } from '../shared_components';
+import {
+  getSliceValue,
+  getFilterContext,
+  isTreemapOrMosaicShape,
+  byDataColorPaletteMap,
+  extractUniqTermsMap,
+} from './render_helpers';
+import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import './visualization.scss';
 import {
   ChartsPluginSetup,
@@ -80,6 +86,7 @@ export function PieComponent(
     truncateLegend,
     hideLabels,
     palette,
+    showValuesInLegend,
   } = props.args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
@@ -110,6 +117,22 @@ export function PieComponent(
     })
   ).length;
 
+  const shouldUseByDataPalette = !syncColors && ['mosaic'].includes(shape) && bucketColumns[1]?.id;
+  let byDataPalette: ReturnType<typeof byDataColorPaletteMap>;
+  if (shouldUseByDataPalette) {
+    byDataPalette = byDataColorPaletteMap(
+      firstTable,
+      bucketColumns[1].id,
+      paletteService.get(palette.name),
+      palette
+    );
+  }
+
+  let sortingMap: Record<string, number> = {};
+  if (shape === 'mosaic') {
+    sortingMap = extractUniqTermsMap(firstTable, bucketColumns[0].id);
+  }
+
   const layers: PartitionLayer[] = bucketColumns.map((col, layerIndex) => {
     return {
       groupByRollup: (d: Datum) => d[col.id] ?? EMPTY_SLICE,
@@ -124,13 +147,19 @@ export function PieComponent(
         return String(d);
       },
       fillLabel,
+      sortPredicate: PartitionChartsMeta[shape].sortPredicate?.(bucketColumns, sortingMap),
       shape: {
         fillColor: (d) => {
           const seriesLayers: SeriesLayer[] = [];
 
+          // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
+          // therefore change it for dask mode
+          const defaultColor = isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
+
           // Color is determined by round-robin on the index of the innermost slice
           // This has to be done recursively until we get to the slice index
           let tempParent: typeof d | typeof d['parent'] = d;
+
           while (tempParent.parent && tempParent.depth > 0) {
             seriesLayers.unshift({
               name: String(tempParent.parent.children[tempParent.sortIndex][0]),
@@ -140,12 +169,14 @@ export function PieComponent(
             tempParent = tempParent.parent;
           }
 
-          if (shape === 'treemap') {
+          if (byDataPalette && seriesLayers[1]) {
+            return byDataPalette.getColor(seriesLayers[1].name) || defaultColor;
+          }
+
+          if (isTreemapOrMosaicShape(shape)) {
             // Only highlight the innermost color of the treemap, as it accurately represents area
             if (layerIndex < bucketColumns.length - 1) {
-              // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
-              // therefore change it for dask mode
-              return isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
+              return defaultColor;
             }
             // only use the top level series layer for coloring
             if (seriesLayers.length > 1) {
@@ -156,7 +187,7 @@ export function PieComponent(
           const outputColor = paletteService.get(palette.name).getCategoricalColor(
             seriesLayers,
             {
-              behindText: categoryDisplay !== 'hide',
+              behindText: categoryDisplay !== 'hide' || isTreemapOrMosaicShape(shape),
               maxDepth: bucketColumns.length,
               totalSeries: totalSeriesCount,
               syncColors,
@@ -164,14 +195,16 @@ export function PieComponent(
             palette.params
           );
 
-          return outputColor || 'rgba(0,0,0,0)';
+          return outputColor || defaultColor;
         },
       },
     };
   });
 
+  const { legend, partitionType: partitionLayout, label: chartType } = PartitionChartsMeta[shape];
+
   const config: RecursivePartial<PartitionConfig> = {
-    partitionLayout: shape === 'treemap' ? PartitionLayout.treemap : PartitionLayout.sunburst,
+    partitionLayout,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,
     specialFirstInnermostSector: true,
@@ -191,7 +224,7 @@ export function PieComponent(
     sectorLineWidth: 1.5,
     circlePadding: 4,
   };
-  if (shape === 'treemap') {
+  if (isTreemapOrMosaicShape(shape)) {
     if (hideLabels || categoryDisplay === 'hide') {
       config.fillLabel = { textColor: 'rgba(0,0,0,0)' };
     }
@@ -253,7 +286,7 @@ export function PieComponent(
           id="xpack.lens.pie.pieWithNegativeWarningLabel"
           defaultMessage="{chartType} charts can't render with negative values."
           values={{
-            chartType: CHART_NAMES[shape].label,
+            chartType,
           }}
         />
       </EuiText>
@@ -279,8 +312,11 @@ export function PieComponent(
           showLegend={
             !hideLabels &&
             (legendDisplay === 'show' ||
-              (legendDisplay === 'default' && bucketColumns.length > 1 && shape !== 'treemap'))
+              (legendDisplay === 'default' &&
+                (legend.getShowLegendDefault?.(bucketColumns) ?? false)))
           }
+          flatLegend={legend.flat}
+          showLegendExtra={showValuesInLegend}
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={props.interactive ?? true ? onElementClickHandler : undefined}

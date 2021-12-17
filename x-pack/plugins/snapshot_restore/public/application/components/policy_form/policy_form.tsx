@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -193,7 +193,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill={!isEditingManagedPolicy}
-                    color={isEditingManagedPolicy ? 'warning' : 'secondary'}
+                    color={isEditingManagedPolicy ? 'warning' : 'success'}
                     iconType="check"
                     onClick={() => savePolicy()}
                     isLoading={isSaving}

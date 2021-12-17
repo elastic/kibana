@@ -11,15 +11,12 @@ import { AttributeName, ElasticsearchUser } from '../../shared/types';
 
 export interface RoleMappingsBaseServerDetails {
   attributes: string[];
-  authProviders: string[];
   elasticsearchRoles: string[];
   elasticsearchUsers: ElasticsearchUser[];
-  multipleAuthProvidersConfig: boolean;
   smtpSettingsPresent: boolean;
 }
 
 export interface RoleMappingsBaseActions {
-  handleAuthProviderChange(value: string[]): { value: string[] };
   handleAttributeSelectorChange(
     value: AttributeName,
     firstElasticsearchRole: string
@@ -51,7 +48,6 @@ export interface RoleMappingsBaseActions {
 export interface RoleMappingsBaseValues extends RoleMappingsBaseServerDetails {
   attributeName: AttributeName;
   attributeValue: string;
-  availableAuthProviders: string[];
   dataLoading: boolean;
   elasticsearchUser: ElasticsearchUser;
   roleMappingFlyoutOpen: boolean;

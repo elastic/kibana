@@ -8,13 +8,13 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiHealth,
   EuiButton,
   EuiInMemoryTable,
   EuiLink,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiOverlayMask,
 } from '@elastic/eui';
 
@@ -262,7 +262,7 @@ export class FollowerIndicesTable extends PureComponent {
     if (apiStatusDelete === API_STATUS.DELETING) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl" />
+          <EuiLoadingLogo logo="logoKibana" size="xl" />
         </EuiOverlayMask>
       );
     }

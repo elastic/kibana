@@ -128,6 +128,19 @@ describe('AuthenticationService', () => {
         expect.any(Function)
       );
     });
+
+    it('properly registers auth handler with no providers', () => {
+      mockSetupAuthenticationParams.config.authc = {
+        ...mockSetupAuthenticationParams.config.authc,
+        sortedProviders: [],
+      };
+      service.setup(mockSetupAuthenticationParams);
+
+      expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledTimes(1);
+      expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledWith(
+        expect.any(Function)
+      );
+    });
   });
 
   describe('#start()', () => {

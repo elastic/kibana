@@ -8,7 +8,9 @@
 
 import { defaultConfigWebFinal } from '@kbn/storybook';
 
+// We have to do this because the kbn/storybook preset overrides the manager entries,
+// so we can't customize the theme.
 module.exports = {
   ...defaultConfigWebFinal,
-  addons: ['@storybook/addon-essentials'],
+  addons: ['@storybook/addon-a11y', '@storybook/addon-essentials'],
 };

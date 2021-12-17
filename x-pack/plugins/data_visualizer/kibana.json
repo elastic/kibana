@@ -10,14 +10,16 @@
     "embeddable",
     "share",
     "discover",
-    "fileUpload"
+    "fileUpload",
+    "uiActions",
+    "charts"
   ],
   "optionalPlugins": [
     "security",
     "maps",
     "home",
     "lens",
-    "indexPatternFieldEditor",
+    "dataViewFieldEditor",
     "customIntegrations"
   ],
   "requiredBundles": [
@@ -26,7 +28,7 @@
     "maps",
     "esUiShared",
     "fieldFormats",
-    "charts"
+    "uiActions"
   ],
   "extraPublicDirs": [
     "common"

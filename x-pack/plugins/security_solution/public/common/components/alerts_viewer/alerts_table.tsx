@@ -7,8 +7,8 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import type { Filter } from '@kbn/es-query';
 import { timelineActions } from '../../../timelines/store/timeline';
-import { Filter } from '../../../../../../../src/plugins/data/public';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { alertsDefaultModel } from './default_headers';
@@ -80,7 +80,7 @@ const AlertsTableComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
   const { filterManager } = useKibana().services.data.query;
-  const ACTION_BUTTON_COUNT = 3;
+  const ACTION_BUTTON_COUNT = 4;
 
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 

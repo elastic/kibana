@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { HttpStart, NotificationsStart } from '../..';
 import type { DocLinksStart } from '../../doc_links';

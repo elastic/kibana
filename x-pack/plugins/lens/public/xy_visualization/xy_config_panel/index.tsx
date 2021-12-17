@@ -40,6 +40,7 @@ import { getScaleType } from '../to_expression';
 import { ColorPicker } from './color_picker';
 import { ReferenceLinePanel } from './reference_line_panel';
 import { PalettePicker, TooltipWrapper } from '../../shared_components';
+import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -176,8 +177,10 @@ function hasPercentageAxis(axisGroups: GroupsConfiguration, groupId: string, sta
   );
 }
 
-export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<State>) {
-  const { state, setState, frame } = props;
+export const XyToolbar = memo(function XyToolbar(
+  props: VisualizationToolbarProps<State> & { useLegacyTimeAxis?: boolean }
+) {
+  const { state, setState, frame, useLegacyTimeAxis } = props;
 
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
   const axisGroups = getAxesConfiguration(state?.layers, shouldRotate, frame.activeData);
@@ -327,6 +330,34 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
     [setState, state]
   );
 
+  const filteredBarLayers = state?.layers.filter((layer) => layer.seriesType.includes('bar'));
+  const chartHasMoreThanOneBarSeries =
+    filteredBarLayers.length > 1 ||
+    filteredBarLayers.some((layer) => layer.accessors.length > 1 || layer.splitAccessor);
+
+  const isTimeHistogramModeEnabled = state?.layers.some(
+    ({ xAccessor, layerId, seriesType, splitAccessor }) => {
+      if (!xAccessor) {
+        return false;
+      }
+      const xAccessorOp = props.frame.datasourceLayers[layerId].getOperationForColumnId(xAccessor);
+      return (
+        getScaleType(xAccessorOp, ScaleType.Linear) === ScaleType.Time &&
+        xAccessorOp?.isBucketed &&
+        (seriesType.includes('stacked') || !splitAccessor) &&
+        (seriesType.includes('stacked') ||
+          !seriesType.includes('bar') ||
+          !chartHasMoreThanOneBarSeries)
+      );
+    }
+  );
+
+  // Ask the datasource if it has a say about default truncation value
+  const defaultParamsFromDatasources = getDefaultVisualValuesForLayer(
+    state,
+    props.frame.datasourceLayers
+  ).truncateText;
+
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem>
@@ -397,9 +428,9 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                 legend: { ...state.legend, maxLines: val },
               });
             }}
-            shouldTruncate={state?.legend.shouldTruncate ?? true}
+            shouldTruncate={state?.legend.shouldTruncate ?? defaultParamsFromDatasources}
             onTruncateLegendChange={() => {
-              const current = state?.legend.shouldTruncate ?? true;
+              const current = state?.legend.shouldTruncate ?? defaultParamsFromDatasources;
               setState({
                 ...state,
                 legend: { ...state.legend, shouldTruncate: !current },
@@ -487,6 +518,9 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             setEndzoneVisibility={onChangeEndzoneVisiblity}
             hasBarOrAreaOnAxis={false}
             hasPercentageAxis={false}
+            useMultilayerTimeAxis={
+              isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
+            }
           />
           <TooltipWrapper
             tooltipContent={

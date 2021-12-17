@@ -8,3 +8,4 @@
 
 export { Sha256 } from './crypto';
 export { MountWrapper, mountReactNode } from './mount';
+export { CoreContextProvider } from './core_context_provider';

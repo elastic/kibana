@@ -129,6 +129,8 @@ export const ControlGroup = () => {
           direction="row"
           responsive={false}
           alignItems="center"
+          data-test-subj="controls-group"
+          data-shared-items-count={idsInOrder.length}
         >
           <EuiFlexItem>
             <DndContext
@@ -174,8 +176,8 @@ export const ControlGroup = () => {
                     <EuiButtonIcon
                       aria-label={ControlGroupStrings.management.getManageButtonTitle()}
                       iconType="gear"
-                      color="subdued"
-                      data-test-subj="inputControlsSortingButton"
+                      color="text"
+                      data-test-subj="controls-sorting-button"
                       onClick={() => {
                         const flyoutInstance = openFlyout(
                           forwardAllContext(
@@ -198,7 +200,7 @@ export const ControlGroup = () => {
         </EuiFlexGroup>
       ) : (
         <>
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexGroup alignItems="center" gutterSize="xs" data-test-subj="controls-empty">
             <EuiFlexItem grow={1}>
               <EuiText className="emptyStateText eui-textCenter" size="s">
                 <p>{ControlGroupStrings.emptyState.getCallToAction()}</p>

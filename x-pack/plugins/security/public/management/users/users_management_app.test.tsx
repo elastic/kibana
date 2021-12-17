@@ -8,7 +8,7 @@
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
 import type { Unmount } from 'src/plugins/management/public/types';
 
 import { securityMock } from '../../mocks';
@@ -33,6 +33,7 @@ describe('usersManagementApp', () => {
         element,
         setBreadcrumbs,
         history,
+        theme$: themeServiceMock.createTheme$(),
       });
     });
 

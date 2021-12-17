@@ -7,8 +7,8 @@
 
 import type { SavedObjectMigrationFn } from 'kibana/server';
 
-import type { Output } from '../../../common';
-import {} from '../../../common';
+import type { Installation, Output } from '../../../common';
+import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../common';
 
 export const migrateOutputToV800: SavedObjectMigrationFn<Output, Output> = (
   outputDoc,
@@ -19,4 +19,21 @@ export const migrateOutputToV800: SavedObjectMigrationFn<Output, Output> = (
   }
 
   return outputDoc;
+};
+
+export const migrateInstallationToV800: SavedObjectMigrationFn<Installation, Installation> = (
+  installationDoc,
+  migrationContext
+) => {
+  const updatedInstallationDoc = installationDoc;
+
+  const shouldKeepPoliciesUpToDate = AUTO_UPGRADE_POLICIES_PACKAGES.some(
+    (pkg) => pkg.name === updatedInstallationDoc.attributes.name
+  );
+
+  if (shouldKeepPoliciesUpToDate) {
+    updatedInstallationDoc.attributes.keep_policies_up_to_date = true;
+  }
+
+  return updatedInstallationDoc;
 };

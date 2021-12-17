@@ -8,21 +8,28 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import type { Settings } from '../../../../types';
-import { LegacySettingsForm } from '../legacy_settings_form';
+import type { Output, Settings } from '../../../../types';
 
 import { SettingsSection } from './settings_section';
+import { OutputSection } from './output_section';
 
 export interface SettingsPageProps {
   settings: Settings;
+  outputs: Output[];
+  deleteOutput: (output: Output) => void;
 }
 
-export const SettingsPage: React.FunctionComponent<SettingsPageProps> = ({ settings }) => {
+export const SettingsPage: React.FunctionComponent<SettingsPageProps> = ({
+  settings,
+  outputs,
+  deleteOutput,
+}) => {
   return (
     <>
       <EuiSpacer size="m" />
       <SettingsSection fleetServerHosts={settings.fleet_server_hosts} />
-      <LegacySettingsForm />
+      <EuiSpacer size="m" />
+      <OutputSection outputs={outputs} deleteOutput={deleteOutput} />
     </>
   );
 };

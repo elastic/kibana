@@ -125,7 +125,7 @@ export const createRulesBulkRoute = (
             } catch (err) {
               return transformBulkError(
                 internalRule.params.ruleId,
-                err as Error & { statusCode?: number | undefined }
+                err as Error & { statusCode?: number }
               );
             }
           })

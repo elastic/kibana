@@ -27,36 +27,6 @@ const createActions = (testBed: TestBed) => {
    * User Actions
    */
 
-  const clickDeprecationToggle = async () => {
-    const { find, component } = testBed;
-
-    await act(async () => {
-      find('deprecationLoggingToggle').simulate('click');
-    });
-
-    component.update();
-  };
-
-  const clickRetryButton = async () => {
-    const { find, component } = testBed;
-
-    await act(async () => {
-      find('retryButton').simulate('click');
-    });
-
-    component.update();
-  };
-
-  const clickResetButton = async () => {
-    const { find, component } = testBed;
-
-    await act(async () => {
-      find('resetLastStoredDate').simulate('click');
-    });
-
-    component.update();
-  };
-
   const clickViewSystemIndicesState = async () => {
     const { find, component } = testBed;
 
@@ -78,9 +48,6 @@ const createActions = (testBed: TestBed) => {
   };
 
   return {
-    clickDeprecationToggle,
-    clickRetryButton,
-    clickResetButton,
     clickViewSystemIndicesState,
     clickRetrySystemIndicesButton,
   };

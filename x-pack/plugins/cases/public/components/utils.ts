@@ -6,7 +6,7 @@
  */
 
 import { IconType } from '@elastic/eui';
-import { ConnectorTypes } from '../../common';
+import { ConnectorTypes } from '../../common/api';
 import { FieldConfig, ValidationConfig } from '../common/shared_imports';
 import { StartPlugins } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';

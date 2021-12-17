@@ -34,6 +34,10 @@ export enum TypeKind {
   EnumKind = 'Enum',
   InterfaceKind = 'Interface',
   /**
+   * Interface children defined like [key: string]: Foo will be tagged as "any" type by typescript. Let's use a specialized type.
+   */
+  IndexSignature = 'IndexSignature',
+  /**
    * Maps to the typescript syntax kind `TypeReferences`. For example,
    * export type FooFn = () => string will be a TypeKind, not a FunctionKind.
    */

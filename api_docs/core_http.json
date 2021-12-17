@@ -194,14 +194,14 @@
           {
             "parentPluginId": "core",
             "id": "def-public.HttpFetchQuery.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: string | number | boolean | string[] | number[] | boolean[] | null | undefined",
             "description": [
               "\nTypeScript note: Technically we should use this interface instead, but @types/node uses the below stricter\ndefinition, so to avoid TypeScript errors, we'll restrict our version.\n\n[key: string]:\n  | string\n  | number\n  | boolean\n  | Array<string | number | boolean>\n  | undefined\n  | null;"
             ],
             "signature": [
-              "any"
+              "[key: string]:  string | number | boolean | string[] | number[] | boolean[] | null | undefined"
             ],
             "path": "src/core/public/http/types.ts",
             "deprecated": false
@@ -291,12 +291,12 @@
           {
             "parentPluginId": "core",
             "id": "def-public.HttpHeadersInit.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[name: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[name: string]:  any"
             ],
             "path": "src/core/public/http/types.ts",
             "deprecated": false
@@ -516,7 +516,7 @@
                 "section": "def-public.HttpResponse",
                 "text": "HttpResponse"
               },
-              "<any>, controller: ",
+              "<unknown>, controller: ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -532,7 +532,7 @@
                 "section": "def-public.IHttpResponseInterceptorOverrides",
                 "text": "IHttpResponseInterceptorOverrides"
               },
-              "<any> | Promise<",
+              "<unknown> | Promise<",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -540,7 +540,7 @@
                 "section": "def-public.IHttpResponseInterceptorOverrides",
                 "text": "IHttpResponseInterceptorOverrides"
               },
-              "<any>>) | undefined"
+              "<unknown>>) | undefined"
             ],
             "path": "src/core/public/http/types.ts",
             "deprecated": false,
@@ -560,7 +560,7 @@
                     "section": "def-public.HttpResponse",
                     "text": "HttpResponse"
                   },
-                  "<any>"
+                  "<unknown>"
                 ],
                 "path": "src/core/public/http/types.ts",
                 "deprecated": false,
@@ -623,7 +623,7 @@
                 "section": "def-public.IHttpResponseInterceptorOverrides",
                 "text": "IHttpResponseInterceptorOverrides"
               },
-              "<any> | Promise<",
+              "<unknown> | Promise<",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -631,7 +631,7 @@
                 "section": "def-public.IHttpResponseInterceptorOverrides",
                 "text": "IHttpResponseInterceptorOverrides"
               },
-              "<any>>) | undefined"
+              "<unknown>>) | undefined"
             ],
             "path": "src/core/public/http/types.ts",
             "deprecated": false,
@@ -762,7 +762,7 @@
             "section": "def-public.HttpResponse",
             "text": "HttpResponse"
           },
-          "<any>"
+          "<unknown>"
         ],
         "path": "src/core/public/http/types.ts",
         "deprecated": false,
@@ -795,7 +795,8 @@
                 "docId": "kibCoreHttpPluginApi",
                 "section": "def-public.IHttpFetchError",
                 "text": "IHttpFetchError"
-              }
+              },
+              "<unknown>"
             ],
             "path": "src/core/public/http/types.ts",
             "deprecated": false
@@ -1733,7 +1734,7 @@
             "section": "def-public.IHttpFetchError",
             "text": "IHttpFetchError"
           },
-          " extends Error"
+          "<TResponseBody> extends Error"
         ],
         "path": "src/core/public/http/types.ts",
         "deprecated": false,
@@ -1818,12 +1819,12 @@
           {
             "parentPluginId": "core",
             "id": "def-public.IHttpFetchError.body",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "body",
             "description": [],
             "signature": [
-              "any"
+              "TResponseBody | undefined"
             ],
             "path": "src/core/public/http/types.ts",
             "deprecated": false
@@ -1923,6 +1924,52 @@
             ],
             "signature": [
               "TResponseBody | undefined"
+            ],
+            "path": "src/core/public/http/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.ResponseErrorBody",
+        "type": "Interface",
+        "tags": [],
+        "label": "ResponseErrorBody",
+        "description": [],
+        "path": "src/core/public/http/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ResponseErrorBody.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "src/core/public/http/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ResponseErrorBody.statusCode",
+            "type": "number",
+            "tags": [],
+            "label": "statusCode",
+            "description": [],
+            "path": "src/core/public/http/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ResponseErrorBody.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
             ],
             "path": "src/core/public/http/types.ts",
             "deprecated": false
@@ -3361,7 +3408,7 @@
               "\nAccess or manipulate the Kibana base path\nSee {@link IBasePath}."
             ],
             "signature": [
-              "{ remove: (path: string) => string; get: (request: ",
+              "{ get: (request: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -3377,7 +3424,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+              "<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void; remove: (path: string) => string; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
             ],
             "path": "src/core/server/http/types.ts",
             "deprecated": false
@@ -3716,7 +3763,7 @@
               "\nAccess or manipulate the Kibana base path\nSee {@link IBasePath}."
             ],
             "signature": [
-              "{ remove: (path: string) => string; get: (request: ",
+              "{ get: (request: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -3732,7 +3779,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+              "<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void; remove: (path: string) => string; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
             ],
             "path": "src/core/server/http/types.ts",
             "deprecated": false
@@ -3946,7 +3993,7 @@
               "\nAccess or manipulate the Kibana base path\nSee {@link IBasePath}."
             ],
             "signature": [
-              "{ remove: (path: string) => string; get: (request: ",
+              "{ get: (request: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -3962,7 +4009,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+              "<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void; remove: (path: string) => string; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
             ],
             "path": "src/core/server/http/types.ts",
             "deprecated": false
@@ -9286,7 +9333,7 @@
           "\nAccess or manipulate the Kibana base path\n\n{@link BasePath}"
         ],
         "signature": [
-          "{ remove: (path: string) => string; get: (request: ",
+          "{ get: (request: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -9302,7 +9349,7 @@
             "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
-          "<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+          "<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void; remove: (path: string) => string; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
         ],
         "path": "src/core/server/http/base_path_service.ts",
         "deprecated": false,

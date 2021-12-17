@@ -12,8 +12,8 @@ import {
   CaseUserActionsResponse,
   AssociationType,
   CommentResponseAlertsType,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../common';
+} from '../../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
 import { BasicParams } from './types';
 

@@ -22,7 +22,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
 import { InstallStatus } from '../../../../../types';
 import type { GetAgentPoliciesResponseItem, InMemoryPackagePolicy } from '../../../../../types';
@@ -211,7 +211,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       {
         field: 'packagePolicy.name',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.name', {
-          defaultMessage: 'Integration Policy',
+          defaultMessage: 'Integration policy',
         }),
         render(_, { packagePolicy }) {
           return <IntegrationDetailsLink packagePolicy={packagePolicy} />;
@@ -269,7 +269,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       {
         field: 'packagePolicy.updated_by',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.updatedBy', {
-          defaultMessage: 'Last Updated By',
+          defaultMessage: 'Last updated by',
         }),
         truncateText: true,
         render(updatedBy) {
@@ -279,7 +279,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       {
         field: 'packagePolicy.updated_at',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.updatedAt', {
-          defaultMessage: 'Last Updated',
+          defaultMessage: 'Last updated',
         }),
         truncateText: true,
         render(updatedAt: InMemoryPackagePolicyAndAgentPolicy['packagePolicy']['updated_at']) {

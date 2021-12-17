@@ -26,7 +26,7 @@ const ANALYZE_MESSAGE = i18n.translate(
   'xpack.apm.analyzeDataButtonLabel.message',
   {
     defaultMessage:
-      'EXPERIMENTAL - Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
+      'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
   }
 );
 
@@ -64,6 +64,7 @@ export function UXActionMenu({
   return (
     <HeaderMenuPortal
       setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
+      theme$={appMountParameters.theme$}
     >
       <EuiHeaderLinks gutterSize="xs">
         <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>

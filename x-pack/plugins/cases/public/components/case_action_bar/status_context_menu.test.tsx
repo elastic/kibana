@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses } from '../../../common/api';
 import { StatusContextMenu } from './status_context_menu';
 
 describe('SyncAlertsSwitch', () => {

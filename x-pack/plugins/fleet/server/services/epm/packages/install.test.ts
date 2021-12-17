@@ -26,6 +26,9 @@ jest.mock('../../app_context', () => {
         return { error: jest.fn(), debug: jest.fn(), warn: jest.fn() };
       }),
       getTelemetryEventsSender: jest.fn(),
+      getSavedObjects: jest.fn(() => ({
+        createImporter: jest.fn(),
+      })),
     },
   };
 });

@@ -213,6 +213,11 @@ export default async function ({ readConfigFile }) {
     },
     security: {
       roles: {
+        test_monitoring: {
+          elasticsearch: {
+            cluster: ['monitor'],
+          },
+        },
         test_logstash_reader: {
           elasticsearch: {
             cluster: [],
@@ -511,6 +516,14 @@ export default async function ({ readConfigFile }) {
           elasticsearch: {
             cluster: ['manage_ilm'],
           },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['default'],
+            },
+          ],
         },
 
         index_management_user: {

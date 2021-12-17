@@ -24,7 +24,7 @@ function calcSlope(data: Array<{ x: number; y: number }>) {
   const xySum = data.reduce((prev, curr) => prev + curr.y * curr.x, 0);
   const xSqSum = data.reduce((prev, curr) => prev + curr.x * curr.x, 0);
   const numerator = length * xySum - xSum * ySum;
-  const denominator = length * xSqSum - xSum * ySum;
+  const denominator = length * xSqSum - xSum * xSum;
   const slope = numerator / denominator;
 
   if (slope) {

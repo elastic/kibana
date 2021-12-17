@@ -33,12 +33,12 @@ import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
 import { calculateTotalPages, combineQueries } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
-import { esQuery, FilterManager } from '../../../../../../../../src/plugins/data/public';
+import { FilterManager } from '../../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import {
   ControlColumnProps,
   KueryFilterQueryKind,
   RowRenderer,
-  TimelineEventsType,
   TimelineId,
   TimelineTabs,
   ToggleDetailPanel,
@@ -47,7 +47,6 @@ import { requiredFieldsForActions } from '../../../../detections/components/aler
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
-import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -62,7 +61,6 @@ import { HeaderActions } from '../body/actions/header_actions';
 import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { Sourcerer } from '../../../../common/components/sourcerer';
-
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
   width: 100%;
@@ -122,8 +120,13 @@ const DatePicker = styled(EuiFlexItem)`
     width: auto;
   }
 `;
-
 DatePicker.displayName = 'DatePicker';
+
+const SourcererFlex = styled(EuiFlexItem)`
+  align-items: flex-end;
+`;
+
+SourcererFlex.displayName = 'SourcererFlex';
 
 const VerticalRule = styled.div`
   width: 2px;
@@ -164,7 +167,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   columns,
   dataProviders,
   end,
-  eventType,
   expandedDetail,
   filters,
   timelineId,
@@ -183,7 +185,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   status,
   sort,
   timerangeKind,
-  updateEventTypeAndIndexesName,
 }) => {
   const dispatch = useDispatch();
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
@@ -194,8 +195,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     loading: loadingSourcerer,
     indexPattern,
     runtimeMappings,
+    // important to get selectedPatterns from useSourcererDataView
+    // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
+
   const { uiSettings } = useKibana().services;
   const ACTION_BUTTON_COUNT = 5;
 
@@ -209,7 +213,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [activeFilterManager, uiSettings]
   );
 
-  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
+  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery: {
     query: string;
     language: KueryFilterQueryKind;
@@ -357,7 +361,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   setFullScreen={setTimelineFullScreen}
                 />
               )}
-              <DatePicker grow={1}>
+              <DatePicker grow={10}>
                 <SuperDatePicker
                   id="timeline"
                   timelineId={timelineId}
@@ -367,9 +371,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <Sourcerer scope={SourcererScopeName.timeline} />
-              </EuiFlexItem>
+              <SourcererFlex grow={1}>
+                {activeTab === TimelineTabs.query && (
+                  <Sourcerer scope={SourcererScopeName.timeline} />
+                )}
+              </SourcererFlex>
             </EuiFlexGroup>
             <TimelineHeaderContainer data-test-subj="timelineHeader">
               <TimelineHeader
@@ -461,7 +467,6 @@ const makeMapStateToProps = () => {
       activeTab,
       columns,
       dataProviders,
-      eventType,
       expandedDetail,
       filters,
       itemsPerPage,
@@ -487,7 +492,6 @@ const makeMapStateToProps = () => {
       activeTab,
       columns,
       dataProviders,
-      eventType: eventType ?? 'raw',
       end: input.timerange.to,
       expandedDetail,
       filters: timelineFilter,
@@ -511,27 +515,6 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
-  updateEventTypeAndIndexesName: (
-    newEventType: TimelineEventsType,
-    newIndexNames: string[],
-    newDataViewId: string
-  ) => {
-    dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));
-    dispatch(
-      timelineActions.updateDataView({
-        dataViewId: newDataViewId,
-        id: timelineId,
-        indexNames: newIndexNames,
-      })
-    );
-    dispatch(
-      sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.timeline,
-        selectedPatterns: newIndexNames,
-        selectedDataViewId: newDataViewId,
-      })
-    );
-  },
   onEventClosed: (args: ToggleDetailPanel) => {
     dispatch(timelineActions.toggleDetailPanel(args));
   },
@@ -548,7 +531,6 @@ const QueryTabContent = connector(
       compareQueryProps(prevProps, nextProps) &&
       prevProps.activeTab === nextProps.activeTab &&
       isTimerangeSame(prevProps, nextProps) &&
-      prevProps.eventType === nextProps.eventType &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.onEventClosed === nextProps.onEventClosed &&
@@ -557,7 +539,6 @@ const QueryTabContent = connector(
       prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.status === nextProps.status &&
       prevProps.timelineId === nextProps.timelineId &&
-      prevProps.updateEventTypeAndIndexesName === nextProps.updateEventTypeAndIndexesName &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&

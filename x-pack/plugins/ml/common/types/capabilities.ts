@@ -63,6 +63,8 @@ export const adminMlCapabilities = {
   // Alerts
   canCreateMlAlerts: false,
   canUseMlAlerts: false,
+  // Model management
+  canViewMlNodes: false,
 };
 
 export type UserMlCapabilities = typeof userMlCapabilities;

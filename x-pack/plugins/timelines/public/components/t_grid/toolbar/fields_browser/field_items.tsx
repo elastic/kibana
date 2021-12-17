@@ -19,7 +19,8 @@ import styled from 'styled-components';
 
 import { getEmptyValue } from '../../../empty_value';
 import { getExampleText, getIconFromType } from '../../../utils/helpers';
-import type { ColumnHeaderOptions, BrowserField } from '../../../../../common';
+import type { BrowserField } from '../../../../../common/search_strategy';
+import type { ColumnHeaderOptions } from '../../../../../common/types';
 import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../body/constants';
 import { TruncatableText } from '../../../truncatable_text';
