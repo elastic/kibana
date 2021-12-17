@@ -41,6 +41,10 @@ import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { ExecuteOptions } from '../../../actions/server/create_execute_function';
 
+jest.mock('uuid', () => ({
+  v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+}));
+
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test',
   name: 'My test rule',
@@ -310,7 +314,7 @@ describe('Task Runner', () => {
           "alert": Object {
             "rule": Object {
               "execution": Object {
-                "uuid": undefined,
+                "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
               },
             },
           },
@@ -465,7 +469,7 @@ describe('Task Runner', () => {
             alert: {
               rule: {
                 execution: {
-                  uuid: undefined,
+                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
                 },
               },
             },
@@ -500,6 +504,13 @@ describe('Task Runner', () => {
             start: '1970-01-01T00:00:00.000Z',
           },
           kibana: {
+            alert: {
+              rule: {
+                execution: {
+                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                },
+              },
+            },
             alerting: {
               action_group_id: 'default',
               action_subgroup: 'subDefault',
@@ -534,6 +545,13 @@ describe('Task Runner', () => {
             start: '1970-01-01T00:00:00.000Z',
           },
           kibana: {
+            alert: {
+              rule: {
+                execution: {
+                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                },
+              },
+            },
             alerting: {
               action_group_id: 'default',
               action_subgroup: 'subDefault',
@@ -564,7 +582,7 @@ describe('Task Runner', () => {
             alert: {
               rule: {
                 execution: {
-                  uuid: undefined,
+                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
                 },
               },
             },
@@ -606,7 +624,7 @@ describe('Task Runner', () => {
             alert: {
               rule: {
                 execution: {
-                  uuid: undefined,
+                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
                 },
               },
             },
@@ -709,7 +727,7 @@ describe('Task Runner', () => {
         alert: {
           rule: {
             execution: {
-              uuid: undefined,
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
         },
@@ -740,6 +758,13 @@ describe('Task Runner', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           action_group_id: 'default',
           instance_id: '1',
@@ -773,6 +798,13 @@ describe('Task Runner', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           instance_id: '1',
           action_group_id: 'default',
@@ -808,7 +840,7 @@ describe('Task Runner', () => {
         alert: {
           rule: {
             execution: {
-              uuid: undefined,
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
         },
@@ -980,7 +1012,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -1019,6 +1051,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -1057,7 +1096,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -1333,7 +1372,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -1372,6 +1411,13 @@ describe('Task Runner', () => {
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -1408,6 +1454,13 @@ describe('Task Runner', () => {
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -1445,7 +1498,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -1493,7 +1546,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -1649,7 +1702,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -1689,6 +1742,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "instance_id": "2",
               },
@@ -1724,6 +1784,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -1761,7 +1828,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -1808,7 +1875,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -1856,7 +1923,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -2245,7 +2312,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -2285,6 +2352,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "2",
@@ -2321,6 +2395,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -2359,7 +2440,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -2599,7 +2680,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -2644,7 +2725,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -2720,7 +2801,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -2765,7 +2846,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -2850,7 +2931,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -2895,7 +2976,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -2980,7 +3061,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -3025,7 +3106,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -3109,7 +3190,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -3154,7 +3235,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -3416,7 +3497,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -3455,6 +3536,13 @@ describe('Task Runner', () => {
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -3491,6 +3579,13 @@ describe('Task Runner', () => {
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "2",
@@ -3527,6 +3622,13 @@ describe('Task Runner', () => {
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -3563,6 +3665,13 @@ describe('Task Runner', () => {
               "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "2",
@@ -3601,7 +3710,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -3715,7 +3824,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -3754,6 +3863,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -3790,6 +3906,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "2",
@@ -3828,7 +3951,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -3934,7 +4057,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -3971,6 +4094,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "1",
@@ -4005,6 +4135,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "action_group_id": "default",
                 "instance_id": "2",
@@ -4043,7 +4180,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -4144,7 +4281,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -4184,6 +4321,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "instance_id": "1",
               },
@@ -4220,6 +4364,13 @@ describe('Task Runner', () => {
               "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "instance_id": "2",
               },
@@ -4257,7 +4408,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -4360,7 +4511,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -4397,6 +4548,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "instance_id": "1",
               },
@@ -4430,6 +4588,13 @@ describe('Task Runner', () => {
               "kind": "alert",
             },
             "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "execution": Object {
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+                  },
+                },
+              },
               "alerting": Object {
                 "instance_id": "2",
               },
@@ -4467,7 +4632,7 @@ describe('Task Runner', () => {
               "alert": Object {
                 "rule": Object {
                   "execution": Object {
-                    "uuid": undefined,
+                    "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                   },
                 },
               },
@@ -4621,7 +4786,7 @@ describe('Task Runner', () => {
           "alert": Object {
             "rule": Object {
               "execution": Object {
-                "uuid": undefined,
+                "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
               },
             },
           },
@@ -4705,7 +4870,7 @@ describe('Task Runner', () => {
         alert: {
           rule: {
             execution: {
-              uuid: undefined,
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
         },
@@ -4734,7 +4899,7 @@ describe('Task Runner', () => {
         alert: {
           rule: {
             execution: {
-              uuid: undefined,
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
         },

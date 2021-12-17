@@ -94,6 +94,7 @@ export class TaskRunner<
     ActionGroupIds,
     RecoveryActionGroupId
   >;
+  private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private searchAbortController: AbortController;
   private cancelled: boolean;
@@ -119,6 +120,7 @@ export class TaskRunner<
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled = false;
+    this.executionId = uuid.v4();
   }
 
   async getDecryptedAttributes(
@@ -197,6 +199,7 @@ export class TaskRunner<
       ruleId,
       ruleName,
       tags,
+      executionId: this.executionId,
       logger: this.logger,
       actionsPlugin: this.context.actionsPlugin,
       apiKey,
@@ -292,7 +295,6 @@ export class TaskRunner<
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const ruleType = this.ruleTypeRegistry.get(alertTypeId);
-    const executionId = uuid.v4();
 
     const alerts = mapValues<
       Record<string, RawAlertInstance>,
@@ -318,7 +320,7 @@ export class TaskRunner<
       updatedRuleTypeState = await this.context.executionContext.withContext(ctx, () =>
         this.ruleType.executor({
           alertId: ruleId,
-          executionId,
+          executionId: this.executionId,
           services: {
             ...services,
             alertInstanceFactory: createAlertInstanceFactory<
@@ -406,6 +408,7 @@ export class TaskRunner<
     if (this.shouldLogAndScheduleActionsForAlerts()) {
       generateNewAndRecoveredAlertEvents({
         eventLogger,
+        executionId: this.executionId,
         originalAlerts,
         currentAlerts: alertsWithScheduledActions,
         recoveredAlerts,
@@ -573,7 +576,7 @@ export class TaskRunner<
 
   async run(): Promise<RuleTaskRunResult> {
     const {
-      params: { alertId: ruleId, executionId, spaceId },
+      params: { alertId: ruleId, spaceId },
       startedAt,
       state: originalState,
       schedule: taskSchedule,
@@ -599,7 +602,7 @@ export class TaskRunner<
       ruleType: this.ruleType as UntypedNormalizedRuleType,
       action: EVENT_LOG_ACTIONS.execute,
       namespace,
-      executionId,
+      executionId: this.executionId,
       task: {
         scheduled: this.taskInstance.runAt.toISOString(),
         scheduleDelay: Millis2Nanos * scheduleDelay,
@@ -756,6 +759,13 @@ export class TaskRunner<
         this.ruleType.ruleTaskTimeout
       }`,
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: this.executionId,
+            },
+          },
+        },
         saved_objects: [
           {
             rel: SAVED_OBJECT_REL_PRIMARY,
@@ -852,6 +862,7 @@ interface GenerateNewAndRecoveredAlertEventsParams<
   InstanceContext extends AlertInstanceContext
 > {
   eventLogger: IEventLogger;
+  executionId: string;
   originalAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
   currentAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
   recoveredAlerts: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
@@ -880,6 +891,7 @@ function generateNewAndRecoveredAlertEvents<
 >(params: GenerateNewAndRecoveredAlertEventsParams<InstanceState, InstanceContext>) {
   const {
     eventLogger,
+    executionId,
     ruleId,
     namespace,
     currentAlerts,
@@ -959,6 +971,13 @@ function generateNewAndRecoveredAlertEvents<
         ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: executionId,
+            },
+          },
+        },
         alerting: {
           instance_id: alertId,
           ...(group ? { action_group_id: group } : {}),

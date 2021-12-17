@@ -73,6 +73,7 @@ const createExecutionHandlerParams: jest.Mocked<
   spaceId: 'test1',
   ruleId: '1',
   ruleName: 'name-of-alert',
+  executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
   tags: ['tag-A', 'tag-B'],
   apiKey: 'MTIzOmFiYw==',
   kibanaBaseUrl: 'http://localhost:5601',
@@ -176,7 +177,7 @@ test('enqueues execution per selected action', async () => {
             "alert": Object {
               "rule": Object {
                 "execution": Object {
-                  "uuid": undefined,
+                  "uuid": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 },
               },
             },

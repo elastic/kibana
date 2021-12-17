@@ -21,6 +21,10 @@ import { getBeforeSetup, setGlobalDate } from './lib';
 import { eventLoggerMock } from '../../../../event_log/server/event_logger.mock';
 import { TaskStatus } from '../../../../task_manager/server';
 
+jest.mock('uuid', () => ({
+  v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+}));
+
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -328,7 +332,7 @@ describe('disable()', () => {
         alert: {
           rule: {
             execution: {
-              uuid: undefined,
+              uuid: 'rules-client', // TODO: See TODO in `rules_client.ts`
             },
           },
         },

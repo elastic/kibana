@@ -32,6 +32,10 @@ import { Alert, RecoveredActionGroup } from '../../common';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 
+jest.mock('uuid', () => ({
+  v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+}));
+
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test',
   name: 'My test rule',
@@ -211,7 +215,7 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
-              uuid: undefined,
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
         },
@@ -243,6 +247,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -271,7 +282,7 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
-              uuid: undefined,
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
         },
@@ -454,7 +465,7 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
-              uuid: undefined,
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
         },
@@ -486,6 +497,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -515,7 +533,7 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
-              uuid: undefined,
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
         },
@@ -584,7 +602,7 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
-              uuid: undefined,
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
         },
@@ -617,6 +635,13 @@ describe('Task Runner Cancel', () => {
         kind: 'alert',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         saved_objects: [
           {
             id: '1',
@@ -644,6 +669,13 @@ describe('Task Runner Cancel', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           action_group_id: 'default',
           instance_id: '1',
@@ -677,6 +709,13 @@ describe('Task Runner Cancel', () => {
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            },
+          },
+        },
         alerting: {
           action_group_id: 'default',
           instance_id: '1',
@@ -704,7 +743,7 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
-              uuid: undefined,
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
         },
@@ -742,7 +781,7 @@ describe('Task Runner Cancel', () => {
         alert: {
           rule: {
             execution: {
-              uuid: undefined,
+              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             },
           },
         },
