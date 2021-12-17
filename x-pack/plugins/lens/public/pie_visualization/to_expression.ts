@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Ast } from '@kbn/interpreter/common';
+import type { Ast } from '@kbn/interpreter';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { Operation, DatasourcePublicAPI } from '../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';

@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import type { GaugeArguments } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
 import {
   GaugeShapes,
