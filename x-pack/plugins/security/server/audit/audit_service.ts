@@ -163,14 +163,14 @@ export class AuditService {
     const asSystem = (request: KibanaRequest): AuditLogger => {
       /**
        * Logs an {@link AuditEvent} and automatically adds meta data about the
-       * current user, space and correlation id.
+       * kibana internal, space and correlation id.
        *
        * Guidelines around what events should be logged and how they should be
        * structured can be found in: `/x-pack/plugins/security/README.md`
        *
        * @example
        * ```typescript
-       * const auditLogger = securitySetup.audit.asScoped(request);
+       * const auditLogger = securitySetup.audit.asSystem(request);
        * auditLogger.log({
        *   message: 'User is updating dashboard [id=123]',
        *   event: {
