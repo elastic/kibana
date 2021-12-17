@@ -1125,9 +1125,7 @@ describe('when on the endpoint list page', () => {
       });
 
       it('should display policy response sub-panel', async () => {
-        expect(
-          await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutHeader')
-        ).not.toBeNull();
+        expect(await renderResult.findByTestId('flyoutSubHeaderBackButton')).not.toBeNull();
         expect(
           await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutBody')
         ).not.toBeNull();
@@ -1214,7 +1212,7 @@ describe('when on the endpoint list page', () => {
 
       it('should include the back to details link', async () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
-        expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
+        expect(subHeaderBackLink.textContent).toBe('Endpoint details');
         expect(subHeaderBackLink.getAttribute('href')).toEqual(
           `${APP_PATH}${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=details`
         );
