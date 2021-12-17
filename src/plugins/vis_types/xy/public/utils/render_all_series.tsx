@@ -69,8 +69,35 @@ export const renderAllSeries = (
   timeZone: string,
   xAccessor: Accessor | AccessorFn,
   splitSeriesAccessors: Array<Accessor | AccessorFn>
-) =>
-  seriesParams.map(
+) => {
+  // const seriesAreOnTheSameAxis = '';
+  // console.dir(seriesParams);
+  // console.dir(yAxes);
+  // yAxes.forEach((yAxis, index) => {
+  //   const axisId = yAxis.groupId;
+  //   const series = seriesParams.filter((s) => s.valueAxis === axisId);
+  //   const scale = yAxis.scale;
+  //   const yAccessors = aspects.y.map((aspect) => aspect.accessor) as string[];
+  //   if (scale.mode === 'percentage') {
+  //     const splitChartAccessor = aspects.splitColumn?.accessor || aspects.splitRow?.accessor;
+
+  //     const groupAccessors = [String(xAccessor)];
+  //     if (splitChartAccessor) {
+  //       groupAccessors.push(splitChartAccessor);
+  //     }
+  //     const temp = computeRatioByGroups(
+  //       data,
+  //       groupAccessors,
+  //       (d) => {
+  //         // console.dir(d);
+  //         return d['col-0-1'];
+  //       },
+  //       'stratou'
+  //     );
+  //   }
+  // });
+
+  return seriesParams.map(
     ({
       show,
       valueAxis: groupId,
@@ -98,7 +125,9 @@ export const renderAllSeries = (
         groupAccessors.push(splitChartAccessor);
       }
       let computedData = data;
-      if (yAxisScale?.mode === 'percentage') {
+      const isStacked = mode === 'stacked';
+
+      if (yAxisScale?.mode === 'percentage' && !isStacked) {
         yAccessors.forEach((accessor) => {
           computedData = computeRatioByGroups(
             computedData,
@@ -108,7 +137,6 @@ export const renderAllSeries = (
           );
         });
       }
-      const isStacked = mode === 'stacked';
       const stackMode = yAxisScale?.mode === 'normal' ? undefined : yAxisScale?.mode;
       // needed to seperate stacked and non-stacked bars into unique pseudo groups
       const pseudoGroupId = isStacked ? `__pseudo_stacked_group-${groupId}__` : groupId;
@@ -201,3 +229,4 @@ export const renderAllSeries = (
       }
     }
   );
+};
