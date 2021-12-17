@@ -236,7 +236,7 @@ export const EventFiltersListPage = memo(() => {
   );
 
   if (isLoading && !doesDataExist) {
-    return <ManagementPageLoader data-test-subj="eventFilterListLaoder" />;
+    return <ManagementPageLoader data-test-subj="eventFilterListLoader" />;
   }
 
   return (
