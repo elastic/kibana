@@ -8,8 +8,7 @@
 
 import { escapeRegExp, memoize } from 'lodash';
 
-// @internal
-export const makeRegEx = memoize(function makeRegEx(glob: string) {
+const makeRegEx = memoize(function makeRegEx(glob: string) {
   const globRegex = glob.split('*').map(escapeRegExp).join('.*');
   return new RegExp(`^${globRegex}$`);
 });
