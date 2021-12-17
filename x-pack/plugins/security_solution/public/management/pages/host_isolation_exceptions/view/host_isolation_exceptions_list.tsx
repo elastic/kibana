@@ -173,7 +173,7 @@ export const HostIsolationExceptionsList = () => {
   );
 
   if (isLoading && !hasDataToShow) {
-    return <ManagementPageLoader data-test-subj="hostIsolationExceptionListLaoder" />;
+    return <ManagementPageLoader data-test-subj="hostIsolationExceptionListLoader" />;
   }
 
   return (

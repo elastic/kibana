@@ -107,14 +107,14 @@ describe('When on the host isolation exceptions page', () => {
         await waitForApiCall();
 
         // see if loader is present
-        expect(renderResult.getByTestId('hostIsolationExceptionListLaoder')).toBeTruthy();
+        expect(renderResult.getByTestId('hostIsolationExceptionListLoader')).toBeTruthy();
 
         // release the request
         releaseApiResponse!(getFoundExceptionListItemSchemaMock());
 
         //  check the loader is gone
         await waitForElementToBeRemoved(
-          renderResult.getByTestId('hostIsolationExceptionListLaoder')
+          renderResult.getByTestId('hostIsolationExceptionListLoader')
         );
       });
 

@@ -168,7 +168,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         ) : displayHeaderAndContent ? (
           <PolicyTrustedAppsList />
         ) : (
-          <ManagementPageLoader data-test-subj="policyTrustedAppsListLaoder" />
+          <ManagementPageLoader data-test-subj="policyTrustedAppsListLoader" />
         )}
       </EuiPageContent>
       {canCreateArtifactsByPolicy && showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
