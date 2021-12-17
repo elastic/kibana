@@ -31,8 +31,8 @@ describe('withQueryParams', () => {
     const Component = withQueryParams(() => <div />, ['id', 'query']);
     const component = mountComponent(<Component services={{} as DiscoverServices} />);
 
-    expect(component.html()).toContain('Error loading Discover');
-    expect(component.html()).toContain('Query should contain id, query.');
+    expect(component.html()).toContain('Cannot load this page');
+    expect(component.html()).toContain('URL query string is missing id, query.');
   });
 
   it('should not display error message, when query contain required parameters', () => {
@@ -50,6 +50,6 @@ describe('withQueryParams', () => {
     );
 
     expect(component.html()).toContain('one and another are presented');
-    expect(component.html()).not.toContain('Query should contain id, query.');
+    expect(component.html()).not.toContain('URL query string is missing id, query.');
   });
 });
