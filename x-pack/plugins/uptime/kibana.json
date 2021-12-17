@@ -24,7 +24,8 @@
     "security",
     "triggersActionsUi",
     "usageCollection",
-    "taskManager"
+    "taskManager",
+    "apm"
   ],
   "server": true,
   "ui": true,

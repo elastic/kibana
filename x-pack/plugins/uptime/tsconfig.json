@@ -30,6 +30,9 @@
     },
     {
       "path": "../fleet/tsconfig.json"
+    },
+    {
+      "path": "../apm/tsconfig.json"
     }
   ]
 }

@@ -24,3 +24,7 @@ export const plugin: PluginInitializer<ApmPluginSetup, ApmPluginStart> = (
 ) => new ApmPlugin(pluginInitializerContext);
 
 export type { ApmPluginSetup, ApmPluginStart };
+
+// Shared components
+export { LazyServiceInventoryWrapper as ServiceInventory } from './components/app/service_inventory/service_inventory_reusable/service_inventory_wrapper';
+export type { ServiceInventoryProps } from './components/app/service_inventory/service_inventory_reusable';

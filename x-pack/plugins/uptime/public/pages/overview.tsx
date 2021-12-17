@@ -16,6 +16,7 @@ import { StatusPanel } from '../components/overview/status_panel';
 import { QueryBar } from '../components/overview/query_bar/query_bar';
 import { MONITORING_OVERVIEW_LABEL } from '../routes';
 import { FilterGroup } from '../components/overview/filter_group/filter_group';
+import { ServiceInventory } from '../../../apm/public';
 
 const EuiFlexItemStyled = styled(EuiFlexItem)`
   && {
@@ -45,6 +46,14 @@ export const OverviewPageComponent = () => {
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
       <StatusPanel />
+      <ServiceInventory
+        comparisonEnabled={true}
+        comparisonType="period"
+        rangeFrom="now-30d/d"
+        rangeTo="now"
+        environment="ENVIRONMENT_ALL"
+        kuery=""
+      />
       <EuiSpacer size="s" />
       <MonitorList />
     </>
