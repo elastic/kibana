@@ -14,6 +14,7 @@ import { CasesClient } from '../client';
 import { CasesClientArgs } from '../types';
 import { AlertsCount } from './alerts_count';
 import { AlertDetails } from './alert_details';
+import { Actions } from './actions';
 import { Connectors } from './connectors';
 import { Lifespan } from './lifespan';
 import { MetricsHandler } from './types';
@@ -69,13 +70,11 @@ const buildHandlers = (
     new Lifespan(params.caseId, casesClient),
     new AlertsCount(params.caseId, casesClient, clientArgs),
     new AlertDetails(params.caseId, casesClient, clientArgs),
+    new Actions(params.caseId, casesClient, clientArgs),
     new Connectors(),
   ];
 
-  const uniqueFeatures = params.features.reduce((acc, feature) => {
-    acc.add(feature);
-    return acc;
-  }, new Set<string>());
+  const uniqueFeatures = new Set(params.features);
 
   const handlerFeatures = new Set<string>();
   const handlersToExecute = new Set<MetricsHandler>();

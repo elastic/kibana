@@ -28,13 +28,14 @@ import {
 import { ClientArgs } from '..';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField } from '../../common/utils';
-
-interface GetAllAlertsAttachToCaseArgs extends ClientArgs {
+interface AttachedToCaseArgs extends ClientArgs {
   caseId: string;
   filter?: KueryNode;
 }
 
-type CountAlertsAttachedToCaseArgs = GetAllAlertsAttachToCaseArgs;
+type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
+type CountAlertsAttachedToCaseArgs = AttachedToCaseArgs;
+type CountActionsAttachedToCaseArgs = AttachedToCaseArgs;
 
 interface GetAttachmentArgs extends ClientArgs {
   attachmentId: string;
@@ -57,6 +58,11 @@ export type UpdateAttachmentArgs = UpdateArgs & ClientArgs;
 interface BulkUpdateAttachmentArgs extends ClientArgs {
   comments: UpdateArgs[];
 }
+
+interface ActionsAggregate {
+  actions: { buckets: Array<{ key: string; doc_count: number }> };
+}
+export type CountActionsResponse = Record<string, number>;
 
 export class AttachmentService {
   constructor(private readonly log: Logger) {}
@@ -144,6 +150,57 @@ export class AttachmentService {
       this.log.error(`Error on GET all alerts for case id ${caseId}: ${error}`);
       throw error;
     }
+  }
+
+  /**
+   * Counts alerts attached to a case by alert type.
+   */
+  public async countActionsAttachedToCase({
+    unsecuredSavedObjectsClient,
+    caseId,
+    filter,
+  }: CountActionsAttachedToCaseArgs): Promise<CountActionsResponse | undefined> {
+    try {
+      this.log.debug(`Attempting to count alerts for case id ${caseId}`);
+      const alertsFilter = buildFilter({
+        filters: [CommentType.actions],
+        field: 'type',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      });
+
+      const combinedFilter = combineFilters([alertsFilter, filter]);
+
+      const response = await unsecuredSavedObjectsClient.find<
+        AttachmentAttributes,
+        ActionsAggregate
+      >({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        aggs: this.buildCountActionsAggs(),
+        filter: combinedFilter,
+      });
+
+      return response.aggregations?.actions?.buckets.reduce(
+        (result, { key, doc_count: total }) => ({ ...result, [key]: total }),
+        {}
+      );
+    } catch (error) {
+      this.log.error(`Error while counting actions for case id ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  private buildCountActionsAggs(): Record<string, estypes.AggregationsAggregationContainer> {
+    return {
+      actions: {
+        terms: {
+          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.actions.type`,
+        },
+      },
+    };
   }
 
   public async get({
