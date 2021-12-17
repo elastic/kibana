@@ -102,7 +102,7 @@ if (doc['task.runAt'].size()!=0) {
     },
   },
 };
-export const SortByRunAtAndRetryAt = SortByRunAtAndRetryAtScript as estypes.SearchSortCombinations;
+export const SortByRunAtAndRetryAt = SortByRunAtAndRetryAtScript as estypes.SortCombinations;
 
 export const updateFieldsAndMarkAsFailed = (
   fieldUpdates: {
