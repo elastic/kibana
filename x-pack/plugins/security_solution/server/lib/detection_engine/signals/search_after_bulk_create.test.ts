@@ -837,7 +837,6 @@ describe('searchAfterAndBulkCreate', () => {
   test('if returns false when singleSearchAfter throws an exception', async () => {
     mockService.search.asCurrentUser.search
       .mockResolvedValueOnce(
-        // @ts-expect-error not full response interface
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           took: 100,
           errors: false,
