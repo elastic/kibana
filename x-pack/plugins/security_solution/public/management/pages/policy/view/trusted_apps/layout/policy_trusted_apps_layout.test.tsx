@@ -140,7 +140,9 @@ describe('Policy trusted apps layout', () => {
         if (options.query?.filter === hasAnyQuery) {
           const exceptionsGenerator = new ExceptionsListItemGenerator('seed');
           return {
-            data: Array.from({ length: 10 }, () => exceptionsGenerator.generate()),
+            data: Array.from({ length: 10 }, () =>
+              exceptionsGenerator.generate({ os_types: ['windows'] })
+            ),
             total: 10,
             page: 0,
             per_page: 10,

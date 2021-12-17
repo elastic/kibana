@@ -92,6 +92,7 @@ export function ObservabilityExploratoryView() {
       indexPatterns={{}}
       reportConfigMap={obsvReportConfigMap}
       setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
+      theme$={appMountParameters.theme$}
     >
       <ExploratoryViewPage />
     </ExploratoryViewContextProvider>
