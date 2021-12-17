@@ -17,8 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
 
-  // FLAKY https://github.com/elastic/kibana/issues/107057
-  describe.skip('indexpattern without timefield', () => {
+  describe('indexpattern without timefield', () => {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'kibana_timefield']);
       await esArchiver.loadIfNeeded(
@@ -66,15 +65,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should switch between with and without timefield using the browser back button', async () => {
       await PageObjects.discover.selectIndexPattern('without-timefield');
       await PageObjects.discover.waitForDocTableLoadingComplete();
-      if (await PageObjects.timePicker.timePickerExists()) {
-        throw new Error('Expected timepicker not to exist');
-      }
+      await retry.waitForWithTimeout(
+        'The timepicker not to exist',
+        5000,
+        async () => !(await PageObjects.timePicker.timePickerExists())
+      );
 
       await PageObjects.discover.selectIndexPattern('with-timefield');
       await PageObjects.discover.waitForDocTableLoadingComplete();
-      if (!(await PageObjects.timePicker.timePickerExists())) {
-        throw new Error('Expected timepicker to exist');
-      }
+      await retry.waitForWithTimeout(
+        'The timepicker to exist',
+        5000,
+        async () => await PageObjects.timePicker.timePickerExists()
+      );
+
       // Navigating back
       await browser.goBack();
       await PageObjects.discover.waitForDocTableLoadingComplete();
@@ -85,9 +89,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           (await testSubjects.getVisibleText('indexPattern-switch-link')) === 'without-timefield'
       );
 
-      if (await PageObjects.timePicker.timePickerExists()) {
-        throw new Error('Expected timepicker not to exist');
-      }
+      await retry.waitForWithTimeout(
+        'The timepicker not to exist',
+        5000,
+        async () => !(await PageObjects.timePicker.timePickerExists())
+      );
     });
   });
 }
