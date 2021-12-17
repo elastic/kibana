@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { AGENT_FIELD, ALL_AGENTS_OPTION, LIVE_QUERY_EDITOR } from '../screens/live_query';
+import { LIVE_QUERY_EDITOR } from '../screens/live_query';
+
+export const DEFAULT_QUERY = 'select * from processes;';
 
 export const selectAllAgents = () => {
-  cy.get(AGENT_FIELD).first().click();
-  return cy.get(ALL_AGENTS_OPTION).contains('All agents').click();
+  cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).click();
+  cy.react('EuiFilterSelectItem').contains('All agents').click();
 };
 
-export const inputQuery = () => cy.get(LIVE_QUERY_EDITOR).type('select * from processes;');
+export const inputQuery = (query: string) => cy.get(LIVE_QUERY_EDITOR).type(query);
 
 export const submitQuery = () => cy.contains('Submit').click();
 

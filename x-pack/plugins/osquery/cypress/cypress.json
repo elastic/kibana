@@ -1,6 +1,6 @@
 {
   "baseUrl": "http://localhost:5620",
-  "defaultCommandTimeout": 6000,
+  "defaultCommandTimeout": 60000,
   "execTimeout": 12000,
   "pageLoadTimeout": 12000,
   "retries": {
@@ -12,5 +12,10 @@
   "videosFolder": "../../../target/kibana-osquery/cypress/videos",
   "viewportHeight": 900,
   "viewportWidth": 1440,
-  "experimentalStudio": true
+  "experimentalStudio": true,
+  "env": {
+    "cypress-react-selector": {
+      "root": "#osquery-app"
+    }
+  }
 }
