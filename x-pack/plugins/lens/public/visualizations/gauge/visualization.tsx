@@ -10,6 +10,7 @@ import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter/common';
+import { DatatableRow } from 'src/plugins/expressions';
 import type { GaugeArguments } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
 import {
   GaugeShapes,
@@ -73,6 +74,35 @@ function computePaletteParams(params: CustomPaletteParams) {
     reverse: false, // managed at UI level
   };
 }
+
+const checkInvalidConfiguration = (row?: DatatableRow, state?: GaugeVisualizationState) => {
+  if (!row || !state) {
+    return;
+  }
+  const minValue = getValueFromAccessor('minAccessor', row, state);
+  const maxValue = getValueFromAccessor('maxAccessor', row, state);
+  if (maxValue != null && minValue != null) {
+    if (maxValue < minValue) {
+      return {
+        invalid: true,
+        invalidMessage: i18n.translate(
+          'xpack.lens.guageVisualization.chartCannotRenderMinGreaterMax',
+          {
+            defaultMessage: 'Minimum value may not be greater than maximum value',
+          }
+        ),
+      };
+    }
+    if (maxValue === minValue) {
+      return {
+        invalid: true,
+        invalidMessage: i18n.translate('xpack.lens.guageVisualization.chartCannotRenderEqual', {
+          defaultMessage: 'Minimum and maximum values may not be equal',
+        }),
+      };
+    }
+  }
+};
 
 const toExpression = (
   paletteService: PaletteRegistry,
@@ -195,31 +225,7 @@ export const getGaugeVisualization = ({
       const displayStops = applyPaletteParams(paletteService, state?.palette, currentMinMax);
       palette = getStopsForFixedMode(displayStops, state?.palette?.params?.colorStops);
     }
-
-    let invalidProps: { invalid?: boolean; invalidMessage?: string } = {};
-    const minValue = getValueFromAccessor('minAccessor', row, state);
-    const maxValue = getValueFromAccessor('maxAccessor', row, state);
-    if (maxValue != null && minValue != null) {
-      if (maxValue < minValue) {
-        invalidProps = {
-          invalid: true,
-          invalidMessage: i18n.translate(
-            'xpack.lens.guageVisualization.chartCannotRenderMinGreaterMax',
-            {
-              defaultMessage: 'Minimum value may not be greater than maximum value',
-            }
-          ),
-        };
-      }
-      if (maxValue === minValue) {
-        invalidProps = {
-          invalid: true,
-          invalidMessage: i18n.translate('xpack.lens.guageVisualization.chartCannotRenderEqual', {
-            defaultMessage: 'Minimum and maximum values may not be equal',
-          }),
-        };
-      }
-    }
+    const invalidProps = checkInvalidConfiguration(row, state) || {};
 
     return {
       groups: [
@@ -429,7 +435,7 @@ export const getGaugeVisualization = ({
     }
 
     const row = frame?.activeData?.[state.layerId]?.rows?.[0];
-    if (!row) {
+    if (!row || checkInvalidConfiguration(row, state)) {
       return [];
     }
     const metricValue = row[metricAccessor];
