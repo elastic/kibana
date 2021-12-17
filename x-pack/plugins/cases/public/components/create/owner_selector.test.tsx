@@ -9,9 +9,10 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 
-import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { OBSERVABILITY_OWNER } from '../../../common/constants';
 import { useForm, Form, FormHook } from '../../common/shared_imports';
-import { CaseOwnerSelection } from './case_owner_selection';
+import { CreateCaseOwnerSelector } from './owner_selector';
 import { schema, FormProps } from './schema';
 
 describe('Case Owner Selection', () => {
@@ -37,11 +38,11 @@ describe('Case Owner Selection', () => {
   it('renders', () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CaseOwnerSelection availableOwners={[SECURITY_SOLUTION_OWNER]} isLoading={false} />
+        <CreateCaseOwnerSelector availableOwners={[SECURITY_SOLUTION_OWNER]} isLoading={false} />
       </MockHookWrapperComponent>
     );
 
-    expect(wrapper.find(`[data-test-subj="caseOwnerSelection"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseOwnerSelector"]`).exists()).toBeTruthy();
   });
 
   it.each([
@@ -50,7 +51,7 @@ describe('Case Owner Selection', () => {
   ])('disables %s button if user only has %j', (disabledButton, permission) => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CaseOwnerSelection availableOwners={[permission]} isLoading={false} />
+        <CreateCaseOwnerSelector availableOwners={[permission]} isLoading={false} />
       </MockHookWrapperComponent>
     );
 
@@ -68,7 +69,7 @@ describe('Case Owner Selection', () => {
   it('defaults to security Solution', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CaseOwnerSelection
+        <CreateCaseOwnerSelector
           availableOwners={[OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER]}
           isLoading={false}
         />
@@ -86,7 +87,7 @@ describe('Case Owner Selection', () => {
   it('it changes the selection', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <CaseOwnerSelection
+        <CreateCaseOwnerSelector
           availableOwners={[OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER]}
           isLoading={false}
         />

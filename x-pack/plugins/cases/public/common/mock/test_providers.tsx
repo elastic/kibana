@@ -10,13 +10,19 @@ import React from 'react';
 import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
+
 import { DEFAULT_FEATURES, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CasesFeatures } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
 import { createKibanaContextProviderMock } from '../lib/kibana/kibana_react.mock';
 import { FieldHook } from '../shared_imports';
 
-type Props = { children: React.ReactNode } & Partial<CasesContextValue>;
+interface Props {
+  children: React.ReactNode;
+  userCanCrud?: boolean;
+  features?: CasesFeatures;
+  owner?: string[];
+}
 
 window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();

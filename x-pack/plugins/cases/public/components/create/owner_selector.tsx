@@ -18,13 +18,13 @@ import {
 } from '@elastic/eui';
 
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
-import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common';
-import { OWNER_INFO } from '../../../common/constants';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { OBSERVABILITY_OWNER, OWNER_INFO } from '../../../common/constants';
 
 import { FieldHook, getFieldValidityAndErrorMessage, UseField } from '../../common/shared_imports';
 import * as i18n from './translations';
 
-interface MenuSelectionProps {
+interface OwnerSelectorProps {
   field: FieldHook<string>;
   isLoading: boolean;
   availableOwners: string[];
@@ -48,21 +48,11 @@ const FullWidthKeyPadItem = euiStyled(EuiKeyPadMenuItem)`
   width: 100%;
 `;
 
-const CaseOwnerSelectionComponent: React.FC<Props> = ({ availableOwners, isLoading }) => {
-  return (
-    <UseField
-      path={FIELD_NAME}
-      component={MenuSelection}
-      componentProps={{ availableOwners, isLoading }}
-    />
-  );
-};
-
-const MenuSelection = ({
+const OwnerSelector = ({
   availableOwners,
   field,
   isLoading = false,
-}: MenuSelectionProps): JSX.Element => {
+}: OwnerSelectorProps): JSX.Element => {
   const { errorMessage, isInvalid } = getFieldValidityAndErrorMessage(field);
   const radioGroupName = useGeneratedHtmlId({ prefix: 'caseOwnerRadioGroup' });
 
@@ -70,17 +60,17 @@ const MenuSelection = ({
 
   useEffect(() => {
     if (!field.value) {
-      const securitySolutionIndex = availableOwners.findIndex(
-        (value) => value === SECURITY_SOLUTION_OWNER
+      onChange(
+        availableOwners.includes(SECURITY_SOLUTION_OWNER)
+          ? SECURITY_SOLUTION_OWNER
+          : availableOwners[0]
       );
-      const defaultSelectedSolution = securitySolutionIndex === -1 ? 0 : securitySolutionIndex;
-      onChange(availableOwners[defaultSelectedSolution]);
     }
   }, [availableOwners, field.value, onChange]);
 
   return (
     <EuiFormRow
-      data-test-subj="caseOwnerSelection"
+      data-test-subj="caseOwnerSelector"
       fullWidth
       isInvalid={isInvalid}
       error={errorMessage}
@@ -112,6 +102,16 @@ const MenuSelection = ({
   );
 };
 
-CaseOwnerSelectionComponent.displayName = 'CaseOwnerSelectionComponent';
+const CaseOwnerSelector: React.FC<Props> = ({ availableOwners, isLoading }) => {
+  return (
+    <UseField
+      path={FIELD_NAME}
+      component={OwnerSelector}
+      componentProps={{ availableOwners, isLoading }}
+    />
+  );
+};
 
-export const CaseOwnerSelection = memo(CaseOwnerSelectionComponent);
+CaseOwnerSelector.displayName = 'CaseOwnerSelectionComponent';
+
+export const CreateCaseOwnerSelector = memo(CaseOwnerSelector);

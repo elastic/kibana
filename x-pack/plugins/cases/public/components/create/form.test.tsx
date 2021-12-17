@@ -18,7 +18,6 @@ import { CreateCaseForm, CreateCaseFormProps } from './form';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { TestProviders } from '../../common/mock';
-import { CasesContextValue } from '../../containers/types';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
@@ -48,9 +47,9 @@ const casesFormProps: CreateCaseFormProps = {
 
 describe('CreateCaseForm', () => {
   let globalForm: FormHook;
-  const MockHookWrapperComponent: React.FC<Partial<CasesContextValue>> = ({
+  const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
     children,
-    ...props
+    testProviderProps = {},
   }) => {
     const { form } = useForm<FormProps>({
       defaultValue: initialCaseValue,
@@ -61,7 +60,7 @@ describe('CreateCaseForm', () => {
     globalForm = form;
 
     return (
-      <TestProviders {...props}>
+      <TestProviders {...testProviderProps}>
         <Form form={form}>{children}</Form>
       </TestProviders>
     );
@@ -106,12 +105,12 @@ describe('CreateCaseForm', () => {
     expect(wrapper.find(`[data-test-subj="caseDescription"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="caseSyncAlerts"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="caseOwnerSelection"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="caseOwnerSelector"]`).exists()).toBeFalsy();
   });
 
   it('renders all form fields including case selection if has permissions and no owner', async () => {
     const wrapper = mount(
-      <MockHookWrapperComponent owner={[]}>
+      <MockHookWrapperComponent testProviderProps={{ owner: [] }}>
         <CreateCaseForm {...casesFormProps} />
       </MockHookWrapperComponent>
     );
@@ -121,12 +120,12 @@ describe('CreateCaseForm', () => {
     expect(wrapper.find(`[data-test-subj="caseDescription"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="caseSyncAlerts"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="caseConnectors"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="caseOwnerSelection"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="caseOwnerSelector"]`).exists()).toBeTruthy();
   });
 
   it('hides the sync alerts toggle', () => {
     const { queryByText } = render(
-      <MockHookWrapperComponent features={{ alerts: { sync: false } }}>
+      <MockHookWrapperComponent testProviderProps={{ features: { alerts: { sync: false } } }}>
         <CreateCaseForm {...casesFormProps} />
       </MockHookWrapperComponent>
     );

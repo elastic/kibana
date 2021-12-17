@@ -31,7 +31,7 @@ import { UsePostComment } from '../../containers/use_post_comment';
 import { SubmitCaseButton } from './submit_button';
 import { FormContext } from './form_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
-import { CaseOwnerSelection } from './case_owner_selection';
+import { CreateCaseOwnerSelector } from './owner_selector';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 
@@ -88,7 +88,10 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             </Container>
             {canShowCaseSolutionSelection && (
               <Container big>
-                <CaseOwnerSelection availableOwners={availableOwners} isLoading={isSubmitting} />
+                <CreateCaseOwnerSelector
+                  availableOwners={availableOwners}
+                  isLoading={isSubmitting}
+                />
               </Container>
             )}
             <Container big>
