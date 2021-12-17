@@ -6,12 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import { PolicyTestResourceInfo } from '../../security_solution_endpoint/services/endpoint_policy';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { deletePolicyStream } from './data_stream_helper';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const policyService = getService('policyService');
   describe('Endpoint policy api', () => {
     describe('GET /api/endpoint/policy_response', () => {
       before(
@@ -46,22 +48,24 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
     describe('get policy list', async () => {
-      before(
-        async () =>
-          await esArchiver.load('x-pack/test/functional/es_archives/endpoint/policy', {
-            useCreate: true,
-          })
-      );
+      let policyInfo: PolicyTestResourceInfo;
+      beforeEach(async () => {
+        policyInfo = await policyService.createPolicy();
+      });
+
+      afterEach(async () => {
+        if (policyInfo) {
+          await policyInfo.cleanup();
+        }
+      });
       it('should return a list of policies', async () => {
         const { body } = await supertest.get(`/api/endpoint/policy`).send().expect(200);
-        expect(body.items).to.eql([
-          {
-            items: [],
-            total: 0,
-            page: 1,
-            perPage: 10,
-          },
-        ]);
+        expect(body).to.eql({
+          items: [policyInfo.packagePolicy],
+          total: 1,
+          page: 1,
+          perPage: 20,
+        });
       });
     });
   });
