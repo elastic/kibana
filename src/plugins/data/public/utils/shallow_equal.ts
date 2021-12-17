@@ -6,21 +6,12 @@
  * Side Public License, v 1.
  */
 
-function is(x: unknown, y: unknown) {
-  if (x === y) {
-    return x !== 0 || y !== 0 || 1 / x === 1 / y;
-  } else {
-    return x !== x && y !== y;
-  }
-}
-
 /**
- * Shallow Equal check
- *
- * Adapted from react-redux
+ * Shallow Equal check adapted from react-redux
+ * Copy-pasted to avoid importing copy of react-redux into data plugin async chunk
  **/
 export function shallowEqual(objA: unknown, objB: unknown): boolean {
-  if (is(objA, objB)) return true;
+  if (Object.is(objA, objB)) return true;
 
   if (typeof objA !== 'object' || objA === null || typeof objB !== 'object' || objB === null) {
     return false;
@@ -35,7 +26,7 @@ export function shallowEqual(objA: unknown, objB: unknown): boolean {
     if (
       !Object.prototype.hasOwnProperty.call(objB, keysA[i]) ||
       // @ts-ignore
-      !is(objA[keysA[i]], objB[keysA[i]])
+      !Object.is(objA[keysA[i]], objB[keysA[i]])
     ) {
       return false;
     }
