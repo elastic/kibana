@@ -7,7 +7,15 @@
 
 import './login_page.scss';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
@@ -30,6 +38,7 @@ import {
 } from '../../../common/constants';
 import type { LoginState } from '../../../common/login_state';
 import type { LogoutReason } from '../../../common/types';
+import type { ConfigType } from '../../config';
 import type { LoginFormProps } from './components';
 import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
 
@@ -38,6 +47,7 @@ interface Props {
   notifications: NotificationsStart;
   fatalErrors: FatalErrorsStart;
   loginAssistanceMessage: string;
+  sameSiteCookies?: ConfigType['sameSiteCookies'];
 }
 
 interface State {
@@ -96,10 +106,13 @@ export class LoginPage extends Component<Props, State> {
     }
 
     const isSecureConnection = !!window.location.protocol.match(/^https/);
+    const isCookiesEnabled = window.navigator.cookieEnabled;
     const { allowLogin, layout, requiresSecureConnection } = loginState;
 
     const loginIsSupported =
-      requiresSecureConnection && !isSecureConnection ? false : allowLogin && layout === 'form';
+      (requiresSecureConnection && !isSecureConnection) || !isCookiesEnabled
+        ? false
+        : allowLogin && layout === 'form';
 
     const contentHeaderClasses = classNames('loginWelcome__content', 'eui-textCenter', {
       ['loginWelcome__contentDisabledForm']: !loginIsSupported,
@@ -130,7 +143,13 @@ export class LoginPage extends Component<Props, State> {
         </header>
         <div className={contentBodyClasses}>
           <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem>{this.getLoginForm({ ...loginState, isSecureConnection })}</EuiFlexItem>
+            <EuiFlexItem>
+              {this.getLoginForm({
+                ...loginState,
+                isSecureConnection,
+                isCookiesEnabled,
+              })}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </div>
       </div>
@@ -141,9 +160,13 @@ export class LoginPage extends Component<Props, State> {
     layout,
     requiresSecureConnection,
     isSecureConnection,
+    isCookiesEnabled,
     selector,
     loginHelp,
-  }: LoginState & { isSecureConnection: boolean }) => {
+  }: LoginState & {
+    isSecureConnection: boolean;
+    isCookiesEnabled: boolean;
+  }) => {
     const isLoginExplicitlyDisabled = selector.providers.length === 0;
     if (isLoginExplicitlyDisabled) {
       return (
@@ -177,6 +200,60 @@ export class LoginPage extends Component<Props, State> {
             <FormattedMessage
               id="xpack.security.loginPage.requiresSecureConnectionMessage"
               defaultMessage="Contact your system administrator."
+            />
+          }
+        />
+      );
+    }
+
+    if (!isCookiesEnabled) {
+      if (isWindowEmbedded()) {
+        return (
+          <div style={{ maxWidth: '36em', margin: 'auto', textAlign: 'center' }}>
+            <EuiText color="subdued">
+              <p>
+                {this.props.sameSiteCookies !== 'None' ? (
+                  <FormattedMessage
+                    id="xpack.security.loginPage.openInNewWindowOrChangeKibanaConfigTitle"
+                    defaultMessage="To view this content, open it in a new window or ask your administrator to allow cross-origin cookies."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.security.loginPage.openInNewWindowOrChangeBrowserSettingsTitle"
+                    defaultMessage="To view this content, open it in a new window or adjust your browser settings to allow third-party cookies."
+                  />
+                )}
+              </p>
+            </EuiText>
+            <EuiSpacer />
+            <EuiButton
+              href={window.location.href}
+              target="_blank"
+              iconType="popout"
+              iconSide="right"
+              fill
+            >
+              <FormattedMessage
+                id="xpack.security.loginPage.openInNewWindowButton"
+                defaultMessage="Open in new window"
+              />
+            </EuiButton>
+          </div>
+        );
+      }
+
+      return (
+        <DisabledLoginForm
+          title={
+            <FormattedMessage
+              id="xpack.security.loginPage.requiresCookiesTitle"
+              defaultMessage="Cookies are required to log in to Elastic"
+            />
+          }
+          message={
+            <FormattedMessage
+              id="xpack.security.loginPage.requiresCookiesMessage"
+              defaultMessage="Enable cookies in your browser settings to continue."
             />
           }
         />
@@ -273,4 +350,12 @@ export function renderLoginPage(
   );
 
   return () => ReactDOM.unmountComponentAtNode(element);
+}
+
+function isWindowEmbedded() {
+  try {
+    return window.self !== window.top;
+  } catch (error) {
+    return true;
+  }
 }

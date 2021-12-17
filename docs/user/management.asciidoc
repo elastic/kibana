@@ -106,7 +106,7 @@ a| <<xpack-security, Users>>
 Add or delete users and assign roles that give users
 specific privileges.
 
-| <<xpack-kibana-role-management, Roles>>
+| <<kibana-role-management, Roles>>
 |View the roles that exist on your cluster. Customize
 the actions that a user with the role can perform, on a cluster, index, and space level.
 
