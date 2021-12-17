@@ -39,7 +39,9 @@ export type {
 } from './types';
 
 export type { CreateStateContainerOptions } from './create_state_container';
+
 export { createStateContainer } from './create_state_container';
+
 export {
   createStateContainerReactHelpers,
   useContainerSelector,
