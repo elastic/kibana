@@ -32,13 +32,15 @@ export async function runDockerGenerator(
     context: boolean;
     image: boolean;
     ubi?: boolean;
+    ubuntu?: boolean;
     ironbank?: boolean;
     cloud?: boolean;
     dockerBuildDate?: string;
   }
 ) {
-  // UBI var config
-  const baseOSImage = flags.ubi ? 'docker.elastic.co/ubi8/ubi-minimal:latest' : 'centos:8';
+  let baseOSImage = '';
+  if (flags.ubuntu) baseOSImage = 'ubuntu:20.04';
+  if (flags.ubi) baseOSImage = 'docker.elastic.co/ubi8/ubi-minimal:latest';
   const ubiVersionTag = 'ubi8';
 
   let imageFlavor = '';
@@ -91,6 +93,7 @@ export async function runDockerGenerator(
     baseOSImage,
     dockerBuildDate,
     ubi: flags.ubi,
+    ubuntu: flags.ubuntu,
     cloud: flags.cloud,
     metricbeatTarball,
     filebeatTarball,

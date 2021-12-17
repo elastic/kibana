@@ -28,7 +28,7 @@ if [[ "${GITHUB_PR_LABELS:-}" == *"ci:deploy-cloud"* ]]; then
     --docker-tag-qualifier="$GIT_COMMIT" \
     --docker-push \
     --skip-docker-ubi \
-    --skip-docker-centos \
+    --skip-docker-ubuntu \
     --skip-docker-contexts
 
   CLOUD_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-cloud)
