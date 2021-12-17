@@ -85,6 +85,7 @@ export function registerRoutes(
           rollup_index: schema.maybe(schema.string()),
           allow_no_index: schema.maybe(schema.boolean()),
         }),
+        body: schema.maybe(schema.object({ index_filter: schema.any() })),
       },
     },
     async (context, request, response) => {

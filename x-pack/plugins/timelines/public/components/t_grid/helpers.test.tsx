@@ -239,7 +239,7 @@ describe('Combined Queries', () => {
     ).toBeNull();
   });
 
-  test('No Data Provider & No kqlQuery & isEventViewer is true', () => {
+  test.only('No Data Provider & No kqlQuery & isEventViewer is true', () => {
     const isEventViewer = true;
     expect(
       combineQueries({

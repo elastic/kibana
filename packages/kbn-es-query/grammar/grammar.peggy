@@ -17,6 +17,7 @@
 
   const buildLiteralNode = (value) => ({ type: 'literal', value });
   const buildWildcardNode = (value) => ({ type: 'wildcard', value });
+  const buildRegexpNode = (value, flags) => ({ type: 'regexp', value, flags });
   const buildFunctionNode = (fn, args) => ({ type: 'function', function: fn, arguments: args });
 }
 
@@ -191,6 +192,11 @@ Value "value"
     const isPhrase = buildLiteralNode(true);
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
+  / value:Regexp {
+    if (value.type === 'cursor') return value;
+    const isPhrase = buildLiteralNode(false);
+    return (field) => buildFunctionNode('is', [field, value, isPhrase]);
+  }
   / value:UnquotedLiteral {
     if (value.type === 'cursor') return value;
 
@@ -206,6 +212,21 @@ Value "value"
     const isPhrase = buildLiteralNode(false);
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
+
+Regexp
+  = '/' chars:RegexpCharacter+ '/' flags:RegexpCharacter* {
+    return buildRegexpNode(chars.join(''), flags.join(''));
+  }
+
+RegexpCharacter
+  = '\\/' { return '/'; }
+  / !'/' char:. { return char; }
+
+EscapedRegexpOperator
+  = '\\' char:RegexpOperator { return char; }
+
+RegexpOperator
+  = [.?+*|{}[\]()"\\]
 
 Or "OR"
   = Space+ 'or'i Space+

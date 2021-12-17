@@ -16,15 +16,25 @@ import { getPhraseScript } from '../../filters';
 import { getDataViewFieldSubtypeNested, getTimeZoneFromSettings } from '../../utils';
 import * as ast from '../ast';
 import { KQL_NODE_TYPE_FUNCTION } from '../node_types/function';
-import { KQL_WILDCARD_SYMBOL, KqlWildcardNode, toQueryStringQuery } from '../node_types/wildcard';
+import {
+  KQL_WILDCARD_SYMBOL,
+  KqlWildcardNode,
+  isNode as isWildcardNode,
+  toQueryStringQuery as toWildcardQueryStringQuery,
+} from '../node_types/wildcard';
+import {
+  isNode as isRegexpNode,
+  toQueryStringQuery as toRegexpQueryStringQuery,
+} from '../node_types/regexp';
 import { getFields } from './utils/get_fields';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
+import { KqlRegexpNode } from '../node_types/regexp';
 
 export const KQL_FUNCTION_NAME_IS = 'is';
 
 type KqlIsFunctionArgs = [
   KqlLiteralNode | KqlWildcardNode, // Field name
-  KqlLiteralNode | KqlWildcardNode, // Value
+  KqlLiteralNode | KqlWildcardNode | KqlRegexpNode, // Value
   KqlLiteralNode // Is this a "phrase" value? (surrounded in quotes)
 ];
 
@@ -81,21 +91,26 @@ export function toElasticsearchQuery(
   const value = !isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
   const type = isPhraseArg.value ? 'phrase' : 'best_fields';
   if (fullFieldNameArg.value === null) {
-    if (valueArg.type === 'wildcard') {
+    if (isWildcardNode(valueArg)) {
       return {
         query_string: {
-          query: toQueryStringQuery(valueArg),
+          query: toWildcardQueryStringQuery(valueArg),
         },
       };
-    }
-
-    return {
-      multi_match: {
-        type,
-        query: value as unknown as string,
-        lenient: true,
-      },
-    };
+    } else if (isRegexpNode(valueArg)) {
+      return {
+        query_string: {
+          query: toRegexpQueryStringQuery(valueArg),
+        },
+      };
+    } else
+      return {
+        multi_match: {
+          type,
+          query: value as unknown as string,
+          lenient: true,
+        },
+      };
   }
 
   const fields = indexPattern ? getFields(fullFieldNameArg, indexPattern) : [];
@@ -156,13 +171,23 @@ export function toElasticsearchQuery(
           },
         }),
       ];
-    } else if (valueArg.type === 'wildcard') {
+    } else if (isWildcardNode(valueArg)) {
       return [
         ...accumulator,
         wrapWithNestedQuery({
           query_string: {
             fields: [field.name],
-            query: toQueryStringQuery(valueArg),
+            query: toWildcardQueryStringQuery(valueArg),
+          },
+        }),
+      ];
+    } else if (isRegexpNode(valueArg)) {
+      return [
+        ...accumulator,
+        wrapWithNestedQuery({
+          query_string: {
+            fields: [field.name],
+            query: toRegexpQueryStringQuery(valueArg),
           },
         }),
       ];
