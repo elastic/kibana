@@ -26,20 +26,14 @@ import {
   Actions,
   ActionTypes,
   CaseAttributes,
-  CaseExternalServiceBasic,
-  CasePostRequest,
-  CaseStatuses,
   CaseUserActionAttributes,
   CaseUserActionAttributesWithoutConnectorId,
   CaseUserActionResponse,
   CommentRequest,
-  CommentUserAction,
-  CreateCaseUserActionWithoutConnectorId,
-  noneConnectorId,
-  PushedUserActionWithoutConnectorId,
-  StatusUserAction,
+  NONE_CONNECTOR_ID,
   SubCaseAttributes,
   User,
+  UserActionTypes,
 } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
@@ -58,8 +52,8 @@ import {
 } from '../../common/constants';
 import { findConnectorIdReference } from '../transform';
 import { isTwoArraysDifference } from '../../client/utils';
-import { UserActionBuilder } from './builder';
-import { CommonArguments } from './types';
+import { BuilderReturnValue, CommonArguments } from './types';
+import { BuilderFactory } from './builder_factory';
 
 interface GetCaseUserActionArgs extends ClientArgs {
   caseId: string;
@@ -72,7 +66,7 @@ export interface UserActionItem {
 }
 
 interface PostCaseUserActionArgs extends ClientArgs {
-  actions: UserActionItem[];
+  actions: BuilderReturnValue[];
 }
 
 interface CreateUserActionES<T> extends ClientArgs {
@@ -81,21 +75,10 @@ interface CreateUserActionES<T> extends ClientArgs {
 }
 
 type CommonUserActionArgs = ClientArgs & CommonArguments;
-interface CreateCaseCreationUserActionArgs extends CommonUserActionArgs {
-  payload: CasePostRequest;
-}
 
 interface BulkCreateCaseDeletionUserAction extends ClientArgs {
   cases: Array<{ id: string; owner: string; subCaseId?: string; connectorId: string }>;
   user: User;
-}
-
-interface CreateStatusUpdateUserAction extends CommonUserActionArgs {
-  status: CaseStatuses;
-}
-
-interface CreatePushToServiceUserAction extends CommonUserActionArgs {
-  externalService: CaseExternalServiceBasic;
 }
 
 interface GetUserActionItemByDifference extends CommonUserActionArgs {
@@ -110,20 +93,18 @@ interface BulkCreateBulkUpdateCaseUserActions extends ClientArgs {
   user: User;
 }
 
-interface CreateAttachmentUserAction extends CommonUserActionArgs {
-  action: 'create' | 'delete' | 'update';
-  attachmentId: string;
-  attachment: CommentRequest;
-}
-
 interface BulkCreateAttachmentDeletionUserAction extends Omit<CommonUserActionArgs, 'owner'> {
   attachments: Array<{ id: string; owner: string; attachment: CommentRequest }>;
+}
+interface CreateUserAction extends CommonUserActionArgs {
+  type: UserActionTypes;
+  payload: Record<string, unknown>;
 }
 
 export class CaseUserActionService {
   private static readonly userActionFieldsAllowed: Set<string> = new Set(Object.keys(ActionTypes));
 
-  private readonly builder: UserActionBuilder = new UserActionBuilder();
+  private readonly builderFactory: BuilderFactory = new BuilderFactory();
 
   constructor(private readonly log: Logger) {}
 
@@ -135,26 +116,25 @@ export class CaseUserActionService {
     subCaseId,
     owner,
     user,
-  }: GetUserActionItemByDifference): UserActionItem[] {
+  }: GetUserActionItemByDifference): BuilderReturnValue[] {
     if (!CaseUserActionService.userActionFieldsAllowed.has(field)) {
       return [];
     }
 
     if (field === ActionTypes.tags) {
+      const tagsUserActionBuilder = this.builderFactory.getBuilder(ActionTypes.tags);
       const compareValues = isTwoArraysDifference(originalValue, newValue);
-      const userActions: UserActionItem[] = [];
+      const userActions = [];
+
       if (compareValues && compareValues.addedItems.length > 0) {
-        const tagAddUserAction = this.builder.buildUserAction<typeof ActionTypes.tags>(
-          ActionTypes.tags,
-          {
-            caseId,
-            subCaseId,
-            owner,
-            user,
-            action: Actions.add,
-            tags: compareValues.addedItems,
-          }
-        );
+        const tagAddUserAction = tagsUserActionBuilder?.build({
+          action: Actions.add,
+          caseId,
+          subCaseId,
+          user,
+          owner,
+          payload: { tags: compareValues.addedItems },
+        });
 
         if (tagAddUserAction) {
           userActions.push(tagAddUserAction);
@@ -162,17 +142,14 @@ export class CaseUserActionService {
       }
 
       if (compareValues && compareValues.deletedItems.length > 0) {
-        const tagsDeleteUserAction = this.builder.buildUserAction<typeof ActionTypes.tags>(
-          ActionTypes.tags,
-          {
-            caseId,
-            subCaseId,
-            owner,
-            user,
-            action: Actions.delete,
-            tags: compareValues.deletedItems,
-          }
-        );
+        const tagsDeleteUserAction = tagsUserActionBuilder?.build({
+          action: Actions.delete,
+          caseId,
+          subCaseId,
+          user,
+          owner,
+          payload: { tags: compareValues.deletedItems },
+        });
 
         if (tagsDeleteUserAction) {
           userActions.push(tagsDeleteUserAction);
@@ -183,14 +160,13 @@ export class CaseUserActionService {
     }
 
     if (isUserActionType(field)) {
-      const fieldUserAction = this.builder.buildUserAction<typeof field>(field, {
+      const userActionBuilder = this.builderFactory.getBuilder(ActionTypes[field]);
+      const fieldUserAction = userActionBuilder?.build({
         caseId,
         subCaseId,
         owner,
         user,
-        [field]: newValue,
-        // TODO: Fix
-        connectorId: '',
+        payload: { [field]: newValue },
       });
 
       return fieldUserAction ? [fieldUserAction] : [];
@@ -199,168 +175,31 @@ export class CaseUserActionService {
     return [];
   }
 
-  private async createAttachmentUserAction({
-    action,
-    unsecuredSavedObjectsClient,
-    caseId,
-    subCaseId,
-    attachmentId,
-    user,
-    attachment,
-    owner,
-  }: CreateAttachmentUserAction): Promise<void> {
-    try {
-      this.log.debug(`Attempting to create a create case user action`);
-      const userAction = this.builder.buildUserAction<typeof ActionTypes.comment>(
-        ActionTypes.comment,
-        {
-          action,
-          caseId,
-          user,
-          owner,
-          comment: attachment,
-          attachmentId,
-          subCaseId,
-        }
-      );
-
-      if (userAction) {
-        await this.create<CommentUserAction>({
-          unsecuredSavedObjectsClient,
-          attributes: userAction.attributes,
-          references: userAction.references,
-        });
-      }
-    } catch (error) {
-      this.log.error(`Error on create a create case user action: ${error}`);
-      throw error;
-    }
-  }
-
-  public async createCaseCreationUserAction({
-    unsecuredSavedObjectsClient,
-    caseId,
-    subCaseId,
-    user,
-    payload,
-    owner,
-  }: CreateCaseCreationUserActionArgs): Promise<void> {
-    try {
-      this.log.debug(`Attempting to create a create case user action`);
-      const userAction = this.builder.buildUserAction<typeof ActionTypes.create_case>(
-        ActionTypes.create_case,
-        {
-          caseId,
-          subCaseId,
-          user,
-          owner,
-          payload,
-        }
-      );
-
-      if (userAction) {
-        await this.create<CreateCaseUserActionWithoutConnectorId>({
-          unsecuredSavedObjectsClient,
-          attributes: userAction.attributes,
-          references: userAction.references,
-        });
-      }
-    } catch (error) {
-      this.log.error(`Error on create a create case user action: ${error}`);
-      throw error;
-    }
-  }
-
   public async bulkCreateCaseDeletionUserAction({
     unsecuredSavedObjectsClient,
     cases,
     user,
   }: BulkCreateCaseDeletionUserAction): Promise<void> {
     this.log.debug(`Attempting to create a create case user action`);
-    const userActionsWithReferences = cases.reduce((acc, caseInfo) => {
-      const deleteCaseUserAction = this.builder.buildUserAction<typeof ActionTypes.delete_case>(
-        ActionTypes.delete_case,
-        {
-          user,
-          owner: caseInfo.owner,
-          caseId: caseInfo.id,
-          connectorId: caseInfo.connectorId,
-        }
-      );
+    const userActionsWithReferences = cases.reduce<BuilderReturnValue[]>((acc, caseInfo) => {
+      const userActionBuilder = this.builderFactory.getBuilder(ActionTypes.delete_case);
+      const deleteCaseUserAction = userActionBuilder?.build({
+        action: Actions.delete,
+        caseId: caseInfo.id,
+        user,
+        owner: caseInfo.owner,
+        connectorId: caseInfo.connectorId,
+        payload: {},
+      });
 
-      return [
-        ...acc,
-        {
-          ...(deleteCaseUserAction ? deleteCaseUserAction : {}),
-        },
-      ];
-    }, [] as UserActionItem[]);
+      if (deleteCaseUserAction == null) {
+        return acc;
+      }
+
+      return [...acc, deleteCaseUserAction];
+    }, []);
 
     await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
-  }
-
-  public async createStatusUpdateUserAction({
-    unsecuredSavedObjectsClient,
-    caseId,
-    user,
-    status,
-    owner,
-  }: CreateStatusUpdateUserAction): Promise<void> {
-    try {
-      this.log.debug(`Attempting to create a create case user action`);
-      const userAction = this.builder.buildUserAction<typeof ActionTypes.status>(
-        ActionTypes.status,
-        {
-          caseId,
-          user,
-          status,
-          owner,
-        }
-      );
-
-      if (userAction) {
-        await this.create<StatusUserAction>({
-          unsecuredSavedObjectsClient,
-          attributes: userAction.attributes,
-          references: userAction.references,
-        });
-      }
-    } catch (error) {
-      this.log.error(`Error on create a create case user action: ${error}`);
-      throw error;
-    }
-  }
-
-  public async createPushToServiceUserAction({
-    unsecuredSavedObjectsClient,
-    caseId,
-    user,
-    externalService,
-    owner,
-  }: CreatePushToServiceUserAction): Promise<void> {
-    try {
-      this.log.debug(`Attempting to create a create case user action`);
-      const userAction = this.builder.buildUserAction<typeof ActionTypes.pushed>(
-        ActionTypes.pushed,
-        {
-          caseId,
-          user,
-          externalService,
-          owner,
-        }
-      );
-
-      if (userAction) {
-        await this.create<PushedUserActionWithoutConnectorId>({
-          unsecuredSavedObjectsClient,
-          attributes: userAction.attributes,
-          references: userAction.references,
-        });
-      }
-    } catch (error) {
-      this.log.error(`Error on create a create case user action: ${error}`);
-      throw error;
-    }
   }
 
   public async bulkCreateBulkUpdateCaseUserActions({
@@ -369,59 +208,44 @@ export class CaseUserActionService {
     updatedCases,
     user,
   }: BulkCreateBulkUpdateCaseUserActions): Promise<void> {
-    const userActionsWithReferences = updatedCases.reduce<UserActionItem[]>((acc, updatedCase) => {
-      const originalCase = originalCases.find(({ id }) => id === updatedCase.id);
+    const userActionsWithReferences = updatedCases.reduce<BuilderReturnValue[]>(
+      (acc, updatedCase) => {
+        const originalCase = originalCases.find(({ id }) => id === updatedCase.id);
 
-      if (originalCase == null) {
-        return acc;
-      }
+        if (originalCase == null) {
+          return acc;
+        }
 
-      const caseId = updatedCase.id;
-      const owner = originalCase.attributes.owner;
+        const caseId = updatedCase.id;
+        const owner = originalCase.attributes.owner;
 
-      const userActions: UserActionItem[] = [];
-      const updatedFields = Object.keys(updatedCase.attributes);
+        const userActions: BuilderReturnValue[] = [];
+        const updatedFields = Object.keys(updatedCase.attributes);
 
-      updatedFields
-        .filter((field) => CaseUserActionService.userActionFieldsAllowed.has(field))
-        .forEach((field) => {
-          const originalValue = get(originalCase, ['attributes', field]);
-          const newValue = get(updatedCase, ['attributes', field]);
-          userActions.push(
-            ...this.getUserActionItemByDifference({
-              unsecuredSavedObjectsClient,
-              field,
-              originalValue,
-              newValue,
-              user,
-              owner,
-              caseId,
-            })
-          );
-        });
+        updatedFields
+          .filter((field) => CaseUserActionService.userActionFieldsAllowed.has(field))
+          .forEach((field) => {
+            const originalValue = get(originalCase, ['attributes', field]);
+            const newValue = get(updatedCase, ['attributes', field]);
+            userActions.push(
+              ...this.getUserActionItemByDifference({
+                unsecuredSavedObjectsClient,
+                field,
+                originalValue,
+                newValue,
+                user,
+                owner,
+                caseId,
+              })
+            );
+          });
 
-      return [...acc, ...userActions];
-    }, []);
+        return [...acc, ...userActions];
+      },
+      []
+    );
 
     await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
-  }
-
-  public async createAttachmentCreationUserAction(
-    args: Omit<CreateAttachmentUserAction, 'action'>
-  ): Promise<void> {
-    return this.createAttachmentUserAction({ ...args, action: Actions.create });
-  }
-
-  public async createAttachmentDeletionUserAction(
-    args: Omit<CreateAttachmentUserAction, 'action'>
-  ): Promise<void> {
-    return this.createAttachmentUserAction({ ...args, action: Actions.delete });
-  }
-
-  public async createAttachmentUpdateUserAction(
-    args: Omit<CreateAttachmentUserAction, 'action'>
-  ): Promise<void> {
-    return this.createAttachmentUserAction({ ...args, action: Actions.update });
   }
 
   public async bulkCreateAttachmentDeletionUserAction({
@@ -432,29 +256,65 @@ export class CaseUserActionService {
     user,
   }: BulkCreateAttachmentDeletionUserAction): Promise<void> {
     this.log.debug(`Attempting to create a create case user action`);
-    const userActionsWithReferences = attachments.reduce((acc, attachment) => {
-      const deleteCommentUserAction = this.builder.buildUserAction<typeof ActionTypes.comment>(
-        ActionTypes.comment,
-        {
+    const userActionsWithReferences = attachments.reduce<BuilderReturnValue[]>(
+      (acc, attachment) => {
+        const userActionBuilder = this.builderFactory.getBuilder(ActionTypes.comment);
+        const deleteCommentUserAction = userActionBuilder?.build({
           action: Actions.delete,
           caseId,
+          subCaseId,
           user,
           owner: attachment.owner,
-          comment: attachment.attachment,
           attachmentId: attachment.id,
-          subCaseId,
+          payload: { comment: attachment.attachment },
+        });
+
+        if (deleteCommentUserAction == null) {
+          return acc;
         }
-      );
-      return [
-        ...acc,
-        {
-          ...(deleteCommentUserAction ? deleteCommentUserAction : {}),
-          // TODO: Fix type
-        } as unknown as UserActionItem,
-      ];
-    }, [] as UserActionItem[]);
+
+        return [...acc, deleteCommentUserAction];
+      },
+      []
+    );
 
     await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
+  }
+
+  public async createUserAction({
+    unsecuredSavedObjectsClient,
+    action,
+    type,
+    caseId,
+    subCaseId,
+    user,
+    owner,
+    payload,
+    connectorId,
+    attachmentId,
+  }: CreateUserAction) {
+    try {
+      this.log.debug(`Attempting to create a user action of type: ${type}`);
+      const userActionBuilder = this.builderFactory.getBuilder(type);
+      const userAction = userActionBuilder?.build({
+        action,
+        caseId,
+        subCaseId,
+        user,
+        owner,
+        connectorId,
+        attachmentId,
+        payload,
+      });
+
+      if (userAction) {
+        const { attributes, references } = userAction;
+        await this.create({ unsecuredSavedObjectsClient, attributes, references });
+      }
+    } catch (error) {
+      this.log.error(`Error on creating user action of type: ${type}. Error: ${error}`);
+      throw error;
+    }
   }
 
   public async getAll({
@@ -507,7 +367,7 @@ export class CaseUserActionService {
     try {
       this.log.debug(`Attempting to POST a new case user action`);
 
-      await unsecuredSavedObjectsClient.bulkCreate<CaseUserActionAttributesWithoutConnectorId>(
+      await unsecuredSavedObjectsClient.bulkCreate(
         actions.map((action) => ({ type: CASE_USER_ACTION_SAVED_OBJECT, ...action }))
       );
     } catch (error) {
@@ -549,7 +409,7 @@ function transformToExternalModel(
       comment_id: commentId,
       sub_case_id: subCaseId,
       payload,
-    },
+    } as CaseUserActionResponse,
   };
 }
 
@@ -564,7 +424,7 @@ const addReferenceIdToPayload = (
       ...userActionAttributes.payload,
       connector: {
         ...userActionAttributes.payload.connector,
-        id: connectorId ?? noneConnectorId,
+        id: connectorId ?? NONE_CONNECTOR_ID,
       },
     };
   } else if (isPushedUserAction(userActionAttributes)) {
@@ -572,7 +432,7 @@ const addReferenceIdToPayload = (
       ...userAction.attributes.payload,
       externalService: {
         ...userActionAttributes.payload.externalService,
-        connector_id: connectorId ?? noneConnectorId,
+        connector_id: connectorId ?? NONE_CONNECTOR_ID,
       },
     };
   }

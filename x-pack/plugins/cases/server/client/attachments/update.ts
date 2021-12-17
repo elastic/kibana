@@ -12,7 +12,7 @@ import { LensServerPluginSetup } from '../../../../lens/server';
 import { CommentableCase } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import { checkEnabledCaseConnectorOrThrow } from '../../common/utils';
-import { CaseResponse, CommentPatchRequest } from '../../../common/api';
+import { Actions, ActionTypes, CaseResponse, CommentPatchRequest } from '../../../common/api';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 import { AttachmentService, CasesService } from '../../services';
 import { CasesClientArgs } from '..';
@@ -178,12 +178,14 @@ export async function update(
         user,
       });
 
-    await userActionService.createAttachmentUpdateUserAction({
+    await userActionService.createUserAction({
+      type: ActionTypes.comment,
+      action: Actions.update,
       unsecuredSavedObjectsClient,
       caseId: caseID,
       subCaseId: subCaseID,
       attachmentId: updatedComment.id,
-      attachment: queryRestAttributes,
+      payload: { comment: queryRestAttributes },
       user,
       owner: myComment.attributes.owner,
     });

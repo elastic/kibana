@@ -12,6 +12,7 @@ import { SavedObject, SavedObjectsFindResponse, SavedObjectsFindResult } from 'k
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import {
   Actions,
+  ActionTypes,
   CaseStatuses,
   CaseUserActionAttributes,
   ConnectorUserAction,
@@ -481,50 +482,172 @@ describe('CaseUserActionService', () => {
       service = new CaseUserActionService(mockLogger);
     });
 
-    describe('createCaseCreationUserAction', () => {
-      it('creates a create case user action', async () => {
-        await service.createCaseCreationUserAction({ ...commonArgs, payload: casePayload });
-        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-          'cases-user-actions',
-          {
-            action: Actions.create,
-            created_at: '2022-01-09T22:00:00.000Z',
-            created_by: {
-              email: 'elastic@elastic.co',
-              full_name: 'Elastic User',
-              username: 'elastic',
-            },
-            type: 'create_case',
-            owner: 'securitySolution',
-            payload: {
-              connector: {
-                fields: {
-                  category: 'Denial of Service',
-                  destIp: true,
-                  malwareHash: true,
-                  malwareUrl: true,
-                  priority: '2',
-                  sourceIp: true,
-                  subcategory: '45',
-                },
-                name: 'ServiceNow SN',
-                type: '.servicenow-sir',
+    describe('createUserAction', () => {
+      describe('create case', () => {
+        it('creates a create case user action', async () => {
+          await service.createUserAction({
+            ...commonArgs,
+            payload: casePayload,
+            type: ActionTypes.create_case,
+          });
+          expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+            'cases-user-actions',
+            {
+              action: Actions.create,
+              created_at: '2022-01-09T22:00:00.000Z',
+              created_by: {
+                email: 'elastic@elastic.co',
+                full_name: 'Elastic User',
+                username: 'elastic',
               },
-              description: 'testing sir',
+              type: 'create_case',
               owner: 'securitySolution',
-              settings: { syncAlerts: true },
-              status: 'open',
-              tags: ['sir'],
-              title: 'Case SIR',
+              payload: {
+                connector: {
+                  fields: {
+                    category: 'Denial of Service',
+                    destIp: true,
+                    malwareHash: true,
+                    malwareUrl: true,
+                    priority: '2',
+                    sourceIp: true,
+                    subcategory: '45',
+                  },
+                  name: 'ServiceNow SN',
+                  type: '.servicenow-sir',
+                },
+                description: 'testing sir',
+                owner: 'securitySolution',
+                settings: { syncAlerts: true },
+                status: 'open',
+                tags: ['sir'],
+                title: 'Case SIR',
+              },
             },
-          },
-          {
-            references: [
-              { id: '123', name: 'associated-cases', type: 'cases' },
-              { id: '456', name: 'connectorId', type: 'action' },
-            ],
-          }
-        );
+            {
+              references: [
+                { id: '123', name: 'associated-cases', type: 'cases' },
+                { id: '456', name: 'connectorId', type: 'action' },
+              ],
+            }
+          );
+        });
+
+        describe('status', () => {
+          it('creates an update status user action', async () => {
+            await service.createUserAction({
+              ...commonArgs,
+              payload: { status: CaseStatuses.closed },
+              type: ActionTypes.status,
+            });
+
+            expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+              'cases-user-actions',
+              {
+                action: Actions.update,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'status',
+                owner: 'securitySolution',
+                payload: { status: 'closed' },
+              },
+              { references: [{ id: '123', name: 'associated-cases', type: 'cases' }] }
+            );
+          });
+        });
+
+        describe('push', () => {
+          it('creates a push user action', async () => {
+            await service.createUserAction({
+              ...commonArgs,
+              payload: { externalService },
+              type: ActionTypes.pushed,
+            });
+
+            expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+              'cases-user-actions',
+              {
+                action: Actions.push_to_service,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'pushed',
+                owner: 'securitySolution',
+                payload: {
+                  externalService: {
+                    connector_name: 'ServiceNow SN',
+                    external_id: 'external-id',
+                    external_title: 'SIR0010037',
+                    external_url:
+                      'https://dev92273.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=external-id',
+                    pushed_at: '2021-02-03T17:41:26.108Z',
+                    pushed_by: {
+                      email: 'elastic@elastic.co',
+                      full_name: 'Elastic',
+                      username: 'elastic',
+                    },
+                  },
+                },
+              },
+              {
+                references: [
+                  { id: '123', name: 'associated-cases', type: 'cases' },
+                  { id: '456', name: 'pushConnectorId', type: 'action' },
+                ],
+              }
+            );
+          });
+        });
+
+        describe('comment', () => {
+          it.each([[Actions.create], [Actions.delete], [Actions.update]])(
+            'creates a comment user action of action: %s',
+            async (action) => {
+              await service.createUserAction({
+                ...commonArgs,
+                type: ActionTypes.comment,
+                action,
+                attachmentId: 'test-id',
+                payload: { comment },
+              });
+
+              expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+                'cases-user-actions',
+                {
+                  action,
+                  created_at: '2022-01-09T22:00:00.000Z',
+                  created_by: {
+                    email: 'elastic@elastic.co',
+                    full_name: 'Elastic User',
+                    username: 'elastic',
+                  },
+                  type: 'comment',
+                  owner: 'securitySolution',
+                  payload: {
+                    comment: {
+                      comment: 'a comment',
+                      type: 'user',
+                      owner: 'securitySolution',
+                    },
+                  },
+                },
+                {
+                  references: [
+                    { id: '123', name: 'associated-cases', type: 'cases' },
+                    { id: 'test-id', name: 'associated-cases-comments', type: 'cases-comments' },
+                  ],
+                }
+              );
+            }
+          );
+        });
       });
     });
 
@@ -579,69 +702,6 @@ describe('CaseUserActionService', () => {
             type: 'cases-user-actions',
           },
         ]);
-      });
-    });
-
-    describe('createStatusUpdateUserAction', () => {
-      it('creates an update status user action', async () => {
-        await service.createStatusUpdateUserAction({ ...commonArgs, status: CaseStatuses.closed });
-        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-          'cases-user-actions',
-          {
-            action: Actions.update,
-            created_at: '2022-01-09T22:00:00.000Z',
-            created_by: {
-              email: 'elastic@elastic.co',
-              full_name: 'Elastic User',
-              username: 'elastic',
-            },
-            type: 'status',
-            owner: 'securitySolution',
-            payload: { status: 'closed' },
-          },
-          { references: [{ id: '123', name: 'associated-cases', type: 'cases' }] }
-        );
-      });
-    });
-
-    describe('createPushToServiceUserAction', () => {
-      it('creates a push user action', async () => {
-        await service.createPushToServiceUserAction({ ...commonArgs, externalService });
-        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-          'cases-user-actions',
-          {
-            action: Actions.push_to_service,
-            created_at: '2022-01-09T22:00:00.000Z',
-            created_by: {
-              email: 'elastic@elastic.co',
-              full_name: 'Elastic User',
-              username: 'elastic',
-            },
-            type: 'pushed',
-            owner: 'securitySolution',
-            payload: {
-              externalService: {
-                connector_name: 'ServiceNow SN',
-                external_id: 'external-id',
-                external_title: 'SIR0010037',
-                external_url:
-                  'https://dev92273.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=external-id',
-                pushed_at: '2021-02-03T17:41:26.108Z',
-                pushed_by: {
-                  email: 'elastic@elastic.co',
-                  full_name: 'Elastic',
-                  username: 'elastic',
-                },
-              },
-            },
-          },
-          {
-            references: [
-              { id: '123', name: 'associated-cases', type: 'cases' },
-              { id: '456', name: 'pushConnectorId', type: 'action' },
-            ],
-          }
-        );
       });
     });
 
@@ -785,54 +845,6 @@ describe('CaseUserActionService', () => {
             type: 'cases-user-actions',
           },
         ]);
-      });
-    });
-
-    describe('createAttachmentUserAction', () => {
-      type MethodsOfService =
-        | 'createAttachmentCreationUserAction'
-        | 'createAttachmentDeletionUserAction'
-        | 'createAttachmentUpdateUserAction';
-      type TestParameters = [MethodsOfService, string];
-
-      it.each<TestParameters>([
-        ['createAttachmentCreationUserAction', Actions.create],
-        ['createAttachmentDeletionUserAction', 'delete'],
-        ['createAttachmentUpdateUserAction', Actions.update],
-      ])('creates a create case user action', async (func, action) => {
-        await service[func]({
-          ...commonArgs,
-          attachmentId: 'test-id',
-          attachment: comment,
-        });
-
-        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-          'cases-user-actions',
-          {
-            action,
-            created_at: '2022-01-09T22:00:00.000Z',
-            created_by: {
-              email: 'elastic@elastic.co',
-              full_name: 'Elastic User',
-              username: 'elastic',
-            },
-            type: 'comment',
-            owner: 'securitySolution',
-            payload: {
-              comment: {
-                comment: 'a comment',
-                type: 'user',
-                owner: 'securitySolution',
-              },
-            },
-          },
-          {
-            references: [
-              { id: '123', name: 'associated-cases', type: 'cases' },
-              { id: 'test-id', name: 'associated-cases-comments', type: 'cases-comments' },
-            ],
-          }
-        );
       });
     });
 

@@ -17,6 +17,7 @@ import {
   CaseType,
   CasesConfigureAttributes,
   CaseAttributes,
+  ActionTypes,
 } from '../../../common/api';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
@@ -219,18 +220,20 @@ export const push = async (
     ]);
 
     if (shouldMarkAsClosed) {
-      await userActionService.createStatusUpdateUserAction({
+      await userActionService.createUserAction({
+        type: ActionTypes.status,
         unsecuredSavedObjectsClient,
-        status: CaseStatuses.closed,
+        payload: { status: CaseStatuses.closed },
         user,
         caseId,
         owner: myCase.attributes.owner,
       });
     }
 
-    await userActionService.createPushToServiceUserAction({
+    await userActionService.createUserAction({
+      type: ActionTypes.pushed,
       unsecuredSavedObjectsClient,
-      externalService,
+      payload: { externalService },
       user,
       caseId,
       owner: myCase.attributes.owner,

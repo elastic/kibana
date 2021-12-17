@@ -20,6 +20,8 @@ import {
 import { LensServerPluginSetup } from '../../../../lens/server';
 
 import {
+  Actions,
+  ActionTypes,
   AlertCommentRequestRt,
   CaseResponse,
   CaseStatuses,
@@ -190,12 +192,16 @@ const addGeneratedAlerts = async (
       await alertsService.updateAlertsStatus(alertsToUpdate);
     }
 
-    await userActionService.createAttachmentCreationUserAction({
+    await userActionService.createUserAction({
+      type: ActionTypes.comment,
+      action: Actions.create,
       unsecuredSavedObjectsClient,
       caseId: updatedCase.caseId,
       subCaseId: updatedCase.subCaseId,
+      payload: {
+        attachment: query,
+      },
       attachmentId: newComment.id,
-      attachment: query,
       user,
       owner: newComment.attributes.owner,
     });
@@ -370,12 +376,16 @@ export const addComment = async (
       await alertsService.updateAlertsStatus(alertsToUpdate);
     }
 
-    await userActionService.createAttachmentCreationUserAction({
+    await userActionService.createUserAction({
+      type: ActionTypes.comment,
+      action: Actions.create,
       unsecuredSavedObjectsClient,
       caseId,
       subCaseId: updatedCase.subCaseId,
       attachmentId: newComment.id,
-      attachment: query,
+      payload: {
+        comment: query,
+      },
       user,
       owner: newComment.attributes.owner,
     });

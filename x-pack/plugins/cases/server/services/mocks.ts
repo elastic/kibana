@@ -85,15 +85,10 @@ export const connectorMappingsServiceMock = (): ConnectorMappingsServiceMock => 
 
 export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
   const service: PublicMethodsOf<CaseUserActionService> = {
-    createCaseCreationUserAction: jest.fn(),
     bulkCreateCaseDeletionUserAction: jest.fn(),
-    createStatusUpdateUserAction: jest.fn(),
-    createPushToServiceUserAction: jest.fn(),
     bulkCreateBulkUpdateCaseUserActions: jest.fn(),
-    createAttachmentCreationUserAction: jest.fn(),
-    createAttachmentDeletionUserAction: jest.fn(),
-    createAttachmentUpdateUserAction: jest.fn(),
     bulkCreateAttachmentDeletionUserAction: jest.fn(),
+    createUserAction: jest.fn(),
     create: jest.fn(),
     getAll: jest.fn(),
     bulkCreate: jest.fn(),

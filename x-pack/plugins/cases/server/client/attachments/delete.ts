@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import pMap from 'p-map';
 
 import { SavedObject } from 'kibana/public';
-import { AssociationType, CommentAttributes } from '../../../common/api';
+import { Actions, ActionTypes, AssociationType, CommentAttributes } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   MAX_CONCURRENT_SEARCHES,
@@ -172,12 +172,14 @@ export async function deleteComment(
       attachmentId: attachmentID,
     });
 
-    await userActionService.createAttachmentDeletionUserAction({
+    await userActionService.createUserAction({
+      type: ActionTypes.comment,
+      action: Actions.delete,
       unsecuredSavedObjectsClient,
       caseId: id,
       subCaseId: subCaseID,
       attachmentId: attachmentID,
-      attachment: { ...myComment.attributes },
+      payload: { comment: { ...myComment.attributes } },
       user,
       owner: myComment.attributes.owner,
     });

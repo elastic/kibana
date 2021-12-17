@@ -13,10 +13,11 @@ import {
   CommentType,
   ConnectorTypes,
 } from '../../../common/api';
-import { UserActionBuilder } from './builder';
+import { BuilderFactory } from './builder_factory';
 import { casePayload, externalService } from './mocks';
 
 describe('UserActionBuilder', () => {
+  const builderFactory = new BuilderFactory();
   const commonArgs = {
     caseId: '123',
     user: { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' },
@@ -33,9 +34,9 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a title user action correctly', () => {
-    const builder = new UserActionBuilder();
-    const userAction = builder.buildUserAction<typeof ActionTypes.title>(ActionTypes.title, {
-      title: 'test',
+    const builder = builderFactory.getBuilder(ActionTypes.title)!;
+    const userAction = builder.build({
+      payload: { title: 'test' },
       ...commonArgs,
     });
 
@@ -67,10 +68,9 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a connector user action correctly', () => {
-    const builder = new UserActionBuilder();
-    const userAction = builder.buildUserAction<typeof ActionTypes.connector>(
-      ActionTypes.connector,
-      {
+    const builder = builderFactory.getBuilder(ActionTypes.connector)!;
+    const userAction = builder.build({
+      payload: {
         connector: {
           id: '456',
           name: 'ServiceNow SN',
@@ -85,9 +85,9 @@ describe('UserActionBuilder', () => {
             subcategory: '45',
           },
         },
-        ...commonArgs,
-      }
-    );
+      },
+      ...commonArgs,
+    });
 
     expect(userAction).toMatchInlineSnapshot(`
       Object {
@@ -134,10 +134,12 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a comment user action correctly', () => {
-    const builder = new UserActionBuilder();
-    const userAction = builder.buildUserAction<typeof ActionTypes.comment>(ActionTypes.comment, {
+    const builder = builderFactory.getBuilder(ActionTypes.comment)!;
+    const userAction = builder.build({
       action: Actions.update,
-      comment: { comment: 'a comment!', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER },
+      payload: {
+        comment: { comment: 'a comment!', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER },
+      },
       attachmentId: 'test-id',
       ...commonArgs,
     });
@@ -179,14 +181,11 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a description user action correctly', () => {
-    const builder = new UserActionBuilder();
-    const userAction = builder.buildUserAction<typeof ActionTypes.description>(
-      ActionTypes.description,
-      {
-        description: 'test',
-        ...commonArgs,
-      }
-    );
+    const builder = builderFactory.getBuilder(ActionTypes.description)!;
+    const userAction = builder.build({
+      payload: { description: 'test' },
+      ...commonArgs,
+    });
 
     expect(userAction).toMatchInlineSnapshot(`
       Object {
@@ -216,9 +215,9 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a pushed user action correctly', () => {
-    const builder = new UserActionBuilder();
-    const userAction = builder.buildUserAction<typeof ActionTypes.pushed>(ActionTypes.pushed, {
-      externalService,
+    const builder = builderFactory.getBuilder(ActionTypes.pushed)!;
+    const userAction = builder.build({
+      payload: { externalService },
       ...commonArgs,
     });
 
@@ -266,10 +265,10 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a tags user action correctly', () => {
-    const builder = new UserActionBuilder();
-    const userAction = builder.buildUserAction<typeof ActionTypes.tags>(ActionTypes.tags, {
+    const builder = builderFactory.getBuilder(ActionTypes.tags)!;
+    const userAction = builder.build({
       action: Actions.add,
-      tags: ['one', 'two'],
+      payload: { tags: ['one', 'two'] },
       ...commonArgs,
     });
 
@@ -304,9 +303,9 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a status user action correctly', () => {
-    const builder = new UserActionBuilder();
-    const userAction = builder.buildUserAction<typeof ActionTypes.status>(ActionTypes.status, {
-      status: CaseStatuses.open,
+    const builder = builderFactory.getBuilder(ActionTypes.status)!;
+    const userAction = builder.build({
+      payload: { status: CaseStatuses.open },
       ...commonArgs,
     });
 
@@ -338,9 +337,9 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a settings user action correctly', () => {
-    const builder = new UserActionBuilder();
-    const userAction = builder.buildUserAction<typeof ActionTypes.settings>(ActionTypes.settings, {
-      settings: { syncAlerts: true },
+    const builder = builderFactory.getBuilder(ActionTypes.settings)!;
+    const userAction = builder.build({
+      payload: { settings: { syncAlerts: true } },
       ...commonArgs,
     });
 
@@ -374,14 +373,11 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a create case user action correctly', () => {
-    const builder = new UserActionBuilder();
-    const userAction = builder.buildUserAction<typeof ActionTypes.create_case>(
-      ActionTypes.create_case,
-      {
-        payload: casePayload,
-        ...commonArgs,
-      }
-    );
+    const builder = builderFactory.getBuilder(ActionTypes.create_case)!;
+    const userAction = builder.build({
+      payload: casePayload,
+      ...commonArgs,
+    });
 
     expect(userAction).toMatchInlineSnapshot(`
       Object {
@@ -438,14 +434,12 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a delete case user action correctly', () => {
-    const builder = new UserActionBuilder();
-    const userAction = builder.buildUserAction<typeof ActionTypes.delete_case>(
-      ActionTypes.delete_case,
-      {
-        connectorId: '456',
-        ...commonArgs,
-      }
-    );
+    const builder = builderFactory.getBuilder(ActionTypes.delete_case)!;
+    const userAction = builder.build({
+      payload: {},
+      connectorId: '456',
+      ...commonArgs,
+    });
 
     expect(userAction).toMatchInlineSnapshot(`
       Object {

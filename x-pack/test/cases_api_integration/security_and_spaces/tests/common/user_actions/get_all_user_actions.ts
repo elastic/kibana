@@ -281,27 +281,29 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    // TODO: fix
-    it.skip('creates a delete comment user action', async () => {
+    it('creates a delete comment user action', async () => {
       const theCase = await createCase(supertest, postCaseReq);
       const caseWithComments = await createComment({
         supertest,
         caseId: theCase.id,
         params: postCommentUserReq,
       });
+
       await deleteComment({
         supertest,
         caseId: theCase.id,
         commentId: caseWithComments.comments![0].id,
       });
+
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
       const commentUserAction = userActions[2];
+      const { id, version: _, ...restComment } = caseWithComments.comments![0];
 
-      expect(userActions.length).to.eql(2);
+      expect(userActions.length).to.eql(3);
       expect(commentUserAction.type).to.eql('comment');
       expect(commentUserAction.action).to.eql('delete');
-      expect(commentUserAction.comment_id).to.eql(caseWithComments.comments![0].id);
-      expect(commentUserAction.payload).to.eql({ comment: {} });
+      expect(commentUserAction.comment_id).to.eql(id);
+      expect(commentUserAction.payload).to.eql({ comment: restComment });
     });
 
     describe('rbac', () => {

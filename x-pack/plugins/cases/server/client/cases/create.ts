@@ -20,6 +20,7 @@ import {
   CasesClientPostRequestRt,
   CasePostRequest,
   CaseType,
+  ActionTypes,
 } from '../../../common/api';
 import { ENABLE_CASE_CONNECTOR, MAX_TITLE_LENGTH } from '../../../common/constants';
 
@@ -87,7 +88,8 @@ export const create = async (
       id: savedObjectID,
     });
 
-    await userActionService.createCaseCreationUserAction({
+    await userActionService.createUserAction({
+      type: ActionTypes.create_case,
       unsecuredSavedObjectsClient,
       caseId: newCase.id,
       user,
