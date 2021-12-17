@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import 'moment-duration-format';
+import * as moment from 'moment';
+import momentDurationFormatSetup from 'moment-duration-format';
+momentDurationFormatSetup(moment);
 
 import {
   Comparator,
