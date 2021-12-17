@@ -11,10 +11,10 @@ import { isNumber, isFinite } from 'lodash';
 import { IErrorObject, ValidationResult } from '../../../../triggers_actions_ui/public';
 import {
   PartialCountCriteria,
-  isRatioAlert,
+  isRatioRule,
   getNumerator,
   getDenominator,
-  PartialRequiredAlertParams,
+  PartialRequiredRuleParams,
   PartialCriteria,
 } from '../../../common/alerting/logs/log_threshold/types';
 
@@ -50,7 +50,7 @@ export function validateExpression({
   count,
   criteria,
   timeSize,
-}: PartialRequiredAlertParams & {
+}: PartialRequiredRuleParams & {
   criteria: PartialCriteria;
 }): ValidationResult {
   const validationResult = { errors: {} };
@@ -122,7 +122,7 @@ export function validateExpression({
       return _errors;
     };
 
-    if (!isRatioAlert(criteria)) {
+    if (!isRatioRule(criteria)) {
       const criteriaErrors = getCriterionErrors(criteria);
       errors.criteria[0] = criteriaErrors;
     } else {

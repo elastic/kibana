@@ -52,6 +52,7 @@ export interface SourceActions {
   setButtonNotLoading(): void;
   setStagedPrivateKey(stagedPrivateKey: string | null): string | null;
   setConfigurationUpdateButtonNotLoading(): void;
+  showDiagnosticDownloadButton(): void;
 }
 
 interface SourceValues {
@@ -59,6 +60,7 @@ interface SourceValues {
   dataLoading: boolean;
   sectionLoading: boolean;
   buttonLoading: boolean;
+  diagnosticDownloadButtonVisible: boolean;
   contentItems: SourceContentItem[];
   contentMeta: Meta;
   contentFilterValue: string;
@@ -108,6 +110,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     setButtonNotLoading: () => false,
     setStagedPrivateKey: (stagedPrivateKey: string) => stagedPrivateKey,
     setConfigurationUpdateButtonNotLoading: () => false,
+    showDiagnosticDownloadButton: true,
   },
   reducers: {
     contentSource: [
@@ -145,6 +148,13 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       {
         searchContentSourceDocuments: () => true,
         setSearchResults: () => false,
+      },
+    ],
+    diagnosticDownloadButtonVisible: [
+      false,
+      {
+        showDiagnosticDownloadButton: () => true,
+        initializeSource: () => false,
       },
     ],
     contentItems: [
@@ -200,6 +210,9 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         }
         if (response.errors) {
           setErrorMessage(response.errors);
+          if (errorsHaveDiagnosticBundleString(response.errors as unknown as string[])) {
+            actions.showDiagnosticDownloadButton();
+          }
         } else {
           clearFlashMessages();
         }
@@ -343,3 +356,8 @@ const setPage = (state: Meta, page: number) => ({
     current: page,
   },
 });
+
+const errorsHaveDiagnosticBundleString = (errors: string[]) => {
+  const ERROR_SUBSTRING = 'Check diagnostic bundle for details';
+  return errors.find((e) => e.includes(ERROR_SUBSTRING));
+};

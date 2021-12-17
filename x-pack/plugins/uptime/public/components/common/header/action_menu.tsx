@@ -18,7 +18,10 @@ export const ActionMenu = ({
   appMountParameters: AppMountParameters;
   config: UptimeConfig;
 }) => (
-  <HeaderMenuPortal setHeaderActionMenu={appMountParameters.setHeaderActionMenu}>
+  <HeaderMenuPortal
+    setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
+    theme$={appMountParameters.theme$}
+  >
     <ActionMenuContent config={config} />
   </HeaderMenuPortal>
 );

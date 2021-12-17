@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { ActionGroupIdsOf } from '../../../../../alerting/common';
-import { AlertType, PluginSetupContract } from '../../../../../alerting/server';
+import { RuleType, PluginSetupContract } from '../../../../../alerting/server';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
 import {
   createMetricThresholdExecutor,
@@ -31,7 +31,7 @@ import {
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
 >;
-export type MetricThresholdAlertType = Omit<AlertType, 'ActionGroupIdsOf'> & {
+export type MetricThresholdAlertType = Omit<RuleType, 'ActionGroupIdsOf'> & {
   ActionGroupIdsOf: MetricThresholdAllowedActionGroups;
 };
 

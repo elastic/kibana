@@ -19,7 +19,7 @@ import { eventLogClientMock } from '../../../../event_log/server/mocks';
 import { QueryEventsBySavedObjectResult } from '../../../../event_log/server';
 import { SavedObject } from 'kibana/server';
 import { EventsFactory } from '../../lib/alert_summary_from_event_log.test';
-import { RawAlert } from '../../types';
+import { RawRule } from '../../types';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
 
 const taskManager = taskManagerMock.createStart();
@@ -64,7 +64,7 @@ const AlertSummaryFindEventsResult: QueryEventsBySavedObjectResult = {
 
 const RuleIntervalSeconds = 1;
 
-const BaseRuleSavedObject: SavedObject<RawAlert> = {
+const BaseRuleSavedObject: SavedObject<RawRule> = {
   id: '1',
   type: 'alert',
   attributes: {
@@ -96,7 +96,7 @@ const BaseRuleSavedObject: SavedObject<RawAlert> = {
   references: [],
 };
 
-function getRuleSavedObject(attributes: Partial<RawAlert> = {}): SavedObject<RawAlert> {
+function getRuleSavedObject(attributes: Partial<RawRule> = {}): SavedObject<RawRule> {
   return {
     ...BaseRuleSavedObject,
     attributes: { ...BaseRuleSavedObject.attributes, ...attributes },
