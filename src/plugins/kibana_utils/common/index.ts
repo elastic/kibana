@@ -8,9 +8,9 @@
 
 export { Defer, defer } from './defer';
 export { fieldWildcardMatcher, fieldWildcardFilter } from './field_wildcard';
-export { UiComponent, UiComponentInstance } from './ui';
+export type { UiComponent, UiComponentInstance } from './ui';
 export { of } from './of';
-export {
+export type {
   BaseState,
   BaseStateContainer,
   StateContainer,
@@ -30,13 +30,15 @@ export {
   PureSelector,
   PureTransition,
   CreateStateContainerOptions,
+} from './state_containers';
+export {
   createStateContainerReactHelpers,
   useContainerSelector,
   useContainerState,
   createStateContainer,
 } from './state_containers';
+export type { KibanaServerError } from './errors';
 export {
-  KibanaServerError,
   KbnError,
   CharacterNotAllowedInField,
   SavedFieldNotFound,
@@ -59,6 +61,5 @@ export {
   MigrateFunction,
   MigrateFunctionsObject,
   PersistableState,
-  migrateToLatest,
-  mergeMigrationFunctionMaps,
 } from './persistable_state';
+export { migrateToLatest, mergeMigrationFunctionMaps } from './persistable_state';

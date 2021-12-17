@@ -22,9 +22,10 @@ export {
   url,
   createGetterSetter,
 } from '../common';
-export { StartServicesGetter, createStartServicesGetter } from './core';
+export type { StartServicesGetter } from './core';
+export { createStartServicesGetter } from './core';
+export type { KibanaServerError } from '../common/errors';
 export {
-  KibanaServerError,
   KbnError,
   CharacterNotAllowedInField,
   SavedFieldNotFound,
@@ -40,7 +41,7 @@ export {
   dispatchRenderStart,
 } from './render_complete';
 export { ResizeChecker } from './resize_checker';
-export {
+export type {
   BaseState,
   BaseStateContainer,
   StateContainer,
@@ -60,12 +61,15 @@ export {
   PureSelector,
   PureTransition,
   CreateStateContainerOptions,
+} from '../common/state_containers';
+export {
   createStateContainerReactHelpers,
   useContainerSelector,
   useContainerState,
   createStateContainer,
 } from '../common/state_containers';
-export { Storage, IStorageWrapper, IStorage } from './storage';
+export type { IStorageWrapper, IStorage } from './storage';
+export { Storage } from './storage';
 export { hashedItemStore, HashedItemStore } from './storage/hashed_item_store';
 export {
   createStateHash,
