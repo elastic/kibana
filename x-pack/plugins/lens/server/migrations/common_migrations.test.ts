@@ -17,23 +17,25 @@ describe('Lens migrations', () => {
         '3.3': (filter: Filter) => ({ ...filter, version: '3.3' }),
       };
 
-      const lensVisualization = {
-        state: {
-          filters: [{}, {}],
+      const lensVisualizationSavedObject = {
+        attributes: {
+          state: {
+            filters: [{}, {}],
+          },
         },
       };
 
       const migrationMap = getLensFilterMigrations(filterMigrations);
 
-      expect(migrationMap['1.1'](lensVisualization).state.filters).toEqual([
+      expect(migrationMap['1.1'](lensVisualizationSavedObject).attributes.state.filters).toEqual([
         { version: '1.1' },
         { version: '1.1' },
       ]);
-      expect(migrationMap['2.2'](lensVisualization).state.filters).toEqual([
+      expect(migrationMap['2.2'](lensVisualizationSavedObject).attributes.state.filters).toEqual([
         { version: '2.2' },
         { version: '2.2' },
       ]);
-      expect(migrationMap['3.3'](lensVisualization).state.filters).toEqual([
+      expect(migrationMap['3.3'](lensVisualizationSavedObject).attributes.state.filters).toEqual([
         { version: '3.3' },
         { version: '3.3' },
       ]);
