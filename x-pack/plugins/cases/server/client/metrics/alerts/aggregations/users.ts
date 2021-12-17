@@ -14,13 +14,13 @@ export class Users implements AggregationBuilder {
     return {
       users_frequency: {
         terms: {
-          field: 'user.name',
+          field: userName,
           size: this.uniqueValuesLimit,
         },
       },
       users_total: {
         cardinality: {
-          field: 'user.name',
+          field: userName,
         },
       },
     };
@@ -48,6 +48,8 @@ export class Users implements AggregationBuilder {
     return 'users';
   }
 }
+
+const userName = 'user.name';
 
 type UsersAggregate = UsersAggregateResponse | undefined;
 

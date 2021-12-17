@@ -18,7 +18,7 @@ export class Hosts implements AggregationBuilder {
       aggs: {
         top_fields: {
           top_hits: {
-            docvalue_fields: ['host.name'],
+            docvalue_fields: [hostName],
             sort: [
               {
                 '@timestamp': {
@@ -35,14 +35,14 @@ export class Hosts implements AggregationBuilder {
     return {
       hosts_frequency: {
         terms: {
-          field: 'host.id',
+          field: hostId,
           size: this.uniqueValuesLimit,
         },
         ...topHits,
       },
       hosts_total: {
         cardinality: {
-          field: 'host.id',
+          field: hostId,
         },
       },
     };
@@ -68,7 +68,7 @@ export class Hosts implements AggregationBuilder {
   }
 
   private static getName(bucket: FieldAggregateBucket) {
-    const unsafeHostName = get(bucket.top_fields.hits.hits[0].fields, 'host.name');
+    const unsafeHostName = get(bucket.top_fields.hits.hits[0].fields, hostName);
 
     if (Array.isArray(unsafeHostName) && unsafeHostName.length > 0) {
       return unsafeHostName[0];
@@ -80,6 +80,9 @@ export class Hosts implements AggregationBuilder {
     return 'hosts';
   }
 }
+
+const hostName = 'host.name';
+const hostId = 'host.id';
 
 type HostsAggregate = HostsAggregateResponse | undefined;
 
