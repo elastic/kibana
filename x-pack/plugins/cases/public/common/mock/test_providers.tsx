@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { merge } from 'lodash';
+import React from 'react';
 import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
+
 import { DEFAULT_FEATURES, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CasesFeatures } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
@@ -20,6 +21,7 @@ interface Props {
   children: React.ReactNode;
   userCanCrud?: boolean;
   features?: CasesFeatures;
+  owner?: string[];
 }
 
 window.scrollTo = jest.fn();
@@ -28,8 +30,9 @@ const MockKibanaContextProvider = createKibanaContextProviderMock();
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<Props> = ({
   children,
+  features,
+  owner = [SECURITY_SOLUTION_OWNER],
   userCanCrud = true,
-  features = {},
 }) => {
   /**
    * The empty object at the beginning avoids the mutation
@@ -40,9 +43,7 @@ const TestProvidersComponent: React.FC<Props> = ({
     <I18nProvider>
       <MockKibanaContextProvider>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <CasesProvider
-            value={{ owner: [SECURITY_SOLUTION_OWNER], userCanCrud, features: featuresOptions }}
-          >
+          <CasesProvider value={{ features: featuresOptions, owner, userCanCrud }}>
             {children}
           </CasesProvider>
         </ThemeProvider>

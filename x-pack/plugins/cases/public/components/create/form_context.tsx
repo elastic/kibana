@@ -27,13 +27,13 @@ const initialCaseValue: FormProps = {
   connectorId: 'none',
   fields: null,
   syncAlerts: true,
+  selectedOwner: null,
 };
 
 interface Props {
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
   caseType?: CaseType;
   children?: JSX.Element | JSX.Element[];
-  hideConnectorServiceNowSir?: boolean;
   onSuccess?: (theCase: Case) => Promise<void>;
 }
 
@@ -41,7 +41,6 @@ export const FormContext: React.FC<Props> = ({
   afterCaseCreated,
   caseType = CaseType.individual,
   children,
-  hideConnectorServiceNowSir,
   onSuccess,
 }) => {
   const { connectors, loading: isLoadingConnectors } = useConnectors();
@@ -62,6 +61,7 @@ export const FormContext: React.FC<Props> = ({
       isValid
     ) => {
       if (isValid) {
+        const { selectedOwner, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
 
         const connectorToUpdate = caseConnector
@@ -69,11 +69,11 @@ export const FormContext: React.FC<Props> = ({
           : getNoneConnector();
 
         const updatedCase = await postCase({
-          ...dataWithoutConnectorId,
+          ...userFormData,
           type: caseType,
           connector: connectorToUpdate,
           settings: { syncAlerts },
-          owner: owner[0],
+          owner: selectedOwner ?? owner[0],
         });
 
         if (afterCaseCreated && updatedCase) {
