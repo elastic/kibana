@@ -12,7 +12,7 @@ import {
   MonitorManagementListResult,
   ServiceLocations,
   SyntheticsMonitor,
-  ServiceLocationsCodec,
+  ServiceLocationsApiResponseCodec,
 } from '../../../common/runtime_types';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { apiService } from './utils';
@@ -55,7 +55,7 @@ export const fetchServiceLocations = async (): Promise<ServiceLocations> => {
   const { locations } = await apiService.get(
     API_URLS.SERVICE_LOCATIONS,
     undefined,
-    ServiceLocationsCodec
+    ServiceLocationsApiResponseCodec
   );
   return locations;
 };
