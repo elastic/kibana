@@ -317,6 +317,7 @@ export class GisPageObject extends FtrService {
   }
 
   async clickFitToBounds(layerName: string) {
+    this.log.debug(`Fit to bounds, layer: ${layerName}`);
     const origView = await this.getView();
     await this.openLayerTocActionsPanel(layerName);
     await this.testSubjects.click('fitToBoundsButton');
