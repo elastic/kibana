@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiSwitchEvent,
   EuiSwitch,
+  EuiIcon,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +34,7 @@ import {
   FIXED_PROGRESSION,
   getStopsForFixedMode,
   PalettePanelContainer,
+  TooltipWrapper,
 } from '../../shared_components/';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import './dimension_editor.scss';
@@ -193,11 +195,32 @@ export function GaugeDimensionEditor(
             </EuiFlexGroup>
           </EuiFormRow>
           <EuiFormRow
-            fullWidth
             display="columnCompressedSwitch"
-            label={i18n.translate('xpack.lens.shared.ticksPositionOptions', {
-              defaultMessage: 'Ticks on bands',
-            })}
+            fullWidth
+            label={
+              <TooltipWrapper
+                position="top"
+                tooltipContent={i18n.translate('xpack.lens.shared.ticksPositionOptionsTooltip', {
+                  defaultMessage:
+                    'Places ticks on each band border instead of distributing them evenly',
+                })}
+                condition={true}
+                delay="regular"
+              >
+                <span>
+                  {i18n.translate('xpack.lens.shared.ticksPositionOptions', {
+                    defaultMessage: 'Ticks on bands',
+                  })}
+
+                  <EuiIcon
+                    type="questionInCircle"
+                    color="subdued"
+                    size="s"
+                    className="eui-alignTop"
+                  />
+                </span>
+              </TooltipWrapper>
+            }
           >
             <EuiSwitch
               compressed

@@ -15,6 +15,9 @@ import {
 import { setState, LensGetState, LensDispatch } from '..';
 import { getResolvedDateRange } from '../../utils';
 
+/**
+ * subscribes to external changes for filters, searchSessionId, timerange and autorefresh
+ */
 export function subscribeToExternalContext(
   data: DataPublicPluginStart,
   getState: LensGetState,
