@@ -167,7 +167,6 @@ export const requestIndexFieldSearch = async (
         hits: [
           {
             _index: '',
-            _type: '',
             _id: '',
             _score: -1,
             _source: null,

@@ -293,7 +293,6 @@ describe('formatTimelineData', () => {
         'kibana.alert.rule.name': ['Threshold test'],
         'kibana.alert.rule.to': ['now'],
       },
-      _type: '',
       sort: ['1610199700517'],
     };
 
