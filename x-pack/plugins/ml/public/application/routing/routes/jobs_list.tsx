@@ -9,6 +9,7 @@ import React, { useEffect, FC, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { NavigateToPath } from '../../contexts/kibana';
 
 import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
@@ -24,6 +25,11 @@ import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 
 export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
+  id: 'anomaly_detection',
+  title: i18n.translate('xpack.ml.overview.anomalyDetection.panelTitle', {
+    defaultMessage: 'Anomaly Detection',
+  }),
+  header: <FormattedMessage id="xpack.ml.jobsList.title" defaultMessage="Anomaly detection jobs" />,
   path: '/jobs',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
@@ -36,6 +42,8 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
       href: '',
     },
   ],
+  'data-test-subj': 'mlPageJobManagement',
+  enableDatePicker: true,
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {

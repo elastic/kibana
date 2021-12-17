@@ -6,7 +6,6 @@
  */
 
 import React, { FC } from 'react';
-import { NavigationMenu } from '../../components/navigation_menu';
 // @ts-ignore
 import { JobsListView } from './components/jobs_list_view/index';
 import { usePageUrlState } from '../../util/url_state';
@@ -39,10 +38,9 @@ export const JobsPage: FC<JobsPageProps> = (props) => {
   } = useMlKibana();
   const helpLink = docLinks.links.ml.anomalyDetection;
   return (
-    <div data-test-subj="mlPageJobManagement">
-      <NavigationMenu tabId="anomaly_detection" />
+    <>
       <JobsListView {...props} jobsViewState={pageState} onJobsViewStateUpdate={setPageState} />
       <HelpMenu docLink={helpLink} />
-    </div>
+    </>
   );
 };

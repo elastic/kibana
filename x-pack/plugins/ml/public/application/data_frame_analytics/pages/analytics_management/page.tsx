@@ -5,24 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useMemo, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiPageHeaderSection } from '@elastic/eui';
 
 import { useLocation } from 'react-router-dom';
 import { useUrlState } from '../../../util/url_state';
-import { NavigationMenu } from '../../../components/navigation_menu';
 import { DatePickerWrapper } from '../../../components/navigation_menu/date_picker_wrapper';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
@@ -69,65 +57,45 @@ export const Page: FC = () => {
   } = useMlKibana();
   const helpLink = docLinks.links.ml.dataFrameAnalytics;
   return (
-    <Fragment>
-      <NavigationMenu tabId="data_frame_analytics" />
-      <EuiPage data-test-subj="mlPageDataFrameAnalytics">
-        <EuiPageBody>
-          <EuiPageHeader>
-            <EuiPageHeaderSection>
-              <EuiTitle>
-                <h1>
-                  <FormattedMessage
-                    id="xpack.ml.dataframe.analyticsList.title"
-                    defaultMessage="Data frame analytics"
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiPageHeaderSection>
-            <EuiPageHeaderSection>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                {selectedTabId !== 'map' && (
-                  <>
-                    <EuiFlexItem grow={false}>
-                      <RefreshAnalyticsListButton />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <DatePickerWrapper />
-                    </EuiFlexItem>
-                  </>
-                )}
-              </EuiFlexGroup>
-            </EuiPageHeaderSection>
-          </EuiPageHeader>
-
-          <NodeAvailableWarning />
-          <SavedObjectsWarning
-            jobType="data-frame-analytics"
-            onCloseFlyout={refresh}
-            forceRefresh={isLoading}
-          />
-          <UpgradeWarning />
-
-          <EuiPageContent>
-            <AnalyticsNavigationBar
-              selectedTabId={selectedTabId}
-              jobId={mapJobId}
-              modelId={mapModelId}
-            />
-            {selectedTabId === 'map' && (mapJobId || mapModelId) && (
-              <JobMap analyticsId={mapJobId} modelId={mapModelId} />
+    <>
+      <EuiPageHeader>
+        <EuiPageHeaderSection>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            {selectedTabId !== 'map' && (
+              <>
+                <EuiFlexItem grow={false}>
+                  <RefreshAnalyticsListButton />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <DatePickerWrapper />
+                </EuiFlexItem>
+              </>
             )}
-            {selectedTabId === 'data_frame_analytics' && (
-              <DataFrameAnalyticsList
-                blockRefresh={blockRefresh}
-                pageState={dfaPageState}
-                updatePageState={setDfaPageState}
-              />
-            )}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+          </EuiFlexGroup>
+        </EuiPageHeaderSection>
+      </EuiPageHeader>
+
+      <NodeAvailableWarning />
+
+      <SavedObjectsWarning
+        jobType="data-frame-analytics"
+        onCloseFlyout={refresh}
+        forceRefresh={isLoading}
+      />
+      <UpgradeWarning />
+
+      <AnalyticsNavigationBar selectedTabId={selectedTabId} jobId={mapJobId} modelId={mapModelId} />
+      {selectedTabId === 'map' && (mapJobId || mapModelId) && (
+        <JobMap analyticsId={mapJobId} modelId={mapModelId} />
+      )}
+      {selectedTabId === 'data_frame_analytics' && (
+        <DataFrameAnalyticsList
+          blockRefresh={blockRefresh}
+          pageState={dfaPageState}
+          updatePageState={setDfaPageState}
+        />
+      )}
       <HelpMenu docLink={helpLink} />
-    </Fragment>
+    </>
   );
 };
