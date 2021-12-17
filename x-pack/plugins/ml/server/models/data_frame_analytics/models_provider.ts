@@ -20,6 +20,7 @@ import {
 } from '../memory_overview/memory_overview_service';
 import { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 import { isDefined } from '../../../common/types/guards';
+import { isPopulatedObject } from '../../../common';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 
@@ -89,7 +90,7 @@ export function modelsProvider(
 
       const {
         body: { nodes: clusterNodes },
-      } = await client.asCurrentUser.nodes.stats();
+      } = await client.asInternalUser.nodes.stats();
 
       const mlNodes = Object.entries(clusterNodes).filter(([, node]) => node.roles.includes('ml'));
 
@@ -99,6 +100,12 @@ export function modelsProvider(
       const nodeDeploymentStatsResponses: NodeDeploymentStatsResponse[] = mlNodes.map(
         ([nodeId, node]) => {
           const nodeFields = pick(node, NODE_FIELDS) as RequiredNodeFields;
+
+          nodeFields.attributes = isPopulatedObject(nodeFields.attributes)
+            ? Object.fromEntries(
+                Object.entries(nodeFields.attributes).filter(([id]) => id.startsWith('ml'))
+              )
+            : nodeFields.attributes;
 
           const allocatedModels = (
             trainedModelStats

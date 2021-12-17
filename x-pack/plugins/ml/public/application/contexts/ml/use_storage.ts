@@ -7,13 +7,14 @@
 
 import { useCallback, useState } from 'react';
 import { useMlKibana } from '../kibana';
+import type { MlStorageKey } from '../../../../common/types/storage';
 
 /**
  * Hook for accessing and changing a value in the storage.
  * @param key - Storage key
  * @param initValue
  */
-export function useStorage<T>(key: string, initValue?: T): [T, (value: T) => void] {
+export function useStorage<T>(key: MlStorageKey, initValue?: T): [T, (value: T) => void] {
   const {
     services: { storage },
   } = useMlKibana();

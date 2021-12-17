@@ -38,6 +38,7 @@ export interface MlSummaryJob {
   awaitingNodeAssignment: boolean;
   alertingRules?: MlAnomalyDetectionAlertRule[];
   jobTags: Record<string, string>;
+  bucketSpanSeconds: number;
 }
 
 export interface AuditMessage {

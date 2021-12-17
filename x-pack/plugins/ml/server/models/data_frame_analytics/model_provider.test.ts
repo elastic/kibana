@@ -13,7 +13,7 @@ import { MemoryOverviewService } from '../memory_overview/memory_overview_servic
 
 describe('Model service', () => {
   const client = {
-    asCurrentUser: {
+    asInternalUser: {
       nodes: {
         stats: jest.fn(() => {
           return Promise.resolve({
@@ -220,7 +220,6 @@ describe('Model service', () => {
           attributes: {
             'ml.machine_memory': '15599742976',
             'ml.max_jvm_size': '1073741824',
-            'xpack.installed': 'true',
           },
           id: '3qIoLFnbSi-DwVrYioUCdw',
           memory_overview: {
@@ -337,7 +336,6 @@ describe('Model service', () => {
           attributes: {
             'ml.machine_memory': '15599742976',
             'ml.max_jvm_size': '1073741824',
-            'xpack.installed': 'true',
           },
           id: 'DpCy7SOBQla3pu0Dq-tnYw',
           memory_overview: {
@@ -457,7 +455,6 @@ describe('Model service', () => {
           attributes: {
             'ml.machine_memory': '15599742976',
             'ml.max_jvm_size': '1073741824',
-            'xpack.installed': 'true',
           },
           id: 'pt7s6lKHQJaP4QHKtU-Q0Q',
           memory_overview: {
