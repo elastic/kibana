@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 
 import {
   Logger,
@@ -365,6 +365,10 @@ export class CaseUserActionService {
     unsecuredSavedObjectsClient,
     actions,
   }: PostCaseUserActionArgs): Promise<void> {
+    if (isEmpty(actions)) {
+      return;
+    }
+
     try {
       this.log.debug(`Attempting to POST a new case user action`);
 

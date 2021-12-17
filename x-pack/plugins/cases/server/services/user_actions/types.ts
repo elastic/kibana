@@ -65,7 +65,7 @@ export interface BuilderParameters {
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {
   type: T;
-  payload: Record<string, unknown>;
+  payload: BuilderParameters[T]['parameters']['payload'];
 }
 
 export type UserActionParameters<T extends keyof BuilderParameters> =
