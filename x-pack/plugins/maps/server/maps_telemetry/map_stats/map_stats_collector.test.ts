@@ -9,9 +9,9 @@
 import mapSavedObjects from '../test_resources/sample_map_saved_objects.json';
 import { MapStatsCollector } from './map_stats_collector';
 
-test('returns zeroed telemetry data when there are no saved objects', async () => {
-  const mapStatsCollector = new MapStatsCollector();
-  const stats = mapStatsCollector.getStats() as any;
+test('returns zeroed telemetry data when there are no saved objects', () => {
+  const statsCollector = new MapStatsCollector();
+  const stats = statsCollector.getStats() as any;
   delete stats.timeCaptured;
 
   expect(stats).toEqual({
@@ -38,12 +38,12 @@ test('returns zeroed telemetry data when there are no saved objects', async () =
   });
 });
 
-test('returns expected telemetry data from saved objects', async () => {
-  const mapStatsCollector = new MapStatsCollector();
+test('returns expected telemetry data from saved objects', () => {
+  const statsCollector = new MapStatsCollector();
   mapSavedObjects.forEach((savedObject) => {
-    mapStatsCollector.push(savedObject.attributes);
+    statsCollector.push(savedObject.attributes);
   });
-  const stats = mapStatsCollector.getStats() as any;
+  const stats = statsCollector.getStats() as any;
   delete stats.timeCaptured;
 
   expect(stats).toEqual({
