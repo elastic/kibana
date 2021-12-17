@@ -85,7 +85,8 @@ describe('CollectorSet', () => {
       );
 
       const result = await collectors.bulkFetch(mockEsClient, mockSoClient, req);
-      expect(loggerSpies.debug).toHaveBeenCalledTimes(1);
+      expect(loggerSpies.debug).toHaveBeenCalledTimes(2);
+      expect(loggerSpies.debug).toHaveBeenCalledWith('Getting ready collectors');
       expect(loggerSpies.debug).toHaveBeenCalledWith(
         'Fetching data from MY_TEST_COLLECTOR collector'
       );
