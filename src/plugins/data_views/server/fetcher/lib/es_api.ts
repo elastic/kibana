@@ -7,9 +7,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-// import type { BoolQuery } from '@kbn/es-query';
-// import type { QueryDslQueryContainer } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '../../../common/types';
 import { convertEsError } from './errors';
 
 /**

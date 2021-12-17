@@ -146,28 +146,27 @@ export class IndexPatternsTestPlugin
         );
         const es = elasticsearch.client.asScoped(req).asCurrentUser;
         await es.index({
-          index: 'helloworld',
+          index: 'helloworld1',
           refresh: true,
           id: 'helloworld',
           body: { hello: 'world' },
         });
 
         await es.index({
-          index: 'helloworld',
+          index: 'helloworld2',
           refresh: true,
           id: 'helloworld2',
           body: { bye: 'world' },
         });
 
-        const ip = await service.createAndSave({ title: 'helloworld' });
+        const ip = await service.createAndSave({ title: 'helloworld*' });
 
-        // const ip = await service.get(id);
         const fields = await service.getFieldsForIndexPattern(ip, {
           pattern: '*',
           filter: { exists: { field: 'bye' } },
         });
         const fieldNames = fields.map((field) => field.name);
-        console.log('THIS IS IT', fields.length);
+
         if (fieldNames.indexOf('bye') > -1 && fieldNames.indexOf('hello') === -1) {
           return res.ok({ body: { fields } });
         } else {
