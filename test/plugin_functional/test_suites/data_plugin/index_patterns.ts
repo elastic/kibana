@@ -52,6 +52,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       expect(resp.body).to.eql({});
     });
 
+    it('can get filtered field list', async () => {
+      await supertest.get(`/api/index-patterns-plugin/get-filtered-field-list`).expect(200);
+    });
+
     it('can delete index pattern', async () => {
       await supertest.get(`/api/index-patterns-plugin/delete/${indexPatternId}`).expect(200);
     });
