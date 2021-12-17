@@ -27,14 +27,17 @@ export const DiscoverError = ({ error }: { error: Error }) => {
       title={
         <h2>
           {i18n.translate('discover.discoverError.title', {
-            defaultMessage: 'Error loading Discover',
+            defaultMessage: 'Cannot load this page',
           })}
         </h2>
       }
       body={<p>{error.message}</p>}
       actions={
         <EuiButton color="primary" fill onClick={goToMain}>
-          <FormattedMessage id="discover.goToMainButtonText" defaultMessage="Go to main" />
+          <FormattedMessage
+            id="discover.goToDiscoverMainViewButtonText"
+            defaultMessage="Go to Discover main view"
+          />
         </EuiButton>
       }
     />

@@ -32,7 +32,7 @@ export const withQueryParams = <P extends DiscoverRouteProps>(
     if (missingParamNames.length !== 0) {
       const missingParamsList = missingParamNames.join(', ');
       const errorMessage = i18n.translate('discover.discoverError.missingQueryParamsError', {
-        defaultMessage: 'Query should contain {missingParamsList}.',
+        defaultMessage: 'URL query string is missing {missingParamsList}',
         values: { missingParamsList },
       });
 
