@@ -96,6 +96,7 @@ filegroup(
       "//packages/kbn-mapbox-gl:build_types",
       "//packages/kbn-monaco:build_types",
       "//packages/kbn-optimizer:build_types",
+      "//packages/kbn-react-field:build_types",
   ],
 )
 
