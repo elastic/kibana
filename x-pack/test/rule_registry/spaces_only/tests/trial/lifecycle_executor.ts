@@ -113,8 +113,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
     it('should work with object fields', async () => {
       const id = 'host-01';
 
-      // This is factory for creating the function that will wrap the solution's
-      // rule executor with the RuleRegistry lifecycle
+      // This creates the function that will wrap the solution's rule executor with the RuleRegistry lifecycle
       const createLifecycleRuleExecutor = createLifecycleExecutor(logger, ruleDataClient);
 
       // This creates the executor that is passed to the Alerting framework.
@@ -215,7 +214,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
         },
       });
 
-      // Refresh again for the next update
+      // Refresh again so we can query the data to check it was written properly
       await es.indices.refresh({ index: `${ruleDataClient.indexName}*` });
 
       // Use the ruleDataClient to read the results from the index
