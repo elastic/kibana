@@ -14,7 +14,7 @@ export const kibanaTestUser = {
 };
 
 export const kibanaServerTestUser = {
-  username: env.TEST_KIBANA_SERVER_USER || 'kibana',
+  username: env.TEST_KIBANA_SERVER_USER || 'kibana_system',
   password: env.TEST_KIBANA_SERVER_PASS || 'changeme',
 };
 

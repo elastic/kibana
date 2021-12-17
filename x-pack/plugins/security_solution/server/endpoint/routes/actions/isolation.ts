@@ -33,8 +33,8 @@ import {
 import { getMetadataForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
 import { APP_ID } from '../../../../common/constants';
-import { userCanIsolate } from '../../../../common/endpoint/actions';
 import { doLogsEndpointActionDsExists } from '../../utils';
+import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**
  * Registers the Host-(un-)isolation routes
@@ -43,6 +43,8 @@ export function registerHostIsolationRoutes(
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) {
+  const logger = endpointContext.logFactory.get('hostIsolation');
+
   // perform isolation
   router.post(
     {
@@ -50,7 +52,11 @@ export function registerHostIsolationRoutes(
       validate: HostIsolationRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    isolationRequestHandler(endpointContext, true)
+    withEndpointAuthz(
+      { all: ['canIsolateHost'] },
+      logger,
+      isolationRequestHandler(endpointContext, true)
+    )
   );
 
   // perform UN-isolate
@@ -60,7 +66,11 @@ export function registerHostIsolationRoutes(
       validate: HostIsolationRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    isolationRequestHandler(endpointContext, false)
+    withEndpointAuthz(
+      { all: ['canUnIsolateHost'] },
+      logger,
+      isolationRequestHandler(endpointContext, false)
+    )
   );
 }
 
@@ -100,24 +110,7 @@ export const isolationRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
-    // only allow admin users
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
-    if (!userCanIsolate(user?.roles)) {
-      return res.forbidden({
-        body: {
-          message: 'You do not have permission to perform this action',
-        },
-      });
-    }
-
-    // isolation requires plat+
-    if (isolate && !endpointContext.service.getLicenseService()?.isPlatinumPlus()) {
-      return res.forbidden({
-        body: {
-          message: 'Your license level does not allow for this action',
-        },
-      });
-    }
 
     // fetch the Agent IDs to send the commands to
     const endpointIDs = [...new Set(req.body.endpoint_ids)]; // dedupe
@@ -209,13 +202,9 @@ export const isolationRequestHandler = function (
     }
 
     try {
-      let esClient = context.core.elasticsearch.client.asCurrentUser;
-      if (doesLogsEndpointActionsDsExist) {
-        // create action request record as system user with user in .fleet-actions
-        esClient = context.core.elasticsearch.client.asInternalUser;
-      }
-      // write as the current user if the new indices do not exist
-      // <v7.16 requires the current user to be super user
+      const esClient = context.core.elasticsearch.client.asInternalUser;
+      // write as the internal user if the new indices do not exist
+      // 8.0+ requires internal user to write to system indices
       fleetActionIndexResult = await esClient.index<EndpointAction>({
         index: AGENT_ACTIONS_INDEX,
         body: {

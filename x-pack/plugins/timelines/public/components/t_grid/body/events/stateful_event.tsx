@@ -128,7 +128,6 @@ const StatefulEventComponent: React.FC<Props> = ({
     const updatedExpandedDetail: TimelineExpandedDetailType = {
       panelView: 'eventDetail',
       params: {
-        ecsData: event.ecs,
         eventId,
         indexName,
       },
@@ -141,7 +140,7 @@ const StatefulEventComponent: React.FC<Props> = ({
         timelineId,
       })
     );
-  }, [dispatch, event._id, event._index, event.ecs, tabType, timelineId]);
+  }, [dispatch, event._id, event._index, tabType, timelineId]);
 
   const setEventsLoading = useCallback<SetEventsLoading>(
     ({ eventIds, isLoading }) => {

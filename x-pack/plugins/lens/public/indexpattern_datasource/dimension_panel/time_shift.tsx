@@ -127,8 +127,9 @@ export function TimeShift({
       }}
     >
       <EuiFormRow
-        display="columnCompressed"
+        display="rowCompressed"
         fullWidth
+        data-test-subj="indexPattern-dimension-time-shift-row"
         label={i18n.translate('xpack.lens.indexPattern.timeShift.label', {
           defaultMessage: 'Time shift',
         })}
@@ -145,6 +146,10 @@ export function TimeShift({
             i18n.translate('xpack.lens.indexPattern.timeShift.noMultipleHelp', {
               defaultMessage:
                 'Time shift should be a multiple of the date histogram interval. Either adjust time shift or date histogram interval',
+            })) ||
+          (isLocalValueInvalid &&
+            i18n.translate('xpack.lens.indexPattern.timeShift.genericInvalidHelp', {
+              defaultMessage: 'Time shift value is not valid.',
             }))
         }
         isInvalid={Boolean(isLocalValueInvalid || localValueTooSmall || localValueNotMultiple)}

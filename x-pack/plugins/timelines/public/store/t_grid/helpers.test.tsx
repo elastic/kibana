@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SortColumnTimeline } from '../../../common';
+import { SortColumnTimeline } from '../../../common/types';
 import { tGridDefaults } from './defaults';
 import {
   setInitializeTgridSettings,

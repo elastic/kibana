@@ -6,13 +6,13 @@
  */
 
 import React, { useReducer, useMemo, useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import {
-  Alert,
-  AlertTypeParams,
+  Rule,
+  RuleTypeParams,
   AlertUpdates,
   AlertFlyoutCloseReason,
   IErrorObject,
@@ -68,7 +68,7 @@ const AlertAdd = ({
   const [{ alert }, dispatch] = useReducer(alertReducer as InitialAlertReducer, {
     alert: initialAlert,
   });
-  const [initialAlertParams, setInitialAlertParams] = useState<AlertTypeParams>({});
+  const [initialAlertParams, setInitialAlertParams] = useState<RuleTypeParams>({});
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmAlertSaveModalOpen, setIsConfirmAlertSaveModalOpen] = useState<boolean>(false);
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
@@ -81,7 +81,7 @@ const AlertAdd = ({
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
 
-  const setAlertProperty = <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => {
+  const setRuleProperty = <Key extends keyof Rule>(key: Key, value: Rule[Key] | null) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
 
@@ -95,7 +95,7 @@ const AlertAdd = ({
 
   useEffect(() => {
     if (alertTypeId) {
-      setAlertProperty('alertTypeId', alertTypeId);
+      setRuleProperty('alertTypeId', alertTypeId);
     }
   }, [alertTypeId]);
 
@@ -131,7 +131,7 @@ const AlertAdd = ({
   useEffect(() => {
     (async () => {
       setIsLoading(true);
-      const res = await getAlertActionErrors(alert as Alert, actionTypeRegistry);
+      const res = await getAlertActionErrors(alert as Rule, actionTypeRegistry);
       setIsLoading(false);
       setAlertActionsErrors([...res]);
     })();
@@ -141,7 +141,7 @@ const AlertAdd = ({
     if (alert.alertTypeId && ruleTypeIndex) {
       const type = ruleTypeIndex.get(alert.alertTypeId);
       if (type?.defaultScheduleInterval && !changedFromDefaultInterval) {
-        setAlertProperty('schedule', { interval: type.defaultScheduleInterval });
+        setRuleProperty('schedule', { interval: type.defaultScheduleInterval });
       }
     }
   }, [alert.alertTypeId, ruleTypeIndex, alert.schedule.interval, changedFromDefaultInterval]);
@@ -177,7 +177,7 @@ const AlertAdd = ({
   const alertType = alert.alertTypeId ? ruleTypeRegistry.get(alert.alertTypeId) : null;
 
   const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
-    alert as Alert,
+    alert as Rule,
     alertType,
     alert.alertTypeId ? ruleTypeIndex?.get(alert.alertTypeId) : undefined
   );
@@ -185,7 +185,7 @@ const AlertAdd = ({
   // Confirm before saving if user is able to add actions but hasn't added any to this alert
   const shouldConfirmSave = canShowActions && alert.actions?.length === 0;
 
-  async function onSaveAlert(): Promise<Alert | undefined> {
+  async function onSaveAlert(): Promise<Rule | undefined> {
     try {
       const newAlert = await createAlert({ http, alert: alert as AlertUpdates });
       toasts.addSuccess(
@@ -253,7 +253,7 @@ const AlertAdd = ({
                 if (isLoading || !isValidAlert(alert, alertErrors, alertActionsErrors)) {
                   setAlert(
                     getAlertWithInvalidatedFields(
-                      alert as Alert,
+                      alert as Rule,
                       alertParamsErrors,
                       alertBaseErrors,
                       alertActionsErrors

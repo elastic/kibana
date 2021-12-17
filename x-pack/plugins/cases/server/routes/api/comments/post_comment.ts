@@ -9,7 +9,8 @@ import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import { escapeHatch, wrapError } from '../utils';
 import { RouteDeps } from '../types';
-import { CASE_COMMENTS_URL, ENABLE_CASE_CONNECTOR, CommentRequest } from '../../../../common';
+import { CASE_COMMENTS_URL, ENABLE_CASE_CONNECTOR } from '../../../../common/constants';
+import { CommentRequest } from '../../../../common/api';
 
 export function initPostCommentApi({ router, logger }: RouteDeps) {
   router.post(

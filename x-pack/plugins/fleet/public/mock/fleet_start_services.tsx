@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 
 import { coreMock } from '../../../../../src/core/public/mocks';
 import type { IStorage } from '../../../../../src/plugins/kibana_utils/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { setHttpClient } from '../hooks/use_request';
+
+import type { FleetAuthz } from '../../common';
 
 import { createStartDepsMock } from './plugin_dependencies';
 import type { MockedFleetStartServices } from './types';
@@ -26,6 +28,27 @@ const createMockStore = (): MockedKeys<IStorage> => {
     removeItem: jest.fn().mockImplementation((key: string) => delete store[key]),
     clear: jest.fn().mockImplementation(() => (store = {})),
   };
+};
+
+const fleetAuthzMock: FleetAuthz = {
+  fleet: {
+    all: true,
+    setup: true,
+    readEnrollmentTokens: true,
+    readAgentPolicies: true,
+  },
+  integrations: {
+    readPackageInfo: true,
+    readInstalledPackages: true,
+    installPackages: true,
+    upgradePackages: true,
+    uploadPackages: true,
+    removePackages: true,
+    readPackageSettings: true,
+    writePackageSettings: true,
+    readIntegrationPolicies: true,
+    writeIntegrationPolicies: true,
+  },
 };
 
 const configureStartServices = (services: MockedFleetStartServices): void => {
@@ -52,6 +75,7 @@ export const createStartServices = (basePath: string = '/mock'): MockedFleetStar
     ...coreMock.createStart({ basePath }),
     ...createStartDepsMock(),
     storage: new Storage(createMockStore()) as jest.Mocked<Storage>,
+    authz: fleetAuthzMock,
   };
 
   configureStartServices(startServices);

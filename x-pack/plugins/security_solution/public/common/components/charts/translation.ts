@@ -20,3 +20,7 @@ export const DATA_NOT_AVAILABLE_TITLE = i18n.translate(
     defaultMessage: 'Chart Data Not Available',
   }
 );
+
+export const EMPTY_VALUE_LABEL = i18n.translate('xpack.securitySolution.chart.emptyValueLabel', {
+  defaultMessage: 'empty value',
+});

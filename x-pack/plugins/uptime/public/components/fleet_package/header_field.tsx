@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ContentType, Mode } from './types';
 
 import { KeyValuePairsField, Pair } from './key_value_field';

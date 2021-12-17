@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import 'jest-canvas-mock';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { getIndexPatternDatasource, GenericIndexPatternColumn } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource, FramePublicAPI } from '../types';
@@ -26,7 +25,7 @@ import {
   FormulaIndexPatternColumn,
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
-import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
+import { indexPatternFieldEditorPluginMock } from 'src/plugins/data_view_field_editor/public/mocks';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { TinymathAST } from 'packages/kbn-tinymath';
@@ -185,7 +184,7 @@ describe('IndexPattern Data Source', () => {
       data: dataPluginMock.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
-      indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
+      dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
     });
 
@@ -1250,6 +1249,7 @@ describe('IndexPattern Data Source', () => {
           label: 'My Op',
           dataType: 'string',
           isBucketed: true,
+          isStaticValue: false,
         } as Operation);
       });
 
@@ -1723,6 +1723,7 @@ describe('IndexPattern Data Source', () => {
               ...state.layers.first.columns,
               newStatic: {
                 dataType: 'number',
+                isStaticValue: true,
                 isBucketed: false,
                 label: 'Static value: 0',
                 operationType: 'static_value',

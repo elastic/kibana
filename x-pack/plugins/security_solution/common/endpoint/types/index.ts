@@ -1235,18 +1235,16 @@ export interface ListPageRouteState {
 /**
  * REST API standard base response for list types
  */
-export interface BaseListResponse {
-  data: unknown[];
+interface BaseListResponse<D = unknown> {
+  data: D[];
   page: number;
   pageSize: number;
   total: number;
-  sort?: string;
-  sortOrder?: 'asc' | 'desc';
 }
 
 /**
  * Returned by the server via GET /api/endpoint/metadata
  */
-export interface MetadataListResponse extends BaseListResponse {
-  data: HostInfo[];
-}
+export type MetadataListResponse = BaseListResponse<HostInfo>;
+
+export type { EndpointPrivileges } from './authz';

@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 
 import { EmptyPage } from './empty_page';
-import * as i18n from '../../components/app/cases/translations';
+import * as i18n from './translations';
 import { useKibana } from '../../utils/kibana_react';
 
 export const CaseFeatureNoPermissions = React.memo(() => {

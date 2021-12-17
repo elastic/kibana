@@ -38,7 +38,6 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public readonly payload: ReportSource['payload'];
 
   public readonly meta: ReportSource['meta'];
-  public readonly browser_type: ReportSource['browser_type'];
 
   public readonly status: ReportSource['status'];
   public readonly attempts: ReportSource['attempts'];
@@ -82,7 +81,6 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
     this.max_attempts = opts.max_attempts;
     this.attempts = opts.attempts || 0;
     this.timeout = opts.timeout;
-    this.browser_type = opts.browser_type;
 
     this.process_expiration = opts.process_expiration;
     this.started_at = opts.started_at;
@@ -125,7 +123,6 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       meta: this.meta,
       timeout: this.timeout,
       max_attempts: this.max_attempts,
-      browser_type: this.browser_type,
       status: this.status,
       attempts: this.attempts,
       started_at: this.started_at,
@@ -170,7 +167,6 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       meta: this.meta,
       timeout: this.timeout,
       max_attempts: this.max_attempts,
-      browser_type: this.browser_type,
       status: this.status,
       attempts: this.attempts,
       started_at: this.started_at,

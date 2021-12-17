@@ -8,31 +8,29 @@
 import React, { useCallback } from 'react';
 
 import * as i18n from '../translations';
-import { useKibana } from '../../../common/lib/kibana';
 import { LinkAnchor } from '../../links';
+import { useCasesContext } from '../../cases_context/use_cases_context';
+import { useCreateCaseNavigation } from '../../../common/navigation';
 
-const NoCasesComponent = ({
-  createCaseHref,
-  hasWritePermissions,
-}: {
-  createCaseHref: string;
-  hasWritePermissions: boolean;
-}) => {
-  const { navigateToUrl } = useKibana().services.application;
-  const goToCaseCreation = useCallback(
+const NoCasesComponent = () => {
+  const { userCanCrud } = useCasesContext();
+  const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
+
+  const navigateToCreateCaseClick = useCallback(
     (e) => {
       e.preventDefault();
-      navigateToUrl(createCaseHref);
+      navigateToCreateCase();
     },
-    [createCaseHref, navigateToUrl]
+    [navigateToCreateCase]
   );
-  return hasWritePermissions ? (
+
+  return userCanCrud ? (
     <>
       <span>{i18n.NO_CASES}</span>
       <LinkAnchor
         data-test-subj="no-cases-create-case"
-        onClick={goToCaseCreation}
-        href={createCaseHref}
+        onClick={navigateToCreateCaseClick}
+        href={getCreateCaseUrl()}
       >{` ${i18n.START_A_NEW_CASE}`}</LinkAnchor>
       {'!'}
     </>

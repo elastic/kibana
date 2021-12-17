@@ -19,7 +19,6 @@ export const ruleExecutionLogClientMock = {
     deleteCurrentStatus: jest.fn(),
 
     logStatusChange: jest.fn(),
-    logExecutionMetrics: jest.fn(),
   }),
 };
 

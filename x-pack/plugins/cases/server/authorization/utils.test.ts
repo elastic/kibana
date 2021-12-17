@@ -6,7 +6,7 @@
  */
 
 import { nodeBuilder } from '@kbn/es-query';
-import { OWNER_FIELD } from '../../common';
+import { OWNER_FIELD } from '../../common/api';
 import {
   combineFilterWithAuthorizationFilter,
   ensureFieldIsSafeForQuery,

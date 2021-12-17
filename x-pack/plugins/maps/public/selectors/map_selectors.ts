@@ -10,9 +10,9 @@ import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import { Adapters } from 'src/plugins/inspector/public';
 import type { Query } from 'src/plugins/data/common';
-import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
-// @ts-ignore
-import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile_layer';
+import { Filter } from '@kbn/es-query';
+import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
+import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import {
   BlendedVectorLayer,
   IVectorLayer,
@@ -54,11 +54,12 @@ import {
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 import { MapSettings } from '../reducers/map';
-import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
+import { TimeRange } from '../../../../../src/plugins/data/public';
 import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
+import { EMSTMSSource } from '../classes/sources/ems_tms_source';
 import { ILayer } from '../classes/layers/layer';
 import { getIsReadOnly } from './ui_selectors';
 
@@ -70,9 +71,9 @@ export function createLayerInstance(
   const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
 
   switch (layerDescriptor.type) {
-    case LAYER_TYPE.TILE:
-      return new TileLayer({ layerDescriptor, source: source as ITMSSource });
-    case LAYER_TYPE.VECTOR:
+    case LAYER_TYPE.RASTER_TILE:
+      return new RasterTileLayer({ layerDescriptor, source: source as ITMSSource });
+    case LAYER_TYPE.GEOJSON_VECTOR:
       const joins: InnerJoin[] = [];
       const vectorLayerDescriptor = layerDescriptor as VectorLayerDescriptor;
       if (vectorLayerDescriptor.joins) {
@@ -87,8 +88,8 @@ export function createLayerInstance(
         joins,
         chartsPaletteServiceGetColor,
       });
-    case LAYER_TYPE.VECTOR_TILE:
-      return new VectorTileLayer({ layerDescriptor, source: source as ITMSSource });
+    case LAYER_TYPE.EMS_VECTOR_TILE:
+      return new EmsVectorTileLayer({ layerDescriptor, source: source as EMSTMSSource });
     case LAYER_TYPE.HEATMAP:
       return new HeatmapLayer({
         layerDescriptor: layerDescriptor as HeatmapLayerDescriptor,
@@ -100,7 +101,7 @@ export function createLayerInstance(
         source: source as IVectorSource,
         chartsPaletteServiceGetColor,
       });
-    case LAYER_TYPE.TILED_VECTOR:
+    case LAYER_TYPE.MVT_VECTOR:
       return new MvtVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,

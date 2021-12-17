@@ -12,21 +12,18 @@ import {
   SavedObjectsFindResult,
 } from 'kibana/server';
 
+import { isCreateConnector, isPush, isUpdateConnector } from '../../../common/utils/user_actions';
+import { CaseUserActionAttributes, CaseUserActionResponse } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
-  CaseUserActionAttributes,
   MAX_DOCS_PER_PAGE,
   SUB_CASE_SAVED_OBJECT,
-  CaseUserActionResponse,
   CASE_COMMENT_SAVED_OBJECT,
-  isCreateConnector,
-  isPush,
-  isUpdateConnector,
-} from '../../../common';
+} from '../../../common/constants';
 import { ClientArgs } from '..';
 import { UserActionFieldType } from './types';
-import { CASE_REF_NAME, COMMENT_REF_NAME, SUB_CASE_REF_NAME } from '../../common';
+import { CASE_REF_NAME, COMMENT_REF_NAME, SUB_CASE_REF_NAME } from '../../common/constants';
 import { ConnectorIdReferenceName, PushConnectorIdReferenceName } from './transform';
 import { findConnectorIdReference } from '../transform';
 

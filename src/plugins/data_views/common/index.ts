@@ -57,7 +57,7 @@ export type {
 export { DataViewType, IndexPatternType } from './types';
 export type { IndexPatternsContract, DataViewsContract } from './data_views';
 export { IndexPatternsService, DataViewsService } from './data_views';
-export type { IndexPatternListItem, DataViewListItem } from './data_views';
+export type { IndexPatternListItem, DataViewListItem, TimeBasedDataView } from './data_views';
 export { IndexPattern, DataView } from './data_views';
 export { DuplicateDataViewError, DataViewSavedObjectConflictError } from './errors';
 export type {

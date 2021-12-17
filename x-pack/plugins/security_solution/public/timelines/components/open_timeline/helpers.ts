@@ -417,7 +417,6 @@ export const dispatchUpdateTimeline =
           id: SourcererScopeName.timeline,
           selectedDataViewId: timeline.dataViewId,
           selectedPatterns: timeline.indexNames,
-          eventType: timeline.eventType,
         })
       );
     }

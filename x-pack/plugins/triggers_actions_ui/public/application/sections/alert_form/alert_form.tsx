@@ -7,7 +7,7 @@
 
 import React, { Fragment, useState, useEffect, useCallback, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -44,12 +44,12 @@ import {
 import { loadAlertTypes } from '../../lib/alert_api';
 import { AlertReducerAction, InitialAlert } from './alert_reducer';
 import {
-  AlertTypeModel,
-  Alert,
+  RuleTypeModel,
+  Rule,
   IErrorObject,
   AlertAction,
   RuleTypeIndex,
-  AlertType,
+  RuleType,
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
 } from '../../../types';
@@ -120,7 +120,7 @@ export const AlertForm = ({
   } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
 
-  const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(null);
+  const [alertTypeModel, setAlertTypeModel] = useState<RuleTypeModel | null>(null);
 
   const [alertInterval, setAlertInterval] = useState<number | undefined>(
     alert.schedule.interval
@@ -142,10 +142,10 @@ export const AlertForm = ({
   const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | null>(null);
 
   const [availableAlertTypes, setAvailableAlertTypes] = useState<
-    Array<{ alertTypeModel: AlertTypeModel; alertType: AlertType }>
+    Array<{ alertTypeModel: RuleTypeModel; alertType: RuleType }>
   >([]);
   const [filteredAlertTypes, setFilteredAlertTypes] = useState<
-    Array<{ alertTypeModel: AlertTypeModel; alertType: AlertType }>
+    Array<{ alertTypeModel: RuleTypeModel; alertType: RuleType }>
   >([]);
   const [searchText, setSearchText] = useState<string | undefined>();
   const [inputText, setInputText] = useState<string | undefined>();
@@ -221,20 +221,20 @@ export const AlertForm = ({
     }
   }, [alert.schedule.interval]);
 
-  const setAlertProperty = useCallback(
-    <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => {
+  const setRuleProperty = useCallback(
+    <Key extends keyof Rule>(key: Key, value: Rule[Key] | null) => {
       dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
     },
     [dispatch]
   );
 
   const setActions = useCallback(
-    (updatedActions: AlertAction[]) => setAlertProperty('actions', updatedActions),
-    [setAlertProperty]
+    (updatedActions: AlertAction[]) => setRuleProperty('actions', updatedActions),
+    [setRuleProperty]
   );
 
-  const setAlertParams = (key: string, value: any) => {
-    dispatch({ command: { type: 'setAlertParams' }, payload: { key, value } });
+  const setRuleParams = (key: string, value: any) => {
+    dispatch({ command: { type: 'setRuleParams' }, payload: { key, value } });
   };
 
   const setScheduleProperty = (key: string, value: any) => {
@@ -276,13 +276,13 @@ export const AlertForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleTypeRegistry, availableAlertTypes, searchText, JSON.stringify(solutionsFilter)]);
 
-  const getAvailableAlertTypes = (alertTypesResult: AlertType[]) =>
+  const getAvailableAlertTypes = (alertTypesResult: RuleType[]) =>
     ruleTypeRegistry
       .list()
       .reduce(
         (
-          arr: Array<{ alertType: AlertType; alertTypeModel: AlertTypeModel }>,
-          ruleTypeRegistryItem: AlertTypeModel
+          arr: Array<{ alertType: RuleType; alertTypeModel: RuleTypeModel }>,
+          ruleTypeRegistryItem: RuleTypeModel
         ) => {
           const alertType = alertTypesResult.find((item) => ruleTypeRegistryItem.id === item.id);
           if (alertType) {
@@ -316,7 +316,7 @@ export const AlertForm = ({
   const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
 
   const isActionGroupDisabledForActionType = useCallback(
-    (alertType: AlertType, actionGroupId: string, actionTypeId: string): boolean => {
+    (alertType: RuleType, actionGroupId: string, actionTypeId: string): boolean => {
       return isActionGroupDisabledForActionTypeId(
         actionGroupId === alertType?.recoveryActionGroup?.id
           ? RecoveredActionGroup.id
@@ -328,7 +328,7 @@ export const AlertForm = ({
   );
 
   const AlertParamsExpressionComponent = alertTypeModel
-    ? alertTypeModel.alertParamsExpression
+    ? alertTypeModel.ruleParamsExpression
     : null;
 
   const alertTypesByProducer = filteredAlertTypes.reduce(
@@ -339,7 +339,7 @@ export const AlertForm = ({
           id: string;
           name: string;
           checkEnabledResult: IsEnabledResult | IsDisabledResult;
-          alertTypeItem: AlertTypeModel;
+          alertTypeItem: RuleTypeModel;
         }>
       >,
       alertTypeValue
@@ -422,10 +422,10 @@ export const AlertForm = ({
                   }
                   isDisabled={!item.checkEnabledResult.isEnabled}
                   onClick={() => {
-                    setAlertProperty('alertTypeId', item.id);
+                    setRuleProperty('alertTypeId', item.id);
                     setActions([]);
                     setAlertTypeModel(item.alertTypeItem);
-                    setAlertProperty('params', {});
+                    setRuleProperty('params', {});
                     if (ruleTypeIndex && ruleTypeIndex.has(item.id)) {
                       setDefaultActionGroupId(ruleTypeIndex.get(item.id)!.defaultActionGroupId);
                     }
@@ -463,9 +463,9 @@ export const AlertForm = ({
                 }
               )}
               onClick={() => {
-                setAlertProperty('alertTypeId', null);
+                setRuleProperty('alertTypeId', null);
                 setAlertTypeModel(null);
-                setAlertProperty('params', {});
+                setRuleProperty('params', {});
               }}
             />
           </EuiFlexItem>
@@ -514,13 +514,13 @@ export const AlertForm = ({
             }
           >
             <AlertParamsExpressionComponent
-              alertParams={alert.params}
-              alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
-              alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
+              ruleParams={alert.params}
+              ruleInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
+              ruleThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
               alertNotifyWhen={alert.notifyWhen ?? 'onActionGroupChange'}
               errors={errors}
-              setAlertParams={setAlertParams}
-              setAlertProperty={setAlertProperty}
+              setRuleParams={setRuleParams}
+              setRuleProperty={setRuleProperty}
               defaultActionGroupId={defaultActionGroupId}
               actionGroups={selectedAlertType.actionGroups}
               metadata={metadata}
@@ -615,11 +615,11 @@ export const AlertForm = ({
               data-test-subj="alertNameInput"
               value={alert.name || ''}
               onChange={(e) => {
-                setAlertProperty('name', e.target.value);
+                setRuleProperty('name', e.target.value);
               }}
               onBlur={() => {
                 if (!alert.name) {
-                  setAlertProperty('name', '');
+                  setRuleProperty('name', '');
                 }
               }}
             />
@@ -639,20 +639,20 @@ export const AlertForm = ({
               selectedOptions={tagsOptions}
               onCreateOption={(searchValue: string) => {
                 const newOptions = [...tagsOptions, { label: searchValue }];
-                setAlertProperty(
+                setRuleProperty(
                   'tags',
                   newOptions.map((newOption) => newOption.label)
                 );
               }}
               onChange={(selectedOptions: Array<{ label: string }>) => {
-                setAlertProperty(
+                setRuleProperty(
                   'tags',
                   selectedOptions.map((selectedOption) => selectedOption.label)
                 );
               }}
               onBlur={() => {
                 if (!alert.tags) {
-                  setAlertProperty('tags', []);
+                  setRuleProperty('tags', []);
                 }
               }}
             />
@@ -708,17 +708,17 @@ export const AlertForm = ({
             throttleUnit={alertThrottleUnit}
             onNotifyWhenChange={useCallback(
               (notifyWhen) => {
-                setAlertProperty('notifyWhen', notifyWhen);
+                setRuleProperty('notifyWhen', notifyWhen);
               },
-              [setAlertProperty]
+              [setRuleProperty]
             )}
             onThrottleChange={useCallback(
               (throttle: number | null, throttleUnit: string) => {
                 setAlertThrottle(throttle);
                 setAlertThrottleUnit(throttleUnit);
-                setAlertProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null);
+                setRuleProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null);
               },
-              [setAlertProperty]
+              [setRuleProperty]
             )}
           />
         </EuiFlexItem>

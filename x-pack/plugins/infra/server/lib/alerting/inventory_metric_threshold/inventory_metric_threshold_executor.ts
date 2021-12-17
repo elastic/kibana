@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON, ALERT_RULE_PARAMS } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { first, get, last } from 'lodash';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
@@ -15,11 +15,14 @@ import { AlertStates } from './types';
 import {
   ActionGroupIdsOf,
   ActionGroup,
-  AlertInstanceContext,
-  AlertInstanceState,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import { AlertInstance, AlertTypeState } from '../../../../../alerting/server';
+import {
+  AlertInstance as Alert,
+  AlertTypeState as RuleTypeState,
+} from '../../../../../alerting/server';
 import { SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
@@ -31,6 +34,7 @@ import {
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
   stateToAlertMessage,
+  buildInvalidQueryAlertReason,
 } from '../common/messages';
 import { evaluateCondition } from './evaluate_condition';
 
@@ -38,42 +42,61 @@ type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
 >;
 
-export type InventoryMetricThresholdAlertTypeState = AlertTypeState; // no specific state used
-export type InventoryMetricThresholdAlertInstanceState = AlertInstanceState; // no specific state used
-export type InventoryMetricThresholdAlertInstanceContext = AlertInstanceContext; // no specific instance context used
+export type InventoryMetricThresholdRuleTypeState = RuleTypeState; // no specific state used
+export type InventoryMetricThresholdAlertState = AlertState; // no specific state used
+export type InventoryMetricThresholdAlertContext = AlertContext; // no specific instance context used
 
-type InventoryMetricThresholdAlertInstance = AlertInstance<
-  InventoryMetricThresholdAlertInstanceState,
-  InventoryMetricThresholdAlertInstanceContext,
+type InventoryMetricThresholdAlert = Alert<
+  InventoryMetricThresholdAlertState,
+  InventoryMetricThresholdAlertContext,
   InventoryMetricThresholdAllowedActionGroups
 >;
-type InventoryMetricThresholdAlertInstanceFactory = (
+type InventoryMetricThresholdAlertFactory = (
   id: string,
   reason: string,
   threshold?: number | undefined,
   value?: number | undefined
-) => InventoryMetricThresholdAlertInstance;
+) => InventoryMetricThresholdAlert;
 
 export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   libs.metricsRules.createLifecycleRuleExecutor<
     InventoryMetricThresholdParams & Record<string, unknown>,
-    InventoryMetricThresholdAlertTypeState,
-    InventoryMetricThresholdAlertInstanceState,
-    InventoryMetricThresholdAlertInstanceContext,
+    InventoryMetricThresholdRuleTypeState,
+    InventoryMetricThresholdAlertState,
+    InventoryMetricThresholdAlertContext,
     InventoryMetricThresholdAllowedActionGroups
   >(async ({ services, params }) => {
     const { criteria, filterQuery, sourceId, nodeType, alertOnNoData } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const { alertWithLifecycle, savedObjectsClient } = services;
-    const alertInstanceFactory: InventoryMetricThresholdAlertInstanceFactory = (id, reason) =>
+    const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason) =>
       alertWithLifecycle({
         id,
         fields: {
           [ALERT_REASON]: reason,
-          [ALERT_RULE_PARAMS]: JSON.stringify(params),
+          [ALERT_RULE_PARAMETERS]: params as any, // the type assumes the object is already flattened when writing the same way as when reading https://github.com/elastic/kibana/blob/main/x-pack/plugins/rule_registry/common/field_map/runtime_type_from_fieldmap.ts#L60
         },
       });
 
+    if (!params.filterQuery && params.filterQueryText) {
+      try {
+        const { fromKueryExpression } = await import('@kbn/es-query');
+        fromKueryExpression(params.filterQueryText);
+      } catch (e) {
+        const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
+        const reason = buildInvalidQueryAlertReason(params.filterQueryText);
+        const alert = alertFactory('*', reason);
+        alert.scheduleActions(actionGroupId, {
+          group: '*',
+          alertState: stateToAlertMessage[AlertStates.ERROR],
+          reason,
+          timestamp: moment().toISOString(),
+          value: null,
+          metric: mapToConditionsLookup(criteria, (c) => c.metric),
+        });
+        return {};
+      }
+    }
     const source = await libs.sources.getSourceConfiguration(
       savedObjectsClient,
       sourceId || 'default'
@@ -171,8 +194,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
 
-        const alertInstance = alertInstanceFactory(`${group}`, reason);
-        alertInstance.scheduleActions(
+        const alert = alertFactory(`${group}`, reason);
+        alert.scheduleActions(
           /**
            * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
            * the RecoveredActionGroup isn't allowed

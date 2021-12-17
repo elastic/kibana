@@ -13,27 +13,26 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { nodeBuilder, fromKueryExpression, KueryNode } from '@kbn/es-query';
+import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../common/constants';
 import {
+  OWNER_FIELD,
   AlertCommentRequestRt,
   ActionsCommentRequestRt,
-  CASE_SAVED_OBJECT,
   CaseStatuses,
   CaseType,
   CommentRequest,
   ContextTypeUserRt,
   excess,
-  OWNER_FIELD,
-  SUB_CASE_SAVED_OBJECT,
   throwErrors,
-} from '../../common';
+} from '../../common/api';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
   getIDsAndIndicesAsArrays,
   isCommentRequestTypeAlertOrGenAlert,
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
-  SavedObjectFindOptionsKueryNode,
-} from '../common';
+} from '../common/utils';
+import { SavedObjectFindOptionsKueryNode } from '../common/types';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {

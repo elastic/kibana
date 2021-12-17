@@ -29,6 +29,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   toggleDeleteIndex,
   toggleDeleteIndexPattern,
   userCanDeleteIndex,
+  userCanDeleteDataView,
 }) => {
   const isBulkAction = items.length > 1;
 
@@ -74,6 +75,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
               )}
               checked={deleteIndexPattern}
               onChange={toggleDeleteIndexPattern}
+              disabled={userCanDeleteDataView === false}
             />
           }
         </EuiFlexItem>
@@ -114,6 +116,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
               )}
               checked={deleteIndexPattern}
               onChange={toggleDeleteIndexPattern}
+              disabled={userCanDeleteDataView === false}
             />
           </EuiFlexItem>
         )}

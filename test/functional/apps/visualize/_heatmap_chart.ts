@@ -17,9 +17,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('heatmap chart', function indexPatternCreation() {
     const vizName1 = 'Visualization HeatmapChart';
+    let isNewChartsLibraryEnabled = false;
 
     before(async function () {
-      await PageObjects.visualize.initTests();
+      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled(
+        'visualization:visualize:legacyHeatmapChartsLibrary'
+      );
+      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickHeatmapChart');
@@ -79,7 +83,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show 4 color ranges as default colorNumbers param', async function () {
       const legends = await PageObjects.visChart.getLegendEntries();
-      const expectedLegends = ['0 - 400', '400 - 800', '800 - 1,200', '1,200 - 1,600'];
+      let expectedLegends = [];
+      if (isNewChartsLibraryEnabled) {
+        // the bands are different because we always scale to data bounds in the implementation
+        expectedLegends = ['27 - 379.5', '379.5 - 732', '732 - 1,084.5', '1,084.5 - 1,437'];
+      } else {
+        expectedLegends = ['0 - 400', '400 - 800', '800 - 1,200', '1,200 - 1,600'];
+      }
       expect(legends).to.eql(expectedLegends);
     });
 
@@ -90,14 +100,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
 
       const legends = await PageObjects.visChart.getLegendEntries();
-      const expectedLegends = [
-        '0 - 267',
-        '267 - 534',
-        '534 - 800',
-        '800 - 1,067',
-        '1,067 - 1,334',
-        '1,334 - 1,600',
-      ];
+      let expectedLegends = [];
+      if (isNewChartsLibraryEnabled) {
+        // the bands are different because we always scale to data bounds in the implementation
+        expectedLegends = [
+          '27 - 262',
+          '262 - 497',
+          '497 - 732',
+          '732 - 967',
+          '967 - 1,202',
+          '1,202 - 1,437',
+        ];
+      } else {
+        expectedLegends = [
+          '0 - 267',
+          '267 - 534',
+          '534 - 800',
+          '800 - 1,067',
+          '1,067 - 1,334',
+          '1,334 - 1,600',
+        ];
+      }
       expect(legends).to.eql(expectedLegends);
     });
     it('should show 6 custom color ranges', async function () {
@@ -118,16 +141,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       const legends = await PageObjects.visChart.getLegendEntries();
-      const expectedLegends = [
-        '0 - 100',
-        '100 - 200',
-        '200 - 300',
-        '300 - 400',
-        '400 - 500',
-        '500 - 600',
-        '650 - 720',
-        '800 - 905',
-      ];
+      let expectedLegends = [];
+      if (isNewChartsLibraryEnabled) {
+        expectedLegends = [
+          '0 - 100',
+          '100 - 200',
+          '200 - 300',
+          '300 - 400',
+          '400 - 500',
+          '500 - 600',
+          '600 - 650',
+          '650 - 720',
+          '720 - 800',
+          '800 - 905',
+        ];
+      } else {
+        expectedLegends = [
+          '0 - 100',
+          '100 - 200',
+          '200 - 300',
+          '300 - 400',
+          '400 - 500',
+          '500 - 600',
+          '650 - 720',
+          '800 - 905',
+        ];
+      }
       expect(legends).to.eql(expectedLegends);
     });
   });

@@ -14,6 +14,7 @@ export type {
   UseRequestResponse,
   Error,
 } from '../../../../src/plugins/es_ui_shared/public';
+
 export {
   sendRequest,
   useRequest,
@@ -31,6 +32,7 @@ export type {
   FormSchema,
   FieldConfig,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+
 export {
   FIELD_TYPES,
   VALIDATION_TYPES,
@@ -61,4 +63,5 @@ export {
   createKibanaReactContext,
   reactRouterNavigate,
   useKibana,
+  KibanaThemeProvider,
 } from '../../../../src/plugins/kibana_react/public';

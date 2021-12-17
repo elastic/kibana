@@ -16,7 +16,6 @@
     "share",
     "embeddable",
     "uiActions",
-    "kibanaLegacy",
     "discover",
     "triggersActionsUi",
     "fieldFormats"

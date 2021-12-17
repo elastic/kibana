@@ -28,7 +28,7 @@ import {
   EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TIME_UNITS } from '../../../../../../common/constants';
 import { serializeThresholdWatch } from '../../../../../../common/lib/serialization';
 import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
@@ -182,9 +182,8 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
 
   useEffect(() => {
     const getIndexPatterns = async () => {
-      const indexPatternObjects = await loadIndexPatterns();
-      const titles = indexPatternObjects.map((indexPattern: any) => indexPattern.attributes.title);
-      setIndexPatterns(titles);
+      const { data: indexPatternTitles } = await loadIndexPatterns();
+      setIndexPatterns(indexPatternTitles);
     };
 
     const loadData = async () => {

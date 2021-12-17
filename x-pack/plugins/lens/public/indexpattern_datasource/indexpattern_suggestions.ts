@@ -23,7 +23,7 @@ import {
   getReferencedColumnIds,
   hasTermsWithManyBuckets,
 } from './operations';
-import { hasField } from './utils';
+import { hasField } from './pure_utils';
 import type {
   IndexPattern,
   IndexPatternPrivateState,

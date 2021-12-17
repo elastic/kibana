@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiModal,
   EuiButton,

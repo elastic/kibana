@@ -8,14 +8,12 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { Filter } from '@kbn/es-query';
 import { ExpressionFunctionDefinition, Render } from 'src/plugins/expressions/public';
-import {
-  getTimelionRequestHandler,
-  TimelionSuccessResponse,
-} from './helpers/timelion_request_handler';
+import { TimelionSuccessResponse } from './helpers/timelion_request_handler';
 import { TIMELION_VIS_NAME } from './timelion_vis_type';
 import { TimelionVisDependencies } from './plugin';
-import { KibanaContext, Filter, Query, TimeRange } from '../../../data/public';
+import { KibanaContext, Query, TimeRange } from '../../../data/public';
 
 type Input = KibanaContext | null;
 type Output = Promise<Render<TimelionRenderValue>>;
@@ -60,6 +58,7 @@ export const getTimelionVisualizationConfig = (
     },
   },
   async fn(input, args, { getSearchSessionId, getExecutionContext }) {
+    const { getTimelionRequestHandler } = await import('./async_services');
     const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
     const visParams = { expression: args.expression, interval: args.interval };

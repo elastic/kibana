@@ -15,6 +15,9 @@ import {
 } from './workplace_search';
 
 export interface InitialAppData {
+  enterpriseSearchVersion?: string;
+  kibanaVersion?: string;
+  errorConnectingMessage?: string;
   readOnlyMode?: boolean;
   searchOAuth?: SearchOAuth;
   configuredLimits?: ConfiguredLimits;

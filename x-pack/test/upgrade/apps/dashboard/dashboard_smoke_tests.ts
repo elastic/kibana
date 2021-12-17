@@ -25,7 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     ];
 
     const dashboardTests = [
-      { name: 'flights', numPanels: 17 },
+      { name: 'flights', numPanels: 16 },
       { name: 'logs', numPanels: 10 },
       { name: 'ecommerce', numPanels: 11 },
     ];

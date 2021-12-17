@@ -27,7 +27,7 @@
             "section": "def-public.ToastsApi",
             "text": "ToastsApi"
           },
-          ", \"get$\" | \"add\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">"
+          ", \"add\" | \"get$\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">"
         ],
         "path": "src/core/public/notifications/toasts/toasts_api.tsx",
         "deprecated": false,
@@ -947,14 +947,14 @@
           {
             "parentPluginId": "core",
             "id": "def-public.Capabilities.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: Record<string, boolean | Record<string, boolean>>",
             "description": [
               "Custom capabilities, registered by plugins."
             ],
             "signature": [
-              "any"
+              "[key: string]:  Record<string, boolean | Record<string, boolean>>"
             ],
             "path": "src/core/types/capabilities.ts",
             "deprecated": false
@@ -1111,6 +1111,27 @@
                 "path": "src/plugins/vis_types/vega/public/plugin.ts"
               }
             ]
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.CoreSetup.theme",
+            "type": "Object",
+            "tags": [],
+            "label": "theme",
+            "description": [
+              "{@link ThemeServiceSetup}"
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
+              }
+            ],
+            "path": "src/core/public/index.ts",
+            "deprecated": false
           },
           {
             "parentPluginId": "core",
@@ -1385,6 +1406,27 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-public.CoreStart.theme",
+            "type": "Object",
+            "tags": [],
+            "label": "theme",
+            "description": [
+              "{@link ThemeServiceStart}"
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.ThemeServiceStart",
+                "text": "ThemeServiceStart"
+              }
+            ],
+            "path": "src/core/public/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-public.CoreStart.injectedMetadata",
             "type": "Object",
             "tags": [
@@ -1417,6 +1459,33 @@
                 "path": "src/plugins/vis_types/vega/target/types/public/data_model/search_api.d.ts"
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.CoreTheme",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreTheme",
+        "description": [
+          "\nContains all the required information to apply Kibana's theme at the various levels it can be used.\n"
+        ],
+        "path": "src/core/public/theme/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.CoreTheme.darkMode",
+            "type": "boolean",
+            "tags": [],
+            "label": "darkMode",
+            "description": [
+              "is dark mode enabled or not"
+            ],
+            "path": "src/core/public/theme/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1603,7 +1672,7 @@
             "label": "links",
             "description": [],
             "signature": [
-              "{ readonly settings: string; readonly elasticStackGetStarted: string; readonly apm: { readonly kibanaSettings: string; readonly supportedServiceMaps: string; readonly customLinks: string; readonly droppedTransactionSpans: string; readonly upgrading: string; readonly metaData: string; }; readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; readonly suricataModule: string; readonly zeekModule: string; }; readonly auditbeat: { readonly base: string; readonly auditdModule: string; readonly systemModule: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly libbeat: { readonly getStarted: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; readonly sessionLimits: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly rollupJobs: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; readonly troubleshootGaps: string; }; readonly securitySolution: { readonly trustedApps: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; readonly autocompleteChanges: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Readonly<{ guide: string; infrastructureThreshold: string; logsThreshold: string; metricsThreshold: string; monitorStatus: string; monitorUptime: string; tlsCertificate: string; uptimeDurationAnomaly: string; }>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; elasticsearchEnableApiKeys: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly spaces: Readonly<{ kibanaLegacyUrlAliases: string; kibanaDisableLegacyUrlAliasesApi: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; readonly fleet: Readonly<{ datastreamsILM: string; beatsAgentComparison: string; guide: string; fleetServer: string; fleetServerAddFleetServer: string; settings: string; settingsFleetServerHostSettings: string; troubleshooting: string; elasticAgent: string; datastreams: string; datastreamsNamingScheme: string; installElasticAgent: string; upgradeElasticAgent: string; upgradeElasticAgent712lower: string; learnMoreBlog: string; apiKeysLearnMore: string; }>; readonly ecs: { readonly guide: string; }; readonly clients: { readonly guide: string; readonly goOverview: string; readonly javaIndex: string; readonly jsIntro: string; readonly netGuide: string; readonly perlGuide: string; readonly phpGuide: string; readonly pythonGuide: string; readonly rubyOverview: string; readonly rustGuide: string; }; }"
+              "{ readonly settings: string; readonly elasticStackGetStarted: string; readonly upgrade: { readonly upgradingElasticStack: string; }; readonly apm: { readonly kibanaSettings: string; readonly supportedServiceMaps: string; readonly customLinks: string; readonly droppedTransactionSpans: string; readonly upgrading: string; readonly metaData: string; }; readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; readonly suricataModule: string; readonly zeekModule: string; }; readonly auditbeat: { readonly base: string; readonly auditdModule: string; readonly systemModule: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly libbeat: { readonly getStarted: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly terms_doc_count_error: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; readonly sessionLimits: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: { readonly overview: string; readonly batchReindex: string; readonly remoteReindex: string; }; readonly rollupJobs: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; readonly troubleshootGaps: string; }; readonly securitySolution: { readonly trustedApps: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Readonly<{ guide: string; infrastructureThreshold: string; logsThreshold: string; metricsThreshold: string; monitorStatus: string; monitorUptime: string; tlsCertificate: string; uptimeDurationAnomaly: string; }>; readonly alerting: Record<string, string>; readonly maps: Readonly<{ guide: string; importGeospatialPrivileges: string; gdalTutorial: string; }>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; elasticsearchEnableApiKeys: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly spaces: Readonly<{ kibanaLegacyUrlAliases: string; kibanaDisableLegacyUrlAliasesApi: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; readonly fleet: Readonly<{ beatsAgentComparison: string; guide: string; fleetServer: string; fleetServerAddFleetServer: string; settings: string; settingsFleetServerHostSettings: string; settingsFleetServerProxySettings: string; troubleshooting: string; elasticAgent: string; datastreams: string; datastreamsNamingScheme: string; installElasticAgent: string; upgradeElasticAgent: string; upgradeElasticAgent712lower: string; learnMoreBlog: string; apiKeysLearnMore: string; onPremRegistry: string; }>; readonly ecs: { readonly guide: string; }; readonly clients: { readonly guide: string; readonly goOverview: string; readonly javaIndex: string; readonly jsIntro: string; readonly netGuide: string; readonly perlGuide: string; readonly phpGuide: string; readonly pythonGuide: string; readonly rubyOverview: string; readonly rustGuide: string; }; readonly endpoints: { readonly troubleshooting: string; }; }"
             ],
             "path": "src/core/public/doc_links/doc_links_service.ts",
             "deprecated": false
@@ -2079,7 +2148,7 @@
             "signature": [
               "() => Readonly<Record<string, Pick<",
               "UiSettingsParams",
-              "<unknown>, \"type\" | \"description\" | \"name\" | \"options\" | \"order\" | \"value\" | \"category\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"metric\"> & ",
+              "<unknown>, \"name\" | \"type\" | \"description\" | \"options\" | \"order\" | \"value\" | \"category\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"metric\"> & ",
               "UserProvidedValues",
               "<any>>>"
             ],
@@ -2355,17 +2424,7 @@
               "{@link ToastsSetup}"
             ],
             "signature": [
-              "{ get$: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "[]>; add: (toastOrTitle: ",
+              "{ add: (toastOrTitle: ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -2381,7 +2440,17 @@
                 "section": "def-public.Toast",
                 "text": "Toast"
               },
-              "; remove: (toastOrId: string | ",
+              "; get$: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.Toast",
+                "text": "Toast"
+              },
+              "[]>; remove: (toastOrId: string | ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -2529,17 +2598,7 @@
               "{@link ToastsStart}"
             ],
             "signature": [
-              "{ get$: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "[]>; add: (toastOrTitle: ",
+              "{ add: (toastOrTitle: ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -2555,7 +2614,17 @@
                 "section": "def-public.Toast",
                 "text": "Toast"
               },
-              "; remove: (toastOrId: string | ",
+              "; get$: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.Toast",
+                "text": "Toast"
+              },
+              "[]>; remove: (toastOrId: string | ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -2976,7 +3045,7 @@
             "label": "size",
             "description": [],
             "signature": [
-              "\"m\" | \"s\" | \"l\" | undefined"
+              "\"s\" | \"m\" | \"l\" | undefined"
             ],
             "path": "src/core/public/overlays/flyout/flyout_service.tsx",
             "deprecated": false
@@ -3003,6 +3072,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.OverlayFlyoutOpenOptions.maskProps",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "maskProps",
+            "description": [],
+            "signature": [
+              "EuiOverlayMaskProps",
+              " | undefined"
             ],
             "path": "src/core/public/overlays/flyout/flyout_service.tsx",
             "deprecated": false
@@ -3265,7 +3348,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "\"text\" | \"primary\" | \"success\" | \"warning\" | \"danger\" | \"accent\" | \"secondary\" | \"ghost\" | undefined"
+              "\"text\" | \"primary\" | \"success\" | \"warning\" | \"danger\" | \"accent\" | \"ghost\" | undefined"
             ],
             "path": "src/core/public/overlays/modal/modal_service.tsx",
             "deprecated": false
@@ -4374,12 +4457,13 @@
           {
             "parentPluginId": "core",
             "id": "def-public.SavedObjectAttributes.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: SavedObjectAttribute",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  ",
+              "SavedObjectAttribute"
             ],
             "path": "src/core/types/saved_objects.ts",
             "deprecated": false
@@ -5829,12 +5913,12 @@
           {
             "parentPluginId": "core",
             "id": "def-public.SavedObjectsMigrationVersion.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[pluginName: string]: string",
             "description": [],
             "signature": [
-              "any"
+              "[pluginName: string]:  string"
             ],
             "path": "src/core/types/saved_objects.ts",
             "deprecated": false
@@ -5908,6 +5992,76 @@
               "string | undefined"
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.ThemeServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ThemeServiceSetup",
+        "description": [],
+        "path": "src/core/public/theme/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ThemeServiceSetup.theme$",
+            "type": "Object",
+            "tags": [],
+            "label": "theme$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreTheme",
+                "text": "CoreTheme"
+              },
+              ">"
+            ],
+            "path": "src/core/public/theme/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.ThemeServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "ThemeServiceStart",
+        "description": [],
+        "path": "src/core/public/theme/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ThemeServiceStart.theme$",
+            "type": "Object",
+            "tags": [],
+            "label": "theme$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreTheme",
+                "text": "CoreTheme"
+              },
+              ">"
+            ],
+            "path": "src/core/public/theme/types.ts",
             "deprecated": false
           }
         ],
@@ -6104,7 +6258,7 @@
               "defines a type of UI element {@link UiSettingsType}"
             ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"json\" | \"color\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined"
             ],
             "path": "src/core/types/ui_settings.ts",
             "deprecated": false
@@ -6219,12 +6373,16 @@
           {
             "parentPluginId": "core",
             "id": "def-public.UiSettingsState.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: Pick<UiSettingsParams<unknown>, \"name\" | \"type\" | \"description\" | \"options\" | \"order\" | \"value\" | \"category\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"metric\"> & UserProvidedValues<...>",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  Pick<",
+              "UiSettingsParams",
+              "<unknown>, \"name\" | \"type\" | \"description\" | \"options\" | \"order\" | \"value\" | \"category\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"metric\"> & ",
+              "UserProvidedValues",
+              "<any>"
             ],
             "path": "src/core/public/ui_settings/types.ts",
             "deprecated": false
@@ -6328,17 +6486,7 @@
           "\nMethods for adding and removing global toast messages. See {@link ToastsApi}."
         ],
         "signature": [
-          "{ get$: () => ",
-          "Observable",
-          "<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Toast",
-            "text": "Toast"
-          },
-          "[]>; add: (toastOrTitle: ",
+          "{ add: (toastOrTitle: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -6354,7 +6502,17 @@
             "section": "def-public.Toast",
             "text": "Toast"
           },
-          "; remove: (toastOrId: string | ",
+          "; get$: () => ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.Toast",
+            "text": "Toast"
+          },
+          "[]>; remove: (toastOrId: string | ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -6626,7 +6784,7 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined; description?: string | undefined; name?: string | undefined; options?: string[] | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          "{ name?: string | undefined; type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"json\" | \"color\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined; description?: string | undefined; options?: string[] | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
           " | undefined; metric?: { type: ",
           {
@@ -6776,7 +6934,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"security\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"iconType\" | \"toastLifeTimeMs\" | \"onClose\"> & { title?: string | ",
+          ", \"onChange\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"children\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"iconType\" | \"toastLifeTimeMs\" | \"onClose\"> & { title?: string | ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -6833,7 +6991,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"security\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"iconType\" | \"toastLifeTimeMs\" | \"onClose\"> & { title?: string | ",
+          ", \"onChange\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"children\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"iconType\" | \"toastLifeTimeMs\" | \"onClose\"> & { title?: string | ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -6865,17 +7023,7 @@
           "\n{@link IToasts}"
         ],
         "signature": [
-          "{ get$: () => ",
-          "Observable",
-          "<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Toast",
-            "text": "Toast"
-          },
-          "[]>; add: (toastOrTitle: ",
+          "{ add: (toastOrTitle: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -6891,7 +7039,17 @@
             "section": "def-public.Toast",
             "text": "Toast"
           },
-          "; remove: (toastOrId: string | ",
+          "; get$: () => ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.Toast",
+            "text": "Toast"
+          },
+          "[]>; remove: (toastOrId: string | ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -7027,17 +7185,7 @@
           "\n{@link IToasts}"
         ],
         "signature": [
-          "{ get$: () => ",
-          "Observable",
-          "<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Toast",
-            "text": "Toast"
-          },
-          "[]>; add: (toastOrTitle: ",
+          "{ add: (toastOrTitle: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -7053,7 +7201,17 @@
             "section": "def-public.Toast",
             "text": "Toast"
           },
-          "; remove: (toastOrId: string | ",
+          "; get$: () => ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.Toast",
+            "text": "Toast"
+          },
+          "[]>; remove: (toastOrId: string | ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -7189,7 +7347,7 @@
           "\nUI element type to represent the settings."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"json\" | \"color\" | \"image\" | \"markdown\" | \"select\" | \"array\""
         ],
         "path": "src/core/types/ui_settings.ts",
         "deprecated": false,
@@ -7645,7 +7803,7 @@
             "tags": [],
             "label": "collect",
             "description": [
-              "\nCollect gathers event loop delays metrics from nodejs perf_hooks.monitorEventLoopDelay\nthe histogram calculations start from the last time `reset` was called or this\nEventLoopDelaysMonitor instance was created."
+              "\nCollect gathers event loop delays metrics from nodejs perf_hooks.monitorEventLoopDelay\nthe histogram calculations start from the last time `reset` was called or this\nEventLoopDelaysMonitor instance was created.\n\nReturns metrics in milliseconds."
             ],
             "signature": [
               "() => ",
@@ -7700,7 +7858,63 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "core",
+        "id": "def-server.pollEsNodesVersion",
+        "type": "Function",
+        "tags": [],
+        "label": "pollEsNodesVersion",
+        "description": [],
+        "signature": [
+          "({ internalClient, log, kibanaVersion, ignoreVersionMismatch, esVersionCheckInterval: healthCheckInterval, }: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.PollEsNodesVersionOptions",
+            "text": "PollEsNodesVersionOptions"
+          },
+          ") => ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.NodesVersionCompatibility",
+            "text": "NodesVersionCompatibility"
+          },
+          ">"
+        ],
+        "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.pollEsNodesVersion.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  internalClient,\n  log,\n  kibanaVersion,\n  ignoreVersionMismatch,\n  esVersionCheckInterval: healthCheckInterval,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.PollEsNodesVersionOptions",
+                "text": "PollEsNodesVersionOptions"
+              }
+            ],
+            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "core",
@@ -8137,14 +8351,14 @@
           {
             "parentPluginId": "core",
             "id": "def-server.Capabilities.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: Record<string, boolean | Record<string, boolean>>",
             "description": [
               "Custom capabilities, registered by plugins."
             ],
             "signature": [
-              "any"
+              "[key: string]:  Record<string, boolean | Record<string, boolean>>"
             ],
             "path": "src/core/types/capabilities.ts",
             "deprecated": false
@@ -11761,7 +11975,7 @@
             "signature": [
               "Pick<",
               "KibanaClient",
-              ", \"monitoring\" | \"security\" | \"create\" | \"name\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
+              ", \"name\" | \"create\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
               "TransportRequestParams",
               ", options?: ",
               "TransportRequestOptions",
@@ -12813,7 +13027,7 @@
         "tags": [],
         "label": "IntervalHistogram",
         "description": [
-          "\nan IntervalHistogram object that samples and reports the event loop delay over time.\nThe delays will be reported in nanoseconds.\n"
+          "\nan IntervalHistogram object that samples and reports the event loop delay over time.\nThe delays will be reported in milliseconds.\n"
         ],
         "path": "src/core/server/metrics/types.ts",
         "deprecated": false,
@@ -12956,7 +13170,7 @@
             "signature": [
               "Pick<",
               "KibanaClient",
-              ", \"monitoring\" | \"security\" | \"create\" | \"name\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
+              ", \"name\" | \"create\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
               "TransportRequestParams",
               ", options?: ",
               "TransportRequestOptions",
@@ -12979,7 +13193,7 @@
             "signature": [
               "Pick<",
               "KibanaClient",
-              ", \"monitoring\" | \"security\" | \"create\" | \"name\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
+              ", \"name\" | \"create\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
               "TransportRequestParams",
               ", options?: ",
               "TransportRequestOptions",
@@ -13017,7 +13231,7 @@
             "signature": [
               "() => Readonly<Record<string, Pick<",
               "UiSettingsParams",
-              "<unknown>, \"type\" | \"description\" | \"name\" | \"options\" | \"order\" | \"value\" | \"category\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"metric\">>>"
+              "<unknown>, \"name\" | \"type\" | \"description\" | \"options\" | \"order\" | \"value\" | \"category\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"metric\">>>"
             ],
             "path": "src/core/server/ui_settings/types.ts",
             "deprecated": false,
@@ -14928,7 +15142,7 @@
             "signature": [
               "{ legacy: { globalConfig$: ",
               "Observable",
-              "<Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              "<Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "server",
@@ -14952,7 +15166,7 @@
                 "section": "def-server.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
-              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: \"b\" | \"kb\" | \"mb\" | \"gb\" | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: \"b\" | \"kb\" | \"mb\" | \"gb\" | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "server",
@@ -15198,6 +15412,89 @@
               "string | undefined"
             ],
             "path": "src/core/server/plugins/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.PollEsNodesVersionOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "PollEsNodesVersionOptions",
+        "description": [],
+        "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PollEsNodesVersionOptions.internalClient",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "internalClient",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "KibanaClient",
+              ", \"name\" | \"create\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
+              "TransportRequestParams",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<TResponse, unknown>>; }; }"
+            ],
+            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PollEsNodesVersionOptions.log",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PollEsNodesVersionOptions.kibanaVersion",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersion",
+            "description": [],
+            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PollEsNodesVersionOptions.ignoreVersionMismatch",
+            "type": "boolean",
+            "tags": [],
+            "label": "ignoreVersionMismatch",
+            "description": [],
+            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PollEsNodesVersionOptions.esVersionCheckInterval",
+            "type": "number",
+            "tags": [],
+            "label": "esVersionCheckInterval",
+            "description": [],
+            "path": "src/core/server/elasticsearch/version_check/ensure_es_version.ts",
             "deprecated": false
           }
         ],
@@ -15791,12 +16088,13 @@
           {
             "parentPluginId": "core",
             "id": "def-server.SavedObjectAttributes.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: SavedObjectAttribute",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  ",
+              "SavedObjectAttribute"
             ],
             "path": "src/core/types/saved_objects.ts",
             "deprecated": false
@@ -15864,12 +16162,12 @@
           {
             "parentPluginId": "core",
             "id": "def-server.SavedObjectsMigrationVersion.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[pluginName: string]: string",
             "description": [],
             "signature": [
-              "any"
+              "[pluginName: string]:  string"
             ],
             "path": "src/core/types/saved_objects.ts",
             "deprecated": false
@@ -16538,7 +16836,7 @@
               "defines a type of UI element {@link UiSettingsType}"
             ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"json\" | \"color\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined"
             ],
             "path": "src/core/types/ui_settings.ts",
             "deprecated": false
@@ -17291,7 +17589,7 @@
         "label": "EcsEventCategory",
         "description": [],
         "signature": [
-          "\"network\" | \"web\" | \"database\" | \"package\" | \"host\" | \"session\" | \"file\" | \"registry\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
+          "\"database\" | \"package\" | \"host\" | \"session\" | \"file\" | \"registry\" | \"network\" | \"web\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
         ],
         "path": "node_modules/@kbn/logging/target_types/ecs/event.d.ts",
         "deprecated": false,
@@ -17351,7 +17649,7 @@
         "signature": [
           "Pick<",
           "KibanaClient",
-          ", \"monitoring\" | \"security\" | \"create\" | \"name\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
+          ", \"name\" | \"create\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
           "TransportRequestParams",
           ", options?: ",
           "TransportRequestOptions",
@@ -18496,7 +18794,7 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined; description?: string | undefined; name?: string | undefined; options?: string[] | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          "{ name?: string | undefined; type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"json\" | \"color\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined; description?: string | undefined; options?: string[] | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
           " | undefined; metric?: { type: ",
           {
@@ -18604,7 +18902,7 @@
         "label": "SharedGlobalConfig",
         "description": [],
         "signature": [
-          "{ readonly elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; readonly path: Readonly<{ readonly data: string; }>; readonly savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+          "{ readonly elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"M\" | \"y\" | \"year\" | \"years\" | \"month\" | \"months\" | \"week\" | \"weeks\" | \"day\" | \"days\" | \"hour\" | \"hours\" | \"minute\" | \"minutes\" | \"second\" | \"seconds\" | \"millisecond\" | \"milliseconds\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; readonly path: Readonly<{ readonly data: string; }>; readonly savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "server",
@@ -18670,7 +18968,7 @@
           "\nUI element type to represent the settings."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"json\" | \"color\" | \"image\" | \"markdown\" | \"select\" | \"array\""
         ],
         "path": "src/core/types/ui_settings.ts",
         "deprecated": false,

@@ -11,6 +11,7 @@ import {
   mergeOtherBucketAggResponse,
   updateMissingBucket,
   OTHER_BUCKET_SEPARATOR as SEP,
+  constructSingleTermOtherFilter,
 } from './_terms_other_bucket_helper';
 import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -573,7 +574,8 @@ describe('Terms Agg Other bucket helper', () => {
           singleTermResponse,
           singleOtherResponse,
           aggConfigs.aggs[0] as IBucketAggConfig,
-          otherAggConfig()
+          otherAggConfig(),
+          constructSingleTermOtherFilter
         );
         expect((mergedResponse!.aggregations!['1'] as any).buckets[3].key).toEqual('__other__');
       }
@@ -594,7 +596,8 @@ describe('Terms Agg Other bucket helper', () => {
           nestedTermResponse,
           nestedOtherResponse,
           aggConfigs.aggs[1] as IBucketAggConfig,
-          otherAggConfig()
+          otherAggConfig(),
+          constructSingleTermOtherFilter
         );
 
         expect((mergedResponse!.aggregations!['1'] as any).buckets[1]['2'].buckets[3].key).toEqual(

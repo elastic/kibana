@@ -37,7 +37,12 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
   onChange = () => {},
 }) => {
   if (mode === ML_EDITOR_MODE.XJSON) {
-    value = expandLiteralStrings(value);
+    try {
+      value = expandLiteralStrings(value);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
   }
 
   return (

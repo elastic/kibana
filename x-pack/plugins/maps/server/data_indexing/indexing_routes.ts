@@ -52,7 +52,8 @@ export function initIndexingRoutes({
       const { index, mappings } = request.body;
       const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
         context.core.savedObjects.client,
-        context.core.elasticsearch.client.asCurrentUser
+        context.core.elasticsearch.client.asCurrentUser,
+        request
       );
       const result = await createDocSource(
         index,

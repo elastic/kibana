@@ -31,6 +31,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       before(async () => {
         await kibanaServer.uiSettings.update({
           'visualization:visualize:legacyPieChartsLibrary': false,
+          'visualization:visualize:legacyHeatmapChartsLibrary': false,
         });
         await browser.refresh();
       });
@@ -38,6 +39,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       after(async () => {
         await kibanaServer.uiSettings.update({
           'visualization:visualize:legacyPieChartsLibrary': true,
+          'visualization:visualize:legacyHeatmapChartsLibrary': true,
         });
         await browser.refresh();
       });
@@ -51,6 +53,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
       loadTestFile(require.resolve('./_pie_chart'));
       loadTestFile(require.resolve('./_timelion'));
+      loadTestFile(require.resolve('./_heatmap_chart'));
     });
 
     describe('visualize ciGroup9', function () {

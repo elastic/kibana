@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseUserActionConnector, ConnectorTypes } from '../../../common';
+import { CaseUserActionConnector, ConnectorTypes } from '../../../common/api';
 import { CaseUserActions } from '../../containers/types';
 import { getConnectorFieldsFromUserActions } from './helpers';
 

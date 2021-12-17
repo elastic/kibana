@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { service, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -92,15 +92,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const GO_DEV_RATE = 5;
         const JAVA_PROD_RATE = 45;
         before(async () => {
-          const serviceGoProdInstance = service('synth-go', 'production', 'go').instance(
-            'instance-a'
-          );
-          const serviceGoDevInstance = service('synth-go', 'development', 'go').instance(
-            'instance-b'
-          );
-          const serviceJavaInstance = service('synth-java', 'production', 'java').instance(
-            'instance-c'
-          );
+          const serviceGoProdInstance = apm
+            .service('synth-go', 'production', 'go')
+            .instance('instance-a');
+          const serviceGoDevInstance = apm
+            .service('synth-go', 'development', 'go')
+            .instance('instance-b');
+
+          const serviceJavaInstance = apm
+            .service('synth-java', 'production', 'java')
+            .instance('instance-c');
 
           await synthtraceEsClient.index([
             ...timerange(start, end)

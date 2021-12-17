@@ -7,12 +7,8 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-// @ts-expect-error
-import { spritesheet } from '@elastic/maki';
-import sprites1 from '@elastic/maki/dist/sprite@1.png';
-import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { Adapters } from 'src/plugins/inspector/public';
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
 
 import { mapboxgl } from '@kbn/mapbox-gl';
@@ -24,6 +20,7 @@ import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearc
 import { getInitialView } from './get_initial_view';
 import { getPreserveDrawingBuffer } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
+import { IVectorSource } from '../../classes/sources/vector_source';
 import { MapSettings } from '../../reducers/map';
 import {
   Goto,
@@ -31,26 +28,19 @@ import {
   TileMetaFeature,
   Timeslice,
 } from '../../../common/descriptor_types';
-import {
-  DECIMAL_DEGREES_PRECISION,
-  LAYER_TYPE,
-  RawValue,
-  ZOOM_PRECISION,
-} from '../../../common/constants';
-import { getGlyphUrl, isRetina } from '../../util';
+import { DECIMAL_DEGREES_PRECISION, RawValue, ZOOM_PRECISION } from '../../../common/constants';
+import { getGlyphUrl } from '../../util';
 import { syncLayerOrder } from './sort_layers';
 
-import {
-  addSpriteSheetToMapFromImageData,
-  loadSpriteSheetImageData,
-  removeOrphanedSourcesAndLayers,
-} from './utils';
+import { getTileMetaFeatures, removeOrphanedSourcesAndLayers } from './utils';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
-import { MvtVectorLayer } from '../../classes/layers/vector_layer';
 import type { MapExtentState } from '../../reducers/map/types';
+// @ts-expect-error
+import { createSdfIcon } from '../../classes/styles/vector/symbol_utils';
+import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
 
 export interface Props {
   isMapReady: boolean;
@@ -125,11 +115,16 @@ export class MbMap extends Component<Props, State> {
 
   // This keeps track of the latest update calls, per layerId
   _queryForMeta = (layer: ILayer) => {
-    if (this.state.mbMap && layer.isVisible() && layer.getType() === LAYER_TYPE.TILED_VECTOR) {
-      const mbFeatures = (layer as MvtVectorLayer).queryTileMetaFeatures(this.state.mbMap);
-      if (mbFeatures !== null) {
-        this.props.updateMetaFromTiles(layer.getId(), mbFeatures);
-      }
+    const source = layer.getSource();
+    if (
+      this.state.mbMap &&
+      layer.isVisible() &&
+      source.isESSource() &&
+      typeof (source as IVectorSource).isMvt === 'function' &&
+      (source as IVectorSource).isMvt()
+    ) {
+      const features = getTileMetaFeatures(this.state.mbMap, layer.getMbSourceId());
+      this.props.updateMetaFromTiles(layer.getId(), features);
     }
   };
 
@@ -289,11 +284,17 @@ export class MbMap extends Component<Props, State> {
   }
 
   async _loadMakiSprites(mbMap: MapboxMap) {
-    const spritesUrl = isRetina() ? sprites2 : sprites1;
-    const json = isRetina() ? spritesheet[2] : spritesheet[1];
-    const spritesData = await loadSpriteSheetImageData(spritesUrl);
     if (this._isMounted) {
-      addSpriteSheetToMapFromImageData(json, spritesData, mbMap);
+      const pixelRatio = Math.floor(window.devicePixelRatio);
+      for (const [symbolId, { svg }] of Object.entries(MAKI_ICONS)) {
+        if (!mbMap.hasImage(symbolId)) {
+          const imageData = await createSdfIcon(svg, 0.25, 0.25);
+          mbMap.addImage(symbolId, imageData, {
+            pixelRatio,
+            sdf: true,
+          });
+        }
+      }
     }
   }
 

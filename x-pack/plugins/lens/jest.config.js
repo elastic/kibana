@@ -12,4 +12,5 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/lens',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: ['<rootDir>/x-pack/plugins/lens/{common,public,server}/**/*.{ts,tsx}'],
+  setupFiles: ['jest-canvas-mock'],
 };

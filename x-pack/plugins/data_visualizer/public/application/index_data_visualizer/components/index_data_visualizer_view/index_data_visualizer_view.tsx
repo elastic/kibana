@@ -19,8 +19,6 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
@@ -34,7 +32,6 @@ import {
 import { FieldVisConfig } from '../../../common/components/stats_table/types';
 import type { TotalFieldsStats } from '../../../common/components/stats_table/components/field_count_stats';
 import { OverallStats } from '../../types/overall_stats';
-import { getActions } from '../../../common/components/field_data_row/action_menu';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
@@ -232,6 +229,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       indexPattern: currentIndexPattern,
       savedSearch: currentSavedSearch,
       visibleFieldNames,
+      allowEditDataView: true,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndexPattern.id, currentSavedSearch?.id, visibleFieldNames]);
@@ -247,6 +245,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     timefilter,
     setLastRefresh,
     progress,
+    extendedColumns,
   } = useDataVisualizerGridData(input, dataVisualizerListState, setGlobalState);
 
   useEffect(() => {
@@ -381,34 +380,13 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     };
   }, []);
 
-  // Inject custom action column for the index based visualizer
-  // Hide the column completely if no access to any of the plugins
-  const extendedColumns = useMemo(() => {
-    const actions = getActions(
-      currentIndexPattern,
-      services,
-      {
-        searchQueryLanguage,
-        searchString,
-      },
-      actionFlyoutRef
-    );
-    if (!Array.isArray(actions) || actions.length < 1) return;
-
-    const actionColumn: EuiTableActionsColumnType<FieldVisConfig> = {
-      name: (
-        <FormattedMessage
-          id="xpack.dataVisualizer.index.dataGrid.actionsColumnLabel"
-          defaultMessage="Actions"
-        />
-      ),
-      actions,
-      width: '100px',
-    };
-
-    return [actionColumn];
-  }, [currentIndexPattern, services, searchQueryLanguage, searchString]);
-
+  useEffect(() => {
+    // Update data query manager if input string is updated
+    data?.query.queryString.setQuery({
+      query: searchString,
+      language: searchQueryLanguage,
+    });
+  }, [data, searchQueryLanguage, searchString]);
   const helpLink = docLinks.links.ml.guide;
 
   return (

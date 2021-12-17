@@ -6,12 +6,12 @@
  */
 
 import React, { memo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { ConfigKeys, Validation } from '../types';
+import { ConfigKey, Validation } from '../types';
 import { useTCPSimpleFieldsContext } from '../contexts';
 import { ScheduleField } from '../schedule_field';
-import { CommonFields } from '../common/common_fields';
+import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 
 interface Props {
   validate: Validation;
@@ -19,12 +19,12 @@ interface Props {
 
 export const TCPSimpleFields = memo<Props>(({ validate }) => {
   const { fields, setFields } = useTCPSimpleFieldsContext();
-  const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
+  const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
     setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
   };
 
   return (
-    <>
+    <SimpleFieldsWrapper fields={fields} validate={validate} onInputChange={handleInputChange}>
       <EuiFormRow
         label={
           <FormattedMessage
@@ -32,7 +32,7 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
             defaultMessage="Host:Port"
           />
         }
-        isInvalid={!!validate[ConfigKeys.HOSTS]?.(fields)}
+        isInvalid={!!validate[ConfigKey.HOSTS]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tcp.hosts.error"
@@ -41,11 +41,11 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
         }
       >
         <EuiFieldText
-          value={fields[ConfigKeys.HOSTS]}
+          value={fields[ConfigKey.HOSTS]}
           onChange={(event) =>
             handleInputChange({
               value: event.target.value,
-              configKey: ConfigKeys.HOSTS,
+              configKey: ConfigKey.HOSTS,
             })
           }
           data-test-subj="syntheticsTCPHostField"
@@ -60,7 +60,7 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
             defaultMessage="Monitor interval"
           />
         }
-        isInvalid={!!validate[ConfigKeys.SCHEDULE]?.(fields)}
+        isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
@@ -72,14 +72,13 @@ export const TCPSimpleFields = memo<Props>(({ validate }) => {
           onChange={(schedule) =>
             handleInputChange({
               value: schedule,
-              configKey: ConfigKeys.SCHEDULE,
+              configKey: ConfigKey.SCHEDULE,
             })
           }
-          number={fields[ConfigKeys.SCHEDULE].number}
-          unit={fields[ConfigKeys.SCHEDULE].unit}
+          number={fields[ConfigKey.SCHEDULE].number}
+          unit={fields[ConfigKey.SCHEDULE].unit}
         />
       </EuiFormRow>
-      <CommonFields fields={fields} onChange={handleInputChange} validate={validate} />
-    </>
+    </SimpleFieldsWrapper>
   );
 });

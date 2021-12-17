@@ -49,7 +49,7 @@ export interface InternalLoggingServicePreboot {
 /** @internal */
 export type InternalLoggingServiceSetup = InternalLoggingServicePreboot;
 
-interface PrebootDeps {
+export interface PrebootDeps {
   loggingSystem: ILoggingSystem;
 }
 

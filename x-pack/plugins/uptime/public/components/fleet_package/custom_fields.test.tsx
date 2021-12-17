@@ -18,7 +18,7 @@ import {
   TLSFieldsContextProvider,
 } from './contexts';
 import { CustomFields } from './custom_fields';
-import { ConfigKeys, DataStream, ScheduleUnit } from './types';
+import { ConfigKey, DataStream, ScheduleUnit } from './types';
 import { validate as centralValidation } from './validation';
 import { defaultConfig } from './synthetics_policy_create_extension';
 
@@ -26,6 +26,12 @@ import { defaultConfig } from './synthetics_policy_create_extension';
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
+
+// ensures that fields appropriately match to their label
+jest.mock('@elastic/eui/lib/services/accessibility', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility'),
+  useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));
 
 jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
@@ -85,20 +91,20 @@ describe('<CustomFields />', () => {
     const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     expect(monitorType).toBeInTheDocument();
     expect(url).toBeInTheDocument();
-    expect(url.value).toEqual(defaultHTTPConfig[ConfigKeys.URLS]);
+    expect(url.value).toEqual(defaultHTTPConfig[ConfigKey.URLS]);
     expect(proxyUrl).toBeInTheDocument();
-    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKeys.PROXY_URL]);
+    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKey.PROXY_URL]);
     expect(monitorIntervalNumber).toBeInTheDocument();
-    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].number);
+    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKey.SCHEDULE].number);
     expect(monitorIntervalUnit).toBeInTheDocument();
-    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].unit);
+    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKey.SCHEDULE].unit);
     // expect(tags).toBeInTheDocument();
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKeys.APM_SERVICE_NAME]);
+    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKey.APM_SERVICE_NAME]);
     expect(maxRedirects).toBeInTheDocument();
-    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKeys.MAX_REDIRECTS]}`);
+    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKey.MAX_REDIRECTS]}`);
     expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKeys.TIMEOUT]}`);
+    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKey.TIMEOUT]}`);
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Host')).not.toBeInTheDocument();
@@ -145,11 +151,11 @@ describe('<CustomFields />', () => {
     expect(verificationMode).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]);
-      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY]);
-      expect(clientKeyPassphrase.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY_PASSPHRASE]);
-      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE]);
-      expect(verificationMode.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE]);
+      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_CERTIFICATE_AUTHORITIES]);
+      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_KEY]);
+      expect(clientKeyPassphrase.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_KEY_PASSPHRASE]);
+      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_CERTIFICATE]);
+      expect(verificationMode.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_VERIFICATION_MODE]);
     });
   });
 
@@ -181,26 +187,30 @@ describe('<CustomFields />', () => {
   });
 
   it('handles switching monitor type', () => {
-    const { getByText, getByLabelText, queryByLabelText, getAllByLabelText } = render(
+    const { getByText, queryByText, getByLabelText, queryByLabelText, getAllByLabelText } = render(
       <WrappedComponent />
     );
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
     expect(monitorType).toBeInTheDocument();
-    expect(monitorType.value).toEqual(defaultHTTPConfig[ConfigKeys.MONITOR_TYPE]);
+    expect(monitorType.value).toEqual(defaultHTTPConfig[ConfigKey.MONITOR_TYPE]);
     fireEvent.change(monitorType, { target: { value: DataStream.TCP } });
 
     // expect tcp fields to be in the DOM
     const host = getByLabelText('Host:Port') as HTMLInputElement;
 
     expect(host).toBeInTheDocument();
-    expect(host.value).toEqual(defaultTCPConfig[ConfigKeys.HOSTS]);
+    expect(host.value).toEqual(defaultTCPConfig[ConfigKey.HOSTS]);
 
     // expect HTTP fields not to be in the DOM
     expect(queryByLabelText('URL')).not.toBeInTheDocument();
     expect(queryByLabelText('Max redirects')).not.toBeInTheDocument();
 
     // expect tls options to be available for TCP
-    expect(queryByLabelText('Enable TLS configuration')).toBeInTheDocument();
+    // here we must getByText because EUI will generate duplicate aria-labelledby
+    // values within the test-env generator used, and that will conflict with other
+    // automatically generated labels. See:
+    // https://github.com/elastic/eui/blob/91b416dcd51e116edb2cb4a2cac4c306512e28c7/src/services/accessibility/html_id_generator.testenv.ts#L12
+    expect(queryByText(/Enable TLS configuration/)).toBeInTheDocument();
 
     // ensure at least one tcp advanced option is present
     let advancedOptionsButton = getByText('Advanced TCP options');
@@ -214,8 +224,8 @@ describe('<CustomFields />', () => {
     // expect ICMP fields to be in the DOM
     expect(getByLabelText('Wait in seconds')).toBeInTheDocument();
 
-    // expect tls options not be available for ICMP
-    expect(queryByLabelText('Enable TLS configuration')).not.toBeInTheDocument();
+    // expect tls options not to be available for ICMP
+    expect(queryByText(/Enable TLS configuration/)).not.toBeInTheDocument();
 
     // expect TCP fields not to be in the DOM
     expect(queryByLabelText('Proxy URL')).not.toBeInTheDocument();
@@ -234,7 +244,7 @@ describe('<CustomFields />', () => {
 
     // expect tls options to be available for browser
     expect(queryByLabelText('Proxy Zip URL')).toBeInTheDocument();
-    expect(queryByLabelText('Enable TLS configuration for Zip URL')).toBeInTheDocument();
+    expect(queryByText(/Enable TLS configuration for Zip URL/)).toBeInTheDocument();
 
     // ensure at least one browser advanced option is present
     advancedOptionsButton = getByText('Advanced Browser options');
@@ -317,6 +327,21 @@ describe('<CustomFields />', () => {
       expect(getByText('TCP')).toBeInTheDocument();
       expect(getByText('ICMP')).toBeInTheDocument();
       expect(queryByText('Browser (Beta)')).not.toBeInTheDocument();
+    });
+  });
+
+  it('allows monitors to be disabled', async () => {
+    const { queryByLabelText } = render(
+      <WrappedComponent dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP]} />
+    );
+
+    const enabled = queryByLabelText('Enabled') as HTMLInputElement;
+    expect(enabled).toBeChecked();
+
+    fireEvent.click(enabled);
+
+    await waitFor(() => {
+      expect(enabled).not.toBeChecked();
     });
   });
 });

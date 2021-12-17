@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PROVIDER_PREPOSITION = i18n.translate(
-  'xpack.securitySolution.eventDetails.ctiSummary.providerPreposition',
+export const FEED_NAME_PREPOSITION = i18n.translate(
+  'xpack.securitySolution.eventDetails.ctiSummary.feedNamePreposition',
   {
     defaultMessage: 'from',
   }

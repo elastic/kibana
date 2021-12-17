@@ -9,24 +9,29 @@ import React from 'react';
 
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import * as i18n from './translations';
-import { CasesNavigation } from '../links';
+import { useAllCasesNavigation } from '../../common/navigation';
 
 interface Props {
-  allCasesNavigation: CasesNavigation;
   caseId: string;
 }
 
-export const DoesNotExist = ({ allCasesNavigation, caseId }: Props) => (
-  <EuiEmptyPrompt
-    iconColor="default"
-    iconType="addDataApp"
-    title={<h2>{i18n.DOES_NOT_EXIST_TITLE}</h2>}
-    titleSize="xs"
-    body={<p>{i18n.DOES_NOT_EXIST_DESCRIPTION(caseId)}</p>}
-    actions={
-      <EuiButton onClick={allCasesNavigation.onClick} size="s" color="primary" fill>
-        {i18n.DOES_NOT_EXIST_BUTTON}
-      </EuiButton>
-    }
-  />
-);
+export const DoesNotExist = React.memo(({ caseId }: Props) => {
+  const { navigateToAllCases } = useAllCasesNavigation();
+
+  return (
+    <EuiEmptyPrompt
+      iconColor="default"
+      iconType="addDataApp"
+      title={<h2>{i18n.DOES_NOT_EXIST_TITLE}</h2>}
+      titleSize="xs"
+      body={<p>{i18n.DOES_NOT_EXIST_DESCRIPTION(caseId)}</p>}
+      actions={
+        <EuiButton onClick={navigateToAllCases} size="s" color="primary" fill>
+          {i18n.DOES_NOT_EXIST_BUTTON}
+        </EuiButton>
+      }
+    />
+  );
+});
+
+DoesNotExist.displayName = 'DoesNotExist';
