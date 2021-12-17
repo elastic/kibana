@@ -416,6 +416,7 @@
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
+    "@apidevtools/swagger-parser": "^10.0.3",
     "@babel/cli": "^7.16.0",
     "@babel/core": "^7.16.0",
     "@babel/eslint-parser": "^7.16.3",
