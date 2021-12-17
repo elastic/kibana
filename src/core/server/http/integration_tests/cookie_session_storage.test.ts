@@ -11,18 +11,20 @@ import supertest from 'supertest';
 import { REPO_ROOT } from '@kbn/utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { BehaviorSubject } from 'rxjs';
+import { duration as momentDuration } from 'moment';
 
-import { CoreContext } from '../core_context';
-import { HttpService } from './http_service';
-import { Env } from '../config';
+import { CoreContext } from '../../core_context';
+import { HttpService } from './../http_service';
+import { Env } from '../../config';
 
-import { contextServiceMock } from '../context/context_service.mock';
-import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
-import { loggingSystemMock } from '../logging/logging_system.mock';
-import { getEnvOptions, configServiceMock } from '../config/mocks';
-import { httpServerMock } from './http_server.mocks';
+import { contextServiceMock } from '../../context/context_service.mock';
+import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { getEnvOptions, configServiceMock } from '../../config/mocks';
+import { httpServerMock } from '../http_server.mocks';
 
-import { createCookieSessionStorageFactory } from './cookie_session_storage';
+import { createCookieSessionStorageFactory } from '../cookie_session_storage';
+import { ensureRawRequest } from '../router';
 
 let server: HttpService;
 
@@ -31,10 +33,15 @@ let env: Env;
 let coreContext: CoreContext;
 const configService = configServiceMock.create();
 const contextSetup = contextServiceMock.createSetupContract();
+const contextPreboot = contextServiceMock.createPrebootContract();
 
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+};
+
+const prebootDeps = {
+  context: contextPreboot,
 };
 
 configService.atPath.mockImplementation((path) => {
@@ -42,6 +49,7 @@ configService.atPath.mockImplementation((path) => {
     return new BehaviorSubject({
       hosts: ['http://1.2.3.4'],
       maxPayload: new ByteSizeValue(1024),
+      shutdownTimeout: momentDuration('5s'),
       autoListen: true,
       healthCheck: {
         delay: 2000,
@@ -55,6 +63,7 @@ configService.atPath.mockImplementation((path) => {
         allowlist: [],
       },
       customResponseHeaders: {},
+      securityResponseHeaders: {},
       requestId: {
         allowFromAnyIp: true,
         ipAllowlist: [],
@@ -77,18 +86,6 @@ configService.atPath.mockImplementation((path) => {
     });
   }
   throw new Error(`Unexpected config path: ${path}`);
-});
-
-beforeEach(() => {
-  logger = loggingSystemMock.create();
-  env = Env.createDefault(REPO_ROOT, getEnvOptions());
-
-  coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
-  server = new HttpService(coreContext);
-});
-
-afterEach(async () => {
-  await server.stop();
 });
 
 interface User {
@@ -129,11 +126,22 @@ const cookieOptions = {
   path,
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/89318
-// https://github.com/elastic/kibana/issues/89319
-describe.skip('Cookie based SessionStorage', () => {
+describe('Cookie based SessionStorage', () => {
+  beforeEach(async () => {
+    logger = loggingSystemMock.create();
+    env = Env.createDefault(REPO_ROOT, getEnvOptions());
+
+    coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
+    server = new HttpService(coreContext);
+  });
+
+  afterEach(async () => {
+    await server.stop();
+  });
+
   describe('#set()', () => {
     it('Should write to session storage & set cookies', async () => {
+      await server.preboot(prebootDeps);
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('');
 
@@ -167,6 +175,7 @@ describe.skip('Cookie based SessionStorage', () => {
 
   describe('#get()', () => {
     it('reads from session storage', async () => {
+      await server.preboot(prebootDeps);
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('');
 
@@ -202,6 +211,7 @@ describe.skip('Cookie based SessionStorage', () => {
     });
 
     it('returns null for empty session', async () => {
+      await server.preboot(prebootDeps);
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
       const router = createRouter('');
@@ -225,6 +235,7 @@ describe.skip('Cookie based SessionStorage', () => {
     });
 
     it('returns null for invalid session (expired) & clean cookies', async () => {
+      await server.preboot(prebootDeps);
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
       const router = createRouter('');
@@ -270,6 +281,7 @@ describe.skip('Cookie based SessionStorage', () => {
     });
 
     it('returns null for invalid session (incorrect path) & clean cookies accurately', async () => {
+      await server.preboot(prebootDeps);
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
       const router = createRouter('');
@@ -337,7 +349,10 @@ describe.skip('Cookie based SessionStorage', () => {
       expect(session).toBe(null);
 
       expect(mockServer.auth.test).toBeCalledTimes(1);
-      expect(mockServer.auth.test).toHaveBeenCalledWith('security-cookie', mockRequest);
+      expect(mockServer.auth.test).toHaveBeenCalledWith(
+        'security-cookie',
+        ensureRawRequest(mockRequest)
+      );
 
       expect(loggingSystemMock.collect(logger).warn).toEqual([
         ['Found 2 auth sessions when we were only expecting 1.'],
@@ -368,7 +383,10 @@ describe.skip('Cookie based SessionStorage', () => {
       expect(session).toBe('foo');
 
       expect(mockServer.auth.test).toBeCalledTimes(1);
-      expect(mockServer.auth.test).toHaveBeenCalledWith('security-cookie', mockRequest);
+      expect(mockServer.auth.test).toHaveBeenCalledWith(
+        'security-cookie',
+        ensureRawRequest(mockRequest)
+      );
     });
 
     it('logs the reason of validation function failure.', async () => {
@@ -402,6 +420,7 @@ describe.skip('Cookie based SessionStorage', () => {
 
   describe('#clear()', () => {
     it('clears session storage & remove cookies', async () => {
+      await server.preboot(prebootDeps);
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
       const router = createRouter('');
@@ -443,6 +462,7 @@ describe.skip('Cookie based SessionStorage', () => {
   describe('#options', () => {
     describe('#SameSite', () => {
       it('throws an exception if "SameSite: None" set on not Secure connection', async () => {
+        await server.preboot(prebootDeps);
         const { server: innerServer } = await server.setup(setupDeps);
 
         expect(
@@ -457,6 +477,7 @@ describe.skip('Cookie based SessionStorage', () => {
 
       for (const sameSite of ['Strict', 'Lax', 'None'] as const) {
         it(`sets and parses SameSite = ${sameSite} correctly`, async () => {
+          await server.preboot(prebootDeps);
           const { server: innerServer, createRouter } = await server.setup(setupDeps);
           const router = createRouter('');
 
@@ -485,7 +506,7 @@ describe.skip('Cookie based SessionStorage', () => {
           expect(cookies).toHaveLength(1);
 
           const sessionCookie = retrieveSessionCookie(cookies[0]);
-          expect(sessionCookie.extensions).toContain(`SameSite=${sameSite}`);
+          expect(sessionCookie.sameSite).toEqual(sameSite.toLowerCase());
 
           await supertest(innerServer.listener)
             .get('/')
