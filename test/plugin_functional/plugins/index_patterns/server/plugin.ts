@@ -130,50 +130,6 @@ export class IndexPatternsTestPlugin
         return res.ok();
       }
     );
-
-    router.get(
-      {
-        path: '/api/index-patterns-plugin/get-filtered-field-list',
-        validate: {},
-      },
-      async (context, req, res) => {
-        const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
-        const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
-          savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser,
-          req
-        );
-        const es = elasticsearch.client.asScoped(req).asCurrentUser;
-        await es.index({
-          index: 'helloworld1',
-          refresh: true,
-          id: 'helloworld',
-          body: { hello: 'world' },
-        });
-
-        await es.index({
-          index: 'helloworld2',
-          refresh: true,
-          id: 'helloworld2',
-          body: { bye: 'world' },
-        });
-
-        const ip = await service.createAndSave({ title: 'helloworld*' });
-
-        const fields = await service.getFieldsForIndexPattern(ip, {
-          pattern: '*',
-          filter: { exists: { field: 'bye' } },
-        });
-        const fieldNames = fields.map((field) => field.name);
-
-        if (fieldNames.indexOf('bye') > -1 && fieldNames.indexOf('hello') === -1) {
-          return res.ok({ body: { fields } });
-        } else {
-          throw new Error('Wrong fields returned');
-        }
-      }
-    );
   }
 
   public start() {}
