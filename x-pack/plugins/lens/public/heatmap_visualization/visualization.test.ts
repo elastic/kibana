@@ -432,14 +432,10 @@ describe('heatmap', () => {
                         // grid
                         strokeWidth: [],
                         strokeColor: [],
-                        cellHeight: [],
-                        cellWidth: [],
                         // cells
                         isCellLabelVisible: [false],
                         // Y-axis
                         isYAxisLabelVisible: [true],
-                        yAxisLabelWidth: [],
-                        yAxisLabelColor: [],
                         // X-axis
                         isXAxisLabelVisible: [true],
                       },
