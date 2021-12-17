@@ -139,7 +139,7 @@
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team:Operations", "release_note:skip", "auto-backport", "v8.1.0", "v8.0.0", "v7.16.0"],
+      "labels": ["Team:Operations", "release_note:skip", "auto-backport", "v8.1.0", "v8.0.0", "v7.17.0", "v7.16.0"],
       "enabled": true
     }
   ]
