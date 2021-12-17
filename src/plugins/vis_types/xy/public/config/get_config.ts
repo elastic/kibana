@@ -51,12 +51,13 @@ export function getConfig(
 
   const yAxes: Array<AxisConfig<ScaleContinuousType>> = [];
 
-  params.valueAxes.map((a) => {
-    // find the correct aspect for each value axis
-    const aspectsIdx = params.seriesParams.findIndex((s) => s.valueAxis === a.id);
-    const aspect = aspects.y[aspectsIdx > -1 ? aspectsIdx : 0];
-    if (aspect) {
-      yAxes.push(getAxis<YScaleType>(a, params.grid, aspect, params.seriesParams));
+  params.dimensions.y.forEach((y) => {
+    const accessor = y.accessor;
+    const aspect = aspects.y.find(({ column }) => column === accessor);
+    const serie = params.seriesParams.find(({ data: { id } }) => id === aspect?.aggId);
+    const valueAxis = params.valueAxes.find(({ id }) => id === serie?.valueAxis);
+    if (aspect && valueAxis) {
+      yAxes.push(getAxis<YScaleType>(valueAxis, params.grid, aspect, params.seriesParams));
     }
   });
 
