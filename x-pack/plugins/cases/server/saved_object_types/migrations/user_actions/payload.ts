@@ -95,11 +95,12 @@ export const getPayload = (
    * We are taking care of it in this migration by adding the none
    * connector as a default
    */
+  const { id, ...noneConnector } = getNoneCaseConnector();
   return {
     ...payload,
     ...(payload.connector == null &&
     (type === ActionTypes.create_case || type === ActionTypes.connector)
-      ? getNoneCaseConnector()
+      ? { connector: noneConnector }
       : {}),
   };
 };

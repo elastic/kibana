@@ -674,7 +674,7 @@ describe('CaseUserActionService', () => {
               },
               type: 'delete_case',
               owner: 'securitySolution',
-              payload: null,
+              payload: {},
             },
             references: [
               { id: '1', name: 'associated-cases', type: 'cases' },
@@ -693,7 +693,7 @@ describe('CaseUserActionService', () => {
               },
               type: 'delete_case',
               owner: 'securitySolution',
-              payload: null,
+              payload: {},
             },
             references: [
               { id: '2', name: 'associated-cases', type: 'cases' },

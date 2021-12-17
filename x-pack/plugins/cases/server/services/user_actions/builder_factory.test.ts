@@ -456,7 +456,7 @@ describe('UserActionBuilder', () => {
             "username": "elastic",
           },
           "owner": "securitySolution",
-          "payload": null,
+          "payload": Object {},
           "type": "delete_case",
         },
         "references": Array [
