@@ -70,11 +70,6 @@ describe('When event filters delete modal is shown', () => {
     waitForAction = mockedContext.middlewareSpy.waitForAction;
   });
 
-  it('should display name of event filter in body message', async () => {
-    await renderAndSetup();
-    expect(getBody().textContent).toMatch(/You are removing event filter "tic-tac-toe"/);
-  });
-
   it("should display calllout when it's assigned to one policy", async () => {
     partialEventFilter.tags = ['policy:1'];
     await renderAndSetup();
