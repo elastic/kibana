@@ -16,4 +16,4 @@ export {
   InvalidJSONProperty,
 } from './errors';
 
-export * from './types';
+export { KibanaServerError } from './types';
