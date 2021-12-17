@@ -13,6 +13,7 @@ import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
 import { SAVED_QUERIES_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { IQueryPayload } from '../packs/types';
 
 interface UseCreateSavedQueryProps {
   withRedirect?: boolean;
@@ -29,7 +30,7 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
 
   return useMutation(
     (payload) =>
-      http.post<any>('/internal/osquery/saved_query', {
+      http.post<IQueryPayload>('/internal/osquery/saved_query', {
         body: JSON.stringify(payload),
       }),
     {

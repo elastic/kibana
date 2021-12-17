@@ -13,6 +13,7 @@ import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
 import { SAVED_QUERIES_ID, SAVED_QUERY_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { IQueryPayload } from '../packs/types';
 
 interface UseUpdateSavedQueryProps {
   savedQueryId: string;
@@ -29,7 +30,7 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
 
   return useMutation(
     (payload) =>
-      http.put<any>(`/internal/osquery/saved_query/${savedQueryId}`, {
+      http.put<IQueryPayload>(`/internal/osquery/saved_query/${savedQueryId}`, {
         body: JSON.stringify(payload),
       }),
     {
