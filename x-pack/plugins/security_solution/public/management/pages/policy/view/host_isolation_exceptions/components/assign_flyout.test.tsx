@@ -136,6 +136,18 @@ describe('Policy details host isolation exceptions assign flyout', () => {
     expect(renderResult.getByTestId('hostIsolationExceptions-assign-confirm-button')).toBeEnabled();
   });
 
+  it('should warn the user when there are over 100 results in the flyout', async () => {
+    getHostIsolationExceptionItemsMock.mockImplementation(() => {
+      return {
+        ...getFoundExceptionListItemSchemaMock(1),
+        total: 120,
+      };
+    });
+    render();
+    expect(await renderResult.findByTestId('artifactsList')).toBeTruthy();
+    expect(renderResult.getByTestId('hostIsolationExceptions-too-many-results')).toBeTruthy();
+  });
+
   describe('when submitting the form', () => {
     const FIRST_ONE_NAME = uuid.v4();
     const SECOND_ONE_NAME = uuid.v4();
