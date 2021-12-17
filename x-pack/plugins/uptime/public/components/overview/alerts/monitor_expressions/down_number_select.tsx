@@ -14,20 +14,20 @@ interface Props {
   isEnabled?: boolean;
   defaultNumTimes?: number;
   hasFilters: boolean;
-  setAlertParams: (key: string, value: any) => void;
+  setRuleParams: (key: string, value: any) => void;
 }
 
 export const DownNoExpressionSelect: React.FC<Props> = ({
   defaultNumTimes,
   hasFilters,
   isEnabled,
-  setAlertParams,
+  setRuleParams,
 }) => {
   const [numTimes, setNumTimes] = useState<number>(defaultNumTimes ?? 5);
 
   useEffect(() => {
-    setAlertParams('numTimes', numTimes);
-  }, [numTimes, setAlertParams]);
+    setRuleParams('numTimes', numTimes);
+  }, [numTimes, setRuleParams]);
 
   return (
     <AlertExpressionPopover
