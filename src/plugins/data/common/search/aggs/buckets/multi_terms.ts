@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterMultiTerms } from './create_filter/multi_terms';
-import { aggTermsFnName } from './terms_fn';
+import { aggMultiTermsFnName } from './multi_terms_fn';
 import { AggConfigSerialized, BaseAggParams } from '../types';
 
 import { MultiFieldKey } from './multi_field_key';
@@ -41,7 +41,7 @@ export const getMultiTermsBucketAgg = () => {
   const keyCaches = new WeakMap();
   return new BucketAggType({
     name: BUCKET_TYPES.MULTI_TERMS,
-    expressionName: aggTermsFnName,
+    expressionName: aggMultiTermsFnName,
     title: termsTitle,
     makeLabel(agg) {
       const params = agg.params;
