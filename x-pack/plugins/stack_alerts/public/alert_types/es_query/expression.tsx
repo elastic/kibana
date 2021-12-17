@@ -41,7 +41,7 @@ import { EsQueryAlertParams } from './types';
 import { IndexSelectPopover } from '../components/index_select_popover';
 
 function totalHitsToNumber(total: estypes.SearchHitsMetadata['total']): number {
-  return typeof total === 'number' ? total : total.value;
+  return typeof total === 'number' ? total : total?.value ?? 0;
 }
 
 const DEFAULT_VALUES = {
