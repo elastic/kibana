@@ -31,6 +31,8 @@ export default function ({ getPageObjects }) {
       });
     });
 
+    //TODO, skipped because `ESGeoGridSource` show no results icon instead of error icon.
+
     describe.skip('ESGeoGridSource with missing index pattern id', () => {
       const MISSING_INDEX_ID = 'idThatDoesNotExitForESGeoGridSource';
       const LAYER_NAME = MISSING_INDEX_ID;
