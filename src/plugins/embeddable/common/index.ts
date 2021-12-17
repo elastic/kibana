@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-export {
+export type {
   EmbeddableInput,
   CommonEmbeddableStartContract,
   EmbeddableStateWithType,
   PanelState,
   EmbeddablePersistableStateService,
-  ViewMode,
 } from './types';
-export { SavedObjectEmbeddableInput, isSavedObjectEmbeddableInput } from './lib';
+export { ViewMode } from './types';
+export type { SavedObjectEmbeddableInput } from './lib';
+export { isSavedObjectEmbeddableInput } from './lib';
