@@ -24,7 +24,7 @@ import {
 import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
-interface AlertParams {
+interface RuleParams {
   windowSize?: number;
   windowUnit?: string;
   threshold?: number;
@@ -34,22 +34,22 @@ interface AlertParams {
 }
 
 interface Props {
-  alertParams: AlertParams;
+  ruleParams: RuleParams;
   metadata?: AlertMetadata;
-  setAlertParams: (key: string, value: any) => void;
-  setAlertProperty: (key: string, value: any) => void;
+  setRuleParams: (key: string, value: any) => void;
+  setRuleProperty: (key: string, value: any) => void;
 }
 
 export function TransactionErrorRateAlertTrigger(props: Props) {
   const { services } = useKibana();
-  const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
+  const { ruleParams, metadata, setRuleParams, setRuleProperty } = props;
 
   useEffect(() => {
     createCallApmApi(services as CoreStart);
   }, [services]);
 
   const params = defaults(
-    { ...omit(metadata, ['start', 'end']), ...alertParams },
+    { ...omit(metadata, ['start', 'end']), ...ruleParams },
     {
       threshold: 30,
       windowSize: 5,
@@ -95,27 +95,27 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   const fields = [
     <ServiceField
       currentValue={params.serviceName}
-      onChange={(value) => setAlertParams('serviceName', value)}
+      onChange={(value) => setRuleParams('serviceName', value)}
     />,
     <TransactionTypeField
       currentValue={params.transactionType}
-      onChange={(value) => setAlertParams('transactionType', value)}
+      onChange={(value) => setRuleParams('transactionType', value)}
     />,
     <EnvironmentField
       currentValue={params.environment}
-      onChange={(value) => setAlertParams('environment', value)}
+      onChange={(value) => setRuleParams('environment', value)}
     />,
     <IsAboveField
       value={params.threshold}
       unit="%"
-      onChange={(value) => setAlertParams('threshold', value || 0)}
+      onChange={(value) => setRuleParams('threshold', value || 0)}
     />,
     <ForLastExpression
       onChangeWindowSize={(timeWindowSize) =>
-        setAlertParams('windowSize', timeWindowSize || '')
+        setRuleParams('windowSize', timeWindowSize || '')
       }
       onChangeWindowUnit={(timeWindowUnit) =>
-        setAlertParams('windowUnit', timeWindowUnit)
+        setRuleParams('windowUnit', timeWindowUnit)
       }
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
@@ -139,8 +139,8 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
     <ServiceAlertTrigger
       fields={fields}
       defaults={params}
-      setAlertParams={setAlertParams}
-      setAlertProperty={setAlertProperty}
+      setRuleParams={setRuleParams}
+      setRuleProperty={setRuleProperty}
       chartPreview={chartPreview}
     />
   );

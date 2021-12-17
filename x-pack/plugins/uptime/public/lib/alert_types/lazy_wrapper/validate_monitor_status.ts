@@ -14,11 +14,11 @@ import {
 } from '../../../../common/runtime_types/alerts';
 import { ValidationResult } from '../../../../../triggers_actions_ui/public';
 
-export function validateMonitorStatusParams(alertParams: any): ValidationResult {
+export function validateMonitorStatusParams(ruleParams: any): ValidationResult {
   const errors: Record<string, any> = {};
-  const decoded = AtomicStatusCheckParamsType.decode(alertParams);
-  const oldDecoded = StatusCheckParamsType.decode(alertParams);
-  const availabilityDecoded = MonitorAvailabilityType.decode(alertParams);
+  const decoded = AtomicStatusCheckParamsType.decode(ruleParams);
+  const oldDecoded = StatusCheckParamsType.decode(ruleParams);
+  const availabilityDecoded = MonitorAvailabilityType.decode(ruleParams);
 
   if (!isRight(decoded) && !isRight(oldDecoded) && !isRight(availabilityDecoded)) {
     return {
@@ -29,10 +29,7 @@ export function validateMonitorStatusParams(alertParams: any): ValidationResult 
     };
   }
 
-  if (
-    !(alertParams.shouldCheckAvailability ?? false) &&
-    !(alertParams.shouldCheckStatus ?? false)
-  ) {
+  if (!(ruleParams.shouldCheckAvailability ?? false) && !(ruleParams.shouldCheckStatus ?? false)) {
     return {
       errors: {
         noAlertSelected: 'Alert must check for monitor status or monitor availability.',

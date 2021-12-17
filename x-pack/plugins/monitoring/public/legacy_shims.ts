@@ -16,7 +16,7 @@ import { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TypeRegistry } from '../../triggers_actions_ui/public/application/type_registry';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionTypeModel, AlertTypeModel } from '../../triggers_actions_ui/public/types';
+import { ActionTypeModel, RuleTypeModel } from '../../triggers_actions_ui/public/types';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 interface BreadcrumbItem {
@@ -54,7 +54,7 @@ export interface IShims {
   docTitle: CoreStart['chrome']['docTitle'];
   timefilter: MonitoringStartPluginDependencies['data']['query']['timefilter']['timefilter'];
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  ruleTypeRegistry: TypeRegistry<AlertTypeModel>;
+  ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   kfetch: (

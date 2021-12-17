@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 import { Alerts, AlertListItem, alertToListItem } from './alerts';
-import { Alert, AlertSummary, AlertStatus, AlertType } from '../../../../types';
+import { Rule, AlertSummary, AlertStatus, RuleType } from '../../../../types';
 import { EuiBasicTable } from '@elastic/eui';
 import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
 
@@ -382,7 +382,7 @@ describe('execution duration overview', () => {
   });
 });
 
-function mockRule(overloads: Partial<Alert> = {}): Alert {
+function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
     id: uuid.v4(),
     enabled: true,
@@ -410,7 +410,7 @@ function mockRule(overloads: Partial<Alert> = {}): Alert {
   };
 }
 
-function mockRuleType(overloads: Partial<AlertType> = {}): AlertType {
+function mockRuleType(overloads: Partial<RuleType> = {}): RuleType {
   return {
     id: 'test.testRuleType',
     name: 'My Test Rule Type',

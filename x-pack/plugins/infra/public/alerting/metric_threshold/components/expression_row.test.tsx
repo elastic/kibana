@@ -45,7 +45,7 @@ describe('ExpressionRow', () => {
         addExpression={() => {}}
         key={1}
         expressionId={1}
-        setAlertParams={() => {}}
+        setRuleParams={() => {}}
         errors={{
           aggField: [],
           timeSizeUnit: [],

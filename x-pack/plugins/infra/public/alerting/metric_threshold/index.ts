@@ -31,7 +31,7 @@ export function createMetricThresholdRuleType(): ObservabilityRuleTypeModel<Metr
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.metricsThreshold}`;
     },
-    alertParamsExpression: React.lazy(() => import('./components/expression')),
+    ruleParamsExpression: React.lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.threshold.defaultActionMessage',

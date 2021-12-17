@@ -25,11 +25,11 @@ import {
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
-  Alert,
+  Rule,
   AlertFlyoutCloseReason,
   AlertEditProps,
   IErrorObject,
-  AlertType,
+  RuleType,
 } from '../../../types';
 import { AlertForm } from './alert_form';
 import { getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_errors';
@@ -63,7 +63,7 @@ export const AlertEdit = ({
   const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
   const [alertActionsErrors, setAlertActionsErrors] = useState<IErrorObject[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [serverRuleType, setServerRuleType] = useState<AlertType<string, string> | undefined>(
+  const [serverRuleType, setServerRuleType] = useState<RuleType<string, string> | undefined>(
     props.ruleType
   );
 
@@ -71,7 +71,7 @@ export const AlertEdit = ({
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const setAlert = (value: Alert) => {
+  const setAlert = (value: Rule) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
 
@@ -80,7 +80,7 @@ export const AlertEdit = ({
   useEffect(() => {
     (async () => {
       setIsLoading(true);
-      const res = await getAlertActionErrors(alert as Alert, actionTypeRegistry);
+      const res = await getAlertActionErrors(alert as Rule, actionTypeRegistry);
       setAlertActionsErrors([...res]);
       setIsLoading(false);
     })();
@@ -100,7 +100,7 @@ export const AlertEdit = ({
   }, [props.ruleType, alertType.id, serverRuleType, http]);
 
   const { alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
-    alert as Alert,
+    alert as Rule,
     alertType,
     serverRuleType
   );
@@ -113,7 +113,7 @@ export const AlertEdit = ({
     }
   };
 
-  async function onSaveAlert(): Promise<Alert | undefined> {
+  async function onSaveAlert(): Promise<Rule | undefined> {
     try {
       if (
         !isLoading &&
@@ -133,7 +133,7 @@ export const AlertEdit = ({
       } else {
         setAlert(
           getAlertWithInvalidatedFields(
-            alert as Alert,
+            alert as Rule,
             alertParamsErrors,
             alertBaseErrors,
             alertActionsErrors

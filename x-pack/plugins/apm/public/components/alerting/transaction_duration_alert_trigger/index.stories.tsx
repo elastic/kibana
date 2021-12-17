@@ -7,7 +7,7 @@
 
 import { Story } from '@storybook/react';
 import React, { ComponentType, useState } from 'react';
-import { AlertParams, TransactionDurationAlertTrigger } from '.';
+import { RuleParams, TransactionDurationAlertTrigger } from '.';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 
@@ -32,7 +32,7 @@ export default {
 };
 
 export const Example: Story = () => {
-  const [params, setParams] = useState<AlertParams>({
+  const [params, setParams] = useState<RuleParams>({
     aggregationType: 'avg' as const,
     environment: 'testEnvironment',
     serviceName: 'testServiceName',
@@ -42,15 +42,15 @@ export const Example: Story = () => {
     windowUnit: 'm',
   });
 
-  function setAlertParams(property: string, value: any) {
+  function setRuleParams(property: string, value: any) {
     setParams({ ...params, [property]: value });
   }
 
   return (
     <TransactionDurationAlertTrigger
-      alertParams={params}
-      setAlertParams={setAlertParams}
-      setAlertProperty={() => {}}
+      ruleParams={params}
+      setRuleParams={setRuleParams}
+      setRuleProperty={() => {}}
     />
   );
 };

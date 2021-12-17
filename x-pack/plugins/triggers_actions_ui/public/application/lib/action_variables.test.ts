@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertType, ActionVariables } from '../../types';
+import { RuleType, ActionVariables } from '../../types';
 import { transformActionVariables } from './action_variables';
 import { ALERTS_FEATURE_ID } from '../../../../alerting/common';
 
@@ -572,7 +572,7 @@ describe('transformActionVariables', () => {
   });
 });
 
-function getAlertType(actionVariables: ActionVariables): AlertType {
+function getAlertType(actionVariables: ActionVariables): RuleType {
   return {
     id: 'test',
     name: 'Test',

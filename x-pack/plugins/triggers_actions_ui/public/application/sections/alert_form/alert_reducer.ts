@@ -9,17 +9,17 @@ import { SavedObjectAttribute } from 'kibana/public';
 import { isEqual } from 'lodash';
 import { Reducer } from 'react';
 import { AlertActionParam, IntervalSchedule } from '../../../../../alerting/common';
-import { Alert, AlertAction } from '../../../types';
+import { Rule, AlertAction } from '../../../types';
 
-export type InitialAlert = Partial<Alert> &
-  Pick<Alert, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags' | 'notifyWhen'>;
+export type InitialAlert = Partial<Rule> &
+  Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags' | 'notifyWhen'>;
 
 interface CommandType<
   T extends
     | 'setAlert'
     | 'setProperty'
     | 'setScheduleProperty'
-    | 'setAlertParams'
+    | 'setRuleParams'
     | 'setAlertActionParams'
     | 'setAlertActionProperty'
 > {
@@ -36,9 +36,9 @@ interface Payload<Keys, Value> {
   index?: number;
 }
 
-interface AlertPayload<Key extends keyof Alert> {
+interface AlertPayload<Key extends keyof Rule> {
   key: Key;
-  value: Alert[Key] | null;
+  value: Rule[Key] | null;
   index?: number;
 }
 
@@ -61,14 +61,14 @@ export type AlertReducerAction =
     }
   | {
       command: CommandType<'setProperty'>;
-      payload: AlertPayload<keyof Alert>;
+      payload: AlertPayload<keyof Rule>;
     }
   | {
       command: CommandType<'setScheduleProperty'>;
       payload: AlertSchedulePayload<keyof IntervalSchedule>;
     }
   | {
-      command: CommandType<'setAlertParams'>;
+      command: CommandType<'setRuleParams'>;
       payload: Payload<string, unknown>;
     }
   | {
@@ -81,9 +81,9 @@ export type AlertReducerAction =
     };
 
 export type InitialAlertReducer = Reducer<{ alert: InitialAlert }, AlertReducerAction>;
-export type ConcreteAlertReducer = Reducer<{ alert: Alert }, AlertReducerAction>;
+export type ConcreteAlertReducer = Reducer<{ alert: Rule }, AlertReducerAction>;
 
-export const alertReducer = <AlertPhase extends InitialAlert | Alert>(
+export const alertReducer = <AlertPhase extends InitialAlert | Rule>(
   state: { alert: AlertPhase },
   action: AlertReducerAction
 ) => {
@@ -102,7 +102,7 @@ export const alertReducer = <AlertPhase extends InitialAlert | Alert>(
       }
     }
     case 'setProperty': {
-      const { key, value } = action.payload as AlertPayload<keyof Alert>;
+      const { key, value } = action.payload as AlertPayload<keyof Rule>;
       if (isEqual(alert[key], value)) {
         return state;
       } else {
@@ -132,7 +132,7 @@ export const alertReducer = <AlertPhase extends InitialAlert | Alert>(
         };
       }
     }
-    case 'setAlertParams': {
+    case 'setRuleParams': {
       const { key, value } = action.payload as Payload<string, Record<string, unknown>>;
       if (isEqual(alert.params[key], value)) {
         return state;

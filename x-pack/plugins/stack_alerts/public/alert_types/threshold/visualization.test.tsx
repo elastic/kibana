@@ -51,7 +51,7 @@ describe('ThresholdVisualization', () => {
     });
   });
 
-  const alertParams = {
+  const ruleParams = {
     index: 'test-index',
     aggType: 'count',
     thresholdComparator: '>',
@@ -63,7 +63,7 @@ describe('ThresholdVisualization', () => {
   async function setup() {
     const wrapper = mountWithIntl(
       <ThresholdVisualization
-        alertParams={alertParams}
+        ruleParams={ruleParams}
         alertInterval="1m"
         aggregationTypes={builtInAggregationTypes}
         comparators={builtInComparators}
@@ -85,7 +85,7 @@ describe('ThresholdVisualization', () => {
 
     const wrapper = mountWithIntl(
       <ThresholdVisualization
-        alertParams={alertParams}
+        ruleParams={ruleParams}
         alertInterval="1m"
         aggregationTypes={builtInAggregationTypes}
         comparators={builtInComparators}
@@ -114,7 +114,7 @@ describe('ThresholdVisualization', () => {
   test('renders loading message on initial load', async () => {
     const wrapper = mountWithIntl(
       <ThresholdVisualization
-        alertParams={alertParams}
+        ruleParams={ruleParams}
         alertInterval="1m"
         aggregationTypes={builtInAggregationTypes}
         comparators={builtInComparators}

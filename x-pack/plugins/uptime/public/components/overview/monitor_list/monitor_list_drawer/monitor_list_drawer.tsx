@@ -8,7 +8,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { Alert } from '../../../../../../triggers_actions_ui/public';
+import { Rule } from '../../../../../../triggers_actions_ui/public';
 import { MostRecentError } from './most_recent_error';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_types';
@@ -67,7 +67,7 @@ export function MonitorListDrawerComponent({
       <EuiSpacer size="m" />
       <MonitorStatusList summaryPings={summary.state.summaryPings} />
       <EuiSpacer size="s" />
-      <EnabledAlerts loading={loading} monitorAlerts={monitorDetails?.alerts as Alert[]} />
+      <EnabledAlerts loading={loading} monitorAlerts={monitorDetails?.alerts as Rule[]} />
       <EuiSpacer size="s" />
       {monitorDetails && monitorDetails.error && (
         <MostRecentError

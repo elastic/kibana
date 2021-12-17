@@ -6,7 +6,7 @@
  */
 
 import { formatMillisForDisplay, shouldShowDurationWarning } from './execution_duration_utils';
-import { AlertType as RuleType } from '../../types';
+import { RuleType } from '../../types';
 
 describe('formatMillisForDisplay', () => {
   it('should return 0 for undefined', () => {

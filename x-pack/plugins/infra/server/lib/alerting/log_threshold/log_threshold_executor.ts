@@ -143,30 +143,30 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
   });
 
 async function executeAlert(
-  alertParams: CountRuleParams,
+  ruleParams: CountRuleParams,
   timestampField: string,
   indexPattern: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertFactory: LogThresholdAlertFactory
 ) {
-  const query = getESQuery(alertParams, timestampField, indexPattern, runtimeMappings);
+  const query = getESQuery(ruleParams, timestampField, indexPattern, runtimeMappings);
 
   if (!query) {
     throw new Error('ES query could not be built from the provided alert params');
   }
 
-  if (hasGroupBy(alertParams)) {
+  if (hasGroupBy(ruleParams)) {
     processGroupByResults(
       await getGroupedResults(query, esClient),
-      alertParams,
+      ruleParams,
       alertFactory,
       updateAlert
     );
   } else {
     processUngroupedResults(
       await getUngroupedResults(query, esClient),
-      alertParams,
+      ruleParams,
       alertFactory,
       updateAlert
     );
@@ -174,7 +174,7 @@ async function executeAlert(
 }
 
 async function executeRatioAlert(
-  alertParams: RatioRuleParams,
+  ruleParams: RatioRuleParams,
   timestampField: string,
   indexPattern: string,
   runtimeMappings: estypes.MappingRuntimeFields,
@@ -183,13 +183,13 @@ async function executeRatioAlert(
 ) {
   // Ratio alert params are separated out into two standard sets of alert params
   const numeratorParams: RuleParams = {
-    ...alertParams,
-    criteria: getNumerator(alertParams.criteria),
+    ...ruleParams,
+    criteria: getNumerator(ruleParams.criteria),
   };
 
   const denominatorParams: RuleParams = {
-    ...alertParams,
-    criteria: getDenominator(alertParams.criteria),
+    ...ruleParams,
+    criteria: getDenominator(ruleParams.criteria),
   };
 
   const numeratorQuery = getESQuery(numeratorParams, timestampField, indexPattern, runtimeMappings);
@@ -204,7 +204,7 @@ async function executeRatioAlert(
     throw new Error('ES query could not be built from the provided ratio alert params');
   }
 
-  if (hasGroupBy(alertParams)) {
+  if (hasGroupBy(ruleParams)) {
     const [numeratorGroupedResults, denominatorGroupedResults] = await Promise.all([
       getGroupedResults(numeratorQuery, esClient),
       getGroupedResults(denominatorQuery, esClient),
@@ -212,7 +212,7 @@ async function executeRatioAlert(
     processGroupByRatioResults(
       numeratorGroupedResults,
       denominatorGroupedResults,
-      alertParams,
+      ruleParams,
       alertFactory,
       updateAlert
     );
@@ -224,7 +224,7 @@ async function executeRatioAlert(
     processUngroupedRatioResults(
       numeratorUngroupedResults,
       denominatorUngroupedResults,
-      alertParams,
+      ruleParams,
       alertFactory,
       updateAlert
     );
