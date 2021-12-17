@@ -5869,6 +5869,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__monaco@link:bazel-bin/packages/kbn-monaco/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__optimizer@link:bazel-bin/packages/kbn-optimizer/npm_module_types":
   version "0.0.0"
   uid ""
