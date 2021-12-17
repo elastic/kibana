@@ -9,7 +9,7 @@
 
 import { ExtensionPoint } from './types';
 
-type NarrowExtensionPointToType<T extends ExtensionPoint['type']> = ExtensionPoint & { type: T };
+type NarrowExtensionPointToType<T extends ExtensionPoint['type']> = { type: T } & ExtensionPoint;
 
 export class ExtensionPointStorage {
   private readonly store = new Map<ExtensionPoint['type'], Set<ExtensionPoint>>();
@@ -90,6 +90,8 @@ class ExtensionPointStorageClient {
     }
 
     for (const externalExtension of externalExtensions) {
+      // FIXME:PT investigate if we can avoid the TS ignore below?
+      // @ts-expect-error
       inputArgument = await externalExtension.callback(inputArgument);
 
       if (callbackResponseValidator) {
