@@ -8,7 +8,7 @@
 import { countBy } from 'lodash/fp';
 import uuid from 'uuid';
 import { Action } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';

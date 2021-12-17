@@ -53,7 +53,7 @@ describe.each([
   ['Legacy', false],
   ['RAC', true],
 ])('utils - %s', (_, isRuleRegistryEnabled) => {
-  const { clients } = requestContextMock.createTools();
+  const { clients, context } = requestContextMock.createTools();
 
   describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
@@ -661,50 +661,42 @@ describe.each([
       action_type_id: '.slack',
       params: {},
     };
+    const soClient = clients.core.savedObjects.getClient();
     beforeEach(() => {
-      clients.core.elasticsearch.client.asInternalUser.search.mockReset();
-      clients.core.elasticsearch.client.asInternalUser.search.mockClear();
+      soClient.find.mockReset();
+      soClient.find.mockClear();
     });
 
     test('returns original action if Elasticsearch query fails', async () => {
-      clients.core.elasticsearch.client.asInternalUser.search.mockRejectedValueOnce(
-        new Error('failed to query')
-      );
-      const result = await swapActionIds(
-        mockAction,
-        clients.core.elasticsearch.client.asInternalUser
-      );
+      clients.core.savedObjects
+        .getClient()
+        .find.mockRejectedValueOnce(new Error('failed to query'));
+      const result = await swapActionIds(mockAction, soClient);
       expect(result).toEqual(mockAction);
     });
 
     test('returns original action if Elasticsearch query returns no hits', async () => {
-      // @ts-expect-error
-      clients.core.elasticsearch.client.asInternalUser.search.mockImplementationOnce(async () => ({
-        body: {
-          hits: { total: 0, hits: [] },
-        },
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [],
       }));
-      const result = await swapActionIds(
-        mockAction,
-        clients.core.elasticsearch.client.asInternalUser
-      );
+      const result = await swapActionIds(mockAction, soClient);
       expect(result).toEqual(mockAction);
     });
 
     test('returns error if conflicting action connectors are found -> two hits found with same originId', async () => {
-      // @ts-expect-error
-      clients.core.elasticsearch.client.asInternalUser.search.mockImplementationOnce(async () => ({
-        body: {
-          hits: {
-            total: 2,
-            hits: [{ fakeActionKey: 'fakeActionValue' }, { fakeActionKey: 'fakeActionValue2' }],
-          },
-        },
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'fake id 1', type: 'action', attributes: {}, references: [] },
+          { score: 0, id: 'fake id 2', type: 'action', attributes: {}, references: [] },
+        ],
       }));
-      const result = await swapActionIds(
-        mockAction,
-        clients.core.elasticsearch.client.asInternalUser
-      );
+      const result = await swapActionIds(mockAction, soClient);
       expect(result instanceof Error).toBeTruthy();
       expect((result as unknown as Error).message).toEqual(
         'action connector with originId: some-7.x-id had conflicts. Please resolve these conflicts either in the file you are attempting to upload or resolve the conflicting action connector in Kibana.'
@@ -712,19 +704,15 @@ describe.each([
     });
 
     test('returns action with new migrated _id if a single hit is found when querying by action connector originId', async () => {
-      // @ts-expect-error
-      clients.core.elasticsearch.client.asInternalUser.search.mockImplementationOnce(async () => ({
-        body: {
-          hits: {
-            total: 1,
-            hits: [{ _id: 'action:new-post-8.0-id' }],
-          },
-        },
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+        ],
       }));
-      const result = await swapActionIds(
-        mockAction,
-        clients.core.elasticsearch.client.asInternalUser
-      );
+      const result = await swapActionIds(mockAction, soClient);
       expect(result).toEqual({ ...mockAction, id: 'new-post-8.0-id' });
     });
   });
@@ -736,25 +724,29 @@ describe.each([
       action_type_id: '.slack',
       params: {},
     };
+    const soClient = clients.core.savedObjects.getClient();
+    beforeEach(() => {
+      soClient.find.mockReset();
+      soClient.find.mockClear();
+    });
     test('returns import rules schemas + migrated action', async () => {
       const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
         ...getCreateRulesSchemaMock('rule-1'),
         actions: [mockAction],
       };
-      // @ts-expect-error
-      clients.core.elasticsearch.client.asInternalUser.search.mockImplementationOnce(async () => ({
-        body: {
-          hits: {
-            total: 1,
-            hits: [{ _id: 'action:new-post-8.0-id' }],
-          },
-        },
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+        ],
       }));
 
       const res = await migrateLegacyActionsIds(
         // @ts-expect-error
         [rule],
-        clients.core.elasticsearch.client.asInternalUser
+        soClient
       );
       expect(res).toEqual([{ ...rule, actions: [{ ...mockAction, id: 'new-post-8.0-id' }] }]);
     });
@@ -764,20 +756,19 @@ describe.each([
         ...getCreateRulesSchemaMock('rule-1'),
         actions: [mockAction, { ...mockAction, id: 'different-id' }],
       };
-      // @ts-expect-error
-      clients.core.elasticsearch.client.asInternalUser.search.mockImplementation(async () => ({
-        body: {
-          hits: {
-            total: 1,
-            hits: [{ _id: 'action:new-post-8.0-id' }],
-          },
-        },
+      soClient.find.mockImplementation(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+        ],
       }));
 
       const res = await migrateLegacyActionsIds(
         // @ts-expect-error
         [rule],
-        clients.core.elasticsearch.client.asInternalUser
+        soClient
       );
       expect(res).toEqual([
         {
@@ -795,20 +786,20 @@ describe.each([
         ...getCreateRulesSchemaMock('rule-1'),
         actions: [mockAction],
       };
-      // @ts-expect-error
-      clients.core.elasticsearch.client.asInternalUser.search.mockImplementationOnce(async () => ({
-        body: {
-          hits: {
-            total: 2,
-            hits: [{ fakeActionKey: 'fakeActionValue' }, { fakeActionKey: 'fakeActionValue2' }],
-          },
-        },
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+          { score: 0, id: 'new-post-8.0-id-2', type: 'action', attributes: {}, references: [] },
+        ],
       }));
 
       const res = await migrateLegacyActionsIds(
         // @ts-expect-error
         [rule],
-        clients.core.elasticsearch.client.asInternalUser
+        soClient
       );
       expect(res[0] instanceof Error).toBeTruthy();
       expect((res[0] as unknown as Error).message).toEqual(
@@ -828,29 +819,28 @@ describe.each([
         actions: [mockAction],
       };
 
-      // @ts-expect-error
-      clients.core.elasticsearch.client.asInternalUser.search.mockImplementationOnce(async () => ({
-        body: {
-          hits: {
-            total: 1,
-            hits: [{ _id: 'action:new-post-8.0-id' }],
-          },
-        },
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+        ],
       }));
-      // @ts-expect-error
-      clients.core.elasticsearch.client.asInternalUser.search.mockImplementationOnce(async () => ({
-        body: {
-          hits: {
-            total: 2,
-            hits: [{ fakeActionKey: 'fakeActionValue' }, { fakeActionKey: 'fakeActionValue2' }],
-          },
-        },
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+          { score: 0, id: 'new-post-8.0-id-2', type: 'action', attributes: {}, references: [] },
+        ],
       }));
 
       const res = await migrateLegacyActionsIds(
         // @ts-expect-error
         [rule, rule],
-        clients.core.elasticsearch.client.asInternalUser
+        soClient
       );
       expect(res[0]).toEqual({ ...rule, actions: [{ ...mockAction, id: 'new-post-8.0-id' }] });
       expect(res[1] instanceof Error).toBeTruthy();
