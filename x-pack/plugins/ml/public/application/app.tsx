@@ -122,9 +122,8 @@ export const renderApp = (
   appMountParams: AppMountParameters
 ) => {
   setDependencyCache({
-    indexPatterns: deps.data.indexPatterns,
     timefilter: deps.data.query.timefilter,
-    fieldFormats: deps.data.fieldFormats,
+    fieldFormats: deps.fieldFormats,
     autocomplete: deps.data.autocomplete,
     config: coreStart.uiSettings!,
     chrome: coreStart.chrome!,
