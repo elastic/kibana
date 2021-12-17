@@ -35,7 +35,6 @@ const rowsSource: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
-    _type: 'test',
     _score: 1,
     _source: { bytes: 100, extension: '.gz' },
     highlight: {
@@ -48,7 +47,6 @@ const rowsFields: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
-    _type: 'test',
     _score: 1,
     _source: undefined,
     fields: { bytes: [100], extension: ['.gz'] },
@@ -62,7 +60,6 @@ const rowsFieldsWithTopLevelObject: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
-    _type: 'test',
     _score: 1,
     _source: undefined,
     fields: { 'object.value': [100], extension: ['.gz'] },
