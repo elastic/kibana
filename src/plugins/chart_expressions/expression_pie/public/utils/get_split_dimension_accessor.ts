@@ -8,7 +8,7 @@
 import { AccessorFn } from '@elastic/charts';
 import { DatatableColumn } from '../../../../expressions/public';
 import type { FieldFormatsStart } from '../../../../field_formats/public';
-import { Dimension } from '../types';
+import { Dimension } from '../../common/types';
 
 export const getSplitDimensionAccessor =
   (fieldFormats: FieldFormatsStart, columns: DatatableColumn[]) =>

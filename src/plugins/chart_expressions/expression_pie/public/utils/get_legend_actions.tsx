@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { LegendAction, SeriesIdentifier, useLegendAction } from '@elastic/charts';
 import { DataPublicPluginStart } from '../../../../data/public';
-import { PieVisParams } from '../types';
+import { PieVisParams } from '../../common/types';
 import { ClickTriggerEvent } from '../../../../charts/public';
 
 export const getLegendActions = (

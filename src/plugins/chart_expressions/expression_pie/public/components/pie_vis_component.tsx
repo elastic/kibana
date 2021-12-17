@@ -25,17 +25,22 @@ import {
   ClickTriggerEvent,
   ChartsPluginSetup,
   PaletteRegistry,
-} from '../../../charts/public';
-import { DataPublicPluginStart } from '../../../data/public';
-import type { PersistedState } from '../../../visualizations/public';
+} from '../../../../charts/public';
+import { DataPublicPluginStart } from '../../../../data/public';
+import type { PersistedState } from '../../../../visualizations/public';
 import {
   Datatable,
   DatatableColumn,
   IInterpreterRenderHandlers,
-} from '../../../expressions/public';
-import type { FieldFormat } from '../../../field_formats/common';
-import { DEFAULT_PERCENT_DECIMALS } from '../common';
-import { PieVisParams, BucketColumns, ValueFormats, PieContainerDimensions } from './types';
+} from '../../../../expressions/public';
+import type { FieldFormat } from '../../../../field_formats/common';
+import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
+import {
+  PieVisParams,
+  BucketColumns,
+  ValueFormats,
+  PieContainerDimensions,
+} from '../../common/types/expression_renderers';
 import {
   getColorPicker,
   getLayers,
@@ -46,11 +51,11 @@ import {
   getConfig,
   getColumns,
   getSplitDimensionAccessor,
-} from './utils';
-import { ChartSplit, SMALL_MULTIPLES_ID } from './components/chart_split';
-import { VisualizationNoResults } from './components/visualization_noresults';
+} from '../utils';
+import { ChartSplit, SMALL_MULTIPLES_ID } from './chart_split';
+import { VisualizationNoResults } from './visualization_noresults';
 
-import './chart.scss';
+import './pie_vis_component.scss';
 
 declare global {
   interface Window {

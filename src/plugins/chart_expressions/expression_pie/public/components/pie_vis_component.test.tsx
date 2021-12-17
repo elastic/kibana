@@ -8,14 +8,14 @@
 
 import React from 'react';
 import { Settings, TooltipType, SeriesIdentifier } from '@elastic/charts';
-import { chartPluginMock } from '../../../charts/public/mocks';
-import { dataPluginMock } from '../../../data/public/mocks';
-import type { Datatable } from '../../../expressions/public';
+import { chartPluginMock } from '../../../../charts/public/mocks';
+import { dataPluginMock } from '../../../../data/public/mocks';
+import type { Datatable } from '../../../../expressions/public';
 import { shallow, mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
-import PieComponent, { PieComponentProps } from './pie_component';
-import { createMockPieParams, createMockVisData } from './mocks';
+import PieComponent, { PieComponentProps } from './pie_vis_component';
+import { createMockPieParams, createMockVisData } from '../mocks';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');

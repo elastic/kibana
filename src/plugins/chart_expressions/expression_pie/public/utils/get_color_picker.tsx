@@ -13,7 +13,7 @@ import { PopoverAnchorPosition, EuiPopover, EuiOutsideClickDetector } from '@ela
 import type { DatatableRow } from '../../../../expressions/public';
 import type { PersistedState } from '../../../../visualizations/public';
 import { ColorPicker } from '../../../../charts/public';
-import { BucketColumns } from '../types';
+import { BucketColumns } from '../../common/types';
 
 const KEY_CODE_ENTER = 13;
 

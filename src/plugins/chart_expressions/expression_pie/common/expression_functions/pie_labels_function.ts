@@ -7,11 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ExpressionFunctionDefinition,
-  Datatable,
-  ExpressionValueBoxed,
-} from '../../../../expressions/public';
+import { ExpressionFunctionDefinition, Datatable } from '../../../../expressions/common';
+import { PIE_LABELS_FUNCTION, PIE_LABELS_VALUE } from '../constants';
+import { ExpressionValuePieLabels } from '../types/expression_functions';
 
 interface Arguments {
   show: boolean;
@@ -23,30 +21,17 @@ interface Arguments {
   percentDecimals: number;
 }
 
-export type ExpressionValuePieLabels = ExpressionValueBoxed<
-  'pie_labels',
-  {
-    show: boolean;
-    position: string;
-    values: boolean;
-    truncate: number | null;
-    valuesFormat: string;
-    last_level: boolean;
-    percentDecimals: number;
-  }
->;
-
-export const pieLabels = (): ExpressionFunctionDefinition<
-  'pielabels',
+export const pieLabelsFunction = (): ExpressionFunctionDefinition<
+  typeof PIE_LABELS_FUNCTION,
   Datatable | null,
   Arguments,
   ExpressionValuePieLabels
 > => ({
-  name: 'pielabels',
+  name: PIE_LABELS_FUNCTION,
   help: i18n.translate('visTypePie.function.pieLabels.help', {
     defaultMessage: 'Generates the pie labels object',
   }),
-  type: 'pie_labels',
+  type: PIE_LABELS_VALUE,
   args: {
     show: {
       types: ['boolean'],
@@ -84,7 +69,7 @@ export const pieLabels = (): ExpressionFunctionDefinition<
       default: true,
     },
     truncate: {
-      types: ['number', 'null'],
+      types: ['number'],
       help: i18n.translate('visTypePie.function.pieLabels.truncate.help', {
         defaultMessage: 'Defines the number of characters that the slice value will display',
       }),
@@ -100,7 +85,7 @@ export const pieLabels = (): ExpressionFunctionDefinition<
   },
   fn: (context, args) => {
     return {
-      type: 'pie_labels',
+      type: PIE_LABELS_VALUE,
       show: args.show,
       position: args.position,
       percentDecimals: args.percentDecimals,

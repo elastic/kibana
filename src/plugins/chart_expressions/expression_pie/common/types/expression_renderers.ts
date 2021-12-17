@@ -7,24 +7,11 @@
  */
 
 import { Position } from '@elastic/charts';
-import { UiCounterMetricType } from '@kbn/analytics';
-import { DatatableColumn, ExpressionValueBoxed } from '../../../../expressions/public';
-import type { SerializedFieldFormat } from '../../../../field_formats/common';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
-import { PaletteOutput, ChartsPluginSetup } from '../../../../charts/public';
-
-export type ExpressionValuePieLabels = ExpressionValueBoxed<
-  'pie_vis_labels',
-  {
-    show: boolean;
-    position: string;
-    values: boolean;
-    truncate: number | null;
-    valuesFormat: string;
-    last_level: boolean;
-    percentDecimals: number;
-  }
->;
+import { Datatable, DatatableColumn } from '../../../../expressions/common';
+import { SerializedFieldFormat } from '../../../../field_formats/common';
+import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { PaletteOutput } from '../../../../charts/common';
+import { ExpressionValuePieLabels } from './expression_functions';
 
 export interface Dimension {
   accessor: number;
@@ -41,6 +28,16 @@ export interface Dimensions {
   splitColumn?: Dimension[];
 }
 
+export interface LabelsParams {
+  show: boolean;
+  last_level: boolean;
+  position: LabelPositions;
+  values: boolean;
+  truncate: number | null;
+  valuesFormat: ValueFormats;
+  percentDecimals: number;
+}
+
 interface PieCommonParams {
   addTooltip: boolean;
   addLegend: boolean;
@@ -50,16 +47,6 @@ interface PieCommonParams {
   maxLegendLines: number;
   distinctColors: boolean;
   isDonut: boolean;
-}
-
-export interface LabelsParams {
-  show: boolean;
-  last_level: boolean;
-  position: LabelPositions;
-  values: boolean;
-  truncate: number | null;
-  valuesFormat: ValueFormats;
-  percentDecimals: number;
 }
 
 export interface PieVisParams extends PieCommonParams {
@@ -77,11 +64,11 @@ export interface PieVisConfig extends PieCommonParams {
   palette: string;
 }
 
-export interface BucketColumns extends DatatableColumn {
-  format?: {
-    id?: string;
-    params?: SerializedFieldFormat<object>;
-  };
+export interface RenderValue {
+  visData: Datatable;
+  visType: string;
+  visConfig: PieVisParams;
+  syncColors: boolean;
 }
 
 export enum LabelPositions {
@@ -94,18 +81,19 @@ export enum ValueFormats {
   VALUE = 'value',
 }
 
-export interface PieTypeProps {
-  showElasticChartsOptions?: boolean;
-  palettes?: ChartsPluginSetup['palettes'];
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-}
-
-export interface SplitDimensionParams {
-  order?: string;
-  orderBy?: string;
+export interface BucketColumns extends DatatableColumn {
+  format?: {
+    id?: string;
+    params?: SerializedFieldFormat<object>;
+  };
 }
 
 export interface PieContainerDimensions {
   width: number;
   height: number;
+}
+
+export interface SplitDimensionParams {
+  order?: string;
+  orderBy?: string;
 }

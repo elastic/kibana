@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { functionWrapper } from '../../../expressions/common/expression_functions/specs/tests/utils';
-import { createPieVisFn } from './pie_fn';
-import { PieVisConfig } from './types';
-import { Datatable } from '../../../expressions/common/expression_types/specs';
+import { PieVisConfig } from '../types/expression_renderers';
+import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { pieVisFunction } from './pie_vis_function';
+import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
 
 describe('interpreter/functions#pie', () => {
-  const fn = functionWrapper(createPieVisFn());
+  const fn = functionWrapper(pieVisFunction());
   const context = {
     type: 'datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
   } as unknown as Datatable;
+
   const visConfig = {
     addTooltip: true,
     addLegend: true,

@@ -17,7 +17,7 @@ import { isEqual } from 'lodash';
 import { SeriesLayer, PaletteRegistry, lightenColor } from '../../../../charts/public';
 import type { DataPublicPluginStart } from '../../../../data/public';
 import type { DatatableRow } from '../../../../expressions/public';
-import type { BucketColumns, PieVisParams, SplitDimensionParams } from '../types';
+import type { BucketColumns, PieVisParams, SplitDimensionParams } from '../../common/types';
 import { getDistinctSeries } from './get_distinct_series';
 
 const EMPTY_SLICE = Symbol('empty_slice');

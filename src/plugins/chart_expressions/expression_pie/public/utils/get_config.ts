@@ -7,7 +7,8 @@
  */
 
 import { PartitionConfig, PartitionLayout, RecursivePartial, Theme } from '@elastic/charts';
-import { LabelPositions, PieVisParams, PieContainerDimensions } from '../types';
+import { LabelPositions, PieVisParams, PieContainerDimensions } from '../../common/types';
+
 const MAX_SIZE = 1000;
 
 export const getConfig = (

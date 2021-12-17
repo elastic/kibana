@@ -7,7 +7,7 @@
  */
 
 import { getColumns } from './get_columns';
-import { PieVisParams } from '../types';
+import { PieVisParams } from '../../common/types';
 import { createMockPieParams, createMockVisData } from '../mocks';
 
 const visParams = createMockPieParams();

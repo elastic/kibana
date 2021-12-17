@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { DatatableRow } from '../../../../expressions/public';
-import { BucketColumns } from '../types';
+import { BucketColumns } from '../../common/types'
 
 export const getDistinctSeries = (rows: DatatableRow[], buckets: Array<Partial<BucketColumns>>) => {
   const parentBucketId = buckets[0].id;

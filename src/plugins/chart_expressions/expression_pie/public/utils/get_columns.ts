@@ -7,7 +7,7 @@
  */
 
 import { DatatableColumn, Datatable } from '../../../../expressions/public';
-import { BucketColumns, PieVisParams } from '../types';
+import { BucketColumns, PieVisParams } from '../common/types';
 
 export const getColumns = (
   visParams: PieVisParams,

@@ -12,7 +12,7 @@ import { DataPublicPluginStart } from '../../../../data/public';
 import { ClickTriggerEvent } from '../../../../charts/public';
 import { ValueClickContext } from '../../../../embeddable/public';
 import type { FieldFormat } from '../../../../field_formats/common';
-import { BucketColumns } from '../types';
+import { BucketColumns } from '../../common/types';
 
 export const canFilter = async (
   event: ClickTriggerEvent | null,
