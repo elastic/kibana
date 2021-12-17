@@ -15,7 +15,7 @@ import {
 } from '../tasks/live_query';
 import { login } from '../tasks/login';
 
-describe('Osquery works as CRUD', () => {
+describe('Osquery works as CRUD for', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
   const SAVED_QUERY_DESCRIPTION = 'Saved Query Description';
 
@@ -23,7 +23,7 @@ describe('Osquery works as CRUD', () => {
     login();
   });
 
-  describe('Saved queries', () => {
+  describe('saved queries:', () => {
     beforeEach(() => {
       navigateTo('/app/osquery');
       cy.waitForReact(1000);
@@ -43,7 +43,7 @@ describe('Osquery works as CRUD', () => {
       cy.react('EuiButtonDisplay').contains('Save').click();
     });
 
-    it('should view query details ', () => {
+    it('should view query details in status', () => {
       cy.contains('New live query');
       cy.react('ActionTableResultsButton').first().click();
       cy.wait(1000);
@@ -55,7 +55,7 @@ describe('Osquery works as CRUD', () => {
       cy.contains('Successful').siblings().contains(1);
     });
 
-    it('should see a previously saved query and play it', () => {
+    it('should display a previously saved query and run it', () => {
       cy.contains('Saved queries').click();
       cy.contains(SAVED_QUERY_ID);
       cy.react('PlayButtonComponent', {
