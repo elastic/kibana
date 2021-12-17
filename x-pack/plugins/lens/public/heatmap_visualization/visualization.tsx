@@ -34,6 +34,7 @@ import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import type { CustomPaletteParams } from '../../common';
 import { layerTypes } from '../../common';
+import { hasSortOverrideActive } from '../shared_components/sort_override';
 
 const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Magnitude',
@@ -180,6 +181,7 @@ export const getHeatmapVisualization = ({
           supportsMoreColumns: !state.xAccessor,
           required: true,
           dataTestSubj: 'lnsHeatmap_xDimensionPanel',
+          sortable: isBucketed,
         },
         {
           layerId: state.layerId,
@@ -190,6 +192,7 @@ export const getHeatmapVisualization = ({
           supportsMoreColumns: !state.yAccessor,
           required: false,
           dataTestSubj: 'lnsHeatmap_yDimensionPanel',
+          sortable: isBucketed,
         },
         {
           layerId: state.layerId,
@@ -492,16 +495,39 @@ export const getHeatmapVisualization = ({
     const hasArrayValues = rows.some((row) => Array.isArray(row[state.valueAccessor!]));
 
     const datasource = frame.datasourceLayers[state.layerId];
-    const operation = datasource.getOperationForColumnId(state.valueAccessor);
 
-    return hasArrayValues
-      ? [
-          <FormattedMessage
-            id="xpack.lens.heatmapVisualization.arrayValuesWarningMessage"
-            defaultMessage="{label} contains array values. Your visualization may not render as expected."
-            values={{ label: <strong>{operation?.label}</strong> }}
-          />,
-        ]
-      : undefined;
+    const messages = [];
+    if (hasArrayValues) {
+      const operation = datasource.getOperationForColumnId(state.valueAccessor);
+      messages.push(
+        <FormattedMessage
+          id="xpack.lens.heatmapVisualization.arrayValuesWarningMessage"
+          defaultMessage="{label} contains array values. Your visualization may not render as expected."
+          values={{ label: <strong>{operation?.label}</strong> }}
+        />
+      );
+    }
+    const visualSettings = datasource.getVisualDefaults();
+    if (
+      state.xAccessor &&
+      state.yAccessor &&
+      !hasSortOverrideActive(visualSettings?.[state.xAccessor]?.sortOverride) &&
+      hasSortOverrideActive(visualSettings?.[state.yAccessor]?.sortOverride)
+    ) {
+      const yOperation = datasource.getOperationForColumnId(state.yAccessor);
+      const xOperation = datasource.getOperationForColumnId(state.xAccessor);
+      messages.push(
+        <FormattedMessage
+          id="xpack.lens.heatmapVisualization.partialSortingWarningMessage"
+          defaultMessage="{yOperation} contains a sorting override, but {xOperation} does not and may not render as expected. Assign a sort override to {xOperation} to stabilize it."
+          values={{
+            yOperation: <strong>{yOperation?.label}</strong>,
+            xOperation: <strong>{xOperation?.label}</strong>,
+          }}
+        />
+      );
+    }
+
+    return messages;
   },
 });

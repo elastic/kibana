@@ -43,6 +43,7 @@ import {
   getAxisName,
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
+import { hasSortOverrideActive } from '../shared_components/sort_override';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
@@ -435,6 +436,7 @@ export const getXyVisualization = ({
           filterOperations: isBucketed,
           supportsMoreColumns: !layer.xAccessor,
           dataTestSubj: 'lnsXY_xDimensionPanel',
+          sortable: (operation) => isBucketed(operation) && operation.scale === 'ordinal',
         },
         {
           groupId: 'y',
@@ -467,6 +469,7 @@ export const getXyVisualization = ({
           dataTestSubj: 'lnsXY_splitDimensionPanel',
           required: layer.seriesType.includes('percentage') && hasOnlyOneAccessor,
           enableDimensionEditor: true,
+          sortable: (operation) => isBucketed(operation) && operation.scale === 'ordinal',
         },
       ],
     };
@@ -687,31 +690,61 @@ export const getXyVisualization = ({
     const layers = state.layers;
 
     const filteredLayers = layers.filter(({ accessors }: XYLayerConfig) => accessors.length > 0);
+    const messages: React.ReactNode[] = [];
+
     const accessorsWithArrayValues = [];
+
     for (const layer of filteredLayers) {
-      const { layerId, accessors } = layer;
+      const { layerId, accessors, xAccessor, splitAccessor } = layer;
       const rows = frame.activeData[layerId] && frame.activeData[layerId].rows;
       if (!rows) {
         break;
       }
-      const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layerId]);
+      const datasource = frame.datasourceLayers[layerId];
+      const columnToLabel = getColumnToLabelMap(layer, datasource);
+
       for (const accessor of accessors) {
         const hasArrayValues = rows.some((row) => Array.isArray(row[accessor]));
         if (hasArrayValues) {
           accessorsWithArrayValues.push(columnToLabel[accessor]);
         }
       }
+
+      if (splitAccessor && xAccessor) {
+        const visualSettings = datasource.getVisualDefaults();
+        if (
+          !hasSortOverrideActive(visualSettings[xAccessor]?.sortOverride) &&
+          hasSortOverrideActive(visualSettings[splitAccessor]?.sortOverride)
+        ) {
+          const splitOperation = datasource.getOperationForColumnId(splitAccessor);
+          const xOperation = datasource.getOperationForColumnId(xAccessor);
+          messages.push(
+            <FormattedMessage
+              id="xpack.lens.heatmapVisualization.partialSortingWarningMessage"
+              defaultMessage="{splitOperation} contains a sorting override, but {xOperation} does not and may not render as expected. Assign a sort override to {xOperation} to stabilize it."
+              values={{
+                splitOperation: <strong>{splitOperation?.label}</strong>,
+                xOperation: <strong>{xOperation?.label}</strong>,
+              }}
+            />
+          );
+        }
+      }
     }
-    return accessorsWithArrayValues.map((label) => (
-      <FormattedMessage
-        key={label}
-        id="xpack.lens.xyVisualization.arrayValues"
-        defaultMessage="{label} contains array values. Your visualization may not render as expected."
-        values={{
-          label: <strong>{label}</strong>,
-        }}
-      />
-    ));
+    messages.push(
+      ...accessorsWithArrayValues.map((label) => (
+        <FormattedMessage
+          key={label}
+          id="xpack.lens.xyVisualization.arrayValues"
+          defaultMessage="{label} contains array values. Your visualization may not render as expected."
+          values={{
+            label: <strong>{label}</strong>,
+          }}
+        />
+      ))
+    );
+
+    return messages;
   },
 });
 

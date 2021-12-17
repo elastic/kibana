@@ -31,6 +31,7 @@ import { formatColumn } from '../common/expressions/format_column';
 import { counterRate } from '../common/expressions/counter_rate';
 import { getTimeScale } from '../common/expressions/time_scale/time_scale';
 import { metricChart } from '../common/expressions/metric_chart/metric_chart';
+import { tableSorting } from '../common/expressions/table_sorting';
 import { lensMultitable } from '../common/expressions';
 
 export const setupExpressions = (
@@ -49,6 +50,7 @@ export const setupExpressions = (
     yAxisConfig,
     layerConfig,
     formatColumn,
+    tableSorting,
     legendConfig,
     renameColumns,
     gridlinesConfig,

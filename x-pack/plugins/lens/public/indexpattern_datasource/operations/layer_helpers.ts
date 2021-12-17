@@ -39,6 +39,7 @@ import {
 import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula';
 import type { TimeScaleUnit } from '../../../common/expressions';
 import { isColumnOfType } from './definitions/helpers';
+import { isReferenced } from '../pure_utils';
 
 interface ColumnAdvancedParams {
   filter?: Query | undefined;
@@ -1350,13 +1351,6 @@ export function getErrorMessages(
   >;
 
   return errors.length ? errors : undefined;
-}
-
-export function isReferenced(layer: IndexPatternLayer, columnId: string): boolean {
-  const allReferences = Object.values(layer.columns).flatMap((col) =>
-    'references' in col ? col.references : []
-  );
-  return allReferences.includes(columnId);
 }
 
 export function getReferencedColumnIds(layer: IndexPatternLayer, columnId: string): string[] {

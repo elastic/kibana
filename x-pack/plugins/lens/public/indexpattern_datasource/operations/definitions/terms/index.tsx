@@ -32,11 +32,8 @@ import {
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
 import type { TermsIndexPatternColumn } from './types';
-import {
-  getDisallowedTermsMessage,
-  getMultiTermsScriptedFieldErrorMessage,
-  isSortableByColumn,
-} from './helpers';
+import { getDisallowedTermsMessage, getMultiTermsScriptedFieldErrorMessage } from './helpers';
+import { isSortableByColumn } from '../../../pure_utils';
 
 export type { TermsIndexPatternColumn } from './types';
 
@@ -468,38 +465,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               );
             }}
           />
-          {/* <EuiSelect
-            compressed
-            data-test-subj="indexPattern-terms-orderDirection"
-            options={[
-              {
-                value: 'asc',
-                text: i18n.translate('xpack.lens.indexPattern.terms.orderAscending', {
-                  defaultMessage: 'Ascending',
-                }),
-              },
-              {
-                value: 'desc',
-                text: i18n.translate('xpack.lens.indexPattern.terms.orderDescending', {
-                  defaultMessage: 'Descending',
-                }),
-              },
-            ]}
-            value={currentColumn.params.orderDirection}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              updateLayer(
-                updateColumnParam({
-                  layer,
-                  columnId,
-                  paramName: 'orderDirection',
-                  value: e.target.value as 'asc' | 'desc',
-                })
-              )
-            }
-            aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-              defaultMessage: 'Rank by',
-            })}
-          /> */}
         </EuiFormRow>
         {!hasRestrictions && (
           <>

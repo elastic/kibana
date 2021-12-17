@@ -206,6 +206,7 @@ export const getDatatableVisualization = ({
           enableDimensionEditor: true,
           hideGrouping: true,
           nestingOrder: 1,
+          sortable: (op) => op.isBucketed && op.scale === 'ordinal',
         },
         {
           groupId: 'columns',

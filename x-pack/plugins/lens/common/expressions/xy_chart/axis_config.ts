@@ -42,6 +42,7 @@ export interface YConfig {
   fill?: FillStyle;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
+  hidden?: boolean;
 }
 
 export type AxisTitlesVisibilityConfigResult = AxesSettingsConfig & {
@@ -195,6 +196,10 @@ export const yAxisConfig: ExpressionFunctionDefinition<
     fill: {
       types: ['string'],
       options: ['none', 'above', 'below'],
+      help: '',
+    },
+    hidden: {
+      types: ['boolean'],
       help: '',
     },
   },

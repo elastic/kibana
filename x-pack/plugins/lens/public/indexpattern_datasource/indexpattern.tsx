@@ -43,7 +43,7 @@ import {
 } from './indexpattern_suggestions';
 
 import { getVisualDefaultsForLayer, isColumnInvalid } from './utils';
-import { normalizeOperationDataType, isDraggedField } from './pure_utils';
+import { normalizeOperationDataType, isDraggedField, isReferenced } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import { GenericIndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
@@ -56,7 +56,7 @@ import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/pub
 import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import { deleteColumn, isReferenced } from './operations';
+import { deleteColumn } from './operations';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { DraggingIdentifier } from '../drag_drop';

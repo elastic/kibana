@@ -1,7 +1,7 @@
 @import '@elastic/eui/src/components/flyout/variables';
 @import '@elastic/eui/src/components/flyout/mixins';
 
-.lnsPalettePanelContainer {
+.lnsStackedPanelContainer {
   // Use the EuiFlyout style
   @include euiFlyout;
   // But with custom positioning to keep it within the sidebar contents
@@ -15,15 +15,15 @@
   z-index: $euiZLevel3 + 1
 }
 
-.lnsPalettePanelContainer__header {
+.lnsStackedPanelContainer__header {
   padding: $euiSize;
 }
 
-.lnsPalettePanelContainer__content {
+.lnsStackedPanelContainer__content {
   @include euiYScroll;
   flex: 1;
 }
 
-.lnsPalettePanelContainer__footer {
+.lnsStackedPanelContainer__footer {
   padding: $euiSize;
 }

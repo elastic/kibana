@@ -13,6 +13,7 @@ export * from './time_scale';
 export * from './datatable';
 export * from './gauge_chart';
 export * from './metric_chart';
+export * from './table_sorting';
 export * from './pie_chart';
 export * from './xy_chart';
 

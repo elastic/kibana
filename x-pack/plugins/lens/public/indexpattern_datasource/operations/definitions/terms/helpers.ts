@@ -12,7 +12,6 @@ import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/public';
 import { operationDefinitionMap } from '../index';
 import { defaultLabel } from '../filters';
-import { isReferenced } from '../../layer_helpers';
 
 import type { FieldStatsResponse } from '../../../../../common';
 import type { FrameDatasourceAPI } from '../../../../types';
@@ -201,15 +200,4 @@ export function getDisallowedTermsMessage(
       },
     },
   };
-}
-
-export function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {
-  const column = layer.columns[columnId];
-  return (
-    column &&
-    !column.isBucketed &&
-    column.operationType !== 'last_value' &&
-    !('references' in column) &&
-    !isReferenced(layer, columnId)
-  );
 }

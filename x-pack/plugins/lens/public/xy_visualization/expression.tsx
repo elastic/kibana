@@ -280,10 +280,7 @@ export function XYChart({
       ? (value as string)
       : xAxisFormatter.convert(value);
 
-  const chartHasMoreThanOneSeries =
-    filteredLayers.length > 1 ||
-    filteredLayers.some((layer) => layer.accessors.length > 1) ||
-    filteredLayers.some((layer) => layer.splitAccessor);
+  const chartHasMoreThanOneSeries = hasMoreThanOneSeries(filteredLayers);
   const shouldRotate = isHorizontalChart(filteredLayers);
 
   const yAxesConfiguration = getAxesConfiguration(
@@ -313,10 +310,7 @@ export function XYChart({
 
   const filteredBarLayers = filteredLayers.filter((layer) => layer.seriesType.includes('bar'));
 
-  const chartHasMoreThanOneBarSeries =
-    filteredBarLayers.length > 1 ||
-    filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
-    filteredBarLayers.some((layer) => layer.splitAccessor);
+  const chartHasMoreThanOneBarSeries = hasMoreThanOneSeries(filteredBarLayers);
 
   const isTimeViz = Boolean(data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time'));
   const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
@@ -718,7 +712,7 @@ export function XYChart({
       )}
 
       {filteredLayers.flatMap((layer, layerIndex) =>
-        layer.accessors.map((accessor, accessorIndex) => {
+        getVisibleAccessors(layer.accessors, layer.yConfig).map((accessor, accessorIndex) => {
           const {
             splitAccessor,
             seriesType,
@@ -984,12 +978,28 @@ export function XYChart({
   );
 }
 
+function hasMoreThanOneSeries(layers: LayerArgs[]) {
+  return (
+    layers.length > 1 ||
+    layers.some((layer) => getVisibleAccessors(layer.accessors, layer.yConfig).length > 1) ||
+    layers.some((layer) => layer.splitAccessor)
+  );
+}
+
+function getVisibleAccessors(accessors: LayerArgs['accessors'], yConfig: LayerArgs['yConfig']) {
+  const hiddenAccessors = new Set(
+    yConfig?.filter(({ hidden }) => hidden).map(({ forAccessor }) => forAccessor)
+  );
+  return accessors.filter((acc) => !hiddenAccessors.has(acc));
+}
+
 function getFilteredLayers(layers: LayerArgs[], data: LensMultiTable) {
-  return layers.filter(({ layerId, xAccessor, accessors, splitAccessor, layerType }) => {
+  return layers.filter(({ layerId, xAccessor, accessors, splitAccessor, layerType, yConfig }) => {
+    const filteredAccessors = getVisibleAccessors(accessors, yConfig);
     return (
       layerType === layerTypes.DATA &&
       !(
-        !accessors.length ||
+        !filteredAccessors.length ||
         !data.tables[layerId] ||
         data.tables[layerId].rows.length === 0 ||
         (xAccessor &&

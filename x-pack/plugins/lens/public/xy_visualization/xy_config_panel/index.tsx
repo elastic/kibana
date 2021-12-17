@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiSwitch,
   htmlIdGenerator,
 } from '@elastic/eui';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
@@ -578,10 +579,16 @@ export function DimensionEditor(
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
   const isHorizontal = isHorizontalChart(state.layers);
-  const axisMode =
-    (layer.yConfig &&
-      layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
-    'auto';
+  const column = layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor);
+  const axisMode = column?.axisMode || 'auto';
+
+  // At least one valid column metric must be visible
+  // TODO: extend to support single dimensions for multiple layers
+  const canBeHidden =
+    layer.accessors.length > 1 &&
+    layer.accessors.length -
+      (layer.yConfig?.filter((otherColumn) => otherColumn && otherColumn.hidden)?.length ?? 0) >
+      0;
 
   if (props.groupId === 'breakdown') {
     return (
@@ -670,6 +677,41 @@ export function DimensionEditor(
               });
             }
             setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.xyChart.columnVisibilityLabel', {
+          defaultMessage: 'Hide column',
+        })}
+        display="columnCompressedSwitch"
+      >
+        <EuiSwitch
+          compressed
+          label={i18n.translate('xpack.lens.xyChart.columnVisibilityLabel', {
+            defaultMessage: 'Hide column',
+          })}
+          showLabel={false}
+          data-test-subj="lnsXY-column-hidden"
+          checked={Boolean(column?.hidden)}
+          disabled={!canBeHidden}
+          onChange={() => {
+            const newYVisibilityConfig = [...(layer.yConfig || [])];
+            const existingIndex = newYVisibilityConfig.findIndex(
+              (yAxisConfig) => yAxisConfig.forAccessor === accessor
+            );
+            if (existingIndex !== -1) {
+              newYVisibilityConfig[existingIndex] = {
+                ...newYVisibilityConfig[existingIndex],
+                hidden: !column?.hidden,
+              };
+            } else {
+              newYVisibilityConfig.push({
+                forAccessor: accessor,
+                hidden: !column?.hidden,
+              });
+            }
+            setState(updateLayer(state, { ...layer, yConfig: newYVisibilityConfig }, index));
           }}
         />
       </EuiFormRow>

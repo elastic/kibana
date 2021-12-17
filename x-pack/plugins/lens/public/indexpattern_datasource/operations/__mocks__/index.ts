@@ -45,7 +45,6 @@ export const {
   mergeLayer,
   isColumnTransferable,
   getErrorMessages,
-  isReferenced,
   resetIncomplete,
   isOperationAllowedAsReference,
   canTransition,
