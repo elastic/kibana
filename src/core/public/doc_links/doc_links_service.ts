@@ -57,6 +57,9 @@ export class DocLinksService {
         cloud: {
           indexManagement: `${ELASTIC_WEBSITE_URL}/guide/en/cloud/current/ec-configure-index-management.html`,
         },
+        console: {
+          guide: `${KIBANA_DOCS}console-kibana.html`,
+        },
         dashboard: {
           guide: `${KIBANA_DOCS}dashboard.html`,
           drilldowns: `${KIBANA_DOCS}drilldowns.html`,
@@ -562,7 +565,7 @@ export class DocLinksService {
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
           learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
           apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
-          onPremRegistry: `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/${DOC_LINK_VERSION}/air-gapped.html`,
+          onPremRegistry: `${FLEET_DOCS}air-gapped.html`,
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
@@ -611,6 +614,9 @@ export interface DocLinksStart {
     };
     readonly cloud: {
       readonly indexManagement: string;
+    };
+    readonly console: {
+      readonly guide: string;
     };
     readonly dashboard: {
       readonly guide: string;

@@ -13,7 +13,7 @@ import HeaderMenuPortal from '../../shared/header_menu_portal';
 
 export function ObservabilityHeaderMenu(): React.ReactElement | null {
   const {
-    appMountParameters: { setHeaderActionMenu },
+    appMountParameters: { setHeaderActionMenu, theme$ },
     core: {
       http: {
         basePath: { prepend },
@@ -22,7 +22,7 @@ export function ObservabilityHeaderMenu(): React.ReactElement | null {
   } = usePluginContext();
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
       <EuiHeaderLinks>
         <EuiHeaderLink
           color="primary"
