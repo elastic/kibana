@@ -70,7 +70,7 @@ export function registerApmAlerts(
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    alertParamsExpression: lazy(() => import('./error_count_alert_trigger')),
+    ruleParamsExpression: lazy(() => import('./error_count_alert_trigger')),
     validate: () => ({
       errors: [],
     }),
@@ -118,7 +118,7 @@ export function registerApmAlerts(
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    alertParamsExpression: lazy(
+    ruleParamsExpression: lazy(
       () => import('./transaction_duration_alert_trigger')
     ),
     validate: () => ({
@@ -169,7 +169,7 @@ export function registerApmAlerts(
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    alertParamsExpression: lazy(
+    ruleParamsExpression: lazy(
       () => import('./transaction_error_rate_alert_trigger')
     ),
     validate: () => ({
@@ -218,7 +218,7 @@ export function registerApmAlerts(
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    alertParamsExpression: lazy(
+    ruleParamsExpression: lazy(
       () => import('./transaction_duration_anomaly_alert_trigger')
     ),
     validate: () => ({

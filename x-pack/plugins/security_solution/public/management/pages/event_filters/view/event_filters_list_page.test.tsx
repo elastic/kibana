@@ -98,7 +98,7 @@ describe('When on the Event Filters List Page', () => {
       );
       render();
 
-      expect(renderResult.getByTestId('eventFiltersContent-loader')).toBeTruthy();
+      expect(renderResult.getByTestId('eventFilterListLoader')).toBeTruthy();
 
       const wasReceived = dataReceived();
       releaseApiResponse!();
