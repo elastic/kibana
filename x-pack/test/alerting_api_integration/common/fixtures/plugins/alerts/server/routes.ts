@@ -16,7 +16,7 @@ import {
 } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { InvalidatePendingApiKey } from '../../../../../../../plugins/alerting/server/types';
-import { RawAlert } from '../../../../../../../plugins/alerting/server/types';
+import { RawRule } from '../../../../../../../plugins/alerting/server/types';
 import {
   ConcreteTaskInstance,
   TaskInstance,
@@ -89,12 +89,12 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>, { logger }: { lo
         logger,
         `/api/alerts_fixture/${id}/replace_api_key`,
         async () => {
-          return await savedObjectsWithAlerts.update<RawAlert>(
+          return await savedObjectsWithAlerts.update<RawRule>(
             'alert',
             id,
             {
               ...(
-                await encryptedSavedObjectsWithAlerts.getDecryptedAsInternalUser<RawAlert>(
+                await encryptedSavedObjectsWithAlerts.getDecryptedAsInternalUser<RawRule>(
                   'alert',
                   id,
                   {
@@ -154,7 +154,7 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>, { logger }: { lo
       const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
         includedHiddenTypes: ['alert'],
       });
-      const savedAlert = await savedObjectsWithAlerts.get<RawAlert>(type, id);
+      const savedAlert = await savedObjectsWithAlerts.get<RawRule>(type, id);
       const result = await retryIfConflicts(
         logger,
         `/api/alerts_fixture/saved_object/${type}/${id}`,
@@ -232,7 +232,7 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>, { logger }: { lo
       const savedObjectsWithTasksAndAlerts = await savedObjects.getScopedClient(req, {
         includedHiddenTypes: ['task', 'alert'],
       });
-      const alert = await savedObjectsWithTasksAndAlerts.get<RawAlert>('alert', id);
+      const alert = await savedObjectsWithTasksAndAlerts.get<RawRule>('alert', id);
       const result = await retryIfConflicts(
         logger,
         `/api/alerts_fixture/{id}/reset_task_status`,

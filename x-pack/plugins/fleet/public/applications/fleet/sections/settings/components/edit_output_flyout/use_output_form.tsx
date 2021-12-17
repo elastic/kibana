@@ -22,7 +22,12 @@ import type { Output, PostOutputRequest } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import { getAgentAndPolicyCountForOutput } from '../../services/agent_and_policies_count';
 
-import { validateName, validateHosts, validateYamlConfig } from './output_form_validators';
+import {
+  validateName,
+  validateHosts,
+  validateYamlConfig,
+  validateCATrustedFingerPrint,
+} from './output_form_validators';
 
 const ConfirmTitle = () => (
   <FormattedMessage
@@ -44,7 +49,7 @@ const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
 }) => (
   <FormattedMessage
     id="xpack.fleet.settings.updateOutput.confirmModalText"
-    defaultMessage="This action will update {outputName} output. It will update {policies} agent policies and {agents}. This action can not be undone. Are you sure you wish to continue?"
+    defaultMessage="This action will update {outputName} output. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
     values={{
       outputName: <strong>{output.name}</strong>,
       agents: (
@@ -111,6 +116,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isPreconfigured
   );
 
+  const caTrustedFingerprintInput = useInput(
+    output?.ca_trusted_fingerprint ?? '',
+    validateCATrustedFingerPrint,
+    isPreconfigured
+  );
+
   const defaultOutputInput = useSwitchInput(
     output?.is_default ?? false,
     isPreconfigured || output?.is_default
@@ -127,6 +138,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     additionalYamlConfigInput,
     defaultOutputInput,
     defaultMonitoringOutputInput,
+    caTrustedFingerprintInput,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -135,13 +147,19 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     const nameInputValid = nameInput.validate();
     const elasticsearchUrlsValid = elasticsearchUrlInput.validate();
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
+    const caTrustedFingerprintValid = caTrustedFingerprintInput.validate();
 
-    if (!elasticsearchUrlsValid || !additionalYamlConfigValid || !nameInputValid) {
+    if (
+      !elasticsearchUrlsValid ||
+      !additionalYamlConfigValid ||
+      !nameInputValid ||
+      !caTrustedFingerprintValid
+    ) {
       return false;
     }
 
     return true;
-  }, [nameInput, elasticsearchUrlInput, additionalYamlConfigInput]);
+  }, [nameInput, elasticsearchUrlInput, additionalYamlConfigInput, caTrustedFingerprintInput]);
 
   const submit = useCallback(async () => {
     try {
@@ -157,6 +175,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         is_default: defaultOutputInput.value,
         is_default_monitoring: defaultMonitoringOutputInput.value,
         config_yaml: additionalYamlConfigInput.value,
+        ca_trusted_fingerprint: caTrustedFingerprintInput.value,
       };
 
       if (output) {
@@ -195,6 +214,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     defaultMonitoringOutputInput.value,
     defaultOutputInput.value,
     elasticsearchUrlInput.value,
+    caTrustedFingerprintInput.value,
     nameInput.value,
     notifications.toasts,
     onSucess,

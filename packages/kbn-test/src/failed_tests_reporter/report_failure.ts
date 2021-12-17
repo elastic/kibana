@@ -7,8 +7,9 @@
  */
 
 import { TestFailure } from './get_failures';
-import { GithubIssueMini, GithubApi } from './github_api';
+import { GithubApi } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
+import { ExistingFailedTestIssue } from './existing_failed_test_issues';
 
 export async function createFailureIssue(
   buildUrl: string,
@@ -40,18 +41,21 @@ export async function createFailureIssue(
 
 export async function updateFailureIssue(
   buildUrl: string,
-  issue: GithubIssueMini,
+  issue: ExistingFailedTestIssue,
   api: GithubApi,
   branch: string
 ) {
   // Increment failCount
-  const newCount = getIssueMetadata(issue.body, 'test.failCount', 0) + 1;
-  const newBody = updateIssueMetadata(issue.body, {
+  const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
+  const newBody = updateIssueMetadata(issue.github.body, {
     'test.failCount': newCount,
   });
 
-  await api.editIssueBodyAndEnsureOpen(issue.number, newBody);
-  await api.addIssueComment(issue.number, `New failure: [CI Build - ${branch}](${buildUrl})`);
+  await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
+  await api.addIssueComment(
+    issue.github.number,
+    `New failure: [CI Build - ${branch}](${buildUrl})`
+  );
 
-  return newCount;
+  return { newBody, newCount };
 }

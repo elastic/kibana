@@ -60,6 +60,14 @@ describe('Actions Plugin', () => {
         usageCollection: usageCollectionPluginMock.createSetupContract(),
         features: featuresPluginMock.createSetup(),
       };
+      coreSetup.getStartServices.mockResolvedValue([
+        coreMock.createStart(),
+        {
+          ...pluginsSetup,
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+        },
+        {},
+      ]);
     });
 
     it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
