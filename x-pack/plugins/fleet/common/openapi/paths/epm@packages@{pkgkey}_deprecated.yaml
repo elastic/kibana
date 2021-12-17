@@ -28,12 +28,13 @@ get:
   operationId: get-package
   security:
     - basicAuth: []
-parameters:
-  - schema:
-      type: string
-    name: pkgkey
-    in: path
-    required: true
+  parameters:
+    - schema:
+        type: string
+      name: pkgkey
+      in: path
+      required: true
+  deprecated: true
 post:
   summary: Packages - Install
   tags: []
@@ -73,6 +74,7 @@ post:
           properties:
             force:
               type: boolean
+  deprecated: true
 delete:
   summary: Packages - Delete
   tags: []
@@ -111,3 +113,4 @@ delete:
           properties:
             force:
               type: boolean
+  deprecated: true
