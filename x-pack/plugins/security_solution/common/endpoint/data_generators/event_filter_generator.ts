@@ -10,6 +10,7 @@ import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-const
 import { BaseDataGenerator } from './base_data_generator';
 import { getCreateExceptionListItemSchemaMock } from '../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';
 
+const EFFECT_SCOPE_TYPES = ['policy:', 'policy:all'];
 export class EventFilterGenerator extends BaseDataGenerator<CreateExceptionListItemSchema> {
   generate(): CreateExceptionListItemSchema {
     const overrides: Partial<CreateExceptionListItemSchema> = {
@@ -17,7 +18,7 @@ export class EventFilterGenerator extends BaseDataGenerator<CreateExceptionListI
       list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
       item_id: `generator_endpoint_event_filter_${this.randomUUID()}`,
       os_types: [this.randomOSFamily()] as CreateExceptionListItemSchema['os_types'],
-      tags: ['policy:all'],
+      tags: [this.randomChoice(EFFECT_SCOPE_TYPES)],
       namespace_type: 'agnostic',
       meta: undefined,
     };
