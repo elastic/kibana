@@ -20,7 +20,12 @@ export const createTestSourceConfiguration = (
     name: 'TEST CONFIGURATION',
     description: '',
     fields: {
+      pod: 'TEST POD FIELD',
+      host: 'TEST HOST FIELD',
       message: ['TEST MESSAGE FIELD'],
+      container: 'TEST CONTAINER FIELD',
+      timestamp: 'TEST TIMESTAMP FIELD',
+      tiebreaker: 'TEST TIEBREAKER FIELD',
     },
     inventoryDefaultView: '0',
     metricsExplorerDefaultView: '0',
