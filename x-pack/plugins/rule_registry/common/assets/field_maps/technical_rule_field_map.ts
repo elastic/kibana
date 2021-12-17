@@ -37,16 +37,6 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
-  [Fields.ALERT_RULE_SEVERITY]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_RISK_SCORE]: {
-    type: 'float',
-    array: false,
-    required: false,
-  },
   [Fields.ALERT_RISK_SCORE]: {
     type: 'float',
     array: false,
@@ -147,57 +137,12 @@ export const technicalRuleFieldMap = {
     array: true,
     required: false,
   },
-  [Fields.ALERT_RULE_RISK_SCORE_MAPPING]: {
-    type: 'object',
-    array: false,
-    required: false,
-  },
-  [`${Fields.ALERT_RULE_RISK_SCORE_MAPPING}.field`]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [`${Fields.ALERT_RULE_RISK_SCORE_MAPPING}.operator`]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [`${Fields.ALERT_RULE_RISK_SCORE_MAPPING}.value`]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   [Fields.ALERT_RULE_RULE_ID]: {
     type: 'keyword',
     array: false,
     required: false,
   },
   [Fields.ALERT_RULE_RULE_NAME_OVERRIDE]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_SEVERITY_MAPPING]: {
-    type: 'object',
-    array: false,
-    required: false,
-  },
-  [`${Fields.ALERT_RULE_SEVERITY_MAPPING}.field`]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [`${Fields.ALERT_RULE_SEVERITY_MAPPING}.operator`]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [`${Fields.ALERT_RULE_SEVERITY_MAPPING}.value`]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [`${Fields.ALERT_RULE_SEVERITY_MAPPING}.severity`]: {
     type: 'keyword',
     array: false,
     required: false,

@@ -5877,6 +5877,14 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__plugin-generator@link:bazel-bin/packages/kbn-plugin-generator/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__plugin-helpers@link:bazel-bin/packages/kbn-plugin-helpers/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/keyv@*":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@types/keyv/-/keyv-3.1.1.tgz#e45a45324fca9dab716ab1230ee249c9fb52cfa7"
@@ -8754,10 +8762,10 @@ broadcast-channel@^3.4.1:
     rimraf "3.0.2"
     unload "2.2.0"
 
-broadcast-channel@^4.7.1:
-  version "4.7.1"
-  resolved "https://registry.yarnpkg.com/broadcast-channel/-/broadcast-channel-4.7.1.tgz#f2a5129cf4bf69c9f944b34e777a4fc907be407e"
-  integrity sha512-liKNu7gwUtBVyTzqx3Thg//7ZooKXfnXxFm/pjLPaxG3t8CquwqnobH8jtFe2FQenFduC2dUzkL1bIrld7auqg==
+broadcast-channel@^4.8.0:
+  version "4.8.0"
+  resolved "https://registry.yarnpkg.com/broadcast-channel/-/broadcast-channel-4.8.0.tgz#1f2c1f1fd97e186c26793b044218ed44a9d4d7d8"
+  integrity sha512-Ei6MylH1YfQQql52zNyZaLu8UvD+BeWNUKcKc8KrqyA7z3Ap2tb6A8KQJm0EBO0SDiKKNaAyzrnkRHhrtG9pYQ==
   dependencies:
     "@babel/runtime" "^7.16.0"
     detect-node "^2.1.0"
