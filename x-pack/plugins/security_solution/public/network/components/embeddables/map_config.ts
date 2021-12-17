@@ -14,7 +14,7 @@ import {
   LayerMappingDetails,
 } from './types';
 import * as i18n from './translations';
-import { SOURCE_TYPES } from '../../../../../maps/common';
+import { SCALING_TYPES, SOURCE_TYPES } from '../../../../../maps/common';
 const euiVisColorPalette = euiPaletteColorBlind();
 
 // Update field mappings to modify what fields will be returned to map tooltip
@@ -206,6 +206,7 @@ export const getDestinationLayer = (
   sourceDescriptor: {
     id: uuid.v4(),
     type: 'ES_SEARCH',
+    SCALING_TYPES.LIMIT,
     applyGlobalQuery: true,
     geoField: layerDetails.geoField,
     filterByMapBounds: true,

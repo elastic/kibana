@@ -123,7 +123,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         : SortDirection.desc,
       scalingType: isValidStringConfig(descriptor.scalingType)
         ? descriptor.scalingType!
-        : SCALING_TYPES.LIMIT,
+        : SCALING_TYPES.MVT,
       topHitsSplitField: isValidStringConfig(descriptor.topHitsSplitField)
         ? descriptor.topHitsSplitField!
         : '',
