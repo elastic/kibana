@@ -7,18 +7,20 @@
 
 import { journey, step } from '@elastic/synthetics';
 
-journey('perf_login_and_home', ({ page, params }) => {
-  step('Go to Kibana login page', async () => {
-    await page.goto(`${params.kibanaUrl}`, { waitUntil: 'networkidle' });
-  });
+for (let i = 0; i < 10; i++) {
+  journey('perf_login_and_home', ({ page, params }) => {
+    step('Go to Kibana login page', async () => {
+      await page.goto(`${params.kibanaUrl}`, { waitUntil: 'networkidle' });
+    });
 
-  step('Login to Kibana', async () => {
-    await page.fill('[data-test-subj=loginUsername]', 'elastic', { timeout: 60 * 1000 });
-    await page.fill('[data-test-subj=loginPassword]', 'changeme');
-    await page.click('[data-test-subj=loginSubmit]');
-  });
+    step('Login to Kibana', async () => {
+      await page.fill('[data-test-subj=loginUsername]', 'elastic', { timeout: 60 * 1000 });
+      await page.fill('[data-test-subj=loginPassword]', 'changeme');
+      await page.click('[data-test-subj=loginSubmit]');
+    });
 
-  step('Dismiss Synthetics Notice', async () => {
-    await page.click('[data-test-subj=skipWelcomeScreen]', { timeout: 60 * 1000 });
+    step('Dismiss Synthetics Notice', async () => {
+      await page.click('[data-test-subj=skipWelcomeScreen]', { timeout: 60 * 1000 });
+    });
   });
-});
+}
