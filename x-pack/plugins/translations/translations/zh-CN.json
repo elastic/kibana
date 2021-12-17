@@ -1635,7 +1635,6 @@
     "discover.discoverBreadcrumbTitle": "Discover",
     "discover.discoverDefaultSearchSessionName": "发现",
     "discover.discoverDescription": "通过查询和筛选原始文档来以交互方式浏览您的数据。",
-    "discover.discoverError.title": "加载 Discover 时出错",
     "discover.discoverSubtitle": "搜索和查找数据分析结果。",
     "discover.discoverTitle": "Discover",
     "discover.doc.couldNotFindDocumentsDescription": "无文档匹配该 ID。",
