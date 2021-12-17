@@ -41,9 +41,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ELASTIC_APM_SERVER_URL: APM_SERVER_URL,
         ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
         ELASTIC_APM_GLOBAL_LABELS: Object.entries({
-          performancePhase: process.env.PERFORMANCE_PHASE,
           ftrConfig: `x-pack/test/performance/tests/config.ftr`,
           testRunner: process.env.TEST_RUNNER,
+          performancePhase: process.env.PERFORMANCE_PHASE,
+          networkThrottlingProfile: process.env.KBN_NETWORK_TEST_PROFILE,
         })
           .filter(([, v]) => !!v)
           .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), ''),
