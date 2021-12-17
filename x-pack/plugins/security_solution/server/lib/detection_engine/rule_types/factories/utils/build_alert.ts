@@ -46,6 +46,7 @@ import {
   commonParamsCamelToSnake,
   typeSpecificCamelToSnake,
 } from '../../../schemas/rule_converters';
+import { transformTags } from '../../../routes/rules/utils';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 
 export const generateAlertId = (alert: RACAlert) => {
@@ -117,8 +118,18 @@ export const buildAlert = (
     ...typeSpecificCamelToSnake(completeRule.ruleParams),
   };
 
-  const { actions, schedule, name, enabled, createdBy, updatedBy, throttle, createdAt, updatedAt } =
-    completeRule.ruleConfig;
+  const {
+    actions,
+    schedule,
+    name,
+    tags,
+    enabled,
+    createdBy,
+    updatedBy,
+    throttle,
+    createdAt,
+    updatedAt,
+  } = completeRule.ruleConfig;
 
   return {
     [TIMESTAMP]: new Date().toISOString(),
@@ -141,6 +152,7 @@ export const buildAlert = (
       enabled,
       interval: schedule.interval,
       name: overrides?.nameOverride ?? name,
+      tags: transformTags(tags),
       throttle: throttle ?? undefined,
       updated_at: updatedAt.toISOString(),
       updated_by: updatedBy ?? '',
