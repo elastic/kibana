@@ -139,18 +139,25 @@ describe('formatMonitorConfig', () => {
         testBrowserConfig
       );
 
-      expect(formattedConfig).toEqual(formattedConfig);
+      const expected = { ...formattedConfig, 'throttling.is_enabled': undefined };
+
+      expect(formattedConfig).toEqual(expected);
     });
 
     it('excludes empty array values', () => {
       testBrowserConfig['filter_journeys.tags'] = [];
+      testBrowserConfig['throttling.upload_speed'] = '3';
 
       const formattedConfig = formatMonitorConfig(
         Object.keys(testBrowserConfig) as ConfigKey[],
         testBrowserConfig
       );
 
-      const expected = { ...formattedConfig, 'filter_journeys.tags': undefined };
+      const expected = {
+        ...formattedConfig,
+        'filter_journeys.tags': undefined,
+        'throttling.upload_speed': undefined,
+      };
 
       expect(formattedConfig).toEqual(expected);
     });
