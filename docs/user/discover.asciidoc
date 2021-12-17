@@ -275,6 +275,7 @@ Go to **Advanced Settings** to configure the number of documents to show,
 the table columns that display by default, and more.
 
 --
+include::{kib-repo-dir}/discover/field-statistics.asciidoc[]
 
 include::{kib-repo-dir}/discover/view-document.asciidoc[]
 

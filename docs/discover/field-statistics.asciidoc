@@ -1,0 +1,55 @@
+[[show-field-statistics]]
+== Explore the fields in your data
+
+beta::[]
+
+Explore the fields in your data with the *Field statistics*.
+You can answer questions such as:
+
+* What does the latency
+look like when one of the containers is down on a Sunday?
+* What is the weather like when there are flight delays?
+* How many fields in my index are empty or redundant?
+* Is the field type and format specified in the data view appropriate
+for the data and its cardinality?
+
+This example explores the fields in
+the <<gs-get-data-into-kibana, sample web logs data set>>, or you can use your own data.
+
+. Go to *Stack Managment > Advanced Settings*, search for *Show field statistics*,
+and turn on the setting.
+
+. Go to *Discover*, open the {data-source} dropdown,
+and select *kibana_sample_data_logs*.
+
+. If you don’t see any results, expand the time range, for example, to *Last 7 days*.
+
+. Click *Field statistics*.
++
+The table summarizes how many documents in the sample
+for the selected time period contain each field,
+the number of distinct values, and the distribution.
++
+[role="screenshot"]
+image::images/field-statistics-view.png["Field statistics view in Discover."]
+
+. Expand the `hour_of_day` field.
++
+For numeric fields, *Discover* provides the
+document statistics, minimum, median, and
+maximum values, a list of top values, and a distribution chart.
+Use the distribution chart to get a better idea of how the values
+in the data are clustered.
++
+[role="screenshot"]
+image::images/field-statistics-numeric.png["Statistics for a numeric field."]
+
+. Expand the `geo.coordinates` field. *Discover* includes a map of the coordinates.
++
+[role="screenshot"]
+image::images/field-statistics-geo.png["Statistics for a geo field."]
+
+. Explore additional field types to see which statistics that *Discover* provides.
+
+. To create a visualization of the field data, click the icon in the *Actions* column
+of the summary table.
