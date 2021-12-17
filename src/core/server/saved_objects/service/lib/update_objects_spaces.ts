@@ -231,6 +231,7 @@ export async function updateObjectsSpaces({
 
       if (
         isErrorDoc ||
+        !doc?.found ||
         // @ts-expect-error MultiGetHit._source is optional
         !rawDocExistsInNamespace(registry, doc, namespace)
       ) {

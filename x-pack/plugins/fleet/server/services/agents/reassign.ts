@@ -92,7 +92,7 @@ export async function reassignAgents(
   } else if ('agentIds' in options) {
     const givenAgentsResults = await getAgentDocuments(esClient, options.agentIds);
     for (const agentResult of givenAgentsResults) {
-      if (!isMgetDoc(agentResult)) {
+      if (isMgetDoc(agentResult) && agentResult.found === false) {
         outgoingErrors[agentResult._id] = new AgentReassignmentError(
           `Cannot find agent ${agentResult._id}`
         );

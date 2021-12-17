@@ -143,7 +143,7 @@ export async function preflightCheckForCreate(params: PreflightCheckForCreatePar
         for (let i = 0; i < spaces.size; i++) {
           const aliasDoc = bulkGetResponse?.body.docs[getResponseIndex++];
           const index = aliasSpacesIndex++; // increment whether the alias was found or not
-          if (isMgetDoc(aliasDoc)) {
+          if (isMgetDoc(aliasDoc) && aliasDoc.found) {
             const legacyUrlAlias: LegacyUrlAlias | undefined =
               aliasDoc._source![LEGACY_URL_ALIAS_TYPE]; // if the 'disabled' field is not present, the source will be empty
             if (!legacyUrlAlias?.disabled) {
@@ -164,7 +164,7 @@ export async function preflightCheckForCreate(params: PreflightCheckForCreatePar
       }
 
       let existingDocument: PreflightCheckForCreateResult['existingDocument'];
-      if (isMgetDoc(objectDoc)) {
+      if (isMgetDoc(objectDoc) && objectDoc.found) {
         // @ts-expect-error MultiGetHit._source is optional
         if (!rawDocExistsInNamespaces(registry, objectDoc, [...spaces])) {
           const error = {

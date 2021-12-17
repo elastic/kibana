@@ -651,7 +651,7 @@ export class SavedObjectsRepository {
 
       const { type, id, esRequestIndex } = expectedResult.value;
       const doc = bulkGetResponse?.body.docs[esRequestIndex];
-      if (isMgetDoc(doc)) {
+      if (isMgetDoc(doc) && doc.found) {
         errors.push({
           id,
           type,
@@ -1501,7 +1501,7 @@ export class SavedObjectsRepository {
         if (esRequestIndex !== undefined) {
           const indexFound = bulkGetResponse?.statusCode !== 404;
           const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
-          const docFound = indexFound && isMgetDoc(actualResult);
+          const docFound = indexFound && isMgetDoc(actualResult) && actualResult.found;
           if (
             !docFound ||
             // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
