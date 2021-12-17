@@ -239,8 +239,10 @@ export const getStatsHandler: FleetRequestHandler<
   try {
     const { pkgName } = request.params;
     const savedObjectsClient = context.fleet.epm.internalSoClient;
+    const stats = await getPackageUsageStats({ savedObjectsClient, pkgName })
     const body: GetStatsResponse = {
-      response: await getPackageUsageStats({ savedObjectsClient, pkgName }),
+      items: stats,
+      response: stats
     };
     return response.ok({ body });
   } catch (error) {

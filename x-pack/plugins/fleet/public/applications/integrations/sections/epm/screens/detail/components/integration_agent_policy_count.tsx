@@ -15,5 +15,5 @@ import { useGetPackageStats } from '../../../../../hooks';
 export const IntegrationAgentPolicyCount = memo<{ packageName: string }>(({ packageName }) => {
   const { data } = useGetPackageStats(packageName);
 
-  return <>{data?.response.agent_policy_count ?? 0}</>;
+  return <>{data?.items.agent_policy_count ?? 0}</>;
 });

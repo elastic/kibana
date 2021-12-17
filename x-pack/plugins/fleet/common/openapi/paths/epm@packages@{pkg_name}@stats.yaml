@@ -7,12 +7,7 @@ get:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              response:
-                $ref: ../components/schemas/package_usage_stats.yaml
-            required:
-              - response
+            $ref: ../components/schemas/get_stats_response.yaml
   operationId: get-package-stats
   security:
     - basicAuth: []

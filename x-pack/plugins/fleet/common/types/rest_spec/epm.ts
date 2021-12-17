@@ -94,7 +94,9 @@ export interface GetStatsRequest {
 }
 
 export interface GetStatsResponse {
-  response: PackageUsageStats;
+  items: PackageUsageStats;
+  // deprecated in 8.0
+  response?: PackageUsageStats;
 }
 
 export interface InstallPackageRequest {

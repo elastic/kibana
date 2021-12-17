@@ -866,15 +866,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "response": {
-                      "$ref": "#/components/schemas/package_usage_stats"
-                    }
-                  },
-                  "required": [
-                    "response"
-                  ]
+                  "$ref": "#/components/schemas/get_stats_response"
                 }
               }
             }
@@ -3504,6 +3496,22 @@
         },
         "required": [
           "agent_policy_count"
+        ]
+      },
+      "get_stats_response": {
+        "title": "Get stats response",
+        "type": "object",
+        "properties": {
+          "items": {
+            "$ref": "#/components/schemas/package_usage_stats"
+          },
+          "response": {
+            "deprecated": true,
+            "$ref": "#/components/schemas/package_usage_stats"
+          }
+        },
+        "required": [
+          "items"
         ]
       },
       "fleet_status_response": {

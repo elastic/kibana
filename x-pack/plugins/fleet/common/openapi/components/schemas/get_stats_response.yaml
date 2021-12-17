@@ -1,0 +1,10 @@
+title: Get stats response
+type: object
+properties:
+  items:
+    $ref: ./package_usage_stats.yaml
+  response:
+    deprecated: true
+    $ref: ./package_usage_stats.yaml
+required:
+  - items
