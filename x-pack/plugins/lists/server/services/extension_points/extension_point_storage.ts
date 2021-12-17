@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-// eslint-disable-next-line max-classes-per-file
-import { ExtensionPoint, ServerExtensionCallback } from './types';
+/* eslint-disable max-classes-per-file */
+
+import { ExtensionPoint } from './types';
 
 export class ExtensionPointStorage {
-  private readonly store = new Map<ExtensionPoint['type'], Set<ServerExtensionCallback>>();
+  private readonly store = new Map<ExtensionPoint['type'], Set<ExtensionPoint>>();
 
   add(extension: ExtensionPoint): void {
     if (!this.store.has(extension.type)) {
@@ -19,9 +20,9 @@ export class ExtensionPointStorage {
     const extensionPointCallbacks = this.store.get(extension.type);
 
     if (extensionPointCallbacks) {
-      // FIXME:PT store the entire definition? ALso, capture (via Error#stack) where the extension was added from (debug purposes)
+      // FIXME:PT should we capture (via Error#stack) where the extension was added from (debug purposes)
 
-      extensionPointCallbacks.add(extension.callback);
+      extensionPointCallbacks.add(extension);
     }
   }
 
@@ -29,7 +30,7 @@ export class ExtensionPointStorage {
     this.store.clear();
   }
 
-  get(extensionType: ExtensionPoint['type']): Set<ServerExtensionCallback> | undefined {
+  get(extensionType: ExtensionPoint['type']): Set<ExtensionPoint> | undefined {
     return this.store.get(extensionType);
   }
 
@@ -48,10 +49,45 @@ class ExtensionPointStorageClient {
    * Retrieve a list (`Set`) of extension points that are registered for a given type
    * @param extensionType
    */
-  get(
-    extensionType: ExtensionPoint['type']
-  ): ReadonlySet<Readonly<ServerExtensionCallback>> | undefined {
+  get(extensionType: ExtensionPoint['type']): ReadonlySet<Readonly<ExtensionPoint>> | undefined {
     return this.storage.get(extensionType);
+  }
+
+  /**
+   * Runs a set of callbacks by piping the Response from one extension point callback to the next callback
+   * and finally returning the last callback payload.
+   *
+   * @param extensionType
+   * @param initialCallbackInput
+   * @param callbackResponseValidator
+   */
+  async pipeRun(
+    extensionType: ExtensionPoint['type'],
+    // FIXME:PT fix types
+    initialCallbackInput,
+    callbackResponseValidator
+  ): Promise<unknown> {
+    let inputArgument = initialCallbackInput;
+    const externalExtensions = this.get(extensionType);
+
+    if (!externalExtensions || externalExtensions.size === 0) {
+      return inputArgument;
+    }
+
+    for (const externalExtension of externalExtensions) {
+      inputArgument = await externalExtension.callback(inputArgument);
+
+      if (callbackResponseValidator) {
+        // Before calling the next one, make sure the returned payload is valid
+        const validationError = callbackResponseValidator(inputArgument);
+
+        if (validationError) {
+          throw validationError;
+        }
+      }
+    }
+
+    return inputArgument;
   }
 }
 

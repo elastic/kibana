@@ -78,6 +78,7 @@ import {
   importExceptionsAsStream,
 } from './import_exception_list_and_items';
 import { DataValidationError } from './utils/errors';
+import { transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema } from './utils';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -101,8 +102,8 @@ export class ExceptionListClient {
    * @private
    */
   private validateData(
-    data: unknown,
-    validator: Type<unknown, unknown>
+    validator: Type<unknown, unknown>,
+    data: unknown
   ): undefined | DataValidationError {
     // FIXME:PT fix `validator` type so that it does not show error when used
 
@@ -411,8 +412,7 @@ export class ExceptionListClient {
     tags,
     type,
   }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
-    const { savedObjectsClient, user, serverExtensionsClient } = this;
-    const externalExtensions = serverExtensionsClient.get('exceptionsListPreCreateItem');
+    const { savedObjectsClient, user } = this;
     let itemData: CreateExceptionListItemOptions = {
       comments,
       description,
@@ -427,19 +427,16 @@ export class ExceptionListClient {
       type,
     };
 
-    if (externalExtensions) {
-      // Call each extension callback
-      for (const externalExtensionCallback of externalExtensions) {
-        itemData = await externalExtensionCallback(itemData);
-
-        // Before calling the next one, make sure the returned payload is valid
-        const validationError = this.validateData(itemData, createExceptionListItemSchema);
-
-        if (validationError) {
-          throw validationError;
-        }
+    itemData = await this.serverExtensionsClient.pipeRun(
+      'exceptionsListPreCreateItem',
+      itemData,
+      (data: CreateExceptionListItemOptions) => {
+        this.validateData(
+          createExceptionListItemSchema,
+          transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema(data)
+        );
       }
-    }
+    );
 
     return createExceptionListItem({
       ...itemData,

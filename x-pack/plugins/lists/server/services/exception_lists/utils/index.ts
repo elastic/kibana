@@ -11,6 +11,7 @@ import {
   CommentsArray,
   CreateComment,
   CreateCommentsArray,
+  CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   ExceptionListSchema,
   FoundExceptionListItemSchema,
@@ -22,6 +23,7 @@ import {
 import { getExceptionListType } from '@kbn/securitysolution-list-utils';
 
 import { ExceptionListSoSchema } from '../../../schemas/saved_objects';
+import { CreateExceptionListItemOptions } from '../exception_list_client_types';
 
 export const transformSavedObjectToExceptionList = ({
   savedObject,
@@ -291,4 +293,32 @@ export const transformCreateCommentsToComments = ({
     created_by: user,
     id: uuid.v4(),
   }));
+};
+
+export const transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema = ({
+  description,
+  entries,
+  listId,
+  name,
+  type,
+  comments,
+  itemId,
+  meta,
+  namespaceType,
+  osTypes,
+  tags,
+}: CreateExceptionListItemOptions): CreateExceptionListItemSchema => {
+  return {
+    comments,
+    description,
+    entries,
+    item_id: itemId,
+    list_id: listId,
+    meta,
+    name,
+    namespace_type: namespaceType,
+    os_types: osTypes,
+    tags,
+    type,
+  };
 };
