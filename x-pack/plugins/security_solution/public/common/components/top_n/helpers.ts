@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { TimelineEventsType } from '../../../../common/types/timeline';
+import type { Filter } from '@kbn/es-query';
+
+import { TimelineEventsType, TimelineId } from '../../../../common/types/timeline';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 import * as i18n from './translations';
 
@@ -64,4 +67,83 @@ export const getOptions = (activeTimelineEventsType?: TimelineEventsType): TopNO
     default:
       return defaultOptions;
   }
+};
+
+/** returns true if the specified timelineId is a detections alert table */
+export const isDetectionsAlertsTable = (timelineId: string | undefined): boolean =>
+  timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage;
+
+/**
+ * The following fields are used to filter alerts tables, (i.e. tables in the
+ * `Security > Alert` and `Security > Rule > Details` pages). These fields,
+ * MUST be ignored when showing Top N alerts for `raw` documents, because
+ * the raw documents don't include them.
+ */
+export const IGNORED_ALERT_FILTERS = [
+  'kibana.alert.building_block_type', // an "Additional filters" option on the alerts table
+  'kibana.alert.rule.rule_id', // filters alerts to a single rule on the Security > Rules > details pages
+  'kibana.alert.rule.name', // not a built-in view filter, but frequently applied via the `Filter In` and `Filter Out` actions
+  'kibana.alert.rule.threat_mapping', // an "Additional filters" option on the alerts table
+  'kibana.alert.workflow_status', // open | acknowledged | closed filter
+];
+
+/**
+ * returns true if the Top N query should ignore filters specific to alerts
+ * when querying raw documents
+ *
+ * @see IGNORED_ALERT_FILTERS
+ */
+export const shouldIgnoreAlertFilters = ({
+  timelineId,
+  view,
+}: {
+  timelineId: string | undefined;
+  view: TimelineEventsType;
+}): boolean => view === 'raw' && isDetectionsAlertsTable(timelineId);
+
+/**
+ * returns a new set of `filters` that don't contain the fields specified in
+ * `IGNORED_ALERT_FILTERS` when they should be ignored
+ *
+ * @see IGNORED_ALERT_FILTERS
+ */
+export const removeIgnoredAlertFilters = ({
+  filters,
+  timelineId,
+  view,
+}: {
+  filters: Filter[];
+  timelineId: string | undefined;
+  view: TimelineEventsType;
+}): Filter[] => {
+  if (!shouldIgnoreAlertFilters({ timelineId, view })) {
+    return filters; // unmodified filters
+  }
+
+  return filters.filter((x) => !IGNORED_ALERT_FILTERS.includes(`${x.meta.key}`));
+};
+
+/** returns the SourcererScopeName applicable to the specified timelineId and view */
+export const getSourcererScopeName = ({
+  timelineId,
+  view,
+}: {
+  timelineId: string | undefined;
+  view: TimelineEventsType;
+}): SourcererScopeName => {
+  // When alerts should be ignored, use the `default` Sourcerer scope,
+  // because it does NOT include alert indexes:
+  if (shouldIgnoreAlertFilters({ timelineId, view })) {
+    return SourcererScopeName.default; // no alerts in this scope
+  }
+
+  if (isDetectionsAlertsTable(timelineId)) {
+    return SourcererScopeName.detections;
+  }
+
+  if (timelineId === TimelineId.active) {
+    return SourcererScopeName.timeline;
+  }
+
+  return SourcererScopeName.default;
 };
