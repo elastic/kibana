@@ -36,6 +36,7 @@ import {
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { IEventLogService } from '../../../../../event_log/server';
 import { AlertsFieldMap, RulesFieldMap } from '../../../../common/field_maps';
+import { TelemetryEventsSender } from '../../telemetry/sender';
 import { IRuleExecutionLogClient } from '../rule_execution_log';
 
 export interface SecurityAlertTypeReturnValue<TState extends AlertTypeState> {
@@ -124,5 +125,6 @@ export interface CreateRuleOptions {
   experimentalFeatures: ExperimentalFeatures;
   logger: Logger;
   ml?: SetupPlugins['ml'];
+  eventsTelemetry?: TelemetryEventsSender | undefined;
   version: string;
 }
