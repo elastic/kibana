@@ -17,7 +17,7 @@ import {
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
-import { APP_NAME } from '../visualize_constants';
+import { APP_NAME } from '../../../common/constants';
 import { getTopNavConfig } from '../utils';
 import type { IndexPattern } from '../../../../data/public';
 

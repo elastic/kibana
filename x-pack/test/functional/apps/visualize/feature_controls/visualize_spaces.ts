@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { VisualizeConstants } from '../../../../../../src/plugins/visualize/public/application/visualize_constants';
+import { VisualizeConstants } from '../../../../../../src/plugins/visualizations/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

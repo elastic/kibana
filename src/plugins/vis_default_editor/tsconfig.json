@@ -12,7 +12,6 @@
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
-    { "path": "../visualize/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../field_formats/tsconfig.json" }

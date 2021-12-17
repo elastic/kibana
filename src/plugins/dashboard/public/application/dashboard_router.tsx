@@ -124,7 +124,9 @@ export async function mountApp({
       mapsCapabilities: { save: Boolean(coreStart.application.capabilities.maps?.save) },
       createShortUrl: Boolean(coreStart.application.capabilities.dashboard.createShortUrl),
       showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
-      visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize?.save) },
+      visualizationsCapabilities: {
+        save: Boolean(coreStart.application.capabilities.visualizations?.save),
+      },
       storeSearchSession: Boolean(coreStart.application.capabilities.dashboard.storeSearchSession),
     },
     dashboardSessionStorage: new DashboardSessionStorage(

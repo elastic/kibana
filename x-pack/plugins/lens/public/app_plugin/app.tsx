@@ -150,7 +150,7 @@ export function App({
       // or when the user has configured something without saving
 
       if (
-        application.capabilities.visualize.save &&
+        application.capabilities.visualizations.save &&
         !isEqual(persistedDoc?.state, getLastKnownDocWithoutPinnedFilters(lastKnownDoc)?.state) &&
         (isSaveable || persistedDoc)
       ) {
@@ -166,7 +166,13 @@ export function App({
         return actions.default();
       }
     });
-  }, [onAppLeave, lastKnownDoc, isSaveable, persistedDoc, application.capabilities.visualize.save]);
+  }, [
+    onAppLeave,
+    lastKnownDoc,
+    isSaveable,
+    persistedDoc,
+    application.capabilities.visualizations.save,
+  ]);
 
   const getLegacyUrlConflictCallout = useCallback(() => {
     // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario

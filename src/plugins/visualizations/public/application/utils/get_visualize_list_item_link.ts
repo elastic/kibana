@@ -11,8 +11,7 @@ import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
 import { QueryState } from '../../../../data/public';
 import { setStateToKbnUrl } from '../../../../kibana_utils/public';
 import { getUISettings } from '../../services';
-import { GLOBAL_STATE_STORAGE_KEY } from '../../../common/constants';
-import { APP_NAME } from '../visualize_constants';
+import { GLOBAL_STATE_STORAGE_KEY, APP_NAME } from '../../../common/constants';
 
 export const getVisualizeListItemLink = (
   application: ApplicationStart,

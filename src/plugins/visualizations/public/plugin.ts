@@ -6,7 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
+import { filter, map } from 'rxjs/operators';
 import type { SavedObjectsFindOptionsReference } from 'kibana/public';
+import { createHashHistory } from 'history';
+import { BehaviorSubject } from 'rxjs';
+import {
+  AppMountParameters,
+  AppUpdater,
+  DEFAULT_APP_CATEGORIES,
+  ScopedHistory,
+} from '../../../core/public';
+import { VisualizeConstants } from '../common/constants';
 import {
   setUISettings,
   setTypes,
@@ -26,6 +37,7 @@ import {
   setDocLinks,
   setSpaces,
   setTheme,
+  setVisEditorsRegistry,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -38,7 +50,15 @@ import { range as rangeExpressionFunction } from '../common/expression_functions
 import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
 import { xyDimension as xyDimensionExpressionFunction } from '../common/expression_functions/xy_dimension';
 
-import { createStartServicesGetter, StartServicesGetter } from '../../kibana_utils/public';
+import {
+  createKbnUrlStateStorage,
+  createKbnUrlTracker,
+  createStartServicesGetter,
+  StartServicesGetter,
+  Storage,
+  withNotifyOnErrors,
+} from '../../kibana_utils/public';
+import { VisualizeLocatorDefinition } from '../common/locator';
 import type { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';
 
@@ -72,6 +92,17 @@ import type { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import { createVisAsync } from './vis_async';
 import type { VisSavedObject, SaveVisOptions, GetVisOptions } from './types';
+import type { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
+import type { SharePluginSetup, SharePluginStart } from '../../share/public';
+import type { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
+import type { DashboardStart } from '../../dashboard/public';
+import type { PresentationUtilPluginStart } from '../../presentation_util/public';
+import type { UsageCollectionStart } from '../../usage_collection/public';
+import type { HomePublicPluginSetup } from '../../home/public';
+import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
+import { esFilters } from '../../../plugins/data/public';
+import { FeatureCatalogueCategory } from '../../home/public';
+import { VisualizationServices } from './types';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -79,7 +110,7 @@ import type { VisSavedObject, SaveVisOptions, GetVisOptions } from './types';
  * @public
  */
 
-export type VisualizationsSetup = TypesSetup;
+export type VisualizationsSetup = TypesSetup & { visEditorsRegistry: VisEditorsRegistry };
 
 export interface VisualizationsStart extends TypesStart {
   createVis: (visType: string, visState: SerializedVis) => Promise<Vis>;
@@ -102,6 +133,9 @@ export interface VisualizationsSetupDeps {
   expressions: ExpressionsSetup;
   inspector: InspectorSetup;
   usageCollection: UsageCollectionSetup;
+  urlForwarding: UrlForwardingSetup;
+  home?: HomePublicPluginSetup;
+  share?: SharePluginSetup;
 }
 
 export interface VisualizationsStartDeps {
@@ -111,11 +145,17 @@ export interface VisualizationsStartDeps {
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   application: ApplicationStart;
+  dashboard: DashboardStart;
   getAttributeService: EmbeddableStart['getAttributeService'];
+  navigation: NavigationStart;
+  presentationUtil: PresentationUtilPluginStart;
   savedObjects: SavedObjectsStart;
   savedObjectsClient: SavedObjectsClientContract;
   spaces?: SpacesPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  share?: SharePluginStart;
+  urlForwarding: UrlForwardingStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 /**
@@ -137,13 +177,175 @@ export class VisualizationsPlugin
 {
   private readonly types: TypesService = new TypesService();
   private getStartServicesOrDie?: StartServicesGetter<VisualizationsStartDeps, VisualizationsStart>;
+  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private stopUrlTracking: (() => void) | undefined = undefined;
+  private currentHistory: ScopedHistory | undefined = undefined;
+  private isLinkedToOriginatingApp: (() => boolean) | undefined = undefined;
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  private readonly visEditorsRegistry = createVisEditorsRegistry();
+
+  constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<VisualizationsStartDeps, VisualizationsStart>,
-    { expressions, embeddable, usageCollection, data }: VisualizationsSetupDeps
+    {
+      expressions,
+      embeddable,
+      usageCollection,
+      data,
+      home,
+      urlForwarding,
+      share,
+    }: VisualizationsSetupDeps
   ): VisualizationsSetup {
+    const {
+      appMounted,
+      appUnMounted,
+      stop: stopUrlTracker,
+      setActiveUrl,
+      restorePreviousUrl,
+    } = createKbnUrlTracker({
+      baseUrl: core.http.basePath.prepend(VisualizeConstants.VISUALIZE_BASE_PATH),
+      defaultSubUrl: '#/',
+      storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
+      navLinkUpdater$: this.appStateUpdater,
+      toastNotifications: core.notifications.toasts,
+      stateParams: [
+        {
+          kbnUrlKey: '_g',
+          stateUpdate$: data.query.state$.pipe(
+            filter(
+              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
+            ),
+            map(({ state }) => ({
+              ...state,
+              filters: state.filters?.filter(esFilters.isFilterPinned),
+            }))
+          ),
+        },
+      ],
+      getHistory: () => this.currentHistory!,
+      onBeforeNavLinkSaved: (urlToSave: string) => {
+        if (this.isLinkedToOriginatingApp?.()) {
+          return core.http.basePath.prepend(VisualizeConstants.VISUALIZE_BASE_PATH);
+        }
+        return urlToSave;
+      },
+    });
+    this.stopUrlTracking = () => {
+      stopUrlTracker();
+    };
+
+    setUISettings(core.uiSettings);
+
+    core.application.register({
+      id: VisualizeConstants.APP_ID,
+      title: 'Visualize Library',
+      order: 8000,
+      euiIconType: 'logoKibana',
+      defaultPath: '#/',
+      category: DEFAULT_APP_CATEGORIES.kibana,
+      updater$: this.appStateUpdater.asObservable(),
+      // remove all references to visualize
+      mount: async (params: AppMountParameters) => {
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        this.currentHistory = params.history;
+
+        // allows the urlTracker to only save URLs that are not linked to an originatingApp
+        this.isLinkedToOriginatingApp = () => {
+          return Boolean(
+            pluginsStart.embeddable
+              .getStateTransfer()
+              .getIncomingEditorState(VisualizeConstants.APP_ID)?.originatingApp
+          );
+        };
+
+        // make sure the index pattern list is up to date
+        pluginsStart.data.indexPatterns.clearCache();
+        // make sure a default index pattern exists
+        // if not, the page will be redirected to management and visualize won't be rendered
+        await pluginsStart.data.indexPatterns.ensureDefaultDataView();
+
+        appMounted();
+
+        // dispatch synthetic hash change event to update hash history objects
+        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+        const unlistenParentHistory = params.history.listen(() => {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        });
+        /**
+         * current implementation uses 2 history objects:
+         * 1. the hash history (used for the react hash router)
+         * 2. and the scoped history (used for url tracking)
+         * this should be replaced to use only scoped history after moving legacy apps to browser routing
+         */
+        const history = createHashHistory();
+        const services: VisualizationServices = {
+          ...coreStart,
+          history,
+          kbnUrlStateStorage: createKbnUrlStateStorage({
+            history,
+            useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            ...withNotifyOnErrors(coreStart.notifications.toasts),
+          }),
+          urlForwarding: pluginsStart.urlForwarding,
+          pluginInitializerContext: this.initializerContext,
+          chrome: coreStart.chrome,
+          data: pluginsStart.data,
+          localStorage: new Storage(localStorage),
+          navigation: pluginsStart.navigation,
+          share: pluginsStart.share,
+          toastNotifications: coreStart.notifications.toasts,
+          dashboardCapabilities: coreStart.application.capabilities.dashboard,
+          embeddable: pluginsStart.embeddable,
+          stateTransferService: pluginsStart.embeddable.getStateTransfer(),
+          setActiveUrl,
+          savedObjectsPublic: pluginsStart.savedObjects,
+          scopedHistory: params.history,
+          restorePreviousUrl,
+          dashboard: pluginsStart.dashboard,
+          setHeaderActionMenu: params.setHeaderActionMenu,
+          savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
+          presentationUtil: pluginsStart.presentationUtil,
+          usageCollection: pluginsStart.usageCollection,
+          getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
+          spaces: pluginsStart.spaces,
+        };
+
+        params.element.classList.add('visAppWrapper');
+        const { renderApp } = await import('./application');
+        const unmount = renderApp(params, services);
+        return () => {
+          data.search.session.clear();
+          params.element.classList.remove('visAppWrapper');
+          unlistenParentHistory();
+          unmount();
+          appUnMounted();
+        };
+      },
+    });
+
+    urlForwarding.forwardApp('visualize', 'visualize');
+
+    if (home) {
+      home.featureCatalogue.register({
+        id: 'visualize',
+        title: 'Visualize Library',
+        description: i18n.translate('visualize.visualizeDescription', {
+          defaultMessage:
+            'Create visualizations and aggregate data stores in your Elasticsearch indices.',
+        }),
+        icon: 'visualizeApp',
+        path: `/app/visualize#${VisualizeConstants.LANDING_PAGE_PATH}`,
+        showOnHomePage: false,
+        category: FeatureCatalogueCategory.DATA,
+      });
+    }
+
+    if (share) {
+      share.url.locators.create(new VisualizeLocatorDefinition());
+    }
+
     const start = (this.getStartServicesOrDie = createStartServicesGetter(core.getStartServices));
 
     setUISettings(core.uiSettings);
@@ -158,6 +360,7 @@ export class VisualizationsPlugin
 
     return {
       ...this.types.setup(),
+      visEditorsRegistry: this.visEditorsRegistry,
     };
   }
 
@@ -171,6 +374,7 @@ export class VisualizationsPlugin
       savedObjects,
       spaces,
       savedObjectsTaggingOss,
+      usageCollection,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -192,6 +396,8 @@ export class VisualizationsPlugin
     if (spaces) {
       setSpaces(spaces);
     }
+
+    setVisEditorsRegistry(this.visEditorsRegistry);
 
     return {
       ...types,
@@ -237,5 +443,8 @@ export class VisualizationsPlugin
 
   public stop() {
     this.types.stop();
+    if (this.stopUrlTracking) {
+      this.stopUrlTracking();
+    }
   }
 }

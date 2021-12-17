@@ -73,7 +73,6 @@
     "visTypePie": "src/plugins/vis_types/pie",
     "visTypeHeatmap": "src/plugins/vis_types/heatmap",
     "visualizations": "src/plugins/visualizations",
-    "visualize": "src/plugins/visualize",
     "apmOss": "src/plugins/apm_oss",
     "usageCollection": "src/plugins/usage_collection"
   },

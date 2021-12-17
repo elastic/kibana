@@ -83,7 +83,7 @@ export const reportingScreenshotShareProvider = ({
       capabilityHasDashboardScreenshotReporting =
         application.capabilities.dashboard?.generateScreenshot === true;
       capabilityHasVisualizeScreenshotReporting =
-        application.capabilities.visualize?.generateScreenshot === true;
+        application.capabilities.visualizations?.generateScreenshot === true;
     });
   } else {
     // deprecated

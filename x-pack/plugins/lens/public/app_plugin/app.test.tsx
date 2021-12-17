@@ -426,7 +426,7 @@ describe('Lens App', () => {
           ...services.application,
           capabilities: {
             ...services.application.capabilities,
-            visualize: { save: false, saveQuery: false, show: true },
+            visualizations: { save: false, saveQuery: false, show: true },
           },
         };
         const { instance, lensStore } = await mountWith({ services });
@@ -766,7 +766,7 @@ describe('Lens App', () => {
         ...services.application,
         capabilities: {
           ...services.application.capabilities,
-          visualize: { save: false, saveQuery: false, show: true },
+          visualizations: { save: false, saveQuery: false, show: true },
         },
       };
 
@@ -950,7 +950,7 @@ describe('Lens App', () => {
         ...services.application,
         capabilities: {
           ...services.application.capabilities,
-          visualize: { save: false, saveQuery: false, show: true },
+          visualizations: { save: false, saveQuery: false, show: true },
         },
       };
       await mountWith({ services });
@@ -1208,7 +1208,7 @@ describe('Lens App', () => {
         ...services.application,
         capabilities: {
           ...services.application.capabilities,
-          visualize: { save: false, saveQuery: false, show: true },
+          visualizations: { save: false, saveQuery: false, show: true },
         },
       };
       const { props } = await mountWith({ services, preloadedState: { isSaveable: true } });

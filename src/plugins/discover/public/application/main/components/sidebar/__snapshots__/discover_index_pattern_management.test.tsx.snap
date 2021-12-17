@@ -644,7 +644,7 @@ exports[`Discover IndexPattern Management renders correctly 1`] = `
         "discover": Object {
           "save": false,
         },
-        "visualize": Object {
+        "visualizations": Object {
           "show": true,
         },
       },

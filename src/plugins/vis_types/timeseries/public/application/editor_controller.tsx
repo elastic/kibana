@@ -9,9 +9,12 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { EventEmitter } from 'events';
-import type { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
-import type { IEditorController, EditorRenderProps } from 'src/plugins/visualize/public';
-
+import type {
+  Vis,
+  VisualizeEmbeddableContract,
+  IEditorController,
+  EditorRenderProps,
+} from 'src/plugins/visualizations/public';
 import { getUISettings, getI18n, getCoreStart } from '../services';
 import { VisEditor } from './components/vis_editor_lazy';
 import type { TimeseriesVisParams } from '../types';

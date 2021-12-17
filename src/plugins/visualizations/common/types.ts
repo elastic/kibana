@@ -22,6 +22,8 @@ export type SavedVisState<TVisParams = SerializableRecord> = {
   aggs: AggConfigSerialized[];
 };
 
+export type PureVisState = SavedVisState;
+
 export interface VisualizationSavedObjectAttributes extends SavedObjectAttributes {
   description: string;
   kibanaSavedObjectMeta: {

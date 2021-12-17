@@ -16,12 +16,12 @@ export type CapabilitiesServiceFactory = KibanaPluginServiceFactory<
 >;
 
 export const capabilitiesServiceFactory: CapabilitiesServiceFactory = ({ coreStart }) => {
-  const { dashboard, visualize, advancedSettings } = coreStart.application.capabilities;
+  const { dashboard, visualizations, advancedSettings } = coreStart.application.capabilities;
 
   return {
     canAccessDashboards: () => Boolean(dashboard.show),
     canCreateNewDashboards: () => Boolean(dashboard.createNew),
-    canSaveVisualizations: () => Boolean(visualize.save),
+    canSaveVisualizations: () => Boolean(visualizations.save),
     canSetAdvancedSettings: () => Boolean(advancedSettings.save),
   };
 };

@@ -92,7 +92,7 @@ const defaultCapabilities: DashboardAppCapabilities = {
   createShortUrl: false,
   showWriteControls: false,
   mapsCapabilities: { save: false },
-  visualizeCapabilities: { save: false },
+  visualizationsCapabilities: { save: false },
   storeSearchSession: true,
 };
 

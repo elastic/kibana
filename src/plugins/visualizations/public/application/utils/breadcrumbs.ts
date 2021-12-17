@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { VisualizeConstants } from '../visualize_constants';
+import { VisualizeConstants } from '../../../common/constants';
 
 const defaultEditText = i18n.translate('visualize.editor.defaultEditBreadcrumbText', {
   defaultMessage: 'Edit visualization',

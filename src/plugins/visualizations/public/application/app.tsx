@@ -20,7 +20,7 @@ import {
   VisualizeNoMatch,
   VisualizeByValueEditor,
 } from './components';
-import { VisualizeConstants } from './visualize_constants';
+import { VisualizeConstants } from '../../common/constants';
 
 export interface VisualizeAppProps {
   onAppLeave: AppMountParameters['onAppLeave'];

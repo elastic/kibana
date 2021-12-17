@@ -27,7 +27,7 @@ jest.mock('../../../../kibana_services', () => ({
       },
     }),
     capabilities: {
-      visualize: {
+      visualizations: {
         show: true,
       },
     },

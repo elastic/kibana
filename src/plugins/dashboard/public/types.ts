@@ -181,7 +181,7 @@ export interface DashboardAppCapabilities {
   showWriteControls: boolean;
   storeSearchSession: boolean;
   mapsCapabilities: { save: boolean };
-  visualizeCapabilities: { save: boolean };
+  visualizationsCapabilities: { save: boolean };
 }
 
 export interface DashboardAppServices {

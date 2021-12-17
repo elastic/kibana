@@ -25,6 +25,7 @@ import { ExpressionsStart } from '../../../plugins/expressions/public';
 import { UiActionsStart } from '../../../plugins/ui_actions/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
+import type { VisEditorsRegistry } from './vis_editors_registry';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -66,3 +67,6 @@ export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Over
 export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
 
 export const [getSpaces, setSpaces] = createGetterSetter<SpacesPluginStart>('Spaces', false);
+
+export const [getVisEditorsRegistry, setVisEditorsRegistry] =
+  createGetterSetter<VisEditorsRegistry>('VisEditorsRegistry');

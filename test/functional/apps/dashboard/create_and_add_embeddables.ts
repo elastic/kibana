@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 
-import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
+import { VisualizeConstants } from '../../../../src/plugins/visualizations/common/constants';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../src/plugins/visualizations/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

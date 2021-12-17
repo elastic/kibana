@@ -59,7 +59,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
 
   public isEditable = async () => {
     const { capabilities } = await this.getStartServices();
-    return Boolean(capabilities.visualize.save || capabilities.dashboard?.showWriteControls);
+    return Boolean(capabilities.visualizations.save || capabilities.dashboard?.showWriteControls);
   };
 
   canCreateNew() {
@@ -116,7 +116,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         visualizationMap,
         capabilities: {
           canSaveDashboards: Boolean(capabilities.dashboard?.showWriteControls),
-          canSaveVisualizations: Boolean(capabilities.visualize.save),
+          canSaveVisualizations: Boolean(capabilities.visualizations.save),
         },
         usageCollection,
         theme,

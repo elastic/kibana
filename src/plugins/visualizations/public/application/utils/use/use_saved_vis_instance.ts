@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { getVisualizationInstance } from '../get_visualization_instance';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { SavedVisInstance, VisualizeServices, IEditorController } from '../../types';
-import { VisualizeConstants } from '../../visualize_constants';
+import { VisualizeConstants } from '../../../../common/constants';
 import { getVisEditorsRegistry } from '../../../services';
 import { redirectToSavedObjectPage } from '../utils';
 

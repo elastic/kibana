@@ -13,7 +13,7 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { useKibana, toMountPoint, KibanaThemeProvider } from '../../../../kibana_react/public';
 import { VisualizeServices } from '../types';
-import { VisualizeConstants } from '../visualize_constants';
+import { VisualizeConstants } from '../../../common/constants';
 
 let bannerId: string;
 

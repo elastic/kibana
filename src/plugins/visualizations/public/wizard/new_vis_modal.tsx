@@ -78,7 +78,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
     this.trackUiMetric = this.props.usageCollection?.reportUiCounter.bind(
       this.props.usageCollection,
-      'visualize'
+      'visualizations'
     );
   }
 

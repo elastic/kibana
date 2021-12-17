@@ -34,7 +34,7 @@ export const discoverServiceMock = {
   data: dataPlugin,
   docLinks: docLinksServiceMock.createStartContract(),
   capabilities: {
-    visualize: {
+    visualizations: {
       show: true,
     },
     discover: {
