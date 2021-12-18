@@ -18,11 +18,7 @@ import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/d
 import { InputsModelId } from '../../store/inputs/constants';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 
-import {
-  isDetectionsAlertsTable,
-  removeIgnoredAlertFilters,
-  TopNOption,
-} from './helpers';
+import { isDetectionsAlertsTable, removeIgnoredAlertFilters, TopNOption } from './helpers';
 import * as i18n from './translations';
 import { getIndicesSelector, IndicesSelector } from './selectors';
 import { State } from '../../store';

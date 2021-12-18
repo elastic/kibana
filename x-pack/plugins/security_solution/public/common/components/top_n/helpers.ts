@@ -8,7 +8,6 @@
 import type { Filter } from '@kbn/es-query';
 import {
   ALERT_ACTION_GROUP,
-  ALERT_BUILDING_BLOCK_TYPE,
   ALERT_DURATION,
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
@@ -30,7 +29,6 @@ import {
   ALERT_RULE_NAME,
   ALERT_RULE_NAMESPACE,
   ALERT_RULE_NOTE,
-  ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_REFERENCES,
   ALERT_RULE_RISK_SCORE,
@@ -131,7 +129,6 @@ export const isDetectionsAlertsTable = (timelineId: string | undefined): boolean
  */
 export const IGNORED_ALERT_FILTERS = [
   ALERT_ACTION_GROUP,
-  ALERT_BUILDING_BLOCK_TYPE, // an "Additional filters" option on the alerts table
   ALERT_DURATION,
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
@@ -157,7 +154,6 @@ export const IGNORED_ALERT_FILTERS = [
   ALERT_RULE_LICENSE,
   ALERT_RULE_NAME, // not a built-in view filter, but frequently applied via the `Filter In` and `Filter Out` actions
   ALERT_RULE_NOTE,
-  ALERT_RULE_PARAMETERS,
   ALERT_RULE_REFERENCES,
   ALERT_RULE_RISK_SCORE,
   ALERT_RULE_RISK_SCORE_MAPPING,
@@ -179,6 +175,11 @@ export const IGNORED_ALERT_FILTERS = [
   ALERT_START,
   ALERT_SYSTEM_STATUS,
   ALERT_UUID,
+  'signal.rule.building_block_type',
+  'signal.rule.id',
+  'signal.rule.name',
+  'signal.rule.threat_mapping',
+  'signal.status',
 ];
 
 /**
