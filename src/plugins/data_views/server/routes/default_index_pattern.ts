@@ -40,7 +40,7 @@ const manageDefaultIndexPatternRoutesFactory =
 
         return res.ok({
           body: {
-            index_pattern_id: defaultIndexPatternId,
+            [`${serviceKey}_id`]: defaultIndexPatternId,
           },
         });
       })

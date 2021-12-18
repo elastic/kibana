@@ -11,17 +11,21 @@ import {
   SERVICE_KEY_LEGACY,
   DATA_VIEW_PATH,
   SERVICE_KEY,
+  SERVICE_PATH,
+  SERVICE_PATH_LEGACY,
 } from '../../../../src/plugins/data_views/server';
 
 const legacyConfig = {
   name: 'legacy index pattern api',
   path: DATA_VIEW_PATH_LEGACY,
+  basePath: SERVICE_PATH_LEGACY,
   serviceKey: SERVICE_KEY_LEGACY,
 };
 
 const dataViewConfig = {
   name: 'data view api',
   path: DATA_VIEW_PATH,
+  basePath: SERVICE_PATH,
   serviceKey: SERVICE_KEY,
 };
 
