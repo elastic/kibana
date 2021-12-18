@@ -101,7 +101,7 @@ export class CollectorSet {
   ): Promise<AnyCollector[]> => {
     if (!(collectors instanceof Map)) {
       throw new Error(
-        `areAllCollectorsReady method given bad Map of collectors: ` + typeof collectors
+        `getReadyCollectors method given bad Map of collectors: ` + typeof collectors
       );
     }
 
@@ -113,10 +113,7 @@ export class CollectorSet {
             try {
               return await collector.isReady();
             } catch (err) {
-              this.logger.debug(
-                `Collector failed to get ready` +
-                  `${this.maximumWaitTimeForAllCollectorsInS}s and will return data from all collectors that are ready.`
-              );
+              this.logger.debug(`Collector ${collector.type} failed to get ready`);
               return false;
             }
           })(),
@@ -127,12 +124,13 @@ export class CollectorSet {
       })
     );
 
-    const hasTimedOutCollectors = collectorsWithStatus.some(
-      (collectorWithStatus) => collectorWithStatus.isReadyWithTimeout.timedout
-    );
-    if (hasTimedOutCollectors) {
+    const timedOutCollectorsTypes = collectorsWithStatus
+      .filter((collectorWithStatus) => collectorWithStatus.isReadyWithTimeout.timedout)
+      .map(({ collector }) => collector.type);
+
+    if (timedOutCollectorsTypes.length) {
       this.logger.debug(
-        `Some collectors timedout getting ready. ` +
+        `Some collectors timedout getting ready (${timedOutCollectorsTypes.join(', ')}). ` +
           `Waited for ${this.maximumWaitTimeForAllCollectorsInS}s and will return data from collectors that are ready.`
       );
     }
@@ -152,7 +150,7 @@ export class CollectorSet {
 
     if (collectorsTypesNotReady.length) {
       this.logger.debug(
-        `Some collectors are not ready (${collectorsTypesNotReady.join(',')}) ` +
+        `Some collectors are not ready (${collectorsTypesNotReady.join(',')}). ` +
           `will return data from all collectors that are ready.`
       );
     }
