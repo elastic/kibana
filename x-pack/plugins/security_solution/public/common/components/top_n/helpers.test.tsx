@@ -64,12 +64,12 @@ const buildingBlockTypeFilter: Filter = {
     negate: true,
     disabled: false,
     type: 'exists',
-    key: 'kibana.alert.building_block_type',
+    key: 'signal.rule.building_block_type',
     value: 'exists',
   },
   query: {
     exists: {
-      field: 'kibana.alert.building_block_type',
+      field: 'signal.rule.building_block_type',
     },
   },
 };
