@@ -11,80 +11,69 @@ import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type {
-  DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
+  DataViewsServerPluginStartDependencies,
 } from '../../types';
-import { SPECIFIC_SCRIPTED_FIELD_PATH, SPECIFIC_SCRIPTED_FIELD_PATH_LEGACY } from '../../constants';
 
-const getScriptedFieldRouteFactory =
-  (path: string) =>
-  (
-    router: IRouter,
-    getStartServices: StartServicesAccessor<
-      DataViewsServerPluginStartDependencies,
-      DataViewsServerPluginStart
-    >
-  ) => {
-    router.get(
-      {
-        path,
-        validate: {
-          params: schema.object(
-            {
-              id: schema.string({
-                minLength: 1,
-                maxLength: 1_000,
-              }),
-              name: schema.string({
-                minLength: 1,
-                maxLength: 1_000,
-              }),
-            },
-            { unknowns: 'allow' }
-          ),
-        },
-      },
-      router.handleLegacyErrors(
-        handleErrors(async (ctx, req, res) => {
-          const savedObjectsClient = ctx.core.savedObjects.client;
-          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-          const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const indexPatternsService = await dataViewsServiceFactory(
-            savedObjectsClient,
-            elasticsearchClient,
-            req
-          );
-          const id = req.params.id;
-          const name = req.params.name;
-
-          const indexPattern = await indexPatternsService.get(id);
-          const field = indexPattern.fields.getByName(name);
-
-          if (!field) {
-            throw new ErrorIndexPatternFieldNotFound(id, name);
-          }
-
-          if (!field.scripted) {
-            throw new Error('Only scripted fields can be retrieved.');
-          }
-
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: JSON.stringify({
-              field: field.toSpec(),
+export const registerGetScriptedFieldRoute = (
+  router: IRouter,
+  getStartServices: StartServicesAccessor<
+    DataViewsServerPluginStartDependencies,
+    DataViewsServerPluginStart
+  >
+) => {
+  router.get(
+    {
+      path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
+      validate: {
+        params: schema.object(
+          {
+            id: schema.string({
+              minLength: 1,
+              maxLength: 1_000,
             }),
-          });
-        })
-      )
-    );
-  };
+            name: schema.string({
+              minLength: 1,
+              maxLength: 1_000,
+            }),
+          },
+          { unknowns: 'allow' }
+        ),
+      },
+    },
+    router.handleLegacyErrors(
+      handleErrors(async (ctx, req, res) => {
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const [, , { indexPatternsServiceFactory }] = await getStartServices();
+        const indexPatternsService = await indexPatternsServiceFactory(
+          savedObjectsClient,
+          elasticsearchClient,
+          req
+        );
+        const id = req.params.id;
+        const name = req.params.name;
 
-export const registerGetScriptedFieldRoute = getScriptedFieldRouteFactory(
-  SPECIFIC_SCRIPTED_FIELD_PATH
-);
+        const indexPattern = await indexPatternsService.get(id);
+        const field = indexPattern.fields.getByName(name);
 
-export const registerGetScriptedFieldRouteLegacy = getScriptedFieldRouteFactory(
-  SPECIFIC_SCRIPTED_FIELD_PATH_LEGACY
-);
+        if (!field) {
+          throw new ErrorIndexPatternFieldNotFound(id, name);
+        }
+
+        if (!field.scripted) {
+          throw new Error('Only scripted fields can be retrieved.');
+        }
+
+        return res.ok({
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            field: field.toSpec(),
+          }),
+        });
+      })
+    )
+  );
+};

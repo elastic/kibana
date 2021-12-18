@@ -29,26 +29,11 @@ import {
   registerUpdateFieldsRoute,
   registerUpdateFieldsRouteLegacy,
 } from './routes/fields/update_fields';
-import {
-  registerCreateScriptedFieldRoute,
-  registerCreateScriptedFieldRouteLegacy,
-} from './routes/scripted_fields/create_scripted_field';
-import {
-  registerPutScriptedFieldRoute,
-  registerPutScriptedFieldRouteLegacy,
-} from './routes/scripted_fields/put_scripted_field';
-import {
-  registerGetScriptedFieldRoute,
-  registerGetScriptedFieldRouteLegacy,
-} from './routes/scripted_fields/get_scripted_field';
-import {
-  registerDeleteScriptedFieldRoute,
-  registerDeleteScriptedFieldRouteLegacy,
-} from './routes/scripted_fields/delete_scripted_field';
-import {
-  registerUpdateScriptedFieldRoute,
-  registerUpdateScriptedFieldRouteLegacy,
-} from './routes/scripted_fields/update_scripted_field';
+import { registerCreateScriptedFieldRoute } from './routes/scripted_fields/create_scripted_field';
+import { registerPutScriptedFieldRoute } from './routes/scripted_fields/put_scripted_field';
+import { registerGetScriptedFieldRoute } from './routes/scripted_fields/get_scripted_field';
+import { registerDeleteScriptedFieldRoute } from './routes/scripted_fields/delete_scripted_field';
+import { registerUpdateScriptedFieldRoute } from './routes/scripted_fields/update_scripted_field';
 import {
   registerManageDefaultDataViewRoute,
   registerManageDefaultDataViewRouteLegacy,
@@ -109,13 +94,6 @@ export function registerRoutes(
   // Fields API
   registerUpdateFieldsRoute(router, getStartServices);
 
-  // Scripted Field API
-  registerCreateScriptedFieldRoute(router, getStartServices);
-  registerPutScriptedFieldRoute(router, getStartServices);
-  registerGetScriptedFieldRoute(router, getStartServices);
-  registerDeleteScriptedFieldRoute(router, getStartServices);
-  registerUpdateScriptedFieldRoute(router, getStartServices);
-
   // Runtime Fields API
   registerCreateRuntimeFieldRoute(router, getStartServices);
   registerGetRuntimeFieldRoute(router, getStartServices);
@@ -137,11 +115,11 @@ export function registerRoutes(
   registerUpdateFieldsRouteLegacy(router, getStartServices);
 
   // Scripted Field API
-  registerCreateScriptedFieldRouteLegacy(router, getStartServices);
-  registerPutScriptedFieldRouteLegacy(router, getStartServices);
-  registerGetScriptedFieldRouteLegacy(router, getStartServices);
-  registerDeleteScriptedFieldRouteLegacy(router, getStartServices);
-  registerUpdateScriptedFieldRouteLegacy(router, getStartServices);
+  registerCreateScriptedFieldRoute(router, getStartServices);
+  registerPutScriptedFieldRoute(router, getStartServices);
+  registerGetScriptedFieldRoute(router, getStartServices);
+  registerDeleteScriptedFieldRoute(router, getStartServices);
+  registerUpdateScriptedFieldRoute(router, getStartServices);
 
   // Runtime Fields API
   registerCreateRuntimeFieldRouteLegacy(router, getStartServices);

@@ -11,96 +11,79 @@ import { handleErrors } from '../util/handle_errors';
 import { fieldSpecSchema } from '../util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type {
-  DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
+  DataViewsServerPluginStartDependencies,
 } from '../../types';
-import {
-  SCRIPTED_FIELD_PATH,
-  SCRIPTED_FIELD_PATH_LEGACY,
-  SERVICE_KEY,
-  SERVICE_KEY_LEGACY,
-} from '../../constants';
 
-const createScriptedFieldRouteFactory =
-  (path: string, serviceKey: string) =>
-  (
-    router: IRouter,
-    getStartServices: StartServicesAccessor<
-      DataViewsServerPluginStartDependencies,
-      DataViewsServerPluginStart
-    >
-  ) => {
-    router.post(
-      {
-        path,
-        validate: {
-          params: schema.object(
-            {
-              id: schema.string({
-                minLength: 1,
-                maxLength: 1_000,
-              }),
-            },
-            { unknowns: 'allow' }
-          ),
-          body: schema.object({
-            field: fieldSpecSchema,
-          }),
-        },
-      },
-      router.handleLegacyErrors(
-        handleErrors(async (ctx, req, res) => {
-          const savedObjectsClient = ctx.core.savedObjects.client;
-          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-          const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const indexPatternsService = await dataViewsServiceFactory(
-            savedObjectsClient,
-            elasticsearchClient,
-            req
-          );
-          const id = req.params.id;
-          const { field } = req.body;
-          if (!field.scripted) {
-            throw new Error('Only scripted fields can be created.');
-          }
-
-          const indexPattern = await indexPatternsService.get(id);
-
-          if (indexPattern.fields.getByName(field.name)) {
-            throw new Error(`Field [name = ${field.name}] already exists.`);
-          }
-
-          indexPattern.fields.add({
-            ...field,
-            aggregatable: true,
-            searchable: true,
-          });
-
-          await indexPatternsService.updateSavedObject(indexPattern);
-
-          const fieldObject = indexPattern.fields.getByName(field.name);
-          if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);
-
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: JSON.stringify({
-              field: fieldObject.toSpec(),
-              [serviceKey]: indexPattern.toSpec(),
+export const registerCreateScriptedFieldRoute = (
+  router: IRouter,
+  getStartServices: StartServicesAccessor<
+    DataViewsServerPluginStartDependencies,
+    DataViewsServerPluginStart
+  >
+) => {
+  router.post(
+    {
+      path: '/api/index_patterns/index_pattern/{id}/scripted_field',
+      validate: {
+        params: schema.object(
+          {
+            id: schema.string({
+              minLength: 1,
+              maxLength: 1_000,
             }),
-          });
-        })
-      )
-    );
-  };
+          },
+          { unknowns: 'allow' }
+        ),
+        body: schema.object({
+          field: fieldSpecSchema,
+        }),
+      },
+    },
+    router.handleLegacyErrors(
+      handleErrors(async (ctx, req, res) => {
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const [, , { indexPatternsServiceFactory }] = await getStartServices();
+        const indexPatternsService = await indexPatternsServiceFactory(
+          savedObjectsClient,
+          elasticsearchClient,
+          req
+        );
+        const id = req.params.id;
+        const { field } = req.body;
 
-export const registerCreateScriptedFieldRoute = createScriptedFieldRouteFactory(
-  SCRIPTED_FIELD_PATH,
-  SERVICE_KEY
-);
+        if (!field.scripted) {
+          throw new Error('Only scripted fields can be created.');
+        }
 
-export const registerCreateScriptedFieldRouteLegacy = createScriptedFieldRouteFactory(
-  SCRIPTED_FIELD_PATH_LEGACY,
-  SERVICE_KEY_LEGACY
-);
+        const indexPattern = await indexPatternsService.get(id);
+
+        if (indexPattern.fields.getByName(field.name)) {
+          throw new Error(`Field [name = ${field.name}] already exists.`);
+        }
+
+        indexPattern.fields.add({
+          ...field,
+          aggregatable: true,
+          searchable: true,
+        });
+
+        await indexPatternsService.updateSavedObject(indexPattern);
+
+        const fieldObject = indexPattern.fields.getByName(field.name);
+        if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);
+
+        return res.ok({
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            field: fieldObject.toSpec(),
+            index_pattern: indexPattern.toSpec(),
+          }),
+        });
+      })
+    )
+  );
+};
