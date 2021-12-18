@@ -6,7 +6,9 @@
  */
 
 import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
@@ -15,15 +17,13 @@ import { EventsByDataset } from '../../../overview/components/events_by_dataset'
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
 import { InputsModelId } from '../../store/inputs/constants';
 import { TimelineEventsType } from '../../../../common/types/timeline';
-import { useSourcererDataView } from '../../containers/sourcerer';
-import {
-  isDetectionsAlertsTable,
-  getSourcererScopeName,
-  removeIgnoredAlertFilters,
-  TopNOption,
-} from './helpers';
+
+import { TopNOption } from './helpers';
 import * as i18n from './translations';
+import { getIndicesSelector, IndicesSelector } from './selectors';
+import { State } from '../../store';
 import { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const TopNContainer = styled.div`
   min-width: 600px;
@@ -89,7 +89,19 @@ const TopNComponent: React.FC<Props> = ({
     (value: string) => setView(value as TimelineEventsType),
     [setView]
   );
-  const { selectedPatterns } = useSourcererDataView(getSourcererScopeName({ timelineId, view }));
+  const indicesSelector = useMemo(getIndicesSelector, []);
+  const { all: allIndices, raw: rawIndices } = useSelector<State, IndicesSelector>(
+    (state) =>
+      indicesSelector(
+        state,
+        timelineId != null
+          ? defaultView === 'alert'
+            ? SourcererScopeName.detections
+            : SourcererScopeName.timeline
+          : SourcererScopeName.default
+      ),
+    deepEqual
+  );
 
   useEffect(() => {
     setView(defaultView);
@@ -99,20 +111,13 @@ const TopNComponent: React.FC<Props> = ({
     () => (
       <ViewSelect
         data-test-subj="view-select"
-        disabled={!isDetectionsAlertsTable(timelineId)}
+        disabled={options.length === 1}
         onChange={onViewSelected}
         options={options}
         valueOfSelected={view}
       />
     ),
-    [onViewSelected, options, timelineId, view]
-  );
-
-  // alert workflow statuses (e.g. open | closed) and other alert-specific
-  // filters must be ignored when viewing raw alerts
-  const applicableFilters = useMemo(
-    () => removeIgnoredAlertFilters({ filters, timelineId, view }),
-    [filters, timelineId, view]
+    [onViewSelected, options, view]
   );
 
   return (
@@ -129,11 +134,11 @@ const TopNComponent: React.FC<Props> = ({
           <EventsByDataset
             combinedQueries={combinedQueries}
             deleteQuery={deleteQuery}
-            filters={applicableFilters}
+            filters={filters}
             from={from}
             headerChildren={headerChildren}
             indexPattern={indexPattern}
-            indexNames={selectedPatterns}
+            indexNames={view === 'raw' ? rawIndices : allIndices}
             onlyField={field}
             paddingSize={paddingSize}
             query={query}
@@ -148,7 +153,7 @@ const TopNComponent: React.FC<Props> = ({
         ) : (
           <SignalsByCategory
             combinedQueries={combinedQueries}
-            filters={applicableFilters}
+            filters={filters}
             headerChildren={headerChildren}
             onlyField={field}
             paddingSize={paddingSize}
