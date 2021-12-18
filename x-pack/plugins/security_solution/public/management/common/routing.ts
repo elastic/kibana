@@ -6,10 +6,16 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { generatePath } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
-
+import { generatePath } from 'react-router-dom';
+import { appendSearch } from '../../common/components/link_to/helpers';
+import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
+import { EventFiltersPageLocation } from '../pages/event_filters/types';
+import { HostIsolationExceptionsPageLocation } from '../pages/host_isolation_exceptions/types';
+import { PolicyDetailsArtifactsPageLocation } from '../pages/policy/types';
+import { TrustedAppsListPageLocation } from '../pages/trusted_apps/state';
+import { AdministrationSubTab } from '../types';
 import {
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
@@ -19,17 +25,11 @@ import {
   MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from './constants';
-import { AdministrationSubTab } from '../types';
-import { appendSearch } from '../../common/components/link_to/helpers';
-import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
-import { TrustedAppsListPageLocation } from '../pages/trusted_apps/state';
-import { EventFiltersPageLocation } from '../pages/event_filters/types';
-import { HostIsolationExceptionsPageLocation } from '../pages/host_isolation_exceptions/types';
-import { PolicyDetailsArtifactsPageLocation } from '../pages/policy/types';
 
 // Taken from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
 type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;
@@ -209,6 +209,9 @@ const normalizeEventFiltersPageLocation = (
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
       ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
       ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
+      ...(!isDefaultOrMissing(location.included_policies, '')
+        ? { included_policies: location.included_policies }
+        : ''),
     };
   } else {
     return {};
@@ -216,7 +219,7 @@ const normalizeEventFiltersPageLocation = (
 };
 
 const normalizeHostIsolationExceptionsPageLocation = (
-  location?: Partial<EventFiltersPageLocation>
+  location?: Partial<HostIsolationExceptionsPageLocation>
 ): Partial<EventFiltersPageLocation> => {
   if (location) {
     return {
@@ -229,6 +232,9 @@ const normalizeHostIsolationExceptionsPageLocation = (
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
       ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
       ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
+      ...(!isDefaultOrMissing(location.included_policies, '')
+        ? { included_policies: location.included_policies }
+        : ''),
     };
   } else {
     return {};
@@ -283,6 +289,11 @@ export const extractTrustedAppsListPaginationParams = (query: querystring.Parsed
   ...extractListPaginationParams(query),
   included_policies: extractIncludedPolicies(query),
   excluded_policies: extractExcludedPolicies(query),
+});
+
+export const extractArtifactsListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
+  ...extractListPaginationParams(query),
+  included_policies: extractIncludedPolicies(query),
 });
 
 export const extractTrustedAppsListPageLocation = (
@@ -346,7 +357,7 @@ export const extractEventFiltetrsPageLocation = (
   const showParamValue = extractFirstParamValue(query, 'show') as EventFiltersPageLocation['show'];
 
   return {
-    ...extractListPaginationParams(query),
+    ...extractArtifactsListPaginationParams(query),
     show:
       showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,
     id: extractFirstParamValue(query, 'id'),
@@ -373,6 +384,7 @@ export const extractHostIsolationExceptionsPageLocation = (
 
   return {
     ...extractListPaginationParams(query),
+    included_policies: extractIncludedPolicies(query),
     show:
       showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,
     id: extractFirstParamValue(query, 'id'),
@@ -388,5 +400,18 @@ export const getHostIsolationExceptionsListPath = (
 
   return `${path}${appendSearch(
     querystring.stringify(normalizeHostIsolationExceptionsPageLocation(location))
+  )}`;
+};
+
+export const getPolicyHostIsolationExceptionsPath = (
+  policyId: string,
+  location?: Partial<PolicyDetailsArtifactsPageLocation>
+) => {
+  const path = generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  });
+  return `${path}${appendSearch(
+    querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
   )}`;
 };
