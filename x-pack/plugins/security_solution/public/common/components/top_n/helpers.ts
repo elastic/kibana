@@ -175,6 +175,11 @@ export const IGNORED_ALERT_FILTERS = [
   ALERT_START,
   ALERT_SYSTEM_STATUS,
   ALERT_UUID,
+  'signal.rule.building_block_type',
+  'signal.rule.id',
+  'signal.rule.name',
+  'signal.rule.threat_mapping',
+  'signal.status',
 ];
 
 /**
