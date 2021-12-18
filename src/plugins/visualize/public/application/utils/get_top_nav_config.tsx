@@ -14,7 +14,11 @@ import { parse } from 'query-string';
 
 import { Capabilities } from 'src/core/public';
 import { TopNavMenuData } from 'src/plugins/navigation/public';
-import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
+import {
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VisualizeInput,
+  getFullPath,
+} from '../../../../visualizations/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
@@ -45,11 +49,12 @@ interface VisualizeCapabilities {
   show: boolean;
 }
 
-interface TopNavConfigParams {
+export interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
   openInspector: () => void;
   originatingApp?: string;
+  originatingPath?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   hasUnappliedChanges: boolean;
   visInstance: VisualizeEditorVisInstance;
@@ -75,6 +80,7 @@ export const getTopNavConfig = (
     setHasUnsavedChanges,
     openInspector,
     originatingApp,
+    originatingPath,
     setOriginatingApp,
     hasUnappliedChanges,
     visInstance,
@@ -87,6 +93,7 @@ export const getTopNavConfig = (
     data,
     application,
     chrome,
+    overlays,
     history,
     share,
     setActiveUrl,
@@ -99,6 +106,8 @@ export const getTopNavConfig = (
     presentationUtil,
     usageCollection,
     getKibanaVersion,
+    savedObjects,
+    visualizations,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -117,8 +126,10 @@ export const getTopNavConfig = (
   /**
    * Called when the user clicks "Save" button.
    */
-  async function doSave(saveOptions: SavedObjectSaveOpts & { dashboardId?: string }) {
-    const newlyCreated = !Boolean(savedVis.id) || savedVis.copyOnSave;
+  async function doSave(
+    saveOptions: SavedObjectSaveOpts & { dashboardId?: string; copyOnSave?: boolean }
+  ) {
+    const newlyCreated = !Boolean(savedVis.id) || saveOptions.copyOnSave;
     // vis.title was not bound and it's needed to reflect title into visState
     stateContainer.transitions.setVis({
       title: savedVis.title,
@@ -129,7 +140,7 @@ export const getTopNavConfig = (
     setHasUnsavedChanges(false);
 
     try {
-      const id = await savedVis.save(saveOptions);
+      const id = await visualizations.saveVisualization(savedVis, saveOptions);
 
       if (id) {
         toastNotifications.addSuccess({
@@ -141,6 +152,8 @@ export const getTopNavConfig = (
           }),
           'data-test-subj': 'saveVisualizationSuccess',
         });
+
+        chrome.recentlyAccessed.add(getFullPath(id), savedVis.title, String(id));
 
         if ((originatingApp && saveOptions.returnToOrigin) || saveOptions.dashboardId) {
           if (!embeddableId) {
@@ -157,6 +170,8 @@ export const getTopNavConfig = (
           if (saveOptions.dashboardId) {
             path =
               saveOptions.dashboardId === 'new' ? '#/create' : `#/view/${saveOptions.dashboardId}`;
+          } else if (originatingPath) {
+            path = originatingPath;
           }
 
           if (stateTransfer) {
@@ -164,7 +179,7 @@ export const getTopNavConfig = (
               state: {
                 type: VISUALIZE_EMBEDDABLE_TYPE,
                 input: { savedObjectId: id },
-                embeddableId: savedVis.copyOnSave ? undefined : embeddableId,
+                embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
                 searchSessionId: data.search.session.getSessionId(),
               },
               path,
@@ -221,7 +236,8 @@ export const getTopNavConfig = (
       type: VISUALIZE_EMBEDDABLE_TYPE,
       searchSessionId: data.search.session.getSessionId(),
     };
-    stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state });
+
+    stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state, path: originatingPath });
   };
 
   const navigateToOriginatingApp = () => {
@@ -232,18 +248,17 @@ export const getTopNavConfig = (
 
   const allowByValue = dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
   const saveButtonLabel =
-    embeddableId || (!savedVis.id && allowByValue && originatingApp)
+    !savedVis.id && allowByValue && originatingApp
       ? i18n.translate('visualize.topNavMenu.saveVisualizationToLibraryButtonLabel', {
           defaultMessage: 'Save to library',
         })
-      : originatingApp && (embeddableId || savedVis.id)
+      : originatingApp && savedVis.id
       ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
           defaultMessage: 'Save as',
         })
       : i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
           defaultMessage: 'Save',
         });
-
   const showSaveAndReturn = originatingApp && (savedVis?.id || allowByValue);
 
   const showSaveButton =
@@ -282,7 +297,7 @@ export const getTopNavConfig = (
       }),
       testId: 'shareTopNavButton',
       run: (anchorElement) => {
-        if (share && !embeddableId) {
+        if (share) {
           const currentState = stateContainer.getState();
           const searchParams = parse(history.location.search);
           const params: VisualizeLocatorParams = {
@@ -325,8 +340,8 @@ export const getTopNavConfig = (
           });
         }
       },
-      // disable the Share button if no action specified
-      disableButton: !share || !!embeddableId,
+      // disable the Share button if no action specified and fot byValue visualizations
+      disableButton: !share || Boolean(!savedVis.id && allowByValue && originatingApp),
     },
     ...(originatingApp
       ? [
@@ -392,11 +407,10 @@ export const getTopNavConfig = (
                 const currentTitle = savedVis.title;
                 savedVis.title = newTitle;
                 embeddableHandler.updateInput({ title: newTitle });
-                savedVis.copyOnSave = newCopyOnSave;
                 savedVis.description = newDescription;
 
-                if (savedObjectsTagging && savedObjectsTagging.ui.hasTagDecoration(savedVis)) {
-                  savedVis.setTags(selectedTags);
+                if (savedObjectsTagging) {
+                  savedVis.tags = selectedTags;
                 }
 
                 const saveOptions = {
@@ -405,6 +419,7 @@ export const getTopNavConfig = (
                   onTitleDuplicate,
                   returnToOrigin,
                   dashboardId: !!dashboardId ? dashboardId : undefined,
+                  copyOnSave: newCopyOnSave,
                 };
 
                 // If we're adding to a dashboard and not saving to library,
@@ -457,9 +472,7 @@ export const getTopNavConfig = (
               let tagOptions: React.ReactNode | undefined;
 
               if (savedObjectsTagging) {
-                if (savedVis && savedObjectsTagging.ui.hasTagDecoration(savedVis)) {
-                  selectedTags = savedVis.getTags();
-                }
+                selectedTags = savedVis.tags || [];
                 tagOptions = (
                   <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
                     initialSelection={selectedTags}

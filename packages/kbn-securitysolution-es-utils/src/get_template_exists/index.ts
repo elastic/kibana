@@ -13,8 +13,11 @@ export const getTemplateExists = async (
   template: string
 ): Promise<boolean> => {
   return (
-    await esClient.indices.existsTemplate({
-      name: template,
-    })
+    await esClient.indices.existsTemplate(
+      {
+        name: template,
+      },
+      { meta: true }
+    )
   ).body;
 };

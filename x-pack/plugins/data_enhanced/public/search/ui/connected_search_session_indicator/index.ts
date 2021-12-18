@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export {
-  SearchSessionIndicatorDeps,
-  createConnectedSearchSessionIndicator,
-} from './connected_search_session_indicator';
+export type { SearchSessionIndicatorDeps } from './connected_search_session_indicator';
+export { createConnectedSearchSessionIndicator } from './connected_search_session_indicator';

@@ -165,8 +165,6 @@ describe('Detection rules, EQL', () => {
       .invoke('text')
       .then((text) => {
         expect(text).contains(this.rule.name);
-        expect(text).contains(this.rule.severity.toLowerCase());
-        expect(text).contains(this.rule.riskScore);
       });
   });
 });
@@ -221,7 +219,6 @@ describe('Detection rules, sequence EQL', () => {
         cy.log('ALERT_DATA_GRID', text);
         expect(text).contains(this.rule.name);
         expect(text).contains(this.rule.severity.toLowerCase());
-        expect(text).contains(this.rule.riskScore);
       });
   });
 });

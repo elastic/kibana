@@ -25,7 +25,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await ml.testResources.deleteIndexPatternByTitle('ft_module_apache');
       await ml.testResources.deleteIndexPatternByTitle('ft_module_auditbeat');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_apm');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_apm_transaction');
       await ml.testResources.deleteIndexPatternByTitle('ft_module_heartbeat');
       await ml.testResources.deleteIndexPatternByTitle('ft_module_logs');
       await ml.testResources.deleteIndexPatternByTitle('ft_module_nginx');
@@ -44,9 +44,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/categorization');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/categorization_small');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_apache');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_auditbeat');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_apm');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_apm_transaction');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_heartbeat');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_logs');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_nginx');
@@ -71,8 +72,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./annotations'));
     loadTestFile(require.resolve('./anomaly_detectors'));
     loadTestFile(require.resolve('./calendars'));
+    loadTestFile(require.resolve('./datafeeds'));
     loadTestFile(require.resolve('./data_frame_analytics'));
-    loadTestFile(require.resolve('./data_visualizer'));
     loadTestFile(require.resolve('./fields_service'));
     loadTestFile(require.resolve('./filters'));
     loadTestFile(require.resolve('./indices'));

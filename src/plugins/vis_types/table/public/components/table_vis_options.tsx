@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import React, { useEffect, useMemo } from 'react';
 import { EuiIconTip, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { search } from '../../../../data/public';
@@ -91,6 +91,16 @@ function TableOptions({
         value={stateParams.showMetricsAtAllLevels}
         setValue={setValue}
         data-test-subj="showMetricsAtAllLevels"
+      />
+
+      <SwitchOption
+        label={i18n.translate('visTypeTable.params.autoFitRow', {
+          defaultMessage: 'Auto fit rows to content',
+        })}
+        paramName="autoFitRowToContent"
+        value={stateParams.autoFitRowToContent}
+        setValue={setValue}
+        data-test-subj="autoFitRowToContent"
       />
 
       <SwitchOption

@@ -25,7 +25,7 @@ import {
 import { AlertForm } from '../../../triggers_actions_ui/public/application/sections/alert_form/alert_form';
 import ActionForm from '../../../triggers_actions_ui/public/application/sections/action_connector_form/action_form';
 import { Legacy } from '../legacy_shims';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
 
 interface AlertAction {
@@ -50,17 +50,13 @@ const initLegacyShims = () => {
     ruleTypeRegistry: ruleTypeRegistryMock.create(),
   };
   const data = { query: { timefilter: { timefilter: {} } } } as any;
-  const ngInjector = {} as angular.auto.IInjectorService;
-  Legacy.init(
-    {
-      core: coreMock.createStart(),
-      data,
-      isCloud: false,
-      triggersActionsUi,
-      usageCollection: {},
-    } as any,
-    ngInjector
-  );
+  Legacy.init({
+    core: coreMock.createStart(),
+    data,
+    isCloud: false,
+    triggersActionsUi,
+    usageCollection: {},
+  } as any);
 };
 
 const ALERTS_FEATURE_ID = 'alerts';

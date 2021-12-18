@@ -20,6 +20,7 @@ export interface Tab {
   id: TabId;
   name: any;
   disabled: boolean;
+  betaTag?: JSX.Element;
 }
 
 interface Props {
@@ -47,6 +48,13 @@ function getTabs(disableLinks: boolean): Tab[] {
       id: 'data_frame_analytics',
       name: i18n.translate('xpack.ml.navMenu.dataFrameAnalyticsTabLinkText', {
         defaultMessage: 'Data Frame Analytics',
+      }),
+      disabled: disableLinks,
+    },
+    {
+      id: 'trained_models',
+      name: i18n.translate('xpack.ml.navMenu.trainedModelsTabLinkText', {
+        defaultMessage: 'Model Management',
       }),
       disabled: disableLinks,
     },
@@ -91,6 +99,12 @@ const TAB_DATA: Record<TabId, TabData> = {
     testSubject: 'mlMainTab dataFrameAnalytics',
     name: i18n.translate('xpack.ml.dataFrameAnalyticsTabLabel', {
       defaultMessage: 'Data Frame Analytics',
+    }),
+  },
+  trained_models: {
+    testSubject: 'mlMainTab modelManagement',
+    name: i18n.translate('xpack.ml.trainedModelsTabLabel', {
+      defaultMessage: 'Trained Models',
     }),
   },
   datavisualizer: {

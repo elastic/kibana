@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IlmPutLifecycleRequest } from '@elastic/elasticsearch/api/types';
+import type { IlmPutLifecycleRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export const reportingIlmPolicy: IlmPutLifecycleRequest['body'] = {
   policy: {

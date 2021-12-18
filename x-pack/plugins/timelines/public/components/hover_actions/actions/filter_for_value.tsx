@@ -9,13 +9,13 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
-import { stopPropagationAndPreventDefault } from '../../../../common';
+import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { createFilter, getAdditionalScreenReaderOnlyContext } from '../utils';
 import { HoverActionComponentProps, FilterValueFnArgs } from './types';
 
-export const FILTER_FOR_VALUE = i18n.translate('xpack.timelines.hoverActions.filterForValue', {
-  defaultMessage: 'Filter for value',
+export const FILTER_FOR_VALUE = i18n.translate('xpack.timelines.hoverActions.filterIn', {
+  defaultMessage: 'Filter In',
 });
 export const FILTER_FOR_VALUE_KEYBOARD_SHORTCUT = 'f';
 
@@ -31,6 +31,7 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
     onFilterAdded,
     ownFocus,
     onClick,
+    size,
     showTooltip = false,
     value,
   }) => {
@@ -74,6 +75,7 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
             data-test-subj="filter-for-value"
             iconType="plusInCircle"
             onClick={filterForValueFn}
+            size={size}
             title={FILTER_FOR_VALUE}
           >
             {FILTER_FOR_VALUE}
@@ -87,9 +89,10 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
             iconSize="s"
             iconType="plusInCircle"
             onClick={filterForValueFn}
+            size={size}
           />
         ),
-      [Component, defaultFocusedButtonRef, filterForValueFn]
+      [Component, defaultFocusedButtonRef, filterForValueFn, size]
     );
 
     return showTooltip ? (

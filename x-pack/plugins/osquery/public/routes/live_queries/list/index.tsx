@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { ActionsTable } from '../../../actions/actions_table';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const LiveQueriesPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
@@ -24,15 +23,14 @@ const LiveQueriesPageComponent = () => {
     () => (
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.liveQueriesHistory.pageTitle"
                 defaultMessage="Live queries history"
               />
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

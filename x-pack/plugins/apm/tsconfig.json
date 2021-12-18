@@ -19,11 +19,9 @@
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/apm_oss/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
-    { "path": "../../../src/plugins/index_pattern_management/tsconfig.json" },
     { "path": "../../../src/plugins/inspector/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },

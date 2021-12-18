@@ -28,10 +28,15 @@ export const useWorkpad = (
   getRedirectPath: (workpadId: string) => string
 ): [CanvasWorkpad | undefined, string | Error | undefined] => {
   const workpadService = useWorkpadService();
+  const workpadResolve = workpadService.resolve;
   const platformService = usePlatformService();
   const dispatch = useDispatch();
   const storedWorkpad = useSelector(getWorkpad);
   const [error, setError] = useState<string | Error | undefined>(undefined);
+
+  const [resolveInfo, setResolveInfo] = useState<
+    { id: string; aliasId: string | undefined; outcome: string } | undefined
+  >(undefined);
 
   useEffect(() => {
     (async () => {
@@ -40,24 +45,40 @@ export const useWorkpad = (
           outcome,
           aliasId,
           workpad: { assets, ...workpad },
-        } = await workpadService.resolve(workpadId);
+        } = await workpadResolve(workpadId);
 
-        if (outcome === 'conflict') {
+        setResolveInfo({ aliasId, outcome, id: workpadId });
+
+        // If it's an alias match, we know we are going to redirect so don't even dispatch that we got the workpad
+        if (storedWorkpad.id !== workpadId && outcome !== 'aliasMatch') {
           workpad.aliasId = aliasId;
-        }
 
-        dispatch(setAssets(assets));
-        dispatch(setWorkpad(workpad, { loadPages }));
-        dispatch(setZoomScale(1));
-
-        if (outcome === 'aliasMatch' && platformService.redirectLegacyUrl && aliasId) {
-          platformService.redirectLegacyUrl(`#${getRedirectPath(aliasId)}`, getWorkpadLabel());
+          dispatch(setAssets(assets));
+          dispatch(setWorkpad(workpad, { loadPages }));
+          dispatch(setZoomScale(1));
         }
       } catch (e) {
         setError(e as Error | string);
       }
     })();
-  }, [workpadId, dispatch, setError, loadPages, workpadService, getRedirectPath, platformService]);
+  }, [workpadId, dispatch, setError, loadPages, workpadResolve, storedWorkpad.id]);
+
+  useEffect(() => {
+    // If the resolved info is not for the current workpad id, bail out
+    if (resolveInfo && resolveInfo.id !== workpadId) {
+      return;
+    }
+
+    (async () => {
+      if (!resolveInfo) return;
+
+      const { aliasId, outcome } = resolveInfo;
+      if (outcome === 'aliasMatch' && platformService.redirectLegacyUrl && aliasId) {
+        const redirectPath = getRedirectPath(aliasId);
+        await platformService.redirectLegacyUrl(`#${redirectPath}`, getWorkpadLabel());
+      }
+    })();
+  }, [workpadId, resolveInfo, getRedirectPath, platformService]);
 
   return [storedWorkpad.id === workpadId ? storedWorkpad : undefined, error];
 };

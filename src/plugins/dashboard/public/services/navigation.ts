@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { NavigationPublicPluginStart } from '../../../navigation/public';
+export type { NavigationPublicPluginStart } from '../../../navigation/public';

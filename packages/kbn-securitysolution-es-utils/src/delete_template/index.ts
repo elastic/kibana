@@ -13,8 +13,11 @@ export const deleteTemplate = async (
   name: string
 ): Promise<unknown> => {
   return (
-    await esClient.indices.deleteTemplate({
-      name,
-    })
+    await esClient.indices.deleteTemplate(
+      {
+        name,
+      },
+      { meta: true }
+    )
   ).body;
 };

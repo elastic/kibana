@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { Filter, IndexPatternField, IndexPattern, ISearchSource } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { IndexPatternField, IndexPattern, ISearchSource } from 'src/plugins/data/public';
 import type { Query } from 'src/plugins/data/common';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
@@ -16,10 +17,11 @@ import {
   getTimeFilter,
   getSearchService,
 } from '../../../kibana_services';
+import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { DataRequestAbortError } from '../../util/data_request';
-import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
+import { expandToTileBoundaries } from '../../util/geo_tile_utils';
 import { IVectorSource } from '../vector_source';
 import { TimeRange } from '../../../../../../../src/plugins/data/common';
 import {
@@ -348,12 +350,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       this.indexPattern = await getIndexPatternService().get(this.getIndexPatternId());
       return this.indexPattern;
     } catch (error) {
-      throw new Error(
-        i18n.translate('xpack.maps.source.esSource.noIndexPatternErrorMessage', {
-          defaultMessage: `Unable to find Index pattern for id: {indexPatternId}`,
-          values: { indexPatternId: this.getIndexPatternId() },
-        })
-      );
+      throw new Error(getDataViewNotFoundMessage(this.getIndexPatternId()));
     }
   }
 
@@ -372,7 +369,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     if (!geoField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
-          defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,
+          defaultMessage: `Data view {indexPatternTitle} no longer contains the geo field {geoField}`,
           values: { indexPatternTitle: indexPattern.title, geoField: this.getGeoFieldName() },
         })
       );

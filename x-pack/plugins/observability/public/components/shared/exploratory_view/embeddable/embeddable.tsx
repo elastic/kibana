@@ -10,11 +10,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { AllSeries, useTheme } from '../../../..';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
-import { ReportViewType } from '../types';
+import { AppDataType, ReportViewType } from '../types';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
-import { LensPublicStart } from '../../../../../../lens/public';
+import { LensPublicStart, XYState } from '../../../../../../lens/public';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
 import { IndexPatternState } from '../hooks/use_app_index_pattern';
+import { ReportConfigMap } from '../contexts/exploatory_view_config';
+import { obsvReportConfigMap } from '../obsv_exploratory_view';
 
 export interface ExploratoryEmbeddableProps {
   reportType: ReportViewType;
@@ -22,6 +24,10 @@ export interface ExploratoryEmbeddableProps {
   appendTitle?: JSX.Element;
   title: string | JSX.Element;
   showCalculationMethod?: boolean;
+  axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
+  legendIsVisible?: boolean;
+  dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
+  reportConfigMap?: ReportConfigMap;
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
@@ -37,6 +43,9 @@ export default function Embeddable({
   appendTitle,
   indexPatterns,
   lens,
+  axisTitlesVisibility,
+  legendIsVisible,
+  reportConfigMap = {},
   showCalculationMethod = false,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
@@ -46,7 +55,13 @@ export default function Embeddable({
   const [operationType, setOperationType] = useState(series?.operationType);
   const theme = useTheme();
 
-  const layerConfigs: LayerConfig[] = getLayerConfigs(attributes, reportType, theme, indexPatterns);
+  const layerConfigs: LayerConfig[] = getLayerConfigs(
+    attributes,
+    reportType,
+    theme,
+    indexPatterns,
+    { ...reportConfigMap, ...obsvReportConfigMap }
+  );
 
   if (layerConfigs.length < 1) {
     return null;
@@ -57,11 +72,20 @@ export default function Embeddable({
     return <EuiText>No lens component</EuiText>;
   }
 
+  const attributesJSON = lensAttributes.getJSON();
+
+  (attributesJSON.state.visualization as XYState).axisTitlesVisibilitySettings =
+    axisTitlesVisibility;
+
+  if (typeof legendIsVisible !== 'undefined') {
+    (attributesJSON.state.visualization as XYState).legend.isVisible = legendIsVisible;
+  }
+
   return (
     <Wrapper>
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h3>{title}</h3>
           </EuiTitle>
         </EuiFlexItem>
@@ -81,7 +105,7 @@ export default function Embeddable({
         id="exploratoryView"
         style={{ height: '100%' }}
         timeRange={series?.time}
-        attributes={lensAttributes.getJSON()}
+        attributes={attributesJSON}
         onBrushEnd={({ range }) => {}}
       />
     </Wrapper>
@@ -92,7 +116,7 @@ const Wrapper = styled.div`
   height: 100%;
   &&& {
     > :nth-child(2) {
-      height: calc(100% - 56px);
+      height: calc(100% - 32px);
     }
   }
 `;

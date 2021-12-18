@@ -8,7 +8,7 @@
 import { transformValidate, transformValidateBulkError } from './validate';
 import { BulkError } from '../utils';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
-import { getAlertMock, getRuleExecutionStatuses } from '../__mocks__/request_responses';
+import { getAlertMock, getRuleExecutionStatusSucceeded } from '../__mocks__/request_responses';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
@@ -121,12 +121,12 @@ describe.each([
     });
 
     test('it should do a validation correctly of a rule id with ruleStatus passed in', () => {
-      const ruleStatuses = getRuleExecutionStatuses();
+      const ruleStatus = getRuleExecutionStatusSucceeded();
       const ruleAlert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       const validatedOrError = transformValidateBulkError(
         'rule-1',
         ruleAlert,
-        ruleStatuses,
+        ruleStatus,
         isRuleRegistryEnabled
       );
       const expected: RulesSchema = {

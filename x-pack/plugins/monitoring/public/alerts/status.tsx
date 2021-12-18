@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiToolTip, EuiHealth } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CommonAlertStatus, AlertState } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
@@ -64,10 +64,12 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
           {showOnlyCount ? (
             count
           ) : (
-            <FormattedMessage
-              id="xpack.monitoring.alerts.status.clearText"
-              defaultMessage="Clear"
-            />
+            <span data-test-subj="alertStatusText">
+              <FormattedMessage
+                id="xpack.monitoring.alerts.status.clearText"
+                defaultMessage="Clear"
+              />
+            </span>
           )}
         </EuiHealth>
       </EuiToolTip>

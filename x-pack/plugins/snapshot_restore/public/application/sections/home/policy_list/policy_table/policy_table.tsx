@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -359,7 +359,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
     toolsRight: [
       <EuiButton
         key="reloadPolicies"
-        color="secondary"
+        color="success"
         iconType="refresh"
         onClick={reload}
         data-test-subj="reloadButton"

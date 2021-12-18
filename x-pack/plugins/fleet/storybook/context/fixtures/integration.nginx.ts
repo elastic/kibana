@@ -7,7 +7,7 @@
 import type { GetInfoResponse } from '../../../public/types';
 import { KibanaAssetType, ElasticsearchAssetType } from '../../../common/types';
 
-export const response: GetInfoResponse['response'] = {
+export const item: GetInfoResponse['item'] = {
   name: 'nginx',
   title: 'Nginx',
   version: '0.7.0',
@@ -252,6 +252,7 @@ export const response: GetInfoResponse['response'] = {
       lens: [],
       map: [],
       security_rule: [],
+      tag: [],
     },
     elasticsearch: {
       ingest_pipeline: [
@@ -294,6 +295,7 @@ export const response: GetInfoResponse['response'] = {
       ilm_policy: [],
       index_template: [],
       transform: [],
+      ml_model: [],
     },
   },
   policy_templates: [

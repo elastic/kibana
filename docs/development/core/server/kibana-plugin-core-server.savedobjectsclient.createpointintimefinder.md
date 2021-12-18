@@ -22,12 +22,12 @@ createPointInTimeFinder<T = unknown, A = unknown>(findOptions: SavedObjectsCreat
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  findOptions | <code>SavedObjectsCreatePointInTimeFinderOptions</code> |  |
-|  dependencies | <code>SavedObjectsCreatePointInTimeFinderDependencies</code> |  |
+|  findOptions | SavedObjectsCreatePointInTimeFinderOptions |  |
+|  dependencies | SavedObjectsCreatePointInTimeFinderDependencies |  |
 
 <b>Returns:</b>
 
-`ISavedObjectsPointInTimeFinder<T, A>`
+ISavedObjectsPointInTimeFinder&lt;T, A&gt;
 
 ## Example
 
@@ -48,6 +48,5 @@ for await (const response of finder.find()) {
     await finder.close();
   }
 }
-
 ```
 

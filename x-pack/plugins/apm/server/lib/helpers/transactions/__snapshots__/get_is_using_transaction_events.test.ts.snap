@@ -1,0 +1,108 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getIsUsingTransactionEvents with config xpack.apm.searchAggregatedTransactions: always should query for data when kuery is set 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "exists": Object {
+              "field": "transaction.duration.histogram",
+            },
+          },
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "match_phrase": Object {
+                    "proccessor.event": "transaction",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  },
+  "terminate_after": 1,
+}
+`;
+
+exports[`getIsUsingTransactionEvents with config xpack.apm.searchAggregatedTransactions: auto should query for data once if metrics data found 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "exists": Object {
+              "field": "transaction.duration.histogram",
+            },
+          },
+        ],
+      },
+    },
+  },
+  "terminate_after": 1,
+}
+`;
+
+exports[`getIsUsingTransactionEvents with config xpack.apm.searchAggregatedTransactions: auto should query for data twice if metrics data not found 1`] = `
+Array [
+  Array [
+    "get_has_aggregated_transactions",
+    Object {
+      "apm": Object {
+        "events": Array [
+          "metric",
+        ],
+      },
+      "body": Object {
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "exists": Object {
+                  "field": "transaction.duration.histogram",
+                },
+              },
+            ],
+          },
+        },
+      },
+      "terminate_after": 1,
+    },
+  ],
+  Array [
+    "get_has_transactions",
+    Object {
+      "apm": Object {
+        "events": Array [
+          "transaction",
+        ],
+      },
+      "body": Object {
+        "query": Object {
+          "bool": Object {
+            "filter": Array [],
+          },
+        },
+      },
+      "terminate_after": 1,
+    },
+  ],
+]
+`;

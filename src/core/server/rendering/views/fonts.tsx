@@ -14,7 +14,6 @@ import { RenderingMetadata } from '../types';
 
 interface Props {
   url: RenderingMetadata['uiPublicUrl'];
-  themeVersion?: string;
 }
 
 interface FontFace {
@@ -165,158 +164,6 @@ const getInter = (url: string): FontFace => {
   };
 };
 
-const getInterUi = (url: string): FontFace => {
-  return {
-    family: 'Inter UI',
-    variants: [
-      {
-        style: 'normal',
-        weight: 100,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-Thin-BETA.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-Thin-BETA.woff`,
-        ],
-      },
-      {
-        style: 'italic',
-        weight: 100,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-ThinItalic-BETA.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-ThinItalic-BETA.woff`,
-        ],
-      },
-      {
-        style: 'normal',
-        weight: 200,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-ExtraLight-BETA.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-ExtraLight-BETA.woff`,
-        ],
-      },
-      {
-        style: 'italic',
-        weight: 200,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-ExtraLightItalic-BETA.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-ExtraLightItalic-BETA.woff`,
-        ],
-      },
-      {
-        style: 'normal',
-        weight: 300,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-Light-BETA.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-Light-BETA.woff`,
-        ],
-      },
-      {
-        style: 'italic',
-        weight: 300,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-LightItalic-BETA.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-LightItalic-BETA.woff`,
-        ],
-      },
-      {
-        style: 'normal',
-        weight: 400,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-Regular.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-Regular.woff`,
-        ],
-      },
-      {
-        style: 'italic',
-        weight: 400,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-Italic.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-Italic.woff`,
-        ],
-      },
-      {
-        style: 'normal',
-        weight: 500,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-Medium.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-Medium.woff`,
-        ],
-      },
-      {
-        style: 'italic',
-        weight: 500,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-MediumItalic.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-MediumItalic.woff`,
-        ],
-      },
-      {
-        style: 'normal',
-        weight: 600,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-SemiBold.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-SemiBold.woff`,
-        ],
-      },
-      {
-        style: 'italic',
-        weight: 600,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-SemiBoldItalic.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-SemiBoldItalic.woff`,
-        ],
-      },
-      {
-        style: 'normal',
-        weight: 700,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-Bold.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-Bold.woff`,
-        ],
-      },
-      {
-        style: 'italic',
-        weight: 700,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-BoldItalic.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-BoldItalic.woff`,
-        ],
-      },
-      {
-        style: 'normal',
-        weight: 800,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-ExtraBold.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-ExtraBold.woff`,
-        ],
-      },
-      {
-        style: 'italic',
-        weight: 800,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-ExtraBoldItalic.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-ExtraBoldItalic.woff`,
-        ],
-      },
-      {
-        style: 'normal',
-        weight: 900,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-Black.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-Black.woff`,
-        ],
-      },
-      {
-        style: 'italic',
-        weight: 900,
-        sources: [
-          `${url}/fonts/inter_ui/Inter-UI-BlackItalic.woff2`,
-          `${url}/fonts/inter_ui/Inter-UI-BlackItalic.woff`,
-        ],
-      },
-    ],
-  };
-};
-
 const getRoboto = (url: string): FontFace => {
   return {
     family: 'Roboto Mono',
@@ -372,11 +219,8 @@ const getRoboto = (url: string): FontFace => {
   };
 };
 
-export const Fonts: FunctionComponent<Props> = ({ url, themeVersion }) => {
-  /**
-   * If `themeVersion` is not provided, we want to fallback to the newest font family `Inter`
-   */
-  const sansFont = themeVersion === 'v7' ? getInterUi(url) : getInter(url);
+export const Fonts: FunctionComponent<Props> = ({ url }) => {
+  const sansFont = getInter(url);
   const codeFont = getRoboto(url);
 
   return (

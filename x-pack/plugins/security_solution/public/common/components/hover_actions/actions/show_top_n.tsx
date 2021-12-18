@@ -14,14 +14,14 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Filter } from '@kbn/es-query';
 import { StatefulTopN } from '../../top_n';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { SourcererScopeName } from '../../../store/sourcerer/model';
-import { useSourcererScope } from '../../../containers/sourcerer';
+import { useSourcererDataView } from '../../../containers/sourcerer';
 import { TooltipWithKeyboardShortcut } from '../../accessibility';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from '../keyboard_shortcut_constants';
-import { Filter } from '../../../../../../../../src/plugins/data/public';
 
 const SHOW_TOP = (fieldName: string) =>
   i18n.translate('xpack.securitySolution.hoverActions.showTopTooltip', {
@@ -30,33 +30,49 @@ const SHOW_TOP = (fieldName: string) =>
   });
 
 interface Props {
+  className?: string;
   /** When `Component` is used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality.
    * When `Component` is used with `EuiContextMenu`, we pass EuiContextMenuItem to render the right style.
    */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   enablePopOver?: boolean;
   field: string;
+  flush?: 'left' | 'right' | 'both';
   globalFilters?: Filter[];
+  iconSide?: 'left' | 'right';
+  iconType?: string;
+  isExpandable?: boolean;
   onClick: () => void;
   onFilterAdded?: () => void;
   ownFocus: boolean;
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   showTooltip?: boolean;
   showTopN: boolean;
+  showLegend?: boolean;
   timelineId?: string | null;
+  title?: string;
   value?: string[] | string | null;
 }
 
 export const ShowTopNButton: React.FC<Props> = React.memo(
   ({
+    className,
     Component,
     enablePopOver,
     field,
+    flush,
+    iconSide,
+    iconType,
+    isExpandable,
     onClick,
     onFilterAdded,
     ownFocus,
+    paddingSize,
+    showLegend,
     showTooltip = true,
     showTopN,
     timelineId,
+    title,
     value,
     globalFilters,
   }) => {
@@ -69,32 +85,38 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
           )
         ? SourcererScopeName.detections
         : SourcererScopeName.default;
-    const { browserFields, indexPattern } = useSourcererScope(activeScope);
+    const { browserFields, indexPattern } = useSourcererDataView(activeScope);
 
+    const icon = iconType ?? 'visBarVertical';
+    const side = iconSide ?? 'left';
+    const buttonTitle = title ?? SHOW_TOP(field);
     const basicButton = useMemo(
       () =>
         Component ? (
           <Component
-            aria-label={SHOW_TOP(field)}
+            aria-label={buttonTitle}
+            className={className}
             data-test-subj="show-top-field"
-            icon="visBarVertical"
-            iconType="visBarVertical"
+            icon={icon}
+            iconType={icon}
+            iconSide={side}
+            flush={flush}
             onClick={onClick}
-            title={SHOW_TOP(field)}
+            title={buttonTitle}
           >
-            {SHOW_TOP(field)}
+            {buttonTitle}
           </Component>
         ) : (
           <EuiButtonIcon
-            aria-label={SHOW_TOP(field)}
+            aria-label={buttonTitle}
             className="securitySolution__hoverActionButton"
             data-test-subj="show-top-field"
             iconSize="s"
-            iconType="visBarVertical"
+            iconType={icon}
             onClick={onClick}
           />
         ),
-      [Component, field, onClick]
+      [Component, buttonTitle, className, flush, icon, onClick, side]
     );
 
     const button = useMemo(
@@ -107,7 +129,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
                   field,
                   value,
                 })}
-                content={SHOW_TOP(field)}
+                content={buttonTitle}
                 shortcut={SHOW_TOP_N_KEYBOARD_SHORTCUT}
                 showShortcut={ownFocus}
               />
@@ -118,7 +140,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
         ) : (
           basicButton
         ),
-      [basicButton, field, ownFocus, showTooltip, showTopN, value]
+      [basicButton, buttonTitle, field, ownFocus, showTooltip, showTopN, value]
     );
 
     const topNPannel = useMemo(
@@ -128,14 +150,36 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
           field={field}
           indexPattern={indexPattern}
           onFilterAdded={onFilterAdded}
+          paddingSize={paddingSize}
+          showLegend={showLegend}
           timelineId={timelineId ?? undefined}
           toggleTopN={onClick}
           value={value}
           globalFilters={globalFilters}
         />
       ),
-      [browserFields, field, indexPattern, onClick, onFilterAdded, timelineId, value, globalFilters]
+      [
+        browserFields,
+        field,
+        indexPattern,
+        onFilterAdded,
+        paddingSize,
+        showLegend,
+        timelineId,
+        onClick,
+        value,
+        globalFilters,
+      ]
     );
+
+    if (isExpandable) {
+      return (
+        <>
+          {basicButton}
+          {showTopN && topNPannel}
+        </>
+      );
+    }
 
     return showTopN ? (
       enablePopOver ? (

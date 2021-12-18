@@ -9,7 +9,6 @@ import React, { memo, useCallback, useState, useMemo } from 'react';
 import {
   CommonProps,
   EuiPanel,
-  EuiText,
   EuiAccordion,
   EuiTitle,
   EuiCheckbox,
@@ -19,11 +18,12 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { getEmptyValue } from '../../../common/components/empty_value';
 import { CriteriaConditions, CriteriaConditionsProps } from './components/criteria_conditions';
 import { AnyArtifact } from './types';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { DESCRIPTION_LABEL } from './components/translations';
+import { DescriptionField } from './components/description_field';
 
 const CardContainerPanel = styled(EuiSplitPanel.Outer)`
   &.artifactEntryCardMinified + &.artifactEntryCardMinified {
@@ -103,13 +103,11 @@ export const ArtifactEntryCardMinified = memo(
         <EuiSplitPanel.Inner paddingSize="s">
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
             <EuiTitle size="xxs">
-              <h5 data-test-subj={getTestId('descriptionTitle')}>{'Description'}</h5>
+              <h5 data-test-subj={getTestId('descriptionTitle')}>{DESCRIPTION_LABEL}</h5>
             </EuiTitle>
-            <EuiText>
-              <p data-test-subj={getTestId('description')}>
-                {artifact.description || getEmptyValue()}
-              </p>
-            </EuiText>
+            <DescriptionField data-test-subj={getTestId('description')}>
+              {artifact.description}
+            </DescriptionField>
           </EuiPanel>
 
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">

@@ -23,23 +23,16 @@ import React, { useCallback, useState } from 'react';
 import {
   ImportDataResponse,
   ImportDataProps,
-  ImportRulesResponseError,
-  ImportResponseError,
 } from '../../../detections/containers/detection_engine/rules';
-import {
-  displayErrorToast,
-  displaySuccessToast,
-  useStateToaster,
-  errorToToaster,
-} from '../toasters';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 import * as i18n from './translations';
 
 interface ImportDataModalProps {
   checkBoxLabel: string;
   closeModal: () => void;
   description: string;
-  errorMessage: string;
-  failedDetailed: (id: string, statusCode: number, message: string) => string;
+  errorMessage: (totalCount: number) => string;
+  failedDetailed: (message: string) => string;
   importComplete: () => void;
   importData: (arg: ImportDataProps) => Promise<ImportDataResponse>;
   showCheckBox: boolean;
@@ -49,12 +42,6 @@ interface ImportDataModalProps {
   successMessage: (totalCount: number) => string;
   title: string;
 }
-
-const isImportRulesResponseError = (
-  error: ImportRulesResponseError | ImportResponseError
-): error is ImportRulesResponseError => {
-  return (error as ImportRulesResponseError).rule_id !== undefined;
-};
 
 /**
  * Modal component for importing Rules from a json file
@@ -77,7 +64,7 @@ export const ImportDataModalComponent = ({
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [overwrite, setOverwrite] = useState(false);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError, addSuccess } = useAppToasts();
 
   const cleanupAndCloseModal = useCallback(() => {
     setIsImporting(false);
@@ -97,31 +84,39 @@ export const ImportDataModalComponent = ({
           signal: abortCtrl.signal,
         });
 
-        // TODO: Improve error toast details for better debugging failed imports
-        // e.g. When success == true && success_count === 0 that means no rules were overwritten, etc
         if (importResponse.success) {
-          displaySuccessToast(successMessage(importResponse.success_count), dispatchToaster);
+          addSuccess(successMessage(importResponse.success_count));
         }
         if (importResponse.errors.length > 0) {
-          const formattedErrors = importResponse.errors.map((e) =>
-            failedDetailed(
-              isImportRulesResponseError(e) ? e.rule_id : e.id,
-              e.error.status_code,
-              e.error.message
-            )
+          const formattedErrors = importResponse.errors.map((e) => failedDetailed(e.error.message));
+          const error: Error & { raw_network_error?: object } = new Error(
+            formattedErrors.join('. ')
           );
-          displayErrorToast(errorMessage, formattedErrors, dispatchToaster);
+          error.stack = undefined;
+          error.name = 'Network errors';
+          error.raw_network_error = importResponse;
+          addError(error, { title: errorMessage(importResponse.errors.length) });
         }
 
         importComplete();
         cleanupAndCloseModal();
       } catch (error) {
         cleanupAndCloseModal();
-        errorToToaster({ title: errorMessage, error, dispatchToaster });
+        addError(error, { title: errorMessage(1) });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedFiles, overwrite]);
+  }, [
+    selectedFiles,
+    overwrite,
+    addError,
+    addSuccess,
+    cleanupAndCloseModal,
+    errorMessage,
+    failedDetailed,
+    importComplete,
+    importData,
+    successMessage,
+  ]);
 
   const handleCloseModal = useCallback(() => {
     setSelectedFiles(null);

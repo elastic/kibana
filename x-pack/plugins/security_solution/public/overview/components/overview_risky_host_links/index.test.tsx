@@ -9,7 +9,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { cloneDeep } from 'lodash/fp';
 import { render, screen } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
 import { mockTheme } from '../overview_cti_links/mock';
 import { RiskyHostLinks } from '.';
@@ -22,11 +22,11 @@ import {
 } from '../../../common/mock';
 import { useRiskyHostsDashboardButtonHref } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
 import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links';
-import { useHostsRiskScore } from '../../containers/overview_risky_host_links/use_hosts_risk_score';
+import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../../containers/overview_risky_host_links/use_hosts_risk_score');
+jest.mock('../../../common/containers/hosts_risk/use_hosts_risk_score');
 const useHostsRiskScoreMock = useHostsRiskScore as jest.Mock;
 
 jest.mock('../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href');

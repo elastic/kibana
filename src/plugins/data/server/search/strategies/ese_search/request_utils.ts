@@ -7,11 +7,8 @@
  */
 
 import { IUiSettingsClient } from 'kibana/server';
-import {
-  AsyncSearchGet,
-  AsyncSearchSubmit,
-  Search,
-} from '@elastic/elasticsearch/api/requestParams';
+import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchOptions, UI_SETTINGS } from '../../../../common';
 import { getDefaultSearchParams } from '../es_search';
 import { SearchSessionsConfigSchema } from '../../../../config';
@@ -21,7 +18,7 @@ import { SearchSessionsConfigSchema } from '../../../../config';
  */
 export async function getIgnoreThrottled(
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>
-): Promise<Pick<Search, 'ignore_throttled'>> {
+): Promise<{ ignore_throttled?: boolean }> {
   const includeFrozen = await uiSettingsClient.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
   return includeFrozen ? { ignore_throttled: false } : {};
 }
@@ -35,7 +32,7 @@ export async function getDefaultAsyncSubmitParams(
   options: ISearchOptions
 ): Promise<
   Pick<
-    AsyncSearchSubmit,
+    AsyncSearchSubmitRequest,
     | 'batched_reduce_size'
     | 'keep_alive'
     | 'wait_for_completion_timeout'
@@ -75,7 +72,7 @@ export async function getDefaultAsyncSubmitParams(
 export function getDefaultAsyncGetParams(
   searchSessionsConfig: SearchSessionsConfigSchema | null,
   options: ISearchOptions
-): Pick<AsyncSearchGet, 'keep_alive' | 'wait_for_completion_timeout'> {
+): Pick<AsyncSearchGetRequest, 'keep_alive' | 'wait_for_completion_timeout'> {
   const useSearchSessions = searchSessionsConfig?.enabled && !!options.sessionId;
 
   return {

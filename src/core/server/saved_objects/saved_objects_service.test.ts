@@ -6,17 +6,25 @@
  * Side Public License, v 1.
  */
 
+import { join } from 'path';
+import loadJsonFile from 'load-json-file';
+
 import {
-  migratorInstanceMock,
   clientProviderInstanceMock,
+  KibanaMigratorMock,
+  migratorInstanceMock,
+  registerRoutesMock,
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
+import { RawPackageInfo } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
 import { Env } from '../config';
+import { getEnvOptions } from '../config/mocks';
 import { configServiceMock } from '../mocks';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
@@ -106,6 +114,42 @@ describe('SavedObjectsService', () => {
       expect(deprecationsSetup.getRegistry).toHaveBeenCalledWith('savedObjects');
       expect(mockRegistry.registerDeprecations).toHaveBeenCalledTimes(1);
       expect(mockRegistry.registerDeprecations).toHaveBeenCalledWith(deprecations);
+    });
+
+    it('registers the deprecation provider with the correct kibanaVersion', async () => {
+      const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+      const kibanaVersion = pkg.version;
+
+      const coreContext = createCoreContext({
+        env: Env.createDefault(REPO_ROOT, getEnvOptions(), {
+          ...pkg,
+          version: `${kibanaVersion}-beta1`, // test behavior when release has a version qualifier
+        }),
+      });
+
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+
+      expect(getSavedObjectsDeprecationsProvider).toHaveBeenCalledWith(
+        expect.objectContaining({ kibanaVersion })
+      );
+    });
+
+    it('calls registerRoutes with the correct kibanaVersion', async () => {
+      const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+      const kibanaVersion = pkg.version;
+
+      const coreContext = createCoreContext({
+        env: Env.createDefault(REPO_ROOT, getEnvOptions(), {
+          ...pkg,
+          version: `${kibanaVersion}-beta1`, // test behavior when release has a version qualifier
+        }),
+      });
+
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+
+      expect(registerRoutesMock).toHaveBeenCalledWith(expect.objectContaining({ kibanaVersion }));
     });
 
     describe('#setClientFactoryProvider', () => {
@@ -216,6 +260,24 @@ describe('SavedObjectsService', () => {
       await soService.setup(createSetupDeps());
       await soService.start(createStartDeps());
       expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
+    });
+
+    it('calls KibanaMigrator with correct version', async () => {
+      const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
+      const kibanaVersion = pkg.version;
+
+      const coreContext = createCoreContext({
+        env: Env.createDefault(REPO_ROOT, getEnvOptions(), {
+          ...pkg,
+          version: `${kibanaVersion}-beta1`, // test behavior when release has a version qualifier
+        }),
+      });
+
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+      await soService.start(createStartDeps());
+
+      expect(KibanaMigratorMock).toHaveBeenCalledWith(expect.objectContaining({ kibanaVersion }));
     });
 
     it('waits for all es nodes to be compatible before running migrations', async (done) => {

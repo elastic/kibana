@@ -37,6 +37,5 @@ registerRouteHandlerContext: <Context extends RequestHandlerContext, ContextName
    const response = await context.myApp.search(...);
    return res.ok(response);
  });
-
 ```
 

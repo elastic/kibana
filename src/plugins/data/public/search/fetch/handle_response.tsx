@@ -13,20 +13,10 @@ import { IKibanaSearchResponse } from 'src/plugins/data/common';
 import { ShardFailureOpenModalButton } from '../../ui/shard_failure_modal';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { getNotifications } from '../../services';
-import { SearchRequest } from '..';
+import type { SearchRequest } from '..';
 
 export function handleResponse(request: SearchRequest, response: IKibanaSearchResponse) {
-  const { rawResponse, warning } = response;
-  if (warning) {
-    getNotifications().toasts.addWarning({
-      title: i18n.translate('data.search.searchSource.fetch.warningMessage', {
-        defaultMessage: 'Warning: {warning}',
-        values: {
-          warning,
-        },
-      }),
-    });
-  }
+  const { rawResponse } = response;
 
   if (rawResponse.timed_out) {
     getNotifications().toasts.addWarning({

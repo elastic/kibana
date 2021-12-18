@@ -7,7 +7,7 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeTypes } from '../node_types/index';
 import { KQLSyntaxError } from '../kuery_syntax_error';
 import { KueryNode, KueryParseOptions, KueryQueryOptions } from '../types';

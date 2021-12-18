@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { useFetcher } from './use_fetcher';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
 import { useTheme } from './use_theme';
@@ -31,7 +31,7 @@ export function useTransactionLatencyChartsFetcher({
       comparisonType,
       comparisonEnabled,
     },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const {
     query: { rangeFrom, rangeTo },

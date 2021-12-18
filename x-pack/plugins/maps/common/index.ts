@@ -19,7 +19,7 @@ export {
   SYMBOLIZE_AS_TYPES,
 } from './constants';
 
-export {
+export type {
   EMSFileSourceDescriptor,
   ESTermSourceDescriptor,
   LayerDescriptor,

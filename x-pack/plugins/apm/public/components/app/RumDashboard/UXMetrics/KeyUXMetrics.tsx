@@ -56,7 +56,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
     (callApmApi) => {
       if (uxQuery) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/long-task-metrics',
+          endpoint: 'GET /internal/apm/ux/long-task-metrics',
           params: {
             query: {
               ...uxQuery,

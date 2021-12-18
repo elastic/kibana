@@ -5,27 +5,34 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import {
-  SavedObjectsClientContract,
   SavedObject,
-  SavedObjectsUpdateResponse,
+  SavedObjectsClientContract,
+  SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
   SavedObjectsFindResult,
-} from '../../../../../../../../src/core/server';
-import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+  SavedObjectsUpdateResponse,
+} from 'kibana/server';
+import { get } from 'lodash';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
+// eslint-disable-next-line no-restricted-imports
+import { legacyRuleStatusSavedObjectType } from '../../rules/legacy_rule_status/legacy_rule_status_saved_object_mappings';
 import { IRuleStatusSOAttributes } from '../../rules/types';
-import { buildChunkedOrFilter } from '../../signals/utils';
 
 export interface RuleStatusSavedObjectsClient {
   find: (
-    options?: Omit<SavedObjectsFindOptions, 'type'>
+    options: Omit<SavedObjectsFindOptions, 'type'> & { ruleId: string }
   ) => Promise<Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>>;
   findBulk: (ids: string[], statusesPerId: number) => Promise<FindBulkResponse>;
-  create: (attributes: IRuleStatusSOAttributes) => Promise<SavedObject<IRuleStatusSOAttributes>>;
+  create: (
+    attributes: IRuleStatusSOAttributes,
+    options: SavedObjectsCreateOptions
+  ) => Promise<SavedObject<IRuleStatusSOAttributes>>;
   update: (
     id: string,
-    attributes: Partial<IRuleStatusSOAttributes>
+    attributes: Partial<IRuleStatusSOAttributes>,
+    options: SavedObjectsCreateOptions
   ) => Promise<SavedObjectsUpdateResponse<IRuleStatusSOAttributes>>;
   delete: (id: string) => Promise<{}>;
 }
@@ -35,63 +42,98 @@ export interface FindBulkResponse {
 }
 
 /**
- * @pdeprecated Use RuleExecutionLogClient instead
+ * @deprecated Use RuleExecutionLogClient instead
  */
 export const ruleStatusSavedObjectsClientFactory = (
   savedObjectsClient: SavedObjectsClientContract
 ): RuleStatusSavedObjectsClient => ({
   find: async (options) => {
-    const result = await savedObjectsClient.find<IRuleStatusSOAttributes>({
-      ...options,
-      type: ruleStatusSavedObjectType,
+    return withSecuritySpan('RuleStatusSavedObjectsClient.find', async () => {
+      const references = {
+        id: options.ruleId,
+        type: 'alert',
+      };
+      const result = await savedObjectsClient.find<IRuleStatusSOAttributes>({
+        ...options,
+        type: legacyRuleStatusSavedObjectType,
+        hasReference: references,
+      });
+      return result.saved_objects;
     });
-    return result.saved_objects;
   },
   findBulk: async (ids, statusesPerId) => {
     if (ids.length === 0) {
       return {};
     }
-    const filter = buildChunkedOrFilter(`${ruleStatusSavedObjectType}.attributes.alertId`, ids);
-    const order: 'desc' = 'desc';
-    const aggs = {
-      alertIds: {
-        terms: {
-          field: `${ruleStatusSavedObjectType}.attributes.alertId`,
-          size: ids.length,
-        },
-        aggs: {
-          most_recent_statuses: {
-            top_hits: {
-              sort: [
-                {
-                  [`${ruleStatusSavedObjectType}.statusDate`]: {
-                    order,
+    return withSecuritySpan('RuleStatusSavedObjectsClient.findBulk', async () => {
+      const references = ids.map<SavedObjectsFindOptionsReference>((alertId) => ({
+        id: alertId,
+        type: 'alert',
+      }));
+      const order: 'desc' = 'desc';
+      // NOTE: Once https://github.com/elastic/kibana/issues/115153 is resolved
+      // ${legacyRuleStatusSavedObjectType}.statusDate will need to be updated to
+      // ${legacyRuleStatusSavedObjectType}.attributes.statusDate
+      const aggs = {
+        references: {
+          nested: {
+            path: `${legacyRuleStatusSavedObjectType}.references`,
+          },
+          aggs: {
+            alertIds: {
+              terms: {
+                field: `${legacyRuleStatusSavedObjectType}.references.id`,
+                size: ids.length,
+              },
+              aggs: {
+                rule_status: {
+                  reverse_nested: {},
+                  aggs: {
+                    most_recent_statuses: {
+                      top_hits: {
+                        sort: [
+                          {
+                            [`${legacyRuleStatusSavedObjectType}.statusDate`]: {
+                              order,
+                            },
+                          },
+                        ],
+                        size: statusesPerId,
+                      },
+                    },
                   },
                 },
-              ],
-              size: statusesPerId,
+              },
             },
           },
         },
-      },
-    };
-    const results = await savedObjectsClient.find({
-      filter,
-      aggs,
-      type: ruleStatusSavedObjectType,
-      perPage: 0,
+      };
+      const results = await savedObjectsClient.find({
+        hasReference: references,
+        aggs,
+        type: legacyRuleStatusSavedObjectType,
+        perPage: 0,
+      });
+      const buckets = get(results, 'aggregations.references.alertIds.buckets');
+      return buckets.reduce((acc: Record<string, unknown>, bucket: unknown) => {
+        const key = get(bucket, 'key');
+        const hits = get(bucket, 'rule_status.most_recent_statuses.hits.hits');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        acc[key] = hits.map((hit: any) => hit._source[legacyRuleStatusSavedObjectType]);
+        return acc;
+      }, {});
     });
-    const buckets = get(results, 'aggregations.alertIds.buckets');
-    return buckets.reduce((acc: Record<string, unknown>, bucket: unknown) => {
-      const key = get(bucket, 'key');
-      const hits = get(bucket, 'most_recent_statuses.hits.hits');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const statuses = hits.map((hit: any) => hit._source['siem-detection-engine-rule-status']);
-      acc[key] = statuses;
-      return acc;
-    }, {});
   },
-  create: (attributes) => savedObjectsClient.create(ruleStatusSavedObjectType, attributes),
-  update: (id, attributes) => savedObjectsClient.update(ruleStatusSavedObjectType, id, attributes),
-  delete: (id) => savedObjectsClient.delete(ruleStatusSavedObjectType, id),
+  create: (attributes, options) =>
+    withSecuritySpan('RuleStatusSavedObjectsClient.create', () =>
+      savedObjectsClient.create(legacyRuleStatusSavedObjectType, attributes, options)
+    ),
+  update: (id, attributes, options) =>
+    withSecuritySpan('RuleStatusSavedObjectsClient.update', () =>
+      savedObjectsClient.update(legacyRuleStatusSavedObjectType, id, attributes, options)
+    ),
+  delete: (id) =>
+    withSecuritySpan('RuleStatusSavedObjectsClient.delete', () =>
+      savedObjectsClient.delete(legacyRuleStatusSavedObjectType, id)
+    ),
 });

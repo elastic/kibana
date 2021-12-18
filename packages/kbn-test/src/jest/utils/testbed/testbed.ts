@@ -16,7 +16,14 @@ import {
   mountComponentAsync,
   getJSXComponentWithProps,
 } from './mount_component';
-import { TestBedConfig, TestBed, SetupFunc } from './types';
+import {
+  TestBedConfig,
+  AsyncTestBedConfig,
+  TestBed,
+  SetupFunc,
+  SyncSetupFunc,
+  AsyncSetupFunc,
+} from './types';
 
 const defaultConfig: TestBedConfig = {
   defaultProps: {},
@@ -48,10 +55,18 @@ const defaultConfig: TestBedConfig = {
   });
   ```
  */
-export const registerTestBed = <T extends string = string>(
+export function registerTestBed<T extends string = string>(
+  Component: ComponentType<any>,
+  config: AsyncTestBedConfig
+): AsyncSetupFunc<T>;
+export function registerTestBed<T extends string = string>(
   Component: ComponentType<any>,
   config?: TestBedConfig
-): SetupFunc<T> => {
+): SyncSetupFunc<T>;
+export function registerTestBed<T extends string = string>(
+  Component: ComponentType<any>,
+  config?: AsyncTestBedConfig | TestBedConfig
+): SetupFunc<T> {
   const {
     defaultProps = defaultConfig.defaultProps,
     memoryRouter = defaultConfig.memoryRouter!,
@@ -188,7 +203,7 @@ export const registerTestBed = <T extends string = string>(
         value,
         isAsync = false
       ) => {
-        const formInput = typeof input === 'string' ? find(input) : (input as ReactWrapper);
+        const formInput = typeof input === 'string' ? find(input) : input;
 
         if (!formInput.length) {
           throw new Error(`Input "${input}" was not found.`);
@@ -207,7 +222,7 @@ export const registerTestBed = <T extends string = string>(
         value,
         doUpdateComponent = true
       ) => {
-        const formSelect = typeof select === 'string' ? find(select) : (select as ReactWrapper);
+        const formSelect = typeof select === 'string' ? find(select) : select;
 
         if (!formSelect.length) {
           throw new Error(`Select "${select}" was not found.`);
@@ -314,7 +329,7 @@ export const registerTestBed = <T extends string = string>(
         router.history.push(url);
       };
 
-      return {
+      const testBed: TestBed<T> = {
         component,
         exists,
         find,
@@ -336,8 +351,10 @@ export const registerTestBed = <T extends string = string>(
           navigateTo,
         },
       };
+
+      return testBed;
     }
   };
 
   return setup;
-};
+}

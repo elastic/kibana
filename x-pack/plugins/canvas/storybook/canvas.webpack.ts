@@ -45,8 +45,6 @@ export const canvasWebpack = {
         test: [
           resolve(KIBANA_ROOT, 'x-pack/plugins/canvas/public/components/embeddable_flyout'),
           resolve(KIBANA_ROOT, 'x-pack/plugins/reporting/public'),
-          resolve(KIBANA_ROOT, 'src/plugins/kibana_legacy/public/angular'),
-          resolve(KIBANA_ROOT, 'src/plugins/kibana_legacy/public/paginate'),
         ],
         use: 'null-loader',
       },

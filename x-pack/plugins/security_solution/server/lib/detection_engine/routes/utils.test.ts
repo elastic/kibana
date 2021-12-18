@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-
 import { SavedObjectsFindResponse } from 'kibana/server';
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
@@ -22,10 +20,11 @@ import {
 } from './utils';
 import { responseMock } from './__mocks__';
 import { exampleRuleStatus } from '../signals/__mocks__/es_results';
-import { getAlertMock } from './__mocks__/request_responses';
+import { resolveAlertMock } from './__mocks__/request_responses';
 import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
 let rulesClient: ReturnType<typeof rulesClientMock.create>;
 
@@ -34,17 +33,17 @@ describe.each([
   ['RAC', true],
 ])('utils - %s', (_, isRuleRegistryEnabled) => {
   describe('transformBulkError', () => {
-    test('returns transformed object if it is a boom object', () => {
-      const boom = new Boom.Boom('some boom message', { statusCode: 400 });
-      const transformed = transformBulkError('rule-1', boom);
+    test('returns transformed object if it is a custom error object', () => {
+      const customError = new CustomHttpRequestError('some custom error message', 400);
+      const transformed = transformBulkError('rule-1', customError);
       const expected: BulkError = {
         rule_id: 'rule-1',
-        error: { message: 'some boom message', status_code: 400 },
+        error: { message: 'some custom error message', status_code: 400 },
       };
       expect(transformed).toEqual(expected);
     });
 
-    test('returns a normal error if it is some non boom object that has a statusCode', () => {
+    test('returns a normal error if it is some non custom error that has a statusCode', () => {
       const error: Error & { statusCode?: number } = {
         statusCode: 403,
         name: 'some name',
@@ -71,7 +70,7 @@ describe.each([
       expect(transformed).toEqual(expected);
     });
 
-    test('it detects a BadRequestError and returns a Boom status of 400', () => {
+    test('it detects a BadRequestError and returns an error status of 400', () => {
       const error: BadRequestError = new BadRequestError('I have a type error');
       const transformed = transformBulkError('rule-1', error);
       const expected: BulkError = {
@@ -142,10 +141,9 @@ describe.each([
       statusTwo.attributes.status = RuleExecutionStatus.failed;
       const currentStatus = exampleRuleStatus();
       const foundRules = [currentStatus.attributes, statusOne.attributes, statusTwo.attributes];
-      const res = mergeStatuses(currentStatus.attributes.alertId, foundRules, {
+      const res = mergeStatuses(currentStatus.references[0].id, foundRules, {
         'myfakealertid-8cfac': {
           current_status: {
-            alert_id: 'myfakealertid-8cfac',
             status_date: '2020-03-27T22:55:59.517Z',
             status: RuleExecutionStatus.succeeded,
             last_failure_at: null,
@@ -163,7 +161,6 @@ describe.each([
       expect(res).toEqual({
         'myfakealertid-8cfac': {
           current_status: {
-            alert_id: 'myfakealertid-8cfac',
             status_date: '2020-03-27T22:55:59.517Z',
             status: 'succeeded',
             last_failure_at: null,
@@ -179,7 +176,6 @@ describe.each([
         },
         'f4b8e31d-cf93-4bde-a265-298bde885cd7': {
           current_status: {
-            alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
             status_date: '2020-03-27T22:55:59.517Z',
             status: 'succeeded',
             last_failure_at: null,
@@ -193,7 +189,6 @@ describe.each([
           },
           failures: [
             {
-              alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
               status_date: '2020-03-27T22:55:59.517Z',
               status: 'failed',
               last_failure_at: null,
@@ -206,7 +201,6 @@ describe.each([
               last_look_back_date: null, // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
             },
             {
-              alert_id: 'f4b8e31d-cf93-4bde-a265-298bde885cd7',
               status_date: '2020-03-27T22:55:59.517Z',
               status: 'failed',
               last_failure_at: null,
@@ -229,12 +223,14 @@ describe.each([
       rulesClient = rulesClientMock.create();
     });
     it('getFailingRules finds no failing rules', async () => {
-      rulesClient.get.mockResolvedValue(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
+      rulesClient.resolve.mockResolvedValue(
+        resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+      );
       const res = await getFailingRules(['my-fake-id'], rulesClient);
       expect(res).toEqual({});
     });
     it('getFailingRules finds a failing rule', async () => {
-      const foundRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const foundRule = resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       foundRule.executionStatus = {
         status: 'error',
         lastExecutionDate: foundRule.executionStatus.lastExecutionDate,
@@ -243,12 +239,12 @@ describe.each([
           message: 'oops',
         },
       };
-      rulesClient.get.mockResolvedValue(foundRule);
+      rulesClient.resolve.mockResolvedValue(foundRule);
       const res = await getFailingRules([foundRule.id], rulesClient);
       expect(res).toEqual({ [foundRule.id]: foundRule });
     });
     it('getFailingRules throws an error', async () => {
-      rulesClient.get.mockImplementation(() => {
+      rulesClient.resolve.mockImplementation(() => {
         throw new Error('my test error');
       });
       let error;

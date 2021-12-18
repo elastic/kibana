@@ -36,6 +36,7 @@ import {
   IEmbeddable,
   EmbeddablePanel,
   SavedObjectEmbeddableInput,
+  EmbeddableContainerContext,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
@@ -90,14 +91,19 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
     V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
       [ATTRIBUTE_SERVICE_KEY]: A;
     },
-    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
+    M extends unknown = unknown
   >(
     type: string,
-    options: AttributeServiceOptions<A>
-  ) => AttributeService<A, V, R>;
+    options: AttributeServiceOptions<A, M>
+  ) => AttributeService<A, V, R, M>;
 }
 
-export type EmbeddablePanelHOC = React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
+export type EmbeddablePanelHOC = React.FC<{
+  embeddable: IEmbeddable;
+  hideHeader?: boolean;
+  containerContext?: EmbeddableContainerContext;
+}>;
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactoryDefinitions: Map<string, EmbeddableFactoryDefinition> =
@@ -155,7 +161,15 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
     const getEmbeddablePanelHoc =
       () =>
-      ({ embeddable, hideHeader }: { embeddable: IEmbeddable; hideHeader?: boolean }) =>
+      ({
+        embeddable,
+        hideHeader,
+        containerContext,
+      }: {
+        embeddable: IEmbeddable;
+        hideHeader?: boolean;
+        containerContext?: EmbeddableContainerContext;
+      }) =>
         (
           <EmbeddablePanel
             hideHeader={hideHeader}
@@ -169,6 +183,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
             application={core.application}
             inspector={inspector}
             SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
+            containerContext={containerContext}
           />
         );
 

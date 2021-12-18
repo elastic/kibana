@@ -196,7 +196,7 @@
                 "signature": [
                   "Pick<Pick<",
                   "CreateManagementItemArgs",
-                  ", \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\"> & Pick<{ id: string; }, \"id\"> & Pick<{ id: string; }, never>, \"id\" | \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\">"
+                  ", \"title\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\" | \"capabilitiesId\" | \"redirectFrom\"> & Pick<{ id: string; }, \"id\"> & Pick<{ id: string; }, never>, \"title\" | \"id\" | \"order\" | \"euiIconType\" | \"icon\" | \"tip\" | \"capabilitiesId\" | \"redirectFrom\">"
                 ],
                 "path": "src/plugins/management/public/utils/management_section.ts",
                 "deprecated": false,
@@ -221,7 +221,7 @@
                 "section": "def-public.RegisterManagementAppArgs",
                 "text": "RegisterManagementAppArgs"
               },
-              ", \"id\" | \"title\" | \"order\" | \"mount\" | \"keywords\" | \"euiIconType\" | \"icon\" | \"tip\">) => ",
+              ", \"title\" | \"id\" | \"order\" | \"mount\" | \"keywords\" | \"euiIconType\" | \"icon\" | \"tip\" | \"capabilitiesId\" | \"redirectFrom\">) => ",
               {
                 "pluginId": "management",
                 "scope": "public",
@@ -249,7 +249,7 @@
                     "section": "def-public.RegisterManagementAppArgs",
                     "text": "RegisterManagementAppArgs"
                   },
-                  ", \"id\" | \"title\" | \"order\" | \"mount\" | \"keywords\" | \"euiIconType\" | \"icon\" | \"tip\">"
+                  ", \"title\" | \"id\" | \"order\" | \"mount\" | \"keywords\" | \"euiIconType\" | \"icon\" | \"tip\" | \"capabilitiesId\" | \"redirectFrom\">"
                 ],
                 "path": "src/plugins/management/public/utils/management_section.ts",
                 "deprecated": false,
@@ -534,6 +534,28 @@
                 "text": "ScopedHistory"
               },
               "<unknown>"
+            ],
+            "path": "src/plugins/management/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "management",
+            "id": "def-public.ManagementAppMountParams.theme$",
+            "type": "Object",
+            "tags": [],
+            "label": "theme$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreTheme",
+                "text": "CoreTheme"
+              },
+              ">"
             ],
             "path": "src/plugins/management/public/types.ts",
             "deprecated": false

@@ -34,6 +34,5 @@ export renderApp = ({ element, history, setHeaderActionMenu }: AppMountParameter
    })
    return renderApp({ element, history });
 }
-
 ```
 

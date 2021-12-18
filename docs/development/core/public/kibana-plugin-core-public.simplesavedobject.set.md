@@ -14,10 +14,10 @@ set(key: string, value: any): T;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  key | <code>string</code> |  |
-|  value | <code>any</code> |  |
+|  key | string |  |
+|  value | any |  |
 
 <b>Returns:</b>
 
-`T`
+T
 

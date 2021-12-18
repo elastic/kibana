@@ -24,6 +24,7 @@ import { buildSiemResponse } from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { readRules } from '../../rules/read_rules';
+import { legacyMigrate } from '../../rules/utils';
 import { PartialFilter } from '../../types';
 
 export const patchRulesRoute = (
@@ -85,6 +86,7 @@ export const patchRulesRoute = (
         threshold,
         threat_filters: threatFilters,
         threat_index: threatIndex,
+        threat_indicator_path: threatIndicatorPath,
         threat_query: threatQuery,
         threat_mapping: threatMapping,
         threat_language: threatLanguage,
@@ -134,8 +136,15 @@ export const patchRulesRoute = (
           throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
         }
 
+        const migratedRule = await legacyMigrate({
+          rulesClient,
+          savedObjectsClient,
+          rule: existingRule,
+        });
+
         const rule = await patchRules({
           rulesClient,
+          savedObjectsClient,
           author,
           buildingBlockType,
           description,
@@ -154,7 +163,7 @@ export const patchRulesRoute = (
           timelineTitle,
           meta,
           filters,
-          rule: existingRule,
+          rule: migratedRule,
           index,
           interval,
           maxSignals,
@@ -171,6 +180,7 @@ export const patchRulesRoute = (
           threshold,
           threatFilters,
           threatIndex,
+          threatIndicatorPath,
           threatQuery,
           threatMapping,
           threatLanguage,
@@ -187,17 +197,12 @@ export const patchRulesRoute = (
           exceptionsList,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
-          const ruleStatuses = await ruleStatusClient.find({
-            logsCount: 1,
+          const ruleStatus = await ruleStatusClient.getCurrentStatus({
             ruleId: rule.id,
             spaceId: context.securitySolution.getSpaceId(),
           });
 
-          const [validated, errors] = transformValidate(
-            rule,
-            ruleStatuses[0],
-            isRuleRegistryEnabled
-          );
+          const [validated, errors] = transformValidate(rule, ruleStatus, isRuleRegistryEnabled);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

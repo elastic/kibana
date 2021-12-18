@@ -17,7 +17,7 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy } from '../../../../types';
 import { AgentEnrollmentFlyout, SearchBar } from '../../../../components';
@@ -224,6 +224,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                 fill
                 iconType="plusInCircle"
                 onClick={() => setIsEnrollmentFlyoutOpen(true)}
+                data-test-subj="addAgentButton"
               >
                 <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />
               </EuiButton>

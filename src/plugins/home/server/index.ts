@@ -7,8 +7,21 @@
  */
 
 export type { HomeServerPluginSetup, HomeServerPluginStart } from './plugin';
-export type { TutorialProvider } from './services';
-export type { SampleDatasetProvider, SampleDataRegistrySetup } from './services';
+export { EmbeddableTypes, TutorialsCategory } from './services';
+export type {
+  AppLinkData,
+  ArtifactsSchema,
+  TutorialProvider,
+  TutorialSchema,
+  InstructionSetSchema,
+  InstructionsSchema,
+  TutorialContext,
+  SampleDatasetProvider,
+  SampleDataRegistrySetup,
+  SampleDatasetDashboardPanel,
+  SampleObject,
+  ScopedTutorialContextFactory,
+} from './services';
 import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
 import { HomeServerPlugin } from './plugin';
 import { configSchema, ConfigSchema } from '../config';
@@ -23,10 +36,3 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 export const plugin = (initContext: PluginInitializerContext) => new HomeServerPlugin(initContext);
 
 export { INSTRUCTION_VARIANT } from '../common/instruction_variant';
-export { TutorialsCategory } from './services/tutorials';
-export type {
-  ArtifactsSchema,
-  TutorialSchema,
-  InstructionSetSchema,
-  InstructionsSchema,
-} from './services/tutorials';

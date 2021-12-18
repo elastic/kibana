@@ -51,6 +51,12 @@ export type {
   IndexPatternLoadStartDependencies,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../data_views/common';
+export type {
+  IndexPatternsContract,
+  DataViewsContract,
+  IndexPatternListItem,
+  DataViewListItem,
+} from '../../data_views/common';
 export {
   RUNTIME_FIELD_TYPES,
   FLEET_ASSETS_TO_IGNORE,
@@ -64,13 +70,9 @@ export {
   DataViewType,
   IndexPatternType,
   IndexPatternsService,
-  IndexPatternsContract,
   DataViewsService,
-  DataViewsContract,
   IndexPattern,
-  IndexPatternListItem,
   DataView,
-  DataViewListItem,
   DuplicateDataViewError,
   DataViewSavedObjectConflictError,
   getIndexPatternLoadMeta,

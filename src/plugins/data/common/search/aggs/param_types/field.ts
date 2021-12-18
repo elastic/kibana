@@ -56,7 +56,7 @@ export class FieldParamType extends BaseParamType {
               'data.search.aggs.paramTypes.field.notFoundSavedFieldParameterErrorMessage',
               {
                 defaultMessage:
-                  'The field "{fieldParameter}" associated with this object no longer exists in the index pattern. Please use another field.',
+                  'The field "{fieldParameter}" associated with this object no longer exists in the data view. Please use another field.',
                 values: {
                   fieldParameter: field.name,
                 },
@@ -75,7 +75,7 @@ export class FieldParamType extends BaseParamType {
               'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
               {
                 defaultMessage:
-                  'Saved field "{fieldParameter}" of index pattern "{indexPatternTitle}" is invalid for use with the "{aggType}" aggregation. Please select a new field.',
+                  'Saved field "{fieldParameter}" of data view "{indexPatternTitle}" is invalid for use with the "{aggType}" aggregation. Please select a new field.',
                 values: {
                   fieldParameter: field.name,
                   aggType: aggConfig?.type?.title,

@@ -19,11 +19,12 @@ export type {
 export { FeatureCatalogueCategory } from './services';
 
 export type {
+  AddDataTab,
   FeatureCatalogueEntry,
+  FeatureCatalogueRegistry,
   FeatureCatalogueSolution,
   Environment,
   TutorialVariables,
-  TutorialDirectoryNoticeComponent,
   TutorialDirectoryHeaderLinkComponent,
   TutorialModuleNoticeComponent,
 } from './services';

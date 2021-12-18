@@ -7,11 +7,11 @@
 
 import React, { Component, Fragment } from 'react';
 
+import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
-import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 
 export class UpdateSourceEditor extends Component {
@@ -35,12 +35,7 @@ export class UpdateSourceEditor extends Component {
     } catch (err) {
       if (this._isMounted) {
         this.setState({
-          loadError: i18n.translate('xpack.maps.source.pewPew.noIndexPatternErrorMessage', {
-            defaultMessage: `Unable to find Index pattern {id}`,
-            values: {
-              id: this.props.indexPatternId,
-            },
-          }),
+          loadError: getDataViewNotFoundMessage(this.props.indexPatternId),
         });
       }
       return;

@@ -28,9 +28,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const setUpQueriesWithFilters = async () => {
     // set up a query with filters and a time filter
     log.debug('set up a query with filters to save');
-    const fromTime = 'Sep 20, 2015 @ 08:00:00.000';
-    const toTime = 'Sep 21, 2015 @ 08:00:00.000';
-    await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    const from = 'Sep 20, 2015 @ 08:00:00.000';
+    const to = 'Sep 21, 2015 @ 08:00:00.000';
+    await PageObjects.common.setTime({ from, to });
+    await PageObjects.common.navigateToApp('discover');
     await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
     await queryBar.setQuery('response:200');
   };
@@ -54,6 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await PageObjects.common.unsetTime();
     });
 
     describe('saved query selection', () => {

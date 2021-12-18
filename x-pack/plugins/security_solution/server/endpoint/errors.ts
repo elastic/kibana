@@ -7,15 +7,15 @@
 
 /* eslint-disable max-classes-per-file */
 
-export class EndpointError extends Error {
-  constructor(message: string, public readonly meta?: unknown) {
-    super(message);
-    // For debugging - capture name of subclasses
-    this.name = this.constructor.name;
-  }
-}
+import { EndpointError } from '../../common/endpoint/errors';
 
 export class NotFoundError extends EndpointError {}
+
+export class EndpointAppContentServicesNotSetUpError extends EndpointError {
+  constructor() {
+    super('EndpointAppContextService has not been set up (EndpointAppContextService.setup())');
+  }
+}
 
 export class EndpointAppContentServicesNotStartedError extends EndpointError {
   constructor() {
@@ -25,5 +25,11 @@ export class EndpointAppContentServicesNotStartedError extends EndpointError {
 export class EndpointLicenseError extends EndpointError {
   constructor() {
     super('Your license level does not allow for this action.');
+  }
+}
+
+export class EndpointAuthorizationError extends EndpointError {
+  constructor(meta?: unknown) {
+    super('Endpoint authorization failure', meta);
   }
 }

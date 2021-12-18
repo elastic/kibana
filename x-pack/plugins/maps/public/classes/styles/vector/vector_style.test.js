@@ -107,11 +107,27 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
       const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
       const nextFields = [
-        new MockField({
-          fieldName: previousFieldName,
-          dataType: 'number',
-          supportsAutoDomain: false,
-        }),
+        {
+          getDataType: async () => {
+            return 'number';
+          },
+          getLabel: async () => {
+            return previousFieldName + '_label';
+          },
+          getName: () => {
+            return previousFieldName;
+          },
+          getOrigin: () => {
+            return FIELD_ORIGIN.SOURCE;
+          },
+          // ordinal field must support auto domain
+          supportsFieldMetaFromLocalData: () => {
+            return false;
+          },
+          supportsFieldMetaFromEs: () => {
+            return false;
+          },
+        },
       ];
       const { hasChanges, nextStyleDescriptor } =
         await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, previousFields, mapColors);

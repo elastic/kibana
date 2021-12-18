@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { ISearchRequestParams } from 'src/plugins/data/common';
+import type { ISearchRequestParams } from 'src/plugins/data/common';
 import {
   TimelineEventsLastEventTimeRequestOptions,
   LastEventIndexKey,
@@ -38,9 +38,9 @@ export const buildLastEventTimeQuery = ({
       case LastEventIndexKey.ipDetails:
         if (details.ip) {
           return {
-            allowNoIndices: true,
+            allow_no_indices: true,
             index: indicesToQuery.network,
-            ignoreUnavailable: true,
+            ignore_unavailable: true,
             track_total_hits: false,
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
@@ -61,9 +61,9 @@ export const buildLastEventTimeQuery = ({
       case LastEventIndexKey.hostDetails:
         if (details.hostName) {
           return {
-            allowNoIndices: true,
+            allow_no_indices: true,
             index: indicesToQuery.hosts,
-            ignoreUnavailable: true,
+            ignore_unavailable: true,
             track_total_hits: false,
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
@@ -85,9 +85,9 @@ export const buildLastEventTimeQuery = ({
       case LastEventIndexKey.network:
       case LastEventIndexKey.ueba:
         return {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: indicesToQuery[indexKey],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           track_total_hits: false,
           body: {
             ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),

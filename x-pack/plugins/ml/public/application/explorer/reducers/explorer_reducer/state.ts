@@ -71,12 +71,10 @@ export function getExplorerDefaultState(): ExplorerState {
     overallAnnotations: {
       error: undefined,
       annotationsData: [],
-      aggregations: {},
     },
     annotations: {
       error: undefined,
       annotationsData: [],
-      aggregations: {},
     },
     anomalyChartsDataLoading: true,
     chartsData: getDefaultChartsData(),

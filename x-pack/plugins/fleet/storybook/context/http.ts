@@ -27,6 +27,7 @@ export const getHttp = (basepath = BASE_PATH) => {
       serverBasePath: basepath,
     },
     get: (async (path: string, options: HttpFetchOptions) => {
+      action('get')(path, options);
       // TODO: all of this needs revision, as it's far too clunky... but it works for now,
       // with the few paths we're supporting.
       if (path === '/api/fleet/agents/setup') {
@@ -54,7 +55,7 @@ export const getHttp = (basepath = BASE_PATH) => {
 
       // Ideally, this would be a markdown file instead of a ts file, but we don't have
       // markdown-loader in our package.json, so we'll make do with what we have.
-      if (path.startsWith('/api/fleet/epm/packages/nginx/')) {
+      if (path.match('/api/fleet/epm/packages/nginx/.*/.*/')) {
         const { readme } = await import('./fixtures/readme.nginx');
         return readme;
       }
@@ -65,7 +66,7 @@ export const getHttp = (basepath = BASE_PATH) => {
 
       // Ideally, this would be a markdown file instead of a ts file, but we don't have
       // markdown-loader in our package.json, so we'll make do with what we have.
-      if (path.startsWith('/api/fleet/epm/packages/okta/')) {
+      if (path.match('/api/fleet/epm/packages/okta/.*/.*/')) {
         const { readme } = await import('./fixtures/readme.okta');
         return readme;
       }
@@ -74,6 +75,11 @@ export const getHttp = (basepath = BASE_PATH) => {
         return await import('./fixtures/integration.okta');
       }
 
+      if (path.startsWith('/api/fleet/check-permissions')) {
+        return { success: true };
+      }
+
+      action(path)('KP: UNSUPPORTED ROUTE');
       return {};
     }) as HttpHandler,
   } as unknown as HttpStart;

@@ -16,8 +16,8 @@ export interface HttpResourcesServiceToolkit
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [renderAnonymousCoreApp](./kibana-plugin-core-server.httpresourcesservicetoolkit.renderanonymouscoreapp.md) | <code>(options?: HttpResourcesRenderOptions) =&gt; Promise&lt;IKibanaResponse&gt;</code> | To respond with HTML page bootstrapping Kibana application without retrieving user-specific information. |
-|  [renderCoreApp](./kibana-plugin-core-server.httpresourcesservicetoolkit.rendercoreapp.md) | <code>(options?: HttpResourcesRenderOptions) =&gt; Promise&lt;IKibanaResponse&gt;</code> | To respond with HTML page bootstrapping Kibana application. |
-|  [renderHtml](./kibana-plugin-core-server.httpresourcesservicetoolkit.renderhtml.md) | <code>(options: HttpResourcesResponseOptions) =&gt; IKibanaResponse</code> | To respond with a custom HTML page. |
-|  [renderJs](./kibana-plugin-core-server.httpresourcesservicetoolkit.renderjs.md) | <code>(options: HttpResourcesResponseOptions) =&gt; IKibanaResponse</code> | To respond with a custom JS script file. |
+|  [renderAnonymousCoreApp](./kibana-plugin-core-server.httpresourcesservicetoolkit.renderanonymouscoreapp.md) | (options?: HttpResourcesRenderOptions) =&gt; Promise&lt;IKibanaResponse&gt; | To respond with HTML page bootstrapping Kibana application without retrieving user-specific information. |
+|  [renderCoreApp](./kibana-plugin-core-server.httpresourcesservicetoolkit.rendercoreapp.md) | (options?: HttpResourcesRenderOptions) =&gt; Promise&lt;IKibanaResponse&gt; | To respond with HTML page bootstrapping Kibana application. |
+|  [renderHtml](./kibana-plugin-core-server.httpresourcesservicetoolkit.renderhtml.md) | (options: HttpResourcesResponseOptions) =&gt; IKibanaResponse | To respond with a custom HTML page. |
+|  [renderJs](./kibana-plugin-core-server.httpresourcesservicetoolkit.renderjs.md) | (options: HttpResourcesResponseOptions) =&gt; IKibanaResponse | To respond with a custom JS script file. |
 

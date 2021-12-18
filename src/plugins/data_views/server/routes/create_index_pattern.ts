@@ -71,7 +71,8 @@ export const registerCreateIndexPatternRoute = (
         const [, , { indexPatternsServiceFactory }] = await getStartServices();
         const indexPatternsService = await indexPatternsServiceFactory(
           savedObjectsClient,
-          elasticsearchClient
+          elasticsearchClient,
+          req
         );
         const body = req.body;
 

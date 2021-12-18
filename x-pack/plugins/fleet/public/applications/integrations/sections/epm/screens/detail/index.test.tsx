@@ -11,6 +11,7 @@ import { act, cleanup } from '@testing-library/react';
 
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import type {
+  CheckPermissionsResponse,
   GetAgentPoliciesResponse,
   GetFleetStatusResponse,
   GetInfoResponse,
@@ -23,6 +24,7 @@ import type {
 } from '../../../../../../../common/types/models';
 import {
   agentPolicyRouteService,
+  appRoutesService,
   epmRouteService,
   fleetSetupRouteService,
   packagePolicyRouteService,
@@ -73,7 +75,7 @@ describe('when on integration detail', () => {
   describe('and the package is not installed', () => {
     beforeEach(() => {
       const unInstalledPackage = mockedApi.responseProvider.epmGetInfo();
-      unInstalledPackage.response.status = 'not_installed';
+      unInstalledPackage.item.status = 'not_installed';
       mockedApi.responseProvider.epmGetInfo.mockReturnValue(unInstalledPackage);
       render();
     });
@@ -260,6 +262,7 @@ interface EpmPackageDetailsResponseProvidersMock {
   fleetSetup: jest.MockedFunction<() => GetFleetStatusResponse>;
   packagePolicyList: jest.MockedFunction<() => GetPackagePoliciesResponse>;
   agentPolicyList: jest.MockedFunction<() => GetAgentPoliciesResponse>;
+  appCheckPermissions: jest.MockedFunction<() => CheckPermissionsResponse>;
 }
 
 const mockApiCalls = (
@@ -280,7 +283,7 @@ const mockApiCalls = (
 
   // @ts-ignore
   const epmPackageResponse: GetInfoResponse = {
-    response: {
+    item: {
       name: 'nginx',
       title: 'Nginx',
       version: '0.3.7',
@@ -740,6 +743,10 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
     },
   };
 
+  const appCheckPermissionsResponse: CheckPermissionsResponse = {
+    success: true,
+  };
+
   const mockedApiInterface: MockedApi<EpmPackageDetailsResponseProvidersMock> = {
     waitForApi() {
       return new Promise((resolve) => {
@@ -757,12 +764,13 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
       fleetSetup: jest.fn().mockReturnValue(agentsSetupResponse),
       packagePolicyList: jest.fn().mockReturnValue(packagePoliciesResponse),
       agentPolicyList: jest.fn().mockReturnValue(agentPoliciesResponse),
+      appCheckPermissions: jest.fn().mockReturnValue(appCheckPermissionsResponse),
     },
   };
 
   http.get.mockImplementation(async (path: any) => {
     if (typeof path === 'string') {
-      if (path === epmRouteService.getInfoPath(`nginx-0.3.7`)) {
+      if (path === epmRouteService.getInfoPath(`nginx`, `0.3.7`)) {
         markApiCallAsHandled();
         return mockedApiInterface.responseProvider.epmGetInfo();
       }
@@ -790,6 +798,11 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
       if (path === epmRouteService.getStatsPath('nginx')) {
         markApiCallAsHandled();
         return mockedApiInterface.responseProvider.epmGetStats();
+      }
+
+      if (path === appRoutesService.getCheckPermissionsPath()) {
+        markApiCallAsHandled();
+        return mockedApiInterface.responseProvider.appCheckPermissions();
       }
 
       const err = new Error(`API [GET ${path}] is not MOCKED!`);

@@ -4,7 +4,7 @@
     "ui": true,
     "server": true,
     "requiredPlugins": ["charts", "data", "expressions", "visualizations", "usageCollection"],
-    "requiredBundles": ["visDefaultEditor"],
+    "requiredBundles": ["visDefaultEditor", "kibanaReact"],
     "extraPublicDirs": ["common/index"],
     "owner": {
       "name": "Vis Editors",

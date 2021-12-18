@@ -15,7 +15,7 @@ import { MatrixHistogramType } from '../../../../common/search_strategy/security
 import { UpdateDateRange } from '../charts/common';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { DocValueFields } from '../../../../common/search_strategy';
-import { Threshold } from '../../../detections/components/rules/query_preview';
+import { FieldValueThreshold } from '../../../detections/components/rules/threshold_input';
 
 export type MatrixHistogramMappingTypes = Record<
   string,
@@ -52,6 +52,7 @@ interface MatrixHistogramBasicProps {
   legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
   panelHeight?: number;
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   setQuery: GlobalTimeArgs['setQuery'];
   startDate: GlobalTimeArgs['from'];
   stackByOptions: MatrixHistogramOption[];
@@ -76,7 +77,7 @@ export interface MatrixHistogramQueryProps {
   stackByField: string;
   startDate: string;
   histogramType: MatrixHistogramType;
-  threshold?: Threshold;
+  threshold?: FieldValueThreshold;
   skip?: boolean;
   isPtrIncluded?: boolean;
   includeMissingData?: boolean;

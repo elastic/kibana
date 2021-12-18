@@ -11,11 +11,12 @@ import { PackagePolicy } from '../../../../fleet/common/types/models/package_pol
 import { copyAllowlistedFields, exceptionListEventFields } from './filters';
 import { ExceptionListItem, ListTemplate, TelemetryEvent } from './types';
 import {
+  LIST_DETECTION_RULE_EXCEPTION,
   LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
 } from './constants';
-import { TrustedApp } from '../../../common/endpoint/types';
+import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -46,7 +47,7 @@ export const getPreviousDiagTaskTimestamp = (
  * @param lastExecutionTimestamp
  * @returns the timestamp to search from
  */
-export const getPreviousEpMetaTaskTimestamp = (
+export const getPreviousDailyTaskTimestamp = (
   executeTo: string,
   lastExecutionTimestamp?: string
 ) => {
@@ -96,19 +97,20 @@ export function isPackagePolicyList(
 /**
  * Maps trusted application to shared telemetry object
  *
- * @param exceptionListItem
- * @returns collection of endpoint exceptions
+ * @param trustedAppExceptionItem
+ * @returns collection of trusted applications
  */
-export const trustedApplicationToTelemetryEntry = (trustedApplication: TrustedApp) => {
+export const trustedApplicationToTelemetryEntry = (
+  trustedAppExceptionItem: ExceptionListItemSchema
+) => {
   return {
-    id: trustedApplication.id,
-    version: trustedApplication.version || '',
-    name: trustedApplication.name,
-    description: trustedApplication.description,
-    created_at: trustedApplication.created_at,
-    updated_at: trustedApplication.updated_at,
-    entries: trustedApplication.entries,
-    os: trustedApplication.os,
+    id: trustedAppExceptionItem.id,
+    name: trustedAppExceptionItem.name,
+    created_at: trustedAppExceptionItem.created_at,
+    updated_at: trustedAppExceptionItem.updated_at,
+    entries: trustedAppExceptionItem.entries,
+    os_types: trustedAppExceptionItem.os_types,
+    scope: tagsToEffectScope(trustedAppExceptionItem.tags),
   } as ExceptionListItem;
 };
 
@@ -121,9 +123,29 @@ export const trustedApplicationToTelemetryEntry = (trustedApplication: TrustedAp
 export const exceptionListItemToTelemetryEntry = (exceptionListItem: ExceptionListItemSchema) => {
   return {
     id: exceptionListItem.id,
-    version: exceptionListItem._version || '',
     name: exceptionListItem.name,
-    description: exceptionListItem.description,
+    created_at: exceptionListItem.created_at,
+    updated_at: exceptionListItem.updated_at,
+    entries: exceptionListItem.entries,
+    os_types: exceptionListItem.os_types,
+  } as ExceptionListItem;
+};
+
+/**
+ * Maps detection rule exception list items to shared telemetry object
+ *
+ * @param exceptionListItem
+ * @param ruleVersion
+ * @returns collection of detection rule exceptions
+ */
+export const ruleExceptionListItemToTelemetryEvent = (
+  exceptionListItem: ExceptionListItemSchema,
+  ruleVersion: number
+) => {
+  return {
+    id: exceptionListItem.item_id,
+    name: exceptionListItem.description,
+    rule_version: ruleVersion,
     created_at: exceptionListItem.created_at,
     updated_at: exceptionListItem.updated_at,
     entries: exceptionListItem.entries,
@@ -141,9 +163,7 @@ export const exceptionListItemToTelemetryEntry = (exceptionListItem: ExceptionLi
 export const templateExceptionList = (listData: ExceptionListItem[], listType: string) => {
   return listData.map((item) => {
     const template: ListTemplate = {
-      trusted_application: [],
-      endpoint_exception: [],
-      endpoint_event_filter: [],
+      '@timestamp': moment().toISOString(),
     };
 
     // cast exception list type to a TelemetryEvent for allowlist filtering
@@ -152,18 +172,23 @@ export const templateExceptionList = (listData: ExceptionListItem[], listType: s
       item as unknown as TelemetryEvent
     );
 
+    if (listType === LIST_DETECTION_RULE_EXCEPTION) {
+      template.detection_rule = filteredListItem;
+      return template;
+    }
+
     if (listType === LIST_TRUSTED_APPLICATION) {
-      template.trusted_application.push(filteredListItem);
+      template.trusted_application = filteredListItem;
       return template;
     }
 
     if (listType === LIST_ENDPOINT_EXCEPTION) {
-      template.endpoint_exception.push(filteredListItem);
+      template.endpoint_exception = filteredListItem;
       return template;
     }
 
     if (listType === LIST_ENDPOINT_EVENT_FILTER) {
-      template.endpoint_event_filter.push(filteredListItem);
+      template.endpoint_event_filter = filteredListItem;
       return template;
     }
 

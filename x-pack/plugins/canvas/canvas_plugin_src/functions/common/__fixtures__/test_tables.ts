@@ -22,6 +22,11 @@ const testTable: Datatable = {
       meta: { type: 'string' },
     },
     {
+      id: 'title_id',
+      name: 'title',
+      meta: { type: 'string' },
+    },
+    {
       id: 'time',
       name: 'time',
       meta: { type: 'date' },
@@ -49,6 +54,7 @@ const testTable: Datatable = {
       price: 605,
       quantity: 100,
       in_stock: true,
+      title_id: 'title1',
     },
     {
       name: 'product1',
@@ -56,6 +62,7 @@ const testTable: Datatable = {
       price: 583,
       quantity: 200,
       in_stock: true,
+      title_id: 'title2',
     },
     {
       name: 'product1',
@@ -63,6 +70,7 @@ const testTable: Datatable = {
       price: 420,
       quantity: 300,
       in_stock: true,
+      title_id: 'title3',
     },
     {
       name: 'product2',
@@ -70,6 +78,7 @@ const testTable: Datatable = {
       price: 216,
       quantity: 350,
       in_stock: false,
+      title_id: 'title4',
     },
     {
       name: 'product2',
@@ -77,6 +86,7 @@ const testTable: Datatable = {
       price: 200,
       quantity: 256,
       in_stock: false,
+      title_id: 'title5',
     },
     {
       name: 'product2',
@@ -84,6 +94,7 @@ const testTable: Datatable = {
       price: 190,
       quantity: 231,
       in_stock: false,
+      title_id: 'title6',
     },
     {
       name: 'product3',
@@ -91,6 +102,7 @@ const testTable: Datatable = {
       price: 67,
       quantity: 240,
       in_stock: true,
+      title_id: 'title7',
     },
     {
       name: 'product4',
@@ -98,6 +110,7 @@ const testTable: Datatable = {
       price: 311,
       quantity: 447,
       in_stock: false,
+      title_id: 'title8',
     },
     {
       name: 'product5',
@@ -105,6 +118,7 @@ const testTable: Datatable = {
       price: 288,
       quantity: 384,
       in_stock: true,
+      title_id: 'title9',
     },
   ],
 };

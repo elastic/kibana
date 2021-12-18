@@ -8,7 +8,7 @@
 import { groupBy, keyBy, memoize } from 'lodash';
 import { KibanaRequest, Logger, SavedObjectsClientContract } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
-import { MlJob } from '@elastic/elasticsearch/api/types';
+import { MlJob } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MlClient } from '../ml_client';
 import { JobSelection } from '../../routes/schemas/alerting_schema';
 import { datafeedsProvider, DatafeedsService } from '../../models/job_service/datafeeds';

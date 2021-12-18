@@ -12,7 +12,8 @@ import { searchMigrations } from './search_migrations';
 export const searchSavedObjectType: SavedObjectsType = {
   name: 'search',
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'discoverApp',
     defaultSearchField: 'title',
@@ -31,7 +32,9 @@ export const searchSavedObjectType: SavedObjectsType = {
     properties: {
       columns: { type: 'keyword', index: false, doc_values: false },
       description: { type: 'text' },
+      viewMode: { type: 'keyword', index: false, doc_values: false },
       hideChart: { type: 'boolean', index: false, doc_values: false },
+      hideAggregatedPreview: { type: 'boolean', index: false, doc_values: false },
       hits: { type: 'integer', index: false, doc_values: false },
       kibanaSavedObjectMeta: {
         properties: {

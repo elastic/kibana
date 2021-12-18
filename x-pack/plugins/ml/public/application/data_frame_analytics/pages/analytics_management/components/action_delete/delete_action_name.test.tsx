@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import * as CheckPrivilige from '../../../../../capabilities/check_capabilities';
 import mockAnalyticsListItem from '../analytics_list/__mocks__/analytics_list_item.json';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import {
   coreMock as mockCoreServices,
   i18nServiceMock,
@@ -30,7 +30,7 @@ jest.mock('../../../../../../application/util/dependency_cache', () => ({
 
 jest.mock('../../../../../contexts/kibana', () => ({
   useMlKibana: () => ({
-    services: mockCoreServices.createStart(),
+    services: { ...mockCoreServices.createStart(), data: { data_view: { find: jest.fn() } } },
   }),
   useNotifications: () => {
     return {

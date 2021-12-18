@@ -7,7 +7,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import { getCoreStart } from '../../services';
@@ -33,8 +33,8 @@ export const UseIndexPatternModeCallout = () => {
     <EuiCallOut
       title={
         <FormattedMessage
-          id="visTypeTimeseries.visEditorVisualization.indexPatternMode.notificationTitle"
-          defaultMessage="TSVB now supports index patterns"
+          id="visTypeTimeseries.visEditorVisualization.dataViewMode.notificationTitle"
+          defaultMessage="TSVB supports data views"
         />
       }
       iconType="cheer"
@@ -42,13 +42,13 @@ export const UseIndexPatternModeCallout = () => {
     >
       <p>
         <FormattedMessage
-          id="visTypeTimeseries.visEditorVisualization.indexPatternMode.notificationMessage"
-          defaultMessage="Great news! You can now visualize the data from Kibana index patterns (recommended) or Elasticsearch indices. {indexPatternModeLink}."
+          id="visTypeTimeseries.visEditorVisualization.dataViewMode.notificationMessage"
+          defaultMessage="Great news! You can visualize the data from Kibana data views (recommended) or Elasticsearch indices. {indexPatternModeLink}."
           values={{
             indexPatternModeLink: (
               <EuiLink href={indexPatternModeLink} target="_blank" external>
                 <FormattedMessage
-                  id="visTypeTimeseries.visEditorVisualization.indexPatternMode.link"
+                  id="visTypeTimeseries.visEditorVisualization.dataViewMode.link"
                   defaultMessage="Check it out."
                 />
               </EuiLink>
@@ -59,7 +59,7 @@ export const UseIndexPatternModeCallout = () => {
       <EuiFlexGroup gutterSize="none">
         <EuiButton size="s" onClick={dismissNotice}>
           <FormattedMessage
-            id="visTypeTimeseries.visEditorVisualization.indexPatternMode.dismissNoticeButtonText"
+            id="visTypeTimeseries.visEditorVisualization.dataViewMode.dismissNoticeButtonText"
             defaultMessage="Dismiss"
           />
         </EuiButton>

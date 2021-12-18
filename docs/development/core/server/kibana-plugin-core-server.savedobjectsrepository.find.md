@@ -14,11 +14,11 @@ find<T = unknown, A = unknown>(options: SavedObjectsFindOptions): Promise<SavedO
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | <code>SavedObjectsFindOptions</code> |  |
+|  options | SavedObjectsFindOptions |  {<!-- -->(string\|Array<string>)<!-- -->} \[options.type\]  {<!-- -->string<!-- -->} \[options.search\]  {<!-- -->string<!-- -->} \[options.defaultSearchOperator\]  {<!-- -->Array<string>} \[options.searchFields\] - see Elasticsearch Simple Query String Query field argument for more information  {<!-- -->integer<!-- -->} \[options.page=1\]  {<!-- -->integer<!-- -->} \[options.perPage=20\]  {<!-- -->Array<unknown>} \[options.searchAfter\]  {<!-- -->string<!-- -->} \[options.sortField\]  {<!-- -->string<!-- -->} \[options.sortOrder\]  {<!-- -->Array<string>} \[options.fields\]  {<!-- -->string<!-- -->} \[options.namespace\]  {<!-- -->object<!-- -->} \[options.hasReference\] - { type, id }  {<!-- -->string<!-- -->} \[options.pit\]  {<!-- -->string<!-- -->} \[options.preference\] |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsFindResponse<T, A>>`
+Promise&lt;SavedObjectsFindResponse&lt;T, A&gt;&gt;
 
 {<!-- -->promise<!-- -->} - { saved\_objects: \[{ id, type, version, attributes }<!-- -->\], total, per\_page, page }
 

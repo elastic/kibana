@@ -6,29 +6,56 @@
  */
 
 import React, { memo, PropsWithChildren, useMemo } from 'react';
-import { EuiText } from '@elastic/eui';
+import { CommonProps, EuiText, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
+import { getEmptyValue } from '../../../../common/components/empty_value';
 
-export type TextValueDisplayProps = PropsWithChildren<{
-  bold?: boolean;
-  truncate?: boolean;
-}>;
+export type TextValueDisplayProps = Pick<CommonProps, 'data-test-subj'> &
+  PropsWithChildren<{
+    bold?: boolean;
+    truncate?: boolean;
+    size?: 'xs' | 's' | 'm' | 'relative';
+    withTooltip?: boolean;
+  }>;
 
 /**
  * Common component for displaying consistent text across the card. Changes here could impact all of
  * display of values on the card
  */
-export const TextValueDisplay = memo<TextValueDisplayProps>(({ bold, truncate, children }) => {
-  const cssClassNames = useMemo(() => {
-    return classNames({
-      'eui-textTruncate': truncate,
-    });
-  }, [truncate]);
+export const TextValueDisplay = memo<TextValueDisplayProps>(
+  ({
+    bold,
+    truncate,
+    size = 's',
+    withTooltip = false,
+    'data-test-subj': dataTestSubj,
+    children,
+  }) => {
+    const cssClassNames = useMemo(() => {
+      return classNames({
+        'eui-textTruncate': truncate,
+        'eui-textBreakWord': true,
+      });
+    }, [truncate]);
 
-  return (
-    <EuiText size="s" className={cssClassNames}>
-      {bold ? <strong>{children}</strong> : children}
-    </EuiText>
-  );
-});
+    const textContent = useMemo(() => {
+      return bold ? <strong>{children}</strong> : children;
+    }, [bold, children]);
+
+    return (
+      <EuiText size={size} data-test-subj={dataTestSubj}>
+        {withTooltip &&
+        'string' === typeof children &&
+        children.length > 0 &&
+        children !== getEmptyValue() ? (
+          <EuiToolTip anchorClassName={cssClassNames} content={children} position="top">
+            <>{textContent}</>
+          </EuiToolTip>
+        ) : (
+          textContent
+        )}
+      </EuiText>
+    );
+  }
+);
 TextValueDisplay.displayName = 'TextValueDisplay';

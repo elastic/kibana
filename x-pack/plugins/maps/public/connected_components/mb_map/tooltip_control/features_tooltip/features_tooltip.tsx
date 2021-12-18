@@ -10,7 +10,7 @@ import { EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { GeoJsonProperties } from 'geojson';
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { FeatureProperties } from './feature_properties';
 import { RawValue } from '../../../../../common/constants';
 import { Footer } from './footer';
@@ -62,8 +62,20 @@ export class FeaturesTooltip extends Component<Props, State> {
 
   static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     if (nextProps.features !== prevState.prevFeatures) {
+      let nextCurrentFeature = nextProps.features ? nextProps.features[0] : null;
+      if (prevState.currentFeature) {
+        const updatedCurrentFeature = nextProps.features.find((tooltipFeature) => {
+          return (
+            tooltipFeature.id === prevState.currentFeature!.id &&
+            tooltipFeature.layerId === prevState.currentFeature!.layerId
+          );
+        });
+        if (updatedCurrentFeature) {
+          nextCurrentFeature = updatedCurrentFeature;
+        }
+      }
       return {
-        currentFeature: nextProps.features ? nextProps.features[0] : null,
+        currentFeature: nextCurrentFeature,
         view: PROPERTIES_VIEW,
         prevFeatures: nextProps.features,
       };

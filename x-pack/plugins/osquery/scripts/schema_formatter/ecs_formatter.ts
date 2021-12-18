@@ -11,7 +11,7 @@ import path from 'path';
 
 import { run } from '@kbn/dev-utils';
 
-const ECS_COLUMN_SCHEMA_FIELDS = ['field', 'type', 'description'];
+const ECS_COLUMN_SCHEMA_FIELDS = ['field', 'type', 'normalization', 'example', 'description'];
 
 const RESTRICTED_FIELDS = [
   'agent.name',

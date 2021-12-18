@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertTypeParams } from '../../../alerting/common';
+import type { Alert, AlertTypeParams } from '../../../alerting/common';
 
 export type TransformHealthRuleParams = {
   includeTransforms?: string[];
@@ -20,3 +20,5 @@ export type TransformHealthRuleParams = {
 export type TransformHealthRuleTestsConfig = TransformHealthRuleParams['testsConfig'];
 
 export type TransformHealthTests = keyof Exclude<TransformHealthRuleTestsConfig, null | undefined>;
+
+export type TransformHealthAlertRule = Omit<Alert<TransformHealthRuleParams>, 'apiKey'>;

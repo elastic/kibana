@@ -20,12 +20,13 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import type { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { DetailView } from './detail_view';
 import { ErrorDistribution } from './Distribution';
 
@@ -49,6 +50,15 @@ const Message = euiStyled.div`
 const Culprit = euiStyled.div`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 `;
+
+type ErrorDistributionAPIResponse =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
+
+const emptyState: ErrorDistributionAPIResponse = {
+  currentPeriod: [],
+  previousPeriod: [],
+  bucketSize: 0,
+};
 
 function getShortGroupId(errorGroupId?: string) {
   if (!errorGroupId) {
@@ -94,7 +104,7 @@ function ErrorGroupHeader({
 }
 
 export function ErrorGroupDetails() {
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
 
   const { serviceName } = useApmServiceContext();
 
@@ -146,7 +156,7 @@ export function ErrorGroupDetails() {
     [environment, kuery, serviceName, start, end, groupId]
   );
 
-  const { errorDistributionData } = useErrorGroupDistributionFetcher({
+  const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId,
     environment,
@@ -209,7 +219,8 @@ export function ErrorGroupDetails() {
           </Titles>
         )}
         <ErrorDistribution
-          distribution={errorDistributionData}
+          fetchStatus={status}
+          distribution={showDetails ? errorDistributionData : emptyState}
           title={i18n.translate(
             'xpack.apm.errorGroupDetails.occurrencesChartLabel',
             {

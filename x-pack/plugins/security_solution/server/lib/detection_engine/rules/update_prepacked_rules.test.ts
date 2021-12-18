@@ -6,6 +6,7 @@
  */
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';
@@ -19,10 +20,12 @@ describe.each([
 ])('updatePrepackagedRules - %s', (_, isRuleRegistryEnabled) => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let ruleStatusClient: ReturnType<typeof ruleExecutionLogClientMock.create>;
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
     ruleStatusClient = ruleExecutionLogClientMock.create();
+    savedObjectsClient = savedObjectsClientMock.create();
   });
 
   it('should omit actions and enabled when calling patchRules', async () => {
@@ -40,6 +43,7 @@ describe.each([
 
     await updatePrepackagedRules(
       rulesClient,
+      savedObjectsClient,
       'default',
       ruleStatusClient,
       [{ ...prepackagedRule, actions }],
@@ -56,6 +60,44 @@ describe.each([
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({
         enabled: undefined,
+      })
+    );
+  });
+
+  it('should update threat match rules', async () => {
+    const updatedThreatParams = {
+      threat_index: ['test-index'],
+      threat_indicator_path: 'test.path',
+      threat_query: 'threat:*',
+    };
+    const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
+    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+
+    await updatePrepackagedRules(
+      rulesClient,
+      savedObjectsClient,
+      'default',
+      ruleStatusClient,
+      [{ ...prepackagedRule, ...updatedThreatParams }],
+      'output-index',
+      isRuleRegistryEnabled
+    );
+
+    expect(patchRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        threatIndicatorPath: 'test.path',
+      })
+    );
+
+    expect(patchRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        threatIndex: ['test-index'],
+      })
+    );
+
+    expect(patchRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        threatQuery: 'threat:*',
       })
     );
   });

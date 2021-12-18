@@ -7,14 +7,7 @@
     "githubTeam": "stack-monitoring-ui"
   },
   "configPath": ["monitoring"],
-  "requiredPlugins": [
-    "licensing",
-    "features",
-    "data",
-    "navigation",
-    "kibanaLegacy",
-    "observability"
-  ],
+  "requiredPlugins": ["licensing", "features", "data", "navigation", "observability"],
   "optionalPlugins": [
     "infra",
     "usageCollection",
@@ -27,5 +20,10 @@
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["kibanaUtils", "home", "alerting", "kibanaReact", "licenseManagement"]
+  "requiredBundles": [
+    "kibanaUtils",
+    "home",
+    "alerting",
+    "kibanaReact"
+  ]
 }

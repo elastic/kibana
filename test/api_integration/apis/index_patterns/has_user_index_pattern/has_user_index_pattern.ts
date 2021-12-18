@@ -17,11 +17,11 @@ export default function ({ getService }: FtrProviderContext) {
   describe('has user index pattern API', () => {
     beforeEach(async () => {
       await esArchiver.emptyKibanaIndex();
-      if ((await es.indices.exists({ index: 'metrics-test' })).body) {
+      if (await es.indices.exists({ index: 'metrics-test' })) {
         await es.indices.delete({ index: 'metrics-test' });
       }
 
-      if ((await es.indices.exists({ index: 'logs-test' })).body) {
+      if (await es.indices.exists({ index: 'logs-test' })) {
         await es.indices.delete({ index: 'logs-test' });
       }
     });

@@ -59,13 +59,16 @@ export function getActionsMigrations(
   const migrationActionsFourteen = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => true,
-    pipeMigrations(addisMissingSecretsField)
+    pipeMigrations(addIsMissingSecretsField)
   );
 
-  const migrationEmailActionsSixteen = createEsoMigration(
+  const migrationActionsSixteen = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => doc.attributes.actionTypeId === '.email',
-    pipeMigrations(setServiceConfigIfNotSet)
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+      doc.attributes.actionTypeId === '.servicenow' ||
+      doc.attributes.actionTypeId === '.servicenow-sir' ||
+      doc.attributes.actionTypeId === '.email',
+    pipeMigrations(addUsesTableApiToServiceNowConnectors, setServiceConfigIfNotSet)
   );
 
   const migrationActions800 = createEsoMigration(
@@ -79,7 +82,7 @@ export function getActionsMigrations(
     '7.10.0': executeMigrationWithErrorHandling(migrationActionsTen, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationActionsEleven, '7.11.0'),
     '7.14.0': executeMigrationWithErrorHandling(migrationActionsFourteen, '7.14.0'),
-    '7.16.0': executeMigrationWithErrorHandling(migrationEmailActionsSixteen, '7.16.0'),
+    '7.16.0': executeMigrationWithErrorHandling(migrationActionsSixteen, '7.16.0'),
     '8.0.0': executeMigrationWithErrorHandling(migrationActions800, '8.0.0'),
   };
 }
@@ -182,7 +185,7 @@ const setServiceConfigIfNotSet = (
   };
 };
 
-const addisMissingSecretsField = (
+const addIsMissingSecretsField = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> => {
   return {
@@ -190,6 +193,28 @@ const addisMissingSecretsField = (
     attributes: {
       ...doc.attributes,
       isMissingSecrets: false,
+    },
+  };
+};
+
+const addUsesTableApiToServiceNowConnectors = (
+  doc: SavedObjectUnsanitizedDoc<RawAction>
+): SavedObjectUnsanitizedDoc<RawAction> => {
+  if (
+    doc.attributes.actionTypeId !== '.servicenow' &&
+    doc.attributes.actionTypeId !== '.servicenow-sir'
+  ) {
+    return doc;
+  }
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      config: {
+        ...doc.attributes.config,
+        usesTableApi: true,
+      },
     },
   };
 };

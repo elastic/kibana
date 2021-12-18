@@ -134,7 +134,6 @@ export interface SerializedColdPhase extends SerializedPhase {
 
 export interface SerializedFrozenPhase extends SerializedPhase {
   actions: {
-    freeze?: {};
     allocate?: AllocateAction;
     set_priority?: {
       priority: number | null;

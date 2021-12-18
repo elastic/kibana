@@ -15,7 +15,7 @@ import { fullContentSources } from '../../../../__mocks__/content_sources.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { expectedAsyncError } from '../../../../../test_helpers';
+import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 
 jest.mock('../../source_logic', () => ({
   SourceLogic: { actions: { setContentSource: jest.fn() } },
@@ -34,18 +34,27 @@ import {
 
 describe('SynchronizationLogic', () => {
   const { http } = mockHttpValues;
-  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
+  const { flashSuccessToast } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
   const { mount } = new LogicMounter(SynchronizationLogic);
   const contentSource = fullContentSources[0];
+  const sourceWithNoBlockedWindows = {
+    ...contentSource,
+    indexing: {
+      ...contentSource.indexing,
+      schedule: {
+        ...contentSource.indexing.schedule,
+        blockedWindows: undefined,
+      },
+    },
+  };
 
   const defaultValues = {
     navigatingBetweenTabs: false,
     hasUnsavedObjectsAndAssetsChanges: false,
-    hasUnsavedFrequencyChanges: true,
+    hasUnsavedFrequencyChanges: false,
     contentExtractionChecked: true,
     thumbnailsChecked: true,
-    blockedWindows: [],
     schedule: contentSource.indexing.schedule,
     cachedSchedule: contentSource.indexing.schedule,
   };
@@ -66,10 +75,23 @@ describe('SynchronizationLogic', () => {
       expect(SynchronizationLogic.values.navigatingBetweenTabs).toEqual(true);
     });
 
-    it('addBlockedWindow', () => {
-      SynchronizationLogic.actions.addBlockedWindow();
+    describe('addBlockedWindow', () => {
+      it('creates and populates empty array when undefined', () => {
+        mount({}, { contentSource: sourceWithNoBlockedWindows });
+        SynchronizationLogic.actions.addBlockedWindow();
 
-      expect(SynchronizationLogic.values.blockedWindows).toEqual([emptyBlockedWindow]);
+        expect(SynchronizationLogic.values.schedule.blockedWindows).toEqual([emptyBlockedWindow]);
+      });
+
+      it('adds item when list has items', () => {
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.addBlockedWindow();
+
+        expect(SynchronizationLogic.values.schedule.blockedWindows).toEqual([
+          emptyBlockedWindow,
+          emptyBlockedWindow,
+        ]);
+      });
     });
 
     it('setThumbnailsChecked', () => {
@@ -82,6 +104,84 @@ describe('SynchronizationLogic', () => {
       SynchronizationLogic.actions.setContentExtractionChecked(false);
 
       expect(SynchronizationLogic.values.contentExtractionChecked).toEqual(false);
+    });
+
+    it('resetSyncSettings', () => {
+      SynchronizationLogic.actions.setContentExtractionChecked(false);
+      SynchronizationLogic.actions.setThumbnailsChecked(false);
+      SynchronizationLogic.actions.resetSyncSettings();
+
+      expect(SynchronizationLogic.values.thumbnailsChecked).toEqual(true);
+      expect(SynchronizationLogic.values.contentExtractionChecked).toEqual(true);
+    });
+
+    describe('setSyncFrequency', () => {
+      it('sets "days"', () => {
+        SynchronizationLogic.actions.setSyncFrequency('full', '1', 'days');
+
+        expect(SynchronizationLogic.values.schedule.full).toEqual('P1D');
+      });
+
+      it('sets "hours"', () => {
+        SynchronizationLogic.actions.setSyncFrequency('full', '10', 'hours');
+
+        expect(SynchronizationLogic.values.schedule.full).toEqual('P1DT10H');
+      });
+
+      it('sets "minutes"', () => {
+        SynchronizationLogic.actions.setSyncFrequency('full', '30', 'minutes');
+
+        expect(SynchronizationLogic.values.schedule.full).toEqual('P1DT30M');
+      });
+    });
+
+    describe('removeBlockedWindow', () => {
+      it('removes window', () => {
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.removeBlockedWindow(0);
+
+        expect(SynchronizationLogic.values.schedule.blockedWindows).toEqual([emptyBlockedWindow]);
+      });
+
+      it('returns "undefined" when last window removed', () => {
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.removeBlockedWindow(0);
+
+        expect(SynchronizationLogic.values.schedule.blockedWindows).toBeUndefined();
+      });
+    });
+  });
+
+  describe('setBlockedTimeWindow', () => {
+    it('sets "jobType"', () => {
+      SynchronizationLogic.actions.addBlockedWindow();
+      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'jobType', 'incremental');
+
+      expect(SynchronizationLogic.values.schedule.blockedWindows![0].jobType).toEqual(
+        'incremental'
+      );
+    });
+
+    it('sets "day"', () => {
+      SynchronizationLogic.actions.addBlockedWindow();
+      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'day', 'tuesday');
+
+      expect(SynchronizationLogic.values.schedule.blockedWindows![0].day).toEqual('tuesday');
+    });
+
+    it('sets "start"', () => {
+      SynchronizationLogic.actions.addBlockedWindow();
+      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'start', '9:00:00Z');
+
+      expect(SynchronizationLogic.values.schedule.blockedWindows![0].start).toEqual('9:00:00Z');
+    });
+
+    it('sets "end"', () => {
+      SynchronizationLogic.actions.addBlockedWindow();
+      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'end', '11:00:00Z');
+
+      expect(SynchronizationLogic.values.schedule.blockedWindows![0].end).toEqual('11:00:00Z');
     });
   });
 
@@ -110,119 +210,126 @@ describe('SynchronizationLogic', () => {
     });
 
     describe('updateSyncEnabled', () => {
-      it('calls API and sets values for false value', async () => {
-        const setContentSourceSpy = jest.spyOn(SourceLogic.actions, 'setContentSource');
-        const promise = Promise.resolve(contentSource);
-        http.patch.mockReturnValue(promise);
+      it('calls updateServerSettings method', async () => {
+        const updateServerSettingsSpy = jest.spyOn(
+          SynchronizationLogic.actions,
+          'updateServerSettings'
+        );
         SynchronizationLogic.actions.updateSyncEnabled(false);
 
-        expect(http.patch).toHaveBeenCalledWith(
-          '/internal/workplace_search/org/sources/123/settings',
-          {
-            body: JSON.stringify({
-              content_source: {
-                indexing: { enabled: false },
-              },
-            }),
-          }
-        );
-        await promise;
-        expect(setContentSourceSpy).toHaveBeenCalledWith(contentSource);
-        expect(flashSuccessToast).toHaveBeenCalledWith('Source synchronization disabled.');
-      });
-
-      it('calls API and sets values for true value', async () => {
-        const promise = Promise.resolve(contentSource);
-        http.patch.mockReturnValue(promise);
-        SynchronizationLogic.actions.updateSyncEnabled(true);
-
-        expect(http.patch).toHaveBeenCalledWith(
-          '/internal/workplace_search/org/sources/123/settings',
-          {
-            body: JSON.stringify({
-              content_source: {
-                indexing: { enabled: true },
-              },
-            }),
-          }
-        );
-        await promise;
-        expect(flashSuccessToast).toHaveBeenCalledWith('Source synchronization enabled.');
-      });
-
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
+        expect(updateServerSettingsSpy).toHaveBeenCalledWith({
+          content_source: {
+            indexing: { enabled: false },
           },
-        };
-        const promise = Promise.reject(error);
-        http.patch.mockReturnValue(promise);
-        SynchronizationLogic.actions.updateSyncEnabled(false);
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
+        });
       });
     });
 
-    describe('resetSyncSettings', () => {
-      it('calls methods', async () => {
-        const setThumbnailsCheckedSpy = jest.spyOn(
+    describe('updateObjectsAndAssetsSettings', () => {
+      it('calls updateServerSettings method', async () => {
+        const updateServerSettingsSpy = jest.spyOn(
           SynchronizationLogic.actions,
-          'setThumbnailsChecked'
+          'updateServerSettings'
         );
-        const setContentExtractionCheckedSpy = jest.spyOn(
-          SynchronizationLogic.actions,
-          'setContentExtractionChecked'
-        );
-        SynchronizationLogic.actions.resetSyncSettings();
+        SynchronizationLogic.actions.updateObjectsAndAssetsSettings();
 
-        expect(setThumbnailsCheckedSpy).toHaveBeenCalledWith(true);
-        expect(setContentExtractionCheckedSpy).toHaveBeenCalledWith(true);
+        expect(updateServerSettingsSpy).toHaveBeenCalledWith({
+          content_source: {
+            indexing: {
+              features: {
+                content_extraction: { enabled: true },
+                thumbnails: { enabled: true },
+              },
+            },
+          },
+        });
       });
     });
 
-    describe('updateSyncSettings', () => {
+    describe('updateFrequencySettings', () => {
+      it('calls updateServerSettings method', async () => {
+        SynchronizationLogic.actions.addBlockedWindow();
+        const updateServerSettingsSpy = jest.spyOn(
+          SynchronizationLogic.actions,
+          'updateServerSettings'
+        );
+        SynchronizationLogic.actions.updateFrequencySettings();
+
+        expect(updateServerSettingsSpy).toHaveBeenCalledWith({
+          content_source: {
+            indexing: {
+              schedule: {
+                full: 'P1D',
+                incremental: 'PT2H',
+                delete: 'PT10M',
+                blocked_windows: [
+                  {
+                    day: 'monday',
+                    end: '13:00:00Z',
+                    job_type: 'full',
+                    start: '11:00:00Z',
+                  },
+                ],
+              },
+            },
+          },
+        });
+      });
+
+      it('handles case where blockedWindows undefined', async () => {
+        const updateServerSettingsSpy = jest.spyOn(
+          SynchronizationLogic.actions,
+          'updateServerSettings'
+        );
+        SynchronizationLogic.actions.updateFrequencySettings();
+
+        expect(updateServerSettingsSpy).toHaveBeenCalledWith({
+          content_source: {
+            indexing: {
+              schedule: {
+                full: 'P1D',
+                incremental: 'PT2H',
+                delete: 'PT10M',
+                blocked_windows: [],
+              },
+            },
+          },
+        });
+      });
+    });
+
+    describe('updateServerSettings', () => {
+      const body = {
+        content_source: {
+          indexing: {
+            features: {
+              content_extraction: { enabled: true },
+              thumbnails: { enabled: true },
+            },
+          },
+        },
+      };
       it('calls API and sets values', async () => {
         const setContentSourceSpy = jest.spyOn(SourceLogic.actions, 'setContentSource');
+        const setServerScheduleSpy = jest.spyOn(SynchronizationLogic.actions, 'setServerSchedule');
         const promise = Promise.resolve(contentSource);
         http.patch.mockReturnValue(promise);
-        SynchronizationLogic.actions.updateSyncSettings();
+        SynchronizationLogic.actions.updateServerSettings(body);
 
         expect(http.patch).toHaveBeenCalledWith(
           '/internal/workplace_search/org/sources/123/settings',
           {
-            body: JSON.stringify({
-              content_source: {
-                indexing: {
-                  features: {
-                    content_extraction: { enabled: true },
-                    thumbnails: { enabled: true },
-                  },
-                },
-              },
-            }),
+            body: JSON.stringify(body),
           }
         );
         await promise;
         expect(setContentSourceSpy).toHaveBeenCalledWith(contentSource);
+        expect(setServerScheduleSpy).toHaveBeenCalledWith(contentSource.indexing.schedule);
         expect(flashSuccessToast).toHaveBeenCalledWith('Source synchronization settings updated.');
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.patch.mockReturnValue(promise);
-        SynchronizationLogic.actions.updateSyncSettings();
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
+      itShowsServerErrorAsFlashMessage(http.patch, () => {
+        SynchronizationLogic.actions.updateServerSettings(body);
       });
     });
   });

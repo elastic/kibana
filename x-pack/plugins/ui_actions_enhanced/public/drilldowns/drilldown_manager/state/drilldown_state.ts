@@ -233,10 +233,8 @@ export class DrilldownState {
   // Below are convenience React hooks for consuming observables in connected
   // React components.
 
-  /* eslint-disable react-hooks/rules-of-hooks */
   public readonly useName = () => useObservable(this.name$, this.name$.getValue());
   public readonly useTriggers = () => useObservable(this.triggers$, this.triggers$.getValue());
   public readonly useConfig = () => useObservable(this.config$, this.config$.getValue());
   public readonly useError = () => useSyncObservable(this.error$);
-  /* eslint-enable react-hooks/rules-of-hooks */
 }

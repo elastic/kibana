@@ -1,3 +1,7 @@
+const groups = /** @type {Array<{key: string, name: string, ciGroups: number }>} */(
+  require('./groups.json').groups
+)
+
 const stepInput = (key, nameOfSuite) => {
   return {
     key: `ftsr-suite/${key}`,
@@ -7,37 +11,31 @@ const stepInput = (key, nameOfSuite) => {
   };
 };
 
-const OSS_CI_GROUPS = 12;
-const XPACK_CI_GROUPS = 13;
-
 const inputs = [
   {
     key: 'ftsr-override-count',
     text: 'Override for all suites',
-    default: 0,
-    required: true,
-  },
-  {
-    key: 'ftsr-concurrency',
-    text: 'Max concurrency per step',
-    default: 20,
+    default: '0',
     required: true,
   },
 ];
 
-for (let i = 1; i <= OSS_CI_GROUPS; i++) {
-  inputs.push(stepInput(`oss/cigroup/${i}`, `OSS CI Group ${i}`));
-}
-
-for (let i = 1; i <= XPACK_CI_GROUPS; i++) {
-  inputs.push(stepInput(`xpack/cigroup/${i}`, `Default CI Group ${i}`));
+for (const group of groups) {
+  if (!group.ciGroups) {
+    inputs.push(stepInput(group.key, group.name))
+  } else {
+    for (let i = 1; i <= group.ciGroups; i++) {
+      inputs.push(stepInput(`${group.key}/${i}`, `${group.name} ${i}`))
+    }
+  }
 }
 
 const pipeline = {
   steps: [
     {
-      input: 'Number of Runs',
+      input: 'Number of Runs - Click Me',
       fields: inputs,
+      if: `build.env('KIBANA_FLAKY_TEST_RUNNER_CONFIG') == null`
     },
     {
       wait: '~',

@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { v4 } from 'uuid';
-
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
-import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { createQueryAlertType } from './create_query_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
+import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
+import { createMockConfig } from '../../routes/__mocks__';
 
 jest.mock('../utils/get_list_client', () => ({
   getListClient: jest.fn().mockReturnValue({
@@ -25,18 +24,22 @@ jest.mock('../utils/get_list_client', () => ({
 jest.mock('../../rule_execution_log/rule_execution_log_client');
 
 describe('Custom Query Alerts', () => {
+  const { services, dependencies, executor } = createRuleTypeMocks();
+  const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
+    lists: dependencies.lists,
+    logger: dependencies.logger,
+    config: createMockConfig(),
+    ruleDataClient: dependencies.ruleDataClient,
+    eventLogService: dependencies.eventLogService,
+  });
   it('does not send an alert when no events found', async () => {
-    const { services, dependencies, executor } = createRuleTypeMocks();
-    const queryAlertType = createQueryAlertType({
-      experimentalFeatures: allowedExperimentalValues,
-      lists: dependencies.lists,
-      logger: dependencies.logger,
-      mergeStrategy: 'allFields',
-      ignoreFields: [],
-      ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
-      version: '1.0.0',
-    });
+    const queryAlertType = securityRuleTypeWrapper(
+      createQueryAlertType({
+        experimentalFeatures: allowedExperimentalValues,
+        logger: dependencies.logger,
+        version: '1.0.0',
+      })
+    );
 
     dependencies.alerting.registerType(queryAlertType);
 
@@ -45,6 +48,7 @@ describe('Custom Query Alerts', () => {
       index: ['*'],
       from: 'now-1m',
       to: 'now',
+      language: 'kuery',
     };
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
@@ -71,51 +75,5 @@ describe('Custom Query Alerts', () => {
 
     await executor({ params });
     expect(dependencies.ruleDataClient.getWriter).not.toBeCalled();
-  });
-
-  it('sends a properly formatted alert when events are found', async () => {
-    const { services, dependencies, executor } = createRuleTypeMocks();
-    const queryAlertType = createQueryAlertType({
-      experimentalFeatures: allowedExperimentalValues,
-      lists: dependencies.lists,
-      logger: dependencies.logger,
-      mergeStrategy: 'allFields',
-      ignoreFields: [],
-      ruleDataClient: dependencies.ruleDataClient,
-      ruleDataService: dependencies.ruleDataService,
-      version: '1.0.0',
-    });
-
-    dependencies.alerting.registerType(queryAlertType);
-
-    const params = {
-      query: '*:*',
-      index: ['*'],
-      from: 'now-1m',
-      to: 'now',
-    };
-
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [sampleDocNoSortId(v4()), sampleDocNoSortId(v4()), sampleDocNoSortId(v4())],
-          total: {
-            relation: 'eq',
-            value: 3,
-          },
-        },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
-
-    await executor({ params });
-    expect(dependencies.ruleDataClient.getWriter).toBeCalled();
   });
 });

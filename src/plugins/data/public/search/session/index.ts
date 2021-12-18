@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { SessionService, ISessionService, SearchSessionInfoProvider } from './session_service';
+export type { ISessionService, SearchSessionInfoProvider } from './session_service';
+export { SessionService } from './session_service';
 export { SearchSessionState } from './search_session_state';
-export { SessionsClient, ISessionsClient } from './sessions_client';
+export type { ISessionsClient } from './sessions_client';
+export { SessionsClient } from './sessions_client';
 export { noSearchSessionStorageCapabilityMessage } from './i18n';
 export { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
-export {
-  waitUntilNextSessionCompletes$,
-  WaitUntilNextSessionCompletesOptions,
-} from './session_helpers';
+export type { WaitUntilNextSessionCompletesOptions } from './session_helpers';
+export { waitUntilNextSessionCompletes$ } from './session_helpers';

@@ -22,12 +22,12 @@ import { deleteAllExceptions, removeExceptionListItemServerGeneratedProperties }
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const log = getService('log');
 
   describe('delete_exception_list_items', () => {
     describe('delete exception list items', () => {
       afterEach(async () => {
-        await deleteAllExceptions(es);
+        await deleteAllExceptions(supertest, log);
       });
 
       it('should delete a single exception list item by its item_id', async () => {

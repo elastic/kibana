@@ -72,7 +72,20 @@ const defineBasicObservabilityRole = (
         ...((features.infrastructure?.length ?? 0) > 0
           ? [{ names: ['metricbeat-*', 'metrics-*'], privileges: ['all'] }]
           : []),
-        ...((features.apm?.length ?? 0) > 0 ? [{ names: ['apm-*'], privileges: ['all'] }] : []),
+        ...((features.apm?.length ?? 0) > 0
+          ? [
+              {
+                names: [
+                  'apm-*',
+                  'logs-apm*',
+                  'metrics-apm*',
+                  'traces-apm*',
+                  'observability-annotations',
+                ],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ]
+          : []),
         ...((features.uptime?.length ?? 0) > 0
           ? [{ names: ['heartbeat-*,synthetics-*'], privileges: ['all'] }]
           : []),
@@ -83,7 +96,6 @@ const defineBasicObservabilityRole = (
       {
         spaces: ['*'],
         base: [],
-        // @ts-expect-error TypeScript doesn't distinguish between missing and
         // undefined props yet
         feature: features,
       },

@@ -28,12 +28,16 @@ export const loggedOutApp = Object.freeze({
       title: i18n.translate('xpack.security.loggedOutAppTitle', { defaultMessage: 'Logged out' }),
       chromeless: true,
       appRoute: '/security/logged_out',
-      async mount({ element }: AppMountParameters) {
+      async mount({ element, theme$ }: AppMountParameters) {
         const [[coreStart], { renderLoggedOutPage }] = await Promise.all([
           getStartServices(),
           import('./logged_out_page'),
         ]);
-        return renderLoggedOutPage(coreStart.i18n, element, { basePath: coreStart.http.basePath });
+        return renderLoggedOutPage(
+          coreStart.i18n,
+          { element, theme$ },
+          { basePath: coreStart.http.basePath }
+        );
       },
     });
   },

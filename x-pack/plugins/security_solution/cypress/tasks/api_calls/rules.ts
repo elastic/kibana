@@ -114,6 +114,7 @@ export const createCustomRuleActivated = (
       enabled: true,
       tags: ['rule1'],
       max_signals: maxSignals,
+      building_block_type: rule.buildingBlockType,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
@@ -133,17 +134,5 @@ export const createSignalsIndex = () => {
     method: 'POST',
     url: 'api/detection_engine/index',
     headers: { 'kbn-xsrf': 'cypress-creds' },
-  });
-};
-
-export const removeSignalsIndex = () => {
-  cy.request({ url: '/api/detection_engine/index', failOnStatusCode: false }).then((response) => {
-    if (response.status === 200) {
-      cy.request({
-        method: 'DELETE',
-        url: `api/detection_engine/index`,
-        headers: { 'kbn-xsrf': 'delete-signals' },
-      });
-    }
   });
 };

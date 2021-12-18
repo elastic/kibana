@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
 import { EndpointDetailsFlyout } from './details';
@@ -59,7 +59,7 @@ import { TableRowActions } from './components/table_row_actions';
 import { EndpointAgentStatus } from './components/endpoint_agent_status';
 import { CallOut } from '../../../../common/components/callouts';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
-import { WARNING_TRANSFORM_STATES } from '../../../../../common/constants';
+import { WARNING_TRANSFORM_STATES, APP_UI_ID } from '../../../../../common/constants';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -128,14 +128,17 @@ export const EndpointList = () => {
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
   const [showTransformFailedCallout, setShowTransformFailedCallout] = useState(false);
+  const [shouldCheckTransforms, setShouldCheckTransforms] = useState(true);
 
   useEffect(() => {
-    if (!endpointsExist || !listData?.length) {
+    // if no endpoint policy, skip transform check
+    if (!shouldCheckTransforms || !policyItems || !policyItems.length) {
       return;
     }
 
     dispatch({ type: 'loadMetadataTransformStats' });
-  }, [endpointsExist, listData.length, dispatch]);
+    setShouldCheckTransforms(false);
+  }, [policyItems, shouldCheckTransforms, dispatch]);
 
   useEffect(() => {
     const hasFailure = metadataTransformStats.some((transform) =>
@@ -182,14 +185,14 @@ export const EndpointList = () => {
       }/add-integration`,
       state: {
         onCancelNavigateTo: [
-          'securitySolution',
+          APP_UI_ID,
           {
             path: getEndpointListPath({ name: 'endpointList' }),
           },
         ],
         onCancelUrl: getAppUrl({ path: getEndpointListPath({ name: 'endpointList' }) }),
         onSaveNavigateTo: [
-          'securitySolution',
+          APP_UI_ID,
           {
             path: getEndpointListPath({ name: 'endpointList' }),
           },
@@ -225,10 +228,7 @@ export const EndpointList = () => {
     useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>('fleet', {
       path: `/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
       state: {
-        onDoneNavigateTo: [
-          'securitySolution',
-          { path: getEndpointListPath({ name: 'endpointList' }) },
-        ],
+        onDoneNavigateTo: [APP_UI_ID, { path: getEndpointListPath({ name: 'endpointList' }) }],
       },
     });
 
@@ -534,14 +534,19 @@ export const EndpointList = () => {
     return endpointsExist && !patternsError;
   }, [endpointsExist, patternsError]);
 
-  const transformFailedCalloutDescription = useMemo(
-    () => (
+  const transformFailedCalloutDescription = useMemo(() => {
+    const failingTransformIds = metadataTransformStats
+      .filter((transformStat) => WARNING_TRANSFORM_STATES.has(transformStat.state))
+      .map((transformStat) => transformStat.id)
+      .join(', ');
+
+    return (
       <>
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.transformFailed.message"
           defaultMessage="A required transform, {transformId}, is currently failing. Most of the time this can be fixed by {transformsPage}. For additional help, please visit the {docsPage}"
           values={{
-            transformId: metadataTransformStats[0]?.id || metadataTransformPrefix,
+            transformId: failingTransformIds || metadataTransformPrefix,
             transformsPage: (
               <LinkToApp
                 data-test-subj="failed-transform-restart-link"
@@ -557,7 +562,7 @@ export const EndpointList = () => {
             docsPage: (
               <EuiLink
                 data-test-subj="failed-transform-docs-link"
-                href={services?.docLinks?.links.transforms.guide}
+                href={services?.docLinks?.links.endpoints.troubleshooting}
                 target="_blank"
               >
                 <FormattedMessage
@@ -570,9 +575,8 @@ export const EndpointList = () => {
         />
         <EuiSpacer size="s" />
       </>
-    ),
-    [metadataTransformStats, services?.docLinks?.links.transforms.guide]
-  );
+    );
+  }, [metadataTransformStats, services?.docLinks?.links.endpoints.troubleshooting]);
 
   const transformFailedCallout = useMemo(() => {
     if (!showTransformFailedCallout) {

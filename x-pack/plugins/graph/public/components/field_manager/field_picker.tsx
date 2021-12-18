@@ -9,8 +9,8 @@ import React, { useState, useEffect, ReactNode } from 'react';
 import { EuiPopover, EuiSelectable, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
+import { FieldIcon } from '@kbn/react-field/field_icon';
 import { WorkspaceField } from '../../types';
-import { FieldIcon } from '../../../../../../src/plugins/kibana_react/public';
 
 export interface FieldPickerProps {
   fieldMap: Record<string, WorkspaceField>;

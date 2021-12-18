@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 import _, { isArray } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { RangeFilter } from '@kbn/es-query';
 import { AggGroupNames } from '../agg_groups';
@@ -186,7 +186,7 @@ export function mergeTimeShifts(
         return;
       } else {
         // a sub-agg
-        const agg = requestAggs.find((requestAgg) => key.indexOf(requestAgg.id) === 0);
+        const agg = requestAggs.find((requestAgg) => key === requestAgg.getResponseId());
         if (agg && agg.type.type === AggGroupNames.Metrics) {
           const timeShift = agg.getTimeShift();
           if (
@@ -430,6 +430,7 @@ export function insertTimeShiftSplit(
       filters[key] = {
         range: {
           [timeField]: {
+            format: 'strict_date_optional_time',
             gte: moment(timeFilter.query.range[timeField].gte).subtract(shift).toISOString(),
             lte: moment(timeFilter.query.range[timeField].lte).subtract(shift).toISOString(),
           },

@@ -14,7 +14,6 @@ import { UserActionPropertyActions } from './user_action_property_actions';
 export interface UserActionContentToolbarProps {
   commentMarkdown: string;
   id: string;
-  getCaseDetailHrefWithCommentId: (commentId: string) => string;
   editLabel: string;
   quoteLabel: string;
   isLoading: boolean;
@@ -26,7 +25,6 @@ export interface UserActionContentToolbarProps {
 const UserActionContentToolbarComponent = ({
   commentMarkdown,
   id,
-  getCaseDetailHrefWithCommentId,
   editLabel,
   quoteLabel,
   isLoading,
@@ -36,7 +34,7 @@ const UserActionContentToolbarComponent = ({
 }: UserActionContentToolbarProps) => (
   <EuiFlexGroup responsive={false} alignItems="center">
     <EuiFlexItem grow={false}>
-      <UserActionCopyLink id={id} getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId} />
+      <UserActionCopyLink id={id} />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <UserActionPropertyActions

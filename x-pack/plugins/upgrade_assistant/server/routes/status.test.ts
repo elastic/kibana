@@ -6,6 +6,8 @@
  */
 
 import { kibanaResponseFactory } from 'src/core/server';
+
+import { handleEsError } from '../shared_imports';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 import { registerUpgradeStatusRoute } from './status';
@@ -31,6 +33,7 @@ describe('Status API', () => {
     mockRouter = createMockRouter();
     routeDependencies = {
       router: mockRouter,
+      lib: { handleEsError },
     };
     registerUpgradeStatusRoute(routeDependencies);
   });
@@ -46,9 +49,8 @@ describe('Status API', () => {
           {
             level: 'critical',
             message:
-              'model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded',
-            details:
-              'model snapshot [%s] for job [%s] supports minimum version [%s] and needs to be at least [%s]',
+              'Model snapshot [1] for job [deprecation_check_job] has an obsolete minimum version [6.3.0].',
+            details: 'Delete model snapshot [1] or update it to 7.0.0 or greater.',
             url: 'doc_url',
             correctiveAction: {
               type: 'mlSnapshot',
@@ -74,7 +76,7 @@ describe('Status API', () => {
       expect(resp.payload).toEqual({
         readyForUpgrade: false,
         details:
-          'You have 1 Elasticsearch deprecation issues and 1 Kibana deprecation issues that must be resolved before upgrading.',
+          'You have 1 Elasticsearch deprecation issue and 1 Kibana deprecation issue that must be resolved before upgrading.',
       });
     });
 
@@ -97,7 +99,7 @@ describe('Status API', () => {
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual({
         readyForUpgrade: true,
-        details: 'All deprecation issues have been resolved.',
+        details: 'All deprecation warnings have been resolved.',
       });
     });
 

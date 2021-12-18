@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Direction } from '../../../../../../common';
-import type { ColumnHeaderOptions } from '../../../../../../common';
+import { Direction } from '../../../../../../common/search_strategy';
+import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { Sort, SortDirection } from '../../sort';
 

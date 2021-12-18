@@ -17,11 +17,8 @@ import { basicResolvers } from '../../resolvers';
 import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { checkBasicLicense } from '../../../license';
-import { loadIndexPatterns } from '../../../util/index_utils';
+import { cacheDataViewsContract } from '../../../util/index_utils';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
-import { checkMlNodesAvailable } from '../../../ml_nodes_check';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
 enum MODE {
   NEW_JOB,
@@ -85,26 +82,23 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
   } = useMlKibana();
 
   const { redirectToMlAccessDeniedPage } = deps;
-  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
-    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
-  );
 
   const newJobResolvers = {
     ...basicResolvers(deps),
     preConfiguredJobRedirect: () =>
-      preConfiguredJobRedirect(deps.indexPatterns, basePath.get(), navigateToUrl),
+      preConfiguredJobRedirect(deps.dataViewsContract, basePath.get(), navigateToUrl),
   };
   const dataVizResolvers = {
     checkBasicLicense,
-    loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
+    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
   };
 
   const { context } = useResolver(
     undefined,
     undefined,
     deps.config,
+    deps.dataViewsContract,
     mode === MODE.NEW_JOB ? newJobResolvers : dataVizResolvers
   );
   return (

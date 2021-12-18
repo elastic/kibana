@@ -6,7 +6,7 @@
  */
 import React, { memo } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CommonProps, EuiButtonEmpty } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -31,7 +31,7 @@ const EuiButtonEmptyStyled = styled(EuiButtonEmpty)`
 export type BackToExternalAppButtonProps = CommonProps & ListPageRouteState;
 export const BackToExternalAppButton = memo<BackToExternalAppButtonProps>(
   ({ backButtonLabel, backButtonUrl, onBackButtonNavigateTo, ...commonProps }) => {
-    const handleBackOnClick = useNavigateToAppEventHandler(...onBackButtonNavigateTo!);
+    const handleBackOnClick = useNavigateToAppEventHandler(...onBackButtonNavigateTo);
 
     return (
       <EuiButtonEmptyStyled
@@ -40,7 +40,7 @@ export const BackToExternalAppButton = memo<BackToExternalAppButtonProps>(
         flush="left"
         size="xs"
         iconType="arrowLeft"
-        href={backButtonUrl!}
+        href={backButtonUrl}
         onClick={handleBackOnClick}
         textProps={{ className: 'text' }}
       >

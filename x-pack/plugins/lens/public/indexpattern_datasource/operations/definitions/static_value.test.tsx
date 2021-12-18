@@ -16,6 +16,7 @@ import { IndexPattern, IndexPatternLayer } from '../../types';
 import { StaticValueIndexPatternColumn } from './static_value';
 import { EuiFieldNumber } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
+import { TermsIndexPatternColumn } from './terms';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -65,29 +66,30 @@ describe('static_value', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: 'Static value: 23',
           dataType: 'number',
           isBucketed: false,
           operationType: 'static_value',
+          isStaticValue: true,
           references: [],
           params: {
             value: '23',
           },
-        },
+        } as StaticValueIndexPatternColumn,
       },
     };
   });
 
-  function getLayerWithStaticValue(newValue: string): IndexPatternLayer {
+  function getLayerWithStaticValue(newValue: string | null | undefined): IndexPatternLayer {
     return {
       ...layer,
       columns: {
         ...layer.columns,
         col2: {
           ...layer.columns.col2,
-          label: `Static value: ${newValue}`,
+          label: `Static value: ${newValue ?? String(newValue)}`,
           params: {
             value: newValue,
           },
@@ -105,6 +107,7 @@ describe('static_value', () => {
             dataType: 'number',
             isBucketed: false,
             operationType: 'static_value',
+            isStaticValue: true,
             references: [],
             params: {
               value: '23',
@@ -155,8 +158,9 @@ describe('static_value', () => {
       ).toBeUndefined();
     });
 
-    it('should return error for invalid values', () => {
-      for (const value of ['NaN', 'Infinity', 'string']) {
+    it.each(['NaN', 'Infinity', 'string'])(
+      'should return error for invalid values: %s',
+      (value) => {
         expect(
           staticValueOperation.getErrorMessage!(
             getLayerWithStaticValue(value),
@@ -165,6 +169,16 @@ describe('static_value', () => {
           )
         ).toEqual(expect.arrayContaining([expect.stringMatching('is not a valid number')]));
       }
+    );
+
+    it.each([null, undefined])('should return no error for: %s', (value) => {
+      expect(
+        staticValueOperation.getErrorMessage!(
+          getLayerWithStaticValue(value),
+          'col2',
+          createMockedIndexPattern()
+        )
+      ).toBe(undefined);
     });
   });
 
@@ -225,6 +239,7 @@ describe('static_value', () => {
         label: 'Static value',
         dataType: 'number',
         operationType: 'static_value',
+        isStaticValue: true,
         isBucketed: false,
         scale: 'ratio',
         params: { value: '100' },
@@ -241,16 +256,18 @@ describe('static_value', () => {
             label: 'Static value',
             dataType: 'number',
             operationType: 'static_value',
+            isStaticValue: true,
             isBucketed: false,
             scale: 'ratio',
             params: { value: '23' },
             references: [],
-          },
+          } as StaticValueIndexPatternColumn,
         })
       ).toEqual({
         label: 'Static value: 23',
         dataType: 'number',
         operationType: 'static_value',
+        isStaticValue: true,
         isBucketed: false,
         scale: 'ratio',
         params: { value: '23' },
@@ -271,6 +288,7 @@ describe('static_value', () => {
         label: 'Static value: 23',
         dataType: 'number',
         operationType: 'static_value',
+        isStaticValue: true,
         isBucketed: false,
         scale: 'ratio',
         params: { value: '23' },
@@ -288,11 +306,12 @@ describe('static_value', () => {
               label: 'Static value',
               dataType: 'number',
               operationType: 'static_value',
+              isStaticValue: true,
               isBucketed: false,
               scale: 'ratio',
               params: { value: '23' },
               references: [],
-            },
+            } as StaticValueIndexPatternColumn,
           },
           { value: '53' }
         )
@@ -300,6 +319,7 @@ describe('static_value', () => {
         label: 'Static value: 53',
         dataType: 'number',
         operationType: 'static_value',
+        isStaticValue: true,
         isBucketed: false,
         scale: 'ratio',
         params: { value: '53' },
@@ -325,6 +345,36 @@ describe('static_value', () => {
       const input = instance.find('[data-test-subj="lns-indexPattern-static_value-input"]');
 
       expect(input.prop('value')).toEqual('23');
+    });
+
+    it('should allow 0 as initial value', () => {
+      const updateLayerSpy = jest.fn();
+      const zeroLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col2: {
+            ...layer.columns.col2,
+            operationType: 'static_value',
+            references: [],
+            params: {
+              value: '0',
+            },
+          } as StaticValueIndexPatternColumn,
+        },
+      } as IndexPatternLayer;
+      const instance = shallow(
+        <ParamEditor
+          {...defaultProps}
+          layer={zeroLayer}
+          updateLayer={updateLayerSpy}
+          columnId="col2"
+          currentColumn={zeroLayer.columns.col2 as StaticValueIndexPatternColumn}
+        />
+      );
+
+      const input = instance.find('[data-test-subj="lns-indexPattern-static_value-input"]');
+      expect(input.prop('value')).toEqual('0');
     });
 
     it('should update state on change', async () => {

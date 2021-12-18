@@ -36,7 +36,9 @@ describe.each([
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
-    clients.ruleExecutionLogClient.findBulk.mockResolvedValue(getFindBulkResultStatus());
+    clients.ruleExecutionLogClient.getCurrentStatusBulk.mockResolvedValue(
+      getFindBulkResultStatus()
+    );
 
     findRulesRoute(server.router, logger, isRuleRegistryEnabled);
   });
@@ -48,7 +50,7 @@ describe.each([
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(getFindRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });

@@ -45,7 +45,7 @@ import { shallow } from 'enzyme';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
+import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import { XyEndzones } from './x_domain';
 
 const onClickValue = jest.fn();
@@ -330,7 +330,7 @@ function sampleArgs() {
   return { data, args };
 }
 
-function sampleArgsWithThreshold(thresholdValue: number = 150) {
+function sampleArgsWithReferenceLine(value: number = 150) {
   const { data, args } = sampleArgs();
 
   return {
@@ -338,16 +338,16 @@ function sampleArgsWithThreshold(thresholdValue: number = 150) {
       ...data,
       tables: {
         ...data.tables,
-        threshold: {
+        referenceLine: {
           type: 'datatable',
           columns: [
             {
-              id: 'threshold-a',
+              id: 'referenceLine-a',
               meta: { params: { id: 'number' }, type: 'number' },
               name: 'Static value',
             },
           ],
-          rows: [{ 'threshold-a': thresholdValue }],
+          rows: [{ 'referenceLine-a': value }],
         },
       },
     } as LensMultiTable,
@@ -356,16 +356,16 @@ function sampleArgsWithThreshold(thresholdValue: number = 150) {
       layers: [
         ...args.layers,
         {
-          layerType: layerTypes.THRESHOLD,
-          accessors: ['threshold-a'],
-          layerId: 'threshold',
+          layerType: layerTypes.REFERENCELINE,
+          accessors: ['referenceLine-a'],
+          layerId: 'referenceLine',
           seriesType: 'line',
           xScaleType: 'linear',
           yScaleType: 'linear',
           palette: mockPaletteOutput,
           isHistogram: false,
           hide: true,
-          yConfig: [{ axisMode: 'left', forAccessor: 'threshold-a', type: 'lens_xy_yConfig' }],
+          yConfig: [{ axisMode: 'left', forAccessor: 'referenceLine-a', type: 'lens_xy_yConfig' }],
         },
       ],
     } as XYArgs,
@@ -531,6 +531,7 @@ describe('xy_expression', () => {
         onClickValue,
         onSelectRange,
         syncColors: false,
+        useLegacyTimeAxis: false,
       };
     });
 
@@ -635,6 +636,117 @@ describe('xy_expression', () => {
         `);
       });
 
+      describe('axis time', () => {
+        const defaultTimeLayer: LayerArgs = {
+          layerId: 'first',
+          layerType: layerTypes.DATA,
+          seriesType: 'line',
+          xAccessor: 'c',
+          accessors: ['a', 'b'],
+          splitAccessor: 'd',
+          columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+          xScaleType: 'time',
+          yScaleType: 'linear',
+          isHistogram: true,
+          palette: mockPaletteOutput,
+        };
+        test('it should disable the new time axis for a line time layer when isHistogram is set to false', () => {
+          const { data } = sampleArgs();
+
+          const instance = shallow(
+            <XYChart
+              {...defaultProps}
+              data={{
+                ...data,
+                dateRange: {
+                  fromDate: new Date('2019-01-02T05:00:00.000Z'),
+                  toDate: new Date('2019-01-03T05:00:00.000Z'),
+                },
+              }}
+              args={multiLayerArgs}
+            />
+          );
+
+          const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
+
+          expect(axisStyle).toBe(0);
+        });
+        test('it should enable the new time axis for a line time layer when isHistogram is set to true', () => {
+          const { data } = sampleArgs();
+          const timeLayerArgs = createArgsWithLayers([defaultTimeLayer]);
+
+          const instance = shallow(
+            <XYChart
+              {...defaultProps}
+              data={{
+                ...data,
+                dateRange: {
+                  fromDate: new Date('2019-01-02T05:00:00.000Z'),
+                  toDate: new Date('2019-01-03T05:00:00.000Z'),
+                },
+              }}
+              args={timeLayerArgs}
+            />
+          );
+
+          const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
+
+          expect(axisStyle).toBe(3);
+        });
+        test('it should disable the new time axis for a vertical bar with break down dimension', () => {
+          const { data } = sampleArgs();
+          const timeLayer: LayerArgs = {
+            ...defaultTimeLayer,
+            seriesType: 'bar',
+          };
+          const timeLayerArgs = createArgsWithLayers([timeLayer]);
+
+          const instance = shallow(
+            <XYChart
+              {...defaultProps}
+              data={{
+                ...data,
+                dateRange: {
+                  fromDate: new Date('2019-01-02T05:00:00.000Z'),
+                  toDate: new Date('2019-01-03T05:00:00.000Z'),
+                },
+              }}
+              args={timeLayerArgs}
+            />
+          );
+
+          const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
+
+          expect(axisStyle).toBe(0);
+        });
+
+        test('it should enable the new time axis for a stacked vertical bar with break down dimension', () => {
+          const { data } = sampleArgs();
+          const timeLayer: LayerArgs = {
+            ...defaultTimeLayer,
+            seriesType: 'bar_stacked',
+          };
+          const timeLayerArgs = createArgsWithLayers([timeLayer]);
+
+          const instance = shallow(
+            <XYChart
+              {...defaultProps}
+              data={{
+                ...data,
+                dateRange: {
+                  fromDate: new Date('2019-01-02T05:00:00.000Z'),
+                  toDate: new Date('2019-01-03T05:00:00.000Z'),
+                },
+              }}
+              args={timeLayerArgs}
+            />
+          );
+
+          const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
+
+          expect(axisStyle).toBe(3);
+        });
+      });
       describe('endzones', () => {
         const { args } = sampleArgs();
         const data: LensMultiTable = {
@@ -809,8 +921,8 @@ describe('xy_expression', () => {
         );
         expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
           fit: true,
-          min: undefined,
-          max: undefined,
+          min: NaN,
+          max: NaN,
         });
       });
 
@@ -838,6 +950,8 @@ describe('xy_expression', () => {
         );
         expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
           fit: false,
+          min: NaN,
+          max: NaN,
         });
       });
 
@@ -867,13 +981,13 @@ describe('xy_expression', () => {
         );
         expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
           fit: false,
-          min: undefined,
-          max: undefined,
+          min: NaN,
+          max: NaN,
         });
       });
 
-      test('it does include threshold values when in full extent mode', () => {
-        const { data, args } = sampleArgsWithThreshold();
+      test('it does include referenceLine values when in full extent mode', () => {
+        const { data, args } = sampleArgsWithReferenceLine();
 
         const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
         expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
@@ -883,8 +997,8 @@ describe('xy_expression', () => {
         });
       });
 
-      test('it should ignore threshold values when set to custom extents', () => {
-        const { data, args } = sampleArgsWithThreshold();
+      test('it should ignore referenceLine values when set to custom extents', () => {
+        const { data, args } = sampleArgsWithReferenceLine();
 
         const component = shallow(
           <XYChart
@@ -908,8 +1022,8 @@ describe('xy_expression', () => {
         });
       });
 
-      test('it should work for negative values in thresholds', () => {
-        const { data, args } = sampleArgsWithThreshold(-150);
+      test('it should work for negative values in referenceLines', () => {
+        const { data, args } = sampleArgsWithReferenceLine(-150);
 
         const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
         expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
@@ -959,7 +1073,11 @@ describe('xy_expression', () => {
           }}
         />
       );
-      expect(component.find(Settings).prop('xDomain')).toEqual({ minInterval: 101 });
+      expect(component.find(Settings).prop('xDomain')).toEqual({
+        minInterval: 101,
+        min: NaN,
+        max: NaN,
+      });
     });
 
     test('disabled legend extra by default', () => {
@@ -1163,7 +1281,7 @@ describe('xy_expression', () => {
       expect(wrapper.find(Settings).first().prop('onBrushEnd')).toBeUndefined();
     });
 
-    test('allowBrushingLastHistogramBucket is true for date histogram data', () => {
+    test('allowBrushingLastHistogramBin is true for date histogram data', () => {
       const { args } = sampleArgs();
 
       const wrapper = mountWithIntl(
@@ -1176,7 +1294,7 @@ describe('xy_expression', () => {
           }}
         />
       );
-      expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBucket')).toEqual(true);
+      expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBin')).toEqual(true);
     });
 
     test('onElementClick returns correct context data', () => {
@@ -1439,7 +1557,41 @@ describe('xy_expression', () => {
       });
     });
 
-    test('allowBrushingLastHistogramBucket should be fakse for ordinal data', () => {
+    test('sets up correct yScaleType equal to binary_linear for bytes formatting', () => {
+      const { args, data } = sampleArgs();
+      data.tables.first.columns[0].meta = {
+        type: 'number',
+        params: { id: 'bytes', params: { pattern: '0,0.00b' } },
+      };
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          {...defaultProps}
+          data={data}
+          args={{
+            ...args,
+            layers: [
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'line',
+                xAccessor: 'd',
+                accessors: ['a', 'b'],
+                columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+                xScaleType: 'ordinal',
+                yScaleType: 'linear',
+                isHistogram: false,
+                palette: mockPaletteOutput,
+              },
+            ],
+          }}
+        />
+      );
+
+      expect(wrapper.find(LineSeries).at(0).prop('yScaleType')).toEqual('linear_binary');
+    });
+
+    test('allowBrushingLastHistogramBin should be fakse for ordinal data', () => {
       const { args, data } = sampleArgs();
 
       const wrapper = mountWithIntl(
@@ -1466,7 +1618,7 @@ describe('xy_expression', () => {
         />
       );
 
-      expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBucket')).toEqual(false);
+      expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBin')).toEqual(false);
     });
 
     test('onElementClick is not triggering event on non-interactive mode', () => {
@@ -1477,6 +1629,16 @@ describe('xy_expression', () => {
       );
 
       expect(wrapper.find(Settings).first().prop('onElementClick')).toBeUndefined();
+    });
+
+    test('legendAction is not triggering event on non-interactive mode', () => {
+      const { args, data } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <XYChart {...defaultProps} data={data} args={args} interactive={false} />
+      );
+
+      expect(wrapper.find(Settings).first().prop('legendAction')).toBeUndefined();
     });
 
     test('it renders stacked bar', () => {

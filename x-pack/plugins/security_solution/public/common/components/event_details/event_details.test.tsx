@@ -11,7 +11,7 @@ import React from 'react';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
-import { mockDetailItemData, mockDetailItemDataId, TestProviders } from '../../mock';
+import { mockDetailItemData, mockDetailItemDataId, rawEventData, TestProviders } from '../../mock';
 
 import { EventDetails, EventsViewType } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
@@ -48,6 +48,9 @@ describe('EventDetails', () => {
     timelineId: 'test',
     eventView: EventsViewType.summaryView,
     hostRisk: { fields: [], loading: true },
+    indexName: 'test',
+    handleOnEventClosed: jest.fn(),
+    rawEventData,
   };
 
   const alertsProps = {

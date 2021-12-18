@@ -6,7 +6,7 @@
  */
 
 import { render, fireEvent } from '@testing-library/react';
-import { ActionProps, HeaderActionProps, TimelineTabs } from '../../../../../common';
+import { ActionProps, HeaderActionProps, TimelineTabs } from '../../../../../common/types';
 import { HeaderCheckBox, RowCheckBox } from './checkbox';
 import React from 'react';
 
@@ -45,8 +45,8 @@ describe('checkbox control column', () => {
       const { getByTestId } = render(
         <RowCheckBox {...defaultProps} onRowSelected={onRowSelected} />
       );
-
-      fireEvent.click(getByTestId('select-event'));
+      const checkbox = getByTestId(/^select-event/);
+      fireEvent.click(checkbox);
 
       expect(onRowSelected).toHaveBeenCalled();
     });

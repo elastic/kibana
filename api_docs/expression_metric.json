@@ -121,7 +121,7 @@
         "label": "metricFunction",
         "description": [],
         "signature": [
-          "() => { name: \"metric\"; aliases: never[]; type: \"render\"; inputTypes: (\"number\" | \"string\" | \"null\")[]; help: string; args: { label: { types: \"string\"[]; aliases: string[]; help: string; default: string; }; labelFont: { types: \"style\"[]; help: string; default: string; }; metricFont: { types: \"style\"[]; help: string; default: string; }; metricFormat: { types: \"string\"[]; aliases: string[]; help: string; }; }; fn: (input: string | number | null, { label, labelFont, metricFont, metricFormat }: ",
+          "() => { name: \"metric\"; aliases: never[]; type: \"render\"; inputTypes: (\"string\" | \"number\" | \"null\")[]; help: string; args: { label: { types: \"string\"[]; aliases: string[]; help: string; default: string; }; labelFont: { types: \"style\"[]; help: string; default: string; }; metricFont: { types: \"style\"[]; help: string; default: string; }; metricFormat: { types: \"string\"[]; aliases: string[]; help: string; }; }; fn: (input: string | number | null, { label, labelFont, metricFont, metricFormat }: ",
           {
             "pluginId": "expressionMetric",
             "scope": "common",
@@ -129,7 +129,7 @@
             "section": "def-common.Arguments",
             "text": "Arguments"
           },
-          ") => { type: \"render\"; as: string; value: { metric: React.ReactText; label: string; labelFont: ",
+          ") => { type: \"render\"; as: string; value: { metric: string | number; label: string; labelFont: ",
           {
             "pluginId": "expressions",
             "scope": "common",

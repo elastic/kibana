@@ -35,9 +35,17 @@ a| <<server-log-action-type, ServerLog>>
 
 | Add a message to a Kibana log.
 
-a| <<servicenow-action-type, ServiceNow>>
+a| <<servicenow-action-type, ServiceNow ITSM>>
 
 | Create an incident in ServiceNow.
+
+a| <<servicenow-sir-action-type, ServiceNow SecOps>>
+
+| Create a security incident in ServiceNow.
+
+a| <<servicenow-itom-action-type, ServiceNow ITOM>>
+
+| Create an event in ServiceNow.
 
 a| <<slack-action-type, Slack>>
 

@@ -7,15 +7,18 @@
 
 import { ObservabilityAlertsPaginationProvider } from './pagination';
 import { ObservabilityAlertsCommonProvider } from './common';
+import { ObservabilityAlertsAddToCaseProvider } from './add_to_case';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export function ObservabilityAlertsProvider(context: FtrProviderContext) {
   const common = ObservabilityAlertsCommonProvider(context);
   const pagination = ObservabilityAlertsPaginationProvider(context);
+  const addToCase = ObservabilityAlertsAddToCaseProvider(context);
 
   return {
     common,
     pagination,
+    addToCase,
   };
 }

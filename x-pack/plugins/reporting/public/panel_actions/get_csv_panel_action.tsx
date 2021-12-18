@@ -117,12 +117,12 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     }
 
     const savedSearch = embeddable.getSavedSearch();
-    const { columns, searchSource } = await this.getSearchSource(savedSearch, embeddable);
+    const { columns, getSearchSource } = await this.getSearchSource(savedSearch, embeddable);
 
     const immediateJobParams = this.apiClient.getDecoratedJobParams({
-      searchSource,
+      searchSource: getSearchSource(true),
       columns,
-      title: savedSearch.title,
+      title: savedSearch.title || '',
       objectType: 'downloadCsv', // FIXME: added for typescript, but immediate download job does not need objectType
     });
 
@@ -144,10 +144,12 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
         this.isDownloading = false;
 
         const download = `${savedSearch.title}.csv`;
-        const blob = new Blob([rawResponse], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([rawResponse as BlobPart], { type: 'text/csv;charset=utf-8;' });
 
         // Hack for IE11 Support
+        // @ts-expect-error
         if (window.navigator.msSaveOrOpenBlob) {
+          // @ts-expect-error
           return window.navigator.msSaveOrOpenBlob(blob, download);
         }
 

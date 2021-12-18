@@ -24,26 +24,13 @@ const ELASTIC_WEBSITE_URL = 'https://www.elastic.co';
 const ELASTICSEARCH_CLIENT_URL = `${ELASTIC_WEBSITE_URL}/guide/en/elasticsearch/client`;
 export const integrations: LanguageIntegration[] = [
   {
-    id: 'all',
-    title: i18n.translate('customIntegrations.languageclients.AllTitle', {
-      defaultMessage: 'Elasticsearch Clients',
-    }),
-    euiIconName: 'logoElasticsearch',
-    description: i18n.translate('customIntegrations.languageclients.AllDescription', {
-      defaultMessage:
-        'Start building your custom application on top of Elasticsearch with the official language clients.',
-    }),
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/index.html`,
-  },
-  {
     id: 'javascript',
     title: i18n.translate('customIntegrations.languageclients.JavascriptTitle', {
       defaultMessage: 'Elasticsearch JavaScript Client',
     }),
     icon: 'nodejs.svg',
     description: i18n.translate('customIntegrations.languageclients.JavascriptDescription', {
-      defaultMessage:
-        'Start building your custom application on top of Elasticsearch with the official Node.js client.',
+      defaultMessage: 'Index data to Elasticsearch with the JavaScript client.',
     }),
     docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/javascript-api/{branch}/introduction.html`,
   },
@@ -54,8 +41,7 @@ export const integrations: LanguageIntegration[] = [
     }),
     icon: 'ruby.svg',
     description: i18n.translate('customIntegrations.languageclients.RubyDescription', {
-      defaultMessage:
-        'Start building your custom application on top of Elasticsearch with the official Ruby client.',
+      defaultMessage: 'Index data to Elasticsearch with the Ruby client.',
     }),
     docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/ruby-api/{branch}/ruby_client.html`,
   },
@@ -66,8 +52,7 @@ export const integrations: LanguageIntegration[] = [
     }),
     icon: 'go.svg',
     description: i18n.translate('customIntegrations.languageclients.GoDescription', {
-      defaultMessage:
-        'Start building your custom application on top of Elasticsearch with the official Go client.',
+      defaultMessage: 'Index data to Elasticsearch with the Go client.',
     }),
     docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/go-api/{branch}/overview.html`,
   },
@@ -78,8 +63,7 @@ export const integrations: LanguageIntegration[] = [
     }),
     icon: 'dotnet.svg',
     description: i18n.translate('customIntegrations.languageclients.DotNetDescription', {
-      defaultMessage:
-        'Start building your custom application on top of Elasticsearch with the official .NET client.',
+      defaultMessage: 'Index data to Elasticsearch with the .NET client.',
     }),
     docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/net-api/{branch}/index.html`,
   },
@@ -90,8 +74,7 @@ export const integrations: LanguageIntegration[] = [
     }),
     icon: 'php.svg',
     description: i18n.translate('customIntegrations.languageclients.PhpDescription', {
-      defaultMessage:
-        'Start building your custom application on top of Elasticsearch with the official .PHP client.',
+      defaultMessage: 'Index data to Elasticsearch with the PHP client.',
     }),
     docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/php-api/{branch}/index.html`,
   },
@@ -102,8 +85,7 @@ export const integrations: LanguageIntegration[] = [
     }),
     icon: 'perl.svg',
     description: i18n.translate('customIntegrations.languageclients.PerlDescription', {
-      defaultMessage:
-        'Start building your custom application on top of Elasticsearch with the official Perl client.',
+      defaultMessage: 'Index data to Elasticsearch with the Perl client.',
     }),
     docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/perl-api/{branch}/index.html`,
   },
@@ -114,8 +96,7 @@ export const integrations: LanguageIntegration[] = [
     }),
     icon: 'python.svg',
     description: i18n.translate('customIntegrations.languageclients.PythonDescription', {
-      defaultMessage:
-        'Start building your custom application on top of Elasticsearch with the official Python client.',
+      defaultMessage: 'Index data to Elasticsearch with the Python client.',
     }),
     docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/python-api/{branch}/index.html`,
   },
@@ -126,8 +107,7 @@ export const integrations: LanguageIntegration[] = [
     }),
     icon: 'rust.svg',
     description: i18n.translate('customIntegrations.languageclients.RustDescription', {
-      defaultMessage:
-        'Start building your custom application on top of Elasticsearch with the official Rust client.',
+      defaultMessage: 'Index data to Elasticsearch with the Rust client.',
     }),
     docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/rust-api/{branch}/index.html`,
   },
@@ -138,8 +118,7 @@ export const integrations: LanguageIntegration[] = [
     }),
     icon: 'java.svg',
     description: i18n.translate('customIntegrations.languageclients.JavaDescription', {
-      defaultMessage:
-        'Start building your custom application on top of Elasticsearch with the official Java client.',
+      defaultMessage: 'Index data to Elasticsearch with the Java client.',
     }),
     docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/java-api-client/{branch}/index.html`,
   },
@@ -172,7 +151,11 @@ export function registerLanguageClients(
       description: integration.description,
       type: 'ui_link',
       shipper: 'language_clients',
-      uiInternalPath: integration.docUrlTemplate.replace('{branch}', branch),
+      // Documentation for `main` branches is still published at a `master` URL.
+      uiInternalPath: integration.docUrlTemplate.replace(
+        '{branch}',
+        branch === 'main' ? 'master' : branch
+      ),
       isBeta: false,
       icons,
       categories: ['elastic_stack', 'custom', 'language_client'],

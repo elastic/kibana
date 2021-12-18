@@ -5,73 +5,185 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
-import { I18nStart, ScopedHistory } from 'src/core/public';
-import { ApplicationStart } from 'kibana/public';
-import { GlobalFlyout } from '../shared_imports';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiEmptyPrompt, EuiPageContent, EuiLoadingSpinner } from '@elastic/eui';
+import { ScopedHistory } from 'src/core/public';
 
-import { KibanaContextProvider } from '../shared_imports';
-import { AppServicesContext } from '../types';
-import { AppContextProvider, ContextValue, useAppContext } from './app_context';
-import { ComingSoonPrompt } from './components/coming_soon_prompt';
-import { EsDeprecations } from './components/es_deprecations';
-import { KibanaDeprecationsContent } from './components/kibana_deprecations';
-import { Overview } from './components/overview';
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
+import { API_BASE_PATH } from '../../common/constants';
+import { ClusterUpgradeState } from '../../common/types';
+import {
+  APP_WRAPPER_CLASS,
+  GlobalFlyout,
+  AuthorizationProvider,
+  RedirectAppLinks,
+  KibanaThemeProvider,
+} from '../shared_imports';
+import { AppDependencies } from '../types';
+import { AppContextProvider, useAppContext } from './app_context';
+import {
+  EsDeprecations,
+  EsDeprecationLogs,
+  ComingSoonPrompt,
+  KibanaDeprecations,
+  Overview,
+} from './components';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
-export interface AppDependencies extends ContextValue {
-  i18n: I18nStart;
-  history: ScopedHistory;
-  application: ApplicationStart;
-  services: AppServicesContext;
-}
 
-const App: React.FunctionComponent = () => {
-  const { isReadOnlyMode } = useAppContext();
+const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
+  const {
+    isReadOnlyMode,
+    services: { api },
+  } = useAppContext();
+
+  const [clusterUpgradeState, setClusterUpradeState] =
+    useState<ClusterUpgradeState>('isPreparingForUpgrade');
+
+  useEffect(() => {
+    api.onClusterUpgradeStateChange((newClusterUpgradeState: ClusterUpgradeState) => {
+      setClusterUpradeState(newClusterUpgradeState);
+    });
+  }, [api]);
 
   // Read-only mode will be enabled up until the last minor before the next major release
   if (isReadOnlyMode) {
     return <ComingSoonPrompt />;
   }
 
+  if (clusterUpgradeState === 'isUpgrading') {
+    return (
+      <EuiPageContent
+        hasShadow={false}
+        paddingSize="none"
+        verticalPosition="center"
+        horizontalPosition="center"
+        data-test-subj="isUpgradingMessage"
+      >
+        <EuiEmptyPrompt
+          iconType="logoElasticsearch"
+          title={
+            <h1>
+              <FormattedMessage
+                id="xpack.upgradeAssistant.upgradingTitle"
+                defaultMessage="Your cluster is upgrading"
+              />
+            </h1>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.upgradeAssistant.upgradingDescription"
+                defaultMessage="One or more Elasticsearch nodes have a newer version of
+                Elasticsearch than Kibana. Once all your nodes are upgraded, upgrade Kibana."
+              />
+            </p>
+          }
+          data-test-subj="emptyPrompt"
+        />
+      </EuiPageContent>
+    );
+  }
+
+  if (clusterUpgradeState === 'isUpgradeComplete') {
+    return (
+      <EuiPageContent
+        hasShadow={false}
+        paddingSize="none"
+        verticalPosition="center"
+        horizontalPosition="center"
+        data-test-subj="isUpgradeCompleteMessage"
+      >
+        <EuiEmptyPrompt
+          iconType="logoElasticsearch"
+          title={
+            <h1>
+              <FormattedMessage
+                id="xpack.upgradeAssistant.upgradedTitle"
+                defaultMessage="Your cluster has been upgraded"
+              />
+            </h1>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.upgradeAssistant.upgradedDescription"
+                defaultMessage="All Elasticsearch nodes have been upgraded. You may now upgrade Kibana."
+              />
+            </p>
+          }
+          data-test-subj="emptyPrompt"
+        />
+      </EuiPageContent>
+    );
+  }
+
   return (
     <Switch>
       <Route exact path="/overview" component={Overview} />
       <Route exact path="/es_deprecations" component={EsDeprecations} />
-      <Route exact path="/kibana_deprecations" component={KibanaDeprecationsContent} />
+      <Route exact path="/es_deprecation_logs" component={EsDeprecationLogs} />
+      <Route exact path="/kibana_deprecations" component={KibanaDeprecations} />
       <Redirect from="/" to="/overview" />
     </Switch>
   );
 };
 
-export const AppWithRouter = ({ history }: { history: ScopedHistory }) => {
+export const App = ({ history }: { history: ScopedHistory }) => {
+  const {
+    services: { api },
+  } = useAppContext();
+
+  // Poll the API to detect when the cluster is either in the middle of
+  // a rolling upgrade or has completed one. We need to create two separate
+  // components: one to call this hook and one to handle state changes.
+  // This is because the implementation of this hook calls the state-change
+  // callbacks on every render, which will get the UI stuck in an infinite
+  // render loop if the same component both called the hook and handled
+  // the state changes it triggers.
+  const { isLoading, isInitialRequest } = api.useLoadClusterUpgradeStatus();
+
+  // Prevent flicker of the underlying UI while we wait for the status to fetch.
+  if (isLoading && isInitialRequest) {
+    return (
+      <EuiPageContent
+        hasShadow={false}
+        paddingSize="none"
+        verticalPosition="center"
+        horizontalPosition="center"
+      >
+        <EuiEmptyPrompt body={<EuiLoadingSpinner size="l" />} />
+      </EuiPageContent>
+    );
+  }
+
   return (
     <Router history={history}>
-      <App />
+      <AppHandlingClusterUpgradeState />
     </Router>
   );
 };
 
-export const RootComponent = ({
-  i18n,
-  history,
-  services,
-  application,
-  ...contextValue
-}: AppDependencies) => {
+export const RootComponent = (dependencies: AppDependencies) => {
+  const {
+    history,
+    core: { i18n, application, http },
+  } = dependencies.services;
+
   return (
-    <RedirectAppLinks application={application}>
-      <i18n.Context>
-        <KibanaContextProvider services={services}>
-          <AppContextProvider value={contextValue}>
-            <GlobalFlyoutProvider>
-              <AppWithRouter history={history} />
-            </GlobalFlyoutProvider>
-          </AppContextProvider>
-        </KibanaContextProvider>
-      </i18n.Context>
+    <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
+      <AuthorizationProvider httpClient={http} privilegesEndpoint={`${API_BASE_PATH}/privileges`}>
+        <i18n.Context>
+          <KibanaThemeProvider theme$={dependencies.theme$}>
+            <AppContextProvider value={dependencies}>
+              <GlobalFlyoutProvider>
+                <App history={history} />
+              </GlobalFlyoutProvider>
+            </AppContextProvider>
+          </KibanaThemeProvider>
+        </i18n.Context>
+      </AuthorizationProvider>
     </RedirectAppLinks>
   );
 };

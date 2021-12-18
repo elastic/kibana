@@ -73,11 +73,11 @@ Object {
 }
 `;
 
-exports[`Error HOST_NAME 1`] = `"my hostname"`;
+exports[`Error HOST_HOSTNAME 1`] = `"my hostname"`;
+
+exports[`Error HOST_NAME 1`] = `undefined`;
 
 exports[`Error HOST_OS_PLATFORM 1`] = `undefined`;
-
-exports[`Error HOSTNAME 1`] = `undefined`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
@@ -209,8 +209,6 @@ exports[`Error TBT_FIELD 1`] = `undefined`;
 
 exports[`Error TRACE_ID 1`] = `"trace id"`;
 
-exports[`Error TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
-
 exports[`Error TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
 
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
@@ -316,11 +314,11 @@ exports[`Span FID_FIELD 1`] = `undefined`;
 
 exports[`Span HOST 1`] = `undefined`;
 
+exports[`Span HOST_HOSTNAME 1`] = `undefined`;
+
 exports[`Span HOST_NAME 1`] = `undefined`;
 
 exports[`Span HOST_OS_PLATFORM 1`] = `undefined`;
-
-exports[`Span HOSTNAME 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
@@ -448,8 +446,6 @@ exports[`Span TBT_FIELD 1`] = `undefined`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
 
-exports[`Span TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
-
 exports[`Span TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
 
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
@@ -559,11 +555,11 @@ Object {
 }
 `;
 
-exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
+exports[`Transaction HOST_HOSTNAME 1`] = `"my hostname"`;
+
+exports[`Transaction HOST_NAME 1`] = `undefined`;
 
 exports[`Transaction HOST_OS_PLATFORM 1`] = `undefined`;
-
-exports[`Transaction HOSTNAME 1`] = `undefined`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
@@ -700,8 +696,6 @@ exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 exports[`Transaction TBT_FIELD 1`] = `undefined`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
-
-exports[`Transaction TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
 

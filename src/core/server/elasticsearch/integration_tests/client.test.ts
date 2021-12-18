@@ -52,17 +52,6 @@ describe('elasticsearch clients', () => {
       );
     expect(resp2.headers).not.toHaveProperty('warning');
   });
-
-  it('returns deprecation warning when x-elastic-product-orign header is not set', async () => {
-    const resp =
-      await kibanaServer.coreStart.elasticsearch.client.asInternalUser.indices.getSettings(
-        { index: '.kibana' },
-        { headers: { 'x-elastic-product-origin': null } }
-      );
-
-    expect(resp.headers).toHaveProperty('warning');
-    expect(resp.headers!.warning).toMatch('system indices');
-  });
 });
 
 function createFakeElasticsearchServer() {

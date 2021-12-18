@@ -33,9 +33,15 @@ const { argv } = yargs(process.argv.slice(2))
     description:
       'Run all tests (an instance of Elasticsearch and kibana are needs to be available)',
   })
+  .option('grep', {
+    alias: 'spec',
+    default: false,
+    type: 'string',
+    description: 'Specify the spec files to run',
+  })
   .help();
 
-const { trial, server, runner } = argv;
+const { trial, server, runner, grep } = argv;
 
 const license = trial ? 'trial' : 'basic';
 console.log(`License: ${license}`);
@@ -46,7 +52,10 @@ if (server) {
 } else if (runner) {
   ftrScript = 'functional_test_runner';
 }
-childProcess.execSync(
-  `node ../../../../scripts/${ftrScript} --config ../../../../test/apm_api_integration/${license}/config.ts`,
-  { cwd: path.join(__dirname), stdio: 'inherit' }
-);
+
+const grepArg = grep ? `--grep "${grep}"` : '';
+const cmd = `node ../../../../scripts/${ftrScript} ${grepArg} --config ../../../../test/apm_api_integration/${license}/config.ts`;
+
+console.log(`Running ${cmd}`);
+
+childProcess.execSync(cmd, { cwd: path.join(__dirname), stdio: 'inherit' });

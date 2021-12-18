@@ -23,18 +23,18 @@ export function zookeeperMetricsSpecProvider(context: TutorialContext): Tutorial
   return {
     id: moduleName + 'Metrics',
     name: i18n.translate('home.tutorials.zookeeperMetrics.nameTitle', {
-      defaultMessage: 'Zookeeper metrics',
+      defaultMessage: 'Zookeeper Metrics',
     }),
     moduleName,
     euiIconType: '/plugins/home/assets/logos/zookeeper.svg',
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.zookeeperMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from a Zookeeper server.',
+      defaultMessage: 'Collect metrics from Zookeeper servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.zookeeperMetrics.longDescription', {
       defaultMessage:
-        'The `{moduleName}` Metricbeat module fetches internal metrics from a Zookeeper server. \
+        'The `{moduleName}` Metricbeat module fetches metrics from a Zookeeper server. \
 [Learn more]({learnMoreLink}).',
       values: {
         moduleName,
@@ -55,8 +55,8 @@ export function zookeeperMetricsSpecProvider(context: TutorialContext): Tutorial
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['datastore', 'config_management'],
   };
 }

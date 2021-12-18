@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
@@ -193,7 +193,6 @@ describe('ReportingStore', () => {
         status: 'pending',
         meta: { testMeta: 'meta' } as any,
         payload: { testPayload: 'payload' } as any,
-        browser_type: 'browser type string',
         attempts: 0,
         max_attempts: 1,
         timeout: 30000,
@@ -214,7 +213,6 @@ describe('ReportingStore', () => {
         "_primary_term": 1234,
         "_seq_no": 5678,
         "attempts": 0,
-        "browser_type": "browser type string",
         "completed_at": undefined,
         "created_at": "some time",
         "created_by": "some security person",
@@ -247,7 +245,6 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -262,7 +259,8 @@ describe('ReportingStore', () => {
     await store.setReportClaimed(report, { testDoc: 'test' } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = updateCall.body?.doc as Report;
+
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`processing`);
     expect(updateCall.if_seq_no).toBe(42);
@@ -278,7 +276,6 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -293,7 +290,7 @@ describe('ReportingStore', () => {
     await store.setReportFailed(report, { errors: 'yes' } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = updateCall.body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`failed`);
     expect(updateCall.if_seq_no).toBe(43);
@@ -309,7 +306,6 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -324,7 +320,7 @@ describe('ReportingStore', () => {
     await store.setReportCompleted(report, { certainly_completed: 'yes' } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = updateCall.body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`completed`);
     expect(updateCall.if_seq_no).toBe(44);
@@ -340,7 +336,6 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -360,7 +355,7 @@ describe('ReportingStore', () => {
     } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = updateCall.body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
 
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`completed_with_warnings`);
@@ -384,7 +379,6 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report-2',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       status: 'processing',
       process_expiration: '2002',
       max_attempts: 3,
@@ -401,7 +395,7 @@ describe('ReportingStore', () => {
     await store.prepareReportForRetry(report);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = updateCall.body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
 
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`pending`);
@@ -417,7 +411,7 @@ describe('ReportingStore', () => {
       const store = new ReportingStore(mockCore, mockLogger);
       await store.start();
 
-      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ policy: 'kibana-reporting' });
+      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
       expect(mockEsClient.ilm.putLifecycle.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
           "body": Object {
@@ -429,7 +423,7 @@ describe('ReportingStore', () => {
               },
             },
           },
-          "policy": "kibana-reporting",
+          "name": "kibana-reporting",
         }
       `);
     });
@@ -440,7 +434,7 @@ describe('ReportingStore', () => {
       const store = new ReportingStore(mockCore, mockLogger);
       await store.start();
 
-      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ policy: 'kibana-reporting' });
+      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
       expect(mockEsClient.ilm.putLifecycle).not.toHaveBeenCalled();
     });
   });

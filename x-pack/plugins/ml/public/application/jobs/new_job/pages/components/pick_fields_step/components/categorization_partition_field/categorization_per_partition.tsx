@@ -7,7 +7,7 @@
 
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { JobCreatorContext } from '../../../job_creator_context';
 import {
   AdvancedJobCreator,

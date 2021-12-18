@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SemVer } from 'semver';
+import SemVer from 'semver/classes/semver';
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
@@ -54,7 +54,7 @@ export async function mountManagementSection(
   isFleetEnabled: boolean,
   kibanaVersion: SemVer
 ) {
-  const { element, setBreadcrumbs, history } = params;
+  const { element, setBreadcrumbs, history, theme$ } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
   const {
     docLinks,
@@ -91,6 +91,7 @@ export async function mountManagementSection(
     url,
     docLinks,
     kibanaVersion,
+    theme$,
   };
 
   const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });

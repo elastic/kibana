@@ -6,4 +6,4 @@
  */
 
 export { filterAggsFieldSupport, FILTERS } from './constants';
-export { FilterAggType } from './types';
+export type { FilterAggType } from './types';

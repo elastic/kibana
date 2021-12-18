@@ -134,7 +134,7 @@ export class TimePickerPageObject extends FtrService {
     });
 
     // set from time
-    await this.retry.waitFor(`endDate is set to ${fromTime}`, async () => {
+    await this.retry.waitFor(`startDate is set to ${fromTime}`, async () => {
       await this.testSubjects.click('superDatePickerstartDatePopoverButton');
       await this.waitPanelIsGone(panel);
       panel = await this.getTimePickerPanel();
@@ -150,6 +150,7 @@ export class TimePickerPageObject extends FtrService {
     });
 
     await this.retry.waitFor('Timepicker popover to close', async () => {
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
       return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput'));
     });
 

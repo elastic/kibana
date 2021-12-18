@@ -328,6 +328,16 @@ export const ArgumentStrings = {
         defaultMessage: 'Select column',
       }),
   },
+  StopsPalette: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.stopsPaletteTitle', {
+        defaultMessage: 'Palette picker with bounds',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.stopsPaletteLabel', {
+        defaultMessage: 'Provides colors for the values, based on the bounds',
+      }),
+  },
 };
 
 export const DataSourceStrings = {
@@ -1271,6 +1281,72 @@ export const ViewStrings = {
     getBucketColumnHelp: () =>
       i18n.translate('xpack.canvas.uis.views.tagcloud.args.bucketHelp', {
         defaultMessage: 'Bucket dimension configuration',
+      }),
+  },
+  MetricVis: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVisTitle', {
+        defaultMessage: 'Metric Vis',
+      }),
+    getMetricColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.metricDisplayName', {
+        defaultMessage: 'Metric',
+      }),
+    getMetricColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.metricHelp', {
+        defaultMessage: 'Metric dimension configuration',
+      }),
+    getBucketColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.bucketDisplayName', {
+        defaultMessage: 'Bucket',
+      }),
+    getBucketColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.bucketHelp', {
+        defaultMessage: 'Bucket dimension configuration',
+      }),
+    getFontColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.fontDisplayName', {
+        defaultMessage: 'Font',
+      }),
+    getFontColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.fontHelp', {
+        defaultMessage: 'Metric font configuration',
+      }),
+    getPercentageModeColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.percentageModeDisplayName', {
+        defaultMessage: 'Enable percentage mode',
+      }),
+    getPercentageModeColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.percentageModeHelp', {
+        defaultMessage: 'Shows metric in percentage mode.',
+      }),
+    getShowLabelsColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.showLabelsDisplayName', {
+        defaultMessage: 'Show metric labels',
+      }),
+    getShowLabelsColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.showLabelsHelp', {
+        defaultMessage: 'Shows labels under the metric values.',
+      }),
+    getColorModeColumnDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorModeDisplayName', {
+        defaultMessage: 'Metric color mode',
+      }),
+    getColorModeColumnHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorModeHelp', {
+        defaultMessage: 'Which part of metric to fill with color.',
+      }),
+    getColorModeNoneOption: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorMode.noneOption', {
+        defaultMessage: 'None',
+      }),
+    getColorModeLabelOption: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorMode.labelsOption', {
+        defaultMessage: 'Labels',
+      }),
+    getColorModeBackgroundOption: () =>
+      i18n.translate('xpack.canvas.uis.views.metricVis.args.colorMode.backgroundOption', {
+        defaultMessage: 'Background',
       }),
   },
 };

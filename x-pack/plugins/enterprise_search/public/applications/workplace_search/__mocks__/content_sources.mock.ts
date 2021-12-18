@@ -54,6 +54,7 @@ const defaultIndexing = {
     incremental: 'PT2H',
     delete: 'PT10M',
     permissions: 'PT3H',
+    blockedWindows: [],
     estimates: {
       full: {
         nextStart: '2021-09-30T15:37:38+00:00',
@@ -122,6 +123,11 @@ export const fullContentSources = [
     urlFieldIsLinkable: true,
     createdAt: '2021-01-20',
     serviceName: 'myService',
+    secret: {
+      app_id: '99999',
+      fingerprint: '65xM7s0RE6tEWNhnuXpK5EvZ5OAMIcbDHIISm/0T23Y=',
+      base_url: 'http://github.com',
+    },
   },
   {
     ...contentSources[1],
@@ -369,7 +375,7 @@ export const exampleResult = {
       myLink: 'http://foo',
       otherTitle: 'foo',
       content_source_id: '60e85e7ea2564c265a88a4f0',
-      external_id: 'doc-60e85eb7a2564c937a88a4f3',
+      id: 'doc-60e85eb7a2564c937a88a4f3',
       last_updated: '2021-07-09T14:35:35+00:00',
       updated_at: '2021-07-09T14:35:35+00:00',
       source: 'custom',

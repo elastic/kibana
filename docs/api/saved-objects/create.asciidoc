@@ -64,6 +64,9 @@ used to specify a single space, and the "All spaces" identifier (`'*'`) is not a
 `200`::
     Indicates a successful call.
 
+`409`::
+    Indicates a <<saved-objects-api-create-conflict-errors,conflict error>>.
+
 [[saved-objects-api-create-example]]
 ==== Example
 
@@ -93,3 +96,11 @@ The API returns the following:
 --------------------------------------------------
 
 <1> When `my-pattern` is unspecified in the path, a unique ID is automatically generated.
+
+[[saved-objects-api-create-conflict-errors]]
+==== Conflict errors
+
+Starting in {kib} 8.0, saved objects can exist in multiple spaces. As a result, you may encounter different types of conflict errors when
+attempting to create an object. If you encounter a 409 error that cannot be overridden by using the `overwrite: true` option, you are likely
+hitting a different type of conflict error. The Create API response is limited and does not include additional metadata. You can get more
+details about this error by using the <<saved-objects-api-bulk-create,Bulk create API>> instead.

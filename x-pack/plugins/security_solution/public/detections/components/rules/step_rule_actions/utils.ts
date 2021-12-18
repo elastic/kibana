@@ -14,10 +14,6 @@ import {
 } from '../../../../../../triggers_actions_ui/public';
 import * as I18n from './translations';
 
-const UUID_REGEX = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
-
-export const isUuid = (id: AlertAction['id']) => !!id.match(UUID_REGEX);
-
 export const getActionTypeName = (actionTypeId: AlertAction['actionTypeId']) => {
   if (!actionTypeId) return '';
   const actionType = actionTypeId.split('.')[1];

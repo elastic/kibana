@@ -141,9 +141,9 @@
             "signature": [
               {
                 "pluginId": "charts",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibChartsPluginApi",
-                "section": "def-public.Labels",
+                "section": "def-common.Labels",
                 "text": "Labels"
               }
             ],
@@ -158,7 +158,7 @@
             "label": "position",
             "description": [],
             "signature": [
-              "\"top\" | \"bottom\" | \"left\" | \"right\""
+              "\"top\" | \"left\" | \"bottom\" | \"right\""
             ],
             "path": "src/plugins/vis_types/xy/public/types/param.ts",
             "deprecated": false
@@ -231,9 +231,9 @@
               "Partial<",
               {
                 "pluginId": "charts",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibChartsPluginApi",
-                "section": "def-public.Style",
+                "section": "def-common.Style",
                 "text": "Style"
               },
               "> | undefined"
@@ -813,7 +813,7 @@
             "section": "def-public.SchemaConfig",
             "text": "SchemaConfig"
           },
-          ", \"label\" | \"format\" | \"accessor\" | \"aggType\"> & { params: {} | ",
+          ", \"format\" | \"label\" | \"accessor\" | \"aggType\"> & { params: {} | ",
           "DateHistogramParams",
           " | ",
           "HistogramParams",

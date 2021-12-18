@@ -24,12 +24,12 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
     id: 'zeekLogs',
     name: i18n.translate('home.tutorials.zeekLogs.nameTitle', {
-      defaultMessage: 'Zeek logs',
+      defaultMessage: 'Zeek Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.zeekLogs.shortDescription', {
-      defaultMessage: 'Collect Zeek network security monitoring logs.',
+      defaultMessage: 'Collect and parse logs from Zeek network security with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.zeekLogs.longDescription', {
       defaultMessage:
@@ -58,8 +58,8 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/zeek_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['network', 'monitoring', 'security'],
   };
 }

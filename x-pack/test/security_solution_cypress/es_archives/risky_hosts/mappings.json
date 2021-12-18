@@ -1,7 +1,7 @@
 {
   "type": "index",
   "value": {
-    "index": "ml_host_risk_score_latest",
+    "index": "ml_host_risk_score_latest_default",
     "mappings": {
       "properties": {
         "@timestamp": {
@@ -10,15 +10,9 @@
         "host": {
           "properties": {
             "name": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
+              "type": "keyword"
               }
             }
-          }
         },
         "ingest_timestamp": {
           "type": "date"
@@ -32,16 +26,20 @@
             }
           }
         },
-        "risk_score": {
-          "type": "long"
+        "risk_stats": {
+          "properties": {
+            "risk_score": {
+              "type": "long"
+            }
+          }
         }
       }
     },
     "settings": {
       "index": {
         "lifecycle": {
-          "name": "ml_host_risk_score_latest",
-          "rollover_alias": "ml_host_risk_score_latest"
+          "name": "ml_host_risk_score_latest_default",
+          "rollover_alias": "ml_host_risk_score_latest_default"
         },
         "mapping": {
           "total_fields": {

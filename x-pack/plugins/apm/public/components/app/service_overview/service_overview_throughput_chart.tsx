@@ -14,11 +14,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
 import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
 import { useTheme } from '../../../hooks/use_theme';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
@@ -30,17 +33,14 @@ import {
 const INITIAL_STATE = {
   currentPeriod: [],
   previousPeriod: [],
-  throughputUnit: 'minute' as const,
 };
 
 export function ServiceOverviewThroughputChart({
   height,
-  environment,
   kuery,
   transactionName,
 }: {
   height?: number;
-  environment: string;
   kuery: string;
   transactionName?: string;
 }) {
@@ -48,11 +48,17 @@ export function ServiceOverviewThroughputChart({
 
   const {
     urlParams: { comparisonEnabled, comparisonType },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const {
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}');
+
+  const { environment } = useEnvironmentsContext();
+
+  const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
+    ApmMlDetectorType.txThroughput
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -135,29 +141,16 @@ export function ServiceOverviewThroughputChart({
                 'xpack.apm.serviceOverview.throughtputChartTitle',
                 { defaultMessage: 'Throughput' }
               )}
-              {data.throughputUnit === 'second'
-                ? i18n.translate(
-                    'xpack.apm.serviceOverview.throughtputPerSecondChartTitle',
-                    { defaultMessage: ' (per second)' }
-                  )
-                : ''}
             </h2>
           </EuiTitle>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            content={
-              data.throughputUnit === 'minute'
-                ? i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
-                    defaultMessage:
-                      'Throughput is measured in transactions per minute (tpm)',
-                  })
-                : i18n.translate('xpack.apm.serviceOverview.tpsHelp', {
-                    defaultMessage:
-                      'Throughput is measured in transactions per second (tps)',
-                  })
-            }
+            content={i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
+              defaultMessage:
+                'Throughput is measured in transactions per minute (tpm)',
+            })}
             position="right"
           />
         </EuiFlexItem>
@@ -169,8 +162,9 @@ export function ServiceOverviewThroughputChart({
         showAnnotations={false}
         fetchStatus={status}
         timeseries={timeseries}
-        yLabelFormat={(y) => asExactTransactionRate(y, data.throughputUnit)}
+        yLabelFormat={asExactTransactionRate}
         customTheme={comparisonChartTheme}
+        anomalyTimeseries={preferredAnomalyTimeseries}
       />
     </EuiPanel>
   );

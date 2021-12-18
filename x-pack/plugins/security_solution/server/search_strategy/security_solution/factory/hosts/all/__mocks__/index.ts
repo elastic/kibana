@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import {
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '../../../../../../../../../../src/core/server';
+import { elasticsearchServiceMock } from '../../../../../../../../../../src/core/server/mocks';
+import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
 
 import {
   Direction,
@@ -14,6 +20,8 @@ import {
   HostsQueries,
   HostsRequestOptions,
 } from '../../../../../../../common/search_strategy';
+import { EndpointAppContextService } from '../../../../../../endpoint/endpoint_app_context_services';
+import { EndpointAppContext } from '../../../../../../endpoint/types';
 
 export const mockOptions: HostsRequestOptions = {
   defaultIndex: [
@@ -611,7 +619,7 @@ export const formattedSearchStrategyResponse = {
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
             'traces-apm*',
@@ -622,7 +630,7 @@ export const formattedSearchStrategyResponse = {
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           track_total_hits: false,
           body: {
             docvalue_fields: mockOptions.docValueFields,
@@ -783,7 +791,7 @@ export const mockBuckets: HostAggEsItem = {
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   track_total_hits: false,
   body: {
     aggregations: {
@@ -821,7 +829,7 @@ export const expectedDsl = {
     docvalue_fields: mockOptions.docValueFields,
     size: 0,
   },
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -832,4 +840,20 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
+};
+
+export const mockDeps = {
+  esClient: elasticsearchServiceMock.createScopedClusterClient(),
+  savedObjectsClient: {} as SavedObjectsClientContract,
+  endpointContext: {
+    logFactory: {
+      get: jest.fn(),
+    },
+    config: jest.fn().mockResolvedValue({}),
+    experimentalFeatures: {
+      ...allowedExperimentalValues,
+    },
+    service: {} as EndpointAppContextService,
+  } as EndpointAppContext,
+  request: {} as KibanaRequest,
 };

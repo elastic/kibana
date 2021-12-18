@@ -17,7 +17,7 @@ exports[`AddData render 1`] = `
             id="homDataAdd__title"
           >
             <FormattedMessage
-              defaultMessage="Get started by adding your data"
+              defaultMessage="Get started by adding integrations"
               id="home.addData.sectionTitle"
               values={Object {}}
             />
@@ -43,17 +43,25 @@ exports[`AddData render 1`] = `
             grow={false}
           >
             <RedirectAppLinks
-              application={Object {}}
+              application={
+                Object {
+                  "capabilities": Object {
+                    "navLinks": Object {
+                      "integrations": true,
+                    },
+                  },
+                }
+              }
             >
               <EuiButton
                 data-test-subj="homeAddData"
                 fill={true}
-                href="/app/home#/tutorial_directory"
+                href="/app/integrations/browse"
                 iconType="plusInCircle"
                 onClick={[Function]}
               >
                 <FormattedMessage
-                  defaultMessage="Add your data"
+                  defaultMessage="Add integrations"
                   id="home.addData.addDataButtonLabel"
                   values={Object {}}
                 />
@@ -71,6 +79,21 @@ exports[`AddData render 1`] = `
               <FormattedMessage
                 defaultMessage="Try sample data"
                 id="home.addData.sampleDataButtonLabel"
+                values={Object {}}
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiButtonEmpty
+              data-test-subj="uploadFile"
+              href="#/tutorial_directory/fileDataViz"
+              iconType="importAction"
+            >
+              <FormattedMessage
+                defaultMessage="Upload a file"
+                id="home.addData.uploadFileButtonLabel"
                 values={Object {}}
               />
             </EuiButtonEmpty>

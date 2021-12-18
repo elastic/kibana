@@ -316,6 +316,61 @@
     "functions": [
       {
         "parentPluginId": "@kbn/optimizer",
+        "id": "def-server.logOptimizerProgress",
+        "type": "Function",
+        "tags": [],
+        "label": "logOptimizerProgress",
+        "description": [],
+        "signature": [
+          "(log: ",
+          {
+            "pluginId": "@kbn/dev-utils",
+            "scope": "server",
+            "docId": "kibKbnDevUtilsPluginApi",
+            "section": "def-server.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => ",
+          "MonoTypeOperatorFunction",
+          "<",
+          {
+            "pluginId": "@kbn/optimizer",
+            "scope": "server",
+            "docId": "kibKbnOptimizerPluginApi",
+            "section": "def-server.OptimizerUpdate",
+            "text": "OptimizerUpdate"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-optimizer/src/log_optimizer_progress.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/optimizer",
+            "id": "def-server.logOptimizerProgress.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/dev-utils",
+                "scope": "server",
+                "docId": "kibKbnDevUtilsPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-optimizer/src/log_optimizer_progress.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/optimizer",
         "id": "def-server.logOptimizerState",
         "type": "Function",
         "tags": [],
@@ -537,6 +592,22 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/optimizer",
+        "id": "def-server.runFindBabelHelpersInEntryBundlesCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runFindBabelHelpersInEntryBundlesCli",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-optimizer/src/babel_runtime_helpers/find_babel_runtime_helpers_in_entry_bundles.ts",
+        "deprecated": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },

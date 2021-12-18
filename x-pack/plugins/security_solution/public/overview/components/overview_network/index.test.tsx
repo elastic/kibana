@@ -138,7 +138,7 @@ describe('OverviewNetwork', () => {
         preventDefault: jest.fn(),
       });
 
-    expect(mockNavigateToApp).toBeCalledWith('securitySolution', {
+    expect(mockNavigateToApp).toBeCalledWith('securitySolutionUI', {
       path: '',
       deepLinkId: SecurityPageName.network,
     });

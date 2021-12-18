@@ -7,7 +7,7 @@
 
 import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { HttpSetup } from 'kibana/public';
@@ -157,7 +157,7 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
       isInvalid={isInvalid}
       value={indexPattern.title}
       defaultValue={i18n.translate('xpack.stackAlerts.geoContainment.entityIndexSelect', {
-        defaultMessage: 'Select an index pattern and geo point field',
+        defaultMessage: 'Select a data view and geo point field',
       })}
       popoverContent={indexPopover}
       expressionDescription={i18n.translate('xpack.stackAlerts.geoContainment.entityIndexLabel', {

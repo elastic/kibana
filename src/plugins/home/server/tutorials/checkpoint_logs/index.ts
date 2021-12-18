@@ -24,12 +24,12 @@ export function checkpointLogsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'checkpointLogs',
     name: i18n.translate('home.tutorials.checkpointLogs.nameTitle', {
-      defaultMessage: 'Check Point logs',
+      defaultMessage: 'Check Point Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.checkpointLogs.shortDescription', {
-      defaultMessage: 'Collect Check Point firewall logs.',
+      defaultMessage: 'Collect and parse logs from Check Point firewalls with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.checkpointLogs.longDescription', {
       defaultMessage:
@@ -54,8 +54,8 @@ export function checkpointLogsSpecProvider(context: TutorialContext): TutorialSc
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['security'],
   };
 }

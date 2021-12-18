@@ -13,8 +13,13 @@ import {
   updateState,
   updateDatasourceState,
   updateVisualizationState,
+  removeOrClearLayer,
+  addLayer,
+  LensRootStore,
 } from '.';
-import { makeLensStore, defaultState } from '../mocks';
+import { layerTypes } from '../../common';
+import { makeLensStore, defaultState, mockStoreDeps } from '../mocks';
+import { DatasourceMap, VisualizationMap } from '../types';
 
 describe('lensSlice', () => {
   const { store } = makeLensStore({});
@@ -31,7 +36,7 @@ describe('lensSlice', () => {
 
     it('updateState: updates state with updater', () => {
       const customUpdater = jest.fn((state) => ({ ...state, query: customQuery }));
-      store.dispatch(updateState({ subType: 'UPDATE', updater: customUpdater }));
+      store.dispatch(updateState({ updater: customUpdater }));
       const changedState = store.getState().lens;
       expect(changedState).toEqual({ ...defaultState, query: customQuery });
     });
@@ -40,7 +45,7 @@ describe('lensSlice', () => {
       store.dispatch(
         updateVisualizationState({
           visualizationId: 'testVis',
-          updater: newVisState,
+          newState: newVisState,
         })
       );
 
@@ -117,7 +122,7 @@ describe('lensSlice', () => {
       expect(store.getState().lens.datasourceStates.testDatasource2.isLoading).toEqual(true);
     });
 
-    it('not initialize already initialized datasource on switch', () => {
+    it('should not initialize already initialized datasource on switch', () => {
       const datasource2State = {};
       const { store: customStore } = makeLensStore({
         preloadedState: {
@@ -145,6 +150,110 @@ describe('lensSlice', () => {
       expect(customStore.getState().lens.datasourceStates.testDatasource2.state).toBe(
         datasource2State
       );
+    });
+
+    describe('adding or removing layer', () => {
+      const testDatasource = (datasourceId: string) => {
+        return {
+          id: datasourceId,
+          getPublicAPI: () => ({
+            datasourceId: 'testDatasource',
+            getOperationForColumnId: jest.fn(),
+            getTableSpec: jest.fn(),
+          }),
+          getLayers: () => ['layer1'],
+          clearLayer: (layerIds: unknown, layerId: string) =>
+            (layerIds as string[]).map((id: string) =>
+              id === layerId ? `${datasourceId}_clear_${layerId}` : id
+            ),
+          removeLayer: (layerIds: unknown, layerId: string) =>
+            (layerIds as string[]).filter((id: string) => id !== layerId),
+          insertLayer: (layerIds: unknown, layerId: string) => [...(layerIds as string[]), layerId],
+        };
+      };
+      const datasourceStates = {
+        testDatasource: {
+          isLoading: false,
+          state: ['layer1'],
+        },
+        testDatasource2: {
+          isLoading: false,
+          state: ['layer2'],
+        },
+      };
+      const datasourceMap = {
+        testDatasource: testDatasource('testDatasource'),
+        testDatasource2: testDatasource('testDatasource2'),
+      };
+      const visualizationMap = {
+        testVis: {
+          clearLayer: (layerIds: unknown, layerId: string) =>
+            (layerIds as string[]).map((id: string) =>
+              id === layerId ? `vis_clear_${layerId}` : id
+            ),
+          removeLayer: (layerIds: unknown, layerId: string) =>
+            (layerIds as string[]).filter((id: string) => id !== layerId),
+          getLayerIds: (layerIds: unknown) => layerIds as string[],
+          appendLayer: (layerIds: unknown, layerId: string) => [...(layerIds as string[]), layerId],
+          getSupportedLayers: jest.fn(() => [{ type: layerTypes.DATA, label: 'Data Layer' }]),
+        },
+      };
+
+      let customStore: LensRootStore;
+      beforeEach(() => {
+        customStore = makeLensStore({
+          preloadedState: {
+            activeDatasourceId: 'testDatasource',
+            datasourceStates,
+            visualization: {
+              activeId: 'testVis',
+              state: ['layer1', 'layer2'],
+            },
+            stagedPreview: {
+              visualization: {
+                activeId: 'testVis',
+                state: ['layer1', 'layer2'],
+              },
+              datasourceStates,
+            },
+          },
+          storeDeps: mockStoreDeps({
+            visualizationMap: visualizationMap as unknown as VisualizationMap,
+            datasourceMap: datasourceMap as unknown as DatasourceMap,
+          }),
+        }).store;
+      });
+
+      it('addLayer: should add the layer to the datasource and visualization', () => {
+        customStore.dispatch(
+          addLayer({
+            layerId: 'foo',
+            layerType: layerTypes.DATA,
+          })
+        );
+        const state = customStore.getState().lens;
+
+        expect(state.visualization.state).toEqual(['layer1', 'layer2', 'foo']);
+        expect(state.datasourceStates.testDatasource.state).toEqual(['layer1', 'foo']);
+        expect(state.datasourceStates.testDatasource2.state).toEqual(['layer2']);
+        expect(state.stagedPreview).not.toBeDefined();
+      });
+
+      it('removeLayer: should remove the layer if it is not the only layer', () => {
+        customStore.dispatch(
+          removeOrClearLayer({
+            visualizationId: 'testVis',
+            layerId: 'layer1',
+            layerIds: ['layer1', 'layer2'],
+          })
+        );
+        const state = customStore.getState().lens;
+
+        expect(state.visualization.state).toEqual(['layer2']);
+        expect(state.datasourceStates.testDatasource.state).toEqual([]);
+        expect(state.datasourceStates.testDatasource2.state).toEqual(['layer2']);
+        expect(state.stagedPreview).not.toBeDefined();
+      });
     });
   });
 });

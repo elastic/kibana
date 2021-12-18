@@ -1,0 +1,96 @@
+[role="xpack"]
+[[servicenow-itom-action-type]]
+=== ServiceNow ITOM connector and action
+++++
+<titleabbrev>ServiceNow ITOM</titleabbrev>
+++++
+
+The {sn} ITOM connector uses the https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.html[Event API] to create {sn} events.
+
+[float]
+[[servicenow-itom-connector-prerequisites]]
+==== Prerequisites
+Create an integration user in {sn} and assign it the following roles.
+
+* `personalize_choices`: Allows the user to retrieve Choice element options, such as Severity.
+* `evt_mgmt_integration`: Enables integration with external event sources by allowing the user to create events.
+
+[float]
+[[servicenow-itom-connector-configuration]]
+==== Connector configuration
+
+{sn} ITOM connectors have the following configuration properties.
+
+Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** connector listing, and in the connector list when configuring an action.
+URL::       {sn} instance URL.
+Username::  Username for HTTP Basic authentication.
+Password::  Password for HTTP Basic authentication.
+
+[float]
+[[servicenow-itom-connector-networking-configuration]]
+==== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
+[[Preconfigured-servicenow-itom-configuration]]
+==== Preconfigured connector type
+
+[source,text]
+--
+ my-servicenow-itom:
+   name: preconfigured-servicenow-connector-type
+   actionTypeId: .servicenow-itom
+   config:
+     apiUrl: https://example.service-now.com/
+   secrets:
+     username: testuser
+     password: passwordkeystorevalue
+--
+
+Config defines information for the connector type.
+
+`apiUrl`:: An address that corresponds to *URL*.
+
+Secrets defines sensitive information for the connector type.
+
+`username`:: A string that corresponds to *Username*.
+`password`::  A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+
+[float]
+[[define-servicenow-itom-ui]]
+==== Define connector in Stack Management
+
+Define {sn} ITOM connector properties.
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-itom-connector.png[ServiceNow ITOM connector]
+
+Test {sn} ITOM action parameters.
+
+[role="screenshot"]
+image::management/connectors/images/servicenow-itom-params-test.png[ServiceNow ITOM params test]
+
+[float]
+[[servicenow-itom-action-configuration]]
+==== Action configuration
+
+{sn} ITOM actions have the following configuration properties.
+
+Source::       The name of the event source type.
+Node::         The Host that the event was triggered for.
+Type::         The type of event.
+Resource::     The name of the resource.
+Metric name::  Name of the metric.
+Source instance (event_class):: Specific instance of the source.
+Message key::  All actions sharing this key will be associated with the same {sn} alert. Default value: `<rule ID>:<alert instance ID>`.
+Severity::     The severity of the event.
+Description::  The details about the event.
+
+Refer to https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.html[ServiceNow documentation] for more information about the properties.
+
+[float]
+[[configuring-servicenow-itom]]
+==== Configure {sn} ITOM
+
+{sn} offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.

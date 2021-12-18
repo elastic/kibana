@@ -21,7 +21,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -63,7 +63,7 @@ export const FleetServerUpgradeModal: React.FunctionComponent<Props> = ({ onClos
           throw res.error;
         }
 
-        for (const agent of res.data?.list ?? []) {
+        for (const agent of res.data?.items ?? []) {
           if (!agent.policy_id || agentPoliciesAlreadyChecked[agent.policy_id]) {
             continue;
           }

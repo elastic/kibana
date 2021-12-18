@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent, useState } from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useEditPolicyContext } from '../edit_policy_context';
 import { getIndicesListPath } from '../../../services/navigation';
 import { useKibana } from '../../../../shared_imports';

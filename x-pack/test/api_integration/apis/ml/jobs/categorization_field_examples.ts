@@ -64,7 +64,7 @@ const analyzer = {
   ],
 };
 const defaultRequestBody = {
-  indexPatternTitle: 'ft_categorization',
+  indexPatternTitle: 'ft_categorization_small',
   query: { bool: { must: [{ match_all: {} }] } },
   size: 5,
   timeField: '@timestamp',
@@ -286,7 +286,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Categorization example endpoint - ', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization_small');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 

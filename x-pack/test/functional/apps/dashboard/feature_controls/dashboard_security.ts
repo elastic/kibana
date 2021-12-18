@@ -43,12 +43,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+      await PageObjects.security.forceLogout();
+
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
       );
-
-      // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
     });
 
     describe('global dashboard all privileges, no embeddable application privileges', () => {
@@ -89,11 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('only shows the dashboard navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql([
-          'Overview',
-          'Dashboard',
-          'Stack Management',
-        ]);
+        expect(navLinks.map((link) => link.text)).to.eql(['Dashboard', 'Stack Management']);
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
@@ -296,7 +293,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Dashboard']);
+        expect(navLinks).to.eql(['Dashboard']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
@@ -427,7 +424,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Dashboard']);
+        expect(navLinks).to.eql(['Dashboard']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
@@ -502,7 +499,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no dashboard privileges', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/116881
+    describe.skip('no dashboard privileges', () => {
       before(async () => {
         await security.role.create('no_dashboard_privileges_role', {
           elasticsearch: {

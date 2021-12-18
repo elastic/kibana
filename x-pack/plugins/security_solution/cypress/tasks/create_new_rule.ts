@@ -32,9 +32,7 @@ import {
   CUSTOM_QUERY_REQUIRED,
   DEFAULT_RISK_SCORE_INPUT,
   DEFINE_CONTINUE_BUTTON,
-  DEFINE_EDIT_TAB,
   EQL_QUERY_INPUT,
-  EQL_QUERY_PREVIEW_HISTOGRAM,
   EQL_QUERY_VALIDATION_SPINNER,
   EQL_TYPE,
   FALSE_POSITIVES_INPUT,
@@ -93,8 +91,8 @@ import {
   EMAIL_CONNECTOR_USER_INPUT,
   EMAIL_CONNECTOR_PASSWORD_INPUT,
   EMAIL_CONNECTOR_SERVICE_SELECTOR,
+  PREVIEW_HISTOGRAM,
 } from '../screens/create_new_rule';
-import { LOADING_INDICATOR } from '../screens/security_header';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
@@ -255,7 +253,7 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   rule: CustomRule | OverrideRule
 ) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id!)).click();
+  cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
@@ -274,7 +272,7 @@ export const fillDefineThresholdRule = (rule: ThresholdRule) => {
   const threshold = 1;
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id!)).click();
+  cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(COMBO_BOX_CLEAR_BTN).first().click();
 
   rule.index.forEach((index) => {
@@ -299,7 +297,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
     cy.wrap($el).type(rule.thresholdField, { delay: 35 });
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id!)).click();
+  cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
@@ -315,20 +313,23 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
 };
 
 export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
+  if (rule.customQuery == null) {
+    throw new TypeError('The rule custom query should never be undefined or null ');
+  }
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
-  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.customQuery!);
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.customQuery);
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
   cy.get(RULES_CREATION_PREVIEW)
     .find(QUERY_PREVIEW_BUTTON)
     .should('not.be.disabled')
     .click({ force: true });
-  cy.get(EQL_QUERY_PREVIEW_HISTOGRAM)
+  cy.get(PREVIEW_HISTOGRAM)
     .invoke('text')
     .then((text) => {
       if (text !== 'Hits') {
         cy.get(RULES_CREATION_PREVIEW).find(QUERY_PREVIEW_BUTTON).click({ force: true });
-        cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
+        cy.get(PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
       }
     });
   cy.get(TOAST_ERROR).should('not.exist');
@@ -495,10 +496,6 @@ export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRu
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).should('not.exist');
 };
 
-export const goToDefineStepTab = () => {
-  cy.get(DEFINE_EDIT_TAB).click({ force: true });
-};
-
 export const goToAboutStepTab = () => {
   cy.get(ABOUT_EDIT_TAB).click({ force: true });
 };
@@ -535,7 +532,6 @@ export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
       refreshPage();
-      cy.get(LOADING_INDICATOR).should('not.exist');
       return cy
         .get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')

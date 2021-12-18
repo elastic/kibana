@@ -19,9 +19,9 @@ describe('read_privileges route', () => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
 
-    context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-      body: getMockPrivilegesResult(),
-    });
+    context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(getMockPrivilegesResult())
+    );
 
     readPrivilegesRoute(server.router, true);
   });

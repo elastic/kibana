@@ -13,10 +13,8 @@ import { first, pluck } from 'rxjs/operators';
 import {
   IInterpreterRenderHandlers,
   ExpressionValue,
-  TablesAdapter,
 } from '../../../../../../../src/plugins/expressions/public';
-import { RequestAdapter } from '../../../../../../../src/plugins/inspector/public';
-import { Adapters, ExpressionRenderHandler } from '../../types';
+import { ExpressionRenderHandler } from '../../types';
 import { getExpressions } from '../../services';
 
 declare global {
@@ -50,13 +48,9 @@ class Main extends React.Component<{}, State> {
       initialContext: ExpressionValue = {}
     ) => {
       this.setState({ expression });
-      const adapters: Adapters = {
-        requests: new RequestAdapter(),
-        tables: new TablesAdapter(),
-      };
+
       return getExpressions()
         .execute(expression, context || { type: 'null' }, {
-          inspectorAdapters: adapters,
           searchContext: initialContext as any,
         })
         .getData()
@@ -70,7 +64,7 @@ class Main extends React.Component<{}, State> {
         lastRenderHandler.destroy();
       }
 
-      lastRenderHandler = getExpressions().render(this.chartRef.current!, context, {
+      lastRenderHandler = await getExpressions().render(this.chartRef.current!, context, {
         onRenderError: (el: HTMLElement, error: unknown, handler: IInterpreterRenderHandlers) => {
           this.setState({
             expression: 'Render error!\n\n' + JSON.stringify(error),

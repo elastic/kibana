@@ -177,7 +177,7 @@ export interface ResolverPaginatedEvents {
 }
 
 /**
- * Returned by the server via /api/endpoint/metadata
+ * Returned by the server via POST /api/endpoint/metadata
  */
 export interface HostResultList {
   /* the hosts restricted by the page size */
@@ -942,12 +942,17 @@ export interface PolicyConfig {
     };
     malware: ProtectionFields;
     behavior_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
         message: string;
         enabled: boolean;
       };
       behavior_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      memory_protection: {
         message: string;
         enabled: boolean;
       };
@@ -965,12 +970,17 @@ export interface PolicyConfig {
     };
     malware: ProtectionFields;
     behavior_protection: ProtectionFields & SupportedFields;
+    memory_protection: ProtectionFields & SupportedFields;
     popup: {
       malware: {
         message: string;
         enabled: boolean;
       };
       behavior_protection: {
+        message: string;
+        enabled: boolean;
+      };
+      memory_protection: {
         message: string;
         enabled: boolean;
       };
@@ -1004,14 +1014,14 @@ export interface UIPolicyConfig {
    */
   mac: Pick<
     PolicyConfig['mac'],
-    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection'
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection' | 'memory_protection'
   >;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
   linux: Pick<
     PolicyConfig['linux'],
-    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection'
+    'malware' | 'events' | 'popup' | 'advanced' | 'behavior_protection' | 'memory_protection'
   >;
 }
 
@@ -1221,3 +1231,20 @@ export interface ListPageRouteState {
   /** The label for the button */
   backButtonLabel?: string;
 }
+
+/**
+ * REST API standard base response for list types
+ */
+interface BaseListResponse<D = unknown> {
+  data: D[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
+/**
+ * Returned by the server via GET /api/endpoint/metadata
+ */
+export type MetadataListResponse = BaseListResponse<HostInfo>;
+
+export type { EndpointPrivileges } from './authz';

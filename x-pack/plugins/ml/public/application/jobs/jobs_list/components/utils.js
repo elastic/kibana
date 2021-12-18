@@ -16,6 +16,7 @@ import {
 import { getToastNotifications } from '../../../util/dependency_cache';
 import { ml } from '../../../services/ml_api_service';
 import { stringMatch } from '../../../util/string_utils';
+import { getDataViewNames } from '../../../util/index_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { JOB_ACTION } from '../../../../../common/constants/job_actions';
 import { parseInterval } from '../../../../../common/util/parse_interval';
@@ -217,6 +218,26 @@ export async function cloneJob(jobId) {
       loadJobForCloning(jobId),
       loadFullJob(jobId, false),
     ]);
+
+    const dataViewNames = await getDataViewNames();
+    const dataViewTitle = datafeed.indices.join(',');
+    const jobIndicesAvailable = dataViewNames.includes(dataViewTitle);
+
+    if (jobIndicesAvailable === false) {
+      const warningText = i18n.translate(
+        'xpack.ml.jobsList.managementActions.noSourceDataViewForClone',
+        {
+          defaultMessage:
+            'Unable to clone the anomaly detection job {jobId}. No data view exists for index {dataViewTitle}.',
+          values: { jobId, dataViewTitle },
+        }
+      );
+      getToastNotificationService().displayDangerToast(warningText, {
+        'data-test-subj': 'mlCloneJobNoDataViewExistsWarningToast',
+      });
+      return;
+    }
+
     if (cloneableJob !== undefined && originalJob?.custom_settings?.created_by !== undefined) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job

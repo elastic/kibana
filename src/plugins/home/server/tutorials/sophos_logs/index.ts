@@ -24,12 +24,12 @@ export function sophosLogsSpecProvider(context: TutorialContext): TutorialSchema
   return {
     id: 'sophosLogs',
     name: i18n.translate('home.tutorials.sophosLogs.nameTitle', {
-      defaultMessage: 'Sophos logs',
+      defaultMessage: 'Sophos Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.sophosLogs.shortDescription', {
-      defaultMessage: 'Collect Sophos XG SFOS logs over syslog.',
+      defaultMessage: 'Collect and parse logs from Sophos XG SFOS with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.sophosLogs.longDescription', {
       defaultMessage:
@@ -54,8 +54,8 @@ export function sophosLogsSpecProvider(context: TutorialContext): TutorialSchema
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['security'],
   };
 }

@@ -21,3 +21,4 @@ export {
 
 // Misc
 export { expectedAsyncError } from './expected_async_error';
+export { itShowsServerErrorAsFlashMessage } from './error_handling';

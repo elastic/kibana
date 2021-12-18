@@ -16,8 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   async function checkData() {
-    const data = await elasticChart.getChartDebugData();
-    expect(data!.bars![0].bars.length).to.eql(24);
+    await retry.try(async () => {
+      const data = await elasticChart.getChartDebugData();
+      expect(data!.bars![0].bars.length).to.eql(24);
+    });
   }
 
   describe('show and save', () => {

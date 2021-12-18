@@ -13,5 +13,5 @@ getLocale(): string;
 ```
 <b>Returns:</b>
 
-`string`
+string
 

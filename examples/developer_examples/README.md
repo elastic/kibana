@@ -14,7 +14,7 @@ services. Add your a link to your example using the developerExamples `register`
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/master/src/plugins/foo/README.md',
+          href: 'https://github.com/elastic/kibana/tree/main/src/plugins/foo/README.md',
           iconType: 'logoGithub',
           target: '_blank',
           size: 's',

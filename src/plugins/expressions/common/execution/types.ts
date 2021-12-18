@@ -14,6 +14,7 @@ import type { KibanaExecutionContext } from 'src/core/public';
 import { Datatable, ExpressionType } from '../expression_types';
 import { Adapters, RequestAdapter } from '../../../inspector/common';
 import { TablesAdapter } from '../util/tables_adapter';
+import { ExpressionsInspectorAdapter } from '../util';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;
@@ -79,7 +80,8 @@ export interface ExecutionContext<
 /**
  * Default inspector adapters created if inspector adapters are not set explicitly.
  */
-export interface DefaultInspectorAdapters extends Adapters {
+export interface DefaultInspectorAdapters {
   requests: RequestAdapter;
   tables: TablesAdapter;
+  expression: ExpressionsInspectorAdapter;
 }

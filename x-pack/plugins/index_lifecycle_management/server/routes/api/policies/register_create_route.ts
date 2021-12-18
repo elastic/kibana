@@ -21,7 +21,7 @@ async function createPolicy(
     ignore: [404],
   };
 
-  return client.ilm.putLifecycle({ policy: name, body }, options);
+  return client.ilm.putLifecycle({ name, body }, options);
 }
 
 /**

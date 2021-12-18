@@ -20,7 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  describe('Export import saved objects between versions', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/116058
+  describe.skip('Export import saved objects between versions', function () {
     before(async function () {
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/getting_started/shakespeare');

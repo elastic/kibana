@@ -104,10 +104,6 @@
   min-height: $euiSizeXXL - 2;
   word-break: break-word;
   font-weight: $euiFontWeightRegular;
-
-  @include kbnThemeStyle('v7') {
-    font-size: $euiFontSizeS;
-  }
 }
 
 .lnsLayerPanel__triggerTextLabel {
@@ -122,8 +118,7 @@
 }
 
 .lnsLayerPanel__styleEditor {
-  margin-top: -$euiSizeS;
-  padding: 0 $euiSize $euiSize;
+  padding: $euiSize;
 }
 
 .lnsLayerPanel__colorIndicator {

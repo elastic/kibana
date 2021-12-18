@@ -35,6 +35,7 @@ export interface KibanaRequestState extends RequestApplicationState {
   requestId: string;
   requestUuid: string;
   rewrittenUrl?: URL;
+  traceId?: string;
 }
 
 /**
@@ -75,13 +76,6 @@ export interface KibanaRequestEvents {
    */
   completed$: Observable<void>;
 }
-
-/**
- * @deprecated
- * `hapi` request object, supported during migration process only for backward compatibility.
- * @public
- */
-export interface LegacyRequest extends Request {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 /**
  * Kibana specific abstraction for an incoming request.
@@ -221,10 +215,8 @@ export class KibanaRequest<
   }
 
   private getEvents(request: Request): KibanaRequestEvents {
-    const finish$ = merge(
-      fromEvent(request.raw.res, 'finish'), // Response has been sent
-      fromEvent(request.raw.req, 'close') // connection was closed
-    ).pipe(shareReplay(1), first());
+    // the response is completed, or its underlying connection was terminated prematurely
+    const finish$ = fromEvent(request.raw.res, 'close').pipe(shareReplay(1), first());
 
     const aborted$ = fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(finish$));
     const completed$ = merge<void, void>(finish$, aborted$).pipe(shareReplay(1), first());
@@ -313,7 +305,7 @@ export class KibanaRequest<
  * Returns underlying Hapi Request
  * @internal
  */
-export const ensureRawRequest = (request: KibanaRequest | LegacyRequest) =>
+export const ensureRawRequest = (request: KibanaRequest | Request) =>
   isKibanaRequest(request) ? request[requestSymbol] : request;
 
 /**
@@ -324,7 +316,7 @@ export function isKibanaRequest(request: unknown): request is KibanaRequest {
   return request instanceof KibanaRequest;
 }
 
-function isRequest(request: any): request is LegacyRequest {
+function isRequest(request: any): request is Request {
   try {
     return request.raw.req && typeof request.raw.req === 'object';
   } catch {
@@ -333,9 +325,9 @@ function isRequest(request: any): request is LegacyRequest {
 }
 
 /**
- * Checks if an incoming request either KibanaRequest or Legacy.Request
+ * Checks if an incoming request either KibanaRequest or Hapi.Request
  * @internal
  */
-export function isRealRequest(request: unknown): request is KibanaRequest | LegacyRequest {
+export function isRealRequest(request: unknown): request is KibanaRequest | Request {
   return isKibanaRequest(request) || isRequest(request);
 }

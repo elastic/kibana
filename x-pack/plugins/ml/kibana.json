@@ -8,6 +8,7 @@
   ],
   "requiredPlugins": [
     "data",
+    "dataViews",
     "cloud",
     "features",
     "dataVisualizer",
@@ -15,7 +16,6 @@
     "share",
     "embeddable",
     "uiActions",
-    "kibanaLegacy",
     "discover",
     "triggersActionsUi",
     "fieldFormats"

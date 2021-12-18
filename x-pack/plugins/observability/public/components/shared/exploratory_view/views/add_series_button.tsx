@@ -14,6 +14,7 @@ import { getSeriesToEdit } from '../series_editor/series_editor';
 import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { DEFAULT_TIME, ReportTypes } from '../configurations/constants';
+import { useExploratoryView } from '../contexts/exploatory_view_config';
 
 export function AddSeriesButton() {
   const [editorItems, setEditorItems] = useState<BuilderItem[]>([]);
@@ -21,9 +22,11 @@ export function AddSeriesButton() {
 
   const { loading, indexPatterns } = useAppIndexPatternContext();
 
+  const { reportConfigMap } = useExploratoryView();
+
   useEffect(() => {
-    setEditorItems(getSeriesToEdit({ allSeries, indexPatterns, reportType }));
-  }, [allSeries, getSeries, indexPatterns, loading, reportType]);
+    setEditorItems(getSeriesToEdit({ allSeries, indexPatterns, reportType, reportConfigMap }));
+  }, [allSeries, getSeries, indexPatterns, loading, reportConfigMap, reportType]);
 
   const addSeries = () => {
     const prevSeries = allSeries?.[0];

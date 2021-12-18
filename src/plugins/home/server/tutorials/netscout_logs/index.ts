@@ -24,12 +24,12 @@ export function netscoutLogsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'netscoutLogs',
     name: i18n.translate('home.tutorials.netscoutLogs.nameTitle', {
-      defaultMessage: 'Arbor Peakflow logs',
+      defaultMessage: 'Arbor Peakflow Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.netscoutLogs.shortDescription', {
-      defaultMessage: 'Collect Netscout Arbor Peakflow SP logs over syslog or from a file.',
+      defaultMessage: 'Collect and parse logs from Netscout Arbor Peakflow SP with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.netscoutLogs.longDescription', {
       defaultMessage:
@@ -54,8 +54,8 @@ export function netscoutLogsSpecProvider(context: TutorialContext): TutorialSche
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['security'],
   };
 }
