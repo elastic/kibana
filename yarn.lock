@@ -1527,10 +1527,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@40.2.0":
-  version "40.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-40.2.0.tgz#2e329ce4f495731f478cbaf2f8f3b89b5167a65b"
-  integrity sha512-N0t7YK58Kce/s9LEgaocrD75NYuFMwrcI1QNIPcwZ9IAOHY8/9yRHD5Ipoz0caGibAgOE8OunGkpyPY/NHKB5Q==
+"@elastic/charts@41.0.0":
+  version "41.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-41.0.0.tgz#fcc83b86d72aa3f2787b2652e5d72076ad756cec"
+  integrity sha512-8MhmoYfoBGrQWDxF+XW/QCfrJv0Oyd0HekYFW7I6Q/C9KdtAyhHloQ4u4NC2NSCOz6yQgoFwCml0hI+shrPSCA==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -10455,7 +10455,7 @@ core-js@^2.4.0, core-js@^2.5.0, core-js@^2.6.9:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
 
-core-js@^3.19.3, core-js@^3.0.4, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
+core-js@^3.0.4, core-js@^3.19.3, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
   version "3.19.3"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.19.3.tgz#6df8142a996337503019ff3235a7022d7cdf4559"
   integrity sha512-LeLBMgEGSsG7giquSzvgBrTS7V5UL6ks3eQlUSbN8dJStlLFiRzUm5iqsRyzUB8carhfKjkJ2vzKqE6z1Vga9g==
