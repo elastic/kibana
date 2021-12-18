@@ -11,8 +11,8 @@ import {
   Fit,
   FitConfig,
   LineSeriesStyle,
+  RecursivePartial,
 } from '@elastic/charts';
-import { DeepPartial } from 'utility-types';
 import { Maybe } from '../typings/common';
 
 export interface Coordinate {
@@ -46,8 +46,8 @@ export interface APMChartSpec<
   fit?: Exclude<Fit, 'explicit'> | FitConfig;
   stackAccessors?: Accessor;
   splitSeriesAccessors?: Accessor;
-  lineSeriesStyle?: DeepPartial<LineSeriesStyle>;
-  areaSeriesStyle?: DeepPartial<AreaSeriesStyle>;
+  lineSeriesStyle?: RecursivePartial<LineSeriesStyle>;
+  areaSeriesStyle?: RecursivePartial<AreaSeriesStyle>;
 }
 
 export type ChartType = 'area' | 'linemark';
