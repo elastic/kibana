@@ -1623,7 +1623,6 @@
     "discover.discoverBreadcrumbTitle": "Discover",
     "discover.discoverDefaultSearchSessionName": "Discover",
     "discover.discoverDescription": "ドキュメントにクエリをかけたりフィルターを適用することで、データをインタラクティブに閲覧できます。",
-    "discover.discoverError.title": "Discoverの読み込みエラー",
     "discover.discoverSubtitle": "インサイトを検索して見つけます。",
     "discover.discoverTitle": "Discover",
     "discover.doc.couldNotFindDocumentsDescription": "そのIDに一致するドキュメントがありません。",

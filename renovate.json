@@ -126,6 +126,21 @@
       "matchBaseBranches": ["main"],
       "labels": ["Team:Security", "release_note:skip", "auto-backport"],
       "enabled": true
+    },
+    {
+      "groupName": "ftr",
+      "packageNames": [
+        "@types/chromedriver",
+        "@types/selenium-webdriver",
+        "chromedriver",
+        "geckodriver",
+        "ms-chromium-edge-driver",
+        "selenium-webdriver"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true
     }
   ]
 }
