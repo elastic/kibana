@@ -28,6 +28,7 @@ import {
   HeatmapBrushEvent,
   Position,
   ScaleType,
+  PartialTheme,
 } from '@elastic/charts';
 import moment from 'moment';
 
@@ -276,66 +277,59 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
   const showBrush = !!onCellsSelection;
 
-  const swimLaneConfig = useMemo<HeatmapSpec['config']>(() => {
+  const themeOverrides = useMemo<PartialTheme>(() => {
     if (!showSwimlane) return {};
 
-    const config: HeatmapSpec['config'] = {
-      grid: {
-        cellHeight: {
-          min: CELL_HEIGHT,
-          max: CELL_HEIGHT,
+    const theme: PartialTheme = {
+      heatmap: {
+        grid: {
+          cellHeight: {
+            min: CELL_HEIGHT,
+            max: CELL_HEIGHT,
+          },
+          stroke: {
+            width: 1,
+            color: euiTheme.euiBorderColor,
+          },
         },
-        stroke: {
-          width: 1,
-          color: euiTheme.euiBorderColor,
+        cell: {
+          maxWidth: 'fill',
+          maxHeight: 'fill',
+          label: {
+            visible: false,
+          },
+          border: {
+            stroke: euiTheme.euiBorderColor,
+            strokeWidth: 0,
+          },
         },
-      },
-      cell: {
-        maxWidth: 'fill',
-        maxHeight: 'fill',
-        label: {
-          visible: false,
+        yAxisLabel: {
+          visible: showYAxis,
+          width: Y_AXIS_LABEL_WIDTH,
+          textColor: euiTheme.euiTextSubduedColor,
+          padding: Y_AXIS_LABEL_PADDING,
+          fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
         },
-        border: {
-          stroke: euiTheme.euiBorderColor,
-          strokeWidth: 0,
+        xAxisLabel: {
+          visible: showTimeline,
+          textColor: euiTheme.euiTextSubduedColor,
+          fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
+          // Required to calculate where the swimlane ends
+          width: X_AXIS_RIGHT_OVERFLOW * 2,
         },
-      },
-      yAxisLabel: {
-        visible: showYAxis,
-        width: Y_AXIS_LABEL_WIDTH,
-        textColor: euiTheme.euiTextSubduedColor,
-        padding: Y_AXIS_LABEL_PADDING,
-        formatter: (laneLabel: string) => {
-          return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : laneLabel;
+        brushMask: {
+          visible: showBrush,
+          fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
         },
-        fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
-      },
-      xAxisLabel: {
-        visible: showTimeline,
-        textColor: euiTheme.euiTextSubduedColor,
-        formatter: (v: number) => {
-          timeBuckets.setInterval(`${swimlaneData.interval}s`);
-          const scaledDateFormat = timeBuckets.getScaledDateFormat();
-          return moment(v).format(scaledDateFormat);
+        brushArea: {
+          visible: showBrush,
+          stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
         },
-        fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
-        // Required to calculate where the swimlane ends
-        width: X_AXIS_RIGHT_OVERFLOW * 2,
+        ...(showLegend ? { maxLegendHeight: LEGEND_HEIGHT } : {}),
       },
-      brushMask: {
-        visible: showBrush,
-        fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
-      },
-      brushArea: {
-        visible: showBrush,
-        stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
-      },
-      ...(showLegend ? { maxLegendHeight: LEGEND_HEIGHT } : {}),
-      timeZone: 'UTC',
     };
 
-    return config;
+    return theme;
   }, [
     showSwimlane,
     swimlaneType,
@@ -427,6 +421,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   {showSwimlane && !isLoading && (
                     <Chart className={'mlSwimLaneContainer'}>
                       <Settings
+                        theme={themeOverrides}
                         onElementClick={onElementClick}
                         showLegend={showLegend}
                         legendPosition={Position.Top}
@@ -438,6 +433,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
                       <Heatmap
                         id={id}
+                        timeZone="UTC"
                         colorScale={{
                           type: 'bands',
                           bands: [
@@ -485,7 +481,14 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                           },
                         }}
                         ySortPredicate="dataIndex"
-                        config={swimLaneConfig}
+                        yAxisLabelFormatter={(laneLabel) => {
+                          return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : String(laneLabel);
+                        }}
+                        xAxisLabelFormatter={(v) => {
+                          timeBuckets.setInterval(`${swimlaneData.interval}s`);
+                          const scaledDateFormat = timeBuckets.getScaledDateFormat();
+                          return moment(v).format(scaledDateFormat);
+                        }}
                       />
                     </Chart>
                   )}
