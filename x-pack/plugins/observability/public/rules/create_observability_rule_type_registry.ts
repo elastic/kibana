@@ -11,11 +11,10 @@ import {
   RuleTypeRegistryContract,
 } from '../../../triggers_actions_ui/public';
 import { ParsedTechnicalFields } from '../../../rule_registry/common/parse_technical_fields';
-import { ParsedExperimentalFields } from '../../../rule_registry/common/parse_experimental_fields';
 import { AsDuration, AsPercent } from '../../common/utils/formatters';
 
 export type ObservabilityRuleTypeFormatter = (options: {
-  fields: ParsedTechnicalFields & ParsedExperimentalFields & Record<string, any>;
+  fields: ParsedTechnicalFields & Record<string, any>;
   formatters: { asDuration: AsDuration; asPercent: AsPercent };
 }) => { reason: string; link: string };
 
