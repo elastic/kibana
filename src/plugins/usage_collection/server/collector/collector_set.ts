@@ -35,11 +35,14 @@ export class CollectorSet {
   private readonly logger: Logger;
   private readonly maximumWaitTimeForAllCollectorsInS: number;
   private readonly collectors: Map<string, AnyCollector>;
-  constructor({ logger, maximumWaitTimeForAllCollectorsInS, collectors = [] }: CollectorSetConfig) {
+  constructor({
+    logger,
+    maximumWaitTimeForAllCollectorsInS = DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S,
+    collectors = [],
+  }: CollectorSetConfig) {
     this.logger = logger;
     this.collectors = new Map(collectors.map((collector) => [collector.type, collector]));
-    this.maximumWaitTimeForAllCollectorsInS =
-      maximumWaitTimeForAllCollectorsInS || DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S;
+    this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS;
   }
 
   /**
