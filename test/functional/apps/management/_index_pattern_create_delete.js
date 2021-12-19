@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }) {
         body: { title: 'hello' },
       });
 
-      await PageObjects.settings.createIndexPattern('index-*,-index');
+      await PageObjects.settings.createIndexPattern('index-*,-index-b');
 
       const fieldCount = await PageObjects.settings.getFieldsTabCount();
 
