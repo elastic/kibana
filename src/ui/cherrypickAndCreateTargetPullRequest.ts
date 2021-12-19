@@ -137,56 +137,62 @@ async function backportViaFilesystem({
 
 // when the user is facing a git conflict we should help them understand
 // why the conflict occurs. In many cases it's because one or more commits haven't been backported yet
-async function getCommitsWithoutBackports(
-  options: ValidConfigOptions,
-  commit: Commit,
-  targetBranch: string
-) {
+export async function getCommitsWithoutBackports({
+  options,
+  commit,
+  targetBranch,
+}: {
+  options: ValidConfigOptions;
+  commit: Commit;
+  targetBranch: string;
+}) {
   const filenames = await getConflictingFiles(options, false);
-  const unbackportedCommits = await fetchCommitsByAuthor({
+  const commitsInConflictingPaths = await fetchCommitsByAuthor({
     ...options,
     all: true,
     commitPaths: filenames,
   });
 
-  const promises = unbackportedCommits
-    .filter((c) => {
-      // don't show the same commit that we are currently trying to backport
-      if (c.sha === commit.sha) {
-        return false;
-      }
+  return (
+    await Promise.all(
+      commitsInConflictingPaths
+        .filter((c) => {
+          // exclude the commit we are currently trying to backport
+          if (c.sha === commit.sha) {
+            return false;
+          }
 
-      // don't show commits that are newer than the commit we are trying to backport
-      if (c.committedDate > commit.committedDate) {
-        return false;
-      }
+          // exclude commits that are newer than the commit we are trying to backport
+          if (c.committedDate > commit.committedDate) {
+            return false;
+          }
 
-      const alreadyBackported = c.expectedTargetPullRequests.some(
-        (pr) => pr.branch === targetBranch && pr.state === 'MERGED'
-      );
-      if (alreadyBackported) {
-        return false;
-      }
+          const alreadyBackported = c.expectedTargetPullRequests.some(
+            (pr) => pr.branch === targetBranch && pr.state === 'MERGED'
+          );
+          if (alreadyBackported) {
+            return false;
+          }
 
-      return true;
-    })
-    .map(async (c) => {
-      const isCommitInBranch = await getIsCommitInBranch(options, c.sha);
-      return { c, isCommitInBranch };
-    });
-
-  return (await Promise.all(promises))
+          return true;
+        })
+        .slice(0, 10) // limit to max 10 commits
+        .map(async (c) => {
+          const isCommitInBranch = await getIsCommitInBranch(options, c.sha);
+          return { c, isCommitInBranch };
+        })
+    )
+  )
     .filter(({ isCommitInBranch }) => !isCommitInBranch)
     .map(({ c }) => {
       const unmergedPr = c.expectedTargetPullRequests.find(
         (pr) => pr.branch === targetBranch
       );
 
-      return ` - ${getFirstLine(c.originalMessage)} ${
-        unmergedPr?.state === 'OPEN' ? chalk.gray('(backport pending)') : ''
+      return ` - ${getFirstLine(c.originalMessage)}${
+        unmergedPr?.state === 'OPEN' ? chalk.gray(' (backport pending)') : ''
       }${c.pullUrl ? `\n   ${c.pullUrl}` : ''}`;
-    })
-    .slice(0, 5);
+    });
 }
 
 /*
@@ -257,11 +263,11 @@ async function waitForCherrypick(
     autoResolveSpinner.fail();
   }
 
-  const commitsWithoutBackports = await getCommitsWithoutBackports(
+  const commitsWithoutBackports = await getCommitsWithoutBackports({
     options,
     commit,
-    targetBranch
-  );
+    targetBranch,
+  });
 
   consoleLog(
     chalk.bold('\nThe commit could not be backported due to conflicts\n')
