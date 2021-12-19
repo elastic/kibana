@@ -148,6 +148,8 @@ const deleteInstance = async (deploymentId) => {
     await execa.command(
       `buildkite-agent artifact upload target/kibana-osquery/**/*`
     );
+
+    await deleteInstance(deploymentId);
   }
 
   await upgradeInstance({ deploymentId });
@@ -169,6 +171,8 @@ const deleteInstance = async (deploymentId) => {
     await execa.command(
       `buildkite-agent artifact upload target/kibana-osquery/**/*`
     );
+
+    await deleteInstance(deploymentId);
   }
 
   await deleteInstance(deploymentId);
