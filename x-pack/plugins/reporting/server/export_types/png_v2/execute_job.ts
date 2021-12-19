@@ -8,7 +8,7 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
-import { PNG_JOB_TYPE_V2 } from '../../../common/constants';
+import { PNG_JOB_TYPE_V2, REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import { TaskRunResult } from '../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import {
@@ -26,8 +26,8 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
     const encryptionKey = config.get('encryptionKey');
 
     return function runTask(jobId, job, cancellationToken, stream) {
-      const apmTrans = apm.startTransaction('reporting execute_job pngV2', 'reporting');
-      const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
+      const apmTrans = apm.startTransaction('execute-job-png-v2', REPORTING_TRANSACTION_TYPE);
+      const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
       let apmGeneratePng: { end: () => void } | null | undefined;
 
       const jobLogger = parentLogger.clone([PNG_JOB_TYPE_V2, 'execute', jobId]);
@@ -40,7 +40,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
           const [locatorParams] = job.locatorParams;
 
           apmGetAssets?.end();
-          apmGeneratePng = apmTrans?.startSpan('generate_png_pipeline', 'execute');
+          apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
 
           return generatePngObservable(reporting, jobLogger, {
             conditionalHeaders,
