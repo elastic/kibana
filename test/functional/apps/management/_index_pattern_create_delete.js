@@ -152,7 +152,8 @@ export default function ({ getService, getPageObjects }) {
 
       const fieldCount = await PageObjects.settings.getFieldsTabCount();
 
-      expect(fieldCount).to.be(7);
+      // five metafields plus keyword and text version of 'user' field
+      expect(parseInt(fieldCount, 10)).to.be(7);
     });
   });
 }
