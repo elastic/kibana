@@ -13,6 +13,7 @@ import {
   PROCESS_TREE,
   PROCESS_TREE_NODE_ALERT,
   SEARCH_BAR,
+  SESSION_COMMANDS,
   DETAILS_PANEL,
   DETAILS_PANEL_TOGGLE,
   DETAILS_PANEL_ALERT,
@@ -131,6 +132,38 @@ describe('Session view', () => {
       cy.get(PROCESS_TREE_NODE_ALERT).first().click();
       cy.get(ALERT_NODE_TEST_ID).first().click();
       cy.location('pathname').should('contain', `app/security/rules/id/${ALERT_RULE_ID}`);
+    });
+
+    it('renders child processes correctly', () => {
+      openSessionView(TEST_EVENT_ID);
+
+
+      // Amount of visible commands on the session view should increase when user clicks on the Child Process dropdown button
+      cy.get(SESSION_COMMANDS).children().its('length').then(lengthBefore =>{
+        const beforeClick = lengthBefore;
+        cy.contains('Child processes').click()
+        cy.get(SESSION_COMMANDS).children().its('length').then(lengthAfter =>{
+          const afterClick = lengthAfter;
+          expect(afterClick).to.be.greaterThan(beforeClick)
+        })
+      })
+
+      //Checks the left margin value for each command line, left margin of child would be more to the right compared the parent 
+      cy.get(SESSION_COMMANDS).eq(1).then(element => {
+        const win = element[0].ownerDocument!.defaultView
+        const before = win!.getComputedStyle(element[0],'before')
+        const contentValue = before.getPropertyValue('margin-left')
+        const parentCommandLeftMargin = parseInt(contentValue.replace('px',''))
+        cy.get(SESSION_COMMANDS).eq(2).then(element => {
+          const win = element[0].ownerDocument!.defaultView
+          const before = win!.getComputedStyle(element[0],'before')
+          const contentValue = before.getPropertyValue('margin-left')
+          const childCommandLeftMargin = parseInt(contentValue.replace('px',''))
+          console.log("PARENT MARGIN :" + parentCommandLeftMargin)
+          console.log("CHILD MARGIN :" + childCommandLeftMargin)
+          expect(parentCommandLeftMargin).to.be.greaterThan(childCommandLeftMargin)
+        })
+      })
     });
   });
 });
