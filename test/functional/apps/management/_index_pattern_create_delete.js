@@ -136,6 +136,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('data view creation with exclusion', async () => {
+      await es.init();
       await es.transport.request({
         path: '/index-a/_doc',
         method: 'POST',
