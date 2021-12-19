@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
+  const es = getService('es');
 
   describe('creating and deleting default index', function describeIndexTests() {
     before(async function () {
@@ -132,6 +133,26 @@ export default function ({ getService, getPageObjects }) {
           });
         });
       });
+    });
+
+    describe('data view creation with exclusion', async () => {
+      await es.transport.request({
+        path: '/index-a/_doc',
+        method: 'POST',
+        body: { user: 'matt' },
+      });
+
+      await es.transport.request({
+        path: '/index-b/_doc',
+        method: 'POST',
+        body: { title: 'hello' },
+      });
+
+      await PageObjects.settings.createIndexPattern('index-*,-index');
+
+      const fieldCount = await PageObjects.settings.getFieldsTabCount();
+
+      expect(fieldCount).to.be(7);
     });
   });
 }
