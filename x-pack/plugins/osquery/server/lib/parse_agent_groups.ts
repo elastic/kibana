@@ -6,7 +6,7 @@
  */
 
 import { uniq } from 'lodash';
-import type { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from 'src/core/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { OsqueryAppContext } from './osquery_app_context_services';
