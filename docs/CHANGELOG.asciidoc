@@ -83,14 +83,17 @@ Breaking changes can prevent your application from optimal operation and perform
 [[fixes-v7.16.2]]
 === Bug Fixes
 
+The 7.16.2 release includes the following bug fixes.
+
+[float]
+[[fixes-v7.16.2]]
+=== Bug Fixes
 Fleet::
-Omit elasticsearch field for policy update API {kibana-pull}121412[#121412]
-
+* Omit elasticsearch field for policy update API (partial backport of {kibana-pull}121412[#121412]
 Lens & Visualizations::
-Fixes the broken chart when an agg is placed in another axis and then is hidden {kibana-pull}121488[#121488]
-
+* Fixes the broken chart when an agg is placed in another axis and then is hidden {kibana-pull}121488[#121488]
 Metrics::
-Adds migrations for saved object references {kibana-pull}121214[#121214]
+* Adds migrations for saved object references {kibana-pull}121214[#121214]
 
 [[release-notes-7.16.1]]
 == {kib} 7.16.1
