@@ -18,3 +18,5 @@ checks-reporter-with-killswitch "Osquery Cypress Tests" \
    --debug --bail \
    --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
    --config test/osquery_cypress/cli_config.ts
+
+buildkite-agent artifact upload 'target/kibana-osquery'

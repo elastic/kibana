@@ -6,9 +6,14 @@
   "license": "Elastic-License",
   "scripts": {
     "cypress:open": "../../../node_modules/.bin/cypress open --config-file ./cypress/cypress.json",
-    "cypress:open-as-ci": "node ../../../scripts/functional_tests --config ../../test/osquery_cypress/visual_config.ts",
+    "cypress:open-as-ci": "CODE_COVERAGE=1 node ../../../scripts/functional_tests --config ../../test/osquery_cypress/visual_config.ts",
     "cypress:run": "../../../node_modules/.bin/cypress run --config-file ./cypress/cypress.json",
-    "cypress:run-as-ci": "node ../../../scripts/functional_tests --config ../../test/osquery_cypress/cli_config.ts",
+    "cypress:run-as-ci": "CODE_COVERAGE=1 node ../../../scripts/functional_tests --config ../../test/osquery_cypress/cli_config.ts",
     "nyc": "../../../node_modules/.bin/nyc report --reporter=text-summary"
+  },
+  "nyc": {
+    "excludeAfterRemap": true,
+    "include": ["public"],
+    "report-dir": "../../target/kibana-osquery/cypress/coverage"
   }
 }
