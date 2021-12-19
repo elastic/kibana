@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
-  const es = getService('es');
+  // const es = getService('es');
 
   describe('creating and deleting default index', function describeIndexTests() {
     before(async function () {
@@ -135,6 +135,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    /*
     describe('data view creation with exclusion', async () => {
       await es.init();
       await es.transport.request({
@@ -155,5 +156,6 @@ export default function ({ getService, getPageObjects }) {
 
       expect(fieldCount).to.be(7);
     });
+    */
   });
 }
