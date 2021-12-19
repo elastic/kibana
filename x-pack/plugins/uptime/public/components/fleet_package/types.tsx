@@ -17,10 +17,8 @@ import {
   ThrottlingConfigKey,
   ThrottlingSuffix,
   ThrottlingSuffixType,
-} from '../../../common/runtime_types/monitor_management';
+} from '../../../common/runtime_types';
 export * from '../../../common/runtime_types/monitor_management';
-
-export type Monitor = Partial<MonitorFields>;
 
 export interface PolicyConfig {
   [DataStream.HTTP]: HTTPFields;
