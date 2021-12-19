@@ -48,7 +48,7 @@ describe('integration', () => {
       expect(spies.createPullRequestCalls).toEqual([
         {
           base: '6.0',
-          body: 'Backports the following commits to 6.0:\n - Add witch (#85)',
+          body: 'Backports the following commits to 6.0:\n - #85',
           head: 'sqren:backport/6.0/pr-85',
           title: '[6.0] Add witch (#85)',
         },
@@ -115,10 +115,10 @@ describe('integration', () => {
     it('sends the correct http body when creating pull request', () => {
       expect(spies.createPullRequestCalls).toEqual([
         {
-          title: '[6.0] Add witch (#85) | Add 👻 (2e63475c)',
+          title: '[6.0] Add witch (#85) | Add 👻',
           head: 'sqren:backport/6.0/pr-85_commit-2e63475c',
           base: '6.0',
-          body: 'Backports the following commits to 6.0:\n - Add witch (#85)\n - Add 👻 (2e63475c)',
+          body: 'Backports the following commits to 6.0:\n - #85\n - Add 👻 (2e63475c)',
         },
       ]);
     });
@@ -204,7 +204,7 @@ describe('integration', () => {
       expect(spies.createPullRequestCalls).toEqual([
         {
           base: '6.0',
-          body: 'Backports the following commits to 6.0:\n - Add witch (#85)',
+          body: 'Backports the following commits to 6.0:\n - #85',
           head: 'backport-org:backport/6.0/pr-85',
           title: '[6.0] Add witch (#85)',
         },

@@ -21,7 +21,7 @@ import {
   getUpstreamFromGitRemote,
   getIsCommitInBranch,
 } from './git';
-import { Commit } from './sourceCommit';
+import { Commit } from './sourceCommit/parseSourceCommit';
 
 jest.unmock('make-dir');
 jest.unmock('del');
@@ -392,16 +392,9 @@ describe('cherrypick', () => {
   const commit: Commit = {
     committedDate: '2021-01-25T00:00:00',
     sourceBranch: '7.x',
-    formattedMessage: '',
     originalMessage: '',
     sha: 'abcd',
-    targetBranchesFromLabels: {
-      expected: [],
-      missing: [],
-      unmerged: [],
-      merged: [],
-    },
-    existingTargetPullRequests: [],
+    expectedTargetPullRequests: [],
   };
 
   it('should return `needsResolving: false` when no errors are encountered', async () => {

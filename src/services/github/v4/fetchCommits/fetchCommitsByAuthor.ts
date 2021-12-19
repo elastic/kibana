@@ -7,7 +7,7 @@ import {
   SourceCommitWithTargetPullRequest,
   sourceCommitWithTargetPullRequestFragment,
   parseSourceCommit,
-} from '../../../sourceCommit';
+} from '../../../sourceCommit/parseSourceCommit';
 import { apiRequestV4 } from '../apiRequestV4';
 import { fetchAuthorId } from '../fetchAuthorId';
 

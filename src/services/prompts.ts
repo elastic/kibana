@@ -4,10 +4,16 @@ import inquirer, {
   ListQuestion,
   ConfirmQuestion,
 } from 'inquirer';
-import { isEmpty } from 'lodash';
+import { isEmpty, repeat } from 'lodash';
+import terminalLink from 'terminal-link';
 import { TargetBranchChoice } from '../options/ConfigOptions';
-import { getShortSha } from './github/commitFormatters';
-import { Commit } from './sourceCommit';
+import {
+  stripPullNumber,
+  getFirstLine,
+  getShortSha,
+} from './github/commitFormatters';
+import { ExpectedTargetPullRequest } from './sourceCommit/getExpectedTargetPullRequests';
+import { Commit } from './sourceCommit/parseSourceCommit';
 
 type Question = CheckboxQuestion | ListQuestion | ConfirmQuestion;
 
@@ -18,69 +24,121 @@ async function prompt<T = unknown>(options: Question) {
   return promptResult;
 }
 
-function getPullRequestStateBadges(c: Commit) {
-  if (c.targetBranchesFromLabels.expected.length === 0) {
-    return c.existingTargetPullRequests
-      .map((item) => {
-        if (item.state === 'MERGED') {
-          return chalk.green(item.branch);
-        }
-
-        return chalk.gray(item.branch);
-      })
-      .join(', ');
+function getPrStateIcon(state: ExpectedTargetPullRequest['state']) {
+  if (state === 'MERGED') {
+    return '🟢';
   }
 
-  return c.targetBranchesFromLabels.expected
-    .map((branch) => {
-      const isMerged = c.targetBranchesFromLabels.merged.includes(branch);
-      if (isMerged) {
+  if (state === 'MISSING') {
+    return '🔴';
+  }
+
+  if (state === 'OPEN') {
+    return '🔵';
+  }
+
+  // unknown state
+  return '🔴';
+}
+
+function getPrStateText(state: ExpectedTargetPullRequest['state']) {
+  if (state === 'MERGED') {
+    return chalk.gray('Merged');
+  }
+
+  if (state === 'MISSING') {
+    return chalk.gray('Backport missing');
+  }
+
+  if (state === 'OPEN') {
+    return chalk.gray('Open, not merged');
+  }
+
+  return chalk.gray('Unknown state');
+}
+
+function getPrLink(number?: number, url?: string) {
+  return url ? `(${terminalLink(`#${number}`, url)})` : '';
+}
+
+function getDetailedPullStatus(c: Commit) {
+  const items = c.expectedTargetPullRequests.map((pr) => {
+    const prLink = getPrLink(pr.number, pr.url);
+    return `     └ ${getPrStateIcon(pr.state)} ${
+      pr.branch
+    } ${prLink} ${getPrStateText(pr.state)}`;
+  });
+
+  const list =
+    items.length > 0
+      ? `\n${chalk.reset(items.join('\n'))}`
+      : `\n     └ ${chalk.gray('No backports expected')}`;
+
+  return `${list}\n`;
+}
+
+function getSimplePullStatus(c: Commit) {
+  return c.expectedTargetPullRequests
+    .map(({ state, branch }) => {
+      if (state === 'MERGED') {
         return chalk.green(branch);
       }
 
-      const isUnmerged = c.targetBranchesFromLabels.unmerged.includes(branch);
-      if (isUnmerged) {
-        return chalk.gray(branch);
-      }
-
-      const isMissing = c.targetBranchesFromLabels.missing.includes(branch);
-      if (isMissing) {
+      if (state === 'MISSING') {
         return chalk.red(branch);
       }
 
-      return '[??]';
+      if (state === 'OPEN') {
+        return chalk.gray(branch);
+      }
+
+      return chalk.gray('Unknown state');
     })
     .join(', ');
 }
 
-export function getChoicesForCommitPrompt(commits: Commit[]) {
+export function getChoicesForCommitPrompt(
+  commits: Commit[],
+  showDetails: boolean
+) {
   return commits.map((c, i) => {
-    const position = chalk.gray(`${i + 1}.`);
+    const leadingWhitespace = repeat(' ', 2 - (i + 1).toString().length);
+    const position = chalk.gray(`${i + 1}.${leadingWhitespace}`);
 
-    const pullRequestStateBadges = getPullRequestStateBadges(c);
+    let name;
+    if (showDetails) {
+      const message = stripPullNumber(c.originalMessage);
+      const prLink = c.pullUrl ? ` ` + getPrLink(c.pullNumber, c.pullUrl) : '';
+      const detailsList = getDetailedPullStatus(c);
+      name = `${position}${message}${prLink}${detailsList}`;
+    } else {
+      const message = getFirstLine(c.originalMessage);
+      const pullStates = getSimplePullStatus(c);
+      name = `${position}${message} ${pullStates}`;
+    }
 
-    return {
-      name: `${position} ${c.formattedMessage} ${pullRequestStateBadges}`,
-      short: c.pullNumber
-        ? `#${c.pullNumber} (${getShortSha(c.sha)})`
-        : getShortSha(c.sha),
-      value: c,
-    };
+    const short = c.pullNumber
+      ? `#${c.pullNumber} (${getShortSha(c.sha)})`
+      : getShortSha(c.sha);
+
+    return { name, short, value: c };
   });
 }
 
 export async function promptForCommits({
   commitChoices,
   isMultipleChoice,
+  showDetails,
 }: {
   commitChoices: Commit[];
   isMultipleChoice: boolean;
+  showDetails: boolean;
 }): Promise<Commit[]> {
-  const choices = getChoicesForCommitPrompt(commitChoices);
+  const choices = getChoicesForCommitPrompt(commitChoices, showDetails);
 
   const res = await prompt<Commit | Commit[]>({
     loop: false,
-    pageSize: 15,
+    pageSize: 30,
     choices: choices,
     message: 'Select commit',
     type: isMultipleChoice ? 'checkbox' : 'list',
@@ -88,7 +146,7 @@ export async function promptForCommits({
 
   const selectedCommits = Array.isArray(res) ? res.reverse() : [res];
   return isEmpty(selectedCommits)
-    ? promptForCommits({ commitChoices, isMultipleChoice })
+    ? promptForCommits({ commitChoices, isMultipleChoice, showDetails })
     : selectedCommits;
 }
 

@@ -17,6 +17,7 @@ describe('getOptionsFromConfigFiles', () => {
       autoMerge: false,
       autoMergeMethod: 'merge',
       ci: false,
+      details: false,
       fork: true,
       gitHostname: 'github.com',
       githubApiBaseUrlV3: 'https://api.github.com',

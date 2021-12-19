@@ -76,7 +76,7 @@ Please note that dashes between the words are optional, for instance you can typ
 | --path              | -p                 | Only list commits touching files under a specific path |                | `string`        |
 | --pull-number       | --pr               | Pull request to backport                               |                | `number`        |
 | --pr-description    | --description      | Pull request description suffix                        |                | `string`        |
-| --pr-filter         |                    | List commits from PRs filtered by a given query        |                | `string`        |
+| --pr-filter         |                    | Find PRs using [Github's search syntax][1]             |                | `string`        |
 | --pr-title          | --title            | Title of pull request                                  |                | `string`        |
 | --reset-author      |                    | Set yourself as commit author                          |                | `boolean`       |
 | --sha               |                    | Sha of commit to backport                              |                | `string`        |
@@ -119,3 +119,5 @@ This tools is for anybody who is working on a codebase where they have to mainta
 ## Contributing
 
 See [CONTRIBUTING.md](https://github.com/sqren/backport/blob/master/CONTRIBUTING.md)
+
+[1]: https://docs.github.com/en/search-github/getting-started-with-searching-on-github/understanding-the-search-syntax

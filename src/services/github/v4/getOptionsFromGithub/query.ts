@@ -48,21 +48,19 @@ export const query = /* GraphQL */ `
     defaultBranchRef {
       name
       target {
-        ...JSONConfigFile
-      }
-    }
-  }
-
-  fragment JSONConfigFile on Commit {
-    jsonConfigFile: history(first: 1, path: ".backportrc.json") {
-      edges {
-        config: node {
-          committedDate
-          file(path: ".backportrc.json") {
-            ... on TreeEntry {
-              object {
-                ... on Blob {
-                  text
+        ... on Commit {
+          jsonConfigFile: history(first: 1, path: ".backportrc.json") {
+            edges {
+              config: node {
+                committedDate
+                file(path: ".backportrc.json") {
+                  ... on TreeEntry {
+                    object {
+                      ... on Blob {
+                        text
+                      }
+                    }
+                  }
                 }
               }
             }

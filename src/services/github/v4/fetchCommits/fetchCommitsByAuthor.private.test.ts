@@ -1,7 +1,7 @@
 import { ValidConfigOptions } from '../../../../options/options';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
 import { PromiseReturnType } from '../../../../types/PromiseReturnType';
-import { Commit } from '../../../sourceCommit';
+import { Commit } from '../../../sourceCommit/parseSourceCommit';
 import { fetchCommitsByAuthor } from './fetchCommitsByAuthor';
 
 describe('fetchCommitsByAuthor', () => {
@@ -96,7 +96,7 @@ describe('fetchCommitsByAuthor', () => {
     });
   });
 
-  describe('existingTargetPullRequests', () => {
+  describe('expectedTargetPullRequests', () => {
     let res: PromiseReturnType<typeof fetchCommitsByAuthor>;
     beforeEach(async () => {
       res = await fetchCommitsByAuthor({
@@ -114,7 +114,7 @@ describe('fetchCommitsByAuthor', () => {
 
     it('returns related OPEN PRs', async () => {
       const commitWithOpenPR = res.find((commit) => commit.pullNumber === 9);
-      expect(commitWithOpenPR?.existingTargetPullRequests).toEqual([
+      expect(commitWithOpenPR?.expectedTargetPullRequests).toEqual([
         {
           branch: '7.8',
           state: 'OPEN',
@@ -126,7 +126,7 @@ describe('fetchCommitsByAuthor', () => {
 
     it('returns related MERGED PRs', async () => {
       const commitWithMergedPRs = res.find((commit) => commit.pullNumber === 5);
-      expect(commitWithMergedPRs?.existingTargetPullRequests).toEqual([
+      expect(commitWithMergedPRs?.expectedTargetPullRequests).toEqual([
         {
           branch: '7.x',
           state: 'MERGED',
@@ -144,7 +144,7 @@ describe('fetchCommitsByAuthor', () => {
 
     it('returns empty if there are no related PRs', async () => {
       const commitWithoutPRs = res.find((commit) => commit.pullNumber === 8);
-      expect(commitWithoutPRs?.existingTargetPullRequests).toEqual([]);
+      expect(commitWithoutPRs?.expectedTargetPullRequests).toEqual([]);
     });
   });
 });

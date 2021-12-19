@@ -3,7 +3,8 @@ import ora from 'ora';
 import { ValidConfigOptions } from '../../../options/options';
 import { HandledError } from '../../HandledError';
 import { logger } from '../../logger';
-import { Commit } from '../../sourceCommit';
+import { Commit } from '../../sourceCommit/parseSourceCommit';
+import { getFirstLine, getShortSha } from '../commitFormatters';
 import { fetchExistingPullRequest } from '../v4/fetchExistingPullRequest';
 import { getGithubV3ErrorMessage } from './getGithubV3ErrorMessage';
 
@@ -80,8 +81,15 @@ export function getBody({
   targetBranch: string;
 }) {
   const commitMessages = commits
-    .map((commit) => ` - ${commit.formattedMessage}`)
+    .map((c) => {
+      const message = c.pullNumber
+        ? `#${c.pullNumber}`
+        : `${getFirstLine(c.originalMessage)} (${getShortSha(c.sha)})`;
+
+      return ` - ${message}`;
+    })
     .join('\n');
+
   const bodySuffix = options.prDescription
     ? `\n\n${options.prDescription}`
     : '';
@@ -98,8 +106,9 @@ export function getTitle({
   targetBranch: string;
 }) {
   const commitMessages = commits
-    .map((commit) => commit.formattedMessage)
+    .map((commit) => getFirstLine(commit.originalMessage))
     .join(' | ');
+
   return options.prTitle
     .replace('{targetBranch}', targetBranch)
     .replace('{commitMessages}', commitMessages)

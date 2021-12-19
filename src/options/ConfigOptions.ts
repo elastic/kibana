@@ -24,11 +24,13 @@ export type ConfigOptions = Partial<{
   assignees: string[];
   author: string;
   autoAssign: boolean;
+  autoFixConflicts: AutoFixConflictsHandler;
   autoMerge: boolean;
   autoMergeMethod: string;
-  autoFixConflicts: AutoFixConflictsHandler;
   branchLabelMapping: Record<string, string>;
   ci: boolean;
+  commitPaths: string[];
+  details: boolean;
   editor: string;
   forceLocalConfig: boolean;
   fork: boolean;
@@ -40,7 +42,6 @@ export type ConfigOptions = Partial<{
   multipleBranches: boolean;
   multipleCommits: boolean;
   noVerify: boolean;
-  commitPaths: string[];
   prDescription: string;
   prFilter: string;
   prTitle: string;

@@ -6,7 +6,7 @@ import { CommitByAuthorResponse } from '../services/github/v4/fetchCommits/fetch
 import { commitsByAuthorMock } from '../services/github/v4/mocks/commitsByAuthorMock';
 import * as logger from '../services/logger';
 import * as prompts from '../services/prompts';
-import { Commit } from '../services/sourceCommit';
+import { Commit } from '../services/sourceCommit/parseSourceCommit';
 import { ExecError } from '../test/ExecError';
 import { mockGqlRequest } from '../test/nockHelpers';
 import { PromiseReturnType } from '../types/PromiseReturnType';
@@ -64,40 +64,27 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
           committedDate: 'fff',
           sourceBranch: '7.x',
           sha: 'mySha',
-          formattedMessage: 'myCommitMessage (#1000)',
-          originalMessage: 'My original commit message',
+          originalMessage: 'My original commit message (#1000)',
           pullNumber: 1000,
-          targetBranchesFromLabels: {
-            expected: [],
-            missing: [],
-            unmerged: [],
-            merged: [],
-          },
-          existingTargetPullRequests: [],
+          expectedTargetPullRequests: [],
         },
         {
           committedDate: 'ggg',
           sourceBranch: '7.x',
           sha: 'mySha2',
-          formattedMessage: 'myOtherCommitMessage (#2000)',
-          originalMessage: 'My original commit message',
+          originalMessage: 'My other commit message (#2000)',
           pullNumber: 2000,
-          targetBranchesFromLabels: {
-            expected: [],
-            missing: [],
-            unmerged: [],
-            merged: [],
-          },
-          existingTargetPullRequests: [],
+          expectedTargetPullRequests: [],
         },
       ];
 
       const scope = nock('https://api.github.com')
         .post('/repos/elastic/kibana/pulls', {
-          title: '[6.x] myCommitMessage (#1000) | myOtherCommitMessage (#2000)',
+          title:
+            '[6.x] My original commit message (#1000) | My other commit message (#2000)',
           head: 'sqren:backport/6.x/pr-1000_pr-2000',
           base: '6.x',
-          body: 'Backports the following commits to 6.x:\n - myCommitMessage (#1000)\n - myOtherCommitMessage (#2000)\n\nmyPrSuffix',
+          body: 'Backports the following commits to 6.x:\n - #1000\n - #2000\n\nmyPrSuffix',
         })
         .reply(200, { number: 1337, html_url: 'myHtmlUrl' });
 
@@ -135,8 +122,8 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         .toMatchInlineSnapshot(`
         Array [
           "Pulling latest changes",
-          "Cherry-picking: myCommitMessage (#1000)",
-          "Cherry-picking: myOtherCommitMessage (#2000)",
+          "Cherry-picking: My original commit message (#1000)",
+          "Cherry-picking: My other commit message (#2000)",
           "Pushing branch \\"sqren:backport/6.x/pr-1000_pr-2000\\"",
           undefined,
           "Creating pull request",
@@ -161,33 +148,28 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         sourcePRLabels: [] as string[],
       } as ValidConfigOptions;
 
+      const commits = [
+        {
+          committedDate: 'hhh',
+          sourceBranch: '7.x',
+          sha: 'mySha',
+          originalMessage: 'My original commit message',
+          expectedTargetPullRequests: [],
+        },
+      ];
+
       const scope = nock('https://api.github.com')
         .post('/repos/elastic/kibana/pulls', {
-          title: '[6.x] myCommitMessage (mySha)',
+          title: '[6.x] My original commit message',
           head: 'sqren:backport/6.x/commit-mySha',
           base: '6.x',
-          body: 'Backports the following commits to 6.x:\n - myCommitMessage (mySha)',
+          body: 'Backports the following commits to 6.x:\n - My original commit message (mySha)',
         })
         .reply(200, { number: 1337, html_url: 'myHtmlUrl' });
 
       res = await cherrypickAndCreateTargetPullRequest({
         options,
-        commits: [
-          {
-            committedDate: 'hhh',
-            sourceBranch: '7.x',
-            sha: 'mySha',
-            formattedMessage: 'myCommitMessage (mySha)',
-            originalMessage: 'My original commit message',
-            targetBranchesFromLabels: {
-              expected: [],
-              missing: [],
-              unmerged: [],
-              merged: [],
-            },
-            existingTargetPullRequests: [],
-          },
-        ],
+        commits,
         targetBranch: '6.x',
       });
       scope.done();
@@ -225,10 +207,10 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
 
       const scope = nock('https://api.github.com')
         .post('/repos/elastic/kibana/pulls', {
-          title: '[6.x] myCommitMessage',
+          title: '[6.x] My original commit message',
           head: 'sqren:backport/6.x/commit-mySha',
           base: '6.x',
-          body: 'Backports the following commits to 6.x:\n - myCommitMessage',
+          body: 'Backports the following commits to 6.x:\n - My original commit message (mySha)',
         })
         .reply(200, { html_url: 'myHtmlUrl', number: 1337 });
 
@@ -245,15 +227,8 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
             committedDate: 'eee',
             sourceBranch: '7.x',
             sha: 'mySha',
-            formattedMessage: 'myCommitMessage',
             originalMessage: 'My original commit message',
-            targetBranchesFromLabels: {
-              expected: [],
-              missing: [],
-              unmerged: [],
-              merged: [],
-            },
-            existingTargetPullRequests: [],
+            expectedTargetPullRequests: [],
           },
         ],
         targetBranch: '6.x',
@@ -322,7 +297,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         .toMatchInlineSnapshot(`
         Array [
           "Pulling latest changes",
-          "Cherry-picking: myCommitMessage",
+          "Cherry-picking: My original commit message",
           "Finalizing cherrypick",
           "Pushing branch \\"sqren:backport/6.x/commit-mySha\\"",
           undefined,

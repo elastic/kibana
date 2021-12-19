@@ -17,7 +17,7 @@ import {
   getRepoForkOwner,
   getIsCommitInBranch,
 } from '../services/git';
-import { getShortSha } from '../services/github/commitFormatters';
+import { getFirstLine, getShortSha } from '../services/github/commitFormatters';
 import { addAssigneesToPullRequest } from '../services/github/v3/addAssigneesToPullRequest';
 import { addLabelsToPullRequest } from '../services/github/v3/addLabelsToPullRequest';
 import {
@@ -31,7 +31,7 @@ import { fetchCommitsByAuthor } from '../services/github/v4/fetchCommits/fetchCo
 import { consoleLog, logger } from '../services/logger';
 import { confirmPrompt } from '../services/prompts';
 import { sequentially } from '../services/sequentially';
-import { Commit } from '../services/sourceCommit';
+import { Commit } from '../services/sourceCommit/parseSourceCommit';
 
 export async function cherrypickAndCreateTargetPullRequest({
   options,
@@ -143,20 +143,25 @@ async function getCommitsWithoutBackports(
   targetBranch: string
 ) {
   const filenames = await getConflictingFiles(options, false);
-  const conflictingCommits = await fetchCommitsByAuthor({
+  const unbackportedCommits = await fetchCommitsByAuthor({
     ...options,
     all: true,
     commitPaths: filenames,
   });
 
-  const promises = conflictingCommits
+  const promises = unbackportedCommits
     .filter((c) => {
       // don't show the same commit that we are currently trying to backport
       if (c.sha === commit.sha) {
         return false;
       }
 
-      const alreadyBackported = c.existingTargetPullRequests.some(
+      // don't show commits that are newer than the commit we are trying to backport
+      if (c.committedDate > commit.committedDate) {
+        return false;
+      }
+
+      const alreadyBackported = c.expectedTargetPullRequests.some(
         (pr) => pr.branch === targetBranch && pr.state === 'MERGED'
       );
       if (alreadyBackported) {
@@ -173,11 +178,11 @@ async function getCommitsWithoutBackports(
   return (await Promise.all(promises))
     .filter(({ isCommitInBranch }) => !isCommitInBranch)
     .map(({ c }) => {
-      const unmergedPr = c.existingTargetPullRequests.find(
+      const unmergedPr = c.expectedTargetPullRequests.find(
         (pr) => pr.branch === targetBranch
       );
 
-      return ` - ${c.formattedMessage} ${
+      return ` - ${getFirstLine(c.originalMessage)} ${
         unmergedPr?.state === 'OPEN' ? chalk.gray('(backport pending)') : ''
       }${c.pullUrl ? `\n   ${c.pullUrl}` : ''}`;
     })
@@ -210,7 +215,7 @@ async function waitForCherrypick(
   targetBranch: string
 ) {
   const spinnerText = `Cherry-picking: ${chalk.greenBright(
-    commit.formattedMessage
+    getFirstLine(commit.originalMessage)
   )}`;
   const cherrypickSpinner = ora(spinnerText).start();
 

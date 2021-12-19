@@ -1,9 +1,8 @@
-import { isEmpty, intersection } from 'lodash';
+import { isEmpty } from 'lodash';
 import { ValidConfigOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';
 import { promptForTargetBranches } from '../services/prompts';
-import { Commit } from '../services/sourceCommit';
-import { filterNil } from '../utils/filterEmpty';
+import { Commit } from '../services/sourceCommit/parseSourceCommit';
 
 export function getTargetBranches(
   options: ValidConfigOptions,
@@ -14,18 +13,21 @@ export function getTargetBranches(
     return options.targetBranches;
   }
 
-  // intersection of target branches from the selected commits
-  const expectedTargetBranchesFromLabels = intersection(
-    ...commits.map((commit) => commit.targetBranchesFromLabels.expected)
-  ).filter(filterNil);
+  // target branches from the first commit
+  const missingTargetBranches =
+    commits.length === 1
+      ? commits[0].expectedTargetPullRequests
+          .filter((pr) => pr.state === 'MISSING')
+          .map((pr) => pr.branch)
+      : [];
 
   // automatically backport to specified target branches
   if (options.ci) {
-    if (isEmpty(expectedTargetBranchesFromLabels)) {
+    if (isEmpty(missingTargetBranches)) {
       throw new HandledError(`There are no branches to backport to. Aborting.`);
     }
 
-    return expectedTargetBranchesFromLabels;
+    return missingTargetBranches;
   }
 
   // sourceBranch should be the same for all commits, so picking `sourceBranch` from the first commit should be fine 🤞
@@ -34,7 +36,7 @@ export function getTargetBranches(
 
   const targetBranchChoices = getTargetBranchChoices(
     options,
-    expectedTargetBranchesFromLabels,
+    missingTargetBranches,
     sourceBranch
   );
 
@@ -47,7 +49,7 @@ export function getTargetBranches(
 
 export function getTargetBranchChoices(
   options: ValidConfigOptions,
-  expectedTargetBranchesFromLabels: string[],
+  missingTargetBranches: string[],
   sourceBranch: string
 ) {
   // exclude sourceBranch from targetBranchChoices
@@ -63,9 +65,9 @@ export function getTargetBranchChoices(
     return targetBranchesChoices;
   }
 
-  // select target branches based on pull request labels
+  // select missing target branches (based on pull request labels)
   return targetBranchesChoices.map((choice) => {
-    const isChecked = expectedTargetBranchesFromLabels.includes(choice.name);
+    const isChecked = missingTargetBranches.includes(choice.name);
     return { ...choice, checked: isChecked };
   });
 }

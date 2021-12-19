@@ -24,7 +24,7 @@ export async function getCommits(options: ValidConfigOptions) {
       spinner.text = `Loading commit "${getShortSha(options.sha)}"`;
       const commit = await fetchCommitBySha({ ...options, sha: options.sha });
       spinner.stopAndPersist(
-        getOraPersistsOption('Select commit', commit.formattedMessage)
+        getOraPersistsOption('Select commit', commit.originalMessage)
       );
       return [commit];
     }
@@ -38,7 +38,7 @@ export async function getCommits(options: ValidConfigOptions) {
 
       // add styles to make it look like a prompt question
       spinner.stopAndPersist(
-        getOraPersistsOption('Select pull request', commit.formattedMessage)
+        getOraPersistsOption('Select pull request', commit.originalMessage)
       );
 
       return [commit];
@@ -57,6 +57,7 @@ export async function getCommits(options: ValidConfigOptions) {
       return promptForCommits({
         commitChoices,
         isMultipleChoice: options.multipleCommits,
+        showDetails: options.details,
       });
     }
 
@@ -66,6 +67,7 @@ export async function getCommits(options: ValidConfigOptions) {
     return promptForCommits({
       commitChoices,
       isMultipleChoice: options.multipleCommits,
+      showDetails: options.details,
     });
   } catch (e) {
     spinner.fail();

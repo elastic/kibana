@@ -20,7 +20,7 @@ export function run(
 // public API
 export { BackportResponse } from './main';
 export { ConfigOptions } from './options/ConfigOptions';
-export { getTargetBranchForLabel } from './services/github/v4/getTargetBranchesFromLabels';
+export { getTargetBranchForLabel } from './services/sourceCommit/getExpectedTargetPullRequests';
 export { fetchCommitsByAuthor } from './services/github/v4/fetchCommits/fetchCommitsByAuthor';
 export { fetchCommitByPullNumber } from './services/github/v4/fetchCommits/fetchCommitByPullNumber';
 export { fetchCommitBySha } from './services/github/v4/fetchCommits/fetchCommitBySha';

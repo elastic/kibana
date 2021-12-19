@@ -27,17 +27,17 @@ export function getOptionsFromCliArgs(
       type: 'boolean',
     })
 
-    .option('author', {
-      description: 'Show commits by specific author',
-      type: 'string',
-    })
-
     .option('assignee', {
       description: 'Add assignees to the target pull request',
       alias: 'assign',
       type: 'array',
       string: true,
       conflicts: ['autoAssign'],
+    })
+
+    .option('author', {
+      description: 'Show commits by specific author',
+      type: 'string',
     })
 
     .option('autoAssign', {
@@ -60,6 +60,11 @@ export function getOptionsFromCliArgs(
 
     .option('ci', {
       description: 'Disable interactive prompts',
+      type: 'boolean',
+    })
+
+    .option('details', {
+      description: 'Show details about each commit',
       type: 'boolean',
     })
 
@@ -158,15 +163,15 @@ export function getOptionsFromCliArgs(
       string: true,
     })
 
-    .option('prTitle', {
-      description: 'Title of pull request',
-      alias: 'title',
-      type: 'string',
-    })
-
     .option('prDescription', {
       description: 'Description to be added to pull request',
       alias: 'description',
+      type: 'string',
+    })
+
+    .option('prTitle', {
+      description: 'Title of pull request',
+      alias: 'title',
       type: 'string',
     })
 
@@ -227,12 +232,6 @@ export function getOptionsFromCliArgs(
       string: true,
     })
 
-    // cli-only
-    .option('verify', {
-      description: `Opposite of no-verify`,
-      type: 'boolean',
-    })
-
     .option('upstream', {
       description: 'Name of repository',
       alias: 'up',
@@ -246,6 +245,12 @@ export function getOptionsFromCliArgs(
 
     .option('verbose', {
       description: 'Show additional debug information',
+      type: 'boolean',
+    })
+
+    // cli-only
+    .option('verify', {
+      description: `Opposite of no-verify`,
       type: 'boolean',
     })
 

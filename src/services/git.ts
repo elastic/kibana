@@ -9,7 +9,7 @@ import { getRepoOwnerPath, getRepoPath } from './env';
 import { stat } from './fs-promisified';
 import { getShortSha } from './github/commitFormatters';
 import { logger } from './logger';
-import { Commit } from './sourceCommit';
+import { Commit } from './sourceCommit/parseSourceCommit';
 
 async function folderExists(path: string): Promise<boolean> {
   try {
@@ -313,7 +313,7 @@ export async function setCommitAuthor(
   options: ValidConfigOptions,
   username: string
 ) {
-  const spinner = ora(`Changing author to "${options.username}"`).start();
+  const spinner = ora(`Changing author to "${username}"`).start();
   try {
     const res = await exec(
       `git commit --amend --no-edit --author "${username} <${username}@users.noreply.github.com>"`,

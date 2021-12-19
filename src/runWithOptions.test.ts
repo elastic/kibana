@@ -55,6 +55,8 @@ describe('runWithOptions', () => {
       autoMergeMethod: 'merge',
       branchLabelMapping: undefined,
       ci: false,
+      commitPaths: [],
+      details: false,
       editor: 'code',
       forceLocalConfig: undefined,
       fork: true,
@@ -66,19 +68,18 @@ describe('runWithOptions', () => {
       multipleBranches: false,
       multipleCommits: false,
       noVerify: true,
-      commitPaths: [],
       prDescription: 'myPrDescription',
+      prFilter: undefined,
       prTitle: 'myPrTitle {targetBranch} {commitMessages}',
       pullNumber: undefined,
-      upstream: 'elastic/kibana',
       repoName: 'kibana',
       repoOwner: 'elastic',
       resetAuthor: false,
       sha: undefined,
       sourceBranch: 'my-source-branch-from-options',
       sourcePRLabels: [],
-      prFilter: undefined,
       targetBranches: [],
+      upstream: 'elastic/kibana',
       targetBranchChoices: [
         { name: '6.x' },
         { name: '6.0' },
@@ -144,7 +145,7 @@ describe('runWithOptions', () => {
         base: '6.x',
         body: 'Backports the following commits to 6.x:\n - Add 👻 (2e63475c)\n\nmyPrDescription',
         head: 'sqren:backport/6.x/commit-2e63475c',
-        title: 'myPrTitle 6.x Add 👻 (2e63475c)',
+        title: 'myPrTitle 6.x Add 👻',
       },
     ]);
   });
@@ -192,7 +193,7 @@ describe('runWithOptions', () => {
     ).toMatchInlineSnapshot(`
       Array [
         Object {
-          "name": "1. Add 👻 (2e63475c) ",
+          "name": "1. Add 👻 ",
           "short": "2e63475c",
         },
         Object {
@@ -204,11 +205,11 @@ describe('runWithOptions', () => {
           "short": "#80 (79cf1845)",
         },
         Object {
-          "name": "4. Add backport config (3827bbba) ",
+          "name": "4. Add backport config ",
           "short": "3827bbba",
         },
         Object {
-          "name": "5. Initial commit (5ea0da55) ",
+          "name": "5. Initial commit ",
           "short": "5ea0da55",
         },
       ]
