@@ -19,7 +19,7 @@ import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
 import {
   storedPackagePoliciesToAgentPermissions,
-  DEFAULT_PERMISSIONS,
+  DEFAULT_CLUSTER_PERMISSIONS,
 } from '../package_policies_to_agent_permissions';
 import { storedPackagePoliciesToAgentInputs, dataTypes, outputType } from '../../../common';
 import type { FullAgentPolicyOutputPermissions } from '../../../common';
@@ -110,13 +110,11 @@ export async function getFullAgentPolicy(
         }),
   };
 
-  const dataPermissions = (await storedPackagePoliciesToAgentPermissions(
-    soClient,
-    agentPolicy.package_policies
-  )) || { _fallback: DEFAULT_PERMISSIONS };
+  const dataPermissions =
+    (await storedPackagePoliciesToAgentPermissions(soClient, agentPolicy.package_policies)) || {};
 
   dataPermissions._elastic_agent_checks = {
-    cluster: DEFAULT_PERMISSIONS.cluster,
+    cluster: DEFAULT_CLUSTER_PERMISSIONS,
   };
 
   const monitoringPermissions = await getMonitoringPermissions(
@@ -128,7 +126,7 @@ export async function getFullAgentPolicy(
     agentPolicy.namespace
   );
   monitoringPermissions._elastic_agent_checks = {
-    cluster: DEFAULT_PERMISSIONS.cluster,
+    cluster: DEFAULT_CLUSTER_PERMISSIONS,
   };
 
   // Only add permissions if output.type is "elasticsearch"
