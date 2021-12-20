@@ -22,6 +22,7 @@ import type {
   CopyAgentPolicyRequestSchema,
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
+  FleetRequestHandler,
 } from '../../types';
 import { FLEET_ELASTIC_AGENT_PACKAGE, FLEET_SYSTEM_PACKAGE } from '../../../common';
 import type {
@@ -100,7 +101,7 @@ export const getOneAgentPolicyHandler: RequestHandler<
   }
 };
 
-export const createAgentPolicyHandler: RequestHandler<
+export const createAgentPolicyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof CreateAgentPolicyRequestSchema.query>,
   TypeOf<typeof CreateAgentPolicyRequestSchema.body>
@@ -109,6 +110,7 @@ export const createAgentPolicyHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
+  const spaceId = context.fleet.spaceId;
   // TODO set first default policy to is_default
   // TODO installing these packages might take long (about 2 mins) which causes network timeout. this results in an error, and fails next agent policy creation request. Could this be improved by bundled default packages?
   try {
@@ -150,6 +152,7 @@ export const createAgentPolicyHandler: RequestHandler<
       newSysPackagePolicy.name = await incrementPackageName(soClient, FLEET_SYSTEM_PACKAGE);
 
       await packagePolicyService.create(soClient, esClient, newSysPackagePolicy, {
+        spaceId,
         user,
         bumpRevision: false,
       });

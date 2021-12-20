@@ -11,7 +11,7 @@ import type Boom from '@hapi/boom';
 import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
-
+import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
 import type {
   BulkInstallPackageInfo,
   EpmPackageInstallStatus,
@@ -85,8 +85,9 @@ export async function ensureInstalledPackage(options: {
   pkgName: string;
   esClient: ElasticsearchClient;
   pkgVersion?: string;
+  spaceId?: string;
 }): Promise<Installation> {
-  const { savedObjectsClient, pkgName, esClient, pkgVersion } = options;
+  const { savedObjectsClient, pkgName, esClient, pkgVersion, spaceId = DEFAULT_SPACE_ID } = options;
 
   // If pkgVersion isn't specified, find the latest package version
   const pkgKeyProps = pkgVersion
@@ -106,6 +107,7 @@ export async function ensureInstalledPackage(options: {
     installSource: 'registry',
     savedObjectsClient,
     pkgkey,
+    spaceId,
     esClient,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
   });
@@ -142,6 +144,7 @@ export async function handleInstallPackageFailure({
   pkgVersion,
   installedPkg,
   esClient,
+  spaceId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   error: IngestManagerError | Boom.Boom | Error;
@@ -149,6 +152,7 @@ export async function handleInstallPackageFailure({
   pkgVersion: string;
   installedPkg: SavedObject<Installation> | undefined;
   esClient: ElasticsearchClient;
+  spaceId: string;
 }) {
   if (error instanceof IngestManagerError) {
     return;
@@ -183,6 +187,7 @@ export async function handleInstallPackageFailure({
         savedObjectsClient,
         pkgkey: prevVersion,
         esClient,
+        spaceId,
         force: true,
       });
     }
@@ -202,6 +207,7 @@ interface InstallRegistryPackageParams {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   esClient: ElasticsearchClient;
+  spaceId: string;
   force?: boolean;
 }
 
@@ -229,6 +235,7 @@ async function installPackageFromRegistry({
   savedObjectsClient,
   pkgkey,
   esClient,
+  spaceId,
   force = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
@@ -317,6 +324,7 @@ async function installPackageFromRegistry({
       paths,
       packageInfo,
       installType,
+      spaceId,
       installSource: 'registry',
     })
       .then(async (assets) => {
@@ -339,6 +347,7 @@ async function installPackageFromRegistry({
           pkgName,
           pkgVersion,
           installedPkg,
+          spaceId,
           esClient,
         });
         sendEvent({
@@ -364,6 +373,7 @@ interface InstallUploadedArchiveParams {
   esClient: ElasticsearchClient;
   archiveBuffer: Buffer;
   contentType: string;
+  spaceId: string;
 }
 
 async function installPackageByUpload({
@@ -371,6 +381,7 @@ async function installPackageByUpload({
   esClient,
   archiveBuffer,
   contentType,
+  spaceId,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // if an error happens during getInstallType, report that we don't know
@@ -427,6 +438,7 @@ async function installPackageByUpload({
       packageInfo,
       installType,
       installSource,
+      spaceId,
     })
       .then((assets) => {
         sendEvent({
@@ -451,9 +463,10 @@ async function installPackageByUpload({
   }
 }
 
-export type InstallPackageParams =
+export type InstallPackageParams = { spaceId: string } & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
-  | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams);
+  | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
+);
 
 export async function installPackage(args: InstallPackageParams) {
   if (!('installSource' in args)) {
@@ -463,23 +476,25 @@ export async function installPackage(args: InstallPackageParams) {
   const { savedObjectsClient, esClient } = args;
 
   if (args.installSource === 'registry') {
-    const { pkgkey, force } = args;
+    const { pkgkey, force, spaceId } = args;
     logger.debug(`kicking off install of ${pkgkey} from registry`);
     const response = installPackageFromRegistry({
       savedObjectsClient,
       pkgkey,
       esClient,
+      spaceId,
       force,
     });
     return response;
   } else if (args.installSource === 'upload') {
-    const { archiveBuffer, contentType } = args;
+    const { archiveBuffer, contentType, spaceId } = args;
     logger.debug(`kicking off install of uploaded package`);
     const response = installPackageByUpload({
       savedObjectsClient,
       esClient,
       archiveBuffer,
       contentType,
+      spaceId,
     });
     return response;
   }
@@ -515,6 +530,7 @@ export async function createInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   packageInfo: InstallablePackage;
   installSource: InstallSource;
+  spaceId: string;
 }) {
   const { savedObjectsClient, packageInfo, installSource } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
@@ -534,6 +550,7 @@ export async function createInstallation(options: {
     PACKAGES_SAVED_OBJECT_TYPE,
     {
       installed_kibana: [],
+      installed_kibana_space_id: options.spaceId,
       installed_es: [],
       package_assets: [],
       es_index_patterns: toSaveESIndexPatterns,
@@ -627,6 +644,7 @@ export async function ensurePackagesCompletedInstall(
             savedObjectsClient,
             pkgkey,
             esClient,
+            spaceId: pkg.attributes.installed_kibana_space_id || DEFAULT_SPACE_ID,
           })
         );
       }
