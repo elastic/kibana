@@ -14,10 +14,10 @@ import { createMockedIndexPattern } from '../../../mocks';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
-  isSortableByColumn,
   MULTI_KEY_VISUAL_SEPARATOR,
 } from './helpers';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
+import { isSortableByColumn } from '../../../pure_utils';
 
 const indexPattern = createMockedIndexPattern();
 

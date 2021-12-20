@@ -783,6 +783,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           {!incompleteInfo &&
             selectedColumn &&
             temporaryState === 'none' &&
+            props.panelRef &&
             currentGroup?.sortable?.(
               selectedColumn,
               currentGroup.accessors.findIndex((accessor) => accessor.columnId === columnId)

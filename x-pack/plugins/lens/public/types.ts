@@ -366,7 +366,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   supportStaticValue: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   supportFieldFormat?: boolean;
-  panelRef: MutableRefObject<HTMLDivElement | null>;
+  panelRef?: MutableRefObject<HTMLDivElement | null>;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
