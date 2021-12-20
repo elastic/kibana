@@ -35,7 +35,7 @@ export const pieLabelsFunction = (): ExpressionFunctionDefinition<
   args: {
     show: {
       types: ['boolean'],
-      help: i18n.translate('expressionPie.pieLabels.function.args.pieLabels.show.help', {
+      help: i18n.translate('expressionPie.pieLabels.function.args.show.help', {
         defaultMessage: 'Displays the pie labels',
       }),
       required: true,
@@ -43,27 +43,27 @@ export const pieLabelsFunction = (): ExpressionFunctionDefinition<
     position: {
       types: ['string'],
       default: 'default',
-      help: i18n.translate('expressionPie.pieLabels.function.args.pieLabels.position.help', {
+      help: i18n.translate('expressionPie.pieLabels.function.args.position.help', {
         defaultMessage: 'Defines the label position',
       }),
     },
     values: {
       types: ['boolean'],
-      help: i18n.translate('expressionPie.pieLabels.function.args.pieLabels.values.help', {
+      help: i18n.translate('expressionPie.pieLabels.function.args.values.help', {
         defaultMessage: 'Displays the values inside the slices',
       }),
       default: true,
     },
     percentDecimals: {
       types: ['number'],
-      help: i18n.translate('expressionPie.pieLabels.function.args.pieLabels.percentDecimals.help', {
+      help: i18n.translate('expressionPie.pieLabels.function.args.percentDecimals.help', {
         defaultMessage: 'Defines the number of decimals that will appear on the values as percent',
       }),
       default: 2,
     },
     lastLevel: {
       types: ['boolean'],
-      help: i18n.translate('expressionPie.pieLabels.function.args.pieLabels.lastLevel.help', {
+      help: i18n.translate('expressionPie.pieLabels.function.args.lastLevel.help', {
         defaultMessage: 'Show top level labels only',
       }),
       default: true,
