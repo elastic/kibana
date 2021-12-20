@@ -13,6 +13,7 @@ Review important information about the {kib} 7.16.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.16.2>>
 * <<release-notes-7.16.1>>
 * <<release-notes-7.16.0>>
 //* <<release-notes-7.15.2>>
@@ -67,6 +68,29 @@ Review important information about the {kib} 7.16.x releases.
 //* <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.16.2]]
+== {kib} 7.16.2
+
+Review the following information about the 7.16.2 release.
+
+[float]
+[[breaking-changes-v7.16.2]]
+=== Breaking changes
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.16.2, review the <<breaking-changes-7.16.0,7.16.0 breaking changes>>.
+
+[float]
+[[fixes-v7.16.2]]
+=== Bug Fixes
+
+The 7.16.2 release includes the following bug fixes.
+
+Fleet::
+* Omit elasticsearch field for policy update API (partial backport of {kibana-pull}121412[#121412]
+Lens & Visualizations::
+* Fixes the broken chart when an agg is placed in another axis and then is hidden {kibana-pull}121488[#121488]
+Metrics::
+* Adds migrations for saved object references {kibana-pull}121214[#121214]
 
 [[release-notes-7.16.1]]
 == {kib} 7.16.1

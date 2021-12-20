@@ -204,17 +204,10 @@ async function get(
   }
 }
 
-async function getConnectors({
+export async function getConnectors({
   actionsClient,
   logger,
 }: CasesClientArgs): Promise<FindActionResult[]> {
-  const isConnectorSupported = (
-    action: FindActionResult,
-    actionTypes: Record<string, ActionType>
-  ): boolean =>
-    SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
-    actionTypes[action.actionTypeId]?.enabledInLicense;
-
   try {
     const actionTypes = (await actionsClient.listTypes()).reduce(
       (types, type) => ({ ...types, [type.id]: type }),
@@ -227,6 +220,18 @@ async function getConnectors({
   } catch (error) {
     throw createCaseError({ message: `Failed to get connectors: ${error}`, error, logger });
   }
+}
+
+function isConnectorSupported(
+  action: FindActionResult,
+  actionTypes: Record<string, ActionType>
+): boolean {
+  return (
+    SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
+    actionTypes[action.actionTypeId]?.enabledInLicense &&
+    action.config != null &&
+    !action.isPreconfigured
+  );
 }
 
 async function update(
