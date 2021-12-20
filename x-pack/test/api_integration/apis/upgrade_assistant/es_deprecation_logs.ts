@@ -29,8 +29,9 @@ export default function ({ getService }: FtrProviderContext) {
           // We add a custom deprecation to make sure our filter is working
           // and make sure that the count of deprecation without filter is greater
           // than the total of deprecations
+          const IS_ELASTIC_PRODUCT = true;
           const doc1 = await createDeprecationLog();
-          const doc2 = await createDeprecationLog(true); // Create Elastic Product deprecation
+          const doc2 = await createDeprecationLog(IS_ELASTIC_PRODUCT);
           const checkpoint = moment('2000-01-01').toISOString();
 
           const allDeprecations = (
