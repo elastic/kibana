@@ -91,6 +91,7 @@ export const BenchmarksSection = () => {
                 listItems={[
                   {
                     title: 'Posture Score',
+                    // TODO: temporary until the type for this are fixed and the score is no longer optional (right now can fail if score equals 0).
                     description: benchmark.postureScore || 'error',
                   },
                   {
