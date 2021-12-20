@@ -196,7 +196,8 @@ export default ({ getService }: FtrProviderContext) => {
     return groupIds.sort();
   }
 
-  describe('jobs_summary', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/121686
+  describe.skip('jobs_summary', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
