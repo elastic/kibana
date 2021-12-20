@@ -129,34 +129,38 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       }
     });
 
-    const isPointsOnly = this.getStyle().getIsPointsOnly();
-    const shapeCountMsg =
-      !isPointsOnly && totalFeaturesCount > 1 && tilesWithFeatures > 1
-        ? i18n.translate('xpack.maps.tiles.shapeCountMsg', {
-            defaultMessage:
-              ' Documents may be counted multiple times if geometry crosses tile boundaries.',
-            values: {
-              count: totalFeaturesCount.toLocaleString(),
-            },
-          })
-        : '';
+    let tooltipContent = '';
+    if (areResultsTrimmed) {
+      tooltipContent = i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
+        defaultMessage: `Results limited to {count} documents.`,
+        values: {
+          count: totalFeaturesCount.toLocaleString(),
+        },
+      });
+    } else {
+      const canDoubleCountShapes = !this.getStyle().getIsPointsOnly() && totalFeaturesCount > 1 && tilesWithFeatures > 1;
+      tooltipContent = i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
+        defaultMessage: `Found {countPrefix}{count} documents.`,
+        values: {
+          count: totalFeaturesCount.toLocaleString(),
+          countPrefix: canDoubleCountShapes ? '~' : '',
+        },
+      });
+
+      if (canDoubleCountShapes) {
+        tooltipContent += i18n.translate('xpack.maps.tiles.shapeCountMsg', {
+          defaultMessage:
+            ' Documents may be counted multiple times if geometry crosses tile boundaries.',
+          values: {
+            count: totalFeaturesCount.toLocaleString(),
+          },
+        });
+      }
+    }
 
     return {
       icon: this.getCurrentStyle().getIcon(isTocIcon && areResultsTrimmed),
-      tooltipContent: areResultsTrimmed
-        ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
-            defaultMessage: `Results limited to {count} documents.`,
-            values: {
-              count: totalFeaturesCount.toLocaleString(),
-            },
-          })
-        : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
-            defaultMessage: `Found {count} documents.{shapeCountMsg}`,
-            values: {
-              count: totalFeaturesCount.toLocaleString(),
-              shapeCountMsg,
-            },
-          }),
+      tooltipContent,
       areResultsTrimmed,
     };
   }
