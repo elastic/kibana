@@ -6,27 +6,25 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { CasePermissionOptions } from '../types';
+import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+
+export type CasesOwners = typeof SECURITY_SOLUTION_OWNER | typeof OBSERVABILITY_OWNER;
 
 export function canUseCases(capabilities: ApplicationStart['capabilities']) {
-  const defaultCaseOptions = {
-    owners: [],
-    crudLevel: 'read',
-  };
-  return (options: CasePermissionOptions): boolean => {
-    const casePermissions = { ...defaultCaseOptions, ...options };
-    casePermissions.owners = casePermissions.owners.length
-      ? casePermissions.owners
-      : ['securitySolutionCases', 'observabilityCases'];
+  return (
+    owners: CasesOwners[] = [OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER]
+  ): { crud: boolean; read: boolean } => {
+    let crud = false;
+    let read = false;
 
-    for (const type of casePermissions.owners) {
-      if (
-        Object.hasOwnProperty.call(capabilities, type) &&
-        capabilities[type][`${casePermissions.crudLevel}_cases`]
-      ) {
-        return true;
-      }
+    if (owners.length) {
+      crud = owners.some((owner) => capabilities[`${owner}Cases`].crud_cases);
+      read = owners.some((owner) => capabilities[`${owner}Cases`].read_cases);
     }
-    return false;
+
+    return {
+      crud,
+      read,
+    };
   };
 }

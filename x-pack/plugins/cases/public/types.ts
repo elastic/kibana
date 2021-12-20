@@ -8,8 +8,8 @@
 import { CoreStart } from 'kibana/public';
 import { ReactElement } from 'react';
 
-import { LensPublicStart } from '../../lens/public';
-import { SecurityPluginSetup } from '../../security/public';
+import type { LensPublicStart } from '../../lens/public';
+import type { SecurityPluginSetup } from '../../security/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
@@ -19,11 +19,12 @@ import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public'
 import type { SpacesPluginStart } from '../../spaces/public';
 import type { Storage } from '../../../../src/plugins/kibana_utils/public';
 
-import {
+import type {
   GetCasesProps,
   GetAllCasesSelectorModalProps,
   GetCreateCaseFlyoutProps,
   GetRecentCasesProps,
+  CasesOwners,
 } from './methods';
 
 export interface SetupPlugins {
@@ -51,19 +52,13 @@ export type StartServices = CoreStart &
     security: SecurityPluginSetup;
   };
 
-type CaseOwnerTypes = 'securitySolutionCases' | 'observabilityCases';
-export interface CasePermissionOptions {
-  owners?: CaseOwnerTypes[];
-  crudLevel: 'crud' | 'read';
-}
-
 export interface CasesUiStart {
   /**
    * Determines whether the current user has the ability to use Cases.
-   * @param options CasePermissionOptions
-   * @return A Boolean defining whether based on the given options, the user can access cases.
+   * @param owners optional array of owner types. All by default.
+   * @return An object denoting a users access to any case type.
    */
-  canUseCases: (options: CasePermissionOptions) => boolean;
+  canUseCases: (owners?: CasesOwners[]) => { crud: boolean; read: boolean };
   /**
    * Get cases
    * @param props GetCasesProps

@@ -45,6 +45,9 @@ jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
+jest.mock('../app/use_available_owners', () => ({
+  useAvailableCasesOwners: () => ['securitySolution', 'observability'],
+}));
 
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
@@ -776,5 +779,17 @@ describe('AllCasesListGeneric', () => {
     });
 
     expect(doRefresh).toHaveBeenCalled();
+  });
+
+  it.only('shows Solution column if there are more than 1 available solutions', async () => {
+    const doRefresh = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders owner={[]}>
+        <AllCasesList isSelectorView={false} doRefresh={doRefresh} />
+      </TestProviders>
+    );
+
+    console.log(wrapper.debug());
   });
 });

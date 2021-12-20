@@ -181,7 +181,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       alertData,
       postComment,
       updateCase,
-      showSolutionColumn: !hasOwner,
+      showSolutionColumn: !hasOwner && availableSolutions.length > 1,
     });
 
     const itemIdToExpandedRowMap = useMemo(
