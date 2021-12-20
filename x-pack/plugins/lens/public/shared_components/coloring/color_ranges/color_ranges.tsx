@@ -34,6 +34,7 @@ export function ColorRanges(props: ColorRangesProps) {
   const [colorRangesValidity, setColorRangesValidity] = useState<
     Record<string, ColorRangeValidation>
   >({});
+
   const [autoValue, setAutoValue] = useState<AutoValueMode>(
     paletteConfiguration?.autoValue ?? 'none'
   );
@@ -97,7 +98,7 @@ export function ColorRanges(props: ColorRangesProps) {
           autoValue={autoValue}
           setAutoValue={setAutoValue}
           index={localColorRanges.length - 1}
-          colorRangeValidation={colorRangesValidity[localColorRanges.length - 1]}
+          colorRangeValidation={colorRangesValidity.last}
           isLast={true}
         />
       </EuiFlexGroup>

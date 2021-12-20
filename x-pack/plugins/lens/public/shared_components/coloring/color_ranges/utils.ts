@@ -94,9 +94,9 @@ export const distributeEqually = (colorRanges: ColorRange[]) => {
 };
 
 export const validateColorRanges = (colorRanges: ColorRange[]) => {
-  const validate = ({ end, start, color }: ColorRange, isLast: boolean) => {
+  const validateСolorRange = ({ start, color }: ColorRange) => {
     const errors: string[] = [];
-    const value = isLast ? end : start;
+
     if (!isValidColor(color)) {
       errors.push(
         i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidColorValue', {
@@ -105,8 +105,7 @@ export const validateColorRanges = (colorRanges: ColorRange[]) => {
       );
     }
 
-    // todo: isLast?
-    if (Number.isNaN(value) && !isLast) {
+    if (Number.isNaN(start)) {
       errors.push(
         i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidValue', {
           defaultMessage: `The number value is required.`,
@@ -120,11 +119,33 @@ export const validateColorRanges = (colorRanges: ColorRange[]) => {
     };
   };
 
-  return colorRanges.reduce<Record<string, ColorRangeValidation>>(
+  const validateLastRange = ({ end, start }: ColorRange) => {
+    const errors: string[] = [];
+
+    if (start > end) {
+      errors.push(
+        i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidMaxValue', {
+          defaultMessage: 'Maximum value should be greater than preceding values',
+        })
+      );
+    }
+
+    return {
+      isValid: !errors.length,
+      errors,
+    };
+  };
+
+  const validations = colorRanges.reduce<Record<string, ColorRangeValidation>>(
     (acc, item, index, array) => ({
       ...acc,
-      [index]: validate(item, false),
+      [index]: validateСolorRange(item),
     }),
     {}
   );
+
+  return {
+    ...validations,
+    last: validateLastRange(colorRanges[colorRanges.length - 1]),
+  };
 };
