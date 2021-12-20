@@ -645,6 +645,7 @@
             "updated_at": "2021-09-30T10:47:12.961Z",
             "version": "WzI1NjgsMV0=",
             "attributes": {
+                "installed_kibana_space_id": "default",
                 "installed_kibana": [
                     {
                         "id": "apache-Logs-Apache-Dashboard",

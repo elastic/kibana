@@ -16,13 +16,14 @@ import type {
   PackagePolicyServiceInterface,
   PostPackagePolicyCreateCallback,
   PutPackagePolicyUpdateCallback,
+  FleetRequestHandlerContext,
 } from '../..';
 import type {
   CreatePackagePolicyRequestSchema,
   UpdatePackagePolicyRequestSchema,
 } from '../../types/rest_spec';
 import type { FleetAuthzRouter } from '../security';
-import type { FleetRequestHandler, FleetRequestHandlerContext } from '../../types';
+import type { FleetRequestHandler } from '../../types';
 import type { PackagePolicy } from '../../types';
 
 import { registerRoutes } from './index';

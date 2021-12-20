@@ -141,12 +141,12 @@ describe('EsQueryAlertTypeExpression', () => {
 
     const wrapper = mountWithIntl(
       <EsQueryAlertTypeExpression
-        alertInterval="1m"
-        alertThrottle="1m"
+        ruleInterval="1m"
+        ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"
-        alertParams={alertParams}
-        setAlertParams={() => {}}
-        setAlertProperty={() => {}}
+        ruleParams={alertParams}
+        setRuleParams={() => {}}
+        setRuleProperty={() => {}}
         errors={errors}
         data={dataMock}
         defaultActionGroupId=""
