@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-export * from './extract';
-export * from './inject';
-export * from './migrate';
-export * from './migrate_base_input';
-export * from './telemetry';
-export * from './saved_object_embeddable';
+export { getExtractFunction } from './extract';
+export { getInjectFunction } from './inject';
+export type { MigrateFunction } from './migrate';
+export { getMigrateFunction } from './migrate';
+export { getTelemetryFunction } from './telemetry';
+export type { SavedObjectEmbeddableInput } from './saved_object_embeddable';
+export { isSavedObjectEmbeddableInput } from './saved_object_embeddable';
