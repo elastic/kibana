@@ -9,7 +9,7 @@ yarn start --no-base-path
 
 # Elasticsearch, APM Server and data generators
 
-To access an eElasticsearch instance that has live data you have two options:
+To access an Elasticsearch instance that has live data you have two options:
 
 ## A. Cloud-based ES Cluster (internal devs only)
 
