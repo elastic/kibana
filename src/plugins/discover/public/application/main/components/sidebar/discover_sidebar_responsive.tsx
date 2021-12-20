@@ -123,16 +123,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   /**
-   * needed for merging new with old field counts, high likely legacy, but kept this behavior
-   * because not 100% sure in this case
+   * fieldCounts are used to determine which fields are actually used in the given set of documents
    */
   const fieldCounts = useRef<Record<string, number> | null>(null);
   if (fieldCounts.current === null) {
-    fieldCounts.current = calcFieldCounts(
-      {},
-      props.documents$.getValue().result,
-      selectedIndexPattern
-    );
+    fieldCounts.current = calcFieldCounts(props.documents$.getValue().result, selectedIndexPattern);
   }
 
   const [documentState, setDocumentState] = useState(props.documents$.getValue());
@@ -140,11 +135,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     const subscription = props.documents$.subscribe((next) => {
       if (next.fetchStatus !== documentState.fetchStatus) {
         if (next.result) {
-          fieldCounts.current = calcFieldCounts(
-            next.result.length && fieldCounts.current ? fieldCounts.current : {},
-            next.result,
-            selectedIndexPattern!
-          );
+          fieldCounts.current = calcFieldCounts(next.result, selectedIndexPattern!);
         }
         setDocumentState({ ...documentState, ...next });
       }
