@@ -10,7 +10,7 @@ import uuid from 'uuid';
 import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
-import { Alert } from '../../../../types';
+import { Rule } from '../../../../types';
 import { ViewInApp } from './view_in_app';
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
@@ -69,7 +69,7 @@ function waitForUseEffect() {
   });
 }
 
-function mockAlert(overloads: Partial<Alert> = {}): Alert {
+function mockAlert(overloads: Partial<Rule> = {}): Rule {
   return {
     id: uuid.v4(),
     enabled: true,
