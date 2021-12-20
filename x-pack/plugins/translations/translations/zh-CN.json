@@ -4269,7 +4269,6 @@
     "uiActions.errors.incompatibleAction": "操作不兼容",
     "uiActions.triggers.rowClickkDescription": "表格行的单击",
     "uiActions.triggers.rowClickTitle": "表格行单击",
-    "usageCollection.stats.notReadyMessage": "统计信息尚未准备就绪。请稍后重试。",
     "visDefaultEditor.advancedToggle.advancedLinkLabel": "高级",
     "visDefaultEditor.agg.disableAggButtonTooltip": "禁用 {schemaTitle} {aggTitle} 聚合",
     "visDefaultEditor.agg.enableAggButtonTooltip": "启用 {schemaTitle} {aggTitle} 聚合",
