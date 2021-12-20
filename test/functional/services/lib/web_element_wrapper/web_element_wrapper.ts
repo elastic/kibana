@@ -490,8 +490,7 @@ export class WebElementWrapper {
   public async findByTestSubject(selector: string) {
     return await this.retryCall(async function find(wrapper) {
       return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.css(testSubjSelector(selector))),
-        wrapper.By.css(selector)
+        await wrapper._webElement.findElement(wrapper.By.css(testSubjSelector(selector)))
       );
     });
   }
