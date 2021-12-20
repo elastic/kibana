@@ -440,12 +440,12 @@ export const fullResponseSchema = t.intersection([
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
 
 export interface RulePreviewLogs {
-  logs: Array<string | undefined>;
+  errors: string[];
+  warnings: string[];
   startedAt?: string;
 }
 
 export interface PreviewResponse {
   previewId: string | undefined;
-  errors: RulePreviewLogs[] | undefined;
-  warnings: RulePreviewLogs[] | undefined;
+  logs: RulePreviewLogs[] | undefined;
 }

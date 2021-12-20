@@ -9,7 +9,6 @@ import { useEffect, useState, useCallback } from 'react';
 import { Unit } from '@elastic/datemath';
 import { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FieldValueQueryBar } from '../query_bar';
-import { QUERY_PREVIEW_NOISE_WARNING } from './translations';
 import { usePreviewRule } from '../../../containers/detection_engine/rules/use_preview_rule';
 import { formatPreviewRule } from '../../../pages/detection_engine/rules/create/helpers';
 import { FieldValueThreshold } from '../threshold_input';
@@ -45,21 +44,22 @@ export const usePreviewRoute = ({
   const [isRequestTriggered, setIsRequestTriggered] = useState(false);
 
   const { isLoading, response, rule, setRule } = usePreviewRule(timeFrame);
-  const [warnings, setWarnings] = useState<RulePreviewLogs[]>(response.warnings ?? []);
+  const [logs, setLogs] = useState<RulePreviewLogs[]>(response.logs ?? []);
+  const [hasNoiseWarning, setHasNoiseWarning] = useState<boolean>(false);
 
   useEffect(() => {
-    setWarnings(response.warnings ?? []);
+    setLogs(response.logs ?? []);
   }, [response]);
 
   const addNoiseWarning = useCallback(() => {
-    const noiseWarning = { logs: [QUERY_PREVIEW_NOISE_WARNING] };
-    setWarnings([noiseWarning, ...warnings]);
-  }, [warnings]);
+    setHasNoiseWarning(true);
+  }, [setHasNoiseWarning]);
 
   const clearPreview = useCallback(() => {
     setRule(null);
-    setWarnings([]);
+    setLogs([]);
     setIsRequestTriggered(false);
+    setHasNoiseWarning(false);
   }, [setRule]);
 
   useEffect(() => {
@@ -113,12 +113,12 @@ export const usePreviewRoute = ({
   ]);
 
   return {
+    hasNoiseWarning,
     addNoiseWarning,
     createPreview: () => setIsRequestTriggered(true),
     clearPreview,
-    errors: response.errors ?? [],
     isPreviewRequestInProgress: isLoading,
     previewId: response.previewId ?? '',
-    warnings,
+    logs,
   };
 };

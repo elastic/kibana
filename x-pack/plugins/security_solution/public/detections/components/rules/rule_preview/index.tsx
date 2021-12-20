@@ -23,7 +23,7 @@ import * as i18n from './translations';
 import { usePreviewRoute } from './use_preview_route';
 import { PreviewHistogram } from './preview_histogram';
 import { getTimeframeOptions } from './helpers';
-import { PreviewWarningsAndErrorsComponent } from './warnings_and_errors';
+import { PreviewLogsComponent } from './preview_logs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LoadingHistogram } from './loading_histogram';
 import { FieldValueThreshold } from '../threshold_input';
@@ -88,10 +88,10 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   const {
     addNoiseWarning,
     createPreview,
-    errors,
     isPreviewRequestInProgress,
     previewId,
-    warnings,
+    logs,
+    hasNoiseWarning,
   } = usePreviewRoute({
     index,
     isDisabled,
@@ -159,7 +159,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           index={index}
         />
       )}
-      <PreviewWarningsAndErrorsComponent errors={errors} warnings={warnings} />
+      <PreviewLogsComponent logs={logs} hasNoiseWarning={hasNoiseWarning} />
     </>
   );
 };

@@ -5,38 +5,50 @@
  * 2.0.
  */
 
-import React, { useMemo, Fragment } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
-import { partition } from 'lodash';
 import { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/request';
 import * as i18n from './translations';
 
-interface PreviewWarningsAndErrorsProps {
-  errors: RulePreviewLogs[];
-  warnings: RulePreviewLogs[];
+interface PreviewLogsComponentProps {
+  logs: RulePreviewLogs[];
+  hasNoiseWarning: boolean;
+}
+
+interface SortedLogs {
+  startedAt?: string;
+  logs: string[];
 }
 
 interface LogAccordionProps {
-  logs: RulePreviewLogs[];
+  logs: SortedLogs[];
   isError?: boolean;
 }
 
-export const PreviewWarningsAndErrorsComponent: React.FC<PreviewWarningsAndErrorsProps> = ({
-  errors,
-  warnings,
+export const PreviewLogsComponentComponent: React.FC<PreviewLogsComponentProps> = ({
+  logs,
+  hasNoiseWarning,
 }) => {
-  const [warningsWithTimestamps, noiseWarnings] = useMemo(() => {
-    return partition(warnings, (warning) => warning.startedAt != null);
-  }, [warnings]);
-
+  const sortedLogs = useMemo(
+    () =>
+      logs.reduce<{
+        errors: SortedLogs[];
+        warnings: SortedLogs[];
+      }>(
+        (acc, curr) => ({
+          errors: [{ startedAt: curr.startedAt, logs: curr.errors }, ...acc.errors],
+          warnings: [{ startedAt: curr.startedAt, logs: curr.warnings }, ...acc.warnings],
+        }),
+        { errors: [], warnings: [] }
+      ),
+    [logs]
+  );
   return (
     <>
       <EuiSpacer size="s" />
-      {noiseWarnings.map((warning, key) => (
-        <CalloutGroup key={key} item={warning} />
-      ))}
-      <LogAccordion logs={errors} isError />
-      <LogAccordion logs={warningsWithTimestamps} />
+      {hasNoiseWarning ?? <CalloutGroup logs={[i18n.QUERY_PREVIEW_NOISE_WARNING]} />}
+      <LogAccordion logs={sortedLogs.errors} isError />
+      <LogAccordion logs={sortedLogs.warnings} />
     </>
   );
 };
@@ -46,7 +58,7 @@ const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError }) => {
   const restOfLogs = logs.slice(1);
   return firstLog != null ? (
     <>
-      <CalloutGroup item={firstLog} isError={isError} />
+      <CalloutGroup logs={firstLog.logs} startedAt={firstLog.startedAt} isError={isError} />
       {restOfLogs.length > 0 ? (
         <EuiAccordion
           id={isError ? 'previewErrorAccordion' : 'previewWarningAccordion'}
@@ -55,7 +67,12 @@ const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError }) => {
           }
         >
           {restOfLogs.map((log, key) => (
-            <CalloutGroup key={`accordion-log-${key}`} item={log} isError={isError} />
+            <CalloutGroup
+              key={`accordion-log-${key}`}
+              logs={log.logs}
+              startedAt={log.startedAt}
+              isError={isError}
+            />
           ))}
         </EuiAccordion>
       ) : null}
@@ -65,18 +82,19 @@ const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError }) => {
 };
 
 export const CalloutGroup: React.FC<{
-  item: RulePreviewLogs;
+  logs: string[];
+  startedAt?: string;
   isError?: boolean;
-}> = ({ item, isError }) => {
-  return item.logs.length > 0 ? (
+}> = ({ logs, startedAt, isError }) => {
+  return logs.length > 0 ? (
     <>
-      {item.logs.map((log, i) => (
-        <Fragment key={`${item.startedAt}-${i}`}>
+      {logs.map((log, i) => (
+        <Fragment key={i}>
           <EuiCallOut
             color={isError ? 'danger' : 'warning'}
             iconType="alert"
             data-test-subj={isError ? 'preview-error' : 'preview-warning'}
-            title={item.startedAt != null ? `[${item.startedAt}]` : null}
+            title={startedAt != null ?? `[${startedAt}]`}
           >
             <EuiText>
               <p>{log}</p>

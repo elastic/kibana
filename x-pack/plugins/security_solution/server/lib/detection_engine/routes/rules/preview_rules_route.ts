@@ -113,8 +113,7 @@ export const previewRulesRoute = async (
         const username = security?.authc.getCurrentUser(request)?.username;
         const { previewRuleExecutionLogClient, warningsAndErrorsStore } = createWarningsAndErrors();
         const runState: Record<string, unknown> = {};
-        const errors: RulePreviewLogs[] = [];
-        const warnings: RulePreviewLogs[] = [];
+        const logs: RulePreviewLogs[] = [];
 
         const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
           ...securityRuleTypeOptions,
@@ -191,28 +190,20 @@ export const previewRulesRoute = async (
             })) as TState;
 
             // Save and reset error and warning logs
-            const currentErrors = {
-              logs: warningsAndErrorsStore
+            const currentLogs = {
+              errors: warningsAndErrorsStore
                 .filter((item) => item.newStatus === RuleExecutionStatus.failed)
-                .map((item) => item.message),
-              startedAt: startedAt.toDate().toISOString(),
-            };
-            const currentWarnings = {
-              logs: warningsAndErrorsStore
+                .map((item) => item.message ?? 'ERROR'),
+              warnings: warningsAndErrorsStore
                 .filter(
                   (item) =>
                     item.newStatus === RuleExecutionStatus['partial failure'] ||
                     item.newStatus === RuleExecutionStatus.warning
                 )
-                .map((item) => item.message),
+                .map((item) => item.message ?? 'WARNING'),
               startedAt: startedAt.toDate().toISOString(),
             };
-            if (currentErrors.logs.length > 0) {
-              errors.push(currentErrors);
-            }
-            if (currentWarnings.logs.length > 0) {
-              warnings.push(currentWarnings);
-            }
+            logs.push(currentLogs);
             previewRuleExecutionLogClient.clearWarningsAndErrorsStore();
 
             previousStartedAt = startedAt.toDate();
@@ -294,8 +285,7 @@ export const previewRulesRoute = async (
         return response.ok({
           body: {
             previewId,
-            errors,
-            warnings,
+            logs,
           },
         });
       } catch (err) {
