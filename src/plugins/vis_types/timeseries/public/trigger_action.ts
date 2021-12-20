@@ -79,6 +79,10 @@ const LENS_METRIC_TYPES: { [key: string]: AggOptions } = {
     name: 'sum',
     isFullReference: false,
   },
+  filter_ratio: {
+    name: 'filter_ratio',
+    isFullReference: false,
+  },
   math: {
     name: 'formula',
     isFullReference: true,
@@ -258,6 +262,20 @@ export const triggerVisualizeToLensActions = async (
         return null;
       }
       const script = `${aggregationMap.name}(${pipelineAggMap.name}(${subFunctionMetric.field}))`;
+      metricsArray = [
+        {
+          agg: 'formula',
+          isFullReference: true,
+          color: layer.color,
+          fieldName: 'document',
+          params: { formula: script, shift: timeShift },
+        },
+      ];
+    } else if (aggregation === 'filter_ratio') {
+      const { numerator, denominator } = layer.metrics[metricIdx];
+      const script = `count(${numerator?.language === 'kuery' ? 'kql' : 'lucene'}='${
+        numerator?.query
+      }') / count(${denominator?.language === 'kuery' ? 'kql' : 'lucene'}='${denominator?.query}')`;
       metricsArray = [
         {
           agg: 'formula',
