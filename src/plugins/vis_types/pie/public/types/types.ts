@@ -8,23 +8,8 @@
 
 import { Position } from '@elastic/charts';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { DatatableColumn, ExpressionValueBoxed } from '../../../../expressions/public';
 import type { SerializedFieldFormat } from '../../../../field_formats/common';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { PaletteOutput, ChartsPluginSetup } from '../../../../charts/public';
-
-export type ExpressionValuePieLabels = ExpressionValueBoxed<
-  'pie_vis_labels',
-  {
-    show: boolean;
-    position: string;
-    values: boolean;
-    truncate: number | null;
-    valuesFormat: string;
-    last_level: boolean;
-    percentDecimals: number;
-  }
->;
 
 export interface Dimension {
   accessor: number;
@@ -68,22 +53,6 @@ export interface PieVisParams extends PieCommonParams {
   palette: PaletteOutput;
 }
 
-export interface PieVisConfig extends PieCommonParams {
-  buckets?: ExpressionValueVisDimension[];
-  metric: ExpressionValueVisDimension;
-  splitColumn?: ExpressionValueVisDimension[];
-  splitRow?: ExpressionValueVisDimension[];
-  labels: ExpressionValuePieLabels;
-  palette: string;
-}
-
-export interface BucketColumns extends DatatableColumn {
-  format?: {
-    id?: string;
-    params?: SerializedFieldFormat<object>;
-  };
-}
-
 export enum LabelPositions {
   INSIDE = 'inside',
   DEFAULT = 'default',
@@ -98,14 +67,4 @@ export interface PieTypeProps {
   showElasticChartsOptions?: boolean;
   palettes?: ChartsPluginSetup['palettes'];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-}
-
-export interface SplitDimensionParams {
-  order?: string;
-  orderBy?: string;
-}
-
-export interface PieContainerDimensions {
-  width: number;
-  height: number;
 }
