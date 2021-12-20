@@ -246,11 +246,20 @@ describe('Event filter form', () => {
     expect(component.queryByTestId('perPolicy')).toBeNull();
   });
 
-  it('should show assignment section when edit mode and no license with by policy', async () => {
+  it('should show disabled assignment section when edit mode and no license with by policy', async () => {
     const policyId = policiesRequest.items[0].id;
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
     component = await renderWithData({ tags: [`policy:${policyId}`], item_id: '1' });
     expect(component.queryByTestId('perPolicy')).not.toBeNull();
     expect(component.getByTestId(`policy-${policyId}`).getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('should change from by policy to global when edit mode and no license with by policy', async () => {
+    const policyId = policiesRequest.items[0].id;
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    component = await renderWithData({ tags: [`policy:${policyId}`], item_id: '1' });
+    userEvent.click(component.getByTestId('globalPolicy'));
+    expect(component.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeFalsy();
+    expect(getState().form.entry?.tags).toEqual([`policy:all`]);
   });
 });
