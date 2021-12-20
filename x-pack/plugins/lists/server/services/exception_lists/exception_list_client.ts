@@ -17,7 +17,6 @@ import {
   updateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { Type } from 'io-ts';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import * as t from 'io-ts';
@@ -104,15 +103,11 @@ export class ExceptionListClient {
    * Error instance will be returned.
    *
    * @param data
-   * @param validator
+   * @param validator A `io-ts` codec that will be used to `.decode()` the data and then check it for validation errors
+   *
    * @private
    */
-  private validateData(
-    validator: Type<unknown, unknown>,
-    data: unknown
-  ): undefined | DataValidationError {
-    // FIXME:PT fix `validator` type so that it does not show error when used
-
+  private validateData<D>(validator: t.Type<D>, data: D): undefined | DataValidationError {
     return pipe(
       validator.decode(data),
       (decoded) => exactCheck(data, decoded),
