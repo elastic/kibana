@@ -7,18 +7,21 @@
  */
 import { throwError as throwErrorRx, of } from 'rxjs';
 import { RequestAdapter } from '../../../../../inspector';
-import { savedSearchMock } from '../../../__mocks__/saved_search';
+import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { fetchTotalHits } from './fetch_total_hits';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { IKibanaSearchResponse } from 'src/plugins/data/common';
+import { FetchDeps } from './fetch_all';
 
-const getDeps = () => ({
-  abortController: new AbortController(),
-  inspectorAdapters: { requests: new RequestAdapter() },
-  searchSessionId: '123',
-  data: discoverServiceMock.data,
-});
+const getDeps = () =>
+  ({
+    abortController: new AbortController(),
+    inspectorAdapters: { requests: new RequestAdapter() },
+    searchSessionId: '123',
+    data: discoverServiceMock.data,
+    savedSearch: savedSearchMock,
+  } as FetchDeps);
 
 describe('test fetchTotalHits', () => {
   test('resolves returned promise with hit count', async () => {
@@ -34,5 +37,25 @@ describe('test fetchTotalHits', () => {
     await expect(fetchTotalHits(savedSearchMock.searchSource, getDeps())).rejects.toEqual({
       msg: 'Oh noes!',
     });
+  });
+  test('fetch$ is called with execution context containing savedSearch id', async () => {
+    const fetch$Mock = jest
+      .fn()
+      .mockReturnValue(
+        of({ rawResponse: { hits: { total: 45 } } } as IKibanaSearchResponse<SearchResponse>)
+      );
+
+    savedSearchMockWithTimeField.searchSource.fetch$ = fetch$Mock;
+
+    await fetchTotalHits(savedSearchMockWithTimeField.searchSource, getDeps());
+    expect(fetch$Mock.mock.calls[0][0].executionContext).toMatchInlineSnapshot(`
+      Object {
+        "description": "fetch total hits",
+        "id": "the-saved-search-id",
+        "name": "discover",
+        "type": "application",
+        "url": "/",
+      }
+    `);
   });
 });
