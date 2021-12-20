@@ -99,4 +99,4 @@ export {
   ReportTypes,
   REPORT_METRIC_FIELD,
 } from './components/shared/exploratory_view/configurations/constants';
-export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploatory_view_config';
+export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';

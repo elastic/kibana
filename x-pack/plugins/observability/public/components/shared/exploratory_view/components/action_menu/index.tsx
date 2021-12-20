@@ -9,7 +9,7 @@ import React from 'react';
 import { ExpViewActionMenuContent } from './action_menu';
 import HeaderMenuPortal from '../../../header_menu_portal';
 import { TypedLensByValueInput } from '../../../../../../../lens/public';
-import { useExploratoryView } from '../../contexts/exploatory_view_config';
+import { useExploratoryView } from '../../contexts/exploratory_view_config';
 
 interface Props {
   timeRange?: { from: string; to: string };
