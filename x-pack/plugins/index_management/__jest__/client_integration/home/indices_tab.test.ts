@@ -201,6 +201,17 @@ describe('<IndexManagementHome />', () => {
       expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
     });
 
+    test("should be able to clear an index's cache", async () => {
+      const { actions } = testBed;
+      actions.clickManageContextMenuButton();
+
+      await actions.clickManageContextMenuButton();
+      await actions.clickContextMenuOption('clearCacheIndexMenuButton');
+
+      const latestRequest = server.requests[server.requests.length - 2];
+      expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/clear_cache`);
+    });
+
     test('should be able to unfreeze a frozen index', async () => {
       const { actions, exists } = testBed;
 
