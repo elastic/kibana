@@ -8,7 +8,6 @@
 import { KibanaRequest } from 'src/core/server';
 import {
   elasticsearchServiceMock,
-  httpServerMock,
   savedObjectsClientMock,
 } from '../../../../../src/core/server/mocks';
 import {
@@ -70,11 +69,7 @@ export const createDefaultAlertExecutorOptions = <
   tags: [],
   params,
   spaceId: 'SPACE_ID',
-  request: KibanaRequest.from(
-    httpServerMock.createRawRequest({
-      app: { requestId: 'fakeId' },
-    })
-  ),
+  request: {} as KibanaRequest,
   services: {
     alertInstanceFactory: alertsMock.createAlertServices<InstanceState, InstanceContext>()
       .alertInstanceFactory,
