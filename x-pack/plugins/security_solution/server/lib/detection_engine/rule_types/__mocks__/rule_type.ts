@@ -73,6 +73,7 @@ export const createRuleTypeMocks = (
   } as SavedObject<AlertAttributes>);
 
   const services = {
+    search: elasticsearchServiceMock.createScopedClusterClient(),
     savedObjectsClient: mockSavedObjectsClient,
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     alertInstanceFactory: jest.fn(() => ({ scheduleActions })),

@@ -60,7 +60,7 @@ describe('Custom Query Alerts', () => {
 
     alerting.registerType(queryAlertType);
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
+    services.search.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           hits: [],
@@ -104,7 +104,7 @@ describe('Custom Query Alerts', () => {
 
     alerting.registerType(queryAlertType);
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
+    services.search.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           hits: [sampleDocNoSortId()],

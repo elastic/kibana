@@ -20,6 +20,7 @@ export const createIndicatorMatchAlertType = (
   return {
     id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',
+    ruleTaskTimeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
     validate: {
       params: {
         validate: (object: unknown) => {
