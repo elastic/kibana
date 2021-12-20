@@ -30,6 +30,10 @@ git clone https://github.com/[YOUR_USERNAME]/kibana.git kibana
 cd kibana
 ```
 
+<DocCallOut color="warning" title="Experimental">
+  Bazel requires that the code be checked out in the same partition that tools like NVM exist at.
+</DocCallOut>
+
 ## Install dependencies
 
 Install the version of Node.js listed in the `.node-version` file. This can be automated with tools such as [nvm](https://github.com/creationix/nvm) or [nvm-windows](https://github.com/coreybutler/nvm-windows). As we also include a `.nvmrc` file you can switch to the correct version when using nvm by running:

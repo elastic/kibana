@@ -29,6 +29,8 @@ that we require and listed above and that you are running all the commands from 
 
 https://help.github.com/en/github/getting-started-with-github/fork-a-repo[Fork], then https://help.github.com/en/github/getting-started-with-github/fork-a-repo#step-2-create-a-local-clone-of-your-fork[clone] the {kib-repo}[{kib} repo] and change directory into it:
 
+WARNING: Bazel requires that the code be checked out in the same partition that tools like NVM exist at.
+
 [source,bash]
 ----
 git clone https://github.com/[YOUR_USERNAME]/kibana.git kibana
