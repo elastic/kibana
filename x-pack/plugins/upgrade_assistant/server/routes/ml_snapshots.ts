@@ -6,6 +6,7 @@
  */
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { ApiResponse } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { API_BASE_PATH } from '../../common/constants';
@@ -95,6 +96,35 @@ const verifySnapshotUpgrade = async (
       isSuccessful: false,
       error: e,
     };
+  }
+};
+
+interface ModelSnapshotUpgradeStatus {
+  model_snapshot_upgrades: Array<{
+    state: 'saving_new_state' | 'loading_old_state' | 'stopped' | 'failed';
+  }>;
+}
+
+const getModelSnapshotUpgradeStatus = async (
+  esClient: IScopedClusterClient,
+  jobId: string,
+  snapshotId: string
+) => {
+  try {
+    const { body } = (await esClient.asCurrentUser.transport.request({
+      method: 'GET',
+      path: `/_ml/anomaly_detectors/${jobId}/model_snapshots/${snapshotId}/_upgrade/_stats`,
+    })) as ApiResponse<ModelSnapshotUpgradeStatus>;
+
+    return body && body.model_snapshot_upgrades[0];
+  } catch (err) {
+    // If the api returns a 404 then it means that the model snapshot upgrade that was started
+    // doesn't exist. Since the start migration call returned success, this means the upgrade must have
+    // completed, so the upgrade assistant can continue to use its current logic. Otherwise we re-throw
+    // the exception so that it can be caught at route level.
+    if (err.statusCode !== 404) {
+      throw err;
+    }
   }
 };
 
@@ -198,18 +228,8 @@ export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: Rou
             });
           }
 
-          let upgradeStatus;
-          try {
-            const { body } = await esClient.asCurrentUser.transport.request({
-              method: 'GET',
-              path: `/_ml/anomaly_detectors/${jobId}/model_snapshots/${snapshotId}/_upgrade/_stats`,
-            });
-
-            upgradeStatus = body && body.model_snapshot_upgrades[0];
-          } catch (err) {
-            // dont do anything
-          }
-
+          const upgradeStatus = await getModelSnapshotUpgradeStatus(esClient, jobId, snapshotId);
+          // Create snapshotInfo payload to send back in the response
           const snapshotOp = foundSnapshots.saved_objects[0];
           const snapshotInfo: MlOperation = {
             ...snapshotOp.attributes,
