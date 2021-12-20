@@ -63,6 +63,8 @@
 /packages/elastic-datemath/ @elastic/kibana-app-services
 /packages/kbn-interpreter/ @elastic/kibana-app-services
 /packages/kbn-react-field/ @elastic/kibana-app-services
+/packages/kbn-es-query/ @elastic/kibana-app-services
+/packages/kbn-field-types/ @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
 /src/plugins/data/ @elastic/kibana-app-services
 /src/plugins/data_views/ @elastic/kibana-app-services
