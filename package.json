@@ -802,6 +802,7 @@
     "null-loader": "^3.0.0",
     "nyc": "^15.1.0",
     "oboe": "^2.1.4",
+    "openapi-types": "^10.0.0",
     "parse-link-header": "^1.0.1",
     "pbf": "3.2.1",
     "pirates": "^4.0.1",
