@@ -21,7 +21,7 @@ import {
 } from '../../../../common/util/date_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { ml } from '../../services/ml_api_service';
-import { escapeForElasticsearchQuery, replaceStringTokens } from '../../util/string_utils';
+import { replaceStringTokens } from '../../util/string_utils';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
@@ -94,7 +94,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         kqlQuery = record.influencers
           .map(
             (influencer) =>
-              `${escapeForElasticsearchQuery(influencer.influencer_field_name)}:"${
+              `"${influencer.influencer_field_name}":"${
                 influencer.influencer_field_values[0] ?? ''
               }"`
           )
