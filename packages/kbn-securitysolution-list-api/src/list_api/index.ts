@@ -46,7 +46,7 @@ import {
   ImportListParams,
 } from './types';
 
-export {
+export type {
   ApiParams,
   DeleteListParams,
   ExportListParams,
