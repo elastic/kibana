@@ -55,7 +55,7 @@ export const getLegendActions = (
         title: `${title}`,
         items: [
           {
-            name: i18n.translate('visTypePie.legend.filterForValueButtonAriaLabel', {
+            name: i18n.translate('expressionPie.legend.filterForValueButtonAriaLabel', {
               defaultMessage: 'Filter for value',
             }),
             'data-test-subj': `legend-${title}-filterIn`,
@@ -66,7 +66,7 @@ export const getLegendActions = (
             },
           },
           {
-            name: i18n.translate('visTypePie.legend.filterOutValueButtonAriaLabel', {
+            name: i18n.translate('expressionPie.legend.filterOutValueButtonAriaLabel', {
               defaultMessage: 'Filter out value',
             }),
             'data-test-subj': `legend-${title}-filterOut`,
@@ -113,7 +113,7 @@ export const getLegendActions = (
         }}
         panelPaddingSize="none"
         anchorPosition="upLeft"
-        title={i18n.translate('visTypePie.legend.filterOptionsLegend', {
+        title={i18n.translate('expressionPie.legend.filterOptionsLegend', {
           defaultMessage: '{legendDataLabel}, filter options',
           values: { legendDataLabel: title },
         })}

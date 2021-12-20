@@ -11,25 +11,25 @@ import { Position } from '@elastic/charts';
 
 export const getLegendPositions = [
   {
-    text: i18n.translate('visTypePie.legendPositions.topText', {
+    text: i18n.translate('expressionPie.legendPositions.topText', {
       defaultMessage: 'Top',
     }),
     value: Position.Top,
   },
   {
-    text: i18n.translate('visTypePie.legendPositions.leftText', {
+    text: i18n.translate('expressionPie.legendPositions.leftText', {
       defaultMessage: 'Left',
     }),
     value: Position.Left,
   },
   {
-    text: i18n.translate('visTypePie.legendPositions.rightText', {
+    text: i18n.translate('expressionPie.legendPositions.rightText', {
       defaultMessage: 'Right',
     }),
     value: Position.Right,
   },
   {
-    text: i18n.translate('visTypePie.legendPositions.bottomText', {
+    text: i18n.translate('expressionPie.legendPositions.bottomText', {
       defaultMessage: 'Bottom',
     }),
     value: Position.Bottom,

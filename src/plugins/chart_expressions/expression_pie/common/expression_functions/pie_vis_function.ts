@@ -104,7 +104,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
     },
     emptySizeRatio: {
       types: ['number'],
-      help: i18n.translate('visTypePie.function.args.emptySizeRatioHelpText', {
+      help: i18n.translate('expressionPie.pieVis.function.args.emptySizeRatioHelpText', {
         defaultMessage: 'Defines donut inner empty area size',
       }),
     },
