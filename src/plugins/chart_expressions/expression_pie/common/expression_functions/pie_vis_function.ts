@@ -141,7 +141,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
         ],
         [
           args.buckets,
-          i18n.translate('expressionPie.pieVis.function.adimension.buckets', {
+          i18n.translate('expressionPie.pieVis.function.dimension.buckets', {
             defaultMessage: 'Slice',
           }),
         ],
