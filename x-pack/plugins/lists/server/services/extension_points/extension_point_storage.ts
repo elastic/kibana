@@ -61,7 +61,7 @@ class ExtensionPointStorageClient {
    */
   get<T extends ExtensionPoint['type']>(
     extensionType: T
-  ): ReturnType<ExtensionPointStorageInterface['get']> {
+  ): Set<NarrowExtensionPointToType<T>> | undefined {
     return this.storage.get(extensionType);
   }
 
@@ -82,7 +82,7 @@ class ExtensionPointStorageClient {
     initialCallbackInput: P[0],
     callbackResponseValidator?: (data: P[0]) => Error | undefined
   ): Promise<P[0]> {
-    let inputArgument = initialCallbackInput;
+    let inputArgument: P[0] = initialCallbackInput;
     const externalExtensions = this.get(extensionType);
 
     if (!externalExtensions || externalExtensions.size === 0) {
