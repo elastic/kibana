@@ -10,9 +10,7 @@ import { PropTypes } from 'prop-types';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
-
-import { NavigationMenu } from '../../../components/navigation_menu';
+import { EuiPageBody } from '@elastic/eui';
 
 import { getCalendarSettingsData, validateCalendarId } from './utils';
 import { CalendarForm } from './calendar_form';
@@ -349,47 +347,40 @@ class NewCalendarUI extends Component {
 
     return (
       <Fragment>
-        <NavigationMenu tabId="settings" />
-        <EuiPage className="mlCalendarEditForm" data-test-subj="mlPageCalendarEdit">
+        <div data-test-subj="mlPageCalendarEdit">
           <EuiPageBody>
-            <EuiPageContent
-              className="mlCalendarEditForm__content"
-              verticalPosition="center"
-              horizontalPosition="center"
-            >
-              <CalendarForm
-                calendarId={selectedCalendar ? selectedCalendar.calendar_id : formCalendarId}
-                canCreateCalendar={this.props.canCreateCalendar}
-                canDeleteCalendar={this.props.canDeleteCalendar}
-                description={selectedCalendar ? selectedCalendar.description : description}
-                eventsList={events}
-                groupIds={groupIdOptions}
-                isEdit={selectedCalendar !== undefined}
-                isNewCalendarIdValid={
-                  selectedCalendar || isNewCalendarIdValid === null ? true : isNewCalendarIdValid
-                }
-                jobIds={jobIdOptions}
-                onCalendarIdChange={this.onCalendarIdChange}
-                onCreate={this.onCreate}
-                onDescriptionChange={this.onDescriptionChange}
-                onEdit={this.onEdit}
-                onEventDelete={this.onEventDelete}
-                onGroupSelection={this.onGroupSelection}
-                showImportModal={this.showImportModal}
-                onJobSelection={this.onJobSelection}
-                saving={saving}
-                loading={loading}
-                selectedGroupOptions={selectedGroupOptions}
-                selectedJobOptions={selectedJobOptions}
-                onCreateGroupOption={this.onCreateGroupOption}
-                showNewEventModal={this.showNewEventModal}
-                isGlobalCalendar={isGlobalCalendar}
-                onGlobalCalendarChange={this.onGlobalCalendarChange}
-              />
-            </EuiPageContent>
+            <CalendarForm
+              calendarId={selectedCalendar ? selectedCalendar.calendar_id : formCalendarId}
+              canCreateCalendar={this.props.canCreateCalendar}
+              canDeleteCalendar={this.props.canDeleteCalendar}
+              description={selectedCalendar ? selectedCalendar.description : description}
+              eventsList={events}
+              groupIds={groupIdOptions}
+              isEdit={selectedCalendar !== undefined}
+              isNewCalendarIdValid={
+                selectedCalendar || isNewCalendarIdValid === null ? true : isNewCalendarIdValid
+              }
+              jobIds={jobIdOptions}
+              onCalendarIdChange={this.onCalendarIdChange}
+              onCreate={this.onCreate}
+              onDescriptionChange={this.onDescriptionChange}
+              onEdit={this.onEdit}
+              onEventDelete={this.onEventDelete}
+              onGroupSelection={this.onGroupSelection}
+              showImportModal={this.showImportModal}
+              onJobSelection={this.onJobSelection}
+              saving={saving}
+              loading={loading}
+              selectedGroupOptions={selectedGroupOptions}
+              selectedJobOptions={selectedJobOptions}
+              onCreateGroupOption={this.onCreateGroupOption}
+              showNewEventModal={this.showNewEventModal}
+              isGlobalCalendar={isGlobalCalendar}
+              onGlobalCalendarChange={this.onGlobalCalendarChange}
+            />
             {modal}
           </EuiPageBody>
-        </EuiPage>
+        </div>
         <HelpMenu docLink={helpLink} />
       </Fragment>
     );

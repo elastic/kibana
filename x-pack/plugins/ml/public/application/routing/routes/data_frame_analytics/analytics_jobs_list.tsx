@@ -8,7 +8,6 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
@@ -24,12 +23,6 @@ export const analyticsJobsListRouteFactory = (
   id: 'data_frame_analytics',
   path: '/data_frame_analytics',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  header: (
-    <FormattedMessage
-      id="xpack.ml.dataframe.analyticsList.title"
-      defaultMessage="Data frame analytics"
-    />
-  ),
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', navigateToPath, basePath),

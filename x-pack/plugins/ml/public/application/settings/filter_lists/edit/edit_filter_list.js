@@ -11,16 +11,13 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
   EuiSearchBar,
   EuiSpacer,
 } from '@elastic/eui';
@@ -32,7 +29,6 @@ import { withKibana } from '../../../../../../../../src/plugins/kibana_react/pub
 import { EditFilterListHeader } from './header';
 import { EditFilterListToolbar } from './toolbar';
 import { ItemsGrid } from '../../../components/items_grid';
-import { NavigationMenu } from '../../../components/navigation_menu';
 import { isValidFilterListId, saveFilterList } from './utils';
 import { ml } from '../../../services/ml_api_service';
 import { ML_PAGES } from '../../../../../common/constants/locator';
@@ -326,80 +322,73 @@ export class EditFilterListUI extends Component {
     const helpLink = getDocLinks().links.ml.customRules;
 
     return (
-      <Fragment>
-        <NavigationMenu tabId="settings" />
-        <EuiPage className="ml-edit-filter-lists" data-test-subj="mlPageFilterListEdit">
-          <EuiPageBody>
-            <EuiPageContent
-              className="ml-edit-filter-lists-content"
-              verticalPosition="center"
-              horizontalPosition="center"
-            >
-              <EditFilterListHeader
-                canCreateFilter={canCreateFilter}
-                filterId={this.props.filterId}
-                newFilterId={newFilterId}
-                isNewFilterIdInvalid={isNewFilterIdInvalid}
-                updateNewFilterId={this.updateNewFilterId}
-                description={description}
-                updateDescription={this.updateDescription}
-                totalItemCount={totalItemCount}
-                usedBy={loadedFilter.used_by}
-              />
-              <EditFilterListToolbar
-                canCreateFilter={canCreateFilter}
-                canDeleteFilter={canDeleteFilter}
-                onSearchChange={this.onSearchChange}
-                addItems={this.addItems}
-                deleteSelectedItems={this.deleteSelectedItems}
-                selectedItemCount={selectedItems.length}
-              />
-              <EuiSpacer size="xl" />
-              <ItemsGrid
-                totalItemCount={totalItemCount}
-                items={matchingItems}
-                selectedItems={selectedItems}
-                itemsPerPage={itemsPerPage}
-                setItemsPerPage={this.setItemsPerPage}
-                setItemSelected={this.setItemSelected}
-                activePage={activePage}
-                setActivePage={this.setActivePage}
-              />
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj={'mlFilterListCancelButton'}
-                    onClick={() => this.returnToFiltersList()}
-                  >
-                    <FormattedMessage
-                      id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
-                      defaultMessage="Cancel"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    onClick={this.save}
-                    disabled={
-                      saveInProgress === true ||
-                      isNewFilterIdInvalid === true ||
-                      canCreateFilter === false
-                    }
-                    fill
-                    data-test-subj={'mlFilterListSaveButton'}
-                  >
-                    <FormattedMessage
-                      id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
-                      defaultMessage="Save"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+      <>
+        <div data-test-subj="mlPageFilterListEdit">
+          {/*<EuiPageContent verticalPosition="center" horizontalPosition="center">*/}
+          <EditFilterListHeader
+            canCreateFilter={canCreateFilter}
+            filterId={this.props.filterId}
+            newFilterId={newFilterId}
+            isNewFilterIdInvalid={isNewFilterIdInvalid}
+            updateNewFilterId={this.updateNewFilterId}
+            description={description}
+            updateDescription={this.updateDescription}
+            totalItemCount={totalItemCount}
+            usedBy={loadedFilter.used_by}
+          />
+          <EditFilterListToolbar
+            canCreateFilter={canCreateFilter}
+            canDeleteFilter={canDeleteFilter}
+            onSearchChange={this.onSearchChange}
+            addItems={this.addItems}
+            deleteSelectedItems={this.deleteSelectedItems}
+            selectedItemCount={selectedItems.length}
+          />
+          <EuiSpacer size="xl" />
+          <ItemsGrid
+            totalItemCount={totalItemCount}
+            items={matchingItems}
+            selectedItems={selectedItems}
+            itemsPerPage={itemsPerPage}
+            setItemsPerPage={this.setItemsPerPage}
+            setItemSelected={this.setItemSelected}
+            activePage={activePage}
+            setActivePage={this.setActivePage}
+          />
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj={'mlFilterListCancelButton'}
+                onClick={() => this.returnToFiltersList()}
+              >
+                <FormattedMessage
+                  id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={this.save}
+                disabled={
+                  saveInProgress === true ||
+                  isNewFilterIdInvalid === true ||
+                  canCreateFilter === false
+                }
+                fill
+                data-test-subj={'mlFilterListSaveButton'}
+              >
+                <FormattedMessage
+                  id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {/*</EuiPageContent>*/}
+        </div>
         <HelpMenu docLink={helpLink} />
-      </Fragment>
+      </>
     );
   }
 }

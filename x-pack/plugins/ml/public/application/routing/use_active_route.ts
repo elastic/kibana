@@ -12,11 +12,9 @@ import type { MlRoute } from './router';
 
 export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
   const { pathname } = useLocation();
-  console.log(pathname, '___pathname___');
-
   const routesMap = useMemo(() => keyBy(routesList, 'path'), []);
 
-  const activeRoute = routesMap[pathname];
+  const activeRoute = useMemo(() => routesMap[pathname], [pathname]);
 
   return activeRoute ?? routesMap['/overview'];
 };

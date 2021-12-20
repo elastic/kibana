@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { createContext, FC, useCallback, useMemo, useReducer } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -15,6 +15,7 @@ import {
   EuiPageSideBar,
 } from '@elastic/eui';
 import { Route } from 'react-router-dom';
+import type { AppMountParameters } from 'kibana/public';
 import { SideNav } from './side_nav';
 import * as routes from '../../routing/routes';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
@@ -23,17 +24,55 @@ import { PageDependencies } from '../../routing/router';
 import { DatePickerWrapper } from '../navigation_menu/date_picker_wrapper';
 import { useActiveRoute } from '../../routing/use_active_route';
 
+export const MlPageControlsContext = createContext<{
+  setPageTitle: (v?: React.ReactNode | undefined) => void;
+  setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
+}>({ setPageTitle: () => {}, setHeaderActionMenu: () => {} });
+
+const ML_PAGE_ACTION = {
+  SET_HEADER: 'setPageHeader',
+};
+
+interface SetHeaderAction {
+  type: typeof ML_PAGE_ACTION.SET_HEADER;
+  payload: React.ReactNode;
+}
+
+type PageAction = SetHeaderAction;
+
+interface MlPageUIState {
+  pageHeader?: React.ReactNode;
+}
+
+function pageStateReducer(state: MlPageUIState, action: PageAction): MlPageUIState {
+  switch (action.type) {
+    case ML_PAGE_ACTION.SET_HEADER:
+      return { ...state, pageHeader: action.payload };
+  }
+
+  return state;
+}
+
 /**
  * Main page component of the ML App
  * @constructor
  */
 export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps, children }) => {
   const navigateToPath = useNavigateToPath();
-  const {
-    services: {
-      http: { basePath },
+  const { services } = useMlKibana();
+
+  const [pageState, dispatch] = useReducer<typeof pageStateReducer>(pageStateReducer, {});
+
+  const setPageTitle = useCallback(
+    (payload) => {
+      dispatch({ type: ML_PAGE_ACTION.SET_HEADER, payload });
     },
-  } = useMlKibana();
+    [dispatch]
+  );
+
+  const {
+    http: { basePath },
+  } = services;
 
   const routeList = useMemo(
     () => Object.values(routes).map((routeFactory) => routeFactory(navigateToPath, basePath.get())),
@@ -51,7 +90,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
       <EuiPageBody panelled data-test-subj={activeRoute?.['data-test-subj']}>
         <EuiPageHeader
           restrictWidth={false}
-          pageTitle={activeRoute.header}
+          pageTitle={pageState.pageHeader}
           rightSideItems={[...(activeRoute.enableDatePicker ? [<DatePickerWrapper />] : [])]}
         />
         <EuiPageContent
@@ -62,27 +101,31 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
           color="transparent"
           borderRadius="none"
         >
-          <EuiPageContentBody restrictWidth={false}>
-            {routeList.map((route) => {
-              return (
-                <Route
-                  key={route.id}
-                  path={route.path}
-                  exact
-                  render={(props) => {
-                    window.setTimeout(() => {
-                      pageDeps.setBreadcrumbs(route.breadcrumbs);
-                    });
-                    return (
-                      <MlPageWrapper path={route.path}>
-                        {route.render(props, pageDeps)}
-                      </MlPageWrapper>
-                    );
-                  }}
-                />
-              );
-            })}
-          </EuiPageContentBody>
+          <MlPageControlsContext.Provider
+            value={{ setPageTitle, setHeaderActionMenu: pageDeps.setHeaderActionMenu }}
+          >
+            <EuiPageContentBody restrictWidth={false}>
+              {routeList.map((route) => {
+                return (
+                  <Route
+                    key={route.id}
+                    path={route.path}
+                    exact
+                    render={(props) => {
+                      window.setTimeout(() => {
+                        pageDeps.setBreadcrumbs(route.breadcrumbs);
+                      });
+                      return (
+                        <MlPageWrapper path={route.path}>
+                          {route.render(props, pageDeps)}
+                        </MlPageWrapper>
+                      );
+                    }}
+                  />
+                );
+              })}
+            </EuiPageContentBody>
+          </MlPageControlsContext.Provider>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

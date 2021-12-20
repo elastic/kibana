@@ -8,7 +8,6 @@
 import React, { FC, Fragment, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana, useTimefilter, useMlLocator } from '../../contexts/kibana';
-import { NavigationMenu } from '../../components/navigation_menu';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
@@ -122,7 +121,6 @@ export const IndexDataVisualizerPage: FC = () => {
 
   return IndexDataVisualizer ? (
     <Fragment>
-      <NavigationMenu tabId="datavisualizer" />
       {IndexDataVisualizer !== null && <IndexDataVisualizer additionalLinks={links} />}
       <HelpMenu docLink={docLinks.links.ml.guide} />
     </Fragment>

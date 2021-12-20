@@ -9,14 +9,11 @@
  * React table for displaying a table of filter lists.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { PropTypes } from 'prop-types';
-
-import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { NavigationMenu } from '../../../components/navigation_menu';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 import { FilterListsHeader } from './header';
@@ -92,32 +89,23 @@ export class FilterListsUI extends Component {
     const helpLink = getDocLinks().links.ml.customRules;
 
     return (
-      <Fragment>
-        <NavigationMenu tabId="settings" />
-        <EuiPage className="ml-list-filter-lists" data-test-subj="mlPageFilterListManagement">
-          <EuiPageBody>
-            <EuiPageContent
-              className="ml-list-filter-lists-content"
-              verticalPosition="center"
-              horizontalPosition="center"
-            >
-              <FilterListsHeader
-                totalCount={filterLists.length}
-                refreshFilterLists={this.refreshFilterLists}
-              />
-              <FilterListsTable
-                canCreateFilter={canCreateFilter}
-                canDeleteFilter={canDeleteFilter}
-                filterLists={filterLists}
-                selectedFilterLists={selectedFilterLists}
-                setSelectedFilterLists={this.setSelectedFilterLists}
-                refreshFilterLists={this.refreshFilterLists}
-              />
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+      <>
+        <div data-test-subj="mlPageFilterListManagement">
+          <FilterListsHeader
+            totalCount={filterLists.length}
+            refreshFilterLists={this.refreshFilterLists}
+          />
+          <FilterListsTable
+            canCreateFilter={canCreateFilter}
+            canDeleteFilter={canDeleteFilter}
+            filterLists={filterLists}
+            selectedFilterLists={selectedFilterLists}
+            setSelectedFilterLists={this.setSelectedFilterLists}
+            refreshFilterLists={this.refreshFilterLists}
+          />
+        </div>
         <HelpMenu docLink={helpLink} />
-      </Fragment>
+      </>
     );
   }
 }

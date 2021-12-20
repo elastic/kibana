@@ -42,6 +42,7 @@ export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'explorer',
   path: '/explorer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
@@ -54,6 +55,8 @@ export const explorerRouteFactory = (
       href: '',
     },
   ],
+  enableDatePicker: true,
+  'data-test-subj': 'mlPageAnomalyExplorer',
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {

@@ -6,18 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { debounce } from 'lodash';
 
 import { ml } from '../../../../services/ml_api_service';
@@ -35,7 +24,6 @@ import { JobStatsBar } from '../jobs_stats_bar';
 import { NodeAvailableWarning } from '../../../../components/node_available_warning';
 import { JobsAwaitingNodeWarning } from '../../../../components/jobs_awaiting_node_warning';
 import { SavedObjectsWarning } from '../../../../components/saved_objects_warning';
-import { DatePickerWrapper } from '../../../../components/navigation_menu/date_picker_wrapper';
 import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 
@@ -473,34 +461,10 @@ export class JobsListView extends Component {
 
     return (
       <div data-test-subj="ml-jobs-list">
-        {/*<EuiPageHeader>*/}
-        {/*  <EuiPageHeaderSection>*/}
-        {/*    <EuiTitle>*/}
-        {/*      <h1>*/}
-        {/*        <FormattedMessage*/}
-        {/*          id="xpack.ml.jobsList.title"*/}
-        {/*          defaultMessage="Anomaly detection jobs"*/}
-        {/*        />*/}
-        {/*      </h1>*/}
-        {/*    </EuiTitle>*/}
-        {/*  </EuiPageHeaderSection>*/}
-        {/*  <EuiPageHeaderSection>*/}
-        {/*    <EuiFlexGroup alignItems="center" gutterSize="s">*/}
-        {/*      <EuiFlexItem grow={false}>*/}
-        {/*        <RefreshJobsListButton*/}
-        {/*          onRefreshClick={this.onRefreshClick}*/}
-        {/*          isRefreshing={isRefreshing}*/}
-        {/*        />*/}
-        {/*      </EuiFlexItem>*/}
-        {/*      <EuiFlexItem grow={false}>*/}
-        {/*        <DatePickerWrapper />*/}
-        {/*      </EuiFlexItem>*/}
-        {/*    </EuiFlexGroup>*/}
-        {/*  </EuiPageHeaderSection>*/}
-        {/*</EuiPageHeader>*/}
-
         <NodeAvailableWarning />
+
         <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
+
         <SavedObjectsWarning
           jobType="anomaly-detector"
           onCloseFlyout={this.onRefreshClick}

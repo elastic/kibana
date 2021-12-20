@@ -20,7 +20,7 @@ import type { DataViewsContract } from 'src/plugins/data_views/public';
 import { MlContext, MlContextValue } from '../contexts/ml';
 import { UrlStateProvider } from '../util/url_state';
 
-import { MlPage } from '../components/ml_page/ml_page';
+import { MlPage } from '../components/ml_page';
 
 // custom RouteProps making location non-optional
 interface MlRouteProps extends RouteProps {
@@ -39,10 +39,6 @@ export interface MlRoute {
    * Used for side nav items and page titles.
    */
   title?: string;
-  /**
-   * Page header
-   */
-  header?: string | React.ReactNode;
   render(props: MlRouteProps, deps: PageDependencies): JSX.Element;
   breadcrumbs: ChromeBreadcrumb[];
   /**
@@ -50,6 +46,7 @@ export interface MlRoute {
    */
   enableDatePicker?: boolean;
   'data-test-subj'?: string;
+  actionMenu?: React.ReactNode;
 }
 
 export interface PageProps {
@@ -60,6 +57,7 @@ export interface PageProps {
 export interface PageDependencies {
   config: IUiSettingsClient;
   history: AppMountParameters['history'];
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   dataViewsContract: DataViewsContract;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
   redirectToMlAccessDeniedPage: () => Promise<void>;

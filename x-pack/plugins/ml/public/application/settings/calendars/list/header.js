@@ -15,7 +15,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiSpacer,
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -25,24 +24,21 @@ import {
 } from '@elastic/eui';
 
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { MlPageHeader } from '../../../components/page_header';
 
 function CalendarsListHeaderUI({ totalCount, refreshCalendars, kibana }) {
   const docsUrl = kibana.services.docLinks.links.ml.calendars;
   return (
-    <React.Fragment>
+    <>
+      <MlPageHeader>
+        <FormattedMessage
+          id="xpack.ml.settings.calendars.listHeader.calendarsTitle"
+          defaultMessage="Calendars"
+        />
+      </MlPageHeader>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle>
-                <h1>
-                  <FormattedMessage
-                    id="xpack.ml.settings.calendars.listHeader.calendarsTitle"
-                    defaultMessage="Calendars"
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTextColor color="subdued">
                 <p>
@@ -100,7 +96,7 @@ function CalendarsListHeaderUI({ totalCount, refreshCalendars, kibana }) {
         </p>
       </EuiText>
       <EuiSpacer size="m" />
-    </React.Fragment>
+    </>
   );
 }
 CalendarsListHeaderUI.propTypes = {

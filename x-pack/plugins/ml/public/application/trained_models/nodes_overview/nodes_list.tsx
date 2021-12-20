@@ -16,6 +16,7 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { usePageUrlState } from '../../util/url_state';
@@ -34,6 +35,7 @@ import { ListingPageUrlState } from '../../../../common/types/common';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 import { useRefresh } from '../../routing/use_refresh';
+import { MlPageHeader } from '../../components/page_header';
 
 export type NodeItem = NodeDeploymentStatsResponse;
 
@@ -202,6 +204,12 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
 
   return (
     <>
+      <MlPageHeader>
+        <FormattedMessage
+          id="xpack.ml.trainedModels.nodesList.header"
+          defaultMessage="Nodes overview"
+        />
+      </MlPageHeader>
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         {nodesStats && (
