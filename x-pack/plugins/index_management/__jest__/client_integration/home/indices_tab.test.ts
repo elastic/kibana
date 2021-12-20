@@ -270,7 +270,9 @@ describe('<IndexManagementHome />', () => {
       // The unfreeze action should not be present anymore
       expect(exists('unfreezeIndexMenuButton')).toBe(false);
     });
+  });
 
+  describe('Edit index settings', () => {
     test('shows error callout when request fails', async () => {
       const { actions, find, component, exists } = testBed;
 
