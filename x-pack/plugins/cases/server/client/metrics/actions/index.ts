@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './hosts';
-export * from './users';
+export { Actions } from './actions';

@@ -8,9 +8,9 @@
 import { get } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AggregationBuilder, AggregationResponse } from './types';
+import { AggregationBuilder, AggregationResponse } from '../../types';
 
-export class Hosts implements AggregationBuilder {
+export class AlertHosts implements AggregationBuilder {
   constructor(private readonly uniqueValuesLimit: number = 10) {}
 
   build() {
@@ -52,7 +52,7 @@ export class Hosts implements AggregationBuilder {
     const aggs = aggregations as HostsAggregate;
 
     const topFrequentHosts = aggs?.hosts_frequency?.buckets.map((bucket) => ({
-      name: Hosts.getName(bucket),
+      name: AlertHosts.getHostName(bucket),
       id: bucket.key,
       count: bucket.doc_count,
     }));
@@ -67,7 +67,7 @@ export class Hosts implements AggregationBuilder {
     return { alerts: { hosts: hostFields } };
   }
 
-  private static getName(bucket: FieldAggregateBucket) {
+  private static getHostName(bucket: FieldAggregateBucket) {
     const unsafeHostName = get(bucket.top_fields.hits.hits[0].fields, hostName);
 
     if (Array.isArray(unsafeHostName) && unsafeHostName.length > 0) {

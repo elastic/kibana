@@ -37,9 +37,7 @@ const TestProvidersComponent: React.FC<Props> = ({
     <I18nProvider>
       <MockKibanaContextProvider>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <CasesProvider value={{ features, owner, userCanCrud }}>
-            {children}
-          </CasesProvider>
+          <CasesProvider value={{ features, owner, userCanCrud }}>{children}</CasesProvider>
         </ThemeProvider>
       </MockKibanaContextProvider>
     </I18nProvider>
