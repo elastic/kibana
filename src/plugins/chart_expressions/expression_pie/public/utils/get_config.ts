@@ -55,7 +55,7 @@ export const getConfig = (
     sectorLineStroke: chartTheme.lineSeriesStyle?.point?.fill,
     sectorLineWidth: 1.5,
     circlePadding: 4,
-    emptySizeRatio: visParams.isDonut ? 0.3 : 0,
+    emptySizeRatio: visParams.isDonut ? visParams.emptySizeRatio : 0,
     ...usingMargin,
   };
   if (!visParams.labels.show) {

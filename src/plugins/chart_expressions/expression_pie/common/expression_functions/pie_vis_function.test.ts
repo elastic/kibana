@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { PieVisConfig } from '../types/expression_renderers';
-import { Datatable } from '../../../../expressions/common/expression_types/specs';
-import { pieVisFunction } from './pie_vis_function';
 import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
+import { PieVisConfig, EMPTY_SIZE_RATIOS } from '../types/expression_renderers';
+import { pieVisFunction } from './pie_vis_function';
+import { Datatable } from '../../../../expressions/common/expression_types/specs';
 
 describe('interpreter/functions#pie', () => {
   const fn = functionWrapper(pieVisFunction());
@@ -24,6 +24,7 @@ describe('interpreter/functions#pie', () => {
     addLegend: true,
     legendPosition: 'right',
     isDonut: true,
+    emptySizeRatio: EMPTY_SIZE_RATIOS.SMALL,
     nestedLegend: true,
     truncateLegend: true,
     maxLegendLines: true,

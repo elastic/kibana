@@ -53,6 +53,7 @@ export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, par
     maxLegendLines: vis.params.maxLegendLines,
     distinctColors: vis.params?.distinctColors,
     isDonut: vis.params.isDonut,
+    emptySizeRatio: vis.params.emptySizeRatio,
     palette: vis.params?.palette?.name,
     labels: prepareLabels(vis.params.labels),
     metric: schemas.metric.map(prepareDimension),

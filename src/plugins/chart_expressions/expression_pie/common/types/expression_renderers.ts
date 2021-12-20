@@ -13,6 +13,12 @@ import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import { PaletteOutput } from '../../../../charts/common';
 import { ExpressionValuePieLabels } from './expression_functions';
 
+export enum EMPTY_SIZE_RATIOS {
+  SMALL = 0.3,
+  MEDIUM = 0.54,
+  LARGE = 0.7,
+}
+
 export interface Dimension {
   accessor: number;
   format: {
@@ -47,6 +53,7 @@ interface PieCommonParams {
   maxLegendLines: number;
   distinctColors: boolean;
   isDonut: boolean;
+  emptySizeRatio?: EMPTY_SIZE_RATIOS;
 }
 
 export interface PieVisParams extends PieCommonParams {

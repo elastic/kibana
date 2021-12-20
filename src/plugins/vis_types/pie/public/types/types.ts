@@ -10,6 +10,7 @@ import { Position } from '@elastic/charts';
 import { UiCounterMetricType } from '@kbn/analytics';
 import type { SerializedFieldFormat } from '../../../../field_formats/common';
 import { PaletteOutput, ChartsPluginSetup } from '../../../../charts/public';
+import { EMPTY_SIZE_RATIOS } from '../editor/constants';
 
 export interface Dimension {
   accessor: number;
@@ -35,6 +36,7 @@ interface PieCommonParams {
   maxLegendLines: number;
   distinctColors: boolean;
   isDonut: boolean;
+  emptySizeRatio?: EMPTY_SIZE_RATIOS;
 }
 
 export interface LabelsParams {
