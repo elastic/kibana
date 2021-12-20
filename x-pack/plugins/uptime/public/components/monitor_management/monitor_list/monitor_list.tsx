@@ -7,6 +7,7 @@
 import React, { useContext, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiPanel, EuiSpacer, EuiLink } from '@elastic/eui';
+import { SyntheticsMonitorSavedObject } from '../../../../common/types';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
 import { MonitorFields } from '../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
@@ -120,6 +121,20 @@ export const MonitorManagementList = ({
       }),
       render: (attributes: Partial<MonitorFields>) => attributes.urls || attributes.hosts,
       truncateText: true,
+    },
+    {
+      align: 'left' as const,
+      field: 'attributes',
+      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.enabled', {
+        defaultMessage: 'Enabled',
+      }),
+      render: (_, savedObject: SyntheticsMonitorSavedObject) => (
+        <MonitorEnabled
+          id={savedObject.id}
+          monitor={savedObject.attributes}
+          setRefresh={setRefresh}
+        />
+      ),
     },
     {
       align: 'left' as const,
