@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { dataPluginMock } from '../../../../src/plugins/data/server/mocks';
 import { rulesClientMock } from './rules_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { AlertInstance } from './alert_instance';
@@ -92,6 +93,7 @@ const createAlertServicesMock = <
     shouldWriteAlerts: () => true,
     shouldStopExecution: () => true,
     search: createAbortableSearchServiceMock(),
+    data: dataPluginMock.createStartContract(),
   };
 };
 export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;

@@ -166,7 +166,7 @@ describe('Task Runner Cancel', () => {
       fn()
     );
     rulesClient.get.mockResolvedValue(mockedRuleSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {

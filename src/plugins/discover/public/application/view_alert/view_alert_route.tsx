@@ -6,30 +6,23 @@
  * Side Public License, v 1.
  */
 import React, { useEffect } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { sha256 } from 'js-sha256';
-import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToastsStart } from 'kibana/public';
-import { DiscoverServices } from '../../build_services';
 import type { Alert } from '../../../../../../x-pack/plugins/alerting/common';
 import { AlertTypeParams } from '../../../../../../x-pack/plugins/alerting/common';
-import { Filter, SearchSourceFields } from '../../../../data/common';
+import { Filter, SerializedSearchSourceFields } from '../../../../data/common';
 import { MarkdownSimple, toMountPoint } from '../../../../kibana_react/public';
 import { DiscoverAppLocatorParams } from '../../locator';
+import { withQueryParams } from '../../utils/with_query_params';
+import { DiscoverRouteProps } from '../types';
 
 interface SearchThresholdAlertParams extends AlertTypeParams {
-  searchSource: SearchSourceFields;
+  searchSource: SerializedSearchSourceFields;
 }
 
-export interface ViewAlertRouteProps {
-  /**
-   * Kibana core services used by discover
-   */
-  services: DiscoverServices;
-}
-
-interface ViewAlertProps extends ViewAlertRouteProps {
+interface ViewAlertProps extends DiscoverRouteProps {
   from: string;
   to: string;
   checksum: string;
@@ -37,43 +30,6 @@ interface ViewAlertProps extends ViewAlertRouteProps {
 
 const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 const DISCOVER_MAIN_ROUTE = '/';
-
-function useQuery() {
-  const { search } = useLocation();
-  return React.useMemo(() => new URLSearchParams(search), [search]);
-}
-
-export const ViewAlertRoute = (props: ViewAlertRouteProps) => {
-  const query = useQuery();
-  const from = query.get('from');
-  const to = query.get('to');
-  const checksum = query.get('checksum');
-
-  if (!from || !to || !checksum) {
-    return (
-      <EuiEmptyPrompt
-        iconType="alert"
-        iconColor="danger"
-        title={
-          <h2>
-            {i18n.translate('discover.discoverError.title', {
-              defaultMessage: 'Error loading Discover',
-            })}
-          </h2>
-        }
-        body={
-          <p>
-            {i18n.translate('discover.discoverError.invalidQueryMessage', {
-              defaultMessage: 'Invalid query',
-            })}
-          </p>
-        }
-      />
-    );
-  }
-
-  return <ViewAlert {...props} from={from} to={to} checksum={checksum} />;
-};
 
 const displayError = (title: string, errorMessage: string, toastNotifications: ToastsStart) => {
   toastNotifications.addDanger({
@@ -176,3 +132,5 @@ function ViewAlert({ services, from, to, checksum }: ViewAlertProps) {
 
   return null;
 }
+
+export const ViewAlertRoute = withQueryParams(ViewAlert, ['from', 'to', 'checksum']);

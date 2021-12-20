@@ -1199,7 +1199,7 @@ describe('Task Runner', () => {
           customTaskRunnerFactoryInitializerParams
         );
         rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
-        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
           id: '1',
           type: 'alert',
           attributes: {
@@ -2294,7 +2294,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
@@ -2323,7 +2323,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
@@ -2357,7 +2357,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
@@ -2394,7 +2394,7 @@ describe('Task Runner', () => {
       ...mockedRuleTypeSavedObject,
       schedule: { interval: '30s' },
     });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
@@ -2440,7 +2440,7 @@ describe('Task Runner', () => {
     );
 
     rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
@@ -3013,7 +3013,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
 
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
       id: '1',
       type: 'alert',
       attributes: {
