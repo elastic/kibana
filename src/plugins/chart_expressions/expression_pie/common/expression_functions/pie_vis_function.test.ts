@@ -7,7 +7,7 @@
  */
 
 import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
-import { PieVisConfig, EMPTY_SIZE_RATIOS } from '../types/expression_renderers';
+import { PieVisConfig, EmptySizeRatios } from '../types/expression_renderers';
 import { pieVisFunction } from './pie_vis_function';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
 
@@ -24,7 +24,7 @@ describe('interpreter/functions#pie', () => {
     addLegend: true,
     legendPosition: 'right',
     isDonut: true,
-    emptySizeRatio: EMPTY_SIZE_RATIOS.SMALL,
+    emptySizeRatio: EmptySizeRatios.SMALL,
     nestedLegend: true,
     truncateLegend: true,
     maxLegendLines: true,

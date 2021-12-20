@@ -6,64 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Position } from '@elastic/charts';
 import { UiCounterMetricType } from '@kbn/analytics';
-import type { SerializedFieldFormat } from '../../../../field_formats/common';
-import { PaletteOutput, ChartsPluginSetup } from '../../../../charts/public';
-import { EMPTY_SIZE_RATIOS } from '../editor/constants';
+import { ChartsPluginSetup } from '../../../../charts/public';
 
-export interface Dimension {
-  accessor: number;
-  format: {
-    id?: string;
-    params?: SerializedFieldFormat<object>;
-  };
-}
-
-export interface Dimensions {
-  metric: Dimension;
-  buckets?: Dimension[];
-  splitRow?: Dimension[];
-  splitColumn?: Dimension[];
-}
-
-interface PieCommonParams {
-  addTooltip: boolean;
-  addLegend: boolean;
-  legendPosition: Position;
-  nestedLegend: boolean;
-  truncateLegend: boolean;
-  maxLegendLines: number;
-  distinctColors: boolean;
-  isDonut: boolean;
-  emptySizeRatio?: EMPTY_SIZE_RATIOS;
-}
-
-export interface LabelsParams {
-  show: boolean;
-  last_level: boolean;
-  position: LabelPositions;
-  values: boolean;
-  truncate: number | null;
-  valuesFormat: ValueFormats;
-  percentDecimals: number;
-}
-
-export interface PieVisParams extends PieCommonParams {
-  dimensions: Dimensions;
-  labels: LabelsParams;
-  palette: PaletteOutput;
-}
-
-export enum LabelPositions {
-  INSIDE = 'inside',
-  DEFAULT = 'default',
-}
-
-export enum ValueFormats {
-  PERCENT = 'percent',
-  VALUE = 'value',
-}
+export type { Dimension, Dimensions } from '../../../../chart_expressions/expression_pie/common';
 
 export interface PieTypeProps {
   showElasticChartsOptions?: boolean;
