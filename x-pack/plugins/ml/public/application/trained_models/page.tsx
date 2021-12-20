@@ -6,11 +6,12 @@
  */
 
 import React, { FC, useMemo } from 'react';
-
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
 import { ModelsList } from './models_management';
 import { TrainedModelsNavigationBar } from './navigation_bar';
 import { NodesList } from './nodes_overview';
+import { MlPageHeader } from '../components/page_header';
 
 export const Page: FC = () => {
   const location = useLocation();
@@ -20,7 +21,17 @@ export const Page: FC = () => {
     <>
       <TrainedModelsNavigationBar selectedTabId={selectedTabId} />
       {selectedTabId === 'trained_models' ? <ModelsList /> : null}
-      {selectedTabId === 'nodes' ? <NodesList /> : null}
+      {selectedTabId === 'nodes' ? (
+        <>
+          <MlPageHeader>
+            <FormattedMessage
+              id="xpack.ml.trainedModels.nodesList.header"
+              defaultMessage="Nodes overview"
+            />
+          </MlPageHeader>
+          <NodesList />
+        </>
+      ) : null}
     </>
   );
 };

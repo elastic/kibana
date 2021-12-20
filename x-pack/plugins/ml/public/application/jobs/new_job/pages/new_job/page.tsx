@@ -6,15 +6,7 @@
  */
 
 import React, { FC, useEffect, Fragment } from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiTitle,
-  EuiPageContentBody,
-} from '@elastic/eui';
+import { EuiPageContentHeader, EuiPageContentHeaderSection } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Wizard } from './wizard';
@@ -42,6 +34,7 @@ import { newJobCapsService } from '../../../../services/new_job_capabilities/new
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
+import { MlPageHeader } from '../../../../components/page_header';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -200,43 +193,32 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   return (
     <Fragment>
-      <EuiPage style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
-        <EuiPageBody>
-          <EuiPageContent>
-            <EuiPageContentHeader>
-              <EuiPageContentHeaderSection>
-                <EuiTitle>
-                  <h1>
-                    <FormattedMessage
-                      id="xpack.ml.newJob.page.createJob"
-                      defaultMessage="Create job"
-                    />
-                    : {jobCreatorTitle}
-                  </h1>
-                </EuiTitle>
+      <MlPageHeader>
+        <FormattedMessage id="xpack.ml.newJob.page.createJob" defaultMessage="Create job" />:{' '}
+        {jobCreatorTitle}
+      </MlPageHeader>
 
-                <FormattedMessage
-                  id="xpack.ml.newJob.page.createJob.dataViewName"
-                  defaultMessage="Using data view {dataViewName}"
-                  values={{ dataViewName: jobCreator.indexPatternTitle }}
-                />
-              </EuiPageContentHeaderSection>
-            </EuiPageContentHeader>
+      <div style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
+        <EuiPageContentHeader>
+          <EuiPageContentHeaderSection>
+            <FormattedMessage
+              id="xpack.ml.newJob.page.createJob.dataViewName"
+              defaultMessage="Using data view {dataViewName}"
+              values={{ dataViewName: jobCreator.indexPatternTitle }}
+            />
+          </EuiPageContentHeaderSection>
+        </EuiPageContentHeader>
 
-            <EuiPageContentBody>
-              <Wizard
-                jobCreator={jobCreator}
-                chartLoader={chartLoader}
-                resultsLoader={resultsLoader}
-                chartInterval={chartInterval}
-                jobValidator={jobValidator}
-                existingJobsAndGroups={existingJobsAndGroups}
-                firstWizardStep={firstWizardStep}
-              />
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+        <Wizard
+          jobCreator={jobCreator}
+          chartLoader={chartLoader}
+          resultsLoader={resultsLoader}
+          chartInterval={chartInterval}
+          jobValidator={jobValidator}
+          existingJobsAndGroups={existingJobsAndGroups}
+          firstWizardStep={firstWizardStep}
+        />
+      </div>
     </Fragment>
   );
 };

@@ -7,6 +7,7 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { checkPermission } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check';
 import { GettingStartedCallout } from './components/getting_started_callout';
@@ -21,6 +22,7 @@ import { NodesList } from '../trained_models/nodes_overview';
 import { useUrlState } from '../util/url_state';
 import { useRefresh } from '../routing/use_refresh';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
+import { MlPageHeader } from '../components/page_header';
 
 export const OverviewPage: FC = () => {
   const canViewMlNodes = checkPermission('canViewMlNodes');
@@ -70,6 +72,9 @@ export const OverviewPage: FC = () => {
 
   return (
     <div>
+      <MlPageHeader>
+        <FormattedMessage id="xpack.ml.overview.overviewLabel" defaultMessage="Overview" />
+      </MlPageHeader>
       <NodeAvailableWarning />
       <JobsAwaitingNodeWarning jobCount={adLazyJobCount + dfaLazyJobCount} />
       <SavedObjectsWarning

@@ -6,18 +6,12 @@
  */
 
 import React, { FC } from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiTitle,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPageContent,
-} from '@elastic/eui';
+import { EuiPageBody, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinderUi } from '../../../../../../../../../src/plugins/saved_objects/public';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
+import { MlPageHeader } from '../../../../components/page_header';
 
 export interface PageProps {
   nextStepPath: string;
@@ -37,21 +31,15 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
   };
 
   return (
-    <EuiPage data-test-subj="mlPageSourceSelection">
+    <div data-test-subj="mlPageSourceSelection">
       <EuiPageBody restrictWidth={1200}>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="m">
-              <h1>
-                <FormattedMessage
-                  id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
-                  defaultMessage="Select data view or saved search"
-                />
-              </h1>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiPageContent>
+        <MlPageHeader>
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
+            defaultMessage="Select data view or saved search"
+          />
+        </MlPageHeader>
+        <EuiPageContent hasShadow={false} hasBorder={true}>
           <SavedObjectFinderUi
             key="searchSavedObjectFinder"
             onChoose={onObjectSelection}
@@ -87,6 +75,6 @@ export const Page: FC<PageProps> = ({ nextStepPath }) => {
           />
         </EuiPageContent>
       </EuiPageBody>
-    </EuiPage>
+    </div>
   );
 };

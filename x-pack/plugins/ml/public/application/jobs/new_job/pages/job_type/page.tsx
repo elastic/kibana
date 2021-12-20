@@ -8,7 +8,6 @@
 import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiPage,
   EuiPageBody,
   EuiTitle,
   EuiSpacer,
@@ -31,6 +30,7 @@ import { CategorizationIcon } from './categorization_job_icon';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../common/constants/locator';
 import { RareIcon } from './rare_job_icon';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
+import { MlPageHeader } from '../../../../components/page_header';
 
 export const Page: FC = () => {
   const {
@@ -214,18 +214,15 @@ export const Page: FC = () => {
   ];
 
   return (
-    <EuiPage data-test-subj="mlPageJobTypeSelection">
+    <div data-test-subj="mlPageJobTypeSelection">
       <EuiPageBody restrictWidth={1200}>
-        <EuiTitle size="l">
-          <h1>
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.jobType.createJobFromTitle"
-              defaultMessage="Create a job from the {pageTitleLabel}"
-              values={{ pageTitleLabel }}
-            />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer />
+        <MlPageHeader>
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.jobType.createJobFromTitle"
+            defaultMessage="Create a job from the {pageTitleLabel}"
+            values={{ pageTitleLabel }}
+          />
+        </MlPageHeader>
 
         {isTimeBasedIndex === false && (
           <>
@@ -354,6 +351,6 @@ export const Page: FC = () => {
           </EuiFlexItem>
         </EuiFlexGrid>
       </EuiPageBody>
-    </EuiPage>
+    </div>
   );
 };
