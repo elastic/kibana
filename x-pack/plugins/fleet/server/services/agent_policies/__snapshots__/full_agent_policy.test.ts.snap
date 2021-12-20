@@ -25,26 +25,6 @@ Object {
           "monitor",
         ],
       },
-      "_fallback": Object {
-        "cluster": Array [
-          "monitor",
-        ],
-        "indices": Array [
-          Object {
-            "names": Array [
-              "logs-*",
-              "metrics-*",
-              "traces-*",
-              "synthetics-*",
-              ".logs-endpoint.diagnostic.collection-*",
-            ],
-            "privileges": Array [
-              "auto_configure",
-              "create_doc",
-            ],
-          },
-        ],
-      },
     },
     "default": Object {
       "_elastic_agent_checks": Object {
@@ -111,26 +91,6 @@ Object {
           "monitor",
         ],
       },
-      "_fallback": Object {
-        "cluster": Array [
-          "monitor",
-        ],
-        "indices": Array [
-          Object {
-            "names": Array [
-              "logs-*",
-              "metrics-*",
-              "traces-*",
-              "synthetics-*",
-              ".logs-endpoint.diagnostic.collection-*",
-            ],
-            "privileges": Array [
-              "auto_configure",
-              "create_doc",
-            ],
-          },
-        ],
-      },
     },
     "monitoring-output-id": Object {
       "_elastic_agent_checks": Object {
@@ -195,26 +155,6 @@ Object {
       "_elastic_agent_checks": Object {
         "cluster": Array [
           "monitor",
-        ],
-      },
-      "_fallback": Object {
-        "cluster": Array [
-          "monitor",
-        ],
-        "indices": Array [
-          Object {
-            "names": Array [
-              "logs-*",
-              "metrics-*",
-              "traces-*",
-              "synthetics-*",
-              ".logs-endpoint.diagnostic.collection-*",
-            ],
-            "privileges": Array [
-              "auto_configure",
-              "create_doc",
-            ],
-          },
         ],
       },
     },
