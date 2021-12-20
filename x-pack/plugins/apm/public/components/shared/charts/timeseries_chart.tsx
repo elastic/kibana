@@ -390,8 +390,12 @@ export function TimeseriesChart({
           <Settings
             debugState={true}
             tooltip={{ stickTo: 'top', showNullValues: true }}
-            onBrushEnd={(event) =>
-              onBrushEnd({ x: (event as XYBrushEvent).x, history })
+            onBrushEnd={
+              !showModal
+                ? (event) => {
+                    onBrushEnd({ x: (event as XYBrushEvent).x, history });
+                  }
+                : undefined
             }
             theme={[
               customTheme,
@@ -414,7 +418,7 @@ export function TimeseriesChart({
                 onToggleLegend(legend);
               }
             }}
-            onProjectionClick={changePoint}
+            onProjectionClick={!showModal ? changePoint : undefined}
           />
           <Axis
             id="x-axis"
@@ -553,6 +557,7 @@ export function TimeseriesChart({
   function closeModalHandler() {
     setShowModal(false);
     setWindowParameters(undefined);
+    setOriginalWindowParameters(undefined);
   }
 
   return (

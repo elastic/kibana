@@ -10,6 +10,8 @@ import { brush, brushSelection, brushX } from 'd3-brush';
 import { scaleLinear } from 'd3-scale';
 import { select } from 'd3-selection';
 
+import { useResizeObserver } from '@elastic/eui';
+
 import { WindowParameters } from '../../../../common/correlations/change_point/types';
 
 import './brush.scss';
@@ -23,23 +25,10 @@ interface MlBrush {
   end: number;
 }
 
-interface Dimensions {
-  width: number;
-  height: number;
-  margin: {
-    left: number;
-    right: number;
-    top: number;
-    bottom: number;
-  };
-  boundedWidth: number;
-  boundedHeight: number;
-}
-
 const margin = {
-  top: 10,
+  top: 0,
   right: 30,
-  bottom: 10,
+  bottom: 0,
   left: 60,
 };
 
@@ -59,10 +48,10 @@ export function MlBrush({
 }) {
   const stageSvgRef = useRef(null);
   const d3Container = useRef(null);
-
+  const stageDimensions = useResizeObserver(stageSvgRef.current);
   const width =
-    stageSvgRef.current !== null
-      ? stageSvgRef.current.clientWidth - margin.left - margin.right
+    stageDimensions.width > 0
+      ? stageDimensions.width - margin.left - margin.right
       : null;
 
   const { baselineMin, baselineMax, deviationMin, deviationMax } =
@@ -77,16 +66,9 @@ export function MlBrush({
 
       const svg = d3.select(d3Container.current);
 
-      const gElement = svg.append('g');
-      // .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+      const gElement = svg.select('g');
 
-      gElement
-        .append('rect')
-        .attr('class', 'grid-background')
-        .attr('width', width)
-        .attr('height', height);
-
-      const gBrushes = gElement.append('g').attr('class', 'brushes');
+      const gBrushes = gElement.select('.brushes');
 
       function newBrush(id: string, start: number, end: number) {
         brushes.push({
@@ -217,7 +199,7 @@ export function MlBrush({
     baselineMax,
     deviationMin,
     deviationMax,
-    // onChange,
+    onChange,
   ]);
 
   return (
@@ -227,8 +209,14 @@ export function MlBrush({
           className="ml-d3-component"
           width={width}
           height={height + 5}
+          style={{ marginLeft: margin.left, marginTop: margin.top }}
           ref={d3Container}
-        />
+        >
+          <g className="ml-d3-component-transform" width={width}>
+            <rect className="grid-background" width={width} height={height} />
+            <g className="brushes" />
+          </g>
+        </svg>
       )}
     </div>
   );
