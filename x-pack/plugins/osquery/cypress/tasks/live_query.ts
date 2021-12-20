@@ -11,9 +11,10 @@ export const DEFAULT_QUERY = 'select * from processes;';
 
 export const selectAllAgents = () => {
   cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } })
-    .click()
-    .wait(1000);
-  cy.react('EuiFilterSelectItem').contains('All agents').click();
+    .type('All agents')
+    .wait(500)
+    .type('{downArrow}{enter}');
+  // cy.react('EuiFilterSelectItem').contains('All agents').click();
 };
 
 export const inputQuery = (query: string) => cy.get(LIVE_QUERY_EDITOR).type(query);
@@ -22,3 +23,26 @@ export const submitQuery = () => cy.contains('Submit').click();
 
 export const checkResults = () =>
   cy.get('[data-test-subj="dataGridRowCell"]', { timeout: 60000 }).should('have.lengthOf.above', 0);
+
+export const typeInECSFieldInput = (text: string) =>
+  cy.get('[data-test-subj="ECS-field-input"]').click().type(text);
+export const typeInOsqueryFieldInput = (text: string) =>
+  cy.react('OsqueryColumnFieldComponent').first().react('ResultComboBox').click().type(text);
+
+export const findFormFieldByRowsLabelAndType = (label: string, text: string) => {
+  cy.react('EuiFormRow', { props: { label } }).type(text);
+};
+
+export const deleteAndConfirm = (type: string) => {
+  cy.react('EuiButton').contains(`Delete ${type}`).click();
+  cy.contains(`Are you sure you want to delete this ${type}?`);
+  cy.react('EuiButton').contains('Confirm').click();
+  cy.get('[data-test-subj="globalToastList"]')
+    .first()
+    .contains('Successfully deleted')
+    .contains(type);
+};
+
+export const findAndClickButton = (text: string) => {
+  cy.react('EuiButton').contains(text).click();
+};

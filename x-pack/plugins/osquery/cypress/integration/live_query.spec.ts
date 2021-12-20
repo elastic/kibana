@@ -7,7 +7,14 @@
 
 import { login } from '../tasks/login';
 import { navigateTo } from '../tasks/navigation';
-import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../tasks/live_query';
+import {
+  checkResults,
+  inputQuery,
+  selectAllAgents,
+  submitQuery,
+  typeInECSFieldInput,
+  typeInOsqueryFieldInput,
+} from '../tasks/live_query';
 
 describe('Live Query', () => {
   beforeEach(() => {
@@ -36,12 +43,8 @@ describe('Live Query', () => {
       });
 
       cy.react('EuiAccordion', { props: { buttonContent: 'Advanced' } }).click();
-      cy.get('[data-test-subj="ECS-field-input"]').click().type('message{downArrow}{enter}');
-      cy.react('OsqueryColumnFieldComponent')
-        .first()
-        .react('ResultComboBox')
-        .click()
-        .type('days{downArrow}{enter}');
+      typeInECSFieldInput('message{downArrow}{enter}');
+      typeInOsqueryFieldInput('days{downArrow}{enter}');
       submitQuery();
 
       checkResults();
