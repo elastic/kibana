@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
-import { EuiIcon, EuiSideNav } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_nav_types';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { isFullLicense } from '../../license';
 import { TabId } from '../navigation_menu/navigation_menu';
 import { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { isFullLicense } from '../../license';
 
 export interface Tab {
   id: TabId;
@@ -123,21 +119,11 @@ const TAB_DATA: Record<TabId, TabData> = {
   },
 };
 
-interface NavItem {
-  test: string;
-}
-
-interface SideNavProps {
-  activeRouteId: string;
-}
-
-export const SideNav: FC<SideNavProps> = ({ activeRouteId }) => {
-  const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
-
-  const [globalState] = useUrlState('_g');
-
+export function useSideNavItems(activeRouteId: string) {
   const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
+
+  const [globalState] = useUrlState('_g');
 
   const redirectToTab = async (defaultPathId: MlLocatorParams['page']) => {
     const pageState =
@@ -160,51 +146,22 @@ export const SideNav: FC<SideNavProps> = ({ activeRouteId }) => {
     await navigateToPath(path, false);
   };
 
-  const disableLinks = isFullLicense() === false;
-  const tabs = getTabs(disableLinks);
+  const tabs = getTabs(!isFullLicense());
 
-  const toggleOpenOnMobile = () => {
-    setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
-  };
+  return tabs.map((tab) => {
+    const { id, disabled } = tab;
+    const testSubject = TAB_DATA[id].testSubject;
+    const defaultPathId = (TAB_DATA[id].pathId || id) as MlLocatorParams['page'];
 
-  const items: Array<EuiSideNavItemType<NavItem>> = [
-    {
-      id: 'ml-all',
-      name: i18n.translate('xpack.ml.plugin.title', {
-        defaultMessage: 'Machine Learning',
-      }),
-      icon: <EuiIcon type="machineLearningApp" />,
-      items: tabs.map((tab) => {
-        const { id, disabled } = tab;
-        const testSubject = TAB_DATA[id].testSubject;
-        const defaultPathId = (TAB_DATA[id].pathId || id) as MlLocatorParams['page'];
-
-        return {
-          id,
-          name: tab.name,
-          isSelected: id === activeRouteId,
-          disabled,
-          onClick: () => {
-            redirectToTab(defaultPathId);
-          },
-          'data-test-subj': testSubject + (id === activeRouteId ? ' selected' : ''),
-        };
-      }),
-    },
-  ];
-
-  return (
-    <EuiSideNav
-      test={''}
-      aria-label={i18n.translate('xpack.ml.sideNav.ariaLabel', {
-        defaultMessage: 'Overview',
-      })}
-      mobileTitle={
-        <FormattedMessage id="xpack.ml.sideNav.mobileTitle" defaultMessage="ML Navigation" />
-      }
-      toggleOpenOnMobile={toggleOpenOnMobile}
-      isOpenOnMobile={isSideNavOpenOnMobile}
-      items={items}
-    />
-  );
-};
+    return {
+      id,
+      name: tab.name,
+      isSelected: id === activeRouteId,
+      disabled,
+      onClick: () => {
+        redirectToTab(defaultPathId);
+      },
+      'data-test-subj': testSubject + (id === activeRouteId ? ' selected' : ''),
+    };
+  });
+}

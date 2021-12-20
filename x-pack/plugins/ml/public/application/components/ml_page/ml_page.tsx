@@ -6,23 +6,18 @@
  */
 
 import React, { createContext, FC, useCallback, useMemo, useReducer } from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageHeader,
-  EuiPageSideBar,
-} from '@elastic/eui';
+import { EuiPageContentBody } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Route } from 'react-router-dom';
 import type { AppMountParameters } from 'kibana/public';
-import { SideNav } from './side_nav';
+import { useSideNavItems } from './side_nav';
 import * as routes from '../../routing/routes';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
 import { PageDependencies } from '../../routing/router';
 import { DatePickerWrapper } from '../navigation_menu/date_picker_wrapper';
 import { useActiveRoute } from '../../routing/use_active_route';
+import { KibanaPageTemplate } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const MlPageControlsContext = createContext<{
   setPageTitle: (v?: React.ReactNode | undefined) => void;
@@ -82,52 +77,48 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
   const activeRoute = useActiveRoute(routeList);
 
   return (
-    <EuiPage paddingSize="none">
-      <EuiPageSideBar paddingSize="l">
-        <SideNav activeRouteId={activeRoute.id} />
-      </EuiPageSideBar>
-
-      <EuiPageBody panelled data-test-subj={activeRoute?.['data-test-subj']}>
-        <EuiPageHeader
-          restrictWidth={false}
-          pageTitle={pageState.pageHeader}
-          rightSideItems={[...(activeRoute.enableDatePicker ? [<DatePickerWrapper />] : [])]}
-        />
-        <EuiPageContent
-          hasBorder={false}
-          hasShadow={false}
-          grow={true}
-          paddingSize="none"
-          color="transparent"
-          borderRadius="none"
-        >
-          <MlPageControlsContext.Provider
-            value={{ setPageTitle, setHeaderActionMenu: pageDeps.setHeaderActionMenu }}
-          >
-            <EuiPageContentBody restrictWidth={false}>
-              {routeList.map((route) => {
-                return (
-                  <Route
-                    key={route.id}
-                    path={route.path}
-                    exact
-                    render={(props) => {
-                      window.setTimeout(() => {
-                        pageDeps.setBreadcrumbs(route.breadcrumbs);
-                      });
-                      return (
-                        <MlPageWrapper path={route.path}>
-                          {route.render(props, pageDeps)}
-                        </MlPageWrapper>
-                      );
-                    }}
-                  />
-                );
-              })}
-            </EuiPageContentBody>
-          </MlPageControlsContext.Provider>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <KibanaPageTemplate
+      restrictWidth={false}
+      solutionNav={{
+        name: i18n.translate('xpack.ml.plugin.title', {
+          defaultMessage: 'Machine Learning',
+        }),
+        icon: 'machineLearningApp',
+        items: useSideNavItems(activeRoute.id),
+      }}
+      grow={true}
+      pageHeader={{
+        pageTitle: pageState.pageHeader,
+        rightSideItems: [...(activeRoute.enableDatePicker ? [<DatePickerWrapper />] : [])],
+        restrictWidth: false,
+      }}
+      pageBodyProps={{
+        'data-test-subj': activeRoute?.['data-test-subj'],
+      }}
+    >
+      <MlPageControlsContext.Provider
+        value={{ setPageTitle, setHeaderActionMenu: pageDeps.setHeaderActionMenu }}
+      >
+        <EuiPageContentBody restrictWidth={false}>
+          {routeList.map((route) => {
+            return (
+              <Route
+                key={route.id}
+                path={route.path}
+                exact
+                render={(props) => {
+                  window.setTimeout(() => {
+                    pageDeps.setBreadcrumbs(route.breadcrumbs);
+                  });
+                  return (
+                    <MlPageWrapper path={route.path}>{route.render(props, pageDeps)}</MlPageWrapper>
+                  );
+                }}
+              />
+            );
+          })}
+        </EuiPageContentBody>
+      </MlPageControlsContext.Provider>
+    </KibanaPageTemplate>
   );
 });
