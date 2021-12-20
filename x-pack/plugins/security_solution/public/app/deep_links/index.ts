@@ -11,7 +11,12 @@ import { get } from 'lodash';
 import { LicenseType } from '../../../../licensing/common/types';
 import { getCasesDeepLinks } from '../../../../cases/public';
 import { SecurityPageName, CloudPosturePage } from '../types';
-import { AppDeepLink, AppNavLinkStatus, Capabilities } from '../../../../../../src/core/public';
+import {
+  AppDeepLink,
+  AppNavLinkStatus,
+  AppStatus,
+  Capabilities,
+} from '../../../../../../src/core/public';
 import {
   OVERVIEW,
   DETECT,
@@ -359,7 +364,8 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     id: SecurityPageName.cloud_posture,
     title: 'Cloud Posture',
     path: CSP_ROOT_PATH,
-    navLinkStatus: AppNavLinkStatus.visible,
+    status: AppStatus.accessible,
+    navLinkStatus: AppNavLinkStatus.hidden,
     keywords: [],
     deepLinks: [
       {
