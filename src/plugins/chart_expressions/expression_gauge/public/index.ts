@@ -12,5 +12,5 @@ export function plugin() {
   return new ExpressionGaugePlugin();
 }
 
-export { getGoalValue, getMaxValue, getMinValue } from './components/utils';
+export { getGoalValue, getMaxValue, getMinValue, getValueFromAccessor } from './components/utils';
 export { GaugeIconVertical, GaugeIconHorizontal } from './components/gauge_icon';
