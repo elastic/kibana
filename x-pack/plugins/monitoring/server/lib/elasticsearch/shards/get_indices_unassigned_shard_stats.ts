@@ -32,7 +32,7 @@ async function getUnassignedShardData(
   } else if (cluster.elasticsearch?.cluster?.stats?.state?.state_uuid) {
     filters.push({
       term: {
-        'elasticsearch.cluster.state.id':
+        'elasticsearch.cluster.stats.state.state_uuid':
           cluster.elasticsearch?.cluster?.stats?.state?.state_uuid,
       },
     });

@@ -110,7 +110,7 @@ export async function getLastRecovery(
     },
   };
   const mbParams = {
-    index: esIndexPattern,
+    index: mbIndexPattern,
     size,
     ignore_unavailable: true,
     body: {
