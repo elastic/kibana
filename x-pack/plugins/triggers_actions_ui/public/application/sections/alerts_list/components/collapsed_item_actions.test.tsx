@@ -10,7 +10,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { CollapsedItemActions } from './collapsed_item_actions';
 import { act } from 'react-dom/test-utils';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { AlertTableItem, AlertTypeModel } from '../../../../types';
+import { AlertTableItem, RuleTypeModel } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 
@@ -31,7 +31,7 @@ describe('CollapsedItemActions', () => {
   async function setup(editable: boolean = true) {
     const ruleTypeRegistry = ruleTypeRegistryMock.create();
     ruleTypeRegistry.has.mockReturnValue(true);
-    const alertTypeR: AlertTypeModel = {
+    const alertTypeR: RuleTypeModel = {
       id: 'my-alert-type',
       iconClass: 'test',
       description: 'Alert when testing',
@@ -39,7 +39,7 @@ describe('CollapsedItemActions', () => {
       validate: () => {
         return { errors: {} };
       },
-      alertParamsExpression: jest.fn(),
+      ruleParamsExpression: jest.fn(),
       requiresAppContext: !editable,
     };
     ruleTypeRegistry.get.mockReturnValue(alertTypeR);
