@@ -34,7 +34,7 @@ export const CspApp = ({ core, deps, params }: CspAppDeps) => {
               {routes.map((route) => (
                 <Route {...route} />
               ))}
-              <Route exact path="/" component={() => <Redirect to={'/findings'} />} />
+              <Route exact path="/" component={() => <Redirect to="/dashboard" />} />
               <Route path="*" component={() => <div>not found</div>} />
             </Switch>
           </I18nProvider>
