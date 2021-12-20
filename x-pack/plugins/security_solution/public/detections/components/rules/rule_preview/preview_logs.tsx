@@ -25,7 +25,7 @@ interface LogAccordionProps {
   isError?: boolean;
 }
 
-export const PreviewLogsComponentComponent: React.FC<PreviewLogsComponentProps> = ({
+export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
   logs,
   hasNoiseWarning,
 }) => {
