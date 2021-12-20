@@ -56,6 +56,20 @@ export const DESCRIPTION_REQUIRED = i18n.translate(
   }
 );
 
+export const SOLUTION_REQUIRED = i18n.translate(
+  'xpack.cases.createCase.solutionFieldRequiredError',
+  {
+    defaultMessage: 'A solution is required',
+  }
+);
+
+export const ARIA_KEYPAD_LEGEND = i18n.translate(
+  'xpack.cases.createCase.ariaKeypadSolutionSelection',
+  {
+    defaultMessage: 'Single solution select',
+  }
+);
+
 export const COMMENT_REQUIRED = i18n.translate('xpack.cases.caseView.commentFieldRequiredError', {
   defaultMessage: 'A comment is required.',
 });
@@ -106,6 +120,10 @@ export const TO = i18n.translate('xpack.cases.caseView.to', {
 
 export const TAGS = i18n.translate('xpack.cases.caseView.tags', {
   defaultMessage: 'Tags',
+});
+
+export const SOLUTION = i18n.translate('xpack.cases.caseView.solution', {
+  defaultMessage: 'Solution',
 });
 
 export const ACTIONS = i18n.translate('xpack.cases.allCases.actions', {

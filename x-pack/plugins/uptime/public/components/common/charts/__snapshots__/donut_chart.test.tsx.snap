@@ -30,6 +30,22 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "opacity": 0.3,
               "visible": true,
             },
+            "fit": Object {
+              "area": Object {
+                "fill": "__use__series__color__",
+                "opacity": 0.15,
+                "visible": true,
+              },
+              "line": Object {
+                "dash": Array [
+                  5,
+                  5,
+                ],
+                "opacity": 1,
+                "stroke": "__use__series__color__",
+                "visible": true,
+              },
+            },
             "line": Object {
               "opacity": 1,
               "strokeWidth": 1,
@@ -260,6 +276,17 @@ exports[`DonutChart component passes correct props without errors for valid prop
             "verticalWidth": 200,
           },
           "lineSeriesStyle": Object {
+            "fit": Object {
+              "line": Object {
+                "dash": Array [
+                  5,
+                  5,
+                ],
+                "opacity": 1,
+                "stroke": "__use__series__color__",
+                "visible": true,
+              },
+            },
             "line": Object {
               "opacity": 1,
               "strokeWidth": 1,
