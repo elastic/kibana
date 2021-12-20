@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternFieldEditorPlugin } from './plugin';
+import { DataViewFieldEditorPlugin } from './plugin';
 
-export const plugin = () => new IndexPatternFieldEditorPlugin();
+export const plugin = () => new DataViewFieldEditorPlugin();

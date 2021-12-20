@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async function () {
       await PageObjects.common.navigateToApp(appId, { insertTimestamp: false });
-      await comboBox.setCustom('indexPatternSelector', 'logstash-*');
+      await comboBox.setCustom('dataViewSelector', 'logstash-*');
       await comboBox.set('searchBucketField', 'geo.src');
       await comboBox.set('searchMetricField', 'memory');
       await PageObjects.timePicker.setAbsoluteRange(

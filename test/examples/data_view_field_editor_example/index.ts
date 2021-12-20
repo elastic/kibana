@@ -19,7 +19,7 @@ export default function ({
   const es = getService('es');
   const PageObjects = getPageObjects(['common', 'header', 'settings']);
 
-  describe('index pattern field editor example', function () {
+  describe('data view field editor example', function () {
     this.tags('ciGroup2');
     before(async () => {
       await esArchiver.emptyKibanaIndex();
@@ -32,9 +32,9 @@ export default function ({
 
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('blogs', null);
-      await PageObjects.common.navigateToApp('indexPatternFieldEditorExample');
+      await PageObjects.common.navigateToApp('dataViewFieldEditorExample');
     });
 
-    loadTestFile(require.resolve('./index_pattern_field_editor_example'));
+    loadTestFile(require.resolve('./data_view_field_editor_example'));
   });
 }

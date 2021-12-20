@@ -45,29 +45,29 @@ export class FieldFormatsExamplePlugin implements Plugin<void, void, SetupDeps, 
     registerExampleFormatEditor(deps.dataViewFieldEditor);
 
     // just for demonstration purposes:
-    // opens a field editor using default index pattern and first number field
-    const openIndexPatternNumberFieldEditor = async () => {
+    // opens a field editor using default data view and first number field
+    const openDateViewNumberFieldEditor = async () => {
       const [, plugins] = await core.getStartServices();
-      const indexPattern = await plugins.data.indexPatterns.getDefault();
-      if (!indexPattern) {
-        alert('Creating at least one index pattern to continue with this example');
+      const dataView = await plugins.data.dataViews.getDefault();
+      if (!dataView) {
+        alert('Create at least one data view to continue with this example');
         return;
       }
 
-      const numberField = indexPattern
-        .getNonScriptedFields()
-        .find((f) => !f.name.startsWith('_') && f.type === KBN_FIELD_TYPES.NUMBER);
+      const numberField = dataView.fields
+        .getAll()
+        .find((f) => !f.name.startsWith('_') && f.type === KBN_FIELD_TYPES.NUMBER && !f.scripted);
 
       if (!numberField) {
         alert(
-          'Default index pattern needs at least a single field of type `number` to continue with this example'
+          'Default data view needs at least a single field of type `number` to continue with this example'
         );
         return;
       }
 
       plugins.dataViewFieldEditor.openEditor({
         ctx: {
-          dataView: indexPattern,
+          dataView,
         },
         fieldName: numberField.name,
       });
@@ -81,7 +81,7 @@ export class FieldFormatsExamplePlugin implements Plugin<void, void, SetupDeps, 
       async mount({ element }: AppMountParameters) {
         const [, plugins] = await core.getStartServices();
         ReactDOM.render(
-          <App deps={{ fieldFormats: plugins.fieldFormats, openIndexPatternNumberFieldEditor }} />,
+          <App deps={{ fieldFormats: plugins.fieldFormats, openDateViewNumberFieldEditor }} />,
           element
         );
         return () => ReactDOM.unmountComponentAtNode(element);
