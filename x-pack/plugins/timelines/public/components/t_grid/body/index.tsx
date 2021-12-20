@@ -89,6 +89,7 @@ const StatefulAlertStatusBulkActions = lazy(
 interface OwnProps {
   activePage: number;
   additionalControls?: React.ReactNode;
+  appId?: string;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
   createFieldComponent?: CreateFieldComponentType;
@@ -299,6 +300,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
   ({
     activePage,
     additionalControls,
+    appId = '',
     browserFields,
     bulkActions = true,
     clearSelected,
@@ -830,6 +832,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           )}
           {tableView === 'eventRenderedView' && (
             <EventRenderedView
+              appId={appId}
               alertToolbar={alertToolbar}
               browserFields={browserFields}
               events={data}

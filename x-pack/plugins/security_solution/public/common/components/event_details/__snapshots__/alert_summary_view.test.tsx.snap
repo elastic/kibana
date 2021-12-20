@@ -350,7 +350,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             >
               <div
                 class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
-                data-test-subj="event-field-kibana.alert.rule.severity"
+                data-test-subj="event-field-kibana.alert.severity"
               >
                 <div
                   class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -371,7 +371,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field kibana.alert.rule.severity. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.severity. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -384,8 +384,8 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-kibana.alert.rule.severity"
-                    field="kibana.alert.rule.severity"
+                    data-test-subj="more-actions-kibana.alert.severity"
+                    field="kibana.alert.severity"
                     items="[object Object]"
                     value="low"
                   >
@@ -421,7 +421,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             >
               <div
                 class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
-                data-test-subj="event-field-kibana.alert.rule.risk_score"
+                data-test-subj="event-field-kibana.alert.risk_score"
               >
                 <div
                   class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -442,7 +442,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field kibana.alert.rule.risk_score. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.risk_score. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -455,8 +455,8 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-kibana.alert.rule.risk_score"
-                    field="kibana.alert.rule.risk_score"
+                    data-test-subj="more-actions-kibana.alert.risk_score"
+                    field="kibana.alert.risk_score"
                     items="[object Object]"
                     value="21"
                   >
@@ -1042,7 +1042,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             >
               <div
                 class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
-                data-test-subj="event-field-kibana.alert.rule.severity"
+                data-test-subj="event-field-kibana.alert.severity"
               >
                 <div
                   class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -1063,7 +1063,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field kibana.alert.rule.severity. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.severity. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -1076,8 +1076,8 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-kibana.alert.rule.severity"
-                    field="kibana.alert.rule.severity"
+                    data-test-subj="more-actions-kibana.alert.severity"
+                    field="kibana.alert.severity"
                     items="[object Object]"
                     value="low"
                   >
@@ -1113,7 +1113,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             >
               <div
                 class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
-                data-test-subj="event-field-kibana.alert.rule.risk_score"
+                data-test-subj="event-field-kibana.alert.risk_score"
               >
                 <div
                   class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -1134,7 +1134,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field kibana.alert.rule.risk_score. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.risk_score. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -1147,8 +1147,8 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-kibana.alert.rule.risk_score"
-                    field="kibana.alert.rule.risk_score"
+                    data-test-subj="more-actions-kibana.alert.risk_score"
+                    field="kibana.alert.risk_score"
                     items="[object Object]"
                     value="21"
                   >

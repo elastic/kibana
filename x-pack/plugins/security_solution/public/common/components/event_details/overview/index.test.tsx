@@ -63,7 +63,7 @@ const props = {
   data: [
     {
       category: 'kibana',
-      field: 'kibana.alert.rule.risk_score',
+      field: 'kibana.alert.risk_score',
       values: ['47'],
       originalValue: ['47'],
       isObjectArray: false,
@@ -91,7 +91,7 @@ const props = {
     },
     {
       category: 'kibana',
-      field: 'kibana.alert.rule.severity',
+      field: 'kibana.alert.severity',
       values: ['medium'],
       originalValue: ['medium'],
       isObjectArray: false,
@@ -100,10 +100,10 @@ const props = {
   browserFields: {
     kibana: {
       fields: {
-        'kibana.alert.rule.severity': {
+        'kibana.alert.severity': {
           category: 'kibana',
           count: 0,
-          name: 'kibana.alert.rule.severity',
+          name: 'kibana.alert.severity',
           type: 'string',
           esTypes: ['keyword'],
           scripted: false,
@@ -115,10 +115,10 @@ const props = {
           isMapped: true,
           indexes: ['apm-*-transaction*'],
         },
-        'kibana.alert.rule.risk_score': {
+        'kibana.alert.risk_score': {
           category: 'kibana',
           count: 0,
-          name: 'kibana.alert.rule.risk_score',
+          name: 'kibana.alert.risk_score',
           type: 'number',
           esTypes: ['float'],
           scripted: false,
@@ -180,12 +180,10 @@ const props = {
   },
 };
 
-const dataWithoutSeverity = props.data.filter(
-  (data) => data.field !== 'kibana.alert.rule.severity'
-);
+const dataWithoutSeverity = props.data.filter((data) => data.field !== 'kibana.alert.severity');
 
 const fieldsWithoutSeverity = {
-  'kibana.alert.rule.risk_score': props.browserFields.kibana.fields['kibana.alert.rule.risk_score'],
+  'kibana.alert.risk_score': props.browserFields.kibana.fields['kibana.alert.risk_score'],
   'kibana.alert.rule.uuid': props.browserFields.kibana.fields['kibana.alert.rule.uuid'],
   'kibana.alert.workflow_status': props.browserFields.kibana.fields['kibana.alert.workflow_status'],
   'kibana.alert.rule.name': props.browserFields.kibana.fields['kibana.alert.rule.name'],
