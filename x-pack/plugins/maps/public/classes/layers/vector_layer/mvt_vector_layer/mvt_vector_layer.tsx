@@ -106,11 +106,16 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       };
     }
 
-    const totalFeaturesCount: number = tileMetaFeatures.reduce((acc: number, tileMeta: Feature) => {
+    let totalFeaturesCount = 0;
+    let tilesWithFeatures = 0;
+    tileMetaFeatures.forEach((tileMeta: Feature) => {
       const count =
         tileMeta && tileMeta.properties ? tileMeta.properties[ES_MVT_HITS_TOTAL_VALUE] : 0;
-      return count + acc;
-    }, 0);
+      if (count > 0) {
+        totalFeaturesCount += count;
+        tilesWithFeatures++;
+      }
+    });
 
     if (totalFeaturesCount === 0) {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
@@ -125,14 +130,14 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     });
 
     const isPointsOnly = this.getStyle().getIsPointsOnly();
-    const shapeCountMsg = isPointsOnly || totalFeaturesCount <= 1
-      ? ''
-      : i18n.translate('xpack.maps.tiles.shapeCountMsg', {
+    const shapeCountMsg = !isPointsOnly && totalFeaturesCount > 1 && tilesWithFeatures > 1
+      ? i18n.translate('xpack.maps.tiles.shapeCountMsg', {
           defaultMessage: ' Documents may be counted multiple times if geometry crosses tile boundaries.',
           values: {
             count: totalFeaturesCount.toLocaleString(),
           },
-        });
+        })
+      : '';
 
     return {
       icon: this.getCurrentStyle().getIcon(isTocIcon && areResultsTrimmed),
