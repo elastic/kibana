@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import type { RuleTypeModel } from '../../../../triggers_actions_ui/public';
 import { RULE_CPU_USAGE, RULE_DETAILS, RULE_REQUIRES_APP_CONTEXT } from '../../../common/constants';
 import type { MonitoringConfig } from '../../types';
 import {
@@ -17,7 +17,7 @@ import { MonitoringAlertTypeParams, validate } from '../components/param_details
 
 export function createCpuUsageAlertType(
   config: MonitoringConfig
-): AlertTypeModel<MonitoringAlertTypeParams> {
+): RuleTypeModel<MonitoringAlertTypeParams> {
   return {
     id: RULE_CPU_USAGE,
     description: RULE_DETAILS[RULE_CPU_USAGE].description,
@@ -25,7 +25,7 @@ export function createCpuUsageAlertType(
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaCpuThreshold}`;
     },
-    alertParamsExpression: (props: LazyExpressionProps) => (
+    ruleParamsExpression: (props: LazyExpressionProps) => (
       <LazyExpression
         {...props}
         config={config}
