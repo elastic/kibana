@@ -15,6 +15,7 @@ describe('Add Integration', () => {
 
   before(() => {
     login();
+    navigateTo('/app/osquery');
   });
 
   it.skip('should open Osquery app', () => {
