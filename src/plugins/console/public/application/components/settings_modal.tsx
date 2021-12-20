@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment, useState } from 'react';
+import React, { ChangeEventHandler, Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -23,6 +23,13 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSwitch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSelect,
+  keysOf,
+  TimeUnitId,
+  EuiRefreshInterval,
+  OnRefreshChangeProps,
 } from '@elastic/eui';
 
 import { DevToolsSettings } from '../../services';
@@ -36,6 +43,17 @@ interface Props {
   settings: DevToolsSettings;
 }
 
+const timeUnits = {
+  s: 'seconds',
+  m: 'minutes',
+  h: 'hours',
+};
+
+const refreshUnitsOptions = keysOf(timeUnits).map((timeUnit) => ({
+  value: timeUnit,
+  text: timeUnits[timeUnit],
+}));
+
 export function DevToolsSettingsModal(props: Props) {
   const [fontSize, setFontSize] = useState(props.settings.fontSize);
   const [wrapMode, setWrapMode] = useState(props.settings.wrapMode);
@@ -45,6 +63,15 @@ export function DevToolsSettingsModal(props: Props) {
   const [polling, setPolling] = useState(props.settings.polling);
   const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
   const [historyDisabled, setHistoryDisabled] = useState(props.settings.historyDisabled);
+  const [refreshFrequency, setRefreshFrequency] = useState(1000);
+  const [refreshFrequencyUnit, setRefreshFrequencyUnit] = useState('s');
+  const [refreshInterval, setRefreshInterval] = useState(1000);
+  const [isPaused, setIsPaused] = useState(true);
+
+  const onRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps) => {
+    setIsPaused(isPaused);
+    setRefreshInterval(refreshInterval);
+  };
 
   const autoCompleteCheckboxes = [
     {
@@ -83,6 +110,15 @@ export function DevToolsSettingsModal(props: Props) {
     }
   };
 
+  const onRefreshFrequencyChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+    const sanitizedValue = parseFloat(event.target.value);
+    setRefreshFrequency(sanitizedValue);
+  };
+
+  const onRefreshFrequencyUnitsChange: ChangeEventHandler<HTMLSelectElement> = (event) => {
+    setRefreshFrequencyUnit(event.target.value as TimeUnitId);
+  };
+
   function saveSettings() {
     props.onSaveSettings({
       fontSize,
@@ -117,18 +153,49 @@ export function DevToolsSettingsModal(props: Props) {
             />
           }
         >
-          <EuiSwitch
-            checked={polling}
-            data-test-subj="autocompletePolling"
-            id="autocompletePolling"
-            label={
-              <FormattedMessage
-                defaultMessage="Automatically refresh autocomplete suggestions"
-                id="console.settingsPage.pollingLabelText"
-              />
-            }
-            onChange={(e) => setPolling(e.target.checked)}
+          <EuiRefreshInterval
+            isPaused={isPaused}
+            refreshInterval={refreshInterval}
+            // onRefreshChange={onRefreshChange}
           />
+          {/* <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={polling}
+                data-test-subj="autocompletePolling"
+                id="autocompletePolling"
+                label={
+                  <FormattedMessage
+                    defaultMessage="Refresh every"
+                    id="console.settingsPage.pollingLabelText"
+                  />
+                }
+                onChange={(e) => setPolling(e.target.checked)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem style={{ minWidth: 60 }}>
+              <EuiFieldNumber
+                compressed
+                fullWidth
+                value={refreshFrequency}
+                onChange={onRefreshFrequencyChange}
+                isInvalid={refreshFrequency <= 0}
+                disabled={!polling}
+                aria-label="Refresh frequecy value"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem style={{ minWidth: 100 }} grow={2}>
+              <EuiSelect
+                compressed
+                fullWidth
+                aria-label="Refresh frequency units"
+                value={refreshFrequencyUnit}
+                disabled={!polling}
+                options={refreshUnitsOptions}
+                onChange={onRefreshFrequencyUnitsChange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup> */}
         </EuiFormRow>
 
         <EuiButton

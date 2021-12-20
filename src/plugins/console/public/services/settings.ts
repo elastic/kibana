@@ -10,7 +10,7 @@ import { Storage } from './index';
 
 export const DEFAULT_SETTINGS = Object.freeze({
   fontSize: 14,
-  polling: true,
+  polling: false,
   tripleQuotes: true,
   wrapMode: true,
   autocomplete: Object.freeze({ fields: true, indices: true, templates: true }),
