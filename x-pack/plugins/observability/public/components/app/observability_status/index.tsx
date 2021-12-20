@@ -7,82 +7,19 @@
 
 import React from 'react';
 import { ObservabilityStatusBox } from './observability_status_box';
-export function ObservabilityStatus() {
-  const boxes = [
-    {
-      dataSource: 'Logs',
-      hasData: true,
-      description: 'This is the description for logs',
-      modules: [
-        { name: 'system', hasData: true },
-        { name: 'kubernetes', hasData: false },
-        { name: 'docker', hasData: true },
-      ],
-      integrationLink: 'http://example.com',
-      learnMoreLink: 'http://example.com',
-    },
-    {
-      dataSource: 'Metrics',
-      hasData: true,
-      description: 'This is the description for metrics',
-      modules: [
-        { name: 'system', hasData: true },
-        { name: 'kubernetes', hasData: true },
-        { name: 'docker', hasData: false },
-      ],
-      integrationLink: 'http://example.com',
-      learnMoreLink: 'http://example.com',
-    },
-    {
-      dataSource: 'APM',
-      hasData: true,
-      description: 'This is the description for apm',
-      modules: [
-        { name: 'system', hasData: true },
-        { name: 'kubernetes', hasData: true },
-        { name: 'docker', hasData: true },
-      ],
-      integrationLink: 'http://example.com',
-      learnMoreLink: 'http://example.com',
-    },
-    {
-      dataSource: 'Uptime',
-      hasData: false,
-      description: 'This is the description for uptime',
-      modules: [
-        { name: 'system', hasData: true },
-        { name: 'kubernetes', hasData: true },
-        { name: 'docker', hasData: true },
-      ],
-      integrationLink: 'http://example.com',
-      learnMoreLink: 'http://example.com',
-    },
-    {
-      dataSource: 'User experience',
-      hasData: false,
-      description: 'This is the description for user experience',
-      modules: [
-        { name: 'system', hasData: true },
-        { name: 'kubernetes', hasData: true },
-        { name: 'docker', hasData: true },
-      ],
-      integrationLink: 'http://example.com',
-      learnMoreLink: 'http://example.com',
-    },
-    {
-      dataSource: 'Alerts and rules',
-      hasData: true,
-      description: 'This is the description for alerts and rules',
-      modules: [
-        { name: 'system', hasData: true },
-        { name: 'kubernetes', hasData: true },
-        { name: 'docker', hasData: true },
-      ],
-      integrationLink: 'http://example.com',
-      learnMoreLink: 'http://example.com',
-    },
-  ];
 
+export interface ObservabilityStatusProps {
+  boxes: Array<{
+    dataSource: string;
+    hasData: boolean;
+    description: string;
+    modules: Array<{ name: string; hasData: boolean }>;
+    integrationLink: string;
+    learnMoreLink: string;
+  }>;
+}
+
+export function ObservabilityStatus({ boxes }: ObservabilityStatusProps) {
   return (
     <div>
       {boxes.map((box) => (
