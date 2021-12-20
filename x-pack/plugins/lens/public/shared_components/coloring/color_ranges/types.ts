@@ -15,6 +15,11 @@ export interface ColorRange {
   id?: string;
 }
 
+export interface ColorRangeValidation {
+  errors: string[];
+  isValid: boolean;
+}
+
 export interface DataBounds {
   min: number;
   max: number;

@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiIcon,
+  EuiFormRow,
   EuiColorPickerSwatch,
   EuiSpacer,
   EuiTextColor,
@@ -30,7 +31,7 @@ import type { ColorRange, DataBounds } from './types';
 import type { CustomPaletteParamsConfig } from '../../../../common';
 
 import { deleteColorRange, sortColorRanges, updateColor } from './utils';
-import type { AutoValueMode } from './types';
+import type { AutoValueMode, ColorRangeValidation } from './types';
 
 export interface ColorRangesItemProps {
   colorRange: ColorRange;
@@ -38,7 +39,7 @@ export interface ColorRangesItemProps {
   colorRanges: ColorRange[];
   isLast: boolean;
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
-  isValid: boolean;
+  colorRangeValidation?: ColorRangeValidation;
   setColorRanges: Function;
   dataBounds: DataBounds;
 
@@ -52,7 +53,7 @@ export function ColorRangeItem({
   index,
   colorRange,
   colorRanges,
-  isValid,
+  colorRangeValidation,
   paletteConfiguration,
   setColorRanges,
   dataBounds,
@@ -113,186 +114,201 @@ export function ColorRangeItem({
     [colorRanges, index, setColorRanges]
   );
 
+  const isInvalid = !(colorRangeValidation?.isValid ?? true);
+
   return (
-    <EuiFlexItem
-      key={colorRange.id}
-      data-test-subj={`dynamicColoring_range_row_${indexPostfix}`}
-      onBlur={onLeaveFocus}
-    >
-      <EuiSpacer size="s" />
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false} data-test-subj={`dynamicColoring_range_color_${indexPostfix}`}>
-          {isLast ? (
-            <EuiIcon type={RelatedIcon} size="l" />
-          ) : (
-            <EuiColorPicker
-              key={value}
-              onChange={onUpdateColor}
-              button={
-                <EuiColorPickerSwatch
-                  color={colorRange.color}
-                  aria-label={i18n.translate(
-                    'xpack.lens.dynamicColoring.customPalette.selectNewColor',
-                    {
-                      defaultMessage: 'Select a new color',
-                    }
-                  )}
-                />
-              }
-              secondaryInputDisplay="top"
-              color={colorRange.color}
-              onFocus={() => setPopoverInFocus(true)}
-              onBlur={() => {
-                setPopoverInFocus(false);
-              }}
-              isInvalid={!isValidColor(colorRange.color)}
-            />
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFieldNumber
-            compressed
-            isInvalid={!isValid}
-            data-test-subj={`dynamicColoring_range_value_${indexPostfix}`}
-            value={value}
-            disabled={isDisabled}
-            onChange={({ target }) => {
-              const newValue = target.value.trim();
-
-              if (isLast) {
-                colorRanges[index].end = parseFloat(newValue);
-              } else {
-                colorRanges[index].start = parseFloat(newValue);
-                if (index > 0) {
-                  colorRanges[index - 1].end = parseFloat(newValue);
+    <>
+      <EuiFormRow
+        fullWidth={true}
+        hasEmptyLabelSpace
+        data-test-subj={`dynamicColoring_range_row_${indexPostfix}`}
+        onBlur={onLeaveFocus}
+        isInvalid={isInvalid}
+        error={colorRangeValidation?.errors.join(' ')}
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false} data-test-subj={`dynamicColoring_range_color_${indexPostfix}`}>
+            {isLast ? (
+              <EuiIcon type={RelatedIcon} size="l" />
+            ) : (
+              <EuiColorPicker
+                key={value}
+                onChange={onUpdateColor}
+                button={
+                  <EuiColorPickerSwatch
+                    color={colorRange.color}
+                    aria-label={i18n.translate(
+                      'xpack.lens.dynamicColoring.customPalette.selectNewColor',
+                      {
+                        defaultMessage: 'Select a new color',
+                      }
+                    )}
+                  />
                 }
-              }
-              setColorRanges([...colorRanges]);
-            }}
-            append={rangeType === 'percent' ? '%' : undefined}
-            prepend={<span className="euiFormLabel">{isLast ? '\u2264' : '\u2265'}</span>}
-            aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.rangeAriaLabel', {
-              defaultMessage: 'Range {index}',
-              values: {
-                index: indexPostfix + 1,
-              },
-            })}
-          />
-        </EuiFlexItem>
+                secondaryInputDisplay="top"
+                color={colorRange.color}
+                onFocus={() => setPopoverInFocus(true)}
+                onBlur={() => {
+                  setPopoverInFocus(false);
+                }}
+                isInvalid={!isValidColor(colorRange.color)}
+              />
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFieldNumber
+              compressed
+              isInvalid={isInvalid}
+              data-test-subj={`dynamicColoring_range_value_${indexPostfix}`}
+              value={value}
+              disabled={isDisabled}
+              onChange={({ target }) => {
+                const newValue = target.value.trim();
 
-        <EuiFlexItem grow={false}>
-          {showDelete && (
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
+                if (isLast) {
+                  colorRanges[index].end = parseFloat(newValue);
+                } else {
+                  colorRanges[index].start = parseFloat(newValue);
+                  if (index > 0) {
+                    colorRanges[index - 1].end = parseFloat(newValue);
+                  }
+                }
+                setColorRanges([...colorRanges]);
+              }}
+              append={rangeType === 'percent' ? '%' : undefined}
+              prepend={<span className="euiFormLabel">{isLast ? '\u2264' : '\u2265'}</span>}
               aria-label={i18n.translate(
-                'xpack.lens.dynamicColoring.customPalette.deleteButtonAriaLabel',
+                'xpack.lens.dynamicColoring.customPalette.rangeAriaLabel',
                 {
-                  defaultMessage: 'Delete',
+                  defaultMessage: 'Range {index}',
+                  values: {
+                    index: indexPostfix + 1,
+                  },
                 }
               )}
-              title={i18n.translate('xpack.lens.dynamicColoring.customPalette.deleteButtonLabel', {
-                defaultMessage: 'Delete',
-              })}
-              onClick={onDeleteItem}
-              data-test-subj={`dynamicColoring_removeColorRange_${indexPostfix}`}
             />
-          )}
-          {!showDelete &&
-            (showEdit ? (
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            {showDelete && (
               <EuiButtonIcon
-                iconType="pencil"
+                iconType="trash"
+                color="danger"
                 aria-label={i18n.translate(
-                  'xpack.lens.dynamicColoring.customPalette.editButtonAriaLabel',
+                  'xpack.lens.dynamicColoring.customPalette.deleteButtonAriaLabel',
                   {
-                    defaultMessage: 'Edit',
+                    defaultMessage: 'Delete',
                   }
                 )}
-                title={i18n.translate('xpack.lens.dynamicColoring.customPalette.editButtonLabel', {
-                  defaultMessage: 'Edit',
-                })}
-                onClick={() => {
-                  let newValue;
-                  const { max } = getDataMinMax(rangeType, dataBounds);
-                  const colorStops = colorRanges.map(({ color, start }) => ({
-                    color,
-                    stop: Number(start),
-                  }));
-                  const step = roundValue(getStepValue(colorStops, colorStops, max));
-                  if (isLast) {
-                    newValue = colorRanges[index].start + step;
-                  } else {
-                    newValue = colorRanges[index].end - step;
+                title={i18n.translate(
+                  'xpack.lens.dynamicColoring.customPalette.deleteButtonLabel',
+                  {
+                    defaultMessage: 'Delete',
                   }
-                  if (isLast) {
-                    setAutoValue(autoValue === 'all' ? 'min' : 'none');
-                  } else {
-                    setAutoValue(autoValue === 'all' ? 'max' : 'none');
-                  }
-                  colorRanges[index][isLast ? 'end' : 'start'] = roundValue(newValue);
-                  setColorRanges([...colorRanges]);
-                }}
-                data-test-subj={`dynamicColoring_editValue_${indexPostfix}`}
+                )}
+                onClick={onDeleteItem}
+                data-test-subj={`dynamicColoring_removeColorRange_${indexPostfix}`}
               />
-            ) : (
-              <EuiButtonIcon
-                iconType={isLast ? ValueMaxIcon : ValueMinIcon}
-                aria-label={
-                  isLast
-                    ? i18n.translate(
-                        'xpack.lens.dynamicColoring.customPalette.autoDetectMaximumAriaLabel',
-                        {
-                          defaultMessage: 'Auto detect maximum value',
-                        }
-                      )
-                    : i18n.translate(
-                        'xpack.lens.dynamicColoring.customPalette.autoDetectMinimumAriaLabel',
-                        {
-                          defaultMessage: 'Auto detect minimum value',
-                        }
-                      )
-                }
-                title={
-                  isLast
-                    ? i18n.translate(
-                        'xpack.lens.dynamicColoring.customPalette.autoDetectMaximumLabel',
-                        {
-                          defaultMessage: 'Auto detect maximum value',
-                        }
-                      )
-                    : i18n.translate(
-                        'xpack.lens.dynamicColoring.customPalette.autoDetectMinimumLabel',
-                        {
-                          defaultMessage: 'Auto detect minimum value',
-                        }
-                      )
-                }
-                onClick={() => {
-                  const { max: autoMax, min: autoMin } = getAutoValues(
+            )}
+            {!showDelete &&
+              (showEdit ? (
+                <EuiButtonIcon
+                  iconType="pencil"
+                  aria-label={i18n.translate(
+                    'xpack.lens.dynamicColoring.customPalette.editButtonAriaLabel',
                     {
-                      first: colorRanges[1].start,
-                      preLast: colorRanges[colorRanges.length - 2].start,
-                      last: colorRanges[colorRanges.length - 1].start,
-                    },
-                    rangeType,
-                    dataBounds
-                  );
-                  const newValue = roundValue(isLast ? autoMax : autoMin);
-                  if (isLast) {
-                    setAutoValue(autoValue === 'none' ? 'max' : 'all');
-                  } else {
-                    setAutoValue(autoValue === 'none' ? 'min' : 'all');
+                      defaultMessage: 'Edit',
+                    }
+                  )}
+                  title={i18n.translate(
+                    'xpack.lens.dynamicColoring.customPalette.editButtonLabel',
+                    {
+                      defaultMessage: 'Edit',
+                    }
+                  )}
+                  onClick={() => {
+                    let newValue;
+                    const { max } = getDataMinMax(rangeType, dataBounds);
+                    const colorStops = colorRanges.map(({ color, start }) => ({
+                      color,
+                      stop: Number(start),
+                    }));
+                    const step = roundValue(getStepValue(colorStops, colorStops, max));
+                    if (isLast) {
+                      newValue = colorRanges[index].start + step;
+                    } else {
+                      newValue = colorRanges[index].end - step;
+                    }
+                    if (isLast) {
+                      setAutoValue(autoValue === 'all' ? 'min' : 'none');
+                    } else {
+                      setAutoValue(autoValue === 'all' ? 'max' : 'none');
+                    }
+                    colorRanges[index][isLast ? 'end' : 'start'] = roundValue(newValue);
+                    setColorRanges([...colorRanges]);
+                  }}
+                  data-test-subj={`dynamicColoring_editValue_${indexPostfix}`}
+                />
+              ) : (
+                <EuiButtonIcon
+                  iconType={isLast ? ValueMaxIcon : ValueMinIcon}
+                  aria-label={
+                    isLast
+                      ? i18n.translate(
+                          'xpack.lens.dynamicColoring.customPalette.autoDetectMaximumAriaLabel',
+                          {
+                            defaultMessage: 'Auto detect maximum value',
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.lens.dynamicColoring.customPalette.autoDetectMinimumAriaLabel',
+                          {
+                            defaultMessage: 'Auto detect minimum value',
+                          }
+                        )
                   }
+                  title={
+                    isLast
+                      ? i18n.translate(
+                          'xpack.lens.dynamicColoring.customPalette.autoDetectMaximumLabel',
+                          {
+                            defaultMessage: 'Auto detect maximum value',
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.lens.dynamicColoring.customPalette.autoDetectMinimumLabel',
+                          {
+                            defaultMessage: 'Auto detect minimum value',
+                          }
+                        )
+                  }
+                  onClick={() => {
+                    const { max: autoMax, min: autoMin } = getAutoValues(
+                      {
+                        first: colorRanges[1].start,
+                        preLast: colorRanges[colorRanges.length - 2].start,
+                        last: colorRanges[colorRanges.length - 1].start,
+                      },
+                      rangeType,
+                      dataBounds
+                    );
+                    const newValue = roundValue(isLast ? autoMax : autoMin);
+                    if (isLast) {
+                      setAutoValue(autoValue === 'none' ? 'max' : 'all');
+                    } else {
+                      setAutoValue(autoValue === 'none' ? 'min' : 'all');
+                    }
 
-                  colorRanges[index][isLast ? 'end' : 'start'] = newValue;
-                  setColorRanges([...colorRanges]);
-                }}
-                data-test-subj={`dynamicColoring_autoDetect_${isLast ? 'maximum' : 'minimum'}`}
-              />
-            ))}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {!isValid && isLast && (
+                    colorRanges[index][isLast ? 'end' : 'start'] = newValue;
+                    setColorRanges([...colorRanges]);
+                  }}
+                  data-test-subj={`dynamicColoring_autoDetect_${isLast ? 'maximum' : 'minimum'}`}
+                />
+              ))}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+      {!colorRangeValidation?.isValid && isLast && (
         <>
           <EuiSpacer size="s" />
           <EuiTextColor color="danger" data-test-subj="lensDateHistogramError">
@@ -302,6 +318,6 @@ export function ColorRangeItem({
           </EuiTextColor>
         </>
       )}
-    </EuiFlexItem>
+    </>
   );
 }

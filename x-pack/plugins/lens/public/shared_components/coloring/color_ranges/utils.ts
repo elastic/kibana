@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ColorRange } from '.';
 import { getDataMinMax, getStepValue, isValidColor, roundValue } from '../utils';
 import { DEFAULT_COLOR } from '../constants';
-import type { DataBounds } from './types';
+
+import type { DataBounds, ColorRangeValidation } from './types';
 
 export const reversePalette = (colorRanges: ColorRange[]) => {
   return colorRanges
@@ -91,17 +93,38 @@ export const distributeEqually = (colorRanges: ColorRange[]) => {
   }));
 };
 
-// todo: isLast?
-export const validateColorRange = ({ end, start, color }: ColorRange, isLast: boolean) => {
-  const value = isLast ? end : start;
-  const isColorValid = isValidColor(color);
+export const validateColorRanges = (colorRanges: ColorRange[]) => {
+  const validate = ({ end, start, color }: ColorRange, isLast: boolean) => {
+    const errors: string[] = [];
+    const value = isLast ? end : start;
+    if (!isValidColor(color)) {
+      errors.push(
+        i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidColorValue', {
+          defaultMessage: `Invalid color value.`,
+        })
+      );
+    }
 
-  return isColorValid && (!Number.isNaN(value) || isLast);
+    // todo: isLast?
+    if (Number.isNaN(value) && !isLast) {
+      errors.push(
+        i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidValue', {
+          defaultMessage: `The number value is required.`,
+        })
+      );
+    }
+
+    return {
+      isValid: !errors.length,
+      errors,
+    };
+  };
+
+  return colorRanges.reduce<Record<string, ColorRangeValidation>>(
+    (acc, item, index, array) => ({
+      ...acc,
+      [index]: validate(item, false),
+    }),
+    {}
+  );
 };
-
-export const validateColorRanges = (colorRanges: ColorRange[]) =>
-  colorRanges.reduce<Record<string, boolean>>((acc, item, index, array) => {
-    acc[index] = validateColorRange(item, false);
-
-    return acc;
-  }, {});

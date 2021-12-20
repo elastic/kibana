@@ -16,7 +16,7 @@ import type { ColorRange, DataBounds } from './types';
 import { ColorRangesActions } from './color_ranges_actions';
 import { ColorRangeItem } from './color_ranges_item';
 import { validateColorRanges } from './utils';
-import type { AutoValueMode } from './types';
+import type { AutoValueMode, ColorRangeValidation } from './types';
 
 export interface ColorRangesProps {
   colorRanges: ColorRange[];
@@ -31,7 +31,9 @@ export interface ColorRangesProps {
 
 export function ColorRanges(props: ColorRangesProps) {
   const { colorRanges, onChange, dataBounds, paletteConfiguration } = props;
-  const [colorRangesValidity, setColorRangesValidity] = useState<Record<string, boolean>>({});
+  const [colorRangesValidity, setColorRangesValidity] = useState<
+    Record<string, ColorRangeValidation>
+  >({});
   const [autoValue, setAutoValue] = useState<AutoValueMode>(
     paletteConfiguration?.autoValue ?? 'none'
   );
@@ -50,7 +52,7 @@ export function ColorRanges(props: ColorRangesProps) {
       ? Infinity
       : Number(newColorRanges[newColorRanges.length - 1].end);
 
-    if (Object.values(validateColorRanges(localColorRanges)).every((item) => Boolean(item))) {
+    if (Object.values(validateColorRanges(localColorRanges)).every(({ isValid }) => isValid)) {
       onChange(colorStops, upperMax, autoValue);
     }
   };
@@ -66,7 +68,6 @@ export function ColorRanges(props: ColorRangesProps) {
 
   return (
     <>
-      <EuiSpacer size="s" />
       <EuiFlexGroup
         data-test-subj={`dynamicColoring_custom_color_ranges`}
         direction="column"
@@ -83,7 +84,7 @@ export function ColorRanges(props: ColorRangesProps) {
             index={index}
             autoValue={autoValue}
             setAutoValue={setAutoValue}
-            isValid={colorRangesValidity[index] ?? true}
+            colorRangeValidation={colorRangesValidity[index]}
             isLast={false}
           />
         ))}
@@ -96,7 +97,7 @@ export function ColorRanges(props: ColorRangesProps) {
           autoValue={autoValue}
           setAutoValue={setAutoValue}
           index={localColorRanges.length - 1}
-          isValid={true}
+          colorRangeValidation={colorRangesValidity[localColorRanges.length - 1]}
           isLast={true}
         />
       </EuiFlexGroup>
