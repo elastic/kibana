@@ -29,7 +29,8 @@ import { getDataMinMax, getStepValue, isValidColor, roundValue, getAutoValues } 
 import type { ColorRange, DataBounds } from './types';
 import type { CustomPaletteParamsConfig } from '../../../../common';
 
-import { deleteColorRange, sortColorRanges } from './utils';
+import { deleteColorRange, sortColorRanges, updateColor } from './utils';
+import type { AutoValueMode } from './types';
 
 export interface ColorRangesItemProps {
   colorRange: ColorRange;
@@ -40,24 +41,11 @@ export interface ColorRangesItemProps {
   isValid: boolean;
   setColorRanges: Function;
   dataBounds: DataBounds;
-  setValid: Function;
-}
 
-const validateLastRange = (
-  colorRanges: ColorRange[],
-  isLast: boolean,
-  isValid: boolean,
-  setValid: Function
-) => {
-  const lastRange = colorRanges[colorRanges.length - 1];
-  if (lastRange.start > lastRange.end) {
-    if (isLast && isValid) {
-      setValid(false);
-    }
-  } else if (!isValid) {
-    setValid(true);
-  }
-};
+  // todo: for removing
+  autoValue: AutoValueMode;
+  setAutoValue: Function;
+}
 
 export function ColorRangeItem({
   isLast,
@@ -68,11 +56,11 @@ export function ColorRangeItem({
   paletteConfiguration,
   setColorRanges,
   dataBounds,
-  setValid,
+  autoValue,
+  setAutoValue,
 }: ColorRangesItemProps) {
   const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
 
-  let { autoValue = 'none' } = paletteConfiguration ?? {};
   const { rangeType = 'percent' } = paletteConfiguration ?? {};
 
   const isDisabledStart = ['min', 'all'].includes(autoValue!);
@@ -83,9 +71,6 @@ export function ColorRangeItem({
   const indexPostfix = isLast ? index + 1 : index;
   const showEdit = !showDelete && isLast ? isDisabledEnd : isDisabledStart;
   const isDisabled = isLast ? isDisabledEnd : index === 0 ? isDisabledStart : false;
-
-  // ? how it works?
-  const isInvalid = (!isValid && isLast) || value === undefined || Number.isNaN(value);
 
   const onLeaveFocus = useCallback(
     () => (e: FocusEvent<HTMLDivElement>) => {
@@ -109,20 +94,8 @@ export function ColorRangeItem({
 
         setColorRanges(newColorRanges);
       }
-
-      // ?
-      validateLastRange(colorRanges, isLast, isValid, setValid);
     },
-    [
-      colorRange.start,
-      colorRanges,
-      index,
-      isLast,
-      isValid,
-      popoverInFocus,
-      setColorRanges,
-      setValid,
-    ]
+    [colorRange.start, colorRanges, index, isLast, popoverInFocus, setColorRanges]
   );
 
   const onDeleteItem = useCallback(() => {
@@ -130,6 +103,15 @@ export function ColorRangeItem({
 
     setColorRanges(newColorRanges);
   }, [colorRanges, index, setColorRanges]);
+
+  const onUpdateColor = useCallback(
+    (color: string) => {
+      const newColorRanges = updateColor(index, color, colorRanges);
+
+      setColorRanges(newColorRanges);
+    },
+    [colorRanges, index, setColorRanges]
+  );
 
   return (
     <EuiFlexItem
@@ -145,10 +127,7 @@ export function ColorRangeItem({
           ) : (
             <EuiColorPicker
               key={value}
-              onChange={(newColor) => {
-                colorRanges[index].color = newColor;
-                setColorRanges([...colorRanges]);
-              }}
+              onChange={onUpdateColor}
               button={
                 <EuiColorPickerSwatch
                   color={colorRange.color}
@@ -165,11 +144,6 @@ export function ColorRangeItem({
               onFocus={() => setPopoverInFocus(true)}
               onBlur={() => {
                 setPopoverInFocus(false);
-                if (colorRange.color === '') {
-                  const newColorRanges = [...colorRanges];
-                  newColorRanges[index].color = colorRanges[index].color;
-                  setColorRanges(newColorRanges);
-                }
               }}
               isInvalid={!isValidColor(colorRange.color)}
             />
@@ -178,16 +152,12 @@ export function ColorRangeItem({
         <EuiFlexItem>
           <EuiFieldNumber
             compressed
-            isInvalid={isInvalid}
+            isInvalid={!isValid}
             data-test-subj={`dynamicColoring_range_value_${indexPostfix}`}
             value={value}
             disabled={isDisabled}
             onChange={({ target }) => {
               const newValue = target.value.trim();
-
-              if (isLast) {
-                setValid(true);
-              }
 
               if (isLast) {
                 colorRanges[index].end = parseFloat(newValue);
@@ -255,9 +225,9 @@ export function ColorRangeItem({
                     newValue = colorRanges[index].end - step;
                   }
                   if (isLast) {
-                    autoValue = autoValue === 'all' ? 'min' : 'none';
+                    setAutoValue(autoValue === 'all' ? 'min' : 'none');
                   } else {
-                    autoValue = autoValue === 'all' ? 'max' : 'none';
+                    setAutoValue(autoValue === 'all' ? 'max' : 'none');
                   }
                   colorRanges[index][isLast ? 'end' : 'start'] = roundValue(newValue);
                   setColorRanges([...colorRanges]);
@@ -309,9 +279,9 @@ export function ColorRangeItem({
                   );
                   const newValue = roundValue(isLast ? autoMax : autoMin);
                   if (isLast) {
-                    autoValue = autoValue === 'none' ? 'max' : 'all';
+                    setAutoValue(autoValue === 'none' ? 'max' : 'all');
                   } else {
-                    autoValue = autoValue === 'none' ? 'min' : 'all';
+                    setAutoValue(autoValue === 'none' ? 'min' : 'all');
                   }
 
                   colorRanges[index][isLast ? 'end' : 'start'] = newValue;

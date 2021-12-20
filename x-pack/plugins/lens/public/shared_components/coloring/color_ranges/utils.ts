@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { htmlIdGenerator } from '@elastic/eui';
 import { ColorRange } from '.';
-import { getDataMinMax, getStepValue, roundValue } from '../utils';
+import { getDataMinMax, getStepValue, isValidColor, roundValue } from '../utils';
 import { DEFAULT_COLOR } from '../constants';
-import { DataBounds } from './types';
-
-const idGeneratorFn = htmlIdGenerator();
+import type { DataBounds } from './types';
 
 export const reversePalette = (colorRanges: ColorRange[]) => {
   return colorRanges
     .map(({ color }, i) => ({
-      id: idGeneratorFn(),
       color,
       start: colorRanges[colorRanges.length - i - 1].start,
       end: colorRanges[colorRanges.length - i - 1].end,
@@ -43,7 +39,6 @@ export const addColorRange = (
 
   newColorRanges[length - 1].end = newStart;
   newColorRanges.push({
-    id: idGeneratorFn(),
     color: prevColor,
     start: newStart,
     end:
@@ -63,7 +58,6 @@ export const sortColorRanges = (colorRanges: ColorRange[]) => {
   return [...colorRanges]
     .sort(({ start: startA }, { start: startB }) => Number(startA) - Number(startB))
     .map((newColorRange, i, array) => ({
-      id: idGeneratorFn(),
       color: newColorRange.color,
       start: newColorRange.start,
       end: i !== array.length - 1 ? array[i + 1].start : maxValue,
@@ -78,6 +72,11 @@ export const deleteColorRange = (index: number, colorRanges: ColorRange[]) => {
   return colorRanges.filter((item, i) => i !== index);
 };
 
+export const updateColor = (index: number, color: string, colorRanges: ColorRange[]) => {
+  colorRanges[index].color = color;
+  return [...colorRanges];
+};
+
 export const distributeEqually = (colorRanges: ColorRange[]) => {
   const colorsCount = colorRanges.length;
   const start = colorRanges[0].start;
@@ -85,10 +84,24 @@ export const distributeEqually = (colorRanges: ColorRange[]) => {
   const step = roundValue((end - start) / colorsCount);
 
   return colorRanges.map((colorRange, index) => ({
-    id: idGeneratorFn(),
     color: colorRange.color,
     start: roundValue(start + (step * 100 * index) / 100),
     end:
       index === colorRanges.length - 1 ? end : roundValue(start + (step * 100 * (index + 1)) / 100),
   }));
 };
+
+// todo: isLast?
+export const validateColorRange = ({ end, start, color }: ColorRange, isLast: boolean) => {
+  const value = isLast ? end : start;
+  const isColorValid = isValidColor(color);
+
+  return isColorValid && (!Number.isNaN(value) || isLast);
+};
+
+export const validateColorRanges = (colorRanges: ColorRange[]) =>
+  colorRanges.reduce<Record<string, boolean>>((acc, item, index, array) => {
+    acc[index] = validateColorRange(item, false);
+
+    return acc;
+  }, {});

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+export type AutoValueMode = 'none' | 'min' | 'max' | 'all';
+
 export interface ColorRange {
   color: string;
   start: number;
   end: number;
+  // todo: do we need it?
   id?: string;
 }
 
