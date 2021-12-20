@@ -24,9 +24,10 @@ import {
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { safeLoad } from 'js-yaml';
 
-import { splitPkgKey } from '../../../../../../common';
+import { dataTypes, splitPkgKey } from '../../../../../../common';
 import type {
   AgentPolicy,
+  NewAgentPolicy,
   NewPackagePolicy,
   PackagePolicy,
   CreatePackagePolicyRouteState,
@@ -40,9 +41,15 @@ import {
   useConfig,
   sendGetAgentStatus,
   useGetPackageInfoByKey,
+  sendCreateAgentPolicy,
+  useGetAgentPolicies,
 } from '../../../hooks';
 import { Loading, Error } from '../../../components';
-import { ConfirmDeployAgentPolicyModal } from '../components';
+import {
+  AgentPolicyIntegrationForm,
+  agentPolicyFormValidation,
+  ConfirmDeployAgentPolicyModal,
+} from '../components';
 import { useIntraAppState, useUIExtension } from '../../../hooks';
 import { ExtensionWrapper } from '../../../components';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
@@ -116,6 +123,20 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   // Agent policy state
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
 
+  const defaultPolicy = {
+    name: 'Default policy',
+    description: '',
+    namespace: 'default',
+    monitoring_enabled: Object.values(dataTypes),
+  };
+
+  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
+    ...defaultPolicy,
+  });
+
+  const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
+  const validation = agentPolicyFormValidation(newAgentPolicy);
+
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
 
@@ -139,7 +160,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
     name: '',
     description: '',
-    namespace: '',
+    namespace: 'default',
     policy_id: '',
     enabled: true,
     output_id: '', // TODO: Blank for now as we only support default output
@@ -185,7 +206,34 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     [packageInfo, setAgentPolicy, setFormState]
   );
 
+  const updateNewAgentPolicy = useCallback(
+    (updatedFields: Partial<NewAgentPolicy>) => {
+      setNewAgentPolicy({
+        ...newAgentPolicy,
+        ...updatedFields,
+      });
+    },
+    [setNewAgentPolicy, newAgentPolicy]
+  );
+
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
+
+  let agentPolicies = [];
+  const { data: agentPoliciesData, error: err } = useGetAgentPolicies({
+    page: 1,
+    perPage: 1000,
+    sortField: 'name',
+    sortOrder: 'asc',
+    full: true,
+  });
+  if (err) {
+    // eslint-disable-next-line no-console
+    console.debug('Could not retrieve agent policies');
+  }
+  agentPolicies = useMemo(
+    () => agentPoliciesData?.items.filter((policy) => !policy.is_managed) || [],
+    [agentPoliciesData?.items]
+  );
 
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
@@ -268,12 +316,15 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   );
 
   // Save package policy
-  const savePackagePolicy = useCallback(async () => {
-    setFormState('LOADING');
-    const result = await sendCreatePackagePolicy(packagePolicy);
-    setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-    return result;
-  }, [packagePolicy, agentCount]);
+  const savePackagePolicy = useCallback(
+    async (pkgPolicy: NewPackagePolicy) => {
+      setFormState('LOADING');
+      const result = await sendCreatePackagePolicy(pkgPolicy);
+      setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+      return result;
+    },
+    [agentCount]
+  );
   const doOnSaveNavigation = useRef<boolean>(true);
 
   // Detect if user left page
@@ -325,7 +376,41 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       setFormState('CONFIRM');
       return;
     }
-    const { error, data } = await savePackagePolicy();
+    let policyId = '';
+    // save agent policy
+    if (!agentPolicy?.id && newAgentPolicy) {
+      try {
+        setFormState('LOADING');
+        const resp = await sendCreateAgentPolicy(newAgentPolicy, { withSysMonitoring });
+        setFormState('VALID');
+        if (resp.error) throw resp.error;
+        if (resp.data) {
+          notifications.toasts.addSuccess(
+            i18n.translate('xpack.fleet.createAgentPolicy.successNotificationTitle', {
+              defaultMessage: "Agent policy '{name}' created",
+              values: { name: newAgentPolicy.name },
+            })
+          );
+          policyId = resp.data.item.id;
+          setAgentPolicy(resp.data.item);
+
+          updatePackagePolicy({ policy_id: policyId });
+        }
+      } catch (e) {
+        notifications.toasts.addDanger(
+          i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
+            defaultMessage: 'Unable to create agent policy',
+          })
+        );
+        return;
+      }
+    }
+
+    // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
+    const { error, data } = await savePackagePolicy({
+      ...packagePolicy,
+      policy_id: packagePolicy.policy_id || policyId,
+    });
     if (!error) {
       setSavedPackagePolicy(data!.item);
 
@@ -367,7 +452,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     onSaveNavigate,
     agentPolicy,
     notifications.toasts,
-    packagePolicy.name,
+    newAgentPolicy,
+    packagePolicy,
+    updatePackagePolicy,
+    withSysMonitoring,
   ]);
 
   const integrationInfo = useMemo(
@@ -393,16 +481,35 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   );
 
   const stepSelectAgentPolicy = useMemo(
-    () => (
-      <StepSelectAgentPolicy
-        packageInfo={packageInfo}
-        defaultAgentPolicyId={queryParamsPolicyId}
-        agentPolicy={agentPolicy}
-        updateAgentPolicy={updateAgentPolicy}
-        setHasAgentPolicyError={setHasAgentPolicyError}
-      />
-    ),
-    [packageInfo, queryParamsPolicyId, agentPolicy, updateAgentPolicy]
+    () =>
+      agentPolicies.length > 0 ? (
+        <StepSelectAgentPolicy
+          packageInfo={packageInfo}
+          defaultAgentPolicyId={queryParamsPolicyId}
+          agentPolicy={agentPolicy}
+          updateAgentPolicy={updateAgentPolicy}
+          setHasAgentPolicyError={setHasAgentPolicyError}
+        />
+      ) : (
+        <AgentPolicyIntegrationForm
+          agentPolicy={newAgentPolicy}
+          updateAgentPolicy={updateNewAgentPolicy}
+          withSysMonitoring={withSysMonitoring}
+          updateSysMonitoring={(newValue) => setWithSysMonitoring(newValue)}
+          validation={validation}
+        />
+      ),
+    [
+      packageInfo,
+      queryParamsPolicyId,
+      agentPolicy,
+      updateAgentPolicy,
+      newAgentPolicy,
+      updateNewAgentPolicy,
+      validation,
+      withSysMonitoring,
+      agentPolicies.length,
+    ]
   );
 
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
@@ -472,7 +579,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     },
     {
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
-        defaultMessage: 'Apply to agent policy',
+        defaultMessage: 'Where to add this integration?',
       }),
       children: stepSelectAgentPolicy,
     },

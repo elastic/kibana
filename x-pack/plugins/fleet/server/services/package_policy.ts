@@ -109,7 +109,9 @@ class PackagePolicyService {
 
       // Check that the name does not exist already
       if (existingPoliciesWithName.items.length > 0) {
-        throw new IngestManagerError('There is already an integration policy with the same name');
+        throw new IngestManagerError(
+          `There is already an integration policy with the same name: ${packagePolicy.name}`
+        );
       }
     }
 
@@ -1382,7 +1384,9 @@ export async function incrementPackageName(
     ? packagePolicyData.items
         .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
         .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-        .sort()
+        .sort((a: number, b: number) => {
+          return a - b;
+        })
     : [];
 
   return `${packageName}-${

@@ -43,7 +43,7 @@ import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 
-import { isUnremovablePackage, getInstallation, getInstallationObject } from './index';
+import { getInstallation, getInstallationObject } from './index';
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
@@ -518,7 +518,6 @@ export async function createInstallation(options: {
 }) {
   const { savedObjectsClient, packageInfo, installSource } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
-  const removable = !isUnremovablePackage(pkgName);
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
 
   // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
@@ -530,6 +529,7 @@ export async function createInstallation(options: {
     ? true
     : undefined;
 
+  // TODO cleanup removable flag and isUnremovablePackage function
   const created = await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     {
@@ -539,7 +539,7 @@ export async function createInstallation(options: {
       es_index_patterns: toSaveESIndexPatterns,
       name: pkgName,
       version: pkgVersion,
-      removable,
+      removable: true,
       install_version: pkgVersion,
       install_status: 'installing',
       install_started_at: new Date().toISOString(),

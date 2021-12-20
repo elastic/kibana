@@ -23,7 +23,7 @@ import type {
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
 } from '../../types';
-import { FLEET_SYSTEM_PACKAGE } from '../../../common';
+import { FLEET_ELASTIC_AGENT_PACKAGE, FLEET_SYSTEM_PACKAGE } from '../../../common';
 import type {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
@@ -37,6 +37,7 @@ import type {
 } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
 import { incrementPackageName } from '../../services/package_policy';
+import { ensureInstalledPackage } from '../../services/epm/packages';
 
 export const getAgentPoliciesHandler: RequestHandler<
   undefined,
@@ -108,8 +109,25 @@ export const createAgentPolicyHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
-
+  // TODO set first default policy to is_default
+  // TODO installing these packages might take long (about 2 mins) which causes network timeout. this results in an error, and fails next agent policy creation request. Could this be improved by bundled default packages?
   try {
+    if (withSysMonitoring) {
+      // install system package if not yet installed
+      await ensureInstalledPackage({
+        savedObjectsClient: soClient,
+        pkgName: FLEET_SYSTEM_PACKAGE,
+        esClient,
+      });
+    }
+    if (request.body.monitoring_enabled?.length) {
+      // install elastic agent package if not yet installed
+      ensureInstalledPackage({
+        savedObjectsClient: soClient,
+        pkgName: FLEET_ELASTIC_AGENT_PACKAGE,
+        esClient,
+      });
+    }
     // eslint-disable-next-line prefer-const
     let [agentPolicy, newSysPackagePolicy] = await Promise.all([
       agentPolicyService.create(soClient, esClient, request.body, {
