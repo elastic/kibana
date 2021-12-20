@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { KibanaRequest } from 'src/core/server';
 import {
   elasticsearchServiceMock,
+  httpServerMock,
   savedObjectsClientMock,
 } from '../../../../../src/core/server/mocks';
 import {
@@ -16,6 +19,7 @@ import {
   AlertTypeState,
 } from '../../../alerting/server';
 import { alertsMock } from '../../../alerting/server/mocks';
+import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 
 export const createDefaultAlertExecutorOptions = <
   Params extends AlertTypeParams = never,
@@ -66,6 +70,11 @@ export const createDefaultAlertExecutorOptions = <
   tags: [],
   params,
   spaceId: 'SPACE_ID',
+  request: KibanaRequest.from(
+    httpServerMock.createRawRequest({
+      app: { requestId: 'fakeId' },
+    })
+  ),
   services: {
     alertInstanceFactory: alertsMock.createAlertServices<InstanceState, InstanceContext>()
       .alertInstanceFactory,
@@ -74,6 +83,7 @@ export const createDefaultAlertExecutorOptions = <
     shouldWriteAlerts: () => shouldWriteAlerts,
     shouldStopExecution: () => false,
     search: alertsMock.createAlertServices<InstanceState, InstanceContext>().search,
+    data: dataPluginMock.createStartContract(),
   },
   state,
   updatedBy: null,
