@@ -662,6 +662,7 @@ function addRACRuleTypes(
         attributes: {
           ...doc.attributes,
           alertTypeId: ruleTypeMappings[ruleType],
+          enabled: false,
           params: {
             ...doc.attributes.params,
             outputIndex: '',

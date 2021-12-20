@@ -37,8 +37,6 @@ import {
   createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
-import { isAlertExecutor } from './lib/detection_engine/signals/types';
-import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import { ManifestTask } from './endpoint/lib/artifacts';
 import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
 import { initSavedObjects } from './saved_objects';
@@ -73,10 +71,6 @@ import { registerEventLogProvider } from './lib/detection_engine/rule_execution_
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
-// eslint-disable-next-line no-restricted-imports
-import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
-// eslint-disable-next-line no-restricted-imports
-import { legacyIsNotificationAlertExecutor } from './lib/detection_engine/notifications/legacy_types';
 import { createSecurityRuleTypeWrapper } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 
 import { RequestContextFactory } from './request_context_factory';
@@ -279,29 +273,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
     plugins.features.registerKibanaFeature(getCasesKibanaFeature());
-
-    // Continue to register legacy rules against alerting client exposed through rule-registry
-    if (plugins.alerting != null) {
-      const signalRuleType = signalRulesAlertType({
-        logger,
-        eventsTelemetry: this.telemetryEventsSender,
-        version: pluginContext.env.packageInfo.version,
-        ml: plugins.ml,
-        lists: plugins.lists,
-        config,
-        experimentalFeatures,
-        eventLogService,
-      });
-      const ruleNotificationType = legacyRulesNotificationAlertType({ logger });
-
-      if (isAlertExecutor(signalRuleType)) {
-        plugins.alerting.registerType(signalRuleType);
-      }
-
-      if (legacyIsNotificationAlertExecutor(ruleNotificationType)) {
-        plugins.alerting.registerType(ruleNotificationType);
-      }
-    }
 
     const exceptionListsSetupEnabled = () => {
       return plugins.taskManager && plugins.lists;
