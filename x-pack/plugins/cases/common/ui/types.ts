@@ -17,12 +17,16 @@ import {
   ActionConnector,
   CaseExternalServiceBasic,
   CaseUserActionResponse,
+  CaseMetricsResponse,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
-interface CasesFeatures {
+export interface CasesContextFeatures {
   alerts: { sync: boolean };
+  metrics: CaseMetricsFeature[];
 }
+
+export type CasesFeatures = Partial<CasesContextFeatures>;
 
 export interface CasesContextValue {
   owner: string[];
@@ -30,7 +34,7 @@ export interface CasesContextValue {
   appTitle: string;
   userCanCrud: boolean;
   basePath: string;
-  features: CasesFeatures;
+  features: CasesContextFeatures;
 }
 
 export interface CasesUiConfigType {
@@ -53,11 +57,8 @@ export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
  */
 export type CaseViewRefreshPropInterface = null | {
   /**
-   * Refreshes the all of the user actions/comments in the view's timeline
-   * (note: this also triggers a silent `refreshCase()`)
+   * Refreshes the case its metrics and user actions/comments in the view's timeline
    */
-  refreshUserActionsAndComments: () => Promise<void>;
-  /** Refreshes the Case information only */
   refreshCase: () => Promise<void>;
 };
 
@@ -142,6 +143,14 @@ export interface AllCases extends CasesStatus {
   perPage: number;
   total: number;
 }
+
+export type CaseMetrics = CaseMetricsResponse;
+export type CaseMetricsFeature =
+  | 'alerts.count'
+  | 'alerts.users'
+  | 'alerts.hosts'
+  | 'connectors'
+  | 'lifespan';
 
 export enum SortFieldCase {
   createdAt = 'createdAt',

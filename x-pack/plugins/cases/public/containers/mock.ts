@@ -7,7 +7,7 @@
 
 import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
-import { ResolvedCase } from '../../common/ui/types';
+import type { ResolvedCase, CaseMetrics, CaseMetricsFeature } from '../../common/ui/types';
 import {
   Actions,
   ActionTypes,
@@ -39,6 +39,7 @@ export const basicSubCaseId = 'basic-sub-case-id';
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';
+const basicClosedAt = '2020-02-21T15:02:57.995Z';
 const laterTime = '2020-02-28T15:02:57.995Z';
 
 export const elasticUser = {
@@ -171,6 +172,32 @@ export const basicResolvedCase: ResolvedCase = {
   case: basicCase,
   outcome: 'aliasMatch',
   aliasTargetId: `${basicCase.id}_2`,
+};
+
+export const basicCaseMetricsFeatures: CaseMetricsFeature[] = [
+  'alerts.count',
+  'alerts.users',
+  'alerts.hosts',
+  'connectors',
+];
+
+export const basicCaseMetrics: CaseMetrics = {
+  alerts: {
+    count: 12,
+    hosts: {
+      total: 2,
+      values: [
+        { name: 'foo', count: 2 },
+        { name: 'bar', count: 10 },
+      ],
+    },
+    users: {
+      total: 1,
+      values: [{ name: 'Jon', count: 12 }],
+    },
+  },
+  connectors: { total: 1 },
+  lifespan: { creationDate: basicCreatedAt, closeDate: basicClosedAt },
 };
 
 export const collectionCase: Case = {

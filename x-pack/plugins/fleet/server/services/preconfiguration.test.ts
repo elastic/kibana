@@ -9,6 +9,7 @@ import uuid from 'uuid';
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
 
 import type {
   InstallResult,
@@ -225,7 +226,8 @@ describe('policy preconfiguration', () => {
       esClient,
       [],
       [],
-      mockDefaultOutput
+      mockDefaultOutput,
+      DEFAULT_SPACE_ID
     );
 
     expect(policies.length).toBe(0);
@@ -242,7 +244,8 @@ describe('policy preconfiguration', () => {
       esClient,
       [],
       [{ name: 'test_package', version: '3.0.0' }],
-      mockDefaultOutput
+      mockDefaultOutput,
+      DEFAULT_SPACE_ID
     );
 
     expect(policies.length).toBe(0);
@@ -271,7 +274,8 @@ describe('policy preconfiguration', () => {
         },
       ] as PreconfiguredAgentPolicy[],
       [{ name: 'test_package', version: '3.0.0' }],
-      mockDefaultOutput
+      mockDefaultOutput,
+      DEFAULT_SPACE_ID
     );
 
     expect(policies.length).toEqual(1);
@@ -322,7 +326,8 @@ describe('policy preconfiguration', () => {
         },
       ] as PreconfiguredAgentPolicy[],
       [{ name: 'test_package', version: '3.0.0' }],
-      mockDefaultOutput
+      mockDefaultOutput,
+      DEFAULT_SPACE_ID
     );
 
     expect(mockedPackagePolicyService.create).not.toBeCalled();
@@ -371,7 +376,8 @@ describe('policy preconfiguration', () => {
         },
       ] as PreconfiguredAgentPolicy[],
       [{ name: 'test_package', version: '3.0.0' }],
-      mockDefaultOutput
+      mockDefaultOutput,
+      DEFAULT_SPACE_ID
     );
 
     expect(mockedPackagePolicyService.create).toBeCalledTimes(1);
@@ -398,7 +404,8 @@ describe('policy preconfiguration', () => {
           { name: 'test_package', version: '3.0.0' },
           { name: 'test_package', version: '2.0.0' },
         ],
-        mockDefaultOutput
+        mockDefaultOutput,
+        DEFAULT_SPACE_ID
       )
     ).rejects.toThrow(
       'Duplicate packages specified in configuration: test_package-3.0.0, test_package-2.0.0'
@@ -429,7 +436,8 @@ describe('policy preconfiguration', () => {
         esClient,
         policies,
         [{ name: 'test_package', version: '3.0.0' }],
-        mockDefaultOutput
+        mockDefaultOutput,
+        DEFAULT_SPACE_ID
       )
     ).rejects.toThrow(
       '[Test policy] could not be added. [test_package] could not be installed due to error: [Error: REGISTRY ERROR]'
@@ -460,7 +468,8 @@ describe('policy preconfiguration', () => {
         esClient,
         policies,
         [{ name: 'CANNOT_MATCH', version: 'x.y.z' }],
-        mockDefaultOutput
+        mockDefaultOutput,
+        DEFAULT_SPACE_ID
       )
     ).rejects.toThrow(
       '[Test policy] could not be added. [test_package] is not installed, add [test_package] to [xpack.fleet.packages] or remove it from [Test package].'
@@ -484,7 +493,8 @@ describe('policy preconfiguration', () => {
           },
         ] as PreconfiguredAgentPolicy[],
         [],
-        mockDefaultOutput
+        mockDefaultOutput,
+        DEFAULT_SPACE_ID
       );
 
     expect(policiesA.length).toEqual(1);
@@ -509,7 +519,8 @@ describe('policy preconfiguration', () => {
           },
         ] as PreconfiguredAgentPolicy[],
         [],
-        mockDefaultOutput
+        mockDefaultOutput,
+        DEFAULT_SPACE_ID
       );
 
     expect(policiesB.length).toEqual(1);
@@ -548,7 +559,8 @@ describe('policy preconfiguration', () => {
           },
         ] as PreconfiguredAgentPolicy[],
         [],
-        mockDefaultOutput
+        mockDefaultOutput,
+        DEFAULT_SPACE_ID
       );
     expect(spyAgentPolicyServiceUpdate).toBeCalled();
     expect(spyAgentPolicyServiceUpdate).toBeCalledWith(
@@ -584,7 +596,8 @@ describe('policy preconfiguration', () => {
         esClient,
         [policy],
         [],
-        mockDefaultOutput
+        mockDefaultOutput,
+        DEFAULT_SPACE_ID
       );
     expect(spyAgentPolicyServiceUpdate).not.toBeCalled();
     expect(policies.length).toEqual(1);

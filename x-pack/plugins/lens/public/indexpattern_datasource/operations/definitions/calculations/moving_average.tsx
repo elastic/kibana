@@ -193,7 +193,7 @@ function MovingAverageParamEditor({
       label={i18n.translate('xpack.lens.indexPattern.movingAverage.window', {
         defaultMessage: 'Window size',
       })}
-      display="columnCompressed"
+      display="rowCompressed"
       fullWidth
       isInvalid={!isValidNumber(inputValue)}
     >

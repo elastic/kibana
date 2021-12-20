@@ -50,7 +50,6 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
     },
     [dispatch]
   );
-
   const indexFieldsSearch = useCallback(
     (selectedDataViewId: string) => {
       const asyncSearch = async () => {

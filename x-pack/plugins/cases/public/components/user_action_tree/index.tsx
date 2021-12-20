@@ -35,7 +35,7 @@ import {
   ContextTypeUserRt,
 } from '../../../common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { OnUpdateFields } from '../case_view';
+import type { OnUpdateFields } from '../case_view';
 import {
   getConnectorLabelTitle,
   getLabelTitle,
