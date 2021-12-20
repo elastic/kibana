@@ -40,14 +40,19 @@ describe('Fleet host isolation exceptions card filters card', () => {
       });
     });
 
-    it('should render the card correctly', async () => {
+    it('should call the API and render the card correctly', async () => {
       getHostIsolationExceptionItemsMock.mockResolvedValue({
         total: 5,
       });
       const renderResult = renderComponent();
 
       await waitFor(() => {
-        expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled();
+        expect(getHostIsolationExceptionItemsMock).toHaveBeenCalledWith({
+          http: mockedContext.coreStart.http,
+          filter: `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`,
+          page: 1,
+          perPage: 1,
+        });
       });
 
       expect(
