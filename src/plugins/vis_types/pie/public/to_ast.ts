@@ -11,6 +11,7 @@ import { buildExpression, buildExpressionFunction } from '../../../expressions/p
 import {
   PIE_VIS_EXPRESSION_NAME,
   PIE_LABELS_FUNCTION,
+  PieVisExpressionFunctionDefinition,
   PieVisParams,
   LabelsParams,
 } from '../../../chart_expressions/expression_pie/common';
@@ -67,7 +68,10 @@ export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, par
     splitRow: schemas.split_row?.map(prepareDimension),
   };
 
-  const visTypePie = buildExpressionFunction(PIE_VIS_EXPRESSION_NAME, args);
+  const visTypePie = buildExpressionFunction<PieVisExpressionFunctionDefinition>(
+    PIE_VIS_EXPRESSION_NAME,
+    args
+  );
 
   const ast = buildExpression([getEsaggsFn(vis), visTypePie]);
 
