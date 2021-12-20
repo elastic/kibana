@@ -8,12 +8,15 @@
 import { FLEET_AGENT_POLICIES, navigateTo } from '../tasks/navigation';
 import { addIntegration } from '../tasks/integrations';
 
-import { login } from '../tasks/login';
+import { loginWithRole } from '../tasks/login';
+import { ROLES } from '../test';
 
 describe('Add Integration', () => {
   const integration = 'Osquery Manager';
   beforeEach(() => {
-    login();
+    cy.visit('/');
+    loginWithRole(ROLES.t1_analyst);
+    cy.wait(5000);
   });
 
   it('should display Osquery integration in the Policies list once installed ', () => {
