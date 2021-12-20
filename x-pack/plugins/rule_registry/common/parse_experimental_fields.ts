@@ -4,25 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import {
-  technicalRuleFieldMap,
-  TechnicalRuleFieldMap,
-} from './assets/field_maps/technical_rule_field_map';
+  experimentalRuleFieldMap,
+  ExperimentalRuleFieldMap,
+} from './assets/field_maps/experimental_rule_field_map';
+
 import { runtimeTypeFromFieldMap } from './field_map';
 
-const technicalFieldRuntimeType =
-  runtimeTypeFromFieldMap<TechnicalRuleFieldMap>(technicalRuleFieldMap);
+const experimentalFieldRuntimeType =
+  runtimeTypeFromFieldMap<ExperimentalRuleFieldMap>(experimentalRuleFieldMap);
 
-export const parseTechnicalFields = (input: unknown) => {
-  const validate = technicalFieldRuntimeType.decode(input);
+export const parseExperimentalFields = (input: unknown) => {
+  const validate = experimentalFieldRuntimeType.decode(input);
 
   if (isLeft(validate)) {
     throw new Error(PathReporter.report(validate).join('\n'));
   }
-  return technicalFieldRuntimeType.encode(validate.right);
+  return experimentalFieldRuntimeType.encode(validate.right);
 };
 
-export type ParsedTechnicalFields = ReturnType<typeof parseTechnicalFields>;
+export type ParsedExperimentalFields = ReturnType<typeof parseExperimentalFields>;

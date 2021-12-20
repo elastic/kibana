@@ -6,6 +6,9 @@
  */
 
 import { CoreSetup, Logger } from 'src/core/server';
+import { mappingFromFieldMap } from '../../../../rule_registry/common/mapping_from_field_map';
+import { experimentalRuleFieldMap } from '../../../../rule_registry/common/assets/field_maps/experimental_rule_field_map';
+
 import { Dataset, RuleRegistryPluginSetupContract } from '../../../../rule_registry/server';
 import type { InfraFeatureId } from '../../../common/constants';
 import { RuleRegistrationContext, RulesServiceStartDeps } from './types';
@@ -31,7 +34,7 @@ export const createRuleDataClient = ({
     componentTemplates: [
       {
         name: 'mappings',
-        mappings: {},
+        mappings: mappingFromFieldMap(experimentalRuleFieldMap, 'strict'),
       },
     ],
   });

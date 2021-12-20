@@ -132,7 +132,6 @@ export function runtimeTypeFromFieldMap<TFieldMap extends FieldMap>(
   }
 
   const required = pickBy(fieldMap, (field) => field.required);
-
   return t.intersection([
     t.exact(t.partial(mapToType(fieldMap))),
     t.type(mapToType(required)),

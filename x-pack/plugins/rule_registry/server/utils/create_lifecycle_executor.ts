@@ -18,6 +18,7 @@ import {
   AlertTypeParams,
   AlertTypeState,
 } from '../../../alerting/server';
+import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
   ALERT_DURATION,
@@ -188,7 +189,7 @@ export const createLifecycleExecutor =
 
     const trackedAlertsDataMap: Record<
       string,
-      { indexName: string; fields: Partial<ParsedTechnicalFields> }
+      { indexName: string; fields: Partial<ParsedTechnicalFields & ParsedExperimentalFields> }
     > = {};
 
     if (trackedAlertStates.length) {
@@ -252,7 +253,7 @@ export const createLifecycleExecutor =
           started: commonRuleFields[TIMESTAMP],
         };
 
-        const event: ParsedTechnicalFields = {
+        const event: ParsedTechnicalFields & ParsedExperimentalFields = {
           ...alertData?.fields,
           ...commonRuleFields,
           ...currentAlertData,

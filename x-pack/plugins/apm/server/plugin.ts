@@ -16,6 +16,7 @@ import {
 } from 'src/core/server';
 import { isEmpty, mapValues } from 'lodash';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
+import { experimentalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/experimental_rule_field_map';
 import { Dataset } from '../../rule_registry/server';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
@@ -110,6 +111,7 @@ export class APMPlugin
           name: 'mappings',
           mappings: mappingFromFieldMap(
             {
+              ...experimentalRuleFieldMap,
               [SERVICE_NAME]: {
                 type: 'keyword',
               },
