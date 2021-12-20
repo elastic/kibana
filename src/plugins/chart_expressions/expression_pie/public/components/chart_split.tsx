@@ -9,7 +9,7 @@
 import React from 'react';
 import { Accessor, AccessorFn, GroupBy, GroupBySort, SmallMultiples } from '@elastic/charts';
 import { DatatableColumn } from '../../../../expressions/public';
-import { SplitDimensionParams } from '../types';
+import { SplitDimensionParams } from '../../common/types';
 
 interface ChartSplitProps {
   splitColumnAccessor?: Accessor | AccessorFn;

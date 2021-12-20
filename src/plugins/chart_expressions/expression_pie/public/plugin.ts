@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  DocLinksStart,
-  Plugin,
-  ThemeServiceStart,
-} from '../../../../core/public';
+import { CoreSetup, CoreStart, DocLinksStart, ThemeServiceStart } from '../../../../core/public';
 import { ChartsPluginSetup } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { pieLabelsFunction, pieVisFunction } from '../common';

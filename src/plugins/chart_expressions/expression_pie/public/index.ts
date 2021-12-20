@@ -12,4 +12,4 @@ export function plugin() {
   return new ExpressionPiePlugin();
 }
 
-export { ExpressionPiePluginSetup, ExpressionPiePluginStart } from './types';
+export type { ExpressionPiePluginSetup, ExpressionPiePluginStart } from './types';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PIE_LABELS_FUNCTION, PIE_LABELS_VALUE, PIE_VIS_EXPRESSION_NAME } from '../constants';
+import { PIE_LABELS_VALUE, PIE_VIS_EXPRESSION_NAME } from '../constants';
 import {
   ExpressionFunctionDefinition,
   Datatable,
