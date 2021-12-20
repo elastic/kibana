@@ -31,7 +31,6 @@ import {
 import { FleetTrustedAppsCard } from './endpoint_package_custom_extension/components/fleet_trusted_apps_card';
 import { LinkWithIcon } from './endpoint_package_custom_extension/components/link_with_icon';
 import { FleetIntegrationHostIsolationExceptionsCard } from './endpoint_package_custom_extension/components/fleet_integration_host_isolation_exceptions_card';
-import { useCanSeeHostIsolationExceptionsMenu } from '../../../host_isolation_exceptions/view/hooks';
 /**
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
@@ -62,8 +61,6 @@ const WrappedPolicyDetailsForm = memo<{
   const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
     'trustedAppsByPolicyEnabled'
   );
-
-  const canSeeHostIsolationExeptions = useCanSeeHostIsolationExceptionsMenu();
 
   // When the form is initially displayed, trigger the Redux middleware which is based on
   // the location information stored via the `userChangedUrl` action.
@@ -184,9 +181,7 @@ const WrappedPolicyDetailsForm = memo<{
               customLink={policyTrustedAppsLink}
             />
             <EuiSpacer size="s" />
-            {canSeeHostIsolationExeptions ? (
-              <FleetIntegrationHostIsolationExceptionsCard policyId={policyId} />
-            ) : null}
+            <FleetIntegrationHostIsolationExceptionsCard policyId={policyId} />
           </div>
           <EuiSpacer size="l" />
           <div>
