@@ -16,6 +16,7 @@ import type {
   IInterpreterRenderHandlers,
   Datatable,
 } from '../../../../src/plugins/expressions/public';
+import type { VisualizeEditorLayersContext } from '../../../../src/plugins/visualizations/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType } from '../common';
 import type { Query } from '../../../../src/plugins/data/public';
@@ -159,35 +160,6 @@ export type StateSetter<T> = (newState: T | ((prevState: T) => T)) => void;
 
 export interface InitializationOptions {
   isFullEditor?: boolean;
-}
-
-interface SplitFilters {
-  color?: string;
-  filter?: Query;
-  id?: string;
-  label?: string;
-}
-
-interface Metric {
-  agg: string;
-  fieldName: string;
-  params?: Record<string, unknown>;
-  isFullReference: boolean;
-  color?: string;
-  pipelineAggType?: string;
-}
-
-export interface VisualizeEditorLayersContext {
-  indexPatternId: string;
-  timeFieldName?: string;
-  chartType?: string;
-  termsParams?: Record<string, unknown>;
-  splitField?: string;
-  splitMode?: string;
-  splitFilters?: SplitFilters[];
-  palette?: PaletteOutput;
-  metrics: Metric[];
-  timeInterval?: string;
 }
 
 export interface VisualizeEditorContext {

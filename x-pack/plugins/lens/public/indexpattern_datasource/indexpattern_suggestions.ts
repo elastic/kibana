@@ -7,8 +7,9 @@
 
 import { flatten, minBy, pick, mapValues, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { VisualizeEditorLayersContext } from '../../../../../src/plugins/visualizations/public';
 import { generateId } from '../id_generator';
-import type { DatasourceSuggestion, TableChangeType, VisualizeEditorLayersContext } from '../types';
+import type { DatasourceSuggestion, TableChangeType } from '../types';
 import { columnToOperation } from './indexpattern';
 import {
   insertNewColumn,

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { LayersSettings } from '../../../../visualizations/public';
+import type { VisualizeEditorLayersContext } from '../../../../visualizations/public';
 import type { Metric } from '../../common/types';
 import { SUPPORTED_METRICS } from './supported_metrics';
 import {
@@ -17,7 +17,10 @@ import {
   computeParentSeries,
 } from './metrics_helpers';
 
-export const getSeries = (metrics: Metric[], color: string): LayersSettings['metrics'] | null => {
+export const getSeries = (
+  metrics: Metric[],
+  color: string
+): VisualizeEditorLayersContext['metrics'] | null => {
   const metricIdx = metrics.length - 1;
   // find the metric idx that has math expression
   const mathMetricIdx = metrics.findIndex((metric) => metric.type === 'math');
@@ -28,7 +31,7 @@ export const getSeries = (metrics: Metric[], color: string): LayersSettings['met
     return null;
   }
 
-  let metricsArray: LayersSettings['metrics'] = [];
+  let metricsArray: VisualizeEditorLayersContext['metrics'] = [];
   switch (aggregation) {
     case 'percentile': {
       const percentiles = metrics[metricIdx].percentiles;
@@ -36,7 +39,7 @@ export const getSeries = (metrics: Metric[], color: string): LayersSettings['met
         const percentilesSeries = getPercentilesSeries(
           percentiles,
           fieldName
-        ) as LayersSettings['metrics'];
+        ) as VisualizeEditorLayersContext['metrics'];
         metricsArray = [...metricsArray, ...percentilesSeries];
       }
       break;
@@ -71,7 +74,7 @@ export const getSeries = (metrics: Metric[], color: string): LayersSettings['met
         metrics[metricIdx],
         metrics,
         color
-      ) as LayersSettings['metrics'];
+      ) as VisualizeEditorLayersContext['metrics'];
       break;
     }
     case 'cumulative_sum': {
@@ -106,7 +109,7 @@ export const getSeries = (metrics: Metric[], color: string): LayersSettings['met
         metrics[metricIdx],
         metrics,
         color
-      ) as LayersSettings['metrics'];
+      ) as VisualizeEditorLayersContext['metrics'];
       break;
     }
     case 'filter_ratio': {

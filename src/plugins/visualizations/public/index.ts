@@ -31,7 +31,7 @@ export type {
   Schema,
   ISchemas,
   NavigateToLensOptions,
-  LayersSettings,
+  VisualizeEditorLayersContext,
 } from './vis_types';
 export type { Vis, SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;

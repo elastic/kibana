@@ -15,5 +15,5 @@ export type {
   ISchemas,
   Schema,
   NavigateToLensOptions,
-  LayersSettings,
+  VisualizeEditorLayersContext,
 } from './types';

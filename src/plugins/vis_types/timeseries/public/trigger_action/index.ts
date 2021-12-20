@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 import { PaletteOutput } from '../../../../charts/public';
-import type { NavigateToLensOptions, LayersSettings } from '../../../../visualizations/public';
+import type {
+  NavigateToLensOptions,
+  VisualizeEditorLayersContext,
+} from '../../../../visualizations/public';
 import type { Panel } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
 import { getDataSourceInfo } from './get_datasource_info';
@@ -25,7 +28,7 @@ export const triggerVisualizeToLensOptions = async (
   if (model.type !== PANEL_TYPES.TIMESERIES || !model.use_kibana_indexes) {
     return null;
   }
-  const options: { [key: string]: LayersSettings } = {};
+  const options: { [key: string]: VisualizeEditorLayersContext } = {};
 
   // handle multiple layers/series
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
@@ -64,7 +67,7 @@ export const triggerVisualizeToLensOptions = async (
       });
     }
 
-    const triggerOptions: LayersSettings = {
+    const triggerOptions: VisualizeEditorLayersContext = {
       indexPatternId,
       timeFieldName: timeField,
       chartType:

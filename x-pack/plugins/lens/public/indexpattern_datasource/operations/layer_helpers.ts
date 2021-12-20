@@ -8,12 +8,12 @@
 import { partition, mapValues, pickBy, isArray } from 'lodash';
 import { CoreStart } from 'kibana/public';
 import { Query } from 'src/plugins/data/common';
+import type { VisualizeEditorLayersContext } from '../../../../../../src/plugins/visualizations/public';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
   OperationMetadata,
   VisualizationDimensionGroupConfig,
-  VisualizeEditorLayersContext,
 } from '../../types';
 import {
   operationDefinitionMap,

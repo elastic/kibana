@@ -90,7 +90,7 @@ interface Metric {
   color?: string;
 }
 
-export interface LayersSettings {
+export interface VisualizeEditorLayersContext {
   indexPatternId: string;
   timeFieldName?: string;
   chartType?: string;
@@ -105,7 +105,7 @@ export interface LayersSettings {
 
 export interface NavigateToLensOptions {
   layers: {
-    [key: string]: LayersSettings;
+    [key: string]: VisualizeEditorLayersContext;
   };
   configuration: {
     fill: number | string;
