@@ -71,7 +71,7 @@ export function getClustersState(
       'hits.hits._source.cluster_uuid',
       'hits.hits._source.elasticsearch.cluster.id',
       'hits.hits._source.cluster_state',
-      'hits.hits._source.elasticsearch.cluster.stats.state',
+      'hits.hits._source.elasticsearch.cluster.state',
     ],
     body: {
       query: {
