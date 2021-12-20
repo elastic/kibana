@@ -39,20 +39,20 @@ const exampleCustomMetric = {
 
 describe('Expression', () => {
   async function setup(currentOptions: AlertContextMeta) {
-    const alertParams = {
+    const ruleParams = {
       criteria: [],
       nodeType: undefined,
       filterQueryText: '',
     };
     const wrapper = mountWithIntl(
       <Expressions
-        alertInterval="1m"
-        alertThrottle="1m"
+        ruleInterval="1m"
+        ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"
-        alertParams={alertParams as any}
+        ruleParams={ruleParams as any}
         errors={{}}
-        setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}
-        setAlertProperty={() => {}}
+        setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
+        setRuleProperty={() => {}}
         metadata={currentOptions}
       />
     );
@@ -65,7 +65,7 @@ describe('Expression', () => {
 
     await update();
 
-    return { wrapper, update, alertParams };
+    return { wrapper, update, ruleParams };
   }
 
   it('should prefill the alert using the context metadata', async () => {
@@ -75,10 +75,10 @@ describe('Expression', () => {
       customMetrics: [],
       options: { metric: { type: 'memory' } },
     };
-    const { alertParams } = await setup(currentOptions as AlertContextMeta);
-    expect(alertParams.nodeType).toBe('pod');
-    expect(alertParams.filterQueryText).toBe('foo');
-    expect(alertParams.criteria).toEqual([
+    const { ruleParams } = await setup(currentOptions as AlertContextMeta);
+    expect(ruleParams.nodeType).toBe('pod');
+    expect(ruleParams.filterQueryText).toBe('foo');
+    expect(ruleParams.criteria).toEqual([
       {
         metric: 'memory',
         comparator: Comparator.GT,
@@ -94,7 +94,7 @@ describe('Expression', () => {
     const FILTER_QUERY =
       '{"bool":{"should":[{"match_phrase":{"host.name":"testHostName"}}],"minimum_should_match":1}}';
 
-    const alertParams = {
+    const ruleParams = {
       criteria: [
         {
           metric: 'cpu',
@@ -111,13 +111,13 @@ describe('Expression', () => {
 
     const wrapper = shallowWithIntl(
       <Expressions
-        alertInterval="1m"
-        alertThrottle="1m"
+        ruleInterval="1m"
+        ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"
-        alertParams={alertParams as any}
+        ruleParams={ruleParams as any}
         errors={{}}
-        setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}
-        setAlertProperty={() => {}}
+        setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
+        setRuleProperty={() => {}}
         metadata={{}}
       />
     );
@@ -135,11 +135,11 @@ describe('Expression', () => {
         customMetrics: [exampleCustomMetric],
         options: { metric: exampleCustomMetric },
       };
-      const { alertParams, update } = await setup(currentOptions as AlertContextMeta);
+      const { ruleParams, update } = await setup(currentOptions as AlertContextMeta);
       await update();
-      expect(alertParams.nodeType).toBe('tx');
-      expect(alertParams.filterQueryText).toBe('');
-      expect(alertParams.criteria).toEqual([
+      expect(ruleParams.nodeType).toBe('tx');
+      expect(ruleParams.filterQueryText).toBe('');
+      expect(ruleParams.criteria).toEqual([
         {
           metric: 'custom',
           comparator: Comparator.GT,
@@ -163,7 +163,7 @@ describe('ExpressionRow', () => {
         addExpression={() => {}}
         key={1}
         expressionId={1}
-        setAlertParams={() => {}}
+        setRuleParams={() => {}}
         errors={{
           aggField: [],
           timeSizeUnit: [],
@@ -171,7 +171,15 @@ describe('ExpressionRow', () => {
           metric: [],
         }}
         expression={expression}
-        fields={[{ name: 'some.system.field', type: 'bzzz' }]}
+        fields={[
+          {
+            name: 'some.system.field',
+            type: 'bzzz',
+            searchable: true,
+            aggregatable: true,
+            displayable: true,
+          },
+        ]}
       />
     );
 
