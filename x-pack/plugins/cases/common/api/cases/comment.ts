@@ -42,7 +42,7 @@ export enum CommentType {
   actions = 'actions',
 }
 
-export enum ActionType {
+export enum IsolateHostActionType {
   isolate = 'isolate',
   unisolate = 'unisolate',
 }

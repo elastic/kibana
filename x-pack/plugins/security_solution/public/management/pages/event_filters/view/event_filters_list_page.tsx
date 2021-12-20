@@ -51,6 +51,7 @@ import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks
 import { useToasts } from '../../../../common/lib/kibana';
 import { getLoadPoliciesError } from '../../../common/translations';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
+import { ManagementPageLoader } from '../../../components/management_page_loader';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -176,9 +177,9 @@ export const EventFiltersListPage = memo(() => {
   );
 
   const handleOnSearch = useCallback(
-    (query: string) => {
+    (query: string, includedPolicies?: string) => {
       dispatch({ type: 'eventFiltersForceRefresh', payload: { forceRefresh: true } });
-      navigateCallback({ filter: query });
+      navigateCallback({ filter: query, included_policies: includedPolicies });
     },
     [navigateCallback, dispatch]
   );
@@ -234,6 +235,10 @@ export const EventFiltersListPage = memo(() => {
     [artifactCardPropsPerItem]
   );
 
+  if (isLoading && !doesDataExist) {
+    return <ManagementPageLoader data-test-subj="eventFilterListLoader" />;
+  }
+
   return (
     <AdministrationListPage
       headerBackComponent={backButton}
@@ -280,6 +285,9 @@ export const EventFiltersListPage = memo(() => {
             placeholder={i18n.translate('xpack.securitySolution.eventFilter.search.placeholder', {
               defaultMessage: 'Search on the fields below: name, comments, value',
             })}
+            hasPolicyFilter
+            policyList={policiesRequest.data?.items}
+            defaultIncludedPolicies={location.included_policies}
           />
           <EuiSpacer size="m" />
           <EuiText color="subdued" size="xs" data-test-subj="eventFiltersCountLabel">

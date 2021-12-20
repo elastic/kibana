@@ -14,6 +14,55 @@ import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { calculateBounds, IKibanaSearchResponse } from '../../../../../data/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FetchDeps } from './fetch_all';
+
+function getDeps() {
+  const deps = {
+    appStateContainer: {
+      getState: () => {
+        return { interval: 'auto' };
+      },
+    } as ReduxLikeStateContainer<AppState>,
+    abortController: new AbortController(),
+    data: discoverServiceMock.data,
+    inspectorAdapters: { requests: new RequestAdapter() },
+    onResults: jest.fn(),
+    savedSearch: savedSearchMockWithTimeField,
+    searchSessionId: '123',
+  } as unknown as FetchDeps;
+  deps.data.query.timefilter.timefilter.getTime = () => {
+    return { from: '2021-07-07T00:05:13.590', to: '2021-07-07T11:20:13.590' };
+  };
+
+  deps.data.query.timefilter.timefilter.calculateBounds = (timeRange) => calculateBounds(timeRange);
+  return deps;
+}
+
+const requestResult = {
+  id: 'Fjk5bndxTHJWU2FldVRVQ0tYR0VqOFEcRWtWNDhOdG5SUzJYcFhONVVZVTBJQToxMDMwOQ==',
+  rawResponse: {
+    took: 2,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: { max_score: null, hits: [], total: 42 },
+    aggregations: {
+      '2': {
+        buckets: [
+          {
+            key_as_string: '2021-07-07T06:36:00.000+02:00',
+            key: 1625632560000,
+            doc_count: 1,
+          },
+        ],
+      },
+    },
+  },
+  isPartial: false,
+  isRunning: false,
+  total: 1,
+  loaded: 1,
+  isRestored: false,
+} as unknown as IKibanaSearchResponse<estypes.SearchResponse<unknown>>;
 
 describe('test fetchCharts', () => {
   test('updateSearchSource helper function', () => {
@@ -52,76 +101,36 @@ describe('test fetchCharts', () => {
   });
 
   test('resolves with summarized chart data', async () => {
-    const deps = {
-      appStateContainer: {
-        getState: () => {
-          return { interval: 'auto' };
-        },
-      } as ReduxLikeStateContainer<AppState>,
-      abortController: new AbortController(),
-      data: discoverServiceMock.data,
-      inspectorAdapters: { requests: new RequestAdapter() },
-      onResults: jest.fn(),
-      searchSessionId: '123',
-    };
-    deps.data.query.timefilter.timefilter.getTime = () => {
-      return { from: '2021-07-07T00:05:13.590', to: '2021-07-07T11:20:13.590' };
-    };
+    savedSearchMockWithTimeField.searchSource.fetch$ = () => of(requestResult);
 
-    deps.data.query.timefilter.timefilter.calculateBounds = (timeRange) =>
-      calculateBounds(timeRange);
-
-    savedSearchMockWithTimeField.searchSource.fetch$ = () =>
-      of({
-        id: 'Fjk5bndxTHJWU2FldVRVQ0tYR0VqOFEcRWtWNDhOdG5SUzJYcFhONVVZVTBJQToxMDMwOQ==',
-        rawResponse: {
-          took: 2,
-          timed_out: false,
-          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-          hits: { max_score: null, hits: [], total: 42 },
-          aggregations: {
-            '2': {
-              buckets: [
-                {
-                  key_as_string: '2021-07-07T06:36:00.000+02:00',
-                  key: 1625632560000,
-                  doc_count: 1,
-                },
-              ],
-            },
-          },
-        },
-        isPartial: false,
-        isRunning: false,
-        total: 1,
-        loaded: 1,
-        isRestored: false,
-      } as unknown as IKibanaSearchResponse<estypes.SearchResponse<unknown>>);
-
-    const result = await fetchChart(savedSearchMockWithTimeField.searchSource, deps);
+    const result = await fetchChart(savedSearchMockWithTimeField.searchSource, getDeps());
     expect(result).toHaveProperty('totalHits', 42);
     expect(result).toHaveProperty('bucketInterval.description', '0 milliseconds');
     expect(result).toHaveProperty('chartData');
   });
 
   test('rejects promise on query failure', async () => {
-    const deps = {
-      appStateContainer: {
-        getState: () => {
-          return { interval: 'auto' };
-        },
-      } as ReduxLikeStateContainer<AppState>,
-      abortController: new AbortController(),
-      data: discoverServiceMock.data,
-      inspectorAdapters: { requests: new RequestAdapter() },
-      onResults: jest.fn(),
-      searchSessionId: '123',
-    };
-
     savedSearchMockWithTimeField.searchSource.fetch$ = () => throwErrorRx({ msg: 'Oh noes!' });
 
-    await expect(fetchChart(savedSearchMockWithTimeField.searchSource, deps)).rejects.toEqual({
+    await expect(fetchChart(savedSearchMockWithTimeField.searchSource, getDeps())).rejects.toEqual({
       msg: 'Oh noes!',
     });
+  });
+
+  test('fetch$ is called with execution context containing savedSearch id', async () => {
+    const fetch$Mock = jest.fn().mockReturnValue(of(requestResult));
+
+    savedSearchMockWithTimeField.searchSource.fetch$ = fetch$Mock;
+
+    await fetchChart(savedSearchMockWithTimeField.searchSource, getDeps());
+    expect(fetch$Mock.mock.calls[0][0].executionContext).toMatchInlineSnapshot(`
+      Object {
+        "description": "fetch chart data and total hits",
+        "id": "the-saved-search-id-with-timefield",
+        "name": "discover",
+        "type": "application",
+        "url": "/",
+      }
+    `);
   });
 });

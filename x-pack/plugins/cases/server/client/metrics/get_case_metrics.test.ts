@@ -11,12 +11,9 @@ import { createCasesClientMock } from '../mocks';
 import { CasesClientArgs } from '../types';
 import { createAuthorizationMock } from '../../authorization/mock';
 import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import {
-  createAlertServiceMock,
-  createAttachmentServiceMock,
-  createCaseServiceMock,
-} from '../../services/mocks';
+import { createAttachmentServiceMock, createCaseServiceMock } from '../../services/mocks';
 import { SavedObject } from 'kibana/server';
+import { mockAlertsService } from './alerts/test_utils';
 
 describe('getMetrics', () => {
   const mockCreateCloseInfo = {
@@ -57,7 +54,7 @@ describe('getMetrics', () => {
       total: 2,
       values: [{ name: 'host1', id: '1', count: 1 }],
     });
-    expect(metrics.alerts?.users).toBeUndefined();
+    expect(metrics.alerts?.users).toEqual({ total: 2, values: [{ count: 1, name: 'user1' }] });
   });
 
   it('populates multiple sections at a time', async () => {
@@ -101,28 +98,27 @@ describe('getMetrics', () => {
 
     try {
       await getCaseMetrics(
-        { caseId: '', features: ['bananas', 'lifespan', 'alerts.count'] },
+        { caseId: '1', features: ['bananas', 'lifespan', 'alerts.count'] },
         client,
         clientArgs
       );
     } catch (error) {
       expect(error.message).toMatchInlineSnapshot(
-        `"Failed to retrieve metrics within client for case id: 1: Error: invalid features: [bananas], please only provide valid features: [alertHosts, alertUsers, alertsCount, connectors, lifespan]"`
+        `"Failed to retrieve metrics within client for case id: 1: Error: invalid features: [bananas], please only provide valid features: [alerts.count, alerts.hosts, alerts.users, connectors, lifespan]"`
       );
     }
   });
 
   it('calls the alert handler once to compute the metrics for both hosts and users', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
 
     await getCaseMetrics(
-      { caseId: '', features: ['alertUsers', 'alertHosts'] },
+      { caseId: '', features: ['alerts.users', 'alerts.hosts'] },
       client,
       clientArgs
     );
 
-    expect(mockServices.alertsService.countUniqueValuesForFields).toBeCalledTimes(1);
-    expect(mockServices.alertsService.getMostFrequentValuesForFields).toBeCalledTimes(1);
+    expect(mockServices.alertsService.executeAggregations).toBeCalledTimes(1);
   });
 });
 
@@ -166,14 +162,7 @@ function createMockClientArgs() {
     } as unknown as SavedObject<CaseAttributes>;
   });
 
-  const alertsService = createAlertServiceMock();
-  alertsService.getMostFrequentValuesForFields.mockImplementation(async () => {
-    return { hosts: [{ name: 'host1', id: '1', count: 1 }] };
-  });
-
-  alertsService.countUniqueValuesForFields.mockImplementation(async () => {
-    return { totalHosts: 2 };
-  });
+  const alertsService = mockAlertsService();
 
   const logger = loggingSystemMock.createLogger();
 

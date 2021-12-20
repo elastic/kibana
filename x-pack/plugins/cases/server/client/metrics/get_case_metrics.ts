@@ -12,8 +12,8 @@ import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { CasesClient } from '../client';
 import { CasesClientArgs } from '../types';
-import { AlertsCount } from './alerts_count';
-import { AlertDetails } from './alert_details';
+import { AlertsCount } from './alerts/count';
+import { AlertDetails } from './alerts/details';
 import { Actions } from './actions';
 import { Connectors } from './connectors';
 import { Lifespan } from './lifespan';
@@ -75,7 +75,6 @@ const buildHandlers = (
   ];
 
   const uniqueFeatures = new Set(params.features);
-
   const handlerFeatures = new Set<string>();
   const handlersToExecute = new Set<MetricsHandler>();
   for (const handler of handlers) {

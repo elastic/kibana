@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionType, CaseMetricsResponse } from '../../../common/api';
+import { IsolateHostActionType, CaseMetricsResponse } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { CountActionsResponse } from '../../services/attachments';
@@ -60,8 +60,8 @@ export class Actions implements MetricsHandler {
     return {
       actions: {
         isolateHost: {
-          [ActionType.isolate]: { total: actionsCounters?.[ActionType.isolate] ?? 0 },
-          [ActionType.unisolate]: { total: actionsCounters?.[ActionType.unisolate] ?? 0 },
+          [IsolateHostActionType.isolate]: { total: actionsCounters?.[IsolateHostActionType.isolate] ?? 0 },
+          [IsolateHostActionType.unisolate]: { total: actionsCounters?.[IsolateHostActionType.unisolate] ?? 0 },
         },
       },
     };

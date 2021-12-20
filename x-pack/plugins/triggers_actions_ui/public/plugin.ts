@@ -36,19 +36,19 @@ import type {
   ActionTypeModel,
   AlertAddProps,
   AlertEditProps,
-  AlertTypeModel,
+  RuleTypeModel,
   ConnectorAddFlyoutProps,
   ConnectorEditFlyoutProps,
 } from './types';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  ruleTypeRegistry: TypeRegistry<AlertTypeModel<any>>;
+  ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
 }
 
 export interface TriggersAndActionsUIPublicPluginStart {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  ruleTypeRegistry: TypeRegistry<AlertTypeModel<any>>;
+  ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
   getAddConnectorFlyout: (
     props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<ConnectorAddFlyoutProps>;
@@ -88,11 +88,11 @@ export class Plugin
     >
 {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  private ruleTypeRegistry: TypeRegistry<AlertTypeModel>;
+  private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
 
   constructor() {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-    this.ruleTypeRegistry = new TypeRegistry<AlertTypeModel>();
+    this.ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
@@ -152,6 +152,7 @@ export class Plugin
           spaces: pluginsStart.spaces,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           element: params.element,
+          theme$: params.theme$,
           storage: new Storage(window.localStorage),
           setBreadcrumbs: params.setBreadcrumbs,
           history: params.history,
