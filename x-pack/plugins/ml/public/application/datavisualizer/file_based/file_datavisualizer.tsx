@@ -8,7 +8,6 @@
 import React, { FC, Fragment, useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '../../contexts/kibana';
-import { NavigationMenu } from '../../components/navigation_menu';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana, useMlLocator } from '../../contexts/kibana';
 
@@ -105,8 +104,11 @@ export const FileDataVisualizerPage: FC = () => {
 
   return (
     <Fragment>
-      <NavigationMenu tabId="datavisualizer" />
-      {FileDataVisualizer !== null && <FileDataVisualizer additionalLinks={links} />}
+      {FileDataVisualizer !== null ? (
+        <>
+          <FileDataVisualizer additionalLinks={links} />
+        </>
+      ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />
     </Fragment>
   );

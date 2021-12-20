@@ -81,8 +81,6 @@ export const DatavisualizerSelector: FC = () => {
           />
         </MlPageHeader>
 
-        <EuiSpacer size="xl" />
-
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>
             <EuiText color="subdued">
