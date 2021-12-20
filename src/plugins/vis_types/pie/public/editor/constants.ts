@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DataViewFieldEditorPlugin } from './plugin';
-
-export const plugin = () => new DataViewFieldEditorPlugin();
+export enum EMPTY_SIZE_RATIOS {
+  SMALL = 0.3,
+  MEDIUM = 0.54,
+  LARGE = 0.7,
+}
