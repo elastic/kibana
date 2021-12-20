@@ -83,10 +83,8 @@ export const EventFilterDeleteModal = memo<{}>(() => {
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.securitySolution.eventFilters.deletionDialog.title"
-            defaultMessage={`Remove "{name}"`}
-            values={{
-              name: eventFilter?.name ?? '',
-            }}
+            defaultMessage='Delete "{name}"'
+            values={{ name: <b className="eui-textBreakWord">{eventFilter?.name ?? ''}</b> }}
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>

@@ -22786,7 +22786,6 @@
     "xpack.securitySolution.eventFilters.deletionDialog.deleteFailure": "イベントフィルターリストから\"{name}\"を削除できません。理由：{message}",
     "xpack.securitySolution.eventFilters.deletionDialog.deleteSuccess": "\"{name}\"がイベントフィルターリストから削除されました。",
     "xpack.securitySolution.eventFilters.deletionDialog.subMessage": "この操作は元に戻すことができません。続行していいですか？",
-    "xpack.securitySolution.eventFilters.deletionDialog.title": "イベントフィルターを削除",
     "xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.cancel": "キャンセル",
     "xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.create": "イベントフィルターを追加",
     "xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.update": "イベントフィルターを更新",
