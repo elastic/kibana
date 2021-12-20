@@ -106,7 +106,7 @@ export const EventFilterDeleteModal = memo<{}>(() => {
           >
             <p data-test-subj="eventFilterDeleteModalCalloutMessage">
               <FormattedMessage
-                id="xxpack.securitySolution.eventFilters.deletionDialog.calloutMessage"
+                id="xpack.securitySolution.eventFilters.deletionDialog.calloutMessage"
                 defaultMessage="Deleting this entry will remove it from {count} associated {count, plural, one {policy} other {policies}}."
                 values={{
                   count: isGlobalPolicyEffected(Array.from(eventFilter?.tags || []))
