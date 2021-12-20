@@ -15,6 +15,7 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { RouteParams } from '../../routes';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { LoadingObservability } from './loading_observability';
+import { ObservabilityStatus } from '../../components/app/observability_status';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -72,7 +73,11 @@ export function OverviewPage({ routeParams }: Props) {
           : undefined
       }
     >
-      {hasData && <div>New observability content goes here</div>}
+      {hasData && (
+        <div style={{ width: 380 }}>
+          <ObservabilityStatus />
+        </div>
+      )}
     </ObservabilityPageTemplate>
   );
 }

@@ -6,25 +6,27 @@
  */
 
 import React from 'react';
-import { ObservabilityStatusBox } from './observability_status_box';
+import { useHasData } from '../../../hooks/use_has_data';
+import { ObservabilityStatusBoxes } from './observability_status_boxes';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { getEmptySections } from '../../../pages/overview/empty_section';
 
-export interface ObservabilityStatusProps {
-  boxes: Array<{
-    dataSource: string;
-    hasData: boolean;
-    description: string;
-    modules: Array<{ name: string; hasData: boolean }>;
-    integrationLink: string;
-    learnMoreLink: string;
-  }>;
-}
+export function ObservabilityStatus() {
+  const { core } = usePluginContext();
+  const { hasDataMap } = useHasData();
 
-export function ObservabilityStatus({ boxes }: ObservabilityStatusProps) {
-  return (
-    <div>
-      {boxes.map((box) => (
-        <ObservabilityStatusBox {...box} />
-      ))}
-    </div>
-  );
+  const appEmptySections = getEmptySections({ core });
+
+  const boxes = appEmptySections.map((app) => {
+    return {
+      dataSource: app.title,
+      hasData: hasDataMap[app.id]?.hasData ?? false,
+      description: app.description,
+      modules: [],
+      integrationLink: app.href ?? '',
+      learnMoreLink: app.href ?? '',
+    };
+  });
+
+  return <ObservabilityStatusBoxes boxes={boxes} />;
 }

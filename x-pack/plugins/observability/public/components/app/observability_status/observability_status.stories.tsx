@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { Story } from '@storybook/react';
-import { ObservabilityStatus, ObservabilityStatusProps } from '.';
+import { ObservabilityStatusBoxes, ObservabilityStatusProps } from './observability_status_boxes';
 
 export default {
-  title: 'app/ObservabilityStatus',
-  component: ObservabilityStatus,
+  title: 'app/ObservabilityStatusBoxes',
+  component: ObservabilityStatusBoxes,
 };
 
 const testBoxes = [
@@ -92,7 +92,7 @@ const testBoxes = [
 const Template: Story<ObservabilityStatusProps> = ({ boxes }: ObservabilityStatusProps) => {
   return (
     <div style={{ width: 380, backgroundColor: '#fff', padding: 40 }}>
-      <ObservabilityStatus boxes={boxes} />
+      <ObservabilityStatusBoxes boxes={boxes} />
     </div>
   );
 };
