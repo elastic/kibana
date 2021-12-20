@@ -12,7 +12,7 @@ import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
 import {
   ALERT_DURATION,
   ALERT_REASON,
-  ALERT_RULE_SEVERITY,
+  ALERT_SEVERITY,
   ALERT_STATUS,
 } from '@kbn/rule-data-utils/technical_field_names';
 
@@ -61,7 +61,7 @@ export const RenderCellValue: React.FC<
     case ALERT_DURATION:
     case 'signal.duration.us':
       return <span data-test-subj="alert-duration">{moment().fromNow(true)}</span>;
-    case ALERT_RULE_SEVERITY:
+    case ALERT_SEVERITY:
     case 'signal.rule.severity':
       return <Severity data-test-subj="rule-severity" severity={value} />;
     case ALERT_REASON:
