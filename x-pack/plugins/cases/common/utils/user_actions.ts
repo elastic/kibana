@@ -61,13 +61,13 @@ export const isDescriptionUserAction = (userAction: unknown): userAction is Desc
 
 export const isCreateCaseUserAction = (userAction: unknown): userAction is CreateCaseUserAction =>
   (userAction as CreateCaseUserAction)?.type === ActionTypes.create_case &&
-  (userAction as CreateCaseUserAction)?.payload?.connector != null &&
-  (userAction as CreateCaseUserAction)?.payload?.description != null &&
-  (userAction as CreateCaseUserAction)?.payload?.settings != null &&
-  (userAction as CreateCaseUserAction)?.payload?.status != null &&
-  (userAction as CreateCaseUserAction)?.payload?.title != null &&
-  (userAction as CreateCaseUserAction)?.payload?.owner != null &&
-  (userAction as CreateCaseUserAction)?.payload?.tags != null;
+  /**
+   * Connector is needed in various places across the application where
+   * the isCreateCaseUserAction is being used.
+   * Migrations should add the connector payload if it is
+   * missing.
+   */
+  (userAction as CreateCaseUserAction)?.payload?.connector != null;
 
 export const isUserActionType = (field: string): field is UserActionTypes =>
   ActionTypes[field as UserActionTypes] != null;
