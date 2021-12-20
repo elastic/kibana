@@ -6,5 +6,14 @@
  * Side Public License, v 1.
  */
 
-export * from './errors';
-export * from './types';
+export {
+  KbnError,
+  DuplicateField,
+  CharacterNotAllowedInField,
+  SavedObjectNotFound,
+  SavedFieldNotFound,
+  SavedFieldTypeInvalidForAgg,
+  InvalidJSONProperty,
+} from './errors';
+
+export type { KibanaServerError } from './types';
