@@ -28,7 +28,8 @@ export interface TransitionDescription<Type extends string = string, Args extend
  */
 export type Transition<State extends BaseState, Args extends any[]> = (...args: Args) => State;
 /**
- * @internal
+ * Given some state and an argument, transform the state and return a new version of the state.
+ * @public
  */
 export type PureTransition<State extends BaseState, Args extends any[]> = (
   state: State
@@ -37,10 +38,12 @@ export type PureTransition<State extends BaseState, Args extends any[]> = (
  * @public
  */
 export type EnsurePureTransition<T> = Ensure<T, PureTransition<any, any>>;
+
 /**
  * @internal
  */
 export type PureTransitionToTransition<T extends PureTransition<any, any>> = ReturnType<T>;
+
 /**
  * @internal
  */

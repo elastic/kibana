@@ -51,7 +51,7 @@ describe('expression gauge utils', () => {
       expect(getMaxValue({ metric: 10 }, localState)).toEqual(15);
       expect(getMaxValue({ min: 0, metric: 2 }, localState)).toEqual(4);
       expect(getMaxValue({ min: -100, metric: 2 }, localState)).toEqual(50);
-      expect(getMaxValue({ min: -0.001, metric: 0 }, localState)).toEqual(0.001);
+      expect(getMaxValue({ min: -0.001, metric: 0 }, localState)).toEqual(1);
       expect(getMaxValue({ min: -2000, metric: -1000 }, localState)).toEqual(-500);
       expect(getMaxValue({ min: 0.5, metric: 1.5 }, localState)).toEqual(2);
     });
