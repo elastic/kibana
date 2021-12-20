@@ -64,14 +64,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await retry.waitForWithTimeout('timestamp matches expected doc', 5000, async() => {
+      await retry.waitForWithTimeout('timestamp matches expected doc', 5000, async () => {
         const cell = await dataGrid.getCellElement(0, 2);
         const text = await cell.getVisibleText();
-        return text === 'Sept 22, 2015 @ 23:50:13.253';
+        log.debug(`row document timestamp: ${text}`);
+        return text === 'Sep 22, 2015 @ 23:50:13.253';
       });
-      const documentCell = await dataGrid.getCellElement(0, 3);
-      await documentCell.click();
-      const expandCellContentButton = await documentCell.findByClassName(
+      const docCell = await dataGrid.getCellElement(0, 3);
+      await docCell.click();
+      const expandCellContentButton = await docCell.findByClassName(
         'euiDataGridRowCell__expandButtonIcon'
       );
       await expandCellContentButton.click();
@@ -94,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         async () => {
           const text = await monacoEditor.getCodeEditorValue();
           const flyoutJson = text?.trim().charAt(0) === '{' ? JSON.parse(text) : {};
-          log.debug(`document in flyout id ${flyoutJson._id}`);
+          log.debug(`flyout document id: ${flyoutJson._id}`);
           return flyoutJson._id === expandDocId;
         }
       );
