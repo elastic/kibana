@@ -28,9 +28,6 @@ describe('Telemetry Collection Manager', () => {
   describe('everything works when no collection mechanisms are registered', () => {
     const telemetryCollectionManager = new TelemetryCollectionManagerPlugin(initializerContext);
     const setupApi = telemetryCollectionManager.setup(coreMock.createSetup(), { usageCollection });
-    test('All collectors are ready (there are none)', async () => {
-      await expect(setupApi.areAllCollectorsReady()).resolves.toBe(true);
-    });
     test('getStats returns empty', async () => {
       const config: StatsGetterConfig = { unencrypted: false };
       await expect(setupApi.getStats(config)).resolves.toStrictEqual([]);

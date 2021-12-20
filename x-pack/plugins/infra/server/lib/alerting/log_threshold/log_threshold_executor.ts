@@ -143,30 +143,30 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
   });
 
 async function executeAlert(
-  alertParams: CountRuleParams,
+  ruleParams: CountRuleParams,
   timestampField: string,
   indexPattern: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
   alertFactory: LogThresholdAlertFactory
 ) {
-  const query = getESQuery(alertParams, timestampField, indexPattern, runtimeMappings);
+  const query = getESQuery(ruleParams, timestampField, indexPattern, runtimeMappings);
 
   if (!query) {
     throw new Error('ES query could not be built from the provided alert params');
   }
 
-  if (hasGroupBy(alertParams)) {
+  if (hasGroupBy(ruleParams)) {
     processGroupByResults(
       await getGroupedResults(query, esClient),
-      alertParams,
+      ruleParams,
       alertFactory,
       updateAlert
     );
   } else {
     processUngroupedResults(
       await getUngroupedResults(query, esClient),
-      alertParams,
+      ruleParams,
       alertFactory,
       updateAlert
     );
@@ -174,7 +174,7 @@ async function executeAlert(
 }
 
 async function executeRatioAlert(
-  alertParams: RatioRuleParams,
+  ruleParams: RatioRuleParams,
   timestampField: string,
   indexPattern: string,
   runtimeMappings: estypes.MappingRuntimeFields,
@@ -183,13 +183,13 @@ async function executeRatioAlert(
 ) {
   // Ratio alert params are separated out into two standard sets of alert params
   const numeratorParams: RuleParams = {
-    ...alertParams,
-    criteria: getNumerator(alertParams.criteria),
+    ...ruleParams,
+    criteria: getNumerator(ruleParams.criteria),
   };
 
   const denominatorParams: RuleParams = {
-    ...alertParams,
-    criteria: getDenominator(alertParams.criteria),
+    ...ruleParams,
+    criteria: getDenominator(ruleParams.criteria),
   };
 
   const numeratorQuery = getESQuery(numeratorParams, timestampField, indexPattern, runtimeMappings);
@@ -204,7 +204,7 @@ async function executeRatioAlert(
     throw new Error('ES query could not be built from the provided ratio alert params');
   }
 
-  if (hasGroupBy(alertParams)) {
+  if (hasGroupBy(ruleParams)) {
     const [numeratorGroupedResults, denominatorGroupedResults] = await Promise.all([
       getGroupedResults(numeratorQuery, esClient),
       getGroupedResults(denominatorQuery, esClient),
@@ -212,7 +212,7 @@ async function executeRatioAlert(
     processGroupByRatioResults(
       numeratorGroupedResults,
       denominatorGroupedResults,
-      alertParams,
+      ruleParams,
       alertFactory,
       updateAlert
     );
@@ -224,7 +224,7 @@ async function executeRatioAlert(
     processUngroupedRatioResults(
       numeratorUngroupedResults,
       denominatorUngroupedResults,
-      alertParams,
+      ruleParams,
       alertFactory,
       updateAlert
     );
@@ -248,13 +248,19 @@ export const processUngroupedResults = (
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
   const documentCount = results.hits.total.value;
 
   if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
     const alert = alertFactory(
       UNGROUPED_FACTORY_KEY,
-      getReasonMessageForUngroupedCountAlert(documentCount, count.value, count.comparator),
+      getReasonMessageForUngroupedCountAlert(
+        documentCount,
+        count.value,
+        count.comparator,
+        timeSize,
+        timeUnit
+      ),
       documentCount,
       count.value
     );
@@ -279,7 +285,7 @@ export const processUngroupedRatioResults = (
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
 
   const numeratorCount = numeratorResults.hits.total.value;
   const denominatorCount = denominatorResults.hits.total.value;
@@ -288,7 +294,13 @@ export const processUngroupedRatioResults = (
   if (ratio !== undefined && checkValueAgainstComparatorMap[count.comparator](ratio, count.value)) {
     const alert = alertFactory(
       UNGROUPED_FACTORY_KEY,
-      getReasonMessageForUngroupedRatioAlert(ratio, count.value, count.comparator),
+      getReasonMessageForUngroupedRatioAlert(
+        ratio,
+        count.value,
+        count.comparator,
+        timeSize,
+        timeUnit
+      ),
       ratio,
       count.value
     );
@@ -352,7 +364,7 @@ export const processGroupByResults = (
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
 
   const groupResults = getReducedGroupByResults(results);
 
@@ -366,7 +378,9 @@ export const processGroupByResults = (
           documentCount,
           count.value,
           count.comparator,
-          group.name
+          group.name,
+          timeSize,
+          timeUnit
         ),
         documentCount,
         count.value
@@ -393,7 +407,7 @@ export const processGroupByRatioResults = (
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
 
   const numeratorGroupResults = getReducedGroupByResults(numeratorResults);
   const denominatorGroupResults = getReducedGroupByResults(denominatorResults);
@@ -417,7 +431,9 @@ export const processGroupByRatioResults = (
           ratio,
           count.value,
           count.comparator,
-          numeratorGroup.name
+          numeratorGroup.name,
+          timeSize,
+          timeUnit
         ),
         ratio,
         count.value
