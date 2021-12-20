@@ -205,6 +205,7 @@ export const getBatchItems = ({
         <>{i18n.BATCH_ACTION_DEACTIVATE_SELECTED}</>
       </EuiToolTip>
     </EuiContextMenuItem>,
+
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_EXPORT_SELECTED}
       data-test-subj="exportRuleBulk"

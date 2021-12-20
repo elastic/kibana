@@ -94,6 +94,97 @@ export const INACTIVE = i18n.translate(
   }
 );
 
+export const BULK_ACTION_ENABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.enableTitle',
+  {
+    defaultMessage: 'Enable',
+  }
+);
+
+export const BULK_ACTION_DISABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.disableTitle',
+  {
+    defaultMessage: 'Disable',
+  }
+);
+
+export const BULK_ACTION_EXPORT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.exportTitle',
+  {
+    defaultMessage: 'Export',
+  }
+);
+
+export const BULK_ACTION_DUPLICATE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicateTitle',
+  {
+    defaultMessage: 'Duplicate',
+  }
+);
+
+export const BULK_ACTION_DELETE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteTitle',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+export const BULK_ACTION_ADD_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addIndexPattersTitle',
+  {
+    defaultMessage: 'Add index patterns',
+  }
+);
+
+export const BULK_ACTION_DELETE_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteIndexPattersTitle',
+  {
+    defaultMessage: 'Delete index patterns',
+  }
+);
+
+export const BULK_EDIT_CONFIRMATION_TITLE = (elasticRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationTitle',
+    {
+      values: { elasticRulesCount },
+      defaultMessage:
+        '{elasticRulesCount} {elasticRulesCount, plural, =1 {Elastic rule} other {Elastic rules}} cannot be edited',
+    }
+  );
+
+export const BULK_EDIT_REJECT_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditReject',
+  {
+    defaultMessage:
+      'Elastic rules are not modifiable. The update action will only be applied to Custom rules.',
+  }
+);
+
+export const BULK_EDIT_CONFIRMATION_BODY = (elasticRulesCount: number, customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationBody',
+    {
+      values: { elasticRulesCount, customRulesCount },
+      defaultMessage:
+        'You are about to edit {elasticRulesCount} {elasticRulesCount, plural, =1 {Elastic rule} other {Elastic rules}}, the update action will only be applied to {customRulesCount} {customRulesCount, plural, =1 {Custom rule} other {Custom rules}} you’ve selected.',
+    }
+  );
+
+export const BULK_EDIT_CONFIRMATION_CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationCancelButton',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const BULK_EDIT_CONFIRMATION_CONFIRM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditConfirmationConfirmButton',
+  {
+    defaultMessage: 'Edit custom rules',
+  }
+);
+
 export const BATCH_ACTION_ACTIVATE_SELECTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.batchActions.activateSelectedTitle',
   {

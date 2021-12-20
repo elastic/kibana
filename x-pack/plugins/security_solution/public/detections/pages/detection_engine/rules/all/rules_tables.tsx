@@ -16,7 +16,7 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { debounce } from 'lodash/fp';
+import { debounce, partition } from 'lodash/fp';
 import { History } from 'history';
 
 import {
@@ -36,7 +36,9 @@ import { PrePackagedRulesPrompt } from '../../../../components/rules/pre_package
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
-import { getBatchItems } from './batch_actions';
+// import { getBatchItems } from './batch_actions';
+import { getBatchItems } from './bulk_actions';
+import { BulkEditConfirmation } from './bulk_actions/bulk_edit_confirmation';
 import { getRulesColumns, getMonitoringColumns } from './columns';
 import { showRulesTable } from './helpers';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
@@ -193,11 +195,25 @@ export const RulesTables = React.memo<RulesTableProps>(
       onFinish: hideDeleteConfirmation,
     });
 
+    const [isBulkEditConfirmationVisible, showBulkEditonfirmation, hideBulkEditConfirmation] =
+      useBoolState();
+
+    const [confirmBulkEdit, handleBulkEditConfirm, handleBulkEditCancel] = useAsyncConfirmation({
+      onInit: showBulkEditonfirmation,
+      onFinish: hideBulkEditConfirmation,
+    });
+
     const selectedItemsCount = isAllSelected ? pagination.total : selectedRuleIds.length;
     const hasPagination = pagination.total > pagination.perPage;
 
+    const [selectedElasticRuleIds, selectedCustomRuleIds] = useMemo(() => {
+      const ruleImmutablityMap = new Map(rules.map((rule) => [rule.id, rule.immutable]));
+      const predicate = (id: string) => ruleImmutablityMap.get(id);
+      return partition(predicate, selectedRuleIds);
+    }, [rules, selectedRuleIds]);
+
     const getBatchItemsPopoverContent = useCallback(
-      (closePopover: () => void): JSX.Element[] => {
+      (closePopover: () => void) => {
         return getBatchItems({
           isAllSelected,
           closePopover,
@@ -212,6 +228,7 @@ export const RulesTables = React.memo<RulesTableProps>(
           rules,
           filterQuery: convertRulesFilterToKQL(filterOptions),
           confirmDeletion,
+          confirmBulkEdit,
           selectedItemsCount,
         });
       },
@@ -228,6 +245,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         hasActionsPrivileges,
         filterOptions,
         confirmDeletion,
+        confirmBulkEdit,
         selectedItemsCount,
       ]
     );
@@ -450,7 +468,14 @@ export const RulesTables = React.memo<RulesTableProps>(
             columns: rulesColumns,
           }
         : { 'data-test-subj': 'monitoring-table', columns: monitoringColumns };
-
+    console.log(
+      '>>>>>>',
+      selectedRuleIds,
+      selectedElasticRuleIds,
+      selectedCustomRuleIds,
+      isAllSelected ? rulesInstalled ?? 0 : selectedElasticRuleIds.length,
+      isAllSelected ? rulesCustomInstalled ?? 0 : selectedCustomRuleIds.length
+    );
     return (
       <>
         <EuiWindowEvent event="mousemove" handler={debounceResetIdleTimer} />
@@ -523,6 +548,17 @@ export const RulesTables = React.memo<RulesTableProps>(
           >
             <p>{i18n.DELETE_CONFIRMATION_BODY}</p>
           </EuiConfirmModal>
+        )}
+        {isBulkEditConfirmationVisible && (
+          <BulkEditConfirmation
+            isAllSelected={isAllSelected}
+            rulesCustomInstalled={rulesCustomInstalled ?? 0}
+            rulesInstalled={rulesInstalled ?? 0}
+            selectedCustomRuleCount={selectedCustomRuleIds.length}
+            selectedElasticRuleCount={selectedElasticRuleIds.length}
+            onCancel={handleBulkEditCancel}
+            onConfirm={handleBulkEditConfirm}
+          />
         )}
         {shouldShowRulesTable && (
           <>

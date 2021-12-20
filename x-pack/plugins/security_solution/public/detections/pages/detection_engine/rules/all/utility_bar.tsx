@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanel, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import {
+  EuiContextMenu,
+  EuiContextMenuPanel,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiContextMenuPanelDescriptor,
+} from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import {
@@ -22,7 +28,7 @@ interface AllRulesUtilityBarProps {
   isAllSelected?: boolean;
   isAutoRefreshOn?: boolean;
   numberSelectedItems: number;
-  onGetBatchItemsPopoverContent?: (closePopover: () => void) => JSX.Element[];
+  onGetBatchItemsPopoverContent?: (closePopover: () => void) => EuiContextMenuPanelDescriptor[];
   onRefresh?: (refreshRule: boolean) => void;
   onRefreshSwitch?: (checked: boolean) => void;
   onToggleSelectAll?: () => void;
@@ -48,7 +54,12 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     const handleGetBatchItemsPopoverContent = useCallback(
       (closePopover: () => void): JSX.Element | null => {
         if (onGetBatchItemsPopoverContent != null) {
-          return <EuiContextMenuPanel items={onGetBatchItemsPopoverContent(closePopover)} />;
+          return (
+            <EuiContextMenu
+              initialPanelId={0}
+              panels={onGetBatchItemsPopoverContent(closePopover)}
+            />
+          );
         } else {
           return null;
         }
@@ -122,6 +133,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
                     dataTestSubj="bulkActions"
                     iconSide="right"
                     iconType="arrowDown"
+                    popoverPanelPaddingSize="none"
                     popoverContent={handleGetBatchItemsPopoverContent}
                   >
                     {i18n.BATCH_ACTIONS}

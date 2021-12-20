@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, PanelPaddingSize } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
 import { LinkIcon, LinkIconProps } from '../link_icon';
@@ -22,6 +22,7 @@ const Popover = React.memo<UtilityBarActionProps>(
     disabled,
     ownFocus,
     dataTestSubj,
+    popoverPanelPaddingSize,
   }) => {
     const [popoverState, setPopoverState] = useState(false);
 
@@ -30,6 +31,7 @@ const Popover = React.memo<UtilityBarActionProps>(
     return (
       <EuiPopover
         ownFocus={ownFocus}
+        panelPaddingSize={popoverPanelPaddingSize}
         button={
           <LinkIcon
             dataTestSubj={dataTestSubj}
@@ -57,6 +59,7 @@ Popover.displayName = 'Popover';
 
 export interface UtilityBarActionProps extends LinkIconProps {
   popoverContent?: (closePopover: () => void) => React.ReactNode;
+  popoverPanelPaddingSize?: PanelPaddingSize;
   dataTestSubj: string;
   ownFocus?: boolean;
 }
@@ -74,6 +77,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
     ownFocus,
     onClick,
     popoverContent,
+    popoverPanelPaddingSize,
   }) => (
     <BarAction data-test-subj={dataTestSubj}>
       {popoverContent ? (
@@ -85,6 +89,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
           iconSize={iconSize}
           iconType={iconType}
           ownFocus={ownFocus}
+          popoverPanelPaddingSize={popoverPanelPaddingSize}
           popoverContent={popoverContent}
         >
           {children}
