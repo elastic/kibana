@@ -248,7 +248,7 @@ export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: Rou
               });
             } else if (upgradeStatus.state === 'failed') {
               return response.customError({
-                statusCode: 404,
+                statusCode: 500,
                 body: {
                   message:
                     "The upgrade that was started for this model snapshot doesn't exist anymore.",
