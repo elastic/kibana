@@ -35,6 +35,7 @@ import { DataView } from '../../../../../../src/plugins/data/common';
 import { ResultLink } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, IndexDataVisualizerLocatorParams } from './locator';
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
+import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
 
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 
@@ -46,11 +47,11 @@ export interface DataVisualizerUrlStateContextProviderProps {
 export const getLocatorParams = (params: {
   indexPatternId?: string;
   savedSearchId?: string;
-  searchString: string;
+  urlSearchString: string;
   searchSessionId?: string;
   shouldRestoreSearchSession: boolean;
 }): IndexDataVisualizerLocatorParams => {
-  const urlState = parseUrlState(params.searchString);
+  const urlState = parseUrlState(params.urlSearchString);
 
   let locatorParams: IndexDataVisualizerLocatorParams = {
     indexPatternId: urlState.index,
@@ -83,7 +84,7 @@ export const DataVisualizerUrlStateContextProvider: FC<
     notifications: { toasts },
   } = services;
   const history = useHistory();
-  const { search: searchString } = useLocation();
+  const { search: urlSearchString } = useLocation();
 
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView | undefined>(undefined);
   const [currentSavedSearch, setCurrentSavedSearch] = useState<SimpleSavedObject<unknown> | null>(
@@ -93,18 +94,20 @@ export const DataVisualizerUrlStateContextProvider: FC<
   const [currentSessionId, setCurrentSessionId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
+    const urlState = parseUrlState(urlSearchString);
+
     if (search.session) {
       search.session.enableStorage({
         getName: async () => {
           // return the name you want to give the saved Search Session
-          return `Data visualizer`;
+          return INDEX_DATA_VISUALIZER_NAME;
         },
         getLocatorData: async () => {
           return {
             id: DATA_VISUALIZER_APP_LOCATOR,
             initialState: getLocatorParams({
               ...services,
-              searchString,
+              urlSearchString,
               indexPatternId: currentIndexPattern?.id,
               savedSearchId: currentSavedSearch?.id,
               shouldRestoreSearchSession: false,
@@ -112,7 +115,7 @@ export const DataVisualizerUrlStateContextProvider: FC<
             }),
             restoreState: getLocatorParams({
               ...services,
-              searchString,
+              urlSearchString,
               indexPatternId: currentIndexPattern?.id,
               savedSearchId: currentSavedSearch?.id,
               shouldRestoreSearchSession: true,
@@ -122,8 +125,6 @@ export const DataVisualizerUrlStateContextProvider: FC<
         },
       });
     }
-
-    const urlState = parseUrlState(searchString);
 
     if (urlState.searchSessionId !== undefined && urlState.searchSessionId !== currentSessionId) {
       search.session?.restore(urlState.searchSessionId);
@@ -135,12 +136,12 @@ export const DataVisualizerUrlStateContextProvider: FC<
     return () => {
       search.session.clear();
     };
-    // searchString already includes all the other dependencies
+    // urlSearchString already includes all the other dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search.session, searchString]);
+  }, [search.session, urlSearchString]);
 
   useEffect(() => {
-    const prevSearchString = searchString;
+    const prevSearchString = urlSearchString;
     const parsedQueryString = parse(prevSearchString, { sort: false });
 
     const getIndexPattern = async () => {
@@ -180,8 +181,7 @@ export const DataVisualizerUrlStateContextProvider: FC<
       }
     };
     getIndexPattern();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [savedObjectsClient, toasts, indexPatterns]);
+  }, [savedObjectsClient, toasts, indexPatterns, urlSearchString]);
 
   const setUrlState: SetUrlState = useCallback(
     (
@@ -190,7 +190,7 @@ export const DataVisualizerUrlStateContextProvider: FC<
       value?: any,
       replaceState?: boolean
     ) => {
-      const prevSearchString = searchString;
+      const prevSearchString = urlSearchString;
       const urlState = parseUrlState(prevSearchString);
       const parsedQueryString = parse(prevSearchString, { sort: false });
 
@@ -242,11 +242,11 @@ export const DataVisualizerUrlStateContextProvider: FC<
         console.error('Could not save url state', error);
       }
     },
-    [history, searchString]
+    [history, urlSearchString]
   );
 
   return (
-    <UrlStateContextProvider value={{ searchString, setUrlState }}>
+    <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
       {currentIndexPattern ? (
         <IndexDataVisualizerComponent
           currentIndexPattern={currentIndexPattern}
