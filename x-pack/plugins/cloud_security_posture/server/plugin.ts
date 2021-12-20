@@ -12,13 +12,12 @@ import type {
   Plugin,
   Logger,
 } from '../../../../src/core/server';
-
+import { createFindingsIndexTemplate } from './index_template/create_index_template';
 import type { CspSetup, CspStart, CspPluginSetup, CspPluginStart } from './types';
 import { defineRoutes } from './routes';
 
 export class CspPlugin implements Plugin<CspSetup, CspStart, CspPluginSetup, CspPluginStart> {
   private readonly logger: Logger;
-
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
@@ -26,16 +25,19 @@ export class CspPlugin implements Plugin<CspSetup, CspStart, CspPluginSetup, Csp
   public setup(core: CoreSetup<CspPluginStart>) {
     this.logger.debug('csp: Setup');
     const router = core.http.createRouter();
-
     // Register server side APIs
     defineRoutes(router);
 
     return {};
   }
 
-  public start(core: CoreStart) {
+  public async start(core: CoreStart) {
     this.logger.debug('csp: Started');
-    return {};
+    try {
+      createFindingsIndexTemplate(core.elasticsearch.client.asInternalUser);
+    } catch (e) {
+      return {};
+    }
   }
 
   public stop() {}

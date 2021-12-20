@@ -11,12 +11,11 @@ import styled from 'styled-components';
 import { DataView } from '../../../../../../src/plugins/data/common';
 import { FindingsTable } from './findings_table';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-
-import { CSPFinding, FetchState } from './types';
-// import { CSP_KUBEBEAT_INDEX } from '../../../../common/constants';
 import { FindingsSearchBar } from './findings_search_bar';
+import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
+import type { CSPFinding, FetchState } from './types';
+import type { CspPluginSetup } from '../../types';
 
-const CSP_KUBEBEAT_INDEX = 'kubebeat*';
 /**
  * This component syncs the FindingsTable with FindingsSearchBar
  */
@@ -65,7 +64,7 @@ const useKubebeatDataView = () => {
   } = useKibana().services;
   useEffect(() => {
     if (!dataViews) return;
-    (async () => setKubebeatDataView((await dataViews.find(CSP_KUBEBEAT_INDEX))?.[0]))();
+    (async () => setKubebeatDataView((await dataViews.find(CSP_KUBEBEAT_INDEX_PATTERN))?.[0]))();
   }, [dataViews]);
   return { kubebeatDataView };
 };

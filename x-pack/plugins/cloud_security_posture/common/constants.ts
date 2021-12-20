@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { defineGetStatsRoute } from './stats/stats';
-import type { IRouter } from '../../../../../src/core/server';
-
-export function defineRoutes(router: IRouter) {
-  defineGetStatsRoute(router);
-}
+export const CSP_KUBEBEAT_INDEX_PATTERN = 'kubebeat*';
+export const CSP_KUBEBEAT_INDEX_NAME = 'findings';
+export const STATS_ROUTH_PATH = '/api/csp/stats';
