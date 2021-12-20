@@ -19,6 +19,7 @@ import {
   PanelNotFoundError,
   EmbeddableInput,
   SavedObjectEmbeddableInput,
+  isReferenceOrValueEmbeddable,
   isErrorEmbeddable,
 } from '../../services/embeddable';
 import {
@@ -67,10 +68,14 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
   }
 
   public async execute({ embeddable }: ClonePanelActionContext) {
-    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
+    if (
+      !embeddable.getRoot() ||
+      !embeddable.getRoot().isContainer ||
+      !isReferenceOrValueEmbeddable(embeddable)
+    ) {
       throw new IncompatibleActionError();
     }
-
+    const byValueClone = await embeddable.getInputAsValueType();
     const dashboard = embeddable.getRoot() as DashboardContainer;
     const panelToClone = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
     if (!panelToClone) {
@@ -78,7 +83,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
     }
 
     dashboard.showPlaceholderUntil(
-      this.cloneEmbeddable(panelToClone, embeddable.type),
+      this.cloneEmbeddable(byValueClone, embeddable.type),
       placePanelBeside,
       {
         width: panelToClone.gridData.w,
@@ -89,57 +94,17 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
     );
   }
 
-  private async getUniqueTitle(rawTitle: string, embeddableType: string): Promise<string> {
-    const clonedTag = dashboardClonePanelAction.getClonedTag();
-    const cloneRegex = new RegExp(`\\(${clonedTag}\\)`, 'g');
-    const cloneNumberRegex = new RegExp(`\\(${clonedTag} [0-9]+\\)`, 'g');
-    const baseTitle = rawTitle.replace(cloneNumberRegex, '').replace(cloneRegex, '').trim();
-
-    const similarSavedObjects = await this.core.savedObjects.client.find<SavedObject>({
-      type: embeddableType,
-      perPage: 0,
-      fields: ['title'],
-      searchFields: ['title'],
-      search: `"${baseTitle}"`,
-    });
-    const similarBaseTitlesCount: number = similarSavedObjects.total - 1;
-
-    return similarBaseTitlesCount <= 0
-      ? baseTitle + ` (${clonedTag})`
-      : baseTitle + ` (${clonedTag} ${similarBaseTitlesCount})`;
-  }
-
   private async cloneEmbeddable(
-    panelToClone: DashboardPanelState,
+    newPanel: EmbeddableInput,
     embeddableType: string
   ): Promise<Partial<PanelState>> {
     const panelState: PanelState<EmbeddableInput> = {
       type: embeddableType,
       explicitInput: {
-        ...panelToClone.explicitInput,
+        ...newPanel,
         id: uuid.v4(),
       },
     };
-    let newTitle: string = '';
-    if (panelToClone.explicitInput.savedObjectId) {
-      // Fetch existing saved object
-      const savedObjectToClone = await this.core.savedObjects.client.get<SavedObject>(
-        embeddableType,
-        panelToClone.explicitInput.savedObjectId
-      );
-
-      // Clone the saved object
-      newTitle = await this.getUniqueTitle(savedObjectToClone.attributes.title, embeddableType);
-      const clonedSavedObject = await this.core.savedObjects.client.create(
-        embeddableType,
-        {
-          ..._.cloneDeep(savedObjectToClone.attributes),
-          title: newTitle,
-        },
-        { references: _.cloneDeep(savedObjectToClone.references) }
-      );
-      (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId = clonedSavedObject.id;
-    }
     this.core.notifications.toasts.addSuccess({
       title: dashboardClonePanelAction.getSuccessMessage(),
       'data-test-subj': 'addObjectToContainerSuccess',

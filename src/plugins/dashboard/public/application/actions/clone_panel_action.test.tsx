@@ -137,32 +137,3 @@ test('Clones an embeddable with a saved object ID', async () => {
   expect(coreStart.savedObjects.client.create).toHaveBeenCalledTimes(1);
   expect(newPanel.type).toEqual(embeddable.type);
 });
-
-test('Gets a unique title ', async () => {
-  coreStart.savedObjects.client.find = jest.fn().mockImplementation(({ search }) => {
-    if (search === '"testFirstTitle"') return { total: 1 };
-    else if (search === '"testSecondTitle"') return { total: 41 };
-    else if (search === '"testThirdTitle"') return { total: 90 };
-  });
-  const action = new ClonePanelAction(coreStart);
-  // @ts-ignore
-  expect(await action.getUniqueTitle('testFirstTitle', embeddable.type)).toEqual(
-    'testFirstTitle (copy)'
-  );
-  // @ts-ignore
-  expect(await action.getUniqueTitle('testSecondTitle (copy 39)', embeddable.type)).toEqual(
-    'testSecondTitle (copy 40)'
-  );
-  // @ts-ignore
-  expect(await action.getUniqueTitle('testSecondTitle (copy 20)', embeddable.type)).toEqual(
-    'testSecondTitle (copy 40)'
-  );
-  // @ts-ignore
-  expect(await action.getUniqueTitle('testThirdTitle', embeddable.type)).toEqual(
-    'testThirdTitle (copy 89)'
-  );
-  // @ts-ignore
-  expect(await action.getUniqueTitle('testThirdTitle (copy 10000)', embeddable.type)).toEqual(
-    'testThirdTitle (copy 89)'
-  );
-});
