@@ -130,14 +130,16 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     });
 
     const isPointsOnly = this.getStyle().getIsPointsOnly();
-    const shapeCountMsg = !isPointsOnly && totalFeaturesCount > 1 && tilesWithFeatures > 1
-      ? i18n.translate('xpack.maps.tiles.shapeCountMsg', {
-          defaultMessage: ' Documents may be counted multiple times if geometry crosses tile boundaries.',
-          values: {
-            count: totalFeaturesCount.toLocaleString(),
-          },
-        })
-      : '';
+    const shapeCountMsg =
+      !isPointsOnly && totalFeaturesCount > 1 && tilesWithFeatures > 1
+        ? i18n.translate('xpack.maps.tiles.shapeCountMsg', {
+            defaultMessage:
+              ' Documents may be counted multiple times if geometry crosses tile boundaries.',
+            values: {
+              count: totalFeaturesCount.toLocaleString(),
+            },
+          })
+        : '';
 
     return {
       icon: this.getCurrentStyle().getIcon(isTocIcon && areResultsTrimmed),
