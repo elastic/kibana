@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -21,6 +22,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextColor,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { AppAction } from '../../../../../../common/store/actions';
 import { EventFiltersForm } from '../form';
@@ -54,6 +57,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
     const creationSuccessful = useEventFiltersSelector(isCreationSuccessful);
     const {
       data: { search },
+      docLinks,
     } = useKibana().services;
 
     // load the list of policies>
@@ -62,6 +66,8 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
         toasts.addWarning(getLoadPoliciesError(error));
       },
     });
+
+    const [showExpiredLicenseBanner, setShowExpiredLicenseBanner] = useState(false);
 
     useEffect(() => {
       if (creationSuccessful) {
@@ -219,11 +225,34 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
           ) : null}
         </EuiFlyoutHeader>
 
+        {showExpiredLicenseBanner && (
+          <EuiCallOut
+            title={i18n.translate('xpack.securitySolution.eventFilters.expiredLicenseTitle', {
+              defaultMessage: 'Expired License',
+            })}
+            color="warning"
+            iconType="help"
+            data-test-subj="expired-license-callout"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.expiredLicenseMessage"
+              defaultMessage="Your Kibana license has been downgraded. Future policy configurations will now be globally assigned to all policies. For more information, see our "
+            />
+            <EuiLink target="_blank" href={`${docLinks.links.securitySolution.eventFilters}`}>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.docsLink"
+                defaultMessage="Event Filters documentation."
+              />
+            </EuiLink>
+          </EuiCallOut>
+        )}
+
         <EuiFlyoutBody>
           <EventFiltersForm
             allowSelectOs={!data}
             policies={policiesRequest?.data?.items ?? []}
             arePoliciesLoading={policiesRequest.isLoading || policiesRequest.isRefetching}
+            showExpiredLicenseBannerChanged={setShowExpiredLicenseBanner}
           />
         </EuiFlyoutBody>
 
