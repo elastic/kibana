@@ -15,6 +15,7 @@ import {
   getExceptionListSchemaMock,
   getTrustedAppsListSchemaMock,
 } from '../../../common/schemas/response/exception_list_schema.mock';
+import { ExtensionPointStorage, ExtensionPointStorageClientInterface } from '../extension_points';
 
 import { ExceptionListClient } from './exception_list_client';
 
@@ -47,10 +48,12 @@ export class ExceptionListClientMock extends ExceptionListClient {
 }
 
 export const getExceptionListClientMock = (
-  savedObject?: ReturnType<typeof savedObjectsClientMock.create>
+  savedObject?: ReturnType<typeof savedObjectsClientMock.create>,
+  serverExtensionsClient: ExtensionPointStorageClientInterface = new ExtensionPointStorage().getClient()
 ): ExceptionListClient => {
   const mock = new ExceptionListClientMock({
     savedObjectsClient: savedObject ? savedObject : savedObjectsClientMock.create(),
+    serverExtensionsClient,
     user: 'elastic',
   });
   return mock;
