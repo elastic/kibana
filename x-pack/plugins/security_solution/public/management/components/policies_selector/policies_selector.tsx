@@ -140,6 +140,7 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
               checked={item.checked}
               key={index}
               onClick={() => updateItem(index)}
+              data-test-subj={`policiesSelector-popover-items-${item.id}`}
             >
               {item.name}
             </EuiFilterSelectItem>

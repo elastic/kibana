@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { FollowerIndexForm } from '../../app/components/follower_index_form/follower_index_form';
@@ -98,18 +99,20 @@ describe('Edit follower index', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
       httpRequestsMockHelpers.setGetFollowerIndexResponse(FOLLOWER_INDEX_EDIT);
 
-      testBed = await setup();
-      await testBed.waitFor('followerIndexForm');
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      testBed.component.update();
     });
 
     test('is consumed correctly', async () => {
-      const { actions, form, component, find, waitFor } = testBed;
+      const { actions, form, component, find } = testBed;
 
       form.setInputValue('maxRetryDelayInput', '10s');
 
       actions.clickSaveForm();
       component.update(); // The modal to confirm the update opens
-      await waitFor('confirmModalTitleText');
       find('confirmModalConfirmButton').simulate('click');
 
       await nextTick(); // Make sure the Request went through
