@@ -222,14 +222,14 @@ export class FleetPlugin
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature
-    // TODO: Flesh out privileges
     if (deps.features) {
       deps.features.registerKibanaFeature({
-        id: PLUGIN_ID,
-        name: 'Fleet and Integrations',
+        id: `fleetv2`,
+        name: 'Fleet',
         category: DEFAULT_APP_CATEGORIES.management,
-        app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
+        app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID],
         catalogue: ['fleet'],
+        privilegesTooltip: 'All Spaces is required for Fleet access.',
         reserved: {
           description:
             'Privilege to setup Fleet packages and configured policies. Intended for use by the elastic/fleet-server service account only.',
@@ -250,8 +250,15 @@ export class FleetPlugin
         },
         privileges: {
           all: {
-            api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`, `integrations-all`, `integrations-read`],
-            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
+            api: [
+              `${PLUGIN_ID}-read`,
+              `${PLUGIN_ID}-all`,
+              `${INTEGRATIONS_PLUGIN_ID}-read`,
+              `${INTEGRATIONS_PLUGIN_ID}-all`,
+            ],
+            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID],
+            // TODO: uncomment after https://github.com/elastic/kibana/pull/118001 is merged
+            // requireAllSpaces: true,
             catalogue: ['fleet'],
             savedObject: {
               all: allSavedObjectTypes,
@@ -260,8 +267,45 @@ export class FleetPlugin
             ui: ['show', 'read', 'write'],
           },
           read: {
-            api: [`${PLUGIN_ID}-read`, `integrations-read`],
-            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
+            api: [`${PLUGIN_ID}-read`, `${INTEGRATIONS_PLUGIN_ID}-read`],
+            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID],
+            catalogue: ['fleet'], // TODO: check if this is actually available to read user
+            // TODO: uncomment after https://github.com/elastic/kibana/pull/118001 is merged
+            // requireAllSpaces: true,
+            savedObject: {
+              all: [],
+              read: allSavedObjectTypes,
+            },
+            ui: ['show', 'read'],
+            // TODO: uncomment after https://github.com/elastic/kibana/pull/118001 is merged
+            // disabled: true,
+          },
+        },
+      });
+
+      deps.features.registerKibanaFeature({
+        id: 'fleet', // for BWC
+        name: 'Integrations',
+        category: DEFAULT_APP_CATEGORIES.management,
+        app: [INTEGRATIONS_PLUGIN_ID],
+        catalogue: ['fleet'],
+        privilegesTooltip: 'Access to Integrations is also included in access to Fleet.',
+        privileges: {
+          all: {
+            api: [`${INTEGRATIONS_PLUGIN_ID}-read`, `${INTEGRATIONS_PLUGIN_ID}-all`],
+            app: [INTEGRATIONS_PLUGIN_ID],
+            catalogue: ['fleet'],
+            // TODO: uncomment after https://github.com/elastic/kibana/pull/118001 is merged
+            // requireAllSpaces: true,
+            savedObject: {
+              all: allSavedObjectTypes,
+              read: [],
+            },
+            ui: ['show', 'read', 'write'],
+          },
+          read: {
+            api: [`${INTEGRATIONS_PLUGIN_ID}-read`],
+            app: [INTEGRATIONS_PLUGIN_ID],
             catalogue: ['fleet'], // TODO: check if this is actually available to read user
             savedObject: {
               all: [],
