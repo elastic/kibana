@@ -786,8 +786,8 @@ export const defaultEndpointExceptionItems = (
   ruleName: string,
   alertEcsData: Flattened<Ecs>
 ): ExceptionsBuilderExceptionItem[] => {
-  const { event: alertEvent } = alertEcsData;
-  const eventCode = alertEvent?.code ?? '';
+  // TODO: make a ticket to fix this with common type
+  const eventCode = (alertEcsData as Flattened<Ecs> & { 'event.code': string })['event.code'];
 
   switch (eventCode) {
     case 'behavior':
