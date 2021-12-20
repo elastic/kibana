@@ -4,18 +4,14 @@
 git clone git@github.com:elastic/kibana.git
 cd kibana/
 yarn kbn bootstrap
-yarn start --no-base-path
+yarn start
 ```
 
 # Elasticsearch, APM Server and data generators
 
-To access an Elasticsearch instance that has live data you have two options:
+To access an Elasticsearch instance that has live data you have three options:
 
-## A. Cloud-based ES Cluster (internal devs only)
-
-Use the [oblt-cli](https://github.com/elastic/observability-test-environments/blob/master/tools/oblt_cli/README.md) to connect to a cloud-based ES cluster.
-
-## B. Using Synthtrace
+## 1. Using Synthtrace
 
 **Start Elasticsearch**
 ```
@@ -32,9 +28,13 @@ node ./scripts/es_archiver load "x-pack/plugins/apm/ftr_e2e/cypress/fixtures/es_
 node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts --target=http://elastic:changeme@localhost:9200
 ```
 
-Documentation for Synthtrace
+Documentation for [Synthtrace](https://github.com/elastic/kibana/blob/main/packages/elastic-apm-synthtrace/README.md)
 
-## C. Local ES Cluster
+## 2. Cloud-based ES Cluster (internal devs only)
+
+Use the [oblt-cli](https://github.com/elastic/observability-test-environments/blob/master/tools/oblt_cli/README.md) to connect to a cloud-based ES cluster.
+
+## 3. Local ES Cluster
 
 ### Start Elasticsearch and APM data generators
 _Docker Compose is required_
