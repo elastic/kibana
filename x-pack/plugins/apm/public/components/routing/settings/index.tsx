@@ -16,7 +16,6 @@ import { AgentConfigurations } from '../../app/settings/agent_configurations';
 import { CreateAgentConfigurationRouteView } from './create_agent_configuration_route_view';
 import { EditAgentConfigurationRouteView } from './edit_agent_configuration_route_view';
 import { CustomLinkOverview } from '../../app/Settings/custom_link';
-import { AgentKeys } from '../../app/Settings/agent_keys';
 import { ApmIndices } from '../../app/settings/ApmIndices';
 import { CustomizeUI } from '../../app/settings/customize_ui';
 import { AgentKeys } from '../../app/settings/agent_keys';
