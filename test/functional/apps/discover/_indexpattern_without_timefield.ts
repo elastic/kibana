@@ -78,15 +78,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         5000,
         async () => await PageObjects.timePicker.timePickerExists()
       );
-
-      // Navigating back
-      await browser.goBack();
-      await PageObjects.discover.waitForDocTableLoadingComplete();
       await retry.waitForWithTimeout(
         'index pattern to have been switched back to "without-timefield"',
         5000,
-        async () =>
-          (await testSubjects.getVisibleText('indexPattern-switch-link')) === 'without-timefield'
+        async () => {
+         // Navigating back
+         await browser.goBack();
+         await PageObjects.discover.waitForDocTableLoadingComplete();  
+         return (await testSubjects.getVisibleText('indexPattern-switch-link')) === 'without-timefield'
+        }
       );
 
       await retry.waitForWithTimeout(
