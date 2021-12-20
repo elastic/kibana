@@ -537,5 +537,39 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
     async clearAdvancedSettingProperty(propertyName: string) {
       await kibanaServer.uiSettings.unset(propertyName);
     },
+
+    async installKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
+      log.debug(`Installing Kibana sample data '${sampleDataId}'`);
+
+      await supertest
+        .post(`/api/sample_data/${sampleDataId}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      log.debug(` > Installed`);
+    },
+
+    async removeKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
+      log.debug(`Removing Kibana sample data '${sampleDataId}'`);
+
+      await supertest
+        .delete(`/api/sample_data/${sampleDataId}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(204); // No Content
+
+      log.debug(` > Removed`);
+    },
+
+    async installAllKibanaSampleData() {
+      await this.installKibanaSampleData('ecommerce');
+      await this.installKibanaSampleData('flights');
+      await this.installKibanaSampleData('logs');
+    },
+
+    async removeAllKibanaSampleData() {
+      await this.removeKibanaSampleData('ecommerce');
+      await this.removeKibanaSampleData('flights');
+      await this.removeKibanaSampleData('logs');
+    },
   };
 }
