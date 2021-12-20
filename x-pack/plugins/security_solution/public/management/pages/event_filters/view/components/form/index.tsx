@@ -63,10 +63,9 @@ interface EventFiltersFormProps {
   allowSelectOs?: boolean;
   policies: PolicyData[];
   arePoliciesLoading: boolean;
-  showExpiredLicenseBannerChanged: (changed: boolean) => void;
 }
 export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
-  ({ allowSelectOs = false, policies, arePoliciesLoading, showExpiredLicenseBannerChanged }) => {
+  ({ allowSelectOs = false, policies, arePoliciesLoading }) => {
     const { http, data } = useKibana().services;
 
     const dispatch = useDispatch<Dispatch<AppAction>>();
@@ -96,16 +95,6 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           (!selection.isGlobal || (wasByPolicy && selection.isGlobal && hasFormChanged)))
       );
     }, [isEditMode, selection.isGlobal, hasFormChanged, isPlatinumPlus, wasByPolicy]);
-
-    const showExpiredLicenseBanner = useMemo(() => {
-      return !isPlatinumPlus && isEditMode && wasByPolicy;
-    }, [isPlatinumPlus, isEditMode, wasByPolicy]);
-
-    useEffect(() => {
-      if (!hasFormChanged) {
-        showExpiredLicenseBannerChanged(showExpiredLicenseBanner);
-      }
-    }, [hasFormChanged, showExpiredLicenseBanner, showExpiredLicenseBannerChanged]);
 
     // set current policies if not previously selected
     useEffect(() => {

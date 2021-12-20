@@ -50,22 +50,15 @@ describe('Event filter form', () => {
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
   let getState: () => EventFiltersListPageState;
   let policiesRequest: GetPolicyListResponse;
-  let showExpiredLicenseBannerChangedMock: jest.Mock;
 
   beforeEach(async () => {
-    showExpiredLicenseBannerChangedMock = jest.fn();
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
     policiesRequest = await sendGetEndpointSpecificPackagePoliciesMock();
     getState = () => mockedContext.store.getState().management.eventFilters;
     render = (props) =>
       mockedContext.render(
-        <EventFiltersForm
-          policies={policiesRequest.items}
-          arePoliciesLoading={false}
-          showExpiredLicenseBannerChanged={showExpiredLicenseBannerChangedMock}
-          {...props}
-        />
+        <EventFiltersForm policies={policiesRequest.items} arePoliciesLoading={false} {...props} />
       );
     renderWithData = async (customEventFilterProps = {}) => {
       const renderResult = render();

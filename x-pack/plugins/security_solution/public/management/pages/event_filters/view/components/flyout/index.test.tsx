@@ -24,6 +24,7 @@ import { createdEventFilterEntryMock, ecsEventMock, esResponseData } from '../..
 import { getFormEntryState, isUninitialisedForm } from '../../../store/selector';
 import { EventFiltersListPageState } from '../../../types';
 import { useKibana } from '../../../../../../common/lib/kibana';
+import { licenseService } from '../../../../../../common/hooks/use_license';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../form');
@@ -37,6 +38,18 @@ jest.mock('../../hooks', () => {
   return {
     ...originalModule,
     useEventFiltersNotification,
+  };
+});
+
+jest.mock('../../../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
   };
 });
 
@@ -65,13 +78,17 @@ describe('Event filter flyout', () => {
       };
     });
   });
+
   beforeEach(() => {
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
     waitForAction = mockedContext.middlewareSpy.waitForAction;
     onCancelMock = jest.fn();
     getState = () => mockedContext.store.getState().management.eventFilters;
-    render = (props) =>
-      mockedContext.render(<EventFiltersFlyout {...props} onCancel={onCancelMock} />);
+
+    render = (props) => {
+      return mockedContext.render(<EventFiltersFlyout {...props} onCancel={onCancelMock} />);
+    };
 
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -228,5 +245,39 @@ describe('Event filter flyout', () => {
 
     expect(getFormEntryState(getState())).not.toBeUndefined();
     expect(getFormEntryState(getState())?.item_id).toBe(createdEventFilterEntryMock().item_id);
+  });
+
+  it('should not display banner when platinum license', async () => {
+    await act(async () => {
+      component = render({ id: 'fakeId', type: 'edit' });
+      await waitForAction('eventFiltersInitFromId');
+    });
+
+    expect(component.queryByTestId('expired-license-callout')).toBeNull();
+  });
+
+  it('should not display banner when under platinum license and create mode', async () => {
+    component = render();
+    expect(component.queryByTestId('expired-license-callout')).toBeNull();
+  });
+
+  it('should not display banner when under platinum license and edit mode with global assignment', async () => {
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    await act(async () => {
+      component = render({ id: 'fakeId', type: 'edit' });
+      await waitForAction('eventFiltersInitFromId');
+    });
+
+    expect(component.queryByTestId('expired-license-callout')).toBeNull();
+  });
+
+  it.skip('should display banner when under platinum license and edit mode with by policy assignment', async () => {
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    await act(async () => {
+      component = render({ id: 'fakeId', type: 'edit' });
+      await waitForAction('eventFiltersInitFromId');
+    });
+
+    expect(component.queryByTestId('expired-license-callout')).not.toBeNull();
   });
 });

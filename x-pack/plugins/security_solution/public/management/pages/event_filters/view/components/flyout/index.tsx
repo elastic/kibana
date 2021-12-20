@@ -29,6 +29,7 @@ import { AppAction } from '../../../../../../common/store/actions';
 import { EventFiltersForm } from '../form';
 import { useEventFiltersSelector, useEventFiltersNotification } from '../../hooks';
 import {
+  getFormEntryStateMutable,
   getFormHasError,
   isCreationInProgress,
   isCreationSuccessful,
@@ -38,6 +39,8 @@ import { Ecs } from '../../../../../../../common/ecs';
 import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
 import { useGetEndpointSpecificPolicies } from '../../../../../services/policies/hooks';
 import { getLoadPoliciesError } from '../../../../../common/translations';
+import { useLicense } from '../../../../../../common/hooks/use_license';
+import { isGlobalPolicyEffected } from '../../../../../components/effected_policy_select/utils';
 
 export interface EventFiltersFlyoutProps {
   type?: 'create' | 'edit';
@@ -55,6 +58,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
     const formHasError = useEventFiltersSelector(getFormHasError);
     const creationInProgress = useEventFiltersSelector(isCreationInProgress);
     const creationSuccessful = useEventFiltersSelector(isCreationSuccessful);
+    const exception = useEventFiltersSelector(getFormEntryStateMutable);
     const {
       data: { search },
       docLinks,
@@ -67,7 +71,19 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
       },
     });
 
-    const [showExpiredLicenseBanner, setShowExpiredLicenseBanner] = useState(false);
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const isEditMode = useMemo(() => type === 'edit' && !!id, [type, id]);
+    const [wasByPolicy, setWasByPolicy] = useState<boolean | undefined>(undefined);
+
+    const showExpiredLicenseBanner = useMemo(() => {
+      return !isPlatinumPlus && isEditMode && wasByPolicy;
+    }, [isPlatinumPlus, isEditMode, wasByPolicy]);
+
+    useEffect(() => {
+      if (exception && wasByPolicy === undefined) {
+        setWasByPolicy(!isGlobalPolicyEffected(exception?.tags));
+      }
+    }, [exception, wasByPolicy]);
 
     useEffect(() => {
       if (creationSuccessful) {
@@ -252,7 +268,6 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
             allowSelectOs={!data}
             policies={policiesRequest?.data?.items ?? []}
             arePoliciesLoading={policiesRequest.isLoading || policiesRequest.isRefetching}
-            showExpiredLicenseBannerChanged={setShowExpiredLicenseBanner}
           />
         </EuiFlyoutBody>
 
