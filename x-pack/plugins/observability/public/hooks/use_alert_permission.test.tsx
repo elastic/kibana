@@ -6,12 +6,12 @@
  */
 
 import { getAlertsPermissions, useGetUserAlertsPermissions } from './use_alert_permission';
-import { capabilitiesServiceMock } from 'src/core/public/mocks';
+import { applicationServiceMock } from 'src/core/public/mocks';
 import { renderHook } from '@testing-library/react-hooks';
 
 describe('getAlertsPermissions', () => {
   it('returns a fallback when featureId is nullish or missing from capabilities', () => {
-    const capabilities = capabilitiesServiceMock.createStartContract().capabilities;
+    const { capabilities } = applicationServiceMock.createStartContract();
 
     expect(getAlertsPermissions(capabilities, '')).toEqual({
       crud: false,
@@ -31,7 +31,7 @@ describe('getAlertsPermissions', () => {
   it('returns proper permissions when featureId is a key in capabilities', () => {
     const capabilities = Object.assign(
       {},
-      capabilitiesServiceMock.createStartContract().capabilities,
+      applicationServiceMock.createStartContract().capabilities,
       {
         apm: { 'alerting:save': false, 'alerting:show': true, loading: true },
         uptime: { loading: true, save: true, show: true },
@@ -62,7 +62,7 @@ describe('useGetUserAlertPermissions', function () {
     async function () {
       const capabilities = Object.assign(
         {},
-        capabilitiesServiceMock.createStartContract().capabilities,
+        applicationServiceMock.createStartContract().capabilities,
         {
           apm: { 'alerting:save': false, 'alerting:show': true },
           uptime: { save: true, show: true },
@@ -86,7 +86,7 @@ describe('useGetUserAlertPermissions', function () {
   it(
     'returns default permissions when permissions for featureId are missing',
     async function () {
-      const { capabilities } = capabilitiesServiceMock.createStartContract();
+      const { capabilities } = applicationServiceMock.createStartContract();
 
       const { result } = renderHook(
         ({ featureId }) => useGetUserAlertsPermissions(capabilities, featureId),
