@@ -20,13 +20,13 @@ interface ChartPanelProps {
 }
 
 const Loading = () => (
-  <EuiFlexGroup justifyContent="center" alignItems="center">
+  <EuiFlexGroup justifyContent="center" alignItems="center" data-test-subj="loading">
     <EuiLoadingChart size="m" />
   </EuiFlexGroup>
 );
 
 const Error = () => (
-  <EuiFlexGroup justifyContent="center" alignItems="center">
+  <EuiFlexGroup justifyContent="center" alignItems="center" data-test-subj="error">
     <EuiText size="xs" color="subdued">
       {'Error'}
     </EuiText>
@@ -34,7 +34,7 @@ const Error = () => (
 );
 
 const Empty = () => (
-  <EuiFlexGroup justifyContent="center" alignItems="center">
+  <EuiFlexGroup justifyContent="center" alignItems="center" data-test-subj="empty">
     <EuiText size="xs" color="subdued">
       {'No data to display'}
     </EuiText>
@@ -58,7 +58,7 @@ export const ChartPanel = ({
   }, [isLoading, isError, data, Chart]);
 
   return (
-    <EuiPanel hasBorder={hasBorder} hasShadow={false}>
+    <EuiPanel hasBorder={hasBorder} hasShadow={false} data-test-subj="chart-panel">
       <EuiFlexGroup direction="column" gutterSize="xs">
         {title && (
           <StyledEuiTitle size="s">
