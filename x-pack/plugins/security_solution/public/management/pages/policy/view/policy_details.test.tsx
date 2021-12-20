@@ -121,7 +121,7 @@ describe('Policy Details', () => {
 
       const backToListLink = policyView.find('BackToExternalAppButton');
       expect(backToListLink.prop('backButtonUrl')).toBe(`/app/security${endpointListPath}`);
-      expect(backToListLink.text()).toBe('Back to endpoint hosts');
+      expect(backToListLink.text()).toBe('View all endpoints');
 
       const pageTitle = policyView.find('span[data-test-subj="header-page-title"]');
       expect(pageTitle).toHaveLength(1);
