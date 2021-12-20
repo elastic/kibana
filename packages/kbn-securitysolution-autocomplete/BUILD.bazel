@@ -46,9 +46,9 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "//packages/kbn-es-query:npm_module_types",
-  "//packages/kbn-i18n",
+  "//packages/kbn-i18n:npm_module_types",
   "//packages/kbn-securitysolution-list-hooks",
-  "//packages/kbn-securitysolution-list-utils",
+  "//packages/kbn-securitysolution-list-utils:npm_module_types",
   "//packages/kbn-securitysolution-io-ts-list-types",
   "@npm//@elastic/eui",
   "@npm//@testing-library/react",
