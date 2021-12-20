@@ -9,6 +9,9 @@
   "description": "Expression Pie plugin adds a `pie` renderer and function to the expression plugin. The renderer will display the `pie` chart.",
   "server": true,
   "ui": true,
+  "extraPublicDirs": [
+    "common"
+  ],
   "requiredPlugins": ["charts", "data", "expressions", "visualizations", "usageCollection"],
   "requiredBundles": ["kibanaReact"],
   "optionalPlugins": []
