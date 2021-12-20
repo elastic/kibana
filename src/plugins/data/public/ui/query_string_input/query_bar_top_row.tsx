@@ -45,33 +45,34 @@ const QueryStringInput = withKibana(QueryStringInputUI);
 
 // @internal
 export interface QueryBarTopRowProps {
-  query?: Query;
-  onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
-  onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
-  onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  customSubmitButton?: any;
   dataTestSubj?: string;
-  disableAutoFocus?: boolean;
-  screenTitle?: string;
-  indexPatterns?: Array<IIndexPattern | string>;
-  isLoading?: boolean;
-  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
-  showQueryInput?: boolean;
-  showDatePicker?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;
-  isRefreshPaused?: boolean;
-  refreshInterval?: number;
-  showAutoRefreshOnly?: boolean;
-  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  customSubmitButton?: any; // TODO: type this
-  isDirty: boolean;
-  timeHistory?: TimeHistoryContract;
-  indicateNoData?: boolean;
+  disableAutoFocus?: boolean;
+  fillSubmitButton: boolean;
   iconType?: EuiIconProps['type'];
-  placeholder?: string;
+  indexPatterns?: Array<IIndexPattern | string>;
+  indicateNoData?: boolean;
   isClearable?: boolean;
+  isDirty: boolean;
+  isLoading?: boolean;
+  isRefreshPaused?: boolean;
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
+  onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
+  onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  placeholder?: string;
+  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
+  query?: Query;
+  refreshInterval?: number;
+  screenTitle?: string;
+  showQueryInput?: boolean;
+  showDatePicker?: boolean;
+  showAutoRefreshOnly?: boolean;
+  timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
 }
 
@@ -318,7 +319,7 @@ export const QueryBarTopRow = React.memo(
           isDisabled={isDateRangeInvalid}
           isLoading={props.isLoading}
           onClick={onClickSubmitButton}
-          fill={false}
+          fill={props.fillSubmitButton}
           data-test-subj="querySubmitButton"
         />
       );
