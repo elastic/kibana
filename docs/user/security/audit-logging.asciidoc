@@ -51,7 +51,7 @@ Refer to the corresponding {es} logs for potential write errors.
 | `failure` | Failed login attempt (e.g. due to invalid credentials).
 
 | `user_logout`
-| `success` | User has logged out successfully.
+| `unknown` | User is logging out.
 
 | `access_agreement_acknowledged`
 | N/A | User has acknowledged the access agreement.

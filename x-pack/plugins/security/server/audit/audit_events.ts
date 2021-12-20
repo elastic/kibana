@@ -138,11 +138,11 @@ export interface UserLogoutParams {
 
 export function userLogoutEvent({ username, provider }: UserLogoutParams): AuditEvent {
   return {
-    message: `User [${username}] has logged out using ${provider.type} provider [name=${provider.name}]`,
+    message: `User [${username}] is logging out using ${provider.type} provider [name=${provider.name}]`,
     event: {
       action: 'user_logout',
       category: ['authentication'],
-      outcome: 'success',
+      outcome: 'unknown',
     },
     user: {
       name: username,

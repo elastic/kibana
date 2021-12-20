@@ -315,13 +315,13 @@ describe('#userLogoutEvent', () => {
           "category": Array [
             "authentication",
           ],
-          "outcome": "success",
+          "outcome": "unknown",
         },
         "kibana": Object {
           "authentication_provider": "basic1",
           "authentication_type": "basic",
         },
-        "message": "User [elastic] has logged out using basic provider [name=basic1]",
+        "message": "User [elastic] is logging out using basic provider [name=basic1]",
         "user": Object {
           "name": "elastic",
         },
