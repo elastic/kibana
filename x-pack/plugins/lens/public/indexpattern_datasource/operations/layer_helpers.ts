@@ -266,6 +266,7 @@ export function insertNewColumn({
           indexPattern,
           field: validFields[0] ?? documentField,
           visualizationGroups,
+          columnParams,
           targetGroup,
         });
       }

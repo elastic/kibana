@@ -45,7 +45,8 @@ export const computeParentSeries = (
   currentMetric: Metric,
   subFunctionMetric: Metric,
   pipelineAgg: string,
-  color: string
+  color: string,
+  meta?: number
 ) => {
   const aggregationMap = SUPPORTED_METRICS[aggregation];
   return [
@@ -56,7 +57,10 @@ export const computeParentSeries = (
       color,
       fieldName:
         subFunctionMetric?.field && pipelineAgg !== 'count' ? subFunctionMetric?.field : 'document',
-      params: { window: currentMetric.window },
+      params: {
+        window: currentMetric.window,
+        ...(pipelineAgg === 'percentile' && meta && { percentile: meta }),
+      },
     },
   ];
 };
@@ -67,7 +71,9 @@ export const getParentPipelineSeries = (
   metrics: Metric[],
   color: string
 ) => {
-  const subFunctionMetric = metrics.find((metric) => metric.id === currentMetric.field);
+  //  percentile value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
+  const [fieldId, meta] = currentMetric?.field?.split('[') ?? [];
+  const subFunctionMetric = metrics.find((metric) => metric.id === fieldId);
   if (!subFunctionMetric) {
     return null;
   }
@@ -75,7 +81,16 @@ export const getParentPipelineSeries = (
   if (!pipelineAgg) {
     return null;
   }
-  return computeParentSeries(aggregation, currentMetric, subFunctionMetric, pipelineAgg, color);
+  const metaValue = Number(meta?.replace(']', ''));
+
+  return computeParentSeries(
+    aggregation,
+    currentMetric,
+    subFunctionMetric,
+    pipelineAgg,
+    color,
+    metaValue
+  );
 };
 
 export const getSiblingPipelineSeries = (

@@ -78,7 +78,9 @@ export const getSeries = (
       break;
     }
     case 'cumulative_sum': {
-      const subFunctionMetric = metrics.find((metric) => metric.id === metrics[metricIdx].field);
+      //  percentile value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
+      const [fieldId, meta] = metrics[metricIdx]?.field?.split('[') ?? [];
+      const subFunctionMetric = metrics.find((metric) => metric.id === fieldId);
       if (!subFunctionMetric) {
         return null;
       }
@@ -87,7 +89,14 @@ export const getSeries = (
         return null;
       }
       if (pipelineAgg !== 'count' && pipelineAgg !== 'sum') {
-        const script = `${aggregationMap.name}(${pipelineAgg}(${subFunctionMetric.field}))`;
+        const metaValue = Number(meta?.replace(']', ''));
+        let additionalFunctionArgs;
+        if (pipelineAgg === 'percentile' && metaValue) {
+          additionalFunctionArgs = `, percentile=${metaValue}`;
+        }
+        const script = `${aggregationMap.name}(${pipelineAgg}(${subFunctionMetric.field}${
+          additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
+        }))`;
         metricsArray = getFormulaSeries(script, color);
       } else {
         metricsArray = computeParentSeries(
