@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { journey, step } from '@elastic/synthetics';
+import { journey, step, before } from '@elastic/synthetics';
 import { NETWORK_PROFILES } from '../../../../../test/functional/services/remote/network_profiles';
 
 for (let i = 0; i < 10; i++) {
   journey('perf_login_and_home', async ({ page, params }) => {
-    const cdpSession = await page.context().newCDPSession(page);
-    await cdpSession.send('Network.setCacheDisabled', { cacheDisabled: true });
-    await cdpSession.send('Network.emulateNetworkConditions', {
-      downloadThroughput: NETWORK_PROFILES.CLOUD_USER.DOWNLOAD,
-      uploadThroughput: NETWORK_PROFILES.CLOUD_USER.UPLOAD,
-      latency: NETWORK_PROFILES.CLOUD_USER.LATENCY,
-      offline: false,
+    before(async () => {
+      const cdpSession = await page.context().newCDPSession(page);
+      await cdpSession.send('Network.setCacheDisabled', { cacheDisabled: true });
+      await cdpSession.send('Network.emulateNetworkConditions', {
+        latency: NETWORK_PROFILES.CLOUD_USER.LATENCY,
+        downloadThroughput: NETWORK_PROFILES.CLOUD_USER.DOWNLOAD,
+        uploadThroughput: NETWORK_PROFILES.CLOUD_USER.UPLOAD,
+        offline: false,
+      });
     });
 
     step('Go to Kibana login page', async () => {

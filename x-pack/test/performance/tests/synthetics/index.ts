@@ -22,7 +22,7 @@ export default async function ({ getService }: any) {
   const result = await playwrightRun({
     params: { kibanaUrl },
     playwrightOptions: {
-      headless: true,
+      headless: process.env.TEST_BROWSER_HEADLESS === '1',
       chromiumSandbox: false,
       timeout: 60 * 1000,
     },
