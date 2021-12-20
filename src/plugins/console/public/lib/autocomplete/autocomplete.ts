@@ -762,7 +762,24 @@ export default function ({
         break;
       default:
         if (nonEmptyToken && nonEmptyToken.type.indexOf('url') < 0) {
-          context.prefixToAdd = ', ';
+          if (
+            // if not on the first line
+            context.rangeToReplace &&
+            context.rangeToReplace.start &&
+            context.rangeToReplace.start.lineNumber > 1
+          ) {
+            // save original start position
+            const startColumn = context.rangeToReplace.start.column;
+            const prevLineNumber = context.rangeToReplace.start.lineNumber - 1;
+            const prevLineLength = context.editor?.getLineValue(prevLineNumber).length ?? 0;
+            // go back to the end of the previous line
+            context.rangeToReplace = {
+              start: { lineNumber: prevLineNumber, column: prevLineLength + 1 },
+              end: { ...context.rangeToReplace.end },
+            };
+            // add a comma at the end of the previous line, a new line and indentation
+            context.prefixToAdd = ',\n' + ' '.repeat(startColumn - 1);
+          }
         }
     }
 
