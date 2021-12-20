@@ -166,6 +166,15 @@ describe('Session view', () => {
           expect(parentCommandLeftMargin).to.be.greaterThan(childCommandLeftMargin)
         })
       })
+    })
+    
+    it('root escalation', () => {
+      openSessionView(TEST_EVENT_ID);
+
+      // Get the parent div for Root Escalation button and checks if Sudo su and Root Escalation button is with same parent or not
+      cy.contains('Root escalation').parent().contains('sudo').should('exist');
+      cy.contains('Root escalation').parent().contains('su').should('exist');
+
     });
   });
 });
