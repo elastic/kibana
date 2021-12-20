@@ -38,7 +38,7 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "//packages/kbn-securitysolution-io-ts-list-types",
-  "//packages/kbn-securitysolution-io-ts-utils",
+  "//packages/kbn-securitysolution-io-ts-utils:npm_module_types",
   "//packages/kbn-securitysolution-list-constants",
   "@npm//fp-ts",
   "@npm//io-ts",
