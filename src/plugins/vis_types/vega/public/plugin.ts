@@ -31,7 +31,7 @@ import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';
 import { getVegaVisRenderer } from './vega_vis_renderer';
-import { getServiceSettings } from './vega_view/vega_map_view/service_settings/get_service_settings';
+import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -81,7 +81,7 @@ export class VegaPlugin implements Plugin<void, void> {
       plugins: {
         data,
       },
-      getServiceSettings,
+      getServiceSettings: getServiceSettingsLazy,
     };
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
