@@ -40,13 +40,30 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
       isMounted.current = true;
       const fetchStats = async () => {
         try {
-          const response = await trustedAppsApi.getTrustedAppsList({
-            kuery: policyId
-              ? `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`
-              : undefined,
-          });
-          if (isMounted) {
-            setStats({ total: response.total || 0, windows: 0, macos: 0, linux: 0 });
+          let response;
+          if (policyId) {
+            response = await trustedAppsApi.getTrustedAppsList({
+              per_page: 1,
+              kuery: `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`,
+            });
+            if (isMounted) {
+              setStats({
+                total: response.total,
+                windows: 0,
+                macos: 0,
+                linux: 0,
+              });
+            }
+          } else {
+            response = await trustedAppsApi.getTrustedAppsSummary();
+            if (isMounted) {
+              setStats({
+                total: response.total,
+                windows: response.windows,
+                macos: response.macos,
+                linux: response.linux,
+              });
+            }
           }
         } catch (error) {
           if (isMounted.current) {
