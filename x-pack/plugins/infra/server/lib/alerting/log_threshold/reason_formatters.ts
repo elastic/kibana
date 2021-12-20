@@ -101,7 +101,6 @@ export const getReasonMessageForGroupedRatioAlert = (
       expectedRatio,
       groupName,
       translatedComparator: ComparatorToi18nMap[comparator],
-      timeSize,
       duration: getDuration(timeSize, timeUnit),
     },
   });
