@@ -58,7 +58,7 @@ describe('<SnapshotList />', () => {
     jest.useFakeTimers();
     const snapshot = fixtures.getSnapshot({
       repository: REPOSITORY_NAME,
-      snapshot: `a${getRandomString()}`,
+      snapshot: getRandomString(),
     });
     const snapshots = [snapshot];
     (useLoadSnapshots as jest.Mock).mockReturnValue({
@@ -121,7 +121,8 @@ describe('<SnapshotList />', () => {
 
     describe('debounce', () => {
       test('waits after input to update list params for search', async () => {
-        await setSearchText('snapshot=test_snapshot', false);
+        const ADVANCE_TIME = false;
+        await setSearchText('snapshot=test_snapshot', ADVANCE_TIME);
         // the last request was without any search params
         expect(useLoadSnapshots).lastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
