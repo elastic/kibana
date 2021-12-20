@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../../fleet/common';
 import { pagePathGetters } from '../../../../../../../../../fleet/public';
 import {
@@ -32,6 +33,7 @@ export const FleetIntegrationHostIsolationExceptionsCard = memo<{
   const isMounted = useRef<boolean>();
   const { getAppUrl } = useAppUrl();
   const policyHostIsolationExceptionsPath = getPolicyHostIsolationExceptionsPath(policyId);
+  const privileges = useUserPrivileges().endpointPrivileges;
 
   const policyHostIsolationExceptionsRouteState = useMemo<PolicyDetailsRouteState>(() => {
     const fleetPackageIntegrationCustomUrlPath = `#${
@@ -119,6 +121,15 @@ export const FleetIntegrationHostIsolationExceptionsCard = memo<{
       isMounted.current = false;
     };
   }, [http, policyId, toasts]);
+
+  // do not render if doesn't have privileges.
+  // render if doesn't have privileges but has data to show
+  if (
+    (stats === undefined && !privileges.canIsolateHost) ||
+    (stats?.total === 0 && !privileges.canIsolateHost)
+  ) {
+    return null;
+  }
 
   return (
     <EuiPanel
