@@ -30,7 +30,6 @@ export const getSeries = (
   if (!aggregationMap) {
     return null;
   }
-
   let metricsArray: VisualizeEditorLayersContext['metrics'] = [];
   switch (aggregation) {
     case 'percentile': {
@@ -93,15 +92,38 @@ export const getSeries = (
         return null;
       }
       if (pipelineAgg !== 'count' && pipelineAgg !== 'sum') {
-        const metaValue = Number(meta?.replace(']', ''));
-        let additionalFunctionArgs;
-        if (pipelineAgg === 'percentile' && metaValue) {
-          additionalFunctionArgs = `, percentile=${metaValue}`;
+        const subMetricField = subFunctionMetric.field;
+        const [nestedFieldId, nestedMeta] = subMetricField?.split('[') ?? [];
+        // support nested aggs
+        const additionalSubFunction = metrics.find((metric) => metric.id === nestedFieldId);
+
+        if (additionalSubFunction) {
+          // support nested aggs with formula
+          const additionalPipelineAggMap = SUPPORTED_METRICS[additionalSubFunction.type];
+          if (!additionalPipelineAggMap) {
+            return null;
+          }
+          const nestedMetaValue = Number(nestedMeta?.replace(']', ''));
+          const aggMap = SUPPORTED_METRICS[aggregation];
+          let additionalFunctionArgs;
+          if (additionalPipelineAggMap.name === 'percentile' && nestedMetaValue) {
+            additionalFunctionArgs = `, percentile=${nestedMetaValue}`;
+          }
+          const formula = `${aggMap.name}(${pipelineAgg}(${additionalPipelineAggMap.name}(${
+            additionalSubFunction.field ?? ''
+          }${additionalFunctionArgs ? `${additionalFunctionArgs}` : ''})))`;
+          metricsArray = getFormulaSeries(formula, color);
+        } else {
+          const metaValue = Number(meta?.replace(']', ''));
+          let additionalFunctionArgs;
+          if (pipelineAgg === 'percentile' && metaValue) {
+            additionalFunctionArgs = `, percentile=${metaValue}`;
+          }
+          const script = `${aggregationMap.name}(${pipelineAgg}(${subFunctionMetric.field}${
+            additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
+          }))`;
+          metricsArray = getFormulaSeries(script, color);
         }
-        const script = `${aggregationMap.name}(${pipelineAgg}(${subFunctionMetric.field}${
-          additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
-        }))`;
-        metricsArray = getFormulaSeries(script, color);
       } else {
         metricsArray = computeParentSeries(
           aggregation,
