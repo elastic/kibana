@@ -18,6 +18,7 @@ import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/comm
 import { loadAlertAggregations as loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { ParsedTechnicalFields } from '../../../../../../rule_registry/common/parse_technical_fields';
+import { ParsedExperimentalFields } from '../../../../../../rule_registry/common/parse_experimental_fields';
 import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -43,7 +44,7 @@ interface RuleStatsState {
   error: number;
 }
 export interface TopAlert {
-  fields: ParsedTechnicalFields;
+  fields: ParsedTechnicalFields & ParsedExperimentalFields;
   start: number;
   reason: string;
   link?: string;
