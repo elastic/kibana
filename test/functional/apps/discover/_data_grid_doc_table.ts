@@ -63,6 +63,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('open popover with expanded cell content to get json from the editor');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await retry.waitForWithTimeout('timestamp matches expected doc', 5000, async() => {
+        const cell = await dataGrid.getCellElement(0, 2);
+        const text = await cell.getVisibleText();
+        return text === 'Sept 22, 2015 @ 23:50:13.253';
+      });
       const documentCell = await dataGrid.getCellElement(0, 3);
       await documentCell.click();
       const expandCellContentButton = await documentCell.findByClassName(
@@ -75,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const text = await monacoEditor.getCodeEditorValue();
         const flyoutJson = text?.trim().charAt(0) === '{' ? JSON.parse(text) : {};
         expandDocId = flyoutJson._id;
-        return !!expandDocId;
+        return !!expandDocId && expandDocId === 'AU_x3_g4GFA8no6QjkYX';
       });
       log.debug(`expanded document id: ${expandDocId}`);
 
