@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { EMPTY_SIZE_RATIOS } from './constants';
 import { LabelPositions, ValueFormats } from '../types';
 
 export const getLabelPositions = [
@@ -36,5 +37,29 @@ export const getValuesFormats = [
       defaultMessage: 'Show value',
     }),
     value: ValueFormats.VALUE,
+  },
+];
+
+export const emptySizeRatioOptions = [
+  {
+    id: 'emptySizeRatioOption-small',
+    value: EMPTY_SIZE_RATIOS.SMALL,
+    label: i18n.translate('visTypePie.emptySizeRatioOptions.small', {
+      defaultMessage: 'Small',
+    }),
+  },
+  {
+    id: 'emptySizeRatioOption-medium',
+    value: EMPTY_SIZE_RATIOS.MEDIUM,
+    label: i18n.translate('visTypePie.emptySizeRatioOptions.medium', {
+      defaultMessage: 'Medium',
+    }),
+  },
+  {
+    id: 'emptySizeRatioOption-large',
+    value: EMPTY_SIZE_RATIOS.LARGE,
+    label: i18n.translate('visTypePie.emptySizeRatioOptions.large', {
+      defaultMessage: 'Large',
+    }),
   },
 ];
