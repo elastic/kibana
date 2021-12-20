@@ -18,7 +18,7 @@ import {
   getBenchmarksQuery,
   getLatestFindingQuery,
 } from './stats_queries';
-
+import { STATS_ROUTH_PATH } from '../../../common/constants';
 interface LastCycle {
   run_id: string;
 }
@@ -139,10 +139,10 @@ export const getResourcesEvaluation = async (
   return [...passedEvaluationPerResorces, ...failedEvaluationPerResorces];
 };
 
-export const defineGetScoreRoute = (router: IRouter): void =>
+export const defineGetStatsRoute = (router: IRouter): void =>
   router.get(
     {
-      path: '/api/csp/stats',
+      path: STATS_ROUTH_PATH,
       validate: false,
     },
     async (context, _, response) => {
