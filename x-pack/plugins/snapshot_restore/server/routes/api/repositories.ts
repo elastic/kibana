@@ -9,9 +9,10 @@ import { TypeOf } from '@kbn/config-schema';
 import type {
   SnapshotGetRepositoryResponse,
   SnapshotRepositorySettings,
+  PluginStats,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
+import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common';
 import { Repository, RepositoryType } from '../../../common/types';
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '../helpers';
@@ -162,21 +163,27 @@ export function registerRepositoriesRoutes({
       const types: RepositoryType[] = isCloudEnabled ? [] : [...DEFAULT_REPOSITORY_TYPES];
 
       try {
-        // Call with internal user so that the requesting user does not need `monitoring` cluster
-        // privilege just to see list of available repository types
-        const { body: plugins } = await clusterClient.asCurrentUser.cat.plugins({ format: 'json' });
+        const {
+          body: { nodes },
+        } = await clusterClient.asCurrentUser.nodes.info({
+          node_id: '_all',
+          metric: 'plugins',
+        });
+        const pluginNamesAllNodes = Object.keys(nodes).map((key: string) => {
+          // extract plugin names
+          return (nodes[key].plugins ?? []).map((plugin: PluginStats) => plugin.name);
+        });
 
         // Filter list of plugins to repository-related ones
-        if (plugins && plugins.length) {
-          const pluginNames: string[] = [
-            ...new Set(plugins.map((plugin) => plugin.component ?? '')),
-          ];
-          pluginNames.forEach((pluginName) => {
-            if (REPOSITORY_PLUGINS_MAP[pluginName]) {
-              types.push(REPOSITORY_PLUGINS_MAP[pluginName]);
-            }
-          });
-        }
+        Object.keys(REPOSITORY_PLUGINS_MAP).forEach((repoTypeName: string) => {
+          if (
+            // check if this repository plugin is installed on every node
+            pluginNamesAllNodes.every((pluginNames: string[]) => pluginNames.includes(repoTypeName))
+          ) {
+            types.push(REPOSITORY_PLUGINS_MAP[repoTypeName]);
+          }
+        });
+
         return res.ok({ body: types });
       } catch (e) {
         return handleEsError({ error: e, response: res });
