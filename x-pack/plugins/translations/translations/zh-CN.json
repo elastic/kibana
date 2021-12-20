@@ -10659,7 +10659,6 @@
     "xpack.fleet.copyAgentPolicy.confirmModal.defaultNewPolicyName": "{name}（副本）",
     "xpack.fleet.copyAgentPolicy.confirmModal.newDescriptionLabel": "描述",
     "xpack.fleet.copyAgentPolicy.confirmModal.newNameLabel": "新策略名称",
-    "xpack.fleet.copyAgentPolicy.failureNotificationTitle": "复制代理策略“{id}”时出错",
     "xpack.fleet.copyAgentPolicy.fatalErrorNotificationTitle": "复制代理策略时出错",
     "xpack.fleet.copyAgentPolicy.successNotificationTitle": "已复制代理策略",
     "xpack.fleet.createAgentPolicy.cancelButtonLabel": "取消",
