@@ -10,7 +10,6 @@ import {
   EuiPageContent,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiProgress,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -37,6 +36,7 @@ import { PolicyHostIsolationExceptionsAssignFlyout } from './components/assign_f
 import { PolicyHostIsolationExceptionsEmptyUnassigned } from './components/empty_unassigned';
 import { PolicyHostIsolationExceptionsEmptyUnexisting } from './components/empty_unexisting';
 import { PolicyHostIsolationExceptionsList } from './components/list';
+import { ManagementPageLoader } from '../../../../components/management_page_loader';
 
 export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyData }) => {
   const { getAppUrl } = useAppUrl();
@@ -204,11 +204,7 @@ export const PolicyHostIsolationExceptionsTab = ({ policy }: { policy: PolicyDat
       </EuiPageContent>
     </div>
   ) : (
-    <EuiProgress
-      size="xs"
-      color="primary"
-      data-test-subj="policyHostIsolationExceptionsTabLoading"
-    />
+    <ManagementPageLoader data-test-subj="policyHostIsolationExceptionsTabLoading" />
   );
 };
 PolicyHostIsolationExceptionsTab.displayName = 'PolicyHostIsolationExceptionsTab';

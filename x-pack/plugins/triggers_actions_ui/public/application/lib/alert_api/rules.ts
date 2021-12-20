@@ -6,12 +6,12 @@
  */
 import { HttpSetup } from 'kibana/public';
 import { BASE_ALERTING_API_PATH } from '../../constants';
-import { Alert, Pagination, Sorting } from '../../../types';
+import { Rule, Pagination, Sorting } from '../../../types';
 import { AsApiContract } from '../../../../../actions/common';
 import { mapFiltersToKql } from './map_filters_to_kql';
 import { transformAlert } from './common_transformations';
 
-const rewriteResponseRes = (results: Array<AsApiContract<Alert>>): Alert[] => {
+const rewriteResponseRes = (results: Array<AsApiContract<Rule>>): Rule[] => {
   return results.map((item) => transformAlert(item));
 };
 
@@ -35,7 +35,7 @@ export async function loadAlerts({
   page: number;
   perPage: number;
   total: number;
-  data: Alert[];
+  data: Rule[];
 }> {
   const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, alertStatusesFilter });
   const res = await http.get<
@@ -43,7 +43,7 @@ export async function loadAlerts({
       page: number;
       perPage: number;
       total: number;
-      data: Array<AsApiContract<Alert>>;
+      data: Array<AsApiContract<Rule>>;
     }>
   >(`${BASE_ALERTING_API_PATH}/rules/_find`, {
     query: {
