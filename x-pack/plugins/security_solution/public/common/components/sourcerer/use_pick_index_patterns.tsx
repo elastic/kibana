@@ -33,6 +33,7 @@ interface UsePickIndexPatterns {
   allOptions: Array<EuiComboBoxOptionOption<string>>;
   dataViewSelectOptions: Array<EuiSuperSelectOption<string>>;
   loadingIndexPatterns: boolean;
+  handleOutsideClick: () => void;
   isModified: ModifiedTypes;
   onChangeCombo: (newSelectedDataViewId: Array<EuiComboBoxOptionOption<string>>) => void;
   renderOption: ({ value }: EuiComboBoxOptionOption<string>) => React.ReactElement;
@@ -168,7 +169,7 @@ export const usePickIndexPatterns = ({
       selectedDataViewId
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDataViewId, missingPatterns, scopeId, selectedPatterns]);
+  }, [isOnlyDetectionAlerts, selectedDataViewId, missingPatterns, scopeId, selectedPatterns]);
 
   const onChangeCombo = useCallback((newSelectedOptions) => {
     setSelectedOptions(newSelectedOptions);
@@ -242,10 +243,15 @@ export const usePickIndexPatterns = ({
     };
   }, []);
 
+  const handleOutsideClick = useCallback(() => {
+    setSelectedOptions(patternListToOptions(selectedPatterns));
+  }, [selectedPatterns]);
+
   return {
     allOptions,
     dataViewSelectOptions,
     loadingIndexPatterns,
+    handleOutsideClick,
     isModified,
     onChangeCombo,
     renderOption,
