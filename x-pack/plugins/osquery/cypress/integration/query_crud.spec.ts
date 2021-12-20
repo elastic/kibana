@@ -9,6 +9,9 @@ import { navigateTo } from '../tasks/navigation';
 import {
   checkResults,
   DEFAULT_QUERY,
+  deleteAndConfirm,
+  findAndClickButton,
+  findFormFieldByRowsLabelAndType,
   inputQuery,
   selectAllAgents,
   submitQuery,
@@ -38,8 +41,8 @@ describe('Osquery works as CRUD for', () => {
       checkResults();
       cy.contains('Save for later').click();
       cy.contains('Save query');
-      cy.react('EuiFormRow', { props: { label: 'ID' } }).type(SAVED_QUERY_ID);
-      cy.react('EuiFormRow', { props: { label: 'Description' } }).type(SAVED_QUERY_DESCRIPTION);
+      findFormFieldByRowsLabelAndType('ID', SAVED_QUERY_ID);
+      findFormFieldByRowsLabelAndType('Description', SAVED_QUERY_DESCRIPTION);
       cy.react('EuiButtonDisplay').contains('Save').click();
     });
 
@@ -71,7 +74,7 @@ describe('Osquery works as CRUD for', () => {
       cy.react('CustomItemAction', {
         props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
       }).click();
-      cy.react('EuiFormRow', { props: { label: 'Description' } }).type(' Edited');
+      findFormFieldByRowsLabelAndType('Description', ' Edited');
       cy.react('EuiButton').contains('Update query').click();
       cy.contains(`${SAVED_QUERY_DESCRIPTION} Edited`);
     });
@@ -82,9 +85,7 @@ describe('Osquery works as CRUD for', () => {
       cy.react('CustomItemAction', {
         props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
       }).click();
-      cy.react('EuiButton').contains('Delete query').click();
-      cy.contains('Are you sure you want to delete this query?');
-      cy.react('EuiButton').contains('Confirm').click();
+      deleteAndConfirm('query');
       cy.contains(SAVED_QUERY_ID);
     });
   });
@@ -104,23 +105,22 @@ describe('Osquery works as CRUD for', () => {
       checkResults();
       cy.contains('Save for later').click();
       cy.contains('Save query');
-      cy.react('EuiFormRow', { props: { label: 'ID' } }).type(SAVED_QUERY_ID);
-      cy.react('EuiFormRow', { props: { label: 'Description' } }).type(SAVED_QUERY_DESCRIPTION);
-      cy.react('EuiButtonDisplay').contains('Save').click();
+      findFormFieldByRowsLabelAndType('ID', SAVED_QUERY_ID);
+      findFormFieldByRowsLabelAndType('Description', SAVED_QUERY_DESCRIPTION);
+      findAndClickButton('Save');
     });
 
     it('should add a pack from a saved query', () => {
       cy.contains('Packs').click();
-      cy.react('EuiButton').contains('Add pack').click();
-      cy.react('EuiFormRow', { props: { label: 'Name' } }).type(PACK_NAME);
-      cy.react('EuiFormRow', { props: { label: 'Description (optional)' } }).type(
-        'Pack description'
-      );
-      cy.react('EuiFormRow', { props: { label: 'Scheduled agent policies (optional)' } }).type(
+      findAndClickButton('Add pack');
+      findFormFieldByRowsLabelAndType('Name', PACK_NAME);
+      findFormFieldByRowsLabelAndType('Description (optional)', 'Pack description');
+      findFormFieldByRowsLabelAndType(
+        'Scheduled agent policies (optional)',
         'Default Fleet Server policy'
       );
       cy.react('List').first().click();
-      cy.react('EuiButton').contains('Add query').click();
+      findAndClickButton('Add query');
       cy.contains('Attach next query');
       cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
         .click()
@@ -132,9 +132,9 @@ describe('Osquery works as CRUD for', () => {
         .type('1800');
       cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
       cy.react('EuiTableRow').contains(SAVED_QUERY_ID);
-      cy.react('EuiButton').contains('Save pack').click();
+      findAndClickButton('Save pack');
       cy.contains('Save and deploy changes');
-      cy.react('EuiButton').contains('Save and deploy changes').click();
+      findAndClickButton('Save and deploy changes');
       cy.contains(PACK_NAME);
     });
     describe('should be editable', () => {
@@ -146,17 +146,17 @@ describe('Osquery works as CRUD for', () => {
       });
       it('by clicking the edit button', () => {
         const NEW_QUERY_NAME = 'new-query-name';
-        cy.react('EuiButton').contains('Edit').click();
+        findAndClickButton('Edit');
         cy.contains(`Edit ${PACK_NAME}`);
-        cy.react('EuiButton').contains('Add query').click();
+        findAndClickButton('Add query');
         cy.contains('Attach next query');
         inputQuery('select * from uptime');
-        cy.react('EuiFormRow', { props: { label: 'ID' } }).type(NEW_QUERY_NAME);
+        findFormFieldByRowsLabelAndType('ID', NEW_QUERY_NAME);
         cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
         cy.react('EuiTableRow').contains(NEW_QUERY_NAME);
-        cy.react('EuiButton').contains('Update pack').click();
+        findAndClickButton('Update pack');
         cy.contains('Save and deploy changes');
-        cy.react('EuiButton').contains('Save and deploy changes').click();
+        findAndClickButton('Save and deploy changes');
       });
       it('by clicking in Discovery button', () => {
         cy.react('CustomItemAction', {
@@ -176,10 +176,8 @@ describe('Osquery works as CRUD for', () => {
       //   );
       // });
       it('by clicking the delete button', () => {
-        cy.react('EuiButton').contains('Edit').click();
-        cy.react('EuiButton').contains('Delete pack').click();
-        cy.contains('Are you sure you want to delete this pack?');
-        cy.react('EuiButton').contains('Confirm').click();
+        findAndClickButton('Edit');
+        deleteAndConfirm('pack');
       });
     });
   });
