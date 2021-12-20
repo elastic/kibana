@@ -30,7 +30,7 @@ export const bulkCreateFactory =
     refreshForBulkCreate: RefreshTypes
   ) =>
   async <T extends Record<string, unknown>>(
-    wrappedDocs: Array<BaseHit<T>>
+    wrappedDocs: Array<BaseHit<T> & { _meta: { legacyId: string } }>
   ): Promise<GenericBulkCreateResponse<T>> => {
     if (wrappedDocs.length === 0) {
       return {
@@ -47,6 +47,7 @@ export const bulkCreateFactory =
     const { createdAlerts } = await alertWithPersistence(
       wrappedDocs.map((doc) => ({
         _id: doc._id,
+        _meta: doc._meta,
         // `fields` should have already been merged into `doc._source`
         _source: doc._source,
       })),

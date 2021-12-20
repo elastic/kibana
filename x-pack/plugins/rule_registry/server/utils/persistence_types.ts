@@ -20,6 +20,9 @@ import { IRuleDataClient } from '../rule_data_client';
 export type PersistenceAlertService = <T>(
   alerts: Array<{
     _id: string;
+    _meta?: {
+      legacyId: string;
+    };
     _source: T;
   }>,
   refresh: boolean | 'wait_for'

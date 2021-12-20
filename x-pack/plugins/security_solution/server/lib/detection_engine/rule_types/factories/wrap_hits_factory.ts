@@ -37,6 +37,14 @@ export const wrapHitsFactory =
       return {
         _id: id,
         _index: '',
+        _meta: {
+          legacyId: generateId(
+            event._index,
+            event._id,
+            String(event._version),
+            completeRule.alertId
+          ),
+        },
         _source: {
           ...buildBulkBody(
             spaceId,
