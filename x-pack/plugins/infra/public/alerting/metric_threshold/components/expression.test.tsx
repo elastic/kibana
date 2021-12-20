@@ -34,7 +34,7 @@ describe('Expression', () => {
     filterQuery?: string;
     groupBy?: string;
   }) {
-    const alertParams = {
+    const ruleParams = {
       criteria: [],
       groupBy: undefined,
       filterQueryText: '',
@@ -42,13 +42,13 @@ describe('Expression', () => {
     };
     const wrapper = mountWithIntl(
       <Expressions
-        alertInterval="1m"
-        alertThrottle="1m"
+        ruleInterval="1m"
+        ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"
-        alertParams={alertParams}
+        ruleParams={ruleParams}
         errors={{}}
-        setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}
-        setAlertProperty={() => {}}
+        setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
+        setRuleProperty={() => {}}
         metadata={{
           currentOptions,
         }}
@@ -63,7 +63,7 @@ describe('Expression', () => {
 
     await update();
 
-    return { wrapper, update, alertParams };
+    return { wrapper, update, ruleParams };
   }
 
   it('should prefill the alert using the context metadata', async () => {
@@ -75,10 +75,10 @@ describe('Expression', () => {
         { aggregation: 'cardinality', field: 'system.cpu.user.pct' },
       ] as MetricsExplorerMetric[],
     };
-    const { alertParams } = await setup(currentOptions);
-    expect(alertParams.groupBy).toBe('host.hostname');
-    expect(alertParams.filterQueryText).toBe('foo');
-    expect(alertParams.criteria).toEqual([
+    const { ruleParams } = await setup(currentOptions);
+    expect(ruleParams.groupBy).toBe('host.hostname');
+    expect(ruleParams.filterQueryText).toBe('foo');
+    expect(ruleParams.criteria).toEqual([
       {
         metric: 'system.load.1',
         comparator: Comparator.GT,

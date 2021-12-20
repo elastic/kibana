@@ -25,6 +25,7 @@ import { AdministrationListPage } from '../../../components/administration_list_
 import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
+import { ManagementPageLoader } from '../../../components/management_page_loader';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { SearchExceptions } from '../../../components/search_exceptions';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
@@ -179,6 +180,10 @@ export const HostIsolationExceptionsList = () => {
       }),
     [navigateCallback]
   );
+
+  if (isLoading && !hasDataToShow) {
+    return <ManagementPageLoader data-test-subj="hostIsolationExceptionListLoader" />;
+  }
 
   return (
     <AdministrationListPage
