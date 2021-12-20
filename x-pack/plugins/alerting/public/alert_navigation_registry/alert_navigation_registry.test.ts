@@ -6,21 +6,27 @@
  */
 
 import { AlertNavigationRegistry } from './alert_navigation_registry';
-import { AlertType, RecoveredActionGroup, SanitizedAlert } from '../../common';
+import { RuleType, RecoveredActionGroup, SanitizedAlert } from '../../common';
 import uuid from 'uuid';
 
 beforeEach(() => jest.resetAllMocks());
 
-const mockAlertType = (id: string): AlertType => ({
+const mockAlertType = (id: string): RuleType => ({
   id,
   name: id,
   actionGroups: [],
   recoveryActionGroup: RecoveredActionGroup,
-  actionVariables: [],
+  actionVariables: {
+    context: [],
+    state: [],
+    params: [],
+  },
   defaultActionGroupId: 'default',
   producer: 'alerts',
   minimumLicenseRequired: 'basic',
   isExportable: true,
+  enabledInLicense: true,
+  authorizedConsumers: { foo: { read: true, all: true } },
 });
 
 describe('AlertNavigationRegistry', () => {

@@ -52,6 +52,7 @@ import type { RulesClient } from '../../../../alerting/server';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
+import { parseInterval } from '../../../common/util/parse_interval';
 
 interface Results {
   [id: string]: {
@@ -247,6 +248,7 @@ export function jobsProvider(
         awaitingNodeAssignment: isJobAwaitingNodeAssignment(job),
         alertingRules: job.alerting_rules,
         jobTags: job.custom_settings?.job_tags ?? {},
+        bucketSpanSeconds: parseInterval(job.analysis_config.bucket_span)!.asSeconds(),
       };
 
       if (jobIds.find((j) => j === tempJob.id)) {
