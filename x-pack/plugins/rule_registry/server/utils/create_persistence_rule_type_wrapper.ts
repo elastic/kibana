@@ -46,9 +46,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     body: {
                       query: {
                         ids: {
-                          values: alertChunk
-                            .flatMap((alert) => [alert._id, alert._meta?.legacyId])
-                            .filter((item) => item != null) as string[],
+                          values: alertChunk.map((alert) => alert._id),
                         },
                       },
                       aggs: {
@@ -83,9 +81,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 }
 
                 const augmentedAlerts = filteredAlerts.map((alert) => {
-                  const { _meta, ...rest } = alert;
                   return {
-                    ...rest,
+                    ...alert,
                     _source: {
                       [VERSION]: ruleDataClient.kibanaVersion,
                       ...commonRuleFields,
