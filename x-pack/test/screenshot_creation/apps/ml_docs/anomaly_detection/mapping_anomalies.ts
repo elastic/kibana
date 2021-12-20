@@ -26,7 +26,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       influencers: ['geo.src', 'agent.keyword', 'geo.dest'],
       detectors: [
         {
-          detector_description: 'Sum og bytes',
+          detector_description: 'Sum of bytes',
           function: 'sum',
           field_name: 'bytes',
           partition_field_name: 'geo.dest',

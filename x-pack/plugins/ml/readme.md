@@ -153,6 +153,7 @@ and Kibana instance that the tests will be run against.
     node scripts/functional_tests_server.js --config test/screenshot_creation/config.ts
     node scripts/functional_test_runner.js --config test/screenshot_creation/config.ts --include-tag mlqa
 
+The generated screenshots are stored in `x-pack/test/functional/screenshots/session/ml_docs`.
 ML screenshot generation tests are located in `x-pack/test/screenshot_creation/apps/ml_docs`.
 ## Shared functions
 

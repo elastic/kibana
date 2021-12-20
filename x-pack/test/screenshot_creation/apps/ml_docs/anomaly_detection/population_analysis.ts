@@ -72,10 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('continue to the pick fields step and take screenshot');
       await ml.jobWizardCommon.advanceToPickFieldsSection();
       await mlScreenshots.removeFocusFromElement();
-      await mlScreenshots.takeScreenshot(
-        'ecommerce-advanced-wizard-geopoint',
-        screenshotDirectories
-      );
+      await mlScreenshots.takeScreenshot('ml-population-job', screenshotDirectories);
     });
 
     it('anomaly explorer screenshots', async () => {
