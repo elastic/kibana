@@ -91,7 +91,8 @@ export const requestIndexFieldSearch = async (
   const dataViewService = await indexPatterns.dataViewsServiceFactory(
     savedObjectsClient,
     esClient.asCurrentUser,
-    kRequest
+    kRequest,
+    true
   );
 
   let indicesExist: string[] = [];

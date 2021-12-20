@@ -51,7 +51,8 @@ export const createSourcererDataViewRoute = (
         const dataViewService = await indexPatterns.dataViewsServiceFactory(
           context.core.savedObjects.client,
           context.core.elasticsearch.client.asCurrentUser,
-          request
+          request,
+          true
         );
 
         let allDataViews: DataViewListItem[] = await dataViewService.getIdsWithTitle();
@@ -152,7 +153,8 @@ export const getSourcererDataViewRoute = (
         const dataViewService = await indexPatterns.dataViewsServiceFactory(
           context.core.savedObjects.client,
           context.core.elasticsearch.client.asCurrentUser,
-          request
+          request,
+          true
         );
 
         const siemDataView = await dataViewService.get(dataViewId);
