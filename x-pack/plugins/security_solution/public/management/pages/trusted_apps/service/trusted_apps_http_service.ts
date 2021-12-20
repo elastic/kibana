@@ -25,7 +25,6 @@ import {
   GetOneTrustedAppResponse,
   GetTrustedAppsListRequest,
   GetTrustedAppsListResponse,
-  GetTrustedAppsSummaryRequest,
   MaybeImmutable,
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
