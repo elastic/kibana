@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest, Logger } from 'src/core/server';
-import { ExceptionListClient } from '../../../lists/server';
+import { CreateExceptionListItemOptions, ExceptionListClient } from '../../../lists/server';
 import {
   CasesClient,
   PluginStartContract as CasesPluginStartContract,
@@ -126,7 +126,7 @@ export class EndpointAppContextService {
 
       registerListsServerExtension({
         type: 'exceptionsListPreCreateItem',
-        callback: async (arg) => {
+        callback: async (arg: CreateExceptionListItemOptions) => {
           this.startDependencies?.logger.info('exceptionsListPreCreateItem called!');
           return arg;
         },

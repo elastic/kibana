@@ -52,7 +52,7 @@ export class ExtensionPointStorage {
   }
 }
 
-class ExtensionPointStorageClient {
+export class ExtensionPointStorageClient {
   constructor(private readonly storage: ExtensionPointStorageInterface) {}
 
   /**
