@@ -13,7 +13,7 @@ export const useNavigateToCSPFindings = () => {
   return {
     navigate: (query: string) =>
       history.push({
-        pathname: '/csp/findings',
+        pathname: '/findings',
         search: new URLSearchParams([['query', query]].filter((p) => !!p[1])).toString(),
       }),
   };
