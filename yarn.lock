@@ -5864,10 +5864,6 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__kbn-securitysolution-io-ts-utils@link:bazel-bin/packages/kbn-securitysolution-io-ts-utils/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/kbn__mapbox-gl@link:bazel-bin/packages/kbn-mapbox-gl/npm_module_types":
   version "0.0.0"
   uid ""
@@ -5885,6 +5881,10 @@
   uid ""
 
 "@types/kbn__plugin-helpers@link:bazel-bin/packages/kbn-plugin-helpers/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__securitysolution-io-ts-utils@link:bazel-bin/packages/kbn-securitysolution-io-ts-utils/npm_module_types":
   version "0.0.0"
   uid ""
 
