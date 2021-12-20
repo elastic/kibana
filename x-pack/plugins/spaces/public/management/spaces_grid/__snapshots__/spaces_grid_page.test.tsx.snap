@@ -136,6 +136,7 @@ Array [
         aria-label="Default"
         className="euiAvatar euiAvatar--s euiAvatar--space"
         data-test-subj="space-avatar-default"
+        role="img"
         style={
           Object {
             "backgroundColor": "#AA6556",
@@ -176,6 +177,7 @@ Array [
         aria-label="Custom 1"
         className="euiAvatar euiAvatar--s euiAvatar--space"
         data-test-subj="space-avatar-custom-1"
+        role="img"
         style={
           Object {
             "backgroundColor": "#DA8B45",
@@ -219,6 +221,7 @@ Array [
         aria-label="Custom 2"
         className="euiAvatar euiAvatar--s euiAvatar--space"
         data-test-subj="space-avatar-custom-2"
+        role="img"
         style={
           Object {
             "backgroundColor": "#ABCDEF",
