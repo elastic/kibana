@@ -27,7 +27,7 @@ import {
 import * as i18n from './translations';
 import { getBrowserFields, getDocValueFields } from './';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { getSourcererDataview } from '../../components/sourcerer/helpers';
+import { getSourcererDataview } from '../sourcerer/api';
 
 const getEsFields = memoizeOne(
   (fields: IndexField[]): FieldSpec[] =>
