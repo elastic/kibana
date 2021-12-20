@@ -46,10 +46,11 @@ export const getSeries = (
     }
     case 'math': {
       let finalScript = metrics[mathMetricIdx].script;
+
       const variables = metrics[mathMetricIdx].variables;
 
       const layerMetricsArray = metrics;
-      if (!finalScript || !variables) return null;
+      if (!finalScript || !variables || finalScript.includes('_interval')) return null;
 
       // create the script
       for (let layerMetricIdx = 0; layerMetricIdx < layerMetricsArray.length; layerMetricIdx++) {
@@ -57,10 +58,13 @@ export const getSeries = (
           continue;
         }
         const currentMetric = metrics[layerMetricIdx];
+        const [_, meta] = variables[layerMetricIdx]?.field?.split('[') ?? [];
+        const metaValue = Number(meta?.replace(']', ''));
+        const agg = SUPPORTED_METRICS[currentMetric.type].name;
         finalScript = finalScript?.replace(
           `params.${variables[layerMetricIdx].name}`,
-          `${SUPPORTED_METRICS[currentMetric.type].name}(${
-            currentMetric.type === 'count' ? '' : currentMetric.field
+          `${agg}(${currentMetric.type === 'count' ? '' : currentMetric.field}${
+            metaValue && agg === 'percentile' ? `, percentile=${metaValue}` : ''
           })`
         );
       }
@@ -138,6 +142,11 @@ export const getSeries = (
           isFullReference: aggregationMap.isFullReference,
           color,
           fieldName: aggregation !== 'count' && fieldName ? fieldName : 'document',
+          params: {
+            ...(metrics[metricIdx].unit && {
+              timeScale: metrics[metricIdx].unit?.replace('1', ''),
+            }),
+          },
         },
       ];
     }
