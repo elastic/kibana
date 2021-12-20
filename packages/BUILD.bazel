@@ -97,6 +97,7 @@ filegroup(
       "//packages/kbn-monaco:build_types",
       "//packages/kbn-optimizer:build_types",
       "//packages/kbn-plugin-generator:build_types",
+      "//packages/kbn-plugin-helpers:build_types",
   ],
 )
 
