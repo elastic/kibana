@@ -10,24 +10,22 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon } from '@elastic/eui';
 
-import type { ColorRange } from './types';
-
-import { deleteColorRange } from './utils';
-import { getAutoValues, getDataMinMax, getStepValue, roundValue } from '../utils';
-import { CustomPaletteParamsConfig } from '../../../../common';
-import type { DataBounds } from './types';
-
 import { ValueMaxIcon } from '../../../assets/value_max';
 import { ValueMinIcon } from '../../../assets/value_min';
+import { deleteColorRange } from './utils';
+import { getAutoValues, getDataMinMax, getStepValue, roundValue } from '../utils';
+
+import type { ColorRange } from './types';
+import type { CustomPaletteParamsConfig } from '../../../../common';
+import type { DataBounds, ColorRangesUpdateFn, AutoValueMode } from './types';
 
 export interface ColorRangesItemButtonProps {
   colorRanges: ColorRange[];
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
   dataBounds: DataBounds;
-  setColorRanges: Function;
+  setColorRanges: ColorRangesUpdateFn;
   index: number;
-  isLast: boolean;
-  setAutoValue: Function;
+  accessor: 'start' | 'end';
 }
 
 export function ColorRangeDeleteButton({
@@ -36,9 +34,7 @@ export function ColorRangeDeleteButton({
   setColorRanges,
 }: ColorRangesItemButtonProps) {
   const onExecuteAction = useCallback(() => {
-    const newColorRanges = deleteColorRange(index, colorRanges);
-
-    setColorRanges(newColorRanges);
+    setColorRanges({ colorRanges: deleteColorRange(index, colorRanges) });
   }, [colorRanges, index, setColorRanges]);
 
   return (
@@ -63,15 +59,16 @@ export function ColorRangeEditButton({
   colorRanges,
   paletteConfiguration,
   setColorRanges,
-  isLast,
-  setAutoValue,
+  accessor,
 }: ColorRangesItemButtonProps) {
   const rangeType = paletteConfiguration?.rangeType ?? 'percent';
   const autoValue = paletteConfiguration?.autoValue ?? 'none';
+  const isLast = accessor === 'end';
 
   const onExecuteAction = useCallback(() => {
     const { max } = getDataMinMax(rangeType, dataBounds);
     let newValue;
+    let newAutoValue: AutoValueMode;
 
     const colorStops = colorRanges.map(({ color, start }) => ({
       color,
@@ -81,20 +78,16 @@ export function ColorRangeEditButton({
 
     if (isLast) {
       newValue = colorRanges[index].start + step;
+      newAutoValue = autoValue === 'all' ? 'min' : 'none';
     } else {
       newValue = colorRanges[index].end - step;
-    }
-
-    if (isLast) {
-      setAutoValue(autoValue === 'all' ? 'min' : 'none');
-    } else {
-      setAutoValue(autoValue === 'all' ? 'max' : 'none');
+      newAutoValue = autoValue === 'all' ? 'max' : 'none';
     }
 
     colorRanges[index][isLast ? 'end' : 'start'] = roundValue(newValue);
 
-    setColorRanges([...colorRanges]);
-  }, [autoValue, colorRanges, dataBounds, index, isLast, rangeType, setAutoValue, setColorRanges]);
+    setColorRanges({ colorRanges: [...colorRanges], autoValue: newAutoValue });
+  }, [isLast, autoValue, colorRanges, dataBounds, index, rangeType, setColorRanges]);
 
   return (
     <EuiButtonIcon
@@ -117,11 +110,11 @@ export function ColorRangeAutoDetectButton({
   colorRanges,
   paletteConfiguration,
   setColorRanges,
-  isLast,
-  setAutoValue,
+  accessor,
 }: ColorRangesItemButtonProps) {
   const rangeType = paletteConfiguration?.rangeType ?? 'percent';
   const autoValue = paletteConfiguration?.autoValue ?? 'none';
+  const isLast = accessor === 'end';
 
   const onExecuteAction = useCallback(() => {
     const { max: autoMax, min: autoMin } = getAutoValues(
@@ -134,15 +127,17 @@ export function ColorRangeAutoDetectButton({
       dataBounds
     );
     const newValue = roundValue(isLast ? autoMax : autoMin);
+    let newAutoValue: AutoValueMode;
+
     if (isLast) {
-      setAutoValue(autoValue === 'none' ? 'max' : 'all');
+      newAutoValue = autoValue === 'none' ? 'max' : 'all';
     } else {
-      setAutoValue(autoValue === 'none' ? 'min' : 'all');
+      newAutoValue = autoValue === 'none' ? 'min' : 'all';
     }
 
     colorRanges[index][isLast ? 'end' : 'start'] = newValue;
-    setColorRanges([...colorRanges]);
-  }, [autoValue, colorRanges, dataBounds, index, isLast, rangeType, setAutoValue, setColorRanges]);
+    setColorRanges({ colorRanges: [...colorRanges], autoValue: newAutoValue });
+  }, [autoValue, colorRanges, dataBounds, index, isLast, rangeType, setColorRanges]);
 
   return (
     <EuiButtonIcon

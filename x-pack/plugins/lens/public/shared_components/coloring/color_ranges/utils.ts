@@ -8,9 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { ColorRange } from '.';
 import { getDataMinMax, getStepValue, isValidColor, roundValue } from '../utils';
+
 import { DEFAULT_COLOR } from '../constants';
 
-import type { DataBounds, ColorRangeValidation } from './types';
+import type { DataBounds, ColorRangeValidation, ColorRangeAccessor } from './types';
+import type { CustomPaletteParamsConfig } from '../../../../common';
 
 export const reversePalette = (colorRanges: ColorRange[]) => {
   return colorRanges
@@ -24,7 +26,7 @@ export const reversePalette = (colorRanges: ColorRange[]) => {
 
 export const addColorRange = (
   colorRanges: ColorRange[],
-  rangeType: 'number' | 'percent',
+  rangeType: CustomPaletteParamsConfig['rangeType'],
   dataBounds: DataBounds
 ) => {
   const newColorRanges = [...colorRanges];
@@ -74,7 +76,27 @@ export const deleteColorRange = (index: number, colorRanges: ColorRange[]) => {
   return colorRanges.filter((item, i) => i !== index);
 };
 
-export const updateColor = (index: number, color: string, colorRanges: ColorRange[]) => {
+export const updateColorRangeValue = (
+  index: number,
+  value: string,
+  accessor: 'start' | 'end',
+  colorRanges: ColorRange[]
+) => {
+  const parsedValue = parseFloat(value);
+
+  if (accessor === 'end') {
+    colorRanges[index].end = parsedValue;
+  } else {
+    colorRanges[index].start = parsedValue;
+    if (index > 0) {
+      colorRanges[index - 1].end = parsedValue;
+    }
+  }
+
+  return [...colorRanges];
+};
+
+export const updateColorRangeColor = (index: number, color: string, colorRanges: ColorRange[]) => {
   colorRanges[index].color = color;
   return [...colorRanges];
 };
@@ -93,10 +115,9 @@ export const distributeEqually = (colorRanges: ColorRange[]) => {
   }));
 };
 
-export const validateColorRanges = (colorRanges: ColorRange[]) => {
-  const validateСolorRange = ({ start, color }: ColorRange) => {
-    const errors: string[] = [];
-
+export const validateСolorRange = (colorRange: ColorRange, accessor: ColorRangeAccessor) => {
+  const errors: string[] = [];
+  const validateStartColorRange = ({ start, color }: ColorRange) => {
     if (!isValidColor(color)) {
       errors.push(
         i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidColorValue', {
@@ -112,16 +133,9 @@ export const validateColorRanges = (colorRanges: ColorRange[]) => {
         })
       );
     }
-
-    return {
-      isValid: !errors.length,
-      errors,
-    };
   };
 
-  const validateLastRange = ({ end, start }: ColorRange) => {
-    const errors: string[] = [];
-
+  const validateEndRange = ({ end, start }: ColorRange) => {
     if (start > end) {
       errors.push(
         i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidMaxValue', {
@@ -129,23 +143,31 @@ export const validateColorRanges = (colorRanges: ColorRange[]) => {
         })
       );
     }
-
-    return {
-      isValid: !errors.length,
-      errors,
-    };
   };
 
+  if (accessor === 'end') {
+    validateEndRange(colorRange);
+  } else {
+    validateStartColorRange(colorRange);
+  }
+
+  return {
+    isValid: !errors.length,
+    errors,
+  };
+};
+
+export const validateColorRanges = (colorRanges: ColorRange[]) => {
   const validations = colorRanges.reduce<Record<string, ColorRangeValidation>>(
     (acc, item, index, array) => ({
       ...acc,
-      [index]: validateСolorRange(item),
+      [index]: validateСolorRange(item, 'start'),
     }),
     {}
   );
 
   return {
     ...validations,
-    last: validateLastRange(colorRanges[colorRanges.length - 1]),
+    last: validateСolorRange(colorRanges[colorRanges.length - 1], 'end'),
   };
 };

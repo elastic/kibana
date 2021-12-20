@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
-import type { FocusEvent } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+
+import type { FocusEvent } from 'react';
 
 import {
   EuiFieldNumber,
@@ -21,12 +22,7 @@ import {
 
 import { RelatedIcon } from '../../../assets/related';
 import { isValidColor } from '../utils';
-
-import type { ColorRange, DataBounds } from './types';
-import type { CustomPaletteParamsConfig } from '../../../../common';
-
-import { sortColorRanges, updateColor } from './utils';
-import type { AutoValueMode, ColorRangeValidation } from './types';
+import { sortColorRanges, updateColorRangeColor, updateColorRangeValue } from './utils';
 import {
   ColorRangeDeleteButton,
   ColorRangeAutoDetectButton,
@@ -34,23 +30,29 @@ import {
   ColorRangesItemButtonProps,
 } from './color_ranges_item_buttons';
 
+import type {
+  ColorRange,
+  DataBounds,
+  ColorRangeAccessor,
+  ColorRangesUpdateFn,
+  ColorRangeValidation,
+} from './types';
+
+import type { CustomPaletteParamsConfig } from '../../../../common';
+
 export interface ColorRangesItemProps {
   colorRange: ColorRange;
   index: number;
   colorRanges: ColorRange[];
-  isLast: boolean;
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
   colorRangeValidation?: ColorRangeValidation;
-  setColorRanges: Function;
+  setColorRanges: ColorRangesUpdateFn;
   dataBounds: DataBounds;
-
-  // todo: for removing
-  autoValue: AutoValueMode;
-  setAutoValue: Function;
+  accessor: ColorRangeAccessor;
 }
 
 export function ColorRangeItem({
-  isLast,
+  accessor,
   index,
   dataBounds,
   colorRange,
@@ -58,18 +60,18 @@ export function ColorRangeItem({
   colorRangeValidation,
   paletteConfiguration,
   setColorRanges,
-  autoValue,
-  setAutoValue,
 }: ColorRangesItemProps) {
+  const value = `${colorRange[accessor]}`;
   const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
+  const [localValue, setLocalValue] = useState<string>(value ?? '');
 
   const { rangeType = 'percent' } = paletteConfiguration ?? {};
+  const autoValue = paletteConfiguration?.autoValue ?? 'none';
+
   const isDisabledStart = ['min', 'all'].includes(autoValue!);
   const isDisabledEnd = ['max', 'all'].includes(autoValue!);
 
-  const value = isLast ? colorRange.end : colorRange.start;
-
-  const indexPostfix = isLast ? index + 1 : index;
+  const isLast = accessor === 'end';
   const isDisabled = isLast ? isDisabledEnd : index === 0 ? isDisabledStart : false;
   const showColorPicker = !isLast;
 
@@ -102,7 +104,7 @@ export function ColorRangeItem({
           lastRange.start = oldEnd;
         }
 
-        setColorRanges(newColorRanges);
+        setColorRanges({ colorRanges: newColorRanges });
       }
     },
     [colorRange.start, colorRanges, index, isLast, popoverInFocus, setColorRanges]
@@ -110,45 +112,43 @@ export function ColorRangeItem({
 
   const onValueChange = useCallback(
     ({ target }) => {
-      const newValue = target.value.trim();
+      const newValue = target.value;
 
-      if (isLast) {
-        colorRanges[index].end = parseFloat(newValue);
-      } else {
-        colorRanges[index].start = parseFloat(newValue);
-        if (index > 0) {
-          colorRanges[index - 1].end = parseFloat(newValue);
-        }
-      }
-      setColorRanges([...colorRanges]);
+      setLocalValue(newValue);
+      setColorRanges({
+        colorRanges: updateColorRangeValue(index, newValue, accessor, colorRanges),
+      });
     },
-    [colorRanges, index, isLast, setColorRanges]
+    [accessor, colorRanges, index, setColorRanges]
   );
 
   const onUpdateColor = useCallback(
     (color: string) => {
-      const newColorRanges = updateColor(index, color, colorRanges);
-
-      setColorRanges(newColorRanges);
+      setColorRanges({ colorRanges: updateColorRangeColor(index, color, colorRanges) });
     },
     [colorRanges, index, setColorRanges]
   );
 
   const isInvalid = !(colorRangeValidation?.isValid ?? true);
 
+  useEffect(() => {
+    if (!isInvalid && value !== localValue) {
+      setLocalValue(value);
+    }
+  }, [isInvalid, localValue, value]);
+
   return (
     <EuiFormRow
       fullWidth={true}
       hasEmptyLabelSpace
-      data-test-subj={`dynamicColoring_range_row_${indexPostfix}`}
+      data-test-subj={`dynamicColoring_range_row_${index}`}
       isInvalid={isInvalid}
       error={colorRangeValidation?.errors.join(' ')}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false} data-test-subj={`dynamicColoring_range_color_${indexPostfix}`}>
+        <EuiFlexItem grow={false}>
           {showColorPicker ? (
             <EuiColorPicker
-              key={value}
               onChange={onUpdateColor}
               button={
                 <EuiColorPickerSwatch
@@ -173,12 +173,13 @@ export function ColorRangeItem({
             <EuiIcon type={RelatedIcon} size="l" />
           )}
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={true}>
           <EuiFieldNumber
             compressed
+            fullWidth={true}
             isInvalid={isInvalid}
-            data-test-subj={`dynamicColoring_range_value_${indexPostfix}`}
-            value={value}
+            data-test-subj={`dynamicColoring_range_value`}
+            value={localValue}
             disabled={isDisabled}
             onChange={onValueChange}
             append={rangeType === 'percent' ? '%' : undefined}
@@ -187,7 +188,7 @@ export function ColorRangeItem({
             aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.rangeAriaLabel', {
               defaultMessage: 'Range {index}',
               values: {
-                index: indexPostfix + 1,
+                index: index + 1,
               },
             })}
           />
@@ -201,8 +202,7 @@ export function ColorRangeItem({
               paletteConfiguration={paletteConfiguration}
               colorRanges={colorRanges}
               setColorRanges={setColorRanges}
-              isLast={isLast}
-              setAutoValue={setAutoValue}
+              accessor={accessor}
             />
           </EuiFlexItem>
         ) : null}

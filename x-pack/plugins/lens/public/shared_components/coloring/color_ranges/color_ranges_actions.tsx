@@ -13,14 +13,14 @@ import { EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import { DistributeEquallyIcon } from '../../../assets/distribute_equally';
 import { TooltipWrapper } from '../../index';
 
-import type { ColorRange, DataBounds } from './types';
+import type { ColorRange, DataBounds, ColorRangesUpdateFn } from './types';
 import type { CustomPaletteParamsConfig } from '../../../../common';
 import { reversePalette, addColorRange, distributeEqually } from './utils';
 
 export interface ColorRangesActionsProps {
   colorRanges: ColorRange[];
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
-  setColorRanges: Function;
+  setColorRanges: ColorRangesUpdateFn;
   dataBounds: DataBounds;
 }
 
@@ -37,21 +37,15 @@ export function ColorRangesActions({
   );
 
   const onAddColorRange = useCallback(() => {
-    const newColorRanges = addColorRange(colorRanges, rangeType, dataBounds);
-
-    setColorRanges(newColorRanges);
+    setColorRanges({ colorRanges: addColorRange(colorRanges, rangeType, dataBounds) });
   }, [colorRanges, dataBounds, rangeType, setColorRanges]);
 
   const onReversePalette = useCallback(() => {
-    const reversedPalette = reversePalette(colorRanges);
-
-    setColorRanges(reversedPalette);
+    setColorRanges({ colorRanges: reversePalette(colorRanges) });
   }, [colorRanges, setColorRanges]);
 
   const onDistributeEqually = useCallback(() => {
-    const distributedRanges = distributeEqually(colorRanges);
-
-    setColorRanges(distributedRanges);
+    setColorRanges({ colorRanges: distributeEqually(colorRanges) });
   }, [colorRanges, setColorRanges]);
 
   return (

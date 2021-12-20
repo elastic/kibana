@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/** @deprecated **/
 export type AutoValueMode = 'none' | 'min' | 'max' | 'all';
 
 export interface ColorRange {
@@ -15,12 +16,23 @@ export interface ColorRange {
   id?: string;
 }
 
+/** @internal **/
 export interface ColorRangeValidation {
   errors: string[];
   isValid: boolean;
 }
 
+/** @internal **/
 export interface DataBounds {
   min: number;
   max: number;
 }
+
+/** @internal **/
+export type ColorRangesUpdateFn = (payload: {
+  colorRanges: ColorRange[];
+  autoValue?: AutoValueMode;
+}) => void;
+
+/** @internal **/
+export type ColorRangeAccessor = 'start' | 'end';
