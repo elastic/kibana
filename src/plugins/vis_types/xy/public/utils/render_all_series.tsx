@@ -7,8 +7,6 @@
  */
 
 import React from 'react';
-import { groupBy, cloneDeep } from 'lodash';
-
 import {
   AreaSeries,
   CurveType,
@@ -27,6 +25,7 @@ import { DatatableRow } from '../../../../expressions/public';
 import { ChartType } from '../../common';
 import { SeriesParam, VisConfig, Aspect } from '../types';
 import { isValidSeriesForDimension } from './accessors';
+import { computePercentageData } from './compute_percentage_data';
 
 /**
  * Matches vislib curve to elastic charts
@@ -70,10 +69,10 @@ export const renderAllSeries = (
   xAccessor: Accessor | AccessorFn,
   splitSeriesAccessors: Array<Accessor | AccessorFn>
 ) => {
-  const percentageModeComputedData = cloneDeep(data);
+  let percentageModeComputedData: DatatableRow[] = [];
   yAxes.forEach((yAxis) => {
     const scale = yAxis.scale;
-    // find the seriesParams that are positioned on this axis
+    // find the series that are positioned on this axis
     const series = seriesParams.filter((seriesParam) => seriesParam.valueAxis === yAxis.groupId);
     const yAspects: Aspect[] = [];
     series.forEach((seriesParam) => {
@@ -86,53 +85,12 @@ export const renderAllSeries = (
     }) as string[];
     if (scale.mode === 'percentage') {
       const splitChartAccessor = aspects.splitColumn?.accessor || aspects.splitRow?.accessor;
-
-      // Group by xAccessor
-      const groupedData = groupBy(percentageModeComputedData, function (row) {
-        return row[String(xAccessor)];
-      });
-      // In case of small multiples, I need to group by xAccessor and splitAccessor
-      if (splitChartAccessor) {
-        for (const key in groupedData) {
-          if (Object.prototype.hasOwnProperty.call(groupedData, key)) {
-            const groupedBySplitData = groupBy(groupedData[key], splitChartAccessor);
-            for (const newGroupKey in groupedBySplitData) {
-              if (Object.prototype.hasOwnProperty.call(groupedBySplitData, newGroupKey)) {
-                groupedData[`${key}-${newGroupKey}`] = groupedBySplitData[newGroupKey];
-              }
-            }
-          }
-        }
-      }
-      //  sum up all the yAccessors per group
-      const sums: Array<{ id: string; sum: number }> = [];
-      for (const key in groupedData) {
-        if (Object.prototype.hasOwnProperty.call(groupedData, key)) {
-          let sum = 0;
-          const array = groupedData[key];
-          array.forEach((row) => {
-            for (const yAccessor of yAccessors) {
-              sum += row[yAccessor];
-            }
-          });
-          sums.push({ id: key ?? 'all', sum });
-        }
-      }
-      //  compute the ratio of each group
-      percentageModeComputedData.forEach((row) => {
-        const groupValue = splitChartAccessor
-          ? `${row[String(xAccessor)]}-${row[splitChartAccessor]}`
-          : row[String(xAccessor)];
-        const sum = sums.find((s) => s.id === String(groupValue))?.sum ?? 0;
-        let metricsSum = 0;
-        for (const yAccessor of yAccessors) {
-          metricsSum += row[yAccessor];
-        }
-        const computedMetric = metricsSum / sum;
-        for (const yAccessor of yAccessors) {
-          row[yAccessor] = (computedMetric / metricsSum) * row[yAccessor];
-        }
-      });
+      percentageModeComputedData = computePercentageData(
+        data,
+        xAccessor,
+        yAccessors,
+        splitChartAccessor
+      );
     }
   });
 
