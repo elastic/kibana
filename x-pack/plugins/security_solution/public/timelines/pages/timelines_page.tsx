@@ -93,7 +93,6 @@ export const TimelinesPageComponent: React.FC = () => {
         </>
       ) : (
         <SecuritySolutionPageWrapper>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
           <OverviewEmpty />
         </SecuritySolutionPageWrapper>
       )}
