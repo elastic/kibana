@@ -158,17 +158,23 @@ describe('<IndexManagementHome />', () => {
   });
 
   describe('index actions', () => {
-    const indexName = 'testIndex';
-    const indexMock = createNonDataStreamIndex(indexName);
+    const indexNameA = 'testIndexA';
+    const indexNameB = 'testIndexB';
+    const indexMockA = createNonDataStreamIndex(indexNameA);
+    const indexMockB = createNonDataStreamIndex(indexNameB);
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([
         {
-          ...indexMock,
+          ...indexMockA,
           isFrozen: true,
         },
+        {
+          ...indexMockB,
+          status: 'closed',
+        },
       ]);
-      httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexName] });
+      httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexNameA, indexNameB] });
 
       testBed = await setup();
       const { component, find } = testBed;
@@ -177,6 +183,7 @@ describe('<IndexManagementHome />', () => {
 
       find('indexTableIndexNameLink').at(0).simulate('click');
     });
+
     test('should be able to close an open index', async () => {
       const { actions } = testBed;
 
@@ -186,6 +193,22 @@ describe('<IndexManagementHome />', () => {
       // A refresh call was added after closing an index so we need to check the second to last request.
       const latestRequest = server.requests[server.requests.length - 2];
       expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/close`);
+    });
+
+    test('should be able to open a closed index', async () => {
+      testBed = await setup();
+      const { component, find, actions } = testBed;
+
+      component.update();
+
+      find('indexTableIndexNameLink').at(1).simulate('click');
+
+      await actions.clickManageContextMenuButton();
+      await actions.clickContextMenuOption('openIndexMenuButton');
+
+      // A refresh call was added after closing an index so we need to check the second to last request.
+      const latestRequest = server.requests[server.requests.length - 2];
+      expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/open`);
     });
 
     test('should be able to flush index', async () => {
@@ -215,7 +238,7 @@ describe('<IndexManagementHome />', () => {
     test('should be able to unfreeze a frozen index', async () => {
       const { actions, exists } = testBed;
 
-      httpRequestsMockHelpers.setReloadIndicesResponse([{ ...indexMock, isFrozen: false }]);
+      httpRequestsMockHelpers.setReloadIndicesResponse([{ ...indexMockA, isFrozen: false }]);
 
       // Open context menu
       await actions.clickManageContextMenuButton();
@@ -232,6 +255,33 @@ describe('<IndexManagementHome />', () => {
       await actions.clickManageContextMenuButton();
       // The unfreeze action should not be present anymore
       expect(exists('unfreezeIndexMenuButton')).toBe(false);
+    });
+  });
+
+  describe('Edit index settings', () => {
+    test('shows error callout when request fails', async () => {
+      const { actions, find, component, exists } = testBed;
+
+      mockGetAceEditorValue.mockReturnValue(`{
+        "index.routing.allocation.include._tier_preference": "non_existent_tier"
+      }`);
+
+      const error = {
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'invalid tier names found in ...',
+      };
+      httpRequestsMockHelpers.setUpdateIndexSettingsResponse(undefined, error);
+
+      await actions.selectIndexDetailsTab('edit_settings');
+
+      await act(async () => {
+        find('updateEditIndexSettingsButton').simulate('click');
+      });
+
+      component.update();
+
+      expect(exists('updateIndexSettingsErrorCallout')).toBe(true);
     });
   });
 });
