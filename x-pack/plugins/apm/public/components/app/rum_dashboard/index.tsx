@@ -8,8 +8,8 @@
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
-import { LocalUIFilters } from './LocalUIFilters';
-import { RumDashboard } from './RumDashboard';
+import { LocalUIFilters } from './local_ui_filters';
+import { RumDashboard } from './rum_dashboard';
 
 export function RumOverview() {
   useTrackPageview({ app: 'ux', path: 'home' });

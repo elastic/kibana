@@ -21,11 +21,11 @@ import {
   useUiSetting$,
 } from '../../../../../src/plugins/kibana_react/public';
 import { APMRouteDefinition } from './routes';
-import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
+import { scroll_to_top_on_path_change } from '../components/app/main/scroll_to_top_on_path_change';
 import {
   RumHome,
   DASHBOARD_LABEL,
-} from '../components/app/rum_dashboard/RumHome';
+} from '../components/app/rum_dashboard/rum_home';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { ConfigSchema } from '../index';
@@ -83,7 +83,7 @@ function UxApp() {
         data-test-subj="csmMainContainer"
         role="main"
       >
-        <ReactRouterRoute component={ScrollToTopOnPathChange} />
+        <ReactRouterRoute component={scroll_to_top_on_path_change} />
         <RumHome />
       </div>
     </ThemeProvider>

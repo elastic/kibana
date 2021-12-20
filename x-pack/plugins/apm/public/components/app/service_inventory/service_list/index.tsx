@@ -36,12 +36,12 @@ import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
-import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
+import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ListMetric } from '../../../shared/list_metric';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { ServiceLink } from '../../../shared/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { HealthBadge } from './HealthBadge';
+import { HealthBadge } from './health_badge';
 
 type ServiceListAPIResponse = APIReturnType<'GET /internal/apm/services'>;
 type Items = ServiceListAPIResponse['items'];

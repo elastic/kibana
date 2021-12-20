@@ -19,7 +19,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { truncate } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/empty_message';
-import { ImpactBar } from '../../shared/ImpactBar';
+import { ImpactBar } from '../../shared/impact_bar';
 import { TransactionDetailLink } from '../../shared/links/apm/transaction_detail_link';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 import { ServiceLink } from '../../shared/service_link';

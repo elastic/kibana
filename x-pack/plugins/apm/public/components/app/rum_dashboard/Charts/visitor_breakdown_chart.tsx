@@ -22,7 +22,7 @@ import {
   EUI_CHARTS_THEME_LIGHT,
 } from '@elastic/eui/dist/eui_charts_theme';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ChartWrapper } from '../ChartWrapper';
+import { ChartWrapper } from '../chart_wrapper';
 import { I18LABELS } from '../translations';
 
 const StyleChart = styled.div`

@@ -26,7 +26,7 @@ import { TransactionOverviewLink } from '../links/apm/transaction_overview_link'
 import { getTimeRangeComparison } from '../time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
-import { ElasticDocsLink } from '../links/ElasticDocsLink';
+import { ElasticDocsLink } from '../links/elastic_docs_link';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 type ApiResponse =

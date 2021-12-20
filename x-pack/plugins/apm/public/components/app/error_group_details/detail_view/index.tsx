@@ -26,18 +26,18 @@ import type { ApmUrlParams } from '../../../../context/url_params_context/types'
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import { DiscoverErrorLink } from '../../../shared/links/DiscoverLinks/DiscoverErrorLink';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
-import { ErrorMetadata } from '../../../shared/MetadataTable/ErrorMetadata';
+import { ErrorMetadata } from '../../../shared/metadata_table/error_metadata';
 import { Stacktrace } from '../../../shared/stack_trace';
-import { Summary } from '../../../shared/Summary';
-import { HttpInfoSummaryItem } from '../../../shared/Summary/http_info_summary_item';
-import { UserAgentSummaryItem } from '../../../shared/Summary/UserAgentSummaryItem';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { Summary } from '../../../shared/summary';
+import { HttpInfoSummaryItem } from '../../../shared/summary/http_info_summary_item';
+import { UserAgentSummaryItem } from '../../../shared/summary/user_agent_summary_item';
+import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import {
   ErrorTab,
   exceptionStacktraceTab,
   getTabs,
   logStacktraceTab,
-} from './ErrorTabs';
+} from './error_tabs';
 import { ExceptionStacktrace } from './exception_stacktrace';
 
 const HeaderContainer = euiStyled.div`

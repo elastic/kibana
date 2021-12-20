@@ -11,7 +11,7 @@ import React, { Fragment } from 'react';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { EmptyMessage } from '../empty_message';
 import { LibraryStacktrace } from './library_stacktrace';
-import { Stackframe as StackframeComponent } from './Stackframe';
+import { Stackframe as StackframeComponent } from './stack_frame';
 
 interface Props {
   stackframes?: Stackframe[];

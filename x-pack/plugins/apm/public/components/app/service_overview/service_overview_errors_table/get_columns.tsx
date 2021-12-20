@@ -12,7 +12,7 @@ import { asInteger } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/links/apm/ErrorDetailLink';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 
 type ErrorGroupMainStatistics =

@@ -23,7 +23,7 @@ import { ErrorDetailLink } from '../../../shared/links/apm/ErrorDetailLink';
 import { ErrorOverviewLink } from '../../../shared/links/apm/ErrorOverviewLink';
 import { APMQueryParams } from '../../../shared/links/url_helpers';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`

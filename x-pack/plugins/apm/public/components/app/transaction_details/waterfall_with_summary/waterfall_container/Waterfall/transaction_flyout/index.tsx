@@ -18,11 +18,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { TransactionActionMenu } from '../../../../../../shared/transaction_action_menu/TransactionActionMenu';
-import { TransactionSummary } from '../../../../../../shared/Summary/TransactionSummary';
+import { TransactionActionMenu } from '../../../../../../shared/transaction_action_menu/transaction_action_menu';
+import { TransactionSummary } from '../../../../../../shared/summary/transaction_summary';
 import { FlyoutTopLevelProperties } from '../flyout_top_level_properties';
 import { ResponsiveFlyout } from '../responsive_flyout';
-import { TransactionMetadata } from '../../../../../../shared/MetadataTable/TransactionMetadata';
+import { TransactionMetadata } from '../../../../../../shared/metadata_table/transaction_metadata';
 import { DroppedSpansWarning } from './dropped_spans_warning';
 
 interface Props {

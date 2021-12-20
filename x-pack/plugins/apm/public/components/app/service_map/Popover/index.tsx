@@ -28,7 +28,7 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { Environment } from '../../../../../common/environment_rt';
 import { useTheme } from '../../../../hooks/use_theme';
-import { CytoscapeContext } from '../Cytoscape';
+import { CytoscapeContext } from '../cytoscape';
 import { getAnimationOptions, popoverWidth } from '../cytoscape_options';
 import { BackendContents } from './backend_contents';
 import { ExternalsListContents } from './externals_list_contents';

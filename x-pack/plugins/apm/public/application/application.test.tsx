@@ -20,13 +20,13 @@ import { disableConsoleWarning } from '../utils/test_helpers';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
-import { RumHome } from '../components/app/rum_dashboard/RumHome';
+import { RumHome } from '../components/app/rum_dashboard/rum_home';
 
 jest.mock('../services/rest/data_view', () => ({
   createStaticDataView: () => Promise.resolve(undefined),
 }));
 
-jest.mock('../components/app/rum_dashboard/RumHome', () => ({
+jest.mock('../components/app/rum_dashboard/rum_home', () => ({
   RumHome: () => <p>Home Mock</p>,
 }));
 

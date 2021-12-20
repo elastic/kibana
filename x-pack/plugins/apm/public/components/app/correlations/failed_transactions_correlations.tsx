@@ -38,7 +38,7 @@ import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 
-import { ImpactBar } from '../../shared/ImpactBar';
+import { ImpactBar } from '../../shared/impact_bar';
 import { push } from '../../shared/links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';

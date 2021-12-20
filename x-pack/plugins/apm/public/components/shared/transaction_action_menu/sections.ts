@@ -15,7 +15,7 @@ import type { Transaction } from '../../../../typings/es_schemas/ui/transaction'
 import type { ApmUrlParams } from '../../../context/url_params_context/types';
 import { getDiscoverHref } from '../links/DiscoverLinks/DiscoverLink';
 import { getDiscoverQuery } from '../links/DiscoverLinks/DiscoverTransactionLink';
-import { getInfraHref } from '../links/InfraLink';
+import { getInfraHref } from '../links/infra_link';
 import { fromQuery } from '../links/url_helpers';
 import { SectionRecord, getNonEmptySections, Action } from './sections_helper';
 

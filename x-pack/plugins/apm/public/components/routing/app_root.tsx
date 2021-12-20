@@ -20,7 +20,7 @@ import {
   HeaderMenuPortal,
   InspectorContextProvider,
 } from '../../../../observability/public';
-import { ScrollToTopOnPathChange } from '../../components/app/Main/ScrollToTopOnPathChange';
+import { scroll_to_top_on_path_change } from '../../components/app/main/scroll_to_top_on_path_change';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,
@@ -70,7 +70,9 @@ export function ApmAppRoot({
                               <ApmThemeProvider>
                                 <MountApmHeaderActionMenu />
 
-                                <Route component={ScrollToTopOnPathChange} />
+                                <Route
+                                  component={scroll_to_top_on_path_change}
+                                />
                                 <RouteRenderer />
                               </ApmThemeProvider>
                             </InspectorContextProvider>

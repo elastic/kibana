@@ -28,7 +28,7 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { DetailView } from './detail_view';
-import { ErrorDistribution } from './Distribution';
+import { ErrorDistribution } from './distribution';
 
 const Titles = euiStyled.div`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeL};

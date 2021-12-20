@@ -16,7 +16,7 @@ import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
-import { CytoscapeContext } from '../Cytoscape';
+import { CytoscapeContext } from '../cytoscape';
 import exampleGroupedConnectionsData from '../__stories__/example_grouped_connections.json';
 
 interface Args {
@@ -24,7 +24,7 @@ interface Args {
 }
 
 const stories: Meta<Args> = {
-  title: 'app/ServiceMap/Popover',
+  title: 'app/ServiceMap/popover',
   component: Popover,
   decorators: [
     (StoryComponent) => {

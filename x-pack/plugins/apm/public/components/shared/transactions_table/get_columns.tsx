@@ -22,7 +22,7 @@ import {
   asTransactionRate,
 } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { ImpactBar } from '../ImpactBar';
+import { ImpactBar } from '../impact_bar';
 import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
 import { ListMetric } from '../list_metric';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';

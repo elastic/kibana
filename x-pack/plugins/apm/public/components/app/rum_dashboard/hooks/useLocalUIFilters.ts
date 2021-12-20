@@ -15,7 +15,7 @@ import {
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { getExcludedName } from '../LocalUIFilters';
+import { getExcludedName } from '../local_ui_filters';
 
 export type FiltersUIHook = ReturnType<typeof useLocalUIFilters>;
 

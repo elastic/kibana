@@ -22,7 +22,7 @@ import {
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyMessage } from '../empty_message';
-import { ImpactBar } from '../ImpactBar';
+import { ImpactBar } from '../impact_bar';
 import { ListMetric } from '../list_metric';
 import { ITableColumn, ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';

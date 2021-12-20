@@ -7,11 +7,11 @@
 
 import cytoscape from 'cytoscape';
 import React from 'react';
-import { Cytoscape } from '../Cytoscape';
+import { Cytoscape } from '../cytoscape';
 import { Centerer } from './centerer';
 
 export default {
-  title: 'app/ServiceMap/Cytoscape',
+  title: 'app/ServiceMap/cytoscape',
   component: Cytoscape,
 };
 
