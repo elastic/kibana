@@ -12,6 +12,8 @@ export interface Timeline {
   description: string;
   query: string;
   id?: string;
+  dataViewId?: string;
+  indexNames?: string[];
 }
 
 export interface CompleteTimeline extends Timeline {
@@ -46,6 +48,12 @@ export const getIndicatorMatchTimelineTemplate = (): CompleteTimeline => ({
   templateTimelineId: '495ad7a7-316e-4544-8a0f-9c098daee76e',
 });
 
+export const getTimelineModifiedSourcerer = () => ({
+  ...getTimeline(),
+  title: 'Auditbeat Timeline',
+  dataViewId: 'security-solution-default',
+  indexNames: ['auditbeat-*'],
+});
 /**
  * Timeline query that finds no valid data to cut down on test failures
  * or other issues for when we want to test one specific thing and not also
