@@ -10,6 +10,7 @@ import { functionWrapper } from '../../../expressions/common/expression_function
 import { createPieVisFn } from './pie_fn';
 import { PieVisConfig } from './types';
 import { Datatable } from '../../../expressions/common/expression_types/specs';
+import { EMPTY_SIZE_RATIOS } from './editor/constants';
 
 describe('interpreter/functions#pie', () => {
   const fn = functionWrapper(createPieVisFn());
@@ -23,6 +24,7 @@ describe('interpreter/functions#pie', () => {
     addLegend: true,
     legendPosition: 'right',
     isDonut: true,
+    emptySizeRatio: EMPTY_SIZE_RATIOS.SMALL,
     nestedLegend: true,
     truncateLegend: true,
     maxLegendLines: true,
