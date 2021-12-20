@@ -48,8 +48,6 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
   isEditing = false,
   onDelete = () => {},
 }) => {
-  // TODO labels different
-
   return (
     <EuiForm>
       <EuiDescribedFormGroup

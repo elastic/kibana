@@ -42,14 +42,9 @@ import {
   sendGetAgentStatus,
   useGetPackageInfoByKey,
   sendCreateAgentPolicy,
-  useGetAgentPolicies,
 } from '../../../hooks';
 import { Loading, Error } from '../../../components';
-import {
-  AgentPolicyIntegrationForm,
-  agentPolicyFormValidation,
-  ConfirmDeployAgentPolicyModal,
-} from '../components';
+import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../components';
 import { useIntraAppState, useUIExtension } from '../../../hooks';
 import { ExtensionWrapper } from '../../../components';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
@@ -60,9 +55,9 @@ import type { EditPackagePolicyFrom, PackagePolicyFormState } from './types';
 import type { PackagePolicyValidationResults } from './services';
 import { validatePackagePolicy, validationHasErrors } from './services';
 import { appendOnSaveQueryParamsToPath } from './utils';
-import { StepSelectAgentPolicy } from './step_select_agent_policy';
 import { StepConfigurePackagePolicy } from './step_configure_package';
 import { StepDefinePackagePolicy } from './step_define_package_policy';
+import { StepSelectHosts } from './step_select_hosts';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -217,23 +212,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   );
 
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
-
-  let agentPolicies = [];
-  const { data: agentPoliciesData, error: err } = useGetAgentPolicies({
-    page: 1,
-    perPage: 1000,
-    sortField: 'name',
-    sortOrder: 'asc',
-    full: true,
-  });
-  if (err) {
-    // eslint-disable-next-line no-console
-    console.debug('Could not retrieve agent policies');
-  }
-  agentPolicies = useMemo(
-    () => agentPoliciesData?.items.filter((policy) => !policy.is_managed) || [],
-    [agentPoliciesData?.items]
-  );
 
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
@@ -481,24 +459,20 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   );
 
   const stepSelectAgentPolicy = useMemo(
-    () =>
-      agentPolicies.length > 0 ? (
-        <StepSelectAgentPolicy
-          packageInfo={packageInfo}
-          defaultAgentPolicyId={queryParamsPolicyId}
-          agentPolicy={agentPolicy}
-          updateAgentPolicy={updateAgentPolicy}
-          setHasAgentPolicyError={setHasAgentPolicyError}
-        />
-      ) : (
-        <AgentPolicyIntegrationForm
-          agentPolicy={newAgentPolicy}
-          updateAgentPolicy={updateNewAgentPolicy}
-          withSysMonitoring={withSysMonitoring}
-          updateSysMonitoring={(newValue) => setWithSysMonitoring(newValue)}
-          validation={validation}
-        />
-      ),
+    () => (
+      <StepSelectHosts
+        agentPolicy={agentPolicy}
+        updateAgentPolicy={updateAgentPolicy}
+        newAgentPolicy={newAgentPolicy}
+        updateNewAgentPolicy={updateNewAgentPolicy}
+        withSysMonitoring={withSysMonitoring}
+        updateSysMonitoring={(newValue) => setWithSysMonitoring(newValue)}
+        validation={validation}
+        packageInfo={packageInfo}
+        setHasAgentPolicyError={setHasAgentPolicyError}
+        defaultAgentPolicyId={queryParamsPolicyId}
+      />
+    ),
     [
       packageInfo,
       queryParamsPolicyId,
@@ -508,7 +482,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       updateNewAgentPolicy,
       validation,
       withSysMonitoring,
-      agentPolicies.length,
     ]
   );
 
