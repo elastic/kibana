@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+
 import { API_BASE_PATH } from '../../common/constants';
 import { MlOperation, ML_UPGRADE_OP_TYPE } from '../../common/types';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
@@ -250,8 +252,13 @@ export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: Rou
               return response.customError({
                 statusCode: 500,
                 body: {
-                  message:
-                    "The upgrade that was started for this model snapshot doesn't exist anymore.",
+                  message: i18n.translate(
+                    'xpack.upgradeAssistant.ml_snapshots.modelSnapshotUpgradeFailed',
+                    {
+                      defaultMessage:
+                        "The upgrade that was started for this model snapshot doesn't exist anymore.",
+                    }
+                  ),
                 },
               });
             } else {
