@@ -75,10 +75,12 @@ describe('useGetUserAlertPermissions', function () {
           initialProps: { featureId: 'uptime' },
         }
       );
-      expect(result.current).toMatchSnapshot();
+      expect(result.current.read).toBe(true);
+      expect(result.current.crud).toBe(true);
 
       rerender({ featureId: 'apm' });
-      expect(result.current).toMatchSnapshot();
+      expect(result.current.read).toBe(true);
+      expect(result.current.crud).toBe(false);
     },
     timeout
   );
@@ -94,7 +96,12 @@ describe('useGetUserAlertPermissions', function () {
           initialProps: { featureId: 'uptime' },
         }
       );
-      expect(result.current).toMatchSnapshot();
+      expect(result.current).toEqual({
+        crud: false,
+        read: false,
+        loading: false,
+        featureId: null,
+      });
     },
     timeout
   );
