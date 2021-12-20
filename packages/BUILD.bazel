@@ -98,6 +98,7 @@ filegroup(
       "//packages/kbn-optimizer:build_types",
       "//packages/kbn-plugin-generator:build_types",
       "//packages/kbn-plugin-helpers:build_types",
+      "//packages/kbn-react-field:build_types",
   ],
 )
 

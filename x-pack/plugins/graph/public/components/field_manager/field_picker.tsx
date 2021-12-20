@@ -9,7 +9,7 @@ import React, { useState, useEffect, ReactNode } from 'react';
 import { EuiPopover, EuiSelectable, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { FieldIcon } from '@kbn/react-field/field_icon';
+import { FieldIcon } from '@kbn/react-field';
 import { WorkspaceField } from '../../types';
 
 export interface FieldPickerProps {
