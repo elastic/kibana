@@ -40,13 +40,13 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
       isMounted.current = true;
       const fetchStats = async () => {
         try {
-          const response = await trustedAppsApi.getTrustedAppsSummary({
+          const response = await trustedAppsApi.getTrustedAppsList({
             kuery: policyId
               ? `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`
               : undefined,
           });
           if (isMounted) {
-            setStats(response);
+            setStats({ total: response.total || 0, windows: 0, macos: 0, linux: 0 });
           }
         } catch (error) {
           if (isMounted.current) {
