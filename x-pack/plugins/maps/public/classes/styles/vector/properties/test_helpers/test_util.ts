@@ -8,12 +8,6 @@
 // eslint-disable-next-line max-classes-per-file
 import { FIELD_ORIGIN, LAYER_STYLE_TYPE } from '../../../../../../common/constants';
 import { StyleMeta } from '../../style_meta';
-import {
-  CategoryFieldMeta,
-  GeometryTypes,
-  RangeFieldMeta,
-  StyleMetaDescriptor,
-} from '../../../../../../common/descriptor_types';
 import { AbstractField, IField } from '../../../../fields/field';
 import { IStyle } from '../../../style';
 
@@ -77,40 +71,32 @@ export class MockStyle implements IStyle {
   }
 
   getStyleMeta(): StyleMeta {
-    const geomTypes: GeometryTypes = {
-      isPointsOnly: false,
-      isLinesOnly: false,
-      isPolygonsOnly: false,
-    };
-    const rangeFieldMeta: RangeFieldMeta = {
-      min: this._min,
-      max: this._max,
-      delta: this._max - this._min,
-    };
-    const catFieldMeta: CategoryFieldMeta = {
-      categories: [
-        {
-          key: 'US',
-          count: 10,
-        },
-        {
-          key: 'CN',
-          count: 8,
-        },
-      ],
-    };
-
-    const styleMetaDescriptor: StyleMetaDescriptor = {
-      geometryTypes: geomTypes,
+    return new StyleMeta({
+      geometryTypes: {
+        isPointsOnly: false,
+        isLinesOnly: false,
+        isPolygonsOnly: false,
+      },
       fieldMeta: {
         foobar: {
-          range: rangeFieldMeta,
-          categories: catFieldMeta,
+          range: {
+            min: this._min,
+            max: this._max,
+            delta: this._max - this._min,
+          },
+          categories: [
+            {
+              key: 'US',
+              count: 10,
+            },
+            {
+              key: 'CN',
+              count: 8,
+            },
+          ],
         },
       },
-    };
-
-    return new StyleMeta(styleMetaDescriptor);
+    });
   }
 }
 

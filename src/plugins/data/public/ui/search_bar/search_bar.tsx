@@ -98,6 +98,8 @@ export interface SearchBarOwnProps {
   nonKqlModeHelpText?: string;
   // defines padding; use 'inPage' to avoid extra padding; use 'detached' if the searchBar appears at the very top of the view, without any wrapper
   displayStyle?: 'inPage' | 'detached';
+  // super update button background fill control
+  fillSubmitButton?: boolean;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -577,6 +579,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           prepend={this.props.showFilterBar ? filterMenu : undefined}
           savedQueryManagement={savedQueryManagement}
           applySelectedSavedQueries={this.applyTimeFilterOverrideModal}
+          fillSubmitButton={this.props.fillSubmitButton || false}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}
