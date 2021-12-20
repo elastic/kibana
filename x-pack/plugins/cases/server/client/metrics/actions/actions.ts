@@ -12,7 +12,7 @@ import { createCaseError } from '../../../common/error';
 import { CasesClient } from '../../client';
 import { CasesClientArgs } from '../../types';
 import { AggregationBuilder, MetricsHandler } from '../types';
-import { IsolateHostActions } from './aggregations/isolateHost';
+import { IsolateHostActions } from './aggregations/isolate_host';
 
 export class Actions implements MetricsHandler {
   private aggregators: AggregationBuilder[] = [];
