@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { HostRiskSeverity } from '../../../../common/search_strategy';
 import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import { HostRiskScore } from '../common/host_risk_score';
@@ -52,97 +52,25 @@ interface TableItem {
 }
 
 const tableItems: TableItem[] = [
-  { classification: HostRiskSeverity.critical, range: '90 and above' },
+  { classification: HostRiskSeverity.critical, range: i18n.CRITICAL_RISK_DESCRIPTION },
   { classification: HostRiskSeverity.high, range: '70 - 90 ' },
   { classification: HostRiskSeverity.moderate, range: '40 - 70' },
   { classification: HostRiskSeverity.low, range: '20 - 40' },
-  { classification: HostRiskSeverity.unknown, range: 'Less than 20' },
+  { classification: HostRiskSeverity.unknown, range: i18n.UNKNOWN_RISK_DESCRIPTION },
 ];
 
 export const HOST_RISK_INFO_BUTTON_CLASS = 'HostRiskInformation__button';
 
 export const HostRiskInformation = () => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const simpleFlyoutTitleId = useGeneratedHtmlId({
-    prefix: 'HostRiskInformation',
-  });
 
-  let flyout;
+  const handleOnClose = useCallback(() => {
+    setIsFlyoutVisible(false);
+  }, []);
 
-  if (isFlyoutVisible) {
-    flyout = (
-      <EuiFlyout
-        ownFocus
-        onClose={() => setIsFlyoutVisible(false)}
-        aria-labelledby={simpleFlyoutTitleId}
-        size={450}
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id={simpleFlyoutTitleId}>
-              <FormattedMessage
-                id="xpack.securitySolution.hosts.hostRiskInformation.title"
-                defaultMessage="How is host risk calculated?"
-              />
-            </h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.hosts.hostRiskInformation.introduction"
-                defaultMessage="The Host Risk Score capability surfaces risky hosts from within your environment."
-              />
-            </p>
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.hosts.hostRiskInformation.explanation"
-                defaultMessage='This feature utilizes a transform, with a scripted metric aggregation to calculate
-                host risk scores based on detection rule alerts with an "open" status, within a 5 day
-                time window. The transform runs hourly to keep the score updated as new detection rule
-                alerts stream in.'
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer />
-          <EuiBasicTable
-            columns={tableColumns}
-            items={tableItems}
-            data-test-subj="risk-information-table"
-          />
-          <EuiSpacer size="l" />
-          <FormattedMessage
-            id="xpack.securitySolution.hosts.hostRiskInformation.learnMore"
-            defaultMessage="You can learn more about host risk {hostsRiskScoreDocumentationLink}"
-            values={{
-              hostsRiskScoreDocumentationLink: (
-                <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
-                  <FormattedMessage
-                    id="xpack.securitySolution.hosts.hostRiskInformation.link"
-                    defaultMessage="here"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiFlyoutBody>
-
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => setIsFlyoutVisible(false)}>
-                <FormattedMessage
-                  id="xpack.securitySolution.hosts.hostRiskInformation.closeBtn"
-                  defaultMessage="Close"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
-    );
-  }
+  const handleOnOpen = useCallback(() => {
+    setIsFlyoutVisible(true);
+  }, []);
 
   return (
     <>
@@ -151,11 +79,62 @@ export const HostRiskInformation = () => {
         iconSize="m"
         iconType="iInCircle"
         aria-label={i18n.INFORMATION_ARIA_LABEL}
-        onClick={() => setIsFlyoutVisible(true)}
+        onClick={handleOnOpen}
         className={HOST_RISK_INFO_BUTTON_CLASS}
         data-test-subj="open-risk-information-flyout"
       />
-      {flyout}
+      {isFlyoutVisible && <HostRiskInformationFlyout handleOnClose={handleOnClose} />}
     </>
+  );
+};
+
+const HostRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => void }) => {
+  const simpleFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'HostRiskInformation',
+  });
+
+  return (
+    <EuiFlyout ownFocus onClose={handleOnClose} aria-labelledby={simpleFlyoutTitleId} size={450}>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id={simpleFlyoutTitleId}>{i18n.TITLE}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiText size="s">
+          <p>{i18n.INTRODUCTION}</p>
+          <p>{i18n.EXPLANATION_MESSAGE}</p>
+        </EuiText>
+        <EuiSpacer />
+        <EuiBasicTable
+          columns={tableColumns}
+          items={tableItems}
+          data-test-subj="risk-information-table"
+        />
+        <EuiSpacer size="l" />
+        <FormattedMessage
+          id="xpack.securitySolution.hosts.hostRiskInformation.learnMore"
+          defaultMessage="You can learn more about host risk {hostsRiskScoreDocumentationLink}"
+          values={{
+            hostsRiskScoreDocumentationLink: (
+              <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
+                <FormattedMessage
+                  id="xpack.securitySolution.hosts.hostRiskInformation.link"
+                  defaultMessage="here"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiFlyoutBody>
+
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={handleOnClose}>{i18n.CLOSE_BUTTON_LTEXT}</EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 };

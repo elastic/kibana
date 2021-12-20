@@ -27,3 +27,44 @@ export const INFORMATION_RISK_HEADER = i18n.translate(
     defaultMessage: 'Host risk score range',
   }
 );
+
+export const UNKNOWN_RISK_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.hosts.hostRiskInformation.unknownRiskDescription',
+  {
+    defaultMessage: 'Less than 20',
+  }
+);
+
+export const CRITICAL_RISK_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.hosts.hostRiskInformation.criticalRiskDescription',
+  {
+    defaultMessage: '90 and above',
+  }
+);
+
+export const TITLE = i18n.translate('xpack.securitySolution.hosts.hostRiskInformation.title', {
+  defaultMessage: 'How is host risk calculated?',
+});
+
+export const INTRODUCTION = i18n.translate(
+  'xpack.securitySolution.hosts.hostRiskInformation.introduction',
+  {
+    defaultMessage:
+      'The Host Risk Score capability surfaces risky hosts from within your environment.',
+  }
+);
+
+export const EXPLANATION_MESSAGE = i18n.translate(
+  'xpack.securitySolution.hosts.hostRiskInformation.explanation',
+  {
+    defaultMessage:
+      'This feature utilizes a transform, with a scripted metric aggregation to calculate host risk scores based on detection rule alerts with an "open" status, within a 5 day time window. The transform runs hourly to keep the score updated as new detection rule alerts stream in.',
+  }
+);
+
+export const CLOSE_BUTTON_LTEXT = i18n.translate(
+  'xpack.securitySolution.hosts.hostRiskInformation.closeBtn',
+  {
+    defaultMessage: 'Close',
+  }
+);
