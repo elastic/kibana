@@ -85,7 +85,7 @@ export const EventFilterDeleteModal = memo<{}>(() => {
             id="xpack.securitySolution.eventFilters.deletionDialog.title"
             defaultMessage={`Remove "{name}"`}
             values={{
-              name: eventFilter?.name,
+              name: eventFilter?.name ?? '',
             }}
           />
         </EuiModalHeaderTitle>
