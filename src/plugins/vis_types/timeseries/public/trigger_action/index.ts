@@ -81,7 +81,7 @@ export const triggerVisualizeToLensOptions = async (
         termsParams: { size: layer.terms_size ?? 10, otherBucket: false },
       }),
       metrics: [...metricsArray],
-      timeInterval: model.interval ?? 'auto',
+      timeInterval: model.interval || 'auto',
     };
     options[layerIdx] = triggerOptions;
   }
