@@ -21,14 +21,7 @@ export const AgentPolicyFormSystemMonitoringCheckbox: React.FunctionComponent<Pr
   updateSysMonitoring,
 }) => {
   return (
-    <EuiFormRow
-      label={
-        <FormattedMessage
-          id="xpack.fleet.agentPolicyForm.systemMonitoringFieldLabel"
-          defaultMessage="System monitoring"
-        />
-      }
-    >
+    <EuiFormRow>
       <EuiCheckbox
         id="agentPolicyFormSystemMonitoringCheckbox"
         label={

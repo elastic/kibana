@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactElement } from 'react';
 import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,12 +19,14 @@ interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
   validation: ValidationResults;
+  nameLabel?: ReactElement<any, any>;
 }
 
 export const AgentPolicyGeneralFields: React.FunctionComponent<Props> = ({
   agentPolicy,
   updateAgentPolicy,
   validation,
+  nameLabel,
 }) => {
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
 
@@ -32,7 +35,9 @@ export const AgentPolicyGeneralFields: React.FunctionComponent<Props> = ({
       fullWidth
       key="name"
       label={
-        <FormattedMessage id="xpack.fleet.agentPolicyForm.nameFieldLabel" defaultMessage="Name" />
+        nameLabel || (
+          <FormattedMessage id="xpack.fleet.agentPolicyForm.nameFieldLabel" defaultMessage="Name" />
+        )
       }
       error={touchedFields.name && validation.name ? validation.name : null}
       isInvalid={Boolean(touchedFields.name && validation.name)}

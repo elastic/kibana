@@ -72,6 +72,12 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
           agentPolicy={agentPolicy}
           updateAgentPolicy={updateAgentPolicy}
           validation={validation}
+          nameLabel={
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.newAgentPolicyFieldLabel"
+              defaultMessage="New agent policy name"
+            />
+          }
         />
 
         <AgentPolicyFormSystemMonitoringCheckbox
