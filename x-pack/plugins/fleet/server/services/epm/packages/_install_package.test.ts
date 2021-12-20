@@ -9,6 +9,8 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/s
 import { savedObjectsClientMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { loggerMock } from '@kbn/logging/mocks';
 
+import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
+
 import { appContextService } from '../../app_context';
 import { createAppContextStartContractMock } from '../../../mocks';
 
@@ -78,6 +80,7 @@ describe('_installPackage', () => {
       },
       installType: 'install',
       installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
     });
 
     // if we have a .catch this will fail nicely (test pass)
