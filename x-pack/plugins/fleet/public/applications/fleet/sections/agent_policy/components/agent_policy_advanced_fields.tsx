@@ -26,6 +26,8 @@ import { dataTypes } from '../../../../../../common';
 import type { NewAgentPolicy, AgentPolicy } from '../../../types';
 import { useStartServices } from '../../../hooks';
 
+import { AgentPolicyPackageBadge } from '../../../components';
+
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 import type { ValidationResults } from './agent_policy_validation';
 
@@ -147,7 +149,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         description={
           <FormattedMessage
             id="xpack.fleet.agentPolicyForm.monitoringDescription"
-            defaultMessage="Collect data about your agents for debugging and tracking performance. Monitoring data will be written to the default namespace specified above."
+            defaultMessage="Collecting monitoring logs and metrics will also create an {agent} integration. Monitoring data will be written to the default namespace specified above."
+            values={{
+              agent: (
+                <AgentPolicyPackageBadge pkgName={'elastic_agent'} pkgTitle={'Elastic Agent'} />
+              ),
+            }}
           />
         }
       >

@@ -8,13 +8,14 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 
 import { FLEET_SERVER_PACKAGE } from '../../common/constants';
 
 import type { PackagePolicy, PackagePolicyPackage } from '../types';
 import { useGetOneAgentPolicy } from '../hooks';
-import { PackageIcon } from '../components';
+
+import { AgentPolicyPackageBadge } from './agent_policy_package_badge';
 
 interface Props {
   agentPolicyId: string;
@@ -88,34 +89,13 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
         {packages.map((pkg, idx) => {
           return (
             <EuiFlexItem grow={false}>
-              <EuiBadge
+              <AgentPolicyPackageBadge
                 key={idx}
-                color="hollow"
-                isDisabled={excludeFleetServer && pkg.name === FLEET_SERVER_PACKAGE}
-              >
-                <EuiFlexGroup
-                  direction="row"
-                  gutterSize="xs"
-                  alignItems="center"
-                  responsive={false}
-                >
-                  <EuiFlexItem grow={false}>
-                    <PackageIcon
-                      packageName={pkg.name}
-                      version={pkg.version}
-                      tryApi={true}
-                      style={
-                        // when a custom SVG is used the logo is rendered with <img class="euiIcon euiIcon--small">
-                        // this collides with some EuiText (+img) CSS from the EuiIcon component
-                        // which  makes the button large, wide, and poorly layed out
-                        // override those styles until the bug is fixed or we find a better approach
-                        { margin: 'unset', width: '16px' }
-                      }
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>{pkg.title}</EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiBadge>
+                excludeFleetServer={excludeFleetServer}
+                pkgName={pkg.name}
+                pkgVersion={pkg.version}
+                pkgTitle={pkg.title}
+              />
             </EuiFlexItem>
           );
         })}

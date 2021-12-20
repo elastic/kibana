@@ -8,7 +8,8 @@
 import React from 'react';
 import { EuiFormRow, EuiIconTip, EuiCheckbox } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+
+import { AgentPolicyPackageBadge } from '../../../components';
 
 interface Props {
   withSysMonitoring: boolean;
@@ -37,10 +38,15 @@ export const AgentPolicyFormSystemMonitoringCheckbox: React.FunctionComponent<Pr
               defaultMessage="Collect system logs and metrics"
             />{' '}
             <EuiIconTip
-              content={i18n.translate('xpack.fleet.agentPolicyForm.systemMonitoringTooltipText', {
-                defaultMessage:
-                  'Enable this option to bootstrap your policy with an integration that collects system logs and metrics.',
-              })}
+              content={
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyForm.systemMonitoringTooltipText"
+                  defaultMessage="This will also add a {system} integration to collect system logs and metrics."
+                  values={{
+                    system: <AgentPolicyPackageBadge pkgName={'system'} pkgTitle={'System'} />,
+                  }}
+                />
+              }
               position="right"
               type="iInCircle"
               color="subdued"

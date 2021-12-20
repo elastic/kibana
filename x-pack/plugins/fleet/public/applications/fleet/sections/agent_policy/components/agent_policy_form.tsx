@@ -17,7 +17,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
 import type { NewAgentPolicy, AgentPolicy } from '../../../types';
-import { isValidNamespace } from '../../../services';
 
 import { AgentPolicyAdvancedOptionsContent } from './agent_policy_advanced_fields';
 import { AgentPolicyGeneralFields } from './agent_policy_general_fields';
