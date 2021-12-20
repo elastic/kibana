@@ -20,6 +20,7 @@ import { ActionContext } from './action_context';
 import { ESSearchResponse, ESSearchRequest } from '../../../../../../src/core/types/elasticsearch';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
+import { KibanaRequest } from 'src/core/server';
 
 describe('alertType', () => {
   const logger = loggingSystemMock.create().get();
@@ -157,6 +158,7 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
+      request: {} as KibanaRequest,
       rule: {
         name: uuid.v4(),
         tags: [],
@@ -236,6 +238,7 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
+      request: {} as KibanaRequest,
       rule: {
         name: uuid.v4(),
         tags: [],
@@ -390,6 +393,7 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
+      request: {} as KibanaRequest,
       rule: {
         name: uuid.v4(),
         tags: [],
@@ -467,6 +471,7 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
+      request: {} as KibanaRequest,
       rule: {
         name: uuid.v4(),
         tags: [],
@@ -582,6 +587,7 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
+      request: {} as KibanaRequest,
       rule: {
         name: uuid.v4(),
         tags: [],
@@ -666,6 +672,7 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
+      request: {} as KibanaRequest,
       rule: {
         name: uuid.v4(),
         tags: [],
