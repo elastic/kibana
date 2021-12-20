@@ -56,6 +56,7 @@ export const createFindingsIndexTemplate = async (
       esClient,
       CSP_KUBEBEAT_INDEX_NAME,
       CSP_KUBEBEAT_INDEX_PATTERN,
+      // TODO: check why this cast is required
       findingsIndexMapping as Record<string, MappingProperty>
     );
   } catch (err) {

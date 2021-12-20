@@ -31,14 +31,10 @@ export class CspPlugin implements Plugin<CspSetup, CspStart, CspPluginSetup, Csp
     return {};
   }
 
-  public async start(core: CoreStart) {
+  public start(core: CoreStart) {
     this.logger.debug('csp: Started');
-    try {
-      createFindingsIndexTemplate(core.elasticsearch.client.asInternalUser);
-    } catch (e) {
-      return {};
-    }
+    createFindingsIndexTemplate(core.elasticsearch.client.asInternalUser).catch(this.logger.error);
+    return {};
   }
-
   public stop() {}
 }
