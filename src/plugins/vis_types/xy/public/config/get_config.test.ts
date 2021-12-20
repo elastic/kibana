@@ -38,7 +38,31 @@ describe('getConfig', () => {
   it('assigns the correct formatter per y axis', () => {
     const config = getConfig(visData, visParamsWithTwoYAxes);
     expect(config.yAxes.length).toBe(2);
-    expect(config.yAxes[0].ticks?.formatter).toStrictEqual(config.aspects.y[1].formatter);
-    expect(config.yAxes[1].ticks?.formatter).toStrictEqual(config.aspects.y[0].formatter);
+    expect(config.yAxes[0].ticks?.formatter).toStrictEqual(config.aspects.y[0].formatter);
+    expect(config.yAxes[1].ticks?.formatter).toStrictEqual(config.aspects.y[1].formatter);
+  });
+
+  it('assigns the correct number of yAxes if the agg is hidden', () => {
+    // We have two axes but the one y dimension is hidden
+    const newVisParams = {
+      ...visParamsWithTwoYAxes,
+      dimensions: {
+        ...visParamsWithTwoYAxes.dimensions,
+        y: [
+          {
+            label: 'Average memory',
+            aggType: 'avg',
+            params: {},
+            accessor: 1,
+            format: {
+              id: 'number',
+              params: {},
+            },
+          },
+        ],
+      },
+    };
+    const config = getConfig(visData, newVisParams);
+    expect(config.yAxes.length).toBe(1);
   });
 });
