@@ -10253,7 +10253,6 @@
     "xpack.fleet.agentPolicyForm.namespaceFieldDescription": "命名空间是用户可配置的任意分组，使搜索数据和管理用户权限更容易。策略命名空间用于命名其集成的数据流。{fleetUserGuide}。",
     "xpack.fleet.agentPolicyForm.nameSpaceFieldDescription.fleetUserGuideLabel": "了解详情",
     "xpack.fleet.agentPolicyForm.namespaceFieldLabel": "默认命名空间",
-    "xpack.fleet.agentPolicyForm.systemMonitoringFieldLabel": "系统监测",
     "xpack.fleet.agentPolicyForm.systemMonitoringText": "收集系统日志和指标",
     "xpack.fleet.agentPolicyForm.systemMonitoringTooltipText": "启用此选项可使用收集系统日志和指标的集成启动您的策略。",
     "xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription": "可选超时（秒）。若提供，代理断开连接此段时间后，将自动注销。",

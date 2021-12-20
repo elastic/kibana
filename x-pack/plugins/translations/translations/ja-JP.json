@@ -10160,7 +10160,6 @@
     "xpack.fleet.agentPolicyForm.namespaceFieldDescription": "名前空間はユーザーが構成できる任意のグループであり、データの検索とユーザーアクセス権の管理が容易になります。ポリシー名前空間は、統合のデータストリームの名前を設定するために使用されます。{fleetUserGuide}。",
     "xpack.fleet.agentPolicyForm.nameSpaceFieldDescription.fleetUserGuideLabel": "詳細",
     "xpack.fleet.agentPolicyForm.namespaceFieldLabel": "デフォルト名前空間",
-    "xpack.fleet.agentPolicyForm.systemMonitoringFieldLabel": "システム監視",
     "xpack.fleet.agentPolicyForm.systemMonitoringText": "システムログとメトリックの収集",
     "xpack.fleet.agentPolicyForm.systemMonitoringTooltipText": "このオプションを有効にすると、システムログとメトリックを収集する統合でポリシーをブートストラップできます。",
     "xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription": "任意のタイムアウト（秒）。指定されている場合、この期間が経過した後、エージェントは自動的に登録解除されます。",
