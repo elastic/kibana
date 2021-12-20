@@ -104,7 +104,7 @@ export async function deleteAll(
       concurrency: MAX_CONCURRENT_SEARCHES,
     });
 
-    await userActionService.bulkCreateAttachmentDeletionUserAction({
+    await userActionService.bulkCreateAttachmentDeletion({
       unsecuredSavedObjectsClient,
       caseId: caseID,
       subCaseId: subCaseID,

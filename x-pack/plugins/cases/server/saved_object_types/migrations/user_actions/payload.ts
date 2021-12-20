@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { isPlainObject, isString } from 'lodash';
+import { isEmpty, isPlainObject, isString } from 'lodash';
 
 import {
   SavedObjectMigrationContext,
@@ -15,7 +15,13 @@ import {
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from '../../../../../../../src/core/server';
-import { Actions, ActionTypes, CommentType, UserActionTypes } from '../../../../common/api';
+import {
+  Actions,
+  ActionTypes,
+  CaseStatuses,
+  CommentType,
+  UserActionTypes,
+} from '../../../../common/api';
 import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
 import { getNoneCaseConnector } from '../../../common/utils';
 import { logError } from '../utils';
@@ -27,15 +33,14 @@ export function payloadMigration(
 ): SavedObjectSanitizedDoc<unknown> {
   const originalDocWithReferences = { ...doc, references: doc.references ?? [] };
   const owner = originalDocWithReferences.attributes.owner;
+  const { new_value, old_value, action_field, action_at, action_by, action, ...restAttributes } =
+    originalDocWithReferences.attributes;
+  const newAction = action === 'push-to-service' ? Actions.push_to_service : action;
+  const type = getUserActionType(action_field, action);
 
   try {
-    const { new_value, old_value, action_field, action_at, action_by, action, ...restAttributes } =
-      originalDocWithReferences.attributes;
-
-    const type = getUserActionType(action_field, action);
     const payload = getPayload(type, action_field, new_value, old_value, owner);
     const references = removeOldReferences(doc.references);
-    const newAction = action === 'push-to-service' ? Actions.push_to_service : action;
 
     return {
       ...originalDocWithReferences,
@@ -58,7 +63,18 @@ export function payloadMigration(
       docKey: 'userAction',
     });
 
-    return originalDocWithReferences;
+    return {
+      ...originalDocWithReferences,
+      attributes: {
+        ...restAttributes,
+        action: newAction,
+        created_at: action_at,
+        created_by: action_by,
+        payload: {},
+        type,
+      },
+      references: doc.references ?? [],
+    };
   }
 }
 
@@ -82,10 +98,7 @@ export const getPayload = (
   old_value: string | null,
   owner: string
 ): Record<string, unknown> => {
-  const payload =
-    action_field.length > 1
-      ? getMultipleFieldsPayload(action_field, new_value ?? old_value ?? null, owner)
-      : getSingleFieldPayload(action_field[0], new_value ?? old_value ?? null, owner);
+  const payload = convertPayload(action_field, new_value ?? old_value ?? null, owner);
 
   /**
    * From 7.10+ the cases saved object has the connector attribute
@@ -94,7 +107,10 @@ export const getPayload = (
    *
    * We are taking care of it in this migration by adding the none
    * connector as a default
+   *
+   * The same applies to the status field.
    */
+
   const { id, ...noneConnector } = getNoneCaseConnector();
   return {
     ...payload,
@@ -102,10 +118,13 @@ export const getPayload = (
     (type === ActionTypes.create_case || type === ActionTypes.connector)
       ? { connector: noneConnector }
       : {}),
+    ...(isEmpty(payload.status) && type === ActionTypes.create_case
+      ? { status: CaseStatuses.open }
+      : {}),
   };
 };
 
-const getMultipleFieldsPayload = (
+const convertPayload = (
   fields: string[],
   value: string | null,
   owner: string
@@ -114,39 +133,48 @@ const getMultipleFieldsPayload = (
     return {};
   }
 
-  const decodedValue = JSON.parse(value);
+  const unsafeDecodedValue = decodeValue(value);
 
   return fields.reduce(
     (payload, field) => ({
       ...payload,
-      ...getSingleFieldPayload(field, decodedValue[field], owner),
+      ...getSingleFieldPayload(field, unsafeDecodedValue[field] ?? unsafeDecodedValue, owner),
     }),
     {}
   );
 };
 
+const decodeValue = (value: string) => {
+  try {
+    return isString(value) ? JSON.parse(value) : value ?? {};
+  } catch {
+    return value;
+  }
+};
+
 const getSingleFieldPayload = (
   field: string,
-  value: string | null,
+  value: Record<string, unknown> | string,
   owner: string
 ): Record<string, unknown> => {
-  const decodeValue = (v: string | null) => {
-    try {
-      return isString(v) ? JSON.parse(v) : value ?? {};
-    } catch {
-      return value;
-    }
-  };
-
   switch (field) {
     case 'title':
-      return { title: value ?? '' };
-    case 'tags':
-      return { tags: isString(value) ? value.split(',').map((item) => item.trim()) : value ?? [] };
     case 'status':
-      return { status: value ?? '' };
     case 'description':
-      return { description: value ?? '' };
+      return { [field]: isString(value) ? value : '' };
+    case 'settings':
+    case 'connector':
+      return { [field]: isPlainObject(value) ? value : {} };
+    case 'pushed':
+      return { externalService: isPlainObject(value) ? value : {} };
+    case 'tags':
+      return {
+        tags: isString(value)
+          ? value.split(',').map((item) => item.trim())
+          : Array.isArray(value)
+          ? value
+          : [],
+      };
     case 'comment':
       /**
        * Until 7.10 the new_value of the comment user action
@@ -160,18 +188,15 @@ const getSingleFieldPayload = (
        * then we assume that the value is a string coming for a 7.10
        * user action saved object.
        */
-      const decodedValue = decodeValue(value);
       return {
-        comment: isPlainObject(decodedValue)
-          ? decodedValue
-          : { comment: isString(decodedValue) ? decodedValue : '', type: CommentType.user, owner },
+        comment: isPlainObject(value)
+          ? value
+          : {
+              comment: isString(value) ? value : '',
+              type: CommentType.user,
+              owner,
+            },
       };
-    case 'connector':
-      return { connector: decodeValue(value) };
-    case 'pushed':
-      return { externalService: decodeValue(value) };
-    case 'settings':
-      return { settings: decodeValue(value) };
 
     default:
       return {};

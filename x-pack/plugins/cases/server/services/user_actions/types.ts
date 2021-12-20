@@ -90,7 +90,6 @@ export interface Attributes {
   payload: Record<string, unknown>;
 }
 
-export type BuilderArgs<T> = { payload: Record<string, T> } & CommonArguments;
 export interface BuilderReturnValue {
   attributes: Attributes;
   references: SavedObjectReference[];

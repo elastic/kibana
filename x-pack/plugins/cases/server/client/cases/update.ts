@@ -589,7 +589,7 @@ export const update = async (
         });
       });
 
-    await userActionService.bulkCreateBulkUpdateCaseUserActions({
+    await userActionService.bulkCreateUpdateCase({
       unsecuredSavedObjectsClient,
       originalCases: myCases.saved_objects,
       updatedCases: updatedCases.saved_objects,

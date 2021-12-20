@@ -143,7 +143,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       });
     }
 
-    await userActionService.bulkCreateCaseDeletionUserAction({
+    await userActionService.bulkCreateCaseDeletion({
       unsecuredSavedObjectsClient,
       cases: cases.saved_objects.map((caseInfo) => ({
         id: caseInfo.id,

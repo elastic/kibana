@@ -16,6 +16,7 @@ import { StatusUserActionBuilder } from './builders/status';
 import { TagsUserActionBuilder } from './builders/tags';
 import { SettingsUserActionBuilder } from './builders/settings';
 import { DeleteCaseUserActionBuilder } from './builders/delete_case';
+import { UserActionBuilder } from './abstract_builder';
 
 const builderMap = {
   title: TitleUserActionBuilder,
@@ -30,10 +31,8 @@ const builderMap = {
   delete_case: DeleteCaseUserActionBuilder,
 };
 
-type BuilderMap = typeof builderMap;
-
 export class BuilderFactory {
-  getBuilder<T extends UserActionTypes>(type: T): InstanceType<BuilderMap[T]> {
-    return new builderMap[type]() as InstanceType<BuilderMap[T]>;
+  getBuilder<T extends UserActionTypes>(type: T): UserActionBuilder | undefined {
+    return new builderMap[type]();
   }
 }

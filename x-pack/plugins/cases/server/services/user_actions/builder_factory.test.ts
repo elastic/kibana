@@ -34,7 +34,7 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a title user action correctly', () => {
-    const builder = builderFactory.getBuilder(ActionTypes.title);
+    const builder = builderFactory.getBuilder(ActionTypes.title)!;
     const userAction = builder.build({
       payload: { title: 'test' },
       ...commonArgs,
@@ -68,7 +68,7 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a connector user action correctly', () => {
-    const builder = builderFactory.getBuilder(ActionTypes.connector);
+    const builder = builderFactory.getBuilder(ActionTypes.connector)!;
     const userAction = builder.build({
       payload: {
         connector: {
@@ -134,7 +134,7 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a comment user action correctly', () => {
-    const builder = builderFactory.getBuilder(ActionTypes.comment);
+    const builder = builderFactory.getBuilder(ActionTypes.comment)!;
     const userAction = builder.build({
       action: Actions.update,
       payload: {
@@ -185,7 +185,7 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a description user action correctly', () => {
-    const builder = builderFactory.getBuilder(ActionTypes.description);
+    const builder = builderFactory.getBuilder(ActionTypes.description)!;
     const userAction = builder.build({
       payload: { description: 'test' },
       ...commonArgs,
@@ -219,7 +219,7 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a pushed user action correctly', () => {
-    const builder = builderFactory.getBuilder(ActionTypes.pushed);
+    const builder = builderFactory.getBuilder(ActionTypes.pushed)!;
     const userAction = builder.build({
       payload: { externalService },
       ...commonArgs,
@@ -269,7 +269,7 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a tags user action correctly', () => {
-    const builder = builderFactory.getBuilder(ActionTypes.tags);
+    const builder = builderFactory.getBuilder(ActionTypes.tags)!;
     const userAction = builder.build({
       action: Actions.add,
       payload: { tags: ['one', 'two'] },
@@ -307,7 +307,7 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a status user action correctly', () => {
-    const builder = builderFactory.getBuilder(ActionTypes.status);
+    const builder = builderFactory.getBuilder(ActionTypes.status)!;
     const userAction = builder.build({
       payload: { status: CaseStatuses.open },
       ...commonArgs,
@@ -341,7 +341,7 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a settings user action correctly', () => {
-    const builder = builderFactory.getBuilder(ActionTypes.settings);
+    const builder = builderFactory.getBuilder(ActionTypes.settings)!;
     const userAction = builder.build({
       payload: { settings: { syncAlerts: true } },
       ...commonArgs,
@@ -377,7 +377,7 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a create case user action correctly', () => {
-    const builder = builderFactory.getBuilder(ActionTypes.create_case);
+    const builder = builderFactory.getBuilder(ActionTypes.create_case)!;
     const userAction = builder.build({
       payload: casePayload,
       ...commonArgs,
@@ -438,7 +438,7 @@ describe('UserActionBuilder', () => {
   });
 
   it('builds a delete case user action correctly', () => {
-    const builder = builderFactory.getBuilder(ActionTypes.delete_case);
+    const builder = builderFactory.getBuilder(ActionTypes.delete_case)!;
     const userAction = builder.build({
       payload: {},
       connectorId: '456',

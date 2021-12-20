@@ -220,7 +220,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               settings: {
                 syncAlerts: true,
               },
-              status: '',
+              status: 'open',
               tags: ['user', 'actions'],
               title: 'User actions',
             },

@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(userAction.action).to.eql('delete');
       expect(userAction.type).to.eql('delete_case');
-      expect(userAction.payload).to.eql(null);
+      expect(userAction.payload).to.eql({});
     });
 
     it('creates a status update user action when changing the status', async () => {

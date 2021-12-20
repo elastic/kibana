@@ -110,8 +110,16 @@ const createCaseUserAction = (): SavedObject<CaseUserActionAttributes> => {
   const { id, ...restConnector } = createJiraConnector();
   return {
     ...createUserActionSO({
-      action: Actions.push_to_service,
-      payload: { externalService: restConnector, title: 'a title', description: 'a desc' },
+      action: Actions.create,
+      payload: {
+        connector: restConnector,
+        title: 'a title',
+        description: 'a desc',
+        settings: { syncAlerts: false },
+        status: CaseStatuses.open,
+        tags: [],
+        owner: SECURITY_SOLUTION_OWNER,
+      },
       connectorId: id,
       type: 'create_case',
     }),
@@ -235,13 +243,10 @@ const testConnectorId = (
       ])
     );
 
-    // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
-    // Do we need to put the connector.id to none?
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
   });
 
-  // TODO: Fix it for create case. isCreateCaseUserAction does not check the payload
-  it.skip('does not populate the payload.connector.id when the reference exists but the payload does not contain a connector', () => {
+  it('does not populate the payload.connector.id when the reference exists but the payload does not contain a connector', () => {
     const invalidUserAction = {
       ...userAction,
       attributes: { ...userAction.attributes, payload: {} },
@@ -252,8 +257,6 @@ const testConnectorId = (
       ])
     ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
-    // TODO: addReferenceIdToPayload returns undefined because the isConnectorUserAction returns false.
-    // Do we need to put the connector.id to none?
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
   });
 
@@ -651,9 +654,9 @@ describe('CaseUserActionService', () => {
       });
     });
 
-    describe('bulkCreateCaseDeletionUserAction', () => {
+    describe('bulkCreateCaseDeletion', () => {
       it('creates a delete case user action', async () => {
-        await service.bulkCreateCaseDeletionUserAction({
+        await service.bulkCreateCaseDeletion({
           unsecuredSavedObjectsClient,
           cases: [
             { id: '1', owner: SECURITY_SOLUTION_OWNER, connectorId: '3' },
@@ -705,9 +708,9 @@ describe('CaseUserActionService', () => {
       });
     });
 
-    describe('bulkCreateBulkUpdateCaseUserActions', () => {
+    describe('bulkCreateUpdateCase', () => {
       it('creates the correct user actions when bulk updating cases', async () => {
-        await service.bulkCreateBulkUpdateCaseUserActions({
+        await service.bulkCreateUpdateCase({
           ...commonArgs,
           originalCases,
           updatedCases,
@@ -848,9 +851,9 @@ describe('CaseUserActionService', () => {
       });
     });
 
-    describe('bulkCreateAttachmentDeletionUserAction', () => {
+    describe('bulkCreateAttachmentDeletion', () => {
       it('creates delete comment user action', async () => {
-        await service.bulkCreateAttachmentDeletionUserAction({
+        await service.bulkCreateAttachmentDeletion({
           ...commonArgs,
           attachments,
         });

@@ -61,12 +61,11 @@ const groupConnectorFields = (
   userActions: CaseUserActions[]
 ): Record<string, Array<CaseConnector['fields']>> =>
   userActions.reduce((acc, mua) => {
-    if (isConnectorUserAction(mua) || isCreateCaseUserAction(mua)) {
+    if (
+      (isConnectorUserAction(mua) || isCreateCaseUserAction(mua)) &&
+      mua.payload?.connector?.id !== NONE_CONNECTOR_ID
+    ) {
       const connector = mua.payload.connector;
-
-      if (connector.id === NONE_CONNECTOR_ID) {
-        return acc;
-      }
 
       return {
         ...acc,

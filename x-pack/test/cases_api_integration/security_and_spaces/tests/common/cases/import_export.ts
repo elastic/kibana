@@ -172,6 +172,9 @@ const expectImportToHavePushUserAction = (userAction: CaseUserActionResponse) =>
   expect(userAction.type).to.eql('pushed');
 
   expect(pushedUserAction.payload.externalService.connector_name).to.eql('A jira connector');
+  expect(pushedUserAction.payload.externalService.connector_id).to.eql(
+    '51a4cbe0-5cea-11ec-a615-15461784e410'
+  );
 };
 
 const expectImportToHaveUpdateConnector = (userAction: CaseUserActionResponse) => {

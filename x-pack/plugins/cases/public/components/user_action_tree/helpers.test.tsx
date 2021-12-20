@@ -19,12 +19,7 @@ import {
   TitleUserAction,
 } from '../../../common/api';
 import { basicPush, getUserAction } from '../../containers/mock';
-import {
-  getLabelTitle,
-  getPushedServiceLabelTitle,
-  getConnectorLabelTitle,
-  toStringArray,
-} from './helpers';
+import { getLabelTitle, getPushedServiceLabelTitle, getConnectorLabelTitle } from './helpers';
 import { connectorsMock } from '../../containers/configure/mock';
 import * as i18n from './translations';
 import { SnakeToCamelCase } from '../../../common/types';
@@ -211,40 +206,6 @@ describe('User action tree helpers', () => {
       });
 
       expect(result).toEqual('removed external incident management system');
-    });
-  });
-
-  describe('toStringArray', () => {
-    const circularReference = { otherData: 123, circularReference: undefined };
-    // @ts-ignore testing catch on circular reference
-    circularReference.circularReference = circularReference;
-    it('handles all data types in an array', () => {
-      const value = [1, true, { a: 1 }, circularReference, 'yeah', 100n, null];
-      const res = toStringArray(value);
-      expect(res).toEqual(['1', 'true', '{"a":1}', 'Invalid Object', 'yeah', '100']);
-    });
-    it('handles null', () => {
-      const value = null;
-      const res = toStringArray(value);
-      expect(res).toEqual([]);
-    });
-
-    it('handles object', () => {
-      const value = { a: true };
-      const res = toStringArray(value);
-      expect(res).toEqual([JSON.stringify(value)]);
-    });
-
-    it('handles Invalid Object', () => {
-      const value = circularReference;
-      const res = toStringArray(value);
-      expect(res).toEqual(['Invalid Object']);
-    });
-
-    it('handles unexpected value', () => {
-      const value = 100n;
-      const res = toStringArray(value);
-      expect(res).toEqual(['100']);
     });
   });
 });

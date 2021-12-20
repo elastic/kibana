@@ -157,14 +157,13 @@ export class CaseUserActionService {
       return userActions;
     }
 
-    if (isUserActionType(field)) {
+    if (isUserActionType(field) && newValue != null) {
       const userActionBuilder = this.builderFactory.getBuilder(ActionTypes[field]);
       const fieldUserAction = userActionBuilder?.build({
         caseId,
         subCaseId,
         owner,
         user,
-        // @ts-ignore
         payload: { [field]: newValue },
       });
 
@@ -174,7 +173,7 @@ export class CaseUserActionService {
     return [];
   }
 
-  public async bulkCreateCaseDeletionUserAction({
+  public async bulkCreateCaseDeletion({
     unsecuredSavedObjectsClient,
     cases,
     user,
@@ -201,7 +200,7 @@ export class CaseUserActionService {
     await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
   }
 
-  public async bulkCreateBulkUpdateCaseUserActions({
+  public async bulkCreateUpdateCase({
     unsecuredSavedObjectsClient,
     originalCases,
     updatedCases,
@@ -247,7 +246,7 @@ export class CaseUserActionService {
     await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
   }
 
-  public async bulkCreateAttachmentDeletionUserAction({
+  public async bulkCreateAttachmentDeletion({
     unsecuredSavedObjectsClient,
     caseId,
     subCaseId,
@@ -304,7 +303,6 @@ export class CaseUserActionService {
         owner,
         connectorId,
         attachmentId,
-        // @ts-ignore
         payload,
       });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { ActionTypes } from '../api';
 import {
   isConnectorUserAction,
@@ -64,12 +65,34 @@ describe('user action utils', () => {
   });
 
   describe('isCreateCaseUserAction', () => {
+    const payloadTests = [...Object.keys(predicateMap), ['settings'], ['owner']];
+
+    const payload = {
+      connector: {},
+      title: '',
+      description: '',
+      tags: [],
+      settings: {},
+      status: '',
+      owner: '',
+    };
+
     it('returns true if the user action is create_case', () => {
-      expect(isCreateCaseUserAction({ type: ActionTypes.create_case })).toBe(true);
+      expect(
+        isCreateCaseUserAction({
+          type: ActionTypes.create_case,
+          payload,
+        })
+      ).toBe(true);
     });
 
     it('returns false if the type is wrong', () => {
       expect(isCreateCaseUserAction({ type: 'not-exist' })).toBe(false);
+    });
+
+    it.each(payloadTests)('returns false if the payload is missing %s', (field) => {
+      const wrongPayload = omit(payload, field);
+      expect(isPushedUserAction({ type: 'not-exist', payload: wrongPayload })).toBe(false);
     });
   });
 

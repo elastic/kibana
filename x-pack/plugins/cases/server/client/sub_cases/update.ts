@@ -380,7 +380,7 @@ export async function update({
       []
     );
 
-    await userActionService.bulkCreateBulkUpdateCaseUserActions({
+    await userActionService.bulkCreateUpdateCase({
       unsecuredSavedObjectsClient,
       originalCases: bulkSubCases.saved_objects,
       updatedCases: updatedCases.saved_objects,

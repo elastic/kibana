@@ -29,7 +29,7 @@ export const isConnectorUserAction = (userAction: unknown): userAction is Connec
   (userAction as ConnectorUserAction)?.type === ActionTypes.connector &&
   (userAction as ConnectorUserAction)?.payload?.connector != null;
 
-export const isPushedUserAction = <T extends 'snakeCase' | 'camelCase'>(
+export const isPushedUserAction = <T extends 'snakeCase' | 'camelCase' = 'snakeCase'>(
   userAction: unknown
 ): userAction is SnakeCaseOrCamelCaseUserAction<
   T,
@@ -60,7 +60,14 @@ export const isDescriptionUserAction = (userAction: unknown): userAction is Desc
   (userAction as DescriptionUserAction)?.payload?.description != null;
 
 export const isCreateCaseUserAction = (userAction: unknown): userAction is CreateCaseUserAction =>
-  (userAction as CreateCaseUserAction)?.type === ActionTypes.create_case;
+  (userAction as CreateCaseUserAction)?.type === ActionTypes.create_case &&
+  (userAction as CreateCaseUserAction)?.payload?.connector != null &&
+  (userAction as CreateCaseUserAction)?.payload?.description != null &&
+  (userAction as CreateCaseUserAction)?.payload?.settings != null &&
+  (userAction as CreateCaseUserAction)?.payload?.status != null &&
+  (userAction as CreateCaseUserAction)?.payload?.title != null &&
+  (userAction as CreateCaseUserAction)?.payload?.owner != null &&
+  (userAction as CreateCaseUserAction)?.payload?.tags != null;
 
 export const isUserActionType = (field: string): field is UserActionTypes =>
   ActionTypes[field as UserActionTypes] != null;

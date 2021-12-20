@@ -247,7 +247,6 @@ describe('case migrations', () => {
     it('does not create a reference and preserves the existing external_service fields when connector_id is null', () => {
       const caseSavedObject = create_7_14_0_case({
         externalService: {
-          // TODO: It was null. Check if it is correct
           connector_id: 'none',
           connector_name: '.jira',
           external_id: '100',

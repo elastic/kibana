@@ -35,7 +35,6 @@ import {
   ContextTypeUserRt,
 } from '../../../common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import type { OnUpdateFields } from '../case_view';
 import {
   getConnectorLabelTitle,
   getLabelTitle,
@@ -57,6 +56,7 @@ import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { useCaseViewParams } from '../../common/navigation';
 import { isConnectorUserAction, isPushedUserAction } from '../../../common/utils/user_actions';
+import type { OnUpdateFields } from '../case_view/types';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;

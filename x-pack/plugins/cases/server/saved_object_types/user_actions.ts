@@ -39,7 +39,6 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
         dynamic: false,
         properties: {
           connector: {
-            dynamic: false,
             properties: {
               // connector.type
               type: { type: 'keyword' },
