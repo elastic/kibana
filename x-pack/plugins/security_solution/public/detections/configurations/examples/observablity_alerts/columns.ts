@@ -6,11 +6,7 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
-import {
-  ALERT_DURATION,
-  ALERT_REASON,
-  ALERT_STATUS,
-} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_DURATION, ALERT_REASON, ALERT_STATUS } from '@kbn/rule-data-utils';
 
 import { ColumnHeaderOptions } from '../../../../../common/types';
 import { defaultColumnHeaderType } from '../../../../timelines/components/timeline/body/column_headers/default_headers';

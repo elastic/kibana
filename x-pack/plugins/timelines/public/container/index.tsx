@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertConsumers } from '@kbn/rule-data-utils/alerts_as_data_rbac';
+import type { AlertConsumers } from '@kbn/rule-data-utils';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isString, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';

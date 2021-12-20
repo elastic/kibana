@@ -9,7 +9,7 @@ import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_RULE_ID,
-} from '@kbn/rule-data-utils/technical_field_names';
+} from '@kbn/rule-data-utils';
 
 import type { Filter } from '@kbn/es-query';
 import { RowRendererId } from '../../../../common/types/timeline';

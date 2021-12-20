@@ -16,13 +16,13 @@ import {
   ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   ALERT_UUID,
   SPACE_IDS,
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
-} from '@kbn/rule-data-utils/technical_field_names';
-import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
+} from '@kbn/rule-data-utils';
 import { ValuesType } from 'utility-types';
 import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { ObservabilityRuleTypeRegistry } from '../../../../../../observability/public';

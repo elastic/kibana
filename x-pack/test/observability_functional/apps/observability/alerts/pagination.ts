@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ROWS_NEEDED_FOR_PAGINATION = 10;

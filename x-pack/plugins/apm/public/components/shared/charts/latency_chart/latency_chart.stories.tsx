@@ -14,6 +14,7 @@ import {
   ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
   ALERT_UUID,
   TIMESTAMP,
   ALERT_RULE_UUID,
@@ -22,8 +23,7 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_PRODUCER,
   SPACE_IDS,
-} from '@kbn/rule-data-utils/technical_field_names';
-import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
+} from '@kbn/rule-data-utils';
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
