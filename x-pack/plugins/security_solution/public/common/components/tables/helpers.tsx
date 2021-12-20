@@ -4,10 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
+import React, { useCallback, useContext, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import {
+  EuiLink,
+  EuiPopover,
+  EuiToolTip,
+  EuiText,
+  EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import styled from 'styled-components';
 
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
@@ -16,6 +23,9 @@ import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
+import { HoverActions } from '../hover_actions';
+import { DataProvider } from '../../../../common/types';
+import { TimelineContext } from '../../../../../timelines/public';
 
 const Subtext = styled.div`
   font-size: ${(props) => props.theme.eui.euiFontSizeXS};
@@ -125,7 +135,15 @@ export const getRowItemDraggables = ({
 
     return draggables.length > 0 ? (
       <>
-        {draggables} {getRowItemOverflow(rowItems, idPrefix, displayCount, maxOverflow)}
+        {draggables}{' '}
+        <RowItemOverflow
+          attrName={attrName}
+          dragDisplayValue={dragDisplayValue}
+          idPrefix={idPrefix}
+          maxOverflowItems={maxOverflow}
+          overflowIndexStart={displayCount}
+          rowItems={rowItems}
+        />
       </>
     ) : (
       getEmptyTagValue()
@@ -135,24 +153,106 @@ export const getRowItemDraggables = ({
   }
 };
 
-export const getRowItemOverflow = (
-  rowItems: string[],
-  idPrefix: string,
+export const OverflowItem: React.FC<{
+  dataProvider?: DataProvider | DataProvider[] | undefined;
+  dragDisplayValue?: string;
+  field: string;
+  rowItem: string;
+}> = ({ dataProvider, dragDisplayValue, field, rowItem }) => {
+  const [showTopN, setShowTopN] = useState<boolean>(false);
+  const { timelineId: timelineIdFind } = useContext(TimelineContext);
+  const [hoverActionsOwnFocus] = useState<boolean>(false);
+  const toggleTopN = useCallback(() => {
+    setShowTopN((prevShowTopN) => {
+      const newShowTopN = !prevShowTopN;
+      return newShowTopN;
+    });
+  }, []);
+
+  const closeTopN = useCallback(() => {
+    setShowTopN(false);
+  }, []);
+
+  return (
+    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" direction="row">
+      <EuiFlexItem grow={1}>{defaultToEmptyTag(rowItem)} </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <HoverActions
+          closeTopN={closeTopN}
+          dataProvider={dataProvider}
+          field={field}
+          isObjectArray={false}
+          ownFocus={hoverActionsOwnFocus}
+          showOwnFocus={false}
+          showTopN={showTopN}
+          timelineId={timelineIdFind}
+          toggleTopN={toggleTopN}
+          values={dragDisplayValue ?? rowItem}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+export const RowItemOverflow: React.FC<{
+  attrName: string;
+  dragDisplayValue?: string;
+  idPrefix: string;
+  maxOverflowItems: number;
+  overflowIndexStart: number;
+  rowItems: string[];
+}> = ({
+  attrName,
+  dragDisplayValue,
+  idPrefix,
+  maxOverflowItems = 5,
   overflowIndexStart = 5,
-  maxOverflowItems = 5
-): JSX.Element => {
+  rowItems,
+}) => {
+  const [closeAllTopN, setCloseAllTopN] = useState(true);
+
+  const handleCloseAllTopN = useCallback(() => {
+    setCloseAllTopN(true);
+  }, [setCloseAllTopN]);
+  const overflowItems = rowItems
+    .slice(overflowIndexStart, overflowIndexStart + maxOverflowItems)
+    .map((rowItem, index) => {
+      const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
+      const dataProvider = {
+        and: [],
+        enabled: true,
+        id,
+        name: rowItem,
+        excluded: false,
+        kqlQuery: '',
+        queryMatch: {
+          field: attrName,
+          value: rowItem,
+          displayValue: dragDisplayValue || rowItem,
+          operator: IS_OPERATOR,
+        },
+      };
+
+      return (
+        <EuiFlexItem id={`${idPrefix}-${id}`}>
+          <OverflowItem
+            dataProvider={dataProvider}
+            rowItem={rowItem}
+            field={attrName}
+            handleCloseAllTopN={handleCloseAllTopN}
+            closeAllTopN={closeAllTopN}
+          />
+        </EuiFlexItem>
+      );
+    });
   return (
     <>
       {rowItems.length > overflowIndexStart && (
         <Popover count={rowItems.length - overflowIndexStart} idPrefix={idPrefix}>
           <EuiText size="xs">
-            <ul>
-              {rowItems
-                .slice(overflowIndexStart, overflowIndexStart + maxOverflowItems)
-                .map((rowItem) => (
-                  <li key={`${idPrefix}-${rowItem}`}>{defaultToEmptyTag(rowItem)}</li>
-                ))}
-            </ul>
+            <EuiFlexGroup gutterSize="none" direction="column">
+              {overflowItems}
+            </EuiFlexGroup>
 
             {rowItems.length > overflowIndexStart + maxOverflowItems && (
               <p data-test-subj="popover-additional-overflow">
@@ -190,6 +290,7 @@ export const PopoverComponent = ({
         closePopover={() => setIsOpen(!isOpen)}
         id={`${idPrefix}-popover`}
         isOpen={isOpen}
+        panelClassName="withHoverActions__popover"
         repositionOnScroll
       >
         {children}
