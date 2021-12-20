@@ -45,6 +45,7 @@ const ALERT_NODE_TEST_ID = getProcessTreeNodeAlertDetailViewRule(
   '64940663527c71b1f577df2aa529c42afc1c023108154714b49966e517e395b8'
 );
 const ALERT_RULE_ID = 'd9f45980-5e10-11ec-b7c6-17150991b0b3';
+const FIRST_CHILD_COMMAND = '/usr/bin/id'
 
 describe('Session view', () => {
   context('Rendering table empty state', () => {
@@ -137,11 +138,11 @@ describe('Session view', () => {
     it('renders child processes correctly', () => {
       openSessionView(TEST_EVENT_ID);
 
-
       // Amount of visible commands on the session view should increase when user clicks on the Child Process dropdown button
       cy.get(SESSION_COMMANDS).children().its('length').then(lengthBefore =>{
         const beforeClick = lengthBefore;
         cy.contains('Child processes').click()
+        cy.contains(FIRST_CHILD_COMMAND).should('exist');
         cy.get(SESSION_COMMANDS).children().its('length').then(lengthAfter =>{
           const afterClick = lengthAfter;
           expect(afterClick).to.be.greaterThan(beforeClick)
@@ -149,18 +150,19 @@ describe('Session view', () => {
       })
 
       //Checks the left margin value for each command line, left margin of child would be more to the right compared the parent 
+      
+      //Get the margin-left value for parent command
       cy.get(SESSION_COMMANDS).eq(1).then(element => {
         const win = element[0].ownerDocument!.defaultView
         const before = win!.getComputedStyle(element[0],'before')
         const contentValue = before.getPropertyValue('margin-left')
         const parentCommandLeftMargin = parseInt(contentValue.replace('px',''))
+      //Get the margin-left value for child command and compares both of them
         cy.get(SESSION_COMMANDS).eq(2).then(element => {
           const win = element[0].ownerDocument!.defaultView
           const before = win!.getComputedStyle(element[0],'before')
           const contentValue = before.getPropertyValue('margin-left')
           const childCommandLeftMargin = parseInt(contentValue.replace('px',''))
-          console.log("PARENT MARGIN :" + parentCommandLeftMargin)
-          console.log("CHILD MARGIN :" + childCommandLeftMargin)
           expect(parentCommandLeftMargin).to.be.greaterThan(childCommandLeftMargin)
         })
       })
