@@ -16,6 +16,7 @@ import { ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
 
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { ParsedTechnicalFields } from '../../../../../../rule_registry/common/parse_technical_fields';
+import { ParsedExperimentalFields } from '../../../../../../rule_registry/common/parse_experimental_fields';
 import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -35,7 +36,7 @@ import './styles.scss';
 import { AlertsStatusFilter, AlertsDisclaimer, AlertsSearchBar } from '../../components';
 
 export interface TopAlert {
-  fields: ParsedTechnicalFields;
+  fields: ParsedTechnicalFields & ParsedExperimentalFields;
   start: number;
   reason: string;
   link?: string;
