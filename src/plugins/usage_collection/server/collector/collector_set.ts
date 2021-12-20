@@ -116,7 +116,7 @@ export class CollectorSet {
             try {
               return await collector.isReady();
             } catch (err) {
-              this.logger.debug(`Collector ${collector.type} failed to get ready`);
+              this.logger.debug(`Collector ${collector.type} failed to get ready. ${err}`);
               return false;
             }
           })(),
