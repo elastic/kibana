@@ -16,8 +16,8 @@ import {
   ControlsPluginStartDeps,
   IEditableControlFactory,
   ControlEditorProps,
-  ControlInput,
   ControlEmbeddable,
+  ControlInput,
 } from './types';
 import { OptionsListEmbeddableFactory } from './control_types/options_list';
 import { ControlGroupContainerFactory, CONTROL_GROUP_TYPE, OPTIONS_LIST_CONTROL } from '.';

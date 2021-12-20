@@ -63,7 +63,7 @@ export {
   useReduxContainerContext,
   useReduxEmbeddableContext,
   getManagedEmbeddablesStore,
-  ReduxContainerContextServices,
+  type ReduxContainerContextServices,
 } from './components/redux_embeddables';
 
 export { DataViewPicker } from './components/data_view_picker';

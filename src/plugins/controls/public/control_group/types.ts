@@ -12,8 +12,8 @@ import { ContainerOutput } from '../../../embeddable/public';
 export type ControlGroupOutput = ContainerOutput & CommonControlOutput;
 
 export {
-  ControlsPanels,
-  ControlGroupInput,
-  ControlPanelState,
+  type ControlsPanels,
+  type ControlGroupInput,
+  type ControlPanelState,
   CONTROL_GROUP_TYPE,
 } from '../../common/control_group/types';

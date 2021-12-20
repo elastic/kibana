@@ -11,6 +11,6 @@ export {
   useReduxContainerContext,
   useReduxEmbeddableContext,
 } from './redux_embeddable_context';
-export { ReduxContainerContextServices } from './types';
+export type { ReduxContainerContextServices } from './types';
 export { ReduxEmbeddableWrapper } from './redux_embeddable_wrapper';
 export { getManagedEmbeddablesStore } from './generic_embeddable_store';

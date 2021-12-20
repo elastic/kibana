@@ -71,3 +71,6 @@ export interface ControlsPluginStartDeps {
   embeddable: EmbeddableStart;
   dataViews: DataViewsPublicPluginStart;
 }
+
+// re-export from common
+export type { ControlWidth, ControlInput, ControlStyle } from '../common/types';

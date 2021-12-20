@@ -8,7 +8,7 @@
 
 import { ControlsPlugin } from './plugin';
 
-export {
+export type {
   ControlOutput,
   ControlFactory,
   ControlEmbeddable,
@@ -27,16 +27,16 @@ export type {
 export { OPTIONS_LIST_CONTROL, CONTROL_GROUP_TYPE } from '../common';
 
 export {
-  ControlGroupInput,
-  ControlGroupOutput,
   ControlGroupContainer,
   ControlGroupContainerFactory,
+  type ControlGroupInput,
+  type ControlGroupOutput,
 } from './control_group';
 
 export {
   OptionsListEmbeddableFactory,
-  OptionsListEmbeddableInput,
   OptionsListEmbeddable,
+  type OptionsListEmbeddableInput,
 } from './control_types';
 
 export function plugin() {
