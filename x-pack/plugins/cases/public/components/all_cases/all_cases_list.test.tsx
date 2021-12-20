@@ -781,7 +781,7 @@ describe('AllCasesListGeneric', () => {
     expect(doRefresh).toHaveBeenCalled();
   });
 
-  it.only('shows Solution column if there are more than 1 available solutions', async () => {
+  it('shows Solution column if there are no set owners', async () => {
     const doRefresh = jest.fn();
 
     const wrapper = mount(
@@ -790,6 +790,20 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    console.log(wrapper.debug());
+    const solutionHeader = wrapper.find({ children: 'Solution' });
+    expect(solutionHeader.exists()).toBeTruthy();
+  });
+
+  it('hides Solution column if there is a set owner', async () => {
+    const doRefresh = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList isSelectorView={false} doRefresh={doRefresh} />
+      </TestProviders>
+    );
+
+    const solutionHeader = wrapper.find({ children: 'Solution' });
+    expect(solutionHeader.exists()).toBeFalsy();
   });
 });

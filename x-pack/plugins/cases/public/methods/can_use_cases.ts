@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ApplicationStart } from 'kibana/public';
+import type { ApplicationStart } from 'kibana/public';
 import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 
 export type CasesOwners = typeof SECURITY_SOLUTION_OWNER | typeof OBSERVABILITY_OWNER;
 
-export function canUseCases(capabilities: ApplicationStart['capabilities']) {
+export function canUseCases(capabilities: Partial<ApplicationStart['capabilities']>) {
   return (
     owners: CasesOwners[] = [OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER]
   ): { crud: boolean; read: boolean } => {
@@ -18,8 +18,8 @@ export function canUseCases(capabilities: ApplicationStart['capabilities']) {
     let read = false;
 
     if (owners.length) {
-      crud = owners.some((owner) => capabilities[`${owner}Cases`].crud_cases);
-      read = owners.some((owner) => capabilities[`${owner}Cases`].read_cases);
+      crud = owners.some((owner) => capabilities[`${owner}Cases`]?.crud_cases);
+      read = owners.some((owner) => capabilities[`${owner}Cases`]?.read_cases);
     }
 
     return {
