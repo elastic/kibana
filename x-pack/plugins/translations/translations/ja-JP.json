@@ -10230,7 +10230,6 @@
     "xpack.fleet.copyAgentPolicy.confirmModal.defaultNewPolicyName": "{name}（コピー）",
     "xpack.fleet.copyAgentPolicy.confirmModal.newDescriptionLabel": "説明",
     "xpack.fleet.copyAgentPolicy.confirmModal.newNameLabel": "新しいポリシー名",
-    "xpack.fleet.copyAgentPolicy.failureNotificationTitle": "エージェントポリシー'{id}'の複製エラー",
     "xpack.fleet.copyAgentPolicy.fatalErrorNotificationTitle": "エージェントポリシーの複製エラー",
     "xpack.fleet.copyAgentPolicy.successNotificationTitle": "エージェントポリシーが複製されました",
     "xpack.fleet.createAgentPolicy.cancelButtonLabel": "キャンセル",
