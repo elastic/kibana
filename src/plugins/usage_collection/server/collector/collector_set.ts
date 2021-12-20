@@ -21,6 +21,7 @@ import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../../common/
 // Needed for the general array containing all the collectors. We don't really care about their types here
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyCollector = ICollector<any, any>;
+type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 interface CollectorWithStatus {
   isReadyWithTimeout: Awaited<ReturnType<typeof withTimeout>>;
   collector: AnyCollector;
