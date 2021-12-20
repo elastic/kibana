@@ -18,13 +18,14 @@ describe('Fleet startup', () => {
     cy.get('.euiBadge').contains('Healthy');
   });
 
-  it('should display default agent policies on agent policies tab', () => {
+  // TODO update assertions
+  it.skip('should display default agent policies on agent policies tab', () => {
     cy.getBySel(AGENT_POLICIES_TAB).click();
     cy.get('.euiLink').contains('Default policy');
     cy.get('.euiLink').contains('Default Fleet Server policy');
   });
 
-  it('should display default tokens on enrollment tokens tab', () => {
+  it.skip('should display default tokens on enrollment tokens tab', () => {
     cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
     cy.get('.euiTableRow').should('have.length', 2);
     cy.get('.euiTableRowCell').contains('Default policy');
