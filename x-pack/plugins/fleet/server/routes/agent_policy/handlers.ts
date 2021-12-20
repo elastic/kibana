@@ -22,6 +22,7 @@ import type {
   CopyAgentPolicyRequestSchema,
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
+  FleetRequestHandler,
 } from '../../types';
 import type { AgentPolicy, NewPackagePolicy } from '../../types';
 import { FLEET_SYSTEM_PACKAGE } from '../../../common';
@@ -100,7 +101,7 @@ export const getOneAgentPolicyHandler: RequestHandler<
   }
 };
 
-export const createAgentPolicyHandler: RequestHandler<
+export const createAgentPolicyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof CreateAgentPolicyRequestSchema.query>,
   TypeOf<typeof CreateAgentPolicyRequestSchema.body>
@@ -109,7 +110,7 @@ export const createAgentPolicyHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
-
+  const spaceId = context.fleet.spaceId;
   try {
     // eslint-disable-next-line prefer-const
     let [agentPolicy, newSysPackagePolicy] = await Promise.all<
@@ -136,6 +137,7 @@ export const createAgentPolicyHandler: RequestHandler<
       newSysPackagePolicy.name = await incrementPackageName(soClient, FLEET_SYSTEM_PACKAGE);
 
       await packagePolicyService.create(soClient, esClient, newSysPackagePolicy, {
+        spaceId,
         user,
         bumpRevision: false,
       });
