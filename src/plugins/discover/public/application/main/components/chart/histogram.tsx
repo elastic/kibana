@@ -11,6 +11,7 @@ import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiIconTip,
   EuiLoadingChart,
   EuiSpacer,
@@ -21,7 +22,6 @@ import dateMath from '@elastic/datemath';
 import {
   Axis,
   BrushEndListener,
-  XYBrushEvent,
   Chart,
   ElementClickListener,
   HistogramBarSeries,
@@ -29,6 +29,7 @@ import {
   ScaleType,
   Settings,
   TooltipType,
+  XYBrushEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
 import { IUiSettingsClient } from 'kibana/public';
@@ -73,7 +74,7 @@ export function DiscoverHistogram({
 
   const uiSettings = services.uiSettings;
   const timeZone = getTimezone(uiSettings);
-  const { chartData, fetchStatus, bucketInterval } = dataState;
+  const { chartData, bucketInterval, fetchStatus, error } = dataState;
 
   const onBrushEnd = useCallback(
     ({ x }: XYBrushEvent) => {
@@ -137,6 +138,29 @@ export function DiscoverHistogram({
             <FormattedMessage id="discover.loadingChartResults" defaultMessage="Loading chart" />
           </EuiText>
         </div>
+      </div>
+    );
+  }
+
+  if (fetchStatus === FetchStatus.ERROR && error) {
+    return (
+      <div className="dscHistogram__errorChartContainer">
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false} className="dscHistogram__errorChart__icon">
+            <EuiIcon type="visBarVertical" color="danger" size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem className="dscHistogram__errorChart">
+            <EuiText size="s" color="danger">
+              <FormattedMessage
+                id="discover.errorLoadingChart"
+                defaultMessage="Error loading chart"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiText className="dscHistogram__errorChart__text" size="s">
+          {error.message}
+        </EuiText>
       </div>
     );
   }

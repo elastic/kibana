@@ -6,12 +6,7 @@
  */
 
 import {
-  EuiButton,
-  EuiCallOut,
-  EuiCheckbox,
   EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
   EuiOutsideClickDetector,
   EuiPopover,
@@ -19,7 +14,7 @@ import {
   EuiSpacer,
   EuiSuperSelect,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import * as i18n from './translations';
@@ -27,14 +22,14 @@ import { sourcererActions, sourcererModel, sourcererSelectors } from '../../stor
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
-import { FormRow, PopoverContent, ResetButton, StyledButton, StyledFormRow } from './helpers';
+import { FormRow, PopoverContent, StyledButton, StyledFormRow } from './helpers';
 import { TemporarySourcerer } from './temporary';
-import { UpdateDefaultDataViewModal } from './update_default_data_view_modal';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useUpdateDataView } from './use_update_data_view';
 import { Trigger } from './trigger';
+import { AlertsCheckbox, SaveButtons, SourcererCallout } from './sub_components';
 
-interface SourcererComponentProps {
+export interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
 }
 
@@ -71,8 +66,20 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     isTimelineSourcerer && selectedPatterns.join() === signalIndexName
   );
 
+  const onUpdateDetectionAlertsChecked = useCallback(() => {
+    setIsOnlyDetectionAlertsChecked(
+      isTimelineSourcerer && selectedPatterns.join() === signalIndexName
+    );
+  }, [isTimelineSourcerer, selectedPatterns, signalIndexName]);
+
+  useEffect(() => {
+    onUpdateDetectionAlertsChecked();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPatterns]);
+
   const isOnlyDetectionAlerts: boolean =
     isDetectionsSourcerer || (isTimelineSourcerer && isOnlyDetectionAlertsChecked);
+
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewId, setDataViewId] = useState<string | null>(selectedDataViewId);
 
@@ -80,6 +87,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     allOptions,
     dataViewSelectOptions,
     isModified,
+    handleOutsideClick,
     onChangeCombo,
     renderOption,
     selectedOptions,
@@ -91,11 +99,12 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     kibanaDataViews,
     missingPatterns,
     scopeId,
+    selectedDataViewId,
     selectedPatterns,
     signalIndexName,
   });
 
-  const onCheckboxChanged = useCallback(
+  const onCheckboxChanged: ChangeEventHandler<HTMLInputElement> = useCallback(
     (e) => {
       setIsOnlyDetectionAlertsChecked(e.target.checked);
       setDataViewId(defaultDataView.id);
@@ -215,7 +224,14 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const onOutsideClick = useCallback(() => {
     setDataViewId(selectedDataViewId);
     setMissingPatterns(sourcererMissingPatterns);
-  }, [selectedDataViewId, sourcererMissingPatterns]);
+    onUpdateDetectionAlertsChecked();
+    handleOutsideClick();
+  }, [
+    handleOutsideClick,
+    onUpdateDetectionAlertsChecked,
+    selectedDataViewId,
+    sourcererMissingPatterns,
+  ]);
 
   const onExpandAdvancedOptionsClicked = useCallback(() => {
     setExpandAdvancedOptions((prevState) => !prevState);
@@ -251,49 +267,35 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           <EuiPopoverTitle data-test-subj="sourcerer-title">
             <>{i18n.SELECT_DATA_VIEW}</>
           </EuiPopoverTitle>
-          {isOnlyDetectionAlerts && (
-            <EuiCallOut
-              data-test-subj="sourcerer-callout"
-              iconType="iInCircle"
-              size="s"
-              title={isTimelineSourcerer ? i18n.CALL_OUT_TIMELINE_TITLE : i18n.CALL_OUT_TITLE}
-            />
-          )}
+          <SourcererCallout
+            isOnlyDetectionAlerts={isOnlyDetectionAlerts}
+            title={isTimelineSourcerer ? i18n.CALL_OUT_TIMELINE_TITLE : i18n.CALL_OUT_TITLE}
+          />
           <EuiSpacer size="s" />
-          {isModified === 'deprecated' || isModified === 'missingPatterns' ? (
-            <>
-              <TemporarySourcerer
-                activePatterns={activePatterns}
-                indicesExist={indicesExist}
-                isModified={isModified}
-                missingPatterns={missingPatterns}
-                onClick={resetDataSources}
-                onClose={setPopoverIsOpenCb}
-                onUpdate={isModified === 'deprecated' ? onUpdateDeprecated : onUpdateDataView}
-                selectedPatterns={selectedPatterns}
-              />
-              <UpdateDefaultDataViewModal
-                isShowing={isShowingUpdateModal}
-                missingPatterns={missingPatterns}
-                onClose={() => setIsShowingUpdateModal(false)}
-                onContinue={onContinueUpdateDeprecated}
-                onUpdate={onUpdateDataView}
-              />
-            </>
+          {(dataViewId === null && isModified === 'deprecated') ||
+          isModified === 'missingPatterns' ? (
+            <TemporarySourcerer
+              activePatterns={activePatterns}
+              indicesExist={indicesExist}
+              isModified={isModified}
+              isShowingUpdateModal={isShowingUpdateModal}
+              missingPatterns={missingPatterns}
+              onContinueWithoutUpdate={onContinueUpdateDeprecated}
+              onDismiss={setPopoverIsOpenCb}
+              onDismissModal={() => setIsShowingUpdateModal(false)}
+              onReset={resetDataSources}
+              onUpdateStepOne={isModified === 'deprecated' ? onUpdateDeprecated : onUpdateDataView}
+              onUpdateStepTwo={onUpdateDataView}
+              selectedPatterns={selectedPatterns}
+            />
           ) : (
             <EuiForm component="form">
               <>
-                {isTimelineSourcerer && (
-                  <StyledFormRow>
-                    <EuiCheckbox
-                      checked={isOnlyDetectionAlertsChecked}
-                      data-test-subj="sourcerer-alert-only-checkbox"
-                      id="sourcerer-alert-only-checkbox"
-                      label={i18n.ALERTS_CHECKBOX_LABEL}
-                      onChange={onCheckboxChanged}
-                    />
-                  </StyledFormRow>
-                )}
+                <AlertsCheckbox
+                  isShow={isTimelineSourcerer}
+                  checked={isOnlyDetectionAlertsChecked}
+                  onChange={onCheckboxChanged}
+                />
                 {dataViewId && (
                   <StyledFormRow label={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}>
                     <EuiSuperSelect
@@ -335,35 +337,12 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                   />
                 </FormRow>
 
-                {!isDetectionsSourcerer && (
-                  <StyledFormRow>
-                    <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
-                      <EuiFlexItem grow={false}>
-                        <ResetButton
-                          aria-label={i18n.INDEX_PATTERNS_RESET}
-                          data-test-subj="sourcerer-reset"
-                          flush="left"
-                          onClick={resetDataSources}
-                          title={i18n.INDEX_PATTERNS_RESET}
-                        >
-                          {i18n.INDEX_PATTERNS_RESET}
-                        </ResetButton>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          onClick={handleSaveIndices}
-                          disabled={selectedOptions.length === 0}
-                          data-test-subj="sourcerer-save"
-                          fill
-                          fullWidth
-                          size="s"
-                        >
-                          {i18n.SAVE_INDEX_PATTERNS}
-                        </EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </StyledFormRow>
-                )}
+                <SaveButtons
+                  disableSave={selectedOptions.length === 0}
+                  isShow={!isDetectionsSourcerer}
+                  onReset={resetDataSources}
+                  onSave={handleSaveIndices}
+                />
               </>
               <EuiSpacer size="s" />
             </EuiForm>

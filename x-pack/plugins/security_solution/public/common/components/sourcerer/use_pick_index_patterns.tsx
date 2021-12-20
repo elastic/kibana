@@ -19,6 +19,7 @@ interface UsePickIndexPatternsProps {
   kibanaDataViews: sourcererModel.SourcererModel['kibanaDataViews'];
   missingPatterns: string[];
   scopeId: sourcererModel.SourcererScopeName;
+  selectedDataViewId: string | null;
   selectedPatterns: string[];
   signalIndexName: string | null;
 }
@@ -28,6 +29,7 @@ export type ModifiedTypes = 'modified' | 'alerts' | 'deprecated' | 'missingPatte
 interface UsePickIndexPatterns {
   allOptions: Array<EuiComboBoxOptionOption<string>>;
   dataViewSelectOptions: Array<EuiSuperSelectOption<string>>;
+  handleOutsideClick: () => void;
   isModified: ModifiedTypes;
   onChangeCombo: (newSelectedDataViewId: Array<EuiComboBoxOptionOption<string>>) => void;
   renderOption: ({ value }: EuiComboBoxOptionOption<string>) => React.ReactElement;
@@ -49,6 +51,7 @@ export const usePickIndexPatterns = ({
   kibanaDataViews,
   missingPatterns,
   scopeId,
+  selectedDataViewId,
   selectedPatterns,
   signalIndexName,
 }: UsePickIndexPatternsProps): UsePickIndexPatterns => {
@@ -155,11 +158,11 @@ export const usePickIndexPatterns = ({
   // when scope updates, check modified to set/remove alerts label
   useEffect(() => {
     onSetIsModified(
-      selectedOptions.map(({ label }) => label),
-      dataViewId
+      selectedPatterns.map((pattern) => pattern),
+      selectedDataViewId
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViewId, missingPatterns, scopeId, selectedOptions]);
+  }, [isOnlyDetectionAlerts, selectedDataViewId, missingPatterns, scopeId, selectedPatterns]);
 
   const onChangeCombo = useCallback((newSelectedOptions) => {
     setSelectedOptions(newSelectedOptions);
@@ -188,9 +191,14 @@ export const usePickIndexPatterns = ({
     [dataViewId, defaultDataViewId, isModified, isOnlyDetectionAlerts, kibanaDataViews]
   );
 
+  const handleOutsideClick = useCallback(() => {
+    setSelectedOptions(patternListToOptions(selectedPatterns));
+  }, [selectedPatterns]);
+
   return {
     allOptions,
     dataViewSelectOptions,
+    handleOutsideClick,
     isModified,
     onChangeCombo,
     renderOption,

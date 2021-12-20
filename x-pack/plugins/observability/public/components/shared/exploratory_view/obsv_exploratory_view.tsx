@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ExploratoryViewPage } from './index';
-import { ExploratoryViewContextProvider } from './contexts/exploatory_view_config';
+import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
 import { AppDataType, ReportViewType } from './types';
 
 import {
@@ -92,6 +92,7 @@ export function ObservabilityExploratoryView() {
       indexPatterns={{}}
       reportConfigMap={obsvReportConfigMap}
       setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
+      theme$={appMountParameters.theme$}
     >
       <ExploratoryViewPage />
     </ExploratoryViewContextProvider>
