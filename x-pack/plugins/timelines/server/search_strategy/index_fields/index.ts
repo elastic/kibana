@@ -8,11 +8,7 @@
 import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
-import {
-  ElasticsearchClient,
-  SavedObjectsServiceStart,
-  StartServicesAccessor,
-} from 'kibana/server';
+import { ElasticsearchClient, StartServicesAccessor } from 'kibana/server';
 import {
   IndexPatternsFetcher,
   ISearchStrategy,

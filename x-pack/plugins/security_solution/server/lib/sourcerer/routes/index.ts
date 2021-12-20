@@ -55,7 +55,17 @@ export const createSourcererDataViewRoute = (
         );
 
         let allDataViews: DataViewListItem[] = await dataViewService.getIdsWithTitle();
-        let siemDataView = await dataViewService.get(dataViewId);
+        let siemDataView = null;
+        try {
+          siemDataView = await dataViewService.get(dataViewId);
+        } catch (err) {
+          const error = transformError(err);
+          // Do nothing if statusCode === 404 because we expect that the security dataview does not exist
+          if (error.statusCode !== 404) {
+            throw err;
+          }
+        }
+
         const { patternList } = request.body;
         const patternListAsTitle = patternList.sort().join();
         const siemDataViewTitle = siemDataView ? siemDataView.title.split(',').sort().join() : '';
@@ -67,8 +77,9 @@ export const createSourcererDataViewRoute = (
               title: patternListAsTitle,
               timeFieldName: DEFAULT_TIME_FIELD,
             });
-          } catch (error) {
-            if (error.name === 'DuplicateDataViewError' || error.statusCode === 409) {
+          } catch (err) {
+            const error = transformError(err);
+            if (err.name === 'DuplicateDataViewError' || error.statusCode === 409) {
               siemDataView = await dataViewService.get(dataViewId);
             } else {
               throw error;
