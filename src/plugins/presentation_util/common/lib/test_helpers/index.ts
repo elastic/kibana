@@ -8,3 +8,5 @@
 
 export * from './function_wrapper';
 export * from './test_styles';
+export * from './fixtures/flights';
+export * from './fixtures/flights_data';

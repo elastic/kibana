@@ -57,7 +57,17 @@ export {
   SolutionToolbarPopover,
 } from './components/solution_toolbar';
 
-export * from './components/controls';
+export {
+  ReduxEmbeddableWrapper,
+  ReduxEmbeddableContext,
+  useReduxContainerContext,
+  useReduxEmbeddableContext,
+  getManagedEmbeddablesStore,
+  ReduxContainerContextServices,
+} from './components/redux_embeddables';
+
+export { DataViewPicker } from './components/data_view_picker';
+export { FieldPicker } from './components/field_picker';
 
 /**
  * Register a set of Expression Functions with the Presentation Utility ExpressionInput.  This allows
