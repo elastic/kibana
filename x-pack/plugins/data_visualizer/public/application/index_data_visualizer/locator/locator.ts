@@ -145,14 +145,14 @@ export class IndexDataVisualizerLocatorDefinition
     if (visibleFieldNames) appState.visibleFieldNames = visibleFieldNames;
     if (visibleFieldTypes) appState.visibleFieldTypes = visibleFieldTypes;
 
-    if (showAllFields) appState.showAllFields = showAllFields;
-    if (showEmptyFields) appState.showEmptyFields = showEmptyFields;
     if (pageSize) appState.pageSize = pageSize;
     if (sortDirection) appState.sortDirection = sortDirection;
     if (samplerShardSize) appState.samplerShardSize = samplerShardSize;
     if (pageIndex) appState.pageIndex = pageIndex;
     if (sortField) appState.sortField = sortField;
-    if (showDistributions) appState.sortField = sortField;
+    if (showDistributions !== undefined) appState.showDistributions = showDistributions;
+    if (showAllFields !== undefined) appState.showAllFields = showAllFields;
+    if (showEmptyFields !== undefined) appState.showEmptyFields = showEmptyFields;
 
     if (timeRange) queryState.time = timeRange;
     if (refreshInterval) queryState.refreshInterval = refreshInterval;

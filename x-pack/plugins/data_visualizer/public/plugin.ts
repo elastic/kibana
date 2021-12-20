@@ -66,13 +66,9 @@ export class DataVisualizerPlugin
       registerHomeAddData(plugins.home);
       registerHomeFeatureCatalogue(plugins.home);
     }
-    if (plugins.embeddable) {
-      registerEmbeddables(plugins.embeddable, core);
-    }
 
-    if (plugins.share) {
-      plugins.share.url.locators.create(new IndexDataVisualizerLocatorDefinition());
-    }
+    registerEmbeddables(plugins.embeddable, core);
+    plugins.share.url.locators.create(new IndexDataVisualizerLocatorDefinition());
   }
 
   public start(core: CoreStart, plugins: DataVisualizerStartDependencies) {

@@ -57,6 +57,7 @@ export const getLocatorParams = (params: {
     searchSessionId: params.searchSessionId,
   };
 
+  if (params.savedSearchId) locatorParams.savedSearchId = params.savedSearchId;
   if (urlState) {
     if (urlState._g) {
       const { time, refreshInterval } = urlState._g;
@@ -134,6 +135,7 @@ export const DataVisualizerUrlStateContextProvider: FC<
     return () => {
       search.session.clear();
     };
+    // searchString already includes all the other dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.session, searchString]);
 
