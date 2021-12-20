@@ -14,16 +14,17 @@ import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../utils/use_index_pattern';
-import { DiscoverRouteProps } from '../types';
 import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
+import { useKibana } from '../../../../kibana_react/public';
+import { DiscoverServices } from '../../build_services';
 
 export interface ContextUrlParams {
   indexPatternId: string;
   id: string;
 }
 
-export function ContextAppRoute(props: DiscoverRouteProps) {
-  const { services } = props;
+export function ContextAppRoute() {
+  const { services } = useKibana<DiscoverServices>();
   const { chrome } = services;
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();

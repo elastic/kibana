@@ -32,6 +32,7 @@ import { RequestAdapter } from '../../../../../../inspector';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { ElasticSearchHit } from '../../../../types';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 
 jest.mock('../../../../kibana_services', () => ({
   ...jest.requireActual('../../../../kibana_services'),
@@ -48,7 +49,7 @@ jest.mock('../../../../kibana_services', () => ({
 
 setHeaderActionMenuMounter(jest.fn());
 
-function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): DiscoverLayoutProps {
+function mountComponent(indexPattern: IndexPattern, prevSidebarClosed?: boolean) {
   const searchSourceMock = createSearchSourceMock({});
   const services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
@@ -56,7 +57,7 @@ function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): Disco
   };
   services.storage.get = (key: string) => {
     if (key === SIDEBAR_CLOSED_KEY) {
-      return wasSidebarClosed;
+      return prevSidebarClosed;
     }
   };
 
@@ -135,7 +136,7 @@ function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): Disco
     charts$,
   };
 
-  return {
+  const props = {
     indexPattern,
     indexPatternList,
     inspectorAdapters: { requests: new RequestAdapter() },
@@ -147,45 +148,42 @@ function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): Disco
     savedSearchData$,
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
-    services,
     state: { columns: [] },
     stateContainer: {} as GetStateReturn,
     setExpandedDoc: jest.fn(),
   };
+
+  return mountWithIntl(
+    <KibanaContextProvider services={services}>
+      <DiscoverLayout {...(props as DiscoverLayoutProps)} />
+    </KibanaContextProvider>
+  );
 }
 
 describe('Discover component', () => {
   test('selected index pattern without time field displays no chart toggle', () => {
-    const component = mountWithIntl(<DiscoverLayout {...getProps(indexPatternMock)} />);
+    const component = mountComponent(indexPatternMock);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
 
   test('selected index pattern with time field displays chart toggle', () => {
-    const component = mountWithIntl(
-      <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
-    );
+    const component = mountComponent(indexPatternWithTimefieldMock);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
   });
 
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', () => {
-      const component = mountWithIntl(
-        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
-      );
+      const component = mountComponent(indexPatternWithTimefieldMock, undefined);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     });
 
     test('should be opened if discover:sidebarClosed is false', () => {
-      const component = mountWithIntl(
-        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock, false)} />
-      );
+      const component = mountComponent(indexPatternWithTimefieldMock, false);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     });
 
     test('should be closed if discover:sidebarClosed is true', () => {
-      const component = mountWithIntl(
-        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock, true)} />
-      );
+      const component = mountComponent(indexPatternWithTimefieldMock, true);
       expect(component.find(DiscoverSidebar).length).toBe(0);
     });
   });

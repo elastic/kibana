@@ -12,12 +12,12 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
+import { useKibana } from '../../../../kibana_react/public';
 import { esFilters } from '../../../../data/public';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
 import { IndexPattern, IndexPatternField } from '../../../../data/common';
 import { LoadingStatus } from './services/context_query_state';
-import { getServices } from '../../kibana_services';
 import { AppState, isEqualFilters } from './services/context_state';
 import { useColumns } from '../../utils/use_data_grid_columns';
 import { useContextAppState } from './utils/use_context_app_state';
@@ -26,6 +26,7 @@ import { popularizeField } from '../../utils/popularize_field';
 import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+import { DiscoverServices } from '../../build_services';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -35,7 +36,7 @@ export interface ContextAppProps {
 }
 
 export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
-  const services = getServices();
+  const { services } = useKibana<DiscoverServices>();
   const { uiSettings, capabilities, indexPatterns, navigation, filterManager } = services;
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
@@ -163,7 +164,6 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
               </EuiText>
               <EuiSpacer size="s" />
               <ContextAppContentMemoized
-                services={services}
                 indexPattern={indexPattern}
                 useNewFieldsApi={useNewFieldsApi}
                 isLegacy={isLegacy}

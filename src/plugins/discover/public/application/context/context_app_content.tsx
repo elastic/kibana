@@ -24,13 +24,13 @@ import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { EsHitRecordList } from '../types';
 import { SortPairArr } from '../../components/doc_table/lib/get_sort';
 import { ElasticSearchHit } from '../../types';
+import { useKibana } from '../../../../kibana_react/public';
 
 export interface ContextAppContentProps {
   columns: string[];
   onAddColumn: (columnsName: string) => void;
   onRemoveColumn: (columnsName: string) => void;
   onSetColumns: (columnsNames: string[], hideTimeColumn: boolean) => void;
-  services: DiscoverServices;
   indexPattern: IndexPattern;
   predecessorCount: number;
   successorCount: number;
@@ -61,7 +61,6 @@ export function ContextAppContent({
   onAddColumn,
   onRemoveColumn,
   onSetColumns,
-  services,
   indexPattern,
   predecessorCount,
   successorCount,
@@ -76,7 +75,9 @@ export function ContextAppContent({
   setAppState,
   addFilter,
 }: ContextAppContentProps) {
-  const { uiSettings: config } = services;
+  const {
+    services: { uiSettings: config },
+  } = useKibana<DiscoverServices>();
 
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>();
   const isAnchorLoading =
@@ -155,7 +156,6 @@ export function ContextAppContent({
             sort={sort as SortPairArr[]}
             isSortEnabled={false}
             showTimeCol={showTimeCol}
-            services={services}
             useNewFieldsApi={useNewFieldsApi}
             isPaginationEnabled={false}
             controlColumnIds={controlColumnIds}

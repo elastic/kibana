@@ -26,6 +26,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { useKibana } from '../../../../../../kibana_react/public';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { IndexPatternAttributes } from '../../../../../../data/common';
 import { SavedObject } from '../../../../../../../core/types';
@@ -82,10 +83,6 @@ export interface DiscoverSidebarResponsiveProps {
    */
   selectedIndexPattern?: IndexPattern;
   /**
-   * Discover plugin services;
-   */
-  services: DiscoverServices;
-  /**
    * Discover App state
    */
   state: AppState;
@@ -119,6 +116,7 @@ export interface DiscoverSidebarResponsiveProps {
  * Mobile: Index pattern selector is visible and a button to trigger a flyout with all elements
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
+  const { services } = useKibana<DiscoverServices>();
   const { selectedIndexPattern, onEditRuntimeField, useNewFieldsApi, onChangeIndexPattern } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -171,7 +169,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     setIsFlyoutVisible(false);
   }, []);
 
-  const { dataViewFieldEditor } = props.services;
+  const { dataViewFieldEditor } = services;
 
   const editField = useCallback(
     (fieldName?: string) => {
@@ -245,7 +243,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <DiscoverIndexPatternManagement
-                  services={props.services}
                   selectedIndexPattern={selectedIndexPattern}
                   editField={editField}
                   useNewFieldsApi={useNewFieldsApi}

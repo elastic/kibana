@@ -9,6 +9,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { useKibana } from '../../../../../../kibana_react/public';
 import { IndexPatternField, IndexPattern, DataView, Query } from '../../../../../../data/common';
 import type { DiscoverServices } from '../../../../build_services';
 import {
@@ -57,10 +58,6 @@ export interface FieldStatisticsTableProps {
    */
   searchTitle?: string;
   /**
-   * Discover plugin services
-   */
-  services: DiscoverServices;
-  /**
    * Optional saved search
    */
   savedSearch?: SavedSearch;
@@ -91,7 +88,6 @@ export interface FieldStatisticsTableProps {
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
-    services,
     indexPattern,
     savedSearch,
     query,
@@ -102,7 +98,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     trackUiMetric,
     savedSearchRefetch$,
   } = props;
-  const { uiSettings } = services;
+  const { services } = useKibana<DiscoverServices>();
   const [embeddable, setEmbeddable] = useState<
     | ErrorEmbeddable
     | IEmbeddable<DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput>
@@ -158,7 +154,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
 
       embeddable.reload();
     }
-  }, [showPreviewByDefault, uiSettings, embeddable]);
+  }, [showPreviewByDefault, embeddable]);
 
   useEffect(() => {
     let unmounted = false;
@@ -203,7 +199,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
       // Clean up embeddable upon unmounting
       embeddable?.destroy();
     };
-  }, [embeddable, embeddableRoot, uiSettings, trackUiMetric]);
+  }, [embeddable, embeddableRoot, trackUiMetric]);
 
   return (
     <div

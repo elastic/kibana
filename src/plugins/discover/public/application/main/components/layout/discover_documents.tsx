@@ -14,6 +14,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../../../kibana_react/public';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { FetchStatus } from '../../../types';
@@ -43,7 +44,6 @@ function DiscoverDocumentsComponent({
   indexPattern,
   onAddFilter,
   savedSearch,
-  services,
   setExpandedDoc,
   state,
   stateContainer,
@@ -54,12 +54,13 @@ function DiscoverDocumentsComponent({
   navigateTo: (url: string) => void;
   onAddFilter: DocViewFilterFn;
   savedSearch: SavedSearch;
-  services: DiscoverServices;
   setExpandedDoc: (doc?: ElasticSearchHit) => void;
   state: AppState;
   stateContainer: GetStateReturn;
 }) {
-  const { capabilities, indexPatterns, uiSettings } = services;
+  const {
+    services: { capabilities, indexPatterns, uiSettings },
+  } = useKibana<DiscoverServices>();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
@@ -160,7 +161,6 @@ function DiscoverDocumentsComponent({
             searchTitle={savedSearch.title}
             setExpandedDoc={setExpandedDoc}
             showTimeCol={showTimeCol}
-            services={services}
             settings={state.grid}
             onAddColumn={onAddColumn}
             onFilter={onAddFilter as DocViewFilterFn}

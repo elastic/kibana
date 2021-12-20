@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { History } from 'history';
+import { useHistory } from 'react-router-dom';
+import { useKibana } from '../../../../kibana_react/public';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
@@ -21,17 +22,9 @@ const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
 export interface DiscoverMainProps {
   /**
-   * Instance of browser history
-   */
-  history: History;
-  /**
    * List of available index patterns
    */
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
-  /**
-   * Kibana core services used by discover
-   */
-  services: DiscoverServices;
   /**
    * Current instance of SavedSearch
    */
@@ -39,8 +32,12 @@ export interface DiscoverMainProps {
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { savedSearch, services, history, indexPatternList } = props;
-  const { chrome, docLinks, uiSettings: config, data } = services;
+  const { savedSearch, indexPatternList } = props;
+  const {
+    services: { chrome, docLinks, uiSettings: config, data },
+    services,
+  } = useKibana<DiscoverServices>();
+  const history = useHistory();
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const navigateTo = useCallback(
     (path: string) => {
@@ -113,7 +110,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       savedSearchData$={data$}
       savedSearchRefetch$={refetch$}
       searchSource={searchSource}
-      services={services}
       state={state}
       stateContainer={stateContainer}
     />

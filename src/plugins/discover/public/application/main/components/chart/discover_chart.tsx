@@ -16,6 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../../../../kibana_react/public';
 import { HitsCounter } from '../hits_counter';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { AppState, GetStateReturn } from '../../services/discover_state';
@@ -34,7 +35,6 @@ export function DiscoverChart({
   savedSearch,
   savedSearchDataChart$,
   savedSearchDataTotalHits$,
-  services,
   state,
   stateContainer,
   isTimeBased,
@@ -45,17 +45,17 @@ export function DiscoverChart({
   savedSearch: SavedSearch;
   savedSearchDataChart$: DataCharts$;
   savedSearchDataTotalHits$: DataTotalHits$;
-  services: DiscoverServices;
   state: AppState;
   stateContainer: GetStateReturn;
   isTimeBased: boolean;
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
 }) {
+  const {
+    services: { uiSettings, data, storage },
+  } = useKibana<DiscoverServices>();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
-  const showViewModeToggle = services.uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
-
-  const { data, storage } = services;
+  const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
     element: null,
@@ -163,7 +163,6 @@ export function DiscoverChart({
             <DiscoverHistogramMemoized
               savedSearchData$={savedSearchDataChart$}
               timefilterUpdateHandler={timefilterUpdateHandler}
-              services={services}
             />
           </section>
           <EuiSpacer size="s" />

@@ -11,7 +11,7 @@ import type { IndexPattern } from 'src/plugins/data/common';
 import { mountWithIntl } from '@kbn/test/jest';
 import { DocViewerSource } from './source';
 import * as hooks from '../../../../utils/use_es_doc_search';
-import * as useUiSettingHook from 'src/plugins/kibana_react/public/ui_settings/use_ui_setting';
+import * as useUiSettingHook from '../../../../../../kibana_react/public/ui_settings/use_ui_setting';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { JsonCodeEditorCommon } from '../../../../components/json_code_editor/json_code_editor_common';
 

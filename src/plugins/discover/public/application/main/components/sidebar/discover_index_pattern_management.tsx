@@ -9,6 +9,7 @@
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../../../../kibana_react/public';
 import { DiscoverServices } from '../../../../build_services';
 import { IndexPattern } from '../../../../../../data/common';
 
@@ -17,10 +18,6 @@ export interface DiscoverIndexPatternManagementProps {
    * Currently selected index pattern
    */
   selectedIndexPattern?: IndexPattern;
-  /**
-   * Discover plugin services;
-   */
-  services: DiscoverServices;
   /**
    * Read from the Fields API
    */
@@ -33,7 +30,9 @@ export interface DiscoverIndexPatternManagementProps {
 }
 
 export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManagementProps) {
-  const { dataViewFieldEditor, core } = props.services;
+  const {
+    services: { dataViewFieldEditor, core },
+  } = useKibana<DiscoverServices>();
   const { useNewFieldsApi, selectedIndexPattern, editField } = props;
   const dataViewEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
   const canEditDataViewField = !!dataViewEditPermission && useNewFieldsApi;

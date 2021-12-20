@@ -34,6 +34,7 @@ import {
 } from '@elastic/charts';
 import { IUiSettingsClient } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../../../../kibana_react/public';
 import {
   CurrentTime,
   Endzones,
@@ -49,7 +50,6 @@ import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
-  services: DiscoverServices;
 }
 
 function getTimezone(uiSettings: IUiSettingsClient) {
@@ -65,14 +65,15 @@ function getTimezone(uiSettings: IUiSettingsClient) {
 export function DiscoverHistogram({
   savedSearchData$,
   timefilterUpdateHandler,
-  services,
 }: DiscoverHistogramProps) {
-  const chartTheme = services.theme.useChartsTheme();
-  const chartBaseTheme = services.theme.useChartsBaseTheme();
+  const {
+    services: { data, theme, uiSettings },
+  } = useKibana<DiscoverServices>();
+  const chartTheme = theme.useChartsTheme();
+  const chartBaseTheme = theme.useChartsBaseTheme();
 
   const dataState: DataChartsMessage = useDataState(savedSearchData$);
 
-  const uiSettings = services.uiSettings;
   const timeZone = getTimezone(uiSettings);
   const { chartData, bucketInterval, fetchStatus, error } = dataState;
 
@@ -102,7 +103,7 @@ export function DiscoverHistogram({
     [timefilterUpdateHandler]
   );
 
-  const { timefilter } = services.data.query.timefilter;
+  const { timefilter } = data.query.timefilter;
 
   const { from, to } = timefilter.getAbsoluteTime();
   const dateFormat = useMemo(() => uiSettings.get('dateFormat'), [uiSettings]);
@@ -174,7 +175,6 @@ export function DiscoverHistogram({
     return moment(val).format(xAxisFormat);
   };
 
-  const data = chartData.values;
   const isDarkMode = uiSettings.get('theme:darkMode');
 
   /*
@@ -192,7 +192,7 @@ export function DiscoverHistogram({
   const domainStart = domain.min.valueOf();
   const domainEnd = domain.max.valueOf();
 
-  const domainMin = Math.min(data[0]?.x, domainStart);
+  const domainMin = Math.min(chartData.values[0]?.x, domainStart);
   const domainMax = Math.max(domainEnd - xInterval, lastXValue);
 
   const xDomain = {
@@ -210,7 +210,7 @@ export function DiscoverHistogram({
     type: TooltipType.VerticalCursor,
   };
 
-  const xAxisFormatter = services.data.fieldFormats.deserialize(chartData.yAxisFormat);
+  const xAxisFormatter = data.fieldFormats.deserialize(chartData.yAxisFormat);
 
   const useLegacyTimeAxis = uiSettings.get(LEGACY_TIME_AXIS, false);
 
@@ -298,7 +298,7 @@ export function DiscoverHistogram({
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['y']}
-            data={data}
+            data={chartData.values}
             yNice
             timeZone={timeZone}
             name={chartData.yAxisLabel}

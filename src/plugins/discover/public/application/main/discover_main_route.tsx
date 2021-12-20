@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useState, memo } from 'react';
-import { History } from 'history';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 
 import { IndexPatternAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
+import { useKibana } from '../../../../kibana_react/public';
 import {
   SavedSearch,
   getSavedSearch,
@@ -24,30 +24,27 @@ import { DataViewSavedObjectConflictError } from '../../../../data_views/common'
 import { getUrlTracker } from '../../kibana_services';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
-import { DiscoverRouteProps } from '../types';
+import { DiscoverServices } from '../../build_services';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
-
-export interface DiscoverMainProps extends DiscoverRouteProps {
-  /**
-   * Instance of browser history
-   */
-  history: History;
-}
 
 interface DiscoverLandingParams {
   id: string;
 }
 
-export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
+export function DiscoverMainRoute() {
+  const history = useHistory();
   const {
-    core,
-    chrome,
-    uiSettings: config,
-    data,
-    toastNotifications,
-    http: { basePath },
-  } = services;
+    services: {
+      core,
+      chrome,
+      uiSettings: config,
+      data,
+      toastNotifications,
+      http: { basePath },
+    },
+    services,
+  } = useKibana<DiscoverServices>();
   const [error, setError] = useState<Error>();
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const indexPattern = savedSearch?.searchSource?.getField('index');
@@ -157,12 +154,5 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     return <LoadingIndicator />;
   }
 
-  return (
-    <DiscoverMainAppMemoized
-      history={history}
-      indexPatternList={indexPatternList}
-      savedSearch={savedSearch}
-      services={services}
-    />
-  );
+  return <DiscoverMainAppMemoized indexPatternList={indexPatternList} savedSearch={savedSearch} />;
 }

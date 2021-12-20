@@ -21,6 +21,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
 } from '@elastic/eui';
+import { useKibana } from '../../../../kibana_react/public';
 import { flattenHit, IndexPattern } from '../../../../data/common';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
@@ -131,10 +132,6 @@ export interface DiscoverGridProps {
    */
   searchTitle?: string;
   /**
-   * Discover plugin services
-   */
-  services: DiscoverServices;
-  /**
    * Determines whether the time columns should be displayed (legacy settings)
    */
   showTimeCol: boolean;
@@ -182,7 +179,6 @@ export const DiscoverGrid = ({
   sampleSize,
   searchDescription,
   searchTitle,
-  services,
   setExpandedDoc,
   settings,
   showTimeCol,
@@ -193,6 +189,7 @@ export const DiscoverGrid = ({
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   className,
 }: DiscoverGridProps) => {
+  const { services } = useKibana<DiscoverServices>();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, indexPattern);
@@ -481,7 +478,6 @@ export const DiscoverGrid = ({
             onAddColumn={onAddColumn}
             onClose={() => setExpandedDoc(undefined)}
             setExpandedDoc={setExpandedDoc}
-            services={services}
           />
         )}
       </span>
