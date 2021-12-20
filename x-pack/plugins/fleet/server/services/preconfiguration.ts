@@ -144,7 +144,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   esClient: ElasticsearchClient,
   policies: PreconfiguredAgentPolicy[] = [],
   packages: PreconfiguredPackage[] = [],
-  defaultOutput: Output
+  defaultOutput: Output,
+  spaceId: string
 ): Promise<PreconfigurationResult> {
   const logger = appContextService.getLogger();
 
@@ -179,6 +180,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
     ),
     force: true, // Always force outdated packages to be installed if a later version isn't installed
+    spaceId,
   });
 
   const fulfilledPackages = [];
