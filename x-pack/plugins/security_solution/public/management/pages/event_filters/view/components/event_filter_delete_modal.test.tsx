@@ -19,7 +19,9 @@ import { isFailedResourceState, isLoadedResourceState } from '../../../../state'
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('When event filters delete modal is shown', () => {
-  let renderAndSetup: () => Promise<ReturnType<AppContextTestRender['render']>>;
+  let renderAndSetup: (
+    customEventFilterProps?: Partial<ExceptionListItemSchema>
+  ) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let coreStart: AppContextTestRender['coreStart'];
   let history: AppContextTestRender['history'];
@@ -42,7 +44,7 @@ describe('When event filters delete modal is shown', () => {
     const mockedContext = createAppRootMockRenderer();
 
     ({ history, store, coreStart } = mockedContext);
-    renderAndSetup = async (customEventFilterProps?: Partial<ExceptionListItemSchema>) => {
+    renderAndSetup = async (customEventFilterProps) => {
       renderResult = mockedContext.render(<EventFilterDeleteModal />);
 
       await act(async () => {
