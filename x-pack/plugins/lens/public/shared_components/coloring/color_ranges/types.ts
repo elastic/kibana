@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Assign } from '@kbn/utility-types';
 
 /** @deprecated **/
 export type AutoValueMode = 'none' | 'min' | 'max' | 'all';
@@ -29,10 +30,15 @@ export interface DataBounds {
 }
 
 /** @internal **/
-export type ColorRangesUpdateFn = (payload: {
+export interface ColorRangesState {
   colorRanges: ColorRange[];
-  autoValue?: AutoValueMode;
-}) => void;
+  autoValue: AutoValueMode;
+}
+
+/** @internal **/
+export type ColorRangesUpdateFn = (
+  state: Assign<ColorRangesState, { autoValue?: AutoValueMode }>
+) => void;
 
 /** @internal **/
 export type ColorRangeAccessor = 'start' | 'end';

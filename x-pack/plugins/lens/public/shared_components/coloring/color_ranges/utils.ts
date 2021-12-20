@@ -79,10 +79,10 @@ export const deleteColorRange = (index: number, colorRanges: ColorRange[]) => {
 export const updateColorRangeValue = (
   index: number,
   value: string,
-  accessor: 'start' | 'end',
+  accessor: ColorRangeAccessor,
   colorRanges: ColorRange[]
 ) => {
-  const parsedValue = parseFloat(value);
+  const parsedValue = value ? parseFloat(value) : Number.NaN;
 
   if (accessor === 'end') {
     colorRanges[index].end = parsedValue;

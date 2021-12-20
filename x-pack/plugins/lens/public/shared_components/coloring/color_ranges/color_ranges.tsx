@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
@@ -17,6 +18,7 @@ import { ColorRangeItem } from './color_ranges_item';
 import { validateColorRanges } from './utils';
 
 import type { ColorRangeValidation, ColorRangesUpdateFn } from './types';
+import { ColorRangesState } from './types';
 
 export interface ColorRangesProps {
   colorRanges: ColorRange[];
@@ -29,36 +31,55 @@ export interface ColorRangesProps {
   dataBounds: DataBounds;
 }
 
-export function ColorRanges(props: ColorRangesProps) {
-  const { colorRanges, onChange, dataBounds, paletteConfiguration } = props;
+export function ColorRanges({
+  colorRanges,
+  onChange,
+  dataBounds,
+  paletteConfiguration,
+}: ColorRangesProps) {
+  const [localState, setLocalState] = useState<ColorRangesState>({
+    colorRanges,
+    autoValue: paletteConfiguration?.autoValue ?? 'none',
+  });
 
   const [colorRangesValidity, setColorRangesValidity] = useState<
     Record<string, ColorRangeValidation>
   >({});
 
-  const onChangeWithValidation: ColorRangesUpdateFn = useCallback(
-    ({ colorRanges: newColorRanges, autoValue = paletteConfiguration?.autoValue ?? 'none' }) => {
-      const upperMin = ['min', 'all'].includes(autoValue)
+  useEffect(() => {
+    setColorRangesValidity(validateColorRanges(localState.colorRanges));
+  }, [localState.colorRanges]);
+
+  useDebounce(
+    () => {
+      const { autoValue: localAutoValue, colorRanges: localColorRanges } = localState;
+      const upperMin = ['min', 'all'].includes(localAutoValue)
         ? -Infinity
-        : Number(newColorRanges[0].start);
+        : Number(localColorRanges[0].start);
 
-      const upperMax = ['max', 'all'].includes(autoValue)
+      const upperMax = ['max', 'all'].includes(localAutoValue)
         ? Infinity
-        : Number(newColorRanges[newColorRanges.length - 1].end);
+        : Number(localColorRanges[localColorRanges.length - 1].end);
 
-      const colorStops = newColorRanges.map((colorRange, i) => ({
+      const colorStops = localColorRanges.map((colorRange, i) => ({
         color: colorRange.color,
         stop: i === 0 ? upperMin : colorRange.start && Number(colorRange.start),
       }));
 
-      onChange(colorStops, upperMax, autoValue);
+      if (Object.values(validateColorRanges(localColorRanges)).every(({ isValid }) => isValid)) {
+        onChange(colorStops, upperMax, localAutoValue);
+      }
     },
-    [onChange, paletteConfiguration?.autoValue]
+    250,
+    [localState]
   );
 
-  useEffect(() => {
-    setColorRangesValidity(validateColorRanges(colorRanges));
-  }, [colorRanges]);
+  const onChangeColorRanges: ColorRangesUpdateFn = useCallback(
+    ({ colorRanges: newColorRanges, autoValue = localState.autoValue }) => {
+      setLocalState({ colorRanges: newColorRanges, autoValue });
+    },
+    [localState.autoValue]
+  );
 
   return (
     <>
@@ -67,12 +88,12 @@ export function ColorRanges(props: ColorRangesProps) {
         direction="column"
         gutterSize="s"
       >
-        {colorRanges.map((colorRange, index) => (
+        {localState.colorRanges.map((colorRange, index) => (
           <ColorRangeItem
             key={`${colorRange.end ?? 0 + colorRange.start ?? 0}${index}`}
             colorRange={colorRange}
-            setColorRanges={onChangeWithValidation}
-            colorRanges={colorRanges}
+            setColorRanges={onChangeColorRanges}
+            colorRanges={localState.colorRanges}
             paletteConfiguration={paletteConfiguration}
             dataBounds={dataBounds}
             index={index}
@@ -81,20 +102,20 @@ export function ColorRanges(props: ColorRangesProps) {
           />
         ))}
         <ColorRangeItem
-          colorRange={colorRanges[colorRanges.length - 1]}
-          setColorRanges={onChangeWithValidation}
-          colorRanges={colorRanges}
+          colorRange={localState.colorRanges[colorRanges.length - 1]}
+          setColorRanges={onChangeColorRanges}
+          colorRanges={localState.colorRanges}
           paletteConfiguration={paletteConfiguration}
           dataBounds={dataBounds}
-          index={colorRanges.length - 1}
+          index={localState.colorRanges.length - 1}
           colorRangeValidation={colorRangesValidity.last}
           accessor="end"
         />
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <ColorRangesActions
-        setColorRanges={onChangeWithValidation}
-        colorRanges={colorRanges}
+        setColorRanges={onChangeColorRanges}
+        colorRanges={localState.colorRanges}
         dataBounds={dataBounds}
         paletteConfiguration={paletteConfiguration}
       />
