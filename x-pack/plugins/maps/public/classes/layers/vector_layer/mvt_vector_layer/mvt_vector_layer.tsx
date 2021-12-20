@@ -124,6 +124,16 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       }
     });
 
+    const isPointsOnly = this.getStyle().getIsPointsOnly();
+    const shapeCountMsg = isPointsOnly || totalFeaturesCount <= 1
+      ? ''
+      : i18n.translate('xpack.maps.tiles.shapeCountMsg', {
+          defaultMessage: ' Documents may be counted multiple times if geometry crosses tile boundaries.',
+          values: {
+            count: totalFeaturesCount.toLocaleString(),
+          },
+        });
+
     return {
       icon: this.getCurrentStyle().getIcon(isTocIcon && areResultsTrimmed),
       tooltipContent: areResultsTrimmed
@@ -134,9 +144,10 @@ export class MvtVectorLayer extends AbstractVectorLayer {
             },
           })
         : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
-            defaultMessage: `Found {count} documents.`,
+            defaultMessage: `Found {count} documents.{shapeCountMsg}`,
             values: {
               count: totalFeaturesCount.toLocaleString(),
+              shapeCountMsg,
             },
           }),
       areResultsTrimmed,
