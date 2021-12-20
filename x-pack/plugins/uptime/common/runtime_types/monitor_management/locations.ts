@@ -30,6 +30,11 @@ export const ServiceLocationCodec = t.interface({
 
 export const ServiceLocationsCodec = t.array(ServiceLocationCodec);
 
+export const ServiceLocationsApiResponseCodec = t.interface({
+  locations: ServiceLocationsCodec,
+});
+
+export type ManifestLocation = t.TypeOf<typeof ManifestLocationCodec>;
 export type ServiceLocation = t.TypeOf<typeof ServiceLocationCodec>;
 export type ServiceLocations = t.TypeOf<typeof ServiceLocationsCodec>;
-export type ManifestLocation = t.TypeOf<typeof ManifestLocationCodec>;
+export type ServiceLocationsApiResponse = t.TypeOf<typeof ServiceLocationsApiResponseCodec>;

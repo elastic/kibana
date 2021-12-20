@@ -50,6 +50,7 @@ export const items: GetPackagesResponse['items'] = [
       id: 'ga_installed',
       attributes: {
         installed_kibana: [],
+        installed_kibana_space_id: 'default',
         installed_es: [],
         package_assets: [],
         es_index_patterns: {},
@@ -86,6 +87,7 @@ export const items: GetPackagesResponse['items'] = [
       id: 'ga_installed_update',
       attributes: {
         installed_kibana: [],
+        installed_kibana_space_id: 'default',
         installed_es: [],
         package_assets: [],
         es_index_patterns: {},
@@ -147,6 +149,7 @@ export const items: GetPackagesResponse['items'] = [
       id: 'beta_installed',
       attributes: {
         installed_kibana: [],
+        installed_kibana_space_id: 'default',
         installed_es: [],
         package_assets: [],
         es_index_patterns: {},
@@ -183,6 +186,7 @@ export const items: GetPackagesResponse['items'] = [
       id: 'beta_installed_update',
       attributes: {
         installed_kibana: [],
+        installed_kibana_space_id: 'default',
         installed_es: [],
         package_assets: [],
         es_index_patterns: {},
@@ -253,6 +257,7 @@ export const items: GetPackagesResponse['items'] = [
       id: 'exp_installed',
       attributes: {
         installed_kibana: [],
+        installed_kibana_space_id: 'default',
         installed_es: [],
         package_assets: [],
         es_index_patterns: {},
@@ -289,6 +294,7 @@ export const items: GetPackagesResponse['items'] = [
       id: 'exp_installed_update',
       attributes: {
         installed_kibana: [],
+        installed_kibana_space_id: 'default',
         installed_es: [],
         package_assets: [],
         es_index_patterns: {},
