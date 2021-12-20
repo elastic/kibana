@@ -129,34 +129,31 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       }
     });
 
-    let tooltipContent = '';
-    if (areResultsTrimmed) {
-      tooltipContent = i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
-        defaultMessage: `Results limited to {count} documents.`,
-        values: {
-          count: totalFeaturesCount.toLocaleString(),
-        },
-      });
-    } else {
-      const canDoubleCountShapes = !this.getStyle().getIsPointsOnly() && totalFeaturesCount > 1 && tilesWithFeatures > 1;
-      tooltipContent = i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
-        defaultMessage: `Found {countPrefix}{count} documents.`,
-        values: {
-          count: totalFeaturesCount.toLocaleString(),
-          countPrefix: canDoubleCountShapes ? '~' : '',
-        },
-      });
-
-      if (canDoubleCountShapes) {
-        tooltipContent += i18n.translate('xpack.maps.tiles.shapeCountMsg', {
-          defaultMessage:
-            ' Documents may be counted multiple times if geometry crosses tile boundaries.',
+    const canMultiCountShapes =
+      !this.getStyle().getIsPointsOnly() && totalFeaturesCount > 1 && tilesWithFeatures > 1;
+    const countPrefix = canMultiCountShapes ? '~' : '';
+    const countMsg = areResultsTrimmed
+      ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
+          defaultMessage: `Results limited to {countPrefix}{count} documents.`,
           values: {
             count: totalFeaturesCount.toLocaleString(),
+            countPrefix,
+          },
+        })
+      : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
+          defaultMessage: `Found {countPrefix}{count} documents.`,
+          values: {
+            count: totalFeaturesCount.toLocaleString(),
+            countPrefix,
           },
         });
-      }
-    }
+    const tooltipContent = canMultiCountShapes
+      ? countMsg +
+        i18n.translate('xpack.maps.tiles.shapeCountMsg', {
+          defaultMessage:
+            ' Documents may be counted multiple times if geometry crosses tile boundaries.',
+        })
+      : countMsg;
 
     return {
       icon: this.getCurrentStyle().getIcon(isTocIcon && areResultsTrimmed),
