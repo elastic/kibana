@@ -43,7 +43,7 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "//packages/kbn-dev-utils:npm_module_types",
-  "//packages/kbn-optimizer",
+  "//packages/kbn-optimizer:npm_module_types",
   "//packages/kbn-utils",
   "@npm//del",
   "@npm//execa",

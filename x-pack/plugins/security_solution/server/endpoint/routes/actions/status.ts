@@ -15,6 +15,7 @@ import {
 } from '../../../types';
 import { EndpointAppContext } from '../../types';
 import { getPendingActionCounts } from '../../services';
+import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**
  * Registers routes for checking status of endpoints based on pending actions
@@ -29,7 +30,11 @@ export function registerActionStatusRoutes(
       validate: ActionStatusRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    actionStatusRequestHandler(endpointContext)
+    withEndpointAuthz(
+      { all: ['canAccessEndpointManagement'] },
+      endpointContext.logFactory.get('hostIsolationStatus'),
+      actionStatusRequestHandler(endpointContext)
+    )
   );
 }
 
