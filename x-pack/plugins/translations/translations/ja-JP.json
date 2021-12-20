@@ -4236,7 +4236,6 @@
     "uiActions.errors.incompatibleAction": "操作に互換性がありません",
     "uiActions.triggers.rowClickkDescription": "テーブル行をクリック",
     "uiActions.triggers.rowClickTitle": "テーブル行クリック",
-    "usageCollection.stats.notReadyMessage": "まだ統計が準備できていません。しばらくたってから再試行してください。",
     "visDefaultEditor.advancedToggle.advancedLinkLabel": "高度な設定",
     "visDefaultEditor.agg.disableAggButtonTooltip": "{schemaTitle} {aggTitle} アグリゲーションを無効にする",
     "visDefaultEditor.agg.enableAggButtonTooltip": "{schemaTitle} {aggTitle} アグリゲーションを有効にする",
