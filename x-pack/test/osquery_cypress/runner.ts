@@ -80,7 +80,11 @@ function startOsqueryCypress(context: FtrProviderContext, cypressCommand: string
         env: {
           FORCE_COLOR: '1',
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          CYPRESS_baseUrl: Url.format(config.get('servers.kibana')),
+          CYPRESS_baseUrl: Url.format({
+            protocol: config.get('servers.kibana.protocol'),
+            hostname: config.get('servers.kibana.hostname'),
+            port: config.get('servers.kibana.port'),
+          }),
           // eslint-disable-next-line @typescript-eslint/naming-convention
           CYPRESS_protocol: config.get('servers.kibana.protocol'),
           // eslint-disable-next-line @typescript-eslint/naming-convention

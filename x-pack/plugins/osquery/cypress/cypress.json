@@ -1,7 +1,7 @@
 {
   "baseUrl": "http://localhost:5620",
   "defaultCommandTimeout": 60000,
-  "execTimeout": 12000,
+  "execTimeout": 120000,
   "pageLoadTimeout": 12000,
   "retries": {
     "runMode": 2

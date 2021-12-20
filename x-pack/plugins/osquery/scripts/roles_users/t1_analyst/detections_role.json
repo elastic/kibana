@@ -1,19 +1,19 @@
 {
-    "elasticsearch": {
-      "indices": [
-        {
-          "names": ["logs-osquery_manager*"],
-          "privileges": ["read"]
-        }
-      ]
-    },
-    "kibana": [
+  "elasticsearch": {
+    "indices": [
       {
-        "feature": {
-          "osquery": ["read"]
-        },
-        "spaces": ["*"]
+        "names": ["logs-osquery_manager*"],
+        "privileges": ["read"]
       }
     ]
+  },
+  "kibana": [
+    {
+      "feature": {
+        "osquery": ["read"]
+      },
+      "spaces": ["*"]
+    }
+  ]
 }
 

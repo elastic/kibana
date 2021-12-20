@@ -14,9 +14,7 @@ import { ROLES } from '../test';
 describe('Add Integration', () => {
   const integration = 'Osquery Manager';
   beforeEach(() => {
-    cy.visit('/');
     loginWithRole(ROLES.t1_analyst);
-    cy.wait(5000);
   });
 
   it('should display Osquery integration in the Policies list once installed ', () => {
