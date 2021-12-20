@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'src/core/server';
+import type { ISavedObjectsRepository } from 'src/core/server';
 
 import { dataTypes, installationStatuses } from '../../../../../common/constants';
 import { appContextService } from '../../../../services';
@@ -26,7 +26,7 @@ export function getIndexPatternSavedObjects() {
   }));
 }
 
-export async function removeUnusedIndexPatterns(savedObjectsClient: SavedObjectsClientContract) {
+export async function removeUnusedIndexPatterns(savedObjectsClient: ISavedObjectsRepository) {
   const logger = appContextService.getLogger();
   // get all user installed packages
   const installedPackagesRes = await getPackageSavedObjects(savedObjectsClient);

@@ -7,7 +7,7 @@
 
 import uuidv5 from 'uuid/v5';
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsRepositoryMock } from 'src/core/server/mocks';
 
 import type {
   AgentPolicy,
@@ -28,7 +28,7 @@ import { outputService } from './output';
 import { getFullAgentPolicy } from './agent_policies';
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
-  const mock = savedObjectsClientMock.create();
+  const mock = savedObjectsRepositoryMock.create();
   mock.get.mockImplementation(async (type: string, id: string) => {
     return {
       type,
@@ -80,7 +80,7 @@ function getAgentPolicyUpdateMock() {
 }
 
 function getAgentPolicyCreateMock() {
-  const soClient = savedObjectsClientMock.create();
+  const soClient = savedObjectsRepositoryMock.create();
   soClient.create.mockImplementation(async (type, attributes) => {
     return {
       attributes: attributes as unknown as NewAgentPolicy,
@@ -133,7 +133,7 @@ describe('agent policy', () => {
   });
 
   describe('delete', () => {
-    let soClient: ReturnType<typeof savedObjectsClientMock.create>;
+    let soClient: ReturnType<typeof savedObjectsRepositoryMock.create>;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
 
     beforeEach(() => {
@@ -208,7 +208,7 @@ describe('agent policy', () => {
     it('should update is_managed property, if given', async () => {
       // ignore unrelated unique name constraint
       agentPolicyService.requireUniqueName = async () => {};
-      const soClient = savedObjectsClientMock.create();
+      const soClient = savedObjectsRepositoryMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       soClient.get.mockResolvedValue({
@@ -242,7 +242,7 @@ describe('agent policy', () => {
       mockedGetFullAgentPolicy.mockReset();
     });
     it('should not create a .fleet-policy document if we cannot get the full policy', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = savedObjectsRepositoryMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
       mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
@@ -260,7 +260,7 @@ describe('agent policy', () => {
     });
 
     it('should create a .fleet-policy document if we can get the full policy', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = savedObjectsRepositoryMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
       mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
@@ -298,7 +298,7 @@ describe('agent policy', () => {
 
     describe('ensurePreconfiguredAgentPolicy', () => {
       it('should use preconfigured id if provided for default policy', async () => {
-        const soClient = savedObjectsClientMock.create();
+        const soClient = savedObjectsRepositoryMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
         const preconfiguredAgentPolicy: PreconfiguredAgentPolicy = {
@@ -340,7 +340,7 @@ describe('agent policy', () => {
     });
 
     it('should generate uuid if no id is provided for default policy', async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = savedObjectsRepositoryMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       const preconfiguredAgentPolicy = {

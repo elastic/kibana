@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'src/core/server';
+import type { ISavedObjectsRepository } from 'src/core/server';
 
 import { removeArchiveEntries } from '../archive/storage';
 
@@ -15,7 +15,7 @@ import { packagePolicyService } from '../../package_policy';
 import { appContextService } from '../..';
 
 export async function removeOldAssets(options: {
-  soClient: SavedObjectsClientContract;
+  soClient: ISavedObjectsRepository;
   pkgName: string;
   currentVersion: string;
 }) {
@@ -43,7 +43,7 @@ export async function removeOldAssets(options: {
 }
 
 async function removeAssetsFromVersion(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   pkgName: string,
   oldVersion: string
 ) {

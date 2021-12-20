@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 
 import type {
   GetAgentsResponse,
@@ -23,15 +23,15 @@ import type {
   GetAgentStatusRequestSchema,
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
+  FleetRequestHandler,
 } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
 
-export const getAgentHandler: RequestHandler<
+export const getAgentHandler: FleetRequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asInternalUser;
 
   try {
@@ -41,7 +41,7 @@ export const getAgentHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    if (soClient.errors.isNotFoundError(error)) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return response.notFound({
         body: { message: `Agent ${request.params.agentId} not found` },
       });
@@ -51,7 +51,7 @@ export const getAgentHandler: RequestHandler<
   }
 };
 
-export const deleteAgentHandler: RequestHandler<
+export const deleteAgentHandler: FleetRequestHandler<
   TypeOf<typeof DeleteAgentRequestSchema.params>
 > = async (context, request, response) => {
   const esClient = context.core.elasticsearch.client.asInternalUser;
@@ -76,7 +76,7 @@ export const deleteAgentHandler: RequestHandler<
   }
 };
 
-export const updateAgentHandler: RequestHandler<
+export const updateAgentHandler: FleetRequestHandler<
   TypeOf<typeof UpdateAgentRequestSchema.params>,
   undefined,
   TypeOf<typeof UpdateAgentRequestSchema.body>
@@ -103,7 +103,7 @@ export const updateAgentHandler: RequestHandler<
   }
 };
 
-export const getAgentsHandler: RequestHandler<
+export const getAgentsHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetAgentsRequestSchema.query>
 > = async (context, request, response) => {
@@ -137,12 +137,12 @@ export const getAgentsHandler: RequestHandler<
   }
 };
 
-export const putAgentsReassignHandler: RequestHandler<
+export const putAgentsReassignHandler: FleetRequestHandler<
   TypeOf<typeof PutAgentReassignRequestSchema.params>,
   undefined,
   TypeOf<typeof PutAgentReassignRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     await AgentService.reassignAgent(
@@ -159,7 +159,7 @@ export const putAgentsReassignHandler: RequestHandler<
   }
 };
 
-export const postBulkAgentsReassignHandler: RequestHandler<
+export const postBulkAgentsReassignHandler: FleetRequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PostBulkAgentReassignRequestSchema.body>
@@ -171,7 +171,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
     });
   }
 
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }
@@ -199,7 +199,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
   }
 };
 
-export const getAgentStatusForAgentPolicyHandler: RequestHandler<
+export const getAgentStatusForAgentPolicyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetAgentStatusRequestSchema.query>
 > = async (context, request, response) => {

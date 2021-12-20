@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObject } from 'kibana/server';
 
@@ -96,7 +96,7 @@ describe('reassignAgents (plural)', () => {
 });
 
 function createClientsMock() {
-  const soClientMock = savedObjectsClientMock.create();
+  const soClientMock = savedObjectsRepositoryMock.create();
 
   // need to mock .create & bulkCreate due to (bulk)createAgentAction(s) in reassignAgent(s)
   // @ts-expect-error

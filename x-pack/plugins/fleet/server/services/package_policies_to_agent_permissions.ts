@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { ISavedObjectsRepository } from 'kibana/server';
 
 import type { FullAgentPolicyOutputPermissions, RegistryDataStreamPrivileges } from '../../common';
 import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../constants';
@@ -14,7 +14,7 @@ import type { PackagePolicy } from '../types';
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
 export async function storedPackagePoliciesToAgentPermissions(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   packagePolicies: string[] | PackagePolicy[]
 ): Promise<FullAgentPolicyOutputPermissions | undefined> {
   if (packagePolicies.length === 0) {

@@ -9,11 +9,11 @@ import type {
   ElasticsearchClient,
   KibanaResponseFactory,
   RequestHandlerContext,
-  SavedObjectsClientContract,
+  ISavedObjectsRepository,
 } from 'kibana/server';
 import {
   elasticsearchServiceMock,
-  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
   httpServerMock,
 } from 'src/core/server/mocks';
 
@@ -49,11 +49,11 @@ describe('test actions handlers schema', () => {
 
 describe('test actions handlers', () => {
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
-  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockSavedObjectsClient: jest.Mocked<ISavedObjectsRepository>;
   let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
 
   beforeEach(() => {
-    mockSavedObjectsClient = savedObjectsClientMock.create();
+    mockSavedObjectsClient = savedObjectsRepositoryMock.create();
     mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockResponse = httpServerMock.createResponseFactory();
   });

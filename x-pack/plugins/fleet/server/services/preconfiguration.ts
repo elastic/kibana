@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { groupBy, omit, pick, isEqual } from 'lodash';
 import { safeDump } from 'js-yaml';
+import type { ISavedObjectsRepository } from 'kibana/server';
 
 import type {
   NewPackagePolicy,
@@ -67,7 +68,7 @@ function isPreconfiguredOutputDifferentFromCurrent(
 }
 
 export async function ensurePreconfiguredOutputs(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   outputs: PreconfiguredOutput[]
 ) {
@@ -123,7 +124,7 @@ export async function ensurePreconfiguredOutputs(
 }
 
 export async function cleanPreconfiguredOutputs(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   outputs: PreconfiguredOutput[]
 ) {
   const existingPreconfiguredOutput = (await outputService.list(soClient)).items.filter(
@@ -140,7 +141,7 @@ export async function cleanPreconfiguredOutputs(
 }
 
 export async function ensurePreconfiguredPackagesAndPolicies(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   policies: PreconfiguredAgentPolicy[] = [],
   packages: PreconfiguredPackage[] = [],
@@ -402,7 +403,7 @@ export function comparePreconfiguredPolicyToCurrent(
 }
 
 async function addPreconfiguredPolicyPackages(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   agentPolicy: AgentPolicy,
   installedPackagePolicies: Array<

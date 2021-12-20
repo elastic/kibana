@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { ISavedObjectsRepository } from 'kibana/server';
 
 import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
@@ -18,7 +18,7 @@ export { getRegistryUrl } from './epm/registry/registry_url';
  */
 export interface ESIndexPatternService {
   getESIndexPattern(
-    savedObjectsClient: SavedObjectsClientContract,
+    savedObjectsClient: ISavedObjectsRepository,
     pkgName: string,
     datasetPath: string
   ): Promise<string | undefined>;

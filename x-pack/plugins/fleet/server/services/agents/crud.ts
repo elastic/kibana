@@ -7,7 +7,8 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from 'src/core/server';
+import type { ISavedObjectsRepository } from 'kibana/server';
 
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
@@ -361,7 +362,7 @@ export async function deleteAgent(esClient: ElasticsearchClient, agentId: string
 }
 
 export async function getAgentPolicyForAgent(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   agentId: string
 ) {

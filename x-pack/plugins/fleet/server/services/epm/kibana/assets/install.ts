@@ -8,7 +8,7 @@
 import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
-  SavedObjectsClientContract,
+  ISavedObjectsRepository,
   SavedObjectsImporter,
   Logger,
 } from 'src/core/server';
@@ -118,7 +118,7 @@ export async function installKibanaAssets(options: {
   return installedAssets;
 }
 export const deleteKibanaInstalledRefs = async (
-  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsClient: ISavedObjectsRepository,
   pkgName: string,
   installedKibanaRefs: AssetReference[]
 ) => {

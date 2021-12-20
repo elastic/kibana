@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import Boom from '@hapi/boom';
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, Logger, ISavedObjectsRepository } from 'src/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type {
@@ -45,7 +45,7 @@ export const installTemplates = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   paths: string[],
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: ISavedObjectsRepository
 ): Promise<IndexTemplateEntry[]> => {
   // install any pre-built index template assets,
   // atm, this is only the base package's global index templates

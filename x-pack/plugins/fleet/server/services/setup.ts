@@ -7,7 +7,7 @@
 
 import { compact } from 'lodash';
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, ISavedObjectsRepository } from 'src/core/server';
 
 import { AUTO_UPDATE_PACKAGES } from '../../common';
 import type { DefaultPackagesInstallationError, PreconfigurationError } from '../../common';
@@ -42,14 +42,14 @@ export interface SetupStatus {
 }
 
 export async function setupFleet(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
   return awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
 }
 
 async function createSetupSideEffects(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
   const logger = appContextService.getLogger();
@@ -134,7 +134,7 @@ async function createSetupSideEffects(
  * Ensure ES assets shared by all Fleet index template are installed
  */
 export async function ensureFleetGlobalEsAssets(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient
 ) {
   const logger = appContextService.getLogger();
@@ -176,7 +176,7 @@ export async function ensureFleetGlobalEsAssets(
 }
 
 export async function ensureDefaultEnrollmentAPIKeysExists(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   options?: { forceRecreate?: boolean }
 ) {

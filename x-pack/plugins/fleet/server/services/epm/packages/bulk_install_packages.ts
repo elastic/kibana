@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, ISavedObjectsRepository } from 'src/core/server';
 
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
@@ -16,7 +16,7 @@ import { installPackage, isPackageVersionOrLaterInstalled } from './install';
 import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
 interface BulkInstallPackagesParams {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   packagesToInstall: Array<string | { name: string; version: string }>;
   esClient: ElasticsearchClient;
   force?: boolean;

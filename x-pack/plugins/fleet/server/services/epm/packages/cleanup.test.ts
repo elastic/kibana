@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import type { ISavedObjectsRepository } from 'kibana/server';
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 
 import type { PackagePolicyServiceInterface } from '../../package_policy';
 import * as storage from '../archive/storage';
@@ -25,7 +25,7 @@ jest.mock('../..', () => ({
 jest.mock('../../package_policy');
 
 describe(' Cleanup old assets', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
+  let soClient: jest.Mocked<ISavedObjectsRepository>;
   const packagePolicyServiceMock =
     packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
   let removeArchiveEntriesMock: jest.MockedFunction<typeof storage.removeArchiveEntries>;
@@ -45,7 +45,7 @@ describe(' Cleanup old assets', () => {
   }
 
   beforeEach(() => {
-    soClient = savedObjectsClientMock.create();
+    soClient = savedObjectsRepositoryMock.create();
     packagePolicyServiceMock.list.mockClear();
     removeArchiveEntriesMock = jest.spyOn(storage, 'removeArchiveEntries') as any;
     removeArchiveEntriesMock.mockClear();

@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import semverCoerce from 'semver/functions/coerce';
 
 import type { PostAgentUpgradeResponse, PostBulkAgentUpgradeResponse } from '../../../common/types';
-import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
+import type {
+  PostAgentUpgradeRequestSchema,
+  PostBulkAgentUpgradeRequestSchema,
+  FleetRequestHandler,
+} from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultIngestErrorHandler } from '../../errors';
 import { isAgentUpgradeable } from '../../../common/services';
 import { getAgentById } from '../../services/agents';
 
-export const postAgentUpgradeHandler: RequestHandler<
+export const postAgentUpgradeHandler: FleetRequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
   undefined,
   TypeOf<typeof PostAgentUpgradeRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const { version, source_uri: sourceUri, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
@@ -72,12 +75,12 @@ export const postAgentUpgradeHandler: RequestHandler<
   }
 };
 
-export const postBulkAgentsUpgradeHandler: RequestHandler<
+export const postBulkAgentsUpgradeHandler: FleetRequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PostBulkAgentUpgradeRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const { version, source_uri: sourceUri, agents, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();

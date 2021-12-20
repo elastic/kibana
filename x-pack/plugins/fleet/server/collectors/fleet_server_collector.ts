@@ -6,7 +6,7 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import type { SavedObjectsClient, ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient, ISavedObjectsRepository } from 'kibana/server';
 
 import { packagePolicyService, settingsService } from '../services';
 import { getAgentStatusForAgentPolicy } from '../services/agents';
@@ -32,7 +32,7 @@ export interface FleetServerUsage {
 }
 
 export const getFleetServerUsage = async (
-  soClient?: SavedObjectsClient,
+  soClient?: ISavedObjectsRepository,
   esClient?: ElasticsearchClient
 ): Promise<any> => {
   if (!soClient || !esClient) {

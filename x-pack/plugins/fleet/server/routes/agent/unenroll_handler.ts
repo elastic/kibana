@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type {
@@ -15,17 +14,18 @@ import type {
 import type {
   PostAgentUnenrollRequestSchema,
   PostBulkAgentUnenrollRequestSchema,
+  FleetRequestHandler,
 } from '../../types';
 import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
 import { defaultIngestErrorHandler } from '../../errors';
 
-export const postAgentUnenrollHandler: RequestHandler<
+export const postAgentUnenrollHandler: FleetRequestHandler<
   TypeOf<typeof PostAgentUnenrollRequestSchema.params>,
   undefined,
   TypeOf<typeof PostAgentUnenrollRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     await AgentService.unenrollAgent(soClient, esClient, request.params.agentId, {
@@ -40,7 +40,7 @@ export const postAgentUnenrollHandler: RequestHandler<
   }
 };
 
-export const postBulkAgentsUnenrollHandler: RequestHandler<
+export const postBulkAgentsUnenrollHandler: FleetRequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PostBulkAgentUnenrollRequestSchema.body>
@@ -52,7 +52,7 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
     });
   }
 
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }

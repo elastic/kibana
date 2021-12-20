@@ -12,7 +12,7 @@ import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
 import type {
   ElasticsearchClient,
-  SavedObjectsClientContract,
+  ISavedObjectsRepository,
   SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
 
@@ -69,7 +69,7 @@ const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     action: 'created' | 'updated' | 'deleted',
     agentPolicyId: string
@@ -78,7 +78,7 @@ class AgentPolicyService {
   };
 
   private async _update(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     id: string,
     agentPolicy: Partial<AgentPolicySOAttributes>,
@@ -115,7 +115,7 @@ class AgentPolicyService {
   }
 
   public async ensurePreconfiguredAgentPolicy(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     config: PreconfiguredAgentPolicy
   ): Promise<{
@@ -160,7 +160,7 @@ class AgentPolicyService {
   }
 
   private async ensureAgentPolicy(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     newAgentPolicy: NewAgentPolicy,
     searchParams:
@@ -223,7 +223,7 @@ class AgentPolicyService {
   }
 
   public async create(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     agentPolicy: NewAgentPolicy,
     options?: { id?: string; user?: AuthenticatedUser }
@@ -251,7 +251,7 @@ class AgentPolicyService {
   }
 
   public async requireUniqueName(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     givenPolicy: { id?: string; name: string }
   ) {
     const results = await soClient.find<AgentPolicySOAttributes>({
@@ -274,7 +274,7 @@ class AgentPolicyService {
   }
 
   public async get(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     id: string,
     withPackagePolicies: boolean = true
   ): Promise<AgentPolicy | null> {
@@ -301,7 +301,7 @@ class AgentPolicyService {
   }
 
   public async getByIDs(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     ids: string[],
     options: { fields?: string[] } = {}
   ): Promise<AgentPolicy[]> {
@@ -316,7 +316,7 @@ class AgentPolicyService {
   }
 
   public async list(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     options: ListWithKuery & {
       withPackagePolicies?: boolean;
     }
@@ -384,7 +384,7 @@ class AgentPolicyService {
   }
 
   public async update(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     id: string,
     agentPolicy: Partial<AgentPolicy>,
@@ -400,7 +400,7 @@ class AgentPolicyService {
   }
 
   public async copy(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     id: string,
     newAgentPolicyProps: Pick<AgentPolicy, 'name' | 'description'>,
@@ -460,7 +460,7 @@ class AgentPolicyService {
   }
 
   public async bumpRevision(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     id: string,
     options?: { user?: AuthenticatedUser }
@@ -471,7 +471,7 @@ class AgentPolicyService {
   }
 
   public async bumpAllAgentPoliciesForOutput(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     outputId: string,
     options?: { user?: AuthenticatedUser }
@@ -503,7 +503,7 @@ class AgentPolicyService {
   }
 
   public async bumpAllAgentPolicies(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     options?: { user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
@@ -533,7 +533,7 @@ class AgentPolicyService {
   }
 
   public async assignPackagePolicies(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyIds: string[],
@@ -568,7 +568,7 @@ class AgentPolicyService {
   }
 
   public async unassignPackagePolicies(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyIds: string[],
@@ -601,7 +601,7 @@ class AgentPolicyService {
     );
   }
 
-  public async getDefaultAgentPolicyId(soClient: SavedObjectsClientContract) {
+  public async getDefaultAgentPolicyId(soClient: ISavedObjectsRepository) {
     const agentPolicies = await soClient.find({
       type: AGENT_POLICY_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
@@ -616,7 +616,7 @@ class AgentPolicyService {
   }
 
   public async delete(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     id: string,
     options?: { force?: boolean; removeFleetServerDocuments?: boolean }
@@ -688,10 +688,7 @@ class AgentPolicyService {
     };
   }
 
-  public async createFleetServerPolicy(
-    soClient: SavedObjectsClientContract,
-    agentPolicyId: string
-  ) {
+  public async createFleetServerPolicy(soClient: ISavedObjectsRepository, agentPolicyId: string) {
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
     const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
@@ -768,7 +765,7 @@ class AgentPolicyService {
   }
 
   public async getFullAgentConfigMap(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     id: string,
     options?: { standalone: boolean }
   ): Promise<string | null> {
@@ -802,7 +799,7 @@ class AgentPolicyService {
   }
 
   public async getFullAgentPolicy(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     id: string,
     options?: { standalone: boolean }
   ): Promise<FullAgentPolicy | null> {
@@ -813,7 +810,7 @@ class AgentPolicyService {
 export const agentPolicyService = new AgentPolicyService();
 
 export async function addPackageToAgentPolicy(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   packageToInstall: Installation,
   agentPolicy: AgentPolicy,

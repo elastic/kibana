@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 
 import { appContextService } from './app_context';
 import { getCloudFleetServersHosts, settingsSetup } from './settings';
@@ -60,7 +60,7 @@ describe('settingsSetup', () => {
     mockedAppContextService.getCloud.mockReset();
   });
   it('should create settings if there is no settings', async () => {
-    const soClientMock = savedObjectsClientMock.create();
+    const soClientMock = savedObjectsRepositoryMock.create();
 
     soClientMock.find.mockResolvedValue({
       total: 0,
@@ -82,7 +82,7 @@ describe('settingsSetup', () => {
   });
 
   it('should do nothing if there is settings and no default fleet server hosts', async () => {
-    const soClientMock = savedObjectsClientMock.create();
+    const soClientMock = savedObjectsRepositoryMock.create();
 
     soClientMock.find.mockResolvedValue({
       total: 1,
@@ -112,7 +112,7 @@ describe('settingsSetup', () => {
   });
 
   it('should update settings if there is settings without fleet server hosts and default fleet server hosts', async () => {
-    const soClientMock = savedObjectsClientMock.create();
+    const soClientMock = savedObjectsRepositoryMock.create();
     mockedAppContextService.getCloud.mockReturnValue({
       cloudId:
         'test:dGVzdC5mcjo5MjQzJGRhM2I2YjNkYWY5ZDRjODE4ZjI4ZmEzNDdjMzgzODViJDgxMmY4NWMxZjNjZTQ2YTliYjgxZjFjMWIxMzRjNmRl',
@@ -159,7 +159,7 @@ describe('settingsSetup', () => {
   });
 
   it('should not update settings if there is settings with fleet server hosts and default fleet server hosts', async () => {
-    const soClientMock = savedObjectsClientMock.create();
+    const soClientMock = savedObjectsRepositoryMock.create();
     mockedAppContextService.getCloud.mockReturnValue({
       cloudId:
         'test:dGVzdC5mcjo5MjQzJGRhM2I2YjNkYWY5ZDRjODE4ZjI4ZmEzNDdjMzgzODViJDgxMmY4NWMxZjNjZTQ2YTliYjgxZjFjMWIxMzRjNmRl',

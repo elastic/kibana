@@ -7,10 +7,10 @@
 
 jest.mock('../registry');
 
-import type { SavedObjectsClientContract, SavedObjectsFindResult } from 'kibana/server';
+import type { ISavedObjectsRepository, SavedObjectsFindResult } from 'kibana/server';
 
 import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
+import { savedObjectsRepositoryMock } from '../../../../../../../src/core/server/mocks';
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
 import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common';
 
@@ -25,10 +25,10 @@ const MockRegistry = Registry as jest.Mocked<typeof Registry>;
 
 describe('When using EPM `get` services', () => {
   describe('and invoking getPackageUsageStats()', () => {
-    let soClient: jest.Mocked<SavedObjectsClientContract>;
+    let soClient: jest.Mocked<ISavedObjectsRepository>;
 
     beforeEach(() => {
-      soClient = savedObjectsClientMock.create();
+      soClient = savedObjectsRepositoryMock.create();
       const savedObjects: Array<SavedObjectsFindResult<PackagePolicySOAttributes>> = [
         {
           type: 'ingest-package-policies',
@@ -199,7 +199,7 @@ describe('When using EPM `get` services', () => {
 
     describe('installation status', () => {
       it('should be not_installed when no package SO exists', async () => {
-        const soClient = savedObjectsClientMock.create();
+        const soClient = savedObjectsRepositoryMock.create();
         soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
 
         expect(
@@ -214,7 +214,7 @@ describe('When using EPM `get` services', () => {
       });
 
       it('should be installing when package SO install_status is installing', async () => {
-        const soClient = savedObjectsClientMock.create();
+        const soClient = savedObjectsRepositoryMock.create();
         soClient.get.mockResolvedValue({
           id: 'my-package',
           type: PACKAGES_SAVED_OBJECT_TYPE,
@@ -236,7 +236,7 @@ describe('When using EPM `get` services', () => {
       });
 
       it('should be installed when package SO install_status is installed', async () => {
-        const soClient = savedObjectsClientMock.create();
+        const soClient = savedObjectsRepositoryMock.create();
         soClient.get.mockResolvedValue({
           id: 'my-package',
           type: PACKAGES_SAVED_OBJECT_TYPE,
@@ -258,7 +258,7 @@ describe('When using EPM `get` services', () => {
       });
 
       it('should be install_failed when package SO install_status is install_failed', async () => {
-        const soClient = savedObjectsClientMock.create();
+        const soClient = savedObjectsRepositoryMock.create();
         soClient.get.mockResolvedValue({
           id: 'my-package',
           type: PACKAGES_SAVED_OBJECT_TYPE,

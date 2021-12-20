@@ -10,7 +10,7 @@ import type {
   RequestHandler,
   RequestHandlerContext,
   RouteMethod,
-  SavedObjectsClientContract,
+  ISavedObjectsRepository,
   IRouter,
 } from '../../../../../src/core/server';
 import type { FleetAuthz } from '../../common/authz';
@@ -31,7 +31,7 @@ export interface FleetRequestHandlerContext extends RequestHandlerContext {
        * Saved Objects client configured to use kibana_system privileges instead of end-user privileges. Should only be
        * used by routes that have additional privilege checks for authorization (such as requiring superuser).
        */
-      readonly internalSoClient: SavedObjectsClientContract;
+      readonly internalSoClient: ISavedObjectsRepository;
     };
     spaceId: string;
   };

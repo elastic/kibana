@@ -6,9 +6,9 @@
  */
 
 jest.mock('./epm/packages');
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { ISavedObjectsRepository } from 'kibana/server';
 
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsRepositoryMock } from '../../../../../src/core/server/mocks';
 import type { PackagePolicy, RegistryDataStream } from '../types';
 
 import { getPackageInfo } from './epm/packages';
@@ -20,9 +20,9 @@ import {
 const getPackageInfoMock = getPackageInfo as jest.MockedFunction<typeof getPackageInfo>;
 
 describe('storedPackagePoliciesToAgentPermissions()', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
+  let soClient: jest.Mocked<ISavedObjectsRepository>;
   beforeEach(() => {
-    soClient = savedObjectsClientMock.create();
+    soClient = savedObjectsRepositoryMock.create();
   });
 
   it('Returns `undefined` if there are no package policies', async () => {

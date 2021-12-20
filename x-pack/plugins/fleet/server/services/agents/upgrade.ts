@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, ISavedObjectsRepository } from 'src/core/server';
 
 import type { Agent, BulkActionResult } from '../../types';
 import { agentPolicyService } from '../../services';
@@ -39,7 +39,7 @@ export async function sendUpgradeAgentAction({
   version,
   sourceUri,
 }: {
-  soClient: SavedObjectsClientContract;
+  soClient: ISavedObjectsRepository;
   esClient: ElasticsearchClient;
   agentId: string;
   version: string;
@@ -72,7 +72,7 @@ export async function sendUpgradeAgentAction({
 }
 
 export async function sendUpgradeAgentsActions(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   options: ({ agents: Agent[] } | GetAgentsOptions) & {
     sourceUri: string | undefined;

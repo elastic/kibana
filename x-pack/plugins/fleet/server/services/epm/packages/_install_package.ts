@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import type {
   ElasticsearchClient,
   Logger,
   SavedObject,
-  SavedObjectsClientContract,
+  ISavedObjectsRepository,
   SavedObjectsImporter,
 } from 'src/core/server';
 
@@ -58,7 +59,7 @@ export async function _installPackage({
   installSource,
   spaceId,
 }: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -245,7 +246,7 @@ export async function _installPackage({
       ...installedMlModel,
     ];
   } catch (err) {
-    if (savedObjectsClient.errors.isConflictError(err)) {
+    if (SavedObjectsErrorHelpers.isConflictError(err)) {
       throw new ConcurrentInstallOperationError(
         `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
           pkgVersion || 'unknown'

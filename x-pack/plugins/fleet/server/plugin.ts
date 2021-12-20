@@ -19,17 +19,13 @@ import type {
   KibanaRequest,
   ServiceStatus,
   ElasticsearchClient,
-  SavedObjectsClientContract,
+  ISavedObjectsRepository,
 } from 'kibana/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import type { TelemetryPluginSetup, TelemetryPluginStart } from 'src/plugins/telemetry/server';
 
-import {
-  DEFAULT_APP_CATEGORIES,
-  SavedObjectsClient,
-  ServiceStatusLevels,
-} from '../../../../src/core/server';
+import { DEFAULT_APP_CATEGORIES, ServiceStatusLevels } from '../../../../src/core/server';
 import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import type {
@@ -192,6 +188,7 @@ export class FleetPlugin
 
   private agentService?: AgentService;
   private packageService?: PackageService;
+  private internalSoClient?: ISavedObjectsRepository;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -291,11 +288,8 @@ export class FleetPlugin
           },
           authz: await getAuthzFromRequest(request),
           epm: {
-            // Use a lazy getter to avoid constructing this client when not used by a request handler
-            get internalSoClient() {
-              return appContextService
-                .getSavedObjects()
-                .getScopedClient(request, { excludedWrappers: ['security'] });
+            get internalSoClient(): ISavedObjectsRepository {
+              return this.internalSoClient;
             },
           },
           get spaceId() {
@@ -363,7 +357,7 @@ export class FleetPlugin
     licenseService.start(this.licensing$);
 
     this.telemetryEventsSender.start(plugins.telemetry, core);
-
+    this.internalSoClient = core.savedObjects.createInternalRepository();
     const logger = appContextService.getLogger();
 
     const fleetSetupPromise = (async () => {
@@ -375,10 +369,7 @@ export class FleetPlugin
           summary: 'Fleet is setting up',
         });
 
-        await setupFleet(
-          new SavedObjectsClient(core.savedObjects.createInternalRepository()),
-          core.elasticsearch.client.asInternalUser
-        );
+        await setupFleet(this.internalSoClient!, core.elasticsearch.client.asInternalUser);
 
         this.fleetStatus$.next({
           level: ServiceStatusLevels.available,

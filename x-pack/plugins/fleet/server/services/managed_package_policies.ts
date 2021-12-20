@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, ISavedObjectsRepository } from 'src/core/server';
 import semverGte from 'semver/functions/gte';
 
 import type {
@@ -29,7 +29,7 @@ export interface UpgradeManagedPackagePoliciesResult {
  * or have the `keep_policies_up_to_date` flag set to `true`
  */
 export const upgradeManagedPackagePolicies = async (
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   packagePolicyIds: string[]
 ): Promise<UpgradeManagedPackagePoliciesResult[]> => {

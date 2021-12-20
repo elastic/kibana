@@ -12,7 +12,7 @@ import { safeLoad } from 'js-yaml';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import uuidv5 from 'uuid/v5';
-import type { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
+import type { ISavedObjectsRepository, SavedObjectsBulkCreateObject } from 'src/core/server';
 
 import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
 import type {
@@ -96,7 +96,7 @@ export async function archiveEntryToESDocument(opts: {
 }
 
 export async function removeArchiveEntries(opts: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   refs?: PackageAssetReference[];
 }) {
   const { savedObjectsClient, refs } = opts;
@@ -108,7 +108,7 @@ export async function removeArchiveEntries(opts: {
 }
 
 export async function saveArchiveEntries(opts: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   paths: string[];
   packageInfo: InstallablePackage;
   installSource: InstallSource;
@@ -153,7 +153,7 @@ export function packageAssetToArchiveEntry(asset: PackageAsset): ArchiveEntry {
 }
 
 export async function getAsset(opts: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   path: string;
 }) {
   const { savedObjectsClient, path } = opts;
@@ -173,7 +173,7 @@ export const getEsPackage = async (
   pkgName: string,
   pkgVersion: string,
   references: PackageAssetReference[],
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: ISavedObjectsRepository
 ) => {
   const logger = appContextService.getLogger();
   const pkgKey = pkgToPkgKey({ name: pkgName, version: pkgVersion });

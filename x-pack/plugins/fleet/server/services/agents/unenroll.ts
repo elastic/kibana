@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, ISavedObjectsRepository } from 'src/core/server';
 
 import type { Agent, BulkActionResult } from '../../types';
 import * as APIKeyService from '../api_keys';
@@ -22,7 +22,7 @@ import {
 } from './crud';
 
 async function unenrollAgentIsAllowed(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   agentId: string
 ) {
@@ -37,7 +37,7 @@ async function unenrollAgentIsAllowed(
 }
 
 export async function unenrollAgent(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   agentId: string,
   options?: {
@@ -63,7 +63,7 @@ export async function unenrollAgent(
 }
 
 export async function unenrollAgents(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   options: GetAgentsOptions & {
     force?: boolean;
@@ -160,7 +160,7 @@ export async function invalidateAPIKeysForAgents(agents: Agent[]) {
 }
 
 export async function forceUnenrollAgent(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   agentIdOrAgent: string | Agent
 ) {

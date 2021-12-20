@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { ISavedObjectsRepository } from 'kibana/server';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { savedObjectsRepositoryMock } from '../../../../../../../../src/core/server/mocks';
 
 import type { EsAssetReference } from '../../../../../common/types/models';
 
 import { deleteTransformRefs } from './remove';
 
 describe('test transform install', () => {
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: jest.Mocked<ISavedObjectsRepository>;
   beforeEach(() => {
-    savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient = savedObjectsRepositoryMock.create();
   });
 
   test('can delete transform ref and handle duplicate when previous version and current version are the same', async () => {

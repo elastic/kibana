@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsRepositoryMock } from '../../../../../src/core/server/mocks';
 import type { OutputSOAttributes } from '../types';
 
 import { outputService, outputIdToUuid } from './output';
@@ -51,7 +51,7 @@ function mockOutputSO(id: string, attributes: any = {}) {
 function getMockedSoClient(
   options: { defaultOutputId?: string; defaultOutputMonitoringId?: string } = {}
 ) {
-  const soClient = savedObjectsClientMock.create();
+  const soClient = savedObjectsRepositoryMock.create();
 
   soClient.get.mockImplementation(async (type: string, id: string) => {
     switch (id) {

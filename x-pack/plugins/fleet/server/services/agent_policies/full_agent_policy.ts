@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { ISavedObjectsRepository } from 'kibana/server';
 import { safeLoad } from 'js-yaml';
 
 import type {
@@ -29,7 +29,7 @@ import { DEFAULT_OUTPUT } from '../../constants';
 import { getMonitoringPermissions } from './monitoring_permissions';
 
 export async function getFullAgentPolicy(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   id: string,
   options?: { standalone: boolean }
 ): Promise<FullAgentPolicy | null> {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 
 import type { ElasticsearchClient } from 'kibana/server';
 
@@ -80,7 +80,7 @@ describe('install', () => {
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
         pkgkey: 'apache-1.1.0',
-        savedObjectsClient: savedObjectsClientMock.create(),
+        savedObjectsClient: savedObjectsRepositoryMock.create(),
         esClient: {} as ElasticsearchClient,
       });
 
@@ -102,7 +102,7 @@ describe('install', () => {
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
         pkgkey: 'apache-1.3.0',
-        savedObjectsClient: savedObjectsClientMock.create(),
+        savedObjectsClient: savedObjectsRepositoryMock.create(),
         esClient: {} as ElasticsearchClient,
       });
 
@@ -124,7 +124,7 @@ describe('install', () => {
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
         pkgkey: 'apache-1.3.0',
-        savedObjectsClient: savedObjectsClientMock.create(),
+        savedObjectsClient: savedObjectsRepositoryMock.create(),
         esClient: {} as ElasticsearchClient,
       });
 
@@ -148,7 +148,7 @@ describe('install', () => {
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
         pkgkey: 'apache-1.3.0',
-        savedObjectsClient: savedObjectsClientMock.create(),
+        savedObjectsClient: savedObjectsRepositoryMock.create(),
         esClient: {} as ElasticsearchClient,
       });
 
@@ -172,7 +172,7 @@ describe('install', () => {
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
         pkgkey: 'apache-1.3.0',
-        savedObjectsClient: savedObjectsClientMock.create(),
+        savedObjectsClient: savedObjectsRepositoryMock.create(),
         esClient: {} as ElasticsearchClient,
       });
 
@@ -199,7 +199,7 @@ describe('install', () => {
         installSource: 'upload',
         archiveBuffer: {} as Buffer,
         contentType: '',
-        savedObjectsClient: savedObjectsClientMock.create(),
+        savedObjectsClient: savedObjectsRepositoryMock.create(),
         esClient: {} as ElasticsearchClient,
       });
 
@@ -222,7 +222,7 @@ describe('install', () => {
         installSource: 'upload',
         archiveBuffer: {} as Buffer,
         contentType: '',
-        savedObjectsClient: savedObjectsClientMock.create(),
+        savedObjectsClient: savedObjectsRepositoryMock.create(),
         esClient: {} as ElasticsearchClient,
       });
 
@@ -246,7 +246,7 @@ describe('install', () => {
         installSource: 'upload',
         archiveBuffer: {} as Buffer,
         contentType: '',
-        savedObjectsClient: savedObjectsClientMock.create(),
+        savedObjectsClient: savedObjectsRepositoryMock.create(),
         esClient: {} as ElasticsearchClient,
       });
 

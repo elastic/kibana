@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type {
@@ -13,6 +12,7 @@ import type {
   GetOneOutputRequestSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
+  FleetRequestHandler,
 } from '../../types';
 import type {
   DeleteOutputResponse,
@@ -23,8 +23,8 @@ import { outputService } from '../../services/output';
 import { defaultIngestErrorHandler } from '../../errors';
 import { agentPolicyService } from '../../services';
 
-export const getOutputsHandler: RequestHandler = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+export const getOutputsHandler: FleetRequestHandler = async (context, request, response) => {
+  const soClient = context.fleet.epm.internalSoClient;
   try {
     const outputs = await outputService.list(soClient);
 
@@ -41,10 +41,10 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
   }
 };
 
-export const getOneOuputHandler: RequestHandler<
+export const getOneOuputHandler: FleetRequestHandler<
   TypeOf<typeof GetOneOutputRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   try {
     const output = await outputService.get(soClient, request.params.outputId);
 
@@ -64,12 +64,12 @@ export const getOneOuputHandler: RequestHandler<
   }
 };
 
-export const putOuputHandler: RequestHandler<
+export const putOuputHandler: FleetRequestHandler<
   TypeOf<typeof PutOutputRequestSchema.params>,
   undefined,
   TypeOf<typeof PutOutputRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     await outputService.update(soClient, request.params.outputId, request.body);
@@ -96,12 +96,12 @@ export const putOuputHandler: RequestHandler<
   }
 };
 
-export const postOuputHandler: RequestHandler<
+export const postOuputHandler: FleetRequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PostOutputRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     const { id, ...data } = request.body;
@@ -120,10 +120,10 @@ export const postOuputHandler: RequestHandler<
   }
 };
 
-export const deleteOutputHandler: RequestHandler<
+export const deleteOutputHandler: FleetRequestHandler<
   TypeOf<typeof DeleteOutputRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   try {
     await outputService.delete(soClient, request.params.outputId);
 

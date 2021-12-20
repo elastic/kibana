@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsRepositoryMock } from 'src/core/server/mocks';
 
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
@@ -53,7 +53,7 @@ const mockDefaultOutput: Output = {
 };
 
 function getPutPreconfiguredPackagesMock() {
-  const soClient = savedObjectsClientMock.create();
+  const soClient = savedObjectsRepositoryMock.create();
   soClient.find.mockImplementation(async ({ type, search }) => {
     if (type === AGENT_POLICY_SAVED_OBJECT_TYPE) {
       const id = search!.replace(/"/g, '');
@@ -702,7 +702,7 @@ describe('output preconfiguration', () => {
   });
 
   it('should create preconfigured output that does not exists', async () => {
-    const soClient = savedObjectsClientMock.create();
+    const soClient = savedObjectsRepositoryMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     await ensurePreconfiguredOutputs(soClient, esClient, [
       {
@@ -721,7 +721,7 @@ describe('output preconfiguration', () => {
   });
 
   it('should set default hosts if hosts is not set output that does not exists', async () => {
-    const soClient = savedObjectsClientMock.create();
+    const soClient = savedObjectsRepositoryMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     await ensurePreconfiguredOutputs(soClient, esClient, [
       {
@@ -738,7 +738,7 @@ describe('output preconfiguration', () => {
   });
 
   it('should update output if preconfigured output exists and changed', async () => {
-    const soClient = savedObjectsClientMock.create();
+    const soClient = savedObjectsRepositoryMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
     await ensurePreconfiguredOutputs(soClient, esClient, [
@@ -758,7 +758,7 @@ describe('output preconfiguration', () => {
   });
 
   it('should not delete default output if preconfigured default output exists and changed', async () => {
-    const soClient = savedObjectsClientMock.create();
+    const soClient = savedObjectsRepositoryMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
     mockedOutputService.getDefaultDataOutputId.mockResolvedValue('existing-output-1');
@@ -806,7 +806,7 @@ describe('output preconfiguration', () => {
   SCENARIOS.forEach((scenario) => {
     const { data, name } = scenario;
     it(`should do nothing if preconfigured output exists and did not changed (${name})`, async () => {
-      const soClient = savedObjectsClientMock.create();
+      const soClient = savedObjectsRepositoryMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       await ensurePreconfiguredOutputs(soClient, esClient, [data]);
 
@@ -816,7 +816,7 @@ describe('output preconfiguration', () => {
   });
 
   it('should not delete non deleted preconfigured output', async () => {
-    const soClient = savedObjectsClientMock.create();
+    const soClient = savedObjectsRepositoryMock.create();
     mockedOutputService.list.mockResolvedValue({
       items: [
         { id: 'output1', is_preconfigured: true } as Output,
@@ -849,7 +849,7 @@ describe('output preconfiguration', () => {
   });
 
   it('should delete deleted preconfigured output', async () => {
-    const soClient = savedObjectsClientMock.create();
+    const soClient = savedObjectsRepositoryMock.create();
     mockedOutputService.list.mockResolvedValue({
       items: [
         { id: 'output1', is_preconfigured: true } as Output,

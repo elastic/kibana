@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RequestHandler, ResponseHeaders } from 'src/core/server';
+import type { ResponseHeaders } from 'src/core/server';
 import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
 
@@ -76,10 +76,10 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   }
 };
 
-export const getOneAgentPolicyHandler: RequestHandler<
+export const getOneAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof GetOneAgentPolicyRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   try {
     const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
     if (agentPolicy) {
@@ -105,7 +105,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof CreateAgentPolicyRequestSchema.query>,
   TypeOf<typeof CreateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
@@ -153,12 +153,12 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   }
 };
 
-export const updateAgentPolicyHandler: RequestHandler<
+export const updateAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdateAgentPolicyRequestSchema.params>,
   unknown,
   TypeOf<typeof UpdateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
@@ -180,12 +180,12 @@ export const updateAgentPolicyHandler: RequestHandler<
   }
 };
 
-export const copyAgentPolicyHandler: RequestHandler<
+export const copyAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof CopyAgentPolicyRequestSchema.params>,
   unknown,
   TypeOf<typeof CopyAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
@@ -208,12 +208,12 @@ export const copyAgentPolicyHandler: RequestHandler<
   }
 };
 
-export const deleteAgentPoliciesHandler: RequestHandler<
+export const deleteAgentPoliciesHandler: FleetRequestHandler<
   unknown,
   unknown,
   TypeOf<typeof DeleteAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
@@ -229,11 +229,11 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   }
 };
 
-export const getFullAgentPolicy: RequestHandler<
+export const getFullAgentPolicy: FleetRequestHandler<
   TypeOf<typeof GetFullAgentPolicyRequestSchema.params>,
   TypeOf<typeof GetFullAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
 
   if (request.query.kubernetes === true) {
     try {
@@ -284,11 +284,11 @@ export const getFullAgentPolicy: RequestHandler<
   }
 };
 
-export const downloadFullAgentPolicy: RequestHandler<
+export const downloadFullAgentPolicy: FleetRequestHandler<
   TypeOf<typeof GetFullAgentPolicyRequestSchema.params>,
   TypeOf<typeof GetFullAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const {
     params: { agentPolicyId },
   } = request;

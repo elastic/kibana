@@ -6,7 +6,7 @@
  */
 
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, Logger, ISavedObjectsRepository } from 'src/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference, RegistryDataStream, InstallablePackage } from '../../../../types';
@@ -43,7 +43,7 @@ export const installPipelines = async (
   installablePackage: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
-  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsClient: ISavedObjectsRepository,
   logger: Logger
 ) => {
   // unlike other ES assets, pipeline names are versioned so after a template is updated

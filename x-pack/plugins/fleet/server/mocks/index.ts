@@ -10,7 +10,7 @@ import {
   coreMock,
   elasticsearchServiceMock,
   loggingSystemMock,
-  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
   savedObjectsServiceMock,
 } from '../../../../../src/core/server/mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
@@ -79,7 +79,7 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
       asInternalUser: agentServiceMock.createClient(),
     },
     epm: {
-      internalSoClient: savedObjectsClientMock.create(),
+      internalSoClient: savedObjectsRepositoryMock.create(),
     },
     spaceId: 'default',
   };

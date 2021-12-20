@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { ISavedObjectsRepository } from 'kibana/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
@@ -16,7 +16,7 @@ import { getInstallationObject, getPackageInfo } from './get';
 
 export async function updatePackage(
   options: {
-    savedObjectsClient: SavedObjectsClientContract;
+    savedObjectsClient: ISavedObjectsRepository;
     pkgName: string;
     keepPoliciesUpToDate?: boolean;
   } & TypeOf<typeof UpdatePackageRequestSchema.body>

@@ -5,49 +5,29 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from 'src/core/server';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient } from 'src/core/server';
+import type { ISavedObjectsRepository } from 'kibana/server';
 
 import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from './api_keys';
 import { unenrollForAgentPolicyId } from './agents';
 import { agentPolicyService } from './agent_policy';
-import { appContextService } from './app_context';
-
-const fakeRequest = {
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-} as unknown as KibanaRequest;
 
 export async function agentPolicyUpdateEventHandler(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   action: string,
   agentPolicyId: string
 ) {
-  // `soClient` from ingest `appContextService` is used to create policy change actions
-  // to ensure encrypted SOs are handled correctly
-  const internalSoClient = appContextService.getInternalUserSOClient(fakeRequest);
-
   if (action === 'created') {
     await generateEnrollmentAPIKey(soClient, esClient, {
       name: 'Default',
       agentPolicyId,
     });
-    await agentPolicyService.createFleetServerPolicy(internalSoClient, agentPolicyId);
+    await agentPolicyService.createFleetServerPolicy(soClient, agentPolicyId);
   }
 
   if (action === 'updated') {
-    await agentPolicyService.createFleetServerPolicy(internalSoClient, agentPolicyId);
+    await agentPolicyService.createFleetServerPolicy(soClient, agentPolicyId);
   }
 
   if (action === 'deleted') {

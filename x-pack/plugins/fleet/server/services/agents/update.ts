@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient } from 'src/core/server';
+import type { ISavedObjectsRepository } from 'kibana/server';
 
 import { AGENTS_PREFIX } from '../../constants';
 
@@ -13,7 +14,7 @@ import { getAgentsByKuery } from './crud';
 import { unenrollAgent } from './unenroll';
 
 export async function unenrollForAgentPolicyId(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   policyId: string
 ) {

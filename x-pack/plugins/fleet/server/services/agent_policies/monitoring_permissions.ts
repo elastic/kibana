@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { ISavedObjectsRepository } from 'kibana/server';
 
 import { getPackageInfo, getInstallation } from '../epm/packages';
 import { getDataStreamPrivileges } from '../package_policies_to_agent_permissions';
@@ -43,7 +43,7 @@ function buildDefault(enabled: { logs: boolean; metrics: boolean }, namespace: s
 }
 
 export async function getMonitoringPermissions(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   enabled: { logs: boolean; metrics: boolean },
   namespace: string
 ): Promise<FullAgentPolicyOutputPermissions> {

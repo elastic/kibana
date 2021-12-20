@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import type { SavedObject } from 'kibana/server';
 
 import type { AgentPolicy } from '../../types';
@@ -230,7 +230,7 @@ describe('unenrollAgents (plural)', () => {
 });
 
 function createClientMock() {
-  const soClientMock = savedObjectsClientMock.create();
+  const soClientMock = savedObjectsRepositoryMock.create();
 
   // need to mock .create & bulkCreate due to (bulk)createAgentAction(s) in unenrollAgent(s)
   // @ts-expect-error

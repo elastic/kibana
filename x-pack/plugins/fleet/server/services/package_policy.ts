@@ -13,7 +13,7 @@ import type { KibanaRequest } from 'src/core/server';
 import type {
   ElasticsearchClient,
   RequestHandlerContext,
-  SavedObjectsClientContract,
+  ISavedObjectsRepository,
 } from 'src/core/server';
 import uuid from 'uuid';
 import { safeLoad } from 'js-yaml';
@@ -90,7 +90,7 @@ export const DATA_STREAM_ALLOWED_INDEX_PRIVILEGES = new Set([
 
 class PackagePolicyService {
   public async create(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options?: {
@@ -209,7 +209,7 @@ class PackagePolicyService {
   }
 
   public async bulkCreate(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     packagePolicies: NewPackagePolicy[],
     agentPolicyId: string,
@@ -264,10 +264,7 @@ class PackagePolicyService {
     }));
   }
 
-  public async get(
-    soClient: SavedObjectsClientContract,
-    id: string
-  ): Promise<PackagePolicy | null> {
+  public async get(soClient: ISavedObjectsRepository, id: string): Promise<PackagePolicy | null> {
     const packagePolicySO = await soClient.get<PackagePolicySOAttributes>(SAVED_OBJECT_TYPE, id);
     if (!packagePolicySO) {
       return null;
@@ -285,7 +282,7 @@ class PackagePolicyService {
   }
 
   public async getByIDs(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     ids: string[]
   ): Promise<PackagePolicy[] | null> {
     const packagePolicySO = await soClient.bulkGet<PackagePolicySOAttributes>(
@@ -306,7 +303,7 @@ class PackagePolicyService {
   }
 
   public async list(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     options: ListWithKuery
   ): Promise<ListResult<PackagePolicy>> {
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
@@ -333,7 +330,7 @@ class PackagePolicyService {
   }
 
   public async listIds(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     options: ListWithKuery
   ): Promise<ListResult<string>> {
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
@@ -357,7 +354,7 @@ class PackagePolicyService {
   }
 
   public async update(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     id: string,
     packagePolicy: UpdatePackagePolicy,
@@ -458,7 +455,7 @@ class PackagePolicyService {
   }
 
   public async delete(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     ids: string[],
     options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean; force?: boolean }
@@ -507,7 +504,7 @@ class PackagePolicyService {
     return result;
   }
 
-  public async getUpgradePackagePolicyInfo(soClient: SavedObjectsClientContract, id: string) {
+  public async getUpgradePackagePolicyInfo(soClient: ISavedObjectsRepository, id: string) {
     const packagePolicy = await this.get(soClient, id);
     if (!packagePolicy) {
       throw new IngestManagerError(
@@ -575,7 +572,7 @@ class PackagePolicyService {
   }
 
   public async upgrade(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     ids: string[],
     options?: { user?: AuthenticatedUser }
@@ -633,7 +630,7 @@ class PackagePolicyService {
   }
 
   public async getUpgradeDryRunDiff(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     id: string
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
     try {
@@ -702,7 +699,7 @@ class PackagePolicyService {
   }
 
   public async enrichPolicyWithDefaultsFromPackage(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     newPolicy: NewPackagePolicy
   ): Promise<NewPackagePolicy> {
     let newPackagePolicy: NewPackagePolicy = newPolicy;
@@ -748,7 +745,7 @@ class PackagePolicyService {
   }
 
   public async buildPackagePolicyFromPackageWithVersion(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     pkgName: string,
     pkgVersion: string
   ): Promise<NewPackagePolicy | undefined> {
@@ -763,7 +760,7 @@ class PackagePolicyService {
   }
 
   public async buildPackagePolicyFromPackage(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     pkgName: string
   ): Promise<NewPackagePolicy | undefined> {
     const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName });
@@ -1377,10 +1374,7 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
   return result;
 }
 
-export async function incrementPackageName(
-  soClient: SavedObjectsClientContract,
-  packageName: string
-) {
+export async function incrementPackageName(soClient: ISavedObjectsRepository, packageName: string) {
   // Fetch all packagePolicies having the package name
   const packagePolicyData = await packagePolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,

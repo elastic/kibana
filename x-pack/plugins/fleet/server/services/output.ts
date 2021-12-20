@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObject } from 'src/core/server';
 import uuid from 'uuid/v5';
+
+import type { ISavedObjectsRepository } from 'kibana/server';
 
 import type { NewOutput, Output, OutputSOAttributes } from '../types';
 import { DEFAULT_OUTPUT, DEFAULT_OUTPUT_ID, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
@@ -45,7 +47,7 @@ function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>) {
 }
 
 class OutputService {
-  private async _getDefaultDataOutputsSO(soClient: SavedObjectsClientContract) {
+  private async _getDefaultDataOutputsSO(soClient: ISavedObjectsRepository) {
     return await soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
@@ -53,7 +55,7 @@ class OutputService {
     });
   }
 
-  private async _getDefaultMonitoringOutputsSO(soClient: SavedObjectsClientContract) {
+  private async _getDefaultMonitoringOutputsSO(soClient: ISavedObjectsRepository) {
     return await soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default_monitoring'],
@@ -61,7 +63,7 @@ class OutputService {
     });
   }
 
-  public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
+  public async ensureDefaultOutput(soClient: ISavedObjectsRepository) {
     const outputs = await this.list(soClient);
 
     const defaultOutput = outputs.items.find((o) => o.is_default);
@@ -98,7 +100,7 @@ class OutputService {
     return cloudHosts || flagHosts || DEFAULT_ES_HOSTS;
   }
 
-  public async getDefaultDataOutputId(soClient: SavedObjectsClientContract) {
+  public async getDefaultDataOutputId(soClient: ISavedObjectsRepository) {
     const outputs = await this._getDefaultDataOutputsSO(soClient);
 
     if (!outputs.saved_objects.length) {
@@ -108,7 +110,7 @@ class OutputService {
     return outputSavedObjectToOutput(outputs.saved_objects[0]).id;
   }
 
-  public async getDefaultMonitoringOutputId(soClient: SavedObjectsClientContract) {
+  public async getDefaultMonitoringOutputId(soClient: ISavedObjectsRepository) {
     const outputs = await this._getDefaultMonitoringOutputsSO(soClient);
 
     if (!outputs.saved_objects.length) {
@@ -119,7 +121,7 @@ class OutputService {
   }
 
   public async create(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     output: NewOutput,
     options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
   ): Promise<Output> {
@@ -169,7 +171,7 @@ class OutputService {
   }
 
   public async bulkGet(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     ids: string[],
     { ignoreNotFound = false } = { ignoreNotFound: true }
   ) {
@@ -191,7 +193,7 @@ class OutputService {
       .filter((output): output is Output => typeof output !== 'undefined');
   }
 
-  public async list(soClient: SavedObjectsClientContract) {
+  public async list(soClient: ISavedObjectsRepository) {
     const outputs = await soClient.find<OutputSOAttributes>({
       type: SAVED_OBJECT_TYPE,
       page: 1,
@@ -208,7 +210,7 @@ class OutputService {
     };
   }
 
-  public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
+  public async get(soClient: ISavedObjectsRepository, id: string): Promise<Output> {
     const outputSO = await soClient.get<OutputSOAttributes>(SAVED_OBJECT_TYPE, outputIdToUuid(id));
 
     if (outputSO.error) {
@@ -219,7 +221,7 @@ class OutputService {
   }
 
   public async delete(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     id: string,
     { fromPreconfiguration = false }: { fromPreconfiguration?: boolean } = {
       fromPreconfiguration: false,
@@ -245,7 +247,7 @@ class OutputService {
   }
 
   public async update(
-    soClient: SavedObjectsClientContract,
+    soClient: ISavedObjectsRepository,
     id: string,
     data: Partial<Output>,
     { fromPreconfiguration = false }: { fromPreconfiguration: boolean } = {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import type { ElasticsearchClient, ISavedObjectsRepository } from 'kibana/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference } from '../../../../types';
@@ -71,7 +71,7 @@ export const deleteTransforms = async (esClient: ElasticsearchClient, transformI
 };
 
 export const deleteTransformRefs = async (
-  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsClient: ISavedObjectsRepository,
   installedEsAssets: EsAssetReference[],
   pkgName: string,
   installedEsIdToRemove: string[],

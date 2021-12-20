@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsRepositoryMock } from 'src/core/server/mocks';
 
 import type { Installation, PackageInfo } from '../../common';
 
@@ -37,7 +37,7 @@ describe('upgradeManagedPackagePolicies', () => {
 
   it('should not upgrade policies for non-managed package', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    const soClient = savedObjectsClientMock.create();
+    const soClient = savedObjectsRepositoryMock.create();
 
     (packagePolicyService.get as jest.Mock).mockImplementationOnce(
       (savedObjectsClient: any, id: string) => {
@@ -89,7 +89,7 @@ describe('upgradeManagedPackagePolicies', () => {
 
   it('should upgrade policies for managed package', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    const soClient = savedObjectsClientMock.create();
+    const soClient = savedObjectsRepositoryMock.create();
 
     (packagePolicyService.get as jest.Mock).mockImplementationOnce(
       (savedObjectsClient: any, id: string) => {
@@ -142,7 +142,7 @@ describe('upgradeManagedPackagePolicies', () => {
   describe('when dry run reports conflicts', () => {
     it('should return errors + diff without performing upgrade', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const soClient = savedObjectsClientMock.create();
+      const soClient = savedObjectsRepositoryMock.create();
 
       (packagePolicyService.get as jest.Mock).mockImplementationOnce(
         (savedObjectsClient: any, id: string) => {

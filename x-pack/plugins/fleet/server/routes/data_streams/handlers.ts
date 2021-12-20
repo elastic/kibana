@@ -6,9 +6,8 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy, keys, merge } from 'lodash';
-import type { RequestHandler } from 'src/core/server';
 
-import type { DataStream } from '../../types';
+import type { DataStream, FleetRequestHandler } from '../../types';
 import { KibanaSavedObjectType } from '../../../common';
 import type { GetDataStreamsResponse } from '../../../common';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
@@ -43,7 +42,7 @@ interface ESDataStreamStats {
   maximum_timestamp: number;
 }
 
-export const getListHandler: RequestHandler = async (context, request, response) => {
+export const getListHandler: FleetRequestHandler = async (context, request, response) => {
   // Query datastreams as the current user as the Kibana internal user may not have all the required permission
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
@@ -64,7 +63,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
     ] = await Promise.all([
       esClient.indices.getDataStream({ name: DATA_STREAM_INDEX_PATTERN }),
       esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN }),
-      getPackageSavedObjects(context.core.savedObjects.client),
+      getPackageSavedObjects(context.fleet.epm.internalSoClient),
     ]);
 
     const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(dataStreamsInfo, 'name');
@@ -91,7 +90,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       allDashboards[pkgSavedObject.id] = dashboards;
       return allDashboards;
     }, {});
-    const allDashboardSavedObjectsResponse = await context.core.savedObjects.client.bulkGet<{
+    const allDashboardSavedObjectsResponse = await context.fleet.epm.internalSoClient.bulkGet<{
       title?: string;
     }>(
       Object.values(dashboardIdsByPackageName).flatMap((dashboardIds) =>

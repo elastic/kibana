@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 
 import type { AgentPolicy, Output } from '../../types';
 
@@ -136,7 +136,10 @@ describe('getFullAgentPolicy', () => {
     mockAgentPolicy({
       revision: 1,
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(
+      savedObjectsRepositoryMock.create(),
+      'agent-policy'
+    );
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -169,7 +172,10 @@ describe('getFullAgentPolicy', () => {
       revision: 1,
       monitoring_enabled: ['logs'],
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(
+      savedObjectsRepositoryMock.create(),
+      'agent-policy'
+    );
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -204,7 +210,10 @@ describe('getFullAgentPolicy', () => {
       revision: 1,
       monitoring_enabled: ['metrics'],
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(
+      savedObjectsRepositoryMock.create(),
+      'agent-policy'
+    );
 
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
@@ -239,7 +248,7 @@ describe('getFullAgentPolicy', () => {
       revision: 1,
       monitoring_enabled: ['metrics'],
     });
-    await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    await getFullAgentPolicy(savedObjectsRepositoryMock.create(), 'agent-policy');
 
     expect(mockedGetElasticAgentMonitoringPermissions).toHaveBeenCalledWith(
       expect.anything(),
@@ -258,7 +267,10 @@ describe('getFullAgentPolicy', () => {
       monitoring_enabled: ['metrics'],
       monitoring_output_id: 'monitoring-output-id',
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(
+      savedObjectsRepositoryMock.create(),
+      'agent-policy'
+    );
 
     expect(agentPolicy).toMatchSnapshot();
   });
@@ -270,7 +282,10 @@ describe('getFullAgentPolicy', () => {
       monitoring_enabled: ['metrics'],
       data_output_id: 'data-output-id',
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(
+      savedObjectsRepositoryMock.create(),
+      'agent-policy'
+    );
 
     expect(agentPolicy).toMatchSnapshot();
   });
@@ -283,7 +298,10 @@ describe('getFullAgentPolicy', () => {
       data_output_id: 'data-output-id',
       monitoring_output_id: 'monitoring-output-id',
     });
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(
+      savedObjectsRepositoryMock.create(),
+      'agent-policy'
+    );
 
     expect(agentPolicy).toMatchSnapshot();
   });
@@ -300,7 +318,10 @@ describe('getFullAgentPolicy', () => {
       monitoring_output_id: 'test-id',
     });
 
-    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+    const agentPolicy = await getFullAgentPolicy(
+      savedObjectsRepositoryMock.create(),
+      'agent-policy'
+    );
 
     expect(agentPolicy?.outputs.default).toBeDefined();
   });

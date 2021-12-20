@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
-import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClient } from 'src/core/server';
+import type { ElasticsearchClient, SavedObject, ISavedObjectsRepository } from 'src/core/server';
 
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
@@ -50,7 +51,7 @@ import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 
 export async function isPackageInstalled(options: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   pkgName: string;
 }): Promise<boolean> {
   const installedPackage = await getInstallation(options);
@@ -58,7 +59,7 @@ export async function isPackageInstalled(options: {
 }
 
 export async function isPackageVersionOrLaterInstalled(options: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   pkgName: string;
   pkgVersion: string;
 }): Promise<{ package: Installation; installType: InstallType } | false> {
@@ -81,7 +82,7 @@ export async function isPackageVersionOrLaterInstalled(options: {
 }
 
 export async function ensureInstalledPackage(options: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   pkgName: string;
   esClient: ElasticsearchClient;
   pkgVersion?: string;
@@ -146,7 +147,7 @@ export async function handleInstallPackageFailure({
   esClient,
   spaceId,
 }: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   error: IngestManagerError | Boom.Boom | Error;
   pkgName: string;
   pkgVersion: string;
@@ -204,7 +205,7 @@ export interface IBulkInstallPackageError {
 export type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
 
 interface InstallRegistryPackageParams {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   pkgkey: string;
   esClient: ElasticsearchClient;
   spaceId: string;
@@ -311,7 +312,7 @@ async function installPackageFromRegistry({
 
     const savedObjectsImporter = appContextService
       .getSavedObjects()
-      .createImporter(savedObjectsClient);
+      .createImporter(new SavedObjectsClient(savedObjectsClient));
 
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
@@ -369,7 +370,7 @@ async function installPackageFromRegistry({
 }
 
 interface InstallUploadedArchiveParams {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   esClient: ElasticsearchClient;
   archiveBuffer: Buffer;
   contentType: string;
@@ -425,7 +426,7 @@ async function installPackageByUpload({
 
     const savedObjectsImporter = appContextService
       .getSavedObjects()
-      .createImporter(savedObjectsClient);
+      .createImporter(new SavedObjectsClient(savedObjectsClient));
 
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
@@ -503,7 +504,7 @@ export async function installPackage(args: InstallPackageParams) {
 }
 
 export const updateVersion = async (
-  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsClient: ISavedObjectsRepository,
   pkgName: string,
   pkgVersion: string
 ) => {
@@ -517,7 +518,7 @@ export const updateInstallStatus = async ({
   pkgName,
   status,
 }: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   pkgName: string;
   status: EpmPackageInstallStatus;
 }) => {
@@ -527,7 +528,7 @@ export const updateInstallStatus = async ({
 };
 
 export async function createInstallation(options: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   packageInfo: InstallablePackage;
   installSource: InstallSource;
   spaceId: string;
@@ -570,7 +571,7 @@ export async function createInstallation(options: {
 }
 
 export const saveKibanaAssetsRefs = async (
-  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsClient: ISavedObjectsRepository,
   pkgName: string,
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
 ) => {
@@ -582,7 +583,7 @@ export const saveKibanaAssetsRefs = async (
 };
 
 export const saveInstalledEsRefs = async (
-  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsClient: ISavedObjectsRepository,
   pkgName: string,
   installedAssets: EsAssetReference[]
 ) => {
@@ -606,7 +607,7 @@ export const saveInstalledEsRefs = async (
 };
 
 export const removeAssetTypesFromInstalledEs = async (
-  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsClient: ISavedObjectsRepository,
   pkgName: string,
   assetTypes: AssetType[]
 ) => {
@@ -623,7 +624,7 @@ export const removeAssetTypesFromInstalledEs = async (
 };
 
 export async function ensurePackagesCompletedInstall(
-  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient
 ) {
   const installingPackages = await getPackageSavedObjects(savedObjectsClient, {

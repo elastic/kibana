@@ -23,7 +23,7 @@ export const updatePreconfigurationHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PutPreconfigurationSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const defaultOutput = await outputService.ensureDefaultOutput(soClient);
   const spaceId = context.fleet.spaceId;

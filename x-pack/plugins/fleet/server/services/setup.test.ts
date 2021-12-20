@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
+
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
 import { appContextService } from './app_context';
@@ -37,7 +39,7 @@ describe('setupFleet', () => {
 
   describe('should reject with any error thrown underneath', () => {
     it('SO client throws plain Error', async () => {
-      const soClient = context.core.savedObjects.client;
+      const soClient = savedObjectsRepositoryMock.create();
       soClient.create = mockedMethodThrowsError();
       soClient.find = mockedMethodThrowsError();
       soClient.get = mockedMethodThrowsError();
@@ -50,7 +52,7 @@ describe('setupFleet', () => {
     });
 
     it('SO client throws other error', async () => {
-      const soClient = context.core.savedObjects.client;
+      const soClient = savedObjectsRepositoryMock.create();
       soClient.create = mockedMethodThrowsCustom();
       soClient.find = mockedMethodThrowsCustom();
       soClient.get = mockedMethodThrowsCustom();

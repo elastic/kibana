@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
-import { savedObjectsClientMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import type { ISavedObjectsRepository, ElasticsearchClient } from 'src/core/server';
+import { savedObjectsRepositoryMock, elasticsearchServiceMock } from 'src/core/server/mocks';
 import { loggerMock } from '@kbn/logging/mocks';
 
 import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
@@ -37,11 +37,11 @@ function sleep(millis: number) {
 }
 
 describe('_installPackage', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
+  let soClient: jest.Mocked<ISavedObjectsRepository>;
   let esClient: jest.Mocked<ElasticsearchClient>;
 
   beforeEach(async () => {
-    soClient = savedObjectsClientMock.create();
+    soClient = savedObjectsRepositoryMock.create();
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
   });

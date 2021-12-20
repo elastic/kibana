@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { ISavedObjectsRepository } from 'kibana/server';
 
 import {
   decodeCloudId,
@@ -18,7 +18,7 @@ import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common'
 
 import { appContextService } from './app_context';
 
-export async function getSettings(soClient: SavedObjectsClientContract): Promise<Settings> {
+export async function getSettings(soClient: ISavedObjectsRepository): Promise<Settings> {
   const res = await soClient.find<SettingsSOAttributes>({
     type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   });
@@ -34,7 +34,7 @@ export async function getSettings(soClient: SavedObjectsClientContract): Promise
   };
 }
 
-export async function settingsSetup(soClient: SavedObjectsClientContract) {
+export async function settingsSetup(soClient: ISavedObjectsRepository) {
   try {
     const settings = await getSettings(soClient);
     // Migration for < 7.13 Kibana
@@ -57,7 +57,7 @@ export async function settingsSetup(soClient: SavedObjectsClientContract) {
 }
 
 export async function saveSettings(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   newData: Partial<Omit<Settings, 'id'>>
 ): Promise<Partial<Settings> & Pick<Settings, 'id'>> {
   const data = { ...newData };

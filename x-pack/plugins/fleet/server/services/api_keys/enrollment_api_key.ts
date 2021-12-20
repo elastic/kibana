@@ -9,7 +9,7 @@ import uuid from 'uuid';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { errors } from '@elastic/elasticsearch';
-import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import type { ISavedObjectsRepository, ElasticsearchClient } from 'src/core/server';
 
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 
@@ -151,7 +151,7 @@ export async function deleteEnrollmentApiKeyForAgentPolicyId(
 }
 
 export async function generateEnrollmentAPIKey(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   data: {
     name?: string;
@@ -314,7 +314,7 @@ export async function getEnrollmentAPIKeyById(esClient: ElasticsearchClient, api
   return enrollmentAPIKey;
 }
 
-async function validateAgentPolicyId(soClient: SavedObjectsClientContract, agentPolicyId: string) {
+async function validateAgentPolicyId(soClient: ISavedObjectsRepository, agentPolicyId: string) {
   try {
     await agentPolicyService.get(soClient, agentPolicyId);
   } catch (e) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'kibana/server';
+import type { ElasticsearchClient, Logger, ISavedObjectsRepository } from 'kibana/server';
 
 import { ElasticsearchAssetType } from '../../../../../common/types/models';
 import type {
@@ -36,7 +36,7 @@ export const installIlmForDataStream = async (
   registryPackage: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
-  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsClient: ISavedObjectsRepository,
   logger: Logger
 ) => {
   const installation = await getInstallation({ savedObjectsClient, pkgName: registryPackage.name });

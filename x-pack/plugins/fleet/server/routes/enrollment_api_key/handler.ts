@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type {
@@ -13,6 +11,7 @@ import type {
   PostEnrollmentAPIKeyRequestSchema,
   DeleteEnrollmentAPIKeyRequestSchema,
   GetOneEnrollmentAPIKeyRequestSchema,
+  FleetRequestHandler,
 } from '../../types';
 import type {
   GetEnrollmentAPIKeysResponse,
@@ -24,7 +23,7 @@ import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
 import { defaultIngestErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 
-export const getEnrollmentApiKeysHandler: RequestHandler<
+export const getEnrollmentApiKeysHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetEnrollmentAPIKeysRequestSchema.query>
 > = async (context, request, response) => {
@@ -50,12 +49,12 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
     return defaultIngestErrorHandler({ error, response });
   }
 };
-export const postEnrollmentApiKeyHandler: RequestHandler<
+export const postEnrollmentApiKeyHandler: FleetRequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PostEnrollmentAPIKeyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     // validate policy id
@@ -81,7 +80,7 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
   }
 };
 
-export const deleteEnrollmentApiKeyHandler: RequestHandler<
+export const deleteEnrollmentApiKeyHandler: FleetRequestHandler<
   TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
   const esClient = context.core.elasticsearch.client.asInternalUser;
@@ -101,7 +100,7 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<
   }
 };
 
-export const getOneEnrollmentApiKeyHandler: RequestHandler<
+export const getOneEnrollmentApiKeyHandler: FleetRequestHandler<
   TypeOf<typeof GetOneEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
   // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse

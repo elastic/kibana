@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
+import type { ISavedObjectsRepository, SavedObjectsFindOptions } from 'src/core/server';
 
 import {
   isPackageLimited,
@@ -43,7 +43,7 @@ export async function getCategories(options: GetCategoriesRequest['query']) {
 
 export async function getPackages(
   options: {
-    savedObjectsClient: SavedObjectsClientContract;
+    savedObjectsClient: ISavedObjectsRepository;
   } & Registry.SearchParams
 ) {
   const { savedObjectsClient, experimental, category } = options;
@@ -67,7 +67,7 @@ export async function getPackages(
 
 // Get package names for packages which cannot have more than one package policy on an agent policy
 export async function getLimitedPackages(options: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
 }): Promise<string[]> {
   const { savedObjectsClient } = options;
   const allPackages = await getPackages({ savedObjectsClient, experimental: true });
@@ -87,7 +87,7 @@ export async function getLimitedPackages(options: {
 }
 
 export async function getPackageSavedObjects(
-  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsClient: ISavedObjectsRepository,
   options?: Omit<SavedObjectsFindOptions, 'type'>
 ) {
   return savedObjectsClient.find<Installation>({
@@ -99,7 +99,7 @@ export async function getPackageSavedObjects(
 export const getInstallations = getPackageSavedObjects;
 
 export async function getPackageInfo(options: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   pkgName: string;
   pkgVersion: string;
 }): Promise<PackageInfo> {
@@ -143,7 +143,7 @@ export const getPackageUsageStats = async ({
   savedObjectsClient,
   pkgName,
 }: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   pkgName: string;
 }): Promise<PackageUsageStats> => {
   const filter = normalizeKuery(
@@ -187,7 +187,7 @@ export async function getPackageFromSource(options: {
   pkgName: string;
   pkgVersion: string;
   installedPkg?: Installation;
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
 }): Promise<PackageResponse> {
   const logger = appContextService.getLogger();
   const { pkgName, pkgVersion, installedPkg, savedObjectsClient } = options;
@@ -244,7 +244,7 @@ export async function getPackageFromSource(options: {
 }
 
 export async function getInstallationObject(options: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   pkgName: string;
 }) {
   const { savedObjectsClient, pkgName } = options;
@@ -254,7 +254,7 @@ export async function getInstallationObject(options: {
 }
 
 export async function getInstallation(options: {
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   pkgName: string;
 }) {
   const savedObject = await getInstallationObject(options);

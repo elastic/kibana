@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'kibana/server';
+import type { ElasticsearchClient, Logger, ISavedObjectsRepository } from 'kibana/server';
 import { errors } from '@elastic/elasticsearch';
 
 import { saveInstalledEsRefs } from '../../packages/install';
@@ -30,7 +30,7 @@ export const installTransform = async (
   installablePackage: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
-  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsClient: ISavedObjectsRepository,
   logger: Logger
 ) => {
   const installation = await getInstallation({

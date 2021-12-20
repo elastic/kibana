@@ -20,14 +20,13 @@ jest.mock('./common', () => {
 
 import { errors } from '@elastic/elasticsearch';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
+import type { ElasticsearchClient, SavedObject, ISavedObjectsRepository } from 'kibana/server';
 import { loggerMock } from '@kbn/logging/mocks';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { Installation, RegistryPackage } from '../../../../types';
 import { getInstallation, getInstallationObject } from '../../packages';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { savedObjectsRepositoryMock } from '../../../../../../../../src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../../../../src/core/server/elasticsearch/client/mocks';
 import { appContextService } from '../../../app_context';
@@ -39,13 +38,13 @@ import { getAsset } from './common';
 
 describe('test transform install', () => {
   let esClient: DeeplyMockedKeys<ElasticsearchClient>;
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: jest.Mocked<ISavedObjectsRepository>;
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
     esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReset();
     (getInstallationObject as jest.MockedFunction<typeof getInstallationObject>).mockReset();
-    savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient = savedObjectsRepositoryMock.create();
   });
 
   afterEach(() => {

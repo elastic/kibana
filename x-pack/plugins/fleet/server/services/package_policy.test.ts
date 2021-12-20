@@ -7,13 +7,14 @@
 
 import {
   elasticsearchServiceMock,
+  savedObjectsRepositoryMock,
   savedObjectsClientMock,
   httpServerMock,
 } from 'src/core/server/mocks';
 
 import type {
   SavedObjectsClient,
-  SavedObjectsClientContract,
+  ISavedObjectsRepository,
   SavedObjectsUpdateResponse,
 } from 'src/core/server';
 import type { KibanaRequest } from 'kibana/server';
@@ -620,7 +621,7 @@ describe('Package policy service', () => {
       appContextService.stop();
     });
     it('should fail to update on version conflict', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = savedObjectsRepositoryMock.create();
       savedObjectsClient.get.mockResolvedValue({
         id: 'test',
         type: 'abcd',
@@ -633,7 +634,7 @@ describe('Package policy service', () => {
           _type: string,
           _id: string
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          throw savedObjectsClient.errors.createConflictError('abc', '123');
+          throw savedObjectsClientMock.create().errors.createConflictError('abc', '123');
         }
       );
       const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -648,7 +649,7 @@ describe('Package policy service', () => {
     });
 
     it('should only update input vars that are not frozen', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = savedObjectsRepositoryMock.create();
       const mockPackagePolicy = createPackagePolicyMock();
       const mockInputs = [
         {
@@ -775,7 +776,7 @@ describe('Package policy service', () => {
     });
 
     it('should add new input vars when updating', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = savedObjectsRepositoryMock.create();
       const mockPackagePolicy = createPackagePolicyMock();
       const mockInputs = [
         {
@@ -898,7 +899,7 @@ describe('Package policy service', () => {
     });
 
     it('should update elasticsearch.priviles.cluster when updating', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient = savedObjectsRepositoryMock.create();
       const mockPackagePolicy = createPackagePolicyMock();
 
       const attributes = {
@@ -2880,7 +2881,7 @@ describe('Package policy service', () => {
         package: { name: 'apache', version: '0.3.3' },
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
-        savedObjectsClientMock.create(),
+        savedObjectsRepositoryMock.create(),
         newPolicy
       );
       expect(result).toEqual({
@@ -2956,7 +2957,7 @@ describe('Package policy service', () => {
         package: { name: 'aws', version: '1.0.0' },
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
-        savedObjectsClientMock.create(),
+        savedObjectsRepositoryMock.create(),
         newPolicy
       );
       expect(result).toEqual({
@@ -3018,7 +3019,7 @@ describe('Package policy service', () => {
         package: { name: 'apache', version: '1.0.0' } as PackagePolicyPackage,
       } as NewPackagePolicy;
       const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
-        savedObjectsClientMock.create(),
+        savedObjectsRepositoryMock.create(),
         newPolicy
       );
       expect(result).toEqual({
@@ -3055,9 +3056,9 @@ describe('Package policy service', () => {
   });
 
   describe('upgrade package policy info', () => {
-    let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+    let savedObjectsClient: jest.Mocked<ISavedObjectsRepository>;
     beforeEach(() => {
-      savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient = savedObjectsRepositoryMock.create();
     });
     function mockPackage(pkgName: string) {
       const mockPackagePolicy = createPackagePolicyMock();

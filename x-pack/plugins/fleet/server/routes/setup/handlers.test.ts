@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { httpServerMock, savedObjectsRepositoryMock } from 'src/core/server/mocks';
 
 import type { PostFleetSetupResponse } from '../../../common';
 import { RegistryError } from '../../errors';
@@ -43,7 +43,7 @@ describe('FleetSetupHandler', () => {
         },
         authz: createFleetAuthzMock(),
         epm: {
-          internalSoClient: savedObjectsClientMock.create(),
+          internalSoClient: savedObjectsRepositoryMock.create(),
         },
         spaceId: 'default',
       },

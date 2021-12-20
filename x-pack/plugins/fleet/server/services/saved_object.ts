@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, SavedObjectsFindResponse } from 'src/core/server';
+import type { ISavedObjectsRepository, SavedObjectsFindResponse } from 'src/core/server';
 
 import { SO_SEARCH_LIMIT } from '../constants';
 import type { ListWithKuery } from '../types';
@@ -36,7 +36,7 @@ export const normalizeKuery = (savedObjectType: string, kuery: string): string =
 // due to SO client limitations (see comments below), so is a placeholder for when SO
 // client is improved.
 export const findAllSOs = async <T = unknown>(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   options: Omit<ListWithKuery, 'page' | 'perPage'> & {
     type: string;
   }

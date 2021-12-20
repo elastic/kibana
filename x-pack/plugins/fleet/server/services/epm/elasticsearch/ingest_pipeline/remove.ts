@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, ISavedObjectsRepository } from 'src/core/server';
 
 import { appContextService } from '../../../';
 import { ElasticsearchAssetType } from '../../../../types';
@@ -16,7 +16,7 @@ import type { EsAssetReference } from '../../../../../common';
 
 export const deletePreviousPipelines = async (
   esClient: ElasticsearchClient,
-  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsClient: ISavedObjectsRepository,
   pkgName: string,
   previousPkgVersion: string
 ) => {
@@ -44,7 +44,7 @@ export const deletePreviousPipelines = async (
 };
 
 export const deletePipelineRefs = async (
-  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsClient: ISavedObjectsRepository,
   installedEsAssets: EsAssetReference[],
   pkgName: string,
   pkgVersion: string

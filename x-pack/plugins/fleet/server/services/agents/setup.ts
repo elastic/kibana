@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, ISavedObjectsRepository } from 'src/core/server';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
@@ -14,7 +14,7 @@ import { agentPolicyService } from '../agent_policy';
  * Ensure a .fleet-policy document exist for each agent policy so Fleet server can retrieve it
  */
 export async function ensureFleetServerAgentPoliciesExists(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient
 ) {
   const { items: agentPolicies } = await agentPolicyService.list(soClient, {

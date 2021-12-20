@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 
 import type { Installation, PackageInfo } from '../../types';
 import { getPackageInfo, getInstallation } from '../epm/packages';
@@ -21,7 +21,7 @@ describe('getMonitoringPermissions', () => {
   describe('Without elastic agent package installed', () => {
     it('should return default logs and metrics permissions if both are enabled', async () => {
       const permissions = await getMonitoringPermissions(
-        savedObjectsClientMock.create(),
+        savedObjectsRepositoryMock.create(),
         { logs: true, metrics: true },
         'testnamespace123'
       );
@@ -29,7 +29,7 @@ describe('getMonitoringPermissions', () => {
     });
     it('should return default logs permissions if only logs are enabled', async () => {
       const permissions = await getMonitoringPermissions(
-        savedObjectsClientMock.create(),
+        savedObjectsRepositoryMock.create(),
         { logs: true, metrics: false },
         'testnamespace123'
       );
@@ -37,7 +37,7 @@ describe('getMonitoringPermissions', () => {
     });
     it('should return default metrics permissions if only metrics are enabled', async () => {
       const permissions = await getMonitoringPermissions(
-        savedObjectsClientMock.create(),
+        savedObjectsRepositoryMock.create(),
         { logs: false, metrics: true },
         'testnamespace123'
       );
@@ -75,7 +75,7 @@ describe('getMonitoringPermissions', () => {
     });
     it('should return default logs and metrics permissions if both are enabled', async () => {
       const permissions = await getMonitoringPermissions(
-        savedObjectsClientMock.create(),
+        savedObjectsRepositoryMock.create(),
         { logs: true, metrics: true },
         'testnamespace123'
       );
@@ -83,7 +83,7 @@ describe('getMonitoringPermissions', () => {
     });
     it('should return default logs permissions if only logs are enabled', async () => {
       const permissions = await getMonitoringPermissions(
-        savedObjectsClientMock.create(),
+        savedObjectsRepositoryMock.create(),
         { logs: true, metrics: false },
         'testnamespace123'
       );
@@ -91,7 +91,7 @@ describe('getMonitoringPermissions', () => {
     });
     it('should return default metrics permissions if only metrics are enabled', async () => {
       const permissions = await getMonitoringPermissions(
-        savedObjectsClientMock.create(),
+        savedObjectsRepositoryMock.create(),
         { logs: false, metrics: true },
         'testnamespace123'
       );

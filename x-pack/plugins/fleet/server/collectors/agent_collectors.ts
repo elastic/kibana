@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClient, ElasticsearchClient } from 'kibana/server';
+import type { ISavedObjectsRepository, ElasticsearchClient } from 'kibana/server';
 
 import type { FleetConfigType } from '../../common/types';
 import * as AgentService from '../services/agents';
@@ -21,7 +21,7 @@ export interface AgentUsage {
 
 export const getAgentUsage = async (
   config: FleetConfigType,
-  soClient?: SavedObjectsClient,
+  soClient?: ISavedObjectsRepository,
   esClient?: ElasticsearchClient
 ): Promise<AgentUsage> => {
   // TODO: unsure if this case is possible at all.

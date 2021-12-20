@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
+import type { ISavedObjectsRepository, ElasticsearchClient } from 'kibana/server';
 import Boom from '@hapi/boom';
 
 import type { Agent, BulkActionResult } from '../../types';
@@ -24,7 +24,7 @@ import { createAgentAction, bulkCreateAgentActions } from './actions';
 import { searchHitToAgent } from './helpers';
 
 export async function reassignAgent(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   agentId: string,
   newAgentPolicyId: string
@@ -49,7 +49,7 @@ export async function reassignAgent(
 }
 
 export async function reassignAgentIsAllowed(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   agentId: string,
   newAgentPolicyId: string
@@ -75,7 +75,7 @@ function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetG
   return Boolean(doc && 'found' in doc);
 }
 export async function reassignAgents(
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   options: ({ agents: Agent[] } | GetAgentsOptions) & { force?: boolean },
   newAgentPolicyId: string
