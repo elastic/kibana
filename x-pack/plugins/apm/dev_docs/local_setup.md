@@ -22,6 +22,7 @@ yarn es snapshot
 ```
 node ./scripts/es_archiver load "x-pack/plugins/apm/ftr_e2e/cypress/fixtures/es_archiver/apm_mappings_only_8.0.0" --es-url=http://elastic:changeme@localhost:9200 --kibana-url=http://elastic:changeme@localhost:5601 --config=./test/functional/config.js
 ```
+*Make sure to execute node ./scripts/es_archiver after Elasticsearch is up and running!*
 
 **Run Synthtrace**
 ```
