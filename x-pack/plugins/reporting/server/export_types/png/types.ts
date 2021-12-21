@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { JobParamsPNG, TaskPayloadPNG } from '../../../common/types';
+export type { JobParamsPNG, TaskPayloadPNG } from '../../../common/types/export_types/png';
