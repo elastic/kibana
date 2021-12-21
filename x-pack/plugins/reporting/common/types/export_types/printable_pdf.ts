@@ -25,8 +25,3 @@ export interface TaskPayloadPDF extends BasePayload {
   forceNow?: string;
   objects: Array<{ relativeUrl: string }>;
 }
-
-export interface JobParamsPDFLegacy extends Omit<JobParamsPDF, 'relativeUrls'> {
-  savedObjectId: string;
-  queryString: string;
-}
