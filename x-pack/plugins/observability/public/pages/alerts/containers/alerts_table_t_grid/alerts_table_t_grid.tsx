@@ -10,12 +10,7 @@
  * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
  * This way plugins can do targeted imports to reduce the final code bundle
  */
-import {
-  ALERT_DURATION,
-  ALERT_REASON,
-  ALERT_STATUS,
-  TIMESTAMP,
-} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_DURATION, ALERT_REASON, ALERT_STATUS, TIMESTAMP } from '@kbn/rule-data-utils';
 
 import {
   EuiButtonIcon,
