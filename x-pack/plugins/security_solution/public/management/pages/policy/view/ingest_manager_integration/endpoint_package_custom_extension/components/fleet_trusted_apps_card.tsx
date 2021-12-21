@@ -20,7 +20,7 @@ import {
   StyledEuiFlexItem,
 } from './styled_components';
 
-interface FleetTrustedAppsCardProps {
+export interface FleetTrustedAppsCardProps {
   customLink: React.ReactNode;
   policyId?: string;
   cardSize?: 'm' | 'l';
@@ -46,7 +46,7 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
               per_page: 1,
               kuery: `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`,
             });
-            if (isMounted) {
+            if (isMounted.current) {
               setStats({
                 total: response.total,
                 windows: 0,
@@ -56,7 +56,7 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
             }
           } else {
             response = await trustedAppsApi.getTrustedAppsSummary();
-            if (isMounted) {
+            if (isMounted.current) {
               setStats({
                 total: response.total,
                 windows: response.windows,
@@ -80,11 +80,13 @@ export const FleetTrustedAppsCard = memo<FleetTrustedAppsCardProps>(
           }
         }
       };
-      fetchStats();
+      if (!stats) {
+        fetchStats();
+      }
       return () => {
         isMounted.current = false;
       };
-    }, [toasts, trustedAppsApi, policyId]);
+    }, [toasts, trustedAppsApi, policyId, stats]);
 
     const getTitleMessage = () => (
       <FormattedMessage
