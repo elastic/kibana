@@ -13,8 +13,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('', () => {
-    it('finds an index pattern', async () => {
-      await testSubjects.existOrFail('indexPatternTitle');
+    it('finds a data view', async () => {
+      await testSubjects.existOrFail('dataViewTitle');
     });
     it('opens the field editor', async () => {
       await testSubjects.click('addField');
