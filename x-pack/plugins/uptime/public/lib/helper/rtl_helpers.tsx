@@ -63,17 +63,17 @@ interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore
 }
 
 function getSetting<T = any>(key: string): T {
-  return ('MMM D, YYYY @ HH:mm:ss.SSS' as unknown) as T;
+  return 'MMM D, YYYY @ HH:mm:ss.SSS' as unknown as T;
 }
 
 function setSetting$<T = any>(key: string): T {
-  return (of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown) as T;
+  return of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown as T;
 }
 
 const createMockStore = () => {
   let store: Record<string, any> = {};
   return {
-    get: jest.fn().mockImplementation(key => store[key]),
+    get: jest.fn().mockImplementation((key) => store[key]),
     set: jest.fn().mockImplementation((key, value) => (store[key] = value)),
     remove: jest.fn().mockImplementation((key: string) => delete store[key]),
     clear: jest.fn().mockImplementation(() => (store = {})),
