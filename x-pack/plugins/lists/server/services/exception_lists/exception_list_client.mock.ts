@@ -18,6 +18,7 @@ import {
 import { ExtensionPointStorage, ExtensionPointStorageClientInterface } from '../extension_points';
 
 import { ExceptionListClient } from './exception_list_client';
+import { CreateExceptionListItemOptions } from './exception_list_client_types';
 
 export class ExceptionListClientMock extends ExceptionListClient {
   public getExceptionList = jest.fn().mockResolvedValue(getExceptionListSchemaMock());
@@ -57,4 +58,34 @@ export const getExceptionListClientMock = (
     user: 'elastic',
   });
   return mock;
+};
+
+export const getCreateExceptionListItemOptionsMock = (): CreateExceptionListItemOptions => {
+  const {
+    comments,
+    description,
+    entries,
+    item_id: itemId,
+    list_id: listId,
+    meta,
+    name,
+    namespace_type: namespaceType,
+    os_types: osTypes,
+    tags,
+    type,
+  } = getExceptionListItemSchemaMock();
+
+  return {
+    comments,
+    description,
+    entries,
+    itemId,
+    listId,
+    meta,
+    name,
+    namespaceType,
+    osTypes,
+    tags,
+    type,
+  };
 };
