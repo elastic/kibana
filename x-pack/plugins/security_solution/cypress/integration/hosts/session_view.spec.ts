@@ -167,7 +167,8 @@ describe('Session view', () => {
         })
       })
     })
-
+    //Commented out Root Escalation check until we have better filtering
+/*
     it('root escalation', () => {
       openSessionView(TEST_EVENT_ID);
 
@@ -185,5 +186,6 @@ describe('Session view', () => {
         })
       })
     });
+    */
   });
 });
