@@ -114,6 +114,7 @@ filegroup(
       "//packages/kbn-securitysolution-rules:build_types",
       "//packages/kbn-securitysolution-t-grid:build_types",
       "//packages/kbn-securitysolution-utils:build_types",
+      "//packages/kbn-telemetry-tools:build_types",
   ],
 )
 
