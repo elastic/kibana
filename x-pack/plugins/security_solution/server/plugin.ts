@@ -71,6 +71,10 @@ import { registerEventLogProvider } from './lib/detection_engine/rule_execution_
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
 import { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
+// eslint-disable-next-line no-restricted-imports
+import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
+// eslint-disable-next-line no-restricted-imports
+import { legacyIsNotificationAlertExecutor } from './lib/detection_engine/notifications/legacy_types';
 import { createSecurityRuleTypeWrapper } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 
 import { RequestContextFactory } from './request_context_factory';
@@ -274,6 +278,14 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
     plugins.features.registerKibanaFeature(getCasesKibanaFeature());
+
+    if (plugins.alerting != null) {
+      const ruleNotificationType = legacyRulesNotificationAlertType({ logger });
+
+      if (legacyIsNotificationAlertExecutor(ruleNotificationType)) {
+        plugins.alerting.registerType(ruleNotificationType);
+      }
+    }
 
     const exceptionListsSetupEnabled = () => {
       return plugins.taskManager && plugins.lists;
