@@ -1,0 +1,101 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Split panel should render correctly 1`] = `
+<PanelsContainer>
+  <PanelContextProvider
+    registry={
+      PanelRegistry {
+        "panels": Array [
+          Object {
+            "getWidth": [Function],
+            "setWidth": [Function],
+            "width": 100,
+          },
+          Object {
+            "getWidth": [Function],
+            "setWidth": [Function],
+            "width": 100,
+          },
+        ],
+      }
+    }
+  >
+    <div
+      onMouseMove={[Function]}
+      onMouseUp={[Function]}
+      style={
+        Object {
+          "display": "flex",
+          "height": "100%",
+          "width": "100%",
+        }
+      }
+    >
+      <Panel
+        key=".0"
+      >
+        <div
+          style={
+            Object {
+              "display": "flex",
+              "width": "100%",
+            }
+          }
+        >
+          <p
+            style={
+              Object {
+                "width": "50px",
+              }
+            }
+          >
+            A
+          </p>
+        </div>
+      </Panel>
+      <Resizer
+        key="resizer"
+        onKeyDown={[Function]}
+        onMouseDown={[Function]}
+      >
+        <button
+          aria-label="Press left/right to adjust panels size"
+          data-test-subj="splitPanelResizer"
+          onKeyDown={[Function]}
+          onMouseDown={[Function]}
+        >
+          <EuiIcon
+            type="grabHorizontal"
+          >
+            <span
+              data-euiicon-type="grabHorizontal"
+            />
+          </EuiIcon>
+        </button>
+      </Resizer>
+      <Panel
+        key=".1"
+      >
+        <div
+          style={
+            Object {
+              "display": "flex",
+              "width": "100%",
+            }
+          }
+        >
+          <p
+            style={
+              Object {
+                "width": "50px",
+              }
+            }
+          >
+            B
+          </p>
+        </div>
+      </Panel>
+    </div>
+  </PanelContextProvider>
+</PanelsContainer>
+`;
