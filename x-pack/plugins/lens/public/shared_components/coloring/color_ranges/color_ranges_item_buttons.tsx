@@ -47,7 +47,6 @@ export function ColorRangeDeleteButton({
         defaultMessage: 'Delete',
       })}
       onClick={onExecuteAction}
-      disabled={colorRanges.length === 2}
       data-test-subj={`dynamicColoring_removeColorRange_${index}`}
     />
   );

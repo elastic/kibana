@@ -283,6 +283,7 @@ export function getStepValue(colorStops: ColorStop[], newColorStops: ColorStop[]
   return step;
 }
 
+// @todo: for refactoriong
 export function getAutoValues(
   { first, preLast, last }: { first: number; preLast: number; last: number },
   rangeType: CustomPaletteParams['rangeType'],
@@ -296,7 +297,6 @@ export function getAutoValues(
   );
 
   const max = dataMax > last ? dataMax : last + step;
-
   const min = dataMin < first ? dataMin : first - step;
 
   return { max, min };

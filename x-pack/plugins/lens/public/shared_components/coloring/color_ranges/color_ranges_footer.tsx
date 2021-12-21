@@ -33,6 +33,8 @@ export function ColorRangesFooter({
     paletteConfiguration?.maxSteps && colorRanges.length >= paletteConfiguration?.maxSteps
   );
 
+  const hasOneColorRange = colorRanges.length === 1;
+
   const onAddColorRange = useCallback(() => {
     dispatch({
       type: 'addColorRange',
@@ -93,6 +95,7 @@ export function ColorRangesFooter({
           size="xs"
           flush="left"
           onClick={onReversePalette}
+          disabled={hasOneColorRange}
         >
           <FormattedMessage
             id="xpack.lens.dynamicColoring.customPalette.reverseColors"
@@ -111,6 +114,7 @@ export function ColorRangesFooter({
           )}
           size="xs"
           flush="left"
+          disabled={hasOneColorRange}
           onClick={onDistributeEqually}
         >
           <FormattedMessage
