@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Assign } from '@kbn/utility-types';
+import { CustomPaletteParamsConfig } from '../../../../common';
 
 /** @deprecated **/
 export type AutoValueMode = 'none' | 'min' | 'max' | 'all';
@@ -36,9 +36,45 @@ export interface ColorRangesState {
 }
 
 /** @internal **/
-export type ColorRangesUpdateFn = (
-  state: Assign<ColorRangesState, { autoValue?: AutoValueMode }>
-) => void;
+export interface AddColorRangePayload {
+  rangeType: CustomPaletteParamsConfig['rangeType'];
+  dataBounds: DataBounds;
+}
+
+/** @internal **/
+export interface UpdateColorPayload {
+  index: number;
+  color: string;
+}
+
+/** @internal **/
+export interface UpdateColorRangeValuePayload {
+  index: number;
+  value: string;
+  accessor: ColorRangeAccessor;
+}
+
+/** @internal **/
+export interface DeleteColorRangePayload {
+  index: number;
+}
+
+/** @internal **/
+export type ColorRangesActions =
+  | { type: 'reversePalette' }
+  | { type: 'sortColorRanges' }
+  | { type: 'distributeEqually' }
+  | { type: 'set'; payload: ColorRangesState }
+  | { type: 'deleteColorRange'; payload: DeleteColorRangePayload }
+  | {
+      type: 'addColorRange';
+      payload: AddColorRangePayload;
+    }
+  | { type: 'updateColor'; payload: UpdateColorPayload }
+  | {
+      type: 'updateValue';
+      payload: UpdateColorRangeValuePayload;
+    };
 
 /** @internal **/
 export type ColorRangeAccessor = 'start' | 'end';

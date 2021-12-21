@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, Dispatch, FocusEvent } from 'react';
 import { i18n } from '@kbn/i18n';
-
-import type { FocusEvent } from 'react';
 
 import {
   EuiFieldNumber,
@@ -22,7 +20,6 @@ import {
 
 import { RelatedIcon } from '../../../assets/related';
 import { isValidColor } from '../utils';
-import { sortColorRanges, updateColorRangeColor, updateColorRangeValue } from './utils';
 import {
   ColorRangeDeleteButton,
   ColorRangeAutoDetectButton,
@@ -34,8 +31,8 @@ import type {
   ColorRange,
   DataBounds,
   ColorRangeAccessor,
-  ColorRangesUpdateFn,
   ColorRangeValidation,
+  ColorRangesActions,
 } from './types';
 
 import type { CustomPaletteParamsConfig } from '../../../../common';
@@ -46,7 +43,7 @@ export interface ColorRangesItemProps {
   colorRanges: ColorRange[];
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
   colorRangeValidation?: ColorRangeValidation;
-  setColorRanges: ColorRangesUpdateFn;
+  dispatch: Dispatch<ColorRangesActions>;
   dataBounds: DataBounds;
   accessor: ColorRangeAccessor;
 }
@@ -59,7 +56,7 @@ export function ColorRangeItem({
   colorRanges,
   colorRangeValidation,
   paletteConfiguration,
-  setColorRanges,
+  dispatch,
 }: ColorRangesItemProps) {
   const value = `${colorRange[accessor]}`;
   const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
@@ -95,19 +92,10 @@ export function ColorRangeItem({
         (e.currentTarget as Node)?.contains(e.relatedTarget as Node) || popoverInFocus;
 
       if (shouldSort && !isFocusStillInContent) {
-        const newColorRanges = sortColorRanges(colorRanges);
-        const lastRange = newColorRanges[newColorRanges.length - 1];
-
-        if (lastRange.start > lastRange.end && !isLast) {
-          const oldEnd = lastRange.end;
-          lastRange.end = lastRange.start;
-          lastRange.start = oldEnd;
-        }
-
-        setColorRanges({ colorRanges: newColorRanges });
+        dispatch({ type: 'sortColorRanges' });
       }
     },
-    [colorRange.start, colorRanges, index, isLast, popoverInFocus, setColorRanges]
+    [colorRange.start, colorRanges, dispatch, index, popoverInFocus]
   );
 
   const onValueChange = useCallback(
@@ -115,18 +103,16 @@ export function ColorRangeItem({
       const newValue = target.value;
 
       setLocalValue(newValue);
-      setColorRanges({
-        colorRanges: updateColorRangeValue(index, newValue, accessor, colorRanges),
-      });
+      dispatch({ type: 'updateValue', payload: { index, value: newValue, accessor } });
     },
-    [accessor, colorRanges, index, setColorRanges]
+    [dispatch, index, accessor]
   );
 
   const onUpdateColor = useCallback(
     (color: string) => {
-      setColorRanges({ colorRanges: updateColorRangeColor(index, color, colorRanges) });
+      dispatch({ type: 'updateColor', payload: { index, color } });
     },
-    [colorRanges, index, setColorRanges]
+    [dispatch, index]
   );
 
   const isInvalid = !(colorRangeValidation?.isValid ?? true);
@@ -201,7 +187,7 @@ export function ColorRangeItem({
               dataBounds={dataBounds}
               paletteConfiguration={paletteConfiguration}
               colorRanges={colorRanges}
-              setColorRanges={setColorRanges}
+              dispatch={dispatch}
               accessor={accessor}
             />
           </EuiFlexItem>

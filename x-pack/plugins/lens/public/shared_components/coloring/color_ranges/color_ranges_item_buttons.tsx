@@ -5,37 +5,35 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { Dispatch, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon } from '@elastic/eui';
 
 import { ValueMaxIcon } from '../../../assets/value_max';
 import { ValueMinIcon } from '../../../assets/value_min';
-import { deleteColorRange } from './utils';
 import { getAutoValues, getDataMinMax, getStepValue, roundValue } from '../utils';
 
-import type { ColorRange } from './types';
 import type { CustomPaletteParamsConfig } from '../../../../common';
-import type { DataBounds, ColorRangesUpdateFn, AutoValueMode } from './types';
+import type { DataBounds, AutoValueMode, ColorRangesActions, ColorRange } from './types';
 
 export interface ColorRangesItemButtonProps {
   colorRanges: ColorRange[];
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
   dataBounds: DataBounds;
-  setColorRanges: ColorRangesUpdateFn;
+  dispatch: Dispatch<ColorRangesActions>;
   index: number;
   accessor: 'start' | 'end';
 }
 
 export function ColorRangeDeleteButton({
   index,
+  dispatch,
   colorRanges,
-  setColorRanges,
 }: ColorRangesItemButtonProps) {
   const onExecuteAction = useCallback(() => {
-    setColorRanges({ colorRanges: deleteColorRange(index, colorRanges) });
-  }, [colorRanges, index, setColorRanges]);
+    dispatch({ type: 'deleteColorRange', payload: { index } });
+  }, [dispatch, index]);
 
   return (
     <EuiButtonIcon
@@ -48,6 +46,7 @@ export function ColorRangeDeleteButton({
         defaultMessage: 'Delete',
       })}
       onClick={onExecuteAction}
+      disabled={colorRanges.length === 2}
       data-test-subj={`dynamicColoring_removeColorRange_${index}`}
     />
   );
@@ -58,7 +57,7 @@ export function ColorRangeEditButton({
   dataBounds,
   colorRanges,
   paletteConfiguration,
-  setColorRanges,
+  dispatch,
   accessor,
 }: ColorRangesItemButtonProps) {
   const rangeType = paletteConfiguration?.rangeType ?? 'percent';
@@ -86,8 +85,8 @@ export function ColorRangeEditButton({
 
     colorRanges[index][isLast ? 'end' : 'start'] = roundValue(newValue);
 
-    setColorRanges({ colorRanges: [...colorRanges], autoValue: newAutoValue });
-  }, [isLast, autoValue, colorRanges, dataBounds, index, rangeType, setColorRanges]);
+    dispatch({ type: 'set', payload: { colorRanges: [...colorRanges], autoValue: newAutoValue } });
+  }, [rangeType, dataBounds, colorRanges, isLast, index, dispatch, autoValue]);
 
   return (
     <EuiButtonIcon
@@ -109,7 +108,7 @@ export function ColorRangeAutoDetectButton({
   dataBounds,
   colorRanges,
   paletteConfiguration,
-  setColorRanges,
+  dispatch,
   accessor,
 }: ColorRangesItemButtonProps) {
   const rangeType = paletteConfiguration?.rangeType ?? 'percent';
@@ -136,8 +135,9 @@ export function ColorRangeAutoDetectButton({
     }
 
     colorRanges[index][isLast ? 'end' : 'start'] = newValue;
-    setColorRanges({ colorRanges: [...colorRanges], autoValue: newAutoValue });
-  }, [autoValue, colorRanges, dataBounds, index, isLast, rangeType, setColorRanges]);
+
+    dispatch({ type: 'set', payload: { colorRanges: [...colorRanges], autoValue: newAutoValue } });
+  }, [autoValue, colorRanges, dataBounds, dispatch, index, isLast, rangeType]);
 
   return (
     <EuiButtonIcon

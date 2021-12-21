@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { last } from 'lodash';
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
-import type { CustomPaletteParamsConfig, ColorStop } from '../../../../common';
-import type { ColorRange, DataBounds } from './types';
-
-import { ColorRangesActions } from './color_ranges_actions';
+import { ColorRangesFooter } from './color_ranges_footer';
 import { ColorRangeItem } from './color_ranges_item';
+import { colorRangesReducer } from './color_ranges_reducer';
 import { validateColorRanges } from './utils';
 
-import type { ColorRangeValidation, ColorRangesUpdateFn } from './types';
-import { ColorRangesState } from './types';
+import type { CustomPaletteParamsConfig, ColorStop } from '../../../../common';
+import type { ColorRange, DataBounds, ColorRangeValidation } from './types';
 
 export interface ColorRangesProps {
   colorRanges: ColorRange[];
@@ -37,7 +36,7 @@ export function ColorRanges({
   dataBounds,
   paletteConfiguration,
 }: ColorRangesProps) {
-  const [localState, setLocalState] = useState<ColorRangesState>({
+  const [localState, dispatch] = useReducer(colorRangesReducer, {
     colorRanges,
     autoValue: paletteConfiguration?.autoValue ?? 'none',
   });
@@ -74,12 +73,7 @@ export function ColorRanges({
     [localState]
   );
 
-  const onChangeColorRanges: ColorRangesUpdateFn = useCallback(
-    ({ colorRanges: newColorRanges, autoValue = localState.autoValue }) => {
-      setLocalState({ colorRanges: newColorRanges, autoValue });
-    },
-    [localState.autoValue]
-  );
+  const lastColorRange = last(localState.colorRanges);
 
   return (
     <>
@@ -92,7 +86,7 @@ export function ColorRanges({
           <ColorRangeItem
             key={`${colorRange.end ?? 0 + colorRange.start ?? 0}${index}`}
             colorRange={colorRange}
-            setColorRanges={onChangeColorRanges}
+            dispatch={dispatch}
             colorRanges={localState.colorRanges}
             paletteConfiguration={paletteConfiguration}
             dataBounds={dataBounds}
@@ -101,20 +95,22 @@ export function ColorRanges({
             accessor="start"
           />
         ))}
-        <ColorRangeItem
-          colorRange={localState.colorRanges[colorRanges.length - 1]}
-          setColorRanges={onChangeColorRanges}
-          colorRanges={localState.colorRanges}
-          paletteConfiguration={paletteConfiguration}
-          dataBounds={dataBounds}
-          index={localState.colorRanges.length - 1}
-          colorRangeValidation={colorRangesValidity.last}
-          accessor="end"
-        />
+        {lastColorRange ? (
+          <ColorRangeItem
+            colorRange={lastColorRange}
+            dispatch={dispatch}
+            colorRanges={localState.colorRanges}
+            paletteConfiguration={paletteConfiguration}
+            dataBounds={dataBounds}
+            index={localState.colorRanges.length - 1}
+            colorRangeValidation={colorRangesValidity.last}
+            accessor="end"
+          />
+        ) : null}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <ColorRangesActions
-        setColorRanges={onChangeColorRanges}
+      <ColorRangesFooter
+        dispatch={dispatch}
         colorRanges={localState.colorRanges}
         dataBounds={dataBounds}
         paletteConfiguration={paletteConfiguration}

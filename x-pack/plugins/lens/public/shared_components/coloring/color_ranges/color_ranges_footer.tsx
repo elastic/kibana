@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, Dispatch } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,40 +13,40 @@ import { EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import { DistributeEquallyIcon } from '../../../assets/distribute_equally';
 import { TooltipWrapper } from '../../index';
 
-import type { ColorRange, DataBounds, ColorRangesUpdateFn } from './types';
+import type { ColorRange, DataBounds, ColorRangesActions } from './types';
 import type { CustomPaletteParamsConfig } from '../../../../common';
-import { reversePalette, addColorRange, distributeEqually } from './utils';
 
 export interface ColorRangesActionsProps {
   colorRanges: ColorRange[];
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
-  setColorRanges: ColorRangesUpdateFn;
+  dispatch: Dispatch<ColorRangesActions>;
   dataBounds: DataBounds;
 }
 
-export function ColorRangesActions({
+export function ColorRangesFooter({
   colorRanges,
-  dataBounds,
-  setColorRanges,
+  dispatch,
   paletteConfiguration,
+  dataBounds,
 }: ColorRangesActionsProps) {
-  const rangeType = paletteConfiguration?.rangeType ?? 'percent';
-
   const shouldDisableAdd = Boolean(
     paletteConfiguration?.maxSteps && colorRanges.length >= paletteConfiguration?.maxSteps
   );
 
   const onAddColorRange = useCallback(() => {
-    setColorRanges({ colorRanges: addColorRange(colorRanges, rangeType, dataBounds) });
-  }, [colorRanges, dataBounds, rangeType, setColorRanges]);
+    dispatch({
+      type: 'addColorRange',
+      payload: { rangeType: paletteConfiguration?.rangeType ?? 'percent', dataBounds },
+    });
+  }, [dataBounds, dispatch, paletteConfiguration?.rangeType]);
 
   const onReversePalette = useCallback(() => {
-    setColorRanges({ colorRanges: reversePalette(colorRanges) });
-  }, [colorRanges, setColorRanges]);
+    dispatch({ type: 'reversePalette' });
+  }, [dispatch]);
 
   const onDistributeEqually = useCallback(() => {
-    setColorRanges({ colorRanges: distributeEqually(colorRanges) });
-  }, [colorRanges, setColorRanges]);
+    dispatch({ type: 'distributeEqually' });
+  }, [dispatch]);
 
   return (
     <>

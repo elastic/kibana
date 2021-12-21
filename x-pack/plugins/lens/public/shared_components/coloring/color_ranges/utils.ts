@@ -59,13 +59,23 @@ export const addColorRange = (
 export const sortColorRanges = (colorRanges: ColorRange[]) => {
   const maxValue = colorRanges[colorRanges.length - 1].end;
 
-  return [...colorRanges]
+  const newColorRanges = [...colorRanges]
     .sort(({ start: startA }, { start: startB }) => Number(startA) - Number(startB))
     .map((newColorRange, i, array) => ({
       color: newColorRange.color,
       start: newColorRange.start,
       end: i !== array.length - 1 ? array[i + 1].start : maxValue,
     }));
+
+  const lastRange = newColorRanges[newColorRanges.length - 1];
+
+  if (lastRange.start > lastRange.end) {
+    const oldEnd = lastRange.end;
+    lastRange.end = lastRange.start;
+    lastRange.start = oldEnd;
+  }
+
+  return newColorRanges;
 };
 
 export const deleteColorRange = (index: number, colorRanges: ColorRange[]) => {
