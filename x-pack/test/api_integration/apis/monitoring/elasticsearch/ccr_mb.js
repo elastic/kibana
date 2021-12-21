@@ -11,7 +11,6 @@ import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('ccr mb', () => {
     const archive = 'x-pack/test/functional/es_archives/monitoring/ccr_mb';
