@@ -16,10 +16,11 @@ import { CreateRuleOptions, SecurityAlertType } from '../types';
 export const createMlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<MachineLearningRuleParams, {}, {}, 'default'> => {
-  const { logger, ml } = createOptions;
+  const { logger, ml, experimentalFeatures } = createOptions;
   return {
     id: ML_RULE_TYPE_ID,
     name: 'Machine Learning Rule',
+    ruleTaskTimeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
     validate: {
       params: {
         validate: (object: unknown) => {
