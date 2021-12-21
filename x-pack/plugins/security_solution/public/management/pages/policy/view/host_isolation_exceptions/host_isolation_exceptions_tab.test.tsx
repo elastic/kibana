@@ -72,7 +72,7 @@ describe('Policy details host isolation exceptions tab', () => {
     ).toBeTruthy();
   });
 
-  it("should display an 'unassigned' empty state if there are no host isolation exceptions assigned", async () => {
+  it("should display an 'unassigned' empty state and 'add' button if there are no host isolation exceptions assigned", async () => {
     // mock no data for all requests
     getHostIsolationExceptionItemsMock.mockImplementation((params) => {
       // no filter = fetch all exceptions
@@ -90,6 +90,7 @@ describe('Policy details host isolation exceptions tab', () => {
     expect(
       await renderResult.findByTestId('policy-host-isolation-exceptions-empty-unassigned')
     ).toBeTruthy();
+    expect(renderResult.getByTestId('empty-assign-host-isolation-exceptions-button')).toBeTruthy();
   });
 
   it('Should display the count of total assigned policies', async () => {
@@ -113,6 +114,30 @@ describe('Policy details host isolation exceptions tab', () => {
       http: mockedContext.coreStart.http,
       page: 1,
       perPage: 10,
+    });
+  });
+
+  describe('and the user is trying to assign policies', () => {
+    it('should not render the assign button if there are not existing exceptions', async () => {
+      getHostIsolationExceptionItemsMock.mockReturnValue(emptyList);
+      render();
+      expect(renderResult.queryByTestId('hostIsolationExceptions-assign-button')).toBeFalsy();
+    });
+
+    it('should not open the assign flyout if there are not existing exceptions', async () => {
+      history.push(getPolicyHostIsolationExceptionsPath(policyId, { show: 'list' }));
+      getHostIsolationExceptionItemsMock.mockReturnValue(emptyList);
+      render();
+      expect(renderResult.queryByTestId('hostIsolationExceptions-assign-flyout')).toBeFalsy();
+    });
+
+    it('should open the assign flyout if there are existing exceptions', () => {
+      history.push(getPolicyHostIsolationExceptionsPath(policyId, { show: 'list' }));
+      getHostIsolationExceptionItemsMock.mockImplementation(() => {
+        return getFoundExceptionListItemSchemaMock(1);
+      });
+      render();
+      expect(renderResult.findByTestId('hostIsolationExceptions-assign-flyout')).toBeTruthy();
     });
   });
 });

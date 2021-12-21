@@ -5,17 +5,29 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLink, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLink, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
+import { getPolicyHostIsolationExceptionsPath } from '../../../../../common/routing';
+import { PolicyData } from '../../../../../../../common/endpoint/types';
 
 export const PolicyHostIsolationExceptionsEmptyUnassigned = ({
-  policyName,
+  policy,
   toHostIsolationList,
 }: {
-  policyName: string;
+  policy: PolicyData;
   toHostIsolationList: string;
 }) => {
+  const history = useHistory();
+
+  const onClickPrimaryButtonHandler = () =>
+    history.push(
+      getPolicyHostIsolationExceptionsPath(policy.id, {
+        ...location,
+        show: 'list',
+      })
+    );
   return (
     <EuiPageTemplate template="centeredContent">
       <EuiEmptyPrompt
@@ -33,10 +45,21 @@ export const PolicyHostIsolationExceptionsEmptyUnassigned = ({
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.empty.unassigned.content"
             defaultMessage="There are currently no host isolation exceptions assigned to {policyName}. Assign exceptions now or add and manage them on the host isolation exceptions page."
-            values={{ policyName }}
+            values={{ policyName: policy.name }}
           />
         }
         actions={[
+          <EuiButton
+            color="primary"
+            fill
+            onClick={onClickPrimaryButtonHandler}
+            data-test-subj="empty-assign-host-isolation-exceptions-button"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.empty.unassigned.primaryAction"
+              defaultMessage="Assign host isolation exceptions"
+            />
+          </EuiButton>,
           <EuiLink href={toHostIsolationList}>
             <FormattedMessage
               id="xpack.securitySolution.endpoint.policy.hostIsolationExceptions.empty.unassigned.secondaryAction"
