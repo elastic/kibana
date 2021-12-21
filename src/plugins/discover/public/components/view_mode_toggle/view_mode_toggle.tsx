@@ -42,7 +42,6 @@ export const DocumentViewModeToggle = ({
                 defaultMessage: 'Beta',
               })}
               size="s"
-              iconType="beaker"
               className="fieldStatsBetaBadge"
             />
           </div>
