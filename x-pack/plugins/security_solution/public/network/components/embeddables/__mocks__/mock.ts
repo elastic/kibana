@@ -91,6 +91,7 @@ export const mockDestinationLayer = {
     topHitsTimeField: '@timestamp',
     topHitsSize: 1,
     indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
+    scalingType: 'LIMIT',
   },
   style: {
     type: 'VECTOR',
@@ -207,6 +208,7 @@ export const mockServerLayer = {
     topHitsTimeField: '@timestamp',
     topHitsSize: 1,
     indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
+    scalingType: 'LIMIT',
   },
   style: {
     type: 'VECTOR',
