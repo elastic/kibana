@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
 import { IRouter } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import zlib from 'zlib';
 import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
@@ -71,7 +72,7 @@ export function initMVTRoutes({
         abortController,
       });
 
-      return sendResponse(response, tile);
+      return await sendResponse(response, tile);
     }
   );
 
@@ -122,28 +123,34 @@ export function initMVTRoutes({
         abortController,
       });
 
-      return sendResponse(response, tile);
+      return await sendResponse(response, tile);
     }
   );
 }
 
-function sendResponse(response: KibanaResponseFactory, tile: any) {
-  const headers = {
-    'content-disposition': 'inline',
-    'content-length': tile ? `${tile.length}` : `0`,
-    'Content-Type': 'application/x-protobuf',
-    'Cache-Control': `public, max-age=${CACHE_TIMEOUT_SECONDS}`,
-    'Last-Modified': `${new Date().toUTCString()}`,
-  };
-
+async function sendResponse(response: KibanaResponseFactory, tile: any) {
   if (tile) {
+    const gzipped = zlib.gzipSync(tile);
     return response.ok({
-      body: tile,
-      headers,
+      body: gzipped,
+      headers: {
+        'content-disposition': 'inline',
+        'content-length': gzipped ? `${gzipped.length}` : `0`,
+        'content-encoding': 'gzip',
+        'Content-Type': 'application/x-protobuf',
+        'Cache-Control': `public, max-age=${CACHE_TIMEOUT_SECONDS}`,
+        'Last-Modified': `${new Date().toUTCString()}`,
+      },
     });
   } else {
     return response.ok({
-      headers,
+      headers: {
+        'content-disposition': 'inline',
+        'content-length': `0`,
+        'Content-Type': 'application/x-protobuf',
+        'Cache-Control': `public, max-age=${CACHE_TIMEOUT_SECONDS}`,
+        'Last-Modified': `${new Date().toUTCString()}`,
+      },
     });
   }
 }
