@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export * from './monitor_duration';
-export * from './synthetics_monitor';
-export * from './monitor_validation';
+import { SimpleSavedObject } from 'kibana/public';
+import { SyntheticsMonitor } from '../runtime_types';
+
+export interface MonitorIdParam {
+  monitorId: string;
+}
+
+export type SyntheticsMonitorSavedObject = SimpleSavedObject<SyntheticsMonitor>;

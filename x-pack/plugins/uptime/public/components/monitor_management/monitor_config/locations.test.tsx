@@ -47,14 +47,20 @@ describe('<ActionBar />', () => {
   });
 
   it('renders locations', () => {
-    render(<ServiceLocations selectedLocations={[]} setLocations={setLocations} />, { state });
+    render(
+      <ServiceLocations selectedLocations={[]} setLocations={setLocations} isInvalid={false} />,
+      { state }
+    );
 
     expect(screen.getByText(LOCATIONS_LABEL)).toBeInTheDocument();
     expect(screen.queryByText('US Central')).not.toBeInTheDocument();
   });
 
   it('shows location options when clicked', async () => {
-    render(<ServiceLocations selectedLocations={[]} setLocations={setLocations} />, { state });
+    render(
+      <ServiceLocations selectedLocations={[]} setLocations={setLocations} isInvalid={false} />,
+      { state }
+    );
 
     userEvent.click(screen.getByRole('button'));
 
@@ -62,7 +68,10 @@ describe('<ActionBar />', () => {
   });
 
   it('prevents bad inputs', async () => {
-    render(<ServiceLocations selectedLocations={[]} setLocations={setLocations} />, { state });
+    render(
+      <ServiceLocations selectedLocations={[]} setLocations={setLocations} isInvalid={false} />,
+      { state }
+    );
 
     userEvent.click(screen.getByRole('button'));
     userEvent.type(screen.getByRole('textbox'), 'fake location');
@@ -75,11 +84,23 @@ describe('<ActionBar />', () => {
   });
 
   it('calls setLocations', async () => {
-    render(<ServiceLocations selectedLocations={[]} setLocations={setLocations} />, { state });
+    render(
+      <ServiceLocations selectedLocations={[]} setLocations={setLocations} isInvalid={false} />,
+      { state }
+    );
 
     userEvent.click(screen.getByRole('button'));
     userEvent.click(screen.getByText('US Central'));
 
     expect(setLocations).toBeCalledWith([location]);
+  });
+
+  it('shows invalid error', async () => {
+    render(
+      <ServiceLocations selectedLocations={[]} setLocations={setLocations} isInvalid={true} />,
+      { state }
+    );
+
+    expect(screen.getByText('At least one service location must be specified')).toBeInTheDocument();
   });
 });

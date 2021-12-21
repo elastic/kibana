@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { EuiForm } from '@elastic/eui';
-import { DataStream } from '../../fleet_package/types';
+import { DataStream } from '../../../../common/runtime_types';
 import { usePolicyConfigContext } from '../../fleet_package/contexts';
 
 import { CustomFields } from '../../fleet_package/custom_fields';
-import { validate } from '../../fleet_package/validation';
+import { validate } from '../validation';
 import { MonitorNameAndLocation } from './monitor_name_location';
 
 export const MonitorFields = () => {
@@ -22,7 +22,7 @@ export const MonitorFields = () => {
         validate={validate[monitorType]}
         dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP, DataStream.BROWSER]}
       >
-        <MonitorNameAndLocation />
+        <MonitorNameAndLocation validate={validate[monitorType]} />
       </CustomFields>
     </EuiForm>
   );

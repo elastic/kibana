@@ -6,15 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  ConfigKey,
-  MonitorFields,
-  TLSFields,
-  PolicyConfig,
-  DataStream,
-} from '../fleet_package/types';
+import { ConfigKey, MonitorFields, TLSFields, DataStream } from '../../../common/runtime_types';
 import { useTrackPageview } from '../../../../observability/public';
 import { SyntheticsProviders } from '../fleet_package/contexts';
+import { PolicyConfig } from '../fleet_package/types';
 import { MonitorConfig } from './monitor_config/monitor_config';
 
 interface Props {

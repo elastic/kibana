@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './monitor_duration';
-export * from './synthetics_monitor';
-export * from './monitor_validation';
+import { ConfigKey, MonitorFields } from '../runtime_types';
+
+export type Validator = (config: Partial<MonitorFields>) => boolean;
+
+export type Validation = Partial<Record<ConfigKey, Validator>>;
