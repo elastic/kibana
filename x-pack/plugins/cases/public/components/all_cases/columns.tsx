@@ -261,10 +261,10 @@ export const useCasesColumns = ({
             align: RIGHT_ALIGNMENT,
             field: 'owner',
             name: i18n.SOLUTION,
-            render: (owner: CasesOwners) => {
-              const caseOwner = OWNER_INFO[owner];
+            render: (caseOwner: CasesOwners) => {
+              const ownerInfo = OWNER_INFO[caseOwner];
               return caseOwner ? (
-                <EuiIcon size="s" type={caseOwner.iconType} title={caseOwner.label} />
+                <EuiIcon size="s" type={ownerInfo.iconType} title={ownerInfo.label} />
               ) : (
                 getEmptyTagValue()
               );
