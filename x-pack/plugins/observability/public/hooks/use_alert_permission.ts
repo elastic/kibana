@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Capabilities } from '../../../../../src/core/types';
+import { Capabilities } from 'src/core/types';
 
 export interface UseGetUserAlertsPermissionsProps {
   crud: boolean;
@@ -36,6 +36,7 @@ export const getAlertsPermissions = (
     read: (featureId === 'apm'
       ? uiCapabilities[featureId]['alerting:show']
       : uiCapabilities[featureId].show) as boolean,
+    loading: false,
     featureId,
   };
 };

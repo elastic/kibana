@@ -8,7 +8,7 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { I18nProvider } from '@kbn/i18n-react';
-import { FleetTrustedAppsCardWrapper } from './fleet_trusted_apps_card_wrapper';
+import { FleetTrustedAppsCard, FleetTrustedAppsCardProps } from './fleet_trusted_apps_card';
 import * as reactTestingLibrary from '@testing-library/react';
 import { TrustedAppsHttpService } from '../../../../../trusted_apps/service';
 import { useToasts } from '../../../../../../../common/lib/kibana';
@@ -57,22 +57,30 @@ const summary: GetExceptionSummaryResponse = {
   total: 7,
 };
 
+const customLinkMock = <div data-test-subj="manageTrustedApplications" />;
+
 describe('Fleet trusted apps card', () => {
   let promise: Promise<GetExceptionSummaryResponse>;
   let addDanger: jest.Mock = jest.fn();
-  const renderComponent: () => Promise<reactTestingLibrary.RenderResult> = async () => {
+  const renderComponent: (
+    customProps?: Partial<FleetTrustedAppsCardProps>
+  ) => Promise<reactTestingLibrary.RenderResult> = async (customProps = {}) => {
     const Wrapper: React.FC = ({ children }) => (
       <I18nProvider>
         <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
       </I18nProvider>
     );
-    // @ts-expect-error TS2739
-    const component = reactTestingLibrary.render(<FleetTrustedAppsCardWrapper />, {
-      wrapper: Wrapper,
-    });
+
+    const component = reactTestingLibrary.render(
+      <FleetTrustedAppsCard customLink={customLinkMock} {...customProps} />,
+      {
+        wrapper: Wrapper,
+      }
+    );
     try {
-      // @ts-expect-error TS2769
-      await reactTestingLibrary.act(() => promise);
+      await reactTestingLibrary.act(async () => {
+        await promise;
+      });
     } catch (err) {
       return component;
     }
@@ -93,15 +101,25 @@ describe('Fleet trusted apps card', () => {
   afterEach(() => {
     TrustedAppsHttpServiceMock.mockReset();
   });
-  it('should render correctly', async () => {
+  it('should render correctly without policyId', async () => {
     TrustedAppsHttpServiceMock.mockImplementationOnce(() => {
       return {
-        getTrustedAppsSummary: () => jest.fn(() => promise),
+        getTrustedAppsSummary: () => promise,
       };
     });
     const component = await renderComponent();
     expect(component.getByText('Trusted applications')).not.toBeNull();
-    expect(component.getByText('Manage')).not.toBeNull();
+    expect(component.getByTestId('manageTrustedApplications')).not.toBeNull();
+  });
+  it('should render correctly with policyId', async () => {
+    TrustedAppsHttpServiceMock.mockImplementationOnce(() => {
+      return {
+        getTrustedAppsList: () => () => promise,
+      };
+    });
+    const component = await renderComponent({ policyId: 'policy-1' });
+    expect(component.getByText('Trusted applications')).not.toBeNull();
+    expect(component.getByTestId('manageTrustedApplications')).not.toBeNull();
   });
   it('should render an error toast when api call fails', async () => {
     expect(addDanger).toBeCalledTimes(0);
@@ -113,7 +131,7 @@ describe('Fleet trusted apps card', () => {
     });
     const component = await renderComponent();
     expect(component.getByText('Trusted applications')).not.toBeNull();
-    expect(component.getByText('Manage')).not.toBeNull();
+    expect(component.getByTestId('manageTrustedApplications')).not.toBeNull();
     await reactTestingLibrary.waitFor(() => expect(addDanger).toBeCalledTimes(1));
   });
 });
