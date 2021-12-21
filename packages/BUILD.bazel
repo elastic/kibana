@@ -101,6 +101,7 @@ filegroup(
       "//packages/kbn-react-field:build_types",
       "//packages/kbn-rule-data-utils:build_types",
       "//packages/kbn-securitysolution-autocomplete:build_types",
+      "//packages/kbn-securitysolution-es-utils:build_types",
   ],
 )
 
