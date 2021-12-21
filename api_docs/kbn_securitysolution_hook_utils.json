@@ -30,7 +30,13 @@
         ],
         "signature": [
           "<Args extends unknown[], Result>(fn: (...args: Args) => Promise<Result>) => ",
-          "Task",
+          {
+            "pluginId": "@kbn/securitysolution-hook-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionHookUtilsPluginApi",
+            "section": "def-common.Task",
+            "text": "Task"
+          },
           "<Args, Result>"
         ],
         "path": "packages/kbn-securitysolution-hook-utils/src/use_async/index.ts",
@@ -91,7 +97,13 @@
           "<Args extends unknown[], Result>(fn: (...args: Args) => ",
           "Observable",
           "<Result>) => ",
-          "Task",
+          {
+            "pluginId": "@kbn/securitysolution-hook-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionHookUtilsPluginApi",
+            "section": "def-common.Task",
+            "text": "Task"
+          },
           "<Args, Result>"
         ],
         "path": "packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
@@ -167,7 +179,99 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/securitysolution-hook-utils",
+        "id": "def-common.Task",
+        "type": "Interface",
+        "tags": [],
+        "label": "Task",
+        "description": [
+          "\nRepresents the state of an asynchronous task, along with an initiator\nfunction to kick off the work."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/securitysolution-hook-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionHookUtilsPluginApi",
+            "section": "def-common.Task",
+            "text": "Task"
+          },
+          "<Args, Result>"
+        ],
+        "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-hook-utils",
+            "id": "def-common.Task.loading",
+            "type": "boolean",
+            "tags": [],
+            "label": "loading",
+            "description": [],
+            "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-hook-utils",
+            "id": "def-common.Task.error",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-hook-utils",
+            "id": "def-common.Task.result",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              "Result | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-hook-utils",
+            "id": "def-common.Task.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "(...args: Args) => void"
+            ],
+            "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-hook-utils",
+                "id": "def-common.Task.start.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "Args"
+                ],
+                "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {

@@ -3218,6 +3218,17 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-common.SCALING_TYPES",
+        "type": "Enum",
+        "tags": [],
+        "label": "SCALING_TYPES",
+        "description": [],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-common.SOURCE_TYPES",
         "type": "Enum",
         "tags": [],

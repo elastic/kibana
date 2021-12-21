@@ -39819,7 +39819,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"min\" | \"max\" | \"sum\" | \"average\")[]"
+                      "(\"sum\" | \"max\" | \"min\" | \"average\")[]"
                     ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
                     "deprecated": false

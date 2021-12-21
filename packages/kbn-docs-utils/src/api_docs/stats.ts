@@ -25,6 +25,7 @@ export function collectApiStatsForPlugin(
     isAnyType: [],
     noReferences: [],
     deprecatedAPIsReferencedCount: 0,
+    unreferencedDeprecatedApisCount: 0,
     apiCount: countApiForPlugin(doc),
     missingExports: Object.values(missingApiItems[doc.id] ?? {}).length,
   };

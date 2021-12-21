@@ -11,17 +11,17 @@ import dedent from 'dedent';
 import fs from 'fs';
 import Path from 'path';
 import {
-  ApiDeclaration,
   ApiReference,
   ReferencedDeprecationsByAPI,
   ReferencedDeprecationsByPlugin,
+  UnreferencedDeprecationsByPlugin,
 } from '../types';
 import { getPluginApiDocId } from '../utils';
 
 export function writeDeprecationDocByApi(
   folder: string,
   deprecationsByPlugin: ReferencedDeprecationsByPlugin,
-  unReferencedDeprecations: ApiDeclaration[],
+  unReferencedDeprecations: UnreferencedDeprecationsByPlugin,
   log: ToolingLog
 ): void {
   const deprecationReferencesByApi = Object.values(deprecationsByPlugin).reduce(
@@ -92,14 +92,18 @@ ${tableMdx}
 
 Safe to remove.
 
-| Deprecated API |
-| ---------------|
-${unReferencedDeprecations
-  .map(
-    (api) =>
-      `| <DocLink id="${getPluginApiDocId(api.parentPluginId)}" section="${api.id}" text="${
-        api.label
-      }"/> |`
+| Deprecated API |  Plugin Id |
+| ---------------|------------|
+${Object.values(unReferencedDeprecations)
+  .map((apis) =>
+    apis
+      .map(
+        (api) =>
+          `| <DocLink id="${getPluginApiDocId(api.parentPluginId)}" section="${api.id}" text="${
+            api.label
+          }"/> | ${api.parentPluginId} | `
+      )
+      .join('\n')
   )
   .join('\n')}
 
