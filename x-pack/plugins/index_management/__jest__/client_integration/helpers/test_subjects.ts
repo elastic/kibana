@@ -59,4 +59,6 @@ export type TestSubjects =
   | 'templateTable'
   | 'title'
   | 'unfreezeIndexMenuButton'
+  | 'updateEditIndexSettingsButton'
+  | 'updateIndexSettingsErrorCallout'
   | 'viewButton';

@@ -99,6 +99,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   private onDestroyControlGroup?: () => void;
   public controlGroup?: ControlGroupContainer;
+  private domNode?: HTMLElement;
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
@@ -256,6 +257,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public render(dom: HTMLElement) {
+    if (this.domNode) {
+      ReactDOM.unmountComponentAtNode(this.domNode);
+    }
+    this.domNode = dom;
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
@@ -271,6 +276,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public destroy() {
     super.destroy();
     this.onDestroyControlGroup?.();
+    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {

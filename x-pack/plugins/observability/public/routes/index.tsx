@@ -7,11 +7,12 @@
 
 import * as t from 'io-ts';
 import React from 'react';
-import { AlertsPage } from '../pages/alerts';
+
 import { AllCasesPage } from '../pages/cases/all_cases';
 import { CaseDetailsPage } from '../pages/cases/case_details';
 import { ConfigureCasesPage } from '../pages/cases/configure_cases';
 import { CreateCasePage } from '../pages/cases/create_case';
+import { AlertsPage } from '../pages/alerts/containers/alerts_page';
 import { HomePage } from '../pages/home';
 import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';

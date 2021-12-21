@@ -3,6 +3,7 @@
   "targetBranchChoices": [
     { "name": "master", "checked": true },
     "8.0",
+    "7.17",
     "7.16",
     "7.15",
     "7.14",

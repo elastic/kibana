@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { IRouter } from 'src/core/server';
-
 import { PLUGIN_ID, PACKAGE_POLICY_API_ROUTES } from '../../constants';
+import type { FleetRouter } from '../../types/request_context';
 import {
   GetPackagePoliciesRequestSchema,
   GetOnePackagePolicyRequestSchema,
@@ -28,7 +27,7 @@ import {
   dryRunUpgradePackagePolicyHandler,
 } from './handlers';
 
-export const registerRoutes = (router: IRouter) => {
+export const registerRoutes = (router: FleetRouter) => {
   // List
   router.get(
     {

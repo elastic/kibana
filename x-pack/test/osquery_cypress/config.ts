@@ -27,6 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // define custom es server here
         // API Keys is enabled at the top level
         'xpack.security.enabled=true',
+        'http.host=0.0.0.0',
       ],
     },
 

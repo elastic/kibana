@@ -211,12 +211,13 @@ export class AlertingPlugin {
         usageCollection,
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
+      const eventLogIndex = this.eventLogService.getIndexPattern();
       initializeAlertingTelemetry(
         this.telemetryLogger,
         core,
         plugins.taskManager,
         kibanaIndex,
-        this.eventLogService
+        eventLogIndex
       );
     }
 
@@ -423,7 +424,9 @@ export class AlertingPlugin {
           : Promise.resolve([]);
     });
 
-    scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
+    this.eventLogService!.isEsContextReady().then(() => {
+      scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
+    });
 
     scheduleAlertingHealthCheck(this.logger, this.config, plugins.taskManager);
     scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager);

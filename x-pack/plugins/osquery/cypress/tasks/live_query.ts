@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  AGENT_FIELD,
-  ALL_AGENTS_OPTION,
-  LIVE_QUERY_EDITOR,
-  SUBMIT_BUTTON,
-} from '../screens/live_query';
+import { AGENT_FIELD, ALL_AGENTS_OPTION, LIVE_QUERY_EDITOR } from '../screens/live_query';
 
 export const selectAllAgents = () => {
   cy.get(AGENT_FIELD).first().click();
@@ -19,7 +14,7 @@ export const selectAllAgents = () => {
 
 export const inputQuery = () => cy.get(LIVE_QUERY_EDITOR).type('select * from processes;');
 
-export const submitQuery = () => cy.get(SUBMIT_BUTTON).contains('Submit').click();
+export const submitQuery = () => cy.contains('Submit').click();
 
 export const checkResults = () =>
-  cy.get('[data-test-subj="dataGridRowCell"]').should('have.lengthOf.above', 0);
+  cy.get('[data-test-subj="dataGridRowCell"]', { timeout: 60000 }).should('have.lengthOf.above', 0);

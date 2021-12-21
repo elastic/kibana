@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
-// import { CTI_ROW_RENDERER_FIELDS } from '../../../../../../common/cti/constants';
+import { ALERT_RULE_CONSUMER, ALERT_RISK_SCORE, ALERT_SEVERITY } from '@kbn/rule-data-utils';
 
 // TODO: share with security_solution/common/cti/constants.ts
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
@@ -62,8 +61,8 @@ export const TIMELINE_EVENTS_FIELDS = [
   'kibana.alert.original_event.kind',
   'kibana.alert.original_event.module',
   'kibana.alert.rule.version',
-  'kibana.alert.rule.severity',
-  'kibana.alert.rule.risk_score',
+  ALERT_SEVERITY,
+  ALERT_RISK_SCORE,
   'kibana.alert.threshold_result',
   'kibana.alert.building_block_type',
   'event.code',

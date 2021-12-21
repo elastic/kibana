@@ -9,6 +9,7 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
 import { LayoutTypes } from '../../../../screenshotting/common';
+import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import { ReportingCore } from '../../';
 import { ScreenshotOptions } from '../../types';
 import { LevelLogger } from '../../lib';
@@ -18,8 +19,8 @@ export function generatePngObservable(
   logger: LevelLogger,
   options: ScreenshotOptions
 ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
-  const apmTrans = apm.startTransaction('reporting generate_png', 'reporting');
-  const apmLayout = apmTrans?.startSpan('create_layout', 'setup');
+  const apmTrans = apm.startTransaction('generate-png', REPORTING_TRANSACTION_TYPE);
+  const apmLayout = apmTrans?.startSpan('create-layout', 'setup');
   if (!options.layout.dimensions) {
     throw new Error(`LayoutParams.Dimensions is undefined.`);
   }
@@ -40,7 +41,7 @@ export function generatePngObservable(
         apmTrans?.setLabel('memory', memory, false);
       });
       apmScreenshots?.end();
-      apmBuffer = apmTrans?.startSpan('get_buffer', 'output') ?? null;
+      apmBuffer = apmTrans?.startSpan('get-buffer', 'output') ?? null;
     }),
     map(({ results }) => ({
       buffer: results[0].screenshots[0].data,
