@@ -12,7 +12,14 @@ export default function canvasApp({ loadTestFile, getService }) {
   describe('Canvas app', function canvasAppTestSuite() {
     before(async () => {
       // init data
-      await security.testUser.setRoles(['test_logstash_reader', 'global_canvas_all']);
+      await security.testUser.setRoles([
+        'test_logstash_reader',
+        'global_canvas_all',
+        'global_discover_all',
+        'global_maps_all',
+        // TODO: Fix permission check, save and return button is disabled when dashboard is disabled
+        'global_dashboard_all',
+      ]);
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
 
@@ -30,7 +37,7 @@ export default function canvasApp({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./embeddables/lens'));
     loadTestFile(require.resolve('./embeddables/maps'));
     loadTestFile(require.resolve('./embeddables/saved_search'));
-    loadTestFile(require.resolve('./embeddables/visualize'));
+    loadTestFile(require.resolve('./embeddables/visualization'));
     loadTestFile(require.resolve('./reports'));
     loadTestFile(require.resolve('./saved_object_resolve'));
   });

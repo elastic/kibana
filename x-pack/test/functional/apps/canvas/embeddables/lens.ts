@@ -33,8 +33,6 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
     });
 
     after(async () => {
-      await PageObjects.common.navigateToApp('canvas');
-      await PageObjects.canvas.deleteAllWorkpadsByName('lens tests');
       await esArchiver.unload(archives.es);
       await kibanaServer.importExport.unload(archives.kbn);
     });

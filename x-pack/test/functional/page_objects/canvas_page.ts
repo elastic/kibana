@@ -52,16 +52,6 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.click('create-workpad-button');
     },
 
-    async deleteAllWorkpadsByName(name: string) {
-      log.debug('CanvasPage.deleteWorkpadByName', name);
-
-      // filters workpad list for provided name
-      await testSubjects.setValue('tableListSearchBox', name);
-      await testSubjects.click('checkboxSelectAll');
-      await testSubjects.click('deleteWorkpadButton');
-      await testSubjects.click('confirmModalConfirmButton');
-    },
-
     async fillOutCustomElementForm(name: string, description: string) {
       // Fill out the custom element form and submit it
       await testSubjects.setValue('canvasCustomElementForm-name', name, {
@@ -154,6 +144,18 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       log.debug('CanvasPage.createNewVisType', visType);
       await testSubjects.click('canvasEditorMenuButton');
       await testSubjects.click(`visType-${visType}`);
+    },
+
+    async getEmbeddableCount() {
+      log.debug('CanvasPage.getEmbeddableCount');
+      const panels = await testSubjects.findAll('embeddablePanel');
+      return panels.length;
+    },
+
+    async deleteSelectedElement() {
+      log.debug('CanvasPage.deleteSelectedElement');
+      await testSubjects.click('canvasWorkpadEditMenuButton');
+      await testSubjects.click('canvasEditMenuDeleteButton');
     },
   };
 }

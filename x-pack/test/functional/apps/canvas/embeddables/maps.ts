@@ -5,46 +5,57 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['canvas', 'common', 'header', 'maps']);
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
-  const archives = {
-    es: 'x-pack/test/functional/es_archives/maps/data',
-    kbn: 'x-pack/test/functional/fixtures/kbn_archiver/maps',
-  };
+  const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const testSubjects = getService('testSubjects');
 
   describe('maps in canvas', function () {
     before(async () => {
-      await esArchiver.load(archives.es);
-      await kibanaServer.importExport.load(archives.kbn);
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
-      // load test workpad
-      await PageObjects.common.navigateToApp('canvas', {
-        hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
-      });
-    });
-
-    after(async () => {
-      await esArchiver.unload(archives.es);
-      await kibanaServer.importExport.unload(archives.kbn);
-    });
-
-    describe('by-reference', () => {
-      it('adds existing map embeddable from the visualize library', async () => {});
-
-      it('edits map by-reference embeddable', async () => {});
-
-      it('renders embeddable with using savedMap expression', () => {});
+      // create new workpad
+      await PageObjects.canvas.createNewWorkpad();
+      await PageObjects.canvas.setWorkpadName('maps tests');
     });
 
     describe('by-value', () => {
-      it('creates new map embeddable', () => {});
+      it('creates new map embeddable', async () => {
+        const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
+        await PageObjects.canvas.createNewVis('maps');
+        await PageObjects.maps.clickSaveAndReturnButton();
+        const embeddableCount = await PageObjects.canvas.getEmbeddableCount();
+        expect(embeddableCount).to.eql(originalEmbeddableCount + 1);
+      });
 
-      it('edits map by-value embeddable', () => {});
+      it('edits map by-value embeddable', async () => {
+        const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
+        await dashboardPanelActions.toggleContextMenu();
+        await dashboardPanelActions.clickEdit();
+        await PageObjects.maps.saveMap('canvas test map');
+        const embeddableCount = await PageObjects.canvas.getEmbeddableCount();
+        expect(embeddableCount).to.eql(originalEmbeddableCount);
+      });
+    });
+
+    describe('by-reference', () => {
+      it('adds existing map embeddable from the visualize library', async () => {
+        await PageObjects.canvas.deleteSelectedElement();
+        await PageObjects.canvas.clickAddFromLibrary();
+        await dashboardAddPanel.addEmbeddable('canvas test map', 'map');
+        await testSubjects.existOrFail('embeddablePanelHeading-canvastestmap');
+      });
+
+      it('edits map by-reference embeddable', async () => {
+        await dashboardPanelActions.editPanelByTitle('canvas test map');
+        await PageObjects.maps.saveMap('canvas test map v2', true, false);
+        await testSubjects.existOrFail('embeddablePanelHeading-canvastestmapv2');
+        await PageObjects.canvas.deleteSelectedElement();
+      });
     });
   });
 }

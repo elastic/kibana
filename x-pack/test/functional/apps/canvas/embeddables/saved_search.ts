@@ -20,11 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('saved search in canvas', function () {
     before(async () => {
-      await security.testUser.setRoles([
-        'test_logstash_reader',
-        'global_canvas_all',
-        'global_discover_all',
-      ]);
       await esArchiver.load(archives.es);
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
@@ -34,8 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await PageObjects.common.navigateToApp('canvas');
-      await PageObjects.canvas.deleteAllWorkpadsByName('saved search tests');
       await esArchiver.unload(archives.es);
     });
 
