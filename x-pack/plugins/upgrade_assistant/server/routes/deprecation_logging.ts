@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import { schema } from '@kbn/config-schema';
 import {
   API_BASE_PATH,
@@ -108,6 +109,8 @@ export function registerDeprecationLoggingRoutes({
             return response.ok({ body: { count: 0 } });
           }
 
+          const now = moment().toISOString();
+
           const { body } = await client.asCurrentUser.count({
             index: DEPRECATION_LOGS_INDEX,
             body: {
@@ -117,7 +120,7 @@ export function registerDeprecationLoggingRoutes({
                     range: {
                       '@timestamp': {
                         gte: request.query.from,
-                        lte: Date.now(),
+                        lte: now,
                       },
                     },
                   },
