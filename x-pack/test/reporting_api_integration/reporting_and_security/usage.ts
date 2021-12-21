@@ -79,10 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/bwc/6_2');
         const usage = await usageAPI.getUsageStats();
 
-        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 0);
-
-        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv', 1);
         reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 7);
 
         // These statistics weren't tracked until 6.3
@@ -102,14 +99,12 @@ export default function ({ getService }: FtrProviderContext) {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/bwc/6_3');
         const usage = await usageAPI.getUsageStats();
 
-        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 0);
         reportingAPI.expectRecentPdfAppStats(usage, 'visualization', 0);
         reportingAPI.expectRecentPdfAppStats(usage, 'dashboard', 0);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 0);
         reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 0);
 
-        reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv', 2);
         reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 12);
         reportingAPI.expectAllTimePdfAppStats(usage, 'visualization', 3);
         reportingAPI.expectAllTimePdfAppStats(usage, 'dashboard', 3);
