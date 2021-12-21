@@ -18,5 +18,5 @@ const MBps = 10 ** 6 / 8; // megabyte per second (MB/s) (can be abbreviated as M
 // Selenium uses B/s (bytes) for network throttling
 // Download (B/s)	Upload (B/s) Latency (ms)
 export const NETWORK_PROFILES: { [key: string]: NetworkOptions } = {
-  CLOUD_USER: { DOWNLOAD: 6 * MBps, UPLOAD: 6 * MBps, LATENCY: 0.1 * sec },
+  CLOUD_USER: { DOWNLOAD: MBps, UPLOAD: MBps, LATENCY: 0.1 * sec },
 };
