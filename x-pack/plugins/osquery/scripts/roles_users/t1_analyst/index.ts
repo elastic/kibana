@@ -7,4 +7,5 @@
 
 import * as t1AnalystUser from './detections_user.json';
 import * as t1AnalystRole from './detections_role.json';
+
 export { t1AnalystUser, t1AnalystRole };
