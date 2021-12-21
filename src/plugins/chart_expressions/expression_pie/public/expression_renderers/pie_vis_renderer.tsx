@@ -9,6 +9,7 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { ExpressionRenderDefinition } from '../../../../expressions/public';
 import { VisualizationContainer } from '../../../../visualizations/public';
 import type { PersistedState } from '../../../../visualizations/public';
@@ -18,6 +19,17 @@ import { PIE_VIS_EXPRESSION_NAME } from '../../common/constants';
 import { RenderValue } from '../../common/types';
 
 import { VisTypePieDependencies } from '../plugin';
+
+export const strings = {
+  getDisplayName: () =>
+    i18n.translate('expressionPie.renderer.pieVis.displayName', {
+      defaultMessage: 'Pie visualization',
+    }),
+  getHelpDescription: () =>
+    i18n.translate('expressionPie.renderer.pieVis.helpDescription', {
+      defaultMessage: 'Render a pie',
+    }),
+};
 
 const PieComponent = lazy(() => import('../components/pie_vis_component'));
 
@@ -32,7 +44,8 @@ export const getPieVisRenderer: (
   deps: VisTypePieDependencies
 ) => ExpressionRenderDefinition<RenderValue> = ({ theme, palettes, getStartDeps }) => ({
   name: PIE_VIS_EXPRESSION_NAME,
-  displayName: 'Pie visualization',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render: async (domNode, { visConfig, visData, syncColors }, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(visData);
