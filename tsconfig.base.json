@@ -7,18 +7,14 @@
         "node_modules/@kbn/*",
         "bazel-out/darwin-fastbuild/bin/packages/kbn-*",
         "bazel-out/k8-fastbuild/bin/packages/kbn-*",
-        "bazel-out/x64_windows-fastbuild/bin/packages/kbn-*",
+        "bazel-out/x64_windows-fastbuild/bin/packages/kbn-*"
       ],
       // Allows for importing from `kibana` package for the exported types.
       "kibana": ["./kibana"],
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
-      "@emotion/core": [
-        "typings/@emotion"
-      ],
-      "resize-observer-polyfill": [
-        "typings/resize-observer-polyfill"
-      ]
+      "@emotion/core": ["typings/@emotion"],
+      "resize-observer-polyfill": ["typings/resize-observer-polyfill"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
