@@ -127,7 +127,7 @@ export class EndpointAppContextService {
       registerListsServerExtension({
         type: 'exceptionsListPreCreateItem',
         callback: async (arg: CreateExceptionListItemOptions) => {
-          this.startDependencies?.logger.info('exceptionsListPreCreateItem called!');
+          // this.startDependencies?.logger.info('exceptionsListPreCreateItem called!');
           return arg;
         },
       });
