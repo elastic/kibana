@@ -102,6 +102,7 @@ filegroup(
       "//packages/kbn-rule-data-utils:build_types",
       "//packages/kbn-securitysolution-autocomplete:build_types",
       "//packages/kbn-securitysolution-es-utils:build_types",
+      "//packages/kbn-securitysolution-hook-utils:build_types",
   ],
 )
 
