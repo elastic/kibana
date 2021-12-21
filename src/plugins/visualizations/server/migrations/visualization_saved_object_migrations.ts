@@ -1161,5 +1161,6 @@ export const visualizationSavedObjectTypeMigrations = {
     replaceIndexPatternReference,
     addDropLastBucketIntoTSVBModel
   ),
+  '7.17.0': flow(addDropLastBucketIntoTSVBModel),
   '8.0.0': flow(removeMarkdownLessFromTSVB),
 };

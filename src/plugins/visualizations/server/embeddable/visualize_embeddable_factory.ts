@@ -94,6 +94,7 @@ export const visualizeEmbeddableFactory = (): EmbeddableRegistryDefinition => {
           byValueMigrateTagcloud,
           byValueAddDropLastBucketIntoTSVBModel
         )(state),
+      '7.17.0': (state) => flow(byValueAddDropLastBucketIntoTSVBModel)(state),
       '8.0.0': (state) => flow(byValueRemoveMarkdownLessFromTSVB)(state),
     },
   };
