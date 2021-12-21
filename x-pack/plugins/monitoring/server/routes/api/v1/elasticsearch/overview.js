@@ -49,7 +49,12 @@ export function esOverviewRoute(server) {
         ccs,
         true
       );
-      const esEcsIndexPattern  = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH_ECS, ccs, true);
+      const esEcsIndexPattern = prefixIndexPattern(
+        config,
+        INDEX_PATTERN_ELASTICSEARCH_ECS,
+        ccs,
+        true
+      );
 
       const filebeatIndexPattern = prefixIndexPattern(
         config,
