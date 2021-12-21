@@ -5973,6 +5973,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__securitysolution-list-utils@link:bazel-bin/packages/kbn-securitysolution-list-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__securitysolution-rules@link:bazel-bin/packages/kbn-securitysolution-rules/npm_module_types":
   version "0.0.0"
   uid ""

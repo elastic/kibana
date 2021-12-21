@@ -111,6 +111,7 @@ filegroup(
       "//packages/kbn-securitysolution-list-api:build_types",
       "//packages/kbn-securitysolution-list-constants:build_types",
       "//packages/kbn-securitysolution-list-hooks:build_types",
+      "//packages/kbn-securitysolution-list-utils:build_types",
       "//packages/kbn-securitysolution-rules:build_types",
       "//packages/kbn-securitysolution-t-grid:build_types",
       "//packages/kbn-securitysolution-utils:build_types",

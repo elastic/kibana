@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const metadata = {
-  id: 'csv',
-  name: 'CSV',
-};
+import { ConfigKey, MonitorFields } from '../runtime_types';
+
+export type Validator = (config: Partial<MonitorFields>) => boolean;
+
+export type Validation = Partial<Record<ConfigKey, Validator>>;
