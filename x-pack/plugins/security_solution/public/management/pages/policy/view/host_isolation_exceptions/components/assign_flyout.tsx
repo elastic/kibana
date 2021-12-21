@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { isEmpty, without } from 'lodash/fp';
+import pMap from 'p-map';
 import React, { useMemo, useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
 import { PolicyData } from '../../../../../../../common/endpoint/types';
@@ -105,16 +106,24 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
 
   const mutation = useMutation(
     () => {
-      const prom: Array<Promise<ExceptionListItemSchema>> = [];
-
-      exceptionsRequest.data?.data.forEach((exception) => {
-        if (selectedArtifactIds.includes(exception.id)) {
-          exception.tags = [...exception.tags, `policy:${policy.id}`];
-          prom.push(updateOneHostIsolationExceptionItem(http, exception));
-        }
+      const toMutate = exceptionsRequest.data?.data.filter((exception) => {
+        return selectedArtifactIds.includes(exception.id);
       });
 
-      return Promise.all(prom);
+      if (toMutate === undefined) {
+        return Promise.reject(new Error('no exceptions selected'));
+      }
+
+      return pMap(
+        toMutate,
+        (exception) => {
+          exception.tags = [...exception.tags, `policy:${policy.id}`];
+          return updateOneHostIsolationExceptionItem(http, exception);
+        },
+        {
+          concurrency: 10,
+        }
+      );
     },
     {
       onSuccess: onUpdateSuccesss,
