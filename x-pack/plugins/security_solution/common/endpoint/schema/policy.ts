@@ -20,19 +20,22 @@ export const GetAgentPolicySummaryRequestSchema = {
   }),
 };
 
-const ListWithKuerySchema = schema.object({
-  page: schema.maybe(schema.number({ defaultValue: 1 })),
-  pageSize: schema.maybe(schema.number({ defaultValue: 20 })),
-  sort: schema.maybe(schema.string()),
-  sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-  showUpgradeable: schema.maybe(schema.boolean()),
-  kuery: schema.maybe(
-    schema.oneOf([
-      schema.string(),
-      schema.any(), // KueryNode
-    ])
-  ),
-});
+const ListWithKuerySchema = schema.object(
+  {
+    page: schema.number({ defaultValue: 1, min: 1 }),
+    pageSize: schema.number({ defaultValue: 20, min: 1 }),
+    sort: schema.maybe(schema.string()),
+    sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
+    showUpgradeable: schema.maybe(schema.boolean()),
+    kuery: schema.maybe(
+      schema.oneOf([
+        schema.string(),
+        schema.any(), // KueryNode
+      ])
+    ),
+  },
+  { defaultValue: { page: 1, pageSize: 20 } }
+);
 
 export const GetEndpointPackagePolicyRequestSchema = {
   query: ListWithKuerySchema,
