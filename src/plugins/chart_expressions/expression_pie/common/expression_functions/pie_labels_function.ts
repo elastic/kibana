@@ -9,17 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Datatable } from '../../../../expressions/common';
 import { PIE_LABELS_FUNCTION, PIE_LABELS_VALUE } from '../constants';
-import { ExpressionValuePieLabels } from '../types/expression_functions';
-
-interface Arguments {
-  show: boolean;
-  position: string;
-  values: boolean;
-  truncate: number | null;
-  valuesFormat: string;
-  lastLevel: boolean;
-  percentDecimals: number;
-}
+import { ExpressionValuePieLabels, Arguments } from '../types/expression_functions';
 
 export const pieLabelsFunction = (): ExpressionFunctionDefinition<
   typeof PIE_LABELS_FUNCTION,

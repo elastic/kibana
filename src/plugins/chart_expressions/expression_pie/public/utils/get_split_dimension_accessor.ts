@@ -9,14 +9,14 @@ import { AccessorFn } from '@elastic/charts';
 import { getColumnByAccessor } from './accessor';
 import { DatatableColumn } from '../../../../expressions/public';
 import type { FieldFormatsStart } from '../../../../field_formats/public';
-import { Dimension } from '../../common/types';
+import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 
 export const getSplitDimensionAccessor =
   (fieldFormats: FieldFormatsStart, columns: DatatableColumn[]) =>
-  (splitDimension: Dimension): AccessorFn => {
+  (splitDimension: ExpressionValueVisDimension): AccessorFn => {
     const formatter = fieldFormats.deserialize(splitDimension.format);
     const splitChartColumn = getColumnByAccessor(splitDimension.accessor, columns);
-    const { id } = splitChartColumn ?? {};
+    const accessor = splitChartColumn.id;
 
     const fn: AccessorFn = (d) => {
       const v = d[accessor];

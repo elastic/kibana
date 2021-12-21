@@ -28,10 +28,10 @@ export interface Dimension {
 }
 
 export interface Dimensions {
-  metric: Dimension;
-  buckets?: Dimension[];
-  splitRow?: Dimension[];
-  splitColumn?: Dimension[];
+  metric: ExpressionValueVisDimension;
+  buckets?: ExpressionValueVisDimension[];
+  splitRow?: ExpressionValueVisDimension[];
+  splitColumn?: ExpressionValueVisDimension[];
 }
 
 export interface LabelsParams {

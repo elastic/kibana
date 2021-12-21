@@ -135,7 +135,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
       },
-    } as PieVisParams;
+    };
 
     if (handlers?.inspectorAdapters?.tables) {
       const logTable = prepareLogTable(context, [
