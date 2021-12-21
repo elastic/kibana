@@ -585,6 +585,7 @@
     "@types/kbn__securitysolution-autocomplete": "link:bazel-bin/packages/kbn-securitysolution-autocomplete/npm_module_types",
     "@types/kbn__securitysolution-es-utils": "link:bazel-bin/packages/kbn-securitysolution-es-utils/npm_module_types",
     "@types/kbn__securitysolution-hook-utils": "link:bazel-bin/packages/kbn-securitysolution-hook-utils/npm_module_types",
+    "@types/kbn__securitysolution-io-ts-alerting-types": "link:bazel-bin/packages/kbn-securitysolution-io-ts-alerting-types/npm_module_types",
     "@types/license-checker": "15.0.0",
     "@types/listr": "^0.14.0",
     "@types/loader-utils": "^1.1.3",
