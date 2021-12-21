@@ -7,7 +7,7 @@
  */
 
 import React, { CSSProperties, ReactNode, useEffect, useRef, useState } from 'react';
-import { usePanelContext } from '../../contexts/split_panel_context';
+import { usePanelContext } from '../../contexts';
 
 export interface Props {
   children: ReactNode[] | ReactNode;
