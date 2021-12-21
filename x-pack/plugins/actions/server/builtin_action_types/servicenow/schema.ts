@@ -10,6 +10,11 @@ import { DEFAULT_ALERTS_GROUPING_KEY } from './config';
 
 export const ExternalIncidentServiceConfigurationBase = {
   apiUrl: schema.string(),
+  isOAuth: schema.boolean({ defaultValue: false }),
+  userIdentifierType: schema.maybe(schema.string()),
+  userIdentifierValue: schema.maybe(schema.string()),
+  clientId: schema.maybe(schema.string()),
+  jwtKeyId: schema.maybe(schema.string()),
 };
 
 export const ExternalIncidentServiceConfiguration = {
@@ -26,8 +31,11 @@ export const ExternalIncidentServiceConfigurationSchema = schema.object(
 );
 
 export const ExternalIncidentServiceSecretConfiguration = {
-  password: schema.string(),
-  username: schema.string(),
+  password: schema.maybe(schema.string()),
+  username: schema.maybe(schema.string()),
+  privateKey: schema.maybe(schema.string()),
+  clientSecret: schema.maybe(schema.string()),
+  privateKeyPassword: schema.maybe(schema.string()),
 };
 
 export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(

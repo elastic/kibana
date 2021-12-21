@@ -187,16 +187,19 @@ async function executor(
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params;
   const externalServiceConfig = snExternalServiceConfig[actionTypeId];
+  const connectorTokenClient = execOptions.services.connectorTokenClient;
   let data: ServiceNowExecutorResultData | null = null;
 
   const externalService = createService(
+    actionId,
     {
       config,
       secrets,
     },
     logger,
     configurationUtilities,
-    externalServiceConfig
+    externalServiceConfig,
+    connectorTokenClient
   );
 
   const apiAsRecord = api as unknown as Record<string, unknown>;
@@ -261,16 +264,19 @@ async function executorITOM(
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params;
   const externalServiceConfig = snExternalServiceConfig[actionTypeId];
+  const connectorTokenClient = execOptions.services.connectorTokenClient;
   let data: ServiceNowExecutorResultData | null = null;
 
   const externalService = createService(
+    actionId,
     {
       config,
       secrets,
     },
     logger,
     configurationUtilities,
-    externalServiceConfig
+    externalServiceConfig,
+    connectorTokenClient
   ) as ExternalServiceITOM;
 
   const apiAsRecord = api as unknown as Record<string, unknown>;
