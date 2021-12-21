@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/109897
-/* eslint-disable @kbn/eslint/no_export_all */
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export * as constants from './constants';
-export { CancellationToken } from './cancellation_token';
-export { Poller } from './poller';
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('apps', function () {
+    loadTestFile(require.resolve('./ml_docs'));
+  });
+}
