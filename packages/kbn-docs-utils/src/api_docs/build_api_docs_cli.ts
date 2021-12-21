@@ -14,7 +14,7 @@ import { REPO_ROOT } from '@kbn/utils';
 import { Project } from 'ts-morph';
 
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
-import { ApiDeclaration, PluginMetaInfo } from './types';
+import { ApiDeclaration, ApiStats, PluginMetaInfo } from './types';
 import { findPlugins } from './find_plugins';
 import { pathsOutsideScopes } from './build_api_declarations/utils';
 import { getPluginApiMap } from './get_plugin_api_map';
@@ -22,6 +22,7 @@ import { writeDeprecationDocByApi } from './mdx/write_deprecations_doc_by_api';
 import { writeDeprecationDocByPlugin } from './mdx/write_deprecations_doc_by_plugin';
 import { writePluginDirectoryDoc } from './mdx/write_plugin_directory_doc';
 import { collectApiStatsForPlugin } from './stats';
+import { countEslintDisableLine, EslintDisableCounts } from './count_eslint_disable';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -78,17 +79,19 @@ export function runBuildApiDocsCli() {
 
       const reporter = CiStatsReporter.fromEnv(log);
 
-      const allPluginStats = plugins.reduce((acc, plugin) => {
+      const allPluginStats: { [key: string]: PluginMetaInfo & ApiStats & EslintDisableCounts } = {};
+      for (const plugin of plugins) {
         const id = plugin.manifest.id;
         const pluginApi = pluginApiMap[id];
-        acc[id] = {
+
+        allPluginStats[id] = {
+          ...(await countEslintDisableLine(plugin.directory)),
           ...collectApiStatsForPlugin(pluginApi, missingApiItems, referencedDeprecations),
           owner: plugin.manifest.owner,
           description: plugin.manifest.description,
           isPlugin: plugin.isPlugin,
         };
-        return acc;
-      }, {} as { [key: string]: PluginMetaInfo });
+      }
 
       writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
 
@@ -135,6 +138,24 @@ export function runBuildApiDocsCli() {
             meta: { pluginTeam },
             group: 'References to deprecated APIs',
             value: pluginStats.deprecatedAPIsReferencedCount,
+          },
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'Eslint disable line counts',
+            value: pluginStats.eslintDisableLineCount,
+          },
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'Eslint disable file counts',
+            value: pluginStats.eslintDisableFileCount,
+          },
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'Total eslint disables',
+            value: pluginStats.eslintDisableFileCount + pluginStats.eslintDisableLineCount,
           },
         ]);
 
