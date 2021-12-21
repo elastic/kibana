@@ -51,6 +51,9 @@ TYPES_DEPS = [
   "@npm//@types/lodash",
   "@npm//@types/node",
   "@npm//@types/uuid",
+  # TODO: Remove once the bug on pkg_npm_types around transitive type deps got solved
+  "@npm//io-ts",
+  "@npm//tslib",
 ]
 
 jsts_transpiler(

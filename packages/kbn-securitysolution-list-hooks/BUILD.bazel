@@ -52,7 +52,7 @@ TYPES_DEPS = [
   "@npm//@types/react",
   "@npm//@types/testing-library__react-hooks",
   "@npm//fp-ts",
-  # TODO
+  # TODO: Remove once the bug on pkg_npm_types around transitive type deps got solved
   "@npm//io-ts",
   "@npm//tslib",
 ]
