@@ -130,7 +130,7 @@ class SavedObjectFinderUi extends React.Component<
       search: query ? `${query}*` : undefined,
       page: 1,
       perPage,
-      searchFields: ['title^3', 'description', 'attributes'],
+      searchFields: ['title^3', 'description'],
       defaultSearchOperator: 'AND',
     });
 
