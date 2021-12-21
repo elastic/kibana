@@ -1,0 +1,17 @@
+get:
+  summary: Packages - Get limited list
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  type: string
+  operationId: list-limited-packages
+parameters: []
