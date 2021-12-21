@@ -850,10 +850,6 @@ module.exports = {
                 name: 'semver',
                 message: 'Please use "semver/*/{function}" instead',
               },
-              {
-                name: '@kbn/rule-data-utils',
-                message: `Import directly from @kbn/rule-data-utils/* submodules in public/common code`,
-              },
             ],
           },
         ],
