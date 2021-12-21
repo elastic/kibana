@@ -17,5 +17,6 @@ export interface CspPluginSetup {
   data: DataPublicPluginStart;
 }
 export interface CspPluginStart {
+  data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
 }

@@ -28,19 +28,18 @@ const navItems: NonNullable<KibanaPageTemplateProps['solutionNav']>['items'] = n
   })
 );
 
-type Props = Pick<KibanaPageTemplateProps, 'pageHeader'>;
+const defaultProps: KibanaPageTemplateProps = {
+  solutionNav: {
+    name: 'Cloud Security Posture',
+    items: navItems,
+  },
+  restrictWidth: false,
+  template: 'default',
+};
 
-export const CspPageTemplate: React.FC<Props> = ({ children, pageHeader }) => {
+export const CspPageTemplate: React.FC<KibanaPageTemplateProps> = ({ children, ...props }) => {
   return (
-    <KibanaPageTemplate
-      pageHeader={pageHeader}
-      solutionNav={{
-        name: 'Cloud Security Posture',
-        items: navItems,
-      }}
-      restrictWidth={false}
-      template="default"
-    >
+    <KibanaPageTemplate {...defaultProps} {...props}>
       {children}
     </KibanaPageTemplate>
   );
