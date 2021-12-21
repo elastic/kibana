@@ -95,9 +95,9 @@ export const HostIsolationExceptionDeleteModal = memo(
         <EuiModalBody data-test-subj="hostIsolationExceptionsFilterDeleteModalBody">
           <EuiText>
             <EuiCallOut
-              data-test-subj="eventFilterDeleteModalCallout"
+              data-test-subj="hostIsolationExceptionsDeleteModalCallout"
               title={i18n.translate(
-                'xpack.securitySolution.eventFilters.deletionDialog.calloutTitle',
+                'xpack.securitySolution.hostIsolationExceptions.deletionDialog.calloutTitle',
                 {
                   defaultMessage: 'Warning',
                 }
