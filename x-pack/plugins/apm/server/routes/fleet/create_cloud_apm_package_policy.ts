@@ -9,6 +9,7 @@ import {
   ElasticsearchClient,
   SavedObjectsClientContract,
   Logger,
+  ISavedObjectsRepository,
 } from 'kibana/server';
 import { PackagePolicy } from '../../../../fleet/common';
 import {
@@ -27,6 +28,7 @@ export async function createCloudApmPackgePolicy({
   cloudPluginSetup,
   fleetPluginStart,
   savedObjectsClient,
+  internalSavedObjectsClient,
   esClient,
   logger,
   setup,
@@ -35,6 +37,7 @@ export async function createCloudApmPackgePolicy({
   cloudPluginSetup: APMPluginSetupDependencies['cloud'];
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
   savedObjectsClient: SavedObjectsClientContract;
+  internalSavedObjectsClient: ISavedObjectsRepository;
   esClient: ElasticsearchClient;
   logger: Logger;
   setup: Setup;
@@ -61,7 +64,7 @@ export async function createCloudApmPackgePolicy({
   });
   logger.info(`Fleet migration on Cloud - apmPackagePolicy create start`);
   const apmPackagePolicy = await fleetPluginStart.packagePolicyService.create(
-    savedObjectsClient,
+    internalSavedObjectsClient,
     esClient,
     mergedAPMPackagePolicy,
     { force: true, bumpRevision: true }

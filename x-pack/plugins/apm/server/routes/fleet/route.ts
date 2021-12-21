@@ -165,13 +165,16 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/fleet/cloud_apm_package_policy',
   options: { tags: ['access:apm', 'access:apm_write'] },
   handler: async (resources) => {
-    const { plugins, context, config, request, logger, kibanaVersion } =
+    const { plugins, context, config, request, logger, kibanaVersion, core } =
       resources;
     const cloudApmMigrationEnabled = config.agent.migrations.enabled;
     if (!plugins.fleet || !plugins.security) {
       throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
     }
     const savedObjectsClient = context.core.savedObjects.client;
+    const internalSavedObjectsClient = await getInternalSavedObjectsClient(
+      core.setup
+    );
     const coreStart = await resources.core.start();
     const esClient = coreStart.elasticsearch.client.asScoped(
       resources.request
@@ -190,6 +193,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       cloudPluginSetup,
       fleetPluginStart,
       savedObjectsClient,
+      internalSavedObjectsClient,
       esClient,
       logger,
       setup,

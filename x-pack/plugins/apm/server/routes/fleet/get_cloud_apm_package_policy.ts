@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { ISavedObjectsRepository } from 'kibana/server';
 import { Maybe } from '../../../typings/common';
 import { AgentPolicy, PackagePolicy } from '../../../../fleet/common';
 import { APMPluginStartDependencies } from '../../types';
@@ -18,7 +18,7 @@ export async function getCloudAgentPolicy({
   savedObjectsClient,
 }: {
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
 }) {
   try {
     return await fleetPluginStart.agentPolicyService.get(

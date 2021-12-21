@@ -8,13 +8,13 @@
 import { GetDeprecationsContext, DeprecationsDetails } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import type { ISavedObjectsRepository } from 'src/core/server';
 import { CloudSetup } from '../../../cloud/server';
 import {
   getCloudAgentPolicy,
   getApmPackagePolicy,
 } from '../routes/fleet/get_cloud_apm_package_policy';
 import { APMRouteHandlerResources } from '../';
-
 export function getDeprecations({
   cloudSetup,
   fleet,
@@ -35,9 +35,13 @@ export function getDeprecations({
     const docBranch = branch === 'main' ? 'master' : branch;
 
     const fleetPluginStart = await fleet.start();
+
+    const internalSavedObjectsClient =
+      // @ts-ignore Conversion of type 'SavedObjectsClientContract' to type 'ISavedObjectsRepository'
+      savedObjectsClient as ISavedObjectsRepository;
     const cloudAgentPolicy = await getCloudAgentPolicy({
       fleetPluginStart,
-      savedObjectsClient,
+      savedObjectsClient: internalSavedObjectsClient,
     });
 
     const isCloudEnabled = !!cloudSetup?.isCloudEnabled;
