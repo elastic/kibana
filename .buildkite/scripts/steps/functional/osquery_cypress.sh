@@ -11,15 +11,7 @@ export JOB=kibana-osquery-cypress
 
 echo "--- Osquery Cypress tests"
 
-cd "$XPACK_DIR"
-
-export CODE_COVERAGE=1
-
 checks-reporter-with-killswitch "Osquery Cypress Tests" \
- node scripts/functional_tests \
-   --debug --bail \
-   --config test/osquery_cypress/cli_config.ts
-
-cd ../
+   yarn --cwd x-pack/plugins/osquery cypress:run-as-ci
 
 buildkite-agent artifact upload 'target/kibana-osquery/**/*'
