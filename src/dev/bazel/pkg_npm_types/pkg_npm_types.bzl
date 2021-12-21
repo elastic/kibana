@@ -7,7 +7,7 @@
 #
 
 load("@npm//@bazel/typescript/internal:ts_config.bzl", "TsConfigInfo")
-load("@build_bazel_rules_nodejs//:providers.bzl", "run_node", "LinkablePackageInfo", "declaration_info")
+load("@build_bazel_rules_nodejs//:providers.bzl", "run_node", "LinkablePackageInfo", "DeclarationInfo", "declaration_info")
 load("@build_bazel_rules_nodejs//internal/linker:link_node_modules.bzl", "module_mappings_aspect")
 
 
@@ -15,9 +15,10 @@ load("@build_bazel_rules_nodejs//internal/linker:link_node_modules.bzl", "module
 # Implement a way to produce source maps for api extractor
 # summarised types as referenced at (https://github.com/microsoft/rushstack/issues/1886#issuecomment-933997910)
 
-def _deps_inputs(ctx):
-  """Returns all transitively referenced files on deps """
+def _collect_inputs_deps_and_transitive_types_deps(ctx):
+  """Returns an array with all transitively referenced files on deps in the pos 0 and all types deps in pos 1"""
   deps_files_depsets = []
+  transitive_types_deps = []
   for dep in ctx.attr.deps:
     # Collect whatever is in the "data"
     deps_files_depsets.append(dep.data_runfiles.files)
@@ -25,8 +26,12 @@ def _deps_inputs(ctx):
     # Only collect DefaultInfo files (not transitive)
     deps_files_depsets.append(dep.files)
 
+    # Collect transitive type deps to propagate in the provider
+    if DeclarationInfo in dep:
+      transitive_types_deps.append(dep)
+
   deps_files = depset(transitive = deps_files_depsets).to_list()
-  return deps_files
+  return [deps_files, transitive_types_deps]
 
 def _calculate_entrypoint_path(ctx):
   return _join(ctx.bin_dir.path, ctx.label.package, _get_types_outdir_name(ctx), ctx.attr.entrypoint_name)
@@ -54,8 +59,12 @@ def _tsconfig_inputs(ctx):
   return all_inputs
 
 def _pkg_npm_types_impl(ctx):
+  # collect input deps and transitive type deps
+  inputs_deps_and_transitive_types_deps = _collect_inputs_deps_and_transitive_types_deps(ctx)
+  transitive_types_deps = inputs_deps_and_transitive_types_deps[1]
+
   # input declarations
-  deps_inputs = _deps_inputs(ctx)
+  deps_inputs = inputs_deps_and_transitive_types_deps[0]
   tsconfig_inputs = _tsconfig_inputs(ctx)
   inputs = ctx.files.srcs[:]
   inputs.extend(tsconfig_inputs)
@@ -106,7 +115,8 @@ def _pkg_npm_types_impl(ctx):
       runfiles = ctx.runfiles([package_dir]),
     ),
     declaration_info(
-      declarations = depset([package_dir])
+      declarations = depset([package_dir]),
+      deps = transitive_types_deps,
     ),
     LinkablePackageInfo(
       package_name = ctx.attr.package_name,
