@@ -1587,5 +1587,3 @@ describe('setup contract', () => {
     });
   });
 });
-
-
