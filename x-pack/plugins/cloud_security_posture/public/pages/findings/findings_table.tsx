@@ -9,48 +9,49 @@ import {
   Criteria,
   EuiLink,
   EuiTableFieldDataColumnType,
+  EuiBadgeGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiBadge,
   EuiBasicTable,
   PropsOf,
   EuiBasicTableProps,
 } from '@elastic/eui';
 import { orderBy } from 'lodash';
-import { CSPFinding, FetchState } from './types';
-import { FindingsRuleFlyout } from './findings_flyout';
+import { TEST_SUBJECTS } from './constants';
+import type { CSPFinding, FindingsFetchState } from './types';
 import { CSPEvaluationBadge } from '../../components/csp_evaluation_badge';
 
-type FindingsTableProps = FetchState<CSPFinding[]>;
+interface BaseFindingsTableProps {
+  selectItem(v: CSPFinding | undefined): void;
+}
+
+type FindingsTableProps = FindingsFetchState & BaseFindingsTableProps;
 
 /**
  * Temporary findings table
  */
-export const FindingsTable = ({ data, loading, error }: FindingsTableProps) => {
+export const FindingsTable = ({ data, status, error, selectItem }: FindingsTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const [sortField, setSortField] = useState<keyof CSPFinding>('resource');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [selectedFinding, setSelectedFinding] = useState<CSPFinding | undefined>();
   const columns = useMemo(getColumns, []);
 
   const getCellProps = (item: CSPFinding, column: EuiTableFieldDataColumnType<CSPFinding>) => ({
-    onClick: column.field === 'rule.name' ? () => setSelectedFinding(item) : undefined,
+    onClick: column.field === 'rule.name' ? () => selectItem(item) : undefined,
   });
 
-  const onTableChange = ({ page, sort }: Criteria<CSPFinding>) => {
-    if (!page || !sort) return;
+  const onTableChange = ({ page }: Criteria<CSPFinding>) => {
+    if (!page) return;
     const { index, size } = page;
-    const { field, direction } = sort;
 
     setPageIndex(index);
     setPageSize(size);
-    setSortField(field as keyof CSPFinding);
-    setSortDirection(direction);
   };
 
   // TODO: add empty/error/loading views
   if (!data) return null;
 
-  // TODO: async pagination?
+  // TODO: async pagination
   const pagination: EuiBasicTableProps<CSPFinding>['pagination'] = {
     pageIndex,
     pageSize,
@@ -59,45 +60,40 @@ export const FindingsTable = ({ data, loading, error }: FindingsTableProps) => {
     hidePerPageOptions: false,
   };
 
-  // TODO: async sorting?
-  const sorting: EuiBasicTableProps<CSPFinding>['sorting'] = {
-    sort: {
-      field: sortField,
-      direction: sortDirection,
-    },
-    enableAllColumns: true,
-  };
-
   const sortedData = orderBy(data, ['@timestamp'], ['desc']);
   const page = sortedData.slice(pageIndex * pageSize, pageSize * pageIndex + pageSize);
 
   return (
-    <>
-      <EuiBasicTable
-        loading={loading}
-        error={error ? error : undefined}
-        items={page}
-        columns={columns}
-        tableLayout={'auto'}
-        pagination={pagination}
-        sorting={sorting}
-        onChange={onTableChange}
-        cellProps={getCellProps}
-      />
-      {selectedFinding && (
-        <FindingsRuleFlyout
-          findings={selectedFinding}
-          onClose={() => setSelectedFinding(undefined)}
-        />
-      )}
-    </>
+    <EuiBasicTable
+      data-test-subj={TEST_SUBJECTS.FINDINGS_TABLE}
+      loading={status === 'loading'}
+      error={error ? error : undefined}
+      items={page}
+      columns={columns}
+      tableLayout={'auto'}
+      pagination={pagination}
+      onChange={onTableChange}
+      cellProps={getCellProps}
+    />
   );
 };
 
-const RuleName = (v: string) => <EuiLink href="#">{v}</EuiLink>;
-const RuleTags = (v: string[]) => v.map((x) => <EuiBadge color="default">{x}</EuiBadge>);
-const ResultEvaluation = (v: PropsOf<typeof CSPEvaluationBadge>['type']) => (
-  <CSPEvaluationBadge type={v} />
+const RuleName = (name: string) => <EuiLink href="#">{name}</EuiLink>;
+const RuleTags = (tags: string[]) => (
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiBadgeGroup>
+        {tags.map((tag) => (
+          <EuiBadge key={tag} color="default">
+            {tag}
+          </EuiBadge>
+        ))}
+      </EuiBadgeGroup>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+const ResultEvaluation = (type: PropsOf<typeof CSPEvaluationBadge>['type']) => (
+  <CSPEvaluationBadge type={type} />
 );
 
 const getColumns = (): Array<EuiTableFieldDataColumnType<CSPFinding>> => [
@@ -122,10 +118,13 @@ const getColumns = (): Array<EuiTableFieldDataColumnType<CSPFinding>> => [
   {
     field: 'rule.tags',
     name: 'Tags',
+<<<<<<< HEAD
     truncateText: true,
     // TODO: tags need to be truncated (as they are components, not texts)
     // and on hover they should show the full tags
     // currently causes the table to overflow its parent
+=======
+>>>>>>> 51f32f44020... Findings page iteration (#52)
     render: RuleTags,
   },
   {
