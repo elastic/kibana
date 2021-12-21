@@ -132,19 +132,24 @@ export abstract class Embeddable<
     return this.output;
   }
 
-  public async getExplicitInputIsEqual(lastInput: Partial<TEmbeddableInput>): Promise<boolean> {
-    const currentInput = this.getExplicitInput();
+  public async getExplicitInputIsEqual(
+    lastExplicitInput: Partial<TEmbeddableInput>
+  ): Promise<boolean> {
+    const currentExplicitInput = this.getExplicitInput();
     return (
-      genericEmbeddableInputIsEqual(lastInput, currentInput) &&
-      fastIsEqual(omitGenericEmbeddableInput(lastInput), omitGenericEmbeddableInput(currentInput))
+      genericEmbeddableInputIsEqual(lastExplicitInput, currentExplicitInput) &&
+      fastIsEqual(
+        omitGenericEmbeddableInput(lastExplicitInput),
+        omitGenericEmbeddableInput(currentExplicitInput)
+      )
     );
   }
 
   public getExplicitInput() {
-    if (this.getRoot().isContainer) {
+    const root = this.getRoot();
+    if (root.getIsContainer()) {
       return (
-        ((this.getRoot() as IContainer).getInput().panels?.[this.id]
-          ?.explicitInput as TEmbeddableInput) ?? this.getInput()
+        (root.getInput().panels?.[this.id]?.explicitInput as TEmbeddableInput) ?? this.getInput()
       );
     }
     return this.getInput();

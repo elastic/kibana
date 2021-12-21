@@ -220,14 +220,14 @@ export class MapEmbeddable
   }
 
   public async getExplicitInputIsEqual(
-    lastInput: Partial<MapByValueInput | MapByReferenceInput>
+    lastExplicitInput: Partial<MapByValueInput | MapByReferenceInput>
   ): Promise<boolean> {
-    const currentInput = this.getExplicitInput();
-    if (!genericEmbeddableInputIsEqual(lastInput, currentInput)) return false;
+    const currentExplicitInput = this.getExplicitInput();
+    if (!genericEmbeddableInputIsEqual(lastExplicitInput, currentExplicitInput)) return false;
 
     // generic embeddable input is equal, now we compare map specific input elements, ignoring 'mapBuffer'.
-    const lastMapInput = omitGenericEmbeddableInput(_.omit(lastInput, 'mapBuffer'));
-    const currentMapInput = omitGenericEmbeddableInput(_.omit(currentInput, 'mapBuffer'));
+    const lastMapInput = omitGenericEmbeddableInput(_.omit(lastExplicitInput, 'mapBuffer'));
+    const currentMapInput = omitGenericEmbeddableInput(_.omit(currentExplicitInput, 'mapBuffer'));
     return fastIsEqual(lastMapInput, currentMapInput);
   }
 
