@@ -84,7 +84,7 @@ const PieComponent = (props: PieComponentProps) => {
   const [showLegend, setShowLegend] = useState<boolean>(() => {
     const bwcLegendStateDefault =
       props.visParams.addLegend == null ? false : props.visParams.addLegend;
-    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
+    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) ?? bwcLegendStateDefault;
   });
   const [dimensions, setDimensions] = useState<undefined | PieContainerDimensions>();
 
