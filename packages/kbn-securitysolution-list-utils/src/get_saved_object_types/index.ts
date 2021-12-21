@@ -16,7 +16,7 @@ export const getSavedObjectTypes = ({
 }: {
   namespaceType: NamespaceTypeArray;
 }): SavedObjectType[] => {
-  return namespaceType.map((singleNamespaceType) =>
+  return namespaceType.map((singleNamespaceType: any) =>
     getSavedObjectType({ namespaceType: singleNamespaceType })
   );
 };

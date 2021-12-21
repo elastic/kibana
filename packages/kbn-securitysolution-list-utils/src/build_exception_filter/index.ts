@@ -76,13 +76,13 @@ export const transformOsType = (
   osTypes: OsTypeArray,
   entries: NonListEntry[]
 ): NonListEntry[][] => {
-  const hostTypeTransformed = osTypes.map<NonListEntry[]>((osType) => {
+  const hostTypeTransformed = osTypes.map<NonListEntry[]>((osType: any) => {
     return [
       { field: 'host.os.type', operator: 'included', type: 'match', value: osType },
       ...entries,
     ];
   });
-  const caseLessTransformed = osTypes.map<NonListEntry[]>((osType) => {
+  const caseLessTransformed = osTypes.map<NonListEntry[]>((osType: any) => {
     return [
       { field: 'host.os.name.caseless', operator: 'included', type: 'match', value: osType },
       ...entries,
@@ -113,7 +113,7 @@ export const buildExceptionItemFilterWithOsType = (
 export const buildExceptionItemFilter = (
   exceptionItem: ExceptionItemSansLargeValueLists
 ): Array<BooleanFilter | NestedFilter> => {
-  const { entries, os_types: osTypes } = exceptionItem;
+  const { entries, os_types: osTypes } = exceptionItem as any;
   if (osTypes != null && osTypes.length > 0) {
     return buildExceptionItemFilterWithOsType(osTypes, entries);
   } else {
@@ -123,7 +123,7 @@ export const buildExceptionItemFilter = (
       return [
         {
           bool: {
-            filter: entries.map((entry) => createInnerAndClauses(entry)),
+            filter: entries.map((entry: any) => createInnerAndClauses(entry)),
           },
         },
       ];
@@ -259,7 +259,7 @@ export const getBaseMatchAnyClause = (entry: EntryMatchAny): BooleanFilter => {
   return {
     bool: {
       minimum_should_match: 1,
-      should: value.map((val) => {
+      should: value.map((val: any) => {
         return {
           bool: {
             minimum_should_match: 1,

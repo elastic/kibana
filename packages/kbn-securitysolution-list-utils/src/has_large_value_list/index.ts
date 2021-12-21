@@ -9,6 +9,6 @@
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 
 export const hasLargeValueList = (entries: EntriesArray): boolean => {
-  const found = entries.filter(({ type }) => type === 'list');
+  const found = entries.filter(({ type }: any) => type === 'list');
   return found.length > 0;
 };

@@ -68,12 +68,14 @@ export const filterExceptionItems = (
         const strippedSingleEntry = removeIdFromItem(singleEntry);
 
         if (entriesNested.is(strippedSingleEntry)) {
-          const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
-            const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
-            const [validatedNestedEntry] = validate(noIdSingleNestedEntry, nestedEntryItem);
-            return validatedNestedEntry != null;
-          });
-          const noIdNestedEntries = nestedEntriesArray.map((singleNestedEntry) =>
+          const nestedEntriesArray = strippedSingleEntry.entries.filter(
+            (singleNestedEntry: any) => {
+              const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
+              const [validatedNestedEntry] = validate(noIdSingleNestedEntry, nestedEntryItem);
+              return validatedNestedEntry != null;
+            }
+          );
+          const noIdNestedEntries = nestedEntriesArray.map((singleNestedEntry: any) =>
             removeIdFromItem(singleNestedEntry)
           );
 
@@ -105,7 +107,7 @@ export const filterExceptionItems = (
       if (exceptionListItemSchema.is(item)) {
         return [...acc, item];
       } else if (createExceptionListItemSchema.is(item)) {
-        const { meta, ...rest } = item;
+        const { meta, ...rest } = item as any;
         const itemSansMetaId: CreateExceptionListItemSchema = { ...rest, meta: undefined };
         return [...acc, itemSansMetaId];
       } else {
@@ -117,11 +119,11 @@ export const filterExceptionItems = (
 };
 
 export const addIdToEntries = (entries: EntriesArray): EntriesArray => {
-  return entries.map((singleEntry) => {
+  return entries.map((singleEntry: any) => {
     if (singleEntry.type === 'nested') {
       return addIdToItem({
         ...singleEntry,
-        entries: singleEntry.entries.map((nestedEntry) => addIdToItem(nestedEntry)),
+        entries: singleEntry.entries.map((nestedEntry: any) => addIdToItem(nestedEntry)),
       });
     } else {
       return addIdToItem(singleEntry);
