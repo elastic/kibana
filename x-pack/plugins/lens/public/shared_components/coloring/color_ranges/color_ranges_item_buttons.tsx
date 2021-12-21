@@ -14,12 +14,13 @@ import { ValueMaxIcon } from '../../../assets/value_max';
 import { ValueMinIcon } from '../../../assets/value_min';
 import { getAutoValues, getDataMinMax, getStepValue, roundValue } from '../utils';
 
-import type { CustomPaletteParamsConfig } from '../../../../common';
-import type { DataBounds, AutoValueMode, ColorRangesActions, ColorRange } from './types';
+import type { DataBounds, ColorRangesActions, ColorRange } from './types';
+import type { CustomPaletteParams } from '../../../../common';
 
 export interface ColorRangesItemButtonProps {
   colorRanges: ColorRange[];
-  paletteConfiguration: CustomPaletteParamsConfig | undefined;
+  rangeType: CustomPaletteParams['rangeType'];
+  continuity: CustomPaletteParams['continuity'];
   dataBounds: DataBounds;
   dispatch: Dispatch<ColorRangesActions>;
   index: number;
@@ -56,18 +57,17 @@ export function ColorRangeEditButton({
   index,
   dataBounds,
   colorRanges,
-  paletteConfiguration,
+  rangeType,
+  continuity,
   dispatch,
   accessor,
 }: ColorRangesItemButtonProps) {
-  const rangeType = paletteConfiguration?.rangeType ?? 'percent';
-  const autoValue = paletteConfiguration?.autoValue ?? 'none';
   const isLast = accessor === 'end';
 
   const onExecuteAction = useCallback(() => {
     const { max } = getDataMinMax(rangeType, dataBounds);
     let newValue;
-    let newAutoValue: AutoValueMode;
+    let newContinuity: CustomPaletteParams['continuity'];
 
     const colorStops = colorRanges.map(({ color, start }) => ({
       color,
@@ -77,16 +77,19 @@ export function ColorRangeEditButton({
 
     if (isLast) {
       newValue = colorRanges[index].start + step;
-      newAutoValue = autoValue === 'all' ? 'min' : 'none';
+      newContinuity = continuity === 'all' ? 'below' : 'none';
     } else {
       newValue = colorRanges[index].end - step;
-      newAutoValue = autoValue === 'all' ? 'max' : 'none';
+      newContinuity = continuity === 'all' ? 'above' : 'none';
     }
 
     colorRanges[index][isLast ? 'end' : 'start'] = roundValue(newValue);
 
-    dispatch({ type: 'set', payload: { colorRanges: [...colorRanges], autoValue: newAutoValue } });
-  }, [rangeType, dataBounds, colorRanges, isLast, index, dispatch, autoValue]);
+    dispatch({
+      type: 'set',
+      payload: { colorRanges: [...colorRanges], continuity: newContinuity },
+    });
+  }, [rangeType, dataBounds, colorRanges, isLast, index, dispatch, continuity]);
 
   return (
     <EuiButtonIcon
@@ -107,12 +110,11 @@ export function ColorRangeAutoDetectButton({
   index,
   dataBounds,
   colorRanges,
-  paletteConfiguration,
+  rangeType,
+  continuity,
   dispatch,
   accessor,
 }: ColorRangesItemButtonProps) {
-  const rangeType = paletteConfiguration?.rangeType ?? 'percent';
-  const autoValue = paletteConfiguration?.autoValue ?? 'none';
   const isLast = accessor === 'end';
 
   const onExecuteAction = useCallback(() => {
@@ -126,18 +128,21 @@ export function ColorRangeAutoDetectButton({
       dataBounds
     );
     const newValue = roundValue(isLast ? autoMax : autoMin);
-    let newAutoValue: AutoValueMode;
+    let newContinuity: CustomPaletteParams['continuity'];
 
     if (isLast) {
-      newAutoValue = autoValue === 'none' ? 'max' : 'all';
+      newContinuity = continuity === 'none' ? 'above' : 'all';
     } else {
-      newAutoValue = autoValue === 'none' ? 'min' : 'all';
+      newContinuity = continuity === 'none' ? 'below' : 'all';
     }
 
     colorRanges[index][isLast ? 'end' : 'start'] = newValue;
 
-    dispatch({ type: 'set', payload: { colorRanges: [...colorRanges], autoValue: newAutoValue } });
-  }, [autoValue, colorRanges, dataBounds, dispatch, index, isLast, rangeType]);
+    dispatch({
+      type: 'set',
+      payload: { colorRanges: [...colorRanges], continuity: newContinuity },
+    });
+  }, [continuity, colorRanges, dataBounds, dispatch, index, isLast, rangeType]);
 
   return (
     <EuiButtonIcon

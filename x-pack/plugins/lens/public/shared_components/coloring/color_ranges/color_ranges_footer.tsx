@@ -36,9 +36,9 @@ export function ColorRangesFooter({
   const onAddColorRange = useCallback(() => {
     dispatch({
       type: 'addColorRange',
-      payload: { rangeType: paletteConfiguration?.rangeType ?? 'percent', dataBounds },
+      payload: { dataBounds },
     });
-  }, [dataBounds, dispatch, paletteConfiguration?.rangeType]);
+  }, [dataBounds, dispatch]);
 
   const onReversePalette = useCallback(() => {
     dispatch({ type: 'reversePalette' });

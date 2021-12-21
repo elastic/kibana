@@ -17,6 +17,7 @@ import {
 } from './utils';
 
 import type {
+  SetColorRangesPayload,
   ColorRangesActions,
   ColorRangesState,
   AddColorRangePayload,
@@ -31,17 +32,18 @@ export const colorRangesReducer: Reducer<ColorRangesState, ColorRangesActions> =
 ) => {
   switch (action.type) {
     case 'set': {
-      const payload = action.payload as ColorRangesState;
+      const payload = action.payload as SetColorRangesPayload;
       return {
         colorRanges: payload.colorRanges ?? state.colorRanges,
-        autoValue: payload.autoValue ?? state.autoValue,
+        continuity: payload.continuity ?? state.continuity,
+        rangeType: payload.rangeType ?? state.rangeType,
       };
     }
     case 'addColorRange': {
-      const { rangeType, dataBounds } = action.payload as AddColorRangePayload;
+      const { dataBounds } = action.payload as AddColorRangePayload;
       return {
         ...state,
-        colorRanges: addColorRange(state.colorRanges, rangeType, dataBounds),
+        colorRanges: addColorRange(state.colorRanges, state.rangeType, dataBounds),
       };
     }
     case 'reversePalette': {

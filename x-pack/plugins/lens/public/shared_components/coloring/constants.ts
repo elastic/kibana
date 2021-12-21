@@ -27,5 +27,4 @@ export const defaultPaletteParams: RequiredPaletteParamTypes = {
   steps: DEFAULT_COLOR_STEPS,
   colorStops: [],
   continuity: DEFAULT_CONTINUITY,
-  autoValue: 'none',
 };

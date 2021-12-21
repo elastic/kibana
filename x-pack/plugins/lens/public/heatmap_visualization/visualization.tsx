@@ -318,8 +318,8 @@ export const getHeatmapVisualization = ({
             yAccessor: [state.yAccessor ?? ''],
             valueAccessor: [state.valueAccessor ?? ''],
             lastRangeIsRightOpen: [
-              state.palette?.params?.autoValue
-                ? ['max', 'all'].includes(state.palette?.params?.autoValue || '')
+              state.palette?.params?.continuity
+                ? ['above', 'all'].includes(state.palette.params.continuity)
                 : true,
             ],
             palette: state.palette?.params

@@ -35,16 +35,17 @@ import type {
   ColorRangesActions,
 } from './types';
 
-import type { CustomPaletteParamsConfig } from '../../../../common';
+import type { CustomPaletteParams } from '../../../../common';
 
 export interface ColorRangesItemProps {
   colorRange: ColorRange;
   index: number;
   colorRanges: ColorRange[];
-  paletteConfiguration: CustomPaletteParamsConfig | undefined;
   colorRangeValidation?: ColorRangeValidation;
   dispatch: Dispatch<ColorRangesActions>;
   dataBounds: DataBounds;
+  rangeType: CustomPaletteParams['rangeType'];
+  continuity: CustomPaletteParams['continuity'];
   accessor: ColorRangeAccessor;
 }
 
@@ -53,20 +54,18 @@ export function ColorRangeItem({
   index,
   dataBounds,
   colorRange,
+  rangeType,
   colorRanges,
   colorRangeValidation,
-  paletteConfiguration,
+  continuity = 'none',
   dispatch,
 }: ColorRangesItemProps) {
   const value = `${colorRange[accessor]}`;
   const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
   const [localValue, setLocalValue] = useState<string>(value ?? '');
 
-  const { rangeType = 'percent' } = paletteConfiguration ?? {};
-  const autoValue = paletteConfiguration?.autoValue ?? 'none';
-
-  const isDisabledStart = ['min', 'all'].includes(autoValue!);
-  const isDisabledEnd = ['max', 'all'].includes(autoValue!);
+  const isDisabledStart = ['below', 'all'].includes(continuity);
+  const isDisabledEnd = ['above', 'all'].includes(continuity);
 
   const isLast = accessor === 'end';
   const isDisabled = isLast ? isDisabledEnd : index === 0 ? isDisabledStart : false;
@@ -185,7 +184,8 @@ export function ColorRangeItem({
             <ActionButton
               index={index}
               dataBounds={dataBounds}
-              paletteConfiguration={paletteConfiguration}
+              continuity={continuity}
+              rangeType={rangeType}
               colorRanges={colorRanges}
               dispatch={dispatch}
               accessor={accessor}

@@ -25,10 +25,19 @@ export interface ColorRangesProps {
   onChange: (
     colorStops: ColorStop[],
     upperMax: number,
-    autoValue: CustomPaletteParamsConfig['autoValue']
+    continuity: CustomPaletteParamsConfig['continuity']
   ) => void;
   dataBounds: DataBounds;
 }
+
+const toLocalState = (
+  colorRanges: ColorRangesProps['colorRanges'],
+  paletteConfiguration: ColorRangesProps['paletteConfiguration']
+) => ({
+  colorRanges,
+  rangeType: paletteConfiguration?.rangeType ?? 'percent',
+  continuity: paletteConfiguration?.continuity ?? 'none',
+});
 
 export function ColorRanges({
   colorRanges,
@@ -36,10 +45,10 @@ export function ColorRanges({
   dataBounds,
   paletteConfiguration,
 }: ColorRangesProps) {
-  const [localState, dispatch] = useReducer(colorRangesReducer, {
-    colorRanges,
-    autoValue: paletteConfiguration?.autoValue ?? 'none',
-  });
+  const [localState, dispatch] = useReducer(
+    colorRangesReducer,
+    toLocalState(colorRanges, paletteConfiguration)
+  );
 
   const [colorRangesValidity, setColorRangesValidity] = useState<
     Record<string, ColorRangeValidation>
@@ -49,14 +58,23 @@ export function ColorRanges({
     setColorRangesValidity(validateColorRanges(localState.colorRanges));
   }, [localState.colorRanges]);
 
+  useEffect(() => {
+    if (paletteConfiguration?.rangeType !== localState.rangeType) {
+      dispatch({
+        type: 'set',
+        payload: toLocalState(colorRanges, paletteConfiguration),
+      });
+    }
+  }, [colorRanges, localState.rangeType, paletteConfiguration, paletteConfiguration?.rangeType]);
+
   useDebounce(
     () => {
-      const { autoValue: localAutoValue, colorRanges: localColorRanges } = localState;
-      const upperMin = ['min', 'all'].includes(localAutoValue)
+      const { continuity: localContinuity = 'none', colorRanges: localColorRanges } = localState;
+      const upperMin = ['below', 'all'].includes(localContinuity)
         ? -Infinity
         : Number(localColorRanges[0].start);
 
-      const upperMax = ['max', 'all'].includes(localAutoValue)
+      const upperMax = ['above', 'all'].includes(localContinuity)
         ? Infinity
         : Number(localColorRanges[localColorRanges.length - 1].end);
 
@@ -66,7 +84,7 @@ export function ColorRanges({
       }));
 
       if (Object.values(validateColorRanges(localColorRanges)).every(({ isValid }) => isValid)) {
-        onChange(colorStops, upperMax, localAutoValue);
+        onChange(colorStops, upperMax, localContinuity);
       }
     },
     250,
@@ -88,7 +106,8 @@ export function ColorRanges({
             colorRange={colorRange}
             dispatch={dispatch}
             colorRanges={localState.colorRanges}
-            paletteConfiguration={paletteConfiguration}
+            continuity={localState.continuity}
+            rangeType={localState.rangeType}
             dataBounds={dataBounds}
             index={index}
             colorRangeValidation={colorRangesValidity[index]}
@@ -100,7 +119,8 @@ export function ColorRanges({
             colorRange={lastColorRange}
             dispatch={dispatch}
             colorRanges={localState.colorRanges}
-            paletteConfiguration={paletteConfiguration}
+            continuity={localState.continuity}
+            rangeType={localState.rangeType}
             dataBounds={dataBounds}
             index={localState.colorRanges.length - 1}
             colorRangeValidation={colorRangesValidity.last}

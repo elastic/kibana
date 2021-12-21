@@ -56,11 +56,11 @@ function getColorRanges(
   );
   const rangeType = activePalette.params?.rangeType ?? 'percent';
 
-  const autoValue = activePalette.params?.autoValue;
+  const continuity = activePalette.params?.continuity;
   let max = activePalette.params?.rangeMax || dataBounds.max;
   let min = activePalette.params?.rangeMin || dataBounds.min;
 
-  if (autoValue) {
+  if (continuity) {
     const { max: autoMax, min: autoMin } = getAutoValues(
       {
         first: colorStopsToShow[1].stop,
@@ -70,12 +70,12 @@ function getColorRanges(
       rangeType,
       dataBounds
     );
-    if (['max', 'all'].includes(autoValue)) {
+    if (['above', 'all'].includes(continuity)) {
       max = autoMax;
     }
 
     // as 0-stop is -infinity when auto detected min value
-    if (['min', 'all'].includes(autoValue)) {
+    if (['below', 'all'].includes(continuity)) {
       min = autoMin;
     }
   }
@@ -91,7 +91,7 @@ function getColorRanges(
     return {
       color: colorStop.color,
       start:
-        index === 0 && autoValue && ['min', 'all'].includes(autoValue)
+        index === 0 && continuity && ['below', 'all'].includes(continuity)
           ? roundValue(min)
           : colorStop.stop ?? activePalette.params?.rangeMin,
       end: index < colorStopsToShow.length - 1 ? colorStopsToShow[index + 1].stop : roundValue(max),
@@ -144,7 +144,6 @@ export function CustomizablePalette({
               name: newPalette.name,
               colorStops: undefined,
               reverse: false, // restore the reverse flag
-              autoValue: 'none',
             };
 
             const newColorStops = getColorStops(palettes, [], activePalette, dataBounds);
@@ -234,7 +233,7 @@ export function CustomizablePalette({
                 ''
               ) as RequiredPaletteParamTypes['rangeType'];
 
-              const autoValue = activePalette.params?.autoValue;
+              const continuity = activePalette.params?.continuity;
               const params: CustomPaletteParams = { rangeType: newRangeType };
               const { min: newMin, max: newMax } = getDataMinMax(newRangeType, dataBounds);
               const { min: oldMin, max: oldMax } = getDataMinMax(
@@ -265,12 +264,12 @@ export function CustomizablePalette({
 
               params.rangeMin = newColorStops[0].stop;
               params.rangeMax = newMax;
-              if (autoValue) {
-                if (['max', 'all'].includes(autoValue)) {
+              if (continuity) {
+                if (['above', 'all'].includes(continuity)) {
                   params.rangeMax = Infinity;
                 }
 
-                if (['min', 'all'].includes(autoValue)) {
+                if (['below', 'all'].includes(continuity)) {
                   params.rangeMin = -Infinity;
                 }
               }
@@ -284,12 +283,12 @@ export function CustomizablePalette({
         colorRanges={colorRangesToShow}
         dataBounds={dataBounds}
         data-test-prefix="lnsPalettePanel"
-        onChange={(colorStops, upperMax, autoValue) => {
+        onChange={(colorStops, upperMax, continuity) => {
           const newParams = getSwitchToCustomParams(
             palettes,
             activePalette,
             {
-              autoValue,
+              continuity,
               colorStops,
               steps: activePalette.params?.steps || DEFAULT_COLOR_STEPS,
               reverse: !activePalette.params?.reverse,

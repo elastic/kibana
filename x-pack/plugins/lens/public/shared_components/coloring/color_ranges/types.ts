@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CustomPaletteParamsConfig } from '../../../../common';
-
-/** @deprecated **/
-export type AutoValueMode = 'none' | 'min' | 'max' | 'all';
+import type { CustomPaletteParams } from '../../../../common';
 
 export interface ColorRange {
   color: string;
@@ -32,12 +29,12 @@ export interface DataBounds {
 /** @internal **/
 export interface ColorRangesState {
   colorRanges: ColorRange[];
-  autoValue: AutoValueMode;
+  rangeType: CustomPaletteParams['rangeType'];
+  continuity: CustomPaletteParams['continuity'];
 }
 
 /** @internal **/
 export interface AddColorRangePayload {
-  rangeType: CustomPaletteParamsConfig['rangeType'];
   dataBounds: DataBounds;
 }
 
@@ -60,11 +57,14 @@ export interface DeleteColorRangePayload {
 }
 
 /** @internal **/
+export type SetColorRangesPayload = Partial<ColorRangesState>;
+
+/** @internal **/
 export type ColorRangesActions =
   | { type: 'reversePalette' }
   | { type: 'sortColorRanges' }
   | { type: 'distributeEqually' }
-  | { type: 'set'; payload: ColorRangesState }
+  | { type: 'set'; payload: SetColorRangesPayload }
   | { type: 'deleteColorRange'; payload: DeleteColorRangePayload }
   | {
       type: 'addColorRange';
