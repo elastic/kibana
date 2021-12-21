@@ -729,7 +729,7 @@ describe('Exception helpers', () => {
     });
   });
 
-  describe('defaultEndpointExceptionItems', () => {
+  describe.skip('defaultEndpointExceptionItems', () => {
     test('it should return pre-populated Endpoint items for non-specified event code', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
