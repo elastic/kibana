@@ -47,6 +47,7 @@ const getDescription = ({
         linkValue={linkValue}
         timelineId={timelineId}
         values={values}
+        applyWidthAndPadding={false}
       />
     )}
   </>
