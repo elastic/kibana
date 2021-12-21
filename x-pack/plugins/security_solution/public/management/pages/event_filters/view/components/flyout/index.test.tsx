@@ -19,16 +19,15 @@ import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { EventFiltersHttpService } from '../../../service';
-import { createdEventFilterEntryMock, ecsEventMock, esResponseData } from '../../../test_utils';
+import { ecsEventMock, esResponseData, eventFiltersListQueryHttpMock } from '../../../test_utils';
 import { getFormEntryState, isUninitialisedForm } from '../../../store/selector';
 import { EventFiltersListPageState } from '../../../types';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { licenseService } from '../../../../../../common/hooks/use_license';
+import { getExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../form');
-jest.mock('../../../service');
 jest.mock('../../../../../services/policies/policies');
 
 jest.mock('../../hooks', () => {
@@ -65,26 +64,17 @@ let render: (
 ) => ReturnType<AppContextTestRender['render']>;
 const act = reactTestingLibrary.act;
 let onCancelMock: jest.Mock;
-const EventFiltersHttpServiceMock = EventFiltersHttpService as jest.Mock;
 let getState: () => EventFiltersListPageState;
+let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
 
 describe('Event filter flyout', () => {
-  beforeAll(() => {
-    EventFiltersHttpServiceMock.mockImplementation(() => {
-      return {
-        getOne: () => createdEventFilterEntryMock(),
-        addEventFilters: () => createdEventFilterEntryMock(),
-        updateOne: () => createdEventFilterEntryMock(),
-      };
-    });
-  });
-
   beforeEach(() => {
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
     waitForAction = mockedContext.middlewareSpy.waitForAction;
     onCancelMock = jest.fn();
     getState = () => mockedContext.store.getState().management.eventFilters;
+    mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
 
     render = (props) => {
       return mockedContext.render(<EventFiltersFlyout {...props} onCancel={onCancelMock} />);
@@ -92,6 +82,13 @@ describe('Event filter flyout', () => {
 
     (useKibana as jest.Mock).mockReturnValue({
       services: {
+        docLinks: {
+          links: {
+            securitySolution: {
+              eventFilters: '',
+            },
+          },
+        },
         http: {},
         data: {
           search: {
@@ -244,7 +241,9 @@ describe('Event filter flyout', () => {
     });
 
     expect(getFormEntryState(getState())).not.toBeUndefined();
-    expect(getFormEntryState(getState())?.item_id).toBe(createdEventFilterEntryMock().item_id);
+    expect(getFormEntryState(getState())?.item_id).toBe(
+      mockedApi.responseProvider.eventFiltersGetOne.getMockImplementation()!().item_id
+    );
   });
 
   it('should not display banner when platinum license', async () => {
@@ -262,6 +261,10 @@ describe('Event filter flyout', () => {
   });
 
   it('should not display banner when under platinum license and edit mode with global assignment', async () => {
+    mockedApi.responseProvider.eventFiltersGetOne.mockReturnValue({
+      ...getExceptionListItemSchemaMock(),
+      tags: ['policy:all'],
+    });
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
     await act(async () => {
       component = render({ id: 'fakeId', type: 'edit' });
@@ -271,7 +274,7 @@ describe('Event filter flyout', () => {
     expect(component.queryByTestId('expired-license-callout')).toBeNull();
   });
 
-  it.skip('should display banner when under platinum license and edit mode with by policy assignment', async () => {
+  it('should display banner when under platinum license and edit mode with by policy assignment', async () => {
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
     await act(async () => {
       component = render({ id: 'fakeId', type: 'edit' });
