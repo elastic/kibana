@@ -71,7 +71,7 @@ export function runBuildApiDocsCli() {
       }
       const collectReferences = flags.references as boolean;
 
-      const { pluginApiMap, missingApiItems, unReferencedDeprecations, referencedDeprecations } =
+      const { pluginApiMap, missingApiItems, unreferencedDeprecations, referencedDeprecations } =
         getPluginApiMap(project, plugins, log, {
           collectReferences,
           pluginFilter: pluginFilter as string[],
@@ -109,6 +109,12 @@ export function runBuildApiDocsCli() {
         const pluginTeam = plugin.manifest.owner.name;
 
         reporter.metrics([
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'Unreferenced deprecated APIs',
+            value: unreferencedDeprecations[id] ? unreferencedDeprecations[id].length : 0,
+          },
           {
             id,
             meta: { pluginTeam },
@@ -245,7 +251,7 @@ export function runBuildApiDocsCli() {
         writeDeprecationDocByApi(
           outputFolder,
           referencedDeprecations,
-          unReferencedDeprecations,
+          unreferencedDeprecations,
           log
         );
       });
