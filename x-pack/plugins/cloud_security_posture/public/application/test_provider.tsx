@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Router, Redirect, Switch, Route } from 'react-router-dom';
+import { Router, Switch, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { routes } from './routes';
 
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 

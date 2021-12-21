@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { Type } from '@kbn/config-schema';
 import type { ElasticsearchClient } from 'src/core/server';
 import { CSP_KUBEBEAT_INDEX_PATTERN, CSP_KUBEBEAT_INDEX_NAME } from '../..//common/constants';
 import findingsIndexMapping from './findings_mapping.json';
@@ -35,6 +34,8 @@ export const createIndexTemplate = async (
         managed: true,
       },
       priority: 500,
+      // TODO: fix types
+      // @ts-ignore
       create: true,
       template: {
         mappings: properties,
