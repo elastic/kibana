@@ -20,11 +20,11 @@ interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
 }
 
-export class IndexPatternFieldEditorPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+export class DataViewFieldEditorPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, deps: SetupDeps) {
     core.application.register({
-      id: 'indexPatternFieldEditorExample',
-      title: 'Index pattern field editor example',
+      id: 'dataViewFieldEditorExample',
+      title: 'Data view field editor example',
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const [, depsStart] = await core.getStartServices();
@@ -34,13 +34,13 @@ export class IndexPatternFieldEditorPlugin implements Plugin<void, void, SetupDe
     });
 
     deps.developerExamples.register({
-      appId: 'indexPatternFieldEditorExample',
-      title: 'Index pattern field editor',
-      description: `IndexPatternFieldEditor provides a UI for editing index pattern fields directly from Kibana apps.  This example plugin demonstrates integration.`,
+      appId: 'dataViewFieldEditorExample',
+      title: 'Data view field editor',
+      description: `DataViewFieldEditor provides a UI for editing data view fields directly from Kibana apps. This example plugin demonstrates integration.`,
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/blob/main/src/plugins/index_pattern_field_editor/README.md',
+          href: 'https://github.com/elastic/kibana/blob/main/src/plugins/data_view_field_editor/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
