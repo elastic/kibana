@@ -32,6 +32,12 @@ const metricsFeaturesTests: Array<[CaseMetricsFeature, string, number]> = [
   ['alerts.count', 'Total Alerts', basicCaseMetrics.alerts!.count!],
   ['alerts.users', 'Associated Users', basicCaseMetrics.alerts!.users!.total!],
   ['alerts.hosts', 'Associated Hosts', basicCaseMetrics.alerts!.hosts!.total!],
+  [
+    'actions.isolateHost',
+    'Isolated Hosts',
+    basicCaseMetrics.actions!.isolateHost!.isolate.total -
+      basicCaseMetrics.actions!.isolateHost!.unisolate.total,
+  ],
   ['connectors', 'Total Connectors', basicCaseMetrics.connectors!.total!],
 ];
 
@@ -51,6 +57,7 @@ describe('CaseViewMetrics', () => {
     expect(getByText('Total Alerts')).toBeInTheDocument();
     expect(getByText('Associated Users')).toBeInTheDocument();
     expect(getByText('Associated Hosts')).toBeInTheDocument();
+    expect(getByText('Isolated Hosts')).toBeInTheDocument();
     expect(getByText('Total Connectors')).toBeInTheDocument();
   });
 
@@ -59,6 +66,7 @@ describe('CaseViewMetrics', () => {
     expect(getByText('Total Alerts')).toBeInTheDocument();
     expect(getByText('Associated Users')).toBeInTheDocument();
     expect(getByText('Associated Hosts')).toBeInTheDocument();
+    expect(getByText('Isolated Hosts')).toBeInTheDocument();
     expect(getByText('Total Connectors')).toBeInTheDocument();
     expect(getAllByText('0')).toHaveLength(basicCaseMetricsFeatures.length);
   });
