@@ -14,21 +14,20 @@ export interface EslintDisableCounts {
 }
 
 export async function countEslintDisableLine(path: string): Promise<EslintDisableCounts> {
-  const disableLineCntOutput = await execSync(
-    `grep -rE 'eslint-disable-next-line|eslint-disable-line' ${path} | wc -l`
-  );
-  const eslintDisableLineCount = Number.parseInt(disableLineCntOutput.toString(), 10);
+  const disableCountOutputs = await Promise.all([
+    execSync(`grep -rE 'eslint-disable-next-line|eslint-disable-line' ${path} | wc -l`),
+    execSync(`grep -rE 'eslint-disable ' ${path} | wc -l`),
+  ]);
+  const eslintDisableLineCount = Number.parseInt(disableCountOutputs[0].toString(), 10);
 
   if (eslintDisableLineCount === undefined || isNaN(eslintDisableLineCount)) {
-    throw new Error(`Parsing ${disableLineCntOutput} failed to product a valid number`);
+    throw new Error(`Parsing ${disableCountOutputs[0]} failed to product a valid number`);
   }
 
-  const disableFileCntOutput = await execSync(`grep -rE 'eslint-disable ' ${path} | wc -l`);
-
-  const eslintDisableFileCount = Number.parseInt(disableFileCntOutput.toString(), 10);
+  const eslintDisableFileCount = Number.parseInt(disableCountOutputs[1].toString(), 10);
 
   if (eslintDisableFileCount === undefined || isNaN(eslintDisableFileCount)) {
-    throw new Error(`Parsing ${disableFileCntOutput} failed to product a valid number`);
+    throw new Error(`Parsing ${disableCountOutputs[1]} failed to product a valid number`);
   }
 
   return { eslintDisableFileCount, eslintDisableLineCount };

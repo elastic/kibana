@@ -142,19 +142,19 @@ export function runBuildApiDocsCli() {
           {
             id,
             meta: { pluginTeam },
-            group: 'Eslint disable line counts',
+            group: 'ESLint disabled line counts',
             value: pluginStats.eslintDisableLineCount,
           },
           {
             id,
             meta: { pluginTeam },
-            group: 'Eslint disable file counts',
+            group: 'ESLint disabled in files',
             value: pluginStats.eslintDisableFileCount,
           },
           {
             id,
             meta: { pluginTeam },
-            group: 'Total eslint disables',
+            group: 'Total ESLint disabled count',
             value: pluginStats.eslintDisableFileCount + pluginStats.eslintDisableLineCount,
           },
         ]);
