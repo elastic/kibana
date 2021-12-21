@@ -71,7 +71,7 @@ export function initMVTRoutes({
         abortController,
       });
 
-      return await sendResponse(response, gzippedTile);
+      return sendResponse(response, gzippedTile);
     }
   );
 
@@ -122,12 +122,12 @@ export function initMVTRoutes({
         abortController,
       });
 
-      return await sendResponse(response, gzippedTile);
+      return sendResponse(response, gzippedTile);
     }
   );
 }
 
-async function sendResponse(response: KibanaResponseFactory, gzippedTile: any) {
+function sendResponse(response: KibanaResponseFactory, gzippedTile: any) {
   if (gzippedTile) {
     return response.ok({
       body: gzippedTile,
