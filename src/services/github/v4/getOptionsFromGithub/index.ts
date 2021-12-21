@@ -4,7 +4,6 @@ import { ConfigOptions } from '../../../../options/ConfigOptions';
 import { OptionsFromCliArgs } from '../../../../options/cliArgs';
 import { OptionsFromConfigFiles } from '../../../../options/config/config';
 import { getRequiredOptions } from '../../../../options/parseRequiredOptions';
-import { PromiseReturnType } from '../../../../types/PromiseReturnType';
 import { HandledError } from '../../../HandledError';
 import {
   getLocalConfigFileCommitDate,
@@ -25,7 +24,9 @@ import { GithubConfigOptionsResponse, query, RemoteConfig } from './query';
 // - verify the access token
 // - ensure no branch named "backport" exists
 
-export type OptionsFromGithub = PromiseReturnType<typeof getOptionsFromGithub>;
+export type OptionsFromGithub = Awaited<
+  ReturnType<typeof getOptionsFromGithub>
+>;
 export async function getOptionsFromGithub(
   optionsFromConfigFiles: OptionsFromConfigFiles,
   optionsFromCliArgs: OptionsFromCliArgs

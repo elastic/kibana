@@ -1,12 +1,13 @@
 import { getOptionsFromGithub } from '../services/github/v4/getOptionsFromGithub';
-import { PromiseReturnType } from '../types/PromiseReturnType';
 import { updateLogger } from './../services/logger';
 import { ConfigOptions } from './ConfigOptions';
 import { getOptionsFromCliArgs } from './cliArgs';
 import { getOptionsFromConfigFiles } from './config/config';
 import { parseRequiredOptions } from './parseRequiredOptions';
 
-export type ValidConfigOptions = Readonly<PromiseReturnType<typeof getOptions>>;
+export type ValidConfigOptions = Readonly<
+  Awaited<ReturnType<typeof getOptions>>
+>;
 export async function getOptions(
   argv: string[],
   optionsFromModule?: ConfigOptions

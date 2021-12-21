@@ -1,3 +1,4 @@
+import os from 'os';
 import { OptionsFromCliArgs } from '../../../../options/cliArgs';
 import { OptionsFromConfigFiles } from '../../../../options/config/config';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
@@ -8,6 +9,7 @@ describe('getOptionsFromGithub', () => {
 
   beforeAll(async () => {
     devAccessToken = await getDevAccessToken();
+    jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
   });
 
   describe('access token', () => {

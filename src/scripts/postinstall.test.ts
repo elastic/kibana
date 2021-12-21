@@ -1,9 +1,14 @@
+import os from 'os';
 import * as globalConfig from '../options/config/globalConfig';
 import * as logger from '../services/logger';
 import { postinstall } from './postinstall';
 
 describe('postinstall', () => {
   beforeEach(() => {
+    jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
   });
 

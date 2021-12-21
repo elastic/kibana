@@ -2,7 +2,6 @@ import { once } from 'lodash';
 import nock from 'nock';
 import { getOptions } from '../../options/options';
 import { runWithOptions } from '../../runWithOptions';
-import { PromiseReturnType } from '../../types/PromiseReturnType';
 import { createSpies } from './createSpies';
 import { REMOTE_ORIGIN_REPO_PATH, REMOTE_FORK_REPO_PATH } from './envConstants';
 import {
@@ -20,7 +19,7 @@ describe('integration', () => {
   });
 
   describe('when a single commit is backported', () => {
-    let res: PromiseReturnType<typeof runWithOptions>;
+    let res: Awaited<ReturnType<typeof runWithOptions>>;
     let spies: ReturnType<typeof createSpies>;
 
     beforeEach(
@@ -95,7 +94,7 @@ describe('integration', () => {
 
   describe('when two commits are backported', () => {
     let spies: ReturnType<typeof createSpies>;
-    let res: PromiseReturnType<typeof runWithOptions>;
+    let res: Awaited<ReturnType<typeof runWithOptions>>;
 
     beforeEach(
       once(async () => {
@@ -182,7 +181,7 @@ describe('integration', () => {
   });
 
   describe('when disabling fork mode', () => {
-    let res: PromiseReturnType<typeof runWithOptions>;
+    let res: Awaited<ReturnType<typeof runWithOptions>>;
     let spies: ReturnType<typeof createSpies>;
 
     beforeEach(

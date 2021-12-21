@@ -1,9 +1,14 @@
+import os from 'os';
 import del from 'del';
 import makeDir = require('make-dir');
 import { ValidConfigOptions } from '../options/options';
 import { maybeSetupRepo } from './maybeSetupRepo';
 
 describe('maybeSetupRepo', () => {
+  beforeEach(() => {
+    jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
+  });
+
   it('should delete repo if an error occurs', async () => {
     expect.assertions(2);
     (makeDir as any as jest.Mock).mockImplementationOnce(() => {

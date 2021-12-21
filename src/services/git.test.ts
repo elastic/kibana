@@ -1,11 +1,8 @@
-import { resolve } from 'path';
-import del from 'del';
-import makeDir from 'make-dir';
+import os from 'os';
 import { ValidConfigOptions } from '../options/options';
 import * as childProcess from '../services/child-process-promisified';
 import { ExecError } from '../test/ExecError';
 import { SpyHelper } from '../types/SpyHelper';
-import * as env from './env';
 import {
   addRemote,
   getUnstagedFiles,
@@ -19,96 +16,15 @@ import {
   isLocalConfigFileUntracked,
   isLocalConfigFileModified,
   getUpstreamFromGitRemote,
-  getIsCommitInBranch,
 } from './git';
 import { Commit } from './sourceCommit/parseSourceCommit';
 
-jest.unmock('make-dir');
-jest.unmock('del');
-
 beforeEach(() => {
-  jest.clearAllMocks();
+  jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
 });
 
-describe('getIsCommitInBranch', () => {
-  let firstSha: string;
-  let secondSha: string;
-  let getRepoPathSpy: jest.SpyInstance;
-
-  beforeEach(async () => {
-    const GIT_SANDBOX_DIR_PATH = resolve(`${__dirname}/git-test-sandbox`);
-    const execOpts = { cwd: GIT_SANDBOX_DIR_PATH };
-
-    const createAndCommitFile = async (filename: string, content: string) => {
-      await childProcess.exec(`echo "I${content}" > ${filename}`, execOpts);
-      await childProcess.exec(
-        `git add -A && git commit -m 'Add ${filename}'`,
-        execOpts
-      );
-    };
-
-    const getCurrentSha = async () => {
-      const { stdout } = await childProcess.exec(
-        'git rev-parse HEAD',
-        execOpts
-      );
-      return stdout.trim();
-    };
-
-    await del(GIT_SANDBOX_DIR_PATH);
-    await makeDir(GIT_SANDBOX_DIR_PATH);
-
-    // create and commit first file
-    await childProcess.exec('git init', execOpts);
-    await createAndCommitFile('My first file', 'foo.md');
-    firstSha = await getCurrentSha();
-
-    // create 7.x branch (but stay on `main` branch)
-    await childProcess.exec('git branch 7.x', execOpts);
-
-    // create and commit second file
-    await createAndCommitFile('My second file', 'bar.md');
-    secondSha = await getCurrentSha();
-
-    // checkout 7.x
-    await childProcess.exec('git checkout 7.x', execOpts);
-
-    // mock repo path to point to git-sandbox dir
-    getRepoPathSpy = jest
-      .spyOn(env, 'getRepoPath')
-      .mockReturnValue(GIT_SANDBOX_DIR_PATH);
-  });
-
-  afterEach(() => {
-    getRepoPathSpy.mockRestore();
-  });
-
-  it('should contain the first commit', async () => {
-    const isFirstCommitInBranch = await getIsCommitInBranch(
-      {} as ValidConfigOptions,
-      firstSha
-    );
-
-    expect(isFirstCommitInBranch).toEqual(true);
-  });
-
-  it('should not contain the second commit', async () => {
-    const isSecondCommitInBranch = await getIsCommitInBranch(
-      {} as ValidConfigOptions,
-      secondSha
-    );
-
-    expect(isSecondCommitInBranch).toEqual(false);
-  });
-
-  it('should not contain a random commit', async () => {
-    const isSecondCommitInBranch = await getIsCommitInBranch(
-      {} as ValidConfigOptions,
-      'abcdefg'
-    );
-
-    expect(isSecondCommitInBranch).toEqual(false);
-  });
+afterEach(() => {
+  jest.restoreAllMocks();
 });
 
 describe('getUnstagedFiles', () => {
@@ -285,7 +201,11 @@ describe('getConflictingFiles', () => {
     } as ValidConfigOptions;
 
     expect(await getConflictingFiles(options)).toEqual([
-      '/myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt',
+      {
+        absolute:
+          '/myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt',
+        relative: 'conflicting-file.txt',
+      },
     ]);
   });
 });
@@ -389,25 +309,16 @@ describe('cherrypick', () => {
     repoName: 'kibana',
   } as ValidConfigOptions;
 
-  const commit: Commit = {
-    committedDate: '2021-01-25T00:00:00',
-    sourceBranch: '7.x',
-    originalMessage: '',
-    sha: 'abcd',
-    expectedTargetPullRequests: [],
-  };
-
   it('should return `needsResolving: false` when no errors are encountered', async () => {
     jest
       .spyOn(childProcess, 'exec')
 
-      // mock git fetch
-      .mockResolvedValueOnce({ stderr: '', stdout: '' })
-
       // mock cherry pick command
       .mockResolvedValueOnce({ stderr: '', stdout: '' });
 
-    expect(await cherrypick(options, commit)).toEqual({
+    expect(await cherrypick(options, 'abcd')).toEqual({
+      conflictingFiles: [],
+      unstagedFiles: [],
       needsResolving: false,
     });
   });
@@ -416,23 +327,17 @@ describe('cherrypick', () => {
     const execSpy = jest
       .spyOn(childProcess, 'exec')
 
-      // mock git fetch
-      .mockResolvedValueOnce({ stderr: '', stdout: '' })
-
       // mock cherry pick command
       .mockResolvedValueOnce({ stderr: '', stdout: '' });
 
-    await cherrypick({ ...options, mainline: 1 }, commit);
+    await cherrypick({ ...options, mainline: 1 }, 'abcd');
 
-    expect(execSpy.mock.calls[1][0]).toBe('git cherry-pick --mainline 1 abcd');
+    expect(execSpy.mock.calls[0][0]).toBe('git cherry-pick --mainline 1 abcd');
   });
 
   it('should return `needsResolving: true` upon cherrypick error', async () => {
     jest
       .spyOn(childProcess, 'exec')
-
-      // mock git fetch
-      .mockResolvedValueOnce({ stderr: '', stdout: '' })
 
       // mock cherry pick command
       .mockRejectedValueOnce(
@@ -459,17 +364,22 @@ describe('cherrypick', () => {
       // mock getUnstagedFiles
       .mockResolvedValueOnce({ stdout: '', stderr: '' });
 
-    expect(await cherrypick(options, commit)).toEqual({
+    expect(await cherrypick(options, 'abcd')).toEqual({
+      conflictingFiles: [
+        {
+          absolute:
+            '/myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt',
+          relative: 'conflicting-file.txt',
+        },
+      ],
       needsResolving: true,
+      unstagedFiles: [],
     });
   });
 
   it('should let the user know about the "--mainline" argument when cherry-picking a merge commit without specifying it', async () => {
     jest
       .spyOn(childProcess, 'exec')
-
-      // mock git fetch
-      .mockResolvedValueOnce({ stderr: '', stdout: '' })
 
       // mock cherry pick command
       .mockRejectedValueOnce(
@@ -484,7 +394,7 @@ describe('cherrypick', () => {
         })
       );
 
-    await expect(cherrypick(options, commit)).rejects
+    await expect(cherrypick(options, 'abcd')).rejects
       .toThrowError(`Cherrypick failed because the selected commit was a merge commit. Please try again by specifying the parent with the \`mainline\` argument:
 
 > backport --mainline
@@ -500,9 +410,6 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
     jest
       .spyOn(childProcess, 'exec')
 
-      // mock git fetch
-      .mockResolvedValueOnce({ stderr: '', stdout: '' })
-
       // mock cherry pick command
       .mockRejectedValueOnce(
         new ExecError({
@@ -517,7 +424,7 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
         })
       );
 
-    await expect(cherrypick(options, commit)).rejects.toThrowError(
+    await expect(cherrypick(options, 'abcd')).rejects.toThrowError(
       `Cherrypick failed because the selected commit (abcd) is empty. Did you already backport this commit?`
     );
   });
@@ -525,9 +432,6 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
   it('gracefully handles missing git info', async () => {
     jest
       .spyOn(childProcess, 'exec')
-
-      // mock git fetch
-      .mockResolvedValueOnce({ stderr: '', stdout: '' })
 
       // mock cherry pick command
       .mockRejectedValueOnce(
@@ -538,11 +442,11 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
           cmd: 'git cherry-pick 83ad852b6ba1a64c8047f07201018eb6fb020db8',
           stdout: '',
           stderr:
-            '\n*** Please tell me who you are.\n\nRun\n\n  git config --global user.email "you@example.com"\n  git config --global user.name "Your Name"\n\nto set your account\'s default identity.\nOmit --global to set the identity only in this repository.\n\nfatal: empty ident name (for <runner@fv-az40.ayh1iyn3zmsehf4wcd4usluype.bx.internal.cloudapp.net>) not allowed\n',
+            '\n*** Please tell me who you are.\n\nRun\n\n  git config --global user.email "you@example.com"\n  git config --global user.name "Your Name"\n\nto set your account\'s default identity.\nOmit --global to set the identity only in this repository.\n\nfatal: empty ident name (for <foo@bar.net>) not allowed\n',
         })
       );
 
-    await expect(cherrypick(options, commit)).rejects
+    await expect(cherrypick(options, 'abcd')).rejects
       .toThrowErrorMatchingInlineSnapshot(`
             "Cherrypick failed:
 
@@ -556,7 +460,7 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
             to set your account's default identity.
             Omit --global to set the identity only in this repository.
 
-            fatal: empty ident name (for <runner@fv-az40.ayh1iyn3zmsehf4wcd4usluype.bx.internal.cloudapp.net>) not allowed
+            fatal: empty ident name (for <foo@bar.net>) not allowed
             "
           `);
   });
@@ -564,9 +468,6 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
   it('should re-throw non-cherrypick errors', async () => {
     jest
       .spyOn(childProcess, 'exec')
-
-      // mock git fetch
-      .mockResolvedValueOnce({ stderr: '', stdout: '' })
 
       // mock cherry pick command
       .mockRejectedValueOnce(new Error('non-cherrypick error'))
@@ -578,7 +479,7 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
       .mockResolvedValueOnce({ stdout: '', stderr: '' });
 
     await expect(
-      cherrypick(options, commit)
+      cherrypick(options, 'abcd')
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"non-cherrypick error"`);
   });
 });
@@ -677,6 +578,7 @@ describe('addRemote', () => {
     const spy = jest
       .spyOn(childProcess, 'exec')
       .mockResolvedValueOnce({ stderr: '', stdout: '' });
+
     await addRemote(options, 'elastic');
 
     return expect(spy).toHaveBeenCalledWith(

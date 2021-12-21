@@ -16,6 +16,8 @@ import {
   getConflictingFiles,
   getRepoForkOwner,
   getIsCommitInBranch,
+  fetchBranch,
+  ConflictingFiles,
 } from '../services/git';
 import { getFirstLine, getShortSha } from '../services/github/commitFormatters';
 import { addAssigneesToPullRequest } from '../services/github/v3/addAssigneesToPullRequest';
@@ -141,16 +143,17 @@ export async function getCommitsWithoutBackports({
   options,
   commit,
   targetBranch,
+  conflictingFiles,
 }: {
   options: ValidConfigOptions;
   commit: Commit;
   targetBranch: string;
+  conflictingFiles: string[];
 }) {
-  const filenames = await getConflictingFiles(options, false);
   const commitsInConflictingPaths = await fetchCommitsByAuthor({
     ...options,
     all: true,
-    commitPaths: filenames,
+    commitPaths: conflictingFiles,
   });
 
   return (
@@ -225,8 +228,16 @@ async function waitForCherrypick(
   )}`;
   const cherrypickSpinner = ora(spinnerText).start();
 
+  let conflictingFiles: ConflictingFiles;
+  let unstagedFiles: string[];
+  let needsResolving: boolean;
+
   try {
-    const { needsResolving } = await cherrypick(options, commit);
+    await fetchBranch(options, commit.sourceBranch);
+    ({ conflictingFiles, unstagedFiles, needsResolving } = await cherrypick(
+      options,
+      commit.sha
+    ));
 
     // no conflicts encountered
     if (!needsResolving) {
@@ -246,10 +257,9 @@ async function waitForCherrypick(
       'Attempting to resolve conflicts automatically'
     ).start();
 
-    const filesWithConflicts = await getConflictingFiles(options);
     const repoPath = getRepoPath(options);
     const didAutoFix = await options.autoFixConflicts({
-      files: filesWithConflicts,
+      files: conflictingFiles.map((f) => f.absolute),
       directory: repoPath,
       logger,
       targetBranch,
@@ -267,6 +277,7 @@ async function waitForCherrypick(
     options,
     commit,
     targetBranch,
+    conflictingFiles: conflictingFiles.map((f) => f.relative),
   });
 
   consoleLog(
@@ -297,7 +308,12 @@ async function waitForCherrypick(
   }
 
   // list files with conflict markers + unstaged files and require user to resolve them
-  await listConflictingAndUnstagedFiles(options);
+  await listConflictingAndUnstagedFiles({
+    retries: 0,
+    options,
+    conflictingFiles: conflictingFiles.map((f) => f.absolute),
+    unstagedFiles,
+  });
 
   // Conflicts should be resolved and files staged at this point
   const stagingSpinner = ora(`Finalizing cherrypick`).start();
@@ -311,58 +327,71 @@ async function waitForCherrypick(
   }
 }
 
-async function listConflictingAndUnstagedFiles(options: ValidConfigOptions) {
-  const checkForProblems = async (retries = 0): Promise<void> => {
-    const [conflictingFiles, _unstagedFiles] = await Promise.all([
-      getConflictingFiles(options),
-      getUnstagedFiles(options),
-    ]);
+async function listConflictingAndUnstagedFiles({
+  retries,
+  options,
+  conflictingFiles,
+  unstagedFiles,
+}: {
+  retries: number;
+  options: ValidConfigOptions;
+  conflictingFiles: string[];
+  unstagedFiles: string[];
+}): Promise<void> {
+  const hasUnstagedFiles = !isEmpty(
+    difference(unstagedFiles, conflictingFiles)
+  );
+  const hasConflictingFiles = !isEmpty(conflictingFiles);
 
-    const unstagedFiles = difference(_unstagedFiles, conflictingFiles);
-    const hasConflictingFiles = !isEmpty(conflictingFiles);
-    const hasUnstagedFiles = !isEmpty(unstagedFiles);
+  if (!hasConflictingFiles && !hasUnstagedFiles) {
+    return;
+  }
 
-    if (!hasConflictingFiles && !hasUnstagedFiles) {
-      return;
-    }
+  // add divider between prompts
+  if (retries > 0) {
+    consoleLog('\n----------------------------------------\n');
+  }
 
-    // add divider between prompts
-    if (retries > 0) {
-      consoleLog('\n----------------------------------------\n');
-    }
+  const header = chalk.reset(`Fix the following conflicts manually:`);
 
-    // show conflict section if there are conflicting files
-    const conflictSection = hasConflictingFiles
-      ? `Conflicting files:\n${chalk.reset(
-          conflictingFiles.map((file) => ` - ${file}`).join('\n')
-        )}`
-      : '';
+  // show conflict section if there are conflicting files
+  const conflictSection = hasConflictingFiles
+    ? `Conflicting files:\n${chalk.reset(
+        conflictingFiles.map((file) => ` - ${file}`).join('\n')
+      )}`
+    : '';
 
-    const unstagedSection = hasUnstagedFiles
-      ? `Unstaged files:\n${chalk.reset(
-          unstagedFiles.map((file) => ` - ${file}`).join('\n')
-        )}`
-      : '';
+  const unstagedSection = hasUnstagedFiles
+    ? `Unstaged files:\n${chalk.reset(
+        unstagedFiles.map((file) => ` - ${file}`).join('\n')
+      )}`
+    : '';
 
-    const res = await confirmPrompt(`${chalk.reset(
-      `Fix the following conflicts manually`
-    )}
+  const res = await confirmPrompt(`${header}
 
 ${conflictSection}
 ${unstagedSection}
 
 Press ENTER when the conflicts are resolved and files are staged`);
 
-    if (!res) {
-      throw new HandledError('Aborted');
-    }
+  if (!res) {
+    throw new HandledError('Aborted');
+  }
 
-    const MAX_RETRIES = 100;
-    if (retries++ > MAX_RETRIES) {
-      throw new Error(`Maximum number of retries (${MAX_RETRIES}) exceeded`);
-    }
-    await checkForProblems(retries);
-  };
+  const MAX_RETRIES = 100;
+  if (retries++ > MAX_RETRIES) {
+    throw new Error(`Maximum number of retries (${MAX_RETRIES}) exceeded`);
+  }
 
-  await checkForProblems();
+  const [_conflictingFiles, _unstagedFiles] = await Promise.all([
+    getConflictingFiles(options),
+    getUnstagedFiles(options),
+  ]);
+
+  await listConflictingAndUnstagedFiles({
+    retries,
+    options,
+    conflictingFiles: _conflictingFiles.map((file) => file.absolute),
+    unstagedFiles: _unstagedFiles,
+  });
 }

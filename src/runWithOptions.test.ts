@@ -1,3 +1,4 @@
+import os from 'os';
 import inquirer from 'inquirer';
 import { last } from 'lodash';
 import nock from 'nock';
@@ -9,7 +10,6 @@ import { AuthorIdResponse } from './services/github/v4/fetchAuthorId';
 import { CommitByAuthorResponse } from './services/github/v4/fetchCommits/fetchCommitsByAuthor';
 import { commitsByAuthorMock } from './services/github/v4/mocks/commitsByAuthorMock';
 import { mockGqlRequest, getNockCallsForScope } from './test/nockHelpers';
-import { PromiseReturnType } from './types/PromiseReturnType';
 import { SpyHelper } from './types/SpyHelper';
 
 jest.mock('./services/child-process-promisified', () => {
@@ -33,7 +33,7 @@ describe('runWithOptions', () => {
   let rpcExecMock: SpyHelper<typeof childProcess.exec>;
   let rpcExecOriginalMock: SpyHelper<typeof childProcess.execAsCallback>;
   let inquirerPromptMock: SpyHelper<typeof inquirer.prompt>;
-  let res: PromiseReturnType<typeof runWithOptions>;
+  let res: Awaited<ReturnType<typeof runWithOptions>>;
   let createPullRequestCalls: unknown[];
   let commitsByAuthorCalls: ReturnType<typeof mockGqlRequest>;
   let authorIdCalls: ReturnType<typeof mockGqlRequest>;
@@ -44,6 +44,8 @@ describe('runWithOptions', () => {
   });
 
   beforeEach(async () => {
+    jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
+
     const options: ValidConfigOptions = {
       accessToken: 'myAccessToken',
       all: false,

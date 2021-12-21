@@ -33,12 +33,6 @@ Array [
     },
   ],
   Array [
-    "git --no-pager diff --check",
-    Object {
-      "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
-    },
-  ],
-  Array [
     "git merge-base --is-ancestor 2e63475c483f7844b0f2833bc57fdee32095bacb HEAD",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",

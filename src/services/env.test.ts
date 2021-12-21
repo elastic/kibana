@@ -1,3 +1,4 @@
+import os from 'os';
 import { ValidConfigOptions } from '../options/options';
 import {
   getGlobalConfigPath,
@@ -7,6 +8,10 @@ import {
 } from '../services/env';
 
 describe('env', () => {
+  beforeEach(() => {
+    jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
+  });
+
   test('getGlobalConfigPath', () => {
     expect(getGlobalConfigPath()).toBe('/myHomeDir/.backport/config.json');
   });

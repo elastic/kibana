@@ -178,18 +178,30 @@ export async function addRemote(
   }
 }
 
-export async function cherrypick(options: ValidConfigOptions, commit: Commit) {
-  await exec(
-    `git fetch ${options.repoOwner} ${commit.sourceBranch}:${commit.sourceBranch} --force`,
-    { cwd: getRepoPath(options) }
-  );
+export async function fetchBranch(options: ValidConfigOptions, branch: string) {
+  await exec(`git fetch ${options.repoOwner} ${branch}:${branch} --force`, {
+    cwd: getRepoPath(options),
+  });
+}
+
+export async function cherrypick(
+  options: ValidConfigOptions,
+  sha: Commit['sha']
+): Promise<{
+  conflictingFiles: {
+    absolute: string;
+    relative: string;
+  }[];
+  unstagedFiles: string[];
+  needsResolving: boolean;
+}> {
   const mainline =
     options.mainline != undefined ? ` --mainline ${options.mainline}` : '';
 
-  const cmd = `git cherry-pick${mainline} ${commit.sha}`;
+  const cmd = `git cherry-pick${mainline} ${sha}`;
   try {
     await exec(cmd, { cwd: getRepoPath(options) });
-    return { needsResolving: false };
+    return { conflictingFiles: [], unstagedFiles: [], needsResolving: false };
   } catch (e) {
     // missing `mainline` option
     if (e.message.includes('is a merge but no -m option was given')) {
@@ -200,7 +212,7 @@ export async function cherrypick(options: ValidConfigOptions, commit: Commit) {
 
     // commit was already backported
     if (e.message.includes('The previous cherry-pick is now empty')) {
-      const shortSha = getShortSha(commit.sha);
+      const shortSha = getShortSha(sha);
       throw new HandledError(
         `Cherrypick failed because the selected commit (${shortSha}) is empty. Did you already backport this commit?`
       );
@@ -211,18 +223,22 @@ export async function cherrypick(options: ValidConfigOptions, commit: Commit) {
       throw new HandledError(`Cherrypick failed:\n${e.message}`);
     }
 
-    if (e.message.includes(`bad object ${commit.sha}`)) {
+    if (e.message.includes(`bad object ${sha}`)) {
       throw new HandledError(
-        `Cherrypick failed because commit "${commit.sha}" was not found`
+        `Cherrypick failed because commit "${sha}" was not found`
       );
     }
 
     const isCherryPickError = e.cmd === cmd;
-    const hasConflicts = !isEmpty(await getConflictingFiles(options));
-    const hasUnstagedFiles = !isEmpty(await getUnstagedFiles(options));
 
-    if (isCherryPickError && (hasConflicts || hasUnstagedFiles)) {
-      return { needsResolving: true };
+    if (isCherryPickError) {
+      const [conflictingFiles, unstagedFiles] = await Promise.all([
+        getConflictingFiles(options),
+        getUnstagedFiles(options),
+      ]);
+
+      if (!isEmpty(conflictingFiles) || !isEmpty(unstagedFiles))
+        return { conflictingFiles, unstagedFiles, needsResolving: true };
     }
 
     // re-throw error if there are no conflicts to solve
@@ -263,10 +279,8 @@ export async function commitChanges(
   }
 }
 
-export async function getConflictingFiles(
-  options: ValidConfigOptions,
-  absolutePath = true
-) {
+export type ConflictingFiles = Awaited<ReturnType<typeof getConflictingFiles>>;
+export async function getConflictingFiles(options: ValidConfigOptions) {
   const repoPath = getRepoPath(options);
   try {
     await exec(`git --no-pager diff --check`, { cwd: repoPath });
@@ -284,10 +298,16 @@ export async function getConflictingFiles(
         .map((line: string) => {
           const posSeparator = line.indexOf(':');
           const filename = line.slice(0, posSeparator).trim();
-          return absolutePath ? pathResolve(repoPath, filename) : filename;
+          return filename;
         });
 
-      return uniq(files);
+      const uniqueFiles = uniq(files);
+      return uniqueFiles.map((file) => {
+        return {
+          absolute: pathResolve(repoPath, file),
+          relative: file,
+        };
+      });
     }
 
     // rethrow error since it's unrelated

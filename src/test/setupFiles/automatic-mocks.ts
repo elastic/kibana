@@ -4,9 +4,6 @@
  */
 
 /* eslint-disable @typescript-eslint/no-empty-function */
-import os from 'os';
-
-jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
 
 jest.mock('../../services/fs-promisified', () => {
   return {

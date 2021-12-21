@@ -1,9 +1,14 @@
+import os from 'os';
 import { OptionsFromGithub } from '../services/github/v4/getOptionsFromGithub';
 import { OptionsFromCliArgs } from './cliArgs';
 import { defaultConfigOptions, OptionsFromConfigFiles } from './config/config';
 import { parseRequiredOptions } from './parseRequiredOptions';
 
 describe('parseRequiredOptions', () => {
+  beforeEach(() => {
+    jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
+  });
+
   const optionsFromConfigFiles = {
     ...defaultConfigOptions,
     accessToken: 'myAccessToken',

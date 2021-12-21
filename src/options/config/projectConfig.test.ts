@@ -1,13 +1,12 @@
 import findUp from 'find-up';
 import * as fs from '../../services/fs-promisified';
-import { PromiseReturnType } from '../../types/PromiseReturnType';
 import { getProjectConfig } from './projectConfig';
 
 describe('getProjectConfig', () => {
   afterEach(() => jest.clearAllMocks());
 
   describe('when projectConfig is valid', () => {
-    let projectConfig: PromiseReturnType<typeof getProjectConfig>;
+    let projectConfig: Awaited<ReturnType<typeof getProjectConfig>>;
     beforeEach(async () => {
       jest
         .spyOn(fs, 'readFile')

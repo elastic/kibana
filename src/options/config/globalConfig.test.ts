@@ -1,13 +1,17 @@
+import os from 'os';
 import makeDir from 'make-dir';
 import * as fs from '../../services/fs-promisified';
-import { PromiseReturnType } from '../../types/PromiseReturnType';
 import { getGlobalConfig, createGlobalConfigIfNotExist } from './globalConfig';
 
 describe('config', () => {
   afterEach(() => jest.clearAllMocks());
 
+  beforeEach(() => {
+    jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
+  });
+
   describe('getGlobalConfig', () => {
-    let res: PromiseReturnType<typeof getGlobalConfig>;
+    let res: Awaited<ReturnType<typeof getGlobalConfig>>;
     beforeEach(async () => {
       jest.spyOn(fs, 'chmod').mockResolvedValueOnce();
       jest.spyOn(fs, 'writeFile').mockResolvedValueOnce();

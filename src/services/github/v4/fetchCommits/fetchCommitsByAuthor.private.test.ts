@@ -1,6 +1,5 @@
 import { ValidConfigOptions } from '../../../../options/options';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
-import { PromiseReturnType } from '../../../../types/PromiseReturnType';
 import { Commit } from '../../../sourceCommit/parseSourceCommit';
 import { fetchCommitsByAuthor } from './fetchCommitsByAuthor';
 
@@ -97,7 +96,7 @@ describe('fetchCommitsByAuthor', () => {
   });
 
   describe('expectedTargetPullRequests', () => {
-    let res: PromiseReturnType<typeof fetchCommitsByAuthor>;
+    let res: Awaited<ReturnType<typeof fetchCommitsByAuthor>>;
     beforeEach(async () => {
       res = await fetchCommitsByAuthor({
         repoOwner: 'backport-org',

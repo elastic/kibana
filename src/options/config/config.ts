@@ -1,4 +1,3 @@
-import { PromiseReturnType } from '../../types/PromiseReturnType';
 import { ConfigOptions } from '../ConfigOptions';
 import { getOptionsFromGit } from './getOptionsFromGit';
 import { getGlobalConfig } from './globalConfig';
@@ -29,8 +28,8 @@ export const defaultConfigOptions = {
   verbose: false,
 };
 
-export type OptionsFromConfigFiles = PromiseReturnType<
-  typeof getOptionsFromConfigFiles
+export type OptionsFromConfigFiles = Awaited<
+  ReturnType<typeof getOptionsFromConfigFiles>
 >;
 export async function getOptionsFromConfigFiles(
   optionsFromModule?: ConfigOptions

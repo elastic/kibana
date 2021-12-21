@@ -1,3 +1,4 @@
+import os from 'os';
 import nock from 'nock';
 import ora from 'ora';
 import stripAnsi from 'strip-ansi';
@@ -12,7 +13,6 @@ import { ExpectedTargetPullRequest } from '../services/sourceCommit/getExpectedT
 import { Commit } from '../services/sourceCommit/parseSourceCommit';
 import { ExecError } from '../test/ExecError';
 import { mockGqlRequest } from '../test/nockHelpers';
-import { PromiseReturnType } from '../types/PromiseReturnType';
 import { SpyHelper } from '../types/SpyHelper';
 import {
   cherrypickAndCreateTargetPullRequest,
@@ -25,6 +25,8 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
   let consoleLogSpy: SpyHelper<typeof logger['consoleLog']>;
 
   beforeEach(() => {
+    jest.spyOn(os, 'homedir').mockReturnValue('/myHomeDir');
+
     execSpy = jest
       .spyOn(childProcess, 'exec')
 
@@ -48,7 +50,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
   });
 
   describe('when commit has a pull request reference', () => {
-    let res: PromiseReturnType<typeof cherrypickAndCreateTargetPullRequest>;
+    let res: Awaited<ReturnType<typeof cherrypickAndCreateTargetPullRequest>>;
 
     beforeEach(async () => {
       const options = {
@@ -140,7 +142,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
   });
 
   describe('when commit does not have a pull request reference', () => {
-    let res: PromiseReturnType<typeof cherrypickAndCreateTargetPullRequest>;
+    let res: Awaited<ReturnType<typeof cherrypickAndCreateTargetPullRequest>>;
     beforeEach(async () => {
       const options = {
         assignees: [] as string[],
@@ -188,7 +190,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
   });
 
   describe('when cherry-picking fails', () => {
-    let res: PromiseReturnType<typeof cherrypickAndCreateTargetPullRequest>;
+    let res: Awaited<ReturnType<typeof cherrypickAndCreateTargetPullRequest>>;
     let promptSpy: SpyHelper<typeof prompts['confirmPrompt']>;
     let execSpy: ReturnType<typeof setupExecSpyForCherryPick>;
     let commitsByAuthorCalls: ReturnType<typeof mockGqlRequest>;
@@ -250,10 +252,10 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
     });
 
     it('shows the right prompts', () => {
-      expect(promptSpy.mock.calls.length).toBe(3);
+      expect(promptSpy.mock.calls.length).toBe(4);
 
       expect(promptSpy.mock.calls[0][0]).toMatchInlineSnapshot(`
-        "Fix the following conflicts manually
+        "Fix the following conflicts manually:
 
         Conflicting files:
          - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
@@ -263,21 +265,21 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
       `);
 
       expect(promptSpy.mock.calls[1][0]).toMatchInlineSnapshot(`
-        "Fix the following conflicts manually
+        "Fix the following conflicts manually:
 
-
-        Unstaged files:
+        Conflicting files:
          - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
+
 
         Press ENTER when the conflicts are resolved and files are staged"
       `);
 
       expect(promptSpy.mock.calls[2][0]).toMatchInlineSnapshot(`
-        "Fix the following conflicts manually
+        "Fix the following conflicts manually:
 
-
-        Unstaged files:
+        Conflicting files:
          - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
+
 
         Press ENTER when the conflicts are resolved and files are staged"
       `);
@@ -349,11 +351,6 @@ describe('getCommitsWithoutBackports', () => {
     }: {
       expectedTargetPullRequests: ExpectedTargetPullRequest[];
     }) {
-      // simulate 1 conflicting files
-      jest
-        .spyOn(git, 'getConflictingFiles')
-        .mockResolvedValueOnce(['/foo/bar/baz.ts']);
-
       // simulate 1 unbackported commit
       jest
         .spyOn(fetchCommitsByAuthorModule, 'fetchCommitsByAuthor')
@@ -381,6 +378,7 @@ describe('getCommitsWithoutBackports', () => {
           sourceBranch: 'main',
         },
         targetBranch: '7.x',
+        conflictingFiles: ['/foo/bar/baz.ts'],
       });
     }
 
@@ -418,11 +416,6 @@ describe('getCommitsWithoutBackports', () => {
       offendingCommitDate: string;
       currentCommitDate: string;
     }) {
-      // simulate 1 conflicting files
-      jest
-        .spyOn(git, 'getConflictingFiles')
-        .mockResolvedValueOnce(['/foo/bar/baz.ts']);
-
       // simulate 1 commit with a pending backport
       jest
         .spyOn(fetchCommitsByAuthorModule, 'fetchCommitsByAuthor')
@@ -449,6 +442,7 @@ describe('getCommitsWithoutBackports', () => {
           sourceBranch: 'main',
         },
         targetBranch: '7.x',
+        conflictingFiles: ['/foo/bar/baz.ts'],
       });
     }
 
@@ -471,11 +465,6 @@ describe('getCommitsWithoutBackports', () => {
 
   describe('isCommitInBranch', () => {
     function setup({ isCommitInBranch }: { isCommitInBranch: boolean }) {
-      // simulate 1 conflicting files
-      jest
-        .spyOn(git, 'getConflictingFiles')
-        .mockResolvedValueOnce(['/foo/bar/baz.ts']);
-
       // simulate 1 unbackported commit
       jest
         .spyOn(fetchCommitsByAuthorModule, 'fetchCommitsByAuthor')
@@ -504,6 +493,7 @@ describe('getCommitsWithoutBackports', () => {
           sourceBranch: 'main',
         },
         targetBranch: '7.x',
+        conflictingFiles: ['/foo/bar/baz.ts'],
       });
     }
 
@@ -526,11 +516,6 @@ describe('getCommitsWithoutBackports', () => {
       offendingCommitTargetBranch: string;
       currentCommitTargetBranch: string;
     }) {
-      // simulate 1 conflicting files
-      jest
-        .spyOn(git, 'getConflictingFiles')
-        .mockResolvedValueOnce(['/foo/bar/baz.ts']);
-
       // simulate 1 commit with a pending backport
       jest
         .spyOn(fetchCommitsByAuthorModule, 'fetchCommitsByAuthor')
@@ -559,6 +544,7 @@ describe('getCommitsWithoutBackports', () => {
           sourceBranch: 'main',
         },
         targetBranch: currentCommitTargetBranch,
+        conflictingFiles: ['/foo/bar/baz.ts'],
       });
     }
 

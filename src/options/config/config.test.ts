@@ -1,8 +1,7 @@
-import { PromiseReturnType } from '../../types/PromiseReturnType';
 import { getOptionsFromConfigFiles } from './config';
 
 describe('getOptionsFromConfigFiles', () => {
-  let res: PromiseReturnType<typeof getOptionsFromConfigFiles>;
+  let res: Awaited<ReturnType<typeof getOptionsFromConfigFiles>>;
 
   beforeEach(async () => {
     res = await getOptionsFromConfigFiles();
