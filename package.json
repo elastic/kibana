@@ -591,6 +591,7 @@
     "@types/kbn__securitysolution-list-api": "link:bazel-bin/packages/kbn-securitysolution-list-api/npm_module_types",
     "@types/kbn__securitysolution-list-constants": "link:bazel-bin/packages/kbn-securitysolution-list-constants/npm_module_types",
     "@types/kbn__securitysolution-list-hooks": "link:bazel-bin/packages/kbn-securitysolution-list-hooks/npm_module_types",
+    "@types/kbn__securitysolution-rules": "link:bazel-bin/packages/kbn-securitysolution-rules/npm_module_types",
     "@types/license-checker": "15.0.0",
     "@types/listr": "^0.14.0",
     "@types/loader-utils": "^1.1.3",
