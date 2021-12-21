@@ -33,7 +33,6 @@ export interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
 }
 
-// eslint-disable-next-line complexity
 export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }) => {
   const dispatch = useDispatch();
   const isDetectionsSourcerer = scopeId === SourcererScopeName.detections;
