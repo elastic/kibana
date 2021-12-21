@@ -134,6 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
                   },
                 ],
                 influencers: [],
+                model_prune_window: '30d',
               },
             },
           },
@@ -196,8 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
     return groupIds.sort();
   }
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/121686
-  describe.skip('jobs_summary', function () {
+  describe('jobs_summary', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
