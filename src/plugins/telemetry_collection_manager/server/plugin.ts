@@ -32,9 +32,12 @@ import type {
   StatsCollectionContext,
   UnencryptedStatsGetterConfig,
   EncryptedStatsGetterConfig,
+  ClusterDetails,
 } from './types';
 import { encryptTelemetry } from './encryption';
 import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
+import { CacheManager } from './cache';
+import { CACHE_DURATION_MS } from '../common';
 
 interface TelemetryCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
@@ -51,6 +54,7 @@ export class TelemetryCollectionManagerPlugin
   private savedObjectsService?: SavedObjectsServiceStart;
   private readonly isDistributable: boolean;
   private readonly version: string;
+  private cacheManager = new CacheManager({ cacheDurationMs: CACHE_DURATION_MS });
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -65,7 +69,6 @@ export class TelemetryCollectionManagerPlugin
       setCollectionStrategy: this.setCollectionStrategy.bind(this),
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
-      areAllCollectorsReady: this.areAllCollectorsReady.bind(this),
     };
   }
 
@@ -76,7 +79,6 @@ export class TelemetryCollectionManagerPlugin
     return {
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
-      areAllCollectorsReady: this.areAllCollectorsReady.bind(this),
     };
   }
 
@@ -125,9 +127,10 @@ export class TelemetryCollectionManagerPlugin
     const soClient = this.getSavedObjectsClient(config);
     // Provide the kibanaRequest so opted-in plugins can scope their custom clients only if the request is not encrypted
     const kibanaRequest = config.unencrypted ? config.request : void 0;
+    const refreshCache = !!config.refreshCache;
 
     if (esClient && soClient) {
-      return { usageCollection, esClient, soClient, kibanaRequest };
+      return { usageCollection, esClient, soClient, kibanaRequest, refreshCache };
     }
   }
 
@@ -216,10 +219,6 @@ export class TelemetryCollectionManagerPlugin
     return [];
   }
 
-  private async areAllCollectorsReady() {
-    return await this.usageCollection?.areAllCollectorsReady();
-  }
-
   private getOptInStatsForCollection = async (
     collection: CollectionStrategy,
     optInStatus: boolean,
@@ -284,6 +283,25 @@ export class TelemetryCollectionManagerPlugin
     return [];
   }
 
+  private createCacheKey(collectionSource: string, clustersDetails: ClusterDetails[]) {
+    const clusterUUids = clustersDetails
+      .map(({ clusterUuid }) => clusterUuid)
+      .sort()
+      .join('_');
+
+    return `${collectionSource}::${clusterUUids}`;
+  }
+
+  private updateFetchedAt(statsPayload: UsageStatsPayload[]): UsageStatsPayload[] {
+    return statsPayload.map((stat) => ({
+      ...stat,
+      cacheDetails: {
+        ...stat.cacheDetails,
+        fetchedAt: new Date().toISOString(),
+      },
+    }));
+  }
+
   private async getUsageForCollection(
     collection: CollectionStrategy,
     statsCollectionConfig: StatsCollectionConfig
@@ -292,17 +310,34 @@ export class TelemetryCollectionManagerPlugin
       logger: this.logger.get(collection.title),
       version: this.version,
     };
-
     const clustersDetails = await collection.clusterDetailsGetter(statsCollectionConfig, context);
+    const { refreshCache } = statsCollectionConfig;
+    const { title: collectionSource } = collection;
+
+    // on `refreshCache: true` clear all cache to store a fresh copy
+    if (refreshCache) {
+      this.cacheManager.resetCache();
+    }
 
     if (clustersDetails.length === 0) {
-      // don't bother doing a further lookup.
       return [];
     }
 
-    const stats = await collection.statsGetter(clustersDetails, statsCollectionConfig, context);
+    const cacheKey = this.createCacheKey(collectionSource, clustersDetails);
+    const cachedUsageStatsPayload = this.cacheManager.getFromCache<UsageStatsPayload[]>(cacheKey);
+    if (cachedUsageStatsPayload) {
+      return this.updateFetchedAt(cachedUsageStatsPayload);
+    }
 
-    // Add the `collectionSource` to the resulting payload
-    return stats.map((stat) => ({ collectionSource: collection.title, ...stat }));
+    const now = new Date().toISOString();
+    const stats = await collection.statsGetter(clustersDetails, statsCollectionConfig, context);
+    const usageStatsPayload = stats.map((stat) => ({
+      collectionSource,
+      cacheDetails: { updatedAt: now, fetchedAt: now },
+      ...stat,
+    }));
+    this.cacheManager.setCache(cacheKey, usageStatsPayload);
+
+    return this.updateFetchedAt(usageStatsPayload);
   }
 }

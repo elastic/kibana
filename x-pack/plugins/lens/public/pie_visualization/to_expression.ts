@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { Ast } from '@kbn/interpreter/common';
+import type { Ast } from '@kbn/interpreter';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
 import type { Operation, DatasourcePublicAPI } from '../types';
-import { DEFAULT_PERCENT_DECIMALS } from './constants';
+import { DEFAULT_PERCENT_DECIMALS, EMPTY_SIZE_RATIOS } from './constants';
 import { shouldShowValuesInLegend } from './render_helpers';
-
 import type { PieVisualizationState } from '../../common/expressions';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 
@@ -59,6 +58,7 @@ function expressionHelper(
           categoryDisplay: [layer.categoryDisplay],
           legendDisplay: [layer.legendDisplay],
           legendPosition: [layer.legendPosition || 'right'],
+          emptySizeRatio: [layer.emptySizeRatio ?? EMPTY_SIZE_RATIOS.SMALL],
           showValuesInLegend: [shouldShowValuesInLegend(layer, state.shape)],
           percentDecimals: [
             state.shape === 'waffle'
