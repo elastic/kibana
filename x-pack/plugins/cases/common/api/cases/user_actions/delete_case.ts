@@ -10,7 +10,7 @@ import { ActionTypes, UserActionWithAttributes } from './common';
 
 export const DeleteCaseUserActionRt = rt.type({
   type: rt.literal(ActionTypes.delete_case),
-  payload: rt.null,
+  payload: rt.type({}),
 });
 
 export type DeleteCaseUserAction = UserActionWithAttributes<

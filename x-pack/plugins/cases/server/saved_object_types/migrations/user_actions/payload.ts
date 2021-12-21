@@ -106,21 +106,24 @@ export const getPayload = (
    * connector attribute included.
    *
    * We are taking care of it in this migration by adding the none
-   * connector as a default
+   * connector as a default. The same applies to the status field.
    *
-   * The same applies to the status field.
+   * If a create_case user action does not have the
+   * owner field we default to the owner of the of the
+   * user action. It is impossible to create a user action
+   * with different owner from the original case.
    */
 
   const { id, ...noneConnector } = getNoneCaseConnector();
   return {
     ...payload,
     ...(payload.connector == null &&
-    (type === ActionTypes.create_case || type === ActionTypes.connector)
-      ? { connector: noneConnector }
-      : {}),
-    ...(isEmpty(payload.status) && type === ActionTypes.create_case
-      ? { status: CaseStatuses.open }
-      : {}),
+      (type === ActionTypes.create_case || type === ActionTypes.connector) && {
+        connector: noneConnector,
+      }),
+    ...(isEmpty(payload.status) &&
+      type === ActionTypes.create_case && { status: CaseStatuses.open }),
+    ...(type === ActionTypes.create_case && { owner }),
   };
 };
 
@@ -162,6 +165,8 @@ const getSingleFieldPayload = (
     case 'status':
     case 'description':
       return { [field]: isString(value) ? value : '' };
+    case 'owner':
+      return { [field]: isString(value) ? value : owner };
     case 'settings':
     case 'connector':
       return { [field]: isPlainObject(value) ? value : {} };
@@ -187,10 +192,17 @@ const getSingleFieldPayload = (
        * If there response of the decodeValue function is not an object
        * then we assume that the value is a string coming for a 7.10
        * user action saved object.
+       *
+       * Also if the comment does not have an owner we default to the owner
+       * of the user action. It is impossible to create a user action
+       * with a different owner from the original case.
        */
       return {
         comment: isPlainObject(value)
-          ? value
+          ? {
+              ...(value as Record<string, unknown>),
+              ...((value as Record<string, unknown>).owner == null && { owner }),
+            }
           : {
               comment: isString(value) ? value : '',
               type: CommentType.user,
