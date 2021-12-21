@@ -25,15 +25,21 @@ import { getConnectorDescriptiveTitle, getSelectedConnectorIcon } from './helper
 
 const validateConnector = async (
   action: ServiceNowActionConnector
-): Promise<ConnectorValidationResult<ServiceNowConfig, ServiceNowSecrets>> => {
+): Promise<ConnectorValidationResult<Omit<ServiceNowConfig, 'isOAuth'>, ServiceNowSecrets>> => {
   const translations = await import('./translations');
   const configErrors = {
     apiUrl: new Array<string>(),
     usesTableApi: new Array<string>(),
+    clientId: new Array<string>(),
+    userIdentifierValue: new Array<string>(),
+    jwtKeyId: new Array<string>(),
   };
   const secretsErrors = {
     username: new Array<string>(),
     password: new Array<string>(),
+    clientSecret: new Array<string>(),
+    privateKey: new Array<string>(),
+    privateKeyPassword: new Array<string>(),
   };
 
   const validationResult = {
@@ -53,12 +59,45 @@ const validateConnector = async (
     }
   }
 
-  if (!action.secrets.username) {
+  if (!action.config.isOAuth && !action.secrets.username) {
     secretsErrors.username = [...secretsErrors.username, translations.USERNAME_REQUIRED];
   }
 
-  if (!action.secrets.password) {
+  if (!action.config.isOAuth && !action.secrets.password) {
     secretsErrors.password = [...secretsErrors.password, translations.PASSWORD_REQUIRED];
+  }
+
+  if (action.config.isOAuth && !action.config.clientId) {
+    configErrors.clientId = [...configErrors.clientId, translations.CLIENTID_REQUIRED];
+  }
+
+  if (action.config.isOAuth && !action.secrets.clientSecret) {
+    secretsErrors.clientSecret = [
+      ...secretsErrors.clientSecret,
+      translations.CLIENTSECRET_REQUIRED,
+    ];
+  }
+
+  if (action.config.isOAuth && !action.secrets.privateKey) {
+    secretsErrors.privateKey = [...secretsErrors.privateKey, translations.PRIVATE_KEY_REQUIRED];
+  }
+
+  if (action.config.isOAuth && !action.secrets.privateKeyPassword) {
+    secretsErrors.privateKeyPassword = [
+      ...secretsErrors.privateKeyPassword,
+      translations.PRIVATE_KEY_PASSWORD_REQUIRED,
+    ];
+  }
+
+  if (action.config.isOAuth && !action.config.userIdentifierValue) {
+    configErrors.userIdentifierValue = [
+      ...configErrors.userIdentifierValue,
+      translations.USER_EMAIL_REQUIRED,
+    ];
+  }
+
+  if (action.config.isOAuth && !action.config.jwtKeyId) {
+    configErrors.jwtKeyId = [...configErrors.jwtKeyId, translations.KEYID_REQUIRED];
   }
 
   return validationResult;

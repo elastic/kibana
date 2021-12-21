@@ -172,6 +172,7 @@ const UpdateConnectorComponent: React.FC<Props> = ({
                     readOnly={readOnly}
                     isLoading={isLoading}
                     editActionSecrets={editActionSecrets}
+                    editActionConfig={editActionConfig}
                   />
                 ),
               },

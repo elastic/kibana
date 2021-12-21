@@ -336,3 +336,102 @@ export const SEVERITY_REQUIRED_LABEL = i18n.translate(
     defaultMessage: 'Severity (required)',
   }
 );
+
+export const REENTER_OAUTH_VALUES_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.reenterOAuthValuesLabel',
+  {
+    defaultMessage:
+      'Private key, private key password and client secret are encrypted. Please reenter values for these fields.',
+  }
+);
+
+export const USER_EMAIL_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.userEmailTextFieldLabel',
+  {
+    defaultMessage: 'User Identifier (Email)',
+  }
+);
+
+export const CLIENTID_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.clientIdTextFieldLabel',
+  {
+    defaultMessage: 'Client ID',
+  }
+);
+
+export const CLIENTSECRET_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.clientSecretTextFieldLabel',
+  {
+    defaultMessage: 'Client Secret',
+  }
+);
+
+export const PRIVATE_KEY_PASSWORD_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.privateKeyPassTextFieldLabel',
+  {
+    defaultMessage: 'Private Key Password',
+  }
+);
+
+export const CLIENTID_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredClientIdTextField',
+  {
+    defaultMessage: 'Client ID is required.',
+  }
+);
+
+export const USER_EMAIL_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredUserEmailTextField',
+  {
+    defaultMessage: 'User Identifier is required.',
+  }
+);
+
+export const KEYID_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredKeyIdTextField',
+  {
+    defaultMessage: 'JWT Verifier Key ID is required.',
+  }
+);
+
+export const CLIENTSECRET_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredClientSecretTextField',
+  {
+    defaultMessage: 'Client Secret is required.',
+  }
+);
+
+export const PRIVATE_KEY_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredPrivateKeyTextField',
+  {
+    defaultMessage: 'Private Key is required.',
+  }
+);
+
+export const PRIVATE_KEY_PASSWORD_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredPrivateKeyPasswordTextField',
+  {
+    defaultMessage: 'Private Key Password is required.',
+  }
+);
+
+export const KEY_ID_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.keyIdTextFieldLabel',
+  {
+    defaultMessage: 'JWT Verifier Key ID',
+  }
+);
+
+export const PRIVATE_KEY_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.privateKeyTextFieldLabel',
+  {
+    defaultMessage: 'Private Key',
+  }
+);
+
+export const IS_OAUTH = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.useOAuth',
+  {
+    defaultMessage: 'Use OAuth',
+  }
+);

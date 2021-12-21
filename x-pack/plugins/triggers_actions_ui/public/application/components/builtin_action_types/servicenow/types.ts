@@ -36,11 +36,18 @@ export interface ServiceNowITOMActionParams {
 export interface ServiceNowConfig {
   apiUrl: string;
   usesTableApi: boolean;
+  isOAuth: boolean;
+  clientId?: string;
+  userIdentifierValue?: string;
+  jwtKeyId?: string;
 }
 
 export interface ServiceNowSecrets {
-  username: string;
-  password: string;
+  username?: string;
+  password?: string;
+  clientSecret?: string;
+  privateKey?: string;
+  privateKeyPassword?: string;
 }
 
 export interface Choice {
