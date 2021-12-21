@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -19,6 +19,9 @@ import {
 } from '@elastic/eui';
 import * as i18n from '../../translations';
 
+import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
+import { useKibana } from '../../../../../../common/lib/kibana';
+
 import {
   Field,
   Form,
@@ -27,15 +30,93 @@ import {
   UseMultiFields,
   useForm,
   useFormData,
+  ERROR_CODE,
+  FIELD_TYPES,
+  fieldValidators,
+  FormSchema,
+  ValidationFunc,
 } from '../../../../../../shared_imports';
 
+interface MyForm {
+  index: string[];
+}
+
+const CommonUseField = getUseField({ component: Field });
+
+interface IndexEditActions {
+  index: string[];
+}
+
+export const schema: FormSchema<IndexEditActions> = {
+  index: {
+    fieldsToValidateOnChange: ['index', 'queryBar'],
+    type: FIELD_TYPES.COMBO_BOX,
+    label: 'Add index patterns for selected rules',
+    // helpText: <EuiText size="xs">{INDEX_HELPER_TEXT}</EuiText>,
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          // const [{ formData }] = args;
+
+          return fieldValidators.emptyField('A minimum of one index pattern is required.')(...args);
+        },
+      },
+    ],
+  },
+};
+
+interface FormComponentProps<T> {
+  data: T;
+  //  getData: (a: T) => void;
+  formRef: ReturnType<typeof useRef>;
+}
+
+export const FormComponent = <T,>({ data, formRef }: FormComponentProps<T>) => {
+  const { uiSettings } = useKibana().services;
+  const { form } = useForm<T>({
+    defaultValue: data,
+    schema,
+  });
+
+  const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
+
+  //   const { getFields, getFormData, reset, submit } = form;
+  if (formRef?.current) {
+    formRef.current = form;
+  }
+
+  return (
+    <Form form={form}>
+      <CommonUseField
+        path="index"
+        config={{
+          ...schema.index,
+        }}
+        componentProps={{
+          idAria: 'detectionEngineBulkEditIndices',
+          'data-test-subj': 'detectionEngineBulkEditIndices',
+          euiFieldProps: {
+            fullWidth: true,
+            placeholder: '',
+            noSuggestions: false,
+            options: defaultPatterns.map((label) => ({ label })),
+          },
+        }}
+      />
+    </Form>
+  );
+};
 interface Props {
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (a: any) => void;
 }
 const BulkEditFlyoutComponent = ({ onClose, onConfirm }: Props) => {
+  const formRef = useRef<ReturnType<typeof useForm>>({} as ReturnType<typeof useForm>);
   const handleSave = () => {
-    onConfirm();
+    console.log('HANDLE safe', formRef?.current?.getFormData?.());
+    onConfirm(formRef?.current?.getFormData?.());
   };
   const flyoutTitleId = 'Bulk edit flyout';
   return (
@@ -45,7 +126,9 @@ const BulkEditFlyoutComponent = ({ onClose, onConfirm }: Props) => {
           <h2 id={flyoutTitleId}>Add index patterns</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody />
+      <EuiFlyoutBody>
+        <FormComponent formRef={formRef} data={{ index: [] }} />
+      </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
