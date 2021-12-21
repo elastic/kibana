@@ -779,6 +779,40 @@ describe('Lens App', () => {
       });
       expect(getButton(instance).disableButton).toEqual(false);
     });
+
+    it('should show a warning tooltip if the datatable contains any char likely to be interpreted as a spreadsheet formula', async () => {
+      const services = makeDefaultServicesForApp();
+      services.application = {
+        ...services.application,
+        capabilities: {
+          ...services.application.capabilities,
+          visualize: { save: false, saveQuery: false, show: true },
+        },
+      };
+
+      const { instance } = await mountWith({
+        services,
+        preloadedState: {
+          isSaveable: true,
+          activeData: {
+            layer1: {
+              type: 'datatable',
+              // mind the indexpattern mock will return no columns to be visible
+              // we use this test to indirectly test the visible columns feature:
+              // the @myField name should trigger the warning tooltip check, but because
+              // of the mock no warning is shown
+              columns: [{ id: 'a', name: '@myField', meta: { type: 'number' } }],
+              rows: [],
+            },
+          },
+        },
+      });
+      const tooltipFn = getButton(instance).tooltip;
+      expect(tooltipFn).toEqual(expect.any(Function));
+      if (typeof tooltipFn === 'function') {
+        expect(tooltipFn()).toEqual(undefined);
+      }
+    });
   });
 
   describe('inspector', () => {
