@@ -9,7 +9,7 @@ import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_RULE_ID,
-} from '@kbn/rule-data-utils/technical_field_names';
+} from '@kbn/rule-data-utils';
 
 import type { Filter } from '@kbn/es-query';
 import { RowRendererId } from '../../../../common/types/timeline';
@@ -141,11 +141,10 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
             alias: null,
             disabled: false,
             negate: false,
-            key: 'kibana.alert.rule.threat_mapping',
-            type: 'exists',
-            value: 'exists',
+            key: 'kibana.alert.rule.type',
+            type: 'term',
           },
-          query: { exists: { field: 'kibana.alert.rule.threat_mapping' } },
+          query: { term: { 'kibana.alert.rule.type': 'threat_match' } },
         },
       ]
     : [];

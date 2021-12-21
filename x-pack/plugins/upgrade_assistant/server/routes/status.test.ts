@@ -11,19 +11,79 @@ import { handleEsError } from '../shared_imports';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 import { registerUpgradeStatusRoute } from './status';
+import { getESUpgradeStatus } from '../lib/es_deprecations_status';
+import { getKibanaUpgradeStatus } from '../lib/kibana_status';
+import { getESSystemIndicesMigrationStatus } from '../lib/es_system_indices_migration';
 
 jest.mock('../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
 }));
 
-// Need to require to get mock on named export to work.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const ESUpgradeStatusApis = require('../lib/es_deprecations_status');
-ESUpgradeStatusApis.getESUpgradeStatus = jest.fn();
+jest.mock('../lib/es_deprecations_status', () => ({
+  getESUpgradeStatus: jest.fn(),
+}));
+const getESUpgradeStatusMock = getESUpgradeStatus as jest.Mock;
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const KibanaUpgradeStatusApis = require('../lib/kibana_status');
-KibanaUpgradeStatusApis.getKibanaUpgradeStatus = jest.fn();
+jest.mock('../lib/kibana_status', () => ({
+  getKibanaUpgradeStatus: jest.fn(),
+}));
+const getKibanaUpgradeStatusMock = getKibanaUpgradeStatus as jest.Mock;
+
+jest.mock('../lib/es_system_indices_migration', () => ({
+  getESSystemIndicesMigrationStatus: jest.fn(),
+}));
+const getESSystemIndicesMigrationStatusMock = getESSystemIndicesMigrationStatus as jest.Mock;
+
+const esDeprecationsResponse = {
+  cluster: [
+    {
+      level: 'critical',
+      message:
+        'Model snapshot [1] for job [deprecation_check_job] has an obsolete minimum version [6.3.0].',
+      details: 'Delete model snapshot [1] or update it to 7.0.0 or greater.',
+      url: 'doc_url',
+      correctiveAction: {
+        type: 'mlSnapshot',
+        snapshotId: '1',
+        jobId: 'deprecation_check_job',
+      },
+    },
+  ],
+  indices: [],
+  totalCriticalDeprecations: 1,
+};
+
+const esNoDeprecationsResponse = {
+  cluster: [],
+  indices: [],
+  totalCriticalDeprecations: 0,
+};
+
+const systemIndicesMigrationResponse = {
+  migration_status: 'MIGRATION_NEEDED',
+  features: [
+    {
+      feature_name: 'machine_learning',
+      minimum_index_version: '7.1.1',
+      migration_status: 'MIGRATION_NEEDED',
+      indices: [
+        {
+          index: '.ml-config',
+          version: '7.1.1',
+        },
+        {
+          index: '.ml-notifications',
+          version: '7.1.1',
+        },
+      ],
+    },
+  ],
+};
+
+const systemIndicesNoMigrationResponse = {
+  migration_status: 'NO_MIGRATION_NEEDED',
+  features: [],
+};
 
 describe('Status API', () => {
   let mockRouter: MockRouter;
@@ -43,29 +103,14 @@ describe('Status API', () => {
   });
 
   describe('GET /api/upgrade_assistant/status', () => {
-    it('returns readyForUpgrade === false if Kibana or ES contain critical deprecations', async () => {
-      ESUpgradeStatusApis.getESUpgradeStatus.mockResolvedValue({
-        cluster: [
-          {
-            level: 'critical',
-            message:
-              'Model snapshot [1] for job [deprecation_check_job] has an obsolete minimum version [6.3.0].',
-            details: 'Delete model snapshot [1] or update it to 7.0.0 or greater.',
-            url: 'doc_url',
-            correctiveAction: {
-              type: 'mlSnapshot',
-              snapshotId: '1',
-              jobId: 'deprecation_check_job',
-            },
-          },
-        ],
-        indices: [],
+    it('returns readyForUpgrade === false if Kibana or ES contain critical deprecations and no system indices need migration', async () => {
+      getESUpgradeStatusMock.mockResolvedValue(esDeprecationsResponse);
+
+      getKibanaUpgradeStatusMock.mockResolvedValue({
         totalCriticalDeprecations: 1,
       });
 
-      KibanaUpgradeStatusApis.getKibanaUpgradeStatus.mockResolvedValue({
-        totalCriticalDeprecations: 1,
-      });
+      getESSystemIndicesMigrationStatusMock.mockResolvedValue(systemIndicesNoMigrationResponse);
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
@@ -76,20 +121,65 @@ describe('Status API', () => {
       expect(resp.payload).toEqual({
         readyForUpgrade: false,
         details:
-          'You have 1 Elasticsearch deprecation issue and 1 Kibana deprecation issue that must be resolved before upgrading.',
+          'You have 0 system indices that must be migrated and ' +
+          '1 Elasticsearch deprecation issue and 1 Kibana deprecation issue that must be resolved before upgrading.',
       });
     });
 
-    it('returns readyForUpgrade === true if there are no critical deprecations', async () => {
-      ESUpgradeStatusApis.getESUpgradeStatus.mockResolvedValue({
-        cluster: [],
-        indices: [],
+    it('returns readyForUpgrade === false if Kibana or ES contain critical deprecations and system indices need migration', async () => {
+      getESUpgradeStatusMock.mockResolvedValue(esDeprecationsResponse);
+
+      getKibanaUpgradeStatusMock.mockResolvedValue({
+        totalCriticalDeprecations: 1,
+      });
+
+      getESSystemIndicesMigrationStatusMock.mockResolvedValue(systemIndicesMigrationResponse);
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/status',
+      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
+
+      expect(resp.status).toEqual(200);
+      expect(resp.payload).toEqual({
+        readyForUpgrade: false,
+        details:
+          'You have 1 system index that must be migrated and ' +
+          '1 Elasticsearch deprecation issue and 1 Kibana deprecation issue that must be resolved before upgrading.',
+      });
+    });
+
+    it('returns readyForUpgrade === false if no critical Kibana or ES deprecations but system indices need migration', async () => {
+      getESUpgradeStatusMock.mockResolvedValue(esNoDeprecationsResponse);
+
+      getKibanaUpgradeStatusMock.mockResolvedValue({
         totalCriticalDeprecations: 0,
       });
 
-      KibanaUpgradeStatusApis.getKibanaUpgradeStatus.mockResolvedValue({
+      getESSystemIndicesMigrationStatusMock.mockResolvedValue(systemIndicesMigrationResponse);
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/status',
+      })(routeHandlerContextMock, createRequestMock(), kibanaResponseFactory);
+
+      expect(resp.status).toEqual(200);
+      expect(resp.payload).toEqual({
+        readyForUpgrade: false,
+        details:
+          'You have 1 system index that must be migrated and ' +
+          '0 Elasticsearch deprecation issues and 0 Kibana deprecation issues that must be resolved before upgrading.',
+      });
+    });
+
+    it('returns readyForUpgrade === true if there are no critical deprecations and no system indices need migration', async () => {
+      getESUpgradeStatusMock.mockResolvedValue(esNoDeprecationsResponse);
+
+      getKibanaUpgradeStatusMock.mockResolvedValue({
         totalCriticalDeprecations: 0,
       });
+
+      getESSystemIndicesMigrationStatusMock.mockResolvedValue(systemIndicesNoMigrationResponse);
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
@@ -104,9 +194,9 @@ describe('Status API', () => {
     });
 
     it('returns an error if it throws', async () => {
-      ESUpgradeStatusApis.getESUpgradeStatus.mockRejectedValue(new Error('test error'));
+      getESUpgradeStatusMock.mockRejectedValue(new Error('test error'));
 
-      KibanaUpgradeStatusApis.getKibanaUpgradeStatus.mockResolvedValue({
+      getKibanaUpgradeStatusMock.mockResolvedValue({
         totalCriticalDeprecations: 0,
       });
 
