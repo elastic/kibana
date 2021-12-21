@@ -31,7 +31,7 @@ import {
   MockAlertState,
   MockAllowedActionGroups,
 } from '../../../common/types';
-import { AlertExecutorOptions } from '../../../../../plugins/alerting/server';
+import { AlertExecutorOptions as RuleExecutorOptions } from '../../../../../plugins/alerting/server';
 import { cleanupRegistryIndices } from '../../../common/lib/helpers/cleanup_registry_indices';
 
 // eslint-disable-next-line import/no-default-export
@@ -180,7 +180,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
           alertInstanceFactory: sinon.stub(),
           shouldWriteAlerts: sinon.stub().returns(true),
         },
-      } as unknown as AlertExecutorOptions<
+      } as unknown as RuleExecutorOptions<
         MockRuleParams,
         WrappedLifecycleRuleState<MockRuleState>,
         { [x: string]: unknown },

@@ -6,8 +6,8 @@
  */
 import { GenericFtrProviderContext } from '@kbn/test';
 import {
-  Alert,
-  AlertTypeParams,
+  Alert as Rule,
+  AlertTypeParams as RuleTypeParams,
   ActionGroupIdsOf,
   AlertInstanceState as AlertState,
   AlertInstanceContext as AlertContext,
@@ -17,7 +17,7 @@ import { services } from './services';
 
 export type GetService = GenericFtrProviderContext<typeof services, {}>['getService'];
 
-export interface AlertParams extends AlertTypeParams {
+export interface AlertParams extends RuleTypeParams {
   windowSize?: number;
   windowUnit?: string;
   threshold?: number;
@@ -26,7 +26,7 @@ export interface AlertParams extends AlertTypeParams {
   environment?: string;
 }
 
-export type AlertDef<Params extends AlertTypeParams = {}> = Partial<Alert<Params>>;
+export type AlertDef<Params extends RuleTypeParams = {}> = Partial<Rule<Params>>;
 
 export type MockRuleParams = Record<string, any>;
 export type MockRuleState = RuleTypeState & {
@@ -40,7 +40,7 @@ export type MockRuleState = RuleTypeState & {
 };
 
 export const FIRED_ACTIONS = {
-  id: 'observabiliy.fired',
+  id: 'observability.fired',
   name: 'Alert',
 };
 
