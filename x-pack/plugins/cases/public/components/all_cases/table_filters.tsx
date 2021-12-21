@@ -203,7 +203,6 @@ const CasesTableFiltersComponent = ({
               onSelectedOptionsChanged={handleSelectedSolution}
               selectedOptions={selectedOwner}
               options={availableSolutions}
-              optionsEmptyLabel={'No Solutions'}
             />
           )}
         </EuiFilterGroup>
