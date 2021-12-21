@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import {
   createTestEsCluster,
   CreateTestEsClusterOptions,

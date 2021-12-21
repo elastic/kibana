@@ -23,17 +23,17 @@ export function kafkaMetricsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'kafkaMetrics',
     name: i18n.translate('home.tutorials.kafkaMetrics.nameTitle', {
-      defaultMessage: 'Kafka metrics',
+      defaultMessage: 'Kafka Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.kafkaMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the Kafka server.',
+      defaultMessage: 'Collect metrics from Kafka servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.kafkaMetrics.longDescription', {
       defaultMessage:
-        'The `kafka` Metricbeat module fetches internal metrics from Kafka. \
+        'The `kafka` Metricbeat module fetches metrics from Kafka. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kafka.html',
@@ -54,8 +54,8 @@ export function kafkaMetricsSpecProvider(context: TutorialContext): TutorialSche
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['message_queue'],
   };
 }

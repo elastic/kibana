@@ -7,7 +7,7 @@
  */
 
 import { merge, omit } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { getLocalStats, handleLocalStats } from './get_local_stats';
 import {
@@ -80,6 +80,7 @@ function mockStatsCollectionConfig(
     esClient: mockGetLocalStats(clusterInfo, clusterStats),
     usageCollection: mockUsageCollection(kibana),
     kibanaRequest: httpServerMock.createKibanaRequest(),
+    refreshCache: false,
   };
 }
 

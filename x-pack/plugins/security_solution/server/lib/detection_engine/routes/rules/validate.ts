@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResult } from 'kibana/server';
-
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import {
   FullResponseSchema,
@@ -19,9 +17,8 @@ import {
 import { PartialAlert } from '../../../../../../alerting/server';
 import {
   isAlertType,
-  IRuleSavedAttributesSavedObjectAttributes,
   IRuleStatusSOAttributes,
-  isRuleStatusSavedObjectType,
+  isRuleStatusSavedObjectAttributes,
 } from '../../rules/types';
 import { createBulkErrorObject, BulkError } from '../utils';
 import { transform, transformAlertToRule } from './utils';
@@ -31,7 +28,7 @@ import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rul
 
 export const transformValidate = (
   alert: PartialAlert<RuleParams>,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
+  ruleStatus?: IRuleStatusSOAttributes,
   isRuleRegistryEnabled?: boolean,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): [RulesSchema | null, string | null] => {
@@ -45,7 +42,7 @@ export const transformValidate = (
 
 export const newTransformValidate = (
   alert: PartialAlert<RuleParams>,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
+  ruleStatus?: IRuleStatusSOAttributes,
   isRuleRegistryEnabled?: boolean,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): [FullResponseSchema | null, string | null] => {
@@ -60,12 +57,12 @@ export const newTransformValidate = (
 export const transformValidateBulkError = (
   ruleId: string,
   alert: PartialAlert<RuleParams>,
-  ruleStatus?: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>,
+  ruleStatus?: IRuleStatusSOAttributes,
   isRuleRegistryEnabled?: boolean
 ): RulesSchema | BulkError => {
   if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
-    if (ruleStatus && ruleStatus?.length > 0 && isRuleStatusSavedObjectType(ruleStatus[0])) {
-      const transformed = transformAlertToRule(alert, ruleStatus[0]);
+    if (ruleStatus && isRuleStatusSavedObjectAttributes(ruleStatus)) {
+      const transformed = transformAlertToRule(alert, ruleStatus);
       const [validated, errors] = validateNonExact(transformed, rulesSchema);
       if (errors != null || validated == null) {
         return createBulkErrorObject({

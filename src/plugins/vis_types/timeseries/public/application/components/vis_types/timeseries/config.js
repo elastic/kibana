@@ -27,7 +27,7 @@ import {
   EuiHorizontalRule,
   EuiFieldNumber,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
 import { PalettePicker } from '../../palette_picker';
 import { getCharts } from '../../../../services';
@@ -538,8 +538,8 @@ export const TimeseriesConfig = injectI18n(function (props) {
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
           <EuiFormRow
-            label={i18n.translate('visTypeTimeseries.timeSeries.overrideIndexPatternLabel', {
-              defaultMessage: 'Override Index Pattern?',
+            label={i18n.translate('visTypeTimeseries.timeSeries.overrideDataViewLabel', {
+              defaultMessage: 'Override data view?',
             })}
           >
             <YesNo

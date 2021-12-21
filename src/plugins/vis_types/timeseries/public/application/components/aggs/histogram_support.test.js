@@ -34,7 +34,7 @@ const runTest = (aggType, name, test, additionalProps = {}) => {
         <div>
           <Agg
             onAdd={jest.fn()}
-            onChange={jest.fn()}
+            onModelChange={jest.fn()}
             onDelete={jest.fn()}
             panel={panel}
             fields={FIELDS}

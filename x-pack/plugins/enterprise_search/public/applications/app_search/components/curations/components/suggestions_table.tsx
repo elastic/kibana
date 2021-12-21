@@ -42,7 +42,7 @@ const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
     render: (query: string, curation: CurationSuggestion) => (
       <EuiLinkTo to={getSuggestionRoute(query)}>
         {query}
-        {curation.override_curation_id && (
+        {curation.override_manual_curation && (
           <>
             <EuiBadge iconType="alert" color="warning" className="suggestionsTableBadge">
               {i18n.translate(

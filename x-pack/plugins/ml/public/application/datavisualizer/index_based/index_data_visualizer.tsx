@@ -29,7 +29,7 @@ export const IndexDataVisualizerPage: FC = () => {
       docLinks,
       dataVisualizer,
       data: {
-        indexPatterns: { get: getIndexPattern },
+        dataViews: { get: getDataView },
       },
     },
   } = useMlKibana();
@@ -74,7 +74,7 @@ export const IndexDataVisualizerPage: FC = () => {
         },
         canDisplay: async ({ indexPatternId }) => {
           try {
-            const { timeFieldName } = await getIndexPattern(indexPatternId);
+            const { timeFieldName } = await getDataView(indexPatternId);
             return (
               isFullLicense() &&
               timeFieldName !== undefined &&

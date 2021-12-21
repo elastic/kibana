@@ -7,7 +7,7 @@
 
 import React, { useMemo, useEffect, useState, FC } from 'react';
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   EuiCallOut,
@@ -24,7 +24,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
 import { extractErrorMessage } from '../../../../common';
 import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 import { stringHash } from '../../../../common/util/string_utils';
@@ -89,7 +89,7 @@ export interface ScatterplotMatrixProps {
   legendType?: LegendType;
   searchQuery?: ResultsSearchQuery;
   runtimeMappings?: RuntimeMappings;
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
 }
 
 export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({

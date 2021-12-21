@@ -27,7 +27,7 @@ import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapt
 import { InfraKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
 import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_status';
-import { registerAlertTypes } from './lib/alerting';
+import { registerRuleTypes } from './lib/alerting';
 import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
@@ -40,10 +40,10 @@ import { UsageCollector } from './usage/usage_collector';
 import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
 import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
 import { RulesService } from './services/rules';
+import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 
 export const config: PluginConfigDescriptor = {
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
     inventory: schema.object({
       compositeSize: schema.number({ defaultValue: 2000 }),
     }),
@@ -51,16 +51,9 @@ export const config: PluginConfigDescriptor = {
       schema.object({
         default: schema.maybe(
           schema.object({
-            logAlias: schema.maybe(schema.string()), // NOTE / TODO: Should be deprecated in 8.0.0
-            metricAlias: schema.maybe(schema.string()),
             fields: schema.maybe(
               schema.object({
-                timestamp: schema.maybe(schema.string()),
                 message: schema.maybe(schema.arrayOf(schema.string())),
-                tiebreaker: schema.maybe(schema.string()),
-                host: schema.maybe(schema.string()),
-                container: schema.maybe(schema.string()),
-                pod: schema.maybe(schema.string()),
               })
             ),
           })
@@ -68,7 +61,7 @@ export const config: PluginConfigDescriptor = {
       })
     ),
   }),
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
+  deprecations: configDeprecations,
 };
 
 export type InfraConfig = TypeOf<typeof config.schema>;
@@ -160,14 +153,15 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
 
     plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
       {
-        path: `/app/logs`,
+        sampleObject: null, // indicates that there is no sample object associated with this app link's path
+        getPath: () => `/app/logs`,
         label: logsSampleDataLinkLabel,
         icon: 'logsApp',
       },
     ]);
 
     initInfraServer(this.libs);
-    registerAlertTypes(plugins.alerting, this.libs, plugins.ml);
+    registerRuleTypes(plugins.alerting, this.libs, plugins.ml);
 
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',
@@ -192,6 +186,11 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
 
     const logEntriesService = new LogEntriesService();
     logEntriesService.setup(core, { ...plugins, sources });
+
+    // register deprecated source configuration fields
+    core.deprecations.registerDeprecations({
+      getDeprecations: getInfraDeprecationsFactory(sources),
+    });
 
     return {
       defineInternalSourceConfiguration(sourceId, sourceProperties) {

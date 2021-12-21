@@ -6,29 +6,36 @@
  */
 
 import expect from '@kbn/expect';
-import { JOB_PARAMS_RISON_CSV_DEPRECATED } from '../services/fixtures';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 import { ILM_POLICY_NAME } from '../../../plugins/reporting/common/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const es = getService('es');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const reportingAPI = getService('reportingAPI');
   const security = getService('security');
 
+  const JOB_PARAMS_RISON_CSV =
+    `(columns:!(order_date,category,customer_full_name,taxful_total_price,currency)` +
+    `,objectType:search,searchSource:(fields:!((field:'*',include_unmapped:true))` +
+    `,filter:!((meta:(field:order_date,index:aac3e500-f2c7-11ea-8250-fb138aa491e7` +
+    `,params:()),query:(range:(order_date:(format:strict_date_optional_time` +
+    `,gte:'2019-06-02T12:28:40.866Z',lte:'2019-07-18T20:59:57.136Z')))))` +
+    `,index:aac3e500-f2c7-11ea-8250-fb138aa491e7,parent:(filter:!(),highlightAll:!t` +
+    `,index:aac3e500-f2c7-11ea-8250-fb138aa491e7,query:(language:kuery,query:'')` +
+    `,version:!t),sort:!((order_date:desc)),trackTotalHits:!t),title:'EC SEARCH from DEFAULT')`;
+
   describe('ILM policy migration APIs', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/logs');
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await reportingAPI.initLogs();
+      await reportingAPI.migrateReportingIndices(); // ensure that the ILM policy exists for the first test
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/logs');
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await reportingAPI.teardownLogs();
     });
 
     afterEach(async () => {
@@ -41,22 +48,21 @@ export default function ({ getService }: FtrProviderContext) {
 
       // try creating a report
       await supertest
-        .post(`/api/reporting/generate/csv`)
+        .post(`/api/reporting/generate/csv_searchsource`)
         .set('kbn-xsrf', 'xxx')
-        .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
+        .send({ jobParams: JOB_PARAMS_RISON_CSV });
 
       expect(await reportingAPI.checkIlmMigrationStatus()).to.eql('ok');
     });
 
     it('detects when reporting indices should be migrated due to missing ILM policy', async () => {
       await reportingAPI.makeAllReportingIndicesUnmanaged();
-      // TODO: Remove "any" when no longer through type issue "policy_id" missing
-      await es.ilm.deleteLifecycle({ policy: ILM_POLICY_NAME } as any);
+      await es.ilm.deleteLifecycle({ name: ILM_POLICY_NAME });
 
       await supertest
-        .post(`/api/reporting/generate/csv`)
+        .post(`/api/reporting/generate/csv_searchsource`)
         .set('kbn-xsrf', 'xxx')
-        .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
+        .send({ jobParams: JOB_PARAMS_RISON_CSV });
 
       expect(await reportingAPI.checkIlmMigrationStatus()).to.eql('policy-not-found');
       // assert that migration fixes this
@@ -67,9 +73,9 @@ export default function ({ getService }: FtrProviderContext) {
     it('detects when reporting indices should be migrated due to unmanaged indices', async () => {
       await reportingAPI.makeAllReportingIndicesUnmanaged();
       await supertest
-        .post(`/api/reporting/generate/csv`)
+        .post(`/api/reporting/generate/csv_searchsource`)
         .set('kbn-xsrf', 'xxx')
-        .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
+        .send({ jobParams: JOB_PARAMS_RISON_CSV });
 
       expect(await reportingAPI.checkIlmMigrationStatus()).to.eql('indices-not-managed-by-policy');
       // assert that migration fixes this
@@ -99,17 +105,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       // customize the lifecycle policy
       await es.ilm.putLifecycle({
-        policy: ILM_POLICY_NAME,
+        name: ILM_POLICY_NAME,
         body: customLifecycle,
       });
 
       await reportingAPI.migrateReportingIndices();
 
       const {
-        body: {
-          [ILM_POLICY_NAME]: { policy },
-        },
-      } = await es.ilm.getLifecycle({ policy: ILM_POLICY_NAME });
+        [ILM_POLICY_NAME]: { policy },
+      } = await es.ilm.getLifecycle({ name: ILM_POLICY_NAME });
 
       expect(policy).to.eql(customLifecycle.policy);
     });

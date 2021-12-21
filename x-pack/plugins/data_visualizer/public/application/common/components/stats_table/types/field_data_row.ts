@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { FieldVisConfig, FileBasedFieldVisConfig } from './field_vis_config';
 import { IndexPatternField } from '../../../../../../../../../src/plugins/data/common';
+import {
+  FieldVisConfig,
+  FileBasedFieldVisConfig,
+} from '../../../../../../common/types/field_vis_config';
 
 export interface FieldDataRowProps {
   config: FieldVisConfig | FileBasedFieldVisConfig;

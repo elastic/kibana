@@ -84,6 +84,9 @@ export const useActionResults = ({
       const totalResponded =
         // @ts-expect-error update types
         responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count ?? 0;
+      const totalRowCount =
+        // @ts-expect-error update types
+        responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.rows_count?.value ?? 0;
       const aggsBuckets =
         // @ts-expect-error update types
         responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
@@ -100,6 +103,7 @@ export const useActionResults = ({
         ...responseData,
         edges: reverse(uniqBy('fields.agent_id[0]', flatten([responseData.edges, previousEdges]))),
         aggregations: {
+          totalRowCount,
           totalResponded,
           // @ts-expect-error update types
           successful: aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0,

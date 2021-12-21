@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback, useState } from 'react';
+import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import {
@@ -16,26 +16,39 @@ import {
   EuiSuperSelect,
   EuiSuperSelectOption,
   EuiText,
+  EuiHorizontalRule,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
 
-import { OperatingSystem } from '../../../../../../../common/endpoint/types';
+import { OperatingSystem, PolicyData } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
 import { filterIndexPatterns } from '../../../../../../common/components/exceptions/helpers';
 import { Loader } from '../../../../../../common/components/loader';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { AppAction } from '../../../../../../common/store/actions';
-import { ExceptionBuilder } from '../../../../../../shared_imports';
-
+import { getExceptionBuilderComponentLazy } from '../../../../../../../../lists/public';
+import type { OnChangeProps } from '../../../../../../../../lists/public';
 import { useEventFiltersSelector } from '../../hooks';
 import { getFormEntryStateMutable, getHasNameError, getNewComment } from '../../../store/selector';
 import { NAME_LABEL, NAME_ERROR, NAME_PLACEHOLDER, OS_LABEL, RULE_NAME } from './translations';
 import { OS_TITLES } from '../../../../../common/translations';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../../constants';
 import { ABOUT_EVENT_FILTERS } from '../../translations';
+import {
+  EffectedPolicySelect,
+  EffectedPolicySelection,
+  EffectedPolicySelectProps,
+} from '../../../../../components/effected_policy_select';
+import {
+  getArtifactTagsByEffectedPolicySelection,
+  getArtifactTagsWithoutPolicies,
+  getEffectedPolicySelectionByTags,
+  isGlobalPolicyEffected,
+} from '../../../../../components/effected_policy_select/utils';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -45,10 +58,13 @@ const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
 
 interface EventFiltersFormProps {
   allowSelectOs?: boolean;
+  policies: PolicyData[];
+  arePoliciesLoading: boolean;
 }
 export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
-  ({ allowSelectOs = false }) => {
+  ({ allowSelectOs = false, policies, arePoliciesLoading }) => {
     const { http, data } = useKibana().services;
+
     const dispatch = useDispatch<Dispatch<AppAction>>();
     const exception = useEventFiltersSelector(getFormEntryStateMutable);
     const hasNameError = useEventFiltersSelector(getHasNameError);
@@ -59,13 +75,25 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const indexNames = useMemo(() => ['logs-endpoint.events.*'], []);
     const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(indexNames);
 
+    const [selection, setSelection] = useState<EffectedPolicySelection>({
+      selected: [],
+      isGlobal: isGlobalPolicyEffected(exception?.tags),
+    });
+
+    // set current policies if not previously selected
+    useEffect(() => {
+      if (selection.selected.length === 0 && exception?.tags) {
+        setSelection(getEffectedPolicySelectionByTags(exception.tags, policies));
+      }
+    }, [exception?.tags, policies, selection.selected.length]);
+
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
       []
     );
 
     const handleOnBuilderChange = useCallback(
-      (arg: ExceptionBuilder.OnChangeProps) => {
+      (arg: OnChangeProps) => {
         dispatch({
           type: 'eventFiltersChangeForm',
           payload: {
@@ -76,6 +104,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
                     name: exception?.name ?? '',
                     comments: exception?.comments ?? [],
                     os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
+                    tags: exception?.tags ?? [],
                   },
                   hasItemsError: arg.errorExists || !arg.exceptionItems[0]?.entries?.length,
                 }
@@ -85,7 +114,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           },
         });
       },
-      [dispatch, exception?.name, exception?.comments, exception?.os_types]
+      [dispatch, exception?.name, exception?.comments, exception?.os_types, exception?.tags]
     );
 
     const handleOnChangeName = useCallback(
@@ -119,7 +148,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
 
     const exceptionBuilderComponentMemo = useMemo(
       () =>
-        ExceptionBuilder.getExceptionBuilderComponentLazy({
+        getExceptionBuilderComponentLazy({
           allowLargeValueLists: false,
           httpService: http,
           autocompleteService: data.autocomplete,
@@ -129,7 +158,8 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           listNamespaceType: 'agnostic',
           ruleName: RULE_NAME,
           indexPatterns,
-          isOrDisabled: true, // TODO: pending to be validated
+          isOrDisabled: true,
+          isOrHidden: true,
           isAndDisabled: false,
           isNestedDisabled: false,
           dataTestSubj: 'alert-exception-builder',
@@ -204,25 +234,137 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
       [exception, handleOnChangeComment, newComment]
     );
 
-    return !isIndexPatternLoading && exception ? (
-      <EuiForm component="div">
-        {!exception || !exception.item_id ? (
-          <EuiText color="subdued" size="xs">
-            {ABOUT_EVENT_FILTERS}
-            <EuiSpacer size="m" />
+    const detailsSection = useMemo(
+      () => (
+        <>
+          <EuiText size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.detailsSectionTitle"
+                defaultMessage="Details"
+              />
+            </h3>
           </EuiText>
-        ) : null}
-        {nameInputMemo}
-        <EuiSpacer size="m" />
-        {allowSelectOs ? (
-          <>
-            {osInputMemo}
-            <EuiSpacer />
-          </>
-        ) : null}
-        {exceptionBuilderComponentMemo}
-        <EuiSpacer size="xl" />
-        {commentsInputMemo}
+          <EuiSpacer size="xs" />
+          <EuiText size="s">
+            <p>{ABOUT_EVENT_FILTERS}</p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          {nameInputMemo}
+        </>
+      ),
+      [nameInputMemo]
+    );
+
+    const criteriaSection = useMemo(
+      () => (
+        <>
+          <EuiText size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.criteriaSectionTitle"
+                defaultMessage="Conditions"
+              />
+            </h3>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.criteriaSectionDescription"
+                defaultMessage="Select an operating system and add conditions."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          {allowSelectOs ? (
+            <>
+              {osInputMemo}
+              <EuiSpacer />
+            </>
+          ) : null}
+          {exceptionBuilderComponentMemo}
+        </>
+      ),
+      [allowSelectOs, exceptionBuilderComponentMemo, osInputMemo]
+    );
+
+    const handleOnChangeEffectScope: EffectedPolicySelectProps['onChange'] = useCallback(
+      (currentSelection) => {
+        if (currentSelection.isGlobal) {
+          // Preserve last selection inputs
+          setSelection({ ...selection, isGlobal: true });
+        } else {
+          setSelection(currentSelection);
+        }
+
+        if (!exception) return;
+
+        dispatch({
+          type: 'eventFiltersChangeForm',
+          payload: {
+            entry: {
+              ...exception,
+              tags: getArtifactTagsByEffectedPolicySelection(
+                currentSelection,
+                getArtifactTagsWithoutPolicies(exception?.tags ?? [])
+              ),
+            },
+          },
+        });
+      },
+      [dispatch, exception, selection]
+    );
+    const policiesSection = useMemo(
+      () => (
+        <EffectedPolicySelect
+          selected={selection.selected}
+          options={policies}
+          isGlobal={selection.isGlobal}
+          isPlatinumPlus={true}
+          onChange={handleOnChangeEffectScope}
+          data-test-subj={'effectedPolicies-select'}
+        />
+      ),
+      [policies, selection, handleOnChangeEffectScope]
+    );
+
+    const commentsSection = useMemo(
+      () => (
+        <>
+          <EuiText size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.commentsSectionTitle"
+                defaultMessage="Comments"
+              />
+            </h3>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.commentsSectionDescription"
+                defaultMessage="Add a comment to your event filter."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          {commentsInputMemo}
+        </>
+      ),
+      [commentsInputMemo]
+    );
+
+    return !isIndexPatternLoading && exception && !arePoliciesLoading ? (
+      <EuiForm component="div">
+        {detailsSection}
+        <EuiHorizontalRule />
+        {criteriaSection}
+        <EuiHorizontalRule />
+        {policiesSection}
+        <EuiHorizontalRule />
+        {commentsSection}
       </EuiForm>
     ) : (
       <Loader size="xl" />

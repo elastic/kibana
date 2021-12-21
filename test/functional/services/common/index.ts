@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { BrowserProvider, Browser } from './browser';
+export type { Browser } from './browser';
+export { BrowserProvider } from './browser';
 export { FailureDebuggingProvider } from './failure_debugging';
 export { FindProvider } from './find';
 export { ScreenshotsService } from './screenshots';

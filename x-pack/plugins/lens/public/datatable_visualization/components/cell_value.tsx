@@ -8,6 +8,7 @@
 import React, { useContext, useEffect } from 'react';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { IUiSettingsClient } from 'kibana/public';
+import classNames from 'classnames';
 import type { FormatFactory } from '../../../common';
 import { getOriginalId } from '../../../common/expressions';
 import type { ColumnConfig } from '../../../common/expressions';
@@ -18,7 +19,8 @@ export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
   columnConfig: ColumnConfig,
   DataContext: React.Context<DataContextType>,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  fitRowToContent?: boolean
 ) => {
   // Changing theme requires a full reload of the page, so we can cache here
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
@@ -28,6 +30,9 @@ export const createGridCell = (
     const content = formatters[columnId]?.convert(rowValue, 'html');
     const currentAlignment = alignments && alignments[columnId];
     const alignmentClassName = `lnsTableCell--${currentAlignment}`;
+    const className = classNames(alignmentClassName, {
+      lnsTableCell: !fitRowToContent,
+    });
 
     const { colorMode, palette } =
       columnConfig.columns.find(({ columnId: id }) => id === columnId) || {};
@@ -75,7 +80,7 @@ export const createGridCell = (
          */
         dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
         data-test-subj="lnsTableCellContent"
-        className={`lnsTableCell ${alignmentClassName}`}
+        className={className}
       />
     );
   };

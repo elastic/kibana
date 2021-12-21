@@ -60,6 +60,23 @@ export const mockState: AppState = {
     },
     loading: false,
   },
+  monitorManagementList: {
+    list: {
+      page: 1,
+      perPage: 10,
+      total: null,
+      monitors: [],
+    },
+    locations: [],
+    loading: {
+      monitorList: false,
+      serviceLocations: false,
+    },
+    error: {
+      monitorList: null,
+      serviceLocations: null,
+    },
+  },
   ml: {
     mlJob: {
       data: null,

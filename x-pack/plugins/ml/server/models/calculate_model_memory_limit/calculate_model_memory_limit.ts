@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import numeral from '@elastic/numeral';
 import { IScopedClusterClient } from 'kibana/server';
 import { MLCATEGORY } from '../../../common/constants/field_types';
@@ -89,6 +89,7 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
       new Set<string>()
     );
 
+    // @ts-expect-error influencers is optional
     const normalizedInfluencers: estypes.Field[] = Array.isArray(influencers)
       ? influencers
       : [influencers];

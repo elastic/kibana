@@ -29,6 +29,23 @@ export class Plugin {
         },
       },
     });
+    core.savedObjects.registerType({
+      name: 'isolatedtype',
+      hidden: false,
+      namespaceType: 'single',
+      management: {
+        icon: 'beaker',
+        importableAndExportable: true,
+        getTitle(obj) {
+          return obj.attributes.title;
+        },
+      },
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+        },
+      },
+    });
   }
 
   public start() {

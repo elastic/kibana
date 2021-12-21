@@ -12,7 +12,7 @@ export { formatRequest } from './format_request';
 export { parseEndpoint } from './parse_endpoint';
 export { decodeRequestParams } from './decode_request_params';
 export { routeValidationObject } from './route_validation_object';
-export {
+export type {
   RouteRepositoryClient,
   ReturnOf,
   EndpointOf,

@@ -8,8 +8,9 @@
 import React, { Component, Fragment } from 'react';
 import { EuiFormRow, EuiTitle, EuiPanel, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { IndexPatternField } from 'src/plugins/data/public';
+import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
 import { FIELD_ORIGIN } from '../../../../../common/constants';
 import { TooltipSelector } from '../../../../components/tooltip_selector';
 
@@ -66,12 +67,7 @@ export class TopHitsUpdateSourceEditor extends Component<Props, State> {
     } catch (err) {
       if (this._isMounted) {
         this.setState({
-          loadError: i18n.translate('xpack.maps.source.esSearch.loadErrorMessage', {
-            defaultMessage: `Unable to find Index pattern {id}`,
-            values: {
-              id: this.props.indexPatternId,
-            },
-          }),
+          loadError: getDataViewNotFoundMessage(this.props.indexPatternId),
         });
       }
       return;

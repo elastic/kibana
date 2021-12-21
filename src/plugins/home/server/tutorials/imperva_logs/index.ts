@@ -24,12 +24,12 @@ export function impervaLogsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'impervaLogs',
     name: i18n.translate('home.tutorials.impervaLogs.nameTitle', {
-      defaultMessage: 'Imperva logs',
+      defaultMessage: 'Imperva Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.impervaLogs.shortDescription', {
-      defaultMessage: 'Collect Imperva SecureSphere logs over syslog or from a file.',
+      defaultMessage: 'Collect and parse logs from Imperva SecureSphere with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.impervaLogs.longDescription', {
       defaultMessage:
@@ -54,8 +54,8 @@ export function impervaLogsSpecProvider(context: TutorialContext): TutorialSchem
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['network', 'security'],
   };
 }

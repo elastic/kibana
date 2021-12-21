@@ -15,7 +15,7 @@ import { SearchSessionState } from './search_session_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
 import { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
-import { SearchSessionSavedObject, ISessionsClient } from './sessions_client';
+import type { SearchSessionSavedObject, ISessionsClient } from './sessions_client';
 import { SearchSessionStatus } from '../../../common';
 import { CoreStart } from 'kibana/public';
 
@@ -25,7 +25,7 @@ const mockSavedObject: SearchSessionSavedObject = {
   attributes: {
     name: 'my_name',
     appId: 'my_app_id',
-    urlGeneratorId: 'my_url_generator_id',
+    locatorId: 'my_locator_id',
     idMapping: {},
     sessionId: 'session_id',
     touched: new Date().toISOString(),
@@ -192,8 +192,8 @@ describe('Session service', () => {
 
     sessionService.enableStorage({
       getName: async () => 'Name',
-      getUrlGeneratorData: async () => ({
-        urlGeneratorId: 'id',
+      getLocatorData: async () => ({
+        id: 'id',
         initialState: {},
         restoreState: {},
       }),
@@ -245,8 +245,8 @@ describe('Session service', () => {
 
     sessionService.enableStorage({
       getName: async () => 'Name',
-      getUrlGeneratorData: async () => ({
-        urlGeneratorId: 'id',
+      getLocatorData: async () => ({
+        id: 'id',
         initialState: {},
         restoreState: {},
       }),
@@ -299,8 +299,8 @@ describe('Session service', () => {
 
     sessionService.enableStorage({
       getName: async () => 'Name',
-      getUrlGeneratorData: async () => ({
-        urlGeneratorId: 'id',
+      getLocatorData: async () => ({
+        id: 'id',
         initialState: {},
         restoreState: {},
       }),
@@ -319,8 +319,8 @@ describe('Session service', () => {
     sessionService.enableStorage(
       {
         getName: async () => 'Name',
-        getUrlGeneratorData: async () => ({
-          urlGeneratorId: 'id',
+        getLocatorData: async () => ({
+          id: 'id',
           initialState: {},
           restoreState: {},
         }),
@@ -336,10 +336,10 @@ describe('Session service', () => {
     expect(sessionService.getSearchSessionIndicatorUiConfig().isDisabled().disabled).toBe(false);
   });
 
-  test('save() throws in case getUrlGeneratorData returns throws', async () => {
+  test('save() throws in case getLocatorData returns throws', async () => {
     sessionService.enableStorage({
       getName: async () => 'Name',
-      getUrlGeneratorData: async () => {
+      getLocatorData: async () => {
         throw new Error('Haha');
       },
     });
@@ -373,8 +373,8 @@ describe('Session service', () => {
     sessionsClient.rename.mockRejectedValue(renameError);
     sessionService.enableStorage({
       getName: async () => 'Name',
-      getUrlGeneratorData: async () => ({
-        urlGeneratorId: 'id',
+      getLocatorData: async () => ({
+        id: 'id',
         initialState: {},
         restoreState: {},
       }),

@@ -10,7 +10,14 @@ import { i18n } from '@kbn/i18n';
 export const API_URL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiUrlTextFieldLabel',
   {
-    defaultMessage: 'URL',
+    defaultMessage: 'ServiceNow instance URL',
+  }
+);
+
+export const API_URL_HELPTEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiUrlHelpText',
+  {
+    defaultMessage: 'Include the full URL.',
   }
 );
 
@@ -53,7 +60,7 @@ export const REMEMBER_VALUES_LABEL = i18n.translate(
 export const REENTER_VALUES_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.reenterValuesLabel',
   {
-    defaultMessage: 'Username and password are encrypted. Please reenter values for these fields.',
+    defaultMessage: 'You must authenticate each time you edit the connector.',
   }
 );
 
@@ -92,24 +99,17 @@ export const TITLE_REQUIRED = i18n.translate(
   }
 );
 
-export const SOURCE_IP_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.sourceIPTitle',
-  {
-    defaultMessage: 'Source IP',
-  }
-);
-
-export const DEST_IP_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.destinationIPTitle',
-  {
-    defaultMessage: 'Destination IP',
-  }
-);
-
 export const INCIDENT = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.title',
   {
     defaultMessage: 'Incident',
+  }
+);
+
+export const SECURITY_INCIDENT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenowSIR.title',
+  {
+    defaultMessage: 'Security Incident',
   }
 );
 
@@ -131,20 +131,6 @@ export const COMMENTS_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.commentsTextAreaFieldLabel',
   {
     defaultMessage: 'Additional comments',
-  }
-);
-
-export const MALWARE_URL_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareURLTitle',
-  {
-    defaultMessage: 'Malware URL',
-  }
-);
-
-export const MALWARE_HASH_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.malwareHashTitle',
-  {
-    defaultMessage: 'Malware Hash',
   }
 );
 
@@ -194,5 +180,159 @@ export const PRIORITY_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.prioritySelectFieldLabel',
   {
     defaultMessage: 'Priority',
+  }
+);
+
+export const API_INFO_ERROR = (status: number) =>
+  i18n.translate('xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiInfoError', {
+    values: { status },
+    defaultMessage: 'Received status: {status} when attempting to get application information',
+  });
+
+export const INSTALL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.install',
+  {
+    defaultMessage: 'install',
+  }
+);
+
+export const INSTALLATION_CALLOUT_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.installationCalloutTitle',
+  {
+    defaultMessage:
+      'To use this connector, first install the Elastic app from the ServiceNow app store.',
+  }
+);
+
+export const UPDATE_SUCCESS_TOAST_TITLE = (connectorName: string) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateSuccessToastTitle',
+    {
+      defaultMessage: '{connectorName} connector updated',
+      values: {
+        connectorName,
+      },
+    }
+  );
+
+export const UPDATE_SUCCESS_TOAST_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.updateCalloutText',
+  {
+    defaultMessage: 'Connector has been updated.',
+  }
+);
+
+export const VISIT_SN_STORE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.visitSNStore',
+  {
+    defaultMessage: 'Visit ServiceNow app store',
+  }
+);
+
+export const SETUP_DEV_INSTANCE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.setupDevInstance',
+  {
+    defaultMessage: 'setup a developer instance',
+  }
+);
+
+export const SN_INSTANCE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.snInstanceLabel',
+  {
+    defaultMessage: 'ServiceNow instance',
+  }
+);
+
+export const UNKNOWN = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.unknown',
+  {
+    defaultMessage: 'UNKNOWN',
+  }
+);
+
+export const CORRELATION_ID = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.correlationID',
+  {
+    defaultMessage: 'Correlation ID (optional)',
+  }
+);
+
+export const CORRELATION_DISPLAY = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.correlationDisplay',
+  {
+    defaultMessage: 'Correlation display (optional)',
+  }
+);
+
+export const EVENT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenowITOM.event',
+  {
+    defaultMessage: 'Event',
+  }
+);
+
+/**
+ * ITOM
+ */
+export const SOURCE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.sourceTextAreaFieldLabel',
+  {
+    defaultMessage: 'Source',
+  }
+);
+
+export const EVENT_CLASS = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.eventClassTextAreaFieldLabel',
+  {
+    defaultMessage: 'Source instance',
+  }
+);
+
+export const RESOURCE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.resourceTextAreaFieldLabel',
+  {
+    defaultMessage: 'Resource',
+  }
+);
+
+export const NODE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.nodeTextAreaFieldLabel',
+  {
+    defaultMessage: 'Node',
+  }
+);
+
+export const METRIC_NAME = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.metricNameTextAreaFieldLabel',
+  {
+    defaultMessage: 'Metric name',
+  }
+);
+
+export const TYPE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.typeTextAreaFieldLabel',
+  {
+    defaultMessage: 'Type',
+  }
+);
+
+export const MESSAGE_KEY = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.messageKeyTextAreaFieldLabel',
+  {
+    defaultMessage: 'Message key',
+  }
+);
+
+export const SEVERITY_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredSeverityTextField',
+  {
+    defaultMessage: 'Severity is required.',
+  }
+);
+
+export const SEVERITY_REQUIRED_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severityRequiredSelectFieldLabel',
+  {
+    defaultMessage: 'Severity (required)',
   }
 );

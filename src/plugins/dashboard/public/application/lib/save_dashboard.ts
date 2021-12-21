@@ -19,6 +19,7 @@ import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss
 import { RefreshInterval, TimefilterContract, esFilters } from '../../services/data';
 import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
 import { DashboardSessionStorage } from './dashboard_session_storage';
+import { serializeControlGroupToDashboardSavedObject } from './dashboard_control_group';
 
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { stayInEditMode?: boolean };
 
@@ -59,6 +60,9 @@ export const saveDashboard = async ({
   savedDashboard.timeRestore = timeRestore;
   savedDashboard.optionsJSON = JSON.stringify(options);
   savedDashboard.panelsJSON = JSON.stringify(savedDashboardPanels);
+
+  // control group input
+  serializeControlGroupToDashboardSavedObject(savedDashboard, currentState);
 
   if (hasTaggingCapabilities(savedDashboard)) {
     savedDashboard.setTags(tags);

@@ -204,7 +204,7 @@ For ad-hoc diagnostic purposes, your go to tools are Discover and Lens. Your
 user will need to have access to the index, which is considered a Kibana
 system index due to it's prefix.
 
-Add the event log index as an index pattern.  The only customization needed is
+Add the event log index as a data view.  The only customization needed is
 to set the `event.duration` field to a duration in nanoseconds.  You'll
 probably want it displayed as milliseconds.
 
@@ -427,7 +427,7 @@ yarn test:jest x-pack/plugins/event_log --watch
 
 ### API Integration tests
 
-See: [`x-pack/test/plugin_api_integration/test_suites/event_log`](https://github.com/elastic/kibana/tree/master/x-pack/test/plugin_api_integration/test_suites/event_log).
+See: [`x-pack/test/plugin_api_integration/test_suites/event_log`](https://github.com/elastic/kibana/tree/main/x-pack/test/plugin_api_integration/test_suites/event_log).
 
 To develop integration tests, first start the test server from the root of the repo:
 

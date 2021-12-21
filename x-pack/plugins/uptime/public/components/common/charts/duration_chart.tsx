@@ -8,7 +8,7 @@
 import React, { useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Axis,
   Chart,
@@ -119,7 +119,7 @@ export const DurationChartComponent = ({
             tickFormat={timeFormatter(getChartDateLabel(min, max))}
           />
           <Axis
-            domain={{ min: 0, fit: false }}
+            domain={{ min: 0, max: NaN, fit: false }}
             id="left"
             position={Position.Left}
             tickFormat={(d) => getTickFormat(d)}

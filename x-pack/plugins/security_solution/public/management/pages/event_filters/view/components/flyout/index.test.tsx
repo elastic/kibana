@@ -13,18 +13,22 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { MiddlewareActionSpyHelper } from '../../../../../../common/store/test_utils';
-
+import { sendGetEndpointSpecificPackagePolicies } from '../../../../../services/policies/policies';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../../services/policies/test_mock_utilts';
 import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EventFiltersHttpService } from '../../../service';
-import { createdEventFilterEntryMock } from '../../../test_utils';
+import { createdEventFilterEntryMock, ecsEventMock, esResponseData } from '../../../test_utils';
 import { getFormEntryState, isUninitialisedForm } from '../../../store/selector';
 import { EventFiltersListPageState } from '../../../types';
+import { useKibana } from '../../../../../../common/lib/kibana';
 
+jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../form');
 jest.mock('../../../service');
+jest.mock('../../../../../services/policies/policies');
 
 jest.mock('../../hooks', () => {
   const originalModule = jest.requireActual('../../hooks');
@@ -36,6 +40,11 @@ jest.mock('../../hooks', () => {
   };
 });
 
+(sendGetEndpointSpecificPackagePolicies as jest.Mock).mockImplementation(
+  sendGetEndpointSpecificPackagePoliciesMock
+);
+
+let component: reactTestingLibrary.RenderResult;
 let mockedContext: AppContextTestRender;
 let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
 let render: (
@@ -63,13 +72,34 @@ describe('Event filter flyout', () => {
     getState = () => mockedContext.store.getState().management.eventFilters;
     render = (props) =>
       mockedContext.render(<EventFiltersFlyout {...props} onCancel={onCancelMock} />);
+
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        http: {},
+        data: {
+          search: {
+            search: jest.fn().mockImplementation(() => ({ toPromise: () => esResponseData() })),
+          },
+        },
+        notifications: {},
+      },
+    });
   });
 
   afterEach(() => reactTestingLibrary.cleanup());
 
   it('should renders correctly', () => {
-    const component = render();
+    component = render();
     expect(component.getAllByText('Add event filter')).not.toBeNull();
+    expect(component.getByText('Cancel')).not.toBeNull();
+  });
+
+  it('should renders correctly with data ', async () => {
+    await act(async () => {
+      component = render({ data: ecsEventMock() });
+      await waitForAction('eventFiltersInitForm');
+    });
+    expect(component.getAllByText('Add endpoint event filter')).not.toBeNull();
     expect(component.getByText('Cancel')).not.toBeNull();
   });
 
@@ -80,11 +110,11 @@ describe('Event filter flyout', () => {
     });
 
     expect(getFormEntryState(getState())).not.toBeUndefined();
-    expect(getFormEntryState(getState())!.entries[0].field).toBe('');
+    expect(getFormEntryState(getState())?.entries[0].field).toBe('');
   });
 
   it('should confirm form when button is disabled', () => {
-    const component = render();
+    component = render();
     const confirmButton = component.getByTestId('add-exception-confirm-button');
     act(() => {
       fireEvent.click(confirmButton);
@@ -93,18 +123,22 @@ describe('Event filter flyout', () => {
   });
 
   it('should confirm form when button is enabled', async () => {
-    const component = render();
+    component = render();
+
     mockedContext.store.dispatch({
       type: 'eventFiltersChangeForm',
       payload: {
         entry: {
-          ...(getState().form!.entry as CreateExceptionListItemSchema),
+          ...(getState().form?.entry as CreateExceptionListItemSchema),
           name: 'test',
           os_types: ['windows'],
         },
         hasNameError: false,
         hasOSError: false,
       },
+    });
+    await reactTestingLibrary.waitFor(() => {
+      expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
     });
     const confirmButton = component.getByTestId('add-exception-confirm-button');
 
@@ -125,7 +159,7 @@ describe('Event filter flyout', () => {
         type: 'eventFiltersFormStateChanged',
         payload: {
           type: 'LoadedResourceState',
-          data: getState().form!.entry as ExceptionListItemSchema,
+          data: getState().form?.entry as ExceptionListItemSchema,
         },
       });
     });
@@ -134,7 +168,7 @@ describe('Event filter flyout', () => {
   });
 
   it('should close when click on cancel button', () => {
-    const component = render();
+    component = render();
     const cancelButton = component.getByText('Cancel');
     expect(onCancelMock).toHaveBeenCalledTimes(0);
 
@@ -146,7 +180,7 @@ describe('Event filter flyout', () => {
   });
 
   it('should close when close flyout', () => {
-    const component = render();
+    component = render();
     const flyoutCloseButton = component.getByTestId('euiFlyoutCloseButton');
     expect(onCancelMock).toHaveBeenCalledTimes(0);
 
@@ -158,7 +192,7 @@ describe('Event filter flyout', () => {
   });
 
   it('should prevent close when is loading action', () => {
-    const component = render();
+    component = render();
     act(() => {
       mockedContext.store.dispatch({
         type: 'eventFiltersFormStateChanged',
@@ -180,7 +214,7 @@ describe('Event filter flyout', () => {
   });
 
   it('should renders correctly when id and edit type', () => {
-    const component = render({ id: 'fakeId', type: 'edit' });
+    component = render({ id: 'fakeId', type: 'edit' });
 
     expect(component.getAllByText('Update event filter')).not.toBeNull();
     expect(component.getByText('Cancel')).not.toBeNull();
@@ -193,6 +227,6 @@ describe('Event filter flyout', () => {
     });
 
     expect(getFormEntryState(getState())).not.toBeUndefined();
-    expect(getFormEntryState(getState())!.item_id).toBe(createdEventFilterEntryMock().item_id);
+    expect(getFormEntryState(getState())?.item_id).toBe(createdEventFilterEntryMock().item_id);
   });
 });

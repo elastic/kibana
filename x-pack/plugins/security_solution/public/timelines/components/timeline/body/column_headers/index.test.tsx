@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../../../../common/mock/match_media';
-import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
+import { getActionsColumnWidth } from '../../../../../../../timelines/public';
 import { defaultHeaders } from './default_headers';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 import { Sort } from '../sort';
@@ -21,8 +21,9 @@ import { cloneDeep } from 'lodash/fp';
 import { timelineActions } from '../../../../store/timeline';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { Direction } from '../../../../../../common/search_strategy';
-import { defaultControlColumn } from '../control_columns';
+import { getDefaultControlColumn } from '../control_columns';
 import { testTrailingControlColumns } from '../../../../../common/mock/mock_timeline_control_columns';
+import { HeaderActions } from '../actions/header_actions';
 
 jest.mock('../../../../../common/lib/kibana');
 
@@ -39,6 +40,12 @@ const timelineId = 'test';
 
 describe('ColumnHeaders', () => {
   const mount = useMountAppended();
+  const ACTION_BUTTON_COUNT = 4;
+  const actionsColumnWidth = getActionsColumnWidth(ACTION_BUTTON_COUNT);
+  const leadingControlColumns = getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
+    ...x,
+    headerCellRender: HeaderActions,
+  }));
 
   describe('rendering', () => {
     const sort: Sort[] = [
@@ -53,7 +60,7 @@ describe('ColumnHeaders', () => {
       const wrapper = shallow(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
@@ -63,7 +70,7 @@ describe('ColumnHeaders', () => {
             sort={sort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
-            leadingControlColumns={[defaultControlColumn]}
+            leadingControlColumns={leadingControlColumns}
             trailingControlColumns={[]}
           />
         </TestProviders>
@@ -75,7 +82,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
@@ -85,7 +92,7 @@ describe('ColumnHeaders', () => {
             sort={sort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
-            leadingControlColumns={[defaultControlColumn]}
+            leadingControlColumns={leadingControlColumns}
             trailingControlColumns={[]}
           />
         </TestProviders>
@@ -98,7 +105,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
             isSelectAllChecked={false}
@@ -108,7 +115,7 @@ describe('ColumnHeaders', () => {
             sort={sort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
-            leadingControlColumns={[defaultControlColumn]}
+            leadingControlColumns={leadingControlColumns}
             trailingControlColumns={[]}
           />
         </TestProviders>
@@ -159,7 +166,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={mockDefaultHeaders}
             isSelectAllChecked={false}
@@ -169,7 +176,7 @@ describe('ColumnHeaders', () => {
             sort={mockSort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
-            leadingControlColumns={[defaultControlColumn]}
+            leadingControlColumns={leadingControlColumns}
             trailingControlColumns={[]}
           />
         </TestProviders>
@@ -203,7 +210,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={mockDefaultHeaders}
             isSelectAllChecked={false}
@@ -213,7 +220,7 @@ describe('ColumnHeaders', () => {
             sort={mockSort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
-            leadingControlColumns={[defaultControlColumn]}
+            leadingControlColumns={leadingControlColumns}
             trailingControlColumns={[]}
           />
         </TestProviders>
@@ -242,7 +249,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={mockDefaultHeaders}
             isSelectAllChecked={false}
@@ -252,7 +259,7 @@ describe('ColumnHeaders', () => {
             sort={mockSort}
             tabType={TimelineTabs.query}
             timelineId={timelineId}
-            leadingControlColumns={[defaultControlColumn]}
+            leadingControlColumns={leadingControlColumns}
             trailingControlColumns={[]}
           />
         </TestProviders>
@@ -280,7 +287,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            actionsColumnWidth={actionsColumnWidth}
             browserFields={mockBrowserFields}
             columnHeaders={mockDefaultHeaders}
             isSelectAllChecked={false}

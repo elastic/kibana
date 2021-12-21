@@ -22,7 +22,7 @@ export default {
 type Args = Omit<PackageCardProps, 'status'> & { width: number };
 
 const args: Args = {
-  width: 250,
+  width: 280,
   title: 'Title',
   description: 'Description',
   name: 'beats',
@@ -32,6 +32,7 @@ const args: Args = {
   url: '/',
   icons: [],
   integration: '',
+  categories: ['foobar'],
 };
 
 const argTypes = {
@@ -62,6 +63,7 @@ export const Installed = ({ width, ...props }: Args) => {
       install_version: props.version,
       es_index_patterns: {},
       installed_kibana: [],
+      installed_kibana_space_id: 'default',
       installed_es: [],
       install_status: 'installed',
       install_source: 'registry',

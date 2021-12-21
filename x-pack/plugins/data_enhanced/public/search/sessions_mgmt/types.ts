@@ -21,7 +21,7 @@ export type PersistedSearchSessionSavedObjectAttributes = SearchSessionSavedObje
   Required<
     Pick<
       SearchSessionSavedObjectAttributes,
-      'name' | 'appId' | 'urlGeneratorId' | 'initialState' | 'restoreState'
+      'name' | 'appId' | 'locatorId' | 'initialState' | 'restoreState'
     >
   >;
 

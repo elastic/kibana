@@ -11,12 +11,12 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import {
-  CASE_CONFIGURE_DETAILS_URL,
   CaseConfigureRequestParamsRt,
   throwErrors,
   CasesConfigurePatch,
   excess,
-} from '../../../../common';
+} from '../../../../common/api';
+import { CASE_CONFIGURE_DETAILS_URL } from '../../../../common/constants';
 import { RouteDeps } from '../types';
 import { wrapError, escapeHatch } from '../utils';
 

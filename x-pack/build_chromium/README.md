@@ -99,7 +99,15 @@ are created in x64 using cross-compiling. CentOS is not supported for building C
 ## Artifacts
 
 After the build completes, there will be a .zip file and a .md5 file in `~/chromium/chromium/src/out/headless`. These are named like so: `chromium-{first_7_of_SHA}-{platform}-{arch}`, for example: `chromium-4747cc2-linux-x64`.
-The zip files and md5 files are copied to a staging bucket in GCP storage.
+The zip files and md5 files are copied to a **staging** bucket in GCP storage.
+
+To publish the built artifacts for bunding in Kibana, copy the files from the `headless_shell_staging` bucket to the `headless_shell` bucket.
+```
+gsutil cp gs://headless_shell_staging/chromium-d163fd7-linux_arm64.md5 gs://headless_shell/
+gsutil cp gs://headless_shell_staging/chromium-d163fd7-linux_arm64.zip gs://headless_shell/
+```
+
+IMPORTANT: Do not replace builds in the `headless_shell` bucket that are referenced in an active Kibana branch. CI tests on that branch will fail since the archive checksum no longer matches the original version.
 
 ## Testing
 Search the Puppeteer Github repo for known issues that could affect our use case, and make sure to test anywhere that is affected.

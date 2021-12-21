@@ -16,15 +16,13 @@ import { AGENT_GROUP_KEY, Group, GroupOption, GroupedAgent } from './types';
 
 const getColor = generateColorPicker();
 
-const generateGroup = <T = Group>(label: string, groupType: AGENT_GROUP_KEY) => {
-  return {
-    label,
-    groupType,
-    color: getColor(groupType),
-    size: 0,
-    data: [] as T[],
-  };
-};
+const generateGroup = <T = Group>(label: string, groupType: AGENT_GROUP_KEY) => ({
+  label,
+  groupType,
+  color: getColor(groupType),
+  size: 0,
+  data: [] as T[],
+});
 
 export const generateAgentOption = (
   label: string,

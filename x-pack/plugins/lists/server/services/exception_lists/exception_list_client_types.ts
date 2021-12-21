@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
+
 import { SavedObjectsClientContract } from 'kibana/server';
 import type {
   CreateCommentsArray,
@@ -15,10 +17,13 @@ import type {
   ExceptionListItemTypeOrUndefined,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
+  ExportExceptionDetails,
   FilterOrUndefined,
   Id,
   IdOrUndefined,
   Immutable,
+  ImportExceptionListItemSchema,
+  ImportExceptionsListSchema,
   ItemId,
   ItemIdOrUndefined,
   ListId,
@@ -219,4 +224,27 @@ export interface FindExceptionListOptions {
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
+}
+
+export interface ExportExceptionListAndItemsOptions {
+  listId: ListIdOrUndefined;
+  id: IdOrUndefined;
+  namespaceType: NamespaceType;
+}
+
+export interface ExportExceptionListAndItemsReturn {
+  exportData: string;
+  exportDetails: ExportExceptionDetails;
+}
+
+export interface ImportExceptionListAndItemsOptions {
+  exceptionsToImport: Readable;
+  maxExceptionsImportSize: number;
+  overwrite: boolean;
+}
+
+export interface ImportExceptionListAndItemsAsArrayOptions {
+  exceptionsToImport: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>;
+  maxExceptionsImportSize: number;
+  overwrite: boolean;
 }

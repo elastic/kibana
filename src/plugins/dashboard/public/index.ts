@@ -16,22 +16,19 @@ export {
 } from './application';
 export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 
-export {
+export type {
   DashboardSetup,
   DashboardStart,
   DashboardUrlGenerator,
   DashboardFeatureFlagConfig,
 } from './plugin';
 
-export {
-  DASHBOARD_APP_URL_GENERATOR,
-  createDashboardUrlGenerator,
-  DashboardUrlGeneratorState,
-} from './url_generator';
-export { DashboardAppLocator, DashboardAppLocatorParams } from './locator';
+export type { DashboardUrlGeneratorState } from './url_generator';
+export { DASHBOARD_APP_URL_GENERATOR, createDashboardUrlGenerator } from './url_generator';
+export type { DashboardAppLocator, DashboardAppLocatorParams } from './locator';
 
-export { DashboardSavedObject } from './saved_dashboards';
-export { SavedDashboardPanel, DashboardContainerInput } from './types';
+export type { DashboardSavedObject } from './saved_dashboards';
+export type { SavedDashboardPanel, DashboardContainerInput } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

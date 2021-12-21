@@ -22,7 +22,6 @@ import {
 import { FlowTarget } from '../../search_strategy/security_solution/network';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 import { Direction, Maybe } from '../../search_strategy';
-import { Ecs } from '../../ecs';
 
 export * from './actions';
 export * from './cells';
@@ -272,6 +271,7 @@ export type TimelineTypeLiteralWithNull = runtimeTypes.TypeOf<typeof TimelineTyp
 export const SavedTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
+  dataViewId: unionWithNullType(runtimeTypes.string),
   description: unionWithNullType(runtimeTypes.string),
   eqlOptions: unionWithNullType(EqlOptionsRuntimeType),
   eventType: unionWithNullType(runtimeTypes.string),
@@ -305,7 +305,7 @@ export type SavedTimelineNote = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeT
  * This type represents a timeline type stored in a saved object that does not include any fields that reference
  * other saved objects.
  */
-export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'savedQueryId'>;
+export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'savedQueryId'>;
 
 /*
  *  Timeline IDs
@@ -502,7 +502,6 @@ export type TimelineExpandedEventType =
         eventId: string;
         indexName: string;
         refetch?: () => void;
-        ecsData?: Ecs;
       };
     }
   | EmptyObject;
@@ -632,7 +631,7 @@ export interface ColumnHeaderResult {
   category?: Maybe<string>;
   columnHeaderType?: Maybe<string>;
   description?: Maybe<string>;
-  example?: Maybe<string>;
+  example?: Maybe<string | number>;
   indexes?: Maybe<string[]>;
   id?: Maybe<string>;
   name?: Maybe<string>;
@@ -719,6 +718,7 @@ export interface TimelineResult {
   created?: Maybe<number>;
   createdBy?: Maybe<string>;
   dataProviders?: Maybe<DataProviderResult[]>;
+  dataViewId?: Maybe<string>;
   dateRange?: Maybe<DateRangePickerResult>;
   description?: Maybe<string>;
   eqlOptions?: Maybe<EqlOptionsResult>;

@@ -13,11 +13,11 @@ import {
 } from './artifact_entry_card_minified';
 import { act, fireEvent } from '@testing-library/react';
 import { AnyArtifact } from './types';
-import { getTrustedAppProvider, getExceptionProvider } from './test_utils';
+import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 
 describe.each([
-  ['trusted apps', getTrustedAppProvider],
-  ['exceptions/event filters', getExceptionProvider],
+  ['trusted apps', getTrustedAppProviderMock],
+  ['exceptions/event filters', getExceptionProviderMock],
 ])('when using the ArtifactEntryCardMinified component with %s', (_, generateItem) => {
   let item: AnyArtifact;
   let appTestContext: AppContextTestRender;
@@ -69,7 +69,7 @@ describe.each([
       await fireEvent.click(renderResult.getByTestId('testCard-collapse'));
     });
     expect(renderResult.getByTestId('testCard-criteriaConditions').textContent).toEqual(
-      ' OSIS WindowsAND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS /one/two/three'
+      ' OSIS WindowsAND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS c:\\fol\\bin.exe'
     );
     expect(renderResult.getByTestId('testCard-collapse').textContent).toEqual('Hide details');
   });

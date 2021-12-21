@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UserActionField } from '../../../common';
+import { UserActionField } from '../../../common/api';
 import { createConnectorObject, createExternalService, createJiraConnector } from '../test_utils';
 import { buildCaseUserActionItem } from './helpers';
 

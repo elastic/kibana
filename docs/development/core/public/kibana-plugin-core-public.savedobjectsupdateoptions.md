@@ -15,7 +15,7 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [references](./kibana-plugin-core-public.savedobjectsupdateoptions.references.md) | <code>SavedObjectReference[]</code> |  |
-|  [upsert](./kibana-plugin-core-public.savedobjectsupdateoptions.upsert.md) | <code>Attributes</code> |  |
-|  [version](./kibana-plugin-core-public.savedobjectsupdateoptions.version.md) | <code>string</code> |  |
+|  [references?](./kibana-plugin-core-public.savedobjectsupdateoptions.references.md) | SavedObjectReference\[\] | <i>(Optional)</i> |
+|  [upsert?](./kibana-plugin-core-public.savedobjectsupdateoptions.upsert.md) | Attributes | <i>(Optional)</i> |
+|  [version?](./kibana-plugin-core-public.savedobjectsupdateoptions.version.md) | string | <i>(Optional)</i> |
 

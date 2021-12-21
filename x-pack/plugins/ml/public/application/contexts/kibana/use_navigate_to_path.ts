@@ -23,7 +23,7 @@ export const useNavigateToPath = () => {
   const location = useLocation();
 
   return useCallback(
-    async (path: string | undefined, preserveSearch = false) => {
+    async (path: string | undefined, preserveSearch: boolean = false) => {
       if (path === undefined) return;
       const modifiedPath = `${path}${preserveSearch === true ? location.search : ''}`;
       /**

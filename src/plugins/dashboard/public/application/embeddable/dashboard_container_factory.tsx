@@ -11,7 +11,7 @@ import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common
 
 import { DashboardContainerInput } from '../..';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
-import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
+import type { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 import {
   Container,
   ErrorEmbeddable,
@@ -23,6 +23,13 @@ import {
   createExtract,
   createInject,
 } from '../../../common/embeddable/dashboard_container_persistable_state';
+import {
+  ControlGroupContainer,
+  ControlGroupInput,
+  ControlGroupOutput,
+  CONTROL_GROUP_TYPE,
+} from '../../../../presentation_util/public';
+import { getDefaultDashboardControlGroupInput } from '../../dashboard_constants';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -36,10 +43,16 @@ export class DashboardContainerFactoryDefinition
   public readonly isContainerType = true;
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
+  public inject: EmbeddablePersistableStateService['inject'];
+  public extract: EmbeddablePersistableStateService['extract'];
+
   constructor(
     private readonly getStartServices: () => Promise<DashboardContainerServices>,
     private readonly persistableStateService: EmbeddablePersistableStateService
-  ) {}
+  ) {
+    this.inject = createInject(this.persistableStateService);
+    this.extract = createExtract(this.persistableStateService);
+  }
 
   public isEditable = async () => {
     // Currently unused for dashboards
@@ -67,10 +80,21 @@ export class DashboardContainerFactoryDefinition
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> => {
     const services = await this.getStartServices();
-    return new DashboardContainer(initialInput, services, parent);
+    const controlsGroupFactory = services.embeddable.getEmbeddableFactory<
+      ControlGroupInput,
+      ControlGroupOutput,
+      ControlGroupContainer
+    >(CONTROL_GROUP_TYPE);
+    const controlGroup = await controlsGroupFactory?.create({
+      ...getDefaultDashboardControlGroupInput(),
+      ...(initialInput.controlGroupInput ?? {}),
+      viewMode: initialInput.viewMode,
+      id: `control_group_${initialInput.id ?? 'new_dashboard'}`,
+    });
+    const { DashboardContainer: DashboardContainerEmbeddable } = await import(
+      './dashboard_container'
+    );
+
+    return new DashboardContainerEmbeddable(initialInput, services, parent, controlGroup);
   };
-
-  public inject = createInject(this.persistableStateService);
-
-  public extract = createExtract(this.persistableStateService);
 }

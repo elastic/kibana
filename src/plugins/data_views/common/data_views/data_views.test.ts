@@ -48,11 +48,18 @@ const savedObject = {
 
 describe('IndexPatterns', () => {
   let indexPatterns: DataViewsService;
+  let indexPatternsNoAccess: DataViewsService;
   let savedObjectsClient: SavedObjectsClientCommon;
   let SOClientGetDelay = 0;
+  const uiSettings = {
+    get: () => Promise.resolve(false),
+    getAll: () => {},
+    set: () => () => {},
+    remove: jest.fn(),
+  } as any as UiSettingsCommon;
+  const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
 
   beforeEach(() => {
-    const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
     savedObjectsClient = {} as SavedObjectsClientCommon;
     savedObjectsClient.find = jest.fn(
       () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
@@ -86,16 +93,25 @@ describe('IndexPatterns', () => {
       });
 
     indexPatterns = new DataViewsService({
-      uiSettings: {
-        get: () => Promise.resolve(false),
-        getAll: () => {},
-      } as any as UiSettingsCommon,
+      uiSettings,
       savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
       apiClient: createFieldsFetcher(),
       fieldFormats,
       onNotification: () => {},
       onError: () => {},
       onRedirectNoIndexPattern: () => {},
+      getCanSave: () => Promise.resolve(true),
+    });
+
+    indexPatternsNoAccess = new DataViewsService({
+      uiSettings,
+      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
+      apiClient: createFieldsFetcher(),
+      fieldFormats,
+      onNotification: () => {},
+      onError: () => {},
+      onRedirectNoIndexPattern: () => {},
+      getCanSave: () => Promise.resolve(false),
     });
   });
 
@@ -166,6 +182,10 @@ describe('IndexPatterns', () => {
     expect(indexPattern).toBeDefined();
     await indexPatterns.delete(id);
     expect(indexPattern).not.toBe(await indexPatterns.get(id));
+  });
+
+  test('delete will throw if insufficient access', async () => {
+    await expect(indexPatternsNoAccess.delete('1')).rejects.toMatchSnapshot();
   });
 
   test('should handle version conflicts', async () => {
@@ -243,6 +263,18 @@ describe('IndexPatterns', () => {
     expect(indexPatterns.setDefault).toBeCalled();
   });
 
+  test('createAndSave will throw if insufficient access', async () => {
+    const title = 'kibana-*';
+
+    await expect(indexPatternsNoAccess.createAndSave({ title })).rejects.toMatchSnapshot();
+  });
+
+  test('updateSavedObject will throw if insufficient access', async () => {
+    await expect(
+      indexPatternsNoAccess.updateSavedObject({ id: 'id' } as unknown as DataView)
+    ).rejects.toMatchSnapshot();
+  });
+
   test('savedObjectToSpec', () => {
     const spec = indexPatterns.savedObjectToSpec(savedObject);
     expect(spec).toMatchSnapshot();
@@ -273,5 +305,50 @@ describe('IndexPatterns', () => {
 
     // successful subsequent request
     expect(async () => await indexPatterns.get(id)).toBeDefined();
+  });
+
+  describe('getDefaultDataView', () => {
+    test('gets default data view', async () => {
+      indexPatterns.clearCache();
+      jest.clearAllMocks();
+
+      expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+    });
+
+    test('returns undefined if no data views exist', async () => {
+      savedObjectsClient.find = jest.fn(
+        () => Promise.resolve([]) as Promise<Array<SavedObject<any>>>
+      );
+      savedObjectsClient.get = jest.fn(() => Promise.resolve(undefined) as Promise<any>);
+      indexPatterns.clearCache();
+      expect(await indexPatterns.getDefaultDataView()).toBeUndefined();
+    });
+
+    test("default doesn't exist, grabs another data view", async () => {
+      indexPatterns.clearCache();
+      jest.clearAllMocks();
+      uiSettings.get = jest.fn().mockResolvedValue(['bar']);
+
+      savedObjectsClient.find = jest.fn(
+        () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
+      );
+
+      savedObjectsClient.get = jest.fn().mockResolvedValue({
+        id: 'bar',
+        version: 'foo',
+        attributes: {
+          title: 'something',
+        },
+      });
+
+      expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+      expect(uiSettings.remove).toBeCalledTimes(1);
+    });
   });
 });

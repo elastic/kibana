@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { DocValueFields } from '../../../../common/search_strategy';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -22,6 +23,7 @@ export const mocksSource = {
       searchable: true,
       type: 'date',
       aggregatable: true,
+      readFromDocValues: true,
     },
     {
       category: 'agent',
@@ -330,7 +332,13 @@ export const mocksSource = {
 };
 
 export const mockIndexFields = [
-  { aggregatable: true, name: '@timestamp', searchable: true, type: 'date' },
+  {
+    aggregatable: true,
+    name: '@timestamp',
+    searchable: true,
+    type: 'date',
+    readFromDocValues: true,
+  },
   { aggregatable: true, name: 'agent.ephemeral_id', searchable: true, type: 'string' },
   { aggregatable: true, name: 'agent.hostname', searchable: true, type: 'string' },
   { aggregatable: true, name: 'agent.id', searchable: true, type: 'string' },
@@ -459,6 +467,7 @@ export const mockBrowserFields: BrowserFields = {
         name: '@timestamp',
         searchable: true,
         type: 'date',
+        readFromDocValues: true,
       },
     },
   },
@@ -726,3 +735,12 @@ export const mockDocValueFields: DocValueFields[] = [
     format: 'date_time',
   },
 ];
+
+export const mockRuntimeMappings: MappingRuntimeFields = {
+  '@a.runtime.field': {
+    script: {
+      source: 'emit("Radical dude: " + doc[\'host.name\'].value)',
+    },
+    type: 'keyword',
+  },
+};

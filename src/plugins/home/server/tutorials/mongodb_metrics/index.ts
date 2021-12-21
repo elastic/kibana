@@ -23,16 +23,16 @@ export function mongodbMetricsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'mongodbMetrics',
     name: i18n.translate('home.tutorials.mongodbMetrics.nameTitle', {
-      defaultMessage: 'MongoDB metrics',
+      defaultMessage: 'MongoDB Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.mongodbMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from MongoDB.',
+      defaultMessage: 'Collect metrics from MongoDB servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.mongodbMetrics.longDescription', {
       defaultMessage:
-        'The `mongodb` Metricbeat module fetches internal metrics from the MongoDB server. \
+        'The `mongodb` Metricbeat module fetches metrics from MongoDB server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mongodb.html',
@@ -59,8 +59,8 @@ export function mongodbMetricsSpecProvider(context: TutorialContext): TutorialSc
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/mongodb_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['datastore'],
   };
 }

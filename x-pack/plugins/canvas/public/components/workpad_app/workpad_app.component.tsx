@@ -16,7 +16,7 @@ import { CommitFn } from '../../../types';
 
 export const WORKPAD_CONTAINER_ID = 'canvasWorkpadContainer';
 
-interface Props {
+export interface Props {
   deselectElement?: MouseEventHandler;
   isWriteable: boolean;
 }

@@ -53,8 +53,8 @@ const getHandledError = () => {
 };
 
 describe('render helper function', () => {
-  it('returns ExpressionRenderHandler instance', () => {
-    const response = render(element, {});
+  it('returns ExpressionRenderHandler instance', async () => {
+    const response = await render(element, {});
     expect(response).toBeInstanceOf(ExpressionRenderHandler);
   });
 });

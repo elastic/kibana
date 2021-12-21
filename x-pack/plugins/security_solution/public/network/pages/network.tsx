@@ -13,7 +13,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isTab } from '../../../../timelines/public';
-import { esQuery } from '../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
 import { SecurityPageName } from '../../app/types';
 import { UpdateDateRange } from '../../common/components/charts/common';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
@@ -49,7 +49,7 @@ import {
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 /**
@@ -109,7 +109,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [dispatch]
     );
 
-    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current
@@ -136,13 +136,13 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     );
 
     const [filterQuery, kqlError] = convertToBuildEsQuery({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+      config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
       filters,
     });
     const [tabsFilterQuery] = convertToBuildEsQuery({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+      config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
       filters: tabsFilters,
@@ -170,6 +170,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     />
                   }
                   title={i18n.PAGE_TITLE}
+                  border
                 />
 
                 <EmbeddedMap
@@ -221,7 +222,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
           </StyledFullHeightContainer>
         ) : (
           <SecuritySolutionPageWrapper>
-            <HeaderPage border title={i18n.PAGE_TITLE} />
             <OverviewEmpty />
           </SecuritySolutionPageWrapper>
         )}

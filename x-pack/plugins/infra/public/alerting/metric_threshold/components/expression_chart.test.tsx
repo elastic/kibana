@@ -9,7 +9,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 import { MetricExpression } from '../types';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import React from 'react';
 import { ExpressionChart } from './expression_chart';
@@ -40,7 +40,7 @@ jest.mock('../hooks/use_metrics_explorer_chart_data', () => ({
 
 describe('ExpressionChart', () => {
   async function setup(expression: MetricExpression, filterQuery?: string, groupBy?: string) {
-    const derivedIndexPattern: IIndexPattern = {
+    const derivedIndexPattern: DataViewBase = {
       title: 'metricbeat-*',
       fields: [],
     };
@@ -54,13 +54,6 @@ describe('ExpressionChart', () => {
         metricAlias: 'metricbeat-*',
         inventoryDefaultView: 'host',
         metricsExplorerDefaultView: 'host',
-        fields: {
-          timestamp: '@timestamp',
-          container: 'container.id',
-          host: 'host.name',
-          pod: 'kubernetes.pod.uid',
-          tiebreaker: '_doc',
-        },
         anomalyThreshold: 20,
       },
     };

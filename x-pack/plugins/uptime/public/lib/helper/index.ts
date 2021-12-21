@@ -9,5 +9,6 @@ export { convertMicrosecondsToMilliseconds } from './convert_measurements';
 export * from './observability_integration';
 export { getChartDateLabel } from './charts';
 export { seriesHasDownValues } from './series_has_down_values';
-export { UptimeUrlParams, getSupportedUrlParams } from './url_params';
+export type { UptimeUrlParams } from './url_params';
+export { getSupportedUrlParams } from './url_params';
 export { MountWithReduxProvider } from './helper_with_redux';

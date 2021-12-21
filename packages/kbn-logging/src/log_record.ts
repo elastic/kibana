@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { LogLevel } from './log_level';
+import type { LogLevel } from './log_level';
+import type { LogMeta } from './log_meta';
 
 /**
  * Essential parts of every log message.
@@ -18,6 +19,9 @@ export interface LogRecord {
   context: string;
   message: string;
   error?: Error;
-  meta?: { [name: string]: any };
+  meta?: LogMeta;
   pid: number;
+  spanId?: string;
+  traceId?: string;
+  transactionId?: string;
 }

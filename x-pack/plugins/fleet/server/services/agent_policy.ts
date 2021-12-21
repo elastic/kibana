@@ -7,18 +7,21 @@
 
 import { uniq, omit } from 'lodash';
 import uuid from 'uuid/v4';
+import uuidv5 from 'uuid/v5';
 import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
 
+import { safeDump } from 'js-yaml';
+
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
 import type { AuthenticatedUser } from '../../../security/server';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
+  AGENTS_PREFIX,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../constants';
 import type {
@@ -31,7 +34,12 @@ import type {
   ListWithKuery,
   NewPackagePolicy,
 } from '../types';
-import { agentPolicyStatuses, packageToPackagePolicy, AGENT_POLICY_INDEX } from '../../common';
+import {
+  agentPolicyStatuses,
+  packageToPackagePolicy,
+  AGENT_POLICY_INDEX,
+  UUID_V5_NAMESPACE,
+} from '../../common';
 import type {
   DeleteAgentPolicyResponse,
   FleetServerPolicy,
@@ -40,6 +48,12 @@ import type {
   DeletePackagePoliciesResponse,
 } from '../../common';
 import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
+
+import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
+
+import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml';
+
+import { elasticAgentManifest } from './elastic_agent_manifest';
 
 import { getPackageInfo } from './epm/packages';
 import { getAgentsByKuery } from './agents';
@@ -120,14 +134,11 @@ class AgentPolicyService {
     };
 
     let searchParams;
-    if (id) {
-      searchParams = {
-        id: String(id),
-      };
-    } else if (
-      preconfiguredAgentPolicy.is_default ||
-      preconfiguredAgentPolicy.is_default_fleet_server
-    ) {
+
+    const isDefaultPolicy =
+      preconfiguredAgentPolicy.is_default || preconfiguredAgentPolicy.is_default_fleet_server;
+
+    if (isDefaultPolicy) {
       searchParams = {
         searchFields: [
           preconfiguredAgentPolicy.is_default_fleet_server
@@ -136,10 +147,15 @@ class AgentPolicyService {
         ],
         search: 'true',
       };
+    } else if (id) {
+      searchParams = {
+        id: String(id),
+      };
     }
+
     if (!searchParams) throw new Error('Missing ID');
 
-    return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams);
+    return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams, id);
   }
 
   private async ensureAgentPolicy(
@@ -151,7 +167,8 @@ class AgentPolicyService {
       | {
           searchFields: string[];
           search: string;
-        }
+        },
+    id?: string | number
   ): Promise<{
     created: boolean;
     policy: AgentPolicy;
@@ -189,7 +206,7 @@ class AgentPolicyService {
     if (agentPolicies.total === 0) {
       return {
         created: true,
-        policy: await this.create(soClient, esClient, newAgentPolicy),
+        policy: await this.create(soClient, esClient, newAgentPolicy, { id: String(id) }),
       };
     }
 
@@ -403,12 +420,16 @@ class AgentPolicyService {
       options
     );
 
-    // Copy all package policies
+    // Copy all package policies and append (copy) to their names
     if (baseAgentPolicy.package_policies.length) {
       const newPackagePolicies = (baseAgentPolicy.package_policies as PackagePolicy[]).map(
         (packagePolicy: PackagePolicy) => {
           const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
-          return newPackagePolicy;
+          const updatedPackagePolicy = {
+            ...newPackagePolicy,
+            name: `${packagePolicy.name} (copy)`,
+          };
+          return updatedPackagePolicy;
         }
       );
       await packagePolicyService.bulkCreate(
@@ -615,7 +636,7 @@ class AgentPolicyService {
       showInactive: false,
       perPage: 0,
       page: 1,
-      kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id:${id}`,
+      kuery: `${AGENTS_PREFIX}.policy_id:${id}`,
     });
 
     if (total > 0) {
@@ -661,7 +682,7 @@ class AgentPolicyService {
   ) {
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
-    const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+    const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
 
     if (!defaultOutputId) {
       return;
@@ -717,6 +738,40 @@ class AgentPolicyService {
     return res.body.hits.hits[0]._source;
   }
 
+  public async getFullAgentConfigMap(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    options?: { standalone: boolean }
+  ): Promise<string | null> {
+    const fullAgentPolicy = await getFullAgentPolicy(soClient, id, options);
+    if (fullAgentPolicy) {
+      const fullAgentConfigMap: FullAgentConfigMap = {
+        apiVersion: 'v1',
+        kind: 'ConfigMap',
+        metadata: {
+          name: 'agent-node-datastreams',
+          namespace: 'kube-system',
+          labels: {
+            'k8s-app': 'elastic-agent',
+          },
+        },
+        data: {
+          'agent.yml': fullAgentPolicy,
+        },
+      };
+
+      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
+      const updateManifestVersion = elasticAgentManifest.replace(
+        'VERSION',
+        appContextService.getKibanaVersion()
+      );
+      const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
+      return [fixedAgentYML, updateManifestVersion].join('\n');
+    } else {
+      return '';
+    }
+  }
+
   public async getFullAgentPolicy(
     soClient: SavedObjectsClientContract,
     id: string,
@@ -735,8 +790,10 @@ export async function addPackageToAgentPolicy(
   agentPolicy: AgentPolicy,
   defaultOutput: Output,
   packagePolicyName?: string,
+  packagePolicyId?: string | number,
   packagePolicyDescription?: string,
-  transformPackagePolicy?: (p: NewPackagePolicy) => NewPackagePolicy
+  transformPackagePolicy?: (p: NewPackagePolicy) => NewPackagePolicy,
+  bumpAgentPolicyRevison = false
 ) {
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
@@ -757,8 +814,18 @@ export async function addPackageToAgentPolicy(
     ? transformPackagePolicy(basePackagePolicy)
     : basePackagePolicy;
 
+  // If an ID is provided via preconfiguration, use that value. Otherwise fall back to
+  // a UUID v5 value seeded from the agent policy's ID and the provided package policy name.
+  const id = packagePolicyId
+    ? String(packagePolicyId)
+    : uuidv5(`${agentPolicy.id}-${packagePolicyName}`, UUID_V5_NAMESPACE);
+
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
-    bumpRevision: false,
+    id,
+    bumpRevision: bumpAgentPolicyRevison,
     skipEnsureInstalled: true,
+    skipUniqueNameVerification: true,
+    overwrite: true,
+    force: true, // To add package to managed policy we need the force flag
   });
 }

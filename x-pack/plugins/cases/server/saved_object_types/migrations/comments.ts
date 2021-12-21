@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { mapValues, trimEnd } from 'lodash';
-import { SerializableRecord } from '@kbn/utility-types';
-
-import { LensServerPluginSetup } from '../../../../lens/server';
+import { mapValues, trimEnd, mergeWith } from 'lodash';
+import type { SerializableRecord } from '@kbn/utility-types';
 import {
-  mergeMigrationFunctionMaps,
   MigrateFunction,
   MigrateFunctionsObject,
 } from '../../../../../../src/plugins/kibana_utils/common';
@@ -19,8 +16,10 @@ import {
   SavedObjectSanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
+  SavedObjectMigrationContext,
 } from '../../../../../../src/core/server';
-import { CommentType, AssociationType } from '../../../common';
+import { LensServerPluginSetup } from '../../../../lens/server';
+import { CommentType, AssociationType } from '../../../common/api';
 import {
   isLensMarkdownNode,
   LensMarkdownNode,
@@ -29,6 +28,7 @@ import {
   stringifyMarkdownComment,
 } from '../../../common/utils/markdown_plugins/utils';
 import { addOwnerToSO, SanitizedCaseOwner } from '.';
+import { logError } from './utils';
 
 interface UnsanitizedComment {
   comment: string;
@@ -103,33 +103,41 @@ export const createCommentsMigrations = (
   return mergeMigrationFunctionMaps(commentsMigrations, embeddableMigrations);
 };
 
-const migrateByValueLensVisualizations =
-  (migrate: MigrateFunction, version: string): SavedObjectMigrationFn<{ comment?: string }> =>
-  (doc: SavedObjectUnsanitizedDoc<{ comment?: string }>) => {
+export const migrateByValueLensVisualizations =
+  (
+    migrate: MigrateFunction,
+    version: string
+  ): SavedObjectMigrationFn<{ comment?: string }, { comment?: string }> =>
+  (doc: SavedObjectUnsanitizedDoc<{ comment?: string }>, context: SavedObjectMigrationContext) => {
     if (doc.attributes.comment == null) {
       return doc;
     }
 
-    const parsedComment = parseCommentString(doc.attributes.comment);
-    const migratedComment = parsedComment.children.map((comment) => {
-      if (isLensMarkdownNode(comment)) {
-        // casting here because ts complains that comment isn't serializable because LensMarkdownNode
-        // extends Node which has fields that conflict with SerializableRecord even though it is serializable
-        return migrate(comment as SerializableRecord) as LensMarkdownNode;
-      }
+    try {
+      const parsedComment = parseCommentString(doc.attributes.comment);
+      const migratedComment = parsedComment.children.map((comment) => {
+        if (isLensMarkdownNode(comment)) {
+          // casting here because ts complains that comment isn't serializable because LensMarkdownNode
+          // extends Node which has fields that conflict with SerializableRecord even though it is serializable
+          return migrate(comment as SerializableRecord) as LensMarkdownNode;
+        }
 
-      return comment;
-    });
+        return comment;
+      });
 
-    const migratedMarkdown = { ...parsedComment, children: migratedComment };
+      const migratedMarkdown = { ...parsedComment, children: migratedComment };
 
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        comment: stringifyCommentWithoutTrailingNewline(doc.attributes.comment, migratedMarkdown),
-      },
-    };
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          comment: stringifyCommentWithoutTrailingNewline(doc.attributes.comment, migratedMarkdown),
+        },
+      };
+    } catch (error) {
+      logError({ id: doc.id, context, error, docType: 'comment', docKey: 'comment' });
+      return doc;
+    }
   };
 
 export const stringifyCommentWithoutTrailingNewline = (
@@ -146,4 +154,24 @@ export const stringifyCommentWithoutTrailingNewline = (
   // the original comment did not end with a newline so the markdown library is going to add one, so let's remove it
   // so the comment stays consistent
   return trimEnd(stringifiedComment, '\n');
+};
+
+/**
+ * merge function maps adds the context param from the original implementation at:
+ * src/plugins/kibana_utils/common/persistable_state/merge_migration_function_map.ts
+ *  */
+export const mergeMigrationFunctionMaps = (
+  // using the saved object framework types here because they include the context, this avoids type errors in our tests
+  obj1: SavedObjectMigrationMap,
+  obj2: SavedObjectMigrationMap
+) => {
+  const customizer = (objValue: SavedObjectMigrationFn, srcValue: SavedObjectMigrationFn) => {
+    if (!srcValue || !objValue) {
+      return srcValue || objValue;
+    }
+    return (doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) =>
+      objValue(srcValue(doc, context), context);
+  };
+
+  return mergeWith({ ...obj1 }, obj2, customizer);
 };

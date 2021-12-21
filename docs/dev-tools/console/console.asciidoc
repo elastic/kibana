@@ -134,8 +134,7 @@ shortcuts, click *Help*.
 [[console-settings]]
 === Disable Console
 
-deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
-If you don’t want to use *Console*, you can disable it by setting `console.enabled`
+If you don’t want to use *Console*, you can disable it by setting `console.ui.enabled`
 to `false` in your `kibana.yml` configuration file. Changing this setting
 causes the server to regenerate assets on the next startup,
 which might cause a delay before pages start being served.

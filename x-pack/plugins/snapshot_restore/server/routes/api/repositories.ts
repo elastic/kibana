@@ -9,9 +9,10 @@ import { TypeOf } from '@kbn/config-schema';
 import type {
   SnapshotGetRepositoryResponse,
   SnapshotRepositorySettings,
-} from '@elastic/elasticsearch/api/types';
+  PluginStats,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
+import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common';
 import { Repository, RepositoryType } from '../../../common/types';
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '../helpers';
@@ -48,7 +49,7 @@ export function registerRepositoriesRoutes({
       try {
         const { body: repositoriesByName } =
           await clusterClient.asCurrentUser.snapshot.getRepository({
-            repository: '_all',
+            name: '_all',
           });
         repositoryNames = Object.keys(repositoriesByName);
         repositories = repositoryNames.map((name) => {
@@ -107,7 +108,7 @@ export function registerRepositoriesRoutes({
 
       try {
         ({ body: repositoryByName } = await clusterClient.asCurrentUser.snapshot.getRepository({
-          repository: name,
+          name,
         }));
       } catch (e) {
         return handleEsError({ error: e, response: res });
@@ -162,21 +163,27 @@ export function registerRepositoriesRoutes({
       const types: RepositoryType[] = isCloudEnabled ? [] : [...DEFAULT_REPOSITORY_TYPES];
 
       try {
-        // Call with internal user so that the requesting user does not need `monitoring` cluster
-        // privilege just to see list of available repository types
-        const { body: plugins } = await clusterClient.asCurrentUser.cat.plugins({ format: 'json' });
+        const {
+          body: { nodes },
+        } = await clusterClient.asCurrentUser.nodes.info({
+          node_id: '_all',
+          metric: 'plugins',
+        });
+        const pluginNamesAllNodes = Object.keys(nodes).map((key: string) => {
+          // extract plugin names
+          return (nodes[key].plugins ?? []).map((plugin: PluginStats) => plugin.name);
+        });
 
         // Filter list of plugins to repository-related ones
-        if (plugins && plugins.length) {
-          const pluginNames: string[] = [
-            ...new Set(plugins.map((plugin) => plugin.component ?? '')),
-          ];
-          pluginNames.forEach((pluginName) => {
-            if (REPOSITORY_PLUGINS_MAP[pluginName]) {
-              types.push(REPOSITORY_PLUGINS_MAP[pluginName]);
-            }
-          });
-        }
+        Object.keys(REPOSITORY_PLUGINS_MAP).forEach((repoTypeName: string) => {
+          if (
+            // check if this repository plugin is installed on every node
+            pluginNamesAllNodes.every((pluginNames: string[]) => pluginNames.includes(repoTypeName))
+          ) {
+            types.push(REPOSITORY_PLUGINS_MAP[repoTypeName]);
+          }
+        });
+
         return res.ok({ body: types });
       } catch (e) {
         return handleEsError({ error: e, response: res });
@@ -196,9 +203,7 @@ export function registerRepositoriesRoutes({
 
       try {
         const { body: verificationResults } = await clusterClient.asCurrentUser.snapshot
-          .verifyRepository({
-            repository: name,
-          })
+          .verifyRepository({ name })
           .catch((e) => ({
             body: {
               valid: false,
@@ -234,15 +239,22 @@ export function registerRepositoriesRoutes({
 
       try {
         const { body: cleanupResults } = await clusterClient.asCurrentUser.snapshot
-          .cleanupRepository({
-            repository: name,
-          })
-          .catch((e) => ({
-            body: {
-              cleaned: false,
-              error: e.response ? JSON.parse(e.response) : e,
-            },
-          }));
+          .cleanupRepository({ name })
+          .catch((e) => {
+            // This API returns errors in a non-standard format, which we'll need to
+            // munge to be compatible with wrapEsError.
+            const normalizedError = {
+              statusCode: e.meta.body.status,
+              response: e.meta.body,
+            };
+
+            return {
+              body: {
+                cleaned: false,
+                error: wrapEsError(normalizedError),
+              },
+            };
+          });
 
         return res.ok({
           body: {
@@ -270,9 +282,7 @@ export function registerRepositoriesRoutes({
       // Check that repository with the same name doesn't already exist
       try {
         const { body: repositoryByName } = await clusterClient.asCurrentUser.snapshot.getRepository(
-          {
-            repository: name,
-          }
+          { name }
         );
         if (repositoryByName[name]) {
           return res.conflict({ body: 'There is already a repository with that name.' });
@@ -284,7 +294,7 @@ export function registerRepositoriesRoutes({
       // Otherwise create new repository
       try {
         const response = await clusterClient.asCurrentUser.snapshot.createRepository({
-          repository: name,
+          name,
           body: {
             type,
             // TODO: Bring {@link RepositorySettings} in line with {@link SnapshotRepositorySettings}
@@ -314,11 +324,11 @@ export function registerRepositoriesRoutes({
       try {
         // Check that repository with the given name exists
         // If it doesn't exist, 404 will be thrown by ES and will be returned
-        await clusterClient.asCurrentUser.snapshot.getRepository({ repository: name });
+        await clusterClient.asCurrentUser.snapshot.getRepository({ name });
 
         // Otherwise update repository
         const response = await clusterClient.asCurrentUser.snapshot.createRepository({
-          repository: name,
+          name,
           body: {
             type,
             settings: serializeRepositorySettings(settings) as SnapshotRepositorySettings,
@@ -352,7 +362,7 @@ export function registerRepositoriesRoutes({
         await Promise.all(
           repositoryNames.map((repoName) => {
             return clusterClient.asCurrentUser.snapshot
-              .deleteRepository({ repository: repoName })
+              .deleteRepository({ name: repoName })
               .then(() => response.itemsDeleted.push(repoName))
               .catch((e) =>
                 response.errors.push({

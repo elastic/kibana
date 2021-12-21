@@ -196,6 +196,7 @@ export const CleanEmptyFolders: Task = {
     await deleteEmptyFolders(log, build.resolvePath('.'), [
       build.resolvePath('plugins'),
       build.resolvePath('data'),
+      build.resolvePath('logs'),
     ]);
   },
 };

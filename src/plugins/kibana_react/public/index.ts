@@ -16,19 +16,20 @@ export * from './context';
 export * from './overview_page';
 export * from './overlays';
 export * from './ui_settings';
-export * from './field_icon';
-export * from './field_button';
 export * from './table_list_view';
 export * from './toolbar_button';
 export * from './split_panel';
 export * from './react_router_navigate';
 export * from './page_template';
-export { ValidatedDualRange, Value } from './validated_range';
+export type { Value } from './validated_range';
+export { ValidatedDualRange } from './validated_range';
 export * from './notifications';
 export { Markdown, MarkdownSimple } from './markdown';
 export { reactToUiComponent, uiToReactComponent } from './adapters';
 export { toMountPoint, MountPointPortal } from './util';
+export type { ToMountPointOptions } from './util';
 export { RedirectAppLinks } from './app_links';
+export { wrapWithTheme, KibanaThemeProvider } from './theme';
 
 /** dummy plugin, we just want kibanaReact to have its own bundle */
 export function plugin() {

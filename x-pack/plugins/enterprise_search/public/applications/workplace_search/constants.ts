@@ -42,6 +42,9 @@ export const NAV = {
   ROLE_MAPPINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {
     defaultMessage: 'Users and roles',
   }),
+  API_KEYS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.apiKeys', {
+    defaultMessage: 'API keys',
+  }),
   SECURITY: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.security', {
     defaultMessage: 'Security',
   }),
@@ -253,12 +256,12 @@ export const SOURCE_OBJ_TYPES = {
     defaultMessage: 'Bugs',
   }),
   ISSUES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.issues', {
-    defaultMessage: 'Issues',
+    defaultMessage: 'Issues (including comments)',
   }),
   PULL_REQUESTS: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.objTypes.pullRequests',
     {
-      defaultMessage: 'Pull Requests',
+      defaultMessage: 'Pull Requests (including comments)',
     }
   ),
   REPOSITORY_LIST: i18n.translate(
@@ -267,6 +270,9 @@ export const SOURCE_OBJ_TYPES = {
       defaultMessage: 'Repository List',
     }
   ),
+  FILES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.files', {
+    defaultMessage: 'Files (markdown only)',
+  }),
   EMAILS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.emails', {
     defaultMessage: 'Emails',
   }),
@@ -287,6 +293,9 @@ export const SOURCE_OBJ_TYPES = {
   }),
   CAMPAIGNS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.campaigns', {
     defaultMessage: 'Campaigns',
+  }),
+  CASES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.cases', {
+    defaultMessage: 'Cases (including feeds and comments)',
   }),
   USERS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.users', {
     defaultMessage: 'Users',
@@ -323,12 +332,29 @@ export const SOURCE_OBJ_TYPES = {
   ),
 };
 
+export const API_KEYS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.apiKeysTitle',
+  {
+    defaultMessage: 'API keys',
+  }
+);
+
+export const API_KEY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.apiKeyLabel',
+  {
+    defaultMessage: 'API key',
+  }
+);
+
 export const GITHUB_LINK_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.applicationLinkTitles.github',
   {
     defaultMessage: 'GitHub Developer Portal',
   }
 );
+
+export const GITHUB_VIA_APP_SERVICE_TYPE = 'github_via_app';
+export const GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE = 'github_enterprise_server_via_app';
 
 export const CUSTOM_SERVICE_TYPE = 'custom';
 
@@ -855,5 +881,16 @@ export const PLATINUM_FEATURE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.platinumFeature',
   {
     defaultMessage: 'Platinum feature',
+  }
+);
+
+export const COPY_TOOLTIP = i18n.translate('xpack.enterpriseSearch.workplaceSearch.copy.tooltip', {
+  defaultMessage: 'Copy to clipboard',
+});
+
+export const COPIED_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.copied.tooltip',
+  {
+    defaultMessage: 'Copied!',
   }
 );

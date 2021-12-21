@@ -10,7 +10,6 @@ import { MetricsUIAggregationRT } from '../inventory_models/types';
 import { afterKeyObjectRT } from './metrics_explorer';
 
 export const MetricsAPITimerangeRT = rt.type({
-  field: rt.string,
   from: rt.number,
   to: rt.number,
   interval: rt.string,

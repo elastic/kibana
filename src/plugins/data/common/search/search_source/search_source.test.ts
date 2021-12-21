@@ -944,7 +944,6 @@ describe('SearchSource', () => {
         },
         `
         Object {
-          "index": undefined,
           "parent": Object {
             "from": 123,
             "index": "123",

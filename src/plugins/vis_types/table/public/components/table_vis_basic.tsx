@@ -47,8 +47,16 @@ export const TableVisBasic = memo(
 
     // renderCellValue is a component which renders a cell based on column and row indexes
     const renderCellValue = useMemo(
-      () => createTableVisCell(sortedRows, formattedColumns),
-      [formattedColumns, sortedRows]
+      () => createTableVisCell(sortedRows, formattedColumns, visConfig.autoFitRowToContent),
+      [formattedColumns, sortedRows, visConfig.autoFitRowToContent]
+    );
+
+    const rowHeightsOptions = useMemo(
+      () =>
+        visConfig.autoFitRowToContent
+          ? ({ defaultHeight: 'auto' } as unknown as EuiDataGridProps['rowHeightsOptions'])
+          : undefined,
+      [visConfig.autoFitRowToContent]
     );
 
     // Columns config
@@ -117,6 +125,7 @@ export const TableVisBasic = memo(
             border: 'horizontal',
             header: 'underline',
           }}
+          rowHeightsOptions={rowHeightsOptions}
           rowCount={rows.length}
           columnVisibility={{
             visibleColumns: columns.map(({ id }) => id),
@@ -127,7 +136,7 @@ export const TableVisBasic = memo(
               showColumnSelector: false,
               showFullScreenSelector: false,
               showSortSelector: false,
-              showStyleSelector: false,
+              showDisplaySelector: false,
               additionalControls: (
                 <TableVisControls
                   dataGridAriaLabel={dataGridAriaLabel}

@@ -12,6 +12,10 @@ export const CreateEmptyDirsAndFiles: Task = {
   description: 'Creating some empty directories and files to prevent file-permission issues',
 
   async run(config, log, build) {
-    await Promise.all([mkdirp(build.resolvePath('plugins')), mkdirp(build.resolvePath('data'))]);
+    await Promise.all([
+      mkdirp(build.resolvePath('plugins')),
+      mkdirp(build.resolvePath('data')),
+      mkdirp(build.resolvePath('logs')),
+    ]);
   },
 };

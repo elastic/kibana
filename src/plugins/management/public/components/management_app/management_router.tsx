@@ -7,7 +7,7 @@
  */
 
 import React, { memo } from 'react';
-import { Route, Router, Switch } from 'react-router-dom';
+import { Route, Router, Switch, Redirect } from 'react-router-dom';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
 import { ManagementAppWrapper } from '../management_app_wrapper';
 import { ManagementLandingPage } from '../landing';
@@ -16,6 +16,7 @@ import { ManagementSection } from '../../utils';
 
 interface ManagementRouterProps {
   history: AppMountParameters['history'];
+  theme$: AppMountParameters['theme$'];
   dependencies: ManagementAppDependencies;
   setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], appHistory?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
@@ -23,7 +24,14 @@ interface ManagementRouterProps {
 }
 
 export const ManagementRouter = memo(
-  ({ dependencies, history, setBreadcrumbs, onAppMounted, sections }: ManagementRouterProps) => (
+  ({
+    dependencies,
+    history,
+    setBreadcrumbs,
+    onAppMounted,
+    sections,
+    theme$,
+  }: ManagementRouterProps) => (
     <Router history={history}>
       <Switch>
         {sections.map((section) =>
@@ -38,10 +46,17 @@ export const ManagementRouter = memo(
                     setBreadcrumbs={setBreadcrumbs}
                     onAppMounted={onAppMounted}
                     history={history}
+                    theme$={theme$}
                   />
                 )}
               />
             ))
+        )}
+        {sections.map((section) =>
+          section
+            .getAppsEnabled()
+            .filter((app) => app.redirectFrom)
+            .map((app) => <Redirect path={`/${app.redirectFrom}*`} to={`${app.basePath}*`} />)
         )}
         <Route
           path={'/'}

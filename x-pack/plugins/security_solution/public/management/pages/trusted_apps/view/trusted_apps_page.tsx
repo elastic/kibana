@@ -9,16 +9,8 @@ import React, { memo, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { useLocation } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -42,6 +34,7 @@ import { SearchExceptions } from '../../../components/search_exceptions';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ListPageRouteState } from '../../../../../common/endpoint/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ManagementPageLoader } from '../../../components/management_page_loader';
 
 export const TrustedAppsPage = memo(() => {
   const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
@@ -171,15 +164,13 @@ export const TrustedAppsPage = memo(() => {
       }
       headerBackComponent={backButton}
       subtitle={ABOUT_TRUSTED_APPS}
-      actions={canDisplayContent() ? addButton : <></>}
+      actions={addButton}
+      hideHeader={!canDisplayContent()}
     >
       <TrustedAppsNotifications />
 
       {isCheckingIfEntriesExists && !didEntriesExist ? (
-        <EuiEmptyPrompt
-          data-test-subj="trustedAppsListLoader"
-          body={<EuiLoadingSpinner className="essentialAnimation" size="xl" />}
-        />
+        <ManagementPageLoader data-test-subj="trustedAppsListLoader" />
       ) : (
         content
       )}

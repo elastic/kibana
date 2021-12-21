@@ -29,12 +29,28 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
+
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+  const logsSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs';
 
   const DATA_ANALYST_USERNAME = 'data_analyst';
   const DATA_ANALYST_PASSWORD = 'data_analyst-password';
   const REPORTING_USER_USERNAME = 'reporting_user';
   const REPORTING_USER_PASSWORD = 'reporting_user-password';
+
+  const logTaskManagerHealth = async () => {
+    // Check task manager health for analyzing test failures. See https://github.com/elastic/kibana/issues/114946
+    const tmHealth = await supertest.get(`/api/task_manager/_health`);
+    const driftValues = tmHealth.body?.stats?.runtime?.value;
+
+    log.info(`Task Manager status: "${tmHealth.body?.status}"`);
+    log.info(`Task Manager overall drift rankings: "${JSON.stringify(driftValues?.drift)}"`);
+    log.info(
+      `Task Manager drift rankings for "report:execute": "${JSON.stringify(
+        driftValues?.drift_by_type?.['report:execute']
+      )}"`
+    );
+  };
 
   const initEcommerce = async () => {
     await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
@@ -44,6 +60,15 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
     await kibanaServer.importExport.unload(ecommerceSOPath);
     await deleteAllReports();
+  };
+
+  const initLogs = async () => {
+    await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+    await kibanaServer.importExport.load(logsSOPath);
+  };
+  const teardownLogs = async () => {
+    await kibanaServer.importExport.unload(logsSOPath);
+    await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
   };
 
   const createDataAnalystRole = async () => {
@@ -132,7 +157,11 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };
-  const generateCsv = async (job: JobParamsCSV, username = 'elastic', password = 'changeme') => {
+  const generateCsv = async (
+    job: JobParamsCSV,
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ) => {
     const jobParams = rison.encode(job as object as RisonValue);
     return await supertestWithoutAuth
       .post(`/api/reporting/generate/csv_searchsource`)
@@ -201,8 +230,11 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   };
 
   return {
+    logTaskManagerHealth,
     initEcommerce,
     teardownEcommerce,
+    initLogs,
+    teardownLogs,
     DATA_ANALYST_USERNAME,
     DATA_ANALYST_PASSWORD,
     REPORTING_USER_USERNAME,

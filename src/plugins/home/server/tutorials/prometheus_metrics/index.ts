@@ -23,13 +23,13 @@ export function prometheusMetricsSpecProvider(context: TutorialContext): Tutoria
   return {
     id: moduleName + 'Metrics',
     name: i18n.translate('home.tutorials.prometheusMetrics.nameTitle', {
-      defaultMessage: 'Prometheus metrics',
+      defaultMessage: 'Prometheus Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.prometheusMetrics.shortDescription', {
-      defaultMessage: 'Fetch metrics from a Prometheus exporter.',
+      defaultMessage: 'Collect metrics from Prometheus exporters with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.prometheusMetrics.longDescription', {
       defaultMessage:
@@ -55,8 +55,8 @@ export function prometheusMetricsSpecProvider(context: TutorialContext): Tutoria
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['monitoring', 'datastore'],
   };
 }

@@ -29,6 +29,14 @@ export class InlineField<T extends IVectorSource> extends AbstractField implemen
     this._dataType = dataType;
   }
 
+  supportsFieldMetaFromEs(): boolean {
+    return false;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    return true;
+  }
+
   getSource(): IVectorSource {
     return this._source;
   }

@@ -6,35 +6,34 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import * as i18n from './translations';
-import { CaseDetailsHrefSchema, CasesNavigation, LinkAnchor } from '../links';
+import { LinkAnchor } from '../links';
 import { RecentCasesFilters } from './filters';
 import { RecentCasesComp } from './recent_cases';
 import { FilterMode as RecentCasesFilterMode } from './types';
 import { useCurrentUser } from '../../common/lib/kibana';
-import { Owner } from '../../types';
-import { OwnerProvider } from '../owner_context';
+import { useAllCasesNavigation } from '../../common/navigation';
 
-export interface RecentCasesProps extends Owner {
-  allCasesNavigation: CasesNavigation;
-  caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
-  createCaseNavigation: CasesNavigation;
-  hasWritePermissions: boolean;
+export interface RecentCasesProps {
   maxCasesToShow: number;
 }
 
-const RecentCasesComponent = ({
-  allCasesNavigation,
-  caseDetailsNavigation,
-  createCaseNavigation,
-  maxCasesToShow,
-  hasWritePermissions,
-}: Omit<RecentCasesProps, 'owner'>) => {
+const RecentCases = React.memo(({ maxCasesToShow }: RecentCasesProps) => {
   const currentUser = useCurrentUser();
+  const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
+
   const [recentCasesFilterBy, setRecentCasesFilterBy] =
     useState<RecentCasesFilterMode>('recentlyCreated');
+
+  const navigateToAllCasesClick = useCallback(
+    (e) => {
+      e.preventDefault();
+      navigateToAllCases();
+    },
+    [navigateToAllCases]
+  );
 
   const recentCasesFilterOptions = useMemo(
     () =>
@@ -73,16 +72,10 @@ const RecentCasesComponent = ({
         <EuiHorizontalRule margin="s" />
       </>
       <EuiText color="subdued" size="s">
-        <RecentCasesComp
-          caseDetailsNavigation={caseDetailsNavigation}
-          createCaseNavigation={createCaseNavigation}
-          filterOptions={recentCasesFilterOptions}
-          maxCasesToShow={maxCasesToShow}
-          hasWritePermissions={hasWritePermissions}
-        />
+        <RecentCasesComp filterOptions={recentCasesFilterOptions} maxCasesToShow={maxCasesToShow} />
         <EuiHorizontalRule margin="s" />
         <EuiText size="xs">
-          <LinkAnchor onClick={allCasesNavigation.onClick} href={allCasesNavigation.href}>
+          <LinkAnchor onClick={navigateToAllCasesClick} href={getAllCasesUrl()}>
             {' '}
             {i18n.VIEW_ALL_CASES}
           </LinkAnchor>
@@ -90,15 +83,9 @@ const RecentCasesComponent = ({
       </EuiText>
     </>
   );
-};
-
-export const RecentCases: React.FC<RecentCasesProps> = React.memo((props) => {
-  return (
-    <OwnerProvider owner={props.owner}>
-      <RecentCasesComponent {...props} />
-    </OwnerProvider>
-  );
 });
+
+RecentCases.displayName = 'RecentCases';
 
 // eslint-disable-next-line import/no-default-export
 export { RecentCases as default };

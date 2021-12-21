@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/api/types';
+import { IndexResponse, UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'src/core/server';
 import { LevelLogger, statuses } from '../';
 import { ReportingCore } from '../../';
@@ -24,7 +24,6 @@ import { MIGRATION_VERSION } from './report';
 export type ReportProcessingFields = Required<{
   kibana_id: Report['kibana_id'];
   kibana_name: Report['kibana_name'];
-  browser_type: Report['browser_type'];
   attempts: Report['attempts'];
   started_at: Report['started_at'];
   max_attempts: Report['max_attempts'];
@@ -196,7 +195,7 @@ export class ReportingStore {
       await ilmPolicyManager.createIlmPolicy();
     } catch (e) {
       this.logger.error('Error in start phase');
-      this.logger.error(e.body.error);
+      this.logger.error(e.body?.error);
       throw e;
     }
   }
@@ -252,7 +251,6 @@ export class ReportingStore {
         _primary_term: document._primary_term,
         jobtype: document._source?.jobtype,
         attempts: document._source?.attempts,
-        browser_type: document._source?.browser_type,
         created_at: document._source?.created_at,
         created_by: document._source?.created_by,
         max_attempts: document._source?.max_attempts,

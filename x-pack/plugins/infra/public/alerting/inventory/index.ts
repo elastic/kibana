@@ -15,15 +15,15 @@ import {
 
 import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 
-import { AlertTypeParams } from '../../../../alerting/common';
+import { AlertTypeParams as RuleTypeParams } from '../../../../alerting/common';
 import { validateMetricThreshold } from './components/validation';
 import { formatReason } from './rule_data_formatters';
 
-interface InventoryMetricAlertTypeParams extends AlertTypeParams {
+interface InventoryMetricRuleTypeParams extends RuleTypeParams {
   criteria: InventoryMetricConditions[];
 }
 
-export function createInventoryMetricAlertType(): ObservabilityRuleTypeModel<InventoryMetricAlertTypeParams> {
+export function createInventoryMetricRuleType(): ObservabilityRuleTypeModel<InventoryMetricRuleTypeParams> {
   return {
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
     description: i18n.translate('xpack.infra.metrics.inventory.alertFlyout.alertDescription', {
@@ -33,7 +33,7 @@ export function createInventoryMetricAlertType(): ObservabilityRuleTypeModel<Inv
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.infrastructureThreshold}`;
     },
-    alertParamsExpression: React.lazy(() => import('./components/expression')),
+    ruleParamsExpression: React.lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.inventory.threshold.defaultActionMessage',

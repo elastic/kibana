@@ -25,6 +25,7 @@ import { getImportListItemAsBuffer } from '../../../../plugins/lists/common/sche
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('import_list_items', () => {
     describe('importing list items without an index', () => {
@@ -46,11 +47,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('importing lists with an index', () => {
       beforeEach(async () => {
-        await createListsIndex(supertest);
+        await createListsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteListsIndex(supertest);
+        await deleteListsIndex(supertest, log);
       });
 
       it('should set the response content types to be expected when importing two items', async () => {
@@ -88,12 +89,16 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Although we try to be aggressive with waitFor in the lists code base, there is still not guarantees
         // that we will have the data just yet so we have to do a waitFor here for when it shows up
-        await waitFor(async () => {
-          const { status } = await supertest
-            .get(`${LIST_ITEM_URL}?list_id=list_items.txt&value=127.0.0.1`)
-            .send();
-          return status !== 404;
-        }, `${LIST_ITEM_URL}?list_id=list_items.txt&value=127.0.0.1`);
+        await waitFor(
+          async () => {
+            const { status } = await supertest
+              .get(`${LIST_ITEM_URL}?list_id=list_items.txt&value=127.0.0.1`)
+              .send();
+            return status !== 404;
+          },
+          `${LIST_ITEM_URL}?list_id=list_items.txt&value=127.0.0.1`,
+          log
+        );
         const { body } = await supertest
           .get(`${LIST_ITEM_URL}?list_id=list_items.txt&value=127.0.0.1`)
           .send()

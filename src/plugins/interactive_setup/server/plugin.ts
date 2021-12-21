@@ -10,6 +10,7 @@ import chalk from 'chalk';
 import type { Subscription } from 'rxjs';
 
 import type { TypeOf } from '@kbn/config-schema';
+import { getDataPath } from '@kbn/utils';
 import type { CorePreboot, Logger, PluginInitializerContext, PrebootPlugin } from 'src/core/server';
 
 import { ElasticsearchConnectionStatus } from '../common';
@@ -45,7 +46,8 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.#logger = this.initializerContext.logger.get();
     this.#elasticsearch = new ElasticsearchService(
-      this.initializerContext.logger.get('elasticsearch')
+      this.initializerContext.logger.get('elasticsearch'),
+      initializerContext.env.packageInfo.version
     );
     this.#verification = new VerificationService(
       this.initializerContext.logger.get('verification')
@@ -67,8 +69,13 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
       core.elasticsearch.config.hosts.length === 1 &&
       DEFAULT_ELASTICSEARCH_HOSTS.includes(core.elasticsearch.config.hosts[0]);
     if (!shouldActiveSetupMode) {
+      const reason = core.elasticsearch.config.credentialsSpecified
+        ? 'Kibana system user credentials are specified'
+        : core.elasticsearch.config.hosts.length > 1
+        ? 'more than one Elasticsearch host is specified'
+        : 'non-default Elasticsearch host is used';
       this.#logger.debug(
-        'Interactive setup mode will not be activated since Elasticsearch connection is already configured.'
+        `Interactive setup mode will not be activated since Elasticsearch connection is already configured: ${reason}.`
       );
       return;
     }
@@ -141,7 +148,11 @@ Go to ${chalk.cyanBright.underline(url)} to get started.
         basePath: core.http.basePath,
         logger: this.#logger.get('routes'),
         preboot: { ...core.preboot, completeSetup },
-        kibanaConfigWriter: new KibanaConfigWriter(configPath, this.#logger.get('kibana-config')),
+        kibanaConfigWriter: new KibanaConfigWriter(
+          configPath,
+          getDataPath(),
+          this.#logger.get('kibana-config')
+        ),
         elasticsearch,
         verificationCode,
         getConfig: this.#getConfig.bind(this),

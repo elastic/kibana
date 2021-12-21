@@ -21,9 +21,11 @@ import type {
   DashboardState,
   RawDashboardState,
 } from '../../types';
-import { convertSavedPanelsToPanelMap } from './convert_saved_panels_to_panel_map';
+import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
 
 type SyncDashboardUrlStateProps = DashboardBuildContext & { savedDashboard: DashboardSavedObject };
+
+let awaitingRemoval = false;
 
 export const syncDashboardUrlState = ({
   dispatchDashboardStateChange,
@@ -89,15 +91,19 @@ const loadDashboardUrlState = ({
     : undefined;
 
   // remove state from URL
-  kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
-    if (nextUrl.includes(DASHBOARD_STATE_STORAGE_KEY)) {
-      return replaceUrlHashQuery(nextUrl, (query) => {
-        delete query[DASHBOARD_STATE_STORAGE_KEY];
-        return query;
-      });
-    }
-    return nextUrl;
-  }, true);
+  if (!awaitingRemoval) {
+    awaitingRemoval = true;
+    kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
+      if (nextUrl.includes(DASHBOARD_STATE_STORAGE_KEY)) {
+        return replaceUrlHashQuery(nextUrl, (query) => {
+          delete query[DASHBOARD_STATE_STORAGE_KEY];
+          return query;
+        });
+      }
+      awaitingRemoval = false;
+      return nextUrl;
+    }, true);
+  }
 
   return {
     ..._.omit(rawAppStateInUrl, ['panels', 'query']),

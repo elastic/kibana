@@ -56,7 +56,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/transform'),
       resolve(__dirname, './apps/reporting_management'),
       resolve(__dirname, './apps/management'),
-      resolve(__dirname, './apps/reporting'),
       resolve(__dirname, './apps/lens'), // smokescreen tests cause flakiness in other tests
 
       // This license_management file must be last because it is destructive.
@@ -82,7 +81,6 @@ export default async function ({ readConfigFile }) {
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.maps.preserveDrawingBuffer=true',
-        '--usageCollection.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
@@ -214,6 +212,11 @@ export default async function ({ readConfigFile }) {
     },
     security: {
       roles: {
+        test_monitoring: {
+          elasticsearch: {
+            cluster: ['monitor'],
+          },
+        },
         test_logstash_reader: {
           elasticsearch: {
             cluster: [],
@@ -512,6 +515,14 @@ export default async function ({ readConfigFile }) {
           elasticsearch: {
             cluster: ['manage_ilm'],
           },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['default'],
+            },
+          ],
         },
 
         index_management_user: {

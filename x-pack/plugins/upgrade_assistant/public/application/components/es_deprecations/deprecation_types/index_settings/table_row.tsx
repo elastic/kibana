@@ -7,10 +7,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell } from '@elastic/eui';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { EnrichedDeprecationInfo, ResponseError } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
-import type { ResponseError } from '../../../../lib/api';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { DeprecationTableColumns, Status } from '../../../types';
 import { IndexSettingsResolutionCell } from './resolution_table_cell';
@@ -33,7 +32,9 @@ export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
     details?: ResponseError;
   }>({ statusType: 'idle' });
 
-  const { api } = useAppContext();
+  const {
+    services: { api },
+  } = useAppContext();
 
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
@@ -71,6 +72,7 @@ export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
         },
         flyoutProps: {
           onClose: closeFlyout,
+          className: 'eui-textBreakWord',
           'data-test-subj': 'indexSettingsDetails',
           'aria-labelledby': 'indexSettingsDetailsFlyoutTitle',
         },

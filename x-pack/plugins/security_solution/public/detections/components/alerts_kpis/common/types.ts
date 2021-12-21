@@ -11,14 +11,17 @@ export interface AlertsStackByOption {
 }
 
 export type AlertsStackByField =
-  | 'signal.rule.risk_score'
-  | 'signal.rule.severity'
-  | 'signal.rule.threat.tactic.name'
+  | 'kibana.alert.risk_score'
+  | 'kibana.alert.severity'
+  | 'kibana.alert.rule.threat.tactic.name'
   | 'destination.ip'
   | 'event.action'
   | 'event.category'
   | 'host.name'
-  | 'signal.rule.type'
-  | 'signal.rule.name'
+  | 'kibana.alert.rule.type'
+  | 'kibana.alert.rule.name'
   | 'source.ip'
-  | 'user.name';
+  | 'user.name'
+  | 'process.name'
+  | 'file.name'
+  | 'hash.sha256';

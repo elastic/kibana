@@ -64,9 +64,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('doc view should show Time and Document columns', async function () {
+      it('doc view should show @timestamp and Document columns', async function () {
         const Docheader = await PageObjects.discover.getDocHeader();
-        expect(Docheader).to.contain('Time');
+        expect(Docheader).to.contain('@timestamp');
         expect(Docheader).to.contain('Document');
       });
 

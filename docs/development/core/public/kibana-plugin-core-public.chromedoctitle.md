@@ -18,7 +18,6 @@ How to change the title of the document
 
 ```ts
 chrome.docTitle.change('My application')
-
 ```
 
 ## Example 2
@@ -27,7 +26,6 @@ How to reset the title of the document to it's initial value
 
 ```ts
 chrome.docTitle.reset()
-
 ```
 
 ## Methods

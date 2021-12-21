@@ -6,29 +6,32 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { IHTTPSimpleFields, ConfigKeys, DataStream } from '../types';
+import { HTTPSimpleFields, ConfigKey, DataStream } from '../types';
 import { defaultValues as commonDefaultValues } from '../common/default_values';
 
-interface IHTTPSimpleFieldsContext {
-  setFields: React.Dispatch<React.SetStateAction<IHTTPSimpleFields>>;
-  fields: IHTTPSimpleFields;
-  defaultValues: IHTTPSimpleFields;
+interface HTTPSimpleFieldsContext {
+  setFields: React.Dispatch<React.SetStateAction<HTTPSimpleFields>>;
+  fields: HTTPSimpleFields;
+  defaultValues: HTTPSimpleFields;
 }
 
-interface IHTTPSimpleFieldsContextProvider {
+interface HTTPSimpleFieldsContextProvider {
   children: React.ReactNode;
-  defaultValues?: IHTTPSimpleFields;
+  defaultValues?: HTTPSimpleFields;
 }
 
-export const initialValues: IHTTPSimpleFields = {
+export const initialValues: HTTPSimpleFields = {
   ...commonDefaultValues,
-  [ConfigKeys.URLS]: '',
-  [ConfigKeys.MAX_REDIRECTS]: '0',
-  [ConfigKeys.MONITOR_TYPE]: DataStream.HTTP,
+  [ConfigKey.METADATA]: {
+    is_tls_enabled: false,
+  },
+  [ConfigKey.URLS]: '',
+  [ConfigKey.MAX_REDIRECTS]: '0',
+  [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
 };
 
-const defaultContext: IHTTPSimpleFieldsContext = {
-  setFields: (_fields: React.SetStateAction<IHTTPSimpleFields>) => {
+const defaultContext: HTTPSimpleFieldsContext = {
+  setFields: (_fields: React.SetStateAction<HTTPSimpleFields>) => {
     throw new Error(
       'setFields was not initialized for HTTP Simple Fields, set it when you invoke the context'
     );
@@ -42,8 +45,8 @@ export const HTTPSimpleFieldsContext = createContext(defaultContext);
 export const HTTPSimpleFieldsContextProvider = ({
   children,
   defaultValues = initialValues,
-}: IHTTPSimpleFieldsContextProvider) => {
-  const [fields, setFields] = useState<IHTTPSimpleFields>(defaultValues);
+}: HTTPSimpleFieldsContextProvider) => {
+  const [fields, setFields] = useState<HTTPSimpleFields>(defaultValues);
 
   const value = useMemo(() => {
     return { fields, setFields, defaultValues };

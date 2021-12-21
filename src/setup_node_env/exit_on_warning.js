@@ -29,6 +29,16 @@ var IGNORE_WARNINGS = [
     file: '/node_modules/supertest/node_modules/superagent/lib/node/index.js',
     line: 418,
   },
+  // TODO @elastic/es-clients
+  // 'Use of deprecated folder mapping "./" in the "exports" field module resolution of the package
+  // at node_modules/@elastic/elasticsearch/package.json.'
+  // This is a breaking change in Node 12, which elasticsearch-js supports.
+  // https://github.com/elastic/elasticsearch-js/issues/1465
+  // https://nodejs.org/api/deprecations.html#DEP0148
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0148',
+  },
   {
     // TODO: @elastic/es-clients - The new client will attempt a Product check and it will `process.emitWarning`
     //  that the security features are blocking such check.

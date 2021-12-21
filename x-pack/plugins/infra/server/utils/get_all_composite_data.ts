@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
+import { TransportResult } from '@elastic/elasticsearch';
 import { InfraDatabaseSearchResponse } from '../lib/adapters/framework';
 
 export const getAllCompositeData = async <
@@ -15,7 +15,7 @@ export const getAllCompositeData = async <
 >(
   esClientSearch: (
     options: Options
-  ) => Promise<ApiResponse<InfraDatabaseSearchResponse<{}, Aggregation>>>,
+  ) => Promise<TransportResult<InfraDatabaseSearchResponse<{}, Aggregation>>>,
   options: Options,
   bucketSelector: (response: InfraDatabaseSearchResponse<{}, Aggregation>) => Bucket[],
   onAfterKey: (options: Options, response: InfraDatabaseSearchResponse<{}, Aggregation>) => Options,

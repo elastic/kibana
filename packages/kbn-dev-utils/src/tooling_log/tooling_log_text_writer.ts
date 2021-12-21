@@ -28,7 +28,20 @@ const MSG_PREFIXES = {
 const has = <T extends object>(obj: T, key: any): key is keyof T => obj.hasOwnProperty(key);
 
 export interface ToolingLogTextWriterConfig {
+  /**
+   * Log level, messages below this level will be ignored
+   */
   level: LogLevel;
+  /**
+   * List of message sources/ToolingLog types which will be ignored. Create
+   * a logger with `ToolingLog#withType()` to create messages with a specific
+   * source. Ignored messages will be dropped without writing.
+   */
+  ignoreSources?: string[];
+  /**
+   * Target which will receive formatted message lines, a common value for `writeTo`
+   * is process.stdout
+   */
   writeTo: {
     write(s: string): void;
   };
@@ -59,10 +72,12 @@ export class ToolingLogTextWriter implements Writer {
   public readonly writeTo: {
     write(msg: string): void;
   };
+  private readonly ignoreSources?: string[];
 
   constructor(config: ToolingLogTextWriterConfig) {
     this.level = parseLogLevel(config.level);
     this.writeTo = config.writeTo;
+    this.ignoreSources = config.ignoreSources;
 
     if (!this.writeTo || typeof this.writeTo.write !== 'function') {
       throw new Error(
@@ -74,6 +89,18 @@ export class ToolingLogTextWriter implements Writer {
   write(msg: Message) {
     if (!shouldWriteType(this.level, msg.type)) {
       return false;
+    }
+
+    if (this.ignoreSources && msg.source && this.ignoreSources.includes(msg.source)) {
+      if (msg.type === 'write') {
+        const txt = format(msg.args[0], ...msg.args.slice(1));
+        // Ensure that Elasticsearch deprecation log messages from Kibana aren't ignored
+        if (!/elasticsearch\.deprecation/.test(txt)) {
+          return false;
+        }
+      } else {
+        return false;
+      }
     }
 
     const prefix = has(MSG_PREFIXES, msg.type) ? MSG_PREFIXES[msg.type] : '';

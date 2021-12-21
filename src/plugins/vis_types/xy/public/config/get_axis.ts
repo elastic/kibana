@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { identity, isNil } from 'lodash';
+import { identity } from 'lodash';
 
 import { AxisSpec, TickFormatter, YDomainRange, ScaleType as ECScaleType } from '@elastic/charts';
 
 import { LabelRotation } from '../../../../charts/public';
 import { BUCKET_TYPES } from '../../../../data/public';
+import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../charts/common';
 
 import {
   Aspect,
@@ -33,7 +34,9 @@ export function getAxis<S extends XScaleType | YScaleType>(
   { categoryLines, valueAxis }: Grid,
   { params, format, formatter, title: fallbackTitle = '', aggType }: Aspect,
   seriesParams: SeriesParam[],
-  isDateHistogram = false
+  isDateHistogram = false,
+  useMultiLayerTimeAxis = false,
+  darkMode = false
 ): AxisConfig<S> {
   const isCategoryAxis = type === AxisType.Category;
   // Hide unassigned axis, not supported in elastic charts
@@ -74,9 +77,10 @@ export function getAxis<S extends XScaleType | YScaleType>(
     ticks,
     grid,
     scale,
-    style: getAxisStyle(ticks, title, fallbackRotation),
+    style: getAxisStyle(useMultiLayerTimeAxis, darkMode, ticks, title, fallbackRotation),
     domain: getAxisDomain(scale, isCategoryAxis),
     integersOnly: aggType === 'count',
+    timeAxisLayerCount: useMultiLayerTimeAxis ? 3 : 0,
   };
 }
 
@@ -120,7 +124,7 @@ function getScaleType(
   return type;
 }
 
-function getScale<S extends XScaleType | YScaleType>(
+export function getScale<S extends XScaleType | YScaleType>(
   scale: Scale,
   params: Aspect['params'],
   format: Aspect['format'],
@@ -130,7 +134,10 @@ function getScale<S extends XScaleType | YScaleType>(
     isCategoryAxis
       ? getScaleType(
           scale,
-          format?.id === 'number' || (format?.params?.id === 'number' && format?.id !== 'range'),
+          format?.id === 'number' ||
+            (format?.params?.id === 'number' &&
+              format?.id !== BUCKET_TYPES.RANGE &&
+              format?.id !== BUCKET_TYPES.TERMS),
           'date' in params,
           'interval' in params
         )
@@ -144,19 +151,36 @@ function getScale<S extends XScaleType | YScaleType>(
 }
 
 function getAxisStyle(
+  isMultiLayerTimeAxis: boolean,
+  darkMode: boolean,
   ticks?: TickOptions,
   title?: string,
   rotationFallback: LabelRotation = LabelRotation.Vertical
 ): AxisSpec['style'] {
-  return {
-    axisTitle: {
-      visible: (title ?? '').trim().length > 0,
-    },
-    tickLabel: {
-      visible: ticks?.show,
-      rotation: -(ticks?.rotation ?? rotationFallback),
-    },
-  };
+  return isMultiLayerTimeAxis
+    ? {
+        ...MULTILAYER_TIME_AXIS_STYLE,
+        tickLabel: {
+          ...MULTILAYER_TIME_AXIS_STYLE.tickLabel,
+          visible: Boolean(ticks?.show),
+        },
+        tickLine: {
+          ...MULTILAYER_TIME_AXIS_STYLE.tickLine,
+          visible: Boolean(ticks?.show),
+        },
+        axisTitle: {
+          visible: (title ?? '').trim().length > 0,
+        },
+      }
+    : {
+        axisTitle: {
+          visible: (title ?? '').trim().length > 0,
+        },
+        tickLabel: {
+          visible: Boolean(ticks?.show),
+          rotation: -(ticks?.rotation ?? rotationFallback),
+        },
+      };
 }
 
 function getAxisDomain<S extends XScaleType | YScaleType>(
@@ -171,17 +195,5 @@ function getAxisDomain<S extends XScaleType | YScaleType>(
   const fit = defaultYExtents;
   const padding = boundsMargin || undefined;
 
-  if (!isNil(min) && !isNil(max)) {
-    return { fit, padding, min, max };
-  }
-
-  if (!isNil(min)) {
-    return { fit, padding, min };
-  }
-
-  if (!isNil(max)) {
-    return { fit, padding, max };
-  }
-
-  return { fit, padding };
+  return { fit, padding, min: min ?? NaN, max: max ?? NaN };
 }

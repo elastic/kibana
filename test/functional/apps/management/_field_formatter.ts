@@ -423,7 +423,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let testDocumentId: string;
 
     before(async () => {
-      if ((await es.indices.exists({ index: indexTitle })).body) {
+      if (await es.indices.exists({ index: indexTitle })) {
         await es.indices.delete({ index: indexTitle });
       }
 
@@ -447,7 +447,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }, {} as Record<string, FieldFormatEditorSpecDescriptor['fieldValue']>),
         refresh: 'wait_for',
       });
-      testDocumentId = docResult.body._id;
+      testDocumentId = docResult._id;
 
       const indexPatternResult = await indexPatterns.create(
         { title: indexTitle },

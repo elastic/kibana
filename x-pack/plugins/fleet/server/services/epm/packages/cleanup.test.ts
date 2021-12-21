@@ -17,7 +17,7 @@ import { removeOldAssets } from './cleanup';
 jest.mock('../..', () => ({
   appContextService: {
     getLogger: () => ({
-      info: jest.fn(),
+      debug: jest.fn(),
     }),
   },
 }));

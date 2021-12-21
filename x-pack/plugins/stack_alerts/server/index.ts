@@ -18,6 +18,8 @@ export const config: PluginConfigDescriptor<Config> = {
       const stackAlerts = get(settings, fromPath);
       if (stackAlerts?.enabled === false || stackAlerts?.enabled === true) {
         addDeprecation({
+          level: 'critical',
+          configPath: 'xpack.stack_alerts.enabled',
           message: `"xpack.stack_alerts.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
           correctiveActions: {
             manualSteps: [`Remove "xpack.stack_alerts.enabled" from your kibana configs.`],

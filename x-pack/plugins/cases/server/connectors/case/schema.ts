@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CommentType, ConnectorTypes } from '../../../common';
+import { CommentType, ConnectorTypes } from '../../../common/api';
 import { validateConnector } from './validators';
 
 // Reserved for future implementation
@@ -83,6 +83,7 @@ const SwimlaneFieldsSchema = schema.object({
 
 const NoneFieldsSchema = schema.nullable(schema.object({}));
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ReducedConnectorFieldsSchema: { [x: string]: any } = {
   [ConnectorTypes.jira]: JiraFieldsSchema,
   [ConnectorTypes.resilient]: ResilientFieldsSchema,

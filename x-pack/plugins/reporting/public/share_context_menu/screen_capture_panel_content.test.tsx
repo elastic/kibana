@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { coreMock } from 'src/core/public/mocks';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content';
@@ -63,6 +63,43 @@ test('ScreenCapturePanelContent properly renders a view with "canvas" layout opt
   expect(component.text()).toMatch('Full page layout');
 });
 
+test('ScreenCapturePanelContent allows POST URL to be copied when objectId is provided', () => {
+  const component = mount(
+    <IntlProvider locale="en">
+      <ScreenCapturePanelContent
+        layoutOption="canvas"
+        reportType="Analytical App"
+        requiresSavedState={false}
+        apiClient={apiClient}
+        uiSettings={uiSettings}
+        toasts={coreSetup.notifications.toasts}
+        getJobParams={getJobParamsDefault}
+        objectId={'1234-5'}
+      />
+    </IntlProvider>
+  );
+  expect(component.text()).toMatch('Copy POST URL');
+  expect(component.text()).not.toMatch('Unsaved work');
+});
+
+test('ScreenCapturePanelContent does not allow POST URL to be copied when objectId is not provided', () => {
+  const component = mount(
+    <IntlProvider locale="en">
+      <ScreenCapturePanelContent
+        layoutOption="canvas"
+        reportType="Analytical App"
+        requiresSavedState={false}
+        apiClient={apiClient}
+        uiSettings={uiSettings}
+        toasts={coreSetup.notifications.toasts}
+        getJobParams={getJobParamsDefault}
+      />
+    </IntlProvider>
+  );
+  expect(component.text()).not.toMatch('Copy POST URL');
+  expect(component.text()).toMatch('Unsaved work');
+});
+
 test('ScreenCapturePanelContent properly renders a view with "print" layout option', () => {
   const component = mount(
     <IntlProvider locale="en">
@@ -85,8 +122,10 @@ test('ScreenCapturePanelContent decorated job params are visible in the POST URL
   const component = mount(
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
+        objectId="test"
         reportType="Analytical App"
         requiresSavedState={false}
+        isDirty={false}
         apiClient={apiClient}
         uiSettings={uiSettings}
         toasts={coreSetup.notifications.toasts}

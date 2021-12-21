@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Query } from '@kbn/es-query';
+
 /*
  * Contains utility functions for building and processing queries.
  */
@@ -16,8 +18,8 @@ export function buildBaseFilterCriteria(
   timeFieldName?: string,
   earliestMs?: number,
   latestMs?: number,
-  query?: object
-) {
+  query?: Query['query']
+): estypes.QueryDslQueryContainer[] {
   const filterCriteria = [];
   if (timeFieldName && earliestMs && latestMs) {
     filterCriteria.push({
@@ -31,7 +33,7 @@ export function buildBaseFilterCriteria(
     });
   }
 
-  if (query) {
+  if (query && typeof query === 'object') {
     filterCriteria.push(query);
   }
 

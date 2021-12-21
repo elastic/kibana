@@ -6,8 +6,9 @@
  */
 
 import { EuiTab, EuiTabs } from '@elastic/eui';
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
+import { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
 import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
@@ -16,8 +17,11 @@ import {
   getSetupModeState,
   isSetupModeFeatureEnabled,
   updateSetupModeData,
-} from '../setup_mode/setup_mode';
+} from '../../lib/setup_mode';
 import { SetupModeFeature } from '../../../common/enums';
+import { AlertsDropdown } from '../../alerts/alerts_dropdown';
+import { ActionMenu } from '../../components/action_menu';
+import { useRequestErrorHandler } from '../hooks/use_request_error_handler';
 
 export interface TabMenuItem {
   id: string;
@@ -45,35 +49,64 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
 
   const { currentTimerange } = useContext(MonitoringTimeContainer.Context);
   const [loaded, setLoaded] = useState(false);
+  const [isRequestPending, setIsRequestPending] = useState(false);
   const history = useHistory();
+  const [hasError, setHasError] = useState(false);
+  const handleRequestError = useRequestErrorHandler();
+
+  const getPageDataResponseHandler = useCallback(
+    (result: any) => {
+      setHasError(false);
+      return result;
+    },
+    [setHasError]
+  );
 
   useEffect(() => {
+    setIsRequestPending(true);
     getPageData?.()
-      .catch((err) => {
-        // TODO: handle errors
+      .then(getPageDataResponseHandler)
+      .catch((err: IHttpFetchError<ResponseErrorBody>) => {
+        handleRequestError(err);
+        setHasError(true);
       })
       .finally(() => {
         setLoaded(true);
+        setIsRequestPending(false);
       });
-  }, [getPageData, currentTimerange]);
+  }, [getPageData, currentTimerange, getPageDataResponseHandler, handleRequestError]);
 
   const onRefresh = () => {
-    const requests = [getPageData?.()];
-    if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
-      requests.push(updateSetupModeData());
-    }
+    // don't refresh when a request is pending
+    if (isRequestPending) return;
+    setIsRequestPending(true);
+    getPageData?.()
+      .then(getPageDataResponseHandler)
+      .catch(handleRequestError)
+      .finally(() => {
+        setIsRequestPending(false);
+      });
 
-    Promise.allSettled(requests).then((results) => {
-      // TODO: handle errors
-    });
+    if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
+      updateSetupModeData();
+    }
   };
 
   const createHref = (route: string) => history.createHref({ pathname: route });
 
   const isTabSelected = (route: string) => history.location.pathname === route;
 
+  const renderContent = () => {
+    if (hasError) return null;
+    if (getPageData && !loaded) return <PageLoading />;
+    return children;
+  };
+
   return (
-    <div className="app-container">
+    <div className="app-container" data-test-subj="monitoringAppContainer">
+      <ActionMenu>
+        <AlertsDropdown />
+      </ActionMenu>
       <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
       {tabs && (
         <EuiTabs>
@@ -93,7 +126,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
           })}
         </EuiTabs>
       )}
-      <div>{!getPageData ? children : loaded ? children : <PageLoading />}</div>
+      <div>{renderContent()}</div>
     </div>
   );
 };

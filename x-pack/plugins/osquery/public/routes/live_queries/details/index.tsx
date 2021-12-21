@@ -6,8 +6,15 @@
  */
 
 import { get } from 'lodash';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCodeBlock,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -16,7 +23,6 @@ import { WithHeaderLayout } from '../../../components/layouts';
 import { useActionDetails } from '../../../actions/use_action_details';
 import { ResultTabs } from '../../saved_queries/edit/tabs';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const LiveQueryDetailsPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
@@ -37,15 +43,14 @@ const LiveQueryDetailsPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.liveQueryDetails.pageTitle"
                 defaultMessage="Live query details"
               />
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

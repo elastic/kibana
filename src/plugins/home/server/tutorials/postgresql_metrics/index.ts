@@ -23,17 +23,17 @@ export function postgresqlMetricsSpecProvider(context: TutorialContext): Tutoria
   return {
     id: 'postgresqlMetrics',
     name: i18n.translate('home.tutorials.postgresqlMetrics.nameTitle', {
-      defaultMessage: 'PostgreSQL metrics',
+      defaultMessage: 'PostgreSQL Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     isBeta: false,
     shortDescription: i18n.translate('home.tutorials.postgresqlMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from PostgreSQL.',
+      defaultMessage: 'Collect metrics from PostgreSQL servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.postgresqlMetrics.longDescription', {
       defaultMessage:
-        'The `postgresql` Metricbeat module fetches internal metrics from the PostgreSQL server. \
+        'The `postgresql` Metricbeat module fetches metrics from PostgreSQL server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-postgresql.html',
@@ -56,8 +56,8 @@ export function postgresqlMetricsSpecProvider(context: TutorialContext): Tutoria
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['datastore'],
   };
 }

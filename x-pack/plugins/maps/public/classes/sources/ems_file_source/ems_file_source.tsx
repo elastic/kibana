@@ -135,7 +135,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
         meta: {},
       };
     } catch (error) {
-      throw new Error(`${getErrorInfo(this._descriptor.id)} - ${error.message}`);
+      throw new Error(getErrorInfo(this._descriptor.id));
     }
   }
 

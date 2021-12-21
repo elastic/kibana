@@ -38,4 +38,5 @@ class Log extends ToolingLog {
 }
 
 export const log = new Log();
-export { LogLevel, Log };
+export type { LogLevel };
+export { Log };

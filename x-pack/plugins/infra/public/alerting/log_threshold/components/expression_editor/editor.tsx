@@ -11,16 +11,16 @@ import React, { useCallback, useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
   ForLastExpression,
 } from '../../../../../../triggers_actions_ui/public';
 import {
   Comparator,
-  isRatioAlert,
-  PartialAlertParams,
-  PartialCountAlertParams,
+  isRatioRule,
+  PartialRuleParams,
+  PartialCountRuleParams,
   PartialCriteria as PartialCriteriaType,
-  PartialRatioAlertParams,
+  PartialRatioRuleParams,
   ThresholdType,
   timeUnitRT,
   isOptimizableGroupedThreshold,
@@ -64,9 +64,9 @@ const createDefaultCriterion = (
     ? { field: DEFAULT_FIELD, comparator: Comparator.EQ, value }
     : { field: undefined, comparator: undefined, value: undefined };
 
-const createDefaultCountAlertParams = (
+const createDefaultCountRuleParams = (
   availableFields: LogIndexField[]
-): PartialCountAlertParams => ({
+): PartialCountRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {
     value: 75,
@@ -75,9 +75,9 @@ const createDefaultCountAlertParams = (
   criteria: [createDefaultCriterion(availableFields, 'error')],
 });
 
-const createDefaultRatioAlertParams = (
+const createDefaultRatioRuleParams = (
   availableFields: LogIndexField[]
-): PartialRatioAlertParams => ({
+): PartialRatioRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   count: {
     value: 2,
@@ -90,7 +90,7 @@ const createDefaultRatioAlertParams = (
 });
 
 export const ExpressionEditor: React.FC<
-  AlertTypeParamsExpressionProps<PartialAlertParams, LogsContextMeta>
+  RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>
 > = (props) => {
   const isInternal = props.metadata?.isInternal ?? false;
   const [sourceId] = useSourceId();
@@ -159,177 +159,176 @@ export const SourceStatusWrapper: React.FC = ({ children }) => {
   );
 };
 
-export const Editor: React.FC<AlertTypeParamsExpressionProps<PartialAlertParams, LogsContextMeta>> =
-  (props) => {
-    const { setAlertParams, alertParams, errors } = props;
-    const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
-    const { sourceId, resolvedSourceConfiguration } = useLogSourceContext();
+export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>> = (
+  props
+) => {
+  const { setRuleParams, ruleParams, errors } = props;
+  const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
+  const { sourceId, resolvedSourceConfiguration } = useLogSourceContext();
 
-    const {
-      criteria: criteriaErrors,
-      threshold: thresholdErrors,
-      timeSizeUnit: timeSizeUnitErrors,
-      timeWindowSize: timeWindowSizeErrors,
-    } = useMemo(() => decodeOrThrow(errorsRT)(errors), [errors]);
+  const {
+    criteria: criteriaErrors,
+    threshold: thresholdErrors,
+    timeSizeUnit: timeSizeUnitErrors,
+    timeWindowSize: timeWindowSizeErrors,
+  } = useMemo(() => decodeOrThrow(errorsRT)(errors), [errors]);
 
-    const supportedFields = useMemo(() => {
-      if (resolvedSourceConfiguration?.fields) {
-        return resolvedSourceConfiguration.fields.filter((field) => {
-          return (field.type === 'string' || field.type === 'number') && field.searchable;
-        });
-      } else {
-        return [];
+  const supportedFields = useMemo(() => {
+    if (resolvedSourceConfiguration?.fields) {
+      return resolvedSourceConfiguration.fields.filter((field) => {
+        return (field.type === 'string' || field.type === 'number') && field.searchable;
+      });
+    } else {
+      return [];
+    }
+  }, [resolvedSourceConfiguration]);
+
+  const groupByFields = useMemo(() => {
+    if (resolvedSourceConfiguration?.fields) {
+      return resolvedSourceConfiguration.fields.filter((field) => {
+        return field.type === 'string' && field.aggregatable;
+      });
+    } else {
+      return [];
+    }
+  }, [resolvedSourceConfiguration]);
+
+  const updateThreshold = useCallback(
+    (thresholdParams) => {
+      const nextThresholdParams = { ...ruleParams.count, ...thresholdParams };
+      setRuleParams('count', nextThresholdParams);
+    },
+    [ruleParams.count, setRuleParams]
+  );
+
+  const updateCriteria = useCallback(
+    (criteria: PartialCriteriaType) => {
+      setRuleParams('criteria', criteria);
+    },
+    [setRuleParams]
+  );
+
+  const updateTimeSize = useCallback(
+    (ts: number | undefined) => {
+      setRuleParams('timeSize', ts);
+    },
+    [setRuleParams]
+  );
+
+  const updateTimeUnit = useCallback(
+    (tu: string) => {
+      if (timeUnitRT.is(tu)) {
+        setRuleParams('timeUnit', tu);
       }
-    }, [resolvedSourceConfiguration]);
+    },
+    [setRuleParams]
+  );
 
-    const groupByFields = useMemo(() => {
-      if (resolvedSourceConfiguration?.fields) {
-        return resolvedSourceConfiguration.fields.filter((field) => {
-          return field.type === 'string' && field.aggregatable;
-        });
-      } else {
-        return [];
-      }
-    }, [resolvedSourceConfiguration]);
+  const updateGroupBy = useCallback(
+    (groups: string[]) => {
+      setRuleParams('groupBy', groups);
+    },
+    [setRuleParams]
+  );
 
-    const updateThreshold = useCallback(
-      (thresholdParams) => {
-        const nextThresholdParams = { ...alertParams.count, ...thresholdParams };
-        setAlertParams('count', nextThresholdParams);
-      },
-      [alertParams.count, setAlertParams]
-    );
+  const defaultCountAlertParams = useMemo(
+    () => createDefaultCountRuleParams(supportedFields),
+    [supportedFields]
+  );
 
-    const updateCriteria = useCallback(
-      (criteria: PartialCriteriaType) => {
-        setAlertParams('criteria', criteria);
-      },
-      [setAlertParams]
-    );
+  const updateType = useCallback(
+    (type: ThresholdType) => {
+      const defaults =
+        type === 'count' ? defaultCountAlertParams : createDefaultRatioRuleParams(supportedFields);
+      // Reset properties that don't make sense switching from one context to the other
+      setRuleParams('count', defaults.count);
+      setRuleParams('criteria', defaults.criteria);
+    },
+    [defaultCountAlertParams, setRuleParams, supportedFields]
+  );
 
-    const updateTimeSize = useCallback(
-      (ts: number | undefined) => {
-        setAlertParams('timeSize', ts);
-      },
-      [setAlertParams]
-    );
+  useMount(() => {
+    const newAlertParams = { ...defaultCountAlertParams, ...ruleParams };
+    for (const [key, value] of Object.entries(newAlertParams) as ObjectEntries<
+      typeof newAlertParams
+    >) {
+      setRuleParams(key, value);
+    }
+    setHasSetDefaults(true);
+  });
 
-    const updateTimeUnit = useCallback(
-      (tu: string) => {
-        if (timeUnitRT.is(tu)) {
-          setAlertParams('timeUnit', tu);
-        }
-      },
-      [setAlertParams]
-    );
-
-    const updateGroupBy = useCallback(
-      (groups: string[]) => {
-        setAlertParams('groupBy', groups);
-      },
-      [setAlertParams]
-    );
-
-    const defaultCountAlertParams = useMemo(
-      () => createDefaultCountAlertParams(supportedFields),
-      [supportedFields]
-    );
-
-    const updateType = useCallback(
-      (type: ThresholdType) => {
-        const defaults =
-          type === 'count'
-            ? defaultCountAlertParams
-            : createDefaultRatioAlertParams(supportedFields);
-        // Reset properties that don't make sense switching from one context to the other
-        setAlertParams('count', defaults.count);
-        setAlertParams('criteria', defaults.criteria);
-      },
-      [defaultCountAlertParams, setAlertParams, supportedFields]
-    );
-
-    useMount(() => {
-      const newAlertParams = { ...defaultCountAlertParams, ...alertParams };
-      for (const [key, value] of Object.entries(newAlertParams) as ObjectEntries<
-        typeof newAlertParams
-      >) {
-        setAlertParams(key, value);
-      }
-      setHasSetDefaults(true);
-    });
-
-    const shouldShowGroupByOptimizationWarning = useMemo(() => {
-      const hasSetGroupBy = alertParams.groupBy && alertParams.groupBy.length > 0;
-      return (
-        hasSetGroupBy &&
-        alertParams.count &&
-        !isOptimizableGroupedThreshold(alertParams.count.comparator, alertParams.count.value)
-      );
-    }, [alertParams]);
-
-    // Wait until the alert param defaults have been set
-    if (!hasSetDefaults) return null;
-
-    const criteriaComponent = alertParams.criteria ? (
-      <Criteria
-        fields={supportedFields}
-        criteria={alertParams.criteria}
-        defaultCriterion={defaultCountAlertParams.criteria[0]}
-        errors={criteriaErrors}
-        alertParams={alertParams}
-        sourceId={sourceId}
-        updateCriteria={updateCriteria}
-      />
-    ) : null;
-
+  const shouldShowGroupByOptimizationWarning = useMemo(() => {
+    const hasSetGroupBy = ruleParams.groupBy && ruleParams.groupBy.length > 0;
     return (
-      <>
-        <TypeSwitcher criteria={alertParams.criteria || []} updateType={updateType} />
-
-        {alertParams.criteria && !isRatioAlert(alertParams.criteria) && criteriaComponent}
-
-        <Threshold
-          comparator={alertParams.count?.comparator}
-          value={alertParams.count?.value}
-          updateThreshold={updateThreshold}
-          errors={thresholdErrors}
-        />
-
-        <ForLastExpression
-          timeWindowSize={alertParams.timeSize}
-          timeWindowUnit={alertParams.timeUnit}
-          onChangeWindowSize={updateTimeSize}
-          onChangeWindowUnit={updateTimeUnit}
-          errors={{ timeWindowSize: timeWindowSizeErrors, timeSizeUnit: timeSizeUnitErrors }}
-        />
-
-        <GroupByExpression
-          selectedGroups={alertParams.groupBy}
-          onChange={updateGroupBy}
-          fields={groupByFields}
-        />
-
-        {alertParams.criteria && isRatioAlert(alertParams.criteria) && criteriaComponent}
-
-        {shouldShowGroupByOptimizationWarning && (
-          <>
-            <EuiSpacer size="l" />
-            <EuiCallOut color="warning">
-              {i18n.translate('xpack.infra.logs.alertFlyout.groupByOptimizationWarning', {
-                defaultMessage:
-                  'When setting a "group by" we highly recommend using the "{comparator}" comparator for your threshold. This can lead to significant performance improvements.',
-                values: {
-                  comparator: Comparator.GT,
-                },
-              })}
-            </EuiCallOut>
-          </>
-        )}
-
-        <EuiSpacer size="l" />
-      </>
+      hasSetGroupBy &&
+      ruleParams.count &&
+      !isOptimizableGroupedThreshold(ruleParams.count.comparator, ruleParams.count.value)
     );
-  };
+  }, [ruleParams]);
+
+  // Wait until the alert param defaults have been set
+  if (!hasSetDefaults) return null;
+
+  const criteriaComponent = ruleParams.criteria ? (
+    <Criteria
+      fields={supportedFields}
+      criteria={ruleParams.criteria}
+      defaultCriterion={defaultCountAlertParams.criteria[0]}
+      errors={criteriaErrors}
+      ruleParams={ruleParams}
+      sourceId={sourceId}
+      updateCriteria={updateCriteria}
+    />
+  ) : null;
+
+  return (
+    <>
+      <TypeSwitcher criteria={ruleParams.criteria || []} updateType={updateType} />
+
+      {ruleParams.criteria && !isRatioRule(ruleParams.criteria) && criteriaComponent}
+
+      <Threshold
+        comparator={ruleParams.count?.comparator}
+        value={ruleParams.count?.value}
+        updateThreshold={updateThreshold}
+        errors={thresholdErrors}
+      />
+
+      <ForLastExpression
+        timeWindowSize={ruleParams.timeSize}
+        timeWindowUnit={ruleParams.timeUnit}
+        onChangeWindowSize={updateTimeSize}
+        onChangeWindowUnit={updateTimeUnit}
+        errors={{ timeWindowSize: timeWindowSizeErrors, timeSizeUnit: timeSizeUnitErrors }}
+      />
+
+      <GroupByExpression
+        selectedGroups={ruleParams.groupBy}
+        onChange={updateGroupBy}
+        fields={groupByFields}
+      />
+
+      {ruleParams.criteria && isRatioRule(ruleParams.criteria) && criteriaComponent}
+
+      {shouldShowGroupByOptimizationWarning && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiCallOut color="warning">
+            {i18n.translate('xpack.infra.logs.alertFlyout.groupByOptimizationWarning', {
+              defaultMessage:
+                'When setting a "group by" we highly recommend using the "{comparator}" comparator for your threshold. This can lead to significant performance improvements.',
+              values: {
+                comparator: Comparator.GT,
+              },
+            })}
+          </EuiCallOut>
+        </>
+      )}
+
+      <EuiSpacer size="l" />
+    </>
+  );
+};
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
@@ -339,7 +338,7 @@ export default ExpressionEditor;
 // components.
 export const ExpressionLike = ({ text }: { text: string }) => {
   return (
-    <div className="euiExpression euiExpression-isUppercase euiExpression--secondary">
+    <div className="euiExpression euiExpression-isUppercase euiExpression--success">
       <span className="euiExpression__description">{text}</span>
     </div>
   );

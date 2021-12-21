@@ -50,6 +50,26 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
   xpack__ml__anomaly_detection_jobs_health: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
 };
 
+const byReasonSchema: MakeSchemaFrom<AlertsUsage>['count_rules_executions_failured_by_reason_per_day'] =
+  {
+    // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
+    DYNAMIC_KEY: { type: 'long' },
+    read: { type: 'long' },
+    decrypt: { type: 'long' },
+    license: { type: 'long' },
+    unknown: { type: 'long' },
+  };
+
+const byReasonSchemaByType: MakeSchemaFrom<AlertsUsage>['count_rules_executions_failured_by_reason_by_type_per_day'] =
+  {
+    // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
+    DYNAMIC_KEY: byTypeSchema,
+    read: byTypeSchema,
+    decrypt: byTypeSchema,
+    license: byTypeSchema,
+    unknown: byTypeSchema,
+  };
+
 export function createAlertsUsageCollector(
   usageCollection: UsageCollectionSetup,
   taskManager: Promise<TaskManagerStartContract>
@@ -84,6 +104,16 @@ export function createAlertsUsageCollector(
             avg: '0s',
             max: '0s',
           },
+          throttle_time_number_s: {
+            min: 0,
+            avg: 0,
+            max: 0,
+          },
+          schedule_time_number_s: {
+            min: 0,
+            avg: 0,
+            max: 0,
+          },
           connectors_per_alert: {
             min: 0,
             avg: 0,
@@ -91,6 +121,14 @@ export function createAlertsUsageCollector(
           },
           count_active_by_type: {},
           count_by_type: {},
+          count_rules_namespaces: 0,
+          count_rules_executions_per_day: 0,
+          count_rules_executions_by_type_per_day: {},
+          count_rules_executions_failured_per_day: 0,
+          count_rules_executions_failured_by_reason_per_day: {},
+          count_rules_executions_failured_by_reason_by_type_per_day: {},
+          avg_execution_time_per_day: 0,
+          avg_execution_time_by_type_per_day: {},
         };
       }
     },
@@ -108,6 +146,16 @@ export function createAlertsUsageCollector(
         avg: { type: 'keyword' },
         max: { type: 'keyword' },
       },
+      throttle_time_number_s: {
+        min: { type: 'long' },
+        avg: { type: 'float' },
+        max: { type: 'long' },
+      },
+      schedule_time_number_s: {
+        min: { type: 'long' },
+        avg: { type: 'float' },
+        max: { type: 'long' },
+      },
       connectors_per_alert: {
         min: { type: 'long' },
         avg: { type: 'float' },
@@ -115,6 +163,14 @@ export function createAlertsUsageCollector(
       },
       count_active_by_type: byTypeSchema,
       count_by_type: byTypeSchema,
+      count_rules_namespaces: { type: 'long' },
+      count_rules_executions_per_day: { type: 'long' },
+      count_rules_executions_by_type_per_day: byTypeSchema,
+      count_rules_executions_failured_per_day: { type: 'long' },
+      count_rules_executions_failured_by_reason_per_day: byReasonSchema,
+      count_rules_executions_failured_by_reason_by_type_per_day: byReasonSchemaByType,
+      avg_execution_time_per_day: { type: 'long' },
+      avg_execution_time_by_type_per_day: byTypeSchema,
     },
   });
 }

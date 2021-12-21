@@ -419,7 +419,6 @@ const wsState: any = {
     maxValuesPerDoc: 1,
     minDocCount: 3,
   },
-  indexPatternRefName: 'indexPattern_0',
 };
 
 export function registerLogsSampleData(sampleDataRegistry: SampleDataRegistrySetup) {
@@ -431,21 +430,16 @@ export function registerLogsSampleData(sampleDataRegistry: SampleDataRegistrySet
       attributes: {
         title: 'Kibana Sample Data - Data Logs',
         description:
-          'This is a sample graph based on the data logs index, which shows agents, extensions, source geography of the log, and response codes.  The graph has 200 and 404 response codes blocked, as they have low cardinality.',
+          'This is a sample graph based on the data logs data view, which shows agents, extensions, source geography of the log, and response codes.  The graph has 200 and 404 response codes blocked, as they have low cardinality.',
         numLinks: 61,
         numVertices: 27,
         version: 1,
         wsState: JSON.stringify(JSON.stringify(wsState)),
+        legacyIndexPatternRef: 'kibana_sample_data_logs',
       },
-      references: [
-        {
-          name: 'indexPattern_0',
-          type: 'index-pattern',
-          id: 'kibana_sample_data_logs',
-        },
-      ],
+      references: [],
       migrationVersion: {
-        'graph-workspace': '7.0.0',
+        'graph-workspace': '7.11.0',
       },
       updated_at: '2020-01-09T16:40:36.122Z',
     },
@@ -454,7 +448,11 @@ export function registerLogsSampleData(sampleDataRegistry: SampleDataRegistrySet
 export function registerLogsSampleDataLink(sampleDataRegistry: SampleDataRegistrySetup) {
   sampleDataRegistry.addAppLinksToSampleDataset(datasetId, [
     {
-      path: createWorkspacePath('e2141080-32fa-11ea-bbe4-818d9c786051'),
+      sampleObject: {
+        type: 'graph-workspace',
+        id: 'e2141080-32fa-11ea-bbe4-818d9c786051',
+      },
+      getPath: createWorkspacePath,
       label: i18n.translate('xpack.graph.sampleData.label', { defaultMessage: 'Graph' }),
       icon: APP_ICON,
     },

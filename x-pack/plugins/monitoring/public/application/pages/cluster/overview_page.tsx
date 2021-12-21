@@ -10,14 +10,17 @@ import { i18n } from '@kbn/i18n';
 import { CODE_PATH_ALL } from '../../../../common/constants';
 import { PageTemplate } from '../page_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { TabMenuItem } from '../page_template';
 import { Overview } from '../../../components/cluster/overview';
-import { ExternalConfigContext } from '../../external_config_context';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { ExternalConfigContext } from '../../contexts/external_config_context';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { fetchClusters } from '../../../lib/fetch_clusters';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
@@ -28,6 +31,7 @@ export const ClusterOverview: React.FC<{}> = () => {
   const clusterUuid = state.cluster_uuid;
   const ccs = state.ccs;
   const [clusters, setClusters] = useState([] as any);
+  const [alerts, setAlerts] = useState<AlertsByName>({});
   const [loaded, setLoaded] = useState<boolean | null>(false);
   const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
 
@@ -46,7 +50,7 @@ export const ClusterOverview: React.FC<{}> = () => {
       {
         id: 'clusterName',
         label: clusters[0].cluster_name,
-        testSubj: 'clusterName',
+        testSubj: 'overviewTabsclusterName',
         route: '/overview',
       },
     ];
@@ -54,23 +58,27 @@ export const ClusterOverview: React.FC<{}> = () => {
 
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
-    try {
-      if (services.http?.fetch) {
-        const response = await fetchClusters({
-          fetch: services.http.fetch,
-          timeRange: {
-            min: bounds.min.toISOString(),
-            max: bounds.max.toISOString(),
-          },
-          ccs,
-          clusterUuid,
-          codePaths: CODE_PATHS,
-        });
-        setClusters(response);
-      }
-    } catch (err) {
-      // TODO: handle errors
-    } finally {
+    if (services.http?.fetch && clusterUuid) {
+      const response = await fetchClusters({
+        fetch: services.http.fetch,
+        timeRange: {
+          min: bounds.min.toISOString(),
+          max: bounds.max.toISOString(),
+        },
+        ccs,
+        clusterUuid,
+        codePaths: CODE_PATHS,
+      });
+      setClusters(response);
+      const alertsResponse = await fetchAlerts({
+        fetch: services.http.fetch,
+        clusterUuid,
+        timeRange: {
+          min: bounds.min.valueOf(),
+          max: bounds.max.valueOf(),
+        },
+      });
+      setAlerts(alertsResponse);
       setLoaded(true);
     }
   }, [ccs, clusterUuid, services.data?.query.timefilter.timefilter, services.http]);
@@ -89,7 +97,7 @@ export const ClusterOverview: React.FC<{}> = () => {
             {flyoutComponent}
             <Overview
               cluster={clusters[0]}
-              alerts={[]}
+              alerts={alerts}
               setupMode={setupMode}
               showLicenseExpiration={externalConfig.showLicenseExpiration}
             />
@@ -98,6 +106,7 @@ export const ClusterOverview: React.FC<{}> = () => {
           </SetupModeContext.Provider>
         )}
       />
+      <EnableAlertsModal alerts={alerts} />
     </PageTemplate>
   );
 };

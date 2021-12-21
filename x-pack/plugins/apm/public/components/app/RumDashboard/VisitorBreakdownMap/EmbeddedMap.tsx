@@ -21,7 +21,7 @@ import {
   isErrorEmbeddable,
 } from '../../../../../../../../src/plugins/embeddable/public';
 import { useLayerList } from './useLayerList';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import type { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { MapToolTip } from './MapToolTip';
@@ -50,7 +50,7 @@ interface KibanaDeps {
   embeddable: EmbeddableStart;
 }
 export function EmbeddedMapComponent() {
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const apmPluginContext = useApmPluginContext();
 
   const { start, end, serviceName } = urlParams;

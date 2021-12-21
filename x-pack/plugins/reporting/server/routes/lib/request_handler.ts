@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
@@ -153,7 +154,13 @@ export class RequestHandler {
       });
     }
 
-    // unknown error, can't convert to 4xx
-    throw err;
+    return this.res.customError({
+      statusCode: 500,
+      body:
+        err?.message ||
+        i18n.translate('xpack.reporting.errorHandler.unknownError', {
+          defaultMessage: 'Unknown error',
+        }),
+    });
   }
 }

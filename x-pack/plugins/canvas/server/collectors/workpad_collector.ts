@@ -381,8 +381,8 @@ const workpadCollector: TelemetryCollector = async function (kibanaIndex, esClie
   const searchParams = {
     size: 10000, // elasticsearch index.max_result_window default value
     index: kibanaIndex,
-    ignoreUnavailable: true,
-    filterPath: ['hits.hits._source.canvas-workpad', '-hits.hits._source.canvas-workpad.assets'],
+    ignore_unavailable: true,
+    filter_path: ['hits.hits._source.canvas-workpad', '-hits.hits._source.canvas-workpad.assets'],
     body: { query: { bool: { filter: { term: { type: CANVAS_TYPE } } } } },
   };
 

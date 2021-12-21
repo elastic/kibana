@@ -321,7 +321,7 @@ export const createConfirmStrings = {
     }),
   getCreateSubtitle: () =>
     i18n.translate('dashboard.createConfirmModal.unsavedChangesSubtitle', {
-      defaultMessage: 'You can continue editing or start with a blank dashboard.',
+      defaultMessage: 'Continue editing or start over with a blank dashboard.',
     }),
   getStartOverButtonText: () =>
     i18n.translate('dashboard.createConfirmModal.confirmButtonLabel', {
@@ -355,6 +355,14 @@ export const panelStorageErrorStrings = {
   getPanelsClearError: (message: string) =>
     i18n.translate('dashboard.panelStorageError.clearError', {
       defaultMessage: 'Error encountered while clearing unsaved changes: {message}',
+      values: { message },
+    }),
+};
+
+export const dashboardLoadingErrorStrings = {
+  getDashboardLoadError: (message: string) =>
+    i18n.translate('dashboard.loadingError.errorMessage', {
+      defaultMessage: 'Error encountered while loading saved dashboard: {message}',
       values: { message },
     }),
 };
@@ -420,7 +428,7 @@ export const dashboardListingTable = {
 export const dashboardUnsavedListingStrings = {
   getUnsavedChangesTitle: (plural = false) =>
     i18n.translate('dashboard.listing.unsaved.unsavedChangesTitle', {
-      defaultMessage: 'You have unsaved changes in the following {dash}.',
+      defaultMessage: 'You have unsaved changes in the following {dash}:',
       values: {
         dash: plural
           ? dashboardListingTable.getEntityNamePlural()
@@ -469,17 +477,21 @@ export const noItemsStrings = {
     i18n.translate('dashboard.listing.createNewDashboard.title', {
       defaultMessage: 'Create your first dashboard',
     }),
+  getReadEditInProgressTitle: () =>
+    i18n.translate('dashboard.listing.createNewDashboard.inProgressTitle', {
+      defaultMessage: 'Dashboard in progress',
+    }),
   getReadEditDashboardDescription: () =>
     i18n.translate('dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription', {
       defaultMessage:
-        'You can combine data views from any Kibana app into one dashboard and see everything in one place.',
+        'Analyze all of your Elastic data in one place by creating a dashboard and adding visualizations.',
     }),
   getSampleDataLinkText: () =>
     i18n.translate('dashboard.listing.createNewDashboard.sampleDataInstallLinkText', {
-      defaultMessage: `Install some sample data`,
+      defaultMessage: `Add some sample data`,
     }),
   getCreateNewDashboardText: () =>
     i18n.translate('dashboard.listing.createNewDashboard.createButtonLabel', {
-      defaultMessage: `Create new dashboard`,
+      defaultMessage: `Create a dashboard`,
     }),
 };

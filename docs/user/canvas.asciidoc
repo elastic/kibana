@@ -43,7 +43,7 @@ To create workpads, you must meet the minimum requirements.
 
 * If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 
-* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>.
+* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and a <<data-views, data view>>.
 
 * Have an understanding of {ref}/documents-indices.html[{es} documents and indices].
 
@@ -112,9 +112,6 @@ Choose the type of element you want to use, then use the preconfigured demo data
 By default, most of the elements you create use the demo data until you change the data source. The demo data includes a small data set that you can use to experiment with your element.
 
 . Click *Add element*, then select the element you want to use.
-+
-[role="screenshot"]
-image::images/canvas-element-select.gif[Canvas elements]
 
 . To connect the element to your data, select *Data*, then select one of the following data sources:
 

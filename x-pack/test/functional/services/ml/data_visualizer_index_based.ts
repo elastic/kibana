@@ -16,6 +16,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
   const retry = getService('retry');
   const PageObjects = getPageObjects(['discover']);
   const queryBar = getService('queryBar');
+  const filterBar = getService('filterBar');
 
   return {
     async assertTimeRangeSelectorSectionExists() {
@@ -33,8 +34,11 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     },
 
     async clickUseFullDataButton(expectedFormattedTotalDocCount: string) {
-      await testSubjects.clickWhenNotDisabled('dataVisualizerButtonUseFullData');
-      await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled('dataVisualizerButtonUseFullData');
+        await testSubjects.clickWhenNotDisabled('superDatePickerApplyTimeButton');
+        await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
+      });
     },
 
     async assertTotalDocCountHeaderExist() {
@@ -204,6 +208,28 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
           `Expected Discover hit count to be '${expectedHitCountFormatted}' (got '${hitCount}')`
         );
       });
+    },
+
+    async assertFilterBarFilterContent(filter: {
+      key: string;
+      value: string;
+      enabled?: boolean;
+      pinned?: boolean;
+      negated?: boolean;
+    }) {
+      await retry.waitForWithTimeout(
+        `filter ${JSON.stringify(filter)} to exist`,
+        2000,
+        async () => {
+          return await filterBar.hasFilter(
+            filter.key,
+            filter.value,
+            filter.enabled,
+            filter.pinned,
+            filter.negated
+          );
+        }
+      );
     },
   };
 }

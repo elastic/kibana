@@ -11,5 +11,5 @@ delete(): Promise<{}>;
 ```
 <b>Returns:</b>
 
-`Promise<{}>`
+Promise&lt;{}&gt;
 

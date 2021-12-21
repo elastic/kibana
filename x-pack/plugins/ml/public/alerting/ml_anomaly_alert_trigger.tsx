@@ -29,19 +29,19 @@ import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs'
 import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../common/util/alerts';
 import { isDefined } from '../../common/types/guards';
-import { AlertTypeParamsExpressionProps } from '../../../triggers_actions_ui/public';
+import { RuleTypeParamsExpressionProps } from '../../../triggers_actions_ui/public';
 import { parseInterval } from '../../common/util/parse_interval';
 import { BetaBadge } from './beta_badge';
 
 export type MlAnomalyAlertTriggerProps =
-  AlertTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
+  RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
 
 const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
-  alertParams,
-  setAlertParams,
-  setAlertProperty,
+  ruleParams,
+  setRuleParams,
+  setRuleProperty,
   errors,
-  alertInterval,
+  ruleInterval,
   alertNotifyWhen,
 }) => {
   const {
@@ -57,14 +57,14 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   const onAlertParamChange = useCallback(
     <T extends keyof MlAnomalyDetectionAlertParams>(param: T) =>
       (update: MlAnomalyDetectionAlertParams[T]) => {
-        setAlertParams(param, update);
+        setRuleParams(param, update);
       },
     []
   );
 
   const jobsAndGroupIds: string[] = useMemo(
-    () => (Object.values(alertParams.jobSelection ?? {}) as string[][]).flat(),
-    [alertParams.jobSelection]
+    () => (Object.values(ruleParams.jobSelection ?? {}) as string[][]).flat(),
+    [ruleParams.jobSelection]
   );
 
   /**
@@ -88,7 +88,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   const availableResultTypes = useMemo(() => {
     if (jobConfigs.length === 0) return Object.values(ANOMALY_RESULT_TYPE);
 
-    return (jobConfigs ?? []).some((v) => v.analysis_config.influencers.length > 0)
+    return (jobConfigs ?? []).some((v) => Boolean(v.analysis_config?.influencers?.length))
       ? Object.values(ANOMALY_RESULT_TYPE)
       : [ANOMALY_RESULT_TYPE.BUCKET, ANOMALY_RESULT_TYPE.RECORD];
   }, [jobConfigs]);
@@ -102,9 +102,9 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   );
 
   useMount(function setDefaults() {
-    const { jobSelection, ...rest } = alertParams;
+    const { jobSelection, ...rest } = ruleParams;
     if (Object.keys(rest).length === 0) {
-      setAlertProperty('params', {
+      setRuleProperty('params', {
         // Set defaults
         severity: ANOMALY_THRESHOLD.CRITICAL,
         resultType: ANOMALY_RESULT_TYPE.BUCKET,
@@ -118,7 +118,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   });
 
   const advancedSettings = useMemo(() => {
-    let { lookbackInterval, topNBuckets } = alertParams;
+    let { lookbackInterval, topNBuckets } = ruleParams;
 
     if (!isDefined(lookbackInterval) && jobConfigs.length > 0) {
       lookbackInterval = getLookbackInterval(jobConfigs);
@@ -130,14 +130,14 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       lookbackInterval,
       topNBuckets,
     };
-  }, [alertParams.lookbackInterval, alertParams.topNBuckets, jobConfigs]);
+  }, [ruleParams.lookbackInterval, ruleParams.topNBuckets, jobConfigs]);
 
   const resultParams = useMemo(() => {
     return {
-      ...alertParams,
+      ...ruleParams,
       ...advancedSettings,
     };
-  }, [alertParams, advancedSettings]);
+  }, [ruleParams, advancedSettings]);
 
   const maxNumberOfBuckets = useMemo(() => {
     if (jobConfigs.length === 0) return;
@@ -170,24 +170,24 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
       <ConfigValidator
         jobConfigs={jobConfigs}
-        alertInterval={alertInterval}
+        alertInterval={ruleInterval}
         alertNotifyWhen={alertNotifyWhen}
         alertParams={resultParams}
         maxNumberOfBuckets={maxNumberOfBuckets}
       />
 
       <ResultTypeSelector
-        value={alertParams.resultType}
+        value={ruleParams.resultType}
         availableOption={availableResultTypes}
         onChange={useCallback(onAlertParamChange('resultType'), [])}
       />
       <SeverityControl
-        value={alertParams.severity}
+        value={ruleParams.severity}
         onChange={useCallback(onAlertParamChange('severity'), [])}
       />
       <EuiSpacer size="m" />
       <InterimResultsControl
-        value={alertParams.includeInterim}
+        value={ruleParams.includeInterim}
         onChange={useCallback(onAlertParamChange('includeInterim'), [])}
       />
       <EuiSpacer size="m" />
@@ -196,14 +196,14 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         value={advancedSettings}
         onChange={useCallback((update) => {
           Object.keys(update).forEach((k) => {
-            setAlertParams(k, update[k as keyof MlAnomalyDetectionAlertAdvancedSettings]);
+            setRuleParams(k, update[k as keyof MlAnomalyDetectionAlertAdvancedSettings]);
           });
         }, [])}
       />
 
       <EuiSpacer size="m" />
 
-      <PreviewAlertCondition alertingApiService={alertingApiService} alertParams={alertParams} />
+      <PreviewAlertCondition alertingApiService={alertingApiService} alertParams={ruleParams} />
 
       <EuiSpacer size="m" />
     </EuiForm>

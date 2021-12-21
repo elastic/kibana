@@ -28,15 +28,16 @@ import { getUpdateMinimalListItemSchemaMock } from '../../../../plugins/lists/co
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('update_list_items', () => {
     describe('update list items', () => {
       beforeEach(async () => {
-        await createListsIndex(supertest);
+        await createListsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteListsIndex(supertest);
+        await deleteListsIndex(supertest, log);
       });
 
       it('should update a single list item property of value using an id', async () => {

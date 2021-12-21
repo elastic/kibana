@@ -56,8 +56,8 @@ To create an APM reader user:
 include::./tab-widgets/apm-app-reader/widget.asciidoc[]
 --
 +
-TIP: Using the {apm-server-ref-v}/apm-integration.html[APM integration for Elastic Agent]?
-Add the privileges under the **Data streams** tab.
+TIP: Using the deprecated APM Server binaries?
+Add the privileges under the **Classic APM indices** tab above.
 
 . Assign the `read-apm` role created in the previous step, and the following built-in roles to
 any APM reader users:
@@ -84,8 +84,8 @@ In some instances, you may wish to restrict certain Kibana apps that a user has 
 include::./tab-widgets/apm-app-reader/widget.asciidoc[]
 --
 +
-TIP: Using the {apm-server-ref-v}/apm-integration.html[APM integration for Elastic Agent]?
-Add the privileges under the **Data streams** tab.
+TIP: Using the deprecated APM Server binaries?
+Add the privileges under the **Classic APM indices** tab above.
 
 . Assign feature privileges to any Kibana feature that the user needs access to.
 Here are two examples:
@@ -184,8 +184,8 @@ Central configuration users need to be able to view, create, update, and delete 
 include::./tab-widgets/central-config-users/widget.asciidoc[]
 --
 +
-TIP: Using the {apm-server-ref-v}/apm-integration.html[APM integration for Elastic Agent]?
-Add the privileges under the **Data streams** tab.
+TIP: Using the deprecated APM Server binaries?
+Add the privileges under the **Classic APM indices** tab above.
 
 . Assign the `central-config-manager` role created in the previous step,
 and the following Kibana feature privileges to anyone who needs to manage central configurations:
@@ -211,8 +211,8 @@ but not create, update, or delete them.
 include::./tab-widgets/central-config-users/widget.asciidoc[]
 --
 +
-TIP: Using the {apm-server-ref-v}/apm-integration.html[APM integration for Elastic Agent]?
-Add the privileges under the **Data streams** tab.
+TIP: Using the deprecated APM Server binaries?
+Add the privileges under the **Classic APM indices** tab above.
 
 . Assign the `central-config-reader` role created in the previous step,
 and the following Kibana feature privileges to anyone who needs to read central configurations:

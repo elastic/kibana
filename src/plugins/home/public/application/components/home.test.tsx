@@ -13,7 +13,9 @@ import { Home } from './home';
 
 import { FeatureCatalogueCategory } from '../../services';
 import { telemetryPluginMock } from '../../../../telemetry/public/mocks';
+import { Welcome } from './welcome';
 
+let mockHasIntegrationsPermission = true;
 jest.mock('../kibana_services', () => ({
   getServices: () => ({
     getBasePath: () => 'path',
@@ -21,6 +23,13 @@ jest.mock('../kibana_services', () => ({
     homeConfig: { disableWelcomeScreen: false },
     chrome: {
       setBreadcrumbs: () => {},
+    },
+    application: {
+      capabilities: {
+        navLinks: {
+          integrations: mockHasIntegrationsPermission,
+        },
+      },
     },
   }),
 }));
@@ -35,6 +44,7 @@ describe('home', () => {
   let defaultProps: HomeProps;
 
   beforeEach(() => {
+    mockHasIntegrationsPermission = true;
     defaultProps = {
       directories: [],
       solutions: [],
@@ -182,7 +192,7 @@ describe('home', () => {
 
       expect(defaultProps.localStorage.getItem).toHaveBeenCalledTimes(1);
 
-      expect(component).toMatchSnapshot();
+      expect(component.find(Welcome).exists()).toBe(true);
     });
 
     test('stores skip welcome setting if skipped', async () => {
@@ -196,7 +206,7 @@ describe('home', () => {
 
       expect(defaultProps.localStorage.setItem).toHaveBeenCalledWith('home:welcome:show', 'false');
 
-      expect(component).toMatchSnapshot();
+      expect(component.find(Welcome).exists()).toBe(false);
     });
 
     test('should show the normal home page if loading fails', async () => {
@@ -205,7 +215,7 @@ describe('home', () => {
       const hasUserIndexPattern = jest.fn(() => Promise.reject('Doh!'));
       const component = await renderHome({ hasUserIndexPattern });
 
-      expect(component).toMatchSnapshot();
+      expect(component.find(Welcome).exists()).toBe(false);
     });
 
     test('should show the normal home page if welcome screen is disabled locally', async () => {
@@ -213,7 +223,15 @@ describe('home', () => {
 
       const component = await renderHome();
 
-      expect(component).toMatchSnapshot();
+      expect(component.find(Welcome).exists()).toBe(false);
+    });
+
+    test("should show the normal home page if user doesn't have access to integrations", async () => {
+      mockHasIntegrationsPermission = false;
+
+      const component = await renderHome();
+
+      expect(component.find(Welcome).exists()).toBe(false);
     });
   });
 

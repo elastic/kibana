@@ -40,6 +40,7 @@ exports[`Renders SymbolIcon 1`] = `
   fill="#ff0000"
   key="airfield-15#ff0000rgb(106,173,213)"
   stroke="rgb(106,173,213)"
+  style={Object {}}
   symbolId="airfield-15"
 />
 `;

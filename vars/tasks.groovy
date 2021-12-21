@@ -135,6 +135,9 @@ def functionalXpack(Map params = [:]) {
 
     whenChanged([
       'x-pack/plugins/security_solution/',
+      'x-pack/plugins/cases/',
+      'x-pack/plugins/timelines/',
+      'x-pack/plugins/lists/',
       'x-pack/test/security_solution_cypress/',
       'x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/',
       'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx',
@@ -146,20 +149,35 @@ def functionalXpack(Map params = [:]) {
       }
     }
 
-    //temporarily disable apm e2e test since it's breaking due to a version upgrade.
-    // whenChanged([
-    //   'x-pack/plugins/apm/',
-    // ]) {
-    //   if (githubPr.isPr()) {
-    //     task(kibanaPipeline.functionalTestProcess('xpack-APMCypress', './test/scripts/jenkins_apm_cypress.sh'))
-    //   }
-    // }
+    whenChanged([
+      'x-pack/plugins/apm/',
+    ]) {
+      if (githubPr.isPr()) {
+        task(kibanaPipeline.functionalTestProcess('xpack-APMCypress', './test/scripts/jenkins_apm_cypress.sh'))
+      }
+    }
 
     whenChanged([
       'x-pack/plugins/uptime/',
     ]) {
       if (githubPr.isPr()) {
         task(kibanaPipeline.functionalTestProcess('xpack-UptimePlaywright', './test/scripts/jenkins_uptime_playwright.sh'))
+      }
+    }
+    
+    whenChanged([
+      'x-pack/plugins/fleet/',
+    ]) {
+      if (githubPr.isPr()) {
+        task(kibanaPipeline.functionalTestProcess('xpack-FleetCypress', './test/scripts/jenkins_fleet_cypress.sh'))
+      }
+    }
+
+    whenChanged([
+      'x-pack/plugins/osquery/',
+    ]) {
+      if (githubPr.isPr()) {
+        task(kibanaPipeline.functionalTestProcess('xpack-osqueryCypress', './test/scripts/jenkins_osquery_cypress.sh'))
       }
     }
 

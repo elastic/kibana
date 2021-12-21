@@ -25,7 +25,6 @@ describe('AppLogic', () => {
     mount({}, DEFAULT_INITIAL_APP_DATA);
 
     expect(AppLogic.values).toEqual({
-      ilmEnabled: true,
       configuredLimits: {
         engine: {
           maxDocumentByteSize: 102400,

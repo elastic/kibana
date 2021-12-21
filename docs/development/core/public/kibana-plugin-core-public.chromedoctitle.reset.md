@@ -13,5 +13,5 @@ reset(): void;
 ```
 <b>Returns:</b>
 
-`void`
+void
 

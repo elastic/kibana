@@ -15,7 +15,7 @@ import {
   EuiPopover,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TelemetryPluginStart } from '../../lib/telemetry';
 
 const OptInExampleFlyout = React.lazy(() => import('./opt_in_example_flyout'));

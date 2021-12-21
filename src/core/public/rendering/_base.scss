@@ -42,6 +42,14 @@
   #app-fixed-viewport {
     top: $headerHeight;
   }
+
+  @include euiBreakpoint('xl', 'l') {
+    .kbnStickyMenu {
+      position: sticky;
+      max-height: calc(100vh - #{$headerHeight + $euiSize});
+      top: $headerHeight + $euiSize;
+    }
+  }
 }
 
 .kbnBody {

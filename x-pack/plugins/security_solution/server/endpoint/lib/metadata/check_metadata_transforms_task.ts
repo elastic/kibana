@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import {
   TransformGetTransformStatsResponse,
   TransformGetTransformStatsTransformStats,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CoreSetup, ElasticsearchClient, Logger } from 'src/core/server';
 import {
   ConcreteTaskInstance,
@@ -104,7 +104,7 @@ export class CheckMetadataTransformsTask {
     const [{ elasticsearch }] = await core.getStartServices();
     const esClient = elasticsearch.client.asInternalUser;
 
-    let transformStatsResponse: ApiResponse<TransformGetTransformStatsResponse>;
+    let transformStatsResponse: TransportResult<TransformGetTransformStatsResponse>;
     try {
       transformStatsResponse = await esClient?.transform.getTransformStats({
         transform_id: METADATA_TRANSFORMS_PATTERN,
@@ -119,7 +119,7 @@ export class CheckMetadataTransformsTask {
 
     const { transforms } = transformStatsResponse.body;
     if (!transforms.length) {
-      this.logger.info('no OLM metadata transforms found');
+      this.logger.info('no endpoint metadata transforms found');
       return;
     }
 

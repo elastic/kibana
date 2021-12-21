@@ -16,7 +16,25 @@ import {
   User,
   UserAction,
   UserActionField,
+  ActionConnector,
+  CaseMetricsResponse,
 } from '../api';
+
+export interface CasesContextFeatures {
+  alerts: { sync: boolean };
+  metrics: CaseMetricsFeature[];
+}
+
+export type CasesFeatures = Partial<CasesContextFeatures>;
+
+export interface CasesContextValue {
+  owner: string[];
+  appId: string;
+  appTitle: string;
+  userCanCrud: boolean;
+  basePath: string;
+  features: CasesContextFeatures;
+}
 
 export interface CasesUiConfigType {
   markdownPlugins: {
@@ -38,11 +56,8 @@ export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
  */
 export type CaseViewRefreshPropInterface = null | {
   /**
-   * Refreshes the all of the user actions/comments in the view's timeline
-   * (note: this also triggers a silent `refreshCase()`)
+   * Refreshes the case its metrics and user actions/comments in the view's timeline
    */
-  refreshUserActionsAndComments: () => Promise<void>;
-  /** Refreshes the Case information only */
   refreshCase: () => Promise<void>;
 };
 
@@ -147,6 +162,14 @@ export interface AllCases extends CasesStatus {
   perPage: number;
   total: number;
 }
+
+export type CaseMetrics = CaseMetricsResponse;
+export type CaseMetricsFeature =
+  | 'alerts.count'
+  | 'alerts.users'
+  | 'alerts.hosts'
+  | 'connectors'
+  | 'lifespan';
 
 export enum SortFieldCase {
   createdAt = 'createdAt',
@@ -254,8 +277,19 @@ export interface SignalEcs {
   threshold_result?: unknown;
 }
 
+export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
+  rule?: Exclude<RuleEcs, 'id'> & { uuid: string[] };
+  building_block_type?: string[];
+  workflow_status?: string[];
+};
+
 export interface Ecs {
   _id: string;
   _index?: string;
   signal?: SignalEcs;
+  kibana?: {
+    alert: SignalEcsAAD;
+  };
 }
+
+export type CaseActionConnector = ActionConnector;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ClusterGetSettingsResponse } from '@elastic/elasticsearch/api/types';
+import { ClusterGetSettingsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { checkClusterSettings } from '.';
 import { LegacyRequest } from '../../types';
 

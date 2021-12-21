@@ -7,7 +7,7 @@
 
 import { CoreSetup } from 'src/core/public';
 
-import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../src/plugins/data_views/public';
 
 import { SavedSearchQuery } from '../../../contexts/ml';
 import { OMIT_FIELDS } from '../../../../../common/constants/field_types';
@@ -22,15 +22,12 @@ import { RuntimeMappings } from '../../../../../common/types/fields';
 const MAX_EXAMPLES_DEFAULT: number = 10;
 
 export class DataLoader {
-  private _indexPattern: IndexPattern;
+  private _indexPattern: DataView;
   private _runtimeMappings: RuntimeMappings;
   private _indexPatternTitle: IndexPatternTitle = '';
   private _maxExamples: number = MAX_EXAMPLES_DEFAULT;
 
-  constructor(
-    indexPattern: IndexPattern,
-    toastNotifications?: CoreSetup['notifications']['toasts']
-  ) {
+  constructor(indexPattern: DataView, toastNotifications?: CoreSetup['notifications']['toasts']) {
     this._indexPattern = indexPattern;
     this._runtimeMappings = this._indexPattern.getComputedFields().runtimeFields as RuntimeMappings;
     this._indexPatternTitle = indexPattern.title;
@@ -43,7 +40,7 @@ export class DataLoader {
     editorRuntimeMappings?: RuntimeMappings
   ): Promise<any[]> {
     const stats = await ml.getVisualizerFieldHistograms({
-      indexPatternTitle: this._indexPatternTitle,
+      indexPattern: this._indexPatternTitle,
       query,
       fields,
       samplerShardSize,

@@ -5,41 +5,53 @@
  * 2.0.
  */
 
-import { SavedObject } from 'src/core/types';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { buildRiskScoreFromMapping } from './mappings/build_risk_score_from_mapping';
-import { AlertAttributes, SignalSource } from './types';
+import { SignalSource } from './types';
 import { buildSeverityFromMapping } from './mappings/build_severity_from_mapping';
 import { buildRuleNameFromMapping } from './mappings/build_rule_name_from_mapping';
-import { RuleParams } from '../schemas/rule_schemas';
+import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 import { commonParamsCamelToSnake, typeSpecificCamelToSnake } from '../schemas/rule_converters';
 import { transformTags } from '../routes/rules/utils';
+import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 
-export const buildRuleWithoutOverrides = (ruleSO: SavedObject<AlertAttributes>): RulesSchema => {
-  const ruleParams = ruleSO.attributes.params;
+export const buildRuleWithoutOverrides = (completeRule: CompleteRule<RuleParams>): RulesSchema => {
+  const ruleParams = completeRule.ruleParams;
+  const {
+    actions,
+    schedule,
+    name,
+    tags,
+    enabled,
+    createdBy,
+    updatedBy,
+    throttle,
+    createdAt,
+    updatedAt,
+  } = completeRule.ruleConfig;
   return {
-    id: ruleSO.id,
-    actions: ruleSO.attributes.actions,
-    interval: ruleSO.attributes.schedule.interval,
-    name: ruleSO.attributes.name,
-    tags: transformTags(ruleSO.attributes.tags),
-    enabled: ruleSO.attributes.enabled,
-    created_by: ruleSO.attributes.createdBy,
-    updated_by: ruleSO.attributes.updatedBy,
-    throttle: ruleSO.attributes.throttle,
-    created_at: ruleSO.attributes.createdAt,
-    updated_at: ruleSO.updated_at ?? '',
+    actions: actions.map(transformAlertToRuleAction),
+    created_at: createdAt.toISOString(),
+    created_by: createdBy ?? '',
+    enabled,
+    id: completeRule.alertId,
+    interval: schedule.interval,
+    name,
+    tags: transformTags(tags),
+    throttle: throttle ?? undefined,
+    updated_at: updatedAt.toISOString(),
+    updated_by: updatedBy ?? '',
     ...commonParamsCamelToSnake(ruleParams),
     ...typeSpecificCamelToSnake(ruleParams),
   };
 };
 
 export const buildRuleWithOverrides = (
-  ruleSO: SavedObject<AlertAttributes>,
+  completeRule: CompleteRule<RuleParams>,
   eventSource: SignalSource
 ): RulesSchema => {
-  const ruleWithoutOverrides = buildRuleWithoutOverrides(ruleSO);
-  return applyRuleOverrides(ruleWithoutOverrides, eventSource, ruleSO.attributes.params);
+  const ruleWithoutOverrides = buildRuleWithoutOverrides(completeRule);
+  return applyRuleOverrides(ruleWithoutOverrides, eventSource, completeRule.ruleParams);
 };
 
 export const applyRuleOverrides = (

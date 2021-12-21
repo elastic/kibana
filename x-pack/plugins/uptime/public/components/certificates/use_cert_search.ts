@@ -7,7 +7,7 @@
 
 import { useSelector } from 'react-redux';
 import { useContext } from 'react';
-import { useEsSearch, createEsParams } from '../../../../observability/public';
+import { createEsParams, useEsSearch } from '../../../../observability/public';
 
 import { CertResult, GetCertsParams, Ping } from '../../../common/runtime_types';
 
@@ -48,13 +48,13 @@ export const useCertSearch = ({
     body: searchBody,
   });
 
-  const { data: result, loading } = useEsSearch<Ping, typeof esParams>(esParams, [
-    settings.settings?.heartbeatIndices,
-    size,
-    pageIndex,
-    lastRefresh,
-    search,
-  ]);
+  const { data: result, loading } = useEsSearch<Ping, typeof esParams>(
+    esParams,
+    [settings.settings?.heartbeatIndices, size, pageIndex, lastRefresh, search, sortBy, direction],
+    {
+      name: 'getTLSCertificates',
+    }
+  );
 
   return result ? { ...processCertsResult(result), loading } : { certs: [], total: 0, loading };
 };

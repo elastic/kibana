@@ -23,8 +23,7 @@ import {
 } from '@elastic/eui';
 import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { PANEL_TYPES } from '../../../../../common/enums';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 
 const TimeseriesSeriesUI = injectI18n(function (props) {
   const {
@@ -45,7 +44,6 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
 
   const defaults = {
     label: '',
-    type: PANEL_TYPES.TIMESERIES,
   };
   const model = { ...defaults, ...props.model };
 

@@ -20,11 +20,7 @@ import {
   EuiTitle,
   EuiButton,
 } from '@elastic/eui';
-import {
-  ExpressionsStart,
-  ReactExpressionRenderer,
-  ExpressionsInspectorAdapter,
-} from '../../../src/plugins/expressions/public';
+import { ExpressionsStart } from '../../../src/plugins/expressions/public';
 import { ExpressionEditor } from './editor/expression_editor';
 import { Start as InspectorStart } from '../../../src/plugins/inspector/public';
 
@@ -42,9 +38,7 @@ export function RenderExpressionsExample({ expressions, inspector }: Props) {
     updateExpression(value);
   };
 
-  const inspectorAdapters = {
-    expression: new ExpressionsInspectorAdapter(),
-  };
+  const inspectorAdapters = {};
 
   return (
     <EuiPageBody>
@@ -83,10 +77,12 @@ export function RenderExpressionsExample({ expressions, inspector }: Props) {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiPanel data-test-subj="expressionRender" paddingSize="none" role="figure">
-                <ReactExpressionRenderer
+                <expressions.ReactExpressionRenderer
                   expression={expression}
                   debug={true}
-                  inspectorAdapters={inspectorAdapters}
+                  onData$={(result, panels) => {
+                    Object.assign(inspectorAdapters, panels);
+                  }}
                   renderError={(message: any) => {
                     return <div>{message}</div>;
                   }}

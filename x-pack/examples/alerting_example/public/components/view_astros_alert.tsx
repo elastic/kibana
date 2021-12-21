@@ -9,7 +9,7 @@ import React, { useState, useEffect, Fragment } from 'react';
 
 import {
   EuiText,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiCallOut,
   EuiTextColor,
   EuiDescriptionList,
@@ -25,10 +25,10 @@ import { CoreStart } from 'kibana/public';
 import { isEmpty } from 'lodash';
 import { ALERTING_EXAMPLE_APP_ID, AlwaysFiringParams } from '../../common/constants';
 import {
-  Alert,
-  AlertTaskState,
-  LEGACY_BASE_ALERT_API_PATH,
+  BASE_ALERTING_API_PATH,
+  INTERNAL_BASE_ALERTING_API_PATH,
 } from '../../../../plugins/alerting/common';
+import { Rule, RuleTaskState } from '../../common/types';
 
 type Props = RouteComponentProps & {
   http: CoreStart['http'];
@@ -39,15 +39,19 @@ function hasCraft(state: any): state is { craft: string } {
   return state && state.craft;
 }
 export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
-  const [alert, setAlert] = useState<Alert<AlwaysFiringParams> | null>(null);
-  const [alertState, setAlertState] = useState<AlertTaskState | null>(null);
+  const [alert, setAlert] = useState<Rule<AlwaysFiringParams> | null>(null);
+  const [alertState, setAlertState] = useState<RuleTaskState | null>(null);
 
   useEffect(() => {
     if (!alert) {
-      http.get(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}`).then(setAlert);
+      http
+        .get<Rule<AlwaysFiringParams> | null>(`${BASE_ALERTING_API_PATH}/rule/${id}`)
+        .then(setAlert);
     }
     if (!alertState) {
-      http.get(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/state`).then(setAlertState);
+      http
+        .get<RuleTaskState | null>(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${id}/state`)
+        .then(setAlertState);
     }
   }, [alert, alertState, http, id]);
 
@@ -65,7 +69,7 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
       <EuiText>
         <h2>Alerts</h2>
       </EuiText>
-      {isEmpty(alertState.alertInstances) ? (
+      {isEmpty(alertState.alerts) ? (
         <EuiCallOut title="No Alerts!" color="warning" iconType="help">
           <p>
             The people in {alert.params.craft} at the moment <b>are not</b> {alert.params.op}{' '}
@@ -85,23 +89,21 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiStat
-                  title={Object.keys(alertState.alertInstances ?? {}).length}
+                  title={Object.keys(alertState.alerts ?? {}).length}
                   description={`People in ${alert.params.craft}`}
                   titleColor="primary"
                 />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiDescriptionList compressed>
-                  {Object.entries(alertState.alertInstances ?? {}).map(
-                    ([instance, { state }], index) => (
-                      <Fragment key={index}>
-                        <EuiDescriptionListTitle>{instance}</EuiDescriptionListTitle>
-                        <EuiDescriptionListDescription>
-                          {hasCraft(state) ? state.craft : 'Unknown Craft'}
-                        </EuiDescriptionListDescription>
-                      </Fragment>
-                    )
-                  )}
+                  {Object.entries(alertState.alerts ?? {}).map(([instance, { state }], index) => (
+                    <Fragment key={index}>
+                      <EuiDescriptionListTitle>{instance}</EuiDescriptionListTitle>
+                      <EuiDescriptionListDescription>
+                        {hasCraft(state) ? state.craft : 'Unknown Craft'}
+                      </EuiDescriptionListDescription>
+                    </Fragment>
+                  ))}
                 </EuiDescriptionList>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -110,6 +112,6 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
       )}
     </Fragment>
   ) : (
-    <EuiLoadingKibana size="xl" />
+    <EuiLoadingLogo logo="logoKibana" size="xl" />
   );
 });

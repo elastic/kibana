@@ -74,9 +74,9 @@ describe('Relationships', () => {
         meta: {
           title: 'MyIndexPattern*',
           icon: 'indexPatternApp',
-          editUrl: '#/management/kibana/indexPatterns/patterns/1',
+          editUrl: '#/management/kibana/dataViews/dataView/1',
           inAppUrl: {
-            path: '/management/kibana/indexPatterns/patterns/1',
+            path: '/management/kibana/dataViews/dataView/1',
             uiCapabilitiesPath: 'management.kibana.indexPatterns',
           },
         },
@@ -111,10 +111,10 @@ describe('Relationships', () => {
             id: '1',
             relationship: 'child',
             meta: {
-              editUrl: '/management/kibana/indexPatterns/patterns/1',
+              editUrl: '/management/kibana/dataViews/dataView/1',
               icon: 'indexPatternApp',
               inAppUrl: {
-                path: '/app/management/kibana/indexPatterns/patterns/1',
+                path: '/app/management/kibana/dataViews/dataView/1',
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
               title: 'My Index Pattern',
@@ -365,9 +365,9 @@ describe('Relationships', () => {
         meta: {
           title: 'MyIndexPattern*',
           icon: 'indexPatternApp',
-          editUrl: '#/management/kibana/indexPatterns/patterns/1',
+          editUrl: '#/management/kibana/dataViews/dataView/1',
           inAppUrl: {
-            path: '/management/kibana/indexPatterns/patterns/1',
+            path: '/management/kibana/dataViews/dataView/1',
             uiCapabilitiesPath: 'management.kibana.indexPatterns',
           },
         },

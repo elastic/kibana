@@ -9,10 +9,7 @@
 import { fetchProvider, Usage } from './fetch';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 
-export async function makeKQLUsageCollector(
-  usageCollection: UsageCollectionSetup,
-  kibanaIndex: string
-) {
+export function makeKQLUsageCollector(usageCollection: UsageCollectionSetup, kibanaIndex: string) {
   const kqlUsageCollector = usageCollection.makeUsageCollector<Usage>({
     type: 'kql',
     fetch: fetchProvider(kibanaIndex),

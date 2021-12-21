@@ -7,11 +7,14 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { BehaviorSubject } from 'rxjs';
 import tls from 'tls';
 
 import { nextTick } from '@kbn/test/jest';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
+import { pollEsNodesVersion } from '../../../../src/core/server';
+import type { NodesVersionCompatibility } from '../../../../src/core/server';
 import { ElasticsearchConnectionStatus } from '../common';
 import { ConfigSchema } from './config';
 import type { ElasticsearchServiceSetup } from './elasticsearch_service';
@@ -19,14 +22,24 @@ import { ElasticsearchService } from './elasticsearch_service';
 import { interactiveSetupMock } from './mocks';
 
 jest.mock('tls');
+jest.mock('../../../../src/core/server', () => ({
+  pollEsNodesVersion: jest.fn(),
+}));
 
 const tlsConnectMock = tls.connect as jest.MockedFunction<typeof tls.connect>;
+const mockPollEsNodesVersion = pollEsNodesVersion as jest.MockedFunction<typeof pollEsNodesVersion>;
+
+function mockCompatibility(isCompatible: boolean, message?: string) {
+  mockPollEsNodesVersion.mockReturnValue(
+    new BehaviorSubject({ isCompatible, message } as NodesVersionCompatibility).asObservable()
+  );
+}
 
 describe('ElasticsearchService', () => {
   let service: ElasticsearchService;
   let mockElasticsearchPreboot: ReturnType<typeof elasticsearchServiceMock.createPreboot>;
   beforeEach(() => {
-    service = new ElasticsearchService(loggingSystemMock.createLogger());
+    service = new ElasticsearchService(loggingSystemMock.createLogger(), '8.0.0');
     mockElasticsearchPreboot = elasticsearchServiceMock.createPreboot();
   });
 
@@ -64,6 +77,7 @@ describe('ElasticsearchService', () => {
           headers: { 'x-elastic-product': 'Elasticsearch' },
         })
       );
+      mockCompatibility(true);
 
       setupContract = service.setup({
         elasticsearch: mockElasticsearchPreboot,
@@ -289,7 +303,8 @@ describe('ElasticsearchService', () => {
 
       it('treats product check error the same as successful response', async () => {
         mockConnectionStatusClient.asInternalUser.ping.mockRejectedValue(
-          new errors.ProductNotSupportedError(interactiveSetupMock.createApiResponse({ body: {} }))
+          // @ts-expect-error not full interface
+          new errors.ProductNotSupportedError('product-name', { body: {} })
         );
 
         const mockHandler = jest.fn();
@@ -379,6 +394,38 @@ describe('ElasticsearchService', () => {
         expect(mockAuthenticateClient.asInternalUser.security.authenticate).toHaveBeenCalledTimes(
           1
         );
+        expect(mockAuthenticateClient.close).toHaveBeenCalledTimes(1);
+      });
+
+      it('fails if version is incompatible', async () => {
+        const mockEnrollScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        mockEnrollScopedClusterClient.asCurrentUser.transport.request.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({
+            statusCode: 200,
+            body: {
+              token: { name: 'some-name', value: 'some-value' },
+              http_ca: '\n\nsome weird-ca_with\n content\n\n',
+            },
+          })
+        );
+        mockEnrollClient.asScoped.mockReturnValue(mockEnrollScopedClusterClient);
+
+        mockAuthenticateClient.asInternalUser.security.authenticate.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({ statusCode: 200, body: {} as any })
+        );
+
+        mockCompatibility(false, 'Oh no!');
+
+        await expect(
+          setupContract.enroll({
+            apiKey: 'apiKey',
+            hosts: ['host1', 'host2'],
+            caFingerprint: 'DE:AD:BE:EF',
+          })
+        ).rejects.toMatchInlineSnapshot(`[CompatibilityError: Oh no!]`);
+
+        // Check that we properly closed all clients.
+        expect(mockEnrollClient.close).toHaveBeenCalledTimes(1);
         expect(mockAuthenticateClient.close).toHaveBeenCalledTimes(1);
       });
 
@@ -509,6 +556,20 @@ some weird+ca/with
         await expect(
           setupContract.authenticate({ host: 'http://localhost:9200' })
         ).rejects.toMatchInlineSnapshot(`[ConnectionError: some-message]`);
+        expect(mockAuthenticateClient.close).toHaveBeenCalledTimes(1);
+      });
+
+      it('fails if version is incompatible', async () => {
+        mockAuthenticateClient.asInternalUser.ping.mockResolvedValue(
+          interactiveSetupMock.createApiResponse({ statusCode: 200, body: true })
+        );
+
+        mockCompatibility(false, 'Oh no!');
+
+        await expect(
+          setupContract.authenticate({ host: 'http://localhost:9200' })
+        ).rejects.toMatchInlineSnapshot(`[CompatibilityError: Oh no!]`);
+        expect(mockAuthenticateClient.close).toHaveBeenCalledTimes(1);
       });
 
       it('succeeds if ping call succeeds', async () => {
@@ -519,6 +580,7 @@ some weird+ca/with
         await expect(
           setupContract.authenticate({ host: 'http://localhost:9200' })
         ).resolves.toEqual(undefined);
+        expect(mockAuthenticateClient.close).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -534,16 +596,19 @@ some weird+ca/with
         await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
           `[ConnectionError: some-message]`
         );
+        expect(mockPingClient.close).toHaveBeenCalledTimes(1);
       });
 
       it('fails if host is not supported', async () => {
         mockPingClient.asInternalUser.ping.mockRejectedValue(
-          new errors.ProductNotSupportedError(interactiveSetupMock.createApiResponse({ body: {} }))
+          // @ts-expect-error not full interface
+          new errors.ProductNotSupportedError('Elasticsearch', { body: {} })
         );
 
         await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
           `[ProductNotSupportedError: The client noticed that the server is not Elasticsearch and we do not support this unknown product.]`
         );
+        expect(mockPingClient.close).toHaveBeenCalledTimes(1);
       });
 
       it('fails if host is not Elasticsearch', async () => {
@@ -557,6 +622,7 @@ some weird+ca/with
         await expect(setupContract.ping('http://localhost:9200')).rejects.toMatchInlineSnapshot(
           `[Error: Host did not respond with valid Elastic product header.]`
         );
+        expect(mockPingClient.close).toHaveBeenCalledTimes(1);
       });
 
       it('succeeds if host does not require authentication', async () => {
@@ -568,6 +634,7 @@ some weird+ca/with
           authRequired: false,
           certificateChain: undefined,
         });
+        expect(mockPingClient.close).toHaveBeenCalledTimes(1);
       });
 
       it('succeeds if host requires authentication', async () => {
@@ -581,6 +648,7 @@ some weird+ca/with
           authRequired: true,
           certificateChain: undefined,
         });
+        expect(mockPingClient.close).toHaveBeenCalledTimes(1);
       });
 
       it('succeeds if host requires SSL', async () => {
@@ -614,6 +682,7 @@ some weird+ca/with
           port: 9200,
           rejectUnauthorized: false,
         });
+        expect(mockPingClient.close).toHaveBeenCalledTimes(1);
       });
 
       it('fails if peer certificate cannot be fetched', async () => {
@@ -634,6 +703,7 @@ some weird+ca/with
         await expect(setupContract.ping('https://localhost:9200')).rejects.toMatchInlineSnapshot(
           `[Error: some-message]`
         );
+        expect(mockPingClient.close).toHaveBeenCalledTimes(1);
       });
     });
   });

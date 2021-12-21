@@ -25,15 +25,24 @@ import {
   getPackagePolicyDeleteCallback,
 } from '../fleet_integration/fleet_integration';
 import { ManifestManager } from './services/artifacts';
-import { AppClientFactory } from '../client';
 import { ConfigType } from '../config';
+import { IRequestContextFactory } from '../request_context_factory';
 import { LicenseService } from '../../common/license';
-import {
-  ExperimentalFeatures,
-  parseExperimentalConfigValue,
-} from '../../common/experimental_features';
+import { ExperimentalFeatures } from '../../common/experimental_features';
 import { EndpointMetadataService } from './services/metadata';
-import { EndpointAppContentServicesNotStartedError } from './errors';
+import {
+  EndpointAppContentServicesNotSetUpError,
+  EndpointAppContentServicesNotStartedError,
+} from './errors';
+import {
+  EndpointFleetServicesFactory,
+  EndpointInternalFleetServicesInterface,
+  EndpointScopedFleetServicesInterface,
+} from './services/endpoint_fleet_services';
+
+export interface EndpointAppContextServiceSetupContract {
+  securitySolutionRequestContextFactory: IRequestContextFactory;
+}
 
 export type EndpointAppContextServiceStartContract = Partial<
   Pick<
@@ -44,7 +53,6 @@ export type EndpointAppContextServiceStartContract = Partial<
   logger: Logger;
   endpointMetadataService: EndpointMetadataService;
   manifestManager?: ManifestManager;
-  appClientFactory: AppClientFactory;
   security: SecurityPluginStart;
   alerting: AlertsPluginStartContract;
   config: ConfigType;
@@ -59,40 +67,41 @@ export type EndpointAppContextServiceStartContract = Partial<
  * of the plugin lifecycle. And stop during the stop phase, if needed.
  */
 export class EndpointAppContextService {
-  private agentService: AgentService | undefined;
-  private manifestManager: ManifestManager | undefined;
-  private packagePolicyService: PackagePolicyServiceInterface | undefined;
-  private agentPolicyService: AgentPolicyServiceInterface | undefined;
-  private config: ConfigType | undefined;
-  private license: LicenseService | undefined;
+  private setupDependencies: EndpointAppContextServiceSetupContract | null = null;
+  private startDependencies: EndpointAppContextServiceStartContract | null = null;
+  private fleetServicesFactory: EndpointFleetServicesFactory | null = null;
   public security: SecurityPluginStart | undefined;
-  private cases: CasesPluginStartContract | undefined;
-  private endpointMetadataService: EndpointMetadataService | undefined;
-  private experimentalFeatures: ExperimentalFeatures | undefined;
+
+  public setup(dependencies: EndpointAppContextServiceSetupContract) {
+    this.setupDependencies = dependencies;
+  }
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
-    this.agentService = dependencies.agentService;
-    this.packagePolicyService = dependencies.packagePolicyService;
-    this.agentPolicyService = dependencies.agentPolicyService;
-    this.manifestManager = dependencies.manifestManager;
-    this.config = dependencies.config;
-    this.license = dependencies.licenseService;
-    this.security = dependencies.security;
-    this.cases = dependencies.cases;
-    this.endpointMetadataService = dependencies.endpointMetadataService;
-    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental);
+    if (!this.setupDependencies) {
+      throw new EndpointAppContentServicesNotSetUpError();
+    }
 
-    if (this.manifestManager && dependencies.registerIngestCallback) {
+    this.startDependencies = dependencies;
+    this.security = dependencies.security;
+
+    // let's try to avoid turning off eslint's Forbidden non-null assertion rule
+    const { agentService, agentPolicyService, packagePolicyService, packageService } =
+      dependencies as Required<EndpointAppContextServiceStartContract>;
+
+    this.fleetServicesFactory = new EndpointFleetServicesFactory({
+      agentService,
+      agentPolicyService,
+      packagePolicyService,
+      packageService,
+    });
+
+    if (dependencies.registerIngestCallback && dependencies.manifestManager) {
       dependencies.registerIngestCallback(
         'packagePolicyCreate',
         getPackagePolicyCreateCallback(
           dependencies.logger,
-          this.manifestManager,
-          dependencies.appClientFactory,
-          dependencies.config.maxTimelineImportExportSize,
-          dependencies.config.prebuiltRulesFromFileSystem,
-          dependencies.config.prebuiltRulesFromSavedObjects,
-          dependencies.security,
+          dependencies.manifestManager,
+          this.setupDependencies.securitySolutionRequestContextFactory,
           dependencies.alerting,
           dependencies.licenseService,
           dependencies.exceptionListsClient
@@ -106,7 +115,7 @@ export class EndpointAppContextService {
 
       dependencies.registerIngestCallback(
         'postPackagePolicyDelete',
-        getPackagePolicyDeleteCallback(dependencies.exceptionListsClient, this.experimentalFeatures)
+        getPackagePolicyDeleteCallback(dependencies.exceptionListsClient)
       );
     }
   }
@@ -114,43 +123,65 @@ export class EndpointAppContextService {
   public stop() {}
 
   public getExperimentalFeatures(): Readonly<ExperimentalFeatures> | undefined {
-    return this.experimentalFeatures;
+    return this.startDependencies?.config.experimentalFeatures;
   }
 
   public getEndpointMetadataService(): EndpointMetadataService {
-    if (!this.endpointMetadataService) {
+    if (this.startDependencies == null) {
       throw new EndpointAppContentServicesNotStartedError();
     }
-    return this.endpointMetadataService;
+    return this.startDependencies.endpointMetadataService;
   }
 
+  public getScopedFleetServices(req: KibanaRequest): EndpointScopedFleetServicesInterface {
+    if (this.fleetServicesFactory === null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.fleetServicesFactory.asScoped(req);
+  }
+
+  public getInternalFleetServices(): EndpointInternalFleetServicesInterface {
+    if (this.fleetServicesFactory === null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.fleetServicesFactory.asInternalUser();
+  }
+
+  /** @deprecated use `getScopedFleetServices()` instead */
   public getAgentService(): AgentService | undefined {
-    return this.agentService;
+    return this.startDependencies?.agentService;
   }
 
-  public getPackagePolicyService(): PackagePolicyServiceInterface | undefined {
-    return this.packagePolicyService;
+  /** @deprecated use `getScopedFleetServices()` instead */
+  public getPackagePolicyService(): PackagePolicyServiceInterface {
+    if (!this.startDependencies?.packagePolicyService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies?.packagePolicyService;
   }
 
+  /** @deprecated use `getScopedFleetServices()` instead */
   public getAgentPolicyService(): AgentPolicyServiceInterface | undefined {
-    return this.agentPolicyService;
+    return this.startDependencies?.agentPolicyService;
   }
 
   public getManifestManager(): ManifestManager | undefined {
-    return this.manifestManager;
+    return this.startDependencies?.manifestManager;
   }
 
   public getLicenseService(): LicenseService {
-    if (!this.license) {
+    if (this.startDependencies == null) {
       throw new EndpointAppContentServicesNotStartedError();
     }
-    return this.license;
+    return this.startDependencies.licenseService;
   }
 
   public async getCasesClient(req: KibanaRequest): Promise<CasesClient> {
-    if (!this.cases) {
+    if (this.startDependencies?.cases == null) {
       throw new EndpointAppContentServicesNotStartedError();
     }
-    return this.cases.getCasesClientWithRequest(req);
+    return this.startDependencies.cases.getCasesClientWithRequest(req);
   }
 }

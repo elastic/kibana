@@ -25,7 +25,6 @@ import type { SpacesPluginStart } from '../../spaces/public';
 
 import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import type { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 
 import type { LicenseManagementUIPluginSetup } from '../../license_management/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
@@ -46,17 +45,21 @@ import type { DataVisualizerPluginStart } from '../../data_visualizer/public';
 import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 import { registerManagementSection } from './application/management';
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import type {
+  FieldFormatsSetup,
+  FieldFormatsStart,
+} from '../../../../src/plugins/field_formats/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
   share: SharePluginStart;
-  kibanaLegacy: KibanaLegacyStart;
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
   embeddable: EmbeddableStart;
   maps?: MapsStartApi;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   dataVisualizer: DataVisualizerPluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 export interface MlSetupDependencies {
@@ -72,6 +75,7 @@ export interface MlSetupDependencies {
   triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
   alerting?: AlertingSetup;
   usageCollection?: UsageCollectionSetup;
+  fieldFormats: FieldFormatsSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -103,7 +107,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           {
             data: pluginsStart.data,
             share: pluginsStart.share,
-            kibanaLegacy: pluginsStart.kibanaLegacy,
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,
@@ -116,6 +119,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             triggersActionsUi: pluginsStart.triggersActionsUi,
             dataVisualizer: pluginsStart.dataVisualizer,
             usageCollection: pluginsSetup.usageCollection,
+            fieldFormats: pluginsStart.fieldFormats,
           },
           params
         );

@@ -51,6 +51,7 @@ const StatefulCellComponent = ({
         isExpandable: true,
         isExpanded: false,
         isDetails: false,
+        isTimeline: true,
         linkValues,
         rowIndex: ariaRowindex - 1,
         setCellProps,

@@ -15,6 +15,15 @@ Array [
       }
     }
     showLabel={true}
+    style={
+      Object {
+        "bgColor": false,
+        "css": "",
+        "labelColor": false,
+        "spec": Object {},
+        "type": "style",
+      }
+    }
   />,
   <MetricVisValue
     key="1"
@@ -29,6 +38,15 @@ Array [
       }
     }
     showLabel={true}
+    style={
+      Object {
+        "bgColor": false,
+        "css": "",
+        "labelColor": false,
+        "spec": Object {},
+        "type": "style",
+      }
+    }
   />,
 ]
 `;
@@ -47,5 +65,14 @@ exports[`MetricVisComponent should render correct structure for single metric 1`
     }
   }
   showLabel={true}
+  style={
+    Object {
+      "bgColor": false,
+      "css": "",
+      "labelColor": false,
+      "spec": Object {},
+      "type": "style",
+    }
+  }
 />
 `;

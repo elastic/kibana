@@ -116,11 +116,16 @@ export const createRulesBulkRoute = (
                 await rulesClient.muteAll({ id: createdRule.id });
               }
 
-              return transformValidateBulkError(internalRule.params.ruleId, createdRule, undefined);
+              return transformValidateBulkError(
+                internalRule.params.ruleId,
+                createdRule,
+                undefined,
+                isRuleRegistryEnabled
+              );
             } catch (err) {
               return transformBulkError(
                 internalRule.params.ruleId,
-                err as Error & { statusCode?: number | undefined }
+                err as Error & { statusCode?: number }
               );
             }
           })

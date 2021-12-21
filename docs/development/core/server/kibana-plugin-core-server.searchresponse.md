@@ -15,11 +15,11 @@ export interface SearchResponse<T = unknown>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [\_scroll\_id](./kibana-plugin-core-server.searchresponse._scroll_id.md) | <code>string</code> |  |
-|  [\_shards](./kibana-plugin-core-server.searchresponse._shards.md) | <code>ShardsResponse</code> |  |
-|  [aggregations](./kibana-plugin-core-server.searchresponse.aggregations.md) | <code>any</code> |  |
-|  [hits](./kibana-plugin-core-server.searchresponse.hits.md) | <code>{</code><br/><code>        total: number;</code><br/><code>        max_score: number;</code><br/><code>        hits: Array&lt;{</code><br/><code>            _index: string;</code><br/><code>            _type: string;</code><br/><code>            _id: string;</code><br/><code>            _score: number;</code><br/><code>            _source: T;</code><br/><code>            _version?: number;</code><br/><code>            _explanation?: Explanation;</code><br/><code>            fields?: any;</code><br/><code>            highlight?: any;</code><br/><code>            inner_hits?: any;</code><br/><code>            matched_queries?: string[];</code><br/><code>            sort?: unknown[];</code><br/><code>        }&gt;;</code><br/><code>    }</code> |  |
-|  [pit\_id](./kibana-plugin-core-server.searchresponse.pit_id.md) | <code>string</code> |  |
-|  [timed\_out](./kibana-plugin-core-server.searchresponse.timed_out.md) | <code>boolean</code> |  |
-|  [took](./kibana-plugin-core-server.searchresponse.took.md) | <code>number</code> |  |
+|  [\_scroll\_id?](./kibana-plugin-core-server.searchresponse._scroll_id.md) | string | <i>(Optional)</i> |
+|  [\_shards](./kibana-plugin-core-server.searchresponse._shards.md) | ShardsResponse |  |
+|  [aggregations?](./kibana-plugin-core-server.searchresponse.aggregations.md) | any | <i>(Optional)</i> |
+|  [hits](./kibana-plugin-core-server.searchresponse.hits.md) | { total: number; max\_score: number; hits: Array&lt;{ \_index: string; \_type: string; \_id: string; \_score: number; \_source: T; \_version?: number; \_explanation?: Explanation; fields?: any; highlight?: any; inner\_hits?: any; matched\_queries?: string\[\]; sort?: unknown\[\]; }&gt;; } |  |
+|  [pit\_id?](./kibana-plugin-core-server.searchresponse.pit_id.md) | string | <i>(Optional)</i> |
+|  [timed\_out](./kibana-plugin-core-server.searchresponse.timed_out.md) | boolean |  |
+|  [took](./kibana-plugin-core-server.searchresponse.took.md) | number |  |
 

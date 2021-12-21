@@ -408,7 +408,6 @@ describe('<EditPolicy /> serialization', () => {
       await actions.cold.setDataAllocation('node_attrs');
       await actions.cold.setSelectedNodeAttribute('test:123');
       await actions.cold.setReplicas('123');
-      await actions.cold.setFreeze();
       await actions.cold.toggleReadonly();
       await actions.cold.setIndexPriority('123');
 
@@ -428,7 +427,6 @@ describe('<EditPolicy /> serialization', () => {
                     "test": "123",
                   },
                 },
-                "freeze": Object {},
                 "readonly": Object {},
                 "set_priority": Object {
                   "priority": 123,

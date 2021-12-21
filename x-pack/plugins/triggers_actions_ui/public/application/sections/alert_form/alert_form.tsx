@@ -7,7 +7,7 @@
 
 import React, { Fragment, useState, useEffect, useCallback, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,7 +35,7 @@ import {
   EuiToolTip,
   EuiCallOut,
 } from '@elastic/eui';
-import { capitalize, isObject } from 'lodash';
+import { capitalize } from 'lodash';
 import { KibanaFeature } from '../../../../../features/public';
 import {
   getDurationNumberInItsUnit,
@@ -44,13 +44,12 @@ import {
 import { loadAlertTypes } from '../../lib/alert_api';
 import { AlertReducerAction, InitialAlert } from './alert_reducer';
 import {
-  AlertTypeModel,
-  Alert,
+  RuleTypeModel,
+  Rule,
   IErrorObject,
   AlertAction,
-  AlertTypeIndex,
-  AlertType,
-  ValidationResult,
+  RuleTypeIndex,
+  RuleType,
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
 } from '../../../types';
@@ -74,100 +73,9 @@ import { checkAlertTypeEnabled } from '../../lib/check_alert_type_enabled';
 import { alertTypeCompare, alertTypeGroupCompare } from '../../lib/alert_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { SectionLoading } from '../../components/section_loading';
+import { DEFAULT_ALERT_INTERVAL } from '../../constants';
 
 const ENTER_KEY = 13;
-
-export function validateBaseProperties(alertObject: InitialAlert): ValidationResult {
-  const validationResult = { errors: {} };
-  const errors = {
-    name: new Array<string>(),
-    interval: new Array<string>(),
-    alertTypeId: new Array<string>(),
-    actionConnectors: new Array<string>(),
-  };
-  validationResult.errors = errors;
-  if (!alertObject.name) {
-    errors.name.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredNameText', {
-        defaultMessage: 'Name is required.',
-      })
-    );
-  }
-  if (alertObject.schedule.interval.length < 2) {
-    errors.interval.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredIntervalText', {
-        defaultMessage: 'Check interval is required.',
-      })
-    );
-  }
-  if (!alertObject.alertTypeId) {
-    errors.alertTypeId.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredRuleTypeIdText', {
-        defaultMessage: 'Rule type is required.',
-      })
-    );
-  }
-  const emptyConnectorActions = alertObject.actions.find(
-    (actionItem) => /^\d+$/.test(actionItem.id) && Object.keys(actionItem.params).length > 0
-  );
-  if (emptyConnectorActions !== undefined) {
-    errors.actionConnectors.push(
-      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredActionConnector', {
-        defaultMessage: 'Action for {actionTypeId} connector is required.',
-        values: { actionTypeId: emptyConnectorActions.actionTypeId },
-      })
-    );
-  }
-  return validationResult;
-}
-
-export function getAlertErrors(alert: Alert, alertTypeModel: AlertTypeModel | null) {
-  const alertParamsErrors: IErrorObject = alertTypeModel
-    ? alertTypeModel.validate(alert.params).errors
-    : [];
-  const alertBaseErrors = validateBaseProperties(alert).errors as IErrorObject;
-  const alertErrors = {
-    ...alertParamsErrors,
-    ...alertBaseErrors,
-  } as IErrorObject;
-
-  return {
-    alertParamsErrors,
-    alertBaseErrors,
-    alertErrors,
-  };
-}
-
-export async function getAlertActionErrors(
-  alert: Alert,
-  actionTypeRegistry: ActionTypeRegistryContract
-): Promise<IErrorObject[]> {
-  return await Promise.all(
-    alert.actions.map(
-      async (alertAction: AlertAction) =>
-        (
-          await actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
-        ).errors
-    )
-  );
-}
-
-export const hasObjectErrors: (errors: IErrorObject) => boolean = (errors) =>
-  !!Object.values(errors).find((errorList) => {
-    if (isObject(errorList)) return hasObjectErrors(errorList as IErrorObject);
-    return errorList.length >= 1;
-  });
-
-export function isValidAlert(
-  alertObject: InitialAlert | Alert,
-  validationResult: IErrorObject,
-  actionsErrors: IErrorObject[]
-): alertObject is Alert {
-  return (
-    !hasObjectErrors(validationResult) &&
-    actionsErrors.every((error: IErrorObject) => !hasObjectErrors(error))
-  );
-}
 
 function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
@@ -185,6 +93,9 @@ interface AlertFormProps<MetaData = Record<string, any>> {
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   metadata?: MetaData;
 }
+
+const defaultScheduleInterval = getDurationNumberInItsUnit(DEFAULT_ALERT_INTERVAL);
+const defaultScheduleIntervalUnit = getDurationUnitValue(DEFAULT_ALERT_INTERVAL);
 
 export const AlertForm = ({
   alert,
@@ -209,13 +120,17 @@ export const AlertForm = ({
   } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
 
-  const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(null);
+  const [alertTypeModel, setAlertTypeModel] = useState<RuleTypeModel | null>(null);
 
   const [alertInterval, setAlertInterval] = useState<number | undefined>(
-    alert.schedule.interval ? getDurationNumberInItsUnit(alert.schedule.interval) : undefined
+    alert.schedule.interval
+      ? getDurationNumberInItsUnit(alert.schedule.interval)
+      : defaultScheduleInterval
   );
   const [alertIntervalUnit, setAlertIntervalUnit] = useState<string>(
-    alert.schedule.interval ? getDurationUnitValue(alert.schedule.interval) : 'm'
+    alert.schedule.interval
+      ? getDurationUnitValue(alert.schedule.interval)
+      : defaultScheduleIntervalUnit
   );
   const [alertThrottle, setAlertThrottle] = useState<number | null>(
     alert.throttle ? getDurationNumberInItsUnit(alert.throttle) : null
@@ -224,13 +139,13 @@ export const AlertForm = ({
     alert.throttle ? getDurationUnitValue(alert.throttle) : 'h'
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
-  const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | null>(null);
+  const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | null>(null);
 
   const [availableAlertTypes, setAvailableAlertTypes] = useState<
-    Array<{ alertTypeModel: AlertTypeModel; alertType: AlertType }>
+    Array<{ alertTypeModel: RuleTypeModel; alertType: RuleType }>
   >([]);
   const [filteredAlertTypes, setFilteredAlertTypes] = useState<
-    Array<{ alertTypeModel: AlertTypeModel; alertType: AlertType }>
+    Array<{ alertTypeModel: RuleTypeModel; alertType: RuleType }>
   >([]);
   const [searchText, setSearchText] = useState<string | undefined>();
   const [inputText, setInputText] = useState<string | undefined>();
@@ -243,14 +158,14 @@ export const AlertForm = ({
     (async () => {
       try {
         const alertTypesResult = await loadAlertTypes({ http });
-        const index: AlertTypeIndex = new Map();
+        const index: RuleTypeIndex = new Map();
         for (const alertTypeItem of alertTypesResult) {
           index.set(alertTypeItem.id, alertTypeItem);
         }
         if (alert.alertTypeId && index.has(alert.alertTypeId)) {
           setDefaultActionGroupId(index.get(alert.alertTypeId)!.defaultActionGroupId);
         }
-        setAlertTypesIndex(index);
+        setRuleTypeIndex(index);
 
         const availableAlertTypesResult = getAvailableAlertTypes(alertTypesResult);
         setAvailableAlertTypes(availableAlertTypesResult);
@@ -287,25 +202,39 @@ export const AlertForm = ({
 
   useEffect(() => {
     setAlertTypeModel(alert.alertTypeId ? ruleTypeRegistry.get(alert.alertTypeId) : null);
-    if (alert.alertTypeId && alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)) {
-      setDefaultActionGroupId(alertTypesIndex.get(alert.alertTypeId)!.defaultActionGroupId);
+    if (alert.alertTypeId && ruleTypeIndex && ruleTypeIndex.has(alert.alertTypeId)) {
+      setDefaultActionGroupId(ruleTypeIndex.get(alert.alertTypeId)!.defaultActionGroupId);
     }
-  }, [alert, alert.alertTypeId, alertTypesIndex, ruleTypeRegistry]);
+  }, [alert, alert.alertTypeId, ruleTypeIndex, ruleTypeRegistry]);
 
-  const setAlertProperty = useCallback(
-    <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => {
+  useEffect(() => {
+    if (alert.schedule.interval) {
+      const interval = getDurationNumberInItsUnit(alert.schedule.interval);
+      const intervalUnit = getDurationUnitValue(alert.schedule.interval);
+
+      if (interval !== defaultScheduleInterval) {
+        setAlertInterval(interval);
+      }
+      if (intervalUnit !== defaultScheduleIntervalUnit) {
+        setAlertIntervalUnit(intervalUnit);
+      }
+    }
+  }, [alert.schedule.interval]);
+
+  const setRuleProperty = useCallback(
+    <Key extends keyof Rule>(key: Key, value: Rule[Key] | null) => {
       dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
     },
     [dispatch]
   );
 
   const setActions = useCallback(
-    (updatedActions: AlertAction[]) => setAlertProperty('actions', updatedActions),
-    [setAlertProperty]
+    (updatedActions: AlertAction[]) => setRuleProperty('actions', updatedActions),
+    [setRuleProperty]
   );
 
-  const setAlertParams = (key: string, value: any) => {
-    dispatch({ command: { type: 'setAlertParams' }, payload: { key, value } });
+  const setRuleParams = (key: string, value: any) => {
+    dispatch({ command: { type: 'setRuleParams' }, payload: { key, value } });
   };
 
   const setScheduleProperty = (key: string, value: any) => {
@@ -347,13 +276,13 @@ export const AlertForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleTypeRegistry, availableAlertTypes, searchText, JSON.stringify(solutionsFilter)]);
 
-  const getAvailableAlertTypes = (alertTypesResult: AlertType[]) =>
+  const getAvailableAlertTypes = (alertTypesResult: RuleType[]) =>
     ruleTypeRegistry
       .list()
       .reduce(
         (
-          arr: Array<{ alertType: AlertType; alertTypeModel: AlertTypeModel }>,
-          ruleTypeRegistryItem: AlertTypeModel
+          arr: Array<{ alertType: RuleType; alertTypeModel: RuleTypeModel }>,
+          ruleTypeRegistryItem: RuleTypeModel
         ) => {
           const alertType = alertTypesResult.find((item) => ruleTypeRegistryItem.id === item.id);
           if (alertType) {
@@ -372,9 +301,7 @@ export const AlertForm = ({
           ? !item.alertTypeModel.requiresAppContext
           : item.alertType!.producer === alert.consumer
       );
-  const selectedAlertType = alert?.alertTypeId
-    ? alertTypesIndex?.get(alert?.alertTypeId)
-    : undefined;
+  const selectedAlertType = alert?.alertTypeId ? ruleTypeIndex?.get(alert?.alertTypeId) : undefined;
   const recoveryActionGroup = selectedAlertType?.recoveryActionGroup?.id;
   const getDefaultActionParams = useCallback(
     (actionTypeId: string, actionGroupId: string): Record<string, AlertActionParam> | undefined =>
@@ -389,7 +316,7 @@ export const AlertForm = ({
   const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
 
   const isActionGroupDisabledForActionType = useCallback(
-    (alertType: AlertType, actionGroupId: string, actionTypeId: string): boolean => {
+    (alertType: RuleType, actionGroupId: string, actionTypeId: string): boolean => {
       return isActionGroupDisabledForActionTypeId(
         actionGroupId === alertType?.recoveryActionGroup?.id
           ? RecoveredActionGroup.id
@@ -401,7 +328,7 @@ export const AlertForm = ({
   );
 
   const AlertParamsExpressionComponent = alertTypeModel
-    ? alertTypeModel.alertParamsExpression
+    ? alertTypeModel.ruleParamsExpression
     : null;
 
   const alertTypesByProducer = filteredAlertTypes.reduce(
@@ -412,7 +339,7 @@ export const AlertForm = ({
           id: string;
           name: string;
           checkEnabledResult: IsEnabledResult | IsDisabledResult;
-          alertTypeItem: AlertTypeModel;
+          alertTypeItem: RuleTypeModel;
         }>
       >,
       alertTypeValue
@@ -495,12 +422,12 @@ export const AlertForm = ({
                   }
                   isDisabled={!item.checkEnabledResult.isEnabled}
                   onClick={() => {
-                    setAlertProperty('alertTypeId', item.id);
+                    setRuleProperty('alertTypeId', item.id);
                     setActions([]);
                     setAlertTypeModel(item.alertTypeItem);
-                    setAlertProperty('params', {});
-                    if (alertTypesIndex && alertTypesIndex.has(item.id)) {
-                      setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
+                    setRuleProperty('params', {});
+                    if (ruleTypeIndex && ruleTypeIndex.has(item.id)) {
+                      setDefaultActionGroupId(ruleTypeIndex.get(item.id)!.defaultActionGroupId);
                     }
                   }}
                 />
@@ -518,8 +445,8 @@ export const AlertForm = ({
         <EuiFlexItem>
           <EuiTitle size="s" data-test-subj="selectedAlertTypeTitle">
             <h5 id="selectedAlertTypeTitle">
-              {alert.alertTypeId && alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)
-                ? alertTypesIndex.get(alert.alertTypeId)!.name
+              {alert.alertTypeId && ruleTypeIndex && ruleTypeIndex.has(alert.alertTypeId)
+                ? ruleTypeIndex.get(alert.alertTypeId)!.name
                 : ''}
             </h5>
           </EuiTitle>
@@ -536,9 +463,9 @@ export const AlertForm = ({
                 }
               )}
               onClick={() => {
-                setAlertProperty('alertTypeId', null);
+                setRuleProperty('alertTypeId', null);
                 setAlertTypeModel(null);
-                setAlertProperty('params', {});
+                setRuleProperty('params', {});
               }}
             />
           </EuiFlexItem>
@@ -587,13 +514,13 @@ export const AlertForm = ({
             }
           >
             <AlertParamsExpressionComponent
-              alertParams={alert.params}
-              alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
-              alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
+              ruleParams={alert.params}
+              ruleInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
+              ruleThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
               alertNotifyWhen={alert.notifyWhen ?? 'onActionGroupChange'}
               errors={errors}
-              setAlertParams={setAlertParams}
-              setAlertProperty={setAlertProperty}
+              setRuleParams={setRuleParams}
+              setRuleProperty={setRuleProperty}
               defaultActionGroupId={defaultActionGroupId}
               actionGroups={selectedAlertType.actionGroups}
               metadata={metadata}
@@ -688,11 +615,11 @@ export const AlertForm = ({
               data-test-subj="alertNameInput"
               value={alert.name || ''}
               onChange={(e) => {
-                setAlertProperty('name', e.target.value);
+                setRuleProperty('name', e.target.value);
               }}
               onBlur={() => {
                 if (!alert.name) {
-                  setAlertProperty('name', '');
+                  setRuleProperty('name', '');
                 }
               }}
             />
@@ -712,20 +639,20 @@ export const AlertForm = ({
               selectedOptions={tagsOptions}
               onCreateOption={(searchValue: string) => {
                 const newOptions = [...tagsOptions, { label: searchValue }];
-                setAlertProperty(
+                setRuleProperty(
                   'tags',
                   newOptions.map((newOption) => newOption.label)
                 );
               }}
               onChange={(selectedOptions: Array<{ label: string }>) => {
-                setAlertProperty(
+                setRuleProperty(
                   'tags',
                   selectedOptions.map((selectedOption) => selectedOption.label)
                 );
               }}
               onBlur={() => {
                 if (!alert.tags) {
-                  setAlertProperty('tags', []);
+                  setRuleProperty('tags', []);
                 }
               }}
             />
@@ -781,17 +708,17 @@ export const AlertForm = ({
             throttleUnit={alertThrottleUnit}
             onNotifyWhenChange={useCallback(
               (notifyWhen) => {
-                setAlertProperty('notifyWhen', notifyWhen);
+                setRuleProperty('notifyWhen', notifyWhen);
               },
-              [setAlertProperty]
+              [setRuleProperty]
             )}
             onThrottleChange={useCallback(
               (throttle: number | null, throttleUnit: string) => {
                 setAlertThrottle(throttle);
                 setAlertThrottleUnit(throttleUnit);
-                setAlertProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null);
+                setRuleProperty('throttle', throttle ? `${throttle}${throttleUnit}` : null);
               },
-              [setAlertProperty]
+              [setRuleProperty]
             )}
           />
         </EuiFlexItem>
@@ -837,7 +764,12 @@ export const AlertForm = ({
                 <EuiFieldSearch
                   fullWidth
                   data-test-subj="alertSearchField"
-                  onChange={(e) => setInputText(e.target.value)}
+                  onChange={(e) => {
+                    setInputText(e.target.value);
+                    if (e.target.value === '') {
+                      setSearchText('');
+                    }
+                  }}
                   onKeyUp={(e) => {
                     if (e.keyCode === ENTER_KEY) {
                       setSearchText(inputText);
@@ -870,7 +802,7 @@ export const AlertForm = ({
           ) : null}
           {alertTypeNodes}
         </>
-      ) : alertTypesIndex ? (
+      ) : ruleTypeIndex ? (
         <NoAuthorizedAlertTypes operation={operation} />
       ) : (
         <SectionLoading>

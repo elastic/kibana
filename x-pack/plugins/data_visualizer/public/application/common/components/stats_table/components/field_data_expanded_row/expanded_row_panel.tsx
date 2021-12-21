@@ -20,7 +20,7 @@ export const ExpandedRowPanel: FC<Props> = ({ children, dataTestSubj, grow, clas
     <EuiPanel
       data-test-subj={dataTestSubj}
       hasShadow={false}
-      hasBorder={true}
+      hasBorder={false}
       grow={!!grow}
       className={className ?? ''}
       paddingSize={'s'}

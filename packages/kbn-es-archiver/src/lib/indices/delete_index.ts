@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 import { Stats } from '../stats';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
@@ -15,7 +15,7 @@ import { ES_CLIENT_HEADERS } from '../../client_headers';
 const PENDING_SNAPSHOT_STATUSES = ['INIT', 'STARTED', 'WAITING'];
 
 export async function deleteIndex(options: {
-  client: KibanaClient;
+  client: Client;
   stats: Stats;
   index: string | string[];
   log: ToolingLog;
@@ -32,6 +32,7 @@ export async function deleteIndex(options: {
       {
         ignore: [404],
         headers: ES_CLIENT_HEADERS,
+        meta: true,
       }
     );
 
@@ -84,15 +85,13 @@ export function isDeleteWhileSnapshotInProgressError(error: any) {
  * snapshotting this index to complete.
  */
 export async function waitForSnapshotCompletion(
-  client: KibanaClient,
+  client: Client,
   index: string | string[],
   log: ToolingLog
 ) {
   const isSnapshotPending = async (repository: string, snapshot: string) => {
     const {
-      body: {
-        snapshots: [status],
-      },
+      snapshots: [status],
     } = await client.snapshot.status(
       {
         repository,
@@ -108,9 +107,7 @@ export async function waitForSnapshotCompletion(
   };
 
   const getInProgressSnapshots = async (repository: string) => {
-    const {
-      body: { snapshots: inProgressSnapshots },
-    } = await client.snapshot.get(
+    const { snapshots: inProgressSnapshots } = await client.snapshot.get(
       {
         repository,
         snapshot: '_current',
@@ -123,7 +120,7 @@ export async function waitForSnapshotCompletion(
     return inProgressSnapshots;
   };
 
-  const { body: repositoryMap } = await client.snapshot.getRepository({} as any);
+  const repositoryMap = await client.snapshot.getRepository({});
   for (const repository of Object.keys(repositoryMap)) {
     const allInProgress = await getInProgressSnapshots(repository);
     const found = allInProgress?.find((s: any) => s.indices.includes(index));

@@ -23,17 +23,17 @@ export function golangMetricsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: moduleName + 'Metrics',
     name: i18n.translate('home.tutorials.golangMetrics.nameTitle', {
-      defaultMessage: 'Golang metrics',
+      defaultMessage: 'Golang Metrics',
     }),
     moduleName,
     isBeta: true,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.golangMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from a Golang app.',
+      defaultMessage: 'Collect metrics from Golang applications with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.golangMetrics.longDescription', {
       defaultMessage:
-        'The `{moduleName}` Metricbeat module fetches internal metrics from a Golang app. \
+        'The `{moduleName}` Metricbeat module fetches metrics from a Golang app. \
 [Learn more]({learnMoreLink}).',
       values: {
         moduleName,
@@ -57,8 +57,8 @@ export function golangMetricsSpecProvider(context: TutorialContext): TutorialSch
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['google_cloud', 'cloud', 'network', 'security'],
   };
 }

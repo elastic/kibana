@@ -27,19 +27,20 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('perform_bulk_action', () => {
     beforeEach(async () => {
-      await createSignalsIndex(supertest);
+      await createSignalsIndex(supertest, log);
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest);
-      await deleteAllAlerts(supertest);
+      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log);
     });
 
     it('should export rules', async () => {
-      await createRule(supertest, getSimpleRule());
+      await createRule(supertest, log, getSimpleRule());
 
       const { body } = await supertest
         .post(DETECTION_ENGINE_RULES_BULK_ACTION)
@@ -57,7 +58,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const exportDetails = JSON.parse(exportDetailsJson);
       expect(exportDetails).to.eql({
+        exported_exception_list_count: 0,
+        exported_exception_list_item_count: 0,
         exported_count: 1,
+        exported_rules_count: 1,
+        missing_exception_list_item_count: 0,
+        missing_exception_list_items: [],
+        missing_exception_lists: [],
+        missing_exception_lists_count: 0,
         missing_rules: [],
         missing_rules_count: 0,
       });
@@ -65,7 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should delete rules', async () => {
       const ruleId = 'ruleId';
-      await createRule(supertest, getSimpleRule(ruleId));
+      await createRule(supertest, log, getSimpleRule(ruleId));
 
       const { body } = await supertest
         .post(DETECTION_ENGINE_RULES_BULK_ACTION)
@@ -83,7 +91,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should enable rules', async () => {
       const ruleId = 'ruleId';
-      await createRule(supertest, getSimpleRule(ruleId));
+      await createRule(supertest, log, getSimpleRule(ruleId));
 
       const { body } = await supertest
         .post(DETECTION_ENGINE_RULES_BULK_ACTION)
@@ -108,7 +116,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should disable rules', async () => {
       const ruleId = 'ruleId';
-      await createRule(supertest, getSimpleRule(ruleId, true));
+      await createRule(supertest, log, getSimpleRule(ruleId, true));
 
       const { body } = await supertest
         .post(DETECTION_ENGINE_RULES_BULK_ACTION)
@@ -131,7 +139,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should duplicate rules', async () => {
       const ruleId = 'ruleId';
-      await createRule(supertest, getSimpleRule(ruleId));
+      await createRule(supertest, log, getSimpleRule(ruleId));
 
       const { body } = await supertest
         .post(DETECTION_ENGINE_RULES_BULK_ACTION)

@@ -12,6 +12,7 @@ import { EuiFormRow, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { CodeEditor } from '../../../../kibana_react/public';
+import { XJson } from '../../../../es_ui_shared/public';
 
 import { AggParamEditorProps } from '../agg_param_props';
 
@@ -58,7 +59,7 @@ function RawJsonParamEditor({
       let isJsonValid = true;
       try {
         if (newValue) {
-          JSON.parse(newValue);
+          JSON.parse(XJson.collapseLiteralStrings(newValue));
         }
       } catch (e) {
         isJsonValid = false;

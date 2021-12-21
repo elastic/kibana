@@ -8,12 +8,12 @@
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
-import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
+import { registerTestBed, TestBed, AsyncTestBedConfig, findTestSubject } from '@kbn/test/jest';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   store: () => indexManagementStore(services as any),
   memoryRouter: {
     initialEntries: [`/indices?includeHiddenIndices=true`],
@@ -29,6 +29,7 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     clickIncludeHiddenIndicesToggle: () => void;
     clickDataStreamAt: (index: number) => void;
     clickManageContextMenuButton: () => void;
+    clickContextMenuOption: (optionDataTestSubject: string) => void;
   };
   findDataStreamDetailPanel: () => ReactWrapper;
   findDataStreamDetailPanelTitle: () => string;
@@ -44,15 +45,27 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
   /**
    * User Actions
    */
+  const clickContextMenuOption = async (optionDataTestSubject: string) => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find(`indexContextMenu.${optionDataTestSubject}`).simulate('click');
+    });
+    component.update();
+  };
 
   const clickIncludeHiddenIndicesToggle = () => {
     const { find } = testBed;
     find('indexTableIncludeHiddenIndicesToggle').simulate('click');
   };
 
-  const clickManageContextMenuButton = () => {
-    const { find } = testBed;
-    find('indexActionsContextMenuButton').simulate('click');
+  const clickManageContextMenuButton = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('indexActionsContextMenuButton').simulate('click');
+    });
+    component.update();
   };
 
   const getIncludeHiddenIndicesToggleStatus = () => {
@@ -102,6 +115,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
       clickIncludeHiddenIndicesToggle,
       clickDataStreamAt,
       clickManageContextMenuButton,
+      clickContextMenuOption,
     },
     findDataStreamDetailPanel,
     findDataStreamDetailPanelTitle,

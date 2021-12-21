@@ -19,6 +19,5 @@ host?: string;
 // allows access to all of google.com, using any protocol.
 allow: true,
 host: 'google.com'
-
 ```
 

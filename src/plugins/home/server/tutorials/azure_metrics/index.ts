@@ -23,13 +23,13 @@ export function azureMetricsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'azureMetrics',
     name: i18n.translate('home.tutorials.azureMetrics.nameTitle', {
-      defaultMessage: 'Azure metrics',
+      defaultMessage: 'Azure Metrics',
     }),
     moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.azureMetrics.shortDescription', {
-      defaultMessage: 'Fetch Azure Monitor metrics.',
+      defaultMessage: 'Collect metrics from Azure with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.azureMetrics.longDescription', {
       defaultMessage:
@@ -57,8 +57,8 @@ export function azureMetricsSpecProvider(context: TutorialContext): TutorialSche
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/azure_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['azure', 'cloud', 'network', 'security'],
   };
 }

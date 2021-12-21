@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { OperationType } from '../../../../../../../lens/public';
 import { ReportViewType } from '../../types';
 import {
   CLS_FIELD,
@@ -13,6 +13,7 @@ import {
   LCP_FIELD,
   TBT_FIELD,
   TRANSACTION_TIME_TO_FIRST_BYTE,
+  TRANSACTION_DURATION,
 } from './elasticsearch_fieldnames';
 import {
   AGENT_HOST_LABEL,
@@ -20,6 +21,7 @@ import {
   BROWSER_VERSION_LABEL,
   CLS_LABEL,
   CORE_WEB_VITALS_LABEL,
+  DCL_LABEL,
   DEVICE_DISTRIBUTION_LABEL,
   DEVICE_LABEL,
   ENVIRONMENT_LABEL,
@@ -45,8 +47,22 @@ import {
   TBT_LABEL,
   URL_LABEL,
   BACKEND_TIME_LABEL,
+  MONITORS_DURATION_LABEL,
+  PAGE_LOAD_TIME_LABEL,
   LABELS_FIELD,
+  STEP_NAME_LABEL,
+  STEP_DURATION_LABEL,
 } from './labels';
+import {
+  MONITOR_DURATION_US,
+  SYNTHETICS_CLS,
+  SYNTHETICS_DCL,
+  SYNTHETICS_DOCUMENT_ONLOAD,
+  SYNTHETICS_FCP,
+  SYNTHETICS_LCP,
+  SYNTHETICS_STEP_DURATION,
+  SYNTHETICS_STEP_NAME,
+} from './field_names/synthetics';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
 
@@ -68,10 +84,20 @@ export const FieldLabels: Record<string, string> = {
   [TBT_FIELD]: TBT_LABEL,
   [FID_FIELD]: FID_LABEL,
   [CLS_FIELD]: CLS_LABEL,
+
+  [SYNTHETICS_CLS]: CLS_LABEL,
+  [SYNTHETICS_DCL]: DCL_LABEL,
+  [SYNTHETICS_STEP_DURATION]: STEP_DURATION_LABEL,
+  [SYNTHETICS_LCP]: LCP_LABEL,
+  [SYNTHETICS_FCP]: FCP_LABEL,
+  [SYNTHETICS_DOCUMENT_ONLOAD]: PAGE_LOAD_TIME_LABEL,
   [TRANSACTION_TIME_TO_FIRST_BYTE]: BACKEND_TIME_LABEL,
+  [TRANSACTION_DURATION]: PAGE_LOAD_TIME_LABEL,
 
   'monitor.id': MONITOR_ID_LABEL,
   'monitor.status': MONITOR_STATUS_LABEL,
+  [MONITOR_DURATION_US]: MONITORS_DURATION_LABEL,
+  [SYNTHETICS_STEP_NAME]: STEP_NAME_LABEL,
 
   'agent.hostname': AGENT_HOST_LABEL,
   'host.hostname': HOST_NAME_LABEL,
@@ -86,6 +112,7 @@ export const FieldLabels: Record<string, string> = {
   'performance.metric': METRIC_LABEL,
   'Business.KPI': KPI_LABEL,
   'http.request.method': REQUEST_METHOD,
+  percentile: 'Percentile',
   LABEL_FIELDS_FILTER: LABELS_FIELD,
   LABEL_FIELDS_BREAKDOWN: 'Labels field',
 };
@@ -114,8 +141,16 @@ export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
 export const FILTER_RECORDS = 'FILTER_RECORDS';
 export const TERMS_COLUMN = 'TERMS_COLUMN';
 export const OPERATION_COLUMN = 'operation';
+export const PERCENTILE = 'percentile';
 
 export const REPORT_METRIC_FIELD = 'REPORT_METRIC_FIELD';
 
+export const PERCENTILE_RANKS = [
+  '99th' as OperationType,
+  '95th' as OperationType,
+  '90th' as OperationType,
+  '75th' as OperationType,
+  '50th' as OperationType,
+];
 export const LABEL_FIELDS_FILTER = 'LABEL_FIELDS_FILTER';
 export const LABEL_FIELDS_BREAKDOWN = 'LABEL_FIELDS_BREAKDOWN';

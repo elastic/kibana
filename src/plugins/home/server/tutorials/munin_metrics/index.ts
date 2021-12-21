@@ -23,18 +23,18 @@ export function muninMetricsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'muninMetrics',
     name: i18n.translate('home.tutorials.muninMetrics.nameTitle', {
-      defaultMessage: 'Munin metrics',
+      defaultMessage: 'Munin Metrics',
     }),
     moduleName,
     euiIconType: '/plugins/home/assets/logos/munin.svg',
     isBeta: true,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.muninMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the Munin server.',
+      defaultMessage: 'Collect metrics from Munin servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.muninMetrics.longDescription', {
       defaultMessage:
-        'The `munin` Metricbeat module fetches internal metrics from Munin. \
+        'The `munin` Metricbeat module fetches metrics from Munin. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-munin.html',
@@ -54,8 +54,8 @@ export function muninMetricsSpecProvider(context: TutorialContext): TutorialSche
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['datastore'],
   };
 }

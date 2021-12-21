@@ -29,7 +29,12 @@ import { getAxis } from './get_axis';
 import { getAspects } from './get_aspects';
 import { ChartType } from '../index';
 
-export function getConfig(table: Datatable, params: VisParams): VisConfig {
+export function getConfig(
+  table: Datatable,
+  params: VisParams,
+  useLegacyTimeAxis = false,
+  darkMode = false
+): VisConfig {
   const {
     thresholdLine,
     orderBucketsBySum,
@@ -42,22 +47,41 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     fillOpacity,
   } = params;
   const aspects = getAspects(table.columns, params.dimensions);
+  const tooltip = getTooltip(aspects, params);
+
+  const yAxes: Array<AxisConfig<ScaleContinuousType>> = [];
+
+  params.dimensions.y.forEach((y) => {
+    const accessor = y.accessor;
+    const aspect = aspects.y.find(({ column }) => column === accessor);
+    const serie = params.seriesParams.find(({ data: { id } }) => id === aspect?.aggId);
+    const valueAxis = params.valueAxes.find(({ id }) => id === serie?.valueAxis);
+    if (aspect && valueAxis) {
+      yAxes.push(getAxis<YScaleType>(valueAxis, params.grid, aspect, params.seriesParams));
+    }
+  });
+
+  const rotation = getRotation(params.categoryAxes[0]);
+
+  const isDateHistogram = params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM;
+  const isHistogram = params.dimensions.x?.aggType === BUCKET_TYPES.HISTOGRAM;
+  const enableHistogramMode =
+    (isDateHistogram || isHistogram) &&
+    shouldEnableHistogramMode(params.seriesParams, aspects.y, yAxes);
+
+  const useMultiLayerTimeAxis =
+    enableHistogramMode && isDateHistogram && !useLegacyTimeAxis && rotation === 0;
+
   const xAxis = getAxis<XScaleType>(
     params.categoryAxes[0],
     params.grid,
     aspects.x,
     params.seriesParams,
-    params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM
+    isDateHistogram,
+    useMultiLayerTimeAxis,
+    darkMode
   );
-  const tooltip = getTooltip(aspects, params);
-  const yAxes = params.valueAxes.map((a) =>
-    // uses first y aspect in array for formatting axis
-    getAxis<YScaleType>(a, params.grid, aspects.y[0], params.seriesParams)
-  );
-  const enableHistogramMode =
-    (params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM ||
-      params.dimensions.x?.aggType === BUCKET_TYPES.HISTOGRAM) &&
-    shouldEnableHistogramMode(params.seriesParams, aspects.y, yAxes);
+
   const isTimeChart = (aspects.x.params as DateHistogramParams).date ?? false;
 
   return {
@@ -77,7 +101,7 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     xAxis,
     yAxes,
     legend: getLegend(params),
-    rotation: getRotation(params.categoryAxes[0]),
+    rotation,
     thresholdLine: getThresholdLine(thresholdLine, yAxes, params.seriesParams),
   };
 }
@@ -112,8 +136,6 @@ const shouldEnableHistogramMode = (
   }
 
   return bars.every(({ valueAxis: groupId, mode }) => {
-    const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
-
-    return mode === 'stacked' || yAxisScale?.mode === 'percentage';
+    return mode === 'stacked';
   });
 };

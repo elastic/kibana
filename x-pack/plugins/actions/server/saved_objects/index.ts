@@ -22,6 +22,7 @@ import { ActionTypeRegistry } from '../action_type_registry';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+  CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
 import { getOldestIdleActionTask } from '../../../task_manager/server';
 
@@ -40,6 +41,7 @@ export function setupSavedObjects(
     mappings: mappings.action as SavedObjectsTypeMappingDefinition,
     migrations: getActionsMigrations(encryptedSavedObjects),
     management: {
+      displayName: 'connector',
       defaultSearchField: 'name',
       importableAndExportable: true,
       getTitle(savedObject: SavedObject<RawAction>) {
@@ -94,5 +96,20 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['apiKey']),
+  });
+
+  savedObjects.registerType({
+    name: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: mappings.connector_token as SavedObjectsTypeMappingDefinition,
+    management: {
+      importableAndExportable: false,
+    },
+  });
+
+  encryptedSavedObjects.registerType({
+    type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['token']),
   });
 }

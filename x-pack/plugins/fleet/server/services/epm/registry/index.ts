@@ -8,8 +8,10 @@
 import { URL } from 'url';
 
 import mime from 'mime-types';
-import semverValid from 'semver/functions/valid';
+
 import type { Response } from 'node-fetch';
+
+import { splitPkgKey as split } from '../../../../common';
 
 import { KibanaAssetType } from '../../../types';
 import type {
@@ -31,12 +33,7 @@ import {
 } from '../archive';
 import { streamToBuffer } from '../streams';
 import { appContextService } from '../..';
-import {
-  PackageKeyInvalidError,
-  PackageNotFoundError,
-  PackageCacheError,
-  RegistryResponseError,
-} from '../../../errors';
+import { PackageNotFoundError, PackageCacheError, RegistryResponseError } from '../../../errors';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
@@ -46,33 +43,7 @@ export interface SearchParams {
   experimental?: boolean;
 }
 
-/**
- * Extract the package name and package version from a string.
- *
- * @param pkgkey a string containing the package name delimited by the package version
- */
-export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: string } {
-  // If no version is provided, use the provided package key as the
-  // package name and return an empty version value
-  if (!pkgkey.includes('-')) {
-    return { pkgName: pkgkey, pkgVersion: '' };
-  }
-
-  const pkgName = pkgkey.includes('-') ? pkgkey.substr(0, pkgkey.indexOf('-')) : pkgkey;
-
-  if (pkgName === '') {
-    throw new PackageKeyInvalidError('Package key parsing failed: package name was empty');
-  }
-
-  // this will return the entire string if `indexOf` return -1
-  const pkgVersion = pkgkey.substr(pkgkey.indexOf('-') + 1);
-  if (!semverValid(pkgVersion)) {
-    throw new PackageKeyInvalidError(
-      'Package key parsing failed: package version was not a valid semver'
-    );
-  }
-  return { pkgName, pkgVersion };
-}
+export const splitPkgKey = split;
 
 export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
   `${name}-${version}`;
@@ -96,16 +67,10 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
 
 export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
   const registryUrl = getRegistryUrl();
-  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
-  const kibanaBranch = appContextService.getKibanaBranch();
-  const url = new URL(
-    `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
-  );
+  const url = new URL(`${registryUrl}/search?package=${packageName}&experimental=true`);
 
-  // on master, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'master') {
-    url.searchParams.set('kibana.version', kibanaVersion);
-  }
+  setKibanaVersion(url);
+
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
   if (searchResults.length) {
@@ -144,11 +109,17 @@ export async function fetchFile(filePath: string): Promise<Response> {
 }
 
 function setKibanaVersion(url: URL) {
+  const disableVersionCheck =
+    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? false;
+  if (disableVersionCheck) {
+    return;
+  }
+
   const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
   const kibanaBranch = appContextService.getKibanaBranch();
 
-  // on master, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'master') {
+  // on main, request all packages regardless of version
+  if (kibanaVersion && kibanaBranch !== 'main') {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
 }

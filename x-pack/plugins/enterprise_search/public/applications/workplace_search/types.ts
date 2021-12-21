@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
-
 import { RoleMapping } from '../shared/types';
 
 export * from '../../../common/types/workplace_search';
@@ -83,7 +81,7 @@ export interface SourceDataItem {
   features?: Features;
   objTypes?: string[];
   addPath: string;
-  editPath: string;
+  editPath?: string; // undefined for GitHub apps, as they are configured on a source level, and don't use a connector where you can edit the configuration
   accountContextOnly: boolean;
 }
 
@@ -132,7 +130,7 @@ interface SourceActivity {
 
 export interface SyncEstimate {
   duration?: string;
-  nextStart: string;
+  nextStart?: string;
   lastRun?: string;
 }
 
@@ -147,6 +145,8 @@ export interface IndexingSchedule extends SyncIndexItem<string> {
   estimates: SyncIndexItem<SyncEstimate>;
   blockedWindows?: BlockedWindow[];
 }
+
+export type TimeUnit = 'minutes' | 'hours' | 'days' | 'weeks' | 'months' | 'years';
 
 export type SyncJobType = 'full' | 'incremental' | 'delete' | 'permissions';
 
@@ -164,8 +164,8 @@ export type DayOfWeek = typeof DAYS_OF_WEEK_VALUES[number];
 export interface BlockedWindow {
   jobType: SyncJobType;
   day: DayOfWeek | 'all';
-  start: Moment;
-  end: Moment;
+  start: string;
+  end: string;
 }
 
 export interface IndexingConfig {
@@ -179,6 +179,12 @@ export interface IndexingConfig {
     };
   };
   schedule: IndexingSchedule;
+}
+
+interface AppSecret {
+  app_id: string;
+  fingerprint: string;
+  base_url?: string;
 }
 
 export interface ContentSourceFullData extends ContentSourceDetails {
@@ -201,6 +207,7 @@ export interface ContentSourceFullData extends ContentSourceDetails {
   urlFieldIsLinkable: boolean;
   createdAt: string;
   serviceName: string;
+  secret?: AppSecret; // undefined for all content sources except GitHub apps
 }
 
 export interface ContentSourceStatus {
@@ -257,7 +264,7 @@ export type CustomAPIFieldValue =
 export interface Result {
   content_source_id: string;
   last_updated: string;
-  external_id: string;
+  id: string;
   updated_at: string;
   source: string;
   [key: string]: CustomAPIFieldValue;
@@ -294,4 +301,10 @@ export interface RoleGroup {
 export interface WSRoleMapping extends RoleMapping {
   allGroups: boolean;
   groups: RoleGroup[];
+}
+
+export interface ApiToken {
+  key?: string;
+  id?: string;
+  name: string;
 }

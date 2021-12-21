@@ -23,7 +23,7 @@ import {
   EuiLink,
   EuiFieldNumber,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 
@@ -237,6 +237,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         }
       >
         <EuiCheckboxGroup
+          disabled={agentPolicy.is_managed === true}
           options={[
             {
               id: dataTypes.Logs,

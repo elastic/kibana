@@ -189,27 +189,23 @@
         },
         "apm-indices": {
           "properties": {
-            "apm_oss": {
-              "properties": {
-                "errorIndices": {
-                  "type": "keyword"
-                },
-                "metricsIndices": {
-                  "type": "keyword"
-                },
-                "onboardingIndices": {
-                  "type": "keyword"
-                },
-                "sourcemapIndices": {
-                  "type": "keyword"
-                },
-                "spanIndices": {
-                  "type": "keyword"
-                },
-                "transactionIndices": {
-                  "type": "keyword"
-                }
-              }
+            "error": {
+              "type": "keyword"
+            },
+            "metric": {
+              "type": "keyword"
+            },
+            "onboarding": {
+              "type": "keyword"
+            },
+            "sourcemap": {
+              "type": "keyword"
+            },
+            "span": {
+              "type": "keyword"
+            },
+            "transaction": {
+              "type": "keyword"
             }
           }
         },
@@ -3094,7 +3090,7 @@
       ".fleet-agents": {
       }
     },
-    "index": ".fleet-agent-7",
+    "index": ".fleet-agents-7",
     "mappings": {
       "_meta": {
         "migrationHash": "87cab95ac988d78a78d0d66bbf05361b65dcbacf"

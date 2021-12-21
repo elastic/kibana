@@ -10,7 +10,7 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
-  getRuleExecutionStatuses,
+  getRuleExecutionStatusSucceeded,
   getAlertMock,
   getPatchRequest,
   getFindResultWithSingleHit,
@@ -46,8 +46,15 @@ describe.each([
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     ); // successful update
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // successful transform
-    clients.savedObjectsClient.create.mockResolvedValue(getRuleExecutionStatuses()[0]); // successful transform
-    clients.ruleExecutionLogClient.find.mockResolvedValue(getRuleExecutionStatuses());
+    clients.savedObjectsClient.create.mockResolvedValue({
+      type: 'my-type',
+      id: 'e0b86950-4e9f-11ea-bdbd-07b56aa159b3',
+      attributes: getRuleExecutionStatusSucceeded(),
+      references: [],
+    }); // successful transform
+    clients.ruleExecutionLogClient.getCurrentStatus.mockResolvedValue(
+      getRuleExecutionStatusSucceeded()
+    );
 
     patchRulesRoute(server.router, ml, isRuleRegistryEnabled);
   });
@@ -69,7 +76,7 @@ describe.each([
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
+      context.alerting.getRulesClient = jest.fn();
       const response = await server.inject(getPatchRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });

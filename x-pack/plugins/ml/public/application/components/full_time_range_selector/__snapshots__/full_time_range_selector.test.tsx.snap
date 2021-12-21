@@ -7,11 +7,11 @@ exports[`FullTimeRangeSelector renders the selector 1`] = `
   onClick={[Function]}
 >
   <FormattedMessage
-    defaultMessage="Use full {indexPatternTitle} data"
+    defaultMessage="Use full {dataViewTitle} data"
     id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
     values={
       Object {
-        "indexPatternTitle": "test-index-pattern",
+        "dataViewTitle": "test-data-view",
       }
     }
   />

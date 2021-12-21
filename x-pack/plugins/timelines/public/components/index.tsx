@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { Store } from 'redux';
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { createStore } from '../store/t_grid';
 
-import { TGrid as TGridComponent } from './tgrid';
+import { TGrid as TGridComponent } from './t_grid';
 import type { TGridProps } from '../types';
 import { DragDropContextWrapper } from './drag_and_drop';
 import { initialTGridState } from '../store/t_grid/reducer';
@@ -41,6 +41,7 @@ export const TGrid = (props: TGridComponent) => {
     browserFields = (tGridProps as TGridIntegratedProps).browserFields;
   }
   return (
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     <Provider store={tGridStore!}>
       <I18nProvider>
         <DragDropContextWrapper browserFields={browserFields} defaultsHeader={props.columns}>

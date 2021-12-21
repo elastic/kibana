@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter } from 'src/core/server';
-
-import { PLUGIN_ID, AGENT_POLICY_API_ROUTES } from '../../constants';
+import { AGENT_POLICY_API_ROUTES } from '../../constants';
 import {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -17,6 +15,7 @@ import {
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
 } from '../../types';
+import type { FleetAuthzRouter } from '../security';
 
 import {
   getAgentPoliciesHandler,
@@ -29,13 +28,15 @@ import {
   downloadFullAgentPolicy,
 } from './handlers';
 
-export const registerRoutes = (router: IRouter) => {
-  // List
+export const registerRoutes = (router: FleetAuthzRouter) => {
+  // List - Fleet Server needs access to run setup
   router.get(
     {
       path: AGENT_POLICY_API_ROUTES.LIST_PATTERN,
       validate: GetAgentPoliciesRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { readAgentPolicies: true },
+      },
     },
     getAgentPoliciesHandler
   );
@@ -45,7 +46,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_POLICY_API_ROUTES.INFO_PATTERN,
       validate: GetOneAgentPolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     getOneAgentPolicyHandler
   );
@@ -55,7 +58,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
       validate: CreateAgentPolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     createAgentPolicyHandler
   );
@@ -65,7 +70,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_POLICY_API_ROUTES.UPDATE_PATTERN,
       validate: UpdateAgentPolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     updateAgentPolicyHandler
   );
@@ -75,7 +82,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_POLICY_API_ROUTES.COPY_PATTERN,
       validate: CopyAgentPolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     copyAgentPolicyHandler
   );
@@ -85,7 +94,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_POLICY_API_ROUTES.DELETE_PATTERN,
       validate: DeleteAgentPolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     deleteAgentPoliciesHandler
   );
@@ -95,7 +106,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_PATTERN,
       validate: GetFullAgentPolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     getFullAgentPolicy
   );
@@ -105,7 +118,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN,
       validate: GetFullAgentPolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     downloadFullAgentPolicy
   );

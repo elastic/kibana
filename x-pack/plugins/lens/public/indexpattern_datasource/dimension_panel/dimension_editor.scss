@@ -26,6 +26,10 @@
   padding: $euiSize;
 }
 
+.lnsIndexPatternDimensionEditor__section--collapseNext {
+  margin-bottom: -$euiSizeL;
+}
+
 .lnsIndexPatternDimensionEditor__section--shaded {
   background-color: $euiColorLightestShade;
   border-bottom: $euiBorderThin;
@@ -49,10 +53,4 @@
 .lnsIndexPatternDimensionEditor__operation > button {
   padding-top: 0;
   padding-bottom: 0;
-}
-
-.lnsIndexPatternDimensionEditor__warning {
-  @include kbnThemeStyle('v7') {
-    border: none;
-  }
 }

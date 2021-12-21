@@ -17,11 +17,9 @@ $bottomBarHeight: $euiSize * 3;
 }
 
 .painlessLabRightPane {
-  border-right: none;
-  border-top: none;
-  border-bottom: none;
-  border-radius: 0;
-  padding-top: 0;
+  background-color: $euiColorEmptyShade;
+  padding: $euiSizeS;
+  border-left: $euiBorderThin;
   height: 100%;
 }
 
@@ -34,10 +32,6 @@ $bottomBarHeight: $euiSize * 3;
     height: 100%;
     overflow-y: auto;
   }
-}
-
-.painlessLab__betaLabelContainer {
-  line-height: 0;
 }
 
 // adding dev tool top bar + bottom bar height to the body offset

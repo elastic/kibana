@@ -16,7 +16,7 @@
   "license": "Elastic License v2",
   "name": "Scheduled Task Created by a Windows Script",
   "note": "## Triage and analysis\n\nDecode the base64 encoded Tasks Actions registry value to investigate the task's configured action.",
-  "query": "sequence by host.id with maxspan = 30s\n  [library where dll.name : \"taskschd.dll\" and process.name : (\"cscript.exe\", \"wscript.exe\", \"powershell.exe\")]\n  [registry where registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Schedule\\\\TaskCache\\\\Tasks\\\\*\\\\Actions\"]\n",
+  "query": "sequence by host.id with maxspan = 30s\n  [library where dll.name : \"taskschd.dll\" and process.name : (\"cscript.exe\", \"wscript.exe\", \"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\")]\n  [registry where registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Schedule\\\\TaskCache\\\\Tasks\\\\*\\\\Actions\"]\n",
   "risk_score": 47,
   "rule_id": "689b9d57-e4d5-4357-ad17-9c334609d79a",
   "severity": "medium",
@@ -39,11 +39,18 @@
         {
           "id": "T1053",
           "name": "Scheduled Task/Job",
-          "reference": "https://attack.mitre.org/techniques/T1053/"
+          "reference": "https://attack.mitre.org/techniques/T1053/",
+          "subtechnique": [
+            {
+              "id": "T1053.005",
+              "name": "Scheduled Task",
+              "reference": "https://attack.mitre.org/techniques/T1053/005/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 3
+  "version": 5
 }

@@ -9,9 +9,9 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiLoadingContent, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LeafIcon } from '../../../../../shared/icons';
 
@@ -46,27 +46,30 @@ export const OrganicDocuments: React.FC = () => {
       }
     >
       {hasDocuments ? (
-        documents.map((document: Result, index) => (
-          <CurationResult
-            result={document}
-            index={index}
-            key={document.id.raw}
-            actions={
-              isAutomated
-                ? []
-                : [
-                    {
-                      ...HIDE_DOCUMENT_ACTION,
-                      onClick: () => addHiddenId(document.id.raw),
-                    },
-                    {
-                      ...PROMOTE_DOCUMENT_ACTION,
-                      onClick: () => addPromotedId(document.id.raw),
-                    },
-                  ]
-            }
-          />
-        ))
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {documents.map((document: Result, index) => (
+            <EuiFlexItem key={index}>
+              <CurationResult
+                result={document}
+                index={index}
+                actions={
+                  isAutomated
+                    ? []
+                    : [
+                        {
+                          ...HIDE_DOCUMENT_ACTION,
+                          onClick: () => addHiddenId(document.id.raw),
+                        },
+                        {
+                          ...PROMOTE_DOCUMENT_ACTION,
+                          onClick: () => addPromotedId(document.id.raw),
+                        },
+                      ]
+                }
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
       ) : organicDocumentsLoading ? (
         <EuiLoadingContent lines={5} />
       ) : (

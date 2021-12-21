@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { TimelionFunctionInterface, TimelionFunctionConfig } from './lib/classes/timelion_function';
+export type {
+  TimelionFunctionInterface,
+  TimelionFunctionConfig,
+} from './lib/classes/timelion_function';

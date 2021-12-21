@@ -12,11 +12,10 @@ import { Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { IExpressionLoaderParams, ExpressionRenderError } from './types';
+import { euiLightVars as theme } from '@kbn/ui-shared-deps-src/theme';
+import { IExpressionLoaderParams, ExpressionRenderError, ExpressionRendererEvent } from './types';
 import { ExpressionAstExpression, IInterpreterRenderHandlers } from '../common';
 import { ExpressionLoader } from './loader';
-import { ExpressionRendererEvent } from './render';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
@@ -39,6 +38,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
    * An observable which can be used to re-run the expression without destroying the component
    */
   reload$?: Observable<unknown>;
+  onRender$?: (item: number) => void;
   debounce?: number;
 }
 
@@ -58,7 +58,8 @@ const defaultState: State = {
   error: null,
 };
 
-export const ReactExpressionRenderer = ({
+// eslint-disable-next-line import/no-default-export
+export default function ReactExpressionRenderer({
   className,
   dataAttrs,
   padding,
@@ -66,10 +67,11 @@ export const ReactExpressionRenderer = ({
   expression,
   onEvent,
   onData$,
+  onRender$,
   reload$,
   debounce,
   ...expressionLoaderOptions
-}: ReactExpressionRendererProps) => {
+}: ReactExpressionRendererProps) {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
   const [state, setState] = useState<State>({ ...defaultState });
   const hasCustomRenderErrorHandler = !!renderError;
@@ -155,6 +157,7 @@ export const ReactExpressionRenderer = ({
             ...defaultState,
             isEmpty: false,
           }));
+          onRender$?.(item);
         })
     );
 
@@ -237,4 +240,4 @@ export const ReactExpressionRenderer = ({
       />
     </div>
   );
-};
+}

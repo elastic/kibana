@@ -8,7 +8,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTable,
   EuiTableHeader,
@@ -202,7 +202,7 @@ const ProcessesTableBody = ({ items, currentTime }: TableBodyProps) => (
       const cells = columns.map((column) => (
         <EuiTableRowCell
           key={`${String(column.field)}-${i}`}
-          header={column.name}
+          mobileOptions={{ header: column.name }}
           align={column.align ?? LEFT_ALIGNMENT}
           textOnly={column.textOnly ?? true}
         >
@@ -218,7 +218,7 @@ const StyledTableBody = euiStyled(EuiTableBody)`
   & .euiTableCellContent {
     padding-top: 0;
     padding-bottom: 0;
-    
+
   }
 `;
 

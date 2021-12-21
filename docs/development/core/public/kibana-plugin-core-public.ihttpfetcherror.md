@@ -8,17 +8,18 @@
 <b>Signature:</b>
 
 ```typescript
-export interface IHttpFetchError extends Error 
+export interface IHttpFetchError<TResponseBody = unknown> extends Error 
 ```
+<b>Extends:</b> Error
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [body](./kibana-plugin-core-public.ihttpfetcherror.body.md) | <code>any</code> |  |
-|  [name](./kibana-plugin-core-public.ihttpfetcherror.name.md) | <code>string</code> |  |
-|  [req](./kibana-plugin-core-public.ihttpfetcherror.req.md) | <code>Request</code> |  |
-|  [request](./kibana-plugin-core-public.ihttpfetcherror.request.md) | <code>Request</code> |  |
-|  [res](./kibana-plugin-core-public.ihttpfetcherror.res.md) | <code>Response</code> |  |
-|  [response](./kibana-plugin-core-public.ihttpfetcherror.response.md) | <code>Response</code> |  |
+|  [body?](./kibana-plugin-core-public.ihttpfetcherror.body.md) | TResponseBody | <i>(Optional)</i> |
+|  [name](./kibana-plugin-core-public.ihttpfetcherror.name.md) | string |  |
+|  [req](./kibana-plugin-core-public.ihttpfetcherror.req.md) | Request |  |
+|  [request](./kibana-plugin-core-public.ihttpfetcherror.request.md) | Request |  |
+|  [res?](./kibana-plugin-core-public.ihttpfetcherror.res.md) | Response | <i>(Optional)</i> |
+|  [response?](./kibana-plugin-core-public.ihttpfetcherror.response.md) | Response | <i>(Optional)</i> |
 

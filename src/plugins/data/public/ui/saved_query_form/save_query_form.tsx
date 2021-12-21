@@ -24,10 +24,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { sortBy, isEqual } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
-import { SavedQueryAttributes } from '../../query';
 
 interface Props {
-  savedQuery?: SavedQueryAttributes;
+  savedQuery?: SavedQuery;
   savedQueryService: SavedQueryService;
   onSave: (savedQueryMeta: SavedQueryMeta) => void;
   onClose: () => void;
@@ -36,6 +35,7 @@ interface Props {
 }
 
 export interface SavedQueryMeta {
+  id?: string;
   title: string;
   description: string;
   shouldIncludeFilters: boolean;
@@ -50,18 +50,18 @@ export function SaveQueryForm({
   showFilterOption = true,
   showTimeFilterOption = true,
 }: Props) {
-  const [title, setTitle] = useState(savedQuery ? savedQuery.title : '');
+  const [title, setTitle] = useState(savedQuery?.attributes.title ?? '');
   const [enabledSaveButton, setEnabledSaveButton] = useState(Boolean(savedQuery));
-  const [description, setDescription] = useState(savedQuery ? savedQuery.description : '');
+  const [description, setDescription] = useState(savedQuery?.attributes.description ?? '');
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
-    savedQuery ? !!savedQuery.filters : true
+    Boolean(savedQuery?.attributes.filters ?? true)
   );
   // Defaults to false because saved queries are meant to be as portable as possible and loading
   // a saved query with a time filter will override whatever the current value of the global timepicker
   // is. We expect this option to be used rarely and only when the user knows they want this behavior.
   const [shouldIncludeTimefilter, setIncludeTimefilter] = useState(
-    savedQuery ? !!savedQuery.timefilter : false
+    Boolean(savedQuery?.attributes.timefilter ?? false)
   );
   const [formErrors, setFormErrors] = useState<string[]>([]);
 
@@ -82,7 +82,7 @@ export function SaveQueryForm({
   useEffect(() => {
     const fetchQueries = async () => {
       const allSavedQueries = await savedQueryService.getAllSavedQueries();
-      const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title') as SavedQuery[];
+      const sortedAllSavedQueries = sortBy(allSavedQueries, 'attributes.title');
       setSavedQueries(sortedAllSavedQueries);
     };
     fetchQueries();
@@ -109,13 +109,22 @@ export function SaveQueryForm({
   const onClickSave = useCallback(() => {
     if (validate()) {
       onSave({
+        id: savedQuery?.id,
         title,
         description,
         shouldIncludeFilters,
         shouldIncludeTimefilter,
       });
     }
-  }, [validate, onSave, title, description, shouldIncludeFilters, shouldIncludeTimefilter]);
+  }, [
+    validate,
+    onSave,
+    savedQuery?.id,
+    title,
+    description,
+    shouldIncludeFilters,
+    shouldIncludeTimefilter,
+  ]);
 
   const onInputChange = useCallback((event) => {
     setEnabledSaveButton(Boolean(event.target.value));

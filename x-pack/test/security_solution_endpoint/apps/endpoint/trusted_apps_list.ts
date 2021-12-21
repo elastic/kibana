@@ -16,10 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const endpointTestResources = getService('endpointTestResources');
   const policyTestResources = getService('policyTestResources');
 
-  // FLAKY
-  // https://github.com/elastic/kibana/issues/114308
-  // https://github.com/elastic/kibana/issues/114309
-  describe.skip('When on the Trusted Apps list', function () {
+  describe('When on the Trusted Apps list', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
       const endpointPackage = await policyTestResources.getEndpointPackage();
@@ -32,10 +29,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await endpointTestResources.unloadEndpointData(indexedData);
     });
 
-    it('should show page title', async () => {
-      expect(await testSubjects.getVisibleText('header-page-title')).to.equal(
-        'Trusted applications'
-      );
+    it('should not show page title if there is no trusted app', async () => {
+      await testSubjects.missingOrFail('header-page-title');
     });
 
     it('should be able to add a new trusted app and remove it', async () => {
@@ -59,6 +54,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await pageObjects.common.closeToast();
 
+      // Title is shown after adding an item
+      expect(await testSubjects.getVisibleText('header-page-title')).to.equal(
+        'Trusted applications'
+      );
+
       // Remove it
       await pageObjects.trustedApps.clickCardActionMenu();
       await testSubjects.click('deleteTrustedAppAction');
@@ -66,6 +66,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.waitForDeleted('trustedAppDeletionConfirm');
       // We only expect one trusted app to have been visible
       await testSubjects.missingOrFail('trustedAppCard');
+      // Header has gone because there is no trusted app
+      await testSubjects.missingOrFail('header-page-title');
     });
   });
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ColumnHeaderOptions } from '../../../common';
+import { ColumnHeaderOptions } from '../../../common/types';
 import { defaultColumnHeaderType } from '../../timelines/components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,

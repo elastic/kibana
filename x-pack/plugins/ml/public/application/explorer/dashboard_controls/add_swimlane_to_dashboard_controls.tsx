@@ -7,7 +7,7 @@
 
 import React, { FC, useCallback, useState } from 'react';
 import { EuiFormRow, EuiCheckboxGroup, EuiInMemoryTableProps, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DashboardSavedObject } from '../../../../../../../src/plugins/dashboard/public';
 import { getDefaultSwimlanePanelTitle } from '../../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';

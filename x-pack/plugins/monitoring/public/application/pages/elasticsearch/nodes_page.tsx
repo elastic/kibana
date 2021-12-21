@@ -9,20 +9,31 @@ import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { ElasticsearchTemplate } from './elasticsearch_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
-import { ExternalConfigContext } from '../../external_config_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
+import { ExternalConfigContext } from '../../contexts/external_config_context';
 import { ElasticsearchNodes } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
-import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
+import {
+  ELASTICSEARCH_SYSTEM_ID,
+  RULE_CPU_USAGE,
+  RULE_DISK_USAGE,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_MEMORY_USAGE,
+  RULE_MISSING_MONITORING_DATA,
+} from '../../../../common/constants';
 
 export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { showCgroupMetricsElasticsearch } = useContext(ExternalConfigContext);
   const { services } = useKibana<{ data: any }>();
+  const [isLoading, setIsLoading] = React.useState(false);
   const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
   const { getPaginationRouteOptions, updateTotalItemCount, getPaginationTableProps } =
     useTable('elasticsearch.nodes');
@@ -32,6 +43,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
     cluster_uuid: clusterUuid,
   }) as any;
   const [data, setData] = useState({} as any);
+  const [alerts, setAlerts] = useState<AlertsByName>({});
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.nodes.routeTitle', {
     defaultMessage: 'Elasticsearch - Nodes',
@@ -52,25 +64,46 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes`;
-    const response = await services.http?.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        ccs,
-        timeRange: {
-          min: bounds.min.toISOString(),
-          max: bounds.max.toISOString(),
-        },
-        ...getPaginationRouteOptions(),
-      }),
-    });
+    if (services.http?.fetch && clusterUuid) {
+      setIsLoading(true);
+      const response = await services.http?.fetch<{ totalNodeCount: number }>(url, {
+        method: 'POST',
+        body: JSON.stringify({
+          ccs,
+          timeRange: {
+            min: bounds.min.toISOString(),
+            max: bounds.max.toISOString(),
+          },
+          ...getPaginationRouteOptions(),
+        }),
+      });
 
-    setData(response);
-    updateTotalItemCount(response.totalNodeCount);
+      setIsLoading(false);
+      setData(response);
+      updateTotalItemCount(response.totalNodeCount);
+      const alertsResponse = await fetchAlerts({
+        fetch: services.http.fetch,
+        clusterUuid,
+        alertTypeIds: [
+          RULE_CPU_USAGE,
+          RULE_DISK_USAGE,
+          RULE_THREAD_POOL_SEARCH_REJECTIONS,
+          RULE_THREAD_POOL_WRITE_REJECTIONS,
+          RULE_MEMORY_USAGE,
+          RULE_MISSING_MONITORING_DATA,
+        ],
+        timeRange: {
+          min: bounds.min.valueOf(),
+          max: bounds.max.valueOf(),
+        },
+      });
+      setAlerts(alertsResponse);
+    }
   }, [
-    ccs,
-    clusterUuid,
     services.data?.query.timefilter.timefilter,
     services.http,
+    clusterUuid,
+    ccs,
     getPaginationRouteOptions,
     updateTotalItemCount,
   ]);
@@ -94,7 +127,8 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
                 clusterUuid={globalState.cluster_uuid}
                 setupMode={setupMode}
                 nodes={data.nodes}
-                alerts={{}}
+                alerts={alerts}
+                isLoading={isLoading}
                 showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
                 {...getPaginationTableProps()}
               />

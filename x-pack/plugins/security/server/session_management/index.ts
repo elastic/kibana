@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export { Session, SessionValue } from './session';
-export {
-  SessionManagementServiceStart,
-  SessionManagementService,
-} from './session_management_service';
+export type { SessionValue } from './session';
+export { Session } from './session';
+export type { SessionManagementServiceStart } from './session_management_service';
+export { SessionManagementService } from './session_management_service';

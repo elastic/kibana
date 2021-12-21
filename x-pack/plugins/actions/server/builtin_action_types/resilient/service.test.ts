@@ -8,7 +8,7 @@
 import axios from 'axios';
 
 import { createExternalService, getValueTextContent, formatUpdateRequest } from './service';
-import * as utils from '../lib/axios_utils';
+import { request, createAxiosResponse } from '../lib/axios_utils';
 import { ExternalService } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
@@ -27,7 +27,7 @@ jest.mock('../lib/axios_utils', () => {
 });
 
 axios.create = jest.fn(() => axios);
-const requestMock = utils.request as jest.Mock;
+const requestMock = request as jest.Mock;
 const now = Date.now;
 const TIMESTAMP = 1589391874472;
 const configurationUtilities = actionsConfigMock.create();
@@ -38,44 +38,50 @@ const configurationUtilities = actionsConfigMock.create();
 // b) Update the incident
 // c) Get the updated incident
 const mockIncidentUpdate = (withUpdateError = false) => {
-  requestMock.mockImplementationOnce(() => ({
-    data: {
-      id: '1',
-      name: 'title',
-      description: {
-        format: 'html',
-        content: 'description',
+  requestMock.mockImplementationOnce(() =>
+    createAxiosResponse({
+      data: {
+        id: '1',
+        name: 'title',
+        description: {
+          format: 'html',
+          content: 'description',
+        },
+        incident_type_ids: [1001, 16, 12],
+        severity_code: 6,
       },
-      incident_type_ids: [1001, 16, 12],
-      severity_code: 6,
-    },
-  }));
+    })
+  );
 
   if (withUpdateError) {
     requestMock.mockImplementationOnce(() => {
       throw new Error('An error has occurred');
     });
   } else {
-    requestMock.mockImplementationOnce(() => ({
-      data: {
-        success: true,
-        id: '1',
-        inc_last_modified_date: 1589391874472,
-      },
-    }));
+    requestMock.mockImplementationOnce(() =>
+      createAxiosResponse({
+        data: {
+          success: true,
+          id: '1',
+          inc_last_modified_date: 1589391874472,
+        },
+      })
+    );
   }
 
-  requestMock.mockImplementationOnce(() => ({
-    data: {
-      id: '1',
-      name: 'title_updated',
-      description: {
-        format: 'html',
-        content: 'desc_updated',
+  requestMock.mockImplementationOnce(() =>
+    createAxiosResponse({
+      data: {
+        id: '1',
+        name: 'title_updated',
+        description: {
+          format: 'html',
+          content: 'desc_updated',
+        },
+        inc_last_modified_date: 1589391874472,
       },
-      inc_last_modified_date: 1589391874472,
-    },
-  }));
+    })
+  );
 };
 
 describe('IBM Resilient service', () => {
@@ -207,24 +213,28 @@ describe('IBM Resilient service', () => {
 
   describe('getIncident', () => {
     test('it returns the incident correctly', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          id: '1',
-          name: '1',
-          description: {
-            format: 'html',
-            content: 'description',
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            name: '1',
+            description: {
+              format: 'html',
+              content: 'description',
+            },
           },
-        },
-      }));
+        })
+      );
       const res = await service.getIncident('1');
       expect(res).toEqual({ id: '1', name: '1', description: 'description' });
     });
 
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data: { id: '1' },
-      }));
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: { id: '1' },
+        })
+      );
 
       await service.getIncident('1');
       expect(requestMock).toHaveBeenCalledWith({
@@ -246,28 +256,42 @@ describe('IBM Resilient service', () => {
         'Unable to get incident with id 1. Error: An error has occurred'
       );
     });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.getIncident('1')).rejects.toThrow(
+        '[Action][IBM Resilient]: Unable to get incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
+      );
+    });
   });
 
   describe('createIncident', () => {
-    test('it creates the incident correctly', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          id: '1',
-          name: 'title',
-          description: 'description',
-          discovered_date: 1589391874472,
-          create_date: 1589391874472,
-        },
-      }));
+    const incident = {
+      incident: {
+        name: 'title',
+        description: 'desc',
+        incidentTypes: [1001],
+        severityCode: 6,
+      },
+    };
 
-      const res = await service.createIncident({
-        incident: {
-          name: 'title',
-          description: 'desc',
-          incidentTypes: [1001],
-          severityCode: 6,
-        },
-      });
+    test('it creates the incident correctly', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            name: 'title',
+            description: 'description',
+            discovered_date: 1589391874472,
+            create_date: 1589391874472,
+          },
+        })
+      );
+
+      const res = await service.createIncident(incident);
 
       expect(res).toEqual({
         title: '1',
@@ -278,24 +302,19 @@ describe('IBM Resilient service', () => {
     });
 
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          id: '1',
-          name: 'title',
-          description: 'description',
-          discovered_date: 1589391874472,
-          create_date: 1589391874472,
-        },
-      }));
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            name: 'title',
+            description: 'description',
+            discovered_date: 1589391874472,
+            create_date: 1589391874472,
+          },
+        })
+      );
 
-      await service.createIncident({
-        incident: {
-          name: 'title',
-          description: 'desc',
-          incidentTypes: [1001],
-          severityCode: 6,
-        },
-      });
+      await service.createIncident(incident);
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
@@ -334,20 +353,39 @@ describe('IBM Resilient service', () => {
         '[Action][IBM Resilient]: Unable to create incident. Error: An error has occurred'
       );
     });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.createIncident(incident)).rejects.toThrow(
+        '[Action][IBM Resilient]: Unable to create incident. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
+      );
+    });
+
+    test('it should throw if the required attributes are not there', async () => {
+      requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
+
+      await expect(service.createIncident(incident)).rejects.toThrow(
+        '[Action][IBM Resilient]: Unable to create incident. Error: Response is missing at least one of the expected fields: id,create_date.'
+      );
+    });
   });
 
   describe('updateIncident', () => {
+    const req = {
+      incidentId: '1',
+      incident: {
+        name: 'title',
+        description: 'desc',
+        incidentTypes: [1001],
+        severityCode: 6,
+      },
+    };
     test('it updates the incident correctly', async () => {
       mockIncidentUpdate();
-      const res = await service.updateIncident({
-        incidentId: '1',
-        incident: {
-          name: 'title',
-          description: 'desc',
-          incidentTypes: [1001],
-          severityCode: 6,
-        },
-      });
+      const res = await service.updateIncident(req);
 
       expect(res).toEqual({
         title: '1',
@@ -430,38 +468,59 @@ describe('IBM Resilient service', () => {
     test('it should throw an error', async () => {
       mockIncidentUpdate(true);
 
-      await expect(
-        service.updateIncident({
-          incidentId: '1',
-          incident: {
+      await expect(service.updateIncident(req)).rejects.toThrow(
+        '[Action][IBM Resilient]: Unable to update incident with id 1. Error: An error has occurred'
+      );
+    });
+
+    test('it should throw if the request is not a JSON', async () => {
+      // get incident request
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
             name: 'title',
-            description: 'desc',
-            incidentTypes: [1001],
-            severityCode: 5,
+            description: {
+              format: 'html',
+              content: 'description',
+            },
+            incident_type_ids: [1001, 16, 12],
+            severity_code: 6,
           },
         })
-      ).rejects.toThrow(
-        '[Action][IBM Resilient]: Unable to update incident with id 1. Error: An error has occurred'
+      );
+
+      // update incident request
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.updateIncident(req)).rejects.toThrow(
+        '[Action][IBM Resilient]: Unable to update incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json'
       );
     });
   });
 
   describe('createComment', () => {
-    test('it creates the comment correctly', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          id: '1',
-          create_date: 1589391874472,
-        },
-      }));
+    const req = {
+      incidentId: '1',
+      comment: {
+        comment: 'comment',
+        commentId: 'comment-1',
+      },
+    };
 
-      const res = await service.createComment({
-        incidentId: '1',
-        comment: {
-          comment: 'comment',
-          commentId: 'comment-1',
-        },
-      });
+    test('it creates the comment correctly', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            create_date: 1589391874472,
+          },
+        })
+      );
+
+      const res = await service.createComment(req);
 
       expect(res).toEqual({
         commentId: 'comment-1',
@@ -471,20 +530,16 @@ describe('IBM Resilient service', () => {
     });
 
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          id: '1',
-          create_date: 1589391874472,
-        },
-      }));
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            create_date: 1589391874472,
+          },
+        })
+      );
 
-      await service.createComment({
-        incidentId: '1',
-        comment: {
-          comment: 'comment',
-          commentId: 'comment-1',
-        },
-      });
+      await service.createComment(req);
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
@@ -506,27 +561,31 @@ describe('IBM Resilient service', () => {
         throw new Error('An error has occurred');
       });
 
-      await expect(
-        service.createComment({
-          incidentId: '1',
-          comment: {
-            comment: 'comment',
-            commentId: 'comment-1',
-          },
-        })
-      ).rejects.toThrow(
+      await expect(service.createComment(req)).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to create comment at incident with id 1. Error: An error has occurred'
+      );
+    });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.createComment(req)).rejects.toThrow(
+        '[Action][IBM Resilient]: Unable to create comment at incident with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
       );
     });
   });
 
   describe('getIncidentTypes', () => {
     test('it creates the incident correctly', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          values: incidentTypes,
-        },
-      }));
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            values: incidentTypes,
+          },
+        })
+      );
 
       const res = await service.getIncidentTypes();
 
@@ -545,15 +604,27 @@ describe('IBM Resilient service', () => {
         '[Action][IBM Resilient]: Unable to get incident types. Error: An error has occurred.'
       );
     });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.getIncidentTypes()).rejects.toThrow(
+        '[Action][IBM Resilient]: Unable to get incident types. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
+      );
+    });
   });
 
   describe('getSeverity', () => {
     test('it creates the incident correctly', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          values: severity,
-        },
-      }));
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: {
+            values: severity,
+          },
+        })
+      );
 
       const res = await service.getSeverity();
 
@@ -578,17 +649,29 @@ describe('IBM Resilient service', () => {
         throw new Error('An error has occurred');
       });
 
-      await expect(service.getIncidentTypes()).rejects.toThrow(
-        '[Action][IBM Resilient]: Unable to get incident types. Error: An error has occurred.'
+      await expect(service.getSeverity()).rejects.toThrow(
+        '[Action][IBM Resilient]: Unable to get severity. Error: An error has occurred.'
+      );
+    });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.getSeverity()).rejects.toThrow(
+        '[Action][IBM Resilient]: Unable to get severity. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
       );
     });
   });
 
   describe('getFields', () => {
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data: resilientFields,
-      }));
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: resilientFields,
+        })
+      );
       await service.getFields();
 
       expect(requestMock).toHaveBeenCalledWith({
@@ -598,10 +681,13 @@ describe('IBM Resilient service', () => {
         url: 'https://resilient.elastic.co/rest/orgs/201/types/incident/fields',
       });
     });
+
     test('it returns common fields correctly', async () => {
-      requestMock.mockImplementation(() => ({
-        data: resilientFields,
-      }));
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: resilientFields,
+        })
+      );
       const res = await service.getFields();
       expect(res).toEqual(resilientFields);
     });
@@ -612,6 +698,16 @@ describe('IBM Resilient service', () => {
       });
       await expect(service.getFields()).rejects.toThrow(
         'Unable to get fields. Error: An error has occurred'
+      );
+    });
+
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.getFields()).rejects.toThrow(
+        '[Action][IBM Resilient]: Unable to get fields. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
       );
     });
   });

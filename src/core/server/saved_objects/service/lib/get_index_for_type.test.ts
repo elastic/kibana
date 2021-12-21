@@ -18,63 +18,27 @@ describe('getIndexForType', () => {
     typeRegistry = typeRegistryMock.create();
   });
 
-  describe('when migV2 is enabled', () => {
-    const migV2Enabled = true;
-
-    it('returns the correct index for a type specifying a custom index', () => {
-      typeRegistry.getIndex.mockImplementation((type) => `.${type}-index`);
-      expect(
-        getIndexForType({
-          type: 'foo',
-          typeRegistry,
-          defaultIndex,
-          kibanaVersion,
-          migV2Enabled,
-        })
-      ).toEqual('.foo-index_8.0.0');
-    });
-
-    it('returns the correct index for a type not specifying a custom index', () => {
-      typeRegistry.getIndex.mockImplementation((type) => undefined);
-      expect(
-        getIndexForType({
-          type: 'foo',
-          typeRegistry,
-          defaultIndex,
-          kibanaVersion,
-          migV2Enabled,
-        })
-      ).toEqual('.kibana_8.0.0');
-    });
+  it('returns the correct index for a type specifying a custom index', () => {
+    typeRegistry.getIndex.mockImplementation((type) => `.${type}-index`);
+    expect(
+      getIndexForType({
+        type: 'foo',
+        typeRegistry,
+        defaultIndex,
+        kibanaVersion,
+      })
+    ).toEqual('.foo-index_8.0.0');
   });
 
-  describe('when migV2 is disabled', () => {
-    const migV2Enabled = false;
-
-    it('returns the correct index for a type specifying a custom index', () => {
-      typeRegistry.getIndex.mockImplementation((type) => `.${type}-index`);
-      expect(
-        getIndexForType({
-          type: 'foo',
-          typeRegistry,
-          defaultIndex,
-          kibanaVersion,
-          migV2Enabled,
-        })
-      ).toEqual('.foo-index');
-    });
-
-    it('returns the correct index for a type not specifying a custom index', () => {
-      typeRegistry.getIndex.mockImplementation((type) => undefined);
-      expect(
-        getIndexForType({
-          type: 'foo',
-          typeRegistry,
-          defaultIndex,
-          kibanaVersion,
-          migV2Enabled,
-        })
-      ).toEqual('.kibana');
-    });
+  it('returns the correct index for a type not specifying a custom index', () => {
+    typeRegistry.getIndex.mockImplementation((type) => undefined);
+    expect(
+      getIndexForType({
+        type: 'foo',
+        typeRegistry,
+        defaultIndex,
+        kibanaVersion,
+      })
+    ).toEqual('.kibana_8.0.0');
   });
 });

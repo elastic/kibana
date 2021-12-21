@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorJiraTypeFields } from '../../../common';
+import { ConnectorJiraTypeFields } from '../../../common/api';
 import { Format } from './types';
 
 export const format: Format = (theCase, alerts) => {

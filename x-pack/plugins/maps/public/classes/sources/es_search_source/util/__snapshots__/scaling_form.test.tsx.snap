@@ -11,6 +11,12 @@ exports[`scaling form should disable clusters option when clustering is not supp
         id="xpack.maps.esSearch.scaleTitle"
         values={Object {}}
       />
+      <ScalingDocumenationPopover
+        clustersOptionLabel="Show clusters when results exceed 10,000"
+        limitOptionLabel="Limit results to 10,000"
+        maxResultWindow="10,000"
+        mvtOptionLabel="Use vector tiles"
+      />
     </h5>
   </EuiTitle>
   <EuiSpacer
@@ -26,9 +32,9 @@ exports[`scaling form should disable clusters option when clustering is not supp
   >
     <div>
       <EuiRadio
-        checked={true}
-        id="LIMIT"
-        label="Limit results to 10,000"
+        checked={false}
+        id="MVT"
+        label="Use vector tiles"
         onChange={[Function]}
       />
       <EuiToolTip
@@ -45,29 +51,12 @@ exports[`scaling form should disable clusters option when clustering is not supp
           onChange={[Function]}
         />
       </EuiToolTip>
-      <EuiToolTip
-        content={
-          <React.Fragment>
-            <EuiBetaBadge
-              label="beta"
-            />
-            <EuiHorizontalRule
-              margin="xs"
-            />
-            Use vector tiles for faster display of large datasets.
-          </React.Fragment>
-        }
-        delay="regular"
-        display="inlineBlock"
-        position="left"
-      >
-        <EuiRadio
-          checked={false}
-          id="MVT"
-          label="Use vector tiles"
-          onChange={[Function]}
-        />
-      </EuiToolTip>
+      <EuiRadio
+        checked={true}
+        id="LIMIT"
+        label="Limit results to 10,000"
+        onChange={[Function]}
+      />
     </div>
   </EuiFormRow>
   <EuiFormRow
@@ -99,6 +88,12 @@ exports[`scaling form should render 1`] = `
         id="xpack.maps.esSearch.scaleTitle"
         values={Object {}}
       />
+      <ScalingDocumenationPopover
+        clustersOptionLabel="Show clusters when results exceed 10,000"
+        limitOptionLabel="Limit results to 10,000"
+        maxResultWindow="10,000"
+        mvtOptionLabel="Use vector tiles"
+      />
     </h5>
   </EuiTitle>
   <EuiSpacer
@@ -114,9 +109,9 @@ exports[`scaling form should render 1`] = `
   >
     <div>
       <EuiRadio
-        checked={true}
-        id="LIMIT"
-        label="Limit results to 10,000"
+        checked={false}
+        id="MVT"
+        label="Use vector tiles"
         onChange={[Function]}
       />
       <EuiRadio
@@ -126,29 +121,12 @@ exports[`scaling form should render 1`] = `
         label="Show clusters when results exceed 10,000"
         onChange={[Function]}
       />
-      <EuiToolTip
-        content={
-          <React.Fragment>
-            <EuiBetaBadge
-              label="beta"
-            />
-            <EuiHorizontalRule
-              margin="xs"
-            />
-            Use vector tiles for faster display of large datasets.
-          </React.Fragment>
-        }
-        delay="regular"
-        display="inlineBlock"
-        position="left"
-      >
-        <EuiRadio
-          checked={false}
-          id="MVT"
-          label="Use vector tiles"
-          onChange={[Function]}
-        />
-      </EuiToolTip>
+      <EuiRadio
+        checked={true}
+        id="LIMIT"
+        label="Limit results to 10,000"
+        onChange={[Function]}
+      />
     </div>
   </EuiFormRow>
   <EuiFormRow

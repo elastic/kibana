@@ -24,12 +24,13 @@ export function iisLogsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
     id: 'iisLogs',
     name: i18n.translate('home.tutorials.iisLogs.nameTitle', {
-      defaultMessage: 'IIS logs',
+      defaultMessage: 'IIS Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.iisLogs.shortDescription', {
-      defaultMessage: 'Collect and parse access and error logs created by the IIS HTTP server.',
+      defaultMessage:
+        'Collect and parse access and error logs from IIS HTTP servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.iisLogs.longDescription', {
       defaultMessage:
@@ -57,8 +58,8 @@ export function iisLogsSpecProvider(context: TutorialContext): TutorialSchema {
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/iis_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['web'],
   };
 }

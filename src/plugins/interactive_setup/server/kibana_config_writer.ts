@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { X509Certificate } from 'crypto';
 import { constants } from 'fs';
 import fs from 'fs/promises';
 import yaml from 'js-yaml';
@@ -30,25 +31,34 @@ export type WriteConfigParameters = {
   | {}
 );
 
+interface FleetOutputConfig {
+  id: string;
+  name: string;
+  is_default: boolean;
+  is_default_monitoring: boolean;
+  type: 'elasticsearch';
+  hosts: string[];
+  ca_trusted_fingerprint: string;
+}
+
 export class KibanaConfigWriter {
-  constructor(private readonly configPath: string, private readonly logger: Logger) {}
+  constructor(
+    private readonly configPath: string,
+    private readonly dataDirectoryPath: string,
+    private readonly logger: Logger
+  ) {}
 
   /**
-   * Checks if we can write to the Kibana configuration file and configuration directory.
+   * Checks if we can write to the Kibana configuration file and data directory.
    */
   public async isConfigWritable() {
     try {
       // We perform two separate checks here:
-      // 1. If we can write to config directory to add a new CA certificate file and potentially Kibana configuration
-      // file if it doesn't exist for some reason.
+      // 1. If we can write to data directory to add a new CA certificate file.
       // 2. If we can write to the Kibana configuration file if it exists.
-      const canWriteToConfigDirectory = fs.access(path.dirname(this.configPath), constants.W_OK);
       await Promise.all([
-        canWriteToConfigDirectory,
-        fs.access(this.configPath, constants.F_OK).then(
-          () => fs.access(this.configPath, constants.W_OK),
-          () => canWriteToConfigDirectory
-        ),
+        fs.access(this.dataDirectoryPath, constants.W_OK),
+        fs.access(this.configPath, constants.W_OK),
       ]);
       return true;
     } catch {
@@ -61,16 +71,33 @@ export class KibanaConfigWriter {
    * @param params
    */
   public async writeConfig(params: WriteConfigParameters) {
-    const caPath = path.join(path.dirname(this.configPath), `ca_${Date.now()}.crt`);
-    const config: Record<string, string | string[]> = { 'elasticsearch.hosts': [params.host] };
-    if ('serviceAccountToken' in params) {
+    const caPath = path.join(this.dataDirectoryPath, `ca_${Date.now()}.crt`);
+    const config: Record<string, string | string[] | FleetOutputConfig[]> = {
+      'elasticsearch.hosts': [params.host],
+    };
+    if ('serviceAccountToken' in params && params.serviceAccountToken) {
       config['elasticsearch.serviceAccountToken'] = params.serviceAccountToken.value;
-    } else if ('username' in params) {
-      config['elasticsearch.password'] = params.password;
+    } else if ('username' in params && params.username) {
       config['elasticsearch.username'] = params.username;
+      config['elasticsearch.password'] = params.password;
     }
     if (params.caCert) {
       config['elasticsearch.ssl.certificateAuthorities'] = [caPath];
+    }
+
+    // If a certificate is passed configure Fleet default output
+    if (params.caCert) {
+      try {
+        config['xpack.fleet.outputs'] = KibanaConfigWriter.getFleetDefaultOutputConfig(
+          params.caCert,
+          params.host
+        );
+      } catch (err) {
+        this.logger.error(
+          `Failed to generate Fleet default output: ${getDetailedErrorMessage(err)}.`
+        );
+        throw err;
+      }
     }
 
     // Load and parse existing configuration file to check if it already has values for the config
@@ -151,6 +178,29 @@ export class KibanaConfigWriter {
     }
 
     return { raw: rawConfig, parsed: parsedConfig };
+  }
+
+  /**
+   * Build config for Fleet outputs
+   * @param caCert
+   * @param host
+   */
+  private static getFleetDefaultOutputConfig(caCert: string, host: string): FleetOutputConfig[] {
+    const cert = new X509Certificate(caCert);
+    // fingerprint256 is a ":" separated uppercase hexadecimal string
+    const certFingerprint = cert.fingerprint256.split(':').join('').toLowerCase();
+
+    return [
+      {
+        id: 'fleet-default-output',
+        name: 'default',
+        is_default: true,
+        is_default_monitoring: true,
+        type: 'elasticsearch',
+        hosts: [host],
+        ca_trusted_fingerprint: certFingerprint,
+      },
+    ];
   }
 
   /**

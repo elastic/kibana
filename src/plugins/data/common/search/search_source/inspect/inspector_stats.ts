@@ -14,7 +14,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ISearchSource } from 'src/plugins/data/public';
 import type { RequestStatistics } from 'src/plugins/inspector/common';
 
@@ -25,17 +25,17 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
 
   if (index) {
     stats.indexPattern = {
-      label: i18n.translate('data.search.searchSource.indexPatternLabel', {
-        defaultMessage: 'Index pattern',
+      label: i18n.translate('data.search.searchSource.dataViewLabel', {
+        defaultMessage: 'Data view',
       }),
       value: index.title,
-      description: i18n.translate('data.search.searchSource.indexPatternDescription', {
-        defaultMessage: 'The index pattern that connected to the Elasticsearch indices.',
+      description: i18n.translate('data.search.searchSource.dataViewDescription', {
+        defaultMessage: 'The data view that was queried.',
       }),
     };
     stats.indexPatternId = {
-      label: i18n.translate('data.search.searchSource.indexPatternIdLabel', {
-        defaultMessage: 'Index pattern ID',
+      label: i18n.translate('data.search.searchSource.dataViewIdLabel', {
+        defaultMessage: 'Data view ID',
       }),
       value: index.id!,
       description: i18n.translate('data.search.searchSource.indexPatternIdDescription', {

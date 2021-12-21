@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, mlCategory } from '../../../../../../common/types/fields';
@@ -47,11 +47,7 @@ export class CategorizationJobCreator extends JobCreator {
   private _partitionFieldName: string | null = null;
   private _ccsVersionFailure: boolean = false;
 
-  constructor(
-    indexPattern: IndexPattern,
-    savedSearch: SavedSearchSavedObject | null,
-    query: object
-  ) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.CATEGORIZATION;
     this._examplesLoader = new CategorizationExamplesLoader(this, indexPattern, query);
@@ -127,7 +123,7 @@ export class CategorizationJobCreator extends JobCreator {
 
     this._ccsVersionFailure = this._checkCcsFailure(examples, overallValidStatus, validationChecks);
     if (this._ccsVersionFailure === true) {
-      // if the index pattern contains a cross-cluster search, one of the clusters may
+      // if the data view contains a cross-cluster search, one of the clusters may
       // be on a version which doesn't support the fields API (e.g. 6.8)
       // and so the categorization examples endpoint will fail
       // if this is the case, we need to allow the user to progress in the wizard.

@@ -6,4 +6,3 @@
  */
 
 export { ShardAllocation } from './shard_allocation';
-export { ShardAllocationReact } from './shard_allocation_react';

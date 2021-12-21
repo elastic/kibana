@@ -24,7 +24,7 @@ interface LayerColorConfig {
   layerType: LayerType;
 }
 
-export const defaultThresholdColor = euiLightVars.euiColorDarkShade;
+export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
 
 export type ColorAssignments = Record<
   string,
@@ -108,7 +108,7 @@ export function getAccessorColorConfig(
 ): AccessorConfig[] {
   const layerContainsSplits = Boolean(layer.splitAccessor);
   const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
-  const totalSeriesCount = colorAssignments[currentPalette.name].totalSeriesCount;
+  const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;
   return layer.accessors.map((accessor) => {
     const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
     if (layerContainsSplits) {
@@ -117,11 +117,11 @@ export function getAccessorColorConfig(
         triggerIcon: 'disabled',
       };
     }
-    if (layer.layerType === layerTypes.THRESHOLD) {
+    if (layer.layerType === layerTypes.REFERENCELINE) {
       return {
         columnId: accessor as string,
         triggerIcon: 'color',
-        color: currentYConfig?.color || defaultThresholdColor,
+        color: currentYConfig?.color || defaultReferenceLineColor,
       };
     }
     const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
@@ -132,17 +132,19 @@ export function getAccessorColorConfig(
     );
     const customColor =
       currentYConfig?.color ||
-      paletteService.get(currentPalette.name).getCategoricalColor(
-        [
-          {
-            name: columnToLabel[accessor] || accessor,
-            rankAtDepth: rank,
-            totalSeriesAtDepth: totalSeriesCount,
-          },
-        ],
-        { maxDepth: 1, totalSeries: totalSeriesCount },
-        currentPalette.params
-      );
+      (totalSeriesCount != null
+        ? paletteService.get(currentPalette.name).getCategoricalColor(
+            [
+              {
+                name: columnToLabel[accessor] || accessor,
+                rankAtDepth: rank,
+                totalSeriesAtDepth: totalSeriesCount,
+              },
+            ],
+            { maxDepth: 1, totalSeries: totalSeriesCount },
+            currentPalette.params
+          )
+        : undefined);
     return {
       columnId: accessor as string,
       triggerIcon: customColor ? 'color' : 'disabled',

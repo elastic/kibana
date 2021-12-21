@@ -7,7 +7,7 @@
  */
 
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { TelemetryPluginStart } from 'src/plugins/telemetry/public';
@@ -45,10 +45,10 @@ export class Home extends Component<HomeProps, State> {
   constructor(props: HomeProps) {
     super(props);
 
-    const isWelcomeEnabled = !(
-      getServices().homeConfig.disableWelcomeScreen ||
-      props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
-    );
+    const isWelcomeEnabled =
+      !getServices().homeConfig.disableWelcomeScreen &&
+      getServices().application.capabilities.navLinks.integrations &&
+      props.localStorage.getItem(KEY_ENABLE_WELCOME) !== 'false';
 
     const body = document.querySelector('body')!;
     body.classList.add('isHomPage');

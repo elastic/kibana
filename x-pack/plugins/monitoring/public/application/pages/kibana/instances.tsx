@@ -9,17 +9,19 @@ import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { ComponentProps } from '../../route_init';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTable } from '../../hooks/use_table';
 import { KibanaTemplate } from './kibana_template';
 // @ts-ignore
 import { KibanaInstances } from '../../../components/kibana/instances';
 // @ts-ignore
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
-import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { KIBANA_SYSTEM_ID, RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
 
 export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const { cluster_uuid: clusterUuid, ccs } = useContext(GlobalStateContext);
@@ -30,6 +32,7 @@ export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
     cluster_uuid: clusterUuid,
   }) as any;
   const [data, setData] = useState({} as any);
+  const [alerts, setAlerts] = useState<AlertsByName>({});
 
   const title = i18n.translate('xpack.monitoring.kibana.instances.routeTitle', {
     defaultMessage: 'Kibana - Instances',
@@ -50,19 +53,31 @@ export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/kibana/instances`;
-    const response = await services.http?.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        ccs,
-        timeRange: {
-          min: bounds.min.toISOString(),
-          max: bounds.max.toISOString(),
-        },
-      }),
-    });
+    if (services.http?.fetch && clusterUuid) {
+      const response = await services.http?.fetch<{ kibanas: { length: number } }>(url, {
+        method: 'POST',
+        body: JSON.stringify({
+          ccs,
+          timeRange: {
+            min: bounds.min.toISOString(),
+            max: bounds.max.toISOString(),
+          },
+        }),
+      });
 
-    setData(response);
-    updateTotalItemCount(response.stats.total);
+      setData(response);
+      updateTotalItemCount(response.kibanas.length);
+      const alertsResponse = await fetchAlerts({
+        fetch: services.http.fetch,
+        alertTypeIds: [RULE_KIBANA_VERSION_MISMATCH],
+        clusterUuid,
+        timeRange: {
+          min: bounds.min.valueOf(),
+          max: bounds.max.valueOf(),
+        },
+      });
+      setAlerts(alertsResponse);
+    }
   }, [
     ccs,
     clusterUuid,
@@ -72,12 +87,7 @@ export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   ]);
 
   return (
-    <KibanaTemplate
-      title={title}
-      pageTitle={pageTitle}
-      getPageData={getPageData}
-      data-test-subj="kibanaInstancesPage"
-    >
+    <KibanaTemplate title={title} pageTitle={pageTitle} getPageData={getPageData}>
       <div data-test-subj="monitoringKibanaInstancesApp">
         <SetupModeRenderer
           productName={KIBANA_SYSTEM_ID}
@@ -85,7 +95,7 @@ export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
             <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}
               <KibanaInstances
-                alerts={{}}
+                alerts={alerts}
                 instances={data.kibanas}
                 setupMode={setupMode}
                 clusterStatus={data.clusterStatus}

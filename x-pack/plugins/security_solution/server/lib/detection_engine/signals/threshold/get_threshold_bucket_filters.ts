@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from 'src/plugins/data/common';
+import type { Filter } from '@kbn/es-query';
 import { ESFilter } from '../../../../../../../../src/core/types/elasticsearch';
 import { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from '../types';
 
@@ -40,6 +40,7 @@ export const getThresholdBucketFilters = async ({
       // Terms to filter events older than `lastSignalTimestamp`.
       bucket.terms.forEach((term) => {
         if (term.field != null) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           (filter.bool!.filter as ESFilter[]).push({
             term: {
               [term.field]: `${term.value}`,

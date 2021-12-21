@@ -6,7 +6,7 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
-import { ColumnHeaderOptions } from '../../../../common';
+import { ColumnHeaderOptions } from '../../../../common/types';
 
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import {
@@ -31,26 +31,26 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_RULE,
-    id: 'signal.rule.name',
+    id: 'kibana.alert.rule.name',
     initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    linkField: 'signal.rule.id',
+    linkField: 'kibana.alert.rule.uuid',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_SEVERITY,
-    id: 'signal.rule.severity',
+    id: 'kibana.alert.severity',
     initialWidth: 105,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_RISK_SCORE,
-    id: 'signal.rule.risk_score',
+    id: 'kibana.alert.risk_score',
     initialWidth: 100,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_REASON,
-    id: 'signal.reason',
+    id: 'kibana.alert.reason',
     initialWidth: 450,
   },
   {

@@ -23,7 +23,7 @@ import {
   EuiSpacer,
   EuiFormRow,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { PANEL_TYPES } from '../../../../common/enums';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';

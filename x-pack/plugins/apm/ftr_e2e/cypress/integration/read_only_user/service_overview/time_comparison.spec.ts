@@ -6,9 +6,11 @@
  */
 import url from 'url';
 import moment from 'moment';
-import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
+import { synthtrace } from '../../../../synthtrace';
+import { opbeans } from '../../../fixtures/synthtrace/opbeans';
 
-const { start, end } = archives_metadata['apm_8.0.0'];
+const start = '2021-10-10T00:00:00.000Z';
+const end = '2021-10-10T00:15:00.000Z';
 
 const serviceOverviewPath = '/app/apm/services/opbeans-java/overview';
 const serviceOverviewHref = url.format({
@@ -38,7 +40,7 @@ const apisToIntercept = [
   },
   {
     endpoint:
-      '/internal/apm/services/opbeans-java/error_groups/detailed_statistics?*',
+      '/internal/apm/services/opbeans-java/errors/groups/detailed_statistics?*',
     name: 'errorGroupsDetailedRequest',
   },
   {
@@ -49,6 +51,19 @@ const apisToIntercept = [
 ];
 
 describe('Service overview: Time Comparison', () => {
+  before(async () => {
+    await synthtrace.index(
+      opbeans({
+        from: new Date(start).getTime(),
+        to: new Date(end).getTime(),
+      })
+    );
+  });
+
+  after(async () => {
+    await synthtrace.clean();
+  });
+
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
@@ -79,8 +94,12 @@ describe('Service overview: Time Comparison', () => {
       cy.contains('opbeans-java');
 
       cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
-      const comparisonStartEnd =
-        'comparisonStart=2021-08-02T06%3A50%3A00.000Z&comparisonEnd=2021-08-02T07%3A20%3A15.910Z';
+      const comparisonStartEnd = `comparisonStart=${encodeURIComponent(
+        moment(start).subtract(1, 'day').toISOString()
+      )}&comparisonEnd=${encodeURIComponent(
+        moment(end).subtract(1, 'day').toISOString()
+      )}`;
+
       // When the page loads it fetches all APIs with comparison time range
       cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
         (interceptions) => {
