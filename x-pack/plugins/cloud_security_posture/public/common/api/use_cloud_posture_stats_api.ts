@@ -11,5 +11,5 @@ import { CloudPostureStats } from '../../../common/types';
 
 export const useCloudPostureStatsApi = () => {
   const { http } = useKibana().services;
-  return useQuery(['csp_dashboard_stats'], () => http.get<CloudPostureStats>('/api/csp/stats'));
+  return useQuery(['csp_dashboard_stats'], () => http!.get<CloudPostureStats>('/api/csp/stats'));
 };

@@ -14,13 +14,13 @@ import { routes } from './routes';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 import type { AppMountParameters, CoreStart } from '../../../../../src/core/public';
-import type { AppPluginStartDependencies } from '../types';
+import type { CspStart } from '../types';
 
 const queryClient = new QueryClient();
 
 interface CspAppDeps {
   core: CoreStart;
-  deps: AppPluginStartDependencies;
+  deps: CspStart;
   params: AppMountParameters;
 }
 

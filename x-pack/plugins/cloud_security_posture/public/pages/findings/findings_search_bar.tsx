@@ -36,14 +36,6 @@ export const FindingsSearchBar = ({
   status,
   setSource,
 }: FindingsSearchBarProps) => {
-<<<<<<< HEAD
-  const { data: dataService } = useKibana().services;
-  const [filters, setFilters] = useState<Filter[]>([]);
-  const searchState = useSearchState();
-  const history = useHistory();
-
-=======
->>>>>>> 51f32f44020... Findings page iteration (#52)
   const {
     data: {
       ui: { SearchBar },

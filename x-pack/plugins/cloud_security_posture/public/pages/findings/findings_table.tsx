@@ -118,13 +118,6 @@ const getColumns = (): Array<EuiTableFieldDataColumnType<CSPFinding>> => [
   {
     field: 'rule.tags',
     name: 'Tags',
-<<<<<<< HEAD
-    truncateText: true,
-    // TODO: tags need to be truncated (as they are components, not texts)
-    // and on hover they should show the full tags
-    // currently causes the table to overflow its parent
-=======
->>>>>>> 51f32f44020... Findings page iteration (#52)
     render: RuleTags,
   },
   {

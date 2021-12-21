@@ -7,9 +7,7 @@
 
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
-// TODO: find out how to import from the server folder without warnings
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Score } from '../../../server/cloud_posture/types';
+import type { Score } from '../../common/types';
 
 interface Props {
   value: Score;

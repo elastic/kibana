@@ -10,13 +10,9 @@ import ReactDOM from 'react-dom';
 import { CspApp } from './app';
 
 import type { AppMountParameters, CoreStart } from '../../../../../src/core/public';
-import type { AppPluginStartDependencies } from '../types';
+import type { CspStart } from '../types';
 
-export const renderApp = (
-  core: CoreStart,
-  deps: AppPluginStartDependencies,
-  params: AppMountParameters
-) => {
+export const renderApp = (core: CoreStart, deps: CspStart, params: AppMountParameters) => {
   ReactDOM.render(<CspApp core={core} params={params} deps={deps} />, params.element);
 
   return () => ReactDOM.unmountComponentAtNode(params.element);

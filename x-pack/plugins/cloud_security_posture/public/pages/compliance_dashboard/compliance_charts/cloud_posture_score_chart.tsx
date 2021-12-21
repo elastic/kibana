@@ -9,9 +9,7 @@ import React from 'react';
 import { Chart, Datum, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { useNavigateToCSPFindings } from '../../../common/hooks/use_navigate_to_csp_findings';
-// TODO: find out how to import from the server folder without warnings
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { BenchmarkStats } from '../../../../../server/cloud_posture/types';
+import type { BenchmarkStats } from '../../../../common/types';
 import { statusColors } from '../../../common/constants';
 
 interface CloudPostureScoreChartProps {
