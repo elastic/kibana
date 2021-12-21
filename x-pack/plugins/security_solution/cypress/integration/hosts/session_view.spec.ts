@@ -144,8 +144,8 @@ describe('Session view', () => {
         cy.contains('Child processes').click()
         cy.contains(FIRST_CHILD_COMMAND).should('exist');
         cy.get(SESSION_COMMANDS).children().its('length').then(lengthAfter =>{
-          const afterClick = lengthAfter;
-          expect(afterClick).to.be.greaterThan(beforeClick)
+          //const afterClick = lengthAfter;
+          expect(lengthAfter).to.be.greaterThan(beforeClick)
         })
       })
 
@@ -167,14 +167,23 @@ describe('Session view', () => {
         })
       })
     })
-    
+
     it('root escalation', () => {
       openSessionView(TEST_EVENT_ID);
 
       // Get the parent div for Root Escalation button and checks if Sudo su and Root Escalation button is with same parent or not
-      cy.contains('Root escalation').parent().contains('sudo').should('exist');
-      cy.contains('Root escalation').parent().contains('su').should('exist');
+      
+      cy.get('span:contains("Root escalation")').its('length').then(lengthBefore =>{
+        console.log("LENGHT BEFORE IS " + lengthBefore )
+        const beforeClick = lengthBefore;
+        const genArr = Array.from({length:beforeClick},(v,k)=>k)
+        console.log(genArr)
+        cy.wrap(genArr).each((index)=>{
 
+          cy.get('span:contains("Root escalation"):eq('+index+')').parent().parent().parent().contains('sudo').should('exist');
+          cy.get('span:contains("Root escalation"):eq('+index+')').parent().parent().parent().contains('su').should('exist');
+        })
+      })
     });
   });
 });
