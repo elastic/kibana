@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ColorRange } from '.';
 import { getDataMinMax, getStepValue, isValidColor, roundValue } from '../utils';
 
 import { DEFAULT_COLOR } from '../constants';
 
-import type { DataBounds, ColorRangeValidation, ColorRangeAccessor } from './types';
+import type { ColorRange, DataBounds, ColorRangeValidation, ColorRangeAccessor } from './types';
 import type { CustomPaletteParamsConfig } from '../../../../common';
+
+export const isLastItem = (accessor: ColorRangeAccessor) => accessor === 'end';
 
 export const reversePalette = (colorRanges: ColorRange[]) => {
   return colorRanges
@@ -125,33 +125,24 @@ export const distributeEqually = (colorRanges: ColorRange[]) => {
   }));
 };
 
-export const validateСolorRange = (colorRange: ColorRange, accessor: ColorRangeAccessor) => {
-  const errors: string[] = [];
+export const validateСolorRange = (
+  colorRange: ColorRange,
+  accessor: ColorRangeAccessor
+): ColorRangeValidation => {
+  const errors: ColorRangeValidation['errors'] = [];
   const validateStartColorRange = ({ start, color }: ColorRange) => {
     if (!isValidColor(color)) {
-      errors.push(
-        i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidColorValue', {
-          defaultMessage: `Invalid color value.`,
-        })
-      );
+      errors.push('invalidColor');
     }
 
     if (Number.isNaN(start)) {
-      errors.push(
-        i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidValue', {
-          defaultMessage: `The number value is required.`,
-        })
-      );
+      errors.push('invalidValue');
     }
   };
 
   const validateEndRange = ({ end, start }: ColorRange) => {
     if (start > end) {
-      errors.push(
-        i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidMaxValue', {
-          defaultMessage: 'Maximum value should be greater than preceding values',
-        })
-      );
+      errors.push('greaterThanMaxValue');
     }
   };
 

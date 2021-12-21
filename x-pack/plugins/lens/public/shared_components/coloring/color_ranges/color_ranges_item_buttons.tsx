@@ -13,18 +13,19 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { ValueMaxIcon } from '../../../assets/value_max';
 import { ValueMinIcon } from '../../../assets/value_min';
 import { getAutoValues, getDataMinMax, getStepValue, roundValue } from '../utils';
+import { isLastItem } from './utils';
 
-import type { DataBounds, ColorRangesActions, ColorRange } from './types';
+import type { DataBounds, ColorRangesActions, ColorRange, ColorRangeAccessor } from './types';
 import type { CustomPaletteParams } from '../../../../common';
 
 export interface ColorRangesItemButtonProps {
+  index: number;
   colorRanges: ColorRange[];
   rangeType: CustomPaletteParams['rangeType'];
   continuity: CustomPaletteParams['continuity'];
   dataBounds: DataBounds;
   dispatch: Dispatch<ColorRangesActions>;
-  index: number;
-  accessor: 'start' | 'end';
+  accessor: ColorRangeAccessor;
 }
 
 export function ColorRangeDeleteButton({
@@ -36,16 +37,16 @@ export function ColorRangeDeleteButton({
     dispatch({ type: 'deleteColorRange', payload: { index } });
   }, [dispatch, index]);
 
+  const title = i18n.translate('xpack.lens.dynamicColoring.customPalette.deleteButtonAriaLabel', {
+    defaultMessage: 'Delete',
+  });
+
   return (
     <EuiButtonIcon
       iconType="trash"
       color="danger"
-      aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.deleteButtonAriaLabel', {
-        defaultMessage: 'Delete',
-      })}
-      title={i18n.translate('xpack.lens.dynamicColoring.customPalette.deleteButtonLabel', {
-        defaultMessage: 'Delete',
-      })}
+      aria-label={title}
+      title={title}
       onClick={onExecuteAction}
       data-test-subj={`dynamicColoring_removeColorRange_${index}`}
     />
@@ -61,7 +62,7 @@ export function ColorRangeEditButton({
   dispatch,
   accessor,
 }: ColorRangesItemButtonProps) {
-  const isLast = accessor === 'end';
+  const isLast = isLastItem(accessor);
 
   const onExecuteAction = useCallback(() => {
     const { max } = getDataMinMax(rangeType, dataBounds);
@@ -90,15 +91,15 @@ export function ColorRangeEditButton({
     });
   }, [rangeType, dataBounds, colorRanges, isLast, index, dispatch, continuity]);
 
+  const title = i18n.translate('xpack.lens.dynamicColoring.customPalette.editButtonAriaLabel', {
+    defaultMessage: 'Edit',
+  });
+
   return (
     <EuiButtonIcon
       iconType="pencil"
-      aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.editButtonAriaLabel', {
-        defaultMessage: 'Edit',
-      })}
-      title={i18n.translate('xpack.lens.dynamicColoring.customPalette.editButtonLabel', {
-        defaultMessage: 'Edit',
-      })}
+      aria-label={title}
+      title={title}
       onClick={onExecuteAction}
       data-test-subj={`dynamicColoring_editValue_${index}`}
     />
@@ -114,7 +115,7 @@ export function ColorRangeAutoDetectButton({
   dispatch,
   accessor,
 }: ColorRangesItemButtonProps) {
-  const isLast = accessor === 'end';
+  const isLast = isLastItem(accessor);
 
   const onExecuteAction = useCallback(() => {
     const { max: autoMax, min: autoMin } = getAutoValues(
@@ -143,27 +144,19 @@ export function ColorRangeAutoDetectButton({
     });
   }, [continuity, colorRanges, dataBounds, dispatch, index, isLast, rangeType]);
 
+  const title = isLast
+    ? i18n.translate('xpack.lens.dynamicColoring.customPalette.autoDetectMaximumAriaLabel', {
+        defaultMessage: 'Auto detect maximum value',
+      })
+    : i18n.translate('xpack.lens.dynamicColoring.customPalette.autoDetectMinimumAriaLabel', {
+        defaultMessage: 'Auto detect minimum value',
+      });
+
   return (
     <EuiButtonIcon
       iconType={isLast ? ValueMaxIcon : ValueMinIcon}
-      aria-label={
-        isLast
-          ? i18n.translate('xpack.lens.dynamicColoring.customPalette.autoDetectMaximumAriaLabel', {
-              defaultMessage: 'Auto detect maximum value',
-            })
-          : i18n.translate('xpack.lens.dynamicColoring.customPalette.autoDetectMinimumAriaLabel', {
-              defaultMessage: 'Auto detect minimum value',
-            })
-      }
-      title={
-        isLast
-          ? i18n.translate('xpack.lens.dynamicColoring.customPalette.autoDetectMaximumLabel', {
-              defaultMessage: 'Auto detect maximum value',
-            })
-          : i18n.translate('xpack.lens.dynamicColoring.customPalette.autoDetectMinimumLabel', {
-              defaultMessage: 'Auto detect minimum value',
-            })
-      }
+      aria-label={title}
+      title={title}
       onClick={onExecuteAction}
       data-test-subj={`dynamicColoring_autoDetect_${isLast ? 'maximum' : 'minimum'}`}
     />

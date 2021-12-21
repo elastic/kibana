@@ -9,7 +9,7 @@ import React, { useCallback, Dispatch } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 import { DistributeEquallyIcon } from '../../../assets/distribute_equally';
 import { TooltipWrapper } from '../../index';
 
@@ -51,8 +51,8 @@ export function ColorRangesFooter({
   }, [dispatch]);
 
   return (
-    <>
-      <EuiFlexGroup justifyContent="spaceAround" gutterSize="s">
+    <EuiFlexGroup justifyContent="flexStart" gutterSize="none" wrap={true}>
+      <EuiFlexItem grow={false}>
         <TooltipWrapper
           tooltipContent={i18n.translate(
             'xpack.lens.dynamicColoring.customPalette.maximumStepsApplied',
@@ -85,6 +85,8 @@ export function ColorRangesFooter({
             />
           </EuiButtonEmpty>
         </TooltipWrapper>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           data-test-subj={`dynamicColoring_reverseColors`}
           iconType="sortable"
@@ -102,6 +104,8 @@ export function ColorRangesFooter({
             defaultMessage="Reverse colors"
           />
         </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           data-test-subj={`dynamicColoring_distributeEqually`}
           iconType={DistributeEquallyIcon}
@@ -122,7 +126,7 @@ export function ColorRangesFooter({
             defaultMessage="Distribute equally"
           />
         </EuiButtonEmpty>
-      </EuiFlexGroup>
-    </>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -10,13 +10,11 @@ export interface ColorRange {
   color: string;
   start: number;
   end: number;
-  // todo: do we need it?
-  id?: string;
 }
 
 /** @internal **/
 export interface ColorRangeValidation {
-  errors: string[];
+  errors: Array<'invalidColor' | 'invalidValue' | 'greaterThanMaxValue'>;
   isValid: boolean;
 }
 
