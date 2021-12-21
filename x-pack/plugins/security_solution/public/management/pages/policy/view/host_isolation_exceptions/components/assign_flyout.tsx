@@ -251,15 +251,13 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
         />
         <EuiSpacer size="m" />
 
-        {!exceptionsRequest.isLoading ? (
-          <PolicyArtifactsAssignableList
-            data-test-subj="hostIsolationExceptions-assignable-list"
-            artifacts={exceptionsRequest.data}
-            selectedArtifactIds={selectedArtifactIds}
-            isListLoading={exceptionsRequest.isLoading}
-            selectedArtifactsUpdated={handleSelectArtifact}
-          />
-        ) : null}
+        <PolicyArtifactsAssignableList
+          data-test-subj="hostIsolationExceptions-assignable-list"
+          artifacts={exceptionsRequest.data}
+          selectedArtifactIds={selectedArtifactIds}
+          isListLoading={exceptionsRequest.isLoading}
+          selectedArtifactsUpdated={handleSelectArtifact}
+        />
 
         {noItemsMessage}
       </EuiFlyoutBody>
