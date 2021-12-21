@@ -82,10 +82,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'index pattern to have been switched back to "without-timefield"',
         5000,
         async () => {
-         // Navigating back
-         await browser.goBack();
-         await PageObjects.discover.waitForDocTableLoadingComplete();  
-         return (await testSubjects.getVisibleText('indexPattern-switch-link')) === 'without-timefield'
+          // Navigating back
+          await browser.goBack();
+          await PageObjects.discover.waitForDocTableLoadingComplete();
+          return (
+            (await testSubjects.getVisibleText('indexPattern-switch-link')) === 'without-timefield'
+          );
         }
       );
 
