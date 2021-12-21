@@ -110,6 +110,9 @@ export class ExtensionPointStorageClient {
     }
 
     for (const externalExtension of externalExtensions) {
+      const extensionRegistrationSource =
+        this.storage.getExtensionRegistrationSource(externalExtension);
+
       try {
         // FIXME:PT investigate if we can avoid the TS ignore below?
         // @ts-expect-error
@@ -117,10 +120,9 @@ export class ExtensionPointStorageClient {
       } catch (error) {
         // Log the error that the external callback threw and keep going with the running of others
         this.logger?.error(
-          new ExtensionPointError(`Extension point execution error for ${externalExtension.type}`, {
-            extensionRegistrationSource:
-              this.storage.getExtensionRegistrationSource(externalExtension),
-          })
+          new ExtensionPointError(
+            `Extension point execution error for ${externalExtension.type}: ${extensionRegistrationSource}`
+          )
         );
       }
 
@@ -131,14 +133,8 @@ export class ExtensionPointStorageClient {
         if (validationError) {
           this.logger?.error(
             new ExtensionPointError(
-              `Extension point for ${
-                externalExtension.type
-              } returned data that failed validation: ${this.storage.getExtensionRegistrationSource(
-                externalExtension
-              )}`,
+              `Extension point for ${externalExtension.type} returned data that failed validation: ${extensionRegistrationSource}`,
               {
-                extensionRegistrationSource:
-                  this.storage.getExtensionRegistrationSource(externalExtension),
                 validationError,
               }
             )
