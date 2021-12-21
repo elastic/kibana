@@ -16,6 +16,7 @@ import {
   AlertServices,
 } from '../../../../../alerting/server';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { withSecuritySpan } from '../../../utils/with_security_span';
 
 export interface GetInputIndex {
   experimentalFeatures: ExperimentalFeatures;
@@ -33,9 +34,11 @@ export const getInputIndex = async ({
   if (index != null) {
     return index;
   } else {
-    const configuration = await services.savedObjectsClient.get<{
-      'securitySolution:defaultIndex': string[];
-    }>('config', version);
+    const configuration = await withSecuritySpan('getDefaultIndex', () =>
+      services.savedObjectsClient.get<{
+        'securitySolution:defaultIndex': string[];
+      }>('config', version)
+    );
     if (configuration.attributes != null && configuration.attributes[DEFAULT_INDEX_KEY] != null) {
       return configuration.attributes[DEFAULT_INDEX_KEY];
     } else {
