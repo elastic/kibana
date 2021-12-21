@@ -136,7 +136,8 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alertingFrameworkHeath: { // Legacy: pre-v8.0 typo
+        alertingFrameworkHeath: {
+          // Legacy: pre-v8.0 typo
           _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
           decryptionHealth: {
             status: HealthStatus.OK,
@@ -193,7 +194,8 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alertingFrameworkHeath: { // Legacy: pre-v8.0 typo
+        alertingFrameworkHeath: {
+          // Legacy: pre-v8.0 typo
           _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
           decryptionHealth: {
             status: HealthStatus.OK,
@@ -250,7 +252,8 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alertingFrameworkHeath: { // Legacy: pre-v8.0 typo
+        alertingFrameworkHeath: {
+          // Legacy: pre-v8.0 typo
           _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
           decryptionHealth: {
             status: HealthStatus.OK,
@@ -307,7 +310,8 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alertingFrameworkHeath: { // Legacy: pre-v8.0 typo
+        alertingFrameworkHeath: {
+          // Legacy: pre-v8.0 typo
           _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
           decryptionHealth: {
             status: HealthStatus.OK,
@@ -364,7 +368,8 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alertingFrameworkHeath: { // Legacy: pre-v8.0 typo
+        alertingFrameworkHeath: {
+          // Legacy: pre-v8.0 typo
           _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
           decryptionHealth: {
             status: HealthStatus.OK,

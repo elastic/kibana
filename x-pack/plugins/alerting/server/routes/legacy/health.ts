@@ -51,11 +51,13 @@ export function healthRoute(
           return res.ok({
             body: {
               ...frameworkHealth,
-              alertingFrameworkHeath: { // Legacy: pre-v8.0 typo
+              alertingFrameworkHeath: {
+                // Legacy: pre-v8.0 typo
                 ...alertingFrameworkHealth,
-                _deprecated: 'This state property has a typo, use "alertingFrameworkHealth" instead.',
+                _deprecated:
+                  'This state property has a typo, use "alertingFrameworkHealth" instead.',
               },
-            }
+            },
           });
         } else {
           return res.forbidden({
