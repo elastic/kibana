@@ -248,13 +248,19 @@ export const processUngroupedResults = (
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
   const documentCount = results.hits.total.value;
 
   if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
     const alert = alertFactory(
       UNGROUPED_FACTORY_KEY,
-      getReasonMessageForUngroupedCountAlert(documentCount, count.value, count.comparator),
+      getReasonMessageForUngroupedCountAlert(
+        documentCount,
+        count.value,
+        count.comparator,
+        timeSize,
+        timeUnit
+      ),
       documentCount,
       count.value
     );
@@ -279,7 +285,7 @@ export const processUngroupedRatioResults = (
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
 
   const numeratorCount = numeratorResults.hits.total.value;
   const denominatorCount = denominatorResults.hits.total.value;
@@ -288,7 +294,13 @@ export const processUngroupedRatioResults = (
   if (ratio !== undefined && checkValueAgainstComparatorMap[count.comparator](ratio, count.value)) {
     const alert = alertFactory(
       UNGROUPED_FACTORY_KEY,
-      getReasonMessageForUngroupedRatioAlert(ratio, count.value, count.comparator),
+      getReasonMessageForUngroupedRatioAlert(
+        ratio,
+        count.value,
+        count.comparator,
+        timeSize,
+        timeUnit
+      ),
       ratio,
       count.value
     );
@@ -352,7 +364,7 @@ export const processGroupByResults = (
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
 
   const groupResults = getReducedGroupByResults(results);
 
@@ -366,7 +378,9 @@ export const processGroupByResults = (
           documentCount,
           count.value,
           count.comparator,
-          group.name
+          group.name,
+          timeSize,
+          timeUnit
         ),
         documentCount,
         count.value
@@ -393,7 +407,7 @@ export const processGroupByRatioResults = (
   alertFactory: LogThresholdAlertFactory,
   alertUpdater: AlertUpdater
 ) => {
-  const { count, criteria } = params;
+  const { count, criteria, timeSize, timeUnit } = params;
 
   const numeratorGroupResults = getReducedGroupByResults(numeratorResults);
   const denominatorGroupResults = getReducedGroupByResults(denominatorResults);
@@ -417,7 +431,9 @@ export const processGroupByRatioResults = (
           ratio,
           count.value,
           count.comparator,
-          numeratorGroup.name
+          numeratorGroup.name,
+          timeSize,
+          timeUnit
         ),
         ratio,
         count.value
