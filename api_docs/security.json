@@ -389,7 +389,8 @@
               "\nDescribes the layout of the login form if it's displayed."
             ],
             "signature": [
-              "\"form\" | \"error-es-unavailable\" | \"error-xpack-unavailable\" | undefined"
+              "LoginLayout",
+              " | undefined"
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
             "deprecated": false
@@ -512,7 +513,7 @@
             "label": "iconType",
             "description": [],
             "signature": [
-              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
+              "string | React.ComponentType<{}>"
             ],
             "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
             "deprecated": false
@@ -1463,10 +1464,6 @@
           "deprecated": true,
           "references": [
             {
-              "plugin": "reporting",
-              "path": "x-pack/plugins/reporting/server/routes/lib/get_user.ts"
-            },
-            {
               "plugin": "encryptedSavedObjects",
               "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_key_rotation_service.ts"
             },
@@ -1481,6 +1478,10 @@
             {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
+            },
+            {
+              "plugin": "reporting",
+              "path": "x-pack/plugins/reporting/server/routes/lib/get_user.ts"
             },
             {
               "plugin": "dataEnhanced",

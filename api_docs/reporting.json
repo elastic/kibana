@@ -377,7 +377,9 @@
             "label": "getReportingJobPath",
             "description": [],
             "signature": [
-              "(exportType: string, jobParams: { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }) => string"
+              "(exportType: string, jobParams: { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "LayoutSelectorDictionary",
+              "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }) => string"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -404,7 +406,9 @@
                 "label": "jobParams",
                 "description": [],
                 "signature": [
-                  "{ layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+                  "{ layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+                  "LayoutSelectorDictionary",
+                  "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
                 ],
                 "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
                 "deprecated": false,
@@ -421,7 +425,9 @@
             "label": "createReportingJob",
             "description": [],
             "signature": [
-              "(exportType: string, jobParams: { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }) => Promise<",
+              "(exportType: string, jobParams: { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "LayoutSelectorDictionary",
+              "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }) => Promise<",
               "Job",
               ">"
             ],
@@ -450,7 +456,9 @@
                 "label": "jobParams",
                 "description": [],
                 "signature": [
-                  "{ layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+                  "{ layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+                  "LayoutSelectorDictionary",
+                  "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
                 ],
                 "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
                 "deprecated": false,
@@ -467,7 +475,9 @@
             "label": "createImmediateReport",
             "description": [],
             "signature": [
-              "(baseParams: { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }) => Promise<unknown>"
+              "(baseParams: { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "LayoutSelectorDictionary",
+              "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }) => Promise<unknown>"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -480,7 +490,9 @@
                 "label": "baseParams",
                 "description": [],
                 "signature": [
-                  "{ layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+                  "{ layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+                  "LayoutSelectorDictionary",
+                  "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
                 ],
                 "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
                 "deprecated": false,
@@ -497,7 +509,9 @@
             "label": "getDecoratedJobParams",
             "description": [],
             "signature": [
-              "<T extends Pick<{ layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }, \"title\" | \"layout\" | \"objectType\">>(baseParams: T) => { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+              "<T extends AppParams>(baseParams: T) => { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "LayoutSelectorDictionary",
+              "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -898,13 +912,63 @@
             "label": "searchSource",
             "description": [],
             "signature": [
+              "{ type?: string | undefined; query?: ",
+              "Query",
+              " | undefined; filter?: ",
+              "Filter",
+              "[] | undefined; sort?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
-              }
+                "section": "def-common.EsQuerySortValue",
+                "text": "EsQuerySortValue"
+              },
+              "[] | undefined; highlight?: ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              " | undefined; highlightAll?: boolean | undefined; trackTotalHits?: number | boolean | undefined; aggs?: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              " | undefined; schema?: string | undefined; }[] | undefined; from?: number | undefined; size?: number | undefined; source?: boolean | ",
+              "Fields",
+              " | undefined; version?: boolean | undefined; fields?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchFieldValue",
+                "text": "SearchFieldValue"
+              },
+              "[] | undefined; fieldsFromSource?: ",
+              "Fields",
+              " | undefined; index?: string | undefined; searchAfter?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.EsQuerySearchAfter",
+                "text": "EsQuerySearchAfter"
+              },
+              " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; parent?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SerializedSearchSourceFields",
+                "text": "SerializedSearchSourceFields"
+              },
+              " | undefined; }"
             ],
             "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource_immediate.ts",
             "deprecated": false
@@ -934,7 +998,9 @@
         "description": [],
         "signature": [
           "JobParamsPNGV2",
-          " extends { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+          " extends { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/png_v2.ts",
         "deprecated": false,
@@ -947,7 +1013,9 @@
             "label": "layout",
             "description": [],
             "signature": [
-              "{ id: string; dimensions?: { width: number; height: number; } | undefined; }"
+              "{ id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "LayoutSelectorDictionary",
+              "> | undefined; zoom?: number | undefined; }"
             ],
             "path": "x-pack/plugins/reporting/common/types/export_types/png_v2.ts",
             "deprecated": false
@@ -990,7 +1058,9 @@
         "label": "JobAppParamsPDF",
         "description": [],
         "signature": [
-          "{ title: string; layout: { id: string; dimensions?: { width: number; height: number; } | undefined; }; objectType: string; relativeUrls: string[]; isDeprecated?: boolean | undefined; }"
+          "{ title: string; layout: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; }; objectType: string; relativeUrls: string[]; isDeprecated?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf.ts",
         "deprecated": false,
@@ -1004,7 +1074,9 @@
         "label": "JobAppParamsPDFV2",
         "description": [],
         "signature": [
-          "{ title: string; layout: { id: string; dimensions?: { width: number; height: number; } | undefined; }; objectType: string; locatorParams: ",
+          "{ title: string; layout: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; }; objectType: string; locatorParams: ",
           "LocatorParams",
           "<",
           {
@@ -1028,7 +1100,9 @@
         "label": "JobParamsCSV",
         "description": [],
         "signature": [
-          "BaseParamsCSV & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+          "BaseParamsCSV & { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource.ts",
         "deprecated": false,
@@ -1042,7 +1116,9 @@
         "label": "JobParamsPDF",
         "description": [],
         "signature": [
-          "BaseParamsPDF & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+          "BaseParamsPDF & { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf.ts",
         "deprecated": false,
@@ -1056,7 +1132,9 @@
         "label": "JobParamsPDFV2",
         "description": [],
         "signature": [
-          "BaseParamsPDFV2 & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+          "BaseParamsPDFV2 & { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf_v2.ts",
         "deprecated": false,
@@ -1070,7 +1148,9 @@
         "label": "JobParamsPNG",
         "description": [],
         "signature": [
-          "BaseParamsPNG & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+          "BaseParamsPNG & { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/png.ts",
         "deprecated": false,
@@ -1176,14 +1256,8 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; zoom: number; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "server",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.ByteSizeValue",
-                    "text": "ByteSizeValue"
-                  },
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; capture: Readonly<{} & { zoom: number; timeouts: Readonly<{} & { renderComplete: number | moment.Duration; openUrl: number | moment.Duration; waitForElements: number | moment.Duration; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ port?: number | undefined; hostname?: string | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "ByteSizeValue",
                   "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
                 ],
                 "path": "x-pack/plugins/reporting/server/core.ts",
@@ -1202,13 +1276,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/config",
-                "scope": "server",
-                "docId": "kibKbnConfigPluginApi",
-                "section": "def-server.PackageInfo",
-                "text": "PackageInfo"
-              }
+              "PackageInfo"
             ],
             "path": "x-pack/plugins/reporting/server/core.ts",
             "deprecated": false,
@@ -1536,21 +1604,6 @@
           },
           {
             "parentPluginId": "reporting",
-            "id": "def-server.ReportingCore.getEnableScreenshotMode",
-            "type": "Function",
-            "tags": [],
-            "label": "getEnableScreenshotMode",
-            "description": [],
-            "signature": [
-              "() => () => void"
-            ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.getPluginSetupDeps",
             "type": "Function",
             "tags": [],
@@ -1573,15 +1626,15 @@
             "label": "getUiSettingsServiceFactory",
             "description": [],
             "signature": [
-              "(savedObjectsClient: Pick<",
+              "(savedObjectsClient: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
               },
-              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Promise<",
+              ") => Promise<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1602,15 +1655,13 @@
                 "label": "savedObjectsClient",
                 "description": [],
                 "signature": [
-                  "Pick<",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsClient",
-                    "text": "SavedObjectsClient"
-                  },
-                  ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "x-pack/plugins/reporting/server/core.ts",
                 "deprecated": false,
@@ -1918,6 +1969,48 @@
           },
           {
             "parentPluginId": "reporting",
+            "id": "def-server.ReportingCore.getScreenshots",
+            "type": "Function",
+            "tags": [],
+            "label": "getScreenshots",
+            "description": [],
+            "signature": [
+              "(options: ",
+              "ScreenshotOptions",
+              ") => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "screenshotting",
+                "scope": "server",
+                "docId": "kibScreenshottingPluginApi",
+                "section": "def-server.ScreenshotResult",
+                "text": "ScreenshotResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/reporting/server/core.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "reporting",
+                "id": "def-server.ReportingCore.getScreenshots.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ScreenshotOptions"
+                ],
+                "path": "x-pack/plugins/reporting/server/core.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingCore.trackReport",
             "type": "Function",
             "tags": [],
@@ -2082,14 +2175,8 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; zoom: number; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "server",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-server.ByteSizeValue",
-                    "text": "ByteSizeValue"
-                  },
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; capture: Readonly<{} & { zoom: number; timeouts: Readonly<{} & { renderComplete: number | moment.Duration; openUrl: number | moment.Duration; waitForElements: number | moment.Duration; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ port?: number | undefined; hostname?: string | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "ByteSizeValue",
                   "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
                 ],
                 "path": "x-pack/plugins/reporting/server/plugin.ts",
@@ -2302,13 +2389,63 @@
             "label": "searchSource",
             "description": [],
             "signature": [
+              "{ type?: string | undefined; query?: ",
+              "Query",
+              " | undefined; filter?: ",
+              "Filter",
+              "[] | undefined; sort?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
-              }
+                "section": "def-common.EsQuerySortValue",
+                "text": "EsQuerySortValue"
+              },
+              "[] | undefined; highlight?: ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              " | undefined; highlightAll?: boolean | undefined; trackTotalHits?: number | boolean | undefined; aggs?: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              " | undefined; schema?: string | undefined; }[] | undefined; from?: number | undefined; size?: number | undefined; source?: boolean | ",
+              "Fields",
+              " | undefined; version?: boolean | undefined; fields?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchFieldValue",
+                "text": "SearchFieldValue"
+              },
+              "[] | undefined; fieldsFromSource?: ",
+              "Fields",
+              " | undefined; index?: string | undefined; searchAfter?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.EsQuerySearchAfter",
+                "text": "EsQuerySearchAfter"
+              },
+              " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; parent?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SerializedSearchSourceFields",
+                "text": "SerializedSearchSourceFields"
+              },
+              " | undefined; }"
             ],
             "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource_immediate.ts",
             "deprecated": false
@@ -2338,7 +2475,9 @@
         "description": [],
         "signature": [
           "JobParamsPNGV2",
-          " extends { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+          " extends { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/png_v2.ts",
         "deprecated": false,
@@ -2351,7 +2490,9 @@
             "label": "layout",
             "description": [],
             "signature": [
-              "{ id: string; dimensions?: { width: number; height: number; } | undefined; }"
+              "{ id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "LayoutSelectorDictionary",
+              "> | undefined; zoom?: number | undefined; }"
             ],
             "path": "x-pack/plugins/reporting/common/types/export_types/png_v2.ts",
             "deprecated": false
@@ -2398,14 +2539,8 @@
             "section": "def-server.ReportingConfig",
             "text": "ReportingConfig"
           },
-          " extends Config<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; zoom: number; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ByteSizeValue",
-            "text": "ByteSizeValue"
-          },
+          " extends Config<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; capture: Readonly<{} & { zoom: number; timeouts: Readonly<{} & { renderComplete: number | moment.Duration; openUrl: number | moment.Duration; waitForElements: number | moment.Duration; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; roles: Readonly<{} & { enabled: boolean; allow: string[]; }>; kibanaServer: Readonly<{ port?: number | undefined; hostname?: string | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+          "ByteSizeValue",
           "; useByteOrderMarkEncoding: boolean; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
         ],
         "path": "x-pack/plugins/reporting/server/config/config.ts",
@@ -2607,6 +2742,25 @@
           },
           {
             "parentPluginId": "reporting",
+            "id": "def-server.ReportingStartDeps.screenshotting",
+            "type": "Object",
+            "tags": [],
+            "label": "screenshotting",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "screenshotting",
+                "scope": "server",
+                "docId": "kibScreenshottingPluginApi",
+                "section": "def-server.ScreenshottingStart",
+                "text": "ScreenshottingStart"
+              }
+            ],
+            "path": "x-pack/plugins/reporting/server/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingStartDeps.taskManager",
             "type": "CompoundType",
             "tags": [],
@@ -2617,7 +2771,7 @@
               "TaskScheduling",
               ", \"schedule\" | \"runNow\" | \"ephemeralRunNow\" | \"ensureScheduled\"> & Pick<",
               "TaskStore",
-              ", \"fetch\" | \"get\" | \"remove\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
+              ", \"remove\" | \"fetch\" | \"get\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
             ],
             "path": "x-pack/plugins/reporting/server/types.ts",
             "deprecated": false
@@ -2636,7 +2790,9 @@
         "label": "JobParamsCSV",
         "description": [],
         "signature": [
-          "BaseParamsCSV & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+          "BaseParamsCSV & { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/csv_searchsource.ts",
         "deprecated": false,
@@ -2650,7 +2806,9 @@
         "label": "JobParamsPDF",
         "description": [],
         "signature": [
-          "BaseParamsPDF & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+          "BaseParamsPDF & { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf.ts",
         "deprecated": false,
@@ -2664,7 +2822,9 @@
         "label": "JobParamsPDFV2",
         "description": [],
         "signature": [
-          "BaseParamsPDFV2 & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+          "BaseParamsPDFV2 & { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf_v2.ts",
         "deprecated": false,
@@ -2678,7 +2838,9 @@
         "label": "JobParamsPNG",
         "description": [],
         "signature": [
-          "BaseParamsPNG & { layout?: { id: string; dimensions?: { width: number; height: number; } | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
+          "BaseParamsPNG & { layout?: { id?: string | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; title: string; browserTimezone: string; version: string; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/png.ts",
         "deprecated": false,
@@ -2929,22 +3091,6 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "reporting",
-        "id": "def-common.constants",
-        "type": "Object",
-        "tags": [],
-        "label": "constants",
-        "description": [],
-        "signature": [
-          "typeof ",
-          "x-pack/plugins/reporting/common/constants"
-        ],
-        "path": "x-pack/plugins/reporting/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }
