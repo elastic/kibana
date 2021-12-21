@@ -6,11 +6,4 @@
  * Side Public License, v 1.
  */
 
-export default function ({ loadTestFile }) {
-  describe('index_patterns/_fields_for_wildcard route', () => {
-    loadTestFile(require.resolve('./params'));
-    loadTestFile(require.resolve('./conflicts'));
-    loadTestFile(require.resolve('./response'));
-    loadTestFile(require.resolve('./filter'));
-  });
-}
+export * from './common';
