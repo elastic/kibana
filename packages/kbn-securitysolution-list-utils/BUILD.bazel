@@ -36,6 +36,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-securitysolution-list-constants",
   "//packages/kbn-securitysolution-utils",
   "@npm//lodash",
+  "@npm//uuid",
 ]
 
 TYPES_DEPS = [
@@ -44,11 +45,12 @@ TYPES_DEPS = [
   "//packages/kbn-securitysolution-io-ts-list-types:npm_module_types",
   "//packages/kbn-securitysolution-io-ts-utils",
   "//packages/kbn-securitysolution-list-constants:npm_module_types",
-  "//packages/kbn-securitysolution-utils",
+  "//packages/kbn-securitysolution-utils:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//@types/node",
+  "@npm//@types/uuid",
 ]
 
 jsts_transpiler(
