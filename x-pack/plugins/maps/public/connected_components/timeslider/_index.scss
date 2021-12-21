@@ -1,4 +1,4 @@
-$timesliderWidth: 585px;
+$timesliderWidth: 650px;
 
 .mapTimeslider {
   @include euiBottomShadowLarge;
@@ -12,6 +12,11 @@ $timesliderWidth: 585px;
   background: $euiColorEmptyShade;
   padding: $euiSizeL $euiSize;
   border-radius: $euiSize;
+}
+
+.mapTimeslider--large {
+  width: 900px;
+  margin-left: -450px;
 }
 
 .mapTimeslider__row {
@@ -34,6 +39,12 @@ $timesliderWidth: 585px;
   position: absolute;
   top: $euiSizeXS;
   right: $euiSizeXS;
+}
+
+.mapTimeslider__timeRange {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 10px;
 }
 
 .mapTimeslider__timeWindow {
@@ -66,4 +77,8 @@ $timesliderWidth: 585px;
 
 .mapTimeslider--animation {
   animation: mapAnimationPulse .6s ease-in-out;
+}
+
+.mapTimeslider__euiButton-controls {
+  min-width: 0;
 }

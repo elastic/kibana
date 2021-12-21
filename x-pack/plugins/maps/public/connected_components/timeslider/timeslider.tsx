@@ -7,13 +7,21 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { EuiButtonIcon, EuiDualRange, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiDualRange,
+  EuiText,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiButton,
+} from '@elastic/eui';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import { i18n } from '@kbn/i18n';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { epochToKbnDateFormat, getInterval, getTicks } from './time_utils';
-import { TimeRange } from '../../../../../../src/plugins/data/common';
+import { epochToKbnDateFormat, getInterval, getTicks, newTicks, getTimeRanges } from './time_utils';
+import { TimeRange, TimeRangeBounds } from '../../../../../../src/plugins/data/common';
 import { getTimeFilter } from '../../kibana_services';
 import { Timeslice } from '../../../common/descriptor_types';
 
@@ -32,6 +40,9 @@ interface State {
   range: number;
   timeslice: [number, number];
   ticks: EuiRangeTick[];
+  isPopoverOpen: boolean;
+  step: number;
+  rangeButtonMsg: string;
 }
 
 function prettyPrintTimeslice(timeslice: [number, number]) {
@@ -50,6 +61,14 @@ class KeyedTimeslider extends Component<Props, State> {
   private _isMounted: boolean = false;
   private _timeoutId: number | undefined;
   private _subscription: Subscription | undefined;
+  defaultRange: {
+    timeRangeBounds: TimeRangeBounds;
+    min: number;
+    max: number;
+    ticks: EuiRangeTick[];
+    step: number;
+    rangeButtonMsg: string;
+  };
 
   constructor(props: Props) {
     super(props);
@@ -64,6 +83,17 @@ class KeyedTimeslider extends Component<Props, State> {
     const interval = getInterval(min, max);
     const timeslice: [number, number] = [min, max];
 
+    this.defaultRange = {
+      timeRangeBounds,
+      min,
+      max,
+      ticks: getTicks(min, max, interval),
+      step: 1,
+      rangeButtonMsg: i18n.translate('xpack.maps.timeslider.rangeButtonMsg', {
+        defaultMessage: 'Auto',
+      }),
+    };
+
     this.state = {
       isPaused: true,
       max,
@@ -71,6 +101,11 @@ class KeyedTimeslider extends Component<Props, State> {
       range: interval,
       ticks: getTicks(min, max, interval),
       timeslice,
+      isPopoverOpen: false,
+      step: 1,
+      rangeButtonMsg: i18n.translate('xpack.maps.timeslider.rangeButtonMsg', {
+        defaultMessage: 'Auto',
+      }),
     };
   }
 
@@ -164,9 +199,87 @@ class KeyedTimeslider extends Component<Props, State> {
     });
   }
 
+  _togglePopover = () => {
+    this.setState((prevState) => ({
+      isPopoverOpen: !prevState.isPopoverOpen,
+    }));
+  };
+
+  _closePopover = () => {
+    this.setState({
+      isPopoverOpen: false,
+    });
+  };
+
+  _renderFilteredPeriods = () => {
+    const filteredPeriods = getTimeRanges(this.defaultRange.timeRangeBounds).map(
+      (range: { label: string; ms: number }, index: number) => {
+        return (
+          <EuiContextMenuItem
+            key={index}
+            onClick={() => {
+              this._updateTimeRange(range);
+            }}
+          >
+            {range.label}
+          </EuiContextMenuItem>
+        );
+      }
+    );
+
+    filteredPeriods?.unshift(
+      <EuiContextMenuItem
+        key="default"
+        onClick={() => {
+          this._updateTimeRange({
+            label: i18n.translate('xpack.maps.timeslider.autoPeriod', {
+              defaultMessage: 'Auto',
+            }),
+            ms: 0,
+            default: true,
+          });
+        }}
+      >
+        {i18n.translate('xpack.maps.timeslider.autoPeriod', {
+          defaultMessage: 'Auto',
+        })}
+      </EuiContextMenuItem>
+    );
+
+    return filteredPeriods;
+  };
+
+  _updateTimeRange = (data: { label: string; ms: number; default?: boolean }) => {
+    if (!data.default) {
+      const updatedTicks = newTicks(this.defaultRange.min, this.defaultRange.max, data.ms);
+
+      this.setState({
+        min: updatedTicks[0].value,
+        max: updatedTicks[updatedTicks.length - 1].value,
+        ticks: updatedTicks,
+        step: data.ms,
+        rangeButtonMsg: data.label,
+      });
+    } else {
+      this.setState({
+        min: this.defaultRange.min,
+        max: this.defaultRange.max,
+        ticks: this.defaultRange.ticks,
+        step: this.defaultRange.step,
+        rangeButtonMsg: this.defaultRange.rangeButtonMsg,
+      });
+    }
+
+    this._closePopover();
+  };
+
   render() {
     return (
-      <div className="mapTimeslider mapTimeslider--animation">
+      <div
+        className={`mapTimeslider mapTimeslider--animation ${
+          this.state.ticks.length > 10 ? 'mapTimeslider--large' : ''
+        }`}
+      >
         <div className="mapTimeslider__row">
           <EuiButtonIcon
             onClick={this.props.closeTimeslider}
@@ -177,6 +290,31 @@ class KeyedTimeslider extends Component<Props, State> {
               defaultMessage: 'Close timeslider',
             })}
           />
+
+          {this._renderFilteredPeriods()?.length > 0 && (
+            <div className="mapTimeslider__timeRange">
+              <EuiPopover
+                id="metricsPopover"
+                isOpen={this.state.isPopoverOpen}
+                closePopover={this._closePopover}
+                panelPaddingSize="none"
+                ownFocus
+                anchorPosition="upCenter"
+                button={
+                  <EuiButton
+                    iconType="controlsVertical"
+                    size="s"
+                    className="mapTimeslider__euiButton-controls"
+                    onClick={this._togglePopover}
+                  >
+                    {this.state.rangeButtonMsg}
+                  </EuiButton>
+                }
+              >
+                <EuiContextMenuPanel size="s" items={this._renderFilteredPeriods()} />
+              </EuiPopover>
+            </div>
+          )}
 
           <div className="mapTimeslider__timeWindow">
             <EuiText size="s">{prettyPrintTimeslice(this.state.timeslice)}</EuiText>
@@ -228,7 +366,7 @@ class KeyedTimeslider extends Component<Props, State> {
             showTicks={true}
             min={this.state.min}
             max={this.state.max}
-            step={1}
+            step={this.state.step}
             ticks={this.state.ticks}
             isDraggable
           />
