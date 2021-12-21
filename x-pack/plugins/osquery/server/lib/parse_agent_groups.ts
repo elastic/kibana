@@ -40,6 +40,8 @@ export const parseAgentSelection = async (
 ) => {
   const selectedAgents: Set<string> = new Set();
   const addAgent = selectedAgents.add.bind(selectedAgents);
+  const [coreStart] = await context.getStartServices();
+  const savedObjectsRepository = await coreStart.savedObjects.createInternalRepository();
   const { allAgentsSelected, platformsSelected, policiesSelected, agents } = agentSelection;
   const agentService = context.service.getAgentService()?.asInternalUser;
   const packagePolicyService = context.service.getPackagePolicyService();
@@ -47,7 +49,7 @@ export const parseAgentSelection = async (
 
   if (agentService && packagePolicyService) {
     const osqueryPolicies = await aggregateResults(async (page, perPage) => {
-      const { items, total } = await packagePolicyService.list(soClient, {
+      const { items, total } = await packagePolicyService.list(savedObjectsRepository, {
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
         perPage,
         page,

@@ -62,7 +62,8 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const savedObjectsClient = context.core.savedObjects.client;
       const agentPolicyService = osqueryContext.service.getAgentPolicyService();
-
+      const [coreStart] = await osqueryContext.getStartServices();
+      const savedObjectsRepository = await coreStart.savedObjects.createInternalRepository();
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
@@ -78,14 +79,14 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         return response.conflict({ body: `Pack with name "${name}" already exists.` });
       }
 
-      const { items: packagePolicies } = (await packagePolicyService?.list(savedObjectsClient, {
+      const { items: packagePolicies } = (await packagePolicyService?.list(savedObjectsRepository, {
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
         perPage: 1000,
         page: 1,
       })) ?? { items: [] };
 
       const agentPolicies = policy_ids
-        ? mapKeys(await agentPolicyService?.getByIds(savedObjectsClient, policy_ids), 'id')
+        ? mapKeys(await agentPolicyService?.getByIds(savedObjectsRepository, policy_ids), 'id')
         : {};
 
       const references = policy_ids
@@ -120,7 +121,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
             if (packagePolicy) {
               return packagePolicyService?.update(
-                savedObjectsClient,
+                savedObjectsRepository,
                 esClient,
                 packagePolicy.id,
                 produce<PackagePolicy>(packagePolicy, (draft) => {

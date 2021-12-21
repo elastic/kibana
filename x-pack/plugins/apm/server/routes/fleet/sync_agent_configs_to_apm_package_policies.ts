@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import { CoreSetup, CoreStart } from 'kibana/server';
 import { TelemetryUsageCounter } from '../typings';
 import { APMPluginStartDependencies } from '../../types';
-import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { Setup } from '../../lib/helpers/setup_request';
 import { listConfigurations } from '../settings/agent_configuration/list_configurations';
 import { getApmPackgePolicies } from './get_apm_package_policies';
@@ -36,16 +31,16 @@ export async function syncAgentConfigsToApmPackagePolicies({
     });
   }
   const coreStart = await core.start();
+  const savedObjectsRepository =
+    await coreStart.savedObjects.createInternalRepository();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
-  const [savedObjectsClient, agentConfigurations, packagePolicies] =
-    await Promise.all([
-      getInternalSavedObjectsClient(core.setup),
-      listConfigurations({ setup }),
-      getApmPackgePolicies({
-        core,
-        fleetPluginStart,
-      }),
-    ]);
+  const [agentConfigurations, packagePolicies] = await Promise.all([
+    listConfigurations({ setup }),
+    getApmPackgePolicies({
+      core,
+      fleetPluginStart,
+    }),
+  ]);
 
   return Promise.all(
     packagePolicies.items.map(async (item) => {
@@ -55,7 +50,7 @@ export async function syncAgentConfigsToApmPackagePolicies({
         agentConfigurations
       );
       return fleetPluginStart.packagePolicyService.update(
-        savedObjectsClient as unknown as SavedObjectsClientContract,
+        savedObjectsRepository,
         esClient,
         id,
         updatedPackagePolicy

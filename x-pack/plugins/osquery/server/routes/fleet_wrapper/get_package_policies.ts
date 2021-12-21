@@ -23,7 +23,9 @@ export const getPackagePoliciesRoute = (router: IRouter, osqueryContext: Osquery
     async (context, request, response) => {
       const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: ${OSQUERY_INTEGRATION_NAME}`;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-      const policies = await packagePolicyService?.list(context.core.savedObjects.client, {
+      const [coreStart] = await osqueryContext.getStartServices();
+      const savedObjectsRepository = await coreStart.savedObjects.createInternalRepository();
+      const policies = await packagePolicyService?.list(savedObjectsRepository, {
         kuery,
       });
 

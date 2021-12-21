@@ -31,6 +31,8 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(
         osqueryContext.getStartServices
       );
+      const [coreStart] = await osqueryContext.getStartServices();
+      const savedObjectsRepository = await coreStart.savedObjects.createInternalRepository();
       const packageService = osqueryContext.service.getPackageService()?.asInternalUser;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
       const agentPolicyService = osqueryContext.service.getAgentPolicyService();
@@ -39,7 +41,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
       if (packageInfo?.install_version && satisfies(packageInfo?.install_version, '<0.6.0')) {
         try {
-          const policyPackages = await packagePolicyService?.list(internalSavedObjectsClient, {
+          const policyPackages = await packagePolicyService?.list(savedObjectsRepository, {
             kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
             perPage: 10000,
             page: 1,
@@ -104,7 +106,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
           const agentPolicyIds = uniq(map(policyPackages?.items, 'policy_id'));
           const agentPolicies = mapKeys(
-            await agentPolicyService?.getByIds(internalSavedObjectsClient, agentPolicyIds),
+            await agentPolicyService?.getByIds(savedObjectsRepository, agentPolicyIds),
             'id'
           );
 
@@ -141,7 +143,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
           // delete unnecessary package policies
           await packagePolicyService?.delete(
-            internalSavedObjectsClient,
+            savedObjectsRepository,
             esClient,
             migrationObject.packagePoliciesToDelete
           );
@@ -153,15 +155,12 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                 // @ts-expect-error update types
                 pack.policy_ids.includes(key)
               );
-              await packagePolicyService?.upgrade(internalSavedObjectsClient, esClient, [value]);
-              const packagePolicy = await packagePolicyService?.get(
-                internalSavedObjectsClient,
-                value
-              );
+              await packagePolicyService?.upgrade(savedObjectsRepository, esClient, [value]);
+              const packagePolicy = await packagePolicyService?.get(savedObjectsRepository, value);
 
               if (packagePolicy) {
                 return packagePolicyService?.update(
-                  internalSavedObjectsClient,
+                  savedObjectsRepository,
                   esClient,
                   packagePolicy.id,
                   produce(packagePolicy, (draft) => {

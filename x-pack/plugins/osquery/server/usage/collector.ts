@@ -27,16 +27,21 @@ export const registerCollector: RegisterCollector = ({ core, osqueryContext, usa
     schema: usageSchema,
     isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
+      const [coreStart] = await osqueryContext.getStartServices();
+      const savedObjectsRepository = await coreStart.savedObjects.createInternalRepository();
       const savedObjectsClient = await getInternalSavedObjectsClient(core.getStartServices);
-
       return {
         beat_metrics: {
           usage: await getBeatUsage(esClient),
         },
-        live_query_usage: await getLiveQueryUsage(savedObjectsClient, esClient),
+        live_query_usage: await getLiveQueryUsage(
+          savedObjectsClient,
+          savedObjectsRepository,
+          esClient
+        ),
         ...(await getPolicyLevelUsage(
           esClient,
-          savedObjectsClient,
+          savedObjectsRepository,
           osqueryContext.service.getPackagePolicyService()
         )),
       };

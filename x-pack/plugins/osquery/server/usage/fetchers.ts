@@ -13,7 +13,11 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PackagePolicyServiceInterface } from '../../../fleet/server';
 import { getRouteMetric } from '../routes/usage';
-import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../src/core/server';
+import {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  ISavedObjectsRepository,
+} from '../../../../../src/core/server';
 import { ListResult, PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { METRICS_INDICES } from './constants';
@@ -26,13 +30,13 @@ interface PolicyLevelUsage {
 
 export async function getPolicyLevelUsage(
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract,
+  soRepository: ISavedObjectsRepository,
   packagePolicyService?: PackagePolicyServiceInterface
 ): Promise<PolicyLevelUsage> {
   if (!packagePolicyService) {
     return {};
   }
-  const packagePolicies = await packagePolicyService.list(soClient, {
+  const packagePolicies = await packagePolicyService.list(soRepository, {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
     perPage: 10_000,
   });
@@ -114,6 +118,7 @@ export function getScheduledQueryUsage(packagePolicies: ListResult<PackagePolicy
 
 export async function getLiveQueryUsage(
   soClient: SavedObjectsClientContract,
+  soRepository: ISavedObjectsRepository,
   esClient: ElasticsearchClient
 ) {
   const { body: metricResponse } = await esClient.search<

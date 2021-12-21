@@ -29,12 +29,12 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
-      const soClient = context.core.savedObjects.client;
       const agentService = osqueryContext.service.getAgentService();
       const agentPolicyService = osqueryContext.service.getAgentPolicyService();
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-
-      const { items: packagePolicies } = (await packagePolicyService?.list(soClient, {
+      const [coreStart] = await osqueryContext.getStartServices();
+      const savedObjectsRepository = await coreStart.savedObjects.createInternalRepository();
+      const { items: packagePolicies } = (await packagePolicyService?.list(savedObjectsRepository, {
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
         perPage: 1000,
         page: 1,
@@ -43,7 +43,10 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
         satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
       );
       const agentPolicyIds = uniq(map(supportedPackagePolicyIds, 'policy_id'));
-      const agentPolicies = await agentPolicyService?.getByIds(soClient, agentPolicyIds);
+      const agentPolicies = await agentPolicyService?.getByIds(
+        savedObjectsRepository,
+        agentPolicyIds
+      );
 
       if (agentPolicies?.length) {
         await pMap(

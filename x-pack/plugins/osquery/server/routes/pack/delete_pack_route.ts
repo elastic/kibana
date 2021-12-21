@@ -30,6 +30,8 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const savedObjectsClient = context.core.savedObjects.client;
+      const [coreStart] = await osqueryContext.getStartServices();
+      const savedObjectsRepository = await coreStart.savedObjects.createInternalRepository();
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
       const currentPackSO = await savedObjectsClient.get<{ name: string }>(
@@ -41,7 +43,7 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         refresh: 'wait_for',
       });
 
-      const { items: packagePolicies } = (await packagePolicyService?.list(savedObjectsClient, {
+      const { items: packagePolicies } = (await packagePolicyService?.list(savedObjectsRepository, {
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
         perPage: 1000,
         page: 1,
@@ -53,7 +55,7 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       await Promise.all(
         currentPackagePolicies.map((packagePolicy) =>
           packagePolicyService?.update(
-            savedObjectsClient,
+            savedObjectsRepository,
             esClient,
             packagePolicy.id,
             produce(packagePolicy, (draft) => {

@@ -22,11 +22,11 @@ export const getAgentPolicyRoute = (router: IRouter, osqueryContext: OsqueryAppC
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
-      const soClient = context.core.savedObjects.client;
-
+      const [coreStart] = await osqueryContext.getStartServices();
+      const savedObjectsRepository = await coreStart.savedObjects.createInternalRepository();
       const packageInfo = await osqueryContext.service
         .getAgentPolicyService()
-        ?.get(soClient, request.params.id);
+        ?.get(savedObjectsRepository, request.params.id);
 
       return response.ok({ body: { item: packageInfo } });
     }
