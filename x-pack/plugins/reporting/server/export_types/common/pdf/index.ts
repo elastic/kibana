@@ -76,7 +76,7 @@ export class PdfMaker {
         text: title,
         style: 'heading',
         font: getFont(title),
-        noWrap: true,
+        noWrap: false,
       });
     }
 
@@ -85,7 +85,7 @@ export class PdfMaker {
         text: description,
         style: 'subheading',
         font: getFont(description),
-        noWrap: true,
+        noWrap: false,
       });
     }
 
