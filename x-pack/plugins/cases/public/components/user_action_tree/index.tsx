@@ -12,7 +12,7 @@ import {
   EuiCommentList,
   EuiCommentProps,
 } from '@elastic/eui';
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 import classNames from 'classnames';
 import { get, isEmpty } from 'lodash';
