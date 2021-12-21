@@ -44,8 +44,11 @@ import {
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { convertRulesFilterToKQL } from './utils';
+import type {
+  GetRulesCountResponse,
+  RulesSchema,
+} from '../../../../../common/detection_engine/schemas/response';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 /**
@@ -410,6 +413,29 @@ export const getPrePackagedRulesStatus = async ({
     DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
     {
       method: 'GET',
+      signal,
+    }
+  );
+
+/**
+ * Get count of elastic and custom rules for a particalar filter
+ *
+ * @param filter string  search filter
+ *
+ * @throws An error if response is not OK
+ */
+export const fetchRulesCount = async ({
+  filter,
+  signal,
+}: {
+  filter: string;
+  signal?: AbortSignal;
+}): Promise<GetRulesCountResponse> =>
+  KibanaServices.get().http.fetch<GetRulesCountResponse>(
+    `${DETECTION_ENGINE_RULES_URL}/_get_rules_count`,
+    {
+      method: 'GET',
+      query: { filter },
       signal,
     }
   );

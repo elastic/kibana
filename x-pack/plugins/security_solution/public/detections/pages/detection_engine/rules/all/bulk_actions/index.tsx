@@ -49,6 +49,8 @@ interface GetBatchItems {
   filterQuery: string;
   confirmDeletion: () => Promise<boolean>;
   confirmBulkEdit: () => Promise<boolean>;
+  performBulkEdit: () => Promise<boolean>;
+  fetchRulesCount: (filter: string) => Promise<void>
   selectedItemsCount: number;
 }
 
@@ -68,6 +70,8 @@ export const getBatchItems = ({
   filterQuery,
   confirmDeletion,
   confirmBulkEdit,
+  performBulkEdit,
+  fetchRulesCount,
   selectedItemsCount,
 }: GetBatchItems): EuiContextMenuPanelDescriptor[] => {
   const selectedRules = rules.filter(({ id }) => selectedRuleIds.includes(id));
@@ -193,12 +197,19 @@ export const getBatchItems = ({
   const handleBulkEdit = (bulkEditAction: BulkActionEditType) => async () => {
     closePopover();
 
+    if (isAllSelected) {
+      await fetchRulesCount(filterQuery);
+    }
+
     if ((await confirmBulkEdit()) === false) {
-      // User has cancelled bulk edits
       return;
     }
 
-    alert('should do EDIT action');
+    if ((await performBulkEdit()) === false) {
+      return;
+    }
+
+   // alert('should do EDIT action');
     // await rulesBulkActionByQuery(
     //   selectedRuleIds,
     //   selectedItemsCount,

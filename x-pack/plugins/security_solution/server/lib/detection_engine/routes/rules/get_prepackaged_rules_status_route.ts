@@ -54,26 +54,50 @@ export const getPrepackagedRulesStatusRoute = (
       }
 
       try {
-        const latestPrepackagedRules = await getLatestPrepackagedRules(
-          ruleAssetsClient,
-          config.prebuiltRulesFromFileSystem,
-          config.prebuiltRulesFromSavedObjects
-        );
-        const customRules = await findRules({
-          isRuleRegistryEnabled,
-          rulesClient,
-          perPage: 1,
-          page: 1,
-          sortField: 'enabled',
-          sortOrder: 'desc',
-          filter: 'alert.attributes.tags:"__internal_immutable:false"',
-          fields: undefined,
-        });
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const prepackagedRules = await getExistingPrepackagedRules({
-          rulesClient,
-          isRuleRegistryEnabled,
-        });
+        // const latestPrepackagedRules = await getLatestPrepackagedRules(
+        //   ruleAssetsClient,
+        //   config.prebuiltRulesFromFileSystem,
+        //   config.prebuiltRulesFromSavedObjects
+        // );
+        // const customRules = await findRules({
+        //   isRuleRegistryEnabled,
+        //   rulesClient,
+        //   perPage: 1,
+        //   page: 1,
+        //   sortField: 'enabled',
+        //   sortOrder: 'desc',
+        //   filter: 'alert.attributes.tags:"__internal_immutable:false"',
+        //   fields: undefined,
+        // });
+        // const frameworkRequest = await buildFrameworkRequest(context, security, request);
+        // const prepackagedRules = await getExistingPrepackagedRules({
+        //   rulesClient,
+        //   isRuleRegistryEnabled,
+        // });
+
+        const [latestPrepackagedRules, customRules, frameworkRequest, prepackagedRules] =
+          await Promise.all([
+            getLatestPrepackagedRules(
+              ruleAssetsClient,
+              config.prebuiltRulesFromFileSystem,
+              config.prebuiltRulesFromSavedObjects
+            ),
+            findRules({
+              isRuleRegistryEnabled,
+              rulesClient,
+              perPage: 1,
+              page: 1,
+              sortField: 'enabled',
+              sortOrder: 'desc',
+              filter: 'alert.attributes.tags:"__internal_immutable:false"',
+              fields: undefined,
+            }),
+            buildFrameworkRequest(context, security, request),
+            getExistingPrepackagedRules({
+              rulesClient,
+              isRuleRegistryEnabled,
+            }),
+          ]);
 
         const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);

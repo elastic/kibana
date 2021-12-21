@@ -39,6 +39,7 @@ import { EuiBasicTableOnChange } from '../types';
 // import { getBatchItems } from './batch_actions';
 import { getBatchItems } from './bulk_actions';
 import { BulkEditConfirmation } from './bulk_actions/bulk_edit_confirmation';
+import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
 import { getRulesColumns, getMonitoringColumns } from './columns';
 import { showRulesTable } from './helpers';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
@@ -53,6 +54,7 @@ import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
 import { convertRulesFilterToKQL } from '../../../../containers/detection_engine/rules/utils';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { useAsyncConfirmation } from '../../../../containers/detection_engine/rules/rules_table/use_async_confirmation';
+import { useRulesCount } from '../../../../containers/detection_engine/rules/use_rules_count';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -187,6 +189,7 @@ export const RulesTables = React.memo<RulesTableProps>(
       [actions]
     );
 
+    const { rulesCount, fetchRulesCount } = useRulesCount();
     const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
       useBoolState();
 
@@ -202,6 +205,14 @@ export const RulesTables = React.memo<RulesTableProps>(
       onInit: showBulkEditonfirmation,
       onFinish: hideBulkEditConfirmation,
     });
+
+    const [isBulkEditFlyoutVisible, showBulkEditFlyout, hideBulkEditFlyout] = useBoolState();
+
+    const [performBulkEdit, handlePerformBulkEditConfirm, handlePerformBulkEditCancel] =
+      useAsyncConfirmation({
+        onInit: showBulkEditFlyout,
+        onFinish: hideBulkEditFlyout,
+      });
 
     const selectedItemsCount = isAllSelected ? pagination.total : selectedRuleIds.length;
     const hasPagination = pagination.total > pagination.perPage;
@@ -229,6 +240,8 @@ export const RulesTables = React.memo<RulesTableProps>(
           filterQuery: convertRulesFilterToKQL(filterOptions),
           confirmDeletion,
           confirmBulkEdit,
+          performBulkEdit,
+          fetchRulesCount,
           selectedItemsCount,
         });
       },
@@ -246,7 +259,9 @@ export const RulesTables = React.memo<RulesTableProps>(
         filterOptions,
         confirmDeletion,
         confirmBulkEdit,
+        performBulkEdit,
         selectedItemsCount,
+        fetchRulesCount,
       ]
     );
 
@@ -468,14 +483,7 @@ export const RulesTables = React.memo<RulesTableProps>(
             columns: rulesColumns,
           }
         : { 'data-test-subj': 'monitoring-table', columns: monitoringColumns };
-    console.log(
-      '>>>>>>',
-      selectedRuleIds,
-      selectedElasticRuleIds,
-      selectedCustomRuleIds,
-      isAllSelected ? rulesInstalled ?? 0 : selectedElasticRuleIds.length,
-      isAllSelected ? rulesCustomInstalled ?? 0 : selectedCustomRuleIds.length
-    );
+
     return (
       <>
         <EuiWindowEvent event="mousemove" handler={debounceResetIdleTimer} />
@@ -552,12 +560,18 @@ export const RulesTables = React.memo<RulesTableProps>(
         {isBulkEditConfirmationVisible && (
           <BulkEditConfirmation
             isAllSelected={isAllSelected}
-            rulesCustomInstalled={rulesCustomInstalled ?? 0}
-            rulesInstalled={rulesInstalled ?? 0}
-            selectedCustomRuleCount={selectedCustomRuleIds.length}
-            selectedElasticRuleCount={selectedElasticRuleIds.length}
+            customRulesCount={rulesCount?.custom_rules_count ?? 0}
+            elasticRulesCount={rulesCount?.elastic_rules_count ?? 0}
+            selectedCustomRulesCount={selectedCustomRuleIds.length}
+            selectedElasticRulesCount={selectedElasticRuleIds.length}
             onCancel={handleBulkEditCancel}
             onConfirm={handleBulkEditConfirm}
+          />
+        )}
+        {isBulkEditFlyoutVisible && (
+          <BulkEditFlyout
+            onClose={handlePerformBulkEditCancel}
+            onConfirm={handlePerformBulkEditConfirm}
           />
         )}
         {shouldShowRulesTable && (

@@ -6,34 +6,39 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal, EuiConfirmModalProps } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 import * as i18n from '../../translations';
 
 interface Props {
   isAllSelected: boolean;
-  rulesInstalled: number;
-  rulesCustomInstalled: number;
-  selectedElasticRuleCount: number;
-  selectedCustomRuleCount: number;
-  onCancel: EuiConfirmModalProps['onCancel'];
-  onConfirm: EuiConfirmModalProps['onConfirm'];
+  customRulesCount: number;
+  elasticRulesCount: number;
+  selectedElasticRulesCount: number;
+  selectedCustomRulesCount: number;
+  onCancel: () => void;
+  onConfirm: () => void;
 }
 const BulkEditConfirmationComponent = ({
   onCancel,
   onConfirm,
   isAllSelected,
-  rulesInstalled,
-  rulesCustomInstalled,
-  selectedElasticRuleCount,
-  selectedCustomRuleCount,
+  customRulesCount,
+  elasticRulesCount,
+  selectedCustomRulesCount,
+  selectedElasticRulesCount,
 }: Props) => {
-  const elasticRulesCount = isAllSelected ? rulesInstalled ?? 0 : selectedElasticRuleCount;
-  const customRulesCount = isAllSelected ? rulesCustomInstalled ?? 0 : selectedCustomRuleCount;
+  const displayElasticRules = isAllSelected ? elasticRulesCount : selectedElasticRulesCount;
+  const displayCustomRules = isAllSelected ? customRulesCount : selectedCustomRulesCount;
 
-  if (customRulesCount === 0) {
+  if (displayElasticRules === 0) {
+    setTimeout(onConfirm, 0);
+    return null;
+  }
+
+  if (displayCustomRules === 0) {
     return (
       <EuiConfirmModal
-        title={i18n.BULK_EDIT_CONFIRMATION_TITLE(elasticRulesCount)}
+        title={i18n.BULK_EDIT_CONFIRMATION_TITLE(displayElasticRules)}
         onCancel={onCancel}
         onConfirm={onCancel}
         confirmButtonText={i18n.BULK_EDIT_CONFIRMATION_CANCEL}
@@ -44,9 +49,10 @@ const BulkEditConfirmationComponent = ({
       </EuiConfirmModal>
     );
   }
+
   return (
     <EuiConfirmModal
-      title={i18n.BULK_EDIT_CONFIRMATION_TITLE(elasticRulesCount)}
+      title={i18n.BULK_EDIT_CONFIRMATION_TITLE(displayElasticRules)}
       onCancel={onCancel}
       onConfirm={onConfirm}
       confirmButtonText={i18n.BULK_EDIT_CONFIRMATION_CONFIRM}
@@ -54,7 +60,7 @@ const BulkEditConfirmationComponent = ({
       defaultFocusedButton="confirm"
       data-test-subj="bulkEditConfirmationModal"
     >
-      <p>{i18n.BULK_EDIT_CONFIRMATION_BODY(elasticRulesCount, customRulesCount)}</p>
+      <p>{i18n.BULK_EDIT_CONFIRMATION_BODY(displayElasticRules, displayCustomRules)}</p>
     </EuiConfirmModal>
   );
 };

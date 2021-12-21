@@ -12,3 +12,4 @@ export * from './prepackaged_rules_status_schema';
 export * from './rules_bulk_schema';
 export * from './rules_schema';
 export * from './type_timeline_only_schema';
+export * from './get_rules_count_schema';
