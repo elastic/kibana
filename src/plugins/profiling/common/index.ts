@@ -8,4 +8,9 @@
 export const PLUGIN_ID = 'profiling';
 export const PLUGIN_NAME = 'profiling';
 
-export const TRACE_EVENTS_TOPN_SEARCH_ROUTE_PATH = '/api/profiling/example';
+export const TRACE_EVENTS_TOPN_STACK_TRACES_SEARCH_ROUTE_PATH = '/api/profiling/topNStackTraces';
+export const TRACE_EVENTS_TOPN_CONTAINERS_SEARCH_ROUTE_PATH = '/api/profiling/topNContainers';
+export const TRACE_EVENTS_TOPN_DEPLOYMENTS_SEARCH_ROUTE_PATH = '/api/profiling/topNDeployments';
+export const TRACE_EVENTS_TOPN_THREADS_SEARCH_ROUTE_PATH = '/api/profiling/topNThreads';
+export const FLAMEGRAPH_SEARCH_ROUTE_PATH = '/api/profiling/flamegraph';
+

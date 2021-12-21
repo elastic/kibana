@@ -7,8 +7,16 @@
  */
 import type { IRouter } from '../../../../core/server';
 import { DataRequestHandlerContext } from '../../../data/server';
-import { registerTraceEventsTopNSearchRoute } from './search_profiling';
+import { registerTraceEventsTopNStackTracesSearchRoute } from './search_topNStackTraces';
+import { registerTraceEventsTopNContainersSearchRoute } from './search_topNContainers';
+import { registerTraceEventsTopNDeploymentsSearchRoute } from './search_topNDeployments';
+import { registerTraceEventsTopNThreadsSearchRoute } from './search_topNThreads';
+import { registerFlamegraphSearchRoute } from './search_flamegraph';
 
 export function registerRoutes(router: IRouter<DataRequestHandlerContext>) {
-  registerTraceEventsTopNSearchRoute(router);
+  registerTraceEventsTopNStackTracesSearchRoute(router);
+  registerTraceEventsTopNContainersSearchRoute(router);
+  registerTraceEventsTopNDeploymentsSearchRoute(router);
+  registerTraceEventsTopNThreadsSearchRoute(router);
+  registerFlamegraphSearchRoute(router);
 }

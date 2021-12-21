@@ -7,7 +7,7 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { BrowserRouter as Router } from 'react-router-dom';
 
 import {
@@ -37,9 +37,38 @@ interface ProfilingAppDeps {
 
 export const ProfilingApp = ({ basename, notifications, http, navigation }: ProfilingAppDeps) => {
   // Use React hooks to manage state.
-  const [timestamp, setTimestamp] = useState<string | undefined>();
+  const [timestamp /* , setTimestamp */] = useState<string | undefined>();
 
-  const onClickHandler = () => {
+  const onClickHandler = async () => {
+    try {
+      // const res =
+      await http.get('/api/profiling/topNStackTraces', {
+        query: {
+          index: 'profiling-events',
+          projectID: 1,
+          timeFrom: 1639699200,
+          timeTo: 1639737410,
+        },
+      });
+      notifications.toasts.addSuccess(
+        i18n.translate('profiling.dataUpdated', {
+          defaultMessage: 'Data updated',
+        })
+      );
+      // notifications.toasts.addSuccess(`Server returned ${JSON.stringify(res)}`);
+    } catch (e) {
+      if (e?.name === 'AbortError') {
+        notifications.toasts.addWarning({
+          title: e.message,
+        });
+      } else {
+        notifications.toasts.addDanger({
+          title: 'Failed to run search',
+          text: e.message,
+        });
+      }
+    }
+    /*
     // Use the core http service to make a response to the server API.
     http.get('/api/profiling/example').then((res) => {
       setTimestamp(res.time);
@@ -49,7 +78,7 @@ export const ProfilingApp = ({ basename, notifications, http, navigation }: Prof
           defaultMessage: 'Data updated',
         })
       );
-    });
+    });*/
   };
 
   // Render the application DOM.
