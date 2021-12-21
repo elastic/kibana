@@ -8,8 +8,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_nav_types';
 
-import { useLocation } from 'react-router-dom';
-
 import { securityNavGroup } from '../../../../app/home/home_navigations';
 import { getSearch } from '../helpers';
 import { PrimaryNavigationItemsProps } from './types';
@@ -38,6 +36,7 @@ export const usePrimaryNavigationItems = ({
       };
 
       const appHref = getAppUrl({ deepLinkId: id, path: urlSearch });
+
       return {
         'data-href': appHref,
         'data-test-subj': `navigation-${id}`,
@@ -64,27 +63,14 @@ export const usePrimaryNavigationItems = ({
   );
 };
 
-const useIsCloudPosture = () => !!useLocation()?.pathname?.includes(CSP_ROOT_PATH);
-
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
   const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
   const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
   const uiCapabilities = useKibana().services.application.capabilities;
-
-  const isCSP = useIsCloudPosture(); // Temp Hack
-
   return useMemo(
     () =>
-      isCSP
-        ? [
-            {
-              id: 'cloud_posture',
-              name: 'Cloud  Posture',
-              items: Object.values(navTabs),
-            },
-          ]
-        : uiCapabilities.siem.show
+      uiCapabilities.siem.show
         ? [
             {
               id: 'main',

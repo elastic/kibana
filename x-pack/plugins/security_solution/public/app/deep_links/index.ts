@@ -53,9 +53,6 @@ import {
   CASES_FEATURE_ID,
   HOST_ISOLATION_EXCEPTIONS_PATH,
   SERVER_APP_ID,
-  CSP_ROOT_PATH,
-  CSP_FINDINGS_PATH,
-  CSP_DASHBOARD_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
@@ -363,21 +360,9 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
   {
     id: SecurityPageName.cloud_posture,
     title: 'Cloud Posture',
-    path: CSP_ROOT_PATH,
+    path: '/csp',
     navLinkStatus: AppNavLinkStatus.hidden,
     keywords: [],
-    deepLinks: [
-      {
-        id: CloudPosturePage.dashboard,
-        title: 'Dashboard',
-        path: CSP_DASHBOARD_PATH,
-      },
-      {
-        id: CloudPosturePage.findings,
-        title: 'Findings',
-        path: CSP_FINDINGS_PATH,
-      },
-    ],
   },
 ];
 

@@ -84,13 +84,6 @@ export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"' as const;
 
 export const CSP_KUBEBEAT_INDEX = 'kubebeat*';
 
-/**
- * Cloud Posture Routes
- */
-export const CSP_ROOT_PATH = `/csp`;
-export const CSP_FINDINGS_PATH = `${CSP_ROOT_PATH}/findings` as const;
-export const CSP_DASHBOARD_PATH = `${CSP_ROOT_PATH}/dashboard` as const;
-
 export enum CloudPosturePage {
   findings = 'csp_findings',
   dashboard = 'csp_dashboard',
