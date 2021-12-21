@@ -34,7 +34,7 @@ import { PresentationUtilPluginStart } from './services/presentation_util';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from './services/home';
 import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
 import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from './services/data';
-import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from './services/share';
+import { SharePluginSetup, SharePluginStart } from './services/share';
 import type { SavedObjectTaggingOssPluginStart } from './services/saved_objects_tagging_oss';
 import type {
   ScreenshotModePluginSetup,
@@ -70,28 +70,14 @@ import {
   CopyToDashboardAction,
   DashboardCapabilities,
 } from './application';
-import {
-  createDashboardUrlGenerator,
-  DASHBOARD_APP_URL_GENERATOR,
-  DashboardUrlGeneratorState,
-} from './url_generator';
 import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
-import { UrlGeneratorState } from '../../share/public';
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { replaceUrlHashQuery } from '../../kibana_utils/public';
 import { SpacesPluginStart } from './services/spaces';
-
-declare module '../../share/public' {
-  export interface UrlGeneratorStateMapping {
-    [DASHBOARD_APP_URL_GENERATOR]: UrlGeneratorState<DashboardUrlGeneratorState>;
-  }
-}
-
-export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_URL_GENERATOR>;
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -134,15 +120,6 @@ export interface DashboardStart {
   getDashboardContainerByValueRenderer: () => ReturnType<
     typeof createDashboardContainerByValueRenderer
   >;
-  /**
-   * @deprecated Use dashboard locator instead. Dashboard locator is available
-   * under `.locator` key. This dashboard URL generator will be removed soon.
-   *
-   * ```ts
-   * plugins.dashboard.locator.getLocation({ ... });
-   * ```
-   */
-  dashboardUrlGenerator?: DashboardUrlGenerator;
   locator?: DashboardAppLocator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
 }
@@ -157,11 +134,6 @@ export class DashboardPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
-
-  /**
-   * @deprecated Use locator instead.
-   */
-  private dashboardUrlGenerator?: DashboardUrlGenerator;
   private locator?: DashboardAppLocator;
 
   public setup(
@@ -179,19 +151,6 @@ export class DashboardPlugin
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
     const startServices = core.getStartServices();
-
-    if (share) {
-      this.dashboardUrlGenerator = share.urlGenerators.registerUrlGenerator(
-        createDashboardUrlGenerator(async () => {
-          const [coreStart, , selfStart] = await startServices;
-          return {
-            appBasePath: coreStart.application.getUrlForApp('dashboards'),
-            useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
-            savedDashboardLoader: selfStart.getSavedDashboardLoader(),
-          };
-        })
-      );
-    }
 
     const getPlaceholderEmbeddableStartServices = async () => {
       const [coreStart] = await core.getStartServices();
@@ -455,7 +414,6 @@ export class DashboardPlugin
           factory: dashboardContainerFactory as DashboardContainerFactory,
         });
       },
-      dashboardUrlGenerator: this.dashboardUrlGenerator,
       locator: this.locator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
     };
