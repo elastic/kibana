@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { before, journey, step } from '@elastic/synthetics';
+import { journey, step, beforeAll } from '@elastic/synthetics';
 import { NETWORK_PROFILES } from '../../../../../test/functional/services/remote/network_profiles';
 
 journey('perf_login_and_home', async ({ page, params, client }) => {
-  before(async () => {
+  beforeAll(async () => {
     await client.send('Network.setCacheDisabled', { cacheDisabled: true });
     await client.send('Network.emulateNetworkConditions', {
       latency: NETWORK_PROFILES.CLOUD_USER.LATENCY,
