@@ -35,9 +35,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
 
               if (writeAlerts && numAlerts) {
-                console.log('made it here 1');
                 const commonRuleFields = getCommonAlertFields(options);
-                console.log('made it here 2');
 
                 const CHUNK_SIZE = 10000;
                 const alertChunks = chunk(alerts, CHUNK_SIZE);
@@ -72,12 +70,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   if (aggs != null) {
                     aggs.uuids.buckets.forEach((bucket) => (uuidsMap[bucket.key] = true));
                     const newAlerts = alertChunk.filter((alert) => !uuidsMap[alert._id]);
-                    console.log('new alerts');
-                    console.log(JSON.stringify(newAlerts));
                     filteredAlerts.push(...newAlerts);
                   } else {
-                    console.log('alerts');
-                    console.log(JSON.stringify(alertChunk));
                     filteredAlerts.push(...alertChunk);
                   }
                 }
@@ -96,8 +90,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     },
                   };
                 });
-                console.log('made it here 3');
-                console.log(JSON.stringify(augmentedAlerts));
 
                 const response = await ruleDataClient
                   .getWriter({ namespace: options.spaceId })
@@ -108,8 +100,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     ]),
                     refresh,
                   });
-                console.log('response');
-                console.log(JSON.stringify(response));
 
                 if (response == null) {
                   return { createdAlerts: [] };
