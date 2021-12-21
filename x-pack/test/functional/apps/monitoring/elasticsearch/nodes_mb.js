@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }) {
           {
             from: 'Oct 5, 2017 @ 20:28:28.475',
             to: 'Oct 5, 2017 @ 20:34:38.341',
+            useCreate: true,
           }
         );
 
