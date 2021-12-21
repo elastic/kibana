@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsServiceMock } from '../../../../../src/core/server/mocks';
+import type { SavedObjectsServiceStart } from 'src/core/server';
+import {
+  loggingSystemMock,
+  savedObjectsServiceMock,
+  savedObjectsRepositoryMock,
+} from '../../../../../src/core/server/mocks';
 import { IScopedClusterClient, SavedObjectsClientContract } from '../../../../../src/core/server';
 import { listMock } from '../../../lists/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
 import { alertsMock } from '../../../alerting/server/mocks';
+
 import { xpackMocks } from '../fixtures';
 import { FleetStartContract, ExternalCallback } from '../../../fleet/server';
 import {
@@ -151,6 +157,10 @@ export const createMockEndpointAppContextServiceStartContract =
       cases: {
         getCasesClientWithRequest: jest.fn(async () => casesClientMock),
       },
+      // @ts-ignore neither type sufficiently overlaps with the other
+      soStart: {
+        createInternalRepository: () => savedObjectsRepositoryMock.create(),
+      } as SavedObjectsServiceStart,
     };
   };
 

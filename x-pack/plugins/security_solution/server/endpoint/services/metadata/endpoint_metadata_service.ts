@@ -8,7 +8,7 @@
 import {
   ElasticsearchClient,
   Logger,
-  SavedObjectsClientContract,
+  ISavedObjectsRepository,
   SavedObjectsServiceStart,
 } from 'kibana/server';
 
@@ -50,7 +50,6 @@ import {
   fleetAgentStatusToEndpointHostStatus,
   wrapErrorIfNeeded,
 } from '../../utils';
-import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 import { METADATA_UNITED_INDEX } from '../../../../common/endpoint/constants';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
 import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
@@ -77,10 +76,10 @@ const isAgentPolicyWithPackagePolicies = (
 
 export class EndpointMetadataService {
   /**
-   * For internal use only by the `this.DANGEROUS_INTERNAL_SO_CLIENT`
+   * For internal use only by the `this.DANGEROUS_INTERNAL_SO_REPOSITORY`
    * @deprecated
    */
-  private __DANGEROUS_INTERNAL_SO_CLIENT: SavedObjectsClientContract | undefined;
+  private __DANGEROUS_INTERNAL_SO_REPOSITORY: ISavedObjectsRepository | undefined;
 
   constructor(
     private savedObjectsStart: SavedObjectsServiceStart,
@@ -98,15 +97,15 @@ export class EndpointMetadataService {
    *
    * @private
    */
-  private get DANGEROUS_INTERNAL_SO_CLIENT() {
+  private get DANGEROUS_INTERNAL_SO_REPOSITORY() {
     // The INTERNAL SO client must be created during the first time its used. This is because creating it during
     // instance initialization (in `constructor(){}`) causes the SO Client to be invalid (perhaps because this
     // instantiation is happening during the plugin's the start phase)
-    if (!this.__DANGEROUS_INTERNAL_SO_CLIENT) {
-      this.__DANGEROUS_INTERNAL_SO_CLIENT = createInternalReadonlySoClient(this.savedObjectsStart);
+    if (!this.__DANGEROUS_INTERNAL_SO_REPOSITORY) {
+      this.__DANGEROUS_INTERNAL_SO_REPOSITORY = this.savedObjectsStart.createInternalRepository();
     }
 
-    return this.__DANGEROUS_INTERNAL_SO_CLIENT;
+    return this.__DANGEROUS_INTERNAL_SO_REPOSITORY;
   }
 
   /**
@@ -338,7 +337,7 @@ export class EndpointMetadataService {
    */
   async getFleetAgentPolicy(agentPolicyId: string): Promise<AgentPolicyWithPackagePolicies> {
     const agentPolicy = await this.agentPolicyService
-      .get(this.DANGEROUS_INTERNAL_SO_CLIENT, agentPolicyId, true)
+      .get(this.DANGEROUS_INTERNAL_SO_REPOSITORY, agentPolicyId, true)
       .catch(catchAndWrapError);
 
     if (agentPolicy) {
@@ -357,7 +356,7 @@ export class EndpointMetadataService {
    */
   async getFleetEndpointPackagePolicy(endpointPolicyId: string): Promise<PolicyData> {
     const endpointPackagePolicy = await this.packagePolicyService
-      .get(this.DANGEROUS_INTERNAL_SO_CLIENT, endpointPolicyId)
+      .get(this.DANGEROUS_INTERNAL_SO_REPOSITORY, endpointPolicyId)
       .catch(catchAndWrapError);
 
     if (!endpointPackagePolicy) {
@@ -428,7 +427,7 @@ export class EndpointMetadataService {
 
     const agentPolicies =
       (await this.agentPolicyService
-        .getByIds(this.DANGEROUS_INTERNAL_SO_CLIENT, agentPolicyIds)
+        .getByIds(this.DANGEROUS_INTERNAL_SO_REPOSITORY, agentPolicyIds)
         .catch(catchAndWrapError)) ?? [];
 
     const agentPoliciesMap: Record<string, AgentPolicy> = agentPolicies.reduce(
@@ -484,7 +483,7 @@ export class EndpointMetadataService {
   async getAllEndpointPackagePolicies() {
     return getAllEndpointPackagePolicies(
       this.packagePolicyService,
-      this.DANGEROUS_INTERNAL_SO_CLIENT
+      this.DANGEROUS_INTERNAL_SO_REPOSITORY
     );
   }
 }

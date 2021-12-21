@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { ISavedObjectsRepository } from 'kibana/server';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
 import { PackagePolicy } from '../../../../../../fleet/common/types/models';
 
 export const getAllEndpointPackagePolicies = async (
   packagePolicyService: PackagePolicyServiceInterface,
-  soClient: SavedObjectsClientContract
+  soClient: ISavedObjectsRepository
 ): Promise<PackagePolicy[]> => {
   const result: PackagePolicy[] = [];
   const perPage = 1000;

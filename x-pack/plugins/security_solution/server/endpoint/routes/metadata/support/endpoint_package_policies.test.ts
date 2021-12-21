@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/mocks';
+import { ISavedObjectsRepository } from 'kibana/server';
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import { createPackagePolicyServiceMock } from '../../../../../../fleet/server/mocks';
 import { PackagePolicy } from '../../../../../../fleet/common/types/models';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
@@ -14,11 +14,11 @@ import { getAllEndpointPackagePolicies } from './endpoint_package_policies';
 
 describe('endpoint_package_policies', () => {
   describe('getAllEndpointPackagePolicies', () => {
-    let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
+    let mockSavedObjectClient: jest.Mocked<ISavedObjectsRepository>;
     let mockPackagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
 
     beforeEach(() => {
-      mockSavedObjectClient = savedObjectsClientMock.create();
+      mockSavedObjectClient = savedObjectsRepositoryMock.create();
       mockPackagePolicyService = createPackagePolicyServiceMock();
     });
 

@@ -362,6 +362,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       manifestManager = new ManifestManager({
         savedObjectsClient,
+        savedObjectsRepository: core.savedObjects.createInternalRepository(),
         artifactClient,
         exceptionListClient,
         packagePolicyService: plugins.fleet.packagePolicyService,
@@ -434,6 +435,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       licenseService,
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
+      soStart: core.savedObjects,
     });
 
     this.telemetryReceiver.start(

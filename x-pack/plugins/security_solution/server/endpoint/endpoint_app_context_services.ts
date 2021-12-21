@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { KibanaRequest, Logger } from 'src/core/server';
+import type { SavedObjectsServiceStart, ISavedObjectsRepository } from 'src/core/server';
 import { ExceptionListClient } from '../../../lists/server';
 import {
   CasesClient,
@@ -67,6 +67,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   licenseService: LicenseService;
   exceptionListsClient: ExceptionListClient | undefined;
   cases: CasesPluginStartContract | undefined;
+  soStart: SavedObjectsServiceStart;
 };
 
 /**
@@ -208,5 +209,12 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
     return this.startDependencies.exceptionListsClient;
+  }
+
+  public getInternalRepository(): ISavedObjectsRepository {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies.soStart.createInternalRepository();
   }
 }

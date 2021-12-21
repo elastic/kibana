@@ -254,11 +254,8 @@ export async function enrichHostMetadata(
     log.error(e);
     throw e;
   }
-
-  const esSavedObjectClient =
-    metadataRequestContext?.savedObjectsClient ??
-    (metadataRequestContext.requestHandlerContext?.core.savedObjects
-      .client as SavedObjectsClientContract);
+  const internalRepository =
+    metadataRequestContext.endpointAppContextService.getInternalRepository();
 
   try {
     /**
@@ -294,7 +291,7 @@ export async function enrichHostMetadata(
     const agentPolicy = await metadataRequestContext.endpointAppContextService
       .getAgentPolicyService()
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      ?.get(esSavedObjectClient, agent?.policy_id!, true);
+      ?.get(internalRepository, agent?.policy_id!, true);
     const endpointPolicy = ((agentPolicy?.package_policies || []) as PackagePolicy[]).find(
       (policy: PackagePolicy) => policy.package?.name === 'endpoint'
     );

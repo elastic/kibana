@@ -9,7 +9,7 @@ import pMap from 'p-map';
 import semver from 'semver';
 import LRU from 'lru-cache';
 import { isEqual, isEmpty } from 'lodash';
-import { Logger, SavedObjectsClientContract } from 'src/core/server';
+import { ISavedObjectsRepository, Logger, SavedObjectsClientContract } from 'src/core/server';
 import { ListResult } from '../../../../../../fleet/common';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
@@ -81,6 +81,7 @@ const iterateAllListItems = async <T>(
 
 export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsRepository: ISavedObjectsRepository;
   artifactClient: EndpointArtifactClientInterface;
   exceptionListClient: ExceptionListClient;
   packagePolicyService: PackagePolicyServiceInterface;
@@ -102,6 +103,7 @@ export class ManifestManager {
   protected exceptionListClient: ExceptionListClient;
   protected packagePolicyService: PackagePolicyServiceInterface;
   protected savedObjectsClient: SavedObjectsClientContract;
+  protected savedObjectsRepository: ISavedObjectsRepository;
   protected logger: Logger;
   protected cache: LRU<string, Buffer>;
   protected schemaVersion: ManifestSchemaVersion;
@@ -112,6 +114,7 @@ export class ManifestManager {
     this.exceptionListClient = context.exceptionListClient;
     this.packagePolicyService = context.packagePolicyService;
     this.savedObjectsClient = context.savedObjectsClient;
+    this.savedObjectsRepository = context.savedObjectsRepository;
     this.logger = context.logger;
     this.cache = context.cache;
     this.schemaVersion = 'v1';
@@ -484,7 +487,7 @@ export class ManifestManager {
 
               try {
                 await this.packagePolicyService.update(
-                  this.savedObjectsClient,
+                  this.savedObjectsRepository,
                   // @ts-expect-error TS2345
                   undefined,
                   id,
@@ -540,7 +543,7 @@ export class ManifestManager {
   }
 
   private async listEndpointPolicies(page: number) {
-    return this.packagePolicyService.list(this.savedObjectsClient, {
+    return this.packagePolicyService.list(this.savedObjectsRepository, {
       page,
       perPage: 20,
       kuery: 'ingest-package-policies.package.name:endpoint',
@@ -548,7 +551,7 @@ export class ManifestManager {
   }
 
   private async listEndpointPolicyIds(page: number) {
-    return this.packagePolicyService.listIds(this.savedObjectsClient, {
+    return this.packagePolicyService.listIds(this.savedObjectsRepository, {
       page,
       perPage: 20,
       kuery: 'ingest-package-policies.package.name:endpoint',

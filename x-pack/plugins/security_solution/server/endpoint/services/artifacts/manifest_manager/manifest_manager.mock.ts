@@ -6,7 +6,11 @@
  */
 
 import LRU from 'lru-cache';
-import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+  loggingSystemMock,
+} from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
 import { createPackagePolicyServiceMock } from '../../../../../../fleet/server/mocks';
@@ -65,17 +69,20 @@ export interface ManifestManagerMockOptions {
   exceptionListClient: ExceptionListClient;
   packagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
   savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  savedObjectsRepository: ReturnType<typeof savedObjectsRepositoryMock.create>;
 }
 
 export const buildManifestManagerMockOptions = (
   opts: Partial<ManifestManagerMockOptions>
 ): ManifestManagerMockOptions => {
   const savedObjectMock = savedObjectsClientMock.create();
+  const savedObjectRepoMock = savedObjectsRepositoryMock.create();
   return {
     cache: new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 }),
     exceptionListClient: listMock.getExceptionListClient(savedObjectMock),
     packagePolicyService: createPackagePolicyServiceMock(),
     savedObjectsClient: savedObjectMock,
+    savedObjectsRepository: savedObjectRepoMock,
     ...opts,
   };
 };

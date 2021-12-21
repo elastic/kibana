@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  Logger,
-  CoreStart,
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-} from 'src/core/server';
+import { Logger, CoreStart, ElasticsearchClient, ISavedObjectsRepository } from 'src/core/server';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { AgentClient, AgentPolicyServiceInterface } from '../../../../fleet/server';
@@ -36,7 +31,7 @@ export class TelemetryReceiver {
   private agentPolicyService?: AgentPolicyServiceInterface;
   private esClient?: ElasticsearchClient;
   private exceptionListClient?: ExceptionListClient;
-  private soClient?: SavedObjectsClientContract;
+  private soRepository?: ISavedObjectsRepository;
   private kibanaIndex?: string;
   private clusterInfo?: ESClusterInfo;
   private readonly max_records = 10_000;
@@ -56,8 +51,7 @@ export class TelemetryReceiver {
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.exceptionListClient = exceptionListClient;
-    this.soClient =
-      core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
+    this.soRepository = core?.savedObjects.createInternalRepository();
     this.clusterInfo = await this.fetchClusterInfo();
   }
 
@@ -207,13 +201,13 @@ export class TelemetryReceiver {
   }
 
   public async fetchPolicyConfigs(id: string) {
-    if (this.soClient === undefined || this.soClient === null) {
+    if (this.soRepository === undefined || this.soRepository === null) {
       throw Error(
-        'saved object client is unavailable: cannot retrieve endpoint policy configurations'
+        'saved object repository is unavailable: cannot retrieve endpoint policy configurations'
       );
     }
 
-    return this.agentPolicyService?.get(this.soClient, id);
+    return this.agentPolicyService?.get(this.soRepository, id);
   }
 
   public async fetchTrustedApplications() {

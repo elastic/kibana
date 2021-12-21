@@ -10,9 +10,7 @@ import { Subscription } from 'rxjs';
 import {
   ElasticsearchClient,
   ElasticsearchServiceStart,
-  KibanaRequest,
   Logger,
-  SavedObjectsClientContract,
   SavedObjectsServiceStart,
 } from 'src/core/server';
 import { PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../fleet/common';
@@ -44,25 +42,6 @@ export class PolicyWatcher {
     this.soStart = soStart;
   }
 
-  /**
-   * The policy watcher is not called as part of a HTTP request chain, where the
-   * request-scoped SOClient could be passed down. It is called via license observable
-   * changes. We are acting as the 'system' in response to license changes, so we are
-   * intentionally using the system user here. Be very aware of what you are using this
-   * client to do
-   */
-  private makeInternalSOClient(soStart: SavedObjectsServiceStart): SavedObjectsClientContract {
-    const fakeRequest = {
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-    } as unknown as KibanaRequest;
-    return soStart.getScopedClient(fakeRequest, { excludedWrappers: ['security'] });
-  }
-
   public start(licenseService: LicenseService) {
     this.subscription = licenseService.getLicenseInformation$()?.subscribe(this.watch.bind(this));
   }
@@ -84,7 +63,7 @@ export class PolicyWatcher {
 
     do {
       try {
-        response = await this.policyService.list(this.makeInternalSOClient(this.soStart), {
+        response = await this.policyService.list(this.soStart.createInternalRepository(), {
           page: page++,
           perPage: 100,
           kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
@@ -108,7 +87,7 @@ export class PolicyWatcher {
             );
             try {
               await this.policyService.update(
-                this.makeInternalSOClient(this.soStart),
+                this.soStart.createInternalRepository(),
                 this.esClient,
                 policy.id,
                 updatePolicy
@@ -117,7 +96,7 @@ export class PolicyWatcher {
               // try again for transient issues
               try {
                 await this.policyService.update(
-                  this.makeInternalSOClient(this.soStart),
+                  this.soStart.createInternalRepository(),
                   this.esClient,
                   policy.id,
                   updatePolicy
