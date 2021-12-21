@@ -325,21 +325,18 @@ export class FleetPlugin
     // The upload package route is only authorized for the superuser
     registerEPMRoutes(fleetAuthzRouter);
 
-    // Register rest of routes only if security is enabled
-    if (deps.security) {
-      registerSetupRoutes(fleetAuthzRouter, config);
-      registerAgentPolicyRoutes(fleetAuthzRouter);
-      registerPackagePolicyRoutes(fleetAuthzRouter);
-      registerOutputRoutes(fleetAuthzRouter);
-      registerSettingsRoutes(fleetAuthzRouter);
-      registerDataStreamRoutes(fleetAuthzRouter);
-      registerPreconfigurationRoutes(fleetAuthzRouter);
+    registerSetupRoutes(fleetAuthzRouter, config);
+    registerAgentPolicyRoutes(fleetAuthzRouter);
+    registerPackagePolicyRoutes(fleetAuthzRouter);
+    registerOutputRoutes(fleetAuthzRouter);
+    registerSettingsRoutes(fleetAuthzRouter);
+    registerDataStreamRoutes(fleetAuthzRouter);
+    registerPreconfigurationRoutes(fleetAuthzRouter);
 
-      // Conditional config routes
-      if (config.agents.enabled) {
-        registerAgentAPIRoutes(fleetAuthzRouter, config);
-        registerEnrollmentApiKeyRoutes(fleetAuthzRouter);
-      }
+    // Conditional config routes
+    if (config.agents.enabled) {
+      registerAgentAPIRoutes(fleetAuthzRouter, config);
+      registerEnrollmentApiKeyRoutes(fleetAuthzRouter);
     }
 
     this.telemetryEventsSender.setup(deps.telemetry);
