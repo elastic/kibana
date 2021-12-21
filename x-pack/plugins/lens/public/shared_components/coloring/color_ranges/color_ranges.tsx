@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { last } from 'lodash';
 import React, { useState, useEffect, useReducer } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { last } from 'lodash';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { EuiFlexGroup, EuiTextColor, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
@@ -79,37 +80,40 @@ export function ColorRanges({
     setColorRangesValidity(validateColorRanges(localState.colorRanges));
   }, [localState.colorRanges]);
 
-  useEffect(() => {
+  useUpdateEffect(() => {
     if (paletteConfiguration) {
       const { rangeType } = paletteConfiguration;
       const rangeTypeChanged = rangeType && rangeType !== localState.rangeType;
 
-      if (rangeTypeChanged) {
+      if (rangeTypeChanged || colorRanges !== localState.colorRanges) {
         dispatch({
           type: 'set',
           payload: toLocalState(colorRanges, paletteConfiguration),
         });
       }
     }
-  }, [colorRanges, localState, paletteConfiguration]);
+  }, [colorRanges, paletteConfiguration?.rangeType]);
 
   useDebounce(
     () => {
       const { continuity: localContinuity, colorRanges: localColorRanges } = localState;
       const upperMin = ['below', 'all'].includes(localContinuity!)
         ? -Infinity
-        : Number(localColorRanges[0].start);
+        : localColorRanges[0].start;
 
       const upperMax = ['above', 'all'].includes(localContinuity!)
         ? Infinity
-        : Number(localColorRanges[localColorRanges.length - 1].end);
+        : last(localColorRanges)!.end;
 
       const colorStops = localColorRanges.map((colorRange, i) => ({
         color: colorRange.color,
-        stop: i === 0 ? upperMin : colorRange.start && Number(colorRange.start),
+        stop: i === 0 ? upperMin : colorRange.start,
       }));
 
-      if (Object.values(validateColorRanges(localColorRanges)).every(({ isValid }) => isValid)) {
+      if (
+        Object.values(validateColorRanges(localColorRanges)).every(({ isValid }) => isValid) &&
+        localColorRanges !== colorRanges
+      ) {
         onChange(colorStops, upperMax, localContinuity);
       }
     },
@@ -169,7 +173,7 @@ export function ColorRanges({
             dispatch={dispatch}
             colorRanges={localState.colorRanges}
             dataBounds={dataBounds}
-            paletteConfiguration={paletteConfiguration}
+            maxSteps={paletteConfiguration?.maxSteps}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

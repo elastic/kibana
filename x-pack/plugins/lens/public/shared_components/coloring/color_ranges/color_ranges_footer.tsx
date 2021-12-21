@@ -14,25 +14,21 @@ import { DistributeEquallyIcon } from '../../../assets/distribute_equally';
 import { TooltipWrapper } from '../../index';
 
 import type { ColorRange, DataBounds, ColorRangesActions } from './types';
-import type { CustomPaletteParamsConfig } from '../../../../common';
 
 export interface ColorRangesActionsProps {
   colorRanges: ColorRange[];
-  paletteConfiguration: CustomPaletteParamsConfig | undefined;
   dispatch: Dispatch<ColorRangesActions>;
   dataBounds: DataBounds;
+  maxSteps?: number;
 }
 
 export function ColorRangesFooter({
   colorRanges,
   dispatch,
-  paletteConfiguration,
+  maxSteps,
   dataBounds,
 }: ColorRangesActionsProps) {
-  const shouldDisableAdd = Boolean(
-    paletteConfiguration?.maxSteps && colorRanges.length >= paletteConfiguration?.maxSteps
-  );
-
+  const shouldDisableAdd = Boolean(maxSteps && colorRanges.length >= maxSteps);
   const hasOneColorRange = colorRanges.length === 1;
 
   const onAddColorRange = useCallback(() => {

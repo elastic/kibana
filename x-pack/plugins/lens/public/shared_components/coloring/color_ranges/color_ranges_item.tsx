@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback, useEffect, Dispatch, FocusEvent } from 'react';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
+import React, { useState, useCallback, Dispatch, FocusEvent } from 'react';
 
 import {
   EuiFieldNumber,
@@ -67,14 +68,13 @@ export function ColorRangeItem({
 }: ColorRangesItemProps) {
   const value = `${colorRange[accessor]}`;
   const [popoverInFocus, setPopoverInFocus] = useState<boolean>(false);
-  const [localValue, setLocalValue] = useState<string>(value ?? '');
+  const [localValue, setLocalValue] = useState<string>(value || '');
   const isLast = isLastItem(accessor);
   const mode = getMode(index, isLast, continuity);
   const isDisabled = mode === 'auto';
   const isColorValid = isValidColor(colorRange.color);
 
   let ActionButton: React.FunctionComponent<ColorRangesItemButtonProps>;
-
   if (mode === 'value') {
     ActionButton = ColorRangeDeleteButton;
   } else {
@@ -98,23 +98,21 @@ export function ColorRangeItem({
   );
 
   const onValueChange = useCallback(
-    ({ target }) => {
-      const newValue = target.value;
-
-      setLocalValue(newValue);
-      dispatch({ type: 'updateValue', payload: { index, value: newValue, accessor } });
+    ({ target: { value: targetValue } }) => {
+      setLocalValue(targetValue);
+      dispatch({ type: 'updateValue', payload: { index, value: targetValue, accessor } });
     },
     [dispatch, index, accessor]
   );
 
   const onUpdateColor = useCallback(
-    (color: string) => {
+    (color) => {
       dispatch({ type: 'updateColor', payload: { index, color } });
     },
     [dispatch, index]
   );
 
-  useEffect(() => {
+  useUpdateEffect(() => {
     if (isValid && value !== localValue) {
       setLocalValue(value);
     }
@@ -124,7 +122,7 @@ export function ColorRangeItem({
     <EuiFlexGroup
       alignItems="center"
       gutterSize="s"
-      responsive={false}
+      wrap={false}
       data-test-subj={`dynamicColoring_range_row_${index}`}
     >
       <EuiFlexItem grow={false}>
@@ -178,7 +176,6 @@ export function ColorRangeItem({
           })}
         />
       </EuiFlexItem>
-
       {ActionButton ? (
         <EuiFlexItem grow={false}>
           <ActionButton
