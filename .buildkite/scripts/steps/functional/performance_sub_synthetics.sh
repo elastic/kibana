@@ -23,18 +23,11 @@ sleep 120
 cd "$XPACK_DIR"
 
 # warmup round 1
-checks-reporter-with-killswitch "Run Performance Tests with Synthetics Config (Phase: WARMUP_1)" \
+checks-reporter-with-killswitch "Run Performance Tests with Synthetics Config (Phase: WARMUP)" \
   node scripts/functional_tests \
     --debug --bail \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
     --config "test/performance/config.synthetics.ts";
-
-# warmup round 2
-checks-reporter-with-killswitch "Run Performance Tests with Synthetics Config (Phase: WARMUP_2)" \
-   node scripts/functional_tests \
-     --debug --bail \
-     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-     --config "test/performance/config.synthetics.ts";
 
 export DISABLE_APM=false
 export PERFORMANCE_PHASE=TEST
