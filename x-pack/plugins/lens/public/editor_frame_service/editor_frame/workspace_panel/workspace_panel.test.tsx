@@ -26,7 +26,7 @@ jest.mock('../../../debounced_component', () => {
 import { WorkspacePanel } from './workspace_panel';
 import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
-import { fromExpression } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter';
 import { coreMock } from 'src/core/public/mocks';
 import { esFilters, IndexPattern } from '../../../../../../../src/plugins/data/public';
 import type { FieldSpec } from '../../../../../../../src/plugins/data/common';

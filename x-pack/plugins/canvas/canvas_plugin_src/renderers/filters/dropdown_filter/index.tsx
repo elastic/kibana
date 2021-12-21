@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromExpression, toExpression, Ast } from '@kbn/interpreter/common';
+import { fromExpression, toExpression, Ast } from '@kbn/interpreter';
 import { get } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';

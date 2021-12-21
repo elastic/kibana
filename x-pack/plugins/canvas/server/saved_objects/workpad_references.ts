@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromExpression, toExpression } from '@kbn/interpreter/common';
+import { fromExpression, toExpression } from '@kbn/interpreter';
 import { PersistableStateService } from '../../../../../src/plugins/kibana_utils/common';
 import { SavedObjectReference } from '../../../../../src/core/server';
 import { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
