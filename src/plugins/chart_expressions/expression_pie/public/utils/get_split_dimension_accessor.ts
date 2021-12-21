@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { AccessorFn } from '@elastic/charts';
+import { getColumnByAccessor } from './accessor';
 import { DatatableColumn } from '../../../../expressions/public';
 import type { FieldFormatsStart } from '../../../../field_formats/public';
 import { Dimension } from '../../common/types';
@@ -14,8 +15,8 @@ export const getSplitDimensionAccessor =
   (fieldFormats: FieldFormatsStart, columns: DatatableColumn[]) =>
   (splitDimension: Dimension): AccessorFn => {
     const formatter = fieldFormats.deserialize(splitDimension.format);
-    const splitChartColumn = columns[splitDimension.accessor];
-    const accessor = splitChartColumn.id;
+    const splitChartColumn = getColumnByAccessor(splitDimension.accessor, columns);
+    const { id } = splitChartColumn ?? {};
 
     const fn: AccessorFn = (d) => {
       const v = d[accessor];

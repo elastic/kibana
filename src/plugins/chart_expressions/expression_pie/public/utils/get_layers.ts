@@ -14,8 +14,8 @@ import {
   ArrayEntry,
 } from '@elastic/charts';
 import { isEqual } from 'lodash';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { SeriesLayer, PaletteRegistry, lightenColor } from '../../../../charts/public';
-import type { DataPublicPluginStart } from '../../../../data/public';
 import type { DatatableRow } from '../../../../expressions/public';
 import type { BucketColumns, PieVisParams, SplitDimensionParams } from '../../common/types';
 import { getDistinctSeries } from './get_distinct_series';
@@ -31,7 +31,7 @@ export const computeColor = (
   visParams: PieVisParams,
   palettes: PaletteRegistry | null,
   syncColors: boolean,
-  formatter: DataPublicPluginStart['fieldFormats'],
+  formatter: FieldFormatsStart,
   format?: BucketColumns['format']
 ) => {
   const { parentSeries, allSeries } = getDistinctSeries(rows, columns);
@@ -129,7 +129,7 @@ export const getLayers = (
   overwriteColors: { [key: string]: string },
   rows: DatatableRow[],
   palettes: PaletteRegistry | null,
-  formatter: DataPublicPluginStart['fieldFormats'],
+  formatter: FieldFormatsStart,
   syncColors: boolean
 ): PartitionLayer[] => {
   const fillLabel: Partial<PartitionFillLabel> = {

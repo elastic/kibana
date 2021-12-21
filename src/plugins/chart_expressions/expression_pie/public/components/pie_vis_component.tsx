@@ -50,6 +50,7 @@ import {
   getConfig,
   getColumns,
   getSplitDimensionAccessor,
+  getColumnByAccessor,
 } from '../utils';
 import { ChartSplit, SMALL_MULTIPLES_ID } from './chart_split';
 import { VisualizationNoResults } from './visualization_noresults';
@@ -295,9 +296,9 @@ const PieComponent = (props: PieComponentProps) => {
     : undefined;
 
   const splitChartDimension = visParams.dimensions.splitColumn
-    ? visData.columns[visParams.dimensions.splitColumn[0].accessor]
+    ? getColumnByAccessor(visParams.dimensions.splitColumn[0].accessor, visData.columns)
     : visParams.dimensions.splitRow
-    ? visData.columns[visParams.dimensions.splitRow[0].accessor]
+    ? getColumnByAccessor(visParams.dimensions.splitRow[0].accessor, visData.columns)
     : undefined;
 
   /**
