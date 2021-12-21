@@ -84,6 +84,16 @@ export const useInitSourcerer = (
   } = useDeepEqualSelector((state) => scopeIdSelector(state, SourcererScopeName.timeline));
   const { indexFieldsSearch } = useDataView();
 
+  /*
+   * Note for future engineer:
+   * we changed the logic to not fetch all the index fields for every data view on the loading of the app
+   * because user can have a lot of them and it can slow down the loading of the app
+   * and maybe blow up the memory of the browser. We decided to load this data view on demand,
+   * we know that will only have to load this dataview on default and timeline scope.
+   * We will use two conditions to see if we need to fetch and initialize the dataview selected.
+   * First, we will make sure that we did not already fetch them by using `searchedIds`
+   * and then we will init them if selectedPatterns and missingPatterns are empty.
+   */
   const searchedIds = useRef<string[]>([]);
   useEffect(() => {
     const activeDataViewIds = [...new Set([scopeDataViewId, timelineDataViewId])];
