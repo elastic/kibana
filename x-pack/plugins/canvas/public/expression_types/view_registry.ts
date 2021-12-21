@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Registry } from '@kbn/interpreter';
+import { Registry } from '@kbn/interpreter/common';
 import { View } from './view';
 import type { View as ViewType, ViewProps } from './view';
 

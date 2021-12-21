@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionAST } from '@kbn/interpreter';
+import type { ExpressionFunctionAST } from '@kbn/interpreter/common';
 import memoizeOne from 'memoize-one';
 import { LayerType, layerTypes } from '../../../../../common';
 import type { TimeScaleUnit } from '../../../../../common/expressions';

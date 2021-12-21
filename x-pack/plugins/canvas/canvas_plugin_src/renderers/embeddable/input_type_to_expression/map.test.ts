@@ -6,7 +6,7 @@
  */
 
 import { toExpression } from './map';
-import { fromExpression, Ast } from '@kbn/interpreter';
+import { fromExpression, Ast } from '@kbn/interpreter/common';
 
 const baseSavedMapInput = {
   id: 'elementId',

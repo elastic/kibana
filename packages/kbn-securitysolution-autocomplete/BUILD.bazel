@@ -1,10 +1,10 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
+load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
 PKG_BASE_NAME = "kbn-securitysolution-autocomplete"
+
 PKG_REQUIRE_NAME = "@kbn/securitysolution-autocomplete"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__securitysolution-autocomplete"
 
 SOURCE_FILES = glob(
   [
@@ -33,9 +33,9 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/kbn-es-query",
   "//packages/kbn-i18n",
-  "//packages/kbn-securitysolution-io-ts-list-types",
   "//packages/kbn-securitysolution-list-hooks",
   "//packages/kbn-securitysolution-list-utils",
+  "//packages/kbn-securitysolution-io-ts-list-types",
   "@npm//@elastic/eui",
   "@npm//@testing-library/react",
   "@npm//@testing-library/react-hooks",
@@ -46,10 +46,10 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "//packages/kbn-es-query:npm_module_types",
-  "//packages/kbn-i18n:npm_module_types",
-  "//packages/kbn-securitysolution-io-ts-list-types:npm_module_types",
-  "//packages/kbn-securitysolution-list-hooks:npm_module_types",
+  "//packages/kbn-i18n",
+  "//packages/kbn-securitysolution-list-hooks",
   "//packages/kbn-securitysolution-list-utils",
+  "//packages/kbn-securitysolution-io-ts-list-types",
   "@npm//@elastic/eui",
   "@npm//@testing-library/react",
   "@npm//@testing-library/react-hooks",
@@ -99,7 +99,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -118,21 +118,3 @@ filegroup(
   ],
   visibility = ["//visibility:public"],
 )
-
-pkg_npm_types(
-  name = "npm_module_types",
-  srcs = SRCS,
-  deps = [":tsc_types"],
-  package_name = TYPES_PKG_REQUIRE_NAME,
-  tsconfig = ":tsconfig",
-  visibility = ["//visibility:public"],
-)
-
-filegroup(
-  name = "build_types",
-  srcs = [
-    ":npm_module_types",
-  ],
-  visibility = ["//visibility:public"],
-)
-

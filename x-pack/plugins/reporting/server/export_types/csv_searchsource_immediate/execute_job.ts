@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
 import { Writable } from 'stream';
-import { CancellationToken } from '../../../common/cancellation_token';
+import { KibanaRequest } from 'src/core/server';
+import { CancellationToken } from '../../../common';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { TaskRunResult } from '../../lib/tasks';
 import { getFieldFormats } from '../../services';

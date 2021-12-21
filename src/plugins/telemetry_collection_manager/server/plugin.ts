@@ -69,6 +69,7 @@ export class TelemetryCollectionManagerPlugin
       setCollectionStrategy: this.setCollectionStrategy.bind(this),
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
+      areAllCollectorsReady: this.areAllCollectorsReady.bind(this),
     };
   }
 
@@ -79,6 +80,7 @@ export class TelemetryCollectionManagerPlugin
     return {
       getOptInStats: this.getOptInStats.bind(this),
       getStats: this.getStats.bind(this),
+      areAllCollectorsReady: this.areAllCollectorsReady.bind(this),
     };
   }
 
@@ -217,6 +219,10 @@ export class TelemetryCollectionManagerPlugin
     }
 
     return [];
+  }
+
+  private async areAllCollectorsReady() {
+    return await this.usageCollection?.areAllCollectorsReady();
   }
 
   private getOptInStatsForCollection = async (

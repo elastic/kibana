@@ -65,7 +65,6 @@ const resolveLegacyReference = async (
     timestampField: TIMESTAMP_FIELD,
     tiebreakerField: TIEBREAKER_FIELD,
     messageField: sourceConfiguration.fields.message,
-    // @ts-ignore
     fields,
     runtimeMappings: {},
     columns: sourceConfiguration.logColumns,

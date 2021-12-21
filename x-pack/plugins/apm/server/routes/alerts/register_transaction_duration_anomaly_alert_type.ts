@@ -14,7 +14,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_SEVERITY,
   ALERT_REASON,
-} from '@kbn/rule-data-utils';
+} from '@kbn/rule-data-utils/technical_field_names';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getSeverity } from '../../../common/anomaly_detection';

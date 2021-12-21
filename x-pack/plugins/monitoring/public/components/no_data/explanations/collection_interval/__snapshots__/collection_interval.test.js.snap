@@ -360,15 +360,27 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
         >
           We checked the cluster settings and found that 
           <EuiCode>
-            <code>
-              xpack.monitoring.collection.interval
-            </code>
+            <EuiCodeBlockImpl
+              inline={true}
+            >
+              <span>
+                <code>
+                  xpack.monitoring.collection.interval
+                </code>
+              </span>
+            </EuiCodeBlockImpl>
           </EuiCode>
            is set to 
           <EuiCode>
-            <code>
-              -1
-            </code>
+            <EuiCodeBlockImpl
+              inline={true}
+            >
+              <span>
+                <code>
+                  -1
+                </code>
+              </span>
+            </EuiCodeBlockImpl>
           </EuiCode>
           .
         </FormattedMessage>
@@ -675,15 +687,27 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
         >
           We checked the cluster settings and found that 
           <EuiCode>
-            <code>
-              xpack.monitoring.collection.interval
-            </code>
+            <EuiCodeBlockImpl
+              inline={true}
+            >
+              <span>
+                <code>
+                  xpack.monitoring.collection.interval
+                </code>
+              </span>
+            </EuiCodeBlockImpl>
           </EuiCode>
            is set to 
           <EuiCode>
-            <code>
-              -1
-            </code>
+            <EuiCodeBlockImpl
+              inline={true}
+            >
+              <span>
+                <code>
+                  -1
+                </code>
+              </span>
+            </EuiCodeBlockImpl>
           </EuiCode>
           .
         </FormattedMessage>

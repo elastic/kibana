@@ -8,40 +8,42 @@
 import {
   EuiButton,
   EuiCard,
-  EuiCodeBlock,
   EuiContextMenu,
-  EuiContextMenuProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiLink,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
   EuiPopover,
-  EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiCodeBlock,
+  EuiSpacer,
+  EuiLink,
+  EuiContextMenuProps,
 } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
-import { parsePath } from 'history';
 import moment from 'moment';
+import { I18nProvider } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
+import { parsePath } from 'history';
 import { BrowserRouter as Router, useHistory } from 'react-router-dom';
 import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
 import type {
   JobAppParamsPDF,
   JobParamsPDFV2,
   JobParamsPNGV2,
-} from '../../../../plugins/reporting/common/types';
-import type { ReportingStart } from '../../../../plugins/reporting/public';
+} from '../../../../plugins/reporting/public';
 import { LayoutTypes } from '../../../../plugins/screenshotting/public';
+import { ReportingStart } from '../../../../plugins/reporting/public';
+
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
+
 import { useApplicationContext } from '../application_context';
 import { ROUTES } from '../constants';
 import type { MyForwardableState } from '../types';

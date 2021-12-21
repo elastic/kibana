@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromExpression } from '@kbn/interpreter';
+import { fromExpression } from '@kbn/interpreter/common';
 import { shallowEqual, useSelector } from 'react-redux';
 import { State } from '../../../../types';
 import { getFiltersByGroups } from '../../../lib/filter';

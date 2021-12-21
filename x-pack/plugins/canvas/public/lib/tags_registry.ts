@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Registry } from '@kbn/interpreter';
+import { Registry } from '@kbn/interpreter/common';
 import { Tag, TagSpec } from './tag';
 
 class TagRegistry extends Registry<TagSpec, Tag> {

@@ -10,7 +10,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import memoizeOne from 'memoize-one';
-import { DataViewField } from '../../../data_views/public';
 
 import {
   IndexPatternSpec,
@@ -201,7 +200,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         }
 
         const fields = await ensureMinimumTime(dataViews.getFieldsForWildcard(getFieldsOptions));
-        timestampOptions = extractTimeFields(fields as DataViewField[], requireTimestampField);
+        timestampOptions = extractTimeFields(fields, requireTimestampField);
       }
       if (currentLoadingTimestampFieldsIdx === currentLoadingTimestampFieldsRef.current) {
         setIsLoadingTimestampFields(false);

@@ -41,7 +41,7 @@ describe('threshold_executor', () => {
 
   beforeEach(() => {
     alertServices = alertsMock.createAlertServices();
-    alertServices.search.asCurrentUser.search.mockResolvedValue(
+    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleEmptyDocSearchResults())
     );
     logger = loggingSystemMock.createLogger();

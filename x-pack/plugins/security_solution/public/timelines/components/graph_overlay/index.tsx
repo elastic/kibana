@@ -40,7 +40,6 @@ import {
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { sourcererSelectors } from '../../../common/store';
 
 const OverlayContainer = styled.div`
   display: flex;
@@ -182,18 +181,7 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
     globalFullScreen,
   ]);
 
-  const getDefaultDataViewSelector = useMemo(
-    () => sourcererSelectors.defaultDataViewSelector(),
-    []
-  );
-  const defaultDataView = useDeepEqualSelector(getDefaultDataViewSelector);
-
-  const { selectedPatterns: timelinePatterns } = useSourcererDataView(SourcererScopeName.timeline);
-
-  const selectedPatterns = useMemo(
-    () => (isInTimeline ? timelinePatterns : defaultDataView.patternList),
-    [defaultDataView.patternList, isInTimeline, timelinePatterns]
-  );
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
   if (fullScreen && !isInTimeline) {
     return (

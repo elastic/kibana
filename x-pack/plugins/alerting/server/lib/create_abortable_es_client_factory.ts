@@ -6,15 +6,15 @@
  */
 
 import { TransportRequestOptions, TransportResult } from '@elastic/elasticsearch';
-import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { SearchRequest as SearchRequestWithBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from 'src/core/server';
+import type { ESSearchRequest } from 'src/core/types/elasticsearch';
 
 export interface IAbortableEsClient {
-  search: <TDocument = unknown, TContext = unknown>(
-    query: SearchRequest | SearchRequestWithBody,
+  search: (
+    query: ESSearchRequest,
     options?: TransportRequestOptions
-  ) => Promise<TransportResult<SearchResponse<TDocument>, TContext>>;
+  ) => Promise<TransportResult<SearchResponse<unknown>, unknown>>;
 }
 
 export interface IAbortableClusterClient {
@@ -30,13 +30,10 @@ export function createAbortableEsClientFactory(opts: CreateAbortableEsClientFact
   const { scopedClusterClient, abortController } = opts;
   return {
     asInternalUser: {
-      search: async <TDocument = unknown, TContext = unknown>(
-        query: SearchRequest | SearchRequestWithBody,
-        options?: TransportRequestOptions
-      ) => {
+      search: async (query: ESSearchRequest, options?: TransportRequestOptions) => {
         try {
           const searchOptions = options ?? {};
-          return await scopedClusterClient.asInternalUser.search<TDocument, TContext>(query, {
+          return await scopedClusterClient.asInternalUser.search(query, {
             ...searchOptions,
             signal: abortController.signal,
           });
@@ -49,13 +46,10 @@ export function createAbortableEsClientFactory(opts: CreateAbortableEsClientFact
       },
     },
     asCurrentUser: {
-      search: async <TDocument = unknown, TContext = unknown>(
-        query: SearchRequest | SearchRequestWithBody,
-        options?: TransportRequestOptions
-      ) => {
+      search: async (query: ESSearchRequest, options?: TransportRequestOptions) => {
         try {
           const searchOptions = options ?? {};
-          return await scopedClusterClient.asCurrentUser.search<TDocument, TContext>(query, {
+          return await scopedClusterClient.asCurrentUser.search(query, {
             ...searchOptions,
             signal: abortController.signal,
           });

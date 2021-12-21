@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { fromExpression, toExpression } from '@kbn/interpreter';
+import { fromExpression, toExpression } from '@kbn/interpreter/common';
 
 const strings = {
   getApplyButtonLabel: () =>

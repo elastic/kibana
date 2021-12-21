@@ -548,6 +548,7 @@ export const Overview: React.FC = () => {
                 {!indexPermissions && isOrganization && (
                   <EuiFlexItem>{documentPermissionsDisabled}</EuiFlexItem>
                 )}
+                {indexPermissions && <EuiFlexItem>{credentials}</EuiFlexItem>}
               </>
             )}
             {custom && (

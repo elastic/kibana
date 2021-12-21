@@ -11,13 +11,10 @@ import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notificatio
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IFieldType } from './fields';
 import { RUNTIME_FIELD_TYPES } from './constants';
 import { DataViewField } from './fields';
 import { FieldFormat, SerializedFieldFormat } from '../../field_formats/common';
-
-export type { QueryDslQueryContainer };
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
@@ -130,7 +127,6 @@ export interface GetFieldsOptions {
   metaFields?: string[];
   rollupIndex?: string;
   allowNoIndex?: boolean;
-  filter?: QueryDslQueryContainer;
 }
 
 export interface GetFieldsOptionsTimePattern {

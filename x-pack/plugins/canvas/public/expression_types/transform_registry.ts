@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Registry } from '@kbn/interpreter';
+import { Registry } from '@kbn/interpreter/common';
 import { Transform } from './transform';
 import type { Transform as TransformType, TransformProps } from './transform';
 

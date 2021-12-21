@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromExpression, getType } from '@kbn/interpreter';
+import { fromExpression, getType } from '@kbn/interpreter/common';
 import { pluck } from 'rxjs/operators';
 import { ExpressionValue, ExpressionAstExpression } from 'src/plugins/expressions/public';
 import { pluginServices } from '../services';

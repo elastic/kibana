@@ -30,7 +30,6 @@ import {
 } from '../../store/policy_details/selectors';
 import { FleetTrustedAppsCard } from './endpoint_package_custom_extension/components/fleet_trusted_apps_card';
 import { LinkWithIcon } from './endpoint_package_custom_extension/components/link_with_icon';
-import { FleetIntegrationHostIsolationExceptionsCard } from './endpoint_package_custom_extension/components/fleet_integration_host_isolation_exceptions_card';
 /**
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
@@ -180,8 +179,6 @@ const WrappedPolicyDetailsForm = memo<{
               cardSize="m"
               customLink={policyTrustedAppsLink}
             />
-            <EuiSpacer size="s" />
-            <FleetIntegrationHostIsolationExceptionsCard policyId={policyId} />
           </div>
           <EuiSpacer size="l" />
           <div>

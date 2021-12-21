@@ -66,20 +66,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     isTimelineSourcerer && selectedPatterns.join() === signalIndexName
   );
 
-  const onUpdateDetectionAlertsChecked = useCallback(() => {
-    setIsOnlyDetectionAlertsChecked(
-      isTimelineSourcerer && selectedPatterns.join() === signalIndexName
-    );
-  }, [isTimelineSourcerer, selectedPatterns, signalIndexName]);
-
-  useEffect(() => {
-    onUpdateDetectionAlertsChecked();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPatterns]);
-
   const isOnlyDetectionAlerts: boolean =
     isDetectionsSourcerer || (isTimelineSourcerer && isOnlyDetectionAlertsChecked);
-
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewId, setDataViewId] = useState<string | null>(selectedDataViewId);
 
@@ -87,7 +75,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     allOptions,
     dataViewSelectOptions,
     isModified,
-    handleOutsideClick,
     onChangeCombo,
     renderOption,
     selectedOptions,
@@ -224,14 +211,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const onOutsideClick = useCallback(() => {
     setDataViewId(selectedDataViewId);
     setMissingPatterns(sourcererMissingPatterns);
-    onUpdateDetectionAlertsChecked();
-    handleOutsideClick();
-  }, [
-    handleOutsideClick,
-    onUpdateDetectionAlertsChecked,
-    selectedDataViewId,
-    sourcererMissingPatterns,
-  ]);
+  }, [selectedDataViewId, sourcererMissingPatterns]);
 
   const onExpandAdvancedOptionsClicked = useCallback(() => {
     setExpandAdvancedOptions((prevState) => !prevState);

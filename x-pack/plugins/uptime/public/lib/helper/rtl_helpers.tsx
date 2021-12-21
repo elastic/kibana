@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement, ReactNode } from 'react';
+import React, { ReactElement } from 'react';
 import { of } from 'rxjs';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import {
@@ -52,7 +52,7 @@ export interface KibanaProviderOptions<ExtraCore> {
 }
 
 interface MockKibanaProviderProps<ExtraCore> extends KibanaProviderOptions<ExtraCore> {
-  children: ReactElement | ReactNode;
+  children: React.ReactNode;
 }
 
 interface MockRouterProps<ExtraCore> extends MockKibanaProviderProps<ExtraCore> {

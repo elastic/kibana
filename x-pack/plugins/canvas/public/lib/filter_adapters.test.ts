@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionFunctionAST } from '@kbn/interpreter';
+import { ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { adaptCanvasFilter } from './filter_adapters';
 
 describe('adaptCanvasFilter', () => {

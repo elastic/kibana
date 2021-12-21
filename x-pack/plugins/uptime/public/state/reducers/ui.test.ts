@@ -29,16 +29,7 @@ describe('ui reducer', () => {
         },
         action
       )
-    ).toMatchInlineSnapshot(`
-      Object {
-        "alertFlyoutVisible": false,
-        "basePath": "yyz",
-        "esKuery": "",
-        "integrationsPopoverOpen": null,
-        "monitorId": "test",
-        "searchText": "",
-      }
-    `);
+    ).toMatchSnapshot();
   });
 
   it('adds integration popover status to state', () => {
@@ -58,19 +49,7 @@ describe('ui reducer', () => {
         },
         action
       )
-    ).toMatchInlineSnapshot(`
-      Object {
-        "alertFlyoutVisible": false,
-        "basePath": "",
-        "esKuery": "",
-        "integrationsPopoverOpen": Object {
-          "id": "popover-2",
-          "open": true,
-        },
-        "monitorId": "test",
-        "searchText": "",
-      }
-    `);
+    ).toMatchSnapshot();
   });
 
   it('updates the alert flyout value', () => {

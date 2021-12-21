@@ -14,7 +14,11 @@ import dateMath from '@elastic/datemath';
 
 import { FilterStateStore, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { ALERT_RULE_FROM, ALERT_RULE_TYPE, ALERT_RULE_NOTE } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_FROM,
+  ALERT_RULE_TYPE,
+  ALERT_RULE_NOTE,
+} from '@kbn/rule-data-utils/technical_field_names';
 
 import {
   ALERT_ORIGINAL_TIME,

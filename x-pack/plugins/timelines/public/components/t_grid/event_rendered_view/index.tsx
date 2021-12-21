@@ -15,7 +15,11 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_REASON,
+  ALERT_RULE_NAME,
+  ALERT_RULE_UUID,
+} from '@kbn/rule-data-utils/technical_field_names';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { ComponentType, useCallback, useMemo } from 'react';

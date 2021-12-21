@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromExpression } from '@kbn/interpreter';
+import { fromExpression } from '@kbn/interpreter/common';
 import { flowRight, get, groupBy } from 'lodash';
 import {
   Filter as FilterType,

@@ -1,10 +1,9 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
+load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
 PKG_BASE_NAME = "kbn-securitysolution-io-ts-alerting-types"
 PKG_REQUIRE_NAME = "@kbn/securitysolution-io-ts-alerting-types"
-TYPES_PKG_REQUIRE_NAME = "@types/kbn__securitysolution-io-ts-alerting-types"
 
 SOURCE_FILES = glob(
   [
@@ -37,7 +36,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-securitysolution-io-ts-types:npm_module_types",
+  "//packages/kbn-securitysolution-io-ts-types",
   "//packages/kbn-securitysolution-io-ts-utils",
   "@npm//fp-ts",
   "@npm//io-ts",
@@ -85,7 +84,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -101,23 +100,6 @@ filegroup(
   name = "build",
   srcs = [
     ":npm_module",
-  ],
-  visibility = ["//visibility:public"],
-)
-
-pkg_npm_types(
-  name = "npm_module_types",
-  srcs = SRCS,
-  deps = [":tsc_types"],
-  package_name = TYPES_PKG_REQUIRE_NAME,
-  tsconfig = ":tsconfig",
-  visibility = ["//visibility:public"],
-)
-
-filegroup(
-  name = "build_types",
-  srcs = [
-    ":npm_module_types",
   ],
   visibility = ["//visibility:public"],
 )

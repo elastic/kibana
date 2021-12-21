@@ -30,7 +30,6 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
     type,
     rollupIndex,
     allowNoIndex,
-    filter,
   }: GetFieldsOptions) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient, allowNoIndex);
     return await indexPatterns
@@ -39,7 +38,6 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
         metaFields,
         type,
         rollupIndex,
-        filter,
       })
       .catch((err) => {
         if (

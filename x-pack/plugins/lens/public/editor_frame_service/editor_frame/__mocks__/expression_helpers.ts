@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
+import { Ast } from '@kbn/interpreter/common';
 
 export function buildExpression(): Ast {
   return {

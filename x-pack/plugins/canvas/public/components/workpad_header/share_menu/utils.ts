@@ -6,9 +6,10 @@
  */
 
 import type { RedirectOptions } from 'src/plugins/share/public';
-import { JobAppParamsPDFV2 } from '../../../../../reporting/common/types';
-import { CanvasAppLocatorParams, CANVAS_APP_LOCATOR } from '../../../../common/locator';
+import { CANVAS_APP_LOCATOR } from '../../../../common/locator';
+import { CanvasAppLocatorParams } from '../../../../common/locator';
 import { CanvasWorkpad } from '../../../../types';
+import { JobAppParamsPDFV2 } from '../../../../../reporting/public';
 
 export interface CanvasWorkpadSharingData {
   workpad: Pick<CanvasWorkpad, 'id' | 'name' | 'height' | 'width'>;

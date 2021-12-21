@@ -21,7 +21,7 @@ import {
   EuiSpacer,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { FieldIcon } from '@kbn/react-field';
+import { FieldIcon } from '@kbn/react-field/field_icon';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface Props {

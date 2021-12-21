@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter';
+import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,

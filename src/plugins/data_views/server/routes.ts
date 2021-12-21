@@ -27,7 +27,6 @@ import { registerDeleteRuntimeFieldRoute } from './routes/runtime_fields/delete_
 import { registerPutRuntimeFieldRoute } from './routes/runtime_fields/put_runtime_field';
 import { registerUpdateRuntimeFieldRoute } from './routes/runtime_fields/update_runtime_field';
 import { registerHasUserIndexPatternRoute } from './routes/has_user_index_pattern';
-import { registerFieldForWildcard } from './fields_for';
 
 export function registerRoutes(
   http: HttpServiceSetup,
@@ -73,7 +72,76 @@ export function registerRoutes(
   registerPutRuntimeFieldRoute(router, getStartServices);
   registerUpdateRuntimeFieldRoute(router, getStartServices);
 
-  registerFieldForWildcard(router, getStartServices);
+  router.get(
+    {
+      path: '/api/index_patterns/_fields_for_wildcard',
+      validate: {
+        query: schema.object({
+          pattern: schema.string(),
+          meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+            defaultValue: [],
+          }),
+          type: schema.maybe(schema.string()),
+          rollup_index: schema.maybe(schema.string()),
+          allow_no_index: schema.maybe(schema.boolean()),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { asCurrentUser } = context.core.elasticsearch.client;
+      const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
+      const {
+        pattern,
+        meta_fields: metaFields,
+        type,
+        rollup_index: rollupIndex,
+        allow_no_index: allowNoIndex,
+      } = request.query;
+
+      let parsedFields: string[] = [];
+      try {
+        parsedFields = parseMetaFields(metaFields);
+      } catch (error) {
+        return response.badRequest();
+      }
+
+      try {
+        const fields = await indexPatterns.getFieldsForWildcard({
+          pattern,
+          metaFields: parsedFields,
+          type,
+          rollupIndex,
+          fieldCapsOptions: {
+            allow_no_indices: allowNoIndex || false,
+          },
+        });
+
+        return response.ok({
+          body: { fields },
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
+      } catch (error) {
+        if (
+          typeof error === 'object' &&
+          !!error?.isBoom &&
+          !!error?.output?.payload &&
+          typeof error?.output?.payload === 'object'
+        ) {
+          const payload = error?.output?.payload;
+          return response.notFound({
+            body: {
+              message: payload.message,
+              attributes: payload,
+            },
+          });
+        } else {
+          return response.notFound();
+        }
+      }
+    }
+  );
 
   router.get(
     {

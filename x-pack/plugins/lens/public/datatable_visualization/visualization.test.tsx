@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
+import { Ast } from '@kbn/interpreter/common';
 import { buildExpression } from '../../../../../src/plugins/expressions/public';
 import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../mocks';
 import { DatatableVisualizationState, getDatatableVisualization } from './visualization';

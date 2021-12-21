@@ -31,15 +31,10 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
     { 'used to verify that values are directly passed through': true },
   ];
 
-  const fillUndefinedParams = (args) => ({
-    callCluster: undefined,
-    indices: undefined,
-    fieldCapsOptions: undefined,
-    filter: undefined,
-    ...args,
-  });
-
-  const getArgsWithCallCluster = (args = {}) => ({ callCluster: callFieldCapsApi, ...args });
+  // assert that the stub was called with the exact `args`, using === matching
+  const calledWithExactly = (stub, args, matcher = sinon.match.same) => {
+    sinon.assert.calledWithExactly(stub, ...args.map((arg) => matcher(arg)));
+  };
 
   const stubDeps = (options = {}) => {
     const { esResponse = [], fieldsFromFieldCaps = [], mergeOverrides = identity } = options;
@@ -55,11 +50,9 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
     it('passes exact `callCluster` and `indices` args through', async () => {
       stubDeps();
 
-      const args = getArgsWithCallCluster({ indices: ['index1', 'index2'] });
-
-      await getFieldCapabilities(args);
+      await getFieldCapabilities(footballs[0], footballs[1]);
       sinon.assert.calledOnce(callFieldCapsApi);
-      sinon.assert.calledWithExactly(callFieldCapsApi, fillUndefinedParams(args));
+      calledWithExactly(callFieldCapsApi, [footballs[0], footballs[1], undefined]);
     });
   });
 
@@ -69,11 +62,9 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
         esResponse: footballs[0],
       });
 
-      const args = getArgsWithCallCluster({ indices: ['index1', 'index2'] });
-
-      await getFieldCapabilities(args);
+      await getFieldCapabilities();
       sinon.assert.calledOnce(readFieldCapsResponse);
-      sinon.assert.calledWithExactly(readFieldCapsResponse, footballs[0]);
+      calledWithExactly(readFieldCapsResponse, [footballs[0]]);
     });
   });
 
@@ -85,9 +76,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
         fieldsFromFieldCaps: fields.map((name) => ({ name })),
       });
 
-      const fieldNames = (await getFieldCapabilities(getArgsWithCallCluster())).map(
-        (field) => field.name
-      );
+      const fieldNames = (await getFieldCapabilities()).map((field) => field.name);
       expect(fieldNames).toEqual(fields);
     });
 
@@ -99,9 +88,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
         fieldsFromFieldCaps: shuffle(letters.map((name) => ({ name }))),
       });
 
-      const fieldNames = (await getFieldCapabilities(getArgsWithCallCluster())).map(
-        (field) => field.name
-      );
+      const fieldNames = (await getFieldCapabilities()).map((field) => field.name);
       expect(fieldNames).toEqual(sortedLetters);
     });
   });
@@ -112,9 +99,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
         fieldsFromFieldCaps: [{ name: 'foo' }, { name: 'bar' }],
       });
 
-      const args = getArgsWithCallCluster({ metaFields: ['meta1', 'meta2'] });
-
-      const resp = await getFieldCapabilities(args);
+      const resp = await getFieldCapabilities(undefined, undefined, ['meta1', 'meta2']);
       expect(resp).toHaveLength(4);
       expect(resp.map((field) => field.name)).toEqual(['bar', 'foo', 'meta1', 'meta2']);
     });
@@ -141,7 +126,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
             fieldsFromFieldCaps: [field],
           });
 
-          const resp = await getFieldCapabilities(getArgsWithCallCluster());
+          const resp = await getFieldCapabilities();
           expect(resp).toHaveLength(1);
           expect(resp[0]).toHaveProperty(property);
           expect(resp[0][property]).not.toBe(footballs[0]);
@@ -164,7 +149,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
       stubDeps({ fieldsFromFieldCaps });
 
       sinon.assert.notCalled(mergeOverrides);
-      await getFieldCapabilities(getArgsWithCallCluster());
+      await getFieldCapabilities();
       sinon.assert.calledThrice(mergeOverrides);
 
       expect(mergeOverrides.args[0][0]).toHaveProperty('name', 'foo');
@@ -185,7 +170,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
         },
       });
 
-      expect(await getFieldCapabilities(getArgsWithCallCluster())).toEqual([
+      expect(await getFieldCapabilities()).toEqual([
         { notFieldAnymore: 1 },
         { notFieldAnymore: 1 },
       ]);

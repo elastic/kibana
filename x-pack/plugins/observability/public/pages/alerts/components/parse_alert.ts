@@ -8,10 +8,10 @@
 import {
   ALERT_START,
   ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_NAME,
-} from '@kbn/rule-data-utils';
+} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
 import type { TopAlert } from '../';
 import { experimentalRuleFieldMap } from '../../../../../rule_registry/common/assets/field_maps/experimental_rule_field_map';
 import { parseTechnicalFields } from '../../../../../rule_registry/common/parse_technical_fields';

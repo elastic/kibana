@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toExpression as toExpressionString } from '@kbn/interpreter';
+import { toExpression as toExpressionString } from '@kbn/interpreter/common';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedLensInput } from '../../../functions/external/saved_lens';
 

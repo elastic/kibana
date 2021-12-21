@@ -11,7 +11,8 @@ import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { ALERT_STATUS, AlertStatus } from '@kbn/rule-data-utils';
+import { AlertStatus } from '@kbn/rule-data-utils/alerts_as_data_status';
+import { ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
 
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { loadAlertAggregations as loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';

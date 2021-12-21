@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Registry } from '@kbn/interpreter';
+import { Registry } from '@kbn/interpreter/common';
 import { Model } from './model';
 import type { ModelProps, Model as ModelType } from './model';
 

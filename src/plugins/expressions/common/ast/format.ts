@@ -9,7 +9,7 @@
 import { ExpressionAstExpression, ExpressionAstArgument } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { toExpression } = require('@kbn/interpreter');
+const { toExpression } = require('@kbn/interpreter/common');
 
 export function format<T extends ExpressionAstExpression | ExpressionAstArgument>(
   ast: T,

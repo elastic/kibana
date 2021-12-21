@@ -11,7 +11,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
-} from '@kbn/rule-data-utils';
+} from '@kbn/rule-data-utils/technical_field_names';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   ENVIRONMENT_NOT_DEFINED,

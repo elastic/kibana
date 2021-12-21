@@ -9,7 +9,7 @@ import { EuiSuperDatePicker, OnTimeChangeProps, EuiSuperDatePickerCommonRange } 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { fromExpression } from '@kbn/interpreter';
+import { fromExpression } from '@kbn/interpreter/common';
 import { UnitStrings } from '../../../../../i18n/units';
 
 const { quickRanges: strings } = UnitStrings;

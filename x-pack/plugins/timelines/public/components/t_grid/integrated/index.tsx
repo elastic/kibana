@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers } from '@kbn/rule-data-utils/alerts_as_data_rbac';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useRef, useState } from 'react';

@@ -251,7 +251,7 @@ export class DataViewsService {
    * @param options
    * @returns FieldSpec[]
    */
-  getFieldsForWildcard = async (options: GetFieldsOptions): Promise<FieldSpec[]> => {
+  getFieldsForWildcard = async (options: GetFieldsOptions) => {
     const metaFields = await this.config.get(META_FIELDS);
     return this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
@@ -259,7 +259,6 @@ export class DataViewsService {
       type: options.type,
       rollupIndex: options.rollupIndex,
       allowNoIndex: options.allowNoIndex,
-      filter: options.filter,
     });
   };
 
