@@ -32,6 +32,7 @@ import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
+const MAX_ERROR_MESSAGE_LENGTH = 1000;
 
 type RuleActionFn = (rule: Rule) => Promise<void>;
 
@@ -220,12 +221,15 @@ export const performBulkActionRoute = (
 
         if (errorsCount > 0) {
           const responseBody = {
-            message: 'Bulk edit partially failed',
+            message: errorsCount === rulesCount ? 'Bulk edit failed' : 'Bulk edit partially failed',
             status_code: 500,
             errors: errors.map(({ error, rule }) => ({
               rule_id: rule.id,
               rule_name: rule.name,
-              error_message: error.message,
+              error_message:
+                error.message.length > MAX_ERROR_MESSAGE_LENGTH
+                  ? error.message.slice(0, MAX_ERROR_MESSAGE_LENGTH)
+                  : error.message,
               error_status_code: error.statusCode,
             })),
             rules: {

@@ -77,7 +77,7 @@ describe.each([
     });
   });
 
-  describe('partial failures', () => {
+  describe('rules execution failures', () => {
     it('returns error if disable rule throws error', async () => {
       clients.rulesClient.disable.mockImplementation(async () => {
         throw new Error('Test error');
@@ -85,7 +85,7 @@ describe.each([
       const response = await server.inject(getBulkActionRequest(), context);
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        message: 'Bulk edit partially failed',
+        message: 'Bulk edit failed',
         status_code: 500,
         errors: [
           {
@@ -121,7 +121,7 @@ describe.each([
             rule_name: 'Detect Root/Admin Users',
           },
         ],
-        message: 'Bulk edit partially failed',
+        message: 'Bulk edit failed',
         rules: {
           failed: 1,
           succeeded: 0,
@@ -131,7 +131,7 @@ describe.each([
       });
     });
 
-    it('returns error if one of rule validations fails and the rest are successfull', async () => {
+    it('returns partial failure error if one of rule validations fails and the rest are successfull', async () => {
       const failedRuleId = 'fail-rule-id';
       const failedRuleName = 'Rule that fails';
       clients.rulesClient.find.mockResolvedValue(
@@ -168,6 +168,15 @@ describe.each([
         },
         status_code: 500,
       });
+    });
+
+    it('return error message limited to length of 1000, to prevent large response size', async () => {
+      clients.rulesClient.disable.mockImplementation(async () => {
+        throw new Error('a'.repeat(1_300));
+      });
+      const response = await server.inject(getBulkActionRequest(), context);
+      expect(response.status).toEqual(500);
+      expect(response.body.errors[0].error_message.length).toEqual(1000);
     });
   });
 
