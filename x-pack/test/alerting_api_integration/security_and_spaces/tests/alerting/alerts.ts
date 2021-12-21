@@ -227,7 +227,7 @@ instanceStateValue: true
                 alertId,
                 ruleTypeId: 'test.always-firing',
                 outcome: 'success',
-                message: `alert executed: test.always-firing:${alertId}: 'abc'`,
+                message: `rule executed: test.always-firing:${alertId}: 'abc'`,
                 ruleObject: alertSearchResultWithoutDates,
               });
               break;

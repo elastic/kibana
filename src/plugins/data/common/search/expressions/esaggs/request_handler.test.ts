@@ -14,7 +14,7 @@ import type { IAggConfigs } from '../../aggs';
 import type { ISearchSource } from '../../search_source';
 import { searchSourceCommonMock, searchSourceInstanceMock } from '../../search_source/mocks';
 
-import { handleRequest, RequestHandlerParams } from './request_handler';
+import { handleRequest } from './request_handler';
 
 jest.mock('../../tabify', () => ({
   tabifyAggResponse: jest.fn(),
@@ -25,7 +25,7 @@ import { of } from 'rxjs';
 import { toArray } from 'rxjs/operators';
 
 describe('esaggs expression function - public', () => {
-  let mockParams: MockedKeys<RequestHandlerParams>;
+  let mockParams: MockedKeys<Parameters<typeof handleRequest>[0]>;
 
   beforeEach(() => {
     jest.clearAllMocks();

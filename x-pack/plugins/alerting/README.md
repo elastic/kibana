@@ -115,6 +115,9 @@ This is the primary function for a rule type. Whenever the rule needs to execute
 |services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to perform CRUD operations on any saved object that lives in the same space as the rule.<br><br>The scope of the saved objects client is tied to the user who created the rule (only when security is enabled).|
 |services.alertInstanceFactory(id)|This [alert factory](#alert-factory) creates alerts and must be used in order to execute actions. The id you give to the alert factory is a unique identifier for the alert.|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
+|services.shouldWriteAlerts()|This returns a boolean indicating whether the executor should write out alerts as data. This is determined by whether rule execution has been cancelled due to timeout AND whether both the Kibana `cancelAlertsOnRuleTimeout` flag and the rule type `cancelAlertsOnRuleTimeout` are set to `true`.|
+|services.shouldStopExecution()|This returns a boolean indicating whether rule execution has been cancelled due to timeout.|
+|services.search|This provides an implementation of Elasticsearch client `search` function that aborts searches if rule execution is cancelled mid-search.|
 |startedAt|The date and time the rule type started execution.|
 |previousStartedAt|The previous date and time the rule type started a successful execution.|
 |params|Parameters for the execution. This is where the parameters you require will be passed in. (e.g. threshold). Use rule type validation to ensure values are set before execution.|
@@ -194,7 +197,7 @@ This example rule type receives server and threshold as parameters. It will read
 
 ```typescript
 import { schema } from '@kbn/config-schema';
-import { AlertType, AlertExecutorOptions } from '../../../alerting/server';
+import { RuleType, AlertExecutorOptions } from '../../../alerting/server';
 // These type names will eventually be updated to reflect the new terminology
 import {
 	AlertTypeParams,
@@ -230,7 +233,7 @@ interface MyRuleTypeAlertContext extends AlertInstanceContext {
 
 type MyRuleTypeActionGroups = 'default' | 'warning';
   
-const myRuleType: AlertType<
+const myRuleType: RuleType<
 	MyRuleTypeParams,
 	MyRuleTypeExtractedParams,
 	MyRuleTypeState,
@@ -287,8 +290,19 @@ const myRuleType: AlertType<
 		// Let's assume params is { server: 'server_1', threshold: 0.8 }
 		const { server, threshold } = params;
 
+		// Query Elasticsearch using a cancellable search
+		// If rule execution is cancelled mid-search, the search request will be aborted
+		// and an error will be thrown.
+		const esClient = services.search.asCurrentUser;
+		await esClient.search(esQuery);
+
 		// Call a function to get the server's current CPU usage
 		const currentCpuUsage = await getCpuUsage(server);
+
+		// Periodically check that execution should continue
+		if (services.shouldStopExecution()) {
+			throw new Error('short circuiting rule execution!');
+		}
 
 		// Only execute if CPU usage is greater than threshold
 		if (currentCpuUsage > threshold) {
@@ -356,7 +370,7 @@ server.newPlatform.setup.plugins.alerting.registerType(myRuleType);
 
 ## Role Based Access-Control
 
-Once you have registered your AlertType, you need to grant your users privileges to use it.
+Once you have registered your RuleType, you need to grant your users privileges to use it.
 When registering a feature in Kibana you can specify multiple types of privileges which are granted to users when they're assigned certain roles.
 
 Assuming your feature introduces its own AlertTypes, you'll want to control which roles have all/read privileges for the rules and alerts for these AlertTypes when they're inside the feature.
@@ -410,7 +424,7 @@ features.registerKibanaFeature({
 						'my-application-id.my-alert-type',
 						// grant `read` over the built-in IndexThreshold
 						'.index-threshold', 
-						// grant `read` over Uptime's TLS AlertType
+						// grant `read` over Uptime's TLS RuleType
 						'xpack.uptime.alerts.actionGroups.tls'
 					],
 				},
@@ -420,7 +434,7 @@ features.registerKibanaFeature({
 						'my-application-id.my-alert-type',
 						// grant `read` over the built-in IndexThreshold
 						'.index-threshold', 
-						// grant `read` over Uptime's TLS AlertType
+						// grant `read` over Uptime's TLS RuleType
 						'xpack.uptime.alerts.actionGroups.tls'
 					],
 				},
@@ -629,14 +643,14 @@ When registering a rule type, you'll likely want to provide a way of viewing rul
 
 In order for the Alerting Framework to know that your plugin has its own internal view for displaying a rule, you must register a navigation handler within the framework.
 
-A navigation handler is nothing more than a function that receives a rule and its corresponding AlertType, and is expected to then return the path *within your plugin* which knows how to display this rule.
+A navigation handler is nothing more than a function that receives a rule and its corresponding RuleType, and is expected to then return the path *within your plugin* which knows how to display this rule.
 
 The signature of such a handler is:
 
 ```typescript
 type AlertNavigationHandler = (
   alert: SanitizedAlert,
-  alertType: AlertType
+  alertType: RuleType
 ) => string;
 ```
 
@@ -654,7 +668,7 @@ alerting.registerNavigation(
 );
 ```
 
-This tells the Alerting Framework that, given a rule of the AlertType whose ID is `my-application-id.my-unique-rule-type`, if that rule's `consumer` value (which is set when the rule is created by your plugin) is your application (whose id is `my-application-id`), then it will navigate to your application using the path `/my-unique-rule/${the id of the rule}`.
+This tells the Alerting Framework that, given a rule of the RuleType whose ID is `my-application-id.my-unique-rule-type`, if that rule's `consumer` value (which is set when the rule is created by your plugin) is your application (whose id is `my-application-id`), then it will navigate to your application using the path `/my-unique-rule/${the id of the rule}`.
 
 The navigation is handled using the `navigateToApp` API, meaning that the path will be automatically picked up by your `react-router-dom` **Route** component, so all you have top do is configure a Route that handles the path `/my-unique-rule/:id`.
 
@@ -675,9 +689,9 @@ This tells the Alerting Framework that any rule whose `consumer` value is your a
 ### Balancing both APIs side by side
 As we mentioned, using `registerDefaultNavigation` will tell the Alerting Framework that your application can handle any type of rule we throw at it, as long as your application created it, using the handler you provided.
 
-The only case in which this handler will not be used to evaluate the navigation for a rule (assuming your application is the `consumer`) is if you have also used the `registerNavigation` API, alongside your `registerDefaultNavigation` usage, to handle that rule's specific AlertType.
+The only case in which this handler will not be used to evaluate the navigation for a rule (assuming your application is the `consumer`) is if you have also used the `registerNavigation` API, alongside your `registerDefaultNavigation` usage, to handle that rule's specific RuleType.
 
-You can use the `registerNavigation` API to specify as many AlertType specific handlers as you like, but you can only use it once per AlertType as we wouldn't know which handler to use if you specified two for the same AlertType. For the same reason, you can only use `registerDefaultNavigation` once per plugin, as it covers all cases for your specific plugin.
+You can use the `registerNavigation` API to specify as many RuleType specific handlers as you like, but you can only use it once per RuleType as we wouldn't know which handler to use if you specified two for the same RuleType. For the same reason, you can only use `registerDefaultNavigation` once per plugin, as it covers all cases for your specific plugin.
 
 ## Internal HTTP APIs
 
@@ -744,7 +758,7 @@ Action Groups are static, and have to be define when the rule type is defined.
 Action Subgroups are dynamic, and can be defined on the fly.
 
 This approach enables users to specify actions under specific action groups, but they can't specify actions that are specific to subgroups.
-As subgroups fall under action groups, we will schedule the actions specified for the action group, but the subgroup allows the AlertType implementer to reuse the same action group for multiple different active subgroups.
+As subgroups fall under action groups, we will schedule the actions specified for the action group, but the subgroup allows the RuleType implementer to reuse the same action group for multiple different active subgroups.
 
 ## Templating Actions
 

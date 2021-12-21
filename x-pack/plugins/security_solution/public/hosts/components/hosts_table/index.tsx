@@ -25,9 +25,11 @@ import {
   HostItem,
   HostsSortField,
   HostsFields,
+  HostRiskSeverity,
 } from '../../../../common/search_strategy/security_solution/hosts';
 import { Direction } from '../../../../common/search_strategy';
 import { HostEcs, OsEcs } from '../../../../common/ecs/host';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -47,7 +49,8 @@ export type HostsTableColumns = [
   Columns<HostEcs['name']>,
   Columns<HostItem['lastSeen']>,
   Columns<OsEcs['name']>,
-  Columns<OsEcs['version']>
+  Columns<OsEcs['version']>,
+  Columns<HostRiskSeverity>?
 ];
 
 const rowItems: ItemsPerRow[] = [
@@ -124,8 +127,12 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     },
     [direction, sortField, type, dispatch]
   );
+  const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
-  const hostsColumns = useMemo(() => getHostsColumns(), []);
+  const hostsColumns = useMemo(
+    () => getHostsColumns(riskyHostsFeatureEnabled),
+    [riskyHostsFeatureEnabled]
+  );
 
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);
 

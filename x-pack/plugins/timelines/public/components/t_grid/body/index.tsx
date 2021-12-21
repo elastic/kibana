@@ -32,10 +32,7 @@ import React, {
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import styled, { ThemeContext } from 'styled-components';
-import {
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_PRODUCER,
-} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import {
   TGridCellAction,
@@ -89,6 +86,7 @@ const StatefulAlertStatusBulkActions = lazy(
 interface OwnProps {
   activePage: number;
   additionalControls?: React.ReactNode;
+  appId?: string;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
   createFieldComponent?: CreateFieldComponentType;
@@ -299,6 +297,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
   ({
     activePage,
     additionalControls,
+    appId = '',
     browserFields,
     bulkActions = true,
     clearSelected,
@@ -507,7 +506,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               showSortSelector: true,
               showFullScreenSelector: true,
             }),
-        showStyleSelector: false,
+        showDisplaySelector: false,
       }),
       [
         alertCountText,
@@ -830,6 +829,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           )}
           {tableView === 'eventRenderedView' && (
             <EventRenderedView
+              appId={appId}
               alertToolbar={alertToolbar}
               browserFields={browserFields}
               events={data}
