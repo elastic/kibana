@@ -7,7 +7,7 @@
 
 import { AppDataType, ReportViewType, SeriesConfig } from '../types';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
-import { ReportConfigMap } from '../contexts/exploatory_view_config';
+import { ReportConfigMap } from '../contexts/exploratory_view_config';
 
 interface Props {
   reportType: ReportViewType;
