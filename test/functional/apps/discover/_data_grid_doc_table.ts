@@ -80,9 +80,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
         const text = await monacoEditor.getCodeEditorValue();
-        const flyoutJson = text?.trim().charAt(0) === '{' ? JSON.parse(text) : {};
+        const flyoutJson = JSON.parse(text);
         expandDocId = flyoutJson._id;
-        return !!expandDocId && expandDocId === 'AU_x3_g4GFA8no6QjkYX';
+        return expandDocId === 'AU_x3_g4GFA8no6QjkYX';
       });
       log.debug(`expanded document id: ${expandDocId}`);
 
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         5000,
         async () => {
           const text = await monacoEditor.getCodeEditorValue();
-          const flyoutJson = text?.trim().charAt(0) === '{' ? JSON.parse(text) : {};
+          const flyoutJson = JSON.parse(text);
           log.debug(`flyout document id: ${flyoutJson._id}`);
           return flyoutJson._id === expandDocId;
         }
