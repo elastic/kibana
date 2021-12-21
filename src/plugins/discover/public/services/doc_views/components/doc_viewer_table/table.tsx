@@ -63,11 +63,25 @@ const PAGE_SIZE = 'discover:pageSize';
 const SEARCH_TEXT = 'discover:searchText';
 
 const getPinnedFields = (dataViewId: string, storage: Storage): string[] => {
-  return (storage.get(PINNED_FIELDS_KEY) || {})[dataViewId] || [];
+  const pinnedFieldsEntry = storage.get(PINNED_FIELDS_KEY);
+  if (
+    typeof pinnedFieldsEntry === 'object' &&
+    pinnedFieldsEntry !== null &&
+    Array.isArray(pinnedFieldsEntry[dataViewId])
+  ) {
+    return pinnedFieldsEntry[dataViewId].filter((cur: unknown) => typeof cur === 'string');
+  }
+  return [];
 };
 const updatePinnedFieldsState = (newFields: string[], dataViewId: string, storage: Storage) => {
-  const pinnedFieldsState = storage.get(PINNED_FIELDS_KEY) || {};
-  storage.set(PINNED_FIELDS_KEY, Object.assign(pinnedFieldsState, { [dataViewId]: newFields }));
+  let pinnedFieldsEntry = storage.get(PINNED_FIELDS_KEY);
+  pinnedFieldsEntry =
+    typeof pinnedFieldsEntry === 'object' && pinnedFieldsEntry !== null ? pinnedFieldsEntry : {};
+
+  storage.set(PINNED_FIELDS_KEY, {
+    ...pinnedFieldsEntry,
+    [dataViewId]: newFields,
+  });
 };
 
 const getPageSize = (storage: Storage): number => {
