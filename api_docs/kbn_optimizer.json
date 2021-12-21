@@ -300,9 +300,8 @@
             "label": "getCacheableWorkerConfig",
             "description": [],
             "signature": [
-              "() => Pick<",
-              "WorkerConfig",
-              ", \"dist\" | \"repoRoot\" | \"themeTags\" | \"browserslistEnv\" | \"optimizerCacheKey\">"
+              "() => ",
+              "CacheableWorkerConfig"
             ],
             "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
             "deprecated": false,
@@ -323,13 +322,7 @@
         "description": [],
         "signature": [
           "(log: ",
-          {
-            "pluginId": "@kbn/dev-utils",
-            "scope": "server",
-            "docId": "kibKbnDevUtilsPluginApi",
-            "section": "def-server.ToolingLog",
-            "text": "ToolingLog"
-          },
+          "ToolingLog",
           ") => ",
           "MonoTypeOperatorFunction",
           "<",
@@ -353,13 +346,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.ToolingLog",
-                "text": "ToolingLog"
-              }
+              "ToolingLog"
             ],
             "path": "packages/kbn-optimizer/src/log_optimizer_progress.ts",
             "deprecated": false,
@@ -378,13 +365,7 @@
         "description": [],
         "signature": [
           "(log: ",
-          {
-            "pluginId": "@kbn/dev-utils",
-            "scope": "server",
-            "docId": "kibKbnDevUtilsPluginApi",
-            "section": "def-server.ToolingLog",
-            "text": "ToolingLog"
-          },
+          "ToolingLog",
           ", config: ",
           {
             "pluginId": "@kbn/optimizer",
@@ -422,13 +403,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.ToolingLog",
-                "text": "ToolingLog"
-              }
+              "ToolingLog"
             ],
             "path": "packages/kbn-optimizer/src/log_optimizer_state.ts",
             "deprecated": false,
@@ -515,13 +490,7 @@
         "description": [],
         "signature": [
           "(log: ",
-          {
-            "pluginId": "@kbn/dev-utils",
-            "scope": "server",
-            "docId": "kibKbnDevUtilsPluginApi",
-            "section": "def-server.ToolingLog",
-            "text": "ToolingLog"
-          },
+          "ToolingLog",
           ", config: ",
           {
             "pluginId": "@kbn/optimizer",
@@ -559,13 +528,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.ToolingLog",
-                "text": "ToolingLog"
-              }
+              "ToolingLog"
             ],
             "path": "packages/kbn-optimizer/src/report_optimizer_timings.ts",
             "deprecated": false,
@@ -745,13 +708,7 @@
         "description": [],
         "signature": [
           "(log: ",
-          {
-            "pluginId": "@kbn/dev-utils",
-            "scope": "server",
-            "docId": "kibKbnDevUtilsPluginApi",
-            "section": "def-server.ToolingLog",
-            "text": "ToolingLog"
-          },
+          "ToolingLog",
           ", config: ",
           {
             "pluginId": "@kbn/optimizer",
@@ -773,13 +730,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.ToolingLog",
-                "text": "ToolingLog"
-              }
+              "ToolingLog"
             ],
             "path": "packages/kbn-optimizer/src/limits.ts",
             "deprecated": false,

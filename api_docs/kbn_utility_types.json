@@ -242,9 +242,8 @@
           "\nRequired"
         ],
         "signature": [
-          "Pick<T, ",
-          "SetDifference",
-          "<keyof T, K>> & Required<Pick<T, K>>"
+          "Omit",
+          "<T, K> & Required<Pick<T, K>>"
         ],
         "path": "node_modules/utility-types/dist/mapped-types.d.ts",
         "deprecated": false,
@@ -359,9 +358,8 @@
           "\nOptional"
         ],
         "signature": [
-          "Pick<T, ",
-          "SetDifference",
-          "<keyof T, K>> & Partial<Pick<T, K>>"
+          "Omit",
+          "<T, K> & Partial<Pick<T, K>>"
         ],
         "path": "node_modules/utility-types/dist/mapped-types.d.ts",
         "deprecated": false,

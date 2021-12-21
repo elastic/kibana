@@ -16,8 +16,8 @@
             "pluginId": "triggersActionsUi",
             "scope": "public",
             "docId": "kibTriggersActionsUiPluginApi",
-            "section": "def-public.AlertTypeModel",
-            "text": "AlertTypeModel"
+            "section": "def-public.RuleTypeModel",
+            "text": "RuleTypeModel"
           },
           "<",
           "TransformHealthRuleParams",

@@ -234,6 +234,58 @@
           "deprecated": false,
           "children": [],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "screenshotMode",
+          "id": "def-server.ScreenshotModePluginSetup.setScreenshotLayout",
+          "type": "Function",
+          "tags": [
+            "deprecated"
+          ],
+          "label": "setScreenshotLayout",
+          "description": [],
+          "signature": [
+            "(value: ",
+            {
+              "pluginId": "screenshotMode",
+              "scope": "common",
+              "docId": "kibScreenshotModePluginApi",
+              "section": "def-common.Layout",
+              "text": "Layout"
+            },
+            ") => void"
+          ],
+          "path": "src/plugins/screenshot_mode/server/types.ts",
+          "deprecated": true,
+          "references": [
+            {
+              "plugin": "screenshotting",
+              "path": "x-pack/plugins/screenshotting/server/browsers/chromium/driver.ts"
+            }
+          ],
+          "children": [
+            {
+              "parentPluginId": "screenshotMode",
+              "id": "def-server.ScreenshotModePluginSetup.setScreenshotLayout.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "value",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "screenshotMode",
+                  "scope": "common",
+                  "docId": "kibScreenshotModePluginApi",
+                  "section": "def-common.Layout",
+                  "text": "Layout"
+                }
+              ],
+              "path": "src/plugins/screenshot_mode/server/types.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -303,6 +355,33 @@
     "functions": [
       {
         "parentPluginId": "screenshotMode",
+        "id": "def-common.getScreenshotLayout",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "getScreenshotLayout",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "screenshotMode",
+            "scope": "common",
+            "docId": "kibScreenshotModePluginApi",
+            "section": "def-common.Layout",
+            "text": "Layout"
+          },
+          " | undefined"
+        ],
+        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+        "deprecated": true,
+        "references": [],
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "screenshotMode",
         "id": "def-common.getScreenshotMode",
         "type": "Function",
         "tags": [],
@@ -316,6 +395,54 @@
         "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
         "deprecated": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "screenshotMode",
+        "id": "def-common.setScreenshotLayout",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "setScreenshotLayout",
+        "description": [],
+        "signature": [
+          "(value: ",
+          {
+            "pluginId": "screenshotMode",
+            "scope": "common",
+            "docId": "kibScreenshotModePluginApi",
+            "section": "def-common.Layout",
+            "text": "Layout"
+          },
+          ") => void"
+        ],
+        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+        "deprecated": true,
+        "references": [],
+        "children": [
+          {
+            "parentPluginId": "screenshotMode",
+            "id": "def-common.setScreenshotLayout.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "screenshotMode",
+                "scope": "common",
+                "docId": "kibScreenshotModePluginApi",
+                "section": "def-common.Layout",
+                "text": "Layout"
+              }
+            ],
+            "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -380,6 +507,89 @@
         "description": [],
         "path": "src/plugins/screenshot_mode/common/constants.ts",
         "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "screenshotMode",
+        "id": "def-common.KBN_SCREENSHOT_MODE_LAYOUT_KEY",
+        "type": "string",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "KBN_SCREENSHOT_MODE_LAYOUT_KEY",
+        "description": [],
+        "signature": [
+          "\"__KBN_SCREENSHOT_MODE_LAYOUT_KEY__\""
+        ],
+        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+        "deprecated": true,
+        "references": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "screenshotMode",
+        "id": "def-common.Layout",
+        "type": "Type",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "Layout",
+        "description": [],
+        "signature": [
+          "\"canvas\" | \"preserve_layout\" | \"print\""
+        ],
+        "path": "src/plugins/screenshot_mode/common/get_set_browser_screenshot_mode.ts",
+        "deprecated": true,
+        "references": [
+          {
+            "plugin": "screenshotting",
+            "path": "x-pack/plugins/screenshotting/server/screenshots/observable.ts"
+          },
+          {
+            "plugin": "screenshotting",
+            "path": "x-pack/plugins/screenshotting/server/browsers/chromium/driver.ts"
+          },
+          {
+            "plugin": "screenshotting",
+            "path": "x-pack/plugins/screenshotting/server/browsers/chromium/driver.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/services/screenshot_mode.ts"
+          },
+          {
+            "plugin": "screenshotting",
+            "path": "x-pack/plugins/screenshotting/server/screenshots/open_url.ts"
+          },
+          {
+            "plugin": "screenshotting",
+            "path": "x-pack/plugins/screenshotting/server/screenshots/open_url.ts"
+          },
+          {
+            "plugin": "screenshotting",
+            "path": "x-pack/plugins/screenshotting/server/screenshots/observable.ts"
+          },
+          {
+            "plugin": "screenshotting",
+            "path": "x-pack/plugins/screenshotting/server/screenshots/observable.ts"
+          },
+          {
+            "plugin": "screenshotting",
+            "path": "x-pack/plugins/screenshotting/target/types/server/browsers/chromium/driver.d.ts"
+          },
+          {
+            "plugin": "screenshotting",
+            "path": "x-pack/plugins/screenshotting/target/types/server/browsers/chromium/driver.d.ts"
+          },
+          {
+            "plugin": "screenshotting",
+            "path": "x-pack/plugins/screenshotting/target/types/server/screenshots/open_url.d.ts"
+          },
+          {
+            "plugin": "screenshotting",
+            "path": "x-pack/plugins/screenshotting/target/types/server/screenshots/open_url.d.ts"
+          }
+        ],
         "initialIsOpen": false
       }
     ],

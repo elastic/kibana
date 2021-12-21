@@ -651,11 +651,7 @@
             "description": [],
             "signature": [
               "(newMetrics: ",
-              "ApplicationUsageMetric",
-              " | ",
-              "UiCounterMetric",
-              " | ",
-              "UserAgentMetric",
+              "Metric",
               " | ",
               "Metric",
               "[]) => { report: ",
@@ -679,11 +675,7 @@
                 "label": "newMetrics",
                 "description": [],
                 "signature": [
-                  "ApplicationUsageMetric",
-                  " | ",
-                  "UiCounterMetric",
-                  " | ",
-                  "UserAgentMetric",
+                  "Metric",
                   " | ",
                   "Metric",
                   "[]"

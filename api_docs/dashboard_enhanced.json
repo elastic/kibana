@@ -489,15 +489,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "() => ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.StartServices",
-                "text": "StartServices"
-              },
-              "<{ uiActionsEnhanced: ",
+              "() => StartServices<{ uiActionsEnhanced: ",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "public",

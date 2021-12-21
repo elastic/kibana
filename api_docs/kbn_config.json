@@ -894,7 +894,7 @@
             "tags": [],
             "label": "config",
             "description": [
-              "must not be mutated, return {@link ConfigDeprecationCommand} to change config shape."
+              "must not be mutated, return {@link ConfigDeprecationCommand } to change config shape."
             ],
             "signature": [
               "{ readonly [x: string]: any; }"

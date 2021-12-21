@@ -942,7 +942,7 @@
               "The size of the avatar."
             ],
             "signature": [
-              "\"s\" | \"m\" | \"l\" | \"xl\" | undefined"
+              "\"m\" | \"s\" | \"l\" | \"xl\" | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false
@@ -1204,7 +1204,7 @@
                 "section": "def-public.SpacesContextProps",
                 "text": "SpacesContextProps"
               },
-              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
@@ -1243,7 +1243,7 @@
                 "section": "def-public.ShareToSpaceFlyoutProps",
                 "text": "ShareToSpaceFlyoutProps"
               },
-              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
@@ -1282,7 +1282,7 @@
                 "section": "def-public.CopyToSpaceFlyoutProps",
                 "text": "CopyToSpaceFlyoutProps"
               },
-              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
@@ -1321,7 +1321,7 @@
                 "section": "def-public.SpaceListProps",
                 "text": "SpaceListProps"
               },
-              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
@@ -1360,7 +1360,7 @@
                 "section": "def-public.EmbeddableLegacyUrlConflictProps",
                 "text": "EmbeddableLegacyUrlConflictProps"
               },
-              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
@@ -1399,7 +1399,7 @@
                 "section": "def-public.LegacyUrlConflictProps",
                 "text": "LegacyUrlConflictProps"
               },
-              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
@@ -1438,7 +1438,7 @@
                 "section": "def-public.SpaceAvatarProps",
                 "text": "SpaceAvatarProps"
               },
-              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
@@ -1559,7 +1559,7 @@
             "section": "def-public.SpacesDataEntry",
             "text": "SpacesDataEntry"
           },
-          " extends Pick<",
+          " extends Omit<",
           {
             "pluginId": "spaces",
             "scope": "common",
@@ -1567,7 +1567,7 @@
             "section": "def-common.GetSpaceResult",
             "text": "GetSpaceResult"
           },
-          ", \"name\" | \"description\" | \"id\" | \"color\" | \"initials\" | \"imageUrl\" | \"_reserved\">"
+          ", \"disabledFeatures\" | \"authorizedPurposes\">"
         ],
         "path": "x-pack/plugins/spaces/public/types.ts",
         "deprecated": false,
@@ -1750,7 +1750,7 @@
           "\nFunction that returns a promise for a lazy-loadable component."
         ],
         "signature": [
-          "(props: T) => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+          "(props: T) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
         "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
         "deprecated": false,
@@ -1979,7 +1979,14 @@
               "\nAn optional purpose describing how the set of spaces will be used.\nThe default purpose (`any`) will retrieve all spaces the user is authorized to see,\nwhereas a more specific purpose will retrieve all spaces the user is authorized to perform a specific action within.\n"
             ],
             "signature": [
-              "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\" | undefined"
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.GetAllSpacesPurpose",
+                "text": "GetAllSpacesPurpose"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
             "deprecated": false
@@ -3039,15 +3046,14 @@
             "section": "def-server.SavedObjectsServiceStart",
             "text": "SavedObjectsServiceStart"
           },
-          ") => Pick<",
+          ") => ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsRepository",
-            "text": "SavedObjectsRepository"
-          },
-          ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+            "section": "def-server.ISavedObjectsRepository",
+            "text": "ISavedObjectsRepository"
+          }
         ],
         "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
         "deprecated": false,
@@ -3494,7 +3500,14 @@
               "\nAn optional purpose describing how the set of spaces will be used.\nThe default purpose (`any`) will retrieve all spaces the user is authorized to see,\nwhereas a more specific purpose will retrieve all spaces the user is authorized to perform a specific action within.\n"
             ],
             "signature": [
-              "\"any\" | \"copySavedObjectsIntoSpace\" | \"findSavedObjects\" | \"shareSavedObjectsIntoSpace\" | undefined"
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.GetAllSpacesPurpose",
+                "text": "GetAllSpacesPurpose"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/spaces/common/types.ts",
             "deprecated": false
