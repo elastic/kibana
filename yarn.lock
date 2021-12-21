@@ -5864,6 +5864,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__interpreter@link:bazel-bin/packages/kbn-interpreter/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__mapbox-gl@link:bazel-bin/packages/kbn-mapbox-gl/npm_module_types":
   version "0.0.0"
   uid ""
@@ -5925,6 +5929,18 @@
   uid ""
 
 "@types/kbn__securitysolution-list-hooks@link:bazel-bin/packages/kbn-securitysolution-list-hooks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__securitysolution-rules@link:bazel-bin/packages/kbn-securitysolution-rules/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__securitysolution-t-grid@link:bazel-bin/packages/kbn-securitysolution-t-grid/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__securitysolution-utils@link:bazel-bin/packages/kbn-securitysolution-utils/npm_module_types":
   version "0.0.0"
   uid ""
 
