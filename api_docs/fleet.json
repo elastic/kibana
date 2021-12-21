@@ -15576,7 +15576,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"yaml\" | \"integer\" | \"bool\" | \"password\""
+              "\"string\" | \"text\" | \"integer\" | \"yaml\" | \"bool\" | \"password\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
@@ -18813,7 +18813,7 @@
         "label": "RegistryVarType",
         "description": [],
         "signature": [
-          "\"string\" | \"text\" | \"yaml\" | \"integer\" | \"bool\" | \"password\""
+          "\"string\" | \"text\" | \"integer\" | \"yaml\" | \"bool\" | \"password\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,

@@ -864,13 +864,7 @@
             "description": [],
             "signature": [
               "(featureId: ",
-              {
-                "pluginId": "@kbn/rule-data-utils",
-                "scope": "server",
-                "docId": "kibKbnRuleDataUtilsPluginApi",
-                "section": "def-server.AlertConsumers",
-                "text": "AlertConsumers"
-              },
+              "AlertConsumers",
               ", dataset?: ",
               {
                 "pluginId": "ruleRegistry",
@@ -894,13 +888,7 @@
                 "label": "featureId",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/rule-data-utils",
-                    "scope": "server",
-                    "docId": "kibKbnRuleDataUtilsPluginApi",
-                    "section": "def-server.AlertConsumers",
-                    "text": "AlertConsumers"
-                  }
+                  "AlertConsumers"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
@@ -2385,13 +2373,7 @@
             ],
             "signature": [
               "(featureId: ",
-              {
-                "pluginId": "@kbn/rule-data-utils",
-                "scope": "server",
-                "docId": "kibKbnRuleDataUtilsPluginApi",
-                "section": "def-server.AlertConsumers",
-                "text": "AlertConsumers"
-              },
+              "AlertConsumers",
               ", dataset?: ",
               {
                 "pluginId": "ruleRegistry",
@@ -2415,13 +2397,7 @@
                 "label": "featureId",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/rule-data-utils",
-                    "scope": "server",
-                    "docId": "kibKbnRuleDataUtilsPluginApi",
-                    "section": "def-server.AlertConsumers",
-                    "text": "AlertConsumers"
-                  }
+                  "AlertConsumers"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
