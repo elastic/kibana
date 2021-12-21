@@ -9,8 +9,9 @@ import { renderHook } from '@testing-library/react-hooks';
 import { applicationServiceMock } from 'src/core/public/mocks';
 import { casesFeatureId } from '../../common';
 import { useGetUserCasesPermissions } from './use_get_user_cases_permissions';
+import { kibanaStartMock } from '../utils/kibana_react.mock';
 
-let mockUseKibanaReturnValue = null;
+let mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
 jest.mock('../utils/kibana_react', () => ({
   __esModule: true,
@@ -20,15 +21,15 @@ jest.mock('../utils/kibana_react', () => ({
 describe('useGetUserCasesPermissions', function () {
   it('returns expected permissions when capabilities entry exists', () => {
     mockUseKibanaReturnValue = {
+      ...mockUseKibanaReturnValue,
       services: {
+        ...mockUseKibanaReturnValue.services,
         application: {
-          capabilities: Object.assign(
-            {},
-            applicationServiceMock.createStartContract().capabilities,
-            {
-              [casesFeatureId]: { crud_cases: false, read_cases: true },
-            }
-          ),
+          ...mockUseKibanaReturnValue.services.application,
+          capabilities: {
+            ...applicationServiceMock.createStartContract().capabilities,
+            [casesFeatureId]: { crud_cases: false, read_cases: true },
+          },
         },
       },
     };
@@ -39,17 +40,17 @@ describe('useGetUserCasesPermissions', function () {
 
   it('returns false when capabilities entry permissions are missing', () => {
     mockUseKibanaReturnValue = {
+      ...mockUseKibanaReturnValue,
       services: {
+        ...mockUseKibanaReturnValue.services,
         application: {
-          capabilities: Object.assign(
-            {},
-            applicationServiceMock.createStartContract().capabilities,
-            {
-              [casesFeatureId]: {
-                /* intentionally empty */
-              },
-            }
-          ),
+          ...mockUseKibanaReturnValue.services.application,
+          capabilities: {
+            ...applicationServiceMock.createStartContract().capabilities,
+            [casesFeatureId]: {
+              /* intentionally empty */
+            },
+          },
         },
       },
     };
@@ -60,13 +61,14 @@ describe('useGetUserCasesPermissions', function () {
 
   it('returns false when capabilities entry is missing entirely', () => {
     mockUseKibanaReturnValue = {
+      ...mockUseKibanaReturnValue,
       services: {
+        ...mockUseKibanaReturnValue.services,
         application: {
-          capabilities: Object.assign(
-            {},
-            applicationServiceMock.createStartContract().capabilities,
-            {}
-          ),
+          ...mockUseKibanaReturnValue.services.application,
+          capabilities: {
+            ...applicationServiceMock.createStartContract().capabilities,
+          },
         },
       },
     };
