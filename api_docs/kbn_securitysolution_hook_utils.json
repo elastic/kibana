@@ -54,7 +54,7 @@
           }
         ],
         "returnComment": [
-          "An {@link Task} containing the task's current state along with a\nstart callback"
+          "An {@link Task } containing the task's current state along with a\nstart callback"
         ],
         "initialIsOpen": false
       },
@@ -74,7 +74,7 @@
         "deprecated": false,
         "children": [],
         "returnComment": [
-          "A {@link GetIsMounted} getter function returning whether the component is currently mounted"
+          "A {@link GetIsMounted } getter function returning whether the component is currently mounted"
         ],
         "initialIsOpen": false
       },
@@ -117,7 +117,7 @@
           }
         ],
         "returnComment": [
-          "An {@link Async} containing the underlying task's state along with a start callback"
+          "An {@link Async } containing the underlying task's state along with a start callback"
         ],
         "initialIsOpen": false
       },
@@ -178,7 +178,7 @@
         "label": "OptionalSignalArgs",
         "description": [],
         "signature": [
-          "Pick<Args, Exclude<keyof Args, \"signal\">> & Partial<SignalArgs>"
+          "Omit<Args, \"signal\"> & Partial<SignalArgs>"
         ],
         "path": "packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
         "deprecated": false,
