@@ -35,13 +35,14 @@ import {
 export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {}, PluginsStart> {
   private readonly logger: Logger;
   private readonly config: ConfigType;
-  private readonly extensionPoints: ExtensionPointStorageInterface = new ExtensionPointStorage();
+  private readonly extensionPoints: ExtensionPointStorageInterface;
   private spaces: SpacesServiceStart | undefined | null;
   private security: SecurityPluginStart | undefined | null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
     this.config = this.initializerContext.config.get<ConfigType>();
+    this.extensionPoints = new ExtensionPointStorage(this.logger);
   }
 
   public setup(core: CoreSetup): ListPluginSetup {

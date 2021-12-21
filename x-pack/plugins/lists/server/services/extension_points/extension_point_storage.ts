@@ -7,29 +7,46 @@
 
 /* eslint-disable max-classes-per-file */
 
+import type { Logger } from 'kibana/server';
+
 import { ExtensionPoint } from './types';
+import { ExtensionPointError } from './errors';
 
 type NarrowExtensionPointToType<T extends ExtensionPoint['type']> = { type: T } & ExtensionPoint;
 
 export class ExtensionPointStorage {
   private readonly store = new Map<ExtensionPoint['type'], Set<ExtensionPoint>>();
+  private readonly registeredFrom = new Map<ExtensionPoint, string>();
+
+  constructor(private readonly logger?: Logger) {}
 
   add(extension: ExtensionPoint): void {
     if (!this.store.has(extension.type)) {
       this.store.set(extension.type, new Set());
     }
 
-    const extensionPointCallbacks = this.store.get(extension.type);
+    const extensionPointsForType = this.store.get(extension.type);
 
-    if (extensionPointCallbacks) {
-      // FIXME:PT should we capture (via Error#stack) where the extension was added from (debug purposes)
+    if (extensionPointsForType) {
+      extensionPointsForType.add(extension);
 
-      extensionPointCallbacks.add(extension);
+      // Capture stack trace from where this extension point was registered, so that it can be used when
+      // errors occur or callbacks don't return the expected result
+      const from = new Error('REGISTERED FROM:').stack ?? 'REGISTERED FROM: unknown';
+      this.registeredFrom.set(
+        extension,
+        from.substring(from.indexOf('REGISTERED FROM:')).concat('\n    ----------------------')
+      );
     }
   }
 
   clear(): void {
     this.store.clear();
+    this.registeredFrom.clear();
+  }
+
+  getExtensionRegistrationSource(extensionPoint: ExtensionPoint): string | undefined {
+    return this.registeredFrom.get(extensionPoint);
   }
 
   get<T extends ExtensionPoint['type']>(
@@ -48,12 +65,15 @@ export class ExtensionPointStorage {
    * returns a client interface that does not expose the full set of methods available in the storage
    */
   getClient(): ExtensionPointStorageClientInterface {
-    return new ExtensionPointStorageClient(this);
+    return new ExtensionPointStorageClient(this, this.logger);
   }
 }
 
 export class ExtensionPointStorageClient {
-  constructor(private readonly storage: ExtensionPointStorageInterface) {}
+  constructor(
+    private readonly storage: ExtensionPointStorageInterface,
+    private readonly logger?: Logger
+  ) {}
 
   /**
    * Retrieve a list (`Set`) of extension points that are registered for a given type
@@ -70,8 +90,8 @@ export class ExtensionPointStorageClient {
    * and finally returning the last callback payload.
    *
    * @param extensionType
-   * @param initialCallbackInput
-   * @param callbackResponseValidator
+   * @param initialCallbackInput The initial argument given to the first extension point callback
+   * @param callbackResponseValidator A function to validate the returned data from an extension point callback
    */
   async pipeRun<
     T extends ExtensionPoint['type'],
@@ -90,15 +110,40 @@ export class ExtensionPointStorageClient {
     }
 
     for (const externalExtension of externalExtensions) {
-      // FIXME:PT investigate if we can avoid the TS ignore below?
-      // @ts-expect-error
-      inputArgument = await externalExtension.callback(inputArgument);
+      try {
+        // FIXME:PT investigate if we can avoid the TS ignore below?
+        // @ts-expect-error
+        inputArgument = await externalExtension.callback(inputArgument);
+      } catch (error) {
+        // Log the error that the external callback threw and keep going with the running of others
+        this.logger?.error(
+          new ExtensionPointError(`Extension point execution error for ${externalExtension.type}`, {
+            extensionRegistrationSource:
+              this.storage.getExtensionRegistrationSource(externalExtension),
+          })
+        );
+      }
 
       if (callbackResponseValidator) {
         // Before calling the next one, make sure the returned payload is valid
         const validationError = callbackResponseValidator(inputArgument);
 
         if (validationError) {
+          this.logger?.error(
+            new ExtensionPointError(
+              `Extension point for ${
+                externalExtension.type
+              } returned data that failed validation: ${this.storage.getExtensionRegistrationSource(
+                externalExtension
+              )}`,
+              {
+                extensionRegistrationSource:
+                  this.storage.getExtensionRegistrationSource(externalExtension),
+                validationError,
+              }
+            )
+          );
+
           throw validationError;
         }
       }
