@@ -185,6 +185,31 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     return body.path;
   };
 
+  const waitForJobToFinish = async (downloadReportPath: string) => {
+    log.debug(`Waiting for job to finish: ${downloadReportPath}`);
+    const JOB_IS_PENDING_CODE = 503;
+
+    await new Promise((resolve) => {
+      const intervalId = setInterval(async () => {
+        const response = (await supertest
+          .get(downloadReportPath)
+          .responseType('blob')
+          .set('kbn-xsrf', 'xxx')) as any;
+        if (response.statusCode === 503) {
+          log.debug(`Report at path ${downloadReportPath} is pending`);
+        } else if (response.statusCode === 200) {
+          log.debug(`Report at path ${downloadReportPath} is complete`);
+        } else {
+          log.debug(`Report at path ${downloadReportPath} returned code ${response.statusCode}`);
+        }
+        if (response.statusCode !== JOB_IS_PENDING_CODE) {
+          clearInterval(intervalId);
+          resolve(response.statusCode);
+        }
+      }, 1500);
+    });
+  };
+
   const getCompletedJobOutput = async (downloadReportPath: string) => {
     const response = await supertest.get(downloadReportPath);
     return response.text as unknown;
@@ -254,6 +279,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     postJob,
     postJobJSON,
     getCompletedJobOutput,
+    waitForJobToFinish,
     deleteAllReports,
     checkIlmMigrationStatus,
     migrateReportingIndices,

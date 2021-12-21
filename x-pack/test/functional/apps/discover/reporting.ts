@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import { FilterMeta } from '@kbn/es-query';
 import expect from '@kbn/expect';
+import moment from 'moment';
+import { EsQuerySortValue } from 'src/plugins/data/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const reportingAPI = getService('reporting');
   const log = getService('log');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
@@ -47,11 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after('clean up archives', async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.unload(ecommerceSOPath);
-      await es.deleteByQuery({
-        index: '.reporting-*',
-        refresh: true,
-        body: { query: { match_all: {} } },
-      });
+      await reportingAPI.deleteAllReports();
       await esArchiver.emptyKibanaIndex();
     });
 
@@ -114,6 +114,140 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(csvFile.length).to.be(5093456);
         expectSnapshot(csvFile.slice(0, 5000)).toMatch();
         expectSnapshot(csvFile.slice(-5000)).toMatch();
+      });
+    });
+
+    describe('Generate CSV: sparse data', () => {
+      const TEST_INDEX_NAME = 'sparse_data';
+
+      const reset = async () => {
+        try {
+          await esArchiver.emptyKibanaIndex();
+          await es.indices.delete({ index: TEST_INDEX_NAME });
+        } catch (err) {
+          // ignore 404 error
+        }
+      };
+
+      let indexPatternId: string;
+      before(async () => {
+        await reset();
+
+        interface TestDoc {
+          timestamp: string;
+          name: string;
+          updated_at?: string;
+        }
+
+        // setup: add 510 test documents
+        // conditionally set a value for a date field in the last 5 rows of data
+        const docs = Array<TestDoc>(510);
+        for (let i = 0; i <= docs.length - 1; i++) {
+          const name = `test-${i + 1}`;
+          const timestamp = moment
+            .utc('2006-08-14T00:00:00')
+            .subtract(510 - i, 'days')
+            .format();
+
+          if (i >= 500) {
+            docs[i] = {
+              timestamp,
+              name,
+              updated_at: moment.utc('2006-08-14T00:00:00').format(),
+            };
+          } else {
+            // updated_at field does not exist in first 500 documents
+            docs[i] = { timestamp, name };
+          }
+        }
+
+        const res = await es.bulk({
+          index: TEST_INDEX_NAME,
+          body: docs.map((d) => `{"index": {}}\n${JSON.stringify(d)}\n`),
+        });
+
+        log.info(`Indexed ${res.items.length} test data docs.`);
+
+        // setup: create index pattern
+        const indexPatternCreateResponse = await kibanaServer.savedObjects.create({
+          type: 'index-pattern',
+          overwrite: true,
+          attributes: { title: TEST_INDEX_NAME, timeFieldName: 'timestamp' },
+        });
+
+        indexPatternId = indexPatternCreateResponse.id;
+        log.info(`Created data view ${indexPatternId}`);
+      });
+
+      after(reset);
+
+      it('uses correct formats for fields that did not exist in previous pages of data', async () => {
+        await kibanaServer.uiSettings.update({ 'csv:quoteValues': true });
+
+        // 1. check the data
+        const { text: reportApiJson, status } = await reportingAPI.generateCsv({
+          browserTimezone: 'UTC',
+          columns: ['timestamp', 'name', 'updated_at'],
+          objectType: 'search',
+          searchSource: {
+            fields: [{ field: '*', include_unmapped: 'true' }],
+            filter: [
+              {
+                meta: {
+                  field: 'timestamp',
+                  index: indexPatternId,
+                  params: {},
+                } as FilterMeta,
+                query: {
+                  range: {
+                    timestamp: {
+                      format: 'strict_date_optional_time',
+                      gte: '2005-01-01T00:00:00.000Z',
+                      lte: '2006-12-01T00:00:00.000Z',
+                    },
+                  },
+                },
+              },
+              {
+                meta: {
+                  field: 'timestamp',
+                  index: indexPatternId,
+                  params: {},
+                } as FilterMeta,
+                query: {
+                  range: {
+                    timestamp: {
+                      format: 'strict_date_optional_time',
+                      gte: '2005-01-01T00:00:00.000Z',
+                      lte: '2006-12-01T00:00:00.000Z',
+                    },
+                  },
+                },
+              },
+            ],
+            index: indexPatternId,
+            parent: {
+              filter: [],
+              index: indexPatternId,
+              query: { language: 'kuery', query: '' },
+            },
+            sort: [{ timestamp: 'asc' }] as EsQuerySortValue[],
+            trackTotalHits: true,
+          },
+          title: 'Sparse data search',
+          version: '8.1.0',
+        });
+        expect(status).to.be(200);
+
+        const { path } = JSON.parse(reportApiJson) as { path: string };
+
+        // wait for the the pending job to complete
+        await reportingAPI.waitForJobToFinish(path);
+
+        const csvFile = await reportingAPI.getCompletedJobOutput(path);
+        expectSnapshot(csvFile).toMatch();
+
+        await reportingAPI.deleteAllReports();
       });
     });
 
