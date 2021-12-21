@@ -155,7 +155,8 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alerting_framework_heath: { // Legacy: pre-v8.0 typo
+        alerting_framework_heath: {
+          // Legacy: pre-v8.0 typo
           _deprecated: 'This state property has a typo, use "alerting_framework_health" instead.',
           decryption_health: {
             status: HealthStatus.OK,
@@ -212,7 +213,8 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alerting_framework_heath: { // Legacy: pre-v8.0 typo
+        alerting_framework_heath: {
+          // Legacy: pre-v8.0 typo
           _deprecated: 'This state property has a typo, use "alerting_framework_health" instead.',
           decryption_health: {
             status: HealthStatus.OK,
@@ -269,7 +271,8 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alerting_framework_heath: { // Legacy: pre-v8.0 typo
+        alerting_framework_heath: {
+          // Legacy: pre-v8.0 typo
           _deprecated: 'This state property has a typo, use "alerting_framework_health" instead.',
           decryption_health: {
             status: HealthStatus.OK,
@@ -326,7 +329,8 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alerting_framework_heath: { // Legacy: pre-v8.0 typo
+        alerting_framework_heath: {
+          // Legacy: pre-v8.0 typo
           _deprecated: 'This state property has a typo, use "alerting_framework_health" instead.',
           decryption_health: {
             status: HealthStatus.OK,
@@ -383,7 +387,8 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alerting_framework_heath: { // Legacy: pre-v8.0 typo
+        alerting_framework_heath: {
+          // Legacy: pre-v8.0 typo
           _deprecated: 'This state property has a typo, use "alerting_framework_health" instead.',
           decryption_health: {
             status: HealthStatus.OK,
