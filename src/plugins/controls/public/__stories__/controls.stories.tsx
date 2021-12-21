@@ -26,6 +26,7 @@ import { EmbeddablePersistableStateService } from '../../../embeddable/common';
 
 import { decorators } from './decorators';
 import { ControlsPanels } from '../control_group/types';
+import { ControlGroupContainer } from '../control_group';
 import { pluginServices, registry } from '../services/storybook';
 import { replaceValueSuggestionMethod } from '../services/storybook/data';
 import { injectStorybookDataView } from '../services/storybook/data_views';
@@ -37,9 +38,6 @@ export default {
   decorators,
 };
 
-type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;
-type EmbeddableType = UnwrapPromise<ReturnType<ControlGroupContainerFactory['create']>>;
-
 injectStorybookDataView(storybookFlightsDataView);
 replaceValueSuggestionMethod(getFlightOptionsAsync);
 
@@ -48,7 +46,7 @@ const ControlGroupStoryComponent: FC<{
   edit?: boolean;
 }> = ({ panels, edit }) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
-  const [embeddable, setEmbeddable] = useState<EmbeddableType>();
+  const [embeddable, setEmbeddable] = useState<ControlGroupContainer>();
   const [viewMode, setViewMode] = useState<ViewMode>(
     edit === undefined || edit ? ViewMode.EDIT : ViewMode.VIEW
   );
