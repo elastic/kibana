@@ -37,8 +37,6 @@
         "ml": ["read"],
         "siem": ["all", "read_alerts", "crud_alerts"],
         "securitySolutionCases": ["all"],
-        "indexPatterns": ["read"],
-        "savedObjectsManagement": ["read"],
         "actions": ["read"],
         "builtInAlerts": ["all"]
       },

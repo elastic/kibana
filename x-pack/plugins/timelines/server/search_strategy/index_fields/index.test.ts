@@ -817,7 +817,7 @@ describe('Fields Provider', () => {
       {
         data: {
           indexPatterns: {
-            indexPatternsServiceFactory: () => ({
+            dataViewsServiceFactory: () => ({
               get: jest.fn().mockReturnValue(mockPattern),
             }),
           },
