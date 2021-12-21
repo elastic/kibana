@@ -52,9 +52,9 @@ export class MapStatsCollector {
 
   // attributesPerMap
   private _emsFileClusterStats: { [key: string]: ClusterCountStats } = {};
-  private _layerCountsPerMap: number[] = [];
+  private _layerCountStats: ClusterCountStats | undefined;
   private _layerTypeClusterStats: { [key: string]: ClusterCountStats } = {};
-  private _sourceCountsPerMap: number[] = [];
+  private _sourceCountStats: ClusterCountStats | undefined;
 
   push(attributes: MapSavedObjectAttributes) {
     if (!attributes || !attributes.layerListJSON) {
@@ -69,7 +69,25 @@ export class MapStatsCollector {
     }
 
     this._mapCount++;
-    this._layerCountsPerMap.push(layerList.length);
+
+    const layerCount = layerList.length;
+    if (this._layerCountStats) {
+      const layerCountTotal = this._layerCountStats.total + layerCount;
+      this._layerCountStats = {
+        min: Math.min(layerCount, this._layerCountStats.min),
+        max: Math.max(layerCount, this._layerCountStats.max),
+        total: layerCountTotal,
+        avg: layerCountTotal / this._mapCount,
+      };
+    } else {
+      this._layerCountStats = {
+        min: layerCount,
+        max: layerCount,
+        total: layerCount,
+        avg: layerCount,
+      };
+    }
+
     const sourceIdList = layerList
       .map((layer: LayerDescriptor) => {
         return layer.sourceDescriptor && 'id' in layer.sourceDescriptor
@@ -79,7 +97,23 @@ export class MapStatsCollector {
       .filter((id: string | null | undefined) => {
         return id;
       });
-    this._sourceCountsPerMap.push(_.uniq(sourceIdList).length);
+    const sourceCount = _.uniq(sourceIdList).length;
+    if (this._sourceCountStats) {
+      const sourceCountTotal = this._sourceCountStats.total + sourceCount;
+      this._sourceCountStats = {
+        min: Math.min(sourceCount, this._sourceCountStats.min),
+        max: Math.max(sourceCount, this._sourceCountStats.max),
+        total: sourceCountTotal,
+        avg: sourceCountTotal / this._mapCount,
+      };
+    } else {
+      this._sourceCountStats = {
+        min: sourceCount,
+        max: sourceCount,
+        total: sourceCount,
+        avg: sourceCount,
+      };
+    }
 
     const basemapCounts: { [key in EMS_BASEMAP_KEYS]?: number } = {};
     const joinCounts: { [key in JOIN_KEYS]?: number } = {};
@@ -109,8 +143,6 @@ export class MapStatsCollector {
   }
 
   getStats(): MapStats {
-    const layerCountSum = _.sum(this._layerCountsPerMap);
-    const sourceCountSum = _.sum(this._sourceCountsPerMap);
     return {
       timeCaptured: new Date().toISOString(),
       mapsTotalCount: this._mapCount,
@@ -121,21 +153,17 @@ export class MapStatsCollector {
       scalingOptions: this._scalingClusterStats,
       attributesPerMap: {
         // Count of data sources per map
-        dataSourcesCount: {
-          min: this._sourceCountsPerMap.length ? _.min(this._sourceCountsPerMap)! : 0,
-          max: this._sourceCountsPerMap.length ? _.max(this._sourceCountsPerMap)! : 0,
-          avg: this._mapCount > 0 ? sourceCountSum / this._mapCount : 0,
-        },
+        dataSourcesCount: this._sourceCountStats
+          ? this._excludeTotal(this._sourceCountStats)
+          : { min: 0, max: 0, avg: 0 },
         // Total count of layers per map
-        layersCount: {
-          min: this._layerCountsPerMap.length ? _.min(this._layerCountsPerMap)! : 0,
-          max: this._layerCountsPerMap.length ? _.max(this._layerCountsPerMap)! : 0,
-          avg: this._mapCount > 0 ? layerCountSum / this._mapCount : 0,
-        },
+        layersCount: this._layerCountStats
+          ? this._excludeTotal(this._layerCountStats)
+          : { min: 0, max: 0, avg: 0 },
         // Count of layers by type
-        layerTypesCount: this._excludeTotal(this._layerTypeClusterStats),
+        layerTypesCount: this._excludeTotalFromKeyedStats(this._layerTypeClusterStats),
         // Count of layer by EMS region
-        emsVectorLayersCount: this._excludeTotal(this._emsFileClusterStats),
+        emsVectorLayersCount: this._excludeTotalFromKeyedStats(this._emsFileClusterStats),
       },
     };
   }
@@ -181,25 +209,27 @@ export class MapStatsCollector {
   }
 
   // stats in attributesPerMap do not include 'total' key. Use this method to remove 'total' key from ClusterCountStats
-  _excludeTotal(clusterStats: { [key: string]: ClusterCountStats }): {
+  _excludeTotalFromKeyedStats(clusterStats: { [key: string]: ClusterCountStats }): {
     [key: string]: Omit<ClusterCountStats, 'total'>;
   } {
     const results: { [key: string]: Omit<ClusterCountStats, 'total'> } = {};
     for (const key in clusterStats) {
-      if (!clusterStats.hasOwnProperty(key)) {
-        continue;
+      if (clusterStats.hasOwnProperty(key)) {
+        results[key] = this._excludeTotal(clusterStats[key]);
       }
-
-      const stats = { ...clusterStats[key] } as {
-        min: number;
-        max: number;
-        total?: number;
-        avg: number;
-      };
-      delete stats.total;
-      results[key] = stats;
     }
     return results;
+  }
+
+  _excludeTotal(stats: ClusterCountStats): Omit<ClusterCountStats, 'total'> {
+    const modifiedStats = { ...stats } as {
+      min: number;
+      max: number;
+      total?: number;
+      avg: number;
+    };
+    delete modifiedStats.total;
+    return modifiedStats;
   }
 }
 
