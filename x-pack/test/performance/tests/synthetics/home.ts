@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { journey, step, before } from '@elastic/synthetics';
+import { before, journey, step } from '@elastic/synthetics';
 import { NETWORK_PROFILES } from '../../../../../test/functional/services/remote/network_profiles';
 
 for (let i = 0; i < 10; i++) {
-  journey('perf_login_and_home', async ({ page, params }) => {
+  journey('perf_login_and_home', async ({ page, params, client }) => {
     before(async () => {
-      const cdpSession = await page.context().newCDPSession(page);
-      await cdpSession.send('Network.setCacheDisabled', { cacheDisabled: true });
-      await cdpSession.send('Network.emulateNetworkConditions', {
+      await client.send('Network.setCacheDisabled', { cacheDisabled: true });
+      await client.send('Network.emulateNetworkConditions', {
         latency: NETWORK_PROFILES.CLOUD_USER.LATENCY,
         downloadThroughput: NETWORK_PROFILES.CLOUD_USER.DOWNLOAD,
         uploadThroughput: NETWORK_PROFILES.CLOUD_USER.UPLOAD,
@@ -29,10 +28,12 @@ for (let i = 0; i < 10; i++) {
       await page.fill('[data-test-subj=loginUsername]', 'elastic', { timeout: 60 * 1000 });
       await page.fill('[data-test-subj=loginPassword]', 'changeme');
       await page.click('[data-test-subj=loginSubmit]');
+      await page.waitForNavigation({ waitUntil: 'networkidle' });
     });
 
     step('Dismiss Synthetics Notice', async () => {
       await page.click('[data-test-subj=skipWelcomeScreen]', { timeout: 60 * 1000 });
+      await page.locator('Welcome home');
     });
   });
 }
