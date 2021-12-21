@@ -19,10 +19,13 @@ yarn es snapshot
 ```
 
 **Create APM mappings**
+
 ```
 node ./scripts/es_archiver load "x-pack/plugins/apm/ftr_e2e/cypress/fixtures/es_archiver/apm_mappings_only_8.0.0" --es-url=http://elastic:changeme@localhost:9200 --kibana-url=http://elastic:changeme@localhost:5601 --config=./test/functional/config.js
 ```
-*Make sure to execute node ./scripts/es_archiver after Elasticsearch is up and running!*
+
+*Note: Elasticsearch must be available before running the above command*
+
 
 **Run Synthtrace**
 ```
