@@ -19,7 +19,6 @@ import type { VisualizationDimensionEditorProps } from '../types';
 import {
   CustomizablePalette,
   FIXED_PROGRESSION,
-  getStopsForFixedMode,
   PalettePanelContainer,
 } from '../shared_components/';
 import './dimension_editor.scss';
@@ -64,7 +63,7 @@ export function HeatmapDimensionEditor(
         <EuiFlexItem>
           <EuiColorPaletteDisplay
             data-test-subj="lnsHeatmap_dynamicColoring_palette"
-            palette={getStopsForFixedMode(displayStops, activePalette?.params?.colorStops)}
+            palette={displayStops.map(({ color }) => color)}
             type={FIXED_PROGRESSION}
             onClick={() => {
               setIsPaletteOpen(!isPaletteOpen);

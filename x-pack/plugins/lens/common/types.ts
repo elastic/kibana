@@ -51,7 +51,6 @@ export interface CustomPaletteParams {
   reverse?: boolean;
   rangeType?: 'number' | 'percent';
   continuity?: 'above' | 'below' | 'all' | 'none';
-  // todo:        max       min
   progression?: 'fixed';
   rangeMin?: number;
   rangeMax?: number;

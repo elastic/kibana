@@ -17,7 +17,7 @@ import { colorRangesReducer } from './color_ranges_reducer';
 import { validateColorRanges } from './utils';
 
 import type { CustomPaletteParamsConfig, ColorStop } from '../../../../common';
-import type { ColorRange, DataBounds, ColorRangeValidation } from './types';
+import type { ColorRange, DataBounds, ColorRangeValidation, ColorRangesState } from './types';
 
 export interface ColorRangesProps {
   colorRanges: ColorRange[];
@@ -33,7 +33,7 @@ export interface ColorRangesProps {
 const toLocalState = (
   colorRanges: ColorRangesProps['colorRanges'],
   paletteConfiguration: ColorRangesProps['paletteConfiguration']
-) => ({
+): ColorRangesState => ({
   colorRanges,
   rangeType: paletteConfiguration?.rangeType ?? 'percent',
   continuity: paletteConfiguration?.continuity ?? 'none',
@@ -80,25 +80,27 @@ export function ColorRanges({
   }, [localState.colorRanges]);
 
   useEffect(() => {
-    if (
-      paletteConfiguration?.rangeType &&
-      paletteConfiguration.rangeType !== localState.rangeType
-    ) {
-      dispatch({
-        type: 'set',
-        payload: toLocalState(colorRanges, paletteConfiguration),
-      });
+    if (paletteConfiguration) {
+      const { rangeType } = paletteConfiguration;
+      const rangeTypeChanged = rangeType && rangeType !== localState.rangeType;
+
+      if (rangeTypeChanged) {
+        dispatch({
+          type: 'set',
+          payload: toLocalState(colorRanges, paletteConfiguration),
+        });
+      }
     }
-  }, [colorRanges, localState.rangeType, paletteConfiguration, paletteConfiguration?.rangeType]);
+  }, [colorRanges, localState, paletteConfiguration]);
 
   useDebounce(
     () => {
-      const { continuity: localContinuity = 'none', colorRanges: localColorRanges } = localState;
-      const upperMin = ['below', 'all'].includes(localContinuity)
+      const { continuity: localContinuity, colorRanges: localColorRanges } = localState;
+      const upperMin = ['below', 'all'].includes(localContinuity!)
         ? -Infinity
         : Number(localColorRanges[0].start);
 
-      const upperMax = ['above', 'all'].includes(localContinuity)
+      const upperMax = ['above', 'all'].includes(localContinuity!)
         ? Infinity
         : Number(localColorRanges[localColorRanges.length - 1].end);
 
