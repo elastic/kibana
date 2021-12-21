@@ -699,6 +699,7 @@ export class Authenticator {
   /**
    * Invalidates session value associated with the specified request.
    * @param request Request instance.
+   * @param sessionValue Value of the existing session if any.
    */
   private async invalidateSessionValue(request: KibanaRequest, sessionValue: SessionValue | null) {
     if (sessionValue) {

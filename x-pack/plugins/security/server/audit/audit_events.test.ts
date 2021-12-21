@@ -302,7 +302,7 @@ describe('#userLoginEvent', () => {
 });
 
 describe('#userLogoutEvent', () => {
-  test('creates event with `success` outcome', () => {
+  test('creates event with `unknown` outcome', () => {
     expect(
       userLogoutEvent({
         username: 'elastic',
@@ -325,6 +325,28 @@ describe('#userLogoutEvent', () => {
         "user": Object {
           "name": "elastic",
         },
+      }
+    `);
+
+    expect(
+      userLogoutEvent({
+        provider: { name: 'basic1', type: 'basic' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "user_logout",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "unknown",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+        },
+        "message": "User [undefined] is logging out using basic provider [name=basic1]",
+        "user": undefined,
       }
     `);
   });

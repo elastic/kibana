@@ -144,9 +144,11 @@ export function userLogoutEvent({ username, provider }: UserLogoutParams): Audit
       category: ['authentication'],
       outcome: 'unknown',
     },
-    user: {
-      name: username,
-    },
+    user: username
+      ? {
+          name: username,
+        }
+      : undefined,
     kibana: {
       authentication_provider: provider.name,
       authentication_type: provider.type,
