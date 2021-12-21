@@ -9,7 +9,6 @@ import { readFileSync } from 'fs';
 import path from 'path';
 
 import { safeLoad } from 'js-yaml';
-import { loggerMock } from '@kbn/logging/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
@@ -815,8 +814,7 @@ describe('EPM template', () => {
           ],
         },
       } as any);
-      const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
+      await updateCurrentWriteIndices(esClient, [
         {
           templateName: 'test',
           indexTemplate: {

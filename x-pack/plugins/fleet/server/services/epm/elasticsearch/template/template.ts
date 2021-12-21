@@ -426,7 +426,7 @@ export const updateCurrentWriteIndices = async (
     return true;
   });
   if (!allUpdatablesIndices.length) return;
-  return updateAllDataStreams(allIndices, esClient);
+  return updateAllDataStreams(allUpdatablesIndices, esClient);
 };
 
 function isCurrentDataStream(item: CurrentDataStream[] | undefined): item is CurrentDataStream[] {
@@ -452,6 +452,7 @@ const getDataStreams = async (
   const { body } = await esClient.indices.getDataStream({ name: `${templateName}-*` });
 
   const dataStreams = body.data_streams;
+
   if (!dataStreams.length) return;
   return dataStreams.map((dataStream: any) => ({
     dataStreamName: dataStream.name,
