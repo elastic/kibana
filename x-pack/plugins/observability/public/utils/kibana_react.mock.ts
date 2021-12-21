@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { coreMock } from 'src/core/public/mocks';
-import { notificationServiceMock } from 'src/core/public/notifications/notifications_service.mock';
-import { overlayServiceMock } from 'src/core/public/overlays/overlay_service.mock';
+import { coreMock, notificationServiceMock, overlayServiceMock } from 'src/core/public/mocks';
 import { observabilityPublicPluginsStartMock } from '../observability_public_plugins_start.mock';
 
 export const kibanaStartMock = {
