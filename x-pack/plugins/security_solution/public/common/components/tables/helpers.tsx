@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiLink,
@@ -24,20 +24,14 @@ import { MoreRowItems } from '../page';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { HoverActions } from '../hover_actions';
-import { DataProvider } from '../../../../common/types';
+import { DataProvider, QueryOperator } from '../../../../common/types';
 import { TimelineContext } from '../../../../../timelines/public';
 
 const Subtext = styled.div`
   font-size: ${(props) => props.theme.eui.euiFontSizeXS};
 `;
 
-export const getRowItemDraggable = ({
-  rowItem,
-  attrName,
-  idPrefix,
-  render,
-  dragDisplayValue,
-}: {
+interface GetRowItemDraggableParams {
   rowItem: string | null | undefined;
   attrName: string;
   idPrefix: string;
@@ -45,7 +39,15 @@ export const getRowItemDraggable = ({
   displayCount?: number;
   dragDisplayValue?: string;
   maxOverflow?: number;
-}): JSX.Element => {
+}
+
+export const getRowItemDraggable = ({
+  rowItem,
+  attrName,
+  idPrefix,
+  render,
+  dragDisplayValue,
+}: GetRowItemDraggableParams): JSX.Element => {
   if (rowItem != null) {
     const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
     return (
@@ -81,6 +83,15 @@ export const getRowItemDraggable = ({
   }
 };
 
+interface GetRowItemDraggablesParams {
+  rowItems: string[] | null | undefined;
+  attrName: string;
+  idPrefix: string;
+  render?: (item: string) => JSX.Element;
+  displayCount?: number;
+  dragDisplayValue?: string;
+  maxOverflow?: number;
+}
 export const getRowItemDraggables = ({
   rowItems,
   attrName,
@@ -89,15 +100,7 @@ export const getRowItemDraggables = ({
   dragDisplayValue,
   displayCount = 5,
   maxOverflow = 5,
-}: {
-  rowItems: string[] | null | undefined;
-  attrName: string;
-  idPrefix: string;
-  render?: (item: string) => JSX.Element;
-  displayCount?: number;
-  dragDisplayValue?: string;
-  maxOverflow?: number;
-}): JSX.Element => {
+}: GetRowItemDraggablesParams): JSX.Element => {
   if (rowItems != null && rowItems.length > 0) {
     const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
       const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
@@ -153,12 +156,19 @@ export const getRowItemDraggables = ({
   }
 };
 
-export const OverflowItem: React.FC<{
+interface OverflowItemProps {
   dataProvider?: DataProvider | DataProvider[] | undefined;
   dragDisplayValue?: string;
   field: string;
   rowItem: string;
-}> = ({ dataProvider, dragDisplayValue, field, rowItem }) => {
+}
+
+export const OverflowItemComponent: React.FC<OverflowItemProps> = ({
+  dataProvider,
+  dragDisplayValue,
+  field,
+  rowItem,
+}) => {
   const [showTopN, setShowTopN] = useState<boolean>(false);
   const { timelineId: timelineIdFind } = useContext(TimelineContext);
   const [hoverActionsOwnFocus] = useState<boolean>(false);
@@ -176,7 +186,7 @@ export const OverflowItem: React.FC<{
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" direction="row">
       <EuiFlexItem grow={1}>{defaultToEmptyTag(rowItem)} </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} data-test-subj="hover-actions">
         <HoverActions
           closeTopN={closeTopN}
           dataProvider={dataProvider}
@@ -194,14 +204,19 @@ export const OverflowItem: React.FC<{
   );
 };
 
-export const RowItemOverflow: React.FC<{
+OverflowItemComponent.displayName = 'OverflowItemComponent';
+export const OverflowItem = React.memo(OverflowItemComponent);
+
+interface RowItemOverflowProps {
   attrName: string;
   dragDisplayValue?: string;
   idPrefix: string;
   maxOverflowItems: number;
   overflowIndexStart: number;
   rowItems: string[];
-}> = ({
+}
+
+export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
   attrName,
   dragDisplayValue,
   idPrefix,
@@ -209,48 +224,41 @@ export const RowItemOverflow: React.FC<{
   overflowIndexStart = 5,
   rowItems,
 }) => {
-  const [closeAllTopN, setCloseAllTopN] = useState(true);
+  const overflowItems = useMemo(
+    () =>
+      rowItems
+        .slice(overflowIndexStart, overflowIndexStart + maxOverflowItems)
+        .map((rowItem, index) => {
+          const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
+          const dataProvider = {
+            and: [],
+            enabled: true,
+            id,
+            name: rowItem,
+            excluded: false,
+            kqlQuery: '',
+            queryMatch: {
+              field: attrName,
+              value: rowItem,
+              displayValue: dragDisplayValue || rowItem,
+              operator: IS_OPERATOR as QueryOperator,
+            },
+          };
 
-  const handleCloseAllTopN = useCallback(() => {
-    setCloseAllTopN(true);
-  }, [setCloseAllTopN]);
-  const overflowItems = rowItems
-    .slice(overflowIndexStart, overflowIndexStart + maxOverflowItems)
-    .map((rowItem, index) => {
-      const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
-      const dataProvider = {
-        and: [],
-        enabled: true,
-        id,
-        name: rowItem,
-        excluded: false,
-        kqlQuery: '',
-        queryMatch: {
-          field: attrName,
-          value: rowItem,
-          displayValue: dragDisplayValue || rowItem,
-          operator: IS_OPERATOR,
-        },
-      };
-
-      return (
-        <EuiFlexItem id={`${idPrefix}-${id}`}>
-          <OverflowItem
-            dataProvider={dataProvider}
-            rowItem={rowItem}
-            field={attrName}
-            handleCloseAllTopN={handleCloseAllTopN}
-            closeAllTopN={closeAllTopN}
-          />
-        </EuiFlexItem>
-      );
-    });
+          return (
+            <EuiFlexItem key={`${idPrefix}-${id}`}>
+              <OverflowItem dataProvider={dataProvider} rowItem={rowItem} field={attrName} />
+            </EuiFlexItem>
+          );
+        }),
+    [attrName, dragDisplayValue, idPrefix, maxOverflowItems, overflowIndexStart, rowItems]
+  );
   return (
     <>
       {rowItems.length > overflowIndexStart && (
         <Popover count={rowItems.length - overflowIndexStart} idPrefix={idPrefix}>
           <EuiText size="xs">
-            <EuiFlexGroup gutterSize="none" direction="column">
+            <EuiFlexGroup gutterSize="none" direction="column" data-test-subj="overflow-items">
               {overflowItems}
             </EuiFlexGroup>
 
@@ -271,16 +279,16 @@ export const RowItemOverflow: React.FC<{
     </>
   );
 };
+RowItemOverflowComponent.displayName = 'RowItemOverflowComponent';
+export const RowItemOverflow = React.memo(RowItemOverflowComponent);
 
-export const PopoverComponent = ({
-  children,
-  count,
-  idPrefix,
-}: {
+interface PopoverComponentProps {
   children: React.ReactNode;
   count: number;
   idPrefix: string;
-}) => {
+}
+
+const PopoverComponent: React.FC<PopoverComponentProps> = ({ children, count, idPrefix }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

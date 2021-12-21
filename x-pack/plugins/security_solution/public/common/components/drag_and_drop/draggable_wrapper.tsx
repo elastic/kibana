@@ -357,7 +357,6 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     [dataProvider, render, setContainerRef, truncate]
   );
   if (!isDraggable) {
-    console.log(hoverContent, isDraggable);
     return (
       <WithHoverActions
         alwaysShow={showTopN || hoverActionsOwnFocus}
