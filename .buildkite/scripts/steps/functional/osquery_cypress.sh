@@ -13,8 +13,10 @@ echo "--- Osquery Cypress tests"
 
 cd "$XPACK_DIR"
 
+export CODE_COVERAGE=1
+
 checks-reporter-with-killswitch "Osquery Cypress Tests" \
- CODE_COVERAGE=1 node scripts/functional_tests \
+ node scripts/functional_tests \
    --debug --bail \
    --config test/osquery_cypress/cli_config.ts
 
