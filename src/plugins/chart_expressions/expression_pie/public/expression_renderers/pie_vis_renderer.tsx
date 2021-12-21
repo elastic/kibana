@@ -69,7 +69,7 @@ export const getPieVisRenderer: (
               renderComplete={handlers.done}
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}
-              services={services.data}
+              services={{ data: services.data, fieldFormats: services.fieldFormats }}
               syncColors={syncColors}
             />
           </VisualizationContainer>

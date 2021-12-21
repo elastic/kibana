@@ -26,7 +26,6 @@ import {
   ChartsPluginSetup,
   PaletteRegistry,
 } from '../../../../charts/public';
-import { DataPublicPluginStart } from '../../../../data/public';
 import type { PersistedState } from '../../../../visualizations/public';
 import {
   Datatable,
@@ -56,6 +55,7 @@ import { ChartSplit, SMALL_MULTIPLES_ID } from './chart_split';
 import { VisualizationNoResults } from './visualization_noresults';
 
 import './pie_vis_component.scss';
+import { VisTypePiePluginStartDependencies } from '../plugin';
 
 declare global {
   interface Window {
@@ -65,7 +65,6 @@ declare global {
     _echDebugStateFlag?: boolean;
   }
 }
-
 export interface PieComponentProps {
   visParams: PieVisParams;
   visData: Datatable;
@@ -74,7 +73,7 @@ export interface PieComponentProps {
   renderComplete: IInterpreterRenderHandlers['done'];
   chartsThemeService: ChartsPluginSetup['theme'];
   palettesRegistry: PaletteRegistry;
-  services: DataPublicPluginStart;
+  services: VisTypePiePluginStartDependencies;
   syncColors: boolean;
 }
 
@@ -364,7 +363,7 @@ const PieComponent = (props: PieComponentProps) => {
                 getLegendActionEventData(visData),
                 handleLegendAction,
                 visParams,
-                services.actions,
+                services.data.actions,
                 services.fieldFormats
               )}
               theme={[
