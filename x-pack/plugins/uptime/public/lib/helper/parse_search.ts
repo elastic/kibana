@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-export * from './csv';
-export * from './csv_searchsource';
-export * from './csv_searchsource_immediate';
-export * from './png';
-export * from './png_v2';
-export * from './printable_pdf';
-export * from './printable_pdf_v2';
+import { parse } from 'query-string';
+
+export function getParsedParams(search: string) {
+  return search ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false }) : {};
+}
