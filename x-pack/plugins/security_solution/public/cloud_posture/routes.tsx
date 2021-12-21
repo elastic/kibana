@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { RouteProps, Switch, Route } from 'react-router-dom';
-
+import { RouteProps } from 'react-router-dom';
 import { useKibana } from '../common/lib/kibana';
+
 const Routes = () => <RedirectToCSP />;
 
 export const routes: RouteProps[] = [{ path: '/csp', render: Routes }];
