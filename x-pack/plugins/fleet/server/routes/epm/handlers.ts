@@ -116,101 +116,102 @@ export const getLimitedListHandler: FleetRequestHandler = async (context, reques
   }
 };
 
-export const getFileHandler: FleetRequestHandler<TypeOf<typeof GetFileRequestSchema.params>> =
-  async (context, request, response) => {
-    try {
-      const { pkgName, pkgVersion, filePath } = request.params;
-      const savedObjectsClient = context.fleet.epm.internalSoClient;
-      const installation = await getInstallation({ savedObjectsClient, pkgName });
-      const useLocalFile = pkgVersion === installation?.version;
+export const getFileHandler: FleetRequestHandler<
+  TypeOf<typeof GetFileRequestSchema.params>
+> = async (context, request, response) => {
+  try {
+    const { pkgName, pkgVersion, filePath } = request.params;
+    const savedObjectsClient = context.fleet.epm.internalSoClient;
+    const installation = await getInstallation({ savedObjectsClient, pkgName });
+    const useLocalFile = pkgVersion === installation?.version;
 
-      if (useLocalFile) {
-        const assetPath = `${pkgName}-${pkgVersion}/${filePath}`;
-        const fileBuffer = getArchiveEntry(assetPath);
-        // only pull local installation if we don't have it cached
-        const storedAsset =
-          !fileBuffer && (await getAsset({ savedObjectsClient, path: assetPath }));
+    if (useLocalFile) {
+      const assetPath = `${pkgName}-${pkgVersion}/${filePath}`;
+      const fileBuffer = getArchiveEntry(assetPath);
+      // only pull local installation if we don't have it cached
+      const storedAsset = !fileBuffer && (await getAsset({ savedObjectsClient, path: assetPath }));
 
-        // error, if neither is available
-        if (!fileBuffer && !storedAsset) {
-          return response.custom({
-            body: `installed package file not found: ${filePath}`,
-            statusCode: 404,
-          });
-        }
-
-        // if storedAsset is not available, fileBuffer *must* be
-        // b/c we error if we don't have at least one, and storedAsset is the least likely
-        const { buffer, contentType } = storedAsset
-          ? {
-              contentType: storedAsset.media_type,
-              buffer: storedAsset.data_utf8
-                ? Buffer.from(storedAsset.data_utf8, 'utf8')
-                : Buffer.from(storedAsset.data_base64, 'base64'),
-            }
-          : {
-              contentType: mime.contentType(path.extname(assetPath)),
-              buffer: fileBuffer,
-            };
-
-        if (!contentType) {
-          return response.custom({
-            body: `unknown content type for file: ${filePath}`,
-            statusCode: 400,
-          });
-        }
-
+      // error, if neither is available
+      if (!fileBuffer && !storedAsset) {
         return response.custom({
-          body: buffer,
-          statusCode: 200,
-          headers: {
-            'cache-control': 'max-age=10, public',
-            'content-type': contentType,
-          },
+          body: `installed package file not found: ${filePath}`,
+          statusCode: 404,
         });
-      } else {
-        const registryResponse = await getFile(pkgName, pkgVersion, filePath);
-        const headersToProxy: KnownHeaders[] = ['content-type', 'cache-control'];
-        const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
-          const value = registryResponse.headers.get(knownHeader);
-          if (value !== null) {
-            headers[knownHeader] = value;
+      }
+
+      // if storedAsset is not available, fileBuffer *must* be
+      // b/c we error if we don't have at least one, and storedAsset is the least likely
+      const { buffer, contentType } = storedAsset
+        ? {
+            contentType: storedAsset.media_type,
+            buffer: storedAsset.data_utf8
+              ? Buffer.from(storedAsset.data_utf8, 'utf8')
+              : Buffer.from(storedAsset.data_base64, 'base64'),
           }
-          return headers;
-        }, {} as ResponseHeaders);
+        : {
+            contentType: mime.contentType(path.extname(assetPath)),
+            buffer: fileBuffer,
+          };
 
+      if (!contentType) {
         return response.custom({
-          body: registryResponse.body,
-          statusCode: registryResponse.status,
-          headers: proxiedHeaders,
+          body: `unknown content type for file: ${filePath}`,
+          statusCode: 400,
         });
       }
-    } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
-    }
-  };
 
-export const getInfoHandler: FleetRequestHandler<TypeOf<typeof GetInfoRequestSchema.params>> =
-  async (context, request, response) => {
-    try {
-      const savedObjectsClient = context.fleet.epm.internalSoClient;
-      const { pkgName, pkgVersion } = request.params;
-      if (pkgVersion && !semverValid(pkgVersion)) {
-        throw new IngestManagerError('Package version is not a valid semver');
-      }
-      const res = await getPackageInfo({
-        savedObjectsClient,
-        pkgName,
-        pkgVersion: pkgVersion || '',
+      return response.custom({
+        body: buffer,
+        statusCode: 200,
+        headers: {
+          'cache-control': 'max-age=10, public',
+          'content-type': contentType,
+        },
       });
-      const body: GetInfoResponse = {
-        item: res,
-      };
-      return response.ok({ body });
-    } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+    } else {
+      const registryResponse = await getFile(pkgName, pkgVersion, filePath);
+      const headersToProxy: KnownHeaders[] = ['content-type', 'cache-control'];
+      const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
+        const value = registryResponse.headers.get(knownHeader);
+        if (value !== null) {
+          headers[knownHeader] = value;
+        }
+        return headers;
+      }, {} as ResponseHeaders);
+
+      return response.custom({
+        body: registryResponse.body,
+        statusCode: registryResponse.status,
+        headers: proxiedHeaders,
+      });
     }
-  };
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const getInfoHandler: FleetRequestHandler<
+  TypeOf<typeof GetInfoRequestSchema.params>
+> = async (context, request, response) => {
+  try {
+    const savedObjectsClient = context.fleet.epm.internalSoClient;
+    const { pkgName, pkgVersion } = request.params;
+    if (pkgVersion && !semverValid(pkgVersion)) {
+      throw new IngestManagerError('Package version is not a valid semver');
+    }
+    const res = await getPackageInfo({
+      savedObjectsClient,
+      pkgName,
+      pkgVersion: pkgVersion || '',
+    });
+    const body: GetInfoResponse = {
+      item: res,
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
 
 export const updatePackageHandler: FleetRequestHandler<
   TypeOf<typeof UpdatePackageRequestSchema.params>,
@@ -232,19 +233,20 @@ export const updatePackageHandler: FleetRequestHandler<
   }
 };
 
-export const getStatsHandler: FleetRequestHandler<TypeOf<typeof GetStatsRequestSchema.params>> =
-  async (context, request, response) => {
-    try {
-      const { pkgName } = request.params;
-      const savedObjectsClient = context.fleet.epm.internalSoClient;
-      const body: GetStatsResponse = {
-        response: await getPackageUsageStats({ savedObjectsClient, pkgName }),
-      };
-      return response.ok({ body });
-    } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
-    }
-  };
+export const getStatsHandler: FleetRequestHandler<
+  TypeOf<typeof GetStatsRequestSchema.params>
+> = async (context, request, response) => {
+  try {
+    const { pkgName } = request.params;
+    const savedObjectsClient = context.fleet.epm.internalSoClient;
+    const body: GetStatsResponse = {
+      response: await getPackageUsageStats({ savedObjectsClient, pkgName }),
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
 
 export const installPackageFromRegistryHandler: FleetRequestHandler<
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
@@ -255,11 +257,13 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const { pkgName, pkgVersion } = request.params;
 
+  const spaceId = context.fleet.spaceId;
   const res = await installPackage({
     installSource: 'registry',
     savedObjectsClient,
     pkgkey: pkgVersion ? `${pkgName}-${pkgVersion}` : pkgName,
     esClient,
+    spaceId,
     force: request.body?.force,
   });
   if (!res.error) {
@@ -294,10 +298,12 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const savedObjectsClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
+  const spaceId = context.fleet.spaceId;
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
     esClient,
     packagesToInstall: request.body.packages,
+    spaceId,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
@@ -322,12 +328,13 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
-
+  const spaceId = context.fleet.spaceId;
   const res = await installPackage({
     installSource: 'upload',
     savedObjectsClient,
     esClient,
     archiveBuffer,
+    spaceId,
     contentType,
   });
   if (!res.error) {
