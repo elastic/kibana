@@ -351,7 +351,7 @@ a configuration option for changing the tooltip position and padding:
 *Vega* can load data from any URL. To enable, set `vis_type_vega.enableExternalUrls: true` in `kibana.yml`,
 then restart {kib}.
 
-Please be aware the files served by those external URLs must allow https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[CORS].
+The files that the external URLs load must allow https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[CORS].
 The remote URL must include `Access-Control-Allow-Origin`, which allows requests from the {kib} URL.
 
 
