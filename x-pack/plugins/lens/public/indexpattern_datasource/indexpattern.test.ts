@@ -12,7 +12,7 @@ import { DatasourcePublicAPI, Operation, Datasource, FramePublicAPI } from '../t
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
 import {
