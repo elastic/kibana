@@ -77,7 +77,7 @@ export function isGlobalPolicyEffected(tags?: string[]): boolean {
 /**
  * Given an array of an artifact tags, return the ids of policies inside
  * those tags. It will only return tags starting with `policy:` and it will
- * return them without the sufix
+ * return them without the suffix
  */
 export function getArtifactPoliciesIdByTag(tags: string[] = []): string[] {
   return tags.filter((tag) => tag.startsWith('policy:')).map((tag) => tag.substring(7));
