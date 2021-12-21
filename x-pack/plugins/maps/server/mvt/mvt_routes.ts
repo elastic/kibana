@@ -10,7 +10,6 @@ import { schema } from '@kbn/config-schema';
 import { KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
 import { IRouter } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
-import zlib from 'zlib';
 import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
@@ -60,7 +59,7 @@ export function initMVTRoutes({
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
-      const tile = await getEsTile({
+      const gzippedTile = await getEsTile({
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -72,7 +71,7 @@ export function initMVTRoutes({
         abortController,
       });
 
-      return await sendResponse(response, tile);
+      return await sendResponse(response, gzippedTile);
     }
   );
 
@@ -109,7 +108,7 @@ export function initMVTRoutes({
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
-      const tile = await getEsGridTile({
+      const gzippedTile = await getEsGridTile({
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -123,19 +122,18 @@ export function initMVTRoutes({
         abortController,
       });
 
-      return await sendResponse(response, tile);
+      return await sendResponse(response, gzippedTile);
     }
   );
 }
 
-async function sendResponse(response: KibanaResponseFactory, tile: any) {
-  if (tile) {
-    const gzipped = zlib.gzipSync(tile);
+async function sendResponse(response: KibanaResponseFactory, gzippedTile: any) {
+  if (gzippedTile) {
     return response.ok({
-      body: gzipped,
+      body: gzippedTile,
       headers: {
         'content-disposition': 'inline',
-        'content-length': gzipped ? `${gzipped.length}` : `0`,
+        'content-length': gzippedTile ? `${gzippedTile.length}` : `0`,
         'content-encoding': 'gzip',
         'Content-Type': 'application/x-protobuf',
         'Cache-Control': `public, max-age=${CACHE_TIMEOUT_SECONDS}`,

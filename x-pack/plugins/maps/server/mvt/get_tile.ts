@@ -55,9 +55,18 @@ export async function getEsTile({
       },
       {
         signal: abortController.signal,
+        headers: {
+          'Accept-Encoding': 'gzip',
+        },
+        asStream: true,
       }
     );
-    return tile.body as unknown as Buffer;
+
+    const payload = [];
+    for await (const chunk of tile.body) {
+      payload.push(chunk);
+    }
+    return Buffer.concat(payload);
   } catch (e) {
     if (!isAbortError(e)) {
       // These are often circuit breaking exceptions
