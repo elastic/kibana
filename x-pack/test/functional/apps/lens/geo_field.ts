@@ -27,8 +27,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.maps.waitForLayersToLoad();
       const doesLayerExist = await PageObjects.maps.doesLayerExist('logstash-*');
       expect(doesLayerExist).to.equal(true);
-      const hits = await PageObjects.maps.getHits();
-      expect(hits).to.equal('66');
+      const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg('logstash-*');
+      expect(tooltipText).to.equal(
+        'logstash-*\nFound 66 documents.\nResults narrowed by global time'
+      );
       await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
     });
   });
