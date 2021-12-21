@@ -27,7 +27,7 @@ export const getLifecycleMethods = (getService) => {
     },
 
     async tearDown() {
-      await deleteDataStream('.monitoring-8-*');
+      await deleteDataStream('.monitoring-*');
     },
   };
 };
